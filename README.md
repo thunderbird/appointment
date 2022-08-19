@@ -19,7 +19,7 @@ Run application for development with hot reloading backend and frontend:
     git clone https://github.com/thundernest/appointment
     ```
 
-2. Install and run python backend
+2. Install and run python backend (it's recommended to do this in a virtual environment)
 
     ```bash
     cd appointment
