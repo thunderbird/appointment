@@ -1,5 +1,7 @@
 # Thunderbird Appointment
 
+Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
+
 ## Get started for development
 
 Make sure to have the following prerequisites available:
