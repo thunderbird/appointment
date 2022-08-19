@@ -34,3 +34,5 @@ Run application for development with hot reloading backend and frontend:
     yarn install
     yarn serve
     ```
+
+You can now access the backend at [localhost:5000](http://localhost:5000) and the frontend at [localhost:8080](http://localhost:8080).
