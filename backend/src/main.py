@@ -23,12 +23,8 @@ app.add_middleware(
   allow_headers=["*"],
 )
 
-@app.get("/")
-def home():
-  return me
-
-# run database
 def get_db():
+  """run database session"""
   db = SessionLocal()
   try:
     yield db
@@ -36,30 +32,47 @@ def get_db():
     db.close()
 
 
-@app.post("/subscribers/", response_model=schemas.Subscriber)
-def create_subscriber(subscriber: schemas.SubscriberCreate, db: Session = Depends(get_db)):
+@app.get("/")
+def main():
+  """endpoint to get authentication status of current user"""
+  return me
+
+
+@app.post("/me/", response_model=schemas.Subscriber)
+def create_me(subscriber: schemas.SubscriberCreate, db: Session = Depends(get_db)):
+  """endpoint to add an authenticated subscriber to db, if they doesn't exist yet"""
   db_subscriber = repo.get_subscriber_by_email(db, email=subscriber.email)
   if db_subscriber:
     raise HTTPException(status_code=400, detail="Email already registered")
   return repo.create_subscriber(db=db, subscriber=subscriber)
 
 
-@app.get("/subscribers/{subscriber_id}", response_model=schemas.Subscriber)
-def read_subscriber(subscriber_id: int, db: Session = Depends(get_db)):
-  db_subscriber = repo.get_subscriber(db, subscriber_id=subscriber_id)
+@app.get("/me/", response_model=schemas.Subscriber)
+def read_me(db: Session = Depends(get_db)):
+  """endpoint to get data of authenticated subscriber from db"""
+  db_subscriber = repo.get_subscriber(db, subscriber_id=me)
   if db_subscriber is None:
     raise HTTPException(status_code=404, detail="Subscriber not found")
   return db_subscriber
 
 
-@app.post("/subscribers/{subscriber_id}/calendars/", response_model=schemas.Calendar)
-def create_calendar_for_subscriber(
-  subscriber_id: int, calendar: schemas.CalendarCreate, db: Session = Depends(get_db)
-):
-  return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber_id)
-
-
 @app.get("/me/calendars/", response_model=list[schemas.Calendar])
-def read_subscriber_calendars(db: Session = Depends(get_db)):
+def read_my_calendars(db: Session = Depends(get_db)):
+  """get all calendar connections of authenticated subscriber"""
   calendars = repo.get_calendar_by_subscriber(db, subscriber_id=me)
   return calendars
+
+
+@app.post("/calendar/", response_model=schemas.Calendar)
+def create_my_calendar(calendar: schemas.CalendarCreate, db: Session = Depends(get_db)):
+  """endpoint to add a new calender connection for authenticated subscriber"""
+  return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=me)
+
+
+@app.get("/calendar/{id}", response_model=schemas.Calendar)
+def read_calendar(id: int, db: Session = Depends(get_db)):
+  """endpoint to get a calendar from db"""
+  db_calendar = repo.get_calendar(db, calendar_id=id)
+  if db_calendar is None:
+    raise HTTPException(status_code=404, detail="Calendar not found")
+  return db_calendar
