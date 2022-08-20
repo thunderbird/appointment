@@ -23,6 +23,10 @@ def create_subscriber(db: Session, subscriber: schemas.SubscriberCreate):
   return db_subscriber
 
 
+def get_calendar(db: Session, calendar_id: int):
+  return db.query(models.Calendar).filter(models.Calendar.id == calendar_id).first()
+
+
 def get_calendar_by_subscriber(db: Session, subscriber_id: int):
   return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
 
