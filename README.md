@@ -36,3 +36,17 @@ Run application for development with hot reloading backend and frontend:
     ```
 
 You can now access the backend at [localhost:5000](http://localhost:5000) and the frontend at [localhost:8080](http://localhost:8080).
+
+## Testing
+
+To run tests, first install Pytest
+
+```bash
+pip install pytest
+```
+
+Then `cd` into the project root und simply run
+
+```bash
+pytest
+```

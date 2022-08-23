@@ -32,7 +32,7 @@ def get_db():
     db.close()
 
 
-@app.get("/login")
+@app.get("/login/")
 def main(db: Session = Depends(get_db)):
   """endpoint to get authentication status of current user"""
   me = Auth(db).subscriber
@@ -64,13 +64,13 @@ def read_my_calendars(db: Session = Depends(get_db)):
   return calendars
 
 
-@app.post("/calendar/", response_model=schemas.Calendar)
+@app.post("/calendars/", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarCreate, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
   return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
 
 
-@app.get("/calendar/{id}", response_model=schemas.Calendar)
+@app.get("/calendars/{id}", response_model=schemas.Calendar)
 def read_calendar(id: int, db: Session = Depends(get_db)):
   """endpoint to get a calendar from db"""
   db_calendar = repo.get_calendar(db, calendar_id=id)

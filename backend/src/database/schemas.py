@@ -4,11 +4,11 @@ from pydantic import BaseModel
 class CalendarBase(BaseModel):
   url: str
   user: str
+  password: str
 
 
 class CalendarCreate(CalendarBase):
-  password: str
-
+  pass
 
 class Calendar(CalendarBase):
   id: int
