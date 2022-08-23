@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 
 # database
@@ -30,13 +31,12 @@ def get_db():
   finally:
     db.close()
 
-me = None
 
-@app.get("/")
+@app.get("/login")
 def main(db: Session = Depends(get_db)):
-  me = Auth(db).subscriber
   """endpoint to get authentication status of current user"""
-  return me
+  me = Auth(db).subscriber
+  return me is not None
 
 
 @app.post("/me/", response_model=schemas.Subscriber)
@@ -51,7 +51,7 @@ def create_me(subscriber: schemas.SubscriberCreate, db: Session = Depends(get_db
 @app.get("/me/", response_model=schemas.Subscriber)
 def read_me(db: Session = Depends(get_db)):
   """endpoint to get data of authenticated subscriber from db"""
-  db_subscriber = repo.get_subscriber(db=db, subscriber_id=me.id)
+  db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
   if db_subscriber is None:
     raise HTTPException(status_code=404, detail="Subscriber not found")
   return db_subscriber
@@ -60,14 +60,14 @@ def read_me(db: Session = Depends(get_db)):
 @app.get("/me/calendars/", response_model=list[schemas.Calendar])
 def read_my_calendars(db: Session = Depends(get_db)):
   """get all calendar connections of authenticated subscriber"""
-  calendars = repo.get_calendar_by_subscriber(db, subscriber_id=me.id)
+  calendars = repo.get_calendar_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   return calendars
 
 
 @app.post("/calendar/", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarCreate, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
-  return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=me.id)
+  return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
 
 
 @app.get("/calendar/{id}", response_model=schemas.Calendar)
