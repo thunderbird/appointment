@@ -62,3 +62,21 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarCreate, su
   db.commit()
   db.refresh(db_calendar)
   return db_calendar
+
+
+def update_subscriber_calendar(db: Session, calendar: dict, calendar_id: int):
+  """update existing calendar by id"""
+  db_calendar = get_calendar(db, calendar_id)
+  for key, value in calendar.items():
+    if hasattr(db_calendar, key):
+      setattr(db_calendar, key, value)
+  db.commit()
+  return db_calendar
+
+
+def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
+  """check if calendar belongs to subscriber"""
+  return db.query(models.Calendar).filter(
+    models.Calendar.id == calendar_id,
+    models.Calendar.owner_id == subscriber_id
+  ).first() is not None

@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 
 from ..src.database import models
@@ -141,3 +141,45 @@ def test_read_existing_calendar():
 def test_read_missing_calendar():
     response = client.get("/calendars/2")
     assert response.status_code == 404, response.text
+
+
+def test_update_existing_calendar():
+    response = client.put(
+        "/calendars/1",
+        json={
+            "url": "https://example.comx",
+            "user": "ww1984x",
+            "password": "d14n4x"
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["url"] == "https://example.comx"
+    assert data["user"] == "ww1984x"
+    assert data["password"] == "d14n4x"
+
+
+def test_partial_update_existing_calendar():
+    response = client.put(
+        "/calendars/1",
+        json={ "url": "https://example.com" }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["url"] == "https://example.com"
+
+
+def test_update_foreign_calendar():
+    stmt = insert(models.Calendar).values(owner_id="2", url="a", user="a", password="a")
+    db = TestingSessionLocal()
+    db.execute(stmt)
+    db.commit()
+    response = client.put(
+        "/calendars/2",
+        json={
+            "url": "test",
+            "user": "test",
+            "password": "test"
+        }
+    )
+    assert response.status_code == 403, response.text
