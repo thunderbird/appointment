@@ -1,6 +1,9 @@
+"""Module: models
+
+Definitions of database tables and their relationships.
+"""
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-
 from .database import Base
 
 
