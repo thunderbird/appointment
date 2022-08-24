@@ -45,7 +45,7 @@ def test_create_me():
             "name": "Diana",
             "level": "2",
             "timezone": "-1"
-        },
+        }
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -71,6 +71,36 @@ def test_read_me():
     assert "calendars" in data and isinstance(data["calendars"], list)
 
 
+def test_update_me():
+    response = client.put(
+        "/me/",
+        json={
+            "username": "adminx",
+            "email": "admin@example.comx",
+            "name": "The Admin",
+            "level": "3",
+            "timezone": "2"
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["username"] == "adminx"
+    assert data["email"] == "admin@example.comx"
+    assert data["name"] == "The Admin"
+    assert data["level"] == 3
+    assert data["timezone"] == 2
+
+
+def test_partial_update_me():
+    response = client.put(
+        "/me/",
+        json={ "username": "admin" }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["username"] == "admin"
+
+
 def test_create_my_calendar():
     response = client.post(
         "/calendars/",
@@ -78,7 +108,7 @@ def test_create_my_calendar():
             "url": "https://example.com",
             "user": "ww1984",
             "password": "d14n4"
-        },
+        }
     )
     assert response.status_code == 200, response.text
     data = response.json()

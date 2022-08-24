@@ -42,9 +42,12 @@ def main(db: Session = Depends(get_db)):
 @app.post("/me/", response_model=schemas.Subscriber)
 def create_me(subscriber: schemas.SubscriberCreate, db: Session = Depends(get_db)):
   """endpoint to add an authenticated subscriber to db, if they doesn't exist yet"""
-  db_subscriber = repo.get_subscriber_by_email(db=db, email=subscriber.email)
-  if db_subscriber:
+  email_exists = repo.get_subscriber_by_email(db=db, email=subscriber.email)
+  if email_exists:
     raise HTTPException(status_code=400, detail="Email already registered")
+  username_exists = repo.get_subscriber_by_username(db=db, username=subscriber.username)
+  if username_exists:
+    raise HTTPException(status_code=400, detail="Username already registered")
   return repo.create_subscriber(db=db, subscriber=subscriber)
 
 
@@ -57,10 +60,19 @@ def read_me(db: Session = Depends(get_db)):
   return db_subscriber
 
 
+@app.put("/me/", response_model=schemas.Subscriber)
+def update_me(subscriber: dict, db: Session = Depends(get_db)):
+  """endpoint to update an authenticated subscriber"""
+  db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
+  if db_subscriber is None:
+    raise HTTPException(status_code=404, detail="Subscriber not found")
+  return repo.update_subscriber(db=db, subscriber=subscriber, subscriber_id=Auth(db).subscriber.id)
+
+
 @app.get("/me/calendars/", response_model=list[schemas.Calendar])
 def read_my_calendars(db: Session = Depends(get_db)):
   """get all calendar connections of authenticated subscriber"""
-  calendars = repo.get_calendar_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
+  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   return calendars
 
 

@@ -32,12 +32,13 @@ def create_subscriber(db: Session, subscriber: schemas.SubscriberCreate):
   return db_subscriber
 
 
-def update_subscriber(db: Session, subscriber: schemas.SubscriberCreate, subscriber_id: int):
+def update_subscriber(db: Session, subscriber: dict, subscriber_id: int):
   """update existing subscriber by id"""
   db_subscriber = get_subscriber(db, subscriber_id)
-  db_subscriber.update(subscriber)
+  for key, value in subscriber.items():
+    if hasattr(db_subscriber, key):
+      setattr(db_subscriber, key, value)
   db.commit()
-  db.refresh(db_subscriber)
   return db_subscriber
 
 
