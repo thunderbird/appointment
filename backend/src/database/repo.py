@@ -10,7 +10,7 @@ from . import models, schemas
 """
 def get_subscriber(db: Session, subscriber_id: int):
   """retrieve subscriber by id"""
-  return db.query(models.Subscriber).filter(models.Subscriber.id == subscriber_id).first()
+  return db.get(models.Subscriber, subscriber_id)
 
 
 def get_subscriber_by_email(db: Session, email: str):
@@ -46,7 +46,7 @@ def update_subscriber(db: Session, subscriber: dict, subscriber_id: int):
 """
 def get_calendar(db: Session, calendar_id: int):
   """retrieve calendar by id"""
-  return db.query(models.Calendar).filter(models.Calendar.id == calendar_id).first()
+  return db.get(models.Calendar, calendar_id)
 
 
 def get_calendars_by_subscriber(db: Session, subscriber_id: int):
@@ -70,6 +70,14 @@ def update_subscriber_calendar(db: Session, calendar: dict, calendar_id: int):
   for key, value in calendar.items():
     if hasattr(db_calendar, key):
       setattr(db_calendar, key, value)
+  db.commit()
+  return db_calendar
+
+
+def delete_subscriber_calendar(db: Session, calendar_id: int):
+  """remove existing calendar by id"""
+  db_calendar = get_calendar(db, calendar_id)
+  db.delete(db_calendar)
   db.commit()
   return db_calendar
 

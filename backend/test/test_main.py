@@ -183,3 +183,27 @@ def test_update_foreign_calendar():
         }
     )
     assert response.status_code == 403, response.text
+
+
+def test_delete_existing_calendar():
+    response = client.delete("/calendars/1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["url"] == "https://example.com"
+    assert data["user"] == "ww1984x"
+    assert data["password"] == "d14n4x"
+    response = client.get("/calendars/1")
+    assert response.status_code == 404, response.text
+    response = client.get("/me/calendars/")
+    data = response.json()
+    assert len(data) == 0
+
+
+def test_delete_missing_calendar():
+    response = client.delete("/calendars/3")
+    assert response.status_code == 404, response.text
+
+
+def test_delete_foreign_calendar():
+    response = client.delete("/calendars/2")
+    assert response.status_code == 403, response.text
