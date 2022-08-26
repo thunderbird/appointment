@@ -170,7 +170,7 @@ def test_partial_update_existing_calendar():
 
 
 def test_update_foreign_calendar():
-    stmt = insert(models.Calendar).values(owner_id="2", url="a", user="a", password="a")
+    stmt = insert(models.Calendar).values(owner_id="2", url="https://test.org", user="abc", password="dce")
     db = TestingSessionLocal()
     db.execute(stmt)
     db.commit()
