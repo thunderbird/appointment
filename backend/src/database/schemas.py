@@ -13,10 +13,6 @@ class SlotBase(BaseModel):
   is_available: bool | None = True
 
 
-class SlotCreate(SlotBase):
-  pass
-
-
 class Slot(SlotBase):
   id: int
   appointment_id: int
@@ -43,10 +39,6 @@ class AppointmentBase(BaseModel):
   status: AppointmentStatus | None = AppointmentStatus.draft
 
 
-class AppointmentCreate(AppointmentBase):
-  pass
-
-
 class Appointment(AppointmentBase):
   id: int
   calendar_id: int
@@ -62,10 +54,6 @@ class CalendarBase(BaseModel):
   url: str
   user: str
   password: str
-
-
-class CalendarCreate(CalendarBase):
-  pass
 
 
 class Calendar(CalendarBase):
@@ -85,10 +73,6 @@ class SubscriberBase(BaseModel):
   name: str | None = None
   level: int | None = 1
   timezone: int | None = None
-
-
-class SubscriberCreate(SubscriberBase):
-  pass
 
 
 class Subscriber(SubscriberBase):

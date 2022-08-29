@@ -23,7 +23,7 @@ def get_subscriber_by_username(db: Session, username: str):
   return db.query(models.Subscriber).filter(models.Subscriber.username == username).first()
 
 
-def create_subscriber(db: Session, subscriber: schemas.SubscriberCreate):
+def create_subscriber(db: Session, subscriber: schemas.SubscriberBase):
   """create new subscriber"""
   db_subscriber = models.Subscriber(**subscriber.dict())
   db.add(db_subscriber)
@@ -54,7 +54,7 @@ def get_calendars_by_subscriber(db: Session, subscriber_id: int):
   return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
 
 
-def create_subscriber_calendar(db: Session, calendar: schemas.CalendarCreate, subscriber_id: int):
+def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subscriber_id: int):
   """create new calendar for owner"""
   hashed = calendar.password # TODO: hashing/encrypting
   db_calendar = models.Calendar(url=calendar.url, user=calendar.user, password=hashed, owner_id=subscriber_id)

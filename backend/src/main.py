@@ -40,7 +40,7 @@ def main(db: Session = Depends(get_db)):
 
 
 @app.post("/me/", response_model=schemas.Subscriber)
-def create_me(subscriber: schemas.SubscriberCreate, db: Session = Depends(get_db)):
+def create_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db)):
   """endpoint to add an authenticated subscriber to db, if they doesn't exist yet"""
   email_exists = repo.get_subscriber_by_email(db=db, email=subscriber.email)
   if email_exists:
@@ -77,7 +77,7 @@ def read_my_calendars(db: Session = Depends(get_db)):
 
 
 @app.post("/calendars/", response_model=schemas.Calendar)
-def create_my_calendar(calendar: schemas.CalendarCreate, db: Session = Depends(get_db)):
+def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
   return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
 
