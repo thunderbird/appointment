@@ -3,6 +3,57 @@
 Definitions of valid data shapes for database models.
 """
 from pydantic import BaseModel
+from .models import AppointmentStatus
+
+
+""" SLOT model schemas
+"""
+class SlotBase(BaseModel):
+  start: str
+  is_available: bool | None = True
+
+
+class SlotCreate(SlotBase):
+  pass
+
+
+class Slot(SlotBase):
+  id: int
+  appointment_id: int
+
+  class Config:
+    orm_mode = True
+
+
+""" APPOINTMENT model schemas
+"""
+class AppointmentBase(BaseModel):
+  time_created: str | None = None
+  time_updated: str | None = None
+  duration: int
+  title: str
+  location_suggestions: str | None = None
+  location_selected: str | None = None
+  location_name: str | None = None
+  location_url: str | None = None
+  location_phone: str | None = None
+  details: str | None = None
+  attendees: str | None = None
+  slug: str
+  status: AppointmentStatus | None = AppointmentStatus.draft
+
+
+class AppointmentCreate(AppointmentBase):
+  pass
+
+
+class Appointment(AppointmentBase):
+  id: int
+  calendar_id: int
+  slots: list[Slot] = []
+
+  class Config:
+    orm_mode = True
 
 
 """ CALENDAR model schemas
@@ -20,6 +71,7 @@ class CalendarCreate(CalendarBase):
 class Calendar(CalendarBase):
   id: int
   owner_id: int
+  appointments: list[Appointment] = []
 
   class Config:
     orm_mode = True
