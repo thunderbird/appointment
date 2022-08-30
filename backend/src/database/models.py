@@ -3,7 +3,7 @@
 Definitions of database tables and their relationships.
 """
 import enum
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
@@ -29,7 +29,7 @@ class Subscriber(Base):
   level     = Column(Integer, index=True)
   timezone  = Column(Integer, index=True)
 
-  calendars = relationship("Calendar", back_populates="owner")
+  calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
 
 
 class Calendar(Base):
@@ -42,7 +42,7 @@ class Calendar(Base):
   password     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
 
   owner        = relationship("Subscriber", back_populates="calendars")
-  appointments = relationship("Appointment", back_populates="calendar")
+  appointments = relationship("Appointment", cascade="all,delete", back_populates="calendar")
 
 
 class Appointment(Base):
@@ -65,7 +65,7 @@ class Appointment(Base):
   status               = Column(Enum(AppointmentStatus))
 
   calendar             = relationship("Calendar", back_populates="appointments")
-  slots                = relationship("Slot", back_populates="appointment")
+  slots                = relationship("Slot", cascade="all,delete", back_populates="appointment")
 
 
 class Slot(Base):
