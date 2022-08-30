@@ -32,14 +32,14 @@ client = TestClient(app)
 
 
 def test_main():
-    response = client.get("/login/")
+    response = client.get("/login")
     assert response.status_code == 200, response.text
     assert response.json() == True
 
 
 def test_create_me():
     response = client.post(
-        "/me/",
+        "/me",
         json={
             "username": "ww",
             "email": "wonderwoman@example.com",
@@ -60,7 +60,7 @@ def test_create_me():
 
 
 def test_read_me():
-    response = client.get("/me/")
+    response = client.get("/me")
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["username"] == "admin"
@@ -74,7 +74,7 @@ def test_read_me():
 
 def test_update_me():
     response = client.put(
-        "/me/",
+        "/me",
         json={
             "username": "adminx",
             "email": "admin@example.comx",
@@ -94,7 +94,7 @@ def test_update_me():
 
 def test_partial_update_me():
     response = client.put(
-        "/me/",
+        "/me",
         json={ "username": "admin" }
     )
     assert response.status_code == 200, response.text
@@ -104,7 +104,7 @@ def test_partial_update_me():
 
 def test_create_my_calendar():
     response = client.post(
-        "/calendars/",
+        "/calendars",
         json={
             "url": "https://example.com",
             "user": "ww1984",
@@ -121,7 +121,7 @@ def test_create_my_calendar():
 
 
 def test_read_my_calendars():
-    response = client.get("/me/calendars/")
+    response = client.get("/me/calendars")
     assert response.status_code == 200, response.text
     data = response.json()
     assert isinstance(data, list)
@@ -188,7 +188,7 @@ def test_update_foreign_calendar():
 
 def test_create_calendar_appointment():
     response = client.post(
-        "/appointments/",
+        "/appointments",
         json={
             "appointment": {
                 "calendar_id": "1",
@@ -213,7 +213,7 @@ def test_create_calendar_appointment():
 
 def test_create_missing_calendar_appointment():
     response = client.post(
-        "/appointments/",
+        "/appointments",
         json={
             "appointment": {
                 "calendar_id": "30",
@@ -229,7 +229,7 @@ def test_create_missing_calendar_appointment():
 
 def test_create_missing_calendar_appointment():
     response = client.post(
-        "/appointments/",
+        "/appointments",
         json={
             "appointment": {
                 "calendar_id": "2",
@@ -252,7 +252,7 @@ def test_delete_existing_calendar():
     assert data["password"] == "d14n4x"
     response = client.get("/calendars/1")
     assert response.status_code == 404, response.text
-    response = client.get("/me/calendars/")
+    response = client.get("/me/calendars")
     data = response.json()
     assert len(data) == 0
 

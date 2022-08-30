@@ -32,14 +32,14 @@ def get_db():
     db.close()
 
 
-@app.get("/login/")
+@app.get("/login")
 def main(db: Session = Depends(get_db)):
   """endpoint to get authentication status of current user"""
   me = Auth(db).subscriber
   return me is not None
 
 
-@app.post("/me/", response_model=schemas.Subscriber)
+@app.post("/me", response_model=schemas.Subscriber)
 def create_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db)):
   """endpoint to add an authenticated subscriber to db, if they doesn't exist yet"""
   email_exists = repo.get_subscriber_by_email(db=db, email=subscriber.email)
@@ -51,7 +51,7 @@ def create_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db))
   return repo.create_subscriber(db=db, subscriber=subscriber)
 
 
-@app.get("/me/", response_model=schemas.Subscriber)
+@app.get("/me", response_model=schemas.Subscriber)
 def read_me(db: Session = Depends(get_db)):
   """endpoint to get data of authenticated subscriber from db"""
   db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
@@ -60,7 +60,7 @@ def read_me(db: Session = Depends(get_db)):
   return db_subscriber
 
 
-@app.put("/me/", response_model=schemas.Subscriber)
+@app.put("/me", response_model=schemas.Subscriber)
 def update_me(subscriber: dict, db: Session = Depends(get_db)):
   """endpoint to update an authenticated subscriber"""
   db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
@@ -69,14 +69,14 @@ def update_me(subscriber: dict, db: Session = Depends(get_db)):
   return repo.update_subscriber(db=db, subscriber=subscriber, subscriber_id=Auth(db).subscriber.id)
 
 
-@app.get("/me/calendars/", response_model=list[schemas.Calendar])
+@app.get("/me/calendars", response_model=list[schemas.Calendar])
 def read_my_calendars(db: Session = Depends(get_db)):
   """get all calendar connections of authenticated subscriber"""
   calendars = repo.get_calendars_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   return calendars
 
 
-@app.post("/calendars/", response_model=schemas.Calendar)
+@app.post("/calendars", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
   return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
@@ -113,7 +113,7 @@ def delete_calendar(id: int, db: Session = Depends(get_db)):
   return repo.delete_subscriber_calendar(db=db, calendar_id=id)
 
 
-@app.post("/appointments/", response_model=schemas.Appointment)
+@app.post("/appointments", response_model=schemas.Appointment)
 def create_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Depends(get_db)):
   """endpoint to add a new appointment with slots for a given calendar"""
   db_calendar = repo.get_calendar(db, calendar_id=a_s.appointment.calendar_id)
