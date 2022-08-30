@@ -140,8 +140,17 @@ def test_read_existing_calendar():
 
 
 def test_read_missing_calendar():
-    response = client.get("/calendars/2")
+    response = client.get("/calendars/30")
     assert response.status_code == 404, response.text
+
+
+def test_read_foreign_calendar():
+    stmt = insert(models.Calendar).values(owner_id="2", url="https://test.org", user="abc", password="dce")
+    db = TestingSessionLocal()
+    db.execute(stmt)
+    db.commit()
+    response = client.get("/calendars/2")
+    assert response.status_code == 403, response.text
 
 
 def test_update_existing_calendar():
@@ -171,10 +180,6 @@ def test_partial_update_existing_calendar():
 
 
 def test_update_foreign_calendar():
-    stmt = insert(models.Calendar).values(owner_id="2", url="https://test.org", user="abc", password="dce")
-    db = TestingSessionLocal()
-    db.execute(stmt)
-    db.commit()
     response = client.put(
         "/calendars/2",
         json={

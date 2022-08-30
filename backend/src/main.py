@@ -95,6 +95,8 @@ def read_calendar(id: int, db: Session = Depends(get_db)):
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
+  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=Auth(db).subscriber.id):
+    raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   return db_calendar
 
 
