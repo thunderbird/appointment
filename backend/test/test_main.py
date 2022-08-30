@@ -186,12 +186,38 @@ def test_update_foreign_calendar():
     assert response.status_code == 403, response.text
 
 
+def test_delete_existing_calendar():
+    response = client.delete("/calendars/1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["url"] == "https://example.com"
+    assert data["user"] == "ww1984x"
+    assert data["password"] == "d14n4x"
+    response = client.get("/calendars/1")
+    assert response.status_code == 404, response.text
+    response = client.get("/me/calendars")
+    data = response.json()
+    assert len(data) == 0
+    # restore own calendar for testing purposes
+    client.post("/calendars", json={ "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
+
+
+def test_delete_missing_calendar():
+    response = client.delete("/calendars/30")
+    assert response.status_code == 404, response.text
+
+
+def test_delete_foreign_calendar():
+    response = client.delete("/calendars/2")
+    assert response.status_code == 403, response.text
+
+
 def test_create_calendar_appointment():
     response = client.post(
         "/appointments",
         json={
             "appointment": {
-                "calendar_id": "1",
+                "calendar_id": "3",
                 "duration": "180",
                 "title": "Testing new Application feature",
                 "slug": "sodiurw089hsihdef",
@@ -205,7 +231,7 @@ def test_create_calendar_appointment():
     )
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["calendar_id"] == 1
+    assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
     assert data["slug"] == "sodiurw089hsihdef"
@@ -227,7 +253,7 @@ def test_create_missing_calendar_appointment():
     assert response.status_code == 404, response.text
 
 
-def test_create_missing_calendar_appointment():
+def test_create_foreign_calendar_appointment():
     response = client.post(
         "/appointments",
         json={
@@ -240,28 +266,4 @@ def test_create_missing_calendar_appointment():
             "slots": []
         }
     )
-    assert response.status_code == 403, response.text
-
-
-def test_delete_existing_calendar():
-    response = client.delete("/calendars/1")
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["url"] == "https://example.com"
-    assert data["user"] == "ww1984x"
-    assert data["password"] == "d14n4x"
-    response = client.get("/calendars/1")
-    assert response.status_code == 404, response.text
-    response = client.get("/me/calendars")
-    data = response.json()
-    assert len(data) == 0
-
-
-def test_delete_missing_calendar():
-    response = client.delete("/calendars/30")
-    assert response.status_code == 404, response.text
-
-
-def test_delete_foreign_calendar():
-    response = client.delete("/calendars/2")
     assert response.status_code == 403, response.text

@@ -33,7 +33,7 @@ def get_db():
 
 
 @app.get("/login")
-def main(db: Session = Depends(get_db)):
+def login(db: Session = Depends(get_db)):
   """endpoint to get authentication status of current user"""
   me = Auth(db).subscriber
   return me is not None
