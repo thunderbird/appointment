@@ -131,3 +131,12 @@ def create_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Dep
   if not repo.calendar_is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=Auth(db).subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
+
+
+@app.get("/appointments/{slug}", response_model=schemas.Appointment)
+def read_appointment(slug: str, db: Session = Depends(get_db)):
+  """endpoint to get an appointment from db by url slug"""
+  db_appointment = repo.get_appointment(db, appointment_slug=slug)
+  if db_appointment is None:
+    raise HTTPException(status_code=404, detail="Appointment not found")
+  return db_appointment

@@ -54,11 +54,6 @@ def get_calendars_by_subscriber(db: Session, subscriber_id: int):
   return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
 
 
-def get_appointments_by_subscriber(db: Session, subscriber_id: int):
-  """retrieve list of appointments by owner id"""
-  return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
-
-
 def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subscriber_id: int):
   """create new calendar for owner"""
   hashed = calendar.password # TODO: hashing/encrypting
@@ -107,3 +102,19 @@ def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBas
     db.add(db_slot)
   db.commit()
   return db_appointment
+
+
+""" APPOINTMENT / SLOT repository functions
+"""
+def get_appointment(db: Session, appointment_id: int = None, appointment_slug: str = None):
+  """retrieve appointment by id"""
+  if appointment_id:
+    return db.get(models.Appointment, appointment_id)
+  if appointment_slug:
+    return db.query(models.Appointment).filter(models.Appointment.slug == appointment_slug).first()
+  return None
+
+
+def get_appointments_by_subscriber(db: Session, subscriber_id: int):
+  """retrieve list of appointments by owner id"""
+  return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()

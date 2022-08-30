@@ -246,12 +246,7 @@ def test_create_missing_calendar_appointment():
     response = client.post(
         "/appointments",
         json={
-            "appointment": {
-                "calendar_id": "30",
-                "duration": "180",
-                "title": "Testing new Application feature",
-                "slug": "sodiurw089hsihdef",
-            },
+            "appointment": { "calendar_id": "30", "duration": "1", "title": "a", "slug": "a" },
             "slots": []
         }
     )
@@ -262,12 +257,7 @@ def test_create_foreign_calendar_appointment():
     response = client.post(
         "/appointments",
         json={
-            "appointment": {
-                "calendar_id": "2",
-                "duration": "180",
-                "title": "Testing new Application feature",
-                "slug": "sodiurw089hsihdef",
-            },
+            "appointment": { "calendar_id": "2", "duration": "1", "title": "a", "slug": "a" },
             "slots": []
         }
     )
@@ -282,3 +272,18 @@ def test_read_my_appointments():
     assert len(data) == 1
     assert data[0]["duration"] == 180
     assert "calendar_id" in data[0] and data[0]["calendar_id"] == 3
+
+
+def test_read_existing_appointment():
+    response = client.get("/appointments/sodiurw089hsihdef")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["calendar_id"] == 3
+    assert data["duration"] == 180
+    assert data["title"] == "Testing new Application feature"
+    assert data["slug"] == "sodiurw089hsihdef"
+
+
+def test_read_missing_appointment():
+    response = client.get("/appointments/missing")
+    assert response.status_code == 404, response.text
