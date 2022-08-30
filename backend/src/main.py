@@ -111,3 +111,14 @@ def delete_calendar(id: int, db: Session = Depends(get_db)):
   if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=Auth(db).subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   return repo.delete_subscriber_calendar(db=db, calendar_id=id)
+
+
+@app.post("/appointments/", response_model=schemas.Appointment)
+def create_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Depends(get_db)):
+  """endpoint to add a new appointment with slots for a given calendar"""
+  db_calendar = repo.get_calendar(db, calendar_id=a_s.appointment.calendar_id)
+  if db_calendar is None:
+    raise HTTPException(status_code=404, detail="Calendar not found")
+  if not repo.calendar_is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=Auth(db).subscriber.id):
+    raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
+  return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)

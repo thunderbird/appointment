@@ -2,6 +2,7 @@
 
 Definitions of valid data shapes for database models.
 """
+from datetime import datetime
 from pydantic import BaseModel
 from .models import AppointmentStatus
 
@@ -9,7 +10,7 @@ from .models import AppointmentStatus
 """ SLOT model schemas
 """
 class SlotBase(BaseModel):
-  start: str
+  start: datetime
   is_available: bool | None = True
 
 
@@ -24,8 +25,9 @@ class Slot(SlotBase):
 """ APPOINTMENT model schemas
 """
 class AppointmentBase(BaseModel):
-  time_created: str | None = None
-  time_updated: str | None = None
+  time_created: datetime | None = None
+  time_updated: datetime | None = None
+  calendar_id: int
   duration: int
   title: str
   location_suggestions: str | None = None
@@ -41,11 +43,15 @@ class AppointmentBase(BaseModel):
 
 class Appointment(AppointmentBase):
   id: int
-  calendar_id: int
   slots: list[Slot] = []
 
   class Config:
     orm_mode = True
+
+
+class AppointmentSlots(BaseModel):
+  appointment: AppointmentBase
+  slots: list[SlotBase] = []
 
 
 """ CALENDAR model schemas

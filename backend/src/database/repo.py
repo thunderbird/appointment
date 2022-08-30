@@ -88,3 +88,17 @@ def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
     models.Calendar.id == calendar_id,
     models.Calendar.owner_id == subscriber_id
   ).first() is not None
+
+
+def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBase, slots: list[schemas.SlotBase]):
+  """create new appointment with slots for calendar"""
+  db_appointment = models.Appointment(**appointment.dict())
+  db.add(db_appointment)
+  db.commit()
+  db.refresh(db_appointment)
+  for slot in slots:
+    db_slot = models.Slot(**slot.dict())
+    db_slot.appointment_id = db_appointment.id
+    db.add(db_slot)
+  db.commit()
+  return db_appointment
