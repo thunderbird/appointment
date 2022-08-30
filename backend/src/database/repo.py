@@ -54,6 +54,11 @@ def get_calendars_by_subscriber(db: Session, subscriber_id: int):
   return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
 
 
+def get_appointments_by_subscriber(db: Session, subscriber_id: int):
+  """retrieve list of appointments by owner id"""
+  return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
+
+
 def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subscriber_id: int):
   """create new calendar for owner"""
   hashed = calendar.password # TODO: hashing/encrypting

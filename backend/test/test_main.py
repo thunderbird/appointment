@@ -198,7 +198,7 @@ def test_delete_existing_calendar():
     response = client.get("/me/calendars")
     data = response.json()
     assert len(data) == 0
-    # restore own calendar for testing purposes
+    # add own calendar again for testing purposes
     client.post("/calendars", json={ "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
 
 
@@ -267,3 +267,13 @@ def test_create_foreign_calendar_appointment():
         }
     )
     assert response.status_code == 403, response.text
+
+
+def test_read_my_appointments():
+    response = client.get("/me/appointments")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0]["duration"] == 180
+    assert "calendar_id" in data[0] and data[0]["calendar_id"] == 3

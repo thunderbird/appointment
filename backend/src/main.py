@@ -76,6 +76,13 @@ def read_my_calendars(db: Session = Depends(get_db)):
   return calendars
 
 
+@app.get("/me/appointments", response_model=list[schemas.Appointment])
+def read_my_appointments(db: Session = Depends(get_db)):
+  """get all appointments of authenticated subscriber"""
+  appointments = repo.get_appointments_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
+  return appointments
+
+
 @app.post("/calendars", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
