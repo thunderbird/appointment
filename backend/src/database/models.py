@@ -50,7 +50,7 @@ class Appointment(Base):
 
   id                   = Column(Integer, primary_key=True, index=True)
   time_created         = Column(DateTime(timezone=True), server_default=func.now())
-  time_updated         = Column(DateTime(timezone=True), onupdate=func.now())
+  time_updated         = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
   calendar_id          = Column(Integer, ForeignKey("calendars.id"))
   duration             = Column(Integer)
   title                = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
