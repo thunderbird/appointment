@@ -225,7 +225,7 @@ def test_create_calendar_appointment():
                 "calendar_id": "3",
                 "duration": "180",
                 "title": "Testing new Application feature",
-                "slug": "sodiurw089hsihdef",
+                "slug": "lorem-ipsum",
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
@@ -239,7 +239,7 @@ def test_create_calendar_appointment():
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
-    assert data["slug"] == "sodiurw089hsihdef"
+    assert data["slug"] == "lorem-ipsum"
 
 
 def test_create_missing_calendar_appointment():
@@ -275,13 +275,13 @@ def test_read_my_appointments():
 
 
 def test_read_existing_appointment():
-    response = client.get("/appointments/sodiurw089hsihdef")
+    response = client.get("/appointments/lorem-ipsum")
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
-    assert data["slug"] == "sodiurw089hsihdef"
+    assert data["slug"] == "lorem-ipsum"
 
 
 def test_read_missing_appointment():

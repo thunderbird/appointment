@@ -10,13 +10,30 @@ from .models import AppointmentStatus
 """ SLOT model schemas
 """
 class SlotBase(BaseModel):
+  time_updated: datetime | None = None
   start: datetime
-  is_available: bool | None = True
 
 
 class Slot(SlotBase):
   id: int
   appointment_id: int
+  attendee_id: int | None = None
+  subscriber_id: int | None = None
+
+  class Config:
+    orm_mode = True
+
+
+""" ATTENDEE model schemas
+"""
+class AttendeeBase(BaseModel):
+  email: str
+  name: str | None = None
+
+
+class Attendee(AttendeeBase):
+  id: int
+  slots: list[Slot] = []
 
   class Config:
     orm_mode = True
@@ -36,7 +53,6 @@ class AppointmentBase(BaseModel):
   location_url: str | None = None
   location_phone: str | None = None
   details: str | None = None
-  attendees: str | None = None
   slug: str
   status: AppointmentStatus | None = AppointmentStatus.draft
 
@@ -84,6 +100,7 @@ class SubscriberBase(BaseModel):
 class Subscriber(SubscriberBase):
   id: int
   calendars: list[Calendar] = []
+  slots: list[Slot] = []
 
   class Config:
     orm_mode = True

@@ -3,7 +3,7 @@
 Definitions of database tables and their relationships.
 """
 import enum
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
@@ -30,6 +30,7 @@ class Subscriber(Base):
   timezone  = Column(Integer, index=True)
 
   calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
+  slots     = relationship("Slot", cascade="all,delete", back_populates="subscriber")
 
 
 class Calendar(Base):
@@ -49,9 +50,9 @@ class Appointment(Base):
   __tablename__ = "appointments"
 
   id                   = Column(Integer, primary_key=True, index=True)
+  calendar_id          = Column(Integer, ForeignKey("calendars.id"))
   time_created         = Column(DateTime(timezone=True), server_default=func.now())
   time_updated         = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-  calendar_id          = Column(Integer, ForeignKey("calendars.id"))
   duration             = Column(Integer)
   title                = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   location_suggestions = Column(String)
@@ -60,7 +61,6 @@ class Appointment(Base):
   location_url         = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   location_phone       = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   details              = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
-  attendees            = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
   slug                 = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
   status               = Column(Enum(AppointmentStatus))
 
@@ -68,12 +68,26 @@ class Appointment(Base):
   slots                = relationship("Slot", cascade="all,delete", back_populates="appointment")
 
 
+class Attendee(Base):
+  __tablename__ = "attendees"
+
+  id    = Column(Integer, primary_key=True, index=True)
+  email = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
+  name  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
+
+  slots = relationship("Slot", cascade="all,delete", back_populates="attendee")
+
+
 class Slot(Base):
   __tablename__ = "slots"
 
   id             = Column(Integer, primary_key=True, index=True)
   appointment_id = Column(Integer, ForeignKey("appointments.id"))
+  attendee_id    = Column(Integer, ForeignKey("attendees.id"))
+  subscriber_id  = Column(Integer, ForeignKey("subscribers.id"))
+  time_updated   = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
   start          = Column(DateTime(timezone=True))
-  is_available   = Column(Boolean, default=True)
 
   appointment    = relationship("Appointment", back_populates="slots")
+  attendee       = relationship("Attendee", back_populates="slots")
+  subscriber     = relationship("Subscriber", back_populates="slots")
