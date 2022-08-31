@@ -118,3 +118,9 @@ def get_appointment(db: Session, appointment_id: int = None, appointment_slug: s
 def get_appointments_by_subscriber(db: Session, subscriber_id: int):
   """retrieve list of appointments by owner id"""
   return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
+
+
+def appointment_is_owned(db: Session, appointment_id: int, subscriber_id: int):
+  """check if appointment belongs to subscriber"""
+  db_appointment = get_appointment(db, appointment_id)
+  return calendar_is_owned(db, db_appointment.calendar_id, subscriber_id)

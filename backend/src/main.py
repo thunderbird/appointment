@@ -83,13 +83,13 @@ def read_my_appointments(db: Session = Depends(get_db)):
   return appointments
 
 
-@app.post("/calendars", response_model=schemas.Calendar)
+@app.post("/cal", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
   return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
 
 
-@app.get("/calendars/{id}", response_model=schemas.Calendar)
+@app.get("/cal/{id}", response_model=schemas.Calendar)
 def read_calendar(id: int, db: Session = Depends(get_db)):
   """endpoint to get a calendar from db"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
@@ -100,7 +100,7 @@ def read_calendar(id: int, db: Session = Depends(get_db)):
   return db_calendar
 
 
-@app.put("/calendars/{id}", response_model=schemas.Calendar)
+@app.put("/cal/{id}", response_model=schemas.Calendar)
 def update_my_calendar(id: int, calendar: dict, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
@@ -111,7 +111,7 @@ def update_my_calendar(id: int, calendar: dict, db: Session = Depends(get_db)):
   return repo.update_subscriber_calendar(db=db, calendar=calendar, calendar_id=id)
 
 
-@app.delete("/calendars/{id}", response_model=schemas.Calendar)
+@app.delete("/cal/{id}", response_model=schemas.Calendar)
 def delete_calendar(id: int, db: Session = Depends(get_db)):
   """endpoint to remove a calendar from db"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
@@ -122,7 +122,7 @@ def delete_calendar(id: int, db: Session = Depends(get_db)):
   return repo.delete_subscriber_calendar(db=db, calendar_id=id)
 
 
-@app.post("/appointments", response_model=schemas.Appointment)
+@app.post("/apmt", response_model=schemas.Appointment)
 def create_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Depends(get_db)):
   """endpoint to add a new appointment with slots for a given calendar"""
   db_calendar = repo.get_calendar(db, calendar_id=a_s.appointment.calendar_id)
@@ -133,10 +133,12 @@ def create_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Dep
   return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 
-@app.get("/appointments/{slug}", response_model=schemas.Appointment)
-def read_appointment(slug: str, db: Session = Depends(get_db)):
-  """endpoint to get an appointment from db by url slug"""
-  db_appointment = repo.get_appointment(db, appointment_slug=slug)
+@app.get("/apmt/{id}", response_model=schemas.Appointment)
+def read_appointment(id: str, db: Session = Depends(get_db)):
+  """endpoint to get an appointment from db by id"""
+  db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
+  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=Auth(db).subscriber.id):
+    raise HTTPException(status_code=403, detail="Appointment not owned by subscriber")
   return db_appointment

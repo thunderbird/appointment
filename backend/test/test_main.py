@@ -104,7 +104,7 @@ def test_partial_update_me():
 
 def test_create_my_calendar():
     response = client.post(
-        "/calendars",
+        "/cal",
         json={
             "url": "https://example.com",
             "user": "ww1984",
@@ -131,7 +131,7 @@ def test_read_my_calendars():
 
 
 def test_read_existing_calendar():
-    response = client.get("/calendars/1")
+    response = client.get("/cal/1")
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["url"] == "https://example.com"
@@ -140,7 +140,7 @@ def test_read_existing_calendar():
 
 
 def test_read_missing_calendar():
-    response = client.get("/calendars/30")
+    response = client.get("/cal/30")
     assert response.status_code == 404, response.text
 
 
@@ -149,13 +149,13 @@ def test_read_foreign_calendar():
     db = TestingSessionLocal()
     db.execute(stmt)
     db.commit()
-    response = client.get("/calendars/2")
+    response = client.get("/cal/2")
     assert response.status_code == 403, response.text
 
 
 def test_update_existing_calendar():
     response = client.put(
-        "/calendars/1",
+        "/cal/1",
         json={
             "url": "https://example.comx",
             "user": "ww1984x",
@@ -171,7 +171,7 @@ def test_update_existing_calendar():
 
 def test_partial_update_existing_calendar():
     response = client.put(
-        "/calendars/1",
+        "/cal/1",
         json={ "url": "https://example.com" }
     )
     assert response.status_code == 200, response.text
@@ -181,7 +181,7 @@ def test_partial_update_existing_calendar():
 
 def test_update_foreign_calendar():
     response = client.put(
-        "/calendars/2",
+        "/cal/2",
         json={
             "url": "test",
             "user": "test",
@@ -192,34 +192,34 @@ def test_update_foreign_calendar():
 
 
 def test_delete_existing_calendar():
-    response = client.delete("/calendars/1")
+    response = client.delete("/cal/1")
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["url"] == "https://example.com"
     assert data["user"] == "ww1984x"
     assert data["password"] == "d14n4x"
-    response = client.get("/calendars/1")
+    response = client.get("/cal/1")
     assert response.status_code == 404, response.text
     response = client.get("/me/calendars")
     data = response.json()
     assert len(data) == 0
     # add own calendar again for testing purposes
-    client.post("/calendars", json={ "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
+    client.post("/cal", json={ "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
 
 
 def test_delete_missing_calendar():
-    response = client.delete("/calendars/30")
+    response = client.delete("/cal/30")
     assert response.status_code == 404, response.text
 
 
 def test_delete_foreign_calendar():
-    response = client.delete("/calendars/2")
+    response = client.delete("/cal/2")
     assert response.status_code == 403, response.text
 
 
 def test_create_calendar_appointment():
     response = client.post(
-        "/appointments",
+        "/apmt",
         json={
             "appointment": {
                 "calendar_id": "3",
@@ -244,7 +244,7 @@ def test_create_calendar_appointment():
 
 def test_create_missing_calendar_appointment():
     response = client.post(
-        "/appointments",
+        "/apmt",
         json={
             "appointment": { "calendar_id": "30", "duration": "1", "title": "a", "slug": "a" },
             "slots": []
@@ -255,7 +255,7 @@ def test_create_missing_calendar_appointment():
 
 def test_create_foreign_calendar_appointment():
     response = client.post(
-        "/appointments",
+        "/apmt",
         json={
             "appointment": { "calendar_id": "2", "duration": "1", "title": "a", "slug": "a" },
             "slots": []
@@ -275,7 +275,7 @@ def test_read_my_appointments():
 
 
 def test_read_existing_appointment():
-    response = client.get("/appointments/lorem-ipsum")
+    response = client.get("/apmt/1")
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["calendar_id"] == 3
@@ -285,5 +285,14 @@ def test_read_existing_appointment():
 
 
 def test_read_missing_appointment():
-    response = client.get("/appointments/missing")
+    response = client.get("/apmt/2")
     assert response.status_code == 404, response.text
+
+
+def test_read_foreign_appointment():
+    stmt = insert(models.Appointment).values(calendar_id="2", duration="60", title="abc", slug="dce")
+    db = TestingSessionLocal()
+    db.execute(stmt)
+    db.commit()
+    response = client.get("/apmt/2")
+    assert response.status_code == 403, response.text
