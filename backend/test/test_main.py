@@ -296,3 +296,38 @@ def test_read_foreign_appointment():
     db.commit()
     response = client.get("/apmt/2")
     assert response.status_code == 403, response.text
+
+
+def test_update_existing_appointment():
+    response = client.put(
+        "/apmt/1",
+        json={
+            "appointment": {
+                "calendar_id": "3",
+                "duration": "90",
+                "title": "Testing new Application featurex",
+                "slug": "lorem-ipsumx",
+            },
+            "slots": [
+                { "start": "2022-09-01 09:00:00" },
+                { "start": "2022-09-03 10:00:00" },
+                { "start": "2022-09-05 09:00:00" },
+            ]
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["duration"] == 90
+    assert data["title"] == "Testing new Application featurex"
+    assert data["slug"] == "lorem-ipsumx"
+
+
+def test_update_foreign_appointment():
+    response = client.put(
+        "/apmt/2",
+        json={
+            "appointment": { "calendar_id": "2", "duration": "90", "title": "a", "slug": "b" },
+            "slots": []
+        }
+    )
+    assert response.status_code == 403, response.text

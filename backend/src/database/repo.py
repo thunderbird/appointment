@@ -96,15 +96,11 @@ def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBas
   db.add(db_appointment)
   db.commit()
   db.refresh(db_appointment)
-  for slot in slots:
-    db_slot = models.Slot(**slot.dict())
-    db_slot.appointment_id = db_appointment.id
-    db.add(db_slot)
-  db.commit()
+  add_slots(db, slots, db_appointment.id)
   return db_appointment
 
 
-""" APPOINTMENT / SLOT repository functions
+""" APPOINTMENT repository functions
 """
 def get_appointment(db: Session, appointment_id: int = None, appointment_slug: str = None):
   """retrieve appointment by id"""
@@ -124,3 +120,32 @@ def appointment_is_owned(db: Session, appointment_id: int, subscriber_id: int):
   """check if appointment belongs to subscriber"""
   db_appointment = get_appointment(db, appointment_id)
   return calendar_is_owned(db, db_appointment.calendar_id, subscriber_id)
+
+
+def update_calendar_appointment(db: Session, appointment: dict, slots: list[schemas.SlotBase], appointment_id: int):
+  """update existing appointment by id"""
+  db_appointment = get_appointment(db, appointment_id)
+  for key, value in appointment:
+    if hasattr(db_appointment, key):
+      setattr(db_appointment, key, value)
+  db.commit()
+  delete_slots(db, appointment_id)
+  add_slots(db, slots, appointment_id)
+  return db_appointment
+
+
+""" SLOT repository functions
+"""
+def add_slots(db: Session, slots: list[schemas.SlotBase], appointment_id: int):
+  """create new slots for appointment of given id"""
+  for slot in slots:
+    db_slot = models.Slot(**slot.dict())
+    db_slot.appointment_id = appointment_id
+    db.add(db_slot)
+  db.commit()
+  return slots
+
+
+def delete_slots(db: Session, appointment_id: int):
+  """delete all slots for appointment of given id"""
+  return db.query(models.Slot).filter(models.Slot.appointment_id == appointment_id).delete()
