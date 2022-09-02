@@ -32,12 +32,11 @@ def create_subscriber(db: Session, subscriber: schemas.SubscriberBase):
   return db_subscriber
 
 
-def update_subscriber(db: Session, subscriber: dict, subscriber_id: int):
+def update_subscriber(db: Session, subscriber: schemas.SubscriberBase, subscriber_id: int):
   """update existing subscriber by id"""
   db_subscriber = get_subscriber(db, subscriber_id)
-  for key, value in subscriber.items():
-    if hasattr(db_subscriber, key):
-      setattr(db_subscriber, key, value)
+  for key, value in subscriber:
+    setattr(db_subscriber, key, value)
   db.commit()
   return db_subscriber
 
@@ -64,12 +63,11 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subs
   return db_calendar
 
 
-def update_subscriber_calendar(db: Session, calendar: dict, calendar_id: int):
+def update_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, calendar_id: int):
   """update existing calendar by id"""
   db_calendar = get_calendar(db, calendar_id)
-  for key, value in calendar.items():
-    if hasattr(db_calendar, key):
-      setattr(db_calendar, key, value)
+  for key, value in calendar:
+    setattr(db_calendar, key, value)
   db.commit()
   return db_calendar
 
@@ -122,12 +120,12 @@ def appointment_is_owned(db: Session, appointment_id: int, subscriber_id: int):
   return calendar_is_owned(db, db_appointment.calendar_id, subscriber_id)
 
 
-def update_calendar_appointment(db: Session, appointment: dict, slots: list[schemas.SlotBase], appointment_id: int):
+def update_calendar_appointment(db: Session, appointment: schemas.AppointmentBase, slots: list[schemas.SlotBase],
+                                appointment_id: int):
   """update existing appointment by id"""
   db_appointment = get_appointment(db, appointment_id)
   for key, value in appointment:
-    if hasattr(db_appointment, key):
-      setattr(db_appointment, key, value)
+    setattr(db_appointment, key, value)
   db.commit()
   delete_slots(db, appointment_id)
   add_slots(db, slots, appointment_id)

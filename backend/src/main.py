@@ -61,7 +61,7 @@ def read_me(db: Session = Depends(get_db)):
 
 
 @app.put("/me", response_model=schemas.Subscriber)
-def update_me(subscriber: dict, db: Session = Depends(get_db)):
+def update_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db)):
   """endpoint to update an authenticated subscriber"""
   db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
   if db_subscriber is None:
@@ -101,7 +101,7 @@ def read_my_calendar(id: int, db: Session = Depends(get_db)):
 
 
 @app.put("/cal/{id}", response_model=schemas.Calendar)
-def update_my_calendar(id: int, calendar: dict, db: Session = Depends(get_db)):
+def update_my_calendar(id: int, calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to update an existing calender connection for authenticated subscriber"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:

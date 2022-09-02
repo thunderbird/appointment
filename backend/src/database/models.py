@@ -62,7 +62,7 @@ class Appointment(Base):
   location_phone       = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   details              = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   slug                 = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
-  status               = Column(Enum(AppointmentStatus))
+  status               = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
   calendar             = relationship("Calendar", back_populates="appointments")
   slots                = relationship("Slot", cascade="all,delete", back_populates="appointment")

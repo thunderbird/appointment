@@ -92,16 +92,6 @@ def test_update_me():
     assert data["timezone"] == 2
 
 
-def test_partial_update_me():
-    response = client.put(
-        "/me",
-        json={ "username": "admin" }
-    )
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["username"] == "admin"
-
-
 def test_create_my_calendar():
     response = client.post(
         "/cal",
@@ -169,16 +159,6 @@ def test_update_existing_calendar():
     assert data["password"] == "d14n4x"
 
 
-def test_partial_update_existing_calendar():
-    response = client.put(
-        "/cal/1",
-        json={ "url": "https://example.com" }
-    )
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["url"] == "https://example.com"
-
-
 def test_update_foreign_calendar():
     response = client.put(
         "/cal/2",
@@ -195,7 +175,7 @@ def test_delete_existing_calendar():
     response = client.delete("/cal/1")
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["url"] == "https://example.com"
+    assert data["url"] == "https://example.comx"
     assert data["user"] == "ww1984x"
     assert data["password"] == "d14n4x"
     response = client.get("/cal/1")
@@ -236,6 +216,8 @@ def test_create_calendar_appointment():
     )
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["time_created"] != None
+    assert data["time_updated"] != None
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
@@ -278,6 +260,8 @@ def test_read_existing_appointment():
     response = client.get("/apmt/1")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["time_created"] != None
+    assert data["time_updated"] != None
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
@@ -317,6 +301,8 @@ def test_update_existing_appointment():
     )
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["time_created"] != None
+    assert data["time_updated"] != None
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
     assert data["slug"] == "lorem-ipsumx"
