@@ -393,3 +393,31 @@ def test_read_public_existing_appointment():
 def test_read_public_missing_appointment():
     response = client.get("/apmt/adminx/missing")
     assert response.status_code == 404, response.text
+
+
+def test_attendee_selects_appointment_slot():
+    response = client.put(
+        "/apmt/adminx/lorem-ipsumx",
+        json={
+            "slot_id": "2",
+            "attendee": {
+                "email": "person@test.org",
+                "name": "John Doe",
+            }
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["email"] == "person@test.org"
+    assert data["name"] == "John Doe"
+
+
+def test_attendee_selects_unavailable_appointment_slot():
+    response = client.put(
+        "/apmt/adminx/lorem-ipsumx",
+        json={
+            "slot_id": "2",
+            "attendee": { "email": "a", "name": "b" }
+        }
+    )
+    assert response.status_code == 403, response.text

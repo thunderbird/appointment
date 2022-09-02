@@ -39,6 +39,11 @@ class Attendee(AttendeeBase):
     orm_mode = True
 
 
+class SlotAttendee(BaseModel):
+  slot_id: int
+  attendee: AttendeeBase
+
+
 """ APPOINTMENT model schemas
 """
 class AppointmentBase(BaseModel):

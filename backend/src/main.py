@@ -173,3 +173,16 @@ def read_public_appointment(username: str, slug: str, db: Session = Depends(get_
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
   return db_appointment
+
+
+@app.put("/apmt/{username}/{slug}", response_model=schemas.Attendee)
+def read_public_appointment(username: str, slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
+  """endpoint to remove a appointment from db"""
+  db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
+  if db_appointment is None:
+    raise HTTPException(status_code=404, detail="Appointment not found")
+  if not repo.appointment_has_slot(db, appointment_id=db_appointment.id, slot_id=s_a.slot_id):
+    raise HTTPException(status_code=404, detail="Time slot not found for Appointment")
+  if not repo.slot_is_available(db, slot_id=s_a.slot_id):
+    raise HTTPException(status_code=403, detail="Time slot not available anymore")
+  return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
