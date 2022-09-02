@@ -10,7 +10,6 @@ from .models import AppointmentStatus
 """ SLOT model schemas
 """
 class SlotBase(BaseModel):
-  time_updated: datetime | None = None
   start: datetime
 
 
@@ -19,6 +18,7 @@ class Slot(SlotBase):
   appointment_id: int
   attendee_id: int | None = None
   subscriber_id: int | None = None
+  time_updated: datetime | None = None
 
   class Config:
     orm_mode = True
@@ -42,8 +42,6 @@ class Attendee(AttendeeBase):
 """ APPOINTMENT model schemas
 """
 class AppointmentBase(BaseModel):
-  time_created: datetime | None = None
-  time_updated: datetime | None = None
   calendar_id: int
   duration: int
   title: str
@@ -59,6 +57,8 @@ class AppointmentBase(BaseModel):
 
 class Appointment(AppointmentBase):
   id: int
+  time_created: datetime | None = None
+  time_updated: datetime | None = None
   slots: list[Slot] = []
 
   class Config:

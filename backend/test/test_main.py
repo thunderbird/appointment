@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
 
 from ..src.database import models
 from ..src.main import app, get_db
@@ -306,6 +305,17 @@ def test_update_existing_appointment():
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
     assert data["slug"] == "lorem-ipsumx"
+
+
+def test_update_missing_appointment():
+    response = client.put(
+        "/apmt/30",
+        json={
+            "appointment": { "calendar_id": "2", "duration": "90", "title": "a", "slug": "b" },
+            "slots": []
+        }
+    )
+    assert response.status_code == 404, response.text
 
 
 def test_update_foreign_appointment():
