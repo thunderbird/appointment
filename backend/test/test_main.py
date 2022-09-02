@@ -221,6 +221,8 @@ def test_create_calendar_appointment():
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
     assert data["slug"] == "lorem-ipsum"
+    assert len(data["slots"]) == 3
+    assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
 
 
 def test_create_missing_calendar_appointment():
@@ -265,6 +267,8 @@ def test_read_existing_appointment():
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
     assert data["slug"] == "lorem-ipsum"
+    assert len(data["slots"]) == 3
+    assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
 
 
 def test_read_missing_appointment():
@@ -305,6 +309,8 @@ def test_update_existing_appointment():
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
     assert data["slug"] == "lorem-ipsumx"
+    assert len(data["slots"]) == 3
+    assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
 
 
 def test_update_missing_appointment():

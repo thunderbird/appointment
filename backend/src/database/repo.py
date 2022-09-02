@@ -88,6 +88,8 @@ def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
   ).first() is not None
 
 
+""" APPOINTMENT repository functions
+"""
 def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBase, slots: list[schemas.SlotBase]):
   """create new appointment with slots for calendar"""
   db_appointment = models.Appointment(**appointment.dict())
@@ -98,8 +100,6 @@ def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBas
   return db_appointment
 
 
-""" APPOINTMENT repository functions
-"""
 def get_appointment(db: Session, appointment_id: int = None, appointment_slug: str = None):
   """retrieve appointment by id"""
   if appointment_id:
