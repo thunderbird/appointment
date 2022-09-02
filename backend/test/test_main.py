@@ -203,7 +203,7 @@ def test_delete_existing_calendar():
     response = client.get("/me/calendars")
     data = response.json()
     assert len(data) == 0
-    # add own calendar again for testing purposes
+    # add own calendar again for further testing
     client.post("/cal", json={ "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
 
 
@@ -330,4 +330,45 @@ def test_update_foreign_appointment():
             "slots": []
         }
     )
+    assert response.status_code == 403, response.text
+
+
+def test_delete_existing_appointment():
+    response = client.delete("/apmt/1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["duration"] == 90
+    assert data["title"] == "Testing new Application featurex"
+    assert data["slug"] == "lorem-ipsumx"
+    response = client.get("/apmt/1")
+    assert response.status_code == 404, response.text
+    response = client.get("/me/appointments")
+    data = response.json()
+    assert len(data) == 0
+    # add appointment again for further testing
+    client.post(
+        "/apmt",
+        json={
+            "appointment": {
+                "calendar_id": "3",
+                "duration": "90",
+                "title": "Testing new Application featurex",
+                "slug": "lorem-ipsumx",
+            },
+            "slots": [
+                { "start": "2022-09-01 09:00:00" },
+                { "start": "2022-09-03 10:00:00" },
+                { "start": "2022-09-05 09:00:00" },
+            ]
+        }
+    )
+
+
+def test_delete_missing_appointment():
+    response = client.delete("/apmt/30")
+    assert response.status_code == 404, response.text
+
+
+def test_delete_foreign_appointment():
+    response = client.delete("/apmt/2")
     assert response.status_code == 403, response.text

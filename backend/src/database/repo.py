@@ -134,6 +134,14 @@ def update_calendar_appointment(db: Session, appointment: dict, slots: list[sche
   return db_appointment
 
 
+def delete_calendar_appointment(db: Session, appointment_id: int):
+  """remove existing appointment by id"""
+  db_appointment = get_appointment(db, appointment_id)
+  db.delete(db_appointment)
+  db.commit()
+  return db_appointment
+
+
 """ SLOT repository functions
 """
 def add_slots(db: Session, slots: list[schemas.SlotBase], appointment_id: int):
