@@ -164,3 +164,12 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db)):
   if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=Auth(db).subscriber.id):
     raise HTTPException(status_code=403, detail="Appointment not owned by subscriber")
   return repo.delete_calendar_appointment(db=db, appointment_id=id)
+
+
+@app.get("/apmt/{username}/{slug}", response_model=schemas.Appointment)
+def read_public_appointment(username: str, slug: str, db: Session = Depends(get_db)):
+  """endpoint to remove a appointment from db"""
+  db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
+  if db_appointment is None:
+    raise HTTPException(status_code=404, detail="Appointment not found")
+  return db_appointment

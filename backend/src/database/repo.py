@@ -100,12 +100,17 @@ def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBas
   return db_appointment
 
 
-def get_appointment(db: Session, appointment_id: int = None, appointment_slug: str = None):
-  """retrieve appointment by id"""
+def get_appointment(db: Session, appointment_id: int):
+  """retrieve appointment by id (private)"""
   if appointment_id:
     return db.get(models.Appointment, appointment_id)
-  if appointment_slug:
-    return db.query(models.Appointment).filter(models.Appointment.slug == appointment_slug).first()
+  return None
+
+
+def get_public_appointment(db: Session, username: str, slug: str):
+  """retrieve appointment by subscriber username and appointment slug (public)"""
+  if username and slug:
+    return db.query(models.Appointment).join(models.Calendar).join(models.Subscriber).filter(models.Subscriber.username == username, models.Appointment.slug == slug).first()
   return None
 
 

@@ -374,3 +374,22 @@ def test_delete_missing_appointment():
 def test_delete_foreign_appointment():
     response = client.delete("/apmt/2")
     assert response.status_code == 403, response.text
+
+
+def test_read_public_existing_appointment():
+    response = client.get("/apmt/adminx/lorem-ipsumx")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] != None
+    assert data["time_updated"] != None
+    assert data["calendar_id"] == 3
+    assert data["duration"] == 90
+    assert data["title"] == "Testing new Application featurex"
+    assert data["slug"] == "lorem-ipsumx"
+    assert len(data["slots"]) == 3
+    assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
+
+
+def test_read_public_missing_appointment():
+    response = client.get("/apmt/adminx/missing")
+    assert response.status_code == 404, response.text
