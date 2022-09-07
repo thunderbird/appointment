@@ -36,7 +36,7 @@ def get_db():
 def login(db: Session = Depends(get_db)):
   """endpoint to get authentication status of current user"""
   me = Auth(db).subscriber
-  return me is not None
+  return me
 
 
 @app.post("/me", response_model=schemas.Subscriber)
