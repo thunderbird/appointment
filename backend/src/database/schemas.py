@@ -78,6 +78,7 @@ class AppointmentSlots(BaseModel):
 """ CALENDAR model schemas
 """
 class CalendarBase(BaseModel):
+  title: str
   url: str
   user: str
   password: str

@@ -33,7 +33,12 @@ client = TestClient(app)
 def test_main():
     response = client.get("/login")
     assert response.status_code == 200, response.text
-    assert response.json() == True
+    data = response.json()
+    assert data["username"] == "admin"
+    assert data["email"] == "admin@example.com"
+    assert data["name"] == None
+    assert data["level"] == 2
+    assert data["timezone"] == None
 
 
 def test_create_me():
@@ -95,6 +100,7 @@ def test_create_my_calendar():
     response = client.post(
         "/cal",
         json={
+            "title": "My first calendar connection",
             "url": "https://example.com",
             "user": "ww1984",
             "password": "d14n4"
@@ -102,6 +108,7 @@ def test_create_my_calendar():
     )
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["title"] == "My first calendar connection"
     assert data["url"] == "https://example.com"
     assert data["user"] == "ww1984"
     assert data["password"] == "d14n4"
@@ -123,6 +130,7 @@ def test_read_existing_calendar():
     response = client.get("/cal/1")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["title"] == "My first calendar connection"
     assert data["url"] == "https://example.com"
     assert data["user"] == "ww1984"
     assert data["password"] == "d14n4"
@@ -134,7 +142,7 @@ def test_read_missing_calendar():
 
 
 def test_read_foreign_calendar():
-    stmt = insert(models.Calendar).values(owner_id="2", url="https://test.org", user="abc", password="dce")
+    stmt = insert(models.Calendar).values(owner_id="2", title="Cal", url="https://test.org", user="abc", password="dce")
     db = TestingSessionLocal()
     db.execute(stmt)
     db.commit()
@@ -146,6 +154,7 @@ def test_update_existing_calendar():
     response = client.put(
         "/cal/1",
         json={
+            "title": "My first calendar connectionx",
             "url": "https://example.comx",
             "user": "ww1984x",
             "password": "d14n4x"
@@ -153,6 +162,7 @@ def test_update_existing_calendar():
     )
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["title"] == "My first calendar connectionx"
     assert data["url"] == "https://example.comx"
     assert data["user"] == "ww1984x"
     assert data["password"] == "d14n4x"
@@ -162,6 +172,7 @@ def test_update_foreign_calendar():
     response = client.put(
         "/cal/2",
         json={
+            "title": "test",
             "url": "test",
             "user": "test",
             "password": "test"
@@ -174,6 +185,7 @@ def test_delete_existing_calendar():
     response = client.delete("/cal/1")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["title"] == "My first calendar connectionx"
     assert data["url"] == "https://example.comx"
     assert data["user"] == "ww1984x"
     assert data["password"] == "d14n4x"
@@ -183,7 +195,7 @@ def test_delete_existing_calendar():
     data = response.json()
     assert len(data) == 0
     # add own calendar again for further testing
-    client.post("/cal", json={ "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
+    client.post("/cal", json={ "title": "My first calendar connection", "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
 
 
 def test_delete_missing_calendar():

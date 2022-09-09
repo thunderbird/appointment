@@ -56,8 +56,7 @@ def get_calendars_by_subscriber(db: Session, subscriber_id: int):
 
 def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subscriber_id: int):
   """create new calendar for owner"""
-  hashed = calendar.password # TODO: hashing/encrypting
-  db_calendar = models.Calendar(url=calendar.url, user=calendar.user, password=hashed, owner_id=subscriber_id)
+  db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
   db.add(db_calendar)
   db.commit()
   db.refresh(db_calendar)

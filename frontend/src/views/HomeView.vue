@@ -7,7 +7,7 @@
 
       <h3>Your calendars</h3>
       <div v-for="cal in calendars" :key="cal.id">
-        <code>[{{ cal.id }}] {{ cal.url }}</code> (user: {{ cal.user }})
+        <code>[{{ cal.id }}] {{ cal.url }}</code> <i>{{ cal.title }}</i> (user: {{ cal.user }})
         <button @click="removeCalendar(cal.id)">Remove</button>
       </div><br>
       <input v-model="newCalendar.url" type="url" placeholder="url" />
@@ -20,7 +20,7 @@
         <code>[{{ apmt.id }}]</code> <i>{{ apmt.title }}</i> ({{ apmt.duration }}min, <a :href="'http://localhost:8080/admin/' + apmt.slug">Public Link</a>)
       </div><br>
       <select v-model="newAppointment.appointment.calendar_id">
-        <option v-for="cal in calendars" :key="cal.id">{{ cal.id }}</option>
+        <option v-for="cal in calendars" :key="cal.id">{{ cal.title }}</option>
       </select>
       <input v-model="newAppointment.appointment.duration" type="number" placeholder="duration" />
       <input v-model="newAppointment.appointment.title" type="text" placeholder="title" />
