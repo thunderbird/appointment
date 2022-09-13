@@ -4,7 +4,7 @@ Definitions of database tables and their relationships.
 """
 import enum
 import uuid
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
@@ -12,15 +12,15 @@ from sqlalchemy.sql import func
 from .database import Base
 
 def secret():
-  return '4pp01n+m3n+' # TODO: get from env
+  return '4pp01n+m3n+z' # TODO: get from env
 
 def random_slug():
   return ''.join(str(uuid.uuid4()).split('-'))
 
 class AppointmentStatus(enum.Enum):
-  draft  = 1
-  ready  = 2
-  closed = 3
+  draft  = 1 # appointment was created but not published yet
+  ready  = 2 # appointment is published and open for attendees
+  closed = 3 # appointment is published and closed for attendees
 
 
 class Subscriber(Base):
@@ -67,6 +67,7 @@ class Appointment(Base):
   location_phone       = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   details              = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
   slug                 = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
+  keep_open            = Column(Boolean)
   status               = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
   calendar             = relationship("Calendar", back_populates="appointments")

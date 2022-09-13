@@ -58,6 +58,7 @@ class AppointmentBase(BaseModel):
   location_phone: str | None = None
   details: str | None = None
   slug: str | None = random_slug()
+  keep_open: bool | None = True
   status: AppointmentStatus | None = AppointmentStatus.draft
 
 

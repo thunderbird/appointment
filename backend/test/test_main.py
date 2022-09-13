@@ -231,6 +231,7 @@ def test_create_calendar_appointment():
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
+    assert data["keep_open"]
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
     assert data["slots"][2]["duration"] == 275
@@ -277,6 +278,7 @@ def test_read_existing_appointment():
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
+    assert data["keep_open"]
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
     assert data["slots"][2]["duration"] == 275
@@ -304,6 +306,7 @@ def test_update_existing_appointment():
                 "calendar_id": "3",
                 "duration": "90",
                 "title": "Testing new Application featurex",
+                "keep_open": "false"
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
@@ -318,6 +321,7 @@ def test_update_existing_appointment():
     assert data["time_updated"] != None
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
+    assert not data["keep_open"]
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
     assert data["slots"][2]["duration"] == 375
