@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 from ..src.database import models
 from ..src.main import app, get_db
+from ..src.config import config
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///backend/test/test.db"
 
@@ -28,6 +29,10 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+
+
+def test_config():
+    assert config('limit', 'connections') == '3'
 
 
 def test_main():

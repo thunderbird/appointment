@@ -9,10 +9,11 @@ from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from ..config import config
 from .database import Base
 
 def secret():
-  return '4pp01n+m3n+z' # TODO: get from env
+  return config('secret', 'security')
 
 def random_slug():
   return ''.join(str(uuid.uuid4()).split('-'))
