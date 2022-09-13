@@ -4,7 +4,7 @@ Definitions of valid data shapes for database models.
 """
 from datetime import datetime
 from pydantic import BaseModel
-from .models import AppointmentStatus
+from .models import AppointmentStatus, random_slug
 
 
 """ SLOT model schemas
@@ -56,7 +56,7 @@ class AppointmentBase(BaseModel):
   location_url: str | None = None
   location_phone: str | None = None
   details: str | None = None
-  slug: str
+  slug: str | None = random_slug()
   status: AppointmentStatus | None = AppointmentStatus.draft
 
 

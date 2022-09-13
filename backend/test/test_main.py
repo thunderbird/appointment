@@ -215,8 +215,7 @@ def test_create_calendar_appointment():
             "appointment": {
                 "calendar_id": "3",
                 "duration": "180",
-                "title": "Testing new Application feature",
-                "slug": "lorem-ipsum",
+                "title": "Testing new Application feature"
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
@@ -232,7 +231,6 @@ def test_create_calendar_appointment():
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
-    assert data["slug"] == "lorem-ipsum"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
 
@@ -241,7 +239,7 @@ def test_create_missing_calendar_appointment():
     response = client.post(
         "/apmt",
         json={
-            "appointment": { "calendar_id": "30", "duration": "1", "title": "a", "slug": "a" },
+            "appointment": { "calendar_id": "30", "duration": "1", "title": "a" },
             "slots": []
         }
     )
@@ -252,7 +250,7 @@ def test_create_foreign_calendar_appointment():
     response = client.post(
         "/apmt",
         json={
-            "appointment": { "calendar_id": "2", "duration": "1", "title": "a", "slug": "a" },
+            "appointment": { "calendar_id": "2", "duration": "1", "title": "a" },
             "slots": []
         }
     )
@@ -278,7 +276,6 @@ def test_read_existing_appointment():
     assert data["calendar_id"] == 3
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
-    assert data["slug"] == "lorem-ipsum"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
 
@@ -289,7 +286,7 @@ def test_read_missing_appointment():
 
 
 def test_read_foreign_appointment():
-    stmt = insert(models.Appointment).values(calendar_id="2", duration="60", title="abc", slug="dce")
+    stmt = insert(models.Appointment).values(calendar_id="2", duration="60", title="abc", slug="58fe9784f60a42bcaa94eb8f1a7e5c17")
     db = TestingSessionLocal()
     db.execute(stmt)
     db.commit()
@@ -305,7 +302,6 @@ def test_update_existing_appointment():
                 "calendar_id": "3",
                 "duration": "90",
                 "title": "Testing new Application featurex",
-                "slug": "lorem-ipsumx",
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
@@ -320,7 +316,6 @@ def test_update_existing_appointment():
     assert data["time_updated"] != None
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
-    assert data["slug"] == "lorem-ipsumx"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
 
@@ -329,7 +324,7 @@ def test_update_missing_appointment():
     response = client.put(
         "/apmt/30",
         json={
-            "appointment": { "calendar_id": "2", "duration": "90", "title": "a", "slug": "b" },
+            "appointment": { "calendar_id": "2", "duration": "90", "title": "a" },
             "slots": []
         }
     )
@@ -340,7 +335,7 @@ def test_update_foreign_appointment():
     response = client.put(
         "/apmt/2",
         json={
-            "appointment": { "calendar_id": "2", "duration": "90", "title": "a", "slug": "b" },
+            "appointment": { "calendar_id": "2", "duration": "90", "title": "a" },
             "slots": []
         }
     )
@@ -353,7 +348,6 @@ def test_delete_existing_appointment():
     data = response.json()
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
-    assert data["slug"] == "lorem-ipsumx"
     response = client.get("/apmt/1")
     assert response.status_code == 404, response.text
     response = client.get("/me/appointments")
@@ -367,7 +361,6 @@ def test_delete_existing_appointment():
                 "calendar_id": "3",
                 "duration": "90",
                 "title": "Testing new Application featurex",
-                "slug": "lorem-ipsumx",
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
@@ -389,7 +382,8 @@ def test_delete_foreign_appointment():
 
 
 def test_read_public_existing_appointment():
-    response = client.get("/apmt/adminx/lorem-ipsumx")
+    slug = client.get("/apmt/3").json()["slug"]
+    response = client.get("/apmt/adminx/" + slug)
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["time_created"] != None
@@ -397,7 +391,6 @@ def test_read_public_existing_appointment():
     assert data["calendar_id"] == 3
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
-    assert data["slug"] == "lorem-ipsumx"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
 
@@ -408,8 +401,9 @@ def test_read_public_missing_appointment():
 
 
 def test_attendee_selects_appointment_slot():
+    slug = client.get("/apmt/3").json()["slug"]
     response = client.put(
-        "/apmt/adminx/lorem-ipsumx",
+        "/apmt/adminx/" + slug,
         json={
             "slot_id": "2",
             "attendee": {
@@ -425,8 +419,9 @@ def test_attendee_selects_appointment_slot():
 
 
 def test_attendee_selects_unavailable_appointment_slot():
+    slug = client.get("/apmt/3").json()["slug"]
     response = client.put(
-        "/apmt/adminx/lorem-ipsumx",
+        "/apmt/adminx/" + slug,
         json={
             "slot_id": "2",
             "attendee": { "email": "a", "name": "b" }

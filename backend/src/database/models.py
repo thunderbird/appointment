@@ -3,6 +3,7 @@
 Definitions of database tables and their relationships.
 """
 import enum
+import uuid
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
@@ -12,6 +13,9 @@ from .database import Base
 
 def secret():
   return '4pp01n+m3n+' # TODO: get from env
+
+def random_slug():
+  return ''.join(str(uuid.uuid4()).split('-'))
 
 class AppointmentStatus(enum.Enum):
   draft  = 1
