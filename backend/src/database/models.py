@@ -92,6 +92,7 @@ class Slot(Base):
   subscriber_id  = Column(Integer, ForeignKey("subscribers.id"))
   time_updated   = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
   start          = Column(DateTime(timezone=True))
+  duration       = Column(Integer)
 
   appointment    = relationship("Appointment", back_populates="slots")
   attendee       = relationship("Attendee", back_populates="slots")

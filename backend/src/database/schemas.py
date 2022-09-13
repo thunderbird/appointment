@@ -11,6 +11,7 @@ from .models import AppointmentStatus, random_slug
 """
 class SlotBase(BaseModel):
   start: datetime
+  duration: int | None = None
 
 
 class Slot(SlotBase):

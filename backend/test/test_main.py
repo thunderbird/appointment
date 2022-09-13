@@ -219,8 +219,8 @@ def test_create_calendar_appointment():
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
-                { "start": "2022-09-02 09:00:00" },
-                { "start": "2022-09-03 09:00:00" },
+                { "start": "2022-09-02 09:00:00", "duration": 15 },
+                { "start": "2022-09-03 09:00:00", "duration": 275 },
             ]
         }
     )
@@ -233,6 +233,7 @@ def test_create_calendar_appointment():
     assert data["title"] == "Testing new Application feature"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
+    assert data["slots"][2]["duration"] == 275
 
 
 def test_create_missing_calendar_appointment():
@@ -278,6 +279,7 @@ def test_read_existing_appointment():
     assert data["title"] == "Testing new Application feature"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
+    assert data["slots"][2]["duration"] == 275
 
 
 def test_read_missing_appointment():
@@ -305,8 +307,8 @@ def test_update_existing_appointment():
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
-                { "start": "2022-09-03 10:00:00" },
-                { "start": "2022-09-05 09:00:00" },
+                { "start": "2022-09-03 10:00:00", "duration": 25 },
+                { "start": "2022-09-05 09:00:00", "duration": 375 },
             ]
         }
     )
@@ -318,6 +320,7 @@ def test_update_existing_appointment():
     assert data["title"] == "Testing new Application featurex"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
+    assert data["slots"][2]["duration"] == 375
 
 
 def test_update_missing_appointment():
@@ -364,8 +367,8 @@ def test_delete_existing_appointment():
             },
             "slots": [
                 { "start": "2022-09-01 09:00:00" },
-                { "start": "2022-09-03 10:00:00" },
-                { "start": "2022-09-05 09:00:00" },
+                { "start": "2022-09-03 10:00:00", "duration": 25 },
+                { "start": "2022-09-05 09:00:00", "duration": 375 },
             ]
         }
     )
@@ -393,6 +396,7 @@ def test_read_public_existing_appointment():
     assert data["title"] == "Testing new Application featurex"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
+    assert data["slots"][2]["duration"] == 375
 
 
 def test_read_public_missing_appointment():
