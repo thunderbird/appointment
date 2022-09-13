@@ -28,7 +28,7 @@ Run application for development with hot reloading backend and frontend:
     uvicorn backend.src.main:app --reload --port 5000
     ```
 
-    You can now access the frontend at [localhost:8080](http://localhost:8080).
+    You can now access the backend at [localhost:5000](http://localhost:5000).
 
 3. Install and run vue frontend in a second bash
 
@@ -38,7 +38,7 @@ Run application for development with hot reloading backend and frontend:
     yarn serve
     ```
 
-    You can now access the backend at [localhost:5000](http://localhost:5000).
+    You can now access the frontend at [localhost:8080](http://localhost:8080).
 
 4. (optional) Run database migrations
 
