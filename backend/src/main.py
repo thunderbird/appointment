@@ -86,6 +86,11 @@ def read_my_appointments(db: Session = Depends(get_db)):
 @app.post("/cal", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to add a new calender connection for authenticated subscriber"""
+  # first check for connection limit
+  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
+  limit = repo.get_connections_limit(db=db, subscriber_id=Auth(db).subscriber.id)
+  if limit > 0 and len(calendars) >= limit:
+    raise HTTPException(status_code=403, detail="Maximum number of calendar connections reached")
   return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
 
 

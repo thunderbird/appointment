@@ -32,7 +32,7 @@ client = TestClient(app)
 
 
 def test_config():
-    assert config('limit', 'connections') == '3'
+    assert config('limit_basic', 'connections') == '3'
 
 
 def test_main():
@@ -211,6 +211,34 @@ def test_delete_missing_calendar():
 def test_delete_foreign_calendar():
     response = client.delete("/cal/2")
     assert response.status_code == 403, response.text
+
+
+def test_create_too_many_calendars():
+    client.put(
+        "/me",
+        json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 1, "timezone": "2" }
+    )
+    cal2 = insert(models.Calendar).values(owner_id="1", title="Two", url="https://test.org", user="abc", password="dce")
+    cal3 = insert(models.Calendar).values(owner_id="1", title="Three", url="https://test.org", user="abc", password="dce")
+    db = TestingSessionLocal()
+    db.execute(cal2)
+    db.execute(cal3)
+    db.commit()
+    response = client.post(
+        "/cal",
+        json={
+            "title": "Forbidden 4th calendar",
+            "url": "https://example.com",
+            "user": "abc",
+            "password": "def"
+        }
+    )
+    assert response.status_code == 403, response.text
+    # restore current users subscription level again for further testing
+    client.put(
+        "/me",
+        json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 3, "timezone": "2" }
+    )
 
 
 def test_create_calendar_appointment():

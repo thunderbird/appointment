@@ -5,5 +5,7 @@
 secret = some-really-secure-string
 
 [connections]
-# max number of calendars to be simultanously connected
-limit = 3
+# max number of calendars to be simultanously connected for members of the basic tier
+limit_basic = 3
+# max number of calendars to be simultanously connected for members of the plus tier
+limit_plus = 5

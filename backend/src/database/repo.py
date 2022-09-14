@@ -3,6 +3,7 @@
 Repository providing CRUD functions for all database models. 
 """
 from sqlalchemy.orm import Session
+from ..config import config
 from . import models, schemas
 
 
@@ -40,6 +41,17 @@ def update_subscriber(db: Session, subscriber: schemas.SubscriberBase, subscribe
   db.commit()
   db.refresh(db_subscriber)
   return db_subscriber
+
+
+def get_connections_limit(db: Session, subscriber_id: int):
+  """return the number of allowed connections for given subscriber or -1 for unlimited connections"""
+  db_subscriber = get_subscriber(db, subscriber_id)
+  mapping = {
+    models.SubscriberLevel.basic: int(config('limit_basic', 'connections')),
+    models.SubscriberLevel.plus:  int(config('limit_plus', 'connections')),
+    models.SubscriberLevel.pro:   -1
+  }
+  return mapping[db_subscriber.level]
 
 
 """ CALENDAR repository functions
