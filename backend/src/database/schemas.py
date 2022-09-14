@@ -1,6 +1,6 @@
 """Module: schemas
 
-Definitions of valid data shapes for database models.
+Definitions of valid data shapes for database and query models.
 """
 from datetime import datetime
 from pydantic import BaseModel
@@ -72,15 +72,10 @@ class Appointment(AppointmentBase):
     orm_mode = True
 
 
-class AppointmentSlots(BaseModel):
-  appointment: AppointmentBase
-  slots: list[SlotBase] = []
-
-
 """ CALENDAR model schemas
 """
 class CalendarBase(BaseModel):
-  title: str
+  title: str | None = None
   url: str
   user: str
   password: str
@@ -112,3 +107,16 @@ class Subscriber(SubscriberBase):
 
   class Config:
     orm_mode = True
+
+
+""" other schemas used for requests or data migration
+"""
+class AppointmentSlots(BaseModel):
+  appointment: AppointmentBase
+  slots: list[SlotBase] = []
+
+
+class Event(BaseModel):
+  title: str
+  start: str
+  end: str

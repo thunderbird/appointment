@@ -33,6 +33,7 @@ client = TestClient(app)
 
 def test_config():
     assert config('limit_basic', 'connections') == '3'
+    assert config('limit_plus', 'connections') == '5'
 
 
 def test_main():
@@ -239,6 +240,36 @@ def test_create_too_many_calendars():
         "/me",
         json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 3, "timezone": "2" }
     )
+
+
+def test_get_remote_calendars():
+    response = client.post(
+        "/rmt/calendars",
+        json={
+            "url": "https://calendar.robur.coop/principals/", # TODO: setup an own testing CalDAV server
+            "user": "mozilla",
+            "password": "thunderbird"
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert len(data) == 3
+
+
+def test_get_remote_events():
+    response = client.post(
+        "/rmt/events/2022-09-01/2022-09-30",
+        json={
+            "url": "https://calendar.robur.coop/calendars/mozilla/", # TODO: setup an own testing CalDAV server
+            "user": "mozilla",
+            "password": "thunderbird"
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["title"] == "Mozilla Event"
+    assert data[1]["start"] == "2022-09-21"
 
 
 def test_create_calendar_appointment():

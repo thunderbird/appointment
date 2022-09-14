@@ -10,6 +10,7 @@ models.Base.metadata.create_all(bind=engine)
 
 # authentication
 from .controller.auth import Auth
+from .controller.calendar import CalDavConnector
 
 # init app
 app = FastAPI()
@@ -85,10 +86,10 @@ def read_my_appointments(db: Session = Depends(get_db)):
 
 @app.post("/cal", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
-  """endpoint to add a new calender connection for authenticated subscriber"""
-  # first check for connection limit
+  """endpoint to add a new calendar connection for authenticated subscriber"""
   calendars = repo.get_calendars_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   limit = repo.get_connections_limit(db=db, subscriber_id=Auth(db).subscriber.id)
+  # check for connection limit
   if limit > 0 and len(calendars) >= limit:
     raise HTTPException(status_code=403, detail="Maximum number of calendar connections reached")
   return repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=Auth(db).subscriber.id)
@@ -107,7 +108,7 @@ def read_my_calendar(id: int, db: Session = Depends(get_db)):
 
 @app.put("/cal/{id}", response_model=schemas.Calendar)
 def update_my_calendar(id: int, calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
-  """endpoint to update an existing calender connection for authenticated subscriber"""
+  """endpoint to update an existing calendar connection for authenticated subscriber"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
@@ -125,6 +126,21 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db)):
   if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=Auth(db).subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   return repo.delete_subscriber_calendar(db=db, calendar_id=id)
+
+
+@app.post("/rmt/calendars", response_model=list[schemas.CalendarBase])
+def read_caldav_calendars(connection: schemas.CalendarBase):
+  """endpoint to get calendars from a remote CalDAV server"""
+  con = CalDavConnector(connection.url, connection.user, connection.password)
+  return con.list_calendars()
+
+
+@app.post("/rmt/events/{start}/{end}", response_model=list[schemas.Event])
+def read_caldav_events(start: str, end: str, connection: schemas.CalendarBase):
+  """endpoint to get events in a given date range from a remote calendar"""
+  # TODO: get credentials from own calendar table via {id}
+  con = CalDavConnector(connection.url, connection.user, connection.password)
+  return con.list_events(start, end)
 
 
 @app.post("/apmt", response_model=schemas.Appointment)

@@ -3,3 +3,4 @@ uvicorn==0.18.2
 sqlalchemy==1.4.40
 sqlalchemy-utils==0.38.3
 alembic==1.8.1
+caldav==0.9.1
