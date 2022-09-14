@@ -42,7 +42,7 @@ def test_main():
     assert data["username"] == "admin"
     assert data["email"] == "admin@example.com"
     assert data["name"] == None
-    assert data["level"] == 2
+    assert data["level"] == 3
     assert data["timezone"] == None
 
 
@@ -53,7 +53,7 @@ def test_create_me():
             "username": "ww",
             "email": "wonderwoman@example.com",
             "name": "Diana",
-            "level": "2",
+            "level": 3,
             "timezone": "-1"
         }
     )
@@ -62,7 +62,7 @@ def test_create_me():
     assert data["username"] == "ww"
     assert data["email"] == "wonderwoman@example.com"
     assert data["name"] == "Diana"
-    assert data["level"] == 2
+    assert data["level"] == 3
     assert data["timezone"] == -1
     assert "id" in data
     assert "calendars" in data
@@ -75,7 +75,7 @@ def test_read_me():
     assert data["username"] == "admin"
     assert data["email"] == "admin@example.com"
     assert data["name"] == None
-    assert data["level"] == 2
+    assert data["level"] == 3
     assert data["timezone"] == None
     assert "id" in data
     assert "calendars" in data and isinstance(data["calendars"], list)
@@ -88,7 +88,7 @@ def test_update_me():
             "username": "adminx",
             "email": "admin@example.comx",
             "name": "The Admin",
-            "level": "3",
+            "level": 3,
             "timezone": "2"
         }
     )

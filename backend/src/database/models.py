@@ -18,6 +18,12 @@ def secret():
 def random_slug():
   return ''.join(str(uuid.uuid4()).split('-'))
 
+
+class SubscriberLevel(enum.Enum):
+  basic  = 1 # basic tier
+  plus   = 2 # advanced tier
+  pro    = 3 # unlimited tier
+
 class AppointmentStatus(enum.Enum):
   draft  = 1 # appointment was created but not published yet
   ready  = 2 # appointment is published and open for attendees
@@ -31,7 +37,7 @@ class Subscriber(Base):
   username  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
   email     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
   name      = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
-  level     = Column(Integer, index=True)
+  level     = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
   timezone  = Column(Integer, index=True)
 
   calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")

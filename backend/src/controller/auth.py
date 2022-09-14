@@ -3,7 +3,7 @@
 Handle authentification with Firefox Sync and get subscription data.
 """
 from sqlalchemy.orm import Session
-from ..database import repo, schemas
+from ..database import repo, schemas, models
 
 
 class Auth:
@@ -22,6 +22,6 @@ class Auth:
     db_subscriber = repo.get_subscriber(db=db, subscriber_id=fsuser_id)
     # if user is verified but doesn't exist yet, add them
     if db_subscriber is None:
-      subscriber = schemas.SubscriberBase(username='admin', email='admin@example.com', level=2)
+      subscriber = schemas.SubscriberBase(username='admin', email='admin@example.com', level=models.SubscriberLevel.pro)
       db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
     self.subscriber = db_subscriber
