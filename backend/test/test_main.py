@@ -258,7 +258,7 @@ def test_get_remote_calendars():
 
 
 def test_get_remote_events():
-    response = client.get("/rmt/5/2022-09-01/2022-09-30")
+    response = client.get("/rmt/cal/5/2022-09-01/2022-09-30")
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 2
@@ -271,7 +271,7 @@ def test_create_calendar_appointment():
         "/apmt",
         json={
             "appointment": {
-                "calendar_id": "3",
+                "calendar_id": "5",
                 "duration": "180",
                 "title": "Testing new Application feature"
             },
@@ -286,7 +286,7 @@ def test_create_calendar_appointment():
     data = response.json()
     assert data["time_created"] != None
     assert data["time_updated"] != None
-    assert data["calendar_id"] == 3
+    assert data["calendar_id"] == 5
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
     assert data["keep_open"]
@@ -324,7 +324,7 @@ def test_read_my_appointments():
     assert isinstance(data, list)
     assert len(data) == 1
     assert data[0]["duration"] == 180
-    assert "calendar_id" in data[0] and data[0]["calendar_id"] == 3
+    assert "calendar_id" in data[0] and data[0]["calendar_id"] == 5
 
 
 def test_read_existing_appointment():
@@ -333,7 +333,7 @@ def test_read_existing_appointment():
     data = response.json()
     assert data["time_created"] != None
     assert data["time_updated"] != None
-    assert data["calendar_id"] == 3
+    assert data["calendar_id"] == 5
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
     assert data["keep_open"]
@@ -361,7 +361,7 @@ def test_update_existing_appointment():
         "/apmt/1",
         json={
             "appointment": {
-                "calendar_id": "3",
+                "calendar_id": "5",
                 "duration": "90",
                 "title": "Testing new Application featurex",
                 "keep_open": "false"
@@ -423,7 +423,7 @@ def test_delete_existing_appointment():
         "/apmt",
         json={
             "appointment": {
-                "calendar_id": "3",
+                "calendar_id": "5",
                 "duration": "90",
                 "title": "Testing new Application featurex",
             },
@@ -453,7 +453,7 @@ def test_read_public_existing_appointment():
     data = response.json()
     assert data["time_created"] != None
     assert data["time_updated"] != None
-    assert data["calendar_id"] == 3
+    assert data["calendar_id"] == 5
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
     assert len(data["slots"]) == 3
@@ -494,3 +494,24 @@ def test_attendee_selects_unavailable_appointment_slot():
         }
     )
     assert response.status_code == 403, response.text
+
+
+def test_create_remote_event():
+    response = client.post(
+        "/rmt/apmt/3",
+        json={
+            "title": "Testing new Application featurex",
+            "start": "2022-09-30T10:00:00",
+            "end": "2022-09-30T12:00:00",
+        }
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "Testing new Application featurex"
+    assert data["start"] == "2022-09-30T10:00:00"
+    assert data["end"] == "2022-09-30T12:00:00"
+
+
+def test_create_remote_event_on_missing_appointment():
+    response = client.post("/rmt/apmt/30/2022-09-30T10:00:00/2022-09-30T12:00:00")
+    assert response.status_code == 404, response.text

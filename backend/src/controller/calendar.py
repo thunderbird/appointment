@@ -48,3 +48,14 @@ class CalDavConnector:
         end=str(e.vobject_instance.vevent.dtend.value)
       ))
     return events
+
+
+  def create_event(self, event: schemas.Event):
+    """add a new event to the connected calendar"""
+    calendar = self.client.calendar(url=self.url)
+    calendar.save_event(
+      dtstart=datetime(2022, 9, 30, 8),
+      dtend=datetime(2022, 9, 30, 10),
+      summary=event.title
+    )
+    return event

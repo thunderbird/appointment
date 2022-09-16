@@ -135,7 +135,7 @@ def read_caldav_calendars(connection: schemas.CalendarBase):
   return con.list_calendars()
 
 
-@app.get("/rmt/{id}/{start}/{end}", response_model=list[schemas.Event])
+@app.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
 def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_db)):
   """endpoint to get events in a given date range from a remote calendar"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
@@ -209,3 +209,16 @@ def read_public_appointment(username: str, slug: str, s_a: schemas.SlotAttendee,
   if not repo.slot_is_available(db, slot_id=s_a.slot_id):
     raise HTTPException(status_code=403, detail="Time slot not available anymore")
   return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
+
+
+@app.post("/rmt/apmt/{id}", response_model=schemas.Event)
+def create_caldav_event(id: int, event: schemas.Event, db: Session = Depends(get_db)):
+  """endpoint to create an event defined by given appointment id and date range in a remote calendar"""
+  db_appointment = repo.get_appointment(db, appointment_id=id)
+  if db_appointment is None:
+    raise HTTPException(status_code=404, detail="Appointment not found")
+  db_calendar = repo.get_calendar(db, calendar_id=db_appointment.calendar_id)
+  if db_calendar is None:
+    raise HTTPException(status_code=404, detail="Calendar not found")
+  con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
+  return con.create_event(event=event)
