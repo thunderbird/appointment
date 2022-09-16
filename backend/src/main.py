@@ -135,11 +135,13 @@ def read_caldav_calendars(connection: schemas.CalendarBase):
   return con.list_calendars()
 
 
-@app.post("/rmt/events/{start}/{end}", response_model=list[schemas.Event])
-def read_caldav_events(start: str, end: str, connection: schemas.CalendarBase):
+@app.get("/rmt/{id}/{start}/{end}", response_model=list[schemas.Event])
+def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_db)):
   """endpoint to get events in a given date range from a remote calendar"""
-  # TODO: get credentials from own calendar table via {id}
-  con = CalDavConnector(connection.url, connection.user, connection.password)
+  db_calendar = repo.get_calendar(db, calendar_id=id)
+  if db_calendar is None:
+    raise HTTPException(status_code=404, detail="Calendar not found")
+  con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
   return con.list_events(start, end)
 
 

@@ -219,8 +219,8 @@ def test_create_too_many_calendars():
         "/me",
         json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 1, "timezone": "2" }
     )
-    cal2 = insert(models.Calendar).values(owner_id="1", title="Two", url="https://test.org", user="abc", password="dce")
-    cal3 = insert(models.Calendar).values(owner_id="1", title="Three", url="https://test.org", user="abc", password="dce")
+    cal2 = insert(models.Calendar).values(owner_id="1", title="Another", url="https://test.org", user="abc", password="dce")
+    cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", url="https://calendar.robur.coop/calendars/mozilla/", user="mozilla", password="thunderbird")
     db = TestingSessionLocal()
     db.execute(cal2)
     db.execute(cal3)
@@ -254,17 +254,11 @@ def test_get_remote_calendars():
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 3
+    assert data[1]["url"] == "https://calendar.robur.coop/calendars/mozilla/"
 
 
 def test_get_remote_events():
-    response = client.post(
-        "/rmt/events/2022-09-01/2022-09-30",
-        json={
-            "url": "https://calendar.robur.coop/calendars/mozilla/", # TODO: setup an own testing CalDAV server
-            "user": "mozilla",
-            "password": "thunderbird"
-        }
-    )
+    response = client.get("/rmt/5/2022-09-01/2022-09-30")
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 2
