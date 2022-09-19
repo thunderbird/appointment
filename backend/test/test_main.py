@@ -6,7 +6,12 @@ from ..src.database import models
 from ..src.main import app, get_db
 from ..src.config import config
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///backend/test/test.db"
+SQLALCHEMY_DATABASE_URL  = "sqlite:///backend/test/test.db"
+# TODO: setup an own testing CalDAV server
+TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
+TESTING_CALDAV_CALENDAR  = "https://calendar.robur.coop/calendars/mozilla/"
+TESTING_CALDAV_USER      = "mozilla"
+TESTING_CALDAV_PASS      = "thunderbird"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -36,7 +41,7 @@ def test_config():
     assert config('limit_plus', 'connections') == '5'
 
 
-def test_main():
+def test_login():
     response = client.get("/login")
     assert response.status_code == 200, response.text
     data = response.json()
@@ -220,7 +225,7 @@ def test_create_too_many_calendars():
         json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 1, "timezone": "2" }
     )
     cal2 = insert(models.Calendar).values(owner_id="1", title="Another", url="https://test.org", user="abc", password="dce")
-    cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", url="https://calendar.robur.coop/calendars/mozilla/", user="mozilla", password="thunderbird")
+    cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", url=TESTING_CALDAV_CALENDAR, user=TESTING_CALDAV_USER, password=TESTING_CALDAV_PASS)
     db = TestingSessionLocal()
     db.execute(cal2)
     db.execute(cal3)
@@ -246,19 +251,19 @@ def test_get_remote_calendars():
     response = client.post(
         "/rmt/calendars",
         json={
-            "url": "https://calendar.robur.coop/principals/", # TODO: setup an own testing CalDAV server
-            "user": "mozilla",
-            "password": "thunderbird"
+            "url": TESTING_CALDAV_PRINCIPAL,
+            "user": TESTING_CALDAV_USER,
+            "password": TESTING_CALDAV_PASS
         }
     )
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 3
-    assert data[1]["url"] == "https://calendar.robur.coop/calendars/mozilla/"
+    assert data[1]["url"] == TESTING_CALDAV_CALENDAR
 
 
 def test_get_remote_events():
-    response = client.get("/rmt/cal/5/2022-09-01/2022-09-30")
+    response = client.get("/rmt/cal/5/2022-09-01/2022-09-29")
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 2
