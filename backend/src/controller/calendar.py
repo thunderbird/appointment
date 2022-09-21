@@ -59,3 +59,15 @@ class CalDavConnector:
       summary=event.title
     )
     return event
+
+
+  def delete_events(self, start):
+    """delete all events in given date range from the server"""
+    calendar = self.client.calendar(url=self.url)
+    result = calendar.events()
+    count = 0
+    for e in result:
+      if str(e.vobject_instance.vevent.dtstart.value).startswith(start):
+        e.delete()
+        count += 1
+    return count

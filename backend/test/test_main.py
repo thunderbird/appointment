@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from ..src.database import models
 from ..src.main import app, get_db
 from ..src.config import config
+from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL  = "sqlite:///backend/test/test.db"
 # TODO: setup an own testing CalDAV server
@@ -47,9 +48,10 @@ def test_login():
     data = response.json()
     assert data["username"] == "admin"
     assert data["email"] == "admin@example.com"
-    assert data["name"] == None
+    assert data["name"] == "Andy Admin"
     assert data["level"] == 3
     assert data["timezone"] == None
+    assert data["id"] == 1
 
 
 def test_create_me():
@@ -70,7 +72,7 @@ def test_create_me():
     assert data["name"] == "Diana"
     assert data["level"] == 3
     assert data["timezone"] == -1
-    assert "id" in data
+    assert data["id"] == 2
     assert "calendars" in data
 
 
@@ -80,10 +82,10 @@ def test_read_me():
     data = response.json()
     assert data["username"] == "admin"
     assert data["email"] == "admin@example.com"
-    assert data["name"] == None
+    assert data["name"] == "Andy Admin"
     assert data["level"] == 3
     assert data["timezone"] == None
-    assert "id" in data
+    assert data["id"] == 1
     assert "calendars" in data and isinstance(data["calendars"], list)
 
 
@@ -92,7 +94,7 @@ def test_update_me():
         "/me",
         json={
             "username": "adminx",
-            "email": "admin@example.comx",
+            "email": "admin@example.com",
             "name": "The Admin",
             "level": 3,
             "timezone": "2"
@@ -101,10 +103,11 @@ def test_update_me():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["username"] == "adminx"
-    assert data["email"] == "admin@example.comx"
+    assert data["email"] == "admin@example.com"
     assert data["name"] == "The Admin"
     assert data["level"] == 3
     assert data["timezone"] == 2
+    assert data["id"] == 1
 
 
 def test_create_my_calendar():
@@ -222,7 +225,7 @@ def test_delete_foreign_calendar():
 def test_create_too_many_calendars():
     client.put(
         "/me",
-        json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 1, "timezone": "2" }
+        json={ "username": "adminx", "email": "admin@example.com", "name": "The Admin", "level": 1, "timezone": "2" }
     )
     cal2 = insert(models.Calendar).values(owner_id="1", title="Another", url="https://test.org", user="abc", password="dce")
     cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", url=TESTING_CALDAV_CALENDAR, user=TESTING_CALDAV_USER, password=TESTING_CALDAV_PASS)
@@ -243,7 +246,7 @@ def test_create_too_many_calendars():
     # restore current users subscription level again for further testing
     client.put(
         "/me",
-        json={ "username": "adminx", "email": "admin@example.comx", "name": "The Admin", "level": 3, "timezone": "2" }
+        json={ "username": "adminx", "email": "admin@example.com", "name": "The Admin", "level": 3, "timezone": "2" }
     )
 
 
@@ -515,6 +518,15 @@ def test_create_remote_event():
     assert data["title"] == "Testing new Application featurex"
     assert data["start"] == "2022-09-30T10:00:00"
     assert data["end"] == "2022-09-30T12:00:00"
+    con = CalDavConnector(TESTING_CALDAV_CALENDAR, TESTING_CALDAV_USER, TESTING_CALDAV_PASS)
+    events = con.list_events(start='2022-09-30', end='2022-10-01')
+    assert len(events) == 1
+    assert events[0]["title"] == "Testing new Application featurex"
+    assert events[0]["start"] == "2022-09-30T10:00:00"
+    assert events[0]["end"] == "2022-09-30T12:00:00"
+    # delete event again to prevent calendar pollution
+    n = con.delete_events(start='2022-09-30')
+    assert n == 6
 
 
 def test_create_remote_event_on_missing_appointment():

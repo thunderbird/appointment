@@ -1,8 +1,8 @@
 # Appointment backend configuration.
 
 [security]
-# secret phrase for database encryption
-secret = some-really-secure-string
+# secret phrase for database encryption (e.g. run `openssl rand -hex 32`)
+db_secret = some-really-secure-string
 
 [connections]
 # max number of calendars to be simultanously connected for members of the basic tier
