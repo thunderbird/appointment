@@ -265,15 +265,6 @@ def test_get_remote_calendars():
     assert data[1]["url"] == TESTING_CALDAV_CALENDAR
 
 
-def test_get_remote_events():
-    response = client.get("/rmt/cal/5/2022-09-01/2022-09-29")
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert len(data) == 2
-    assert data[0]["title"] == "Mozilla Event"
-    assert data[1]["start"] == "2022-09-21"
-
-
 def test_create_calendar_appointment():
     response = client.post(
         "/apmt",
@@ -518,15 +509,20 @@ def test_create_remote_event():
     assert data["title"] == "Testing new Application featurex"
     assert data["start"] == "2022-09-30T10:00:00"
     assert data["end"] == "2022-09-30T12:00:00"
-    con = CalDavConnector(TESTING_CALDAV_CALENDAR, TESTING_CALDAV_USER, TESTING_CALDAV_PASS)
-    events = con.list_events(start='2022-09-30', end='2022-10-01')
-    assert len(events) == 1
-    assert events[0]["title"] == "Testing new Application featurex"
-    assert events[0]["start"] == "2022-09-30T10:00:00"
-    assert events[0]["end"] == "2022-09-30T12:00:00"
+
+
+def test_get_remote_events():
+    response = client.get("/rmt/cal/5/2022-09-29/2022-10-01")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Testing new Application featurex"
+    assert data[0]["start"] == "2022-09-30 08:00:00"
+    assert data[0]["end"] == "2022-09-30 10:00:00"
     # delete event again to prevent calendar pollution
+    con = CalDavConnector(TESTING_CALDAV_CALENDAR, TESTING_CALDAV_USER, TESTING_CALDAV_PASS)
     n = con.delete_events(start='2022-09-30')
-    assert n == 6
+    assert n == 1
 
 
 def test_create_remote_event_on_missing_appointment():
