@@ -5,6 +5,7 @@ Handle authentification with Firefox Sync and get subscription data.
 from sqlalchemy.orm import Session
 from ..database import repo, schemas, models
 
+# TODO: for now we simulate Firefox Sync with a hardcoded fake db
 ff_sync_fake_users = {
   "admin@example.com": {
     "username": "admin",

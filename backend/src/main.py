@@ -1,3 +1,7 @@
+"""Module: main
+
+Boot application, authenticate user and provide all API endpoints.
+"""
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,6 +47,8 @@ def login(db: Session = Depends(get_db)):
 @app.post("/me", response_model=schemas.Subscriber)
 def create_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db)):
   """endpoint to add an authenticated subscriber to db, if they doesn't exist yet"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   email_exists = repo.get_subscriber_by_email(db=db, email=subscriber.email)
   if email_exists:
     raise HTTPException(status_code=400, detail="Email already registered")
@@ -55,6 +61,8 @@ def create_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db))
 @app.get("/me", response_model=schemas.Subscriber)
 def read_me(db: Session = Depends(get_db)):
   """endpoint to get data of authenticated subscriber from db"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
   if db_subscriber is None:
     raise HTTPException(status_code=404, detail="Subscriber not found")
@@ -64,6 +72,8 @@ def read_me(db: Session = Depends(get_db)):
 @app.put("/me", response_model=schemas.Subscriber)
 def update_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db)):
   """endpoint to update an authenticated subscriber"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_subscriber = repo.get_subscriber(db=db, subscriber_id=Auth(db).subscriber.id)
   if db_subscriber is None:
     raise HTTPException(status_code=404, detail="Subscriber not found")
@@ -73,6 +83,8 @@ def update_me(subscriber: schemas.SubscriberBase, db: Session = Depends(get_db))
 @app.get("/me/calendars", response_model=list[schemas.Calendar])
 def read_my_calendars(db: Session = Depends(get_db)):
   """get all calendar connections of authenticated subscriber"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   calendars = repo.get_calendars_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   return calendars
 
@@ -80,6 +92,8 @@ def read_my_calendars(db: Session = Depends(get_db)):
 @app.get("/me/appointments", response_model=list[schemas.Appointment])
 def read_my_appointments(db: Session = Depends(get_db)):
   """get all appointments of authenticated subscriber"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   appointments = repo.get_appointments_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   return appointments
 
@@ -87,6 +101,8 @@ def read_my_appointments(db: Session = Depends(get_db)):
 @app.post("/cal", response_model=schemas.Calendar)
 def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to add a new calendar connection for authenticated subscriber"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   calendars = repo.get_calendars_by_subscriber(db, subscriber_id=Auth(db).subscriber.id)
   limit = repo.get_connections_limit(db=db, subscriber_id=Auth(db).subscriber.id)
   # check for connection limit
@@ -98,6 +114,8 @@ def create_my_calendar(calendar: schemas.CalendarBase, db: Session = Depends(get
 @app.get("/cal/{id}", response_model=schemas.Calendar)
 def read_my_calendar(id: int, db: Session = Depends(get_db)):
   """endpoint to get a calendar from db"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
@@ -109,6 +127,8 @@ def read_my_calendar(id: int, db: Session = Depends(get_db)):
 @app.put("/cal/{id}", response_model=schemas.Calendar)
 def update_my_calendar(id: int, calendar: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to update an existing calendar connection for authenticated subscriber"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
@@ -119,6 +139,8 @@ def update_my_calendar(id: int, calendar: schemas.CalendarBase, db: Session = De
 
 @app.delete("/cal/{id}", response_model=schemas.Calendar)
 def delete_my_calendar(id: int, db: Session = Depends(get_db)):
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   """endpoint to remove a calendar from db"""
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
@@ -129,8 +151,10 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/rmt/calendars", response_model=list[schemas.CalendarBase])
-def read_caldav_calendars(connection: schemas.CalendarBase):
+def read_caldav_calendars(connection: schemas.CalendarBase, db: Session = Depends(get_db)):
   """endpoint to get calendars from a remote CalDAV server"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   con = CalDavConnector(connection.url, connection.user, connection.password)
   return con.list_calendars()
 
@@ -138,6 +162,8 @@ def read_caldav_calendars(connection: schemas.CalendarBase):
 @app.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
 def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_db)):
   """endpoint to get events in a given date range from a remote calendar"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
@@ -148,6 +174,8 @@ def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_
 @app.post("/apmt", response_model=schemas.Appointment)
 def create_my_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Depends(get_db)):
   """endpoint to add a new appointment with slots for a given calendar"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_calendar = repo.get_calendar(db, calendar_id=a_s.appointment.calendar_id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
@@ -159,6 +187,8 @@ def create_my_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = 
 @app.get("/apmt/{id}", response_model=schemas.Appointment)
 def read_my_appointment(id: str, db: Session = Depends(get_db)):
   """endpoint to get an appointment from db by id"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
@@ -170,6 +200,8 @@ def read_my_appointment(id: str, db: Session = Depends(get_db)):
 @app.put("/apmt/{id}", response_model=schemas.Appointment)
 def update_my_appointment(id: int, a_s: schemas.AppointmentSlots, db: Session = Depends(get_db)):
   """endpoint to update an existing appointment with slots"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
@@ -180,7 +212,9 @@ def update_my_appointment(id: int, a_s: schemas.AppointmentSlots, db: Session = 
 
 @app.delete("/apmt/{id}", response_model=schemas.Appointment)
 def delete_my_appointment(id: int, db: Session = Depends(get_db)):
-  """endpoint to remove a appointment from db"""
+  """endpoint to remove an appointment from db"""
+  if Auth(db).subscriber is None:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
@@ -189,9 +223,10 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db)):
   return repo.delete_calendar_appointment(db=db, appointment_id=id)
 
 
+# TODO: only expose necessary data here, create a PublicAppointment schema
 @app.get("/apmt/{username}/{slug}", response_model=schemas.Appointment)
 def read_public_appointment(username: str, slug: str, db: Session = Depends(get_db)):
-  """endpoint to remove a appointment from db"""
+  """endpoint to retrieve an appointment from db via public link"""
   db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
@@ -199,8 +234,8 @@ def read_public_appointment(username: str, slug: str, db: Session = Depends(get_
 
 
 @app.put("/apmt/{username}/{slug}", response_model=schemas.Attendee)
-def read_public_appointment(username: str, slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
-  """endpoint to remove a appointment from db"""
+def update_public_appointment_slot(username: str, slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
+  """endpoint to update a time slot for an appointment via public link"""
   db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
@@ -211,10 +246,10 @@ def read_public_appointment(username: str, slug: str, s_a: schemas.SlotAttendee,
   return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
-@app.post("/rmt/apmt/{id}", response_model=schemas.Event)
-def create_caldav_event(id: int, event: schemas.Event, db: Session = Depends(get_db)):
+@app.post("/rmt/apmt/{username}/{slug}", response_model=schemas.Event)
+def create_caldav_event(username: str, slug: str, event: schemas.Event, db: Session = Depends(get_db)):
   """endpoint to create an event defined by given appointment id and date range in a remote calendar"""
-  db_appointment = repo.get_appointment(db, appointment_id=id)
+  db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
   db_calendar = repo.get_calendar(db, calendar_id=db_appointment.calendar_id)

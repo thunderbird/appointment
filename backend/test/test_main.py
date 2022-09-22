@@ -496,8 +496,9 @@ def test_attendee_selects_unavailable_appointment_slot():
 
 
 def test_create_remote_event():
+    slug = client.get("/apmt/3").json()["slug"]
     response = client.post(
-        "/rmt/apmt/3",
+        "/rmt/apmt/adminx/" + slug,
         json={
             "title": "Testing new Application featurex",
             "start": "2022-09-30T10:00:00",
