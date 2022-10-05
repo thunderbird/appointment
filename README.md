@@ -43,6 +43,7 @@ Run application for development with hot reloading backend and frontend:
 4. (optional) Run database migrations
 
     ```bash
+    cd backend/src
     alembic current       # check database state
     alembic upgrade head  # migrate to lates state
     ```

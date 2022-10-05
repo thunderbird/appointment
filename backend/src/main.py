@@ -246,6 +246,7 @@ def update_public_appointment_slot(username: str, slug: str, s_a: schemas.SlotAt
   return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
+# TODO: not necessarily needed, maybe include this endpoint into the previous one
 @app.post("/rmt/apmt/{username}/{slug}", response_model=schemas.Event)
 def create_caldav_event(username: str, slug: str, event: schemas.Event, db: Session = Depends(get_db)):
   """endpoint to create an event defined by given appointment id and date range in a remote calendar"""
