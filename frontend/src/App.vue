@@ -1,8 +1,10 @@
 <template>
-  <NavBar />
-  <div class="w-full max-w-[1740px] mx-auto mt-8">
-    <router-view/>
-  </div>
+  <nav-bar />
+  <main class="mt-12 mx-8">
+    <div class="w-full max-w-[1740px] mx-auto">
+      <router-view />
+    </div>
+  </main>
 </template>
 
 <script setup>

@@ -5,7 +5,7 @@
     </router-link>
     <label class="grow flex items-center">
       <img class="h-6 w-6 ml-8 mr-4" src="@/assets/icon-search.svg" alt="Search Icon">
-      <input class="w-full h-full text-xl px-2" type="search" name="search" placeholder="Search">
+      <input class="w-full h-full text-xl px-2" type="search" name="search" :placeholder="t('label.search')">
     </label>
     <nav class="flex gap-8 items-stretch">
       <ul class="flex justify-end gap-8">
