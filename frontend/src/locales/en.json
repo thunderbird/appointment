@@ -1,0 +1,11 @@
+{
+  "app": {
+    "title": "Thunderbird Appointment",
+    "summary": "Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets."
+  },
+  "label": {
+    "calendar": "Calendar",
+    "events": "Events",
+    "settings": "Settings"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "app": {
+    "title": "Thunderbird Appointment",
+    "summary": "Lass Freunde und Kollegen Events in deinem Kalender wählen. Terminabsprachen so simple wie es geht."
+  },
+  "label": {
+    "calendar": "Kalender",
+    "events": "Events",
+    "settings": "Einstellungen"
+  }
+}

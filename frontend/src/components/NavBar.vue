@@ -14,12 +14,12 @@
           :key="item"
           class="flex text-xl border-b-4 border-b-transparent"
           :class="{
-            'font-semibold border-b-teal-400 text-teal-400': route.name == item,
+            'font-semibold border-b-teal-500 text-teal-500': route.name == item,
             'text-gray-700': route.name != item,
           }"
         >
           <router-link class="flex justify-center min-w-[130px] items-center" :to="{ name: item }">
-            {{ item }}
+            {{ t('label.' + item) }}
           </router-link>
         </li>
       </ul>
@@ -35,7 +35,9 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import { useI18n } from "vue-i18n";
 const route = useRoute();
+const { t } = useI18n();
 
 // define which navigation items to show
 const navItems = ['calendar', 'events', 'settings'];
