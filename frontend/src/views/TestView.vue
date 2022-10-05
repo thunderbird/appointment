@@ -18,13 +18,17 @@
       <h3>Your Appointments</h3>
       <div v-for="apmt in appointments" :key="apmt.id">
         <code>[{{ apmt.id }}]</code> <i>{{ apmt.title }}</i> ({{ apmt.duration }}min, <a :href="'http://localhost:8080/admin/' + apmt.slug">Public Link</a>)
+        <ul>
+          <li v-for="(s, i) in apmt.slots" :key="i">
+            {{ s.start }} <button @click="saveEvent(user.username, apmt.slug, apmt.title, s.start, '2022-09-30T20:51:00')">Select</button>
+          </li>
+        </ul>
       </div><br>
       <select v-model="newAppointment.appointment.calendar_id">
-        <option v-for="cal in calendars" :key="cal.id">{{ cal.title }}</option>
+        <option v-for="cal in calendars" :value="cal.id" :key="cal.id">{{ cal.title }}</option>
       </select>
       <input v-model="newAppointment.appointment.duration" type="number" placeholder="duration" />
       <input v-model="newAppointment.appointment.title" type="text" placeholder="title" />
-      <input v-model="newAppointment.appointment.slug" type="text" placeholder="slug" /><br>
       <input v-model="slot1" type="datetime-local" />
       <input v-model="slot2" type="datetime-local" />
       <button @click="addAppointment">Create Appointment</button>
@@ -51,7 +55,6 @@ const newAppointment = reactive({
     calendar_id: 0,
     duration: 0,
     title: '',
-    slug: ''
   },
   slots: []
 });
@@ -72,7 +75,6 @@ const getAppointments = async () => {
 };
 
 const addCalendar = async () => {
-  newAppointment.slots.push({ start: slot1 }, { start: slot2 });
   const res = await fetch(
     'http://localhost:5000/cal',
     {
@@ -86,6 +88,7 @@ const addCalendar = async () => {
 };
 
 const addAppointment = async () => {
+  newAppointment.slots.push({ start: slot1 }, { start: slot2 });
   const res = await fetch(
     'http://localhost:5000/apmt',
     {
@@ -96,6 +99,22 @@ const addAppointment = async () => {
   );
   await res.json();
   getAppointments();
+};
+
+const saveEvent = async (username, slug, title, start, end) => {
+  const res = await fetch(
+    'http://localhost:5000/rmt/apmt/' + username + '/' + slug,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        title: title,
+        start: start,
+        end: end
+      }),
+      headers: { 'Content-Type': 'application/json' }
+    }
+  );
+  await res.json();
 };
 
 const removeCalendar = async (id) => {

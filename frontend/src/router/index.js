@@ -1,18 +1,33 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import CalendarView from '../views/CalendarView.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'calendar',
+    component: CalendarView
+  },
+  // lazy-loaded routes
+  {
+    path: '/events',
+    name: 'events',
+    component: () => import(/* webpackChunkName: "events" */ '../views/EventsView.vue')
   },
   {
-    path: '/about',
-    name: 'about',
-    // lazy-load routes when visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
+    path: '/settings',
+    name: 'settings',
+    component: () => import(/* webpackChunkName: "settings" */ '../views/SettingsView.vue')
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import(/* webpackChunkName: "profile" */ '../views/ProfileView.vue')
+  },
+  {
+    path: '/test',
+    name: 'test',
+    component: () => import(/* webpackChunkName: "about" */ '../views/TestView.vue')
+  },
 ]
 
 const router = createRouter({
