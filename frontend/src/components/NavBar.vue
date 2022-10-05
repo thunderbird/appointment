@@ -39,6 +39,8 @@ import { useI18n } from "vue-i18n";
 const route = useRoute();
 const { t } = useI18n();
 
-// define which navigation items to show
-const navItems = ['calendar', 'events', 'settings'];
+// component properties
+defineProps({
+  navItems: Array // list of route names that are also lang keys, used as nav items
+});
 </script>
