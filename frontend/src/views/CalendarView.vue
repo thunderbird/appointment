@@ -1,13 +1,12 @@
 <template>
   <div class="calendar">
-    <h2 class="flex gap-3">
-      <span class="text-4xl">{{ today.month }}</span>
-      <span class="text-4xl font-light">{{ today.year }}</span>
-    </h2>
+    <page-heading :bold="today.month" :light="today.year" />
   </div>
 </template>
 
 <script setup>
+import PageHeading from '@/elements/PageHeading.vue';
+
 import { useI18n } from "vue-i18n";
 const { locale } = useI18n();
 
