@@ -7,6 +7,10 @@
     "calendar": "Kalender",
     "events": "Events",
     "settings": "Einstellungen",
-    "search": "Suche"
+    "search": "Suche",
+    "day": "Tag",
+    "week": "Woche",
+    "month": "Monat",
+    "today": "Heute"
   }
 }
