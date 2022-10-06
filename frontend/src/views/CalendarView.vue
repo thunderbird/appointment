@@ -6,12 +6,14 @@
         {{ t('label.today') }}
       </button>
       <tab-bar :tab-items="tabItems" />
+      <primary-button :label="t('label.createEvent')" />
     </div>
   </div>
 </template>
 
 <script setup>
 import PageHeading from '@/elements/PageHeading.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();

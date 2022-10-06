@@ -11,6 +11,7 @@
     "day": "Tag",
     "week": "Woche",
     "month": "Monat",
-    "today": "Heute"
+    "today": "Heute",
+    "createEvent": "Event erstellen"
   }
 }
