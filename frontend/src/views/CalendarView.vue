@@ -12,17 +12,18 @@
 </template>
 
 <script setup>
+import { inject } from 'vue';
 import PageHeading from '@/elements/PageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import { useI18n } from "vue-i18n";
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const dj = inject("dayjs");
 
-// handle localized date output
-const now = new Date();
+// handle date output
 const today = {
-  month: now.toLocaleString(locale.value, { month: "long" }),
-  year: now.getFullYear()
+  month: dj().format('MMMM'),
+  year: dj().year()
 }
 
 // menu items for tab navigation

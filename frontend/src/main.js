@@ -23,6 +23,11 @@ const i18n = createI18n({
 });
 app.use(i18n);
 
+// init day.js
+import dayjs from 'dayjs';
+dayjs.locale(loc);
+app.provide('dayjs', dayjs);
+
 // init basic css with tailwind imports
 import './assets/main.css';
 
