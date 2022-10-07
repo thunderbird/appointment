@@ -6,19 +6,27 @@
       :light="cal.active.date.year().toString()"
     />
     <div class="flex gap-8">
-      <button class="font-semibold text-xl text-teal-500 px-4">
+      <button @click="cal.active.date = dj()" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
-      <tab-bar :tab-items="tabItems" />
+      <tab-bar :tab-items="tabItems" :active="2" />
       <primary-button :label="t('label.createEvent')" />
     </div>
   </div>
   <!-- page content -->
-  <div class="flex justify-between gap-16 mt-8">
+  <div class="flex justify-between gap-24 mt-8">
     <!-- main section: big calendar -->
-    <calendar-month class="w-3/4" :selected="cal.active.date" />
+    <calendar-month class="w-4/5" :selected="cal.active.date" />
     <!-- page side bar -->
-    <div class="w-1/4">Small calendar</div>
+    <div class="w-1/5">
+      <calendar-month
+        :selected="cal.active.date"
+        :mini="true"
+        :nav="true"
+        @prev="cal.active.date = cal.active.date.subtract(1, 'month')"
+        @next="cal.active.date = cal.active.date.add(1, 'month')"
+      />
+    </div>
   </div>
 
 </template>

@@ -25,10 +25,11 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 // component properties
-defineProps({
-  tabItems: Array // list of tab names that are also lang keys, used as tab items
+const props = defineProps({
+  tabItems: Array, // list of tab names that are also lang keys, used as tab items
+  active: Number   // index of active tab
 });
 
 // reactive data
-const activeTab = ref(0);
+const activeTab = ref(props.active);
 </script>
