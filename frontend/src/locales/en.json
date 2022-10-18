@@ -12,6 +12,7 @@
     "week": "Week",
     "month": "Month",
     "today": "Today",
-    "createEvent": "Create event"
+    "createEvent": "Create event",
+    "allDay": "All day"
   }
 }

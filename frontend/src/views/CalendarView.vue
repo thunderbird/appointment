@@ -15,9 +15,10 @@
     </div>
   </div>
   <!-- page content -->
-  <div v-show="tabActive === tabItems.month" class="flex justify-between gap-24 mt-8">
-    <!-- main section: big calendar -->
-    <calendar-month class="w-4/5" :selected="cal.active.date" />
+  <div class="flex justify-between gap-24 mt-8">
+    <!-- main section: big calendar showing active month, week or day -->
+    <calendar-month v-show="tabActive === tabItems.month" class="w-4/5" :selected="cal.active.date" />
+    <calendar-week v-show="tabActive === tabItems.week" class="w-4/5" :selected="cal.active.date" />
     <!-- page side bar -->
     <div class="w-1/5">
       <calendar-month
@@ -38,6 +39,7 @@ import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
+import CalendarWeek from '@/components/CalendarWeek.vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");

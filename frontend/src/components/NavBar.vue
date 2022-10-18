@@ -41,6 +41,6 @@ const { t } = useI18n();
 
 // component properties
 defineProps({
-  navItems: Array // list of route names that are also lang keys, used as nav items
+  navItems: Array // list of route names that are also lang keys (format: label.<key>), used as nav items
 });
 </script>

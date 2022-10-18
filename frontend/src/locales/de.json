@@ -12,6 +12,7 @@
     "week": "Woche",
     "month": "Monat",
     "today": "Heute",
-    "createEvent": "Event erstellen"
+    "createEvent": "Event erstellen",
+    "allDay": "Ganzer Tag"
   }
 }
