@@ -13,6 +13,13 @@
     "month": "Month",
     "today": "Today",
     "createEvent": "Create event",
-    "allDay": "All day"
+    "allDay": "All day",
+    "viewAll": "View all"
+  },
+  "heading": {
+    "pendingAndActive": "Pending and Active"
+  },
+  "info": {
+    "noEventsInList": "There are currently no events in this list."
   }
 }

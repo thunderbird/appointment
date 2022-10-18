@@ -23,7 +23,8 @@
     <calendar-week v-show="tabActive === tabItems.week" class="w-4/5" :selected="cal.active.date" />
     <calendar-day v-show="tabActive === tabItems.day" class="w-4/5" :selected="cal.active.date" />
     <!-- page side bar -->
-    <div class="w-1/5">
+    <div class="w-1/5 flex flex-col gap-8">
+      <!-- monthly mini calendar -->
       <calendar-month
         :selected="cal.active.date"
         :mini="true"
@@ -31,6 +32,18 @@
         @prev="dateNav('month', false)"
         @next="dateNav('month')"
       />
+      <!-- events -->
+      <div>
+        <div class="flex justify-between items-center">
+          <div class="font-semibold text-lg">{{ t('heading.pendingAndActive') }}</div>
+          <router-link class="px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs uppercase" :to="{ name: 'events' }">
+            {{ t('label.viewAll') }}
+          </router-link>
+        </div>
+        <div class="text-slate-500 mt-4">
+          {{ t('info.noEventsInList') }}
+        </div>
+      </div>
     </div>
   </div>
 

@@ -13,6 +13,13 @@
     "month": "Monat",
     "today": "Heute",
     "createEvent": "Event erstellen",
-    "allDay": "Ganzer Tag"
+    "allDay": "Ganzer Tag",
+    "viewAll": "Alle ansehen"
+  },
+  "heading": {
+    "pendingAndActive": "Anstehend und Aktiv"
+  },
+  "info": {
+    "noEventsInList": "Hier gibt es aktuell keine Termine."
   }
 }

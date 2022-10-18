@@ -7,7 +7,7 @@
           <polyline points="15 6 9 12 15 18" />
         </svg>
       </div>
-      <div class="text-teal-500 font-semibold">
+      <div class="text-teal-500 font-semibold text-lg">
         {{ selected.format('MMMM YYYY')}}
       </div>
       <div @click="emit('next')" class="group cursor-pointer">
