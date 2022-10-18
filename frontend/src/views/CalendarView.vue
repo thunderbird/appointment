@@ -1,20 +1,21 @@
 <template>
   <!-- page title area -->
-  <div class="flex justify-between">
-    <page-heading
-      :bold="cal.active.date.format('MMMM')"
-      :light="cal.active.date.year().toString()"
+  <div class="flex justify-between items-start">
+    <calendar-page-heading
+      :month="cal.active.date.format('MMMM')"
+      :year="cal.active.date.year().toString()"
+      :title="pageTitle"
     />
-    <div class="flex gap-8">
+    <div class="flex gap-8 items-center">
       <button @click="cal.active.date = dj()" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
-      <tab-bar :tab-items="tabItems" :active="2" />
+      <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
       <primary-button :label="t('label.createEvent')" />
     </div>
   </div>
   <!-- page content -->
-  <div class="flex justify-between gap-24 mt-8">
+  <div v-show="tabActive === tabItems.month" class="flex justify-between gap-24 mt-8">
     <!-- main section: big calendar -->
     <calendar-month class="w-4/5" :selected="cal.active.date" />
     <!-- page side bar -->
@@ -32,8 +33,8 @@
 </template>
 
 <script setup>
-import { reactive, inject } from 'vue';
-import PageHeading from '@/elements/PageHeading.vue';
+import { reactive, ref, inject, computed } from 'vue';
+import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
@@ -48,6 +49,31 @@ const cal = reactive({
   }
 });
 
+// date calculations
+const startOfActiveWeek = computed(() => {
+  return cal.active.date.startOf('week');
+});
+const endOfActiveWeek = computed(() => {
+  return cal.active.date.endOf('week');
+});
+
 // menu items for tab navigation
-const tabItems = ['day', 'week', 'month'];
+const tabItems = { 'day' : 0, 'week' : 1, 'month': 2 };
+const tabActive = ref(tabItems.month);
+const updateTab = (n) => {
+  tabActive.value = n;
+}
+
+// calculate page title
+const pageTitle = computed(() => {
+  switch (tabActive.value) {
+    case tabItems.day:
+      return cal.active.date.format('dddd Do');
+    case tabItems.week:
+      return startOfActiveWeek.value.format('ddd Do') + ' - ' + endOfActiveWeek.value.format('ddd Do');
+    case tabItems.month:
+    default:
+      return ''
+  }
+});
 </script>

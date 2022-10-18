@@ -7,10 +7,10 @@
           :key="item"
           class="flex text-xl leading-8 border-b-4 border-b-transparent cursor-pointer px-8 transition-all ease-in-out"
           :class="{
-            'text-gray-900 bg-white rounded-xl shadow': i == activeTab,
-            'text-gray-500': i != activeTab,
+            'text-gray-900 bg-white rounded-xl shadow': i == active,
+            'text-gray-500': i != active,
           }"
-          @click="activeTab = i"
+          @click="activate(i)"
         >
           {{ t('label.' + item) }}
         </li>
@@ -20,16 +20,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 // component properties
-const props = defineProps({
-  tabItems: Array, // list of tab names that are also lang keys, used as tab items
+defineProps({
+  tabItems: Array, // list of tab names that are also lang keys (label.<key>), used as tab items
   active: Number   // index of active tab
 });
 
-// reactive data
-const activeTab = ref(props.active);
+// component emits
+const emit = defineEmits(['update']);
+
+// handle click events
+const activate = (n) => {
+  emit('update', n);
+}
 </script>
