@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="grid grid-cols-8 gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
+    <div class="grid grid-cols-week gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
       <!-- header with weekdays -->
       <div class="bg-white"></div>
       <div
