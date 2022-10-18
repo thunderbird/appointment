@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-8 items-center">
+  <div class="flex gap-8 items-center select-none">
     <div @click="emit('prev')" class="group cursor-pointer select-none">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>

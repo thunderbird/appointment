@@ -14,10 +14,14 @@
     "today": "Heute",
     "createEvent": "Event erstellen",
     "allDay": "Ganzer Tag",
-    "viewAll": "Alle ansehen"
+    "viewAll": "Alle ansehen",
+    "all": "Alle",
+    "booked": "Gebucht",
+    "pending": "Ausstehend",
+    "past": "Vergangen"
   },
   "heading": {
-    "pendingAndActive": "Anstehend und Aktiv"
+    "pendingAndActive": "Ausstehend und Aktiv"
   },
   "info": {
     "noEventsInList": "Hier gibt es aktuell keine Termine."

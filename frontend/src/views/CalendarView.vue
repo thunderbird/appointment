@@ -1,6 +1,6 @@
 <template>
   <!-- page title area -->
-  <div class="flex justify-between items-start">
+  <div class="flex justify-between items-start select-none">
     <calendar-page-heading
       :month="cal.active.date.format('MMMM')"
       :year="cal.active.date.year().toString()"
@@ -77,11 +77,9 @@ const endOfActiveWeek = computed(() => {
 });
 
 // menu items for tab navigation
-const tabItems = { 'day' : 0, 'week' : 1, 'month': 2 };
+const tabItems = { 'day': 0, 'week': 1, 'month': 2 };
 const tabActive = ref(tabItems.month);
-const updateTab = (n) => {
-  tabActive.value = n;
-}
+const updateTab = (n) => tabActive.value = n;
 
 // calculate page title
 const pageTitle = computed(() => {

@@ -14,7 +14,11 @@
     "today": "Today",
     "createEvent": "Create event",
     "allDay": "All day",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "all": "All",
+    "booked": "Booked",
+    "pending": "Pending",
+    "past": "Past"
   },
   "heading": {
     "pendingAndActive": "Pending and Active"

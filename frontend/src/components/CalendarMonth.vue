@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="nav" class="flex justify-center items-center gap-2 mb-2">
+    <div v-if="nav" class="flex justify-center items-center gap-2 mb-2 select-none">
       <div @click="emit('prev')" class="group cursor-pointer">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
