@@ -5,10 +5,10 @@
         <li
           v-for="(item, i) in tabItems"
           :key="item"
-          class="flex text-xl leading-8 border-b-4 border-b-transparent cursor-pointer px-8 transition-all ease-in-out"
+          class="flex text-xl leading-8 border-b-4 border-b-transparent cursor-pointer px-8 transition-all ease-in-out hover:rounded-xl"
           :class="{
             'text-gray-900 bg-white rounded-xl shadow': i == active,
-            'text-gray-500': i != active,
+            'text-gray-500 hover:bg-gray-100': i != active,
           }"
           @click="activate(i)"
         >
