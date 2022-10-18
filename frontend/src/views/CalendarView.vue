@@ -5,6 +5,8 @@
       :month="cal.active.date.format('MMMM')"
       :year="cal.active.date.year().toString()"
       :title="pageTitle"
+      @prev="dateNav('auto', false)"
+      @next="dateNav('auto')"
     />
     <div class="flex gap-8 items-center">
       <button @click="cal.active.date = dj()" class="font-semibold text-xl text-teal-500 px-4">
@@ -26,8 +28,8 @@
         :selected="cal.active.date"
         :mini="true"
         :nav="true"
-        @prev="cal.active.date = cal.active.date.subtract(1, 'month')"
-        @next="cal.active.date = cal.active.date.add(1, 'month')"
+        @prev="dateNav('month', false)"
+        @next="dateNav('month')"
       />
     </div>
   </div>
@@ -49,7 +51,7 @@ const dj = inject("dayjs");
 // handle calendar output
 const cal = reactive({
 	active: {
-    date: dj()
+    date: dj() // current selected date, defaults to now
   }
 });
 
@@ -80,4 +82,16 @@ const pageTitle = computed(() => {
       return ''
   }
 });
+
+// date navigation
+const dateNav = (unit = 'auto', forward = true) => {
+  if (unit === 'auto') {
+    unit = Object.keys(tabItems).find(key => tabItems[key] === tabActive.value);
+  }
+  if (forward) {
+    cal.active.date = cal.active.date.add(1, unit);
+  } else {
+    cal.active.date = cal.active.date.subtract(1, unit);
+  }
+};
 </script>
