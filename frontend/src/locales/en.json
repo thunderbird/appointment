@@ -18,7 +18,14 @@
     "all": "All",
     "booked": "Booked",
     "pending": "Pending",
-    "past": "Past"
+    "past": "Past",
+    "allEvents": "All events",
+    "eventsToday": "Today's events",
+    "eventsNext7Days": "Events in the next 7 days",
+    "eventsNext14Days": "Events in the next 14 days",
+    "eventsNext31Days": "Events in the next 31 days",
+    "eventsInMonth": "Events in this calendar month",
+    "allFutureEvents": "All future events"
   },
   "heading": {
     "pendingAndActive": "Pending and Active"
