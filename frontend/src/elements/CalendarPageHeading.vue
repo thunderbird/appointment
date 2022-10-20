@@ -1,10 +1,7 @@
 <template>
   <div class="flex gap-8 items-center select-none">
     <div @click="emit('prev')" class="group cursor-pointer select-none">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <polyline points="15 6 9 12 15 18" />
-      </svg>
+      <icon-chevron-left class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" />
     </div>
     <h2 v-if="title" class="flex flex-col">
       <div class="text-4xl font-light">{{ title }}</div>
@@ -18,15 +15,15 @@
       <span class="text-4xl font-light">{{ year }}</span>
     </h2>
     <div @click="emit('next')" class="group cursor-pointer select-none">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <polyline points="9 6 15 12 9 18" />
-      </svg>
+      <icon-chevron-right class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" />
     </div>
   </div>
 </template>
 
 <script setup>
+import IconChevronLeft from './icons/IconChevronLeft.vue';
+import IconChevronRight from './icons/IconChevronRight.vue';
+
 // component properties
 defineProps({
   month:  String, // month of active date

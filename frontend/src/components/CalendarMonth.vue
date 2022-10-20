@@ -2,19 +2,13 @@
   <div>
     <div v-if="nav" class="flex justify-center items-center gap-2 mb-2 select-none">
       <div @click="emit('prev')" class="group cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <polyline points="15 6 9 12 15 18" />
-        </svg>
+        <icon-chevron-left class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
       <div class="text-teal-500 font-semibold text-lg">
         {{ selected.format('MMMM YYYY')}}
       </div>
       <div @click="emit('next')" class="group cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <polyline points="9 6 15 12 9 18" />
-        </svg>
+        <icon-chevron-right class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
     </div>
     <div class="grid grid-cols-7 gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
@@ -41,6 +35,8 @@
 <script setup>
 import { computed, inject } from "vue";
 import CalendarMonthDay from '@/elements/CalendarMonthDay.vue';
+import IconChevronRight from "@/elements/icons/IconChevronRight.vue";
+import IconChevronLeft from "../elements/icons/IconChevronLeft.vue";
 const dj = inject("dayjs");
 
 // component properties
