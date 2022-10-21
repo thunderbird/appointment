@@ -31,6 +31,7 @@
         :nav="true"
         @prev="dateNav('month', false)"
         @next="dateNav('month')"
+        @selected="selectDate"
       />
       <!-- events -->
       <div>
@@ -63,6 +64,7 @@ const dj = inject("dayjs");
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
+const selectDate = (d) => activeDate.value = dj(d);
 
 // date calculations
 const startOfActiveWeek = computed(() => {

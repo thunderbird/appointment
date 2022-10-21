@@ -11,6 +11,7 @@
       class="w-6 h-6 rounded-full text-center"
       :class="{
         'bg-teal-500 text-white font-semibold': isToday,
+        'text-teal-500': isSelected && !isToday,
         'mx-auto': mini,
       }"
     >
@@ -22,9 +23,10 @@
 <script setup>
 // component properties
 defineProps({
-  day: String,       // number of day in its month
-  isActive: Boolean, // flag showing if the day belongs to active month
-  isToday: Boolean,  // flag showing if the day is today
-  mini: Boolean      // flag showing if this is a day cell of a small calendar
+  day: String,         // number of day in its month
+  isActive: Boolean,   // flag showing if the day belongs to active month
+  isSelected: Boolean, // flag showing if the day is currently selected by user
+  isToday: Boolean,    // flag showing if the day is today
+  mini: Boolean        // flag showing if this is a day cell of a small calendar
 });
 </script>

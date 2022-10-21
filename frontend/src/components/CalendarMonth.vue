@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="select-none">
     <div v-if="nav" class="flex justify-center items-center gap-2 mb-2 select-none">
       <div @click="emit('prev')" class="group cursor-pointer">
         <icon-chevron-left class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
@@ -25,8 +25,11 @@
         :key="d.date"
         :day="dj(d.date).format('D')"
         :is-active="d.active"
+        :is-selected="d.date === date"
         :is-today="d.date === today"
         :mini="mini"
+        @click="emit('selected', d.date)"
+        class="cursor-pointer"
       />
     </div>
   </div>
@@ -47,7 +50,7 @@ const props = defineProps({
 });
 
 // component emits
-const emit = defineEmits(['prev', 'next']);
+const emit = defineEmits(['prev', 'next', 'selected']);
 
 // generate names for each day of week
 const weekdayNames = () => {
@@ -68,6 +71,7 @@ const days = computed(() => [
 
 // basic data for selected month
 const today = computed(() => dj().format("YYYY-MM-DD"));
+const date = computed(() => dj(props.selected).format('YYYY-MM-DD'));
 const month = computed(() => Number(props.selected.format("M")));
 const year = computed(() => Number(props.selected.format("YYYY")));
 const numberOfDaysInMonth = computed(() => dj(props.selected).daysInMonth());
