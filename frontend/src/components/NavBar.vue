@@ -15,7 +15,7 @@
           class="flex text-xl border-b-4 border-b-transparent transition-all ease-in-out"
           :class="{
             'font-semibold border-b-teal-500 text-teal-500': route.name == item,
-            'text-gray-600': route.name != item,
+            'text-gray-600 hover:border-b-gray-200': route.name != item,
           }"
         >
           <router-link class="flex justify-center min-w-[130px] items-center" :to="{ name: item }">
