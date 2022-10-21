@@ -28,7 +28,8 @@
     "allFutureEvents": "Alle zukünftigen Events"
   },
   "heading": {
-    "pendingAndActive": "Ausstehend und Aktiv"
+    "pendingAndActive": "Ausstehend und Aktiv",
+    "yourProfile": "Your Profile"
   },
   "info": {
     "noEventsInList": "Hier gibt es aktuell keine Termine."

@@ -57,9 +57,9 @@ import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconList from '@/elements/icons/IconList.vue';
-import { useI18n } from "vue-i18n";
 import IconGrid from "../elements/icons/IconGrid.vue";
 import IconAdjustments from "../elements/icons/IconAdjustments.vue";
+import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");
 

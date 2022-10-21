@@ -28,7 +28,8 @@
     "allFutureEvents": "All future events"
   },
   "heading": {
-    "pendingAndActive": "Pending and Active"
+    "pendingAndActive": "Pending and Active",
+    "yourProfile": "Your Profile"
   },
   "info": {
     "noEventsInList": "There are currently no events in this list."

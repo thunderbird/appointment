@@ -1,5 +1,11 @@
 <template>
-  <div class="settings">
-    <h1>This is an settings page</h1>
+  <!-- page title area -->
+  <div class="flex justify-between items-start select-none">
+    <div class="text-4xl font-light">{{ t('label.settings') }}</div>
   </div>
 </template>
+
+<script setup>
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+</script>
