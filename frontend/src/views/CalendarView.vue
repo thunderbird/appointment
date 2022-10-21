@@ -2,14 +2,14 @@
   <!-- page title area -->
   <div class="flex justify-between items-start select-none">
     <calendar-page-heading
-      :month="cal.active.date.format('MMMM')"
-      :year="cal.active.date.year().toString()"
+      :month="activeDate.format('MMMM')"
+      :year="activeDate.year().toString()"
       :title="pageTitle"
       @prev="dateNav('auto', false)"
       @next="dateNav('auto')"
     />
     <div class="flex gap-8 items-center">
-      <button @click="cal.active.date = dj()" class="font-semibold text-xl text-teal-500 px-4">
+      <button @click="activeDate = dj()" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
       <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
@@ -19,14 +19,14 @@
   <!-- page content -->
   <div class="flex justify-between gap-24 mt-8">
     <!-- main section: big calendar showing active month, week or day -->
-    <calendar-month v-show="tabActive === tabItems.month" class="w-4/5" :selected="cal.active.date" />
-    <calendar-week v-show="tabActive === tabItems.week" class="w-4/5" :selected="cal.active.date" />
-    <calendar-day v-show="tabActive === tabItems.day" class="w-4/5" :selected="cal.active.date" />
+    <calendar-month v-show="tabActive === tabItems.month" class="w-4/5" :selected="activeDate" />
+    <calendar-week v-show="tabActive === tabItems.week" class="w-4/5" :selected="activeDate" />
+    <calendar-day v-show="tabActive === tabItems.day" class="w-4/5" :selected="activeDate" />
     <!-- page side bar -->
     <div class="w-1/5 flex flex-col gap-8">
       <!-- monthly mini calendar -->
       <calendar-month
-        :selected="cal.active.date"
+        :selected="activeDate"
         :mini="true"
         :nav="true"
         @prev="dateNav('month', false)"
@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, inject, computed } from 'vue';
+import { ref, inject, computed } from 'vue';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
@@ -62,18 +62,14 @@ const { t } = useI18n();
 const dj = inject("dayjs");
 
 // handle calendar output
-const cal = reactive({
-	active: {
-    date: dj() // current selected date, defaults to now
-  }
-});
+const activeDate = ref(dj()); // current selected date, defaults to now
 
 // date calculations
 const startOfActiveWeek = computed(() => {
-  return cal.active.date.startOf('week');
+  return activeDate.value.startOf('week');
 });
 const endOfActiveWeek = computed(() => {
-  return cal.active.date.endOf('week');
+  return activeDate.value.endOf('week');
 });
 
 // menu items for tab navigation
@@ -85,7 +81,7 @@ const updateTab = (n) => tabActive.value = n;
 const pageTitle = computed(() => {
   switch (tabActive.value) {
     case tabItems.day:
-      return cal.active.date.format('dddd Do');
+      return activeDate.value.format('dddd Do');
     case tabItems.week:
       return startOfActiveWeek.value.format('ddd Do') + ' - ' + endOfActiveWeek.value.format('ddd Do');
     case tabItems.month:
@@ -100,9 +96,9 @@ const dateNav = (unit = 'auto', forward = true) => {
     unit = Object.keys(tabItems).find(key => tabItems[key] === tabActive.value);
   }
   if (forward) {
-    cal.active.date = cal.active.date.add(1, unit);
+    activeDate.value = activeDate.value.add(1, unit);
   } else {
-    cal.active.date = cal.active.date.subtract(1, unit);
+    activeDate.value = activeDate.value.subtract(1, unit);
   }
 };
 </script>

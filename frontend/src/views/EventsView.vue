@@ -68,10 +68,10 @@ const activeDate = ref(dj()); // current selected date, defaults to now
 
 // menu items for tab navigation
 const tabItems = {
-  'all': 0,
-  'booked': 1,
+  'all':     0,
+  'booked':  1,
   'pending': 2,
-  'past': 3
+  'past':    3,
 };
 const tabActive = ref(tabItems.all);
 const updateTab = n => tabActive.value = n;
@@ -90,12 +90,12 @@ const dateNav = (unit = 'auto', forward = true) => {
 
 // filter fields
 const filter = {
-  'allEvents': 0,
-  'eventsToday': 1,
-  'eventsNext7Days': 2,
+  'allEvents':        0,
+  'eventsToday':      1,
+  'eventsNext7Days':  2,
   'eventsNext14Days': 3,
   'eventsNext31Days': 4,
-  'eventsInMonth': 5,
-  'allFutureEvents': 6,
+  'eventsInMonth':    5,
+  'allFutureEvents':  6,
 }
 </script>
