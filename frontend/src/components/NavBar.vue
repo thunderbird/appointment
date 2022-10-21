@@ -1,11 +1,11 @@
 <template>
   <header class="h-24 shadow-lg border-b border-gray-300 flex justify-between">
     <router-link class="py-7 pl-8 pr-12 border-r" :to="{ name: 'calendar' }">
-      <img class="h-full" src="/appointment_logo.svg" alt="Appointment Logo">
+      <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo">
     </router-link>
-    <label class="grow flex items-center">
-      <icon-search class="h-8 w-8 ml-8 mr-4 stroke-2 stroke-gray-300 fill-transparent" /> 
-      <input class="w-full h-full text-xl px-2 border-none" type="search" name="search" :placeholder="t('label.search')">
+    <label class="grow flex items-center relative">
+      <icon-search class="absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 stroke-gray-300 fill-transparent" /> 
+      <input class="w-full h-full text-xl pl-20 pr-2 border-none" type="search" name="search" :placeholder="t('label.search')">
     </label>
     <nav class="flex gap-8 items-stretch">
       <ul class="flex justify-end gap-8">
