@@ -77,6 +77,16 @@
           </div>
         </div>
       </div>
+      <!-- TODO: events list/grid -->
+      <div class="grid" :class="{
+        'grid-cols-1': visibleColumns.length === 1,
+        'grid-cols-2': visibleColumns.length === 2,
+        'grid-cols-3': visibleColumns.length === 3,
+        'grid-cols-4': visibleColumns.length === 4,
+        'grid-cols-5': visibleColumns.length === 5,
+      }">
+        <div v-for="(_, key) in columns" :key="key">{{ t('label.' + key) }}</div>
+      </div>
     </div>
     <!-- page side bar -->
     <div class="w-1/5 flex flex-col gap-8">
