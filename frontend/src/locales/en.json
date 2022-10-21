@@ -25,7 +25,12 @@
     "eventsNext14Days": "Events in the next 14 days",
     "eventsNext31Days": "Events in the next 31 days",
     "eventsInMonth": "Events in this calendar month",
-    "allFutureEvents": "All future events"
+    "allFutureEvents": "All future events",
+    "title": "Title",
+    "status": "Status",
+    "mode": "Mode",
+    "bookingLink": "Booking Link",
+    "restoreColumnOrder": "Restore Column Order"
   },
   "heading": {
     "pendingAndActive": "Pending and Active",

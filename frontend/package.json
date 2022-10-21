@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vueuse/components": "^9.3.1",
+    "@vueuse/core": "^9.3.1",
     "core-js": "^3.8.3",
     "dayjs": "^1.11.5",
     "vue": "^3.2.13",

@@ -7,8 +7,9 @@ module.exports = {
     },
     extend: {
       gridTemplateColumns: {
-        'week': '100px repeat(7, 1fr)',
-        'day': '100px 1fr',
+        'week':    '100px repeat(7, 1fr)',
+        'day':     '100px 1fr',
+        'context': '28px 1fr',
       }
     },
   },
