@@ -1,13 +1,13 @@
 <template>
   <div class="select-none">
     <div v-if="nav" class="flex justify-center items-center gap-2 mb-2 select-none">
-      <div @click="emit('prev')" class="group cursor-pointer">
+      <div @click="dateNav(false)" class="group cursor-pointer">
         <icon-chevron-left class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
       <div class="text-teal-500 font-semibold text-lg">
         {{ selected.format('MMMM YYYY')}}
       </div>
-      <div @click="emit('next')" class="group cursor-pointer">
+      <div @click="dateNav(true)" class="group cursor-pointer">
         <icon-chevron-right class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
     </div>
@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
+import { ref, computed, inject, watch } from "vue";
 import CalendarMonthDay from '@/elements/CalendarMonthDay.vue';
 import IconChevronRight from "@/elements/icons/IconChevronRight.vue";
 import IconChevronLeft from "../elements/icons/IconChevronLeft.vue";
@@ -50,7 +50,20 @@ const props = defineProps({
 });
 
 // component emits
-const emit = defineEmits(['prev', 'next', 'selected']);
+const emit = defineEmits(['selected']);
+
+// handle nav date (only used if navigation is active)
+const navDate = ref(dj(props.selected)); // current selected date for independent navigation
+const dateNav = (forward = true) => {
+  if (forward) {
+    navDate.value = navDate.value.add(1, 'month');
+  } else {
+    navDate.value = navDate.value.subtract(1, 'month');
+  }
+};
+watch(() => props.selected, (selection) => {
+  navDate.value = dj(selection);
+});
 
 // generate names for each day of week
 const weekdayNames = () => {
@@ -71,10 +84,10 @@ const days = computed(() => [
 
 // basic data for selected month
 const today = computed(() => dj().format("YYYY-MM-DD"));
-const date = computed(() => dj(props.selected).format('YYYY-MM-DD'));
-const month = computed(() => Number(props.selected.format("M")));
-const year = computed(() => Number(props.selected.format("YYYY")));
-const numberOfDaysInMonth = computed(() => dj(props.selected).daysInMonth());
+const date = computed(() => dj(navDate.value).format('YYYY-MM-DD'));
+const month = computed(() => Number(navDate.value.format("M")));
+const year = computed(() => Number(navDate.value.format("YYYY")));
+const numberOfDaysInMonth = computed(() => dj(navDate.value).daysInMonth());
 
 const currentMonthDays = computed(() => [...Array(numberOfDaysInMonth.value)].map((_, index) => {
   return {
