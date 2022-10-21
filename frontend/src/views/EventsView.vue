@@ -56,7 +56,7 @@
         </div>
         <div
           v-show="showAdjustments"
-          class="absolute top-10 right-0 p-2 rounded shadow-md border border-gray-300"
+          class="absolute z-40 top-10 right-0 p-2 rounded shadow-md border border-gray-300 bg-white"
           v-on-click-outside="closeAdjustments"
         >
           <div
@@ -78,14 +78,32 @@
         </div>
       </div>
       <!-- TODO: events list/grid -->
-      <div class="grid" :class="{
+      <div class="grid items-center mt-4" :class="{
         'grid-cols-1': visibleColumns.length === 1,
         'grid-cols-2': visibleColumns.length === 2,
         'grid-cols-3': visibleColumns.length === 3,
         'grid-cols-4': visibleColumns.length === 4,
         'grid-cols-5': visibleColumns.length === 5,
       }">
-        <div v-for="(_, key) in columns" :key="key">{{ t('label.' + key) }}</div>
+        <template v-for="(_, key) in columns" :key="key">
+          <div v-if="columnVisible(key)" class="bg-gray-100 py-1 px-2">
+            <div class="pt-2 border-r border-gray-300">{{ t('label.' + key) }}</div>
+          </div>
+        </template>
+        <template v-for="(event, i) in fakeEvents" :key="i">
+          <template v-for="(value, key) in event" :key="key">
+            <div
+              v-if="columnVisible(key)"
+              class="py-2 px-2"
+              :class="{
+                'text-sm': key !== 'title',
+                'text-teal-500 underline': key === 'bookingLink',
+              }"
+            >
+              {{ value }}
+            </div>
+          </template>
+        </template>
       </div>
     </div>
     <!-- page side bar -->
@@ -188,7 +206,24 @@ const toggleColumnVisibility = (key) => {
     visibleColumns.value.push(key);
   }
 };
+const columnVisible = (key) => {
+  return visibleColumns.value.includes(columns[key]);
+}
 const restoreColumnOrder = () => {
   visibleColumns.value = Object.values(columns);
 }
+
+// TODO: fake data
+const fakeEvents = [
+  { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar: 'Family', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Family', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Team Building Event', status: 'booked', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'closed', calendar: 'Family', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Weekly ZOOM', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
+]
 </script>
