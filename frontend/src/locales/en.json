@@ -20,6 +20,7 @@
     "pending": "Pending",
     "past": "Past",
     "allEvents": "All events",
+    "activeEvent": "Active event",
     "eventsToday": "Today's events",
     "eventsNext7Days": "Events in the next 7 days",
     "eventsNext14Days": "Events in the next 14 days",

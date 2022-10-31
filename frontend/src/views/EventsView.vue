@@ -78,7 +78,7 @@
         </div>
       </div>
       <!-- events list -->
-      <table class="w-full mt-4">
+      <table v-show="view === viewOptions.list" class="w-full mt-4">
         <thead>
           <tr>
             <th class="bg-gray-100 py-1"></th>
@@ -110,6 +110,17 @@
         </tbody>
       </table>
       <!-- events grid -->
+      <div v-show="view === viewOptions.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
+        <div v-for="(event, i) in filteredEvents" :key="i" class="w-1/4 px-4 py-2 hover:bg-sky-400/10 hover:shadow-md rounded border-2 border-l-8 border-dashed border-l-solid border-sky-400">
+          <div>{{ event.title }}</div>
+          <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
+          <div class="pl-4 text-sm">{{ event.calendar }}</div>
+          <div class="pl-4 text-sm">
+            <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" />
+          </div>
+          <div class="pl-4 text-sm text-teal-500 underline">{{ event.bookingLink }}</div>
+        </div>
+      </div>
     </div>
     <!-- page side bar -->
     <div class="w-1/5 flex flex-col gap-8">
@@ -134,9 +145,10 @@ import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconList from '@/elements/icons/IconList.vue';
-import IconGrid from "../elements/icons/IconGrid.vue";
-import IconCheck from "../elements/icons/IconCheck.vue";
-import IconAdjustments from "../elements/icons/IconAdjustments.vue";
+import IconGrid from "@/elements/icons/IconGrid.vue";
+import IconCheck from "@/elements/icons/IconCheck.vue";
+import IconAdjustments from "@/elements/icons/IconAdjustments.vue";
+import SwitchToggle from '@/elements/SwitchToggle.vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -197,7 +209,7 @@ const viewOptions = {
   'list': 0,
   'grid': 1,
 };
-const view = ref(viewOptions.list);
+const view = ref(viewOptions.grid);
 
 // handle view adjustments
 const showAdjustments = ref(false);
