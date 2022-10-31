@@ -77,10 +77,11 @@
           </div>
         </div>
       </div>
-      <!-- TODO: events list/grid -->
+      <!-- events list -->
       <table class="w-full mt-4">
         <thead>
           <tr>
+            <th class="bg-gray-100 py-1"></th>
             <template v-for="(_, key) in columns" :key="key">
               <th v-if="columnVisible(key)" class="group bg-gray-100 font-normal text-left py-1 px-2">
                 <div class="py-1 border-r border-gray-300 group-last:border-none">{{ t('label.' + key) }}</div>
@@ -90,6 +91,9 @@
         </thead>
         <tbody>
           <tr v-for="(event, i) in filteredEvents" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg">
+            <td class="align-middle">
+              <div class="rounded-full w-3 h-3 bg-sky-400 mx-auto"></div>
+            </td>
             <template v-for="(value, key) in event" :key="key">
               <td
                 v-if="columnVisible(key)"
@@ -105,6 +109,7 @@
           </tr>
         </tbody>
       </table>
+      <!-- events grid -->
     </div>
     <!-- page side bar -->
     <div class="w-1/5 flex flex-col gap-8">
@@ -230,11 +235,11 @@ const fakeEvents = [
 // handle filtered events list
 const filteredEvents = computed(() => {
   let list = fakeEvents;
-  // handle search input
+  // by search input
   if (search.value !== '') {
     list = list.filter(e => e.title.toLowerCase().includes(search.value.toLowerCase()))
   }
-  // handle active tab
+  // by active tab
   switch (tabActive.value) {
     case tabItems.booked:
       list = list.filter(e => e.status === 'booked');
