@@ -78,33 +78,33 @@
         </div>
       </div>
       <!-- TODO: events list/grid -->
-      <div class="grid items-center mt-4" :class="{
-        'grid-cols-1': visibleColumns.length === 1,
-        'grid-cols-2': visibleColumns.length === 2,
-        'grid-cols-3': visibleColumns.length === 3,
-        'grid-cols-4': visibleColumns.length === 4,
-        'grid-cols-5': visibleColumns.length === 5,
-      }">
-        <template v-for="(_, key) in columns" :key="key">
-          <div v-if="columnVisible(key)" class="bg-gray-100 py-1 px-2">
-            <div class="pt-2 border-r border-gray-300">{{ t('label.' + key) }}</div>
-          </div>
-        </template>
-        <template v-for="(event, i) in fakeEvents" :key="i">
-          <template v-for="(value, key) in event" :key="key">
-            <div
-              v-if="columnVisible(key)"
-              class="py-2 px-2"
-              :class="{
-                'text-sm': key !== 'title',
-                'text-teal-500 underline': key === 'bookingLink',
-              }"
-            >
-              {{ value }}
-            </div>
-          </template>
-        </template>
-      </div>
+      <table class="w-full mt-4">
+        <thead>
+          <tr>
+            <template v-for="(_, key) in columns" :key="key">
+              <th v-if="columnVisible(key)" class="group bg-gray-100 font-normal text-left py-1 px-2">
+                <div class="py-1 border-r border-gray-300 group-last:border-none">{{ t('label.' + key) }}</div>
+              </th>
+            </template>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(event, i) in filteredEvents" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg">
+            <template v-for="(value, key) in event" :key="key">
+              <td
+                v-if="columnVisible(key)"
+                class="py-2 px-2"
+                :class="{
+                  'text-sm': key !== 'title',
+                  'text-teal-500 underline': key === 'bookingLink',
+                }"
+              >
+                {{ value }}
+              </td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <!-- page side bar -->
     <div class="w-1/5 flex flex-col gap-8">
@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue';
+import { ref, inject, computed } from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
@@ -226,4 +226,29 @@ const fakeEvents = [
   { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
   { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
 ]
+
+// handle filtered events list
+const filteredEvents = computed(() => {
+  let list = fakeEvents;
+  // handle search input
+  if (search.value !== '') {
+    list = list.filter(e => e.title.toLowerCase().includes(search.value.toLowerCase()))
+  }
+  // handle active tab
+  switch (tabActive.value) {
+    case tabItems.booked:
+      list = list.filter(e => e.status === 'booked');
+      break;
+    case tabItems.pending:
+      list = list.filter(e => e.status === 'pending');
+      break;
+    case tabItems.past:
+      list = list.filter(e => e.status === 'past');
+      break;
+    case tabItems.all:
+    default:
+      break;
+  }
+  return list;
+})
 </script>
