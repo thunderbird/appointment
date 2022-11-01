@@ -119,14 +119,16 @@
       </table>
       <!-- events grid -->
       <div v-show="view === viewOptions.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
-        <div v-for="(event, i) in filteredEvents" :key="i" class="w-1/4 px-4 py-2 hover:bg-sky-400/10 hover:shadow-md rounded border-2 border-l-8 border-dashed border-l-solid border-sky-400">
-          <div>{{ event.title }}</div>
-          <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
-          <div class="pl-4 text-sm">{{ event.calendar }}</div>
-          <div class="px-4 text-sm">
-            <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" />
+        <div v-for="(event, i) in filteredEvents" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400">
+          <div class="px-4 py-3 -my-0.5 rounded border-l-8 border-sky-400">
+            <div>{{ event.title }}</div>
+            <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
+            <div class="pl-4 text-sm">{{ event.calendar }}</div>
+            <div class="px-4 text-sm">
+              <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" />
+            </div>
+            <div class="pl-4 text-sm text-teal-500 underline">https://apmt.day/{{ event.slug }}</div>
           </div>
-          <div class="pl-4 text-sm text-teal-500 underline">https://apmt.day/{{ event.slug }}</div>
         </div>
       </div>
     </div>
