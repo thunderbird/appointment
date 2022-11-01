@@ -5,7 +5,7 @@
         <icon-chevron-left class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
       <div class="text-teal-500 font-semibold text-lg">
-        {{ selected.format('MMMM YYYY')}}
+        {{ navDate.format('MMMM YYYY')}}
       </div>
       <div @click="dateNav(true)" class="group cursor-pointer">
         <icon-chevron-right class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
