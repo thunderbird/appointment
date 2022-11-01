@@ -27,9 +27,11 @@ app.use(i18n);
 import dayjs from 'dayjs';
 import weekday from "dayjs/plugin/weekday";
 import advancedFormat from 'dayjs/plugin/advancedFormat';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 dayjs.locale(loc);
 dayjs.extend(weekday);
 dayjs.extend(advancedFormat);
+dayjs.extend(localizedFormat);
 app.provide('dayjs', dayjs);
 
 // init basic css with tailwind imports

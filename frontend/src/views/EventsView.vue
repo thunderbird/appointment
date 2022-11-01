@@ -90,7 +90,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(event, i) in filteredEvents" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg">
+          <tr v-for="(event, i) in filteredEvents" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer" @click="showEvent = event">
             <td class="align-middle">
               <div class="rounded-full w-3 h-3 bg-sky-400 mx-auto"></div>
             </td>
@@ -119,7 +119,7 @@
       </table>
       <!-- events grid -->
       <div v-show="view === viewOptions.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
-        <div v-for="(event, i) in filteredEvents" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400">
+        <div v-for="(event, i) in filteredEvents" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer" @click="showEvent = event">
           <div class="px-4 py-3 -my-0.5 rounded border-l-8 border-sky-400">
             <div>{{ event.title }}</div>
             <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
@@ -127,7 +127,11 @@
             <div class="px-4 text-sm">
               <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" />
             </div>
-            <div class="pl-4 text-sm text-teal-500 underline">https://apmt.day/{{ event.slug }}</div>
+            <div class="pl-4 text-sm">
+              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank">
+                https://apmt.day/{{ event.slug }}
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -145,7 +149,7 @@
       />
     </div>
   </div>
-
+  <event-modal :open="showEvent !== null" :event="showEvent" @close="closeEventModal" />
 </template>
 
 <script setup>
@@ -153,6 +157,7 @@ import { ref, inject, computed } from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
+import EventModal from '@/components/EventModal.vue';
 import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconList from '@/elements/icons/IconList.vue';
 import IconGrid from "@/elements/icons/IconGrid.vue";
@@ -200,7 +205,7 @@ const columns = {
   'replies':     5,
 };
 
-// handle filter
+// handle data filter
 const filterOptions = {
   'allEvents':        0,
   'eventsToday':      1,
@@ -212,17 +217,17 @@ const filterOptions = {
 };
 const filter = ref(filterOptions.eventsToday);
 
-// handle search
+// handle data search
 const search = ref('');
 
-// handle view
+// handle data view
 const viewOptions = {
   'list': 0,
   'grid': 1,
 };
 const view = ref(viewOptions.list);
 
-// handle view adjustments
+// handle view adjustments: column visibility
 const showAdjustments = ref(false);
 const visibleColumns = ref(Object.values(columns));
 const openAdjustments = () => showAdjustments.value = true;
@@ -243,16 +248,18 @@ const restoreColumnOrder = () => {
 
 // TODO: fake data
 const fakeEvents = [
-  { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Team Building Event', status: 'booked', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'closed', calendar: 'Family', slug: 'sdfw83jc', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Weekly ZOOM', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Team Building Event', status: 'booked', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'BigBlueButton', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }, { start: '2022-11-13T11:00:00', duration: 60, attendee: null }, { start: '2022-11-13T12:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'jane@doe.com' } }] },
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'closed', calendar: 'Family', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Weekly ZOOM', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Phone', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Park', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
 ];
 
 // handle filtered events list
@@ -282,4 +289,8 @@ const filteredEvents = computed(() => {
 
 // return number of booked slots (replies) for given event
 const repliesCount = event => event.slots.filter(s => s.attendee !== null).length;
+
+// handle single event modal
+const showEvent = ref(null);
+const closeEventModal = () => showEvent.value = null;
 </script>
