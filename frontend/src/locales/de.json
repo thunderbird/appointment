@@ -31,7 +31,9 @@
     "status": "Status",
     "mode": "Modus",
     "bookingLink": "Buchungslink",
-    "restoreColumnOrder": "Spaltenreihenfolge wiederherstellen"
+    "restoreColumnOrder": "Spaltenreihenfolge wiederherstellen",
+    "replies": "Antworten",
+    "bookings": "Buchungen | Buchung | Buchungen"
   },
   "heading": {
     "pendingAndActive": "Ausstehend und Aktiv",

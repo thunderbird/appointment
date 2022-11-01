@@ -31,7 +31,9 @@
     "status": "Status",
     "mode": "Mode",
     "bookingLink": "Booking Link",
-    "restoreColumnOrder": "Restore Column Order"
+    "restoreColumnOrder": "Restore Column Order",
+    "replies": "Replies",
+    "bookings": "bookings | booking | bookings"
   },
   "heading": {
     "pendingAndActive": "Pending and Active",

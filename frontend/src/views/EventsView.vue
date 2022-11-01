@@ -94,18 +94,26 @@
             <td class="align-middle">
               <div class="rounded-full w-3 h-3 bg-sky-400 mx-auto"></div>
             </td>
-            <template v-for="(value, key) in event" :key="key">
-              <td
-                v-if="columnVisible(key)"
-                class="py-2 px-2"
-                :class="{
-                  'text-sm': key !== 'title',
-                  'text-teal-500 underline': key === 'bookingLink',
-                }"
-              >
-                {{ value }}
-              </td>
-            </template>
+            <td v-if="columnVisible('title')" class="py-2 px-2">
+              <span>{{ event.title }}</span>
+            </td>
+            <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
+              <span>{{ t('label.' + event.status) }}</span>
+            </td>
+            <td v-if="columnVisible('mode')" class="py-2 px-2 text-sm">
+              <span>{{ event.mode }}</span>
+            </td>
+            <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
+              <span>{{ event.calendar }}</span>
+            </td>
+            <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm">
+              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank">
+                https://apmt.day/{{ event.slug }}
+              </a>
+            </td>
+            <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
+              <span>{{ repliesCount(event) }} {{ t('label.bookings', repliesCount(event)) }}</span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -115,10 +123,10 @@
           <div>{{ event.title }}</div>
           <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
           <div class="pl-4 text-sm">{{ event.calendar }}</div>
-          <div class="pl-4 text-sm">
+          <div class="px-4 text-sm">
             <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" />
           </div>
-          <div class="pl-4 text-sm text-teal-500 underline">{{ event.bookingLink }}</div>
+          <div class="pl-4 text-sm text-teal-500 underline">https://apmt.day/{{ event.slug }}</div>
         </div>
       </div>
     </div>
@@ -187,6 +195,7 @@ const columns = {
   'mode':        2,
   'calendar':    3,
   'bookingLink': 4,
+  'replies':     5,
 };
 
 // handle filter
@@ -209,7 +218,7 @@ const viewOptions = {
   'list': 0,
   'grid': 1,
 };
-const view = ref(viewOptions.grid);
+const view = ref(viewOptions.list);
 
 // handle view adjustments
 const showAdjustments = ref(false);
@@ -225,24 +234,24 @@ const toggleColumnVisibility = (key) => {
 };
 const columnVisible = (key) => {
   return visibleColumns.value.includes(columns[key]);
-}
+};
 const restoreColumnOrder = () => {
   visibleColumns.value = Object.values(columns);
-}
+};
 
 // TODO: fake data
 const fakeEvents = [
-  { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar: 'Family', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Family', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Team Building Event', status: 'booked', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'closed', calendar: 'Family', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Weekly ZOOM', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', bookingLink: 'https://apmt.day/sdfw83jc' },
-]
+  { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Team Building Event', status: 'booked', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'closed', calendar: 'Family', slug: 'sdfw83jc', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Weekly ZOOM', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+];
 
 // handle filtered events list
 const filteredEvents = computed(() => {
@@ -267,5 +276,8 @@ const filteredEvents = computed(() => {
       break;
   }
   return list;
-})
+});
+
+// return number of booked slots (replies) for given event
+const repliesCount = event => event.slots.filter(s => s.attendee !== null).length;
 </script>
