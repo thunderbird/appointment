@@ -10,7 +10,7 @@
             'text-gray-900 bg-white rounded-xl shadow': i == active,
             'text-gray-500 hover:bg-gray-100': i != active,
           }"
-          @click="activate(i)"
+          @click="activate(item)"
         >
           {{ t('label.' + item) }}
         </li>
@@ -33,7 +33,7 @@ defineProps({
 const emit = defineEmits(['update']);
 
 // handle click events
-const activate = (n) => {
-  emit('update', n);
+const activate = (item) => {
+  emit('update', item);
 }
 </script>

@@ -59,7 +59,10 @@ import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
 import CalendarDay from '@/components/CalendarDay.vue';
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from 'vue-router';
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const dj = inject("dayjs");
 
 // handle calendar output
@@ -76,8 +79,11 @@ const endOfActiveWeek = computed(() => {
 
 // menu items for tab navigation
 const tabItems = { 'day': 0, 'week': 1, 'month': 2 };
-const tabActive = ref(tabItems.month);
-const updateTab = (n) => tabActive.value = n;
+const tabActive = ref(route.params.view ? tabItems[route.params.view] : tabItems.month);
+const updateTab = view => {
+  router.replace({ name: route.name, params: { view: view } });
+  tabActive.value = tabItems[view];
+};
 
 // calculate page title
 const pageTitle = computed(() => {

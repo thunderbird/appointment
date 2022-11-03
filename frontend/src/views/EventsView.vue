@@ -166,7 +166,10 @@ import IconAdjustments from "@/elements/icons/IconAdjustments.vue";
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from 'vue-router';
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const dj = inject("dayjs");
 
 // handle calendar output
@@ -180,9 +183,11 @@ const tabItems = {
   'pending': 2,
   'past':    3,
 };
-const tabActive = ref(tabItems.all);
-const updateTab = n => tabActive.value = n;
-
+const tabActive = ref(route.params.view ? tabItems[route.params.view] : tabItems.all);
+const updateTab = view => {
+  router.replace({ name: route.name, params: { view: view } });
+  tabActive.value = tabItems[view];
+};
 // date navigation
 const dateNav = (unit = 'auto', forward = true) => {
   if (unit === 'auto') {
