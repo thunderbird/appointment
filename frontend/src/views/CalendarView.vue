@@ -9,7 +9,7 @@
       @next="dateNav('auto')"
     />
     <div class="flex gap-8 items-center">
-      <button @click="activeDate = dj()" class="font-semibold text-xl text-teal-500 px-4">
+      <button @click="selectDate(dj())" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
       <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
@@ -65,9 +65,12 @@ const route = useRoute();
 const router = useRouter();
 const dj = inject("dayjs");
 
-// handle calendar output
-const activeDate = ref(dj()); // current selected date, defaults to now
-const selectDate = (d) => activeDate.value = dj(d);
+// current selected date, if not in route: defaults to now
+const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
+const selectDate = d => {
+  router.replace({ name: route.name, params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') } });
+  activeDate.value = dj(d);
+};
 
 // date calculations
 const startOfActiveWeek = computed(() => {
@@ -81,7 +84,7 @@ const endOfActiveWeek = computed(() => {
 const tabItems = { 'day': 0, 'week': 1, 'month': 2 };
 const tabActive = ref(route.params.view ? tabItems[route.params.view] : tabItems.month);
 const updateTab = view => {
-  router.replace({ name: route.name, params: { view: view } });
+  router.replace({ name: route.name, params: { view: view, date: route.params.date } });
   tabActive.value = tabItems[view];
 };
 
@@ -104,9 +107,9 @@ const dateNav = (unit = 'auto', forward = true) => {
     unit = Object.keys(tabItems).find(key => tabItems[key] === tabActive.value);
   }
   if (forward) {
-    activeDate.value = activeDate.value.add(1, unit);
+    selectDate(activeDate.value.add(1, unit));
   } else {
-    activeDate.value = activeDate.value.subtract(1, unit);
+    selectDate(activeDate.value.subtract(1, unit));
   }
 };
 </script>
