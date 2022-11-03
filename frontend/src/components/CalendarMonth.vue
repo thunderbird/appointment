@@ -84,7 +84,7 @@ const days = computed(() => [
 
 // basic data for selected month
 const today = computed(() => dj().format("YYYY-MM-DD"));
-const date = computed(() => dj(navDate.value).format('YYYY-MM-DD'));
+const date = computed(() => dj(props.selected).format('YYYY-MM-DD'));
 const month = computed(() => Number(navDate.value.format("M")));
 const year = computed(() => Number(navDate.value.format("YYYY")));
 const numberOfDaysInMonth = computed(() => dj(navDate.value).daysInMonth());
