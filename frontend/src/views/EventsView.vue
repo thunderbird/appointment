@@ -107,7 +107,7 @@
               <span>{{ event.calendar }}</span>
             </td>
             <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm">
-              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank">
+              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
                 https://apmt.day/{{ event.slug }}
               </a>
             </td>
@@ -125,10 +125,10 @@
             <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
             <div class="pl-4 text-sm">{{ event.calendar }}</div>
             <div class="px-4 text-sm">
-              <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" />
+              <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" @click.stop="null" />
             </div>
             <div class="pl-4 text-sm">
-              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank">
+              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
                 https://apmt.day/{{ event.slug }}
               </a>
             </div>
