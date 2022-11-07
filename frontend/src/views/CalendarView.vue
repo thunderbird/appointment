@@ -82,9 +82,9 @@ const endOfActiveWeek = computed(() => {
 
 // menu items for tab navigation
 const tabItems = { 'day': 0, 'week': 1, 'month': 2 };
-const tabActive = ref(route.params.view ? tabItems[route.params.view] : tabItems.month);
+const tabActive = ref(tabItems[route.params.view]);
 const updateTab = view => {
-  router.replace({ name: route.name, params: { view: view, date: route.params.date } });
+  router.replace({ name: route.name, params: { view: view, date: route.params.date ?? dj().format('YYYY-MM-DD') } });
   tabActive.value = tabItems[view];
 };
 

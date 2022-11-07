@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import CalendarView from '@/views/CalendarView.vue'
 
 const routes = [
+  { path: '/', redirect: { name: "calendar" } },
+  { path: '/calendar', redirect: { name: "calendar" } },
   {
     path: '/calendar/:view?/:date?',
     name: 'calendar',
@@ -33,6 +35,17 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+router.beforeEach(to => {
+  if(to.name === 'calendar' && !to.params.view){
+    to.params.view = 'month';
+    return to;
+  }
+  if(to.name === 'events' && !to.params.view){
+    to.params.view = 'all';
+    return to;
+  }
 })
 
 export default router
