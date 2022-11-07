@@ -45,10 +45,12 @@
           </div>
         </div>
         <div
-          class="rounded border border-gray-300 py-1 px-1.5 flex items-center cursor-pointer"
+          class="rounded border border-gray-300 py-1 px-1.5 flex items-center"
           :class="{
             'bg-gray-300': showAdjustments,
-            'hover:bg-gray-100': !showAdjustments
+            'hover:bg-gray-100': !showAdjustments && view === viewOptions.list,
+            'opacity-30': view === viewOptions.grid,
+            'cursor-pointer': view === viewOptions.list
           }"
           @click="openAdjustments"
         >
@@ -235,7 +237,11 @@ const view = ref(viewOptions.list);
 // handle view adjustments: column visibility
 const showAdjustments = ref(false);
 const visibleColumns = ref(Object.values(columns));
-const openAdjustments = () => showAdjustments.value = true;
+const openAdjustments = () => {
+  if (view.value == viewOptions.list) {
+    showAdjustments.value = true;
+  }
+};
 const closeAdjustments = () => showAdjustments.value = false;
 const toggleColumnVisibility = (key) => {
   if (visibleColumns.value.includes(key)) {
