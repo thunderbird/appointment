@@ -11,5 +11,5 @@
 import NavBar from '@/components/NavBar.vue';
 
 // menu items for main navigation
-const navItems = ['calendar', 'events', 'settings'];
+const navItems = ['calendar', 'appointments', 'settings'];
 </script>

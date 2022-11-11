@@ -40,7 +40,7 @@
         </a>
       </div>
       <div>
-        <div class="font-semibold mb-1">{{ t('label.activeEvent') }}</div>
+        <div class="font-semibold mb-1">{{ t('label.activeAppointment') }}</div>
         <switch-toggle :active="event.mode === 'open'" />
       </div>
       <div class="col-span-3">

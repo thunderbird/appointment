@@ -1,10 +1,10 @@
 <template>
   <!-- page title area -->
   <div class="flex justify-between items-start select-none">
-    <div class="text-4xl font-light">{{ t('label.events') }}</div>
+    <div class="text-4xl font-light">{{ t('label.appointments') }}</div>
     <div class="flex gap-8 items-center">
       <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
-      <primary-button :label="t('label.createEvent')" />
+      <primary-button :label="t('label.createAppointments')" />
     </div>
   </div>
   <!-- page content -->
@@ -127,7 +127,7 @@
             <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
             <div class="pl-4 text-sm">{{ event.calendar }}</div>
             <div class="px-4 text-sm">
-              <switch-toggle :active="event.mode === 'open'" :label="t('label.activeEvent')" @click.stop="null" />
+              <switch-toggle :active="event.mode === 'open'" :label="t('label.activeAppointment')" @click.stop="null" />
             </div>
             <div class="pl-4 text-sm">
               <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
@@ -214,15 +214,15 @@ const columns = {
 
 // handle data filter
 const filterOptions = {
-  'allEvents':        0,
-  'eventsToday':      1,
-  'eventsNext7Days':  2,
-  'eventsNext14Days': 3,
-  'eventsNext31Days': 4,
-  'eventsInMonth':    5,
-  'allFutureEvents':  6,
+  'allAppointments':        0,
+  'appointmentsToday':      1,
+  'appointmentsNext7Days':  2,
+  'appointmentsNext14Days': 3,
+  'appointmentsNext31Days': 4,
+  'appointmentsInMonth':    5,
+  'allFutureAppointments':  6,
 };
-const filter = ref(filterOptions.eventsToday);
+const filter = ref(filterOptions.appointmentsToday);
 
 // handle data search
 const search = ref('');

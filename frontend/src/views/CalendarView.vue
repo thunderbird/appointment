@@ -13,7 +13,7 @@
         {{ t('label.today') }}
       </button>
       <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
-      <primary-button :label="t('label.createEvent')" />
+      <primary-button :label="t('label.createAppointments')" />
     </div>
   </div>
   <!-- page content -->
@@ -36,13 +36,13 @@
       <!-- events -->
       <div>
         <div class="flex justify-between items-center">
-          <div class="font-semibold text-lg">{{ t('heading.pendingAndActive') }}</div>
-          <router-link class="px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs uppercase" :to="{ name: 'events' }">
+          <div class="font-semibold text-lg">{{ t('heading.appointmentsAndEvents') }}</div>
+          <router-link class="px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs uppercase" :to="{ name: 'appointments' }">
             {{ t('label.viewAll') }}
           </router-link>
         </div>
         <div class="text-slate-500 mt-4">
-          {{ t('info.noEventsInList') }}
+          {{ t('info.noAppointmentsInList') }}
         </div>
       </div>
     </div>

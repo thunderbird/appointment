@@ -11,9 +11,9 @@ const routes = [
   },
   // lazy-loaded routes
   {
-    path: '/events/:view?',
-    name: 'events',
-    component: () => import(/* webpackChunkName: "events" */ '@/views/EventsView.vue')
+    path: '/appointments/:view?',
+    name: 'appointments',
+    component: () => import(/* webpackChunkName: "appointments" */ '@/views/AppointmentsView.vue')
   },
   {
     path: '/settings',
@@ -42,7 +42,7 @@ router.beforeEach(to => {
     to.params.view = 'month';
     return to;
   }
-  if(to.name === 'events' && !to.params.view){
+  if(to.name === 'appointments' && !to.params.view){
     to.params.view = 'all';
     return to;
   }

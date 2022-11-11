@@ -1,35 +1,35 @@
 {
   "app": {
-    "summary": "Lass Freunde und Kollegen Events in deinem Kalender wählen. Terminabsprachen so simple wie möglich.",
+    "summary": "Lass Freunde und Kollegen Zeiten in deinem Kalender wählen. Terminabsprachen so simple wie möglich.",
     "title": "Thunderbird Appointment"
   },
   "heading": {
-    "pendingAndActive": "Ausstehend und Aktiv",
+    "appointmentsAndEvents": "Termine und Events",
     "yourProfile": "Your Profile"
   },
   "info": {
-    "noEventsInList": "Hier gibt es aktuell keine Termine."
+    "noAppointmentsInList": "Hier gibt es aktuell keine Termine."
   },
   "label": {
-    "activeEvent": "Aktives Event",
+    "activeAppointment": "Aktiver Termin",
     "all": "Alle",
     "allDay": "Ganzer Tag",
-    "allEvents": "Alle Events",
-    "allFutureEvents": "Alle zukünftigen Events",
+    "allAppointments": "Alle Termine",
+    "allFutureAppointments": "Alle zukünftigen Termine",
+    "appointments": "Termine",
     "availabilityDay": "Verfügbarer Tag",
     "booked": "Gebucht",
     "bookingLink": "Buchungslink",
     "bookings": "Buchungen | Buchung | Buchungen",
     "calendar": "Kalender",
-    "createEvent": "Event erstellen",
+    "createAppointments": "Termin erstellen",
     "day": "Tag",
     "endTime": "Endzeit",
-    "events": "Events",
-    "eventsInMonth": "Events in diesem Monat",
-    "eventsNext14Days": "Events der nächsten 14 Tage",
-    "eventsNext31Days": "Events der nächsten 31 Tage",
-    "eventsNext7Days": "Events der nächsten 7 Tage",
-    "eventsToday": "Events heute",
+    "appointmentsInMonth": "Termine in diesem Monat",
+    "appointmentsNext14Days": "Termine der nächsten 14 Tage",
+    "appointmentsNext31Days": "Termine der nächsten 31 Tage",
+    "appointmentsNext7Days": "Termine der nächsten 7 Tage",
+    "appointmentsToday": "Termine heute",
     "location": "Ort",
     "mode": "Modus",
     "month": "Monat",
