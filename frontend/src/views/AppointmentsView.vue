@@ -9,7 +9,7 @@
   </div>
   <!-- page content -->
   <div class="flex justify-between gap-24 mt-8">
-    <!-- main section: list/grid of events with filter -->
+    <!-- main section: list/grid of appointments with filter -->
     <div class="w-4/5">
       <!-- filter bar -->
       <div class="relative flex gap-5 select-none">
@@ -17,10 +17,10 @@
           <option v-for="(value, key) in filterOptions" :key="key" :value="value">{{ t('label.' + key) }}</option>
         </select>
         <div class="w-full relative">
-          <label for="events-search" class="absolute top-1/2 -translate-y-1/2 left-3 cursor-text">
+          <label for="appointments-search" class="absolute top-1/2 -translate-y-1/2 left-3 cursor-text">
             <icon-search class="h-4 w-4 stroke-2 stroke-gray-400 fill-transparent" /> 
           </label>
-          <input v-model="search" type="search" id="events-search" class="rounded border border-gray-300 w-full pl-10 text-sm" placeholder="Search events" />
+          <input v-model="search" type="search" id="appointments-search" class="rounded border border-gray-300 w-full pl-10 text-sm" :placeholder="t('label.searchAppointments')" />
         </div>
         <div class="rounded border border-gray-300 flex">
           <div
@@ -79,7 +79,7 @@
           </div>
         </div>
       </div>
-      <!-- events list -->
+      <!-- appointments list -->
       <table v-show="view === viewOptions.list" class="w-full mt-4">
         <thead>
           <tr>
@@ -92,46 +92,46 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(event, i) in filteredEvents" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer" @click="showEvent = event">
+          <tr v-for="(appointment, i) in filteredAppointments" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer" @click="showAppointment = appointment">
             <td class="align-middle">
               <div class="rounded-full w-3 h-3 bg-sky-400 mx-auto"></div>
             </td>
             <td v-if="columnVisible('title')" class="py-2 px-2">
-              <span>{{ event.title }}</span>
+              <span>{{ appointment.title }}</span>
             </td>
             <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
-              <span>{{ t('label.' + event.status) }}</span>
+              <span>{{ t('label.' + appointment.status) }}</span>
             </td>
             <td v-if="columnVisible('mode')" class="py-2 px-2 text-sm">
-              <span>{{ event.mode }}</span>
+              <span>{{ appointment.mode }}</span>
             </td>
             <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
-              <span>{{ event.calendar }}</span>
+              <span>{{ appointment.calendar }}</span>
             </td>
             <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm">
-              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
-                https://apmt.day/{{ event.slug }}
+              <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
+                https://apmt.day/{{ appointment.slug }}
               </a>
             </td>
             <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
-              <span>{{ repliesCount(event) }} {{ t('label.bookings', repliesCount(event)) }}</span>
+              <span>{{ repliesCount(appointment) }} {{ t('label.bookings', repliesCount(appointment)) }}</span>
             </td>
           </tr>
         </tbody>
       </table>
-      <!-- events grid -->
+      <!-- appointments grid -->
       <div v-show="view === viewOptions.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
-        <div v-for="(event, i) in filteredEvents" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer" @click="showEvent = event">
+        <div v-for="(appointment, i) in filteredAppointments" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer" @click="showAppointment = appointment">
           <div class="px-4 py-3 -my-0.5 rounded border-l-8 border-sky-400">
-            <div>{{ event.title }}</div>
-            <div class="pl-4 text-sm">{{ t('label.' + event.status) }}</div>
-            <div class="pl-4 text-sm">{{ event.calendar }}</div>
+            <div>{{ appointment.title }}</div>
+            <div class="pl-4 text-sm">{{ t('label.' + appointment.status) }}</div>
+            <div class="pl-4 text-sm">{{ appointment.calendar }}</div>
             <div class="px-4 text-sm">
-              <switch-toggle :active="event.mode === 'open'" :label="t('label.activeAppointment')" @click.stop="null" />
+              <switch-toggle :active="appointment.mode === 'open'" :label="t('label.activeAppointment')" @click.stop="null" />
             </div>
             <div class="pl-4 text-sm">
-              <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
-                https://apmt.day/{{ event.slug }}
+              <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
+                https://apmt.day/{{ appointment.slug }}
               </a>
             </div>
           </div>
@@ -151,7 +151,7 @@
       />
     </div>
   </div>
-  <event-modal :open="showEvent !== null" :event="showEvent" @close="closeEventModal" />
+  <appointment-modal :open="showAppointment !== null" :appointment="showAppointment" @close="closeAppointmentModal" />
 </template>
 
 <script setup>
@@ -159,7 +159,7 @@ import { ref, inject, computed } from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
-import EventModal from '@/components/EventModal.vue';
+import AppointmentModal from '@/components/AppointmentModal.vue';
 import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconList from '@/elements/icons/IconList.vue';
 import IconGrid from "@/elements/icons/IconGrid.vue";
@@ -258,7 +258,7 @@ const restoreColumnOrder = () => {
 };
 
 // TODO: fake data
-const fakeEvents = [
+const fakeAppointments = [
   { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
   { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
   { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
@@ -273,9 +273,9 @@ const fakeEvents = [
   { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
 ];
 
-// handle filtered events list
-const filteredEvents = computed(() => {
-  let list = fakeEvents;
+// handle filtered appointments list
+const filteredAppointments = computed(() => {
+  let list = fakeAppointments;
   // by search input
   if (search.value !== '') {
     list = list.filter(e => e.title.toLowerCase().includes(search.value.toLowerCase()))
@@ -298,10 +298,10 @@ const filteredEvents = computed(() => {
   return list;
 });
 
-// return number of booked slots (replies) for given event
-const repliesCount = event => event.slots.filter(s => s.attendee !== null).length;
+// return number of booked slots (replies) for given appointment
+const repliesCount = appointment => appointment.slots.filter(s => s.attendee !== null).length;
 
-// handle single event modal
-const showEvent = ref(null);
-const closeEventModal = () => showEvent.value = null;
+// handle single appointment modal
+const showAppointment = ref(null);
+const closeAppointmentModal = () => showAppointment.value = null;
 </script>

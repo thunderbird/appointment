@@ -4,13 +4,13 @@
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
       <icon-x class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
-    <div class="text-xl mb-8">{{ event.title }}</div>
+    <div class="text-xl mb-8">{{ appointment.title }}</div>
     <div class="grid grid-cols-4 text-gray-500 text-sm w-max gap-x-4 gap-y-2 pl-4 mb-8">
       <div class="font-semibold">{{ t('label.availabilityDay') }}</div>
       <div class="font-semibold">{{ t('label.startTime') }}</div>
       <div class="font-semibold">{{ t('label.endTime') }}</div>
       <div class="font-semibold">{{ t('label.bookings') }}</div>
-      <template v-for="s in event.slots" :key="s.start">
+      <template v-for="s in appointment.slots" :key="s.start">
         <div>{{ dj(s.start).format('LL') }}</div>
         <div>{{ dj(s.start).format('LT') }}</div>
         <div>{{ dj(s.start).add(s.duration, 'minutes').format('LT') }}</div>
@@ -20,32 +20,32 @@
     <div class="grid grid-cols-3 text-gray-500 text-sm w-max gap-x-12 gap-y-8 pl-4">
       <div>
         <div class="font-semibold mb-1">{{ t('label.calendar') }}</div>
-        <div>{{ event.calendar }}</div>
+        <div>{{ appointment.calendar }}</div>
       </div>
       <div>
         <div class="font-semibold mb-1">{{ t('label.bookingLink') }}</div>
-        <a :href="'https://apmt.day/' + event.slug" class="text-teal-500 underline" target="_blank">
-          https://apmt.day/{{ event.slug }}
+        <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank">
+          https://apmt.day/{{ appointment.slug }}
         </a>
       </div>
       <div></div>
       <div>
         <div class="font-semibold mb-1">{{ t('label.location') }}</div>
-        <div>{{ event.location_name }}</div>
+        <div>{{ appointment.location_name }}</div>
       </div>
       <div>
         <div class="font-semibold mb-1">{{ t('label.videoLink') }}</div>
-        <a :href="event.location_url" class="text-teal-500 underline" target="_blank">
-          {{ event.location_url }}
+        <a :href="appointment.location_url" class="text-teal-500 underline" target="_blank">
+          {{ appointment.location_url }}
         </a>
       </div>
       <div>
         <div class="font-semibold mb-1">{{ t('label.activeAppointment') }}</div>
-        <switch-toggle :active="event.mode === 'open'" />
+        <switch-toggle :active="appointment.mode === 'open'" />
       </div>
       <div class="col-span-3">
         <div class="font-semibold mb-1">{{ t('label.notes') }}</div>
-        <div class="rounded-lg p-4 border border-gray-400">{{ event.details }}</div>
+        <div class="rounded-lg p-4 border border-gray-400">{{ appointment.details }}</div>
       </div>
     </div>
   </div>
@@ -62,7 +62,7 @@ const dj = inject("dayjs");
 // component properties
 defineProps({
   open: Boolean, // modal state
-  event: Object  // event data to display
+  appointment: Object  // appointment data to display
 });
 
 // component emits
