@@ -51,13 +51,17 @@
             class="rounded-md bg-gray-50 border-gray-200 w-full"
           />
         </label>
-        <label>
+        <label class="relative">
           <div class="font-medium text-gray-500 mb-1">{{ t('label.notes') }}</div>
           <textarea
             v-model="appointment.notes"
             :placeholder="t('placeholder.writeHere')"
-            class="rounded-md bg-gray-50 border-gray-200 w-full"
+            class="rounded-md bg-gray-50 border-gray-200 w-full text-sm h-40 resize-none"
+            :maxlength="charLimit"
           ></textarea>
+          <div class="absolute bottom-3.5 right-3 text-xs" :class="{ 'text-red-700': charCount === charLimit }">
+            {{ charCount }}/{{ charLimit }}
+          </div>
         </label>
       </div>
     </div>
@@ -159,6 +163,10 @@ const appointment = reactive({
   notes: '',
   slots: []
 });
+
+// handle notes char limit
+const charLimit = 250;
+const charCount = computed(() => appointment.notes.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
 const validStep1 = computed(() => appointment.name !== '');
