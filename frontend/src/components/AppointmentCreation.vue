@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4 h-full">
     <div class="text-teal-500 font-semibold text-center text-xl">
       {{ t('heading.createNewAppointment') }}
     </div>
@@ -80,7 +80,7 @@
         />
       </div>
     </div>
-    <div class="flex gap-4">
+    <div class="flex gap-4 mt-auto">
       <secondary-button :label="t('label.cancel')" @click="emit('cancel')" class="w-1/2" />
       <primary-button
         v-show="activeStep1"

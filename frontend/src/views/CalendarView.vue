@@ -51,15 +51,14 @@
           </div>
         </div>
       </div>
-      <div v-else>
-        <!-- appointment creation dialog -->
-        <appointment-creation
-          :status="creationStatus"
-          @start="creationStatus = creationSteps.details"
-          @next="creationStatus = creationSteps.availability"
-          @cancel="creationStatus = creationSteps.hidden"
-        />
-      </div>
+      <!-- appointment creation dialog -->
+      <appointment-creation
+        v-else
+        :status="creationStatus"
+        @start="creationStatus = creationSteps.details"
+        @next="creationStatus = creationSteps.availability"
+        @cancel="creationStatus = creationSteps.hidden"
+      />
     </div>
   </div>
 
