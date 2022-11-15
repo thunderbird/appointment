@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4 h-full">
+  <div class="relative flex flex-col gap-4 h-full">
     <div class="text-teal-500 font-semibold text-center text-xl">
       {{ t('heading.createNewAppointment') }}
     </div>
@@ -61,7 +61,7 @@
       </div>
     </div>
     <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
-      <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
+      <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
           <icon-check v-show="validStep2" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
           {{ t('label.chooseYourAvailability') }}
@@ -73,10 +73,14 @@
       </div>
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr />
-        <div class="text-sm">{{ t('text.defineDaysAndTimeSlots') }}</div>
+        <div v-show="!validStep2" class="text-sm">{{ t('text.defineDaysAndTimeSlots') }}</div>
+        <div v-show="validStep2">
+          {{ appointment.slots }}
+        </div>
         <secondary-button
           :label="t('label.addDay')"
           class="!text-sm !text-teal-500 !h-8 self-center"
+          @click="showDatePicker = true"
         />
       </div>
     </div>
@@ -97,19 +101,31 @@
         class="w-1/2"
       />
     </div>
+    <div v-show="showDatePicker" class="absolute rounded-lg bg-white shadow w-11/12 p-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <!-- monthly mini calendar -->
+      <calendar-month
+        :selected="activeDate"
+        :mini="true"
+        :nav="true"
+        @prev="dateNav('month', false)"
+        @next="dateNav('month')"
+        @selected="addDate"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, inject } from 'vue';
 import TabBar from '@/components/TabBar.vue';
+import CalendarMonth from '@/components/CalendarMonth.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import IconCheck from '@/elements/icons/IconCheck.vue';
 import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-// const dj = inject("dayjs");
+const dj = inject("dayjs");
 
 // component properties
 const props = defineProps({
@@ -132,11 +148,30 @@ const appointment = reactive({
   calendar: 'p',
   locationType: locationTypeActive.value,
   videoLink: '',
-  notes: ''
+  notes: '',
+  slots: []
 });
 // calculate validity of input data for each step
 const validStep1 = computed(() => appointment.name !== '');
-const validStep2 = computed(() => false); // TODO
+const validStep2 = computed(() => appointment.slots.length > 0);
+// show mini month date picker
+const showDatePicker = ref(false);
+const activeDate = ref(dj());
+const addDate = d => {
+  appointment.slots.push({
+    start: dj(d).format(),
+    duration: 90
+  });
+  showDatePicker.value = false;
+};
+// date navigation
+const dateNav = (unit = 'month', forward = true) => {
+  if (forward) {
+    activeDate.value = activeDate.value.add(1, unit);
+  } else {
+    activeDate.value = activeDate.value.subtract(1, unit);
+  }
+};
 
 // component emits
 const emit = defineEmits(['start', 'next', 'create', 'cancel']);
