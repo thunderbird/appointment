@@ -21,11 +21,11 @@
     </div>
   </div>
   <!-- page content -->
-  <div class="flex justify-between gap-24 mt-8">
+  <div class="flex justify-between gap-24 mt-8 min-h-[767px] items-stretch" :class="{ 'mt-[60px]': tabActive === tabItems.month }">
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month v-show="tabActive === tabItems.month" class="w-4/5" :selected="activeDate" />
-    <calendar-week v-show="tabActive === tabItems.week" class="w-4/5" :selected="activeDate" />
-    <calendar-day v-show="tabActive === tabItems.day" class="w-4/5" :selected="activeDate" />
+    <calendar-week v-show="tabActive === tabItems.week" class="w-4/5 flex" :selected="activeDate" />
+    <calendar-day v-show="tabActive === tabItems.day" class="w-4/5 flex" :selected="activeDate" />
     <!-- page side bar -->
     <div class="w-1/5">
       <div v-if="creationStatus === creationSteps.hidden" class="flex flex-col gap-8">

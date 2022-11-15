@@ -2,13 +2,13 @@
   <div
     class="p-1"
     :class="{
-      'h-28': !mini,
+      'h-36': !mini,
       'bg-white': isActive,
       'bg-gray-50 text-gray-400': !isActive,
     }"
   >
     <div
-      class="w-6 h-6 rounded-full text-center"
+      class="w-6 rounded-full text-center"
       :class="{
         'bg-teal-500 text-white font-semibold': isToday,
         'text-teal-500': isSelected && !isToday,
