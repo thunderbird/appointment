@@ -7,6 +7,7 @@
       <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
         <span class="font-semibold flex gap-1">
           <icon-check v-show="validStep1" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
+          <icon-alert-triangle v-show="invalidStep1" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
           {{ t('label.appointmentDetails') }}
         </span>
         <icon-chevron-down
@@ -64,6 +65,7 @@
       <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
           <icon-check v-show="validStep2" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
+          <icon-alert-triangle v-show="invalidStep2" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
           {{ t('label.chooseYourAvailability') }}
         </span>
         <icon-chevron-down
@@ -85,7 +87,11 @@
       </div>
     </div>
     <div class="flex gap-4 mt-auto">
-      <secondary-button :label="t('label.cancel')" @click="emit('cancel')" class="w-1/2" />
+      <secondary-button
+        :label="t('label.cancel')"
+        @click="emit('cancel')"
+        class="w-1/2"
+      />
       <primary-button
         v-show="activeStep1"
         :label="t('label.next')"
@@ -116,12 +122,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, inject } from 'vue';
+import { ref, reactive, computed, inject, watch } from 'vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import IconCheck from '@/elements/icons/IconCheck.vue';
+import IconAlertTriangle from '@/elements/icons/IconAlertTriangle.vue';
 import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
@@ -131,6 +138,7 @@ const dj = inject("dayjs");
 const props = defineProps({
   status: Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
 });
+
 // calculate the current visible step by given status
 const activeStep1 = computed(() => props.status === 1);
 const activeStep2 = computed(() => props.status === 2);
@@ -151,9 +159,15 @@ const appointment = reactive({
   notes: '',
   slots: []
 });
-// calculate validity of input data for each step
+
+// calculate validity of input data for each step (to show corresponding indicators)
 const validStep1 = computed(() => appointment.name !== '');
 const validStep2 = computed(() => appointment.slots.length > 0);
+const visitedStep1 = ref(false);
+const visitedStep2 = ref(false);
+const invalidStep1 = computed(() => !validStep1.value && visitedStep1.value);
+const invalidStep2 = computed(() => !validStep2.value && visitedStep2.value);
+
 // show mini month date picker
 const showDatePicker = ref(false);
 const activeDate = ref(dj());
@@ -164,6 +178,7 @@ const addDate = d => {
   });
   showDatePicker.value = false;
 };
+
 // date navigation
 const dateNav = (unit = 'month', forward = true) => {
   if (forward) {
@@ -175,4 +190,10 @@ const dateNav = (unit = 'month', forward = true) => {
 
 // component emits
 const emit = defineEmits(['start', 'next', 'create', 'cancel']);
+
+// track if steps were already visited
+watch(() => props.status, (_, oldValue) => {
+  if (oldValue === 1) visitedStep1.value = true;
+  if (oldValue === 2) visitedStep2.value = true;
+});
 </script>
