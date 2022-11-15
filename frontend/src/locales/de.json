@@ -5,43 +5,54 @@
   },
   "heading": {
     "appointmentsAndEvents": "Termine und Events",
-    "yourProfile": "Your Profile"
+    "createNewAppointment": "Neuen Termin erstellen",
+    "yourProfile": "Dein Profil"
   },
   "info": {
     "noAppointmentsInList": "Hier gibt es aktuell keine Termine."
   },
   "label": {
     "activeAppointment": "Aktiver Termin",
+    "addDay": "Tag hinzufügen",
     "all": "Alle",
-    "allDay": "Ganzer Tag",
     "allAppointments": "Alle Termine",
+    "allDay": "Ganzer Tag",
     "allFutureAppointments": "Alle zukünftigen Termine",
+    "appointmentDetails": "Termindetails",
+    "appointmentName": "Termin Titel",
     "appointments": "Termine",
-    "availabilityDay": "Verfügbarer Tag",
-    "booked": "Gebucht",
-    "bookingLink": "Buchungslink",
-    "bookings": "Buchungen | Buchung | Buchungen",
-    "calendar": "Kalender",
-    "createAppointments": "Termin erstellen",
-    "day": "Tag",
-    "endTime": "Endzeit",
     "appointmentsInMonth": "Termine in diesem Monat",
     "appointmentsNext14Days": "Termine der nächsten 14 Tage",
     "appointmentsNext31Days": "Termine der nächsten 31 Tage",
     "appointmentsNext7Days": "Termine der nächsten 7 Tage",
     "appointmentsToday": "Termine heute",
+    "availabilityDay": "Verfügbarer Tag",
+    "booked": "Gebucht",
+    "bookingLink": "Buchungslink",
+    "bookings": "Buchungen | Buchung | Buchungen",
+    "calendar": "Kalender",
+    "cancel": "Abbrechen",
+    "chooseYourAvailability": "Wähle Deine Verfügbarkeit",
+    "create": "Erstellen",
+    "createAppointments": "Termin erstellen",
+    "day": "Tag",
+    "endTime": "Endzeit",
+    "inPerson": "Vor Ort",
     "location": "Ort",
     "mode": "Modus",
     "month": "Monat",
+    "next": "Weiter",
     "notes": "Details",
     "off": "Aus",
     "on": "An",
+    "online": "Online",
     "past": "Vergangen",
     "pending": "Ausstehend",
     "replies": "Antworten",
     "restoreColumnOrder": "Spaltenreihenfolge wiederherstellen",
     "search": "Suche",
     "searchAppointments": "Termine durchsuchen",
+    "selectCalendar": "Kalender auswählen",
     "settings": "Einstellungen",
     "startTime": "Startzeit",
     "status": "Status",
@@ -50,5 +61,13 @@
     "videoLink": "Konferenz-Link",
     "viewAll": "Alle ansehen",
     "week": "Woche"
+  },
+  "placeholder": {
+    "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen…",
+    "writeHere": "Hier notieren…",
+    "zoomCom": "zoom.com…"
+  },
+  "text": {
+    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können..."
   }
 }

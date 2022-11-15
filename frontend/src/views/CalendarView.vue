@@ -12,8 +12,12 @@
       <button @click="selectDate(dj())" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
-      <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
-      <primary-button :label="t('label.createAppointments')" />
+      <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" class="text-xl" />
+      <primary-button
+        :label="t('label.createAppointments')"
+        :disabled="creationStatus !== creationSteps.hidden"
+        @click="creationStatus = creationSteps.details"
+      />
     </div>
   </div>
   <!-- page content -->
@@ -23,27 +27,38 @@
     <calendar-week v-show="tabActive === tabItems.week" class="w-4/5" :selected="activeDate" />
     <calendar-day v-show="tabActive === tabItems.day" class="w-4/5" :selected="activeDate" />
     <!-- page side bar -->
-    <div class="w-1/5 flex flex-col gap-8">
-      <!-- monthly mini calendar -->
-      <calendar-month
-        :selected="activeDate"
-        :mini="true"
-        :nav="true"
-        @prev="dateNav('month', false)"
-        @next="dateNav('month')"
-        @selected="selectDate"
-      />
-      <!-- events -->
-      <div>
-        <div class="flex justify-between items-center">
-          <div class="font-semibold text-lg">{{ t('heading.appointmentsAndEvents') }}</div>
-          <router-link class="px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs uppercase" :to="{ name: 'appointments' }">
-            {{ t('label.viewAll') }}
-          </router-link>
+    <div class="w-1/5">
+      <div v-if="creationStatus === creationSteps.hidden" class="flex flex-col gap-8">
+        <!-- monthly mini calendar -->
+        <calendar-month
+          :selected="activeDate"
+          :mini="true"
+          :nav="true"
+          @prev="dateNav('month', false)"
+          @next="dateNav('month')"
+          @selected="selectDate"
+        />
+        <!-- appointments and events list -->
+        <div>
+          <div class="flex justify-between items-center">
+            <div class="font-semibold text-lg">{{ t('heading.appointmentsAndEvents') }}</div>
+            <router-link class="px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs uppercase" :to="{ name: 'appointments' }">
+              {{ t('label.viewAll') }}
+            </router-link>
+          </div>
+          <div class="text-slate-500 mt-4">
+            {{ t('info.noAppointmentsInList') }}
+          </div>
         </div>
-        <div class="text-slate-500 mt-4">
-          {{ t('info.noAppointmentsInList') }}
-        </div>
+      </div>
+      <div v-else>
+        <!-- appointment creation dialog -->
+        <appointment-creation
+          :status="creationStatus"
+          @start="creationStatus = creationSteps.details"
+          @next="creationStatus = creationSteps.availability"
+          @cancel="creationStatus = creationSteps.hidden"
+        />
       </div>
     </div>
   </div>
@@ -58,6 +73,7 @@ import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
 import CalendarDay from '@/components/CalendarDay.vue';
+import AppointmentCreation from '@/components/AppointmentCreation.vue';
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from 'vue-router';
 const { t } = useI18n();
@@ -112,4 +128,13 @@ const dateNav = (unit = 'auto', forward = true) => {
     selectDate(activeDate.value.subtract(1, unit));
   }
 };
+
+// appointment creation
+const creationSteps = {
+  hidden: 0,
+  details: 1,
+  availability: 2,
+  finished: 3
+}
+const creationStatus = ref(creationSteps.hidden);
 </script>

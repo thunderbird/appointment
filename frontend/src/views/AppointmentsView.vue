@@ -3,7 +3,7 @@
   <div class="flex justify-between items-start select-none">
     <div class="text-4xl font-light">{{ t('label.appointments') }}</div>
     <div class="flex gap-8 items-center">
-      <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" />
+      <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button :label="t('label.createAppointments')" />
     </div>
   </div>

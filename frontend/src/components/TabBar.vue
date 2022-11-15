@@ -1,11 +1,11 @@
 <template>
   <div class="rounded-2xl bg-gray-200">
-    <nav class="flex gap-8 items-stretch">
-      <ul class="flex justify-end gap-4 p-1">
+    <nav class="flex">
+      <ul class="flex justify-between w-full gap-4 p-1">
         <li
           v-for="(item, i) in tabItems"
           :key="item"
-          class="flex text-xl leading-8 border-b-4 border-b-transparent cursor-pointer px-8 transition-all ease-in-out hover:rounded-xl"
+          class="flex whitespace-nowrap leading-8 cursor-pointer px-8 transition-all ease-in-out hover:rounded-xl"
           :class="{
             'text-gray-900 bg-white rounded-xl shadow': i == active,
             'text-gray-500 hover:bg-gray-100': i != active,

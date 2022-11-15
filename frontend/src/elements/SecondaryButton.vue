@@ -4,20 +4,16 @@
     text-xl
     font-semibold
     whitespace-nowrap
-    text-white
+    text-gray-600
+    bg-white
+    border
+    border-teal-500
     rounded-full
-    bg-gradient-to-br
-    from-teal-400
-    to-sky-600
-    hover:from-sky-400
-    hover:to-teal-600
     hover:shadow-md
     hover:scale-105
     active:scale-95
     disabled:from-teal-200
     disabled:to-sky-300
-    disabled:scale-100
-    disabled:shadow-none
     px-6
     transition-all
     ease-in-out
