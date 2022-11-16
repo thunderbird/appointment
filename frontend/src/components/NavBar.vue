@@ -18,7 +18,7 @@
             'text-gray-600 hover:border-b-gray-200': route.name != item,
           }"
         >
-          <router-link class="flex justify-center min-w-[130px] items-center" :to="{ name: item }">
+          <router-link class="flex justify-center min-w-[150px] items-center" :to="{ name: item }">
             {{ t('label.' + item) }}
           </router-link>
         </li>

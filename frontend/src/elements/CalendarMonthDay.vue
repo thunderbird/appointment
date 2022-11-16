@@ -2,7 +2,7 @@
   <div
     class="p-1"
     :class="{
-      'h-36': !mini,
+      'h-32': !mini,
       'bg-white': isActive,
       'bg-gray-50 text-gray-400': !isActive,
     }"

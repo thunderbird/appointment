@@ -81,7 +81,27 @@
         <hr />
         <div v-show="!validStep2" class="text-sm">{{ t('text.defineDaysAndTimeSlots') }}</div>
         <div v-show="validStep2">
-          {{ appointment.slots }}
+          <div v-for="(s, i) in appointment.slots" :key="s.start" class="flex gap-4 items-end mb-2">
+            <label class="flex flex-col text-sm">
+              {{ t('label.start') }}
+              <input
+                type="time"
+                :value="dj(s.start).format('HH:mm')"
+                class="rounded-md bg-gray-50 border-gray-200"
+              />
+            </label>
+            <label class="flex flex-col text-sm">
+              {{ t('label.end') }}
+              <input
+                type="time"
+                :value="dj(s.start).add(s.duration, 'minutes').format('HH:mm')"
+                class="rounded-md bg-gray-50 border-gray-200"
+              />
+            </label>
+            <div class="mb-2 p-1 cursor-pointer" @click="removeTime(i)">
+              <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+            </div>
+          </div>
         </div>
         <secondary-button
           :label="t('label.addDay')"
@@ -106,8 +126,8 @@
       <primary-button
         v-show="activeStep2"
         :label="t('label.create')"
-        :disabled="!validStep2"
-        @click="validStep2 ? emit('create') : null"
+        :disabled="!validStep1 || !validStep2"
+        @click="validStep1 && validStep2 ? emit('create') : null"
         class="w-1/2"
       />
     </div>
@@ -131,6 +151,7 @@ import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
+import IconX from '@/elements/icons/IconX.vue';
 import IconCheck from '@/elements/icons/IconCheck.vue';
 import IconAlertTriangle from '@/elements/icons/IconAlertTriangle.vue';
 import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
@@ -179,9 +200,9 @@ const invalidStep2 = computed(() => !validStep2.value && visitedStep2.value);
 // show mini month date picker
 const showDatePicker = ref(false);
 const activeDate = ref(dj());
-const addDate = d => {
+const addDate = (d) => {
   appointment.slots.push({
-    start: dj(d).format(),
+    start: dj(d).add(10, 'hours').format(),
     duration: 90
   });
   showDatePicker.value = false;
