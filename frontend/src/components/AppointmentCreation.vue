@@ -80,26 +80,37 @@
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr />
         <div v-show="!validStep2" class="text-sm">{{ t('text.defineDaysAndTimeSlots') }}</div>
-        <div v-show="validStep2">
-          <div v-for="(s, i) in appointment.slots" :key="s.start" class="flex gap-4 items-end mb-2">
-            <label class="flex flex-col text-sm">
-              {{ t('label.start') }}
-              <input
-                type="time"
-                :value="dj(s.start).format('HH:mm')"
-                class="rounded-md bg-gray-50 border-gray-200"
-              />
-            </label>
-            <label class="flex flex-col text-sm">
-              {{ t('label.end') }}
-              <input
-                type="time"
-                :value="dj(s.start).add(s.duration, 'minutes').format('HH:mm')"
-                class="rounded-md bg-gray-50 border-gray-200"
-              />
-            </label>
-            <div class="mb-2 p-1 cursor-pointer" @click="removeTime(i)">
-              <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+        <div v-show="validStep2" class="flex flex-col gap-2">
+          <div v-for="(slotList, day) in slots" :key="day">
+            <div class="flex justify-between mb-1">
+              <div>{{ dj(day).format('LL') }}</div>
+              <div>
+                <button @click="addTime(day)" class="flex items-center px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
+                  <icon-plus class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
+                  {{ t('label.addTime') }}
+                </button>
+              </div>
+            </div>
+            <div v-for="s in slotList" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
+              <label class="flex flex-col text-sm text-gray-500">
+                {{ t('label.start') }}
+                <input
+                  type="time"
+                  :value="s.start"
+                  class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
+                />
+              </label>
+              <label class="flex flex-col text-sm text-gray-500">
+                {{ t('label.end') }}
+                <input
+                  type="time"
+                  :value="s.end"
+                  class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
+                />
+              </label>
+              <div class="mb-2 p-1 cursor-pointer" @click="removeTime(i)">
+                <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+              </div>
             </div>
           </div>
         </div>
@@ -152,6 +163,7 @@ import CalendarMonth from '@/components/CalendarMonth.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import IconX from '@/elements/icons/IconX.vue';
+import IconPlus from '@/elements/icons/IconPlus.vue';
 import IconCheck from '@/elements/icons/IconCheck.vue';
 import IconAlertTriangle from '@/elements/icons/IconAlertTriangle.vue';
 import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
@@ -184,6 +196,10 @@ const appointment = reactive({
   notes: '',
   slots: []
 });
+// date and time selection data
+// an object having the iso date as key and and array of objects holding start and end time
+// e.g. { '2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ... }
+const slots = reactive({});
 
 // handle notes char limit
 const charLimit = 250;
@@ -191,7 +207,7 @@ const charCount = computed(() => appointment.notes.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
 const validStep1 = computed(() => appointment.name !== '');
-const validStep2 = computed(() => appointment.slots.length > 0);
+const validStep2 = computed(() => Object.keys(slots).length > 0);
 const visitedStep1 = ref(false);
 const visitedStep2 = ref(false);
 const invalidStep1 = computed(() => !validStep1.value && visitedStep1.value);
@@ -201,11 +217,20 @@ const invalidStep2 = computed(() => !validStep2.value && visitedStep2.value);
 const showDatePicker = ref(false);
 const activeDate = ref(dj());
 const addDate = (d) => {
-  appointment.slots.push({
-    start: dj(d).add(10, 'hours').format(),
-    duration: 90
-  });
+  const day = dj(d).format('YYYY-MM-DD');
+  if (!Object.hasOwn(slots, day)) {
+    slots[day] = [{
+      start: dj(d).add(10, 'hours').format('HH:mm'),
+      end: dj(d).add(11, 'hours').format('HH:mm')
+    }];
+  }
   showDatePicker.value = false;
+};
+const addTime = (d) => {
+  const day = dj(d).format('YYYY-MM-DD');
+  // get latest end time to start next time slot default value with
+  const latestTime = slots[day].reduce((p, c) => dj(c.end) > dj(p) ? dj(c.end) : p, dj(d).add(10, 'hours'));
+  slots[day].push({ start: dj(latestTime).format('HH:mm'), end: dj(latestTime).format('HH:mm') });
 };
 
 // date navigation
