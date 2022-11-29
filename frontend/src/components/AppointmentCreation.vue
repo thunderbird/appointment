@@ -229,8 +229,11 @@ const addDate = (d) => {
 const addTime = (d) => {
   const day = dj(d).format('YYYY-MM-DD');
   // get latest end time to start next time slot default value with
-  const latestTime = slots[day].reduce((p, c) => dj(c.end) > dj(p) ? dj(c.end) : p, dj(d).add(10, 'hours'));
-  slots[day].push({ start: dj(latestTime).format('HH:mm'), end: dj(latestTime).format('HH:mm') });
+  const latestTime = slots[day].reduce((p, c) => c.end > p ? c.end : p, '00:00');
+  slots[day].push({
+    start: latestTime,
+    end: dj(day + 'T' + latestTime).add(1, 'hour').format('HH:mm')
+  });
 };
 
 // date navigation
