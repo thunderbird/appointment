@@ -9,7 +9,7 @@
     <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-4" />
     <div class="flex gap-4">
       <secondary-button :label="t('label.close')" @click="emit('close')" />
-      <primary-button :label="t('label.copyLink')" :icon-copy="true" @click="copy" />
+      <primary-button :label="t('label.copyLink')" :icon="icon" @click="copy" />
     </div>
     <div>
       <router-link class="text-sm text-teal-500 cursor-pointer" :to="{ name: 'appointments', params: { 'view': 'pending' } }">
@@ -20,6 +20,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import IconX from '@/elements/icons/IconX.vue';
@@ -37,8 +38,13 @@ const props = defineProps({
 // component emits
 const emit = defineEmits(['close']);
 
+// icon for primary button
+const icon = ref('copy');
+
 // copy link to clipboard
 const copy = () => {
-  console.log(props.publicLink);
+  navigator.clipboard.writeText(props.publicLink).then(function() {
+    icon.value = 'check';
+  });
 };
 </script>

@@ -26,17 +26,19 @@
     justify-center
     gap-2
   ">
-    <icon-copy v-if="iconCopy" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
+    <icon-copy v-if="icon === 'copy'" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
+    <icon-check v-if="icon === 'check'" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
     {{ label }}
   </button>
 </template>
 
 <script setup>
+import IconCheck from '@/elements/icons/IconCheck.vue';
 import IconCopy from '@/elements/icons/IconCopy.vue';
 
 // component properties
 defineProps({
-  label: String,    // button text
-  iconCopy: Boolean // optional copy icon displayed before label
+  label: String, // button text
+  icon: String   // optional icon displayed before label
 });
 </script>
