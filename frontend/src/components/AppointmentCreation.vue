@@ -91,7 +91,7 @@
                 </button>
               </div>
             </div>
-            <div v-for="s in slotList" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
+            <div v-for="(s, i) in slotList" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
               <label class="flex flex-col text-sm text-gray-500">
                 {{ t('label.start') }}
                 <input
@@ -108,7 +108,7 @@
                   class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
                 />
               </label>
-              <div class="mb-2 p-1 cursor-pointer" @click="removeTime(i)">
+              <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
                 <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
               </div>
             </div>
@@ -234,6 +234,9 @@ const addTime = (d) => {
     start: latestTime,
     end: dj(day + 'T' + latestTime).add(1, 'hour').format('HH:mm')
   });
+};
+const removeTime = (day, index) => {
+  slots[day].splice(index, 1);
 };
 
 // date navigation
