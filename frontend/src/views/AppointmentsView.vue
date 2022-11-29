@@ -4,7 +4,11 @@
     <div class="text-4xl font-light">{{ t('label.appointments') }}</div>
     <div class="flex gap-8 items-center">
       <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" class="text-xl" />
-      <primary-button :label="t('label.createAppointments')" />
+      <primary-button
+        :label="t('label.createAppointments')"
+        :disabled="creationStatus !== creationSteps.hidden"
+        @click="creationStatus = creationSteps.details"
+      />
     </div>
   </div>
   <!-- page content -->
@@ -139,15 +143,26 @@
       </div>
     </div>
     <!-- page side bar -->
-    <div class="w-1/5 flex flex-col gap-8">
-      <!-- monthly mini calendar -->
-      <calendar-month
-        :selected="activeDate"
-        :mini="true"
-        :nav="true"
-        @prev="dateNav('month', false)"
-        @next="dateNav('month')"
-        @selected="selectDate"
+    <div class="w-1/5">
+      <div v-if="creationStatus === creationSteps.hidden">
+        <!-- monthly mini calendar -->
+        <calendar-month
+          :selected="activeDate"
+          :mini="true"
+          :nav="true"
+          @prev="dateNav('month', false)"
+          @next="dateNav('month')"
+          @selected="selectDate"
+        />
+      </div>
+      <!-- appointment creation dialog -->
+      <appointment-creation
+        v-else
+        :status="creationStatus"
+        @start="creationStatus = creationSteps.details"
+        @next="creationStatus = creationSteps.availability"
+        @create="creationStatus = creationSteps.finished"
+        @cancel="creationStatus = creationSteps.hidden"
       />
     </div>
   </div>
@@ -166,6 +181,7 @@ import IconGrid from "@/elements/icons/IconGrid.vue";
 import IconCheck from "@/elements/icons/IconCheck.vue";
 import IconAdjustments from "@/elements/icons/IconAdjustments.vue";
 import SwitchToggle from '@/elements/SwitchToggle.vue';
+import AppointmentCreation from '@/components/AppointmentCreation.vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from 'vue-router';
@@ -304,4 +320,13 @@ const repliesCount = appointment => appointment.slots.filter(s => s.attendee !==
 // handle single appointment modal
 const showAppointment = ref(null);
 const closeAppointmentModal = () => showAppointment.value = null;
+
+// appointment creation
+const creationSteps = {
+  hidden: 0,
+  details: 1,
+  availability: 2,
+  finished: 3
+}
+const creationStatus = ref(creationSteps.hidden);
 </script>
