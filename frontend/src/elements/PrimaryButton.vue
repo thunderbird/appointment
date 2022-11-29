@@ -21,14 +21,22 @@
     px-6
     transition-all
     ease-in-out
+    flex
+    items-center
+    justify-center
+    gap-2
   ">
+    <icon-copy v-if="iconCopy" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
     {{ label }}
   </button>
 </template>
 
 <script setup>
+import IconCopy from '@/elements/icons/IconCopy.vue';
+
 // component properties
 defineProps({
-  label: String // button text
+  label: String,    // button text
+  iconCopy: Boolean // optional copy icon displayed before label
 });
 </script>

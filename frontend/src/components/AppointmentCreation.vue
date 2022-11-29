@@ -138,7 +138,7 @@
         v-show="activeStep2"
         :label="t('label.create')"
         :disabled="!validStep1 || !validStep2"
-        @click="validStep1 && validStep2 ? emit('create') : null"
+        @click="validStep1 && validStep2 ? createAppointment() : null"
         class="w-1/2"
       />
     </div>
@@ -154,11 +154,18 @@
       />
     </div>
   </div>
+  <appointment-created-modal
+    :open="createdConfirmation.show"
+    :title="createdConfirmation.title"
+    :public-link="createdConfirmation.publicLink"
+    @close="closeCreatedModal"
+  />
 </template>
 
 <script setup>
 import { ref, reactive, computed, inject, watch } from 'vue';
 import TabBar from '@/components/TabBar.vue';
+import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
@@ -171,13 +178,16 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");
 
+// component emits
+const emit = defineEmits(['start', 'next', 'create', 'cancel']);
+
 // component properties
 const props = defineProps({
   status: Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
 });
 
 // calculate the current visible step by given status
-const activeStep1 = computed(() => props.status === 1);
+const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
 // tab navigation for location types
@@ -187,15 +197,19 @@ const updateLocationType = type => {
   locationTypeActive.value = locationTypes[type];
 };
 
-// appointment form data
-const appointment = reactive({
+// defaul appointment object (for start and reset)
+const defaultAppointment = {
   name: '',
   calendar: 'p',
   locationType: locationTypeActive.value,
   videoLink: '',
   notes: '',
   slots: []
-});
+};
+
+// appointment form data
+const appointment = reactive(defaultAppointment);
+
 // date and time selection data
 // an object having the iso date as key and and array of objects holding start and end time
 // e.g. { '2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ... }
@@ -216,6 +230,8 @@ const invalidStep2 = computed(() => !validStep2.value && visitedStep2.value);
 // show mini month date picker
 const showDatePicker = ref(false);
 const activeDate = ref(dj());
+
+// handle date and time input of user
 const addDate = (d) => {
   const day = dj(d).format('YYYY-MM-DD');
   if (!Object.hasOwn(slots, day)) {
@@ -243,6 +259,35 @@ const removeTime = (day, index) => {
   }
 };
 
+// show confirmation dialog
+const createdConfirmation = reactive({
+  show: false,
+  title: '',
+  publicLink: ''
+});
+const closeCreatedModal = () => createdConfirmation.show = false;
+
+// handle actual appointment creation
+const createAppointment = () => {
+  // TODO: bring time slots into correct format
+  // TODO: save selected appointment data
+  // show confirmation
+  createdConfirmation.title = appointment.name;
+  createdConfirmation.publicLink = 'https://apmt.day/sdfw83jc'; // TODO
+  createdConfirmation.show = true;
+  // reset everything to start again
+  for (const attr in defaultAppointment) {
+    appointment[attr] = defaultAppointment[attr];
+  }
+  for (const attr in slots) {
+    delete slots[attr];
+  }
+  // TODO
+  visitedStep1.value = false;
+  visitedStep2.value = false;
+  emit('create');
+};
+
 // date navigation
 const dateNav = (unit = 'month', forward = true) => {
   if (forward) {
@@ -251,9 +296,6 @@ const dateNav = (unit = 'month', forward = true) => {
     activeDate.value = activeDate.value.subtract(1, unit);
   }
 };
-
-// component emits
-const emit = defineEmits(['start', 'next', 'create', 'cancel']);
 
 // track if steps were already visited
 watch(() => props.status, (_, oldValue) => {

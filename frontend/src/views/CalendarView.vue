@@ -57,6 +57,7 @@
         :status="creationStatus"
         @start="creationStatus = creationSteps.details"
         @next="creationStatus = creationSteps.availability"
+        @create="creationStatus = creationSteps.finished"
         @cancel="creationStatus = creationSteps.hidden"
       />
     </div>

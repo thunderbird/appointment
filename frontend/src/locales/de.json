@@ -4,6 +4,7 @@
     "title": "Thunderbird Appointment"
   },
   "heading": {
+    "appointmentCreated": "Termin erstellt!",
     "appointmentsAndEvents": "Termine und Events",
     "createNewAppointment": "Neuen Termin erstellen",
     "yourProfile": "Dein Profil"
@@ -36,6 +37,8 @@
     "calendar": "Kalender",
     "cancel": "Abbrechen",
     "chooseYourAvailability": "Wähle Deine Verfügbarkeit",
+    "close": "Schließen",
+    "copyLink": "Link kopieren",
     "create": "Erstellen",
     "createAppointments": "Termin erstellen",
     "day": "Tag",
@@ -65,6 +68,7 @@
     "today": "Heute",
     "videoLink": "Konferenz-Link",
     "viewAll": "Alle ansehen",
+    "viewBooking": "Buchung anschauen",
     "week": "Woche"
   },
   "placeholder": {
@@ -73,6 +77,7 @@
     "zoomCom": "zoom.com…"
   },
   "text": {
-    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können..."
+    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
+    "titleIsReadyForBookings": "{title} ist für Buchungen bereit"
   }
 }
