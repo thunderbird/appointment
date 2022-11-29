@@ -92,16 +92,16 @@
               </div>
             </div>
             <div v-for="(s, i) in slotList" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
-              <label class="flex flex-col text-sm text-gray-500">
-                {{ t('label.start') }}
+              <label class="flex flex-col">
+                <div class="text-sm text-gray-500">{{ t('label.start') }}</div>
                 <input
                   type="time"
                   :value="s.start"
                   class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
                 />
               </label>
-              <label class="flex flex-col text-sm text-gray-500">
-                {{ t('label.end') }}
+              <label class="flex flex-col">
+                <div class="text-sm text-gray-500">{{ t('label.end') }}</div>
                 <input
                   type="time"
                   :value="s.end"
@@ -236,7 +236,11 @@ const addTime = (d) => {
   });
 };
 const removeTime = (day, index) => {
-  slots[day].splice(index, 1);
+  if (slots[day].length < 2) {
+    delete slots[day];
+  } else {
+    slots[day].splice(index, 1);
+  }
 };
 
 // date navigation
