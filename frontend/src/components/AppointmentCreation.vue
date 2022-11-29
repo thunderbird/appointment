@@ -3,6 +3,7 @@
     <div class="text-teal-500 font-semibold text-center text-xl">
       {{ t('heading.createNewAppointment') }}
     </div>
+    <!-- step 1 -->
     <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
         <span class="font-semibold flex gap-1">
@@ -65,6 +66,7 @@
         </label>
       </div>
     </div>
+    <!-- step 2 -->
     <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
@@ -121,6 +123,7 @@
         />
       </div>
     </div>
+    <!-- action buttons -->
     <div class="flex gap-4 mt-auto">
       <secondary-button
         :label="t('label.cancel')"
@@ -154,6 +157,7 @@
       />
     </div>
   </div>
+  <!-- modals -->
   <appointment-created-modal
     :open="createdConfirmation.show"
     :title="createdConfirmation.title"
@@ -208,7 +212,7 @@ const defaultAppointment = {
 };
 
 // appointment form data
-const appointment = reactive(defaultAppointment);
+const appointment = reactive({...defaultAppointment});
 
 // date and time selection data
 // an object having the iso date as key and and array of objects holding start and end time
@@ -282,7 +286,6 @@ const createAppointment = () => {
   for (const attr in slots) {
     delete slots[attr];
   }
-  // TODO
   visitedStep1.value = false;
   visitedStep2.value = false;
   emit('create');
@@ -298,8 +301,8 @@ const dateNav = (unit = 'month', forward = true) => {
 };
 
 // track if steps were already visited
-watch(() => props.status, (_, oldValue) => {
+watch(() => props.status, (newValue, oldValue) => {
   if (oldValue === 1) visitedStep1.value = true;
-  if (oldValue === 2) visitedStep2.value = true;
+  if (oldValue === 2 && newValue !== 3) visitedStep2.value = true;
 });
 </script>
