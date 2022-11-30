@@ -17,6 +17,15 @@
     >
       {{ day }}
     </div>
+    <div v-if="(events && !mini)" class="flex flex-col gap-2">
+      <div
+        v-for="event in events"
+        :key="event"
+        class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded border-2 border-dashed border-sky-400 px-2 py-1"
+      >
+        {{ event.title }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -27,6 +36,7 @@ defineProps({
   isActive: Boolean,   // flag showing if the day belongs to active month
   isSelected: Boolean, // flag showing if the day is currently selected by user
   isToday: Boolean,    // flag showing if the day is today
-  mini: Boolean        // flag showing if this is a day cell of a small calendar
+  mini: Boolean,       // flag showing if this is a day cell of a small calendar
+  events: Array        // list of events to show on this day or null
 });
 </script>

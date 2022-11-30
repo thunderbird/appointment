@@ -28,6 +28,7 @@
         :is-selected="d.date === date"
         :is-today="d.date === today"
         :mini="mini"
+        :events="eventsByDate(d.date)"
         @click="emit('selected', d.date)"
         class="cursor-pointer"
       />
@@ -46,11 +47,36 @@ const dj = inject("dayjs");
 const props = defineProps({
   selected: Object, // currently active date
   mini: Boolean,    // show small version of monthly calendar
-  nav: Boolean      // show month navigation
+  nav: Boolean,     // show month navigation
+  events: Array,    // data of events to show
 });
 
 // component emits
 const emit = defineEmits(['selected']);
+
+// handle events to show
+const events = computed(() => {
+  const eventsOnDate = {};
+  props.events?.forEach(event => {
+    event.slots.forEach(slot => {
+      const key = dj(slot.start).format('YYYY-MM-DD');
+      if (key in eventsOnDate) {
+        eventsOnDate[key].push(event);
+      } else {
+        eventsOnDate[key] = [event];
+      }
+    });
+  });
+  return eventsOnDate;
+});
+const eventsByDate = (d) => {
+  const key = dj(d).format('YYYY-MM-DD');
+  if (key in events.value) {
+    return events.value[key];
+  } else {
+    return null;
+  }
+};
 
 // handle nav date (only used if navigation is active)
 const navDate = ref(dj(props.selected)); // current selected date for independent navigation

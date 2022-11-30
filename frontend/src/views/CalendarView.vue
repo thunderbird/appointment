@@ -23,9 +23,22 @@
   <!-- page content -->
   <div class="flex justify-between gap-24 mt-8 min-h-[767px] items-stretch" :class="{ 'mt-[60px]': tabActive === tabItems.month }">
     <!-- main section: big calendar showing active month, week or day -->
-    <calendar-month v-show="tabActive === tabItems.month" class="w-4/5" :selected="activeDate" />
-    <calendar-week v-show="tabActive === tabItems.week" class="w-4/5 flex" :selected="activeDate" />
-    <calendar-day v-show="tabActive === tabItems.day" class="w-4/5 flex" :selected="activeDate" />
+    <calendar-month
+      v-show="tabActive === tabItems.month"
+      class="w-4/5"
+      :selected="activeDate"
+      :events="fakeAppointments"
+    />
+    <calendar-week
+      v-show="tabActive === tabItems.week"
+      class="w-4/5 flex"
+      :selected="activeDate"
+    />
+    <calendar-day
+      v-show="tabActive === tabItems.day"
+      class="w-4/5 flex"
+      :selected="activeDate"
+    />
     <!-- page side bar -->
     <div class="w-1/5">
       <div v-if="creationStatus === creationSteps.hidden" class="flex flex-col gap-8">
@@ -137,4 +150,14 @@ const creationSteps = {
   finished: 3
 }
 const creationStatus = ref(creationSteps.hidden);
+
+// TODO: fake data
+const fakeAppointments = [
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-10T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Dog Park Event', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-10T14:00:00', duration: 60, attendee: null }] },
+  { title: 'Interview Process', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-10T16:00:00', duration: 60, attendee: null }] },
+  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T10:00:00', duration: 60, attendee: null }, { start: '2022-12-14T12:00:00', duration: 60, attendee: null }] },
+];
+
 </script>
