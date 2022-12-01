@@ -78,7 +78,6 @@ const events = computed(() => {
       }
     });
   });
-  console.log(eventsOnDate);
   return eventsOnDate;
 });
 const eventsByDate = (d) => {

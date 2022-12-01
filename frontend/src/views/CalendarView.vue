@@ -39,6 +39,7 @@
       v-show="tabActive === tabItems.day"
       class="w-4/5"
       :selected="activeDate"
+      :events="fakeAppointments"
     />
     <!-- page side bar -->
     <div class="w-1/5">
