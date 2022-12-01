@@ -69,7 +69,7 @@ const events = computed(() => {
     event.slots.forEach(slot => {
       const key = dj(slot.start).format('YYYY-MM-DD');
       // create position of event based on *half hours* | TODO: handle quarter hours
-      const offset = 2 * (dj(slot.start).format('H') - startHour) + 1; // TODO: handle quarter hours
+      const offset = 2*dj(slot.start).format('H') + dj(slot.start).format('m')/30 - 2*startHour + 1;
       const span = Math.round(slot.duration / 30);
       if (key in eventsOnDate) {
         eventsOnDate[key].push({...event, offset: offset, span: span});
