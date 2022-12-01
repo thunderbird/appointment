@@ -30,7 +30,6 @@
         :mini="mini"
         :events="eventsByDate(d.date)"
         @click="emit('selected', d.date)"
-        class="cursor-pointer"
       />
     </div>
   </div>

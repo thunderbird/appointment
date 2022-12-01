@@ -2,6 +2,7 @@
   <div
     class="p-1"
     :class="{
+      'cursor-pointer': mini,
       'h-32': !mini,
       'bg-white': isActive,
       'bg-gray-50 text-gray-400': !isActive,
@@ -17,11 +18,11 @@
     >
       {{ day }}
     </div>
-    <div v-if="(events && !mini)" class="flex flex-col gap-2">
+    <div v-if="(events && !mini)" class="h-24 flex flex-col gap-1.5 overflow-y-auto">
       <div
         v-for="event in events"
         :key="event"
-        class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded border-2 border-dashed border-sky-400 px-2 py-1"
+        class="shrink-0 text-sm text-gray-600 whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5"
       >
         {{ event.title }}
       </div>
