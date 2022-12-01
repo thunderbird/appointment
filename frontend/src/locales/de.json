@@ -38,6 +38,7 @@
     "cancel": "Abbrechen",
     "chooseYourAvailability": "Wähle Deine Verfügbarkeit",
     "close": "Schließen",
+    "confirmSelection": "Auswahl bestätigen",
     "copyLink": "Link kopieren",
     "create": "Erstellen",
     "createAppointments": "Termin erstellen",
@@ -78,6 +79,7 @@
   },
   "text": {
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
-    "titleIsReadyForBookings": "{title} ist für Buchungen bereit"
+    "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
+    "chooseDayTime": "Wähle eine Zeit an einem Tag aus:"
   }
 }
