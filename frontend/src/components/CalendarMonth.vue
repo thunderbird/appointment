@@ -28,6 +28,7 @@
         :is-selected="d.date === date"
         :is-today="d.date === today"
         :mini="mini"
+        :placeholder="placeholder"
         :events="eventsByDate(d.date)"
         @click="emit('selected', d.date)"
       />
@@ -44,10 +45,11 @@ const dj = inject("dayjs");
 
 // component properties
 const props = defineProps({
-  selected: Object, // currently active date
-  mini: Boolean,    // show small version of monthly calendar
-  nav: Boolean,     // show month navigation
-  events: Array,    // data of events to show
+  selected: Object,     // currently active date
+  mini: Boolean,        // show small version of monthly calendar
+  nav: Boolean,         // show month navigation
+  placeholder: Boolean, // format events as placeholder
+  events: Array,        // data of events to show
 });
 
 // component emits
