@@ -48,7 +48,7 @@ const dj = inject("dayjs");
 
 // component properties
 defineProps({
-  day: Object,          // number of day in its month
+  day: String,          // number of day in its month
   isActive: Boolean,    // flag showing if the day belongs to active month
   isSelected: Boolean,  // flag showing if the day is currently selected by user
   isToday: Boolean,     // flag showing if the day is today

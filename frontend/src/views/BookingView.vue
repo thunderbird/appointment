@@ -10,8 +10,8 @@
     <div v-if="appointment">
       <div class="text-3xl text-gray-700 mb-4">{{ appointment.title }}</div>
       <div class="font-bold">{{ t('text.nameIsInvitingYou', { name: appointment.owner }) }}</div>
-      <div class="text-gray-700 mb-8">{{ appointment.details }}</div>
-      <div class="text-xl mb-8">{{ t('text.chooseDayTime') }}</div>
+      <div class="text-gray-700 mb-6">{{ appointment.details }}</div>
+      <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
       <calendar-page-heading
         :nav="false"
         :month="activeDate.format('MMMM')"
@@ -30,6 +30,12 @@
       />
       <calendar-week
         v-if="(activeView === views.week || activeView === views.weekAfterMonth)"
+        :selected="activeDate"
+        :events="[appointment]"
+        @selected="null"
+      />
+      <calendar-day
+        v-if="(activeView === views.day)"
         :selected="activeDate"
         :events="[appointment]"
         @selected="null"
@@ -54,6 +60,7 @@ import { ref, inject, onMounted, computed } from 'vue'
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
+import CalendarDay from '@/components/CalendarDay.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import { useI18n } from "vue-i18n";
 // import { useRoute } from 'vue-router';
@@ -71,8 +78,8 @@ const appointment = ref({ title: '', slots: [] });
 const views = {
   month: 1,
   weekAfterMonth: 2,
-  week: 2,
-  day: 3
+  week: 3,
+  day: 4
 };
 const activeView = ref(views.month);
 const activeDate = ref(dj());
@@ -100,8 +107,28 @@ onMounted(() => {
   // TODO: async get appointment data with route.params.slug;
   appointment.value = fakeAppointment;
   activeDate.value = dj(appointment.value?.slots[0].start);
-  // TODO: check appointment for appropriate view
+  // check appointment slots for appropriate view
+  activeView.value = getViewBySlotDistribution(appointment.value.slots);
 });
+
+// check if slots are distributed over different months, weeks, days or only on a single day
+const getViewBySlotDistribution = (slots) => {
+  let monthChanged = false, weekChanged = false, dayChanged = false, lastDate = null;
+  slots.forEach(slot => {
+    if (!lastDate) {
+      lastDate = dj(slot.start);
+    } else {
+      if (dj(slot.start).format('YYYYMM') !== lastDate.format('YYYYMM')) monthChanged = true;
+      if (dj(slot.start).startOf('week').format('YYYYMMDD') !== lastDate.startOf('week').format('YYYYMMDD')) weekChanged = true;
+      if (dj(slot.start).format('YYYYMMDD') !== lastDate.format('YYYYMMDD')) dayChanged = true;
+    }
+    lastDate = dj(slot.start);
+  });
+  if (monthChanged) return views.month;
+  if (weekChanged) return views.month;
+  if (dayChanged) return views.week;
+  if (!dayChanged) return views.day;
+};
 
 // prepare events to show one placeholder per day
 const eventPlaceholder = computed(() => {
@@ -135,6 +162,7 @@ const fakeAppointment = {
   details: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum magna sit amet est iaculis ullamcorper. Quisque tortor orci, cursus in ex sit amet, scelerisque rhoncus erat. Maecenas vehicula elit in pulvinar laoreet. Vivamus suscipit ligula elementum, porttitor dui eu, suscipit lectus. Mauris vitae',
   owner: 'Solange',
   slots: [
+    { start: '2022-12-09T11:00:00', duration: 120, attendee: null },
     { start: '2022-12-13T11:00:00', duration: 120, attendee: null },
     { start: '2022-12-13T13:00:00', duration: 120, attendee: null },
     { start: '2022-12-13T15:00:00', duration: 120, attendee: null },
