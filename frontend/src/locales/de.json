@@ -36,6 +36,7 @@
     "bookings": "Buchungen | Buchung | Buchungen",
     "calendar": "Kalender",
     "cancel": "Abbrechen",
+    "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
     "chooseYourAvailability": "Wähle Deine Verfügbarkeit",
     "close": "Schließen",
     "confirmSelection": "Auswahl bestätigen",
@@ -80,6 +81,7 @@
   "text": {
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "chooseDayTime": "Wähle eine Zeit an einem Tag aus:"
+    "chooseDayTime": "Wähle eine Zeit an einem Tag aus:",
+    "nameIsInvitingYou": "{name} bittet dich, eine Zeit auszuwählen"
   }
 }

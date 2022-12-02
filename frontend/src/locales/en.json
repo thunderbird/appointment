@@ -36,6 +36,7 @@
     "bookings": "Bookings | Booking | Bookings",
     "calendar": "Calendar",
     "cancel": "Cancel",
+    "checkAvailableSlots": "Check available slots",
     "chooseYourAvailability": "Choose your availability",
     "close": "Close",
     "confirmSelection": "Confirm selection",
@@ -80,6 +81,7 @@
   "text": {
     "defineDaysAndTimeSlots": "Define days and time slots to allow users to select the event time…",
     "titleIsReadyForBookings": "{title} is ready for bookings",
-    "chooseDayTime": "Choose the day and time:"
+    "chooseDayTime": "Choose the day and time:",
+    "nameIsInvitingYou": "{name} is inviting you to choose a date"
   }
 }
