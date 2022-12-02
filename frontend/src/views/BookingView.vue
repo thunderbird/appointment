@@ -39,6 +39,7 @@
         v-if="(activeView === views.day)"
         :selected="activeDate"
         :events="[appointment]"
+        :booking="true"
         @selected="null"
       />
     </div>

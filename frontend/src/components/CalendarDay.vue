@@ -17,8 +17,13 @@
           class="flex overflow-hidden"
           :style="{ 'grid-row': event.offset + ' / span ' + event.span }"
         >
-          <div class="w-full text-sm whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-2 border-dashed border-sky-400 my-1 mx-8 px-2 py-0.5">
+          <div v-if="!booking" class="w-full text-sm whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-2 border-dashed border-sky-400 my-1 mx-8 px-2 py-0.5">
             {{ event.title }}
+          </div>
+          <div v-else class="w-full text-sm text-gray-600 overflow-hidden group rounded-md bg-teal-50 p-1 my-1 mx-8 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600 flex">
+            <div class="w-full whitespace-nowrap overflow-hidden overflow-ellipsis rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500 group-hover:border-white">
+              {{ event.times }}
+            </div>
           </div>
         </div>
       </div>
@@ -34,8 +39,9 @@ const dj = inject("dayjs");
 
 // component properties
 const props = defineProps({
-  selected: Object, // currently active date
-  events: Array,    // data of events to show
+  selected: Object,  // currently active date
+  events:   Array,   // data of events to show
+  booking:  Boolean, // flag indicating if calendar is used to book time slots
 });
 
 // time borders for display
@@ -51,10 +57,12 @@ const events = computed(() => {
       // create position of event based on *half hours* | TODO: handle quarter hours
       const offset = 2*dj(slot.start).format('H') + dj(slot.start).format('m')/30 - 2*startHour + 1;
       const span = Math.round(slot.duration / 30);
+      const times = dj(slot.start).format('LT') + ' - ' + dj(slot.start).add(slot.duration, 'minutes').format('LT');
+      const extendedEvent = {...event, offset: offset, span: span, times: times};
       if (key in eventsOnDate) {
-        eventsOnDate[key].push({...event, offset: offset, span: span});
+        eventsOnDate[key].push(extendedEvent);
       } else {
-        eventsOnDate[key] = [{...event, offset: offset, span: span}];
+        eventsOnDate[key] = [extendedEvent];
       }
     });
   });
