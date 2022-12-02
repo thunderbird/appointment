@@ -24,7 +24,7 @@
       <calendar-month
         v-if="(activeView === views.month)"
         :selected="activeDate"
-        :events="eventPlaceholder"
+        :events="dayPlaceholder"
         :placeholder="true"
         @event-selected="showWeek"
       />
@@ -32,6 +32,7 @@
         v-if="(activeView === views.week || activeView === views.weekAfterMonth)"
         :selected="activeDate"
         :events="[appointment]"
+        :booking="true"
         @selected="null"
       />
       <calendar-day
@@ -131,7 +132,7 @@ const getViewBySlotDistribution = (slots) => {
 };
 
 // prepare events to show one placeholder per day
-const eventPlaceholder = computed(() => {
+const dayPlaceholder = computed(() => {
   const apmt = { title: t('label.checkAvailableSlots'), slots: [] };
   const existingDates = [];
   appointment.value?.slots.forEach(slot => {
@@ -162,13 +163,13 @@ const fakeAppointment = {
   details: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum magna sit amet est iaculis ullamcorper. Quisque tortor orci, cursus in ex sit amet, scelerisque rhoncus erat. Maecenas vehicula elit in pulvinar laoreet. Vivamus suscipit ligula elementum, porttitor dui eu, suscipit lectus. Mauris vitae',
   owner: 'Solange',
   slots: [
-    { start: '2022-12-09T11:00:00', duration: 120, attendee: null },
+    // { start: '2022-12-09T11:00:00', duration: 120, attendee: null },
     { start: '2022-12-13T11:00:00', duration: 120, attendee: null },
     { start: '2022-12-13T13:00:00', duration: 120, attendee: null },
     { start: '2022-12-13T15:00:00', duration: 120, attendee: null },
-    { start: '2022-12-14T09:30:00', duration: 120, attendee: null },
-    { start: '2022-12-15T10:00:00', duration: 120, attendee: null },
-    { start: '2022-12-15T12:00:00', duration: 120, attendee: null }
+    // { start: '2022-12-14T09:30:00', duration: 120, attendee: null },
+    // { start: '2022-12-15T10:00:00', duration: 120, attendee: null },
+    // { start: '2022-12-15T12:00:00', duration: 120, attendee: null }
   ]
 };
 
