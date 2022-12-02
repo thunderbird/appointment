@@ -2,6 +2,7 @@
   <!-- page title area -->
   <div class="flex justify-between items-start select-none">
     <calendar-page-heading
+      :nav="true"
       :month="activeDate.format('MMMM')"
       :year="activeDate.year().toString()"
       :title="pageTitle"

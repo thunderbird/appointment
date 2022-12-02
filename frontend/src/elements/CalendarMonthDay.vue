@@ -16,7 +16,7 @@
         'mx-auto': mini,
       }"
     >
-      {{ day }}
+      {{ dj(day).format('D') }}
     </div>
     <div v-if="events && !mini" class="h-24 flex flex-col gap-1.5 overflow-y-auto">
       <div
@@ -27,7 +27,7 @@
           'rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5': !placeholder,
           'group rounded-md bg-green-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder
         }"
-        @click="emit('eventSelected')"
+        @click="emit('eventSelected', day)"
       >
         <div
           class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded"
@@ -43,9 +43,12 @@
 </template>
 
 <script setup>
+import { inject } from "vue";
+const dj = inject("dayjs");
+
 // component properties
 defineProps({
-  day: String,          // number of day in its month
+  day: Object,          // number of day in its month
   isActive: Boolean,    // flag showing if the day belongs to active month
   isSelected: Boolean,  // flag showing if the day is currently selected by user
   isToday: Boolean,     // flag showing if the day is today

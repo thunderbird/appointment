@@ -23,7 +23,7 @@
       <calendar-month-day
         v-for="d in days"
         :key="d.date"
-        :day="dj(d.date).format('D')"
+        :day="d.date"
         :is-active="d.active"
         :is-selected="d.date === date"
         :is-today="d.date === today"
@@ -31,7 +31,7 @@
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
         @click="!placeholder ? emit('daySelected', d.date) : null"
-        @event-selected="emit('eventSelected')"
+        @event-selected="eventSelected"
       />
     </div>
   </div>
@@ -78,6 +78,9 @@ const eventsByDate = (d) => {
   } else {
     return null;
   }
+};
+const eventSelected = (d) => {
+  emit('eventSelected', d);
 };
 
 // handle nav date (only used if navigation is active)
