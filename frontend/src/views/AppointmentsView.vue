@@ -152,7 +152,7 @@
           :nav="true"
           @prev="dateNav('month', false)"
           @next="dateNav('month')"
-          @selected="selectDate"
+          @day-selected="selectDate"
         />
       </div>
       <!-- appointment creation dialog -->

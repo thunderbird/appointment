@@ -26,7 +26,7 @@
     <calendar-month
       v-show="tabActive === tabItems.month"
       class="w-4/5"
-      :selected="activeDate"
+      :selected-day="activeDate"
       :events="fakeAppointments"
     />
     <calendar-week
@@ -51,7 +51,7 @@
           :nav="true"
           @prev="dateNav('month', false)"
           @next="dateNav('month')"
-          @selected="selectDate"
+          @day-selected="selectDate"
         />
         <!-- appointments and events list -->
         <div>

@@ -153,7 +153,7 @@
         :nav="true"
         @prev="dateNav('month', false)"
         @next="dateNav('month')"
-        @selected="addDate"
+        @day-selected="addDate"
       />
     </div>
   </div>

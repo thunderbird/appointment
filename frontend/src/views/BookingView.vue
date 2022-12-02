@@ -17,14 +17,14 @@
           :selected="activeDate"
           :events="eventPlaceholder"
           :placeholder="true"
-          @selected="showWeek"
+          @event-selected="showWeek"
         />
       </div>
       <div v-if="(activeView === views.week)">
         <calendar-week
           :selected="activeDate"
           :events="[appointment]"
-          @selected="showWeek"
+          @selected="null"
         />
       </div>
     </div>

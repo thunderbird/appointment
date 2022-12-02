@@ -30,7 +30,8 @@
         :mini="mini"
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
-        @click="emit('selected', d.date)"
+        @click="!placeholder ? emit('daySelected', d.date) : null"
+        @event-selected="emit('eventSelected')"
       />
     </div>
   </div>
@@ -53,7 +54,7 @@ const props = defineProps({
 });
 
 // component emits
-const emit = defineEmits(['selected']);
+const emit = defineEmits(['daySelected', 'eventSelected']);
 
 // handle events to show
 const events = computed(() => {
