@@ -3,9 +3,105 @@
   <div class="flex justify-between items-start select-none">
     <div class="text-4xl font-light">{{ t('label.settings') }}</div>
   </div>
+  <div class="flex justify-between gap-24 mt-8 items-stretch">
+    <!-- sidebar navigation -->
+    <div class="w-1/5 flex flex-col gap-6">
+      <!-- search -->
+      <label class="grow flex items-center relative">
+        <icon-search class="absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2 stroke-gray-300 fill-transparent" /> 
+        <input class="w-full text-sm pl-12 pr-2 rounded-md border-gray-300" type="search" name="search" :placeholder="t('label.search')" />
+      </label>
+      <!-- menu -->
+      <div
+        v-for="(view, key) in views"
+        :key="key"
+        class="rounded-lg font-semibold text-gray-500 bg-gray-100 p-4 cursor-pointer flex justify-between"
+        :class="{ 'bg-teal-500 text-white': view === activeView }"
+        @click="show(key)"
+      >
+        <span>{{ t('label.' + key) }}</span>
+        <icon-chevron-right
+          class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-180 transition-transform"
+          :class="{ '!rotate-0': view === activeView }"
+        />
+      </div>
+    </div>
+    <!-- content -->
+    <div class="w-4/5 pt-14">
+      <div v-if="activeView === views.general" class="flex flex-col gap-8">
+        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.generalSettings') }}</div>
+        <div class="pl-6">
+          <div class="text-xl">{{ t('heading.languageAndAppearance') }}</div>
+          <div class="pl-6 mt-6">
+            <div class="text-lg">{{ t('label.language') }}</div>
+            <label class="pl-4 mt-4 flex items-center">
+              <div class="w-full max-w-xs">{{ t('label.language') }}</div>
+              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option value="en-us">English (US)</option>
+                <option value="de-de">German</option>
+              </select>
+            </label>
+          </div>
+          <div class="pl-6 mt-6">
+            <div class="text-lg">{{ t('label.appearance') }}</div>
+            <label class="pl-4 mt-4 flex items-center">
+              <div class="w-full max-w-xs">{{ t('label.theme') }}</div>
+              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+            <label class="pl-4 mt-4 flex items-center">
+              <div class="w-full max-w-xs">{{ t('label.defaultFont') }}</div>
+              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option value="os">Open Sans</option>
+                <option value="fs">Fira Sans</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div v-if="activeView === views.calendar">
+        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
+      </div>
+      <div v-if="activeView === views.appointmentsAndBooking">
+        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.appointmentsAndBookingSettings') }}</div>
+      </div>
+      <div v-if="activeView === views.account">
+        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.accountSettings') }}</div>
+      </div>
+      <div v-if="activeView === views.privacy">
+        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.privacySettings') }}</div>
+      </div>
+      <div v-if="activeView === views.faq">
+        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.frequentlyAskedQuestions') }}</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import IconSearch from '@/elements/icons/IconSearch.vue';
+import IconChevronRight from '@/elements/icons/IconChevronRight.vue';
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from 'vue-router';
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
+
+// menu navigation of different views
+const views = {
+  general: 1,
+  calendar: 2,
+  appointmentsAndBooking: 3,
+  account: 4,
+  privacy: 5,
+  faq: 6
+};
+const activeView = ref(route.params.view ? views[route.params.view] : views.general);
+const show = (key) => {
+  router.replace({ name: route.name, params: { view: key } });
+  activeView.value = views[key];
+};
 </script>

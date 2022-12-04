@@ -22,7 +22,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "appointments" */ '@/views/AppointmentsView.vue')
   },
   {
-    path: '/settings',
+    path: '/settings/:view?',
     name: 'settings',
     component: () => import(/* webpackChunkName: "settings" */ '@/views/SettingsView.vue')
   },
@@ -44,11 +44,11 @@ const router = createRouter({
 })
 
 router.beforeEach(to => {
-  if(to.name === 'calendar' && !to.params.view){
+  if (to.name === 'calendar' && !to.params.view) {
     to.params.view = 'month';
     return to;
   }
-  if(to.name === 'appointments' && !to.params.view){
+  if (to.name === 'appointments' && !to.params.view) {
     to.params.view = 'all';
     return to;
   }
