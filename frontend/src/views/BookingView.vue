@@ -33,14 +33,14 @@
         :selected="activeDate"
         :events="[appointment]"
         :booking="true"
-        @selected="null"
+        @event-selected="selectEvent"
       />
       <calendar-day
         v-if="(activeView === views.day)"
         :selected="activeDate"
         :events="[appointment]"
         :booking="true"
-        @selected="null"
+        @event-selected="selectEvent"
       />
     </div>
   </main>
@@ -50,8 +50,8 @@
       <primary-button
         class="p-7"
         :label="t('label.confirmSelection')"
-        :disabled="true"
-        @click="null"
+        :disabled="!activeEvent"
+        @click="bookEvent"
       />
     </div>
   </footer>
@@ -150,6 +150,28 @@ const dayPlaceholder = computed(() => {
 const showWeek = d => {
   activeDate.value = dj(d);
   activeView.value = views.weekAfterMonth;
+};
+
+// selected event for booking
+const activeEvent = ref();
+
+// user selected a time slot: mark event as selected
+const selectEvent = d => {
+  // set event selected
+  for (let i = 0; i < appointment.value.slots.length; i++) {
+    const slot = appointment.value.slots[i];
+    if (slot.start === d) {
+      activeEvent.value = slot;
+      slot.selected = true;
+    } else {
+      slot.selected = false;
+    }
+  }
+};
+
+// user confirmed the time slot selection: event is booked
+const bookEvent = () => {
+  // TODO: open confirmation modal
 };
 
 // TODO: fake data

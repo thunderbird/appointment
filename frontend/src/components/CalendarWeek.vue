@@ -41,8 +41,16 @@
         <div v-if="!booking" class="w-full text-sm whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-2 border-dashed border-sky-400 m-1 px-2 py-0.5">
           {{ event.title }}
         </div>
-        <div v-else class="w-full text-sm text-gray-600 overflow-hidden group rounded-md bg-teal-50 p-1 m-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600 flex">
-          <div class="w-full whitespace-nowrap overflow-hidden overflow-ellipsis rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500 group-hover:border-white">
+        <div
+          v-else
+          @click="bookSlot(event.start)"
+          class="w-full text-sm text-gray-600 overflow-hidden rounded-md bg-teal-50 p-1 m-1 cursor-pointer hover:shadow hover:bg-teal-100 flex"
+          :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
+        >
+          <div
+            class="w-full whitespace-nowrap overflow-hidden overflow-ellipsis rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
+            :class="{ 'text-white border-white': event.selected }"
+          >
             {{ event.times }}
           </div>
         </div>
@@ -64,6 +72,9 @@ const props = defineProps({
   booking:  Boolean, // flag indicating if calendar is used to book time slots
 });
 
+// component emits
+const emit = defineEmits(['eventSelected']);
+
 // time borders for display
 const startHour = 6;
 const endHour = 18;
@@ -78,7 +89,8 @@ const events = computed(() => {
       const offset = 2*dj(slot.start).format('H') + dj(slot.start).format('m')/30 - 2*startHour + 1;
       const span = Math.round(slot.duration / 30);
       const times = dj(slot.start).format('LT') + ' - ' + dj(slot.start).add(slot.duration, 'minutes').format('LT');
-      const extendedEvent = {...event, offset: offset, span: span, times: times};
+      const extendedEvent = {...event, ...slot, offset: offset, span: span, times: times};
+      delete extendedEvent.slots;
       if (key in eventsOnDate) {
         eventsOnDate[key].push(extendedEvent);
       } else {
@@ -124,5 +136,10 @@ const hours = computed(() => {
   }
   return list;
 });
+
+// user selects a slot for booking
+const bookSlot = (d) => {
+  emit('eventSelected', d);
+};
 
 </script>
