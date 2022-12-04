@@ -51,10 +51,12 @@
         class="p-7"
         :label="t('label.confirmSelection')"
         :disabled="!activeEvent"
-        @click="bookEvent"
+        @click="openBookingModal"
       />
     </div>
   </footer>
+  <!-- modals -->
+  <booking-modal :open="showBooking" :event="activeEvent" @booked="bookEvent" @close="closeBookingModal" />
 </template>
 
 <script setup>
@@ -64,6 +66,7 @@ import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
 import CalendarDay from '@/components/CalendarDay.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
+import BookingModal from '@/components/BookingModal.vue';
 import { useI18n } from "vue-i18n";
 // import { useRoute } from 'vue-router';
 const { t } = useI18n();
@@ -161,17 +164,28 @@ const selectEvent = d => {
   for (let i = 0; i < appointment.value.slots.length; i++) {
     const slot = appointment.value.slots[i];
     if (slot.start === d) {
-      activeEvent.value = slot;
       slot.selected = true;
+      const e = {...appointment.value, ...slot};
+      delete e.slots;
+      activeEvent.value = e;
     } else {
       slot.selected = false;
     }
   }
 };
 
-// user confirmed the time slot selection: event is booked
-const bookEvent = () => {
-  // TODO: open confirmation modal
+// handle booking modal
+const showBooking = ref(false);
+const openBookingModal = () => showBooking.value = true;
+const closeBookingModal = () => {
+  showBooking.value = false;
+  activeEvent.value = null;
+};
+
+// attendee confirmed the time slot selection: event is booked
+const bookEvent = (attendee) => {
+  // TODO: create server side event
+  console.log(attendee);
 };
 
 // TODO: fake data

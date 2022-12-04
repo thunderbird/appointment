@@ -6,7 +6,9 @@
   "heading": {
     "appointmentCreated": "Termin erstellt!",
     "appointmentsAndEvents": "Termine und Events",
+    "bookSelection": "Auswahl buchen",
     "createNewAppointment": "Neuen Termin erstellen",
+    "eventBooked": "Event gebucht!",
     "yourProfile": "Dein Profil"
   },
   "info": {
@@ -31,6 +33,7 @@
     "attendees": "Teilnehmer",
     "availabilityDay": "Verfügbarer Tag",
     "booked": "Gebucht",
+    "bookEvent": "Event buchen",
     "bookingLink": "Buchungslink",
     "bookingSlot": "Gebuchtes Zeitfenster",
     "bookings": "Buchungen | Buchung | Buchungen",
@@ -44,12 +47,15 @@
     "create": "Erstellen",
     "createAppointments": "Termin erstellen",
     "day": "Tag",
+    "downloadIcs": "Download .ics",
+    "email": "E-Mail",
     "end": "Ende",
     "endTime": "Endzeit",
     "inPerson": "Vor Ort",
     "location": "Ort",
     "mode": "Modus",
     "month": "Monat",
+    "name": "Name",
     "next": "Weiter",
     "notes": "Details",
     "off": "Aus",
@@ -75,13 +81,16 @@
   },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen…",
+    "emailAddress": "max.muster@beispiel.de",
+    "firstAndLastName": "Vor- und Nachname",
     "writeHere": "Hier notieren…",
     "zoomCom": "zoom.com…"
   },
   "text": {
-    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
-    "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "chooseDayTime": "Wähle eine Zeit an einem Tag aus:",
-    "nameIsInvitingYou": "{name} bittet dich, eine Zeit auszuwählen"
+    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
+    "invitationSentToAddress": "Eine Einladung für dieses Event wurde dir an {address} geschickt",
+    "nameIsInvitingYou": "{name} bittet dich, eine Zeit auszuwählen",
+    "titleIsReadyForBookings": "{title} ist für Buchungen bereit"
   }
 }
