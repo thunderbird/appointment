@@ -35,7 +35,7 @@
           <div class="pl-6 mt-6">
             <div class="text-lg">{{ t('label.language') }}</div>
             <label class="pl-4 mt-4 flex items-center">
-              <div class="w-full max-w-xs">{{ t('label.language') }}</div>
+              <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
               <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
                 <option value="en-us">English (US)</option>
                 <option value="de-de">German</option>
@@ -45,14 +45,14 @@
           <div class="pl-6 mt-6">
             <div class="text-lg">{{ t('label.appearance') }}</div>
             <label class="pl-4 mt-4 flex items-center">
-              <div class="w-full max-w-xs">{{ t('label.theme') }}</div>
+              <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
               <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
               </select>
             </label>
             <label class="pl-4 mt-4 flex items-center">
-              <div class="w-full max-w-xs">{{ t('label.defaultFont') }}</div>
+              <div class="w-full max-w-2xs">{{ t('label.defaultFont') }}</div>
               <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
                 <option value="os">Open Sans</option>
                 <option value="fs">Fira Sans</option>

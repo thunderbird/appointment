@@ -11,6 +11,9 @@ module.exports = {
         'week':    '100px repeat(7, 1fr)',
         'day':     '100px 1fr',
         'context': '28px 1fr',
+      },
+      maxWidth: {
+        '2xs': '16rem'
       }
     },
   },
