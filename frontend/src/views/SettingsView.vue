@@ -3,11 +3,11 @@
   <div class="flex justify-between items-start select-none">
     <div class="text-4xl font-light">{{ t('label.settings') }}</div>
   </div>
-  <div class="flex justify-between gap-24 mt-8 items-stretch">
+  <div class="flex justify-between gap-24 mt-8 pb-16 items-stretch">
     <!-- sidebar navigation -->
     <div class="w-1/5 flex flex-col gap-6">
       <!-- search -->
-      <label class="grow flex items-center relative">
+      <label class="flex items-center relative">
         <icon-search class="absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2 stroke-gray-300 fill-transparent" /> 
         <input class="w-full text-sm pl-12 pr-2 rounded-md border-gray-300" type="search" name="search" :placeholder="t('label.search')" />
       </label>
@@ -60,6 +60,48 @@
             </label>
           </div>
         </div>
+        <div class="pl-6">
+          <div class="text-xl">{{ t('heading.dateAndTimeFormatting') }}</div>
+          <div class="pl-6 mt-6 inline-grid grid-cols-2 gap-y-8 gap-x-16">
+            <div class="text-lg">{{ t('label.timeFormat') }}</div>
+            <div class="text-lg">{{ t('label.dateFormat') }}</div>
+            <label class="pl-4 flex gap-4 items-center">
+              <input type="radio" name="timeFormat" />
+              <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
+            </label>
+            <label class="pl-4 flex gap-4 items-center">
+              <input type="radio" name="dateFormat" />
+              <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
+            </label>
+            <label class="pl-4 flex gap-4 items-center">
+              <input type="radio" name="timeFormat" />
+              <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
+            </label>
+            <label class="pl-4 flex gap-4 items-center">
+              <input type="radio" name="dateFormat" />
+              <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div>
+            </label>
+          </div>
+          <div class="pl-6 mt-6">
+            <div class="text-lg">{{ t('label.timeZone') }}</div>
+            <label class="pl-4 mt-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
+              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option value="-8">(GMT-8) Pacific Time/Vancouver</option>
+              </select>
+            </label>
+            <label class="pl-4 mt-6 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.showSecondaryTimeZone') }}</div>
+              <switch-toggle :active="false" />
+            </label>
+            <label class="pl-4 mt-6 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.secondaryTimeZone') }}</div>
+              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option value="-8">(GMT-8) Pacific Time/Vancouver</option>
+              </select>
+            </label>
+          </div>
+        </div>
       </div>
       <div v-if="activeView === views.calendar">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
@@ -82,6 +124,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import SwitchToggle from '@/elements/SwitchToggle.vue';
 import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconChevronRight from '@/elements/icons/IconChevronRight.vue';
 import { useI18n } from "vue-i18n";
