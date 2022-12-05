@@ -96,18 +96,15 @@ watch(() => props.selected, (selection) => {
   navDate.value = dj(selection);
 });
 
-// configuration
-const weekStart = 0; // 0: Sunday, 1: Monday
-
 // generate names for each day of week
 const weekdayNames = () => {
-  const names = [];
-  const init  = dj('2022-10-09');
-  const end   = 7 + weekStart;
-  for (let i = weekStart; i < end; i++) {
-    names.push(init.add(i, 'd').format(props.mini ? 'dd' : 'ddd'));
+  const list = props.mini ? dj.weekdaysMin() : dj.weekdaysShort();
+  // handle Monday = 1 as first day of week (default is Sunday = 0)
+  if (dj.localeData().firstDayOfWeek()) {
+    const first = list.shift();
+    list.push(first);
   }
-  return names;
+  return list;
 }
 
 // all day cells in current month view
@@ -132,7 +129,7 @@ const currentMonthDays = computed(() => [...Array(numberOfDaysInMonth.value)].ma
 }));
 
 const previousMonthDays = computed(() => {
-  const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).weekday()+1-weekStart;
+  const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).weekday()+1;
   const previousMonth = dj(`${year.value}-${month.value}-01`).subtract(1, "month");
 
   // Cover first day of the month being sunday (firstDayOfTheMonthWeekday === 0)
@@ -159,7 +156,7 @@ const previousMonthDays = computed(() => {
 });
 
 const nextMonthDays = computed(() => {
-  const lastDayOfTheMonthWeekday = dj(`${year.value}-${month.value}-${currentMonthDays.value.length}`).weekday()+1-weekStart;
+  const lastDayOfTheMonthWeekday = dj(`${year.value}-${month.value}-${currentMonthDays.value.length}`).weekday()+1;
   const nextMonth = dj(`${year.value}-${month.value}-01`).add(1, "month");
 
   const visibleNumberOfDaysFromNextMonth = lastDayOfTheMonthWeekday

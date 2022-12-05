@@ -28,10 +28,13 @@ import dayjs from 'dayjs';
 import weekday from "dayjs/plugin/weekday";
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import localeData from 'dayjs/plugin/localeData';
+import 'dayjs/locale/de';
 dayjs.locale(loc);
 dayjs.extend(weekday);
 dayjs.extend(advancedFormat);
 dayjs.extend(localizedFormat);
+dayjs.extend(localeData)
 app.provide('dayjs', dayjs);
 
 // init basic css with tailwind imports
