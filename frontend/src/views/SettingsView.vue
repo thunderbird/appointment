@@ -66,19 +66,19 @@
             <div class="text-lg">{{ t('label.timeFormat') }}</div>
             <div class="text-lg">{{ t('label.dateFormat') }}</div>
             <label class="pl-4 flex gap-4 items-center">
-              <input type="radio" name="timeFormat" />
+              <input type="radio" name="timeFormat" class="text-teal-500 focus:ring-teal-500" />
               <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
             </label>
             <label class="pl-4 flex gap-4 items-center">
-              <input type="radio" name="dateFormat" />
+              <input type="radio" name="dateFormat" class="text-teal-500 focus:ring-teal-500" />
               <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
             </label>
             <label class="pl-4 flex gap-4 items-center">
-              <input type="radio" name="timeFormat" />
+              <input type="radio" name="timeFormat" class="text-teal-500 focus:ring-teal-500" />
               <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
             </label>
             <label class="pl-4 flex gap-4 items-center">
-              <input type="radio" name="dateFormat" />
+              <input type="radio" name="dateFormat" class="text-teal-500 focus:ring-teal-500" />
               <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div>
             </label>
           </div>
