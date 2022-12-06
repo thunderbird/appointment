@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
+  input, select, textarea {
+    @apply focus:!ring-teal-500 focus:!border-teal-500;
+  }
+
   @font-face {
     font-family: 'Open Sans';
     src: url('./fonts/OpenSans-LightItalic.ttf');
