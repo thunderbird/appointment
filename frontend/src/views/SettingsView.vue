@@ -22,7 +22,7 @@
         <span>{{ t('label.' + key) }}</span>
         <icon-chevron-right
           class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-180 transition-transform"
-          :class="{ '!rotate-0': view === activeView }"
+          :class="{ '!rotate-0 stroke-white': view === activeView }"
         />
       </div>
     </div>
