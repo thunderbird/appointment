@@ -7,6 +7,7 @@
       'bg-white': isActive,
       'bg-gray-50 text-gray-400': !isActive,
     }"
+    @mouseleave="hideEventPopup"
   >
     <div
       class="w-6 rounded-full text-center"
@@ -28,6 +29,7 @@
           'group rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder
         }"
         @click="emit('eventSelected', day)"
+        @mouseenter="element => showEventPopup(element, event)"
       >
         <div
           class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded"
@@ -39,11 +41,12 @@
         </div>
       </div>
     </div>
+    <div v-if="events && !mini" class="absolute p-2 bg-red-500 -translate-y-1/2 transition-all" style="display:none;" ref="popup">test</div>
   </div>
 </template>
 
 <script setup>
-import { inject } from "vue";
+import { inject, ref } from "vue";
 const dj = inject("dayjs");
 
 // component properties
@@ -59,4 +62,19 @@ defineProps({
 
 // component emits
 const emit = defineEmits(['eventSelected']);
+
+// event details
+const popup = ref(null);
+const activeEvent = ref(null);
+const showEventPopup = (element, event) => {
+  console.log(element);
+  activeEvent.value = event;
+  popup.value.style.display = 'block';
+  popup.value.style.top = element.target.offsetTop + element.target.clientHeight/2 - element.target.parentElement.scrollTop + 'px';
+  popup.value.style.left = element.target.offsetLeft + element.target.clientWidth + 5 + 'px';
+};
+const hideEventPopup = () => {
+  activeEvent.value = null;
+  if (popup.value) popup.value.style.display = 'none';
+};
 </script>
