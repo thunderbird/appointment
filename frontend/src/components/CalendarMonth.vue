@@ -30,6 +30,7 @@
         :mini="mini"
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
+        :show-details="!placeholder"
         @click="!placeholder ? emit('daySelected', d.date) : null"
         @event-selected="eventSelected"
       />
@@ -63,9 +64,9 @@ const events = computed(() => {
     event.slots.forEach(slot => {
       const key = dj(slot.start).format('YYYY-MM-DD');
       if (key in eventsOnDate) {
-        eventsOnDate[key].push(event);
+        eventsOnDate[key].push({...event, ...slot});
       } else {
-        eventsOnDate[key] = [event];
+        eventsOnDate[key] = [{...event, ...slot}];
       }
     });
   });

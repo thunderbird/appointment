@@ -70,6 +70,7 @@
     "endTime": "End Time",
     "faq": "FAQ",
     "general": "General",
+    "guest": "{count} guests | {count} guest | {count} guests",
     "inPerson": "In person",
     "language": "Language",
     "location": "Location",

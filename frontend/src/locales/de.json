@@ -75,6 +75,7 @@
     "endTime": "Endzeit",
     "faq": "FAQ",
     "general": "Allgemein",
+    "guest": "{count} Gäste | {count} Gast | {count} Gäste",
     "inPerson": "Vor Ort",
     "language": "Sprache",
     "location": "Ort",

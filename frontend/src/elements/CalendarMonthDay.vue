@@ -29,7 +29,7 @@
           'group rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder
         }"
         @click="emit('eventSelected', day)"
-        @mouseenter="element => showEventPopup(element, event)"
+        @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
       >
         <div
           class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded"
@@ -41,12 +41,21 @@
         </div>
       </div>
     </div>
-    <div v-if="events && !mini" class="absolute p-2 bg-red-500 -translate-y-1/2 transition-all" style="display:none;" ref="popup">test</div>
+    <event-popup
+      v-if="(events && showDetails)"
+      :style="{
+        'display': popup.display,
+        'top': popup.top,
+        'left': popup.left,
+      }"
+      :event="popup.event"
+    />
   </div>
 </template>
 
 <script setup>
-import { inject, ref } from "vue";
+import { inject, reactive } from "vue";
+import EventPopup from '@/elements/EventPopup.vue';
 const dj = inject("dayjs");
 
 // component properties
@@ -57,24 +66,29 @@ defineProps({
   isToday: Boolean,     // flag showing if the day is today
   mini: Boolean,        // flag showing if this is a day cell of a small calendar
   placeholder: Boolean, // flag formating events as placeholder
-  events: Array         // list of events to show on this day or null
+  events: Array,        // list of events to show on this day or null
+  showDetails: Boolean  // flag enabling event popups with details
 });
 
 // component emits
 const emit = defineEmits(['eventSelected']);
 
 // event details
-const popup = ref(null);
-const activeEvent = ref(null);
+const popup = reactive({
+  event: null,
+  display: 'none',
+  top: 0,
+  left: 0
+});
 const showEventPopup = (element, event) => {
-  console.log(element);
-  activeEvent.value = event;
-  popup.value.style.display = 'block';
-  popup.value.style.top = element.target.offsetTop + element.target.clientHeight/2 - element.target.parentElement.scrollTop + 'px';
-  popup.value.style.left = element.target.offsetLeft + element.target.clientWidth + 5 + 'px';
+  popup.event = event;
+  popup.display = 'block';
+  popup.top = element.target.offsetTop + element.target.clientHeight/2 - element.target.parentElement.scrollTop + 'px';
+  popup.left = element.target.offsetLeft + element.target.clientWidth + 8 + 'px';
 };
 const hideEventPopup = () => {
-  activeEvent.value = null;
-  if (popup.value) popup.value.style.display = 'none';
+  popup.event = null;
+  popup.display = 'none';
 };
+
 </script>
