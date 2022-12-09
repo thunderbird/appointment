@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
+from datetime import date
 
 from ..src.database import models
 from ..src.main import app, get_db
@@ -13,6 +14,8 @@ TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
 TESTING_CALDAV_CALENDAR  = "https://calendar.robur.coop/calendars/mozilla/"
 TESTING_CALDAV_USER      = "mozilla"
 TESTING_CALDAV_PASS      = "thunderbird"
+
+YYYYMM = str(date.today())[:-3]
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -38,8 +41,8 @@ client = TestClient(app)
 
 
 def test_config():
-    assert config('limit_basic', 'connections') == '3'
-    assert config('limit_plus', 'connections') == '5'
+    assert config("limit_basic", "connections") == "3"
+    assert config("limit_plus", "connections") == "5"
 
 
 def test_login():
@@ -275,9 +278,9 @@ def test_create_calendar_appointment():
                 "title": "Testing new Application feature"
             },
             "slots": [
-                { "start": "2022-09-01 09:00:00" },
-                { "start": "2022-09-02 09:00:00", "duration": 15 },
-                { "start": "2022-09-03 09:00:00", "duration": 275 },
+                { "start": YYYYMM + "-01 09:00:00" },
+                { "start": YYYYMM + "-02 09:00:00", "duration": 15 },
+                { "start": YYYYMM + "-03 09:00:00", "duration": 275 },
             ]
         }
     )
@@ -290,7 +293,7 @@ def test_create_calendar_appointment():
     assert data["title"] == "Testing new Application feature"
     assert data["keep_open"]
     assert len(data["slots"]) == 3
-    assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
+    assert data["slots"][2]["start"] == YYYYMM + "-03T09:00:00"
     assert data["slots"][2]["duration"] == 275
 
 
@@ -337,7 +340,7 @@ def test_read_existing_appointment():
     assert data["title"] == "Testing new Application feature"
     assert data["keep_open"]
     assert len(data["slots"]) == 3
-    assert data["slots"][2]["start"] == "2022-09-03T09:00:00"
+    assert data["slots"][2]["start"] == YYYYMM + "-03T09:00:00"
     assert data["slots"][2]["duration"] == 275
 
 
@@ -366,9 +369,9 @@ def test_update_existing_appointment():
                 "keep_open": "false"
             },
             "slots": [
-                { "start": "2022-09-01 09:00:00" },
-                { "start": "2022-09-03 10:00:00", "duration": 25 },
-                { "start": "2022-09-05 09:00:00", "duration": 375 },
+                { "start": YYYYMM + "-01 09:00:00" },
+                { "start": YYYYMM + "-03 10:00:00", "duration": 25 },
+                { "start": YYYYMM + "-05 09:00:00", "duration": 375 },
             ]
         }
     )
@@ -380,7 +383,7 @@ def test_update_existing_appointment():
     assert data["title"] == "Testing new Application featurex"
     assert not data["keep_open"]
     assert len(data["slots"]) == 3
-    assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
+    assert data["slots"][2]["start"] == YYYYMM + "-05T09:00:00"
     assert data["slots"][2]["duration"] == 375
 
 
@@ -427,9 +430,9 @@ def test_delete_existing_appointment():
                 "title": "Testing new Application featurex",
             },
             "slots": [
-                { "start": "2022-09-01 09:00:00" },
-                { "start": "2022-09-03 10:00:00", "duration": 25 },
-                { "start": "2022-09-05 09:00:00", "duration": 375 },
+                { "start": YYYYMM + "-01 09:00:00" },
+                { "start": YYYYMM + "-03 10:00:00", "duration": 25 },
+                { "start": YYYYMM + "-05 09:00:00", "duration": 375 },
             ]
         }
     )
@@ -456,7 +459,7 @@ def test_read_public_existing_appointment():
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
     assert len(data["slots"]) == 3
-    assert data["slots"][2]["start"] == "2022-09-05T09:00:00"
+    assert data["slots"][2]["start"] == YYYYMM + "-05T09:00:00"
     assert data["slots"][2]["duration"] == 375
 
 
@@ -501,31 +504,31 @@ def test_create_remote_event():
         "/rmt/apmt/adminx/" + slug,
         json={
             "title": "Testing new Application featurex",
-            "start": "2022-09-30T10:00:00",
-            "end": "2022-09-30T12:00:00",
+            "start": YYYYMM + "-10T10:00:00",
+            "end": YYYYMM + "-10T12:00:00",
         }
     )
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["title"] == "Testing new Application featurex"
-    assert data["start"] == "2022-09-30T10:00:00"
-    assert data["end"] == "2022-09-30T12:00:00"
+    assert data["start"] == YYYYMM + "-10T10:00:00"
+    assert data["end"] == YYYYMM + "-10T12:00:00"
 
 
 def test_get_remote_events():
-    response = client.get("/rmt/cal/5/2022-09-29/2022-10-01")
+    response = client.get("/rmt/cal/5/" + YYYYMM + "-09/" + YYYYMM + "-11")
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 1
     assert data[0]["title"] == "Testing new Application featurex"
-    assert data[0]["start"] == "2022-09-30 08:00:00"
-    assert data[0]["end"] == "2022-09-30 10:00:00"
+    assert data[0]["start"] == YYYYMM + "-10 10:00:00"
+    assert data[0]["end"] == YYYYMM + "-10 12:00:00"
     # delete event again to prevent calendar pollution
     con = CalDavConnector(TESTING_CALDAV_CALENDAR, TESTING_CALDAV_USER, TESTING_CALDAV_PASS)
-    n = con.delete_events(start='2022-09-30')
+    n = con.delete_events(start=YYYYMM + "-10")
     assert n == 1
 
 
 def test_create_remote_event_on_missing_appointment():
-    response = client.post("/rmt/apmt/30/2022-09-30T10:00:00/2022-09-30T12:00:00")
+    response = client.post("/rmt/apmt/30/" + YYYYMM + "-10T10:00:00/" + YYYYMM + "-10T12:00:00")
     assert response.status_code == 404, response.text

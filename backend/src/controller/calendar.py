@@ -54,8 +54,8 @@ class CalDavConnector:
     """add a new event to the connected calendar"""
     calendar = self.client.calendar(url=self.url)
     calendar.save_event(
-      dtstart=datetime(2022, 9, 30, 8),
-      dtend=datetime(2022, 9, 30, 10),
+      dtstart=datetime.fromisoformat(event.start),
+      dtend=datetime.fromisoformat(event.end),
       summary=event.title
     )
     return event
