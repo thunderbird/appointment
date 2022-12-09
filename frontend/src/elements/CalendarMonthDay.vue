@@ -25,12 +25,14 @@
         :key="event"
         class="shrink-0 text-sm text-gray-600 overflow-hidden"
         :class="{
-          'rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5': !placeholder,
-          'group rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder
+          'rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5': !placeholder && !event.remote,
+          'group rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder,
+          'flex items-center gap-2 px-2 py-0.5': event.remote,
         }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
       >
+        <div v-if="event.remote" class="w-2 h-2 rounded-full bg-sky-400"></div>
         <div
           class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded"
           :class="{

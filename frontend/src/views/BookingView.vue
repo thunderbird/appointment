@@ -24,7 +24,7 @@
       <calendar-month
         v-if="(activeView === views.month)"
         :selected="activeDate"
-        :events="dayPlaceholder"
+        :appointments="dayPlaceholder"
         :placeholder="true"
         @event-selected="showWeek"
       />

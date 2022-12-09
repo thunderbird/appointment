@@ -50,17 +50,20 @@ const props = defineProps({
   selected: Object,     // currently active date
   mini: Boolean,        // show small version of monthly calendar
   nav: Boolean,         // show month navigation
-  placeholder: Boolean, // format events as placeholder
-  events: Array,        // data of events to show
+  placeholder: Boolean, // format appointments as placeholder
+  appointments: Array,  // data of appointments to show
+  events: Array,        // data of calendar events to show
 });
 
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected']);
 
 // handle events to show
+// make all events accessible by date key
 const events = computed(() => {
   const eventsOnDate = {};
-  props.events?.forEach(event => {
+  // add appointments
+  props.appointments?.forEach(event => {
     event.slots.forEach(slot => {
       const key = dj(slot.start).format('YYYY-MM-DD');
       if (key in eventsOnDate) {
@@ -70,8 +73,18 @@ const events = computed(() => {
       }
     });
   });
+  // add calendar events
+  props.events?.forEach(event => {
+    const key = dj(event.start).format('YYYY-MM-DD');
+    if (key in eventsOnDate) {
+      eventsOnDate[key].push({ ...event, remote: true });
+    } else {
+      eventsOnDate[key] = [{ ...event, remote: true }];
+    }
+  });
   return eventsOnDate;
 });
+// get all events on a given date
 const eventsByDate = (d) => {
   const key = dj(d).format('YYYY-MM-DD');
   if (key in events.value) {
