@@ -51,6 +51,7 @@
           :selected="activeDate"
           :mini="true"
           :nav="true"
+          :events="calendarEvents"
           @prev="dateNav('month', false)"
           @next="dateNav('month')"
           @day-selected="selectDate"

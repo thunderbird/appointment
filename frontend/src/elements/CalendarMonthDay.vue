@@ -10,7 +10,7 @@
     @mouseleave="hideEventPopup"
   >
     <div
-      class="w-6 rounded-full text-center"
+      class="w-6 rounded-full text-center relative"
       :class="{
         'bg-teal-500 text-white font-semibold': isToday,
         'text-teal-500': isSelected && !isToday,
@@ -19,6 +19,7 @@
       }"
     >
       {{ dj(day).format('D') }}
+      <div v-if="mini && events" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-teal-600 rounded-full"></div>
     </div>
     <div v-if="events && !mini" class="h-24 flex flex-col gap-1.5 overflow-y-auto">
       <div
