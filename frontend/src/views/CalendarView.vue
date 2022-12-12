@@ -168,11 +168,12 @@ const fakeAppointments = [
   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
 ];
 
-// get remote calendar data for current month
+// TODO: get remote calendar data for current month
+const calendarId = 5;
 const eventsFrom = dj().startOf('month').format('YYYY-MM-DD');
 const eventsTo = dj().endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
-fetch("http://localhost:5000/rmt/cal/5/" + eventsFrom + "/" + eventsTo)
+fetch("http://localhost:5000/rmt/cal/" + calendarId + "/" + eventsFrom + "/" + eventsTo)
   .then(result => result.json())
   .then(data => {
     calendarEvents.value = data.map(e => {

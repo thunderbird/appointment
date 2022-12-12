@@ -118,6 +118,7 @@ def test_create_my_calendar():
         "/cal",
         json={
             "title": "My first calendar connection",
+            "color": "#123456",
             "url": "https://example.com",
             "user": "ww1984",
             "password": "d14n4"
@@ -126,6 +127,7 @@ def test_create_my_calendar():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["title"] == "My first calendar connection"
+    assert data["color"] == "#123456"
     assert data["url"] == "https://example.com"
     assert data["user"] == "ww1984"
     assert data["password"] == "d14n4"
@@ -148,6 +150,7 @@ def test_read_existing_calendar():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["title"] == "My first calendar connection"
+    assert data["color"] == "#123456"
     assert data["url"] == "https://example.com"
     assert data["user"] == "ww1984"
     assert data["password"] == "d14n4"
@@ -172,6 +175,7 @@ def test_update_existing_calendar():
         "/cal/1",
         json={
             "title": "My first calendar connectionx",
+            "color": "#123457",
             "url": "https://example.comx",
             "user": "ww1984x",
             "password": "d14n4x"
@@ -180,6 +184,7 @@ def test_update_existing_calendar():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["title"] == "My first calendar connectionx"
+    assert data["color"] == "#123457"
     assert data["url"] == "https://example.comx"
     assert data["user"] == "ww1984x"
     assert data["password"] == "d14n4x"

@@ -50,6 +50,7 @@ class Calendar(Base):
   id           = Column(Integer, primary_key=True, index=True)
   owner_id     = Column(Integer, ForeignKey("subscribers.id"))
   title        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
+  color        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
   url          = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
   user         = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
   password     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))

@@ -76,6 +76,7 @@ class Appointment(AppointmentBase):
 """
 class CalendarBase(BaseModel):
   title: str | None = None
+  color: str | None = None
   url: str
   user: str
   password: str
