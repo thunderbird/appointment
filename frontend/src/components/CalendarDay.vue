@@ -17,7 +17,17 @@
           class="flex overflow-hidden"
           :style="{ 'grid-row': event.offset + ' / span ' + event.span }"
         >
-          <div v-if="!booking" class="w-full text-sm whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-2 border-dashed border-sky-400 my-1 mx-8 px-2 py-0.5">
+          <div
+            v-if="!booking"
+            class="w-full text-sm whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-sky-400 my-1 mx-8 px-2 py-0.5"
+            :class="{
+              'border-2 border-dashed': !event.remote
+            }"
+            :style="{
+              'border-color': event.calendar_color,
+              'background-color': !event.remote ? event.calendar_color + '22' : event.calendar_color + 'aa',
+            }"
+          >
             {{ event.title }}
           </div>
           <div
