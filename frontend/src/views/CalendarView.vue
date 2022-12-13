@@ -35,7 +35,8 @@
       v-show="tabActive === tabItems.week"
       class="w-4/5"
       :selected="activeDate"
-      :events="fakeAppointments"
+      :appointments="fakeAppointments"
+      :events="calendarEvents"
     />
     <calendar-day
       v-show="tabActive === tabItems.day"

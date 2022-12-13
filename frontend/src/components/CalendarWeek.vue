@@ -67,9 +67,10 @@ const dj = inject("dayjs");
 
 // component properties
 const props = defineProps({
-  selected: Object,  // currently active date
-  events:   Array,   // data of events to show
-  booking:  Boolean, // flag indicating if calendar is used to book time slots
+  selected: Object,    // currently active date
+  booking:  Boolean,   // flag indicating if calendar is used to book time slots
+  appointments: Array, // data of appointments to show
+  events: Array,       // data of calendar events to show
 });
 
 // component emits
@@ -80,16 +81,21 @@ const startHour = 6;
 const endHour = 18;
 
 // handle events to show
+const timePosition = (start, duration) => {
+  // create position of event based on *half hours* | TODO: handle quarter hours
+  return {
+    offset: 2*dj(start).format('H') + dj(start).format('m')/30 - 2*startHour + 1,
+    span: Math.round(duration / 30),
+    times: dj(start).format('LT') + ' - ' + dj(start).add(duration, 'minutes').format('LT'),
+  }
+};
 const events = computed(() => {
   const eventsOnDate = {};
-  props.events?.forEach(event => {
+  // add appointments
+  props.appointments?.forEach(event => {
     event.slots.forEach(slot => {
       const key = dj(slot.start).format('YYYY-MM-DD');
-      // create position of event based on *half hours* | TODO: handle quarter hours
-      const offset = 2*dj(slot.start).format('H') + dj(slot.start).format('m')/30 - 2*startHour + 1;
-      const span = Math.round(slot.duration / 30);
-      const times = dj(slot.start).format('LT') + ' - ' + dj(slot.start).add(slot.duration, 'minutes').format('LT');
-      const extendedEvent = {...event, ...slot, offset: offset, span: span, times: times};
+      const extendedEvent = {...event, ...slot, ...timePosition(slot.start, slot.duration)};
       delete extendedEvent.slots;
       if (key in eventsOnDate) {
         eventsOnDate[key].push(extendedEvent);
@@ -97,6 +103,16 @@ const events = computed(() => {
         eventsOnDate[key] = [extendedEvent];
       }
     });
+  });
+  // add calendar events
+  props.events?.forEach(event => {
+    const key = dj(event.start).format('YYYY-MM-DD');
+    const extendedEvent = {...event, ...timePosition(event.start, event.duration), remote: true};
+    if (key in eventsOnDate) {
+      eventsOnDate[key].push(extendedEvent);
+    } else {
+      eventsOnDate[key] = [extendedEvent];
+    }
   });
   return eventsOnDate;
 });
