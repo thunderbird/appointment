@@ -31,12 +31,14 @@
       v-for="d in days"
       :key="d.day"
       class="bg-white grid auto-rows-[1.5rem]"
+      @mouseleave="hideEventPopup"
     >
       <div
         v-for="event in eventsByDate(d.date)"
         :key="event"
         class="flex overflow-hidden"
         :style="{ 'grid-row': event.offset + ' / span ' + event.span }"
+        @mouseenter="element => !booking ? showEventPopup(element, event) : null"
       >
         <div
           v-if="!booking"
@@ -66,11 +68,21 @@
         </div>
       </div>
     </div>
+    <event-popup
+      v-if="(events && !booking)"
+      :style="{
+        'display': popup.display,
+        'top': popup.top,
+        'left': popup.left,
+      }"
+      :event="popup.event"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
+import EventPopup from '@/elements/EventPopup.vue';
+import { computed, inject, reactive } from "vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");
@@ -168,4 +180,21 @@ const bookSlot = (d) => {
   emit('eventSelected', d);
 };
 
+// event details
+const popup = reactive({
+  event: null,
+  display: 'none',
+  top: 0,
+  left: 0
+});
+const showEventPopup = (element, event) => {
+  popup.event = event;
+  popup.display = 'block';
+  popup.top = element.target.offsetTop + element.target.clientHeight/2 - element.target.parentElement.scrollTop + 'px';
+  popup.left = element.target.offsetLeft + element.target.clientWidth + 'px';
+};
+const hideEventPopup = () => {
+  popup.event = null;
+  popup.display = 'none';
+};
 </script>
