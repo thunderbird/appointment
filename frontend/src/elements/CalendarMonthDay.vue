@@ -31,10 +31,18 @@
           'group/event rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder,
           'flex items-center gap-2 px-2 py-0.5': event.remote,
         }"
+        :style="{
+          'border-color': !placeholder && !event.remote ? event.calendar_color : null,
+          'background-color': !placeholder && !event.remote ? event.calendar_color + '22' : null
+        }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
       >
-        <div v-if="event.remote" class="w-2 h-2 rounded-full bg-sky-400"></div>
+        <div
+          v-if="event.remote"
+          class="w-2 h-2 rounded-full bg-sky-400"
+          :style="{ 'background-color': event.calendar_color }"
+        ></div>
         <div
           class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded"
           :class="{

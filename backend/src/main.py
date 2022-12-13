@@ -168,7 +168,11 @@ def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
   con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-  return con.list_events(start, end)
+  events = con.list_events(start, end)
+  for e in events:
+    e.calendar_title = db_calendar.title
+    e.calendar_color = db_calendar.color
+  return events
 
 
 @app.post("/apmt", response_model=schemas.Appointment)

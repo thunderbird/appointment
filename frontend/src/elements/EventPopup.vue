@@ -4,7 +4,7 @@
     <div class="flex flex-col gap-2">
       <div class="text-lg text-teal-500 font-semibold">{{ event?.title }}</div>
       <div class="text-xs text-gray-700">{{ eventDateTime }}</div>
-      <div class="text-xs text-gray-700">{{ event?.calendar }}</div>
+      <div class="text-xs text-gray-700">{{ event?.calendar_title }}</div>
       <div v-if="event?.attendee" class="text-xs text-gray-700">{{ t('label.guest' , { 'count': 1 }) }}</div>
     </div>
   </div>

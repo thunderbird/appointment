@@ -158,14 +158,14 @@ const creationStatus = ref(creationSteps.hidden);
 
 // TODO: appointments testing data
 const fakeAppointments = [
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Project Meeting', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T12:00:00', duration: 60, attendee: null }] },
-  { title: 'Dog Park Event', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T14:00:00', duration: 60, attendee: null }] },
-  { title: 'Interview Process', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T16:00:00', duration: 60, attendee: null }] },
-  { title: 'Learning Group', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 60, attendee: null }] },
-  { title: 'Learning Group', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 90, attendee: null }] },
-  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar: 'Work', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T09:30:00', duration: 90, attendee: { name: 'John Doe', email: 'jane@doe.com' } }] },
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar: 'Family', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Project Meeting', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T12:00:00', duration: 60, attendee: null }] },
+  { title: 'Dog Park Event', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T14:00:00', duration: 60, attendee: null }] },
+  { title: 'Interview Process', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T16:00:00', duration: 60, attendee: null }] },
+  { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 60, attendee: null }] },
+  { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 90, attendee: null }] },
+  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T09:30:00', duration: 90, attendee: { name: 'John Doe', email: 'jane@doe.com' } }] },
+  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
 ];
 
 // TODO: get remote calendar data for current month
@@ -180,7 +180,6 @@ fetch("http://localhost:5000/rmt/cal/" + calendarId + "/" + eventsFrom + "/" + e
       return {
         ...e,
         duration: dj(e.end).diff(dj(e.start), 'minutes'),
-        calendar: 'Family', // TODO
       };
     })
   });

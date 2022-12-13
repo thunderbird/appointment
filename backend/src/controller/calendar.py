@@ -18,7 +18,7 @@ class CalDavConnector:
 
 
   def list_calendars(self):
-    """find all calendars on the server"""
+    """find all calendars on the remote server"""
     calendars = []
     principal = self.client.principal()
     for c in principal.calendars():
@@ -33,7 +33,7 @@ class CalDavConnector:
 
 
   def list_events(self, start, end):
-    """find all events in given date range on the server"""
+    """find all events in given date range on the remote server"""
     calendar = self.client.calendar(url=self.url)
     result = calendar.date_search(
       start=datetime.strptime(start, '%Y-%m-%d'),

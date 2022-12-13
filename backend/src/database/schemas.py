@@ -121,3 +121,5 @@ class Event(BaseModel):
   title: str
   start: str
   end: str
+  calendar_title: str | None = None
+  calendar_color: str | None = None

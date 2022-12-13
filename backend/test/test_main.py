@@ -236,7 +236,7 @@ def test_create_too_many_calendars():
         json={ "username": "adminx", "email": "admin@example.com", "name": "The Admin", "level": 1, "timezone": "2" }
     )
     cal2 = insert(models.Calendar).values(owner_id="1", title="Another", url="https://test.org", user="abc", password="dce")
-    cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", url=TESTING_CALDAV_CALENDAR, user=TESTING_CALDAV_USER, password=TESTING_CALDAV_PASS)
+    cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", color="#978FEE", url=TESTING_CALDAV_CALENDAR, user=TESTING_CALDAV_USER, password=TESTING_CALDAV_PASS)
     db = TestingSessionLocal()
     db.execute(cal2)
     db.execute(cal3)
