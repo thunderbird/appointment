@@ -66,13 +66,41 @@
               {{ t('label.viewAll') }}
             </router-link>
           </div>
-          <div class="text-slate-500 mt-4 flex flex-col gap-8 justify-center items-center">
+          <div v-if="pendingAppointments.length === 0" class="text-slate-500 mt-4 flex flex-col gap-8 justify-center items-center">
             <div class="text-center mt-4">{{ t('info.noPendingAppointmentsInList') }}</div>
             <primary-button
               :label="t('label.createAppointments')"
               :disabled="creationStatus !== creationSteps.hidden"
               @click="creationStatus = creationSteps.details"
             />
+          </div>
+          <div v-else class="flex flex-col gap-8 mt-4">
+            <div
+              v-for="(a, i) in pendingAppointments"
+              :key="i"
+              class="flex gap-2 items-stretch"
+            >
+              <div class="w-1.5 rounded-lg" :style="{ 'background-color': a.calendar_color }"></div>
+              <div class="w-full">
+                <div class="flex justify-between">
+                  <div>
+                    <div>{{ a.title }}</div>
+                    <div class="text-sm">{{ a.duration }}</div>
+                  </div>
+                  <icon-dots-vertical class="h-6 w-6 stroke-slate-400 stroke-2 fill-slate-400" />
+                </div>
+                <div class="flex justify-between items-center">
+                  <a href="" class="text-sm text-teal-500 underline" @click.stop="null">
+                    {{ t('label.viewBooking') }}
+                  </a>
+                  <text-button
+                    :label="t('label.copyLink')"
+                    icon="copy"
+                    @click="null"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -94,11 +122,13 @@
 import { ref, inject, computed, watch } from 'vue';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
+import TextButton from '@/elements/TextButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
 import CalendarDay from '@/components/CalendarDay.vue';
 import AppointmentCreation from '@/components/AppointmentCreation.vue';
+import IconDotsVertical from "@/elements/icons/IconDotsVertical.vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 const { t } = useI18n();
@@ -175,6 +205,17 @@ const fakeAppointments = [
   { title: 'Project Appointment', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T09:30:00', duration: 90, attendee: { name: 'John Doe', email: 'jane@doe.com' } }] },
   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
 ];
+const pendingAppointments = computed(() => {
+  const pending = [];
+  fakeAppointments.filter(a => a.status === 'pending').forEach(event => {
+    event.slots.forEach(slot => {
+      const extendedEvent = {...event, ...slot };
+      delete extendedEvent.slots;
+      pending.push(extendedEvent);
+    });
+  });
+  return pending.slice(0, 4);
+});
 
 // get remote calendar data for current month
 const calendarId = 5; // TODO: retrieve all configured calendars
