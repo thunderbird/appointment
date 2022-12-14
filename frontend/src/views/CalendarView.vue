@@ -61,13 +61,18 @@
         <!-- appointments and events list -->
         <div>
           <div class="flex justify-between items-center">
-            <div class="font-semibold text-lg">{{ t('heading.appointmentsAndEvents') }}</div>
+            <div class="font-semibold text-lg">{{ t('heading.pendingAppointments') }}</div>
             <router-link class="px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs uppercase" :to="{ name: 'appointments' }">
               {{ t('label.viewAll') }}
             </router-link>
           </div>
-          <div class="text-slate-500 mt-4">
-            {{ t('info.noAppointmentsInList') }}
+          <div class="text-slate-500 mt-4 flex flex-col gap-8 justify-center items-center">
+            <div class="text-center mt-4">{{ t('info.noPendingAppointmentsInList') }}</div>
+            <primary-button
+              :label="t('label.createAppointments')"
+              :disabled="creationStatus !== creationSteps.hidden"
+              @click="creationStatus = creationSteps.details"
+            />
           </div>
         </div>
       </div>
@@ -171,8 +176,8 @@ const fakeAppointments = [
   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
 ];
 
-// TODO: get remote calendar data for current month
-const calendarId = 5;
+// get remote calendar data for current month
+const calendarId = 5; // TODO: retrieve all configured calendars
 const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
 const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);

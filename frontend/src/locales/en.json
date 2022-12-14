@@ -7,7 +7,6 @@
     "accountSettings": "Account settings",
     "appointmentCreated": "Appointment created!",
     "appointmentsAndBookingSettings": "Appointments & booking settings",
-    "appointmentsAndEvents": "Appointments and Events",
     "bookSelection": "Book selection",
     "calendarSettings": "Calendar settings",
     "createNewAppointment": "Create new appointment",
@@ -16,11 +15,12 @@
     "frequentlyAskedQuestions": "Frequently asked Questions",
     "generalSettings": "General settings",
     "languageAndAppearance": "Language & Appearance",
+    "pendingAppointments": "Pending Appointments",
     "privacySettings": "Privacy settings",
     "yourProfile": "Your Profile"
   },
   "info": {
-    "noAppointmentsInList": "There are currently no appointments in this list."
+    "noPendingAppointmentsInList": "There are currently no pending appointments in this list."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
