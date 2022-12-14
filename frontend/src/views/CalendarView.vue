@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
+import { ref, inject, computed, watch } from 'vue';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
@@ -94,12 +94,13 @@ import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
 import CalendarDay from '@/components/CalendarDay.vue';
 import AppointmentCreation from '@/components/AppointmentCreation.vue';
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject("dayjs");
+const dj = inject('dayjs');
+const call = inject('call');
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
@@ -172,17 +173,25 @@ const fakeAppointments = [
 
 // TODO: get remote calendar data for current month
 const calendarId = 5;
-const eventsFrom = dj().startOf('month').format('YYYY-MM-DD');
-const eventsTo = dj().endOf('month').format('YYYY-MM-DD');
+const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
+const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
-fetch("http://localhost:5000/rmt/cal/" + calendarId + "/" + eventsFrom + "/" + eventsTo)
-  .then(result => result.json())
-  .then(data => {
-    calendarEvents.value = data.map(e => {
-      return {
-        ...e,
-        duration: dj(e.end).diff(dj(e.start), 'minutes'),
-      };
-    })
-  });
+
+const getRemoteEvents = async (calendar, from, to) => {
+  const { data } = await call("rmt/cal/" + calendar + "/" + from + "/" + to).get().json();
+  calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
+};
+getRemoteEvents(calendarId, eventsFrom, eventsTo);
+
+// react to user calendar navigation
+watch(() => activeDate.value, (newValue, oldValue) => {
+  // remote data is retrieved per month, so data request happens only if the user navigates to a different month
+  if (dj(oldValue).format('M') !== dj(newValue).format('M')) {
+    getRemoteEvents(
+      calendarId,
+      dj(newValue).startOf('month').format('YYYY-MM-DD'),
+      dj(newValue).endOf('month').format('YYYY-MM-DD')
+    );
+  }
+});
 </script>

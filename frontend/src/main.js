@@ -3,6 +3,16 @@ import { createApp } from 'vue';
 import App from './App.vue';
 const app = createApp(App);
 
+// init fetch
+import { createFetch } from '@vueuse/core'
+const call = createFetch({
+  baseUrl: 'http://localhost:5000',
+  fetchOptions: {
+    mode: 'cors',
+  },
+})
+app.provide('call', call);
+
 // init router
 import router from './router';
 app.use(router);
