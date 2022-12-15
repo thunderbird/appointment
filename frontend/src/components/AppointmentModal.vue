@@ -6,58 +6,98 @@
     </div>
     <div class="text-xl mb-8">{{ appointment.title }}</div>
     <div class="grid grid-cols-4 text-gray-500 text-sm w-max gap-x-4 gap-y-2 pl-4 mb-8">
-      <div class="font-semibold">{{ t('label.availabilityDay') }}</div>
-      <div class="font-semibold">{{ t('label.startTime') }}</div>
-      <div class="font-semibold">{{ t('label.endTime') }}</div>
-      <div class="font-semibold">{{ t('label.bookings') }}</div>
+      <div class="font-semibold flex items-center gap-2">
+        <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.availabilityDay') }}
+      </div>
+      <div class="font-semibold flex items-center gap-2">
+        <icon-clock class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.startTime') }}
+      </div>
+      <div class="font-semibold flex items-center gap-2">
+        <icon-clock class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.endTime') }}
+      </div>
+      <div class="font-semibold flex items-center gap-2">
+        <icon-users class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.bookings') }}
+      </div>
       <template v-for="s in appointment.slots" :key="s.start">
-        <div>{{ dj(s.start).format('LL') }}</div>
-        <div>{{ dj(s.start).format('LT') }}</div>
-        <div>{{ dj(s.start).add(s.duration, 'minutes').format('LT') }}</div>
-        <div>{{ s.attendee?.email ?? '&mdash;' }}</div>
+        <div class="pl-6">{{ dj(s.start).format('LL') }}</div>
+        <div class="pl-6">{{ dj(s.start).format('LT') }}</div>
+        <div class="pl-6">{{ dj(s.start).add(s.duration, 'minutes').format('LT') }}</div>
+        <div class="pl-6">{{ s.attendee?.email ?? '&mdash;' }}</div>
       </template>
     </div>
     <div class="grid grid-cols-3 text-gray-500 text-sm w-max gap-x-12 gap-y-8 pl-4 mb-8">
       <div>
-        <div class="font-semibold mb-1">{{ t('label.calendar') }}</div>
-        <div>{{ appointment.calendar }}</div>
+        <div class="font-semibold mb-1 flex items-center gap-2">
+          <icon-calendar class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          {{ t('label.calendar') }}
+        </div>
+        <div class="pl-6 flex items-center gap-3">
+          <div class="w-4 h-4 rounded-full bg-sky-400" :style="{ 'background-color': appointment.calendar_color }"></div>
+          {{ appointment.calendar_title }}
+        </div>
       </div>
       <div>
-        <div class="font-semibold mb-1">{{ t('label.bookingLink') }}</div>
-        <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank">
-          https://apmt.day/{{ appointment.slug }}
-        </a>
+        <div class="font-semibold mb-1 flex items-center gap-2">
+          <icon-link class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          {{ t('label.bookingLink') }}
+        </div>
+        <div class="pl-6">
+          <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank">
+            https://apmt.day/{{ appointment.slug }}
+          </a>
+        </div>
       </div>
       <div></div>
       <div>
-        <div class="font-semibold mb-1">{{ t('label.location') }}</div>
-        <div>{{ appointment.location_name }}</div>
+        <div class="font-semibold mb-1 flex items-center gap-2">
+          <icon-map-pin class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          {{ t('label.location') }}
+        </div>
+        <div class="pl-6">{{ appointment.location_name }}</div>
       </div>
       <div>
-        <div class="font-semibold mb-1">{{ t('label.videoLink') }}</div>
-        <a :href="appointment.location_url" class="text-teal-500 underline" target="_blank">
-          {{ appointment.location_url }}
-        </a>
+        <div class="font-semibold mb-1 flex items-center gap-2">
+          <icon-video class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          {{ t('label.videoLink') }}
+        </div>
+        <div class="pl-6">
+          <a :href="appointment.location_url" class="text-teal-500 underline" target="_blank">
+            {{ appointment.location_url }}
+          </a>
+        </div>
       </div>
       <div>
-        <div class="font-semibold mb-1">{{ t('label.activeAppointment') }}</div>
-        <switch-toggle :active="appointment.mode === 'open'" />
+        <div class="font-semibold mb-1 flex items-center gap-2">
+          <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          {{ t('label.activeAppointment') }}
+        </div>
+        <switch-toggle class="ml-6" :active="appointment.mode === 'open'" />
       </div>
     </div>
     <div
       v-if="attendeesSlots.length > 0"
       class="grid grid-cols-[auto_1fr] items-center text-gray-500 text-sm w-max gap-x-8 gap-y-2 pl-4 mb-8"
     >
-      <div class="font-semibold mb-1">{{ t('label.attendees') }}</div>
-      <div class="font-semibold mb-1">{{ t('label.bookingSlot') }}</div>
+      <div class="font-semibold mb-1 flex items-center gap-2">
+        <icon-users class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.attendees') }}
+      </div>
+      <div class="font-semibold mb-1 flex items-center gap-2">
+        <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.bookingSlot') }}
+      </div>
       <template v-for="s in attendeesSlots" :key="s.start">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 pl-6">
           <div class="relative rounded-full w-6 h-6 bg-teal-500">
             <div class="absolute position-center text-white">{{ initials(s.attendee.name) }}</div>
           </div>
           {{ s.attendee.email }}
         </div>
-        <div class="flex gap-4">
+        <div class="flex gap-4 pl-6">
           <div>{{ dj(s.start).format('LL') }}</div>
           <div>{{ dj(s.start).format('LT') }}</div>
           <div>To</div>
@@ -66,7 +106,10 @@
       </template>
     </div>
     <div class="text-gray-500 text-sm w-full pl-4">
-      <div class="font-semibold mb-1">{{ t('label.notes') }}</div>
+      <div class="font-semibold mb-1 flex items-center gap-2">
+        <icon-notes class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        {{ t('label.notes') }}
+      </div>
       <div class="rounded-lg p-4 border border-gray-400">{{ appointment.details }}</div>
     </div>
   </div>
@@ -75,6 +118,15 @@
 <script setup>
 import { computed, inject } from 'vue';
 import IconX from '@/elements/icons/IconX.vue';
+import IconUsers from '@/elements/icons/IconUsers.vue';
+import IconCalendar from '@/elements/icons/IconCalendar.vue';
+import IconCalendarEvent from '@/elements/icons/IconCalendarEvent.vue';
+import IconClock from '@/elements/icons/IconClock.vue';
+import IconBulb from '@/elements/icons/IconBulb.vue';
+import IconLink from '@/elements/icons/IconLink.vue';
+import IconMapPin from '@/elements/icons/IconMapPin.vue';
+import IconVideo from '@/elements/icons/IconVideo.vue';
+import IconNotes from '@/elements/icons/IconNotes.vue';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
