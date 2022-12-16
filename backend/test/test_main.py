@@ -128,11 +128,9 @@ def test_create_my_calendar():
     data = response.json()
     assert data["title"] == "My first calendar connection"
     assert data["color"] == "#123456"
-    assert data["url"] == "https://example.com"
-    assert data["user"] == "ww1984"
-    assert data["password"] == "d14n4"
-    assert "id" in data
-    assert "owner_id" in data and data["owner_id"] == 1
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
 
 
 def test_read_my_calendars():
@@ -141,8 +139,10 @@ def test_read_my_calendars():
     data = response.json()
     assert isinstance(data, list)
     assert len(data) == 1
-    assert data[0]["user"] == "ww1984"
-    assert "owner_id" in data[0] and data[0]["owner_id"] == 1
+    assert data[0]["title"] == "My first calendar connection"
+    assert "url" not in data[0]
+    assert "user" not in data[0]
+    assert "password" not in data[0]
 
 
 def test_read_existing_calendar():
@@ -151,9 +151,9 @@ def test_read_existing_calendar():
     data = response.json()
     assert data["title"] == "My first calendar connection"
     assert data["color"] == "#123456"
-    assert data["url"] == "https://example.com"
-    assert data["user"] == "ww1984"
-    assert data["password"] == "d14n4"
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
 
 
 def test_read_missing_calendar():
@@ -185,9 +185,9 @@ def test_update_existing_calendar():
     data = response.json()
     assert data["title"] == "My first calendar connectionx"
     assert data["color"] == "#123457"
-    assert data["url"] == "https://example.comx"
-    assert data["user"] == "ww1984x"
-    assert data["password"] == "d14n4x"
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
 
 
 def test_update_foreign_calendar():
@@ -208,9 +208,9 @@ def test_delete_existing_calendar():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["title"] == "My first calendar connectionx"
-    assert data["url"] == "https://example.comx"
-    assert data["user"] == "ww1984x"
-    assert data["password"] == "d14n4x"
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
     response = client.get("/cal/1")
     assert response.status_code == 404, response.text
     response = client.get("/me/calendars")

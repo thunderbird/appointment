@@ -78,18 +78,25 @@ class Appointment(AppointmentBase):
 class CalendarBase(BaseModel):
   title: str | None = None
   color: str | None = None
+
+  
+class CalendarConnection(CalendarBase):
   url: str
   user: str
   password: str
 
 
-class Calendar(CalendarBase):
+class Calendar(CalendarConnection):
   id: int
   owner_id: int
   appointments: list[Appointment] = []
 
   class Config:
     orm_mode = True
+
+
+class CalendarOut(CalendarBase):
+  id: int
 
 
 """ SUBSCRIBER model schemas

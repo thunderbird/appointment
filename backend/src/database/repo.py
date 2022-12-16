@@ -56,6 +56,11 @@ def get_connections_limit(db: Session, subscriber_id: int):
 
 """ CALENDAR repository functions
 """
+def calendar_exists(db: Session, calendar_id: int):
+  """true if calendar of given id exists"""
+  return True if db.get(models.Calendar, calendar_id) is not None else False
+
+
 def get_calendar(db: Session, calendar_id: int):
   """retrieve calendar by id"""
   return db.get(models.Calendar, calendar_id)
@@ -66,7 +71,7 @@ def get_calendars_by_subscriber(db: Session, subscriber_id: int):
   return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
 
 
-def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subscriber_id: int):
+def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int):
   """create new calendar for owner"""
   db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
   db.add(db_calendar)
@@ -75,7 +80,7 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, subs
   return db_calendar
 
 
-def update_subscriber_calendar(db: Session, calendar: schemas.CalendarBase, calendar_id: int):
+def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):
   """update existing calendar by id"""
   db_calendar = get_calendar(db, calendar_id)
   for key, value in calendar:

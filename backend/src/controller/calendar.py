@@ -23,7 +23,7 @@ class CalDavConnector:
     principal = self.client.principal()
     for c in principal.calendars():
       # TODO: validate c.name and c.url
-      calendars.append(schemas.CalendarBase(
+      calendars.append(schemas.CalendarConnection(
         title=c.name,
         url=str(c.url),
         user=self.user,
