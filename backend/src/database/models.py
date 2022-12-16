@@ -20,14 +20,18 @@ def random_slug():
 
 
 class SubscriberLevel(enum.Enum):
-  basic  = 1 # basic tier
-  plus   = 2 # advanced tier
-  pro    = 3 # unlimited tier
+  basic    = 1 # basic tier
+  plus     = 2 # advanced tier
+  pro      = 3 # unlimited tier
 
 class AppointmentStatus(enum.Enum):
-  draft  = 1 # appointment was created but not published yet
-  ready  = 2 # appointment is published and open for attendees
-  closed = 3 # appointment is published and closed for attendees
+  draft    = 1 # appointment was created but not published yet
+  ready    = 2 # appointment is published and open for attendees
+  closed   = 3 # appointment is published and closed for attendees
+
+class LocationType(enum.Enum):
+  inperson = 1 # appointment is held in person
+  online   = 2 # appointment is held online
 
 
 class Subscriber(Base):
@@ -68,6 +72,7 @@ class Appointment(Base):
   time_updated         = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
   duration             = Column(Integer)
   title                = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
+  location_type        = Column(Enum(LocationType), default=LocationType.inperson)
   location_suggestions = Column(String)
   location_selected    = Column(Integer)
   location_name        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
