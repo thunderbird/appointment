@@ -108,6 +108,7 @@
       <appointment-creation
         v-else
         :status="creationStatus"
+        :calendars="calendars"
         @start="creationStatus = creationSteps.details"
         @next="creationStatus = creationSteps.availability"
         @create="creationStatus = creationSteps.finished"
@@ -184,6 +185,14 @@ const dateNav = (unit = 'auto', forward = true) => {
     selectDate(activeDate.value.subtract(1, unit));
   }
 };
+
+// get calendars from db
+const calendars = ref([]);
+const getDbCalendars = async () => {
+  const { data } = await call("me/calendars").get().json();
+  calendars.value = data.value;
+};
+getDbCalendars();
 
 // appointment creation
 const creationSteps = {

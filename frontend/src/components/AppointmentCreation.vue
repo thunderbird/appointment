@@ -22,24 +22,22 @@
           <div class="font-medium text-gray-500 mb-1">{{ t('label.appointmentName') }}</div>
           <input
             type="text"
-            v-model="appointment.name"
+            v-model="appointment.title"
             :placeholder="t('placeholder.biWeeklyCafeDates')"
             class="rounded-md bg-gray-50 border-gray-200 w-full"
           />
         </label>
         <label>
           <div class="font-medium text-gray-500 mb-1">{{ t('label.selectCalendar') }}</div>
-          <select v-model="appointment.calendar" class="rounded-md bg-gray-50 border-gray-200 w-full">
-            <option value="p">Personal</option>
-            <option value="w">Work</option>
-            <option value="f">Freelance</option>
+          <select v-model="appointment.calendar_id" class="rounded-md bg-gray-50 border-gray-200 w-full">
+            <option v-for="calendar in calendars" :key="calendar.id" :value="calendar.id">{{ calendar.title }}</option>
           </select>
         </label>
         <label>
           <div class="font-medium text-gray-500 mb-1">{{ t('label.location') }}</div>
           <tab-bar
             :tab-items="Object.keys(locationTypes)"
-            :active="locationTypeActive"
+            :active="appointment.locationType"
             @update="updateLocationType"
           />
         </label>
@@ -55,12 +53,18 @@
         <label class="relative">
           <div class="font-medium text-gray-500 mb-1">{{ t('label.notes') }}</div>
           <textarea
-            v-model="appointment.notes"
+            v-model="appointment.details"
             :placeholder="t('placeholder.writeHere')"
             class="rounded-md bg-gray-50 border-gray-200 w-full text-sm h-40 resize-none"
             :maxlength="charLimit"
           ></textarea>
-          <div class="absolute bottom-3.5 right-3 text-xs" :class="{ 'text-red-700': charCount === charLimit }">
+          <div
+            class="absolute bottom-3.5 right-3 text-xs"
+            :class="{
+              'text-orange-500': charCount >= charLimit*0.92,
+              '!text-red-600': charCount === charLimit
+            }"
+          >
             {{ charCount }}/{{ charLimit }}
           </div>
         </label>
@@ -187,31 +191,31 @@ const emit = defineEmits(['start', 'next', 'create', 'cancel']);
 
 // component properties
 const props = defineProps({
-  status: Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
+  status: Number,  // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
+  calendars: Array // list of user defined calendars
 });
 
 // calculate the current visible step by given status
+// first step are the appointment details
+// second step are the availability slots
 const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
 // tab navigation for location types
 const locationTypes = { 'inPerson': 0, 'online': 1 };
-const locationTypeActive = ref(locationTypes.inPerson);
 const updateLocationType = type => {
-  locationTypeActive.value = locationTypes[type];
+  appointment.locationType = locationTypes[type];
 };
 
-// defaul appointment object (for start and reset)
+// defaul appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
-  name: '',
-  calendar: 'p',
-  locationType: locationTypeActive.value,
+  title: '',
+  calendar_id: props.calendars[0].id,
+  locationType: locationTypes.inPerson,
   videoLink: '',
-  notes: '',
+  details: '',
   slots: []
 };
-
-// appointment form data
 const appointment = reactive({...defaultAppointment});
 
 // date and time selection data
@@ -221,10 +225,10 @@ const slots = reactive({});
 
 // handle notes char limit
 const charLimit = 250;
-const charCount = computed(() => appointment.notes.length);
+const charCount = computed(() => appointment.details.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
-const validStep1 = computed(() => appointment.name !== '');
+const validStep1 = computed(() => appointment.title !== '');
 const validStep2 = computed(() => Object.keys(slots).length > 0);
 const visitedStep1 = ref(false);
 const visitedStep2 = ref(false);
@@ -276,7 +280,7 @@ const createAppointment = () => {
   // TODO: bring time slots into correct format
   // TODO: save selected appointment data
   // show confirmation
-  createdConfirmation.title = appointment.name;
+  createdConfirmation.title = appointment.title;
   createdConfirmation.publicLink = 'https://apmt.day/sdfw83jc'; // TODO
   createdConfirmation.show = true;
   // reset everything to start again
