@@ -37,7 +37,7 @@
           <div class="font-medium text-gray-500 mb-1">{{ t('label.location') }}</div>
           <tab-bar
             :tab-items="Object.keys(locationTypes)"
-            :active="appointment.locationType"
+            :active="appointment.location_type"
             @update="updateLocationType"
           />
         </label>
@@ -45,7 +45,7 @@
           <div class="font-medium text-gray-500 mb-1">{{ t('label.videoLink') }}</div>
           <input
             type="text"
-            v-model="appointment.videoLink"
+            v-model="appointment.location_url"
             :placeholder="t('placeholder.zoomCom')"
             class="rounded-md bg-gray-50 border-gray-200 w-full"
           />
@@ -185,6 +185,7 @@ import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");
+const call = inject('call');
 
 // component emits
 const emit = defineEmits(['start', 'next', 'create', 'cancel']);
@@ -202,7 +203,7 @@ const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
 // tab navigation for location types
-const locationTypes = { 'inPerson': 0, 'online': 1 };
+const locationTypes = { 'inPerson': 1, 'online': 2 };
 const updateLocationType = type => {
   appointment.locationType = locationTypes[type];
 };
@@ -211,17 +212,37 @@ const updateLocationType = type => {
 const defaultAppointment = {
   title: '',
   calendar_id: props.calendars[0].id,
-  locationType: locationTypes.inPerson,
-  videoLink: '',
+  location_type: locationTypes.inPerson,
+  location_url: '',
   details: '',
-  slots: []
+  status: 2,
 };
 const appointment = reactive({...defaultAppointment});
 
 // date and time selection data
-// an object having the iso date as key and and array of objects holding start and end time
-// e.g. { '2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ... }
+// an object having the iso date as key and a list of objects holding start and end time for each day
+// format: { '2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ...}
 const slots = reactive({});
+
+// bring slots into list form for requests later
+// format: [ { start: '2022-12-01T10:00:00', duration: 90}, ...]
+const slotList = computed(() => {
+  const list = [];
+  for (const day in slots) {
+    if (Object.hasOwnProperty.call(slots, day)) {
+      const times = slots[day];
+      times.forEach(slot => {
+        const start = dj(day + ' ' + slot.start);
+        const end = dj(day + ' ' + slot.end);
+        list.push({
+          start: start.format('YYYY-MM-DDTHH:mm:ss'),
+          duration: end.diff(start, 'minutes')
+        });
+      });
+    }
+  }
+  return list;
+});
 
 // handle notes char limit
 const charLimit = 250;
@@ -276,12 +297,18 @@ const createdConfirmation = reactive({
 const closeCreatedModal = () => createdConfirmation.show = false;
 
 // handle actual appointment creation
-const createAppointment = () => {
-  // TODO: bring time slots into correct format
-  // TODO: save selected appointment data
+const createAppointment = async () => {
+  // build data object for post request
+  const obj = {
+    appointment: appointment,
+    slots: slotList.value
+  };
+  // save selected appointment data
+  const { data } = await call('apmt').post(obj).json();
+
   // show confirmation
-  createdConfirmation.title = appointment.title;
-  createdConfirmation.publicLink = 'https://apmt.day/sdfw83jc'; // TODO
+  createdConfirmation.title = data.value.title;
+  createdConfirmation.publicLink = 'https://apmt.day/' + data.value.slug; // TODO
   createdConfirmation.show = true;
   // reset everything to start again
   for (const attr in defaultAppointment) {
