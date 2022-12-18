@@ -28,21 +28,21 @@
       v-show="tabActive === tabItems.month"
       class="w-4/5"
       :selected="activeDate"
-      :appointments="fakeAppointments"
+      :appointments="appointments"
       :events="calendarEvents"
     />
     <calendar-week
       v-show="tabActive === tabItems.week"
       class="w-4/5"
       :selected="activeDate"
-      :appointments="fakeAppointments"
+      :appointments="appointments"
       :events="calendarEvents"
     />
     <calendar-day
       v-show="tabActive === tabItems.day"
       class="w-4/5"
       :selected="activeDate"
-      :appointments="fakeAppointments"
+      :appointments="appointments"
       :events="calendarEvents"
     />
     <!-- page side bar -->
@@ -111,7 +111,7 @@
         :calendars="calendars"
         @start="creationStatus = creationSteps.details"
         @next="creationStatus = creationSteps.availability"
-        @create="creationStatus = creationSteps.finished"
+        @create="creationStatus = creationSteps.finished; getDbAppointments();"
         @cancel="creationStatus = creationSteps.hidden"
       />
     </div>
@@ -186,15 +186,20 @@ const dateNav = (unit = 'auto', forward = true) => {
   }
 };
 
-// get calendars from db
+// get list of calendars from db
 const calendars = ref([]);
 const getDbCalendars = async () => {
   const { data } = await call("me/calendars").get().json();
   calendars.value = data.value;
 };
+const calendarsById = computed(() => {
+  const calendarsObj = {};
+  calendars.value.forEach(c => { calendarsObj[c.id] = c });
+  return calendarsObj;
+});
 getDbCalendars();
 
-// appointment creation
+// appointment creation status data
 const creationSteps = {
   hidden: 0,
   details: 1,
@@ -203,20 +208,32 @@ const creationSteps = {
 }
 const creationStatus = ref(creationSteps.hidden);
 
-// TODO: appointments testing data
-const fakeAppointments = [
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Project Meeting', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T12:00:00', duration: 60, attendee: null }] },
-  { title: 'Dog Park Event', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T14:00:00', duration: 60, attendee: null }] },
-  { title: 'Interview Process', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T16:00:00', duration: 60, attendee: null }] },
-  { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 60, attendee: null }] },
-  { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 90, attendee: null }] },
-  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T09:30:00', duration: 90, attendee: { name: 'John Doe', email: 'jane@doe.com' } }] },
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
-];
+// get list of appointments from db
+// const fakeAppointments = [
+//   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T10:00:00', duration: 60, attendee: null }] },
+//   { title: 'Project Meeting', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T12:00:00', duration: 60, attendee: null }] },
+//   { title: 'Dog Park Event', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T14:00:00', duration: 60, attendee: null }] },
+//   { title: 'Interview Process', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T16:00:00', duration: 60, attendee: null }] },
+//   { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 60, attendee: null }] },
+//   { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 90, attendee: null }] },
+//   { title: 'Project Appointment', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T09:30:00', duration: 90, attendee: { name: 'John Doe', email: 'jane@doe.com' } }] },
+//   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
+// ];
+const appointments = ref([]);
+const getDbAppointments = async () => {
+  const { data } = await call("me/appointments").get().json();
+  appointments.value = data.value;
+  // enrich appointments data with calendar title and color
+  appointments.value.forEach(a => {
+    a.calendar_title = calendarsById.value[a.calendar_id].title;
+    a.calendar_color = calendarsById.value[a.calendar_id].color;
+  });
+};
+getDbAppointments();
+
 const pendingAppointments = computed(() => {
   const pending = [];
-  fakeAppointments.filter(a => a.status === 'pending').forEach(event => {
+  appointments.value.filter(a => a.status === 'pending').forEach(event => {
     event.slots.forEach(slot => {
       const extendedEvent = {...event, ...slot };
       delete extendedEvent.slots;
