@@ -10,8 +10,8 @@
     border-teal-500
     rounded-full
     hover:shadow-md
-    hover:scale-105
-    active:scale-95
+    hover:scale-102
+    active:scale-98
     disabled:from-teal-200
     disabled:to-sky-300
     px-6
