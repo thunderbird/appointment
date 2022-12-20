@@ -16,6 +16,7 @@
         'text-teal-500': isSelected && !isToday,
         'mx-auto': mini,
         'group-hover/day:bg-sky-600': mini && isToday,
+        'group-hover/day:text-sky-600': mini && !isToday,
       }"
     >
       {{ dj(day).format('D') }}
