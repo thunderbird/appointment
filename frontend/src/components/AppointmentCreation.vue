@@ -36,7 +36,7 @@
         <label>
           <div class="font-medium text-gray-500 mb-1">{{ t('label.location') }}</div>
           <tab-bar
-            :tab-items="Object.keys(locationTypes)"
+            :tab-items="locationTypes"
             :active="appointment.location_type"
             @update="updateLocationType"
           />
@@ -205,7 +205,7 @@ const activeStep2 = computed(() => props.status === 2);
 // tab navigation for location types
 const locationTypes = { 'inPerson': 1, 'online': 2 };
 const updateLocationType = type => {
-  appointment.locationType = locationTypes[type];
+  appointment.location_type = locationTypes[type];
 };
 
 // defaul appointment object (for start and reset) and appointment form data

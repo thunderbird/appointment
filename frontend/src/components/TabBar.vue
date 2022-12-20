@@ -3,16 +3,16 @@
     <nav class="flex">
       <ul class="flex justify-between w-full gap-4 p-1">
         <li
-          v-for="(item, i) in tabItems"
+          v-for="(item, key) in tabItems"
           :key="item"
           class="flex whitespace-nowrap leading-8 cursor-pointer px-8 transition-all ease-in-out hover:rounded-xl"
           :class="{
-            'text-gray-900 bg-white rounded-xl shadow': i == active,
-            'text-gray-500 hover:bg-gray-100': i != active,
+            'text-gray-900 bg-white rounded-xl shadow': item == active,
+            'text-gray-500 hover:bg-gray-100': item != active,
           }"
-          @click="activate(item)"
+          @click="activate(key)"
         >
-          {{ t('label.' + item) }}
+          {{ t('label.' + key) }}
         </li>
       </ul>
     </nav>
@@ -25,15 +25,15 @@ const { t } = useI18n();
 
 // component properties
 defineProps({
-  tabItems: Array, // list of tab names that are also lang keys (label.<key>), used as tab items
-  active: Number   // index of active tab
+  tabItems: Object, // list of tab items. Keys are used as lang keys (label.<key>), values as index
+  active: Number    // value of active tab
 });
 
 // component emits
 const emit = defineEmits(['update']);
 
 // handle click events
-const activate = (item) => {
-  emit('update', item);
+const activate = (key) => {
+  emit('update', key);
 }
 </script>

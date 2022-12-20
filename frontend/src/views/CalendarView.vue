@@ -13,7 +13,7 @@
       <button @click="selectDate(dj())" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
-      <tab-bar :tab-items="Object.keys(tabItems)" :active="tabActive" @update="updateTab" class="text-xl" />
+      <tab-bar :tab-items="tabItems" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="creationStatus !== creationSteps.hidden"
