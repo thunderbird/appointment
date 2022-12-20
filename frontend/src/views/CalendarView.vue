@@ -16,8 +16,8 @@
       <tab-bar :tab-items="tabItems" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationSteps.hidden"
-        @click="creationStatus = creationSteps.details"
+        :disabled="creationStatus !== creationState.hidden"
+        @click="creationStatus = creationState.details"
       />
     </div>
   </div>
@@ -47,7 +47,7 @@
     />
     <!-- page side bar -->
     <div class="w-1/5 min-w-[310px]">
-      <div v-if="creationStatus === creationSteps.hidden" class="flex flex-col gap-8">
+      <div v-if="creationStatus === creationState.hidden" class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month
           :selected="activeDate"
@@ -70,8 +70,8 @@
             <div class="text-center mt-4">{{ t('info.noPendingAppointmentsInList') }}</div>
             <primary-button
               :label="t('label.createAppointments')"
-              :disabled="creationStatus !== creationSteps.hidden"
-              @click="creationStatus = creationSteps.details"
+              :disabled="creationStatus !== creationState.hidden"
+              @click="creationStatus = creationState.details"
             />
           </div>
           <div v-else class="flex flex-col gap-8 mt-4">
@@ -109,10 +109,10 @@
         v-else
         :status="creationStatus"
         :calendars="calendars"
-        @start="creationStatus = creationSteps.details"
-        @next="creationStatus = creationSteps.availability"
-        @create="creationStatus = creationSteps.finished; getDbAppointments();"
-        @cancel="creationStatus = creationSteps.hidden"
+        @start="creationStatus = creationState.details"
+        @next="creationStatus = creationState.availability"
+        @create="creationStatus = creationState.finished; getDbAppointments();"
+        @cancel="creationStatus = creationState.hidden"
       />
     </div>
   </div>
@@ -197,43 +197,38 @@ const calendarsById = computed(() => {
   calendars.value.forEach(c => { calendarsObj[c.id] = c });
   return calendarsObj;
 });
-getDbCalendars();
 
-// appointment creation status data
-const creationSteps = {
+// appointment creation state
+const creationState = {
   hidden: 0,
   details: 1,
   availability: 2,
   finished: 3
 }
-const creationStatus = ref(creationSteps.hidden);
+const creationStatus = ref(creationState.hidden);
 
 // get list of appointments from db
-// const fakeAppointments = [
-//   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T10:00:00', duration: 60, attendee: null }] },
-//   { title: 'Project Meeting', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T12:00:00', duration: 60, attendee: null }] },
-//   { title: 'Dog Park Event', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T14:00:00', duration: 60, attendee: null }] },
-//   { title: 'Interview Process', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-12T16:00:00', duration: 60, attendee: null }] },
-//   { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 60, attendee: null }] },
-//   { title: 'Learning Group', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-13T13:00:00', duration: 90, attendee: null }] },
-//   { title: 'Project Appointment', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-14T09:30:00', duration: 90, attendee: { name: 'John Doe', email: 'jane@doe.com' } }] },
-//   { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-12-15T10:00:00', duration: 120, attendee: null }, { start: '2022-12-15T12:00:00', duration: 120, attendee: null }] },
-// ];
 const appointments = ref([]);
 const getDbAppointments = async () => {
   const { data } = await call("me/appointments").get().json();
   appointments.value = data.value;
-  // enrich appointments data with calendar title and color
+  // extend appointments data with calendar title and color
   appointments.value.forEach(a => {
-    a.calendar_title = calendarsById.value[a.calendar_id].title;
-    a.calendar_color = calendarsById.value[a.calendar_id].color;
+    a.calendar_title = calendarsById.value[a.calendar_id]?.title;
+    a.calendar_color = calendarsById.value[a.calendar_id]?.color;
   });
 };
-getDbAppointments();
+
+// get all calendar and appointments data from db
+const getDbData = async () => {
+  await getDbCalendars();
+  await getDbAppointments();
+}
+getDbData();
 
 const pendingAppointments = computed(() => {
   const pending = [];
-  appointments.value.filter(a => a.status === 'pending').forEach(event => {
+  appointments.value.filter(a => a.status === 2).forEach(event => {
     event.slots.forEach(slot => {
       const extendedEvent = {...event, ...slot };
       delete extendedEvent.slots;
