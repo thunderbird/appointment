@@ -113,8 +113,8 @@
               <span>{{ appointment.calendar_title }}</span>
             </td>
             <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm">
-              <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
-                https://apmt.day/{{ appointment.slug }}
+              <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
+                {{ baseurl + appointment.slug }}
               </a>
             </td>
             <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
@@ -134,8 +134,8 @@
               <switch-toggle :active="appointment.mode === 'open'" :label="t('label.activeAppointment')" @click.stop="null" />
             </div>
             <div class="pl-4 text-sm">
-              <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
-                https://apmt.day/{{ appointment.slug }}
+              <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
+                {{ baseurl + appointment.slug }}
               </a>
             </div>
           </div>
@@ -189,6 +189,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject("dayjs");
+const baseurl = inject("baseurl");
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now

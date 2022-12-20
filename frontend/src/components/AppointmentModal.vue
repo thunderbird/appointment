@@ -46,8 +46,8 @@
           {{ t('label.bookingLink') }}
         </div>
         <div class="pl-6">
-          <a :href="'https://apmt.day/' + appointment.slug" class="text-teal-500 underline" target="_blank">
-            https://apmt.day/{{ appointment.slug }}
+          <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank">
+            {{ baseurl + appointment.slug }}
           </a>
         </div>
       </div>
@@ -131,6 +131,7 @@ import SwitchToggle from '@/elements/SwitchToggle.vue';
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");
+const baseurl = inject("baseurl");
 
 // component properties
 const props = defineProps({

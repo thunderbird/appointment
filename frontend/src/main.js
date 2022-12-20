@@ -12,6 +12,7 @@ const call = createFetch({
   },
 })
 app.provide('call', call);
+app.provide('baseurl', 'https://apmt.day/'); // TODO
 
 // init router
 import router from './router';

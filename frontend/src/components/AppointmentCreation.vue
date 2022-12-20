@@ -186,6 +186,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject('call');
+const baseurl = inject('baseurl');
 
 // component emits
 const emit = defineEmits(['start', 'next', 'create', 'cancel']);
@@ -308,7 +309,7 @@ const createAppointment = async () => {
 
   // show confirmation
   createdConfirmation.title = data.value.title;
-  createdConfirmation.publicLink = 'https://apmt.day/' + data.value.slug; // TODO
+  createdConfirmation.publicLink = baseurl + data.value.slug; // TODO
   createdConfirmation.show = true;
   // reset everything to start again
   for (const attr in defaultAppointment) {
