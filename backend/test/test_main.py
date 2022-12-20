@@ -284,9 +284,10 @@ def test_create_calendar_appointment():
                 "location_type": 2,
                 "location_url": "https://test.com",
                 "details": "Lorem Ipsum",
+                "status": 2,
             },
             "slots": [
-                { "start": YYYYMM + "-01 09:00:00" },
+                { "start": YYYYMM + "-01 09:00:00", "duration": 60 },
                 { "start": YYYYMM + "-02 09:00:00", "duration": 15 },
                 { "start": YYYYMM + "-03 09:00:00", "duration": 275 },
             ]
@@ -304,6 +305,7 @@ def test_create_calendar_appointment():
     assert data["details"] == "Lorem Ipsum"
     assert len(data["slug"]) > 8
     assert data["keep_open"]
+    assert data["status"] == 2
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == YYYYMM + "-03T09:00:00"
     assert data["slots"][2]["duration"] == 275
@@ -316,7 +318,8 @@ def test_create_another_calendar_appointment():
             "appointment": {
                 "calendar_id": 5,
                 "title": "Testing again",
-                "location_type": 1
+                "location_type": 1,
+                "status": 2,
             },
             "slots": [
                 { "start": YYYYMM + "-04 09:00:00", "duration": 120 },
@@ -331,6 +334,7 @@ def test_create_another_calendar_appointment():
     assert data["title"] == "Testing again"
     assert data["location_type"] == 1
     assert len(data["slug"]) > 8
+    assert data["status"] == 2
     assert len(data["slots"]) == 1
     assert data["slots"][0]["start"] == YYYYMM + "-04T09:00:00"
     assert data["slots"][0]["duration"] == 120
@@ -408,7 +412,7 @@ def test_update_existing_appointment():
                 "keep_open": "false"
             },
             "slots": [
-                { "start": YYYYMM + "-01 09:00:00" },
+                { "start": YYYYMM + "-01 09:00:00", "duration": 60 },
                 { "start": YYYYMM + "-03 10:00:00", "duration": 25 },
                 { "start": YYYYMM + "-05 09:00:00", "duration": 375 },
             ]
@@ -467,9 +471,10 @@ def test_delete_existing_appointment():
                 "calendar_id": "5",
                 "duration": "90",
                 "title": "Testing new Application featurex",
+                "status": 2,
             },
             "slots": [
-                { "start": YYYYMM + "-01 09:00:00" },
+                { "start": YYYYMM + "-01 09:00:00", "duration": 60 },
                 { "start": YYYYMM + "-03 10:00:00", "duration": 25 },
                 { "start": YYYYMM + "-05 09:00:00", "duration": 375 },
             ]

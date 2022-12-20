@@ -26,8 +26,8 @@ class SubscriberLevel(enum.Enum):
 
 class AppointmentStatus(enum.Enum):
   draft    = 1 # appointment was created but not published yet
-  ready    = 2 # appointment is published and open for attendees
-  closed   = 3 # appointment is published and closed for attendees
+  pending  = 2 # appointment is published and waiting for attendees
+  closed   = 3 # appointment is published and fulfilled or manually closed for attendees
 
 class LocationType(enum.Enum):
   inperson = 1 # appointment is held in person
