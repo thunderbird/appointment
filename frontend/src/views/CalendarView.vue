@@ -46,7 +46,7 @@
       :events="calendarEvents"
     />
     <!-- page side bar -->
-    <div class="w-1/5">
+    <div class="w-1/5 min-w-[310px]">
       <div v-if="creationStatus === creationSteps.hidden" class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month

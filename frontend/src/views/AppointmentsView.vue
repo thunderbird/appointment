@@ -143,7 +143,7 @@
       </div>
     </div>
     <!-- page side bar -->
-    <div class="w-1/5">
+    <div class="w-1/5 min-w-[310px]">
       <div v-if="creationStatus === creationSteps.hidden">
         <!-- monthly mini calendar -->
         <calendar-month
