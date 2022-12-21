@@ -93,11 +93,7 @@
                   <a href="" class="text-sm text-teal-500 underline" @click.stop="null">
                     {{ t('label.viewBooking') }}
                   </a>
-                  <text-button
-                    :label="t('label.copyLink')"
-                    icon="copy"
-                    @click="null"
-                  />
+                  <text-button :label="t('label.copyLink')" :copy="baseurl + a.slug" />
                 </div>
               </div>
             </div>
@@ -137,6 +133,7 @@ const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
+const baseurl = inject('baseurl');
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
