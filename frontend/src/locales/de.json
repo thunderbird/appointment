@@ -109,7 +109,7 @@
   },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen…",
-    "emailAddress": "max.muster@beispiel.de",
+    "emailAddress": "max.muster{'@'}beispiel.de",
     "firstAndLastName": "Vor- und Nachname",
     "writeHere": "Hier notieren…",
     "zoomCom": "zoom.com…"

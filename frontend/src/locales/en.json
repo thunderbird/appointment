@@ -109,7 +109,7 @@
   },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
-    "emailAddress": "john.doe@example.com",
+    "emailAddress": "john.doe{'@'}example.com",
     "firstAndLastName": "First and last name",
     "writeHere": "Write here…",
     "zoomCom": "zoom.com…"
