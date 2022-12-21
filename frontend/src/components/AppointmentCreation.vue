@@ -227,6 +227,7 @@ const slots = reactive({});
 
 // bring slots into list form for requests later
 // format: [ { start: '2022-12-01T10:00:00', duration: 90}, ...]
+// TODO: somethings wrong here. time durations are not correct.
 const slotList = computed(() => {
   const list = [];
   for (const day in slots) {

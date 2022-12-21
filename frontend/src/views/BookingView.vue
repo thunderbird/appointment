@@ -6,10 +6,10 @@
     <div class="text-4xl font-thin text-sky-500">Appointment</div>
   </header>
   <!-- booking page content -->
-  <main class="max-w-screen-2xl mx-auto py-32 px-4 flex justify-between items-start select-none">
+  <main class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
     <div v-if="appointment">
       <div class="text-3xl text-gray-700 mb-4">{{ appointment.title }}</div>
-      <div class="font-bold">{{ t('text.nameIsInvitingYou', { name: appointment.owner }) }}</div>
+      <div class="font-bold">{{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}</div>
       <div class="text-gray-700 mb-6">{{ appointment.details }}</div>
       <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
       <calendar-page-heading
@@ -31,14 +31,14 @@
       <calendar-week
         v-if="(activeView === views.week || activeView === views.weekAfterMonth)"
         :selected="activeDate"
-        :events="[appointment]"
+        :appointments="[appointment]"
         :booking="true"
         @event-selected="selectEvent"
       />
       <calendar-day
         v-if="(activeView === views.day)"
         :selected="activeDate"
-        :events="[appointment]"
+        :appointments="[appointment]"
         :booking="true"
         @event-selected="selectEvent"
       />
@@ -68,10 +68,11 @@ import CalendarDay from '@/components/CalendarDay.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import BookingModal from '@/components/BookingModal.vue';
 import { useI18n } from "vue-i18n";
-// import { useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 const { t } = useI18n();
-// const route = useRoute();
+const route = useRoute();
 const dj = inject("dayjs");
+const call = inject("call");
 
 // appointment data the visitor should see
 const appointment = ref({ title: '', slots: [] });
@@ -108,9 +109,10 @@ const viewTitle = computed(() => {
 });
 
 // TODO: retrieve appointment by slug
-onMounted(() => {
+onMounted(async () => {
   // TODO: async get appointment data with route.params.slug;
-  appointment.value = fakeAppointment;
+  const { data } = await call("apmt/adminx/" + route.params.slug).get().json();
+  appointment.value = data.value;
   activeDate.value = dj(appointment.value?.slots[0].start);
   // check appointment slots for appropriate view
   activeView.value = getViewBySlotDistribution(appointment.value.slots);
@@ -188,26 +190,9 @@ const bookEvent = (attendee) => {
   console.log(attendee);
 };
 
-// TODO: fake data
-const fakeAppointment = {
-  title: 'Bi-weekly Café Dates',
-  status: 'pending',
-  mode: 'open',
-  calendar: 'Family',
-  slug: 'sdfw83jc',
-  location_name: 'Signal',
-  location_url: '',
-  details: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam dictum magna sit amet est iaculis ullamcorper. Quisque tortor orci, cursus in ex sit amet, scelerisque rhoncus erat. Maecenas vehicula elit in pulvinar laoreet. Vivamus suscipit ligula elementum, porttitor dui eu, suscipit lectus. Mauris vitae',
-  owner: 'Solange',
-  slots: [
-    { start: '2022-12-09T11:00:00', duration: 120, attendee: null },
-    { start: '2022-12-13T11:00:00', duration: 120, attendee: null },
-    { start: '2022-12-13T13:00:00', duration: 120, attendee: null },
-    { start: '2022-12-13T15:00:00', duration: 120, attendee: null },
-    { start: '2022-12-14T09:30:00', duration: 120, attendee: null },
-    { start: '2022-12-15T10:00:00', duration: 120, attendee: null },
-    { start: '2022-12-15T12:00:00', duration: 120, attendee: null }
-  ]
-};
+// TODO: testing
+// test month: c6d252a241e8487f80f80a9b7ce7e105
+// test week: c4b1768e664d4af98a0c4687f63995a6
+// test day: fad65fb192764a079a4515ffa516cefb
 
 </script>
