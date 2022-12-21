@@ -108,7 +108,7 @@ def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
 
 """ APPOINTMENT repository functions
 """
-def create_calendar_appointment(db: Session, appointment: schemas.AppointmentBase, slots: list[schemas.SlotBase]):
+def create_calendar_appointment(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase]):
   """create new appointment with slots for calendar"""
   db_appointment = models.Appointment(**appointment.dict())
   db.add(db_appointment)
@@ -149,7 +149,7 @@ def appointment_has_slot(db: Session, appointment_id: int, slot_id: int):
   return db_slot and db_slot.appointment_id == appointment_id
 
 
-def update_calendar_appointment(db: Session, appointment: schemas.AppointmentBase, slots: list[schemas.SlotBase],
+def update_calendar_appointment(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase],
                                 appointment_id: int):
   """update existing appointment by id"""
   db_appointment = get_appointment(db, appointment_id)

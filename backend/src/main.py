@@ -227,14 +227,14 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db)):
   return repo.delete_calendar_appointment(db=db, appointment_id=id)
 
 
-# TODO: only expose necessary data here, create a PublicAppointment schema
-@app.get("/apmt/{username}/{slug}", response_model=schemas.Appointment)
+@app.get("/apmt/{username}/{slug}", response_model=schemas.AppointmentOut)
 def read_public_appointment(username: str, slug: str, db: Session = Depends(get_db)):
-  """endpoint to retrieve an appointment from db via public link"""
-  db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
-  if db_appointment is None:
+  """endpoint to retrieve an appointment from db via public link and only expose necessary data"""
+  a = repo.get_public_appointment(db, username=username, slug=slug)
+  s = repo.get_subscriber_by_username(db=db, username=username)
+  if a is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
-  return db_appointment
+  return schemas.AppointmentOut(id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=a.slots)
 
 
 @app.put("/apmt/{username}/{slug}", response_model=schemas.Attendee)

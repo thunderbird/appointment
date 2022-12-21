@@ -48,8 +48,13 @@ class SlotAttendee(BaseModel):
 """ APPOINTMENT model schemas
 """
 class AppointmentBase(BaseModel):
-  calendar_id: int
   title: str
+  details: str | None = None
+  slug: str | None = Field(default_factory=random_slug)
+
+
+class AppointmentFull(AppointmentBase):
+  calendar_id: int
   duration: int | None = None
   location_type: LocationType | None = LocationType.inperson
   location_suggestions: str | None = None
@@ -57,13 +62,11 @@ class AppointmentBase(BaseModel):
   location_name: str | None = None
   location_url: str | None = None
   location_phone: str | None = None
-  details: str | None = None
-  slug: str | None = Field(default_factory=random_slug)
   keep_open: bool | None = True
   status: AppointmentStatus | None = AppointmentStatus.draft
 
 
-class Appointment(AppointmentBase):
+class Appointment(AppointmentFull):
   id: int
   time_created: datetime | None = None
   time_updated: datetime | None = None
@@ -72,6 +75,11 @@ class Appointment(AppointmentBase):
   class Config:
     orm_mode = True
 
+
+class AppointmentOut(AppointmentBase):
+  id: int
+  owner_name: str | None = None
+  slots: list[Slot] = []
 
 """ CALENDAR model schemas
 """
@@ -121,7 +129,7 @@ class Subscriber(SubscriberBase):
 """ other schemas used for requests or data migration
 """
 class AppointmentSlots(BaseModel):
-  appointment: AppointmentBase
+  appointment: AppointmentFull
   slots: list[SlotBase] = []
 
 

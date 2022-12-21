@@ -497,11 +497,10 @@ def test_read_public_existing_appointment():
     response = client.get("/apmt/adminx/" + slug)
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["time_created"] != None
-    assert data["time_updated"] != None
-    assert data["calendar_id"] == 5
-    assert data["duration"] == 90
+    assert "calendar_id" not in data
+    assert "status" not in data
     assert data["title"] == "Testing new Application featurex"
+    assert data["owner_name"] == "The Admin"
     assert len(data["slots"]) == 3
     assert data["slots"][2]["start"] == YYYYMM + "-05T09:00:00"
     assert data["slots"][2]["duration"] == 375
