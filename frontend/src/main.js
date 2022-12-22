@@ -40,13 +40,22 @@ import weekday from "dayjs/plugin/weekday";
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import localeData from 'dayjs/plugin/localeData';
+import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/de';
 dayjs.locale(loc);
 dayjs.extend(weekday);
 dayjs.extend(advancedFormat);
 dayjs.extend(localizedFormat);
-dayjs.extend(localeData)
+dayjs.extend(localeData);
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
 app.provide('dayjs', dayjs);
+const hDuration = m => {
+	if (m < 60) return dayjs.duration(m, 'minutes').humanize();
+	else return dayjs.duration(m/60, 'hours').humanize();
+};
+app.provide('hDuration', hDuration);
 
 // init basic css with tailwind imports
 import './assets/main.css';
