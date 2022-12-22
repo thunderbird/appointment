@@ -209,7 +209,7 @@ const pendingAppointments = computed(() => {
       pending.push(extendedEvent);
     });
   });
-  return pending.slice(0, 4);
+  return pending.filter(a => dj(a.start) > dj()).slice(0, 4);
 });
 
 // get remote calendar data for current month
