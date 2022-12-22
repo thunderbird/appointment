@@ -75,34 +75,7 @@
             />
           </div>
           <div v-else class="flex flex-col gap-8 mt-4">
-            <div
-              v-for="(a, i) in pendingAppointments"
-              :key="i"
-              class="flex gap-2 items-stretch"
-            >
-              <div class="w-1.5 rounded-lg" :style="{ 'background-color': a.calendar_color }"></div>
-              <div class="w-full">
-                <div class="flex justify-between">
-                  <div>
-                    <div>{{ a.title }}</div>
-                    <div class="text-sm">
-                      {{ hDuration(a.duration) }},
-                      {{ t('label.' + keyByValue(locationTypes, a.location_type)) }}
-                    </div>
-                  </div>
-                  <icon-dots-vertical class="h-6 w-6 stroke-slate-400 stroke-2 fill-slate-400" />
-                </div>
-                <div class="flex justify-between items-center">
-                  <router-link
-                    :to="{ name: 'booking', params: { 'slug': a.slug } }"
-                    class="text-sm text-teal-500 underline"
-                  >
-                    {{ t('label.viewBooking') }}
-                  </router-link>
-                  <text-button :label="t('label.copyLink')" :copy="baseurl + a.slug" />
-                </div>
-              </div>
-            </div>
+            <appointment-list-item v-for="a in pendingAppointments" :key="a.id" :appointment="a" />
           </div>
         </div>
       </div>
@@ -125,24 +98,19 @@
 import { ref, inject, computed, watch } from 'vue';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
-import TextButton from '@/elements/TextButton.vue';
+import AppointmentListItem from '@/elements/AppointmentListItem.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
 import CalendarDay from '@/components/CalendarDay.vue';
 import AppointmentCreation from '@/components/AppointmentCreation.vue';
-import IconDotsVertical from "@/elements/icons/IconDotsVertical.vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { locationTypes } from "@/definitions";
-import { keyByValue } from "@/utils";
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
-const baseurl = inject('baseurl');
-const hDuration = inject('hDuration');
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
