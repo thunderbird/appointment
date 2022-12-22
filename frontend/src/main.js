@@ -15,7 +15,7 @@ app.provide('call', call);
 app.provide('baseurl', 'https://apmt.day/'); // TODO
 
 // init router
-import router from './router';
+import router from '@/router';
 app.use(router);
 
 // init localization
