@@ -85,14 +85,20 @@
                 <div class="flex justify-between">
                   <div>
                     <div>{{ a.title }}</div>
-                    <div class="text-sm">{{ a.duration }}</div>
+                    <div class="text-sm">
+                      {{ hDuration(a.duration) }},
+                      {{ t('label.' + keyByValue(locationTypes, a.location_type)) }}
+                    </div>
                   </div>
                   <icon-dots-vertical class="h-6 w-6 stroke-slate-400 stroke-2 fill-slate-400" />
                 </div>
                 <div class="flex justify-between items-center">
-                  <a href="" class="text-sm text-teal-500 underline" @click.stop="null">
+                  <router-link
+                    :to="{ name: 'booking', params: { 'slug': a.slug } }"
+                    class="text-sm text-teal-500 underline"
+                  >
                     {{ t('label.viewBooking') }}
-                  </a>
+                  </router-link>
                   <text-button :label="t('label.copyLink')" :copy="baseurl + a.slug" />
                 </div>
               </div>
@@ -128,12 +134,15 @@ import AppointmentCreation from '@/components/AppointmentCreation.vue';
 import IconDotsVertical from "@/elements/icons/IconDotsVertical.vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { locationTypes } from "@/definitions";
+import { keyByValue } from "@/utils";
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
 const baseurl = inject('baseurl');
+const hDuration = inject('hDuration');
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());

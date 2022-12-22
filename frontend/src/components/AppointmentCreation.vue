@@ -183,6 +183,7 @@ import IconCheck from '@/elements/icons/IconCheck.vue';
 import IconAlertTriangle from '@/elements/icons/IconAlertTriangle.vue';
 import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
 import { useI18n } from "vue-i18n";
+import { locationTypes } from "@/definitions";
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject('call');
@@ -204,7 +205,6 @@ const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
 // tab navigation for location types
-const locationTypes = { 'inPerson': 1, 'online': 2 };
 const updateLocationType = type => {
   appointment.location_type = locationTypes[type];
 };
