@@ -60,7 +60,8 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, computed } from 'vue'
+import { ref, inject, onMounted, computed } from 'vue';
+import { bookingCalendarViews as views } from '@/definitions';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
 import CalendarWeek from '@/components/CalendarWeek.vue';
@@ -81,12 +82,6 @@ const appointment = ref({ title: '', slots: [] });
 // month: there are multiple weeks of availability, leads to week view for selection
 // week: there are multiple days of availability, provides selectable slots
 // day: time slots are only on one single day, provides selectable slots
-const views = {
-  month: 1,
-  weekAfterMonth: 2,
-  week: 3,
-  day: 4
-};
 const activeView = ref(views.month);
 const activeDate = ref(dj());
 const startOfActiveWeek = computed(() => {

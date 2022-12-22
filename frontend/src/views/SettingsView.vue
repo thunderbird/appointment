@@ -13,7 +13,7 @@
       </label>
       <!-- menu -->
       <div
-        v-for="(view, key) in views"
+        v-for="(view, key) in settingsSections"
         :key="key"
         class="rounded-lg font-semibold text-gray-500 bg-gray-100 p-4 cursor-pointer flex justify-between"
         :class="{ 'bg-teal-500 text-white': view === activeView }"
@@ -28,7 +28,7 @@
     </div>
     <!-- content -->
     <div class="w-4/5 pt-14">
-      <div v-if="activeView === views.general" class="flex flex-col gap-8">
+      <div v-if="activeView === settingsSections.general" class="flex flex-col gap-8">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.generalSettings') }}</div>
         <div class="pl-6">
           <div class="text-xl">{{ t('heading.languageAndAppearance') }}</div>
@@ -103,19 +103,19 @@
           </div>
         </div>
       </div>
-      <div v-if="activeView === views.calendar">
+      <div v-if="activeView === settingsSections.calendar">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
       </div>
-      <div v-if="activeView === views.appointmentsAndBooking">
+      <div v-if="activeView === settingsSections.appointmentsAndBooking">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.appointmentsAndBookingSettings') }}</div>
       </div>
-      <div v-if="activeView === views.account">
+      <div v-if="activeView === settingsSections.account">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.accountSettings') }}</div>
       </div>
-      <div v-if="activeView === views.privacy">
+      <div v-if="activeView === settingsSections.privacy">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.privacySettings') }}</div>
       </div>
-      <div v-if="activeView === views.faq">
+      <div v-if="activeView === settingsSections.faq">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.frequentlyAskedQuestions') }}</div>
       </div>
     </div>
@@ -124,6 +124,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { settingsSections } from '@/definitions';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconChevronRight from '@/elements/icons/IconChevronRight.vue';
@@ -134,17 +135,9 @@ const route = useRoute();
 const router = useRouter();
 
 // menu navigation of different views
-const views = {
-  general: 1,
-  calendar: 2,
-  appointmentsAndBooking: 3,
-  account: 4,
-  privacy: 5,
-  faq: 6
-};
-const activeView = ref(route.params.view ? views[route.params.view] : views.general);
+const activeView = ref(route.params.view ? settingsSections[route.params.view] : settingsSections.general);
 const show = (key) => {
   router.replace({ name: route.name, params: { view: key } });
-  activeView.value = views[key];
+  activeView.value = settingsSections[key];
 };
 </script>

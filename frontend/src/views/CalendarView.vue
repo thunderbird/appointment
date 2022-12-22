@@ -13,7 +13,7 @@
       <button @click="selectDate(dj())" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
-      <tab-bar :tab-items="tabItems" :active="tabActive" @update="updateTab" class="text-xl" />
+      <tab-bar :tab-items="calendarViews" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="creationStatus !== creationState.hidden"
@@ -22,24 +22,24 @@
     </div>
   </div>
   <!-- page content -->
-  <div class="flex justify-between gap-24 mt-8 min-h-[767px] items-stretch" :class="{ 'mt-[60px]': tabActive === tabItems.month }">
+  <div class="flex justify-between gap-24 mt-8 min-h-[767px] items-stretch" :class="{ 'mt-[60px]': tabActive === calendarViews.month }">
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month
-      v-show="tabActive === tabItems.month"
+      v-show="tabActive === calendarViews.month"
       class="w-4/5"
       :selected="activeDate"
       :appointments="appointments"
       :events="calendarEvents"
     />
     <calendar-week
-      v-show="tabActive === tabItems.week"
+      v-show="tabActive === calendarViews.week"
       class="w-4/5"
       :selected="activeDate"
       :appointments="appointments"
       :events="calendarEvents"
     />
     <calendar-day
-      v-show="tabActive === tabItems.day"
+      v-show="tabActive === calendarViews.day"
       class="w-4/5"
       :selected="activeDate"
       :appointments="appointments"
@@ -96,6 +96,7 @@
 
 <script setup>
 import { ref, inject, computed, watch } from 'vue';
+import { creationState, calendarViews } from '@/definitions';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import AppointmentListItem from '@/elements/AppointmentListItem.vue';
@@ -127,22 +128,21 @@ const endOfActiveWeek = computed(() => {
   return activeDate.value.endOf('week');
 });
 
-// menu items for tab navigation
-const tabItems = { 'day': 0, 'week': 1, 'month': 2 };
-const tabActive = ref(tabItems[route.params.view]);
+// active menu item for tab navigation of calendar views
+const tabActive = ref(calendarViews[route.params.view]);
 const updateTab = view => {
   router.replace({ name: route.name, params: { view: view, date: route.params.date ?? dj().format('YYYY-MM-DD') } });
-  tabActive.value = tabItems[view];
+  tabActive.value = calendarViews[view];
 };
 
 // calculate page title
 const pageTitle = computed(() => {
   switch (tabActive.value) {
-    case tabItems.day:
+    case calendarViews.day:
       return activeDate.value.format('dddd Do');
-    case tabItems.week:
+    case calendarViews.week:
       return startOfActiveWeek.value.format('ddd Do') + ' - ' + endOfActiveWeek.value.format('ddd Do');
-    case tabItems.month:
+    case calendarViews.month:
     default:
       return ''
   }
@@ -151,7 +151,7 @@ const pageTitle = computed(() => {
 // date navigation
 const dateNav = (unit = 'auto', forward = true) => {
   if (unit === 'auto') {
-    unit = Object.keys(tabItems).find(key => tabItems[key] === tabActive.value);
+    unit = Object.keys(calendarViews).find(key => calendarViews[key] === tabActive.value);
   }
   if (forward) {
     selectDate(activeDate.value.add(1, unit));
@@ -173,12 +173,6 @@ const calendarsById = computed(() => {
 });
 
 // appointment creation state
-const creationState = {
-  hidden: 0,
-  details: 1,
-  availability: 2,
-  finished: 3
-}
 const creationStatus = ref(creationState.hidden);
 
 // get list of appointments from db
@@ -213,9 +207,9 @@ const pendingAppointments = computed(() => {
 });
 
 // get remote calendar data for current month
-const calendarId = 5; // TODO: retrieve all configured calendars
-const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
-const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
+const calendarId     = 5; // TODO: retrieve all configured calendars
+const eventsFrom     = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
+const eventsTo       = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
 
 const getRemoteEvents = async (calendar, from, to) => {

@@ -50,10 +50,12 @@ dayjs.extend(localizedFormat);
 dayjs.extend(localeData);
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
+// provide the configured dayjs instance as well es some helper functions
 app.provide('dayjs', dayjs);
 const hDuration = m => {
-	if (m < 60) return dayjs.duration(m, 'minutes').humanize();
-	else return dayjs.duration(m/60, 'hours').humanize();
+	return (m < 60)
+		? dayjs.duration(m, 'minutes').humanize()
+		: dayjs.duration(m/60, 'hours').humanize();
 };
 app.provide('hDuration', hDuration);
 
