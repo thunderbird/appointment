@@ -19,10 +19,45 @@ export const calendarViews = {
   month: 3,
 };
 
+// available appointment views
+export const appointmentViews = {
+  all:     1,
+  booked:  2,
+  pending: 3,
+  past:    4,
+};
+
 // extended calendar views for booking
 export const bookingCalendarViews = {
 	...calendarViews,
   weekAfterMonth: 4,
+};
+
+// columns for appointments list view
+export const listColumns = {
+  title:       1,
+  status:      2,
+  mode:        3,
+  calendar:    4,
+  bookingLink: 5,
+  replies:     6,
+};
+
+// appointments list filter options
+export const filterOptions = {
+  allAppointments:        1,
+  appointmentsToday:      2,
+  appointmentsNext7Days:  3,
+  appointmentsNext14Days: 4,
+  appointmentsNext31Days: 5,
+  appointmentsInMonth:    6,
+  allFutureAppointments:  7,
+};
+
+// data view types
+export const viewTypes = {
+  list: 1,
+  grid: 2,
 };
 
 // settingsSections
@@ -39,5 +74,10 @@ export default {
 	locationTypes,
 	creationState,
 	calendarViews,
-	settingsSections
+	appointmentViews,
+	bookingCalendarViews,
+	listColumns,
+	filterOptions,
+	viewTypes,
+	settingsSections,
 }

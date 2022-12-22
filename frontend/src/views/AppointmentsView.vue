@@ -3,11 +3,11 @@
   <div class="flex justify-between items-start select-none">
     <div class="text-4xl font-light">{{ t('label.appointments') }}</div>
     <div class="flex gap-8 items-center">
-      <tab-bar :tab-items="tabItems" :active="tabActive" @update="updateTab" class="text-xl" />
+      <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationSteps.hidden"
-        @click="creationStatus = creationSteps.details"
+        :disabled="creationStatus !== creationState.hidden"
+        @click="creationStatus = creationState.details"
       />
     </div>
   </div>
@@ -30,20 +30,20 @@
           <div
             class="border-r border-gray-300 py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
             :class="{
-              'bg-gray-300': view === viewOptions.list,
-              'hover:bg-gray-100': view !== viewOptions.list
+              'bg-gray-300': view === viewTypes.list,
+              'hover:bg-gray-100': view !== viewTypes.list
             }"
-            @click="view = viewOptions.list"
+            @click="view = viewTypes.list"
           >
             <icon-list class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
           </div>
           <div
             class="py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
             :class="{
-              'bg-gray-300': view === viewOptions.grid,
-              'hover:bg-gray-100': view !== viewOptions.grid
+              'bg-gray-300': view === viewTypes.grid,
+              'hover:bg-gray-100': view !== viewTypes.grid
             }"
-            @click="view = viewOptions.grid"
+            @click="view = viewTypes.grid"
           >
             <icon-grid class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
           </div>
@@ -52,9 +52,9 @@
           class="rounded border border-gray-300 py-1 px-1.5 flex items-center"
           :class="{
             'bg-gray-300': showAdjustments,
-            'hover:bg-gray-100': !showAdjustments && view === viewOptions.list,
-            'opacity-30': view === viewOptions.grid,
-            'cursor-pointer': view === viewOptions.list
+            'hover:bg-gray-100': !showAdjustments && view === viewTypes.list,
+            'opacity-30': view === viewTypes.grid,
+            'cursor-pointer': view === viewTypes.list
           }"
           @click="openAdjustments"
         >
@@ -84,7 +84,7 @@
         </div>
       </div>
       <!-- appointments list -->
-      <table v-show="view === viewOptions.list" class="w-full mt-4">
+      <table v-show="view === viewTypes.list" class="w-full mt-4">
         <thead>
           <tr>
             <th class="bg-gray-100 py-1"></th>
@@ -124,7 +124,7 @@
         </tbody>
       </table>
       <!-- appointments grid -->
-      <div v-show="view === viewOptions.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
+      <div v-show="view === viewTypes.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
         <div v-for="(appointment, i) in filteredAppointments" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer" @click="showAppointment = appointment">
           <div class="px-4 py-3 -my-0.5 rounded border-l-8 border-sky-400">
             <div>{{ appointment.title }}</div>
@@ -144,7 +144,7 @@
     </div>
     <!-- page side bar -->
     <div class="w-1/5 min-w-[310px]">
-      <div v-if="creationStatus === creationSteps.hidden">
+      <div v-if="creationStatus === creationState.hidden">
         <!-- monthly mini calendar -->
         <calendar-month
           :selected="activeDate"
@@ -159,10 +159,10 @@
       <appointment-creation
         v-else
         :status="creationStatus"
-        @start="creationStatus = creationSteps.details"
-        @next="creationStatus = creationSteps.availability"
-        @create="creationStatus = creationSteps.finished"
-        @cancel="creationStatus = creationSteps.hidden"
+        @start="creationStatus = creationState.details"
+        @next="creationStatus = creationState.availability"
+        @create="creationStatus = creationState.finished"
+        @cancel="creationStatus = creationState.hidden"
       />
     </div>
   </div>
@@ -171,6 +171,7 @@
 
 <script setup>
 import { ref, inject, computed } from 'vue';
+import { listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState } from '@/definitions';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
 import CalendarMonth from '@/components/CalendarMonth.vue';
@@ -195,22 +196,16 @@ const baseurl = inject("baseurl");
 const activeDate = ref(dj()); // current selected date, defaults to now
 const selectDate = (d) => activeDate.value = dj(d);
 
-// menu items for tab navigation
-const tabItems = {
-  'all':     0,
-  'booked':  1,
-  'pending': 2,
-  'past':    3,
-};
-const tabActive = ref(route.params.view ? tabItems[route.params.view] : tabItems.all);
+// active menu item for tab navigation of appointment views
+const tabActive = ref(route.params.view ? views[route.params.view] : views.all);
 const updateTab = view => {
   router.replace({ name: route.name, params: { view: view } });
-  tabActive.value = tabItems[view];
+  tabActive.value = views[view];
 };
 // date navigation
 const dateNav = (unit = 'auto', forward = true) => {
   if (unit === 'auto') {
-    unit = Object.keys(tabItems).find(key => tabItems[key] === tabActive.value);
+    unit = Object.keys(views).find(key => views[key] === tabActive.value);
   }
   if (forward) {
     activeDate.value = activeDate.value.add(1, unit);
@@ -219,43 +214,20 @@ const dateNav = (unit = 'auto', forward = true) => {
   }
 };
 
-// columns for list view
-const columns = {
-  'title':       0,
-  'status':      1,
-  'mode':        2,
-  'calendar':    3,
-  'bookingLink': 4,
-  'replies':     5,
-};
-
 // handle data filter
-const filterOptions = {
-  'allAppointments':        0,
-  'appointmentsToday':      1,
-  'appointmentsNext7Days':  2,
-  'appointmentsNext14Days': 3,
-  'appointmentsNext31Days': 4,
-  'appointmentsInMonth':    5,
-  'allFutureAppointments':  6,
-};
 const filter = ref(filterOptions.appointmentsToday);
 
 // handle data search
 const search = ref('');
 
 // handle data view
-const viewOptions = {
-  'list': 0,
-  'grid': 1,
-};
-const view = ref(viewOptions.list);
+const view = ref(viewTypes.list);
 
 // handle view adjustments: column visibility
 const showAdjustments = ref(false);
 const visibleColumns = ref(Object.values(columns));
 const openAdjustments = () => {
-  if (view.value == viewOptions.list) {
+  if (view.value == viewTypes.list) {
     showAdjustments.value = true;
   }
 };
@@ -299,16 +271,16 @@ const filteredAppointments = computed(() => {
   }
   // by active tab
   switch (tabActive.value) {
-    case tabItems.booked:
+    case views.booked:
       list = list.filter(e => e.status === 'booked');
       break;
-    case tabItems.pending:
+    case views.pending:
       list = list.filter(e => e.status === 'pending');
       break;
-    case tabItems.past:
+    case views.past:
       list = list.filter(e => e.status === 'past');
       break;
-    case tabItems.all:
+    case views.all:
     default:
       break;
   }
@@ -323,11 +295,5 @@ const showAppointment = ref(null);
 const closeAppointmentModal = () => showAppointment.value = null;
 
 // appointment creation
-const creationSteps = {
-  hidden: 0,
-  details: 1,
-  availability: 2,
-  finished: 3
-}
-const creationStatus = ref(creationSteps.hidden);
+const creationStatus = ref(creationState.hidden);
 </script>
