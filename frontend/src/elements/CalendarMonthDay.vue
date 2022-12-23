@@ -41,7 +41,7 @@
       >
         <div
           v-if="event.remote"
-          class="w-2 h-2 rounded-full bg-sky-400"
+          class="w-2 h-2 shrink-0 rounded-full bg-sky-400"
           :style="{ 'background-color': event.calendar_color }"
         ></div>
         <div
