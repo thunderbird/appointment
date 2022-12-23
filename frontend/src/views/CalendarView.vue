@@ -86,7 +86,7 @@
         :calendars="calendars"
         @start="creationStatus = creationState.details"
         @next="creationStatus = creationState.availability"
-        @create="creationStatus = creationState.finished; getDbAppointments();"
+        @create="creationStatus = creationState.finished; refreshAppointments();"
         @cancel="creationStatus = creationState.hidden"
       />
     </div>
@@ -112,6 +112,13 @@ const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
+const refreshAppointments = inject('refreshAppointments');
+
+// view properties
+const props = defineProps({
+  calendars: Array,    // list of calendars from db
+  appointments: Array, // list of appointments from db
+});
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
@@ -160,43 +167,13 @@ const dateNav = (unit = 'auto', forward = true) => {
   }
 };
 
-// get list of calendars from db
-const calendars = ref([]);
-const getDbCalendars = async () => {
-  const { data } = await call("me/calendars").get().json();
-  calendars.value = data.value;
-};
-const calendarsById = computed(() => {
-  const calendarsObj = {};
-  calendars.value.forEach(c => { calendarsObj[c.id] = c });
-  return calendarsObj;
-});
-
 // appointment creation state
 const creationStatus = ref(creationState.hidden);
 
-// get list of appointments from db
-const appointments = ref([]);
-const getDbAppointments = async () => {
-  const { data } = await call("me/appointments").get().json();
-  appointments.value = data.value;
-  // extend appointments data with calendar title and color
-  appointments.value.forEach(a => {
-    a.calendar_title = calendarsById.value[a.calendar_id]?.title;
-    a.calendar_color = calendarsById.value[a.calendar_id]?.color;
-  });
-};
-
-// get all calendar and appointments data from db
-const getDbData = async () => {
-  await getDbCalendars();
-  await getDbAppointments();
-}
-getDbData();
-
+// list of all pending appointments
 const pendingAppointments = computed(() => {
   const pending = [];
-  appointments.value.filter(a => a.status === 2).forEach(event => {
+  props.appointments.filter(a => a.status === 2).forEach(event => {
     event.slots.forEach(slot => {
       const extendedEvent = {...event, ...slot };
       delete extendedEvent.slots;
