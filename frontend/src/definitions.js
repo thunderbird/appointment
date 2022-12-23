@@ -37,7 +37,7 @@ export const bookingCalendarViews = {
 export const listColumns = {
   title:       1,
   status:      2,
-  mode:        3,
+  active:      3,
   calendar:    4,
   bookingLink: 5,
   replies:     6,

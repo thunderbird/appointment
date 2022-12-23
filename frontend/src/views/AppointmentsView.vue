@@ -106,8 +106,8 @@
             <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
               <span>{{ t('label.' + appointment.status) }}</span>
             </td>
-            <td v-if="columnVisible('mode')" class="py-2 px-2 text-sm">
-              <span>{{ appointment.mode }}</span>
+            <td v-if="columnVisible('active')" class="py-2 px-2 text-sm">
+              <span>{{ appointment.active ? t('label.open') : t('label.closed') }}</span>
             </td>
             <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
@@ -131,7 +131,7 @@
             <div class="pl-4 text-sm">{{ t('label.' + appointment.status) }}</div>
             <div class="pl-4 text-sm">{{ appointment.calendar_title }}</div>
             <div class="px-4 text-sm">
-              <switch-toggle :active="appointment.mode === 'open'" :label="t('label.activeAppointment')" @click.stop="null" />
+              <switch-toggle :active="appointment.active" :label="t('label.activeAppointment')" @click.stop="null" />
             </div>
             <div class="pl-4 text-sm">
               <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
@@ -192,6 +192,12 @@ const router = useRouter();
 const dj = inject("dayjs");
 const baseurl = inject("baseurl");
 
+// view properties
+defineProps({
+  calendars: Array,    // list of calendars from db
+  appointments: Array, // list of appointments from db
+});
+
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
 const selectDate = (d) => activeDate.value = dj(d);
@@ -248,18 +254,18 @@ const restoreColumnOrder = () => {
 
 // TODO: fake data
 const fakeAppointments = [
-  { title: 'Bi-weekly Café Dates', status: 'past', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Weekly ZOOM', status: 'past', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Project Appointment', status: 'pending', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Team Building Event', status: 'booked', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'BigBlueButton', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }, { start: '2022-11-13T11:00:00', duration: 60, attendee: null }, { start: '2022-11-13T12:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'jane@doe.com' } }] },
-  { title: 'Bi-weekly Café Dates', status: 'pending', mode: 'closed', calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Weekly ZOOM', status: 'booked', mode: 'closed', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Jour Fixe Team', status: 'booked', mode: 'open', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Phone', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Project Appointment', status: 'booked', mode: 'closed', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Park', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', mode: 'closed', calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Bi-weekly Café Dates', status: 'past', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Weekly ZOOM', status: 'past', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Project Appointment', status: 'pending', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Team Building Event', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'BigBlueButton', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }, { start: '2022-11-13T11:00:00', duration: 60, attendee: null }, { start: '2022-11-13T12:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'jane@doe.com' } }] },
+  { title: 'Bi-weekly Café Dates', status: 'pending', active: false, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
+  { title: 'Weekly ZOOM', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Phone', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Project Appointment', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Park', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+  { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
 ];
 
 // handle filtered appointments list
