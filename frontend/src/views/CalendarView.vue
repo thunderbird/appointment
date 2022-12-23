@@ -86,7 +86,7 @@
         :calendars="calendars"
         @start="creationStatus = creationState.details"
         @next="creationStatus = creationState.availability"
-        @create="creationStatus = creationState.finished; refreshAppointments();"
+        @create="creationStatus = creationState.finished; refresh();"
         @cancel="creationStatus = creationState.hidden"
       />
     </div>
@@ -112,7 +112,7 @@ const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
-const refreshAppointments = inject('refreshAppointments');
+const refresh = inject('refresh');
 
 // view properties
 const props = defineProps({
@@ -173,7 +173,7 @@ const creationStatus = ref(creationState.hidden);
 // list of all pending appointments
 const pendingAppointments = computed(() => {
   const pending = [];
-  props.appointments.filter(a => a.status === 2).forEach(event => {
+  props.appointments.filter(a => a.status === 2).forEach(event => { // TODO: define appointment status
     event.slots.forEach(slot => {
       const extendedEvent = {...event, ...slot };
       delete extendedEvent.slots;
@@ -194,8 +194,9 @@ const getRemoteEvents = async (calendar, from, to) => {
   calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
 };
 
+// initially load data when component gets remounted
 onMounted(() => {
-  refreshAppointments();
+  refresh();
   getRemoteEvents(calendarId, eventsFrom, eventsTo);
 });
 

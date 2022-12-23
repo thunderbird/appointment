@@ -1,7 +1,7 @@
 // appointment location types
 export const locationTypes = {
-	inPerson: 1,
-	online:   2,
+  inPerson: 1,
+  online:   2,
 };
 
 // appointment creation state
@@ -19,18 +19,23 @@ export const calendarViews = {
   month: 3,
 };
 
-// available appointment views
-export const appointmentViews = {
-  all:     1,
-  booked:  2,
-  pending: 3,
-  past:    4,
-};
-
 // extended calendar views for booking
 export const bookingCalendarViews = {
-	...calendarViews,
+  ...calendarViews,
   weekAfterMonth: 4,
+};
+
+// available appointment views
+export const appointmentState = {
+  booked:  1,
+  pending: 2,
+  past:    3,
+};
+
+// available appointment views
+export const appointmentViews = {
+  ...appointmentState,
+  all: 4,
 };
 
 // columns for appointments list view
@@ -71,13 +76,14 @@ export const settingsSections = {
 };
 
 export default {
-	locationTypes,
-	creationState,
-	calendarViews,
-	appointmentViews,
-	bookingCalendarViews,
-	listColumns,
-	filterOptions,
-	viewTypes,
-	settingsSections,
+  locationTypes,
+  creationState,
+  calendarViews,
+  bookingCalendarViews,
+  appointmentState,
+  appointmentViews,
+  listColumns,
+  filterOptions,
+  viewTypes,
+  settingsSections,
 }

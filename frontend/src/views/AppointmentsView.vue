@@ -96,15 +96,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(appointment, i) in filteredAppointments" :key="i" class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer" @click="showAppointment = appointment">
+          <tr
+            v-for="(appointment, i) in filteredAppointments"
+            :key="i"
+            class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer"
+            @mouseover="el => el.currentTarget.style.backgroundColor=appointment.calendar_color + '22'"
+            @mouseout="el => el.currentTarget.style.backgroundColor='transparent'"
+            @click="showAppointment = appointment"
+          >
             <td class="align-middle">
-              <div class="rounded-full w-3 h-3 bg-sky-400 mx-auto"></div>
+              <div
+                class="rounded-full w-3 h-3 bg-sky-400 mx-auto"
+                :style="{ 'background-color': appointment.calendar_color }"
+              ></div>
             </td>
             <td v-if="columnVisible('title')" class="py-2 px-2">
               <span>{{ appointment.title }}</span>
             </td>
             <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
-              <span>{{ t('label.' + appointment.status) }}</span>
+              <span>{{ t('label.' + keyByValue(appointmentState, appointment.status)) }}</span>
             </td>
             <td v-if="columnVisible('active')" class="py-2 px-2 text-sm">
               <span>{{ appointment.active ? t('label.open') : t('label.closed') }}</span>
@@ -112,8 +122,13 @@
             <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
             </td>
-            <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm">
-              <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
+            <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs whitespace-nowrap overflow-hidden overflow-ellipsis">
+              <a
+                :href="baseurl + appointment.slug"
+                class="text-teal-500 underline"
+                target="_blank"
+                @click.stop="null"
+              >
                 {{ baseurl + appointment.slug }}
               </a>
             </td>
@@ -125,15 +140,26 @@
       </table>
       <!-- appointments grid -->
       <div v-show="view === viewTypes.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
-        <div v-for="(appointment, i) in filteredAppointments" :key="i" class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer" @click="showAppointment = appointment">
-          <div class="px-4 py-3 -my-0.5 rounded border-l-8 border-sky-400">
+        <div
+          v-for="(appointment, i) in filteredAppointments"
+          :key="i"
+          class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer"
+          :style="{ 'border-color': appointment.calendar_color }"
+          @mouseover="el => el.currentTarget.style.backgroundColor=appointment.calendar_color + '22'"
+          @mouseout="el => el.currentTarget.style.backgroundColor='transparent'"
+          @click="showAppointment = appointment"
+        >
+          <div
+            class="h-full px-4 py-3 rounded border-l-8 border-sky-400"
+            :style="{ 'border-color': appointment.calendar_color }"
+          >
             <div>{{ appointment.title }}</div>
-            <div class="pl-4 text-sm">{{ t('label.' + appointment.status) }}</div>
+            <div class="pl-4 text-sm">{{ t('label.' + keyByValue(appointmentState, appointment.status)) }}</div>
             <div class="pl-4 text-sm">{{ appointment.calendar_title }}</div>
             <div class="px-4 text-sm">
               <switch-toggle :active="appointment.active" :label="t('label.activeAppointment')" @click.stop="null" />
             </div>
-            <div class="pl-4 text-sm">
+            <div class="pl-4 text-sm whitespace-nowrap overflow-hidden overflow-ellipsis">
               <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
                 {{ baseurl + appointment.slug }}
               </a>
@@ -170,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, inject, computed } from 'vue';
+import { ref, inject, computed, onMounted } from 'vue';
 import { listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState } from '@/definitions';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import TabBar from '@/components/TabBar.vue';
@@ -180,20 +206,23 @@ import IconSearch from '@/elements/icons/IconSearch.vue';
 import IconList from '@/elements/icons/IconList.vue';
 import IconGrid from "@/elements/icons/IconGrid.vue";
 import IconCheck from "@/elements/icons/IconCheck.vue";
-import IconAdjustments from "@/elements/icons/IconAdjustments.vue";
+import IconAdjustments from '@/elements/icons/IconAdjustments.vue';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import AppointmentCreation from '@/components/AppointmentCreation.vue';
 import { vOnClickOutside } from '@vueuse/components';
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { appointmentState } from '@/definitions';
+import { keyByValue } from '@/utils';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject("dayjs");
-const baseurl = inject("baseurl");
+const dj = inject('dayjs');
+const baseurl = inject('baseurl');
+const refresh = inject('refresh');
 
 // view properties
-defineProps({
+const props = defineProps({
   calendars: Array,    // list of calendars from db
   appointments: Array, // list of appointments from db
 });
@@ -253,24 +282,24 @@ const restoreColumnOrder = () => {
 };
 
 // TODO: fake data
-const fakeAppointments = [
-  { title: 'Bi-weekly Café Dates', status: 'past', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Weekly ZOOM', status: 'past', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Project Appointment', status: 'pending', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Team Building Event', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'BigBlueButton', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }, { start: '2022-11-13T11:00:00', duration: 60, attendee: null }, { start: '2022-11-13T12:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'jane@doe.com' } }] },
-  { title: 'Bi-weekly Café Dates', status: 'pending', active: false, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
-  { title: 'Weekly ZOOM', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Phone', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Project Appointment', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Park', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-  { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-];
+// const fakeAppointments = [
+//   { title: 'Bi-weekly Café Dates', status: 'past', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
+//   { title: 'Weekly ZOOM', status: 'past', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Project Appointment', status: 'pending', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
+//   { title: 'Team Building Event', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'BigBlueButton', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }, { start: '2022-11-13T11:00:00', duration: 60, attendee: null }, { start: '2022-11-13T12:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'jane@doe.com' } }] },
+//   { title: 'Bi-weekly Café Dates', status: 'pending', active: false, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
+//   { title: 'Weekly ZOOM', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Phone', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Project Appointment', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Park', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+//   { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
+// ];
 
 // handle filtered appointments list
 const filteredAppointments = computed(() => {
-  let list = fakeAppointments;
+  let list = [...props.appointments];
   // by search input
   if (search.value !== '') {
     list = list.filter(e => e.title.toLowerCase().includes(search.value.toLowerCase()))
@@ -278,13 +307,13 @@ const filteredAppointments = computed(() => {
   // by active tab
   switch (tabActive.value) {
     case views.booked:
-      list = list.filter(e => e.status === 'booked');
+      list = list.filter(e => e.status === appointmentState.booked);
       break;
     case views.pending:
-      list = list.filter(e => e.status === 'pending');
+      list = list.filter(e => e.status === appointmentState.pending);
       break;
     case views.past:
-      list = list.filter(e => e.status === 'past');
+      list = list.filter(e => e.status === appointmentState.past);
       break;
     case views.all:
     default:
@@ -294,7 +323,7 @@ const filteredAppointments = computed(() => {
 });
 
 // return number of booked slots (replies) for given appointment
-const repliesCount = appointment => appointment.slots.filter(s => s.attendee !== null).length;
+const repliesCount = appointment => appointment.slots.filter(s => s.attendee != null).length;
 
 // handle single appointment modal
 const showAppointment = ref(null);
@@ -302,4 +331,9 @@ const closeAppointmentModal = () => showAppointment.value = null;
 
 // appointment creation
 const creationStatus = ref(creationState.hidden);
+
+// initially load data when component gets remounted
+onMounted(() => {
+  refresh();
+});
 </script>

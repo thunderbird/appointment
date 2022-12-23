@@ -62,5 +62,5 @@ const getDbData = async () => {
 getDbData();
 
 // provide refresh functions for components
-provide('refreshAppointments', getDbAppointments);
+provide('refresh', getDbData);
 </script>
