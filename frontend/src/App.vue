@@ -8,14 +8,15 @@
     <nav-bar :nav-items="navItems" />
     <main class="mt-12 mx-8">
       <div class="w-full max-w-[1740px] mx-auto">
-        <router-view :calendars="calendars" :appointments="appointments" />
+        <router-view v-if="routeNeedsData" :calendars="calendars" :appointments="appointments" />
+        <router-view v-else />
       </div>
     </main>
   </template>
 </template>
 
 <script setup>
-import { ref, inject, provide } from 'vue';
+import { ref, inject, provide, computed } from 'vue';
 import NavBar from '@/components/NavBar.vue';
 import { useRoute } from 'vue-router';
 const route = useRoute();
@@ -27,6 +28,11 @@ const navItems = ['calendar', 'appointments', 'settings'];
 // db tables
 const calendars = ref([]);
 const appointments = ref([]);
+
+// define which routes need data from db
+const routeNeedsData = computed(() => {
+  return ['calendar', 'appointments'].includes(route.name);
+});
 
 // query db for all calendar and appointments data
 const getDbCalendars = async () => {
@@ -45,7 +51,7 @@ const getDbAppointments = async () => {
   });
 };
 const getDbData = async () => {
-  if (route.name !== 'booking') {
+  if (routeNeedsData.value) {
     await getDbCalendars();
     await getDbAppointments();
   }

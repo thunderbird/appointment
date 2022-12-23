@@ -95,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch } from 'vue';
+import { ref, inject, computed, watch, onMounted } from 'vue';
 import { creationState, calendarViews } from '@/definitions';
 import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -193,7 +193,11 @@ const getRemoteEvents = async (calendar, from, to) => {
   const { data } = await call("rmt/cal/" + calendar + "/" + from + "/" + to).get().json();
   calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
 };
-getRemoteEvents(calendarId, eventsFrom, eventsTo);
+
+onMounted(() => {
+  refreshAppointments();
+  getRemoteEvents(calendarId, eventsFrom, eventsTo);
+});
 
 // react to user calendar navigation
 watch(() => activeDate.value, (newValue, oldValue) => {
