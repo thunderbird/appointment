@@ -81,9 +81,10 @@
 </template>
 
 <script setup>
-import EventPopup from '@/elements/EventPopup.vue';
-import { computed, inject, reactive } from "vue";
-import { useI18n } from "vue-i18n";
+import { computed, inject, reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
+import EventPopup from '@/elements/EventPopup';
+
 const { t } = useI18n();
 const dj = inject("dayjs");
 

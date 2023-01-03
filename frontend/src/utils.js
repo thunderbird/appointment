@@ -3,4 +3,4 @@ export const keyByValue = (o, v) => Object.keys(o).find(k => o[k]===v);
 
 export default {
 	keyByValue
-}
+};

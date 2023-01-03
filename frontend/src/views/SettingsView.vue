@@ -125,11 +125,12 @@
 <script setup>
 import { ref } from 'vue';
 import { settingsSections } from '@/definitions';
-import SwitchToggle from '@/elements/SwitchToggle.vue';
-import IconSearch from '@/elements/icons/IconSearch.vue';
-import IconChevronRight from '@/elements/icons/IconChevronRight.vue';
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import IconChevronRight from '@/elements/icons/IconChevronRight';
+import IconSearch from '@/elements/icons/IconSearch';
+import SwitchToggle from '@/elements/SwitchToggle';
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();

@@ -39,10 +39,11 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from "vue";
-import CalendarMonthDay from '@/elements/CalendarMonthDay.vue';
-import IconChevronRight from "@/elements/icons/IconChevronRight.vue";
-import IconChevronLeft from "../elements/icons/IconChevronLeft.vue";
+import { ref, computed, inject, watch } from 'vue';
+import CalendarMonthDay from '@/elements/CalendarMonthDay';
+import IconChevronLeft from '@/elements/icons/IconChevronLeft';
+import IconChevronRight from '@/elements/icons/IconChevronRight';
+
 const dj = inject("dayjs");
 
 // component properties

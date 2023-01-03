@@ -17,8 +17,9 @@
 
 <script setup>
 import { ref, inject, provide, computed } from 'vue';
-import NavBar from '@/components/NavBar.vue';
 import { useRoute } from 'vue-router';
+import NavBar from '@/components/NavBar';
+
 const route = useRoute();
 const call = inject('call');
 

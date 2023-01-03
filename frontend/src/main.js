@@ -1,6 +1,6 @@
 // init app
+import App from '@/App';
 import { createApp } from 'vue';
-import App from './App.vue';
 const app = createApp(App);
 
 // init fetch
@@ -21,8 +21,8 @@ app.use(router);
 // init localization
 import { createI18n } from 'vue-i18n';
 const messages = {
-	"de": require("./locales/de.json"), // German
-	"en": require("./locales/en.json"), // English
+	"de": require("@/locales/de.json"), // German
+	"en": require("@/locales/en.json"), // English
 };
 const loc = navigator.language || navigator.userLanguage;
 const i18n = createI18n({
@@ -36,12 +36,12 @@ app.use(i18n);
 
 // init day.js
 import dayjs from 'dayjs';
-import weekday from "dayjs/plugin/weekday";
 import advancedFormat from 'dayjs/plugin/advancedFormat';
-import localizedFormat from 'dayjs/plugin/localizedFormat';
-import localeData from 'dayjs/plugin/localeData';
 import duration from 'dayjs/plugin/duration';
+import localeData from 'dayjs/plugin/localeData';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
 dayjs.locale(loc);
 dayjs.extend(weekday);
@@ -60,7 +60,7 @@ const hDuration = m => {
 app.provide('hDuration', hDuration);
 
 // init basic css with tailwind imports
-import './assets/main.css';
+import '@/assets/main.css';
 
 // ready? let's go!
 app.mount('#app');

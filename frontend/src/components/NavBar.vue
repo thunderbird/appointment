@@ -34,9 +34,10 @@
 </template>
 
 <script setup>
-import IconSearch from '@/elements/icons/IconSearch.vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import { useI18n } from "vue-i18n";
+import IconSearch from '@/elements/icons/IconSearch';
+
 const route = useRoute();
 const { t } = useI18n();
 

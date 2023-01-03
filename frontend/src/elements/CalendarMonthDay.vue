@@ -67,8 +67,9 @@
 </template>
 
 <script setup>
-import { inject, reactive } from "vue";
-import EventPopup from '@/elements/EventPopup.vue';
+import { inject, reactive } from 'vue';
+import EventPopup from '@/elements/EventPopup';
+
 const dj = inject("dayjs");
 
 // component properties

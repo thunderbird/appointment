@@ -1,6 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import CalendarView from '@/views/CalendarView.vue'
-import BookingView from '@/views/BookingView.vue'
+import BookingView from '@/views/BookingView';
+import CalendarView from '@/views/CalendarView';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
   { path: '/', redirect: { name: "calendar" } },
@@ -19,29 +19,29 @@ const routes = [
   {
     path: '/appointments/:view?',
     name: 'appointments',
-    component: () => import(/* webpackChunkName: "appointments" */ '@/views/AppointmentsView.vue')
+    component: () => import(/* webpackChunkName: "appointments" */ '@/views/AppointmentsView')
   },
   {
     path: '/settings/:view?',
     name: 'settings',
-    component: () => import(/* webpackChunkName: "settings" */ '@/views/SettingsView.vue')
+    component: () => import(/* webpackChunkName: "settings" */ '@/views/SettingsView')
   },
   {
     path: '/profile',
     name: 'profile',
-    component: () => import(/* webpackChunkName: "profile" */ '@/views/ProfileView.vue')
+    component: () => import(/* webpackChunkName: "profile" */ '@/views/ProfileView')
   },
   {
     path: '/test',
     name: 'test',
-    component: () => import(/* webpackChunkName: "about" */ '@/views/TestView.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/TestView')
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
-})
+});
 
 router.beforeEach(to => {
   if (to.name === 'calendar' && !to.params.view) {
@@ -52,6 +52,6 @@ router.beforeEach(to => {
     to.params.view = 'all';
     return to;
   }
-})
+});
 
-export default router
+export default router;

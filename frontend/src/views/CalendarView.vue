@@ -95,18 +95,19 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, watch, onMounted } from 'vue';
 import { creationState, calendarViews } from '@/definitions';
-import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import AppointmentListItem from '@/elements/AppointmentListItem.vue';
-import TabBar from '@/components/TabBar.vue';
-import CalendarMonth from '@/components/CalendarMonth.vue';
-import CalendarWeek from '@/components/CalendarWeek.vue';
-import CalendarDay from '@/components/CalendarDay.vue';
-import AppointmentCreation from '@/components/AppointmentCreation.vue';
+import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import AppointmentCreation from '@/components/AppointmentCreation';
+import AppointmentListItem from '@/elements/AppointmentListItem';
+import CalendarDay from '@/components/CalendarDay';
+import CalendarMonth from '@/components/CalendarMonth';
+import CalendarPageHeading from '@/elements/CalendarPageHeading';
+import CalendarWeek from '@/components/CalendarWeek';
+import PrimaryButton from '@/elements/PrimaryButton';
+import TabBar from '@/components/TabBar';
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();

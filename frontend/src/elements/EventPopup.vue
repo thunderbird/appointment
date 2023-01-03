@@ -20,11 +20,12 @@
 </template>
 
 <script setup>
-import { inject, computed } from "vue";
-import { useI18n } from "vue-i18n";
-import IconCalendar from "@/elements/icons/IconCalendar.vue";
-import IconClock from "@/elements/icons/IconClock.vue";
-import IconUsers from "@/elements/icons/IconUsers.vue";
+import { inject, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import IconCalendar from '@/elements/icons/IconCalendar';
+import IconClock from '@/elements/icons/IconClock';
+import IconUsers from '@/elements/icons/IconUsers';
+
 const { t } = useI18n();
 const dj = inject("dayjs");
 

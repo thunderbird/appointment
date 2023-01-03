@@ -117,18 +117,19 @@
 
 <script setup>
 import { computed, inject } from 'vue';
-import IconX from '@/elements/icons/IconX.vue';
-import IconUsers from '@/elements/icons/IconUsers.vue';
-import IconCalendar from '@/elements/icons/IconCalendar.vue';
-import IconCalendarEvent from '@/elements/icons/IconCalendarEvent.vue';
-import IconClock from '@/elements/icons/IconClock.vue';
-import IconBulb from '@/elements/icons/IconBulb.vue';
-import IconLink from '@/elements/icons/IconLink.vue';
-import IconMapPin from '@/elements/icons/IconMapPin.vue';
-import IconVideo from '@/elements/icons/IconVideo.vue';
-import IconNotes from '@/elements/icons/IconNotes.vue';
-import SwitchToggle from '@/elements/SwitchToggle.vue';
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
+import IconBulb from '@/elements/icons/IconBulb';
+import IconCalendar from '@/elements/icons/IconCalendar';
+import IconCalendarEvent from '@/elements/icons/IconCalendarEvent';
+import IconClock from '@/elements/icons/IconClock';
+import IconLink from '@/elements/icons/IconLink';
+import IconMapPin from '@/elements/icons/IconMapPin';
+import IconNotes from '@/elements/icons/IconNotes';
+import IconUsers from '@/elements/icons/IconUsers';
+import IconVideo from '@/elements/icons/IconVideo';
+import IconX from '@/elements/icons/IconX';
+import SwitchToggle from '@/elements/SwitchToggle';
+
 const { t } = useI18n();
 const dj = inject("dayjs");
 const baseurl = inject("baseurl");

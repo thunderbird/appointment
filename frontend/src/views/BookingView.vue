@@ -60,16 +60,17 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, computed } from 'vue';
 import { bookingCalendarViews as views } from '@/definitions';
-import CalendarPageHeading from '@/elements/CalendarPageHeading.vue';
-import CalendarMonth from '@/components/CalendarMonth.vue';
-import CalendarWeek from '@/components/CalendarWeek.vue';
-import CalendarDay from '@/components/CalendarDay.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import BookingModal from '@/components/BookingModal.vue';
-import { useI18n } from "vue-i18n";
+import { ref, inject, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import BookingModal from '@/components/BookingModal';
+import CalendarDay from '@/components/CalendarDay';
+import CalendarMonth from '@/components/CalendarMonth';
+import CalendarPageHeading from '@/elements/CalendarPageHeading';
+import CalendarWeek from '@/components/CalendarWeek';
+import PrimaryButton from '@/elements/PrimaryButton';
+
 const { t } = useI18n();
 const route = useRoute();
 const dj = inject("dayjs");

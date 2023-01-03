@@ -25,11 +25,12 @@
 </template>
 
 <script setup>
-import SwitchToggle from "@/elements/SwitchToggle";
-import { inject } from "vue";
-import { useI18n } from "vue-i18n";
-import { keyByValue } from "@/utils";
 import { appointmentState } from '@/definitions';
+import { inject } from 'vue';
+import { keyByValue } from '@/utils';
+import { useI18n } from 'vue-i18n';
+import SwitchToggle from '@/elements/SwitchToggle';
+
 const baseurl = inject('baseurl');
 const { t } = useI18n();
 

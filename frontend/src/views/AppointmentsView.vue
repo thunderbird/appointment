@@ -175,24 +175,25 @@
 </template>
 
 <script setup>
-import { ref, inject, computed, onMounted } from 'vue';
-import { listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState } from '@/definitions';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import TabBar from '@/components/TabBar.vue';
-import CalendarMonth from '@/components/CalendarMonth.vue';
-import AppointmentModal from '@/components/AppointmentModal.vue';
-import IconSearch from '@/elements/icons/IconSearch.vue';
-import IconList from '@/elements/icons/IconList.vue';
-import IconGrid from "@/elements/icons/IconGrid.vue";
-import IconCheck from "@/elements/icons/IconCheck.vue";
-import IconAdjustments from '@/elements/icons/IconAdjustments.vue';
-import AppointmentGridItem from '@/elements/AppointmentGridItem.vue';
-import AppointmentCreation from '@/components/AppointmentCreation.vue';
-import { vOnClickOutside } from '@vueuse/components';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 import { appointmentState } from '@/definitions';
 import { keyByValue } from '@/utils';
+import { listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState } from '@/definitions';
+import { ref, inject, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { vOnClickOutside } from '@vueuse/components';
+import AppointmentCreation from '@/components/AppointmentCreation';
+import AppointmentGridItem from '@/elements/AppointmentGridItem';
+import AppointmentModal from '@/components/AppointmentModal';
+import CalendarMonth from '@/components/CalendarMonth';
+import IconAdjustments from '@/elements/icons/IconAdjustments';
+import IconCheck from '@/elements/icons/IconCheck';
+import IconGrid from '@/elements/icons/IconGrid';
+import IconList from '@/elements/icons/IconList';
+import IconSearch from '@/elements/icons/IconSearch';
+import PrimaryButton from '@/elements/PrimaryButton';
+import TabBar from '@/components/TabBar';
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();

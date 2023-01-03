@@ -59,11 +59,12 @@
 
 <script setup>
 import { inject, computed, reactive, ref } from 'vue';
-import IconX from '@/elements/icons/IconX.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
-import ArtConfetti from '@/elements/arts/ArtConfetti.vue';
-import { useI18n } from "vue-i18n";
+import { useI18n } from 'vue-i18n';
+import ArtConfetti from '@/elements/arts/ArtConfetti';
+import IconX from '@/elements/icons/IconX';
+import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
+
 const { t } = useI18n();
 const dj = inject("dayjs");
 

@@ -171,19 +171,20 @@
 </template>
 
 <script setup>
+import { locationTypes } from '@/definitions';
 import { ref, reactive, computed, inject, watch } from 'vue';
-import TabBar from '@/components/TabBar.vue';
-import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
-import CalendarMonth from '@/components/CalendarMonth.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
-import IconX from '@/elements/icons/IconX.vue';
-import IconPlus from '@/elements/icons/IconPlus.vue';
-import IconCheck from '@/elements/icons/IconCheck.vue';
-import IconAlertTriangle from '@/elements/icons/IconAlertTriangle.vue';
-import IconChevronDown from '@/elements/icons/IconChevronDown.vue';
-import { useI18n } from "vue-i18n";
-import { locationTypes } from "@/definitions";
+import { useI18n } from 'vue-i18n';
+import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
+import CalendarMonth from '@/components/CalendarMonth';
+import IconAlertTriangle from '@/elements/icons/IconAlertTriangle';
+import IconCheck from '@/elements/icons/IconCheck';
+import IconChevronDown from '@/elements/icons/IconChevronDown';
+import IconPlus from '@/elements/icons/IconPlus';
+import IconX from '@/elements/icons/IconX';
+import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
+import TabBar from '@/components/TabBar';
+
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject('call');

@@ -29,8 +29,8 @@
 </template>
 
 <script setup>
-import IconChevronLeft from './icons/IconChevronLeft.vue';
-import IconChevronRight from './icons/IconChevronRight.vue';
+import IconChevronLeft from '@/elements/icons/IconChevronLeft';
+import IconChevronRight from '@/elements/icons/IconChevronRight';
 
 // component properties
 defineProps({

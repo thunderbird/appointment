@@ -10,7 +10,7 @@ export const creationState = {
   details:      1,
   availability: 2,
   finished:     3,
-}
+};
 
 // available calendar views
 export const calendarViews = {
@@ -86,4 +86,4 @@ export default {
   filterOptions,
   viewTypes,
   settingsSections,
-}
+};

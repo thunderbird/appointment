@@ -26,12 +26,13 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
-import { useI18n } from "vue-i18n";
-import TextButton from '@/elements/TextButton.vue';
-import IconDotsVertical from "@/elements/icons/IconDotsVertical.vue";
-import { locationTypes } from "@/definitions";
-import { keyByValue } from "@/utils";
+import { inject } from 'vue';
+import { keyByValue } from '@/utils';
+import { locationTypes } from '@/definitions';
+import { useI18n } from 'vue-i18n';
+import IconDotsVertical from '@/elements/icons/IconDotsVertical';
+import TextButton from '@/elements/TextButton';
+
 const baseurl = inject('baseurl');
 const hDuration = inject('hDuration');
 const { t } = useI18n();

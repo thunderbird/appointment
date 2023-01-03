@@ -33,8 +33,8 @@
 </template>
 
 <script setup>
-import IconCheck from '@/elements/icons/IconCheck.vue';
-import IconCopy from '@/elements/icons/IconCopy.vue';
+import IconCheck from '@/elements/icons/IconCheck';
+import IconCopy from '@/elements/icons/IconCopy';
 
 // component properties
 defineProps({
