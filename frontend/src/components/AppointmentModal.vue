@@ -29,10 +29,10 @@
         <div class="pl-6">{{ s.attendee?.email ?? '&mdash;' }}</div>
       </template>
     </div>
-    <div class="grid grid-cols-3 text-gray-500 text-sm w-max gap-x-12 gap-y-8 pl-4 mb-8">
+    <div class="grid grid-cols-3 text-gray-500 text-sm w-max max-w-full gap-x-12 gap-y-8 pl-4 mb-8">
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-calendar class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          <icon-calendar class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.calendar') }}
         </div>
         <div class="pl-6 flex items-center gap-3">
@@ -40,28 +40,27 @@
           {{ appointment.calendar_title }}
         </div>
       </div>
-      <div>
+      <div class="col-span-2">
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-link class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          <icon-link class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.bookingLink') }}
         </div>
-        <div class="pl-6">
+        <div class="pl-6 truncate">
           <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank">
             {{ baseurl + appointment.slug }}
           </a>
         </div>
       </div>
-      <div></div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-map-pin class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          <icon-map-pin class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.location') }}
         </div>
         <div class="pl-6">{{ appointment.location_name }}</div>
       </div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-video class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          <icon-video class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.videoLink') }}
         </div>
         <div class="pl-6">
@@ -72,7 +71,7 @@
       </div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+          <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.activeAppointment') }}
         </div>
         <switch-toggle class="ml-6" :active="appointment.active" />
@@ -80,14 +79,14 @@
     </div>
     <div
       v-if="attendeesSlots.length > 0"
-      class="grid grid-cols-[auto_1fr] items-center text-gray-500 text-sm w-max gap-x-8 gap-y-2 pl-4 mb-8"
+      class="grid grid-cols-[auto_1fr] items-center text-gray-500 text-sm w-max max-w-full gap-x-8 gap-y-2 pl-4 mb-8"
     >
       <div class="font-semibold mb-1 flex items-center gap-2">
-        <icon-users class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <icon-users class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.attendees') }}
       </div>
       <div class="font-semibold mb-1 flex items-center gap-2">
-        <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.bookingSlot') }}
       </div>
       <template v-for="s in attendeesSlots" :key="s.start">
@@ -107,7 +106,7 @@
     </div>
     <div class="text-gray-500 text-sm w-full pl-4">
       <div class="font-semibold mb-1 flex items-center gap-2">
-        <icon-notes class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <icon-notes class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.notes') }}
       </div>
       <div class="rounded-lg p-4 border border-gray-400">{{ appointment.details }}</div>
