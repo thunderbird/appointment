@@ -139,7 +139,7 @@
         </tbody>
       </table>
       <!-- appointments grid -->
-      <div v-show="view === viewTypes.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
+      <div v-show="view === viewTypes.grid" class="w-full mt-4 grid grid-cols-3 gap-8 p-4">
         <appointment-grid-item
           v-for="(appointment, i) in filteredAppointments" :key="i"
           :appointment="appointment"
