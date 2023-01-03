@@ -45,7 +45,7 @@
           :style="{ 'background-color': event.calendar_color }"
         ></div>
         <div
-          class="whitespace-nowrap overflow-hidden overflow-ellipsis rounded"
+          class="truncate rounded"
           :class="{
             'h-10 p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder
           }"

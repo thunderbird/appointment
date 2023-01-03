@@ -19,7 +19,7 @@
         >
           <div
             v-if="!booking"
-            class="w-full text-sm whitespace-nowrap overflow-hidden overflow-ellipsis rounded bg-sky-400/10 border-sky-400 my-1 mx-8 px-2 py-0.5"
+            class="w-full text-sm truncate rounded bg-sky-400/10 border-sky-400 my-1 mx-8 px-2 py-0.5"
             :class="{
               'border-2 border-dashed': !event.remote
             }"
@@ -37,7 +37,7 @@
             :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
           >
             <div
-              class="w-full whitespace-nowrap overflow-hidden overflow-ellipsis rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
+              class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
               :class="{ 'text-white border-white': event.selected }"
             >
               {{ event.times }}

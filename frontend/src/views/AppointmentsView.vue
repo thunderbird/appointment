@@ -122,7 +122,7 @@
             <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
             </td>
-            <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs whitespace-nowrap overflow-hidden overflow-ellipsis">
+            <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs truncate">
               <a
                 :href="baseurl + appointment.slug"
                 class="text-teal-500 underline"
