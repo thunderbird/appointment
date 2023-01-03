@@ -1,12 +1,12 @@
 <template>
   <div
-    class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer"
+    class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-l-8 border-sky-400 cursor-pointer"
     :style="{ 'border-color': appointment.calendar_color }"
     @mouseover="el => el.currentTarget.style.backgroundColor=appointment.calendar_color + '22'"
     @mouseout="el => el.currentTarget.style.backgroundColor='transparent'"
   >
     <div
-      class="h-full px-4 py-3 rounded border-l-8 border-sky-400"
+      class="h-full px-4 py-3 rounded-r border-dashed border-t-2 border-r-2 border-b-2 border-sky-400"
       :style="{ 'border-color': appointment.calendar_color }"
     >
       <div>{{ appointment.title }}</div>
