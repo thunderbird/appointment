@@ -140,32 +140,11 @@
       </table>
       <!-- appointments grid -->
       <div v-show="view === viewTypes.grid" class="w-full mt-4 flex flex-wrap justify-evenly gap-8">
-        <div
-          v-for="(appointment, i) in filteredAppointments"
-          :key="i"
-          class="w-1/4 hover:bg-sky-400/10 hover:shadow-md rounded border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 cursor-pointer"
-          :style="{ 'border-color': appointment.calendar_color }"
-          @mouseover="el => el.currentTarget.style.backgroundColor=appointment.calendar_color + '22'"
-          @mouseout="el => el.currentTarget.style.backgroundColor='transparent'"
+        <appointment-grid-item
+          v-for="(appointment, i) in filteredAppointments" :key="i"
+          :appointment="appointment"
           @click="showAppointment = appointment"
-        >
-          <div
-            class="h-full px-4 py-3 rounded border-l-8 border-sky-400"
-            :style="{ 'border-color': appointment.calendar_color }"
-          >
-            <div>{{ appointment.title }}</div>
-            <div class="pl-4 text-sm">{{ t('label.' + keyByValue(appointmentState, appointment.status)) }}</div>
-            <div class="pl-4 text-sm">{{ appointment.calendar_title }}</div>
-            <div class="px-4 text-sm">
-              <switch-toggle :active="appointment.active" :label="t('label.activeAppointment')" @click.stop="null" />
-            </div>
-            <div class="pl-4 text-sm whitespace-nowrap overflow-hidden overflow-ellipsis">
-              <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
-                {{ baseurl + appointment.slug }}
-              </a>
-            </div>
-          </div>
-        </div>
+        />
       </div>
     </div>
     <!-- page side bar -->
@@ -207,7 +186,7 @@ import IconList from '@/elements/icons/IconList.vue';
 import IconGrid from "@/elements/icons/IconGrid.vue";
 import IconCheck from "@/elements/icons/IconCheck.vue";
 import IconAdjustments from '@/elements/icons/IconAdjustments.vue';
-import SwitchToggle from '@/elements/SwitchToggle.vue';
+import AppointmentGridItem from '@/elements/AppointmentGridItem.vue';
 import AppointmentCreation from '@/components/AppointmentCreation.vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
