@@ -87,7 +87,7 @@
         <hr />
         <div v-show="!validStep2" class="text-sm">{{ t('text.defineDaysAndTimeSlots') }}</div>
         <div v-show="validStep2" class="flex flex-col gap-2">
-          <div v-for="(slotList, day) in slots" :key="day">
+          <div v-for="(list, day) in slots" :key="day">
             <div class="flex justify-between mb-1">
               <div>{{ dj(day).format('LL') }}</div>
               <div>
@@ -97,12 +97,12 @@
                 </button>
               </div>
             </div>
-            <div v-for="(s, i) in slotList" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
+            <div v-for="(s, i) in list" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
               <label class="flex flex-col">
                 <div class="text-sm text-gray-500">{{ t('label.start') }}</div>
                 <input
                   type="time"
-                  :value="s.start"
+                  v-model="s.start"
                   class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
                 />
               </label>
@@ -110,7 +110,7 @@
                 <div class="text-sm text-gray-500">{{ t('label.end') }}</div>
                 <input
                   type="time"
-                  :value="s.end"
+                  v-model="s.end"
                   class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
                 />
               </label>
@@ -223,12 +223,11 @@ const appointment = reactive({...defaultAppointment});
 
 // date and time selection data
 // an object having the iso date as key and a list of objects holding start and end time for each day
-// format: { '2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ...}
+// format: {'2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ...}
 const slots = reactive({});
 
 // bring slots into list form for requests later
-// format: [ { start: '2022-12-01T10:00:00', duration: 90}, ...]
-// TODO: somethings wrong here. time durations are not correct.
+// format: [{ start: '2022-12-01T10:00:00', duration: 90}, ...]
 const slotList = computed(() => {
   const list = [];
   for (const day in slots) {
