@@ -38,18 +38,22 @@ app.use(i18n);
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import duration from 'dayjs/plugin/duration';
+import isBetween from 'dayjs/plugin/isBetween';
+import isToday from 'dayjs/plugin/isToday';
 import localeData from 'dayjs/plugin/localeData';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
 dayjs.locale(loc);
-dayjs.extend(weekday);
 dayjs.extend(advancedFormat);
-dayjs.extend(localizedFormat);
-dayjs.extend(localeData);
 dayjs.extend(duration);
+dayjs.extend(isBetween);
+dayjs.extend(isToday);
+dayjs.extend(localeData);
+dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
+dayjs.extend(weekday);
 // provide the configured dayjs instance as well es some helper functions
 app.provide('dayjs', dayjs);
 const hDuration = m => {

@@ -300,6 +300,30 @@ const filteredAppointments = computed(() => {
     default:
       break;
   }
+  // by select filter
+  switch (filter.value) {
+    case filterOptions.appointmentsToday:
+      list = list.filter(e => e.slots.reduce((p, c) => p || dj(c.start).isToday(), false));
+      break;
+    case filterOptions.appointmentsNext7Days:
+      list = list.filter(e => e.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(7, 'days')), false));
+      break;
+    case filterOptions.appointmentsNext14Days:
+      list = list.filter(e => e.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(14, 'days')), false));
+      break;
+    case filterOptions.appointmentsNext31Days:
+      list = list.filter(e => e.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(31, 'days')), false));
+      break;
+    case filterOptions.appointmentsInMonth:
+      list = list.filter(e => e.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'), false));
+      break;
+    case filterOptions.allFutureAppointments:
+      list = list.filter(e => e.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false));
+      break;
+    case filterOptions.allAppointments:
+    default:
+      break;
+  }
   return list;
 });
 
