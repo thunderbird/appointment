@@ -141,7 +141,7 @@ const props = defineProps({
   appointment: Object  // appointment data to display
 });
 
-// attendees list
+// TODO: attendees list
 const attendeesSlots = computed(() => {
   return props.appointment.slots.filter(s => s.attendee);
 });

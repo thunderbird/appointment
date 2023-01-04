@@ -104,9 +104,11 @@ const viewTitle = computed(() => {
   }
 });
 
-// TODO: retrieve appointment by slug
+// retrieve appointment by slug
 onMounted(async () => {
-  // TODO: async get appointment data with route.params.slug;
+  // async get appointment data from route
+  // TODO: only get necessary data here
+  // TODO: username
   const { data } = await call("apmt/adminx/" + route.params.slug).get().json();
   appointment.value = data.value;
   activeDate.value = dj(appointment.value?.slots[0].start);
@@ -181,14 +183,16 @@ const closeBookingModal = () => {
 };
 
 // attendee confirmed the time slot selection: event is booked
-const bookEvent = (attendee) => {
-  // TODO: create server side event
-  console.log(attendee);
+const bookEvent = async (attendee) => {
+  // build data object for put request
+  const obj = {
+    slot_id: activeEvent.value.id,
+    attendee: attendee
+  };
+  // update server side event
+  const { data } = await call("apmt/adminx/" + route.params.slug).put(obj).json();
+  console.log(data.value);
+  // TODO: update view to prevent reselection
 };
-
-// TODO: testing
-// test month: c6d252a241e8487f80f80a9b7ce7e105
-// test week: c4b1768e664d4af98a0c4687f63995a6
-// test day: fad65fb192764a079a4515ffa516cefb
 
 </script>
