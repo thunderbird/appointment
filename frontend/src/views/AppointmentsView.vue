@@ -164,9 +164,10 @@
       <appointment-creation
         v-else
         :status="creationStatus"
+        :calendars="calendars"
         @start="creationStatus = creationState.details"
         @next="creationStatus = creationState.availability"
-        @create="creationStatus = creationState.finished"
+        @create="creationStatus = creationState.finished; refresh();"
         @cancel="creationStatus = creationState.hidden"
       />
     </div>
