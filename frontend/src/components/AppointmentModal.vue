@@ -36,7 +36,7 @@
           {{ t('label.calendar') }}
         </div>
         <div class="pl-6 flex items-center gap-3">
-          <div class="w-4 h-4 rounded-full bg-sky-400 grow-0 shrink-0" :style="{ 'background-color': appointment.calendar_color }"></div>
+          <div class="w-4 h-4 rounded-full bg-sky-400 shrink-0" :style="{ 'background-color': appointment.calendar_color }"></div>
           {{ appointment.calendar_title }}
         </div>
       </div>
@@ -56,7 +56,7 @@
           <icon-map-pin class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.location') }}
         </div>
-        <div class="pl-6">{{ appointment.location_name }}</div>
+        <div class="pl-6">{{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}</div>
       </div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
@@ -115,6 +115,8 @@
 </template>
 
 <script setup>
+import { locationTypes } from '@/definitions';
+import { keyByValue } from '@/utils';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import IconBulb from '@/elements/icons/IconBulb';
