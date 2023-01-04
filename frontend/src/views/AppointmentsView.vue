@@ -100,8 +100,8 @@
             v-for="(appointment, i) in filteredAppointments"
             :key="i"
             class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer"
-            @mouseover="el => el.currentTarget.style.backgroundColor=appointment.calendar_color + '22'"
-            @mouseout="el => el.currentTarget.style.backgroundColor='transparent'"
+            @mouseover="el => paintBackground(el, appointment.calendar_color, '22')"
+            @mouseout="el => paintBackground(el, appointment.calendar_color, _, true)"
             @click="showAppointment = appointment"
           >
             <td class="align-middle">
@@ -179,7 +179,7 @@
 import { appointmentState } from '@/definitions';
 import { keyByValue } from '@/utils';
 import { listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState } from '@/definitions';
-import { ref, inject, computed, onMounted } from 'vue';
+import { ref, inject, provide, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
@@ -341,4 +341,14 @@ const creationStatus = ref(creationState.hidden);
 onMounted(() => {
   refresh();
 });
+
+// paint elements background or reset it to transparent
+const paintBackground = (element, hexColor, hexTransparency, reset=false) => {
+  if (hexColor) {
+    element.currentTarget.style.backgroundColor = reset
+      ? 'transparent'
+      : hexColor + hexTransparency;
+  }
+};
+provide('paintBackground', paintBackground);
 </script>

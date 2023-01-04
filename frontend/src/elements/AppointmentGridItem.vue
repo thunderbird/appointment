@@ -2,8 +2,8 @@
   <div
     class="hover:bg-sky-400/10 hover:shadow-md rounded border-l-8 border-sky-400 cursor-pointer"
     :style="{ 'border-color': appointment.calendar_color }"
-    @mouseover="el => el.currentTarget.style.backgroundColor=appointment.calendar_color + '22'"
-    @mouseout="el => el.currentTarget.style.backgroundColor='transparent'"
+    @mouseover="el => paintBackground(el, appointment.calendar_color, '22')"
+    @mouseout="el => paintBackground(el, appointment.calendar_color, _, true)"
   >
     <div
       class="h-full px-4 py-3 rounded-r border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 flex flex-col gap-1"
@@ -45,8 +45,9 @@ import IconClock from '@/elements/icons/IconClock';
 import IconLink from '@/elements/icons/IconLink';
 import SwitchToggle from '@/elements/SwitchToggle';
 
-const baseurl = inject('baseurl');
 const { t } = useI18n();
+const baseurl = inject('baseurl');
+const paintBackground = inject('paintBackground');
 
 // component properties
 defineProps({
