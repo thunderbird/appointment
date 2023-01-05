@@ -5,7 +5,7 @@
       <icon-x class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
     <div class="text-xl mb-8">{{ appointment.title }}</div>
-    <div class="grid grid-cols-4 text-gray-500 text-sm w-max gap-x-4 gap-y-2 pl-4 mb-8">
+    <div class="grid grid-cols-4 text-gray-500 text-sm w-max max-w-full gap-x-4 gap-y-2 pl-4 mb-8">
       <div class="font-semibold flex items-center gap-2">
         <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
         {{ t('label.availabilityDay') }}
@@ -141,7 +141,7 @@ const props = defineProps({
   appointment: Object  // appointment data to display
 });
 
-// TODO: attendees list
+// attendees list
 const attendeesSlots = computed(() => {
   return props.appointment.slots.filter(s => s.attendee);
 });
