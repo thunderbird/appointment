@@ -262,22 +262,6 @@ const restoreColumnOrder = () => {
   visibleColumns.value = Object.values(columns);
 };
 
-// TODO: fake data
-// const fakeAppointments = [
-//   { title: 'Bi-weekly Café Dates', status: 'past', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-30T10:00:00', duration: 60, attendee: null }] },
-//   { title: 'Weekly ZOOM', status: 'past', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'ZOOM', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-10-31T10:00:00', duration: 60, attendee: { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Teams', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-11T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Project Appointment', status: 'pending', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Jitsi', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-12T10:00:00', duration: 60, attendee: null }] },
-//   { title: 'Team Building Event', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'BigBlueButton', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-13T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }, { start: '2022-11-13T11:00:00', duration: 60, attendee: null }, { start: '2022-11-13T12:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'jane@doe.com' } }] },
-//   { title: 'Bi-weekly Café Dates', status: 'pending', active: false, calendar_title: 'Family', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Signal', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-14T10:00:00', duration: 60, attendee: null }] },
-//   { title: 'Weekly ZOOM', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Online', location_url: 'https://test-conference.org', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-15T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Jour Fixe Team', status: 'booked', active: true, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Phone', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-16T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Project Appointment', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Park', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-17T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-//   { title: 'Team Building Event', status: 'booked', active: false, calendar_title: 'Work', calendar_color: '#978FEE', slug: 'sdfw83jc', location_name: 'Building 429, Room 5', location_url: '', details: 'Lorem Ipsum dolor sit amet', slots: [{ start: '2022-11-18T10:00:00', duration: 60, attendee:  { name: 'John Doe', email: 'john@doe.com' } }] },
-// ];
-
 // handle filtered appointments list
 const filteredAppointments = computed(() => {
   let list = [...props.appointments];

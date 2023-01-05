@@ -108,7 +108,7 @@ const viewTitle = computed(() => {
 onMounted(async () => {
   // async get appointment data from route
   // TODO: only get necessary data here
-  // TODO: username
+  // TODO: handle username
   const { data } = await call("apmt/adminx/" + route.params.slug).get().json();
   appointment.value = data.value;
   activeDate.value = dj(appointment.value?.slots[0].start);

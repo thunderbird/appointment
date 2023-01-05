@@ -105,7 +105,7 @@ const endHour = 18;
 
 // handle events to show
 const timePosition = (start, duration) => {
-  // create position of event based on *half hours* | TODO: handle quarter hours
+  // create position of event based on *half hours* | TODO: handle quarter hours or less
   return {
     offset: 2*dj(start).format('H') + dj(start).format('m')/30 - 2*startHour + 1,
     span: Math.round(duration / 30),
