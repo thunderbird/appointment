@@ -7,6 +7,20 @@ from pydantic import BaseModel, Field
 from .models import SubscriberLevel, AppointmentStatus, LocationType, random_slug
 
 
+""" ATTENDEE model schemas
+"""
+class AttendeeBase(BaseModel):
+  email: str
+  name: str | None = None
+
+
+class Attendee(AttendeeBase):
+  id: int
+
+  class Config:
+    orm_mode = True
+
+
 """ SLOT model schemas
 """
 class SlotBase(BaseModel):
@@ -20,21 +34,7 @@ class Slot(SlotBase):
   attendee_id: int | None = None
   subscriber_id: int | None = None
   time_updated: datetime | None = None
-
-  class Config:
-    orm_mode = True
-
-
-""" ATTENDEE model schemas
-"""
-class AttendeeBase(BaseModel):
-  email: str
-  name: str | None = None
-
-
-class Attendee(AttendeeBase):
-  id: int
-  slots: list[Slot] = []
+  attendee: Attendee | None = None
 
   class Config:
     orm_mode = True
@@ -80,6 +80,7 @@ class AppointmentOut(AppointmentBase):
   id: int
   owner_name: str | None = None
   slots: list[Slot] = []
+
 
 """ CALENDAR model schemas
 """
