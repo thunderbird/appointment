@@ -86,8 +86,10 @@
             <div class="text-lg">{{ t('label.timeZone') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
-              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
-                <option value="-8">(GMT-8) Pacific Time/Vancouver</option>
+              <select v-model="activeTimezone.primary" class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option v-for="t in timezones" :key="t" :value="t">
+                  UTC <span v-if="t > 0">+</span>{{ t }}
+                </option>
               </select>
             </label>
             <label class="pl-4 mt-6 flex items-center">
@@ -96,8 +98,10 @@
             </label>
             <label class="pl-4 mt-6 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.secondaryTimeZone') }}</div>
-              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
-                <option value="-8">(GMT-8) Pacific Time/Vancouver</option>
+              <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option v-for="t in timezones" :key="t" :value="t">
+                  UTC <span v-if="t > 0">+</span>{{ t }}
+                </option>
               </select>
             </label>
           </div>
@@ -123,7 +127,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { settingsSections } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -141,4 +145,11 @@ const show = (key) => {
   router.replace({ name: route.name, params: { view: key } });
   activeView.value = settingsSections[key];
 };
+
+// TODO: timezones
+const activeTimezone = reactive({
+  primary: 0,
+  secondary: 4,
+});
+const timezones = Array.from(new Array(27), (_, i) => i + -12);
 </script>
