@@ -12,9 +12,9 @@
       <primary-button :label="t('label.copyLink')" :icon="icon" @click="copy" />
     </div>
     <div>
-      <router-link class="text-sm text-teal-500 cursor-pointer" :to="{ name: 'appointments', params: { 'view': 'pending' } }">
+      <a :href="publicLink" target="_blank" class="text-sm text-teal-500 cursor-pointer">
         {{ t('label.viewBooking') }}
-      </router-link>
+      </a>
     </div>
   </div>
 </template>

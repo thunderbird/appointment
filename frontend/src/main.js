@@ -12,7 +12,7 @@ const call = createFetch({
   },
 })
 app.provide('call', call);
-app.provide('baseurl', 'https://apmt.day/'); // TODO
+app.provide('baseurl', 'http://localhost:8080/booking/'); // TODO
 
 // init router
 import router from '@/router';
