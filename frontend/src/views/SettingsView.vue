@@ -115,7 +115,7 @@
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
         <div class="pl-6 flex flex-col gap-6">
           <div class="text-xl">{{ t('heading.calendarConnections') }}</div>
-          <div class="pl-6 flex flex-col gap-2 max-w-2xl">
+          <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
             <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
               <div class="flex justify-center items-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
                 <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
