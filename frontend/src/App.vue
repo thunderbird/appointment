@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, inject, provide, computed } from 'vue';
+import { ref, inject, provide, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import NavBar from '@/components/NavBar';
 
@@ -32,7 +32,7 @@ const appointments = ref([]);
 
 // define which routes need data from db
 const routeNeedsData = computed(() => {
-  return ['calendar', 'appointments'].includes(route.name);
+  return ['calendar', 'appointments', 'settings'].includes(route.name);
 });
 
 // query db for all calendar and appointments data
@@ -60,7 +60,9 @@ const getDbData = async () => {
 }
 
 // get the data initially
-getDbData();
+onMounted(() => {
+  getDbData();
+})
 
 // provide refresh functions for components
 provide('refresh', getDbData);

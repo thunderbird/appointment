@@ -28,6 +28,8 @@
     </div>
     <!-- content -->
     <div class="w-4/5 pt-14">
+
+      <!-- general settings -->
       <div v-if="activeView === settingsSections.general" class="flex flex-col gap-8">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.generalSettings') }}</div>
         <div class="pl-6">
@@ -107,37 +109,143 @@
           </div>
         </div>
       </div>
-      <div v-if="activeView === settingsSections.calendar">
+
+      <!-- calendar settings -->
+      <div v-if="activeView === settingsSections.calendar" class="flex flex-col gap-8">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
+        <div class="pl-6 flex flex-col gap-6">
+          <div class="text-xl">{{ t('heading.calendarConnections') }}</div>
+          <div class="pl-6 flex flex-col gap-2 max-w-2xl">
+            <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
+              <div class="flex justify-center items-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
+                <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
+              </div>
+              {{ cal.title }}
+              <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
+                <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
+                {{ t('label.editCalendar') }}
+              </button>
+              <div class="p-0.5 cursor-pointer" @click="deleteCalendar(cal.id)">
+                <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+              </div>
+            </div>
+          </div>
+          <div v-if="!inputMode">
+            <secondary-button
+              :label="t('label.addCalendar')"
+              class="text-sm !text-teal-500"
+              @click="addCalendar"
+            />
+          </div>
+          <div v-if="inputMode" class="pl-6 flex flex-col gap-4 max-w-2xl">
+            <div class="text-lg">
+              {{ t('label.caldav') }} &mdash; {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
+            </div>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
+              <input
+                v-model="calendarInput.data.title"
+                type="text"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
+              <select v-model="calendarInput.data.color" class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+                <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
+                  {{ color }}
+                </option>
+              </select>
+            </label>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
+              <input
+                v-model="calendarInput.data.url"
+                type="url"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
+              <input
+                v-model="calendarInput.data.user"
+                type="text"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
+              <input
+                v-model="calendarInput.data.password"
+                type="password"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+            <div class="self-end flex gap-4">
+              <secondary-button
+                :label="t('label.cancel')"
+                class="text-sm !text-teal-500"
+                @click="resetInput"
+              />
+              <primary-button
+                :label="inputMode === inputModes.add ? t('label.addCalendar') : t('label.saveChanges')"
+                class="text-sm"
+                @click="saveCalendar"
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- appointments and booking settings -->
       <div v-if="activeView === settingsSections.appointmentsAndBooking">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.appointmentsAndBookingSettings') }}</div>
       </div>
+
+      <!-- account settings -->
       <div v-if="activeView === settingsSections.account">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.accountSettings') }}</div>
       </div>
+
+      <!-- privacy settings -->
       <div v-if="activeView === settingsSections.privacy">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.privacySettings') }}</div>
       </div>
+
+      <!-- faq settings -->
       <div v-if="activeView === settingsSections.faq">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.frequentlyAskedQuestions') }}</div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, inject } from 'vue';
 import { settingsSections } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import IconChevronRight from '@/elements/icons/IconChevronRight';
 import IconSearch from '@/elements/icons/IconSearch';
+import IconCalendar from '@/elements/icons/IconCalendar.vue';
+import IconPencil from '@/elements/icons/IconPencil.vue';
+import IconX from '@/elements/icons/IconX.vue';
 import SwitchToggle from '@/elements/SwitchToggle';
+import SecondaryButton from '@/elements/SecondaryButton';
+import PrimaryButton from '@/elements/PrimaryButton';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const call = inject('call');
+const refresh = inject('refresh');
+
+// view properties
+defineProps({
+  calendars:    Array, // list of calendars from db
+  appointments: Array, // list of appointments from db
+});
 
 // menu navigation of different views
 const activeView = ref(route.params.view ? settingsSections[route.params.view] : settingsSections.general);
@@ -148,8 +256,79 @@ const show = (key) => {
 
 // TODO: timezones
 const activeTimezone = reactive({
-  primary: 0,
+  primary:   0,
   secondary: 4,
 });
 const timezones = Array.from(new Array(27), (_, i) => i + -12);
+
+// calendar user input to add or edit calendar connection
+const inputModes = {
+  hidden: 0,
+  add:    1,
+  edit:   2,
+};
+const inputMode = ref(inputModes.hidden);
+const defaultCalendarInput = {
+  title:    '',
+  color:    '',
+  url:      '',
+  user:     '',
+  password: '',
+};
+const calendarInput = reactive({
+  id: null,
+  data: { ...defaultCalendarInput }
+});
+
+// clear input fields
+const resetInput = () => {
+  calendarInput.id = null;
+  calendarInput.data = { ...defaultCalendarInput };
+  inputMode.value = inputModes.hidden;
+};
+
+// set input mode for adding or editing
+const addCalendar = () => {
+  inputMode.value = inputModes.add;
+}
+const editCalendar = async (id) => {
+  inputMode.value = inputModes.edit;
+  calendarInput.id = id;
+  const { data } = await call('cal/' + id).get().json();
+  for (const attr in data.value) {
+    calendarInput.data[attr] = data.value[attr];
+  }
+}
+
+// actually remove a given calendar connection
+const deleteCalendar = async (id) => {
+  await call("cal/" + id).delete();
+  refresh();
+}
+
+// actually save calendar data
+const saveCalendar = async () => {
+  if (inputMode.value === inputModes.add) {
+    await call("cal").post(calendarInput.data);
+  }
+  if (inputMode.value === inputModes.edit) {
+    await call("cal/" + calendarInput.id).put(calendarInput.data);
+  }
+  refresh();
+  resetInput();
+}
+
+// preset of available calendar colors
+const colors = [
+  '#d8495f',
+  '#cc3284',
+  '#904493',
+  '#8633d0',
+  '#5d73d7',
+  '#32909e',
+  '#328c7b',
+  '#41945e',
+  '#ae7b38',
+  '#d25935',
+];
 </script>
