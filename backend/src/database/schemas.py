@@ -88,10 +88,13 @@ class CalendarBase(BaseModel):
   title: str | None = None
   color: str | None = None
 
-  
-class CalendarConnection(CalendarBase):
+
+class CalendarConnectionOut(CalendarBase):
   url: str
   user: str
+
+
+class CalendarConnection(CalendarConnectionOut):
   password: str
 
 

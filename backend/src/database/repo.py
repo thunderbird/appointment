@@ -84,7 +84,9 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
   """update existing calendar by id"""
   db_calendar = get_calendar(db, calendar_id)
   for key, value in calendar:
-    setattr(db_calendar, key, value)
+    # if no password is given, keep existing one
+    if not (key == 'password' and len(value) == 0):
+      setattr(db_calendar, key, value)
   db.commit()
   db.refresh(db_calendar)
   return db_calendar

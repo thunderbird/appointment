@@ -112,7 +112,7 @@ def create_my_calendar(calendar: schemas.CalendarConnection, db: Session = Depen
   return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 
 
-@app.get("/cal/{id}", response_model=schemas.CalendarOut)
+@app.get("/cal/{id}", response_model=schemas.CalendarConnectionOut)
 def read_my_calendar(id: int, db: Session = Depends(get_db)):
   """endpoint to get a calendar from db"""
   if Auth(db).subscriber is None:
@@ -122,7 +122,7 @@ def read_my_calendar(id: int, db: Session = Depends(get_db)):
     raise HTTPException(status_code=404, detail="Calendar not found")
   if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=Auth(db).subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
-  return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
+  return schemas.CalendarConnectionOut(id=cal.id, title=cal.title, color=cal.color, url=cal.url, user=cal.user)
 
 
 @app.put("/cal/{id}", response_model=schemas.CalendarOut)
