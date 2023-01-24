@@ -185,22 +185,26 @@ const pendingAppointments = computed(() => {
 });
 
 // get remote calendar data for current month
-const calendarId     = 1; // TODO: retrieve all configured calendars
 const eventsFrom     = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
 const eventsTo       = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
 
-const getRemoteEvents = async (calendar, from, to) => {
-  const { data } = await call("rmt/cal/" + calendar + "/" + from + "/" + to).get().json();
-  if (Array.isArray(data.value)) {
-    calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
+const getRemoteEvents = async (from, to) => {
+  for (const calendar of props.calendars) {
+    const { data } = await call("rmt/cal/" + calendar.id + "/" + from + "/" + to).get().json();
+    if (Array.isArray(data.value)) {
+      calendarEvents.value = [
+        ...calendarEvents.value,
+        ...data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }))
+      ];
+    }
   }
 };
 
 // initially load data when component gets remounted
 onMounted(() => {
   refresh();
-  getRemoteEvents(calendarId, eventsFrom, eventsTo);
+  getRemoteEvents(eventsFrom, eventsTo);
 });
 
 // react to user calendar navigation
@@ -208,7 +212,6 @@ watch(() => activeDate.value, (newValue, oldValue) => {
   // remote data is retrieved per month, so data request happens only if the user navigates to a different month
   if (dj(oldValue).format('M') !== dj(newValue).format('M')) {
     getRemoteEvents(
-      calendarId,
       dj(newValue).startOf('month').format('YYYY-MM-DD'),
       dj(newValue).endOf('month').format('YYYY-MM-DD')
     );
