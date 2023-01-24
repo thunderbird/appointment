@@ -140,9 +140,9 @@ def update_my_calendar(id: int, calendar: schemas.CalendarConnection, db: Sessio
 
 @app.delete("/cal/{id}", response_model=schemas.CalendarOut)
 def delete_my_calendar(id: int, db: Session = Depends(get_db)):
+  """endpoint to remove a calendar from db"""
   if Auth(db).subscriber is None:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  """endpoint to remove a calendar from db"""
   if not repo.calendar_exists(db, calendar_id=id):
     raise HTTPException(status_code=404, detail="Calendar not found")
   if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=Auth(db).subscriber.id):

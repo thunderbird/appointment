@@ -109,7 +109,7 @@ onMounted(async () => {
   // async get appointment data from route
   // TODO: only get necessary data here
   // TODO: handle username
-  const { data } = await call("apmt/adminx/" + route.params.slug).get().json();
+  const { data } = await call("apmt/admin/" + route.params.slug).get().json();
   appointment.value = data.value;
   activeDate.value = dj(appointment.value?.slots[0].start);
   // check appointment slots for appropriate view
@@ -190,7 +190,7 @@ const bookEvent = async (attendee) => {
     attendee: attendee
   };
   // update server side event
-  const { data } = await call("apmt/adminx/" + route.params.slug).put(obj).json();
+  const { data } = await call("apmt/admin/" + route.params.slug).put(obj).json();
   console.log(data.value);
   // TODO: update view to prevent reselection
 };

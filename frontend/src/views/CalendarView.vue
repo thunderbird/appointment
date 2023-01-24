@@ -185,14 +185,14 @@ const pendingAppointments = computed(() => {
 });
 
 // get remote calendar data for current month
-const calendarId     = 5; // TODO: retrieve all configured calendars
+const calendarId     = 1; // TODO: retrieve all configured calendars
 const eventsFrom     = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
 const eventsTo       = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
 
 const getRemoteEvents = async (calendar, from, to) => {
   const { data } = await call("rmt/cal/" + calendar + "/" + from + "/" + to).get().json();
-  if (data.value) {
+  if (Array.isArray(data.value)) {
     calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
   }
 };

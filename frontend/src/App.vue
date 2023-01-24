@@ -26,6 +26,9 @@ const call = inject('call');
 // menu items for main navigation
 const navItems = ['calendar', 'appointments', 'settings'];
 
+// current user
+const currentUser = ref(null);
+
 // db tables
 const calendars = ref([]);
 const appointments = ref([]);
@@ -35,7 +38,12 @@ const routeNeedsData = computed(() => {
   return ['calendar', 'appointments', 'settings'].includes(route.name);
 });
 
+// check login state of current user first
 // query db for all calendar and appointments data
+const checkLogin = async () => {
+  const { data } = await call("login").get().json();
+  currentUser.value = data.value;
+};
 const getDbCalendars = async () => {
   const { data } = await call("me/calendars").get().json();
   calendars.value = data.value;
@@ -53,7 +61,8 @@ const getDbAppointments = async () => {
   });
 };
 const getDbData = async () => {
-  if (routeNeedsData.value) {
+  await checkLogin();
+  if (currentUser.value && routeNeedsData.value) {
     await getDbCalendars();
     await getDbAppointments();
   }
