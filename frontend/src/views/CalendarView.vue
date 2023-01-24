@@ -174,7 +174,7 @@ const creationStatus = ref(creationState.hidden);
 // list of all pending appointments
 const pendingAppointments = computed(() => {
   const pending = [];
-  props.appointments.filter(a => a.status === 2).forEach(event => { // TODO: define appointment status
+  props.appointments?.filter(a => a.status === 2).forEach(event => { // TODO: define appointment status
     event.slots.forEach(slot => {
       const extendedEvent = {...event, ...slot };
       delete extendedEvent.slots;
