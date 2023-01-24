@@ -190,6 +190,7 @@ const eventsTo       = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
 
 const getRemoteEvents = async (from, to) => {
+  calendarEvents.value = [];
   for (const calendar of props.calendars) {
     const { data } = await call("rmt/cal/" + calendar.id + "/" + from + "/" + to).get().json();
     if (Array.isArray(data.value)) {
