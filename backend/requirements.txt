@@ -5,3 +5,4 @@ sqlalchemy-utils==0.38.3
 alembic==1.8.1
 caldav==0.9.1
 icalendar==4.1.0
+cryptography==39.0.0
