@@ -11,3 +11,5 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY src/ .
+RUN touch ./src/appointment.db
+RUN mv ./src/appointment.ini.example ./src/appointment.ini
