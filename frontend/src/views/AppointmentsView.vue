@@ -264,7 +264,7 @@ const restoreColumnOrder = () => {
 
 // handle filtered appointments list
 const filteredAppointments = computed(() => {
-  let list = [...props.appointments];
+  let list = props.appointments ? [...props.appointments] : [];
   // by search input
   if (search.value !== '') {
     list = list.filter(e => e.title.toLowerCase().includes(search.value.toLowerCase()))

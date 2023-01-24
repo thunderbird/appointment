@@ -192,7 +192,9 @@ const calendarEvents = ref([]);
 
 const getRemoteEvents = async (calendar, from, to) => {
   const { data } = await call("rmt/cal/" + calendar + "/" + from + "/" + to).get().json();
-  calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
+  if (data.value) {
+    calendarEvents.value = data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }));
+  }
 };
 
 // initially load data when component gets remounted
