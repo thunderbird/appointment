@@ -2,7 +2,17 @@
 
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
-## Get started for development
+## Get started
+
+### With Docker
+
+```bash
+git clone https://github.com/thundernest/appointment
+cd appointment
+docker-compose up -d --build
+```
+
+### Manual Setup
 
 Make sure to have the following prerequisites available:
 
@@ -24,6 +34,7 @@ Run application for development with hot reloading backend and frontend:
     ```bash
     cd appointment
     pip install -r backend/requirements.txt
+    touch backend/src/appointment.db # when using sqlite
     mv backend/src/appointment.ini.example backend/src/appointment.ini
     uvicorn backend.src.main:app --reload --port 5000
     ```
