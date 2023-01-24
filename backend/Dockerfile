@@ -1,5 +1,8 @@
 FROM python:3.11-buster
 
+RUN touch src/appointment.db
+RUN mv src/appointment.ini.example ./src/appointment.ini
+
 RUN mkdir app
 WORKDIR /app
 
@@ -11,5 +14,3 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY src/ .
-RUN touch /app/src/appointment.db
-RUN mv /app/src/appointment.ini.example /app/src/appointment.ini
