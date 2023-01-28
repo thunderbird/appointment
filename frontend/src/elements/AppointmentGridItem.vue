@@ -1,12 +1,17 @@
 <template>
   <div
-    class="hover:bg-sky-400/10 hover:shadow-md rounded border-l-8 border-sky-400 cursor-pointer"
+    class="rounded border-l-8 border-sky-400"
+    :class="{
+      'bg-gray-300 text-slate-500 opacity-50': appointment.status === appointmentState.past,
+      'hover:bg-sky-400/10 hover:shadow-md cursor-pointer': appointment.status !== appointmentState.past,
+    }"
     :style="{ 'border-color': appointment.calendar_color }"
-    @mouseover="el => paintBackground(el, appointment.calendar_color, '22')"
-    @mouseout="el => paintBackground(el, appointment.calendar_color, _, true)"
+    @mouseover="el => appointment.status !== appointmentState.past ? paintBackground(el, appointment.calendar_color, '22') : null"
+    @mouseout="el => appointment.status !== appointmentState.past ? paintBackground(el, appointment.calendar_color, _, true) : null"
   >
     <div
-      class="h-full px-4 py-3 rounded-r border-dashed border-t-2 border-r-2 border-b-2 border-sky-400 flex flex-col gap-1"
+      class="h-full px-4 py-3 rounded-r border-solid border-t-2 border-r-2 border-b-2 border-sky-400 flex flex-col gap-1"
+      :class="{ 'border-dashed': appointment.status == appointmentState.pending }"
       :style="{ 'border-color': appointment.calendar_color }"
     >
       <div>{{ appointment.title }}</div>

@@ -195,8 +195,8 @@ const emit = defineEmits(['start', 'next', 'create', 'cancel']);
 
 // component properties
 const props = defineProps({
-  status: Number,  // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
-  calendars: Array // list of user defined calendars
+  status:    Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
+  calendars: Array,  // list of user defined calendars
 });
 
 // calculate the current visible step by given status
@@ -212,12 +212,12 @@ const updateLocationType = type => {
 
 // defaul appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
-  title: '',
-  calendar_id: props.calendars[0].id,
+  title:         '',
+  calendar_id:   props.calendars[0].id,
   location_type: locationTypes.inPerson,
-  location_url: '',
-  details: '',
-  status: 2,
+  location_url:  '',
+  details:       '',
+  status:        2, // appointment is opened | TODO: make configurable sometime
 };
 const appointment = reactive({...defaultAppointment});
 
@@ -247,20 +247,20 @@ const slotList = computed(() => {
 });
 
 // handle notes char limit
-const charLimit = 250;
-const charCount = computed(() => appointment.details.length);
+const charLimit      = 250;
+const charCount      = computed(() => appointment.details.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
-const validStep1 = computed(() => appointment.title !== '');
-const validStep2 = computed(() => Object.keys(slots).length > 0);
-const visitedStep1 = ref(false);
-const visitedStep2 = ref(false);
-const invalidStep1 = computed(() => !validStep1.value && visitedStep1.value);
-const invalidStep2 = computed(() => !validStep2.value && visitedStep2.value);
+const validStep1     = computed(() => appointment.title !== '');
+const validStep2     = computed(() => Object.keys(slots).length > 0);
+const visitedStep1   = ref(false);
+const visitedStep2   = ref(false);
+const invalidStep1   = computed(() => !validStep1.value && visitedStep1.value);
+const invalidStep2   = computed(() => !validStep2.value && visitedStep2.value);
 
 // show mini month date picker
 const showDatePicker = ref(false);
-const activeDate = ref(dj());
+const activeDate     = ref(dj());
 
 // handle date and time input of user
 const addDate = (d) => {

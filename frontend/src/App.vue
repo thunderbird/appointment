@@ -16,12 +16,14 @@
 </template>
 
 <script setup>
+import { appointmentState } from '@/definitions';
 import { ref, inject, provide, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import NavBar from '@/components/NavBar';
 
 const route = useRoute();
 const call = inject('call');
+const dj = inject('dayjs');
 
 // menu items for main navigation
 const navItems = ['calendar', 'appointments', 'settings'];
@@ -57,7 +59,8 @@ const getDbAppointments = async () => {
   appointments.value?.forEach(a => {
     a.calendar_title = calendarsById[a.calendar_id]?.title;
     a.calendar_color = calendarsById[a.calendar_id]?.color;
-    a.active = a.status == 2; // TODO
+    a.status = getStatus(a);
+    a.active = a.status !== appointmentState.past; // TODO
   });
 };
 const getDbData = async () => {
@@ -66,6 +69,20 @@ const getDbData = async () => {
     await getDbCalendars();
     await getDbAppointments();
   }
+}
+
+// check appointment status for current state (past|pending|booked)
+const getStatus = (a) => {
+  // check past events
+  if (a.slots.filter(s => dj(s.start).isAfter(dj())).length === 0) {
+    return appointmentState.past;
+  }
+  // check booked events
+  if (a.slots.filter(s => s.attendee != null).length > 0) {
+    return appointmentState.booked;
+  }
+  // else event is still wating to be booked
+  return appointmentState.pending;
 }
 
 // get the data initially
