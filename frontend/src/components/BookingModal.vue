@@ -11,7 +11,7 @@
       <div>{{ event.title }}:</div>
       <div>{{ time }}</div>
     </div>
-    <div v-if="!bookingDone" class="text-xs text-teal-500 text-center underline mb-8">Time zone: Pacific Standart Time</div>
+    <div v-if="!bookingDone" class="text-sm text-teal-500 text-center underline mb-8">Time zone: Pacific Standart Time</div>
     <div v-if="!bookingDone" class="flex flex-col gap-4 mb-8">
       <label>
         <div class="font-medium text-gray-500 mb-1">{{ t('label.name') }}</div>
@@ -35,7 +35,7 @@
     </div>
     <div v-else class="mb-8 mt-8">
       <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-8 mx-auto" />
-      <div class="text-xs text-gray-500 w-4/5 mx-auto text-center">{{ t('text.invitationSentToAddress', { address: attendee.email }) }}</div>
+      <div class="text-sm text-gray-500 w-4/5 mx-auto text-center">{{ t('text.invitationSentToAddress', { address: attendee.email }) }}</div>
     </div>
     <div class="flex gap-8 w-4/5 mx-auto justify-center items-stretch">
       <secondary-button

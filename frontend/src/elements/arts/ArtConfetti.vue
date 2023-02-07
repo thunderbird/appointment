@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" :class="$props.class || ''" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <svg :class="$props.class || ''" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g clip-path="url(#confetti)">
       <path d="M271.992 375.99L27.345 511.622C24.184 513.374 19.062 508.662 20.547 505.367L135.397 250.302" fill="#2DD4BF"/>
       <path d="M249.373 355.176L34.548 474.274L20.547 505.368C19.063 508.665 24.183 513.376 27.346 511.623L271.993 375.99L249.373 355.176Z" fill="#14B8A6"/>
@@ -28,3 +28,5 @@
     </defs>
   </svg>
 </template>
+
+<script setup></script>

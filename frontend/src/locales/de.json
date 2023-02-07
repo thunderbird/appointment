@@ -21,7 +21,9 @@
     "yourProfile": "Dein Profil"
   },
   "info": {
-    "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine."
+    "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine.",
+    "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
+    "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
@@ -106,6 +108,7 @@
     "showSecondaryTimeZone": "Zeige sekundäre Zeitzone",
     "start": "Start",
     "startTime": "Startzeit",
+    "startUsingTba": "Starte mit TBA",
     "status": "Status",
     "theme": "Thema",
     "timeFormat": "Zeitformat",

@@ -59,7 +59,7 @@ const getDbAppointments = async () => {
   appointments.value?.forEach(a => {
     a.calendar_title = calendarsById[a.calendar_id]?.title;
     a.calendar_color = calendarsById[a.calendar_id]?.color;
-    a.status = getStatus(a);
+    a.status = getAppointmentStatus(a);
     a.active = a.status !== appointmentState.past; // TODO
   });
 };
@@ -72,7 +72,7 @@ const getDbData = async () => {
 }
 
 // check appointment status for current state (past|pending|booked)
-const getStatus = (a) => {
+const getAppointmentStatus = (a) => {
   // check past events
   if (a.slots.filter(s => dj(s.start).isAfter(dj())).length === 0) {
     return appointmentState.past;
@@ -92,4 +92,5 @@ onMounted(() => {
 
 // provide refresh functions for components
 provide('refresh', getDbData);
+provide('getAppointmentStatus', getAppointmentStatus);
 </script>

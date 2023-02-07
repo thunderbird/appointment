@@ -6,7 +6,30 @@
     <div class="text-4xl font-thin text-sky-500">Appointment</div>
   </header>
   <!-- booking page content -->
-  <main class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
+  <main
+    v-if="activeView === views.loading"
+    class="h-screen flex-center select-none"
+  >
+    <div class="w-12 h-12 rounded-full animate-spin border-4 border-white border-t-teal-600"></div>
+  </main>
+  <main
+    v-else-if="activeView === views.invalid"
+    class="h-screen px-4 flex-center flex-col gap-8 select-none"
+  >
+    <art-invalid-link class="max-w-sm h-auto my-6" />
+    <div class="text-xl font-semibold text-sky-600">
+      {{ t('info.bookingLinkHasAlreadyBeenUsed') }}
+    </div>
+    <div class="text-gray-800">
+      {{ t('info.bookedPleaseCheckEmail') }}
+    </div>
+    <primary-button
+      class="p-7 mt-12"
+      :label="t('label.startUsingTba')"
+      @click="null"
+    />
+  </main>
+  <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
     <div v-if="appointment">
       <div class="text-3xl text-gray-700 mb-4">{{ appointment.title }}</div>
       <div class="font-bold">{{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}</div>
@@ -43,27 +66,33 @@
         @event-selected="selectEvent"
       />
     </div>
+    <!-- fixed footer with action button -->
+    <footer class="fixed bottom-0 left-0 h-24 w-full px-4 bg-white border-t border-gray-300">
+      <div class="h-full max-w-screen-2xl mx-auto flex justify-end items-center">
+        <primary-button
+          class="p-7"
+          :label="t('label.confirmSelection')"
+          :disabled="!activeEvent"
+          @click="openBookingModal"
+        />
+      </div>
+    </footer>
   </main>
-  <!-- fixed footer with action button -->
-  <footer class="fixed bottom-0 h-24 w-full px-4 bg-white border-t border-gray-300">
-    <div class="h-full max-w-screen-2xl mx-auto flex justify-end items-center">
-      <primary-button
-        class="p-7"
-        :label="t('label.confirmSelection')"
-        :disabled="!activeEvent"
-        @click="openBookingModal"
-      />
-    </div>
-  </footer>
   <!-- modals -->
-  <booking-modal :open="showBooking" :event="activeEvent" @booked="bookEvent" @close="closeBookingModal" />
+  <booking-modal
+    :open="showBooking"
+    :event="activeEvent"
+    @booked="bookEvent"
+    @close="closeBookingModal"
+  />
 </template>
 
 <script setup>
-import { bookingCalendarViews as views } from '@/definitions';
+import { bookingCalendarViews as views, appointmentState } from '@/definitions';
 import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import BookingModal from '@/components/BookingModal';
 import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
@@ -71,19 +100,21 @@ import CalendarPageHeading from '@/elements/CalendarPageHeading';
 import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
 
+// component constants
 const { t } = useI18n();
 const route = useRoute();
 const dj = inject("dayjs");
 const call = inject("call");
+const getAppointmentStatus = inject("getAppointmentStatus");
 
 // appointment data the visitor should see
-const appointment = ref({ title: '', slots: [] });
+const appointment = ref(null);
 
 // handle different view and active date
 // month: there are multiple weeks of availability, leads to week view for selection
 // week: there are multiple days of availability, provides selectable slots
 // day: time slots are only on one single day, provides selectable slots
-const activeView = ref(views.month);
+const activeView = ref(views.loading);
 const activeDate = ref(dj());
 const startOfActiveWeek = computed(() => {
   return activeDate.value.startOf('week');
@@ -98,7 +129,6 @@ const viewTitle = computed(() => {
     case views.week:
     case views.weekAfterMonth:
       return startOfActiveWeek.value.format('ddd Do') + ' - ' + endOfActiveWeek.value.format('ddd Do');
-    case views.month:
     default:
       return ''
   }
@@ -109,11 +139,16 @@ onMounted(async () => {
   // async get appointment data from route
   // TODO: only get necessary data here
   // TODO: handle username
-  const { data } = await call("apmt/admin/" + route.params.slug).get().json();
-  appointment.value = data.value;
-  activeDate.value = dj(appointment.value?.slots[0].start);
-  // check appointment slots for appropriate view
-  activeView.value = getViewBySlotDistribution(appointment.value.slots);
+  const { error, data } = await call("apmt/admin/" + route.params.slug).get().json();
+  // check if appointment exists and is open
+  if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
+    activeView.value = views.invalid;
+  } else {
+    appointment.value = data.value;
+    activeDate.value = dj(appointment.value?.slots[0].start);
+    // check appointment slots for appropriate view
+    activeView.value = getViewBySlotDistribution(appointment.value.slots);
+  }
 });
 
 // check if slots are distributed over different months, weeks, days or only on a single day
@@ -190,9 +225,12 @@ const bookEvent = async (attendee) => {
     attendee: attendee
   };
   // update server side event
-  const { data } = await call("apmt/admin/" + route.params.slug).put(obj).json();
-  console.log(data.value);
-  // TODO: update view to prevent reselection
+  const { error } = await call("apmt/admin/" + route.params.slug).put(obj).json();
+  // disable calendar view if every thing worked fine
+  if (!error.value) {
+    // update view to prevent reselection
+    activeView.value = views.invalid;
+  }
 };
 
 </script>
