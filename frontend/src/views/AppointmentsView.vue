@@ -45,7 +45,7 @@
             }"
             @click="view = viewTypes.grid"
           >
-            <grid-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+            <layout-grid-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
           </div>
         </div>
         <div
@@ -194,7 +194,7 @@ import TabBar from '@/components/TabBar';
 import {
   AdjustmentsIcon,
   CheckIcon,
-  GridIcon,
+  LayoutGridIcon,
   ListIcon,
   SearchIcon,
 } from "vue-tabler-icons";
