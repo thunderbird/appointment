@@ -25,7 +25,7 @@
       </ul>
       <router-link
         :to="{ name: 'profile' }"
-        class="w-12 h-12 mx-8 self-center flex justify-center items-center rounded-full bg-teal-500 text-lg font-bold text-white"
+        class="w-12 h-12 mx-8 self-center flex-center rounded-full bg-teal-500 text-lg font-bold text-white"
       >
         JD
       </router-link>

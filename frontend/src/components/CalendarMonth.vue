@@ -1,6 +1,6 @@
 <template>
   <div class="select-none">
-    <div v-if="nav" class="flex justify-center items-center gap-2 mb-2 select-none">
+    <div v-if="nav" class="flex-center gap-2 mb-2 select-none">
       <div @click="dateNav(false)" class="group cursor-pointer">
         <chevron-left-icon class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>

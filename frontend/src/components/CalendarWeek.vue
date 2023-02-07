@@ -8,7 +8,7 @@
       class="flex flex-col items-center text-gray-700 bg-white py-2"
     >
       <div
-        class="text-2xl font-semibold w-10 h-10 flex justify-center items-center"
+        class="text-2xl font-semibold w-10 h-10 flex-center"
         :class="{'text-white rounded-full bg-teal-500': d.active }"
       >{{ d.day }}</div>
       <div class="text-lg">{{ d.weekday }}</div>

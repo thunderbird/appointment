@@ -117,7 +117,7 @@
           <div class="text-xl">{{ t('heading.calendarConnections') }}</div>
           <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
             <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
-              <div class="flex justify-center items-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
+              <div class="flex-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
                 <calendar-icon class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
               </div>
               {{ cal.title }}
