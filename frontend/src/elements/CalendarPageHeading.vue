@@ -1,7 +1,7 @@
 <template>
   <div class="flex gap-8 items-center select-none">
     <div v-if="nav" @click="emit('prev')" class="group cursor-pointer select-none">
-      <icon-chevron-left class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" />
+      <chevron-left-icon class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" />
     </div>
     <h2 v-if="(title && !backlink)" class="flex flex-col">
       <div class="text-4xl font-light">{{ title }}</div>
@@ -19,18 +19,21 @@
         <span class="font-normal">{{ month }}</span>
         <span>{{ year }}</span>
       </div>
-      <icon-chevron-right class="h-10 w-10 stroke-slate-400 stroke-1 fill-transparent" />
+      <chevron-right-icon class="h-10 w-10 stroke-slate-400 stroke-1 fill-transparent" />
       <div>{{ title }}</div>
     </h2>
     <div v-if="nav" @click="emit('next')" class="group cursor-pointer select-none">
-      <icon-chevron-right class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" />
+      <chevron-right-icon class="h-10 w-10 stroke-slate-400 group-hover:stroke-teal-500 stroke-1 fill-transparent" />
     </div>
   </div>
 </template>
 
 <script setup>
-import IconChevronLeft from '@/elements/icons/IconChevronLeft';
-import IconChevronRight from '@/elements/icons/IconChevronRight';
+// icons
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "vue-tabler-icons";
 
 // component properties
 defineProps({

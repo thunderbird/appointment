@@ -2,13 +2,13 @@
   <div class="select-none">
     <div v-if="nav" class="flex justify-center items-center gap-2 mb-2 select-none">
       <div @click="dateNav(false)" class="group cursor-pointer">
-        <icon-chevron-left class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
+        <chevron-left-icon class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
       <div class="text-teal-500 font-semibold text-lg">
         {{ navDate.format('MMMM YYYY')}}
       </div>
       <div @click="dateNav(true)" class="group cursor-pointer">
-        <icon-chevron-right class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
+        <chevron-right-icon class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
     </div>
     <div class="grid grid-cols-7 gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
@@ -41,9 +41,14 @@
 <script setup>
 import { ref, computed, inject, watch } from 'vue';
 import CalendarMonthDay from '@/elements/CalendarMonthDay';
-import IconChevronLeft from '@/elements/icons/IconChevronLeft';
-import IconChevronRight from '@/elements/icons/IconChevronRight';
 
+// icons
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "vue-tabler-icons";
+
+// component constants
 const dj = inject("dayjs");
 
 // component properties

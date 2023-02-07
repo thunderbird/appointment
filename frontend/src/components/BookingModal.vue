@@ -2,7 +2,7 @@
   <div v-if="open" class="bg-gray-800/50 w-screen h-screen fixed top-0 left-0 z-40" @click="emit('close')"></div>
   <div v-if="open" class="bg-white fixed z-50 position-center position-center rounded-xl p-12 max-w-lg w-full">
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
-      <icon-x class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+      <x-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
     <div class="text-xl text-teal-500 text-center font-semibold mb-4">
       {{ !bookingDone ? t('heading.bookSelection') : t('heading.eventBooked') }}
@@ -61,10 +61,13 @@
 import { inject, computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ArtConfetti from '@/elements/arts/ArtConfetti';
-import IconX from '@/elements/icons/IconX';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 
+// icons
+import { XIcon } from "vue-tabler-icons";
+
+// component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
 

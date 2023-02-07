@@ -8,7 +8,7 @@
     <div class="w-1/5 flex flex-col gap-6">
       <!-- search -->
       <label class="flex items-center relative">
-        <icon-search class="absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2 stroke-gray-300 fill-transparent" /> 
+        <search-icon class="absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2 stroke-gray-300 fill-transparent" /> 
         <input class="w-full text-sm pl-12 pr-2 rounded-md border-gray-300" type="search" name="search" :placeholder="t('label.search')" />
       </label>
       <!-- menu -->
@@ -20,7 +20,7 @@
         @click="show(key)"
       >
         <span>{{ t('label.' + key) }}</span>
-        <icon-chevron-right
+        <chevron-right-icon
           class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-180 transition-transform"
           :class="{ '!rotate-0 stroke-white': view === activeView }"
         />
@@ -118,15 +118,15 @@
           <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
             <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
               <div class="flex justify-center items-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
-                <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
+                <calendar-icon class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
               </div>
               {{ cal.title }}
               <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
-                <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
+                <pencil-icon class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
                 {{ t('label.editCalendar') }}
               </button>
               <div class="p-0.5 cursor-pointer" @click="deleteCalendar(cal.id)">
-                <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+                <x-icon class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
               </div>
             </div>
           </div>
@@ -226,15 +226,20 @@ import { ref, reactive, inject } from 'vue';
 import { settingsSections } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import IconChevronRight from '@/elements/icons/IconChevronRight';
-import IconSearch from '@/elements/icons/IconSearch';
-import IconCalendar from '@/elements/icons/IconCalendar.vue';
-import IconPencil from '@/elements/icons/IconPencil.vue';
-import IconX from '@/elements/icons/IconX.vue';
 import SwitchToggle from '@/elements/SwitchToggle';
 import SecondaryButton from '@/elements/SecondaryButton';
 import PrimaryButton from '@/elements/PrimaryButton';
 
+// icons
+import {
+  ChevronRightIcon,
+  SearchIcon,
+  CalendarIcon,
+  PencilIcon,
+  XIcon,
+} from "vue-tabler-icons";
+
+// component constants
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();

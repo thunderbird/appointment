@@ -4,15 +4,15 @@
     <div class="flex flex-col gap-2">
       <div class="text-lg text-teal-500 font-semibold">{{ event?.title }}</div>
       <div class="text-xs text-gray-700 flex gap-1.5 items-center">
-        <icon-clock class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
+        <clock-icon class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
         {{ eventDateTime }}
       </div>
       <div class="text-xs text-gray-700 flex gap-1.5 items-center">
-        <icon-calendar class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
+        <calendar-icon class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
         {{ event?.calendar_title }}
       </div>
       <div v-if="event?.attendee" class="text-xs text-gray-700 flex gap-1.5 items-center">
-        <icon-users class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
+        <users-icon class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
         {{ t('label.guest' , { 'count': 1 }) }}
       </div>
     </div>
@@ -22,10 +22,15 @@
 <script setup>
 import { inject, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import IconCalendar from '@/elements/icons/IconCalendar';
-import IconClock from '@/elements/icons/IconClock';
-import IconUsers from '@/elements/icons/IconUsers';
 
+// icons
+import {
+  CalendarIcon,
+  ClockIcon,
+  UsersIcon,
+} from "vue-tabler-icons";
+
+// component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
 

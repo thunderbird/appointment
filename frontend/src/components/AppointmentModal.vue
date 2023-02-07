@@ -2,24 +2,24 @@
   <div v-if="open" class="bg-gray-800/50 w-screen h-screen fixed top-0 left-0 z-40" @click="emit('close')"></div>
   <div v-if="open" class="bg-white fixed z-50 position-center position-center rounded-xl p-12 max-w-3xl w-full">
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
-      <icon-x class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+      <x-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
     <div class="text-xl mb-8">{{ appointment.title }}</div>
     <div class="grid grid-cols-4 text-gray-500 text-sm w-max max-w-full gap-x-4 gap-y-2 pl-4 mb-8">
       <div class="font-semibold flex items-center gap-2">
-        <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <calendar-event-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
         {{ t('label.availabilityDay') }}
       </div>
       <div class="font-semibold flex items-center gap-2">
-        <icon-clock class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <clock-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
         {{ t('label.startTime') }}
       </div>
       <div class="font-semibold flex items-center gap-2">
-        <icon-clock class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <clock-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
         {{ t('label.endTime') }}
       </div>
       <div class="font-semibold flex items-center gap-2">
-        <icon-users class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
+        <users-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent" />
         {{ t('label.bookings') }}
       </div>
       <template v-for="s in appointment.slots" :key="s.start">
@@ -32,7 +32,7 @@
     <div class="grid grid-cols-3 text-gray-500 text-sm w-max max-w-full gap-x-12 gap-y-8 pl-4 mb-8">
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-calendar class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+          <calendar-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.calendar') }}
         </div>
         <div class="pl-6 flex items-center gap-3">
@@ -42,7 +42,7 @@
       </div>
       <div class="col-span-2">
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-link class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+          <link-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.bookingLink') }}
         </div>
         <div class="pl-6 truncate">
@@ -53,14 +53,14 @@
       </div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-map-pin class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+          <map-pin-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.location') }}
         </div>
         <div class="pl-6">{{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}</div>
       </div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-video class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+          <video-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.videoLink') }}
         </div>
         <div class="pl-6">
@@ -71,7 +71,7 @@
       </div>
       <div>
         <div class="font-semibold mb-1 flex items-center gap-2">
-          <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+          <bulb-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.activeAppointment') }}
         </div>
         <switch-toggle class="ml-6" :active="appointment.active" />
@@ -82,11 +82,11 @@
       class="grid grid-cols-[auto_1fr] items-center text-gray-500 text-sm w-max max-w-full gap-x-8 gap-y-2 pl-4 mb-8"
     >
       <div class="font-semibold mb-1 flex items-center gap-2">
-        <icon-users class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <users-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.attendees') }}
       </div>
       <div class="font-semibold mb-1 flex items-center gap-2">
-        <icon-calendar-event class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <calendar-event-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.bookingSlot') }}
       </div>
       <template v-for="s in attendeesSlots" :key="s.start">
@@ -106,7 +106,7 @@
     </div>
     <div class="text-gray-500 text-sm w-full pl-4">
       <div class="font-semibold mb-1 flex items-center gap-2">
-        <icon-notes class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <notes-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.notes') }}
       </div>
       <div class="rounded-lg p-4 border border-gray-400">{{ appointment.details }}</div>
@@ -119,18 +119,23 @@ import { locationTypes } from '@/definitions';
 import { keyByValue } from '@/utils';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import IconBulb from '@/elements/icons/IconBulb';
-import IconCalendar from '@/elements/icons/IconCalendar';
-import IconCalendarEvent from '@/elements/icons/IconCalendarEvent';
-import IconClock from '@/elements/icons/IconClock';
-import IconLink from '@/elements/icons/IconLink';
-import IconMapPin from '@/elements/icons/IconMapPin';
-import IconNotes from '@/elements/icons/IconNotes';
-import IconUsers from '@/elements/icons/IconUsers';
-import IconVideo from '@/elements/icons/IconVideo';
-import IconX from '@/elements/icons/IconX';
 import SwitchToggle from '@/elements/SwitchToggle';
 
+// icons
+import {
+  BulbIcon,
+  CalendarIcon,
+  CalendarEventIcon,
+  ClockIcon,
+  LinkIcon,
+  MapPinIcon,
+  NotesIcon,
+  UsersIcon,
+  VideoIcon,
+  XIcon,
+} from "vue-tabler-icons";
+
+// component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
 const baseurl = inject("baseurl");

@@ -26,15 +26,18 @@
     justify-center
     gap-2
   ">
-    <icon-copy v-if="icon === 'copy'" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
-    <icon-check v-if="icon === 'check'" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
+    <copy-icon v-if="icon === 'copy'" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
+    <check-icon v-if="icon === 'check'" class="h-6 w-6 stroke-2 stroke-white fill-transparent" />
     {{ label }}
   </button>
 </template>
 
 <script setup>
-import IconCheck from '@/elements/icons/IconCheck';
-import IconCopy from '@/elements/icons/IconCopy';
+// icons
+import {
+  CheckIcon,
+  CopyIcon,
+} from "vue-tabler-icons";
 
 // component properties
 defineProps({

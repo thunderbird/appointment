@@ -21,16 +21,20 @@
     "
     @click="copy ? copyToClipboard() : null"
   >
-    <icon-copy v-if="copy && !copied" class="h-4 w-4 stroke-2 stroke-slate-500 fill-transparent" />
-    <icon-check v-if="copy && copied" class="h-4 w-4 stroke-2 stroke-green-500 fill-transparent" />
+    <copy-icon v-if="copy && !copied" class="h-4 w-4 stroke-2 stroke-slate-500 fill-transparent" />
+    <check-icon v-if="copy && copied" class="h-4 w-4 stroke-2 stroke-green-500 fill-transparent" />
     {{ label }}
   </button>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import IconCheck from '@/elements/icons/IconCheck';
-import IconCopy from '@/elements/icons/IconCopy';
+
+// icons
+import {
+  CheckIcon,
+  CopyIcon,
+} from "vue-tabler-icons";
 
 // component properties
 const props = defineProps({

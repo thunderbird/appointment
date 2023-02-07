@@ -16,19 +16,19 @@
     >
       <div>{{ appointment.title }}</div>
       <div class="text-sm flex items-center gap-1">
-        <icon-clock class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <clock-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.' + keyByValue(appointmentState, appointment.status)) }}
       </div>
       <div class="text-sm flex items-center gap-1">
-        <icon-calendar class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <calendar-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ appointment.calendar_title }}
       </div>
       <div class="pr-4 text-sm flex items-center gap-1">
-        <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <bulb-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         <switch-toggle :active="appointment.active" :label="t('label.activeAppointment')" @click.stop="null" />
       </div>
       <div class="text-sm flex items-center gap-1">
-        <icon-link class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <link-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         <div class="truncate">
           <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
             {{ baseurl + appointment.slug }}
@@ -44,12 +44,17 @@ import { appointmentState } from '@/definitions';
 import { inject } from 'vue';
 import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
-import IconBulb from '@/elements/icons/IconBulb';
-import IconCalendar from '@/elements/icons/IconCalendar';
-import IconClock from '@/elements/icons/IconClock';
-import IconLink from '@/elements/icons/IconLink';
 import SwitchToggle from '@/elements/SwitchToggle';
 
+// icons
+import {
+  BulbIcon,
+  CalendarIcon,
+  ClockIcon,
+  LinkIcon,
+} from "vue-tabler-icons";
+
+// component constants
 const { t } = useI18n();
 const baseurl = inject('baseurl');
 const paintBackground = inject('paintBackground');
