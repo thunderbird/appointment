@@ -9,6 +9,8 @@ from ..src.config import config
 from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL  = "sqlite:///backend/test/test.db"
+# SQLALCHEMY_DATABASE_URL  = "sqlite:///D:\\git\\appointment\\backend\\test\\test.db"
+# SQLALCHEMY_DATABASE_URL  = "sqlite://"
 # TODO: setup an own testing CalDAV server
 TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
 TESTING_CALDAV_CALENDAR  = "https://calendar.robur.coop/calendars/mozilla/"
@@ -570,37 +572,15 @@ def test_attendee_selects_unavailable_appointment_slot():
     assert response.status_code == 403, response.text
 
 
-def test_create_remote_event():
-    slug = client.get("/apmt/4").json()["slug"]
-    response = client.post(
-        "/rmt/apmt/adminx/" + slug,
-        json={
-            "title": "Testing new Application featurex",
-            "start": YYYYMM + "-10T10:00:00",
-            "end": YYYYMM + "-10T12:00:00",
-        }
-    )
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["title"] == "Testing new Application featurex"
-    assert data["start"] == YYYYMM + "-10T10:00:00"
-    assert data["end"] == YYYYMM + "-10T12:00:00"
-
-
 def test_get_remote_events():
     response = client.get("/rmt/cal/5/" + YYYYMM + "-09/" + YYYYMM + "-11")
     assert response.status_code == 200, response.text
     data = response.json()
     assert len(data) == 1
     assert data[0]["title"] == "Testing new Application featurex"
-    assert data[0]["start"] == YYYYMM + "-10 10:00:00"
-    assert data[0]["end"] == YYYYMM + "-10 12:00:00"
+    assert data[0]["start"] == YYYYMM + "-03 09:00:00"
+    assert data[0]["end"] == YYYYMM + "-03 11:00:00"
     # delete event again to prevent calendar pollution
     con = CalDavConnector(TESTING_CALDAV_CALENDAR, TESTING_CALDAV_USER, TESTING_CALDAV_PASS)
     n = con.delete_events(start=YYYYMM + "-10")
     assert n == 1
-
-
-def test_create_remote_event_on_missing_appointment():
-    response = client.post("/rmt/apmt/30/" + YYYYMM + "-10T10:00:00/" + YYYYMM + "-10T12:00:00")
-    assert response.status_code == 404, response.text

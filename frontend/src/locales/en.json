@@ -23,7 +23,9 @@
   "info": {
     "noPendingAppointmentsInList": "There are currently no pending appointments in this list.",
     "bookingLinkHasAlreadyBeenUsed": "It seems that this booking link has already been used.",
-    "bookedPleaseCheckEmail": "This event has been booked, please check your email to add it to you calendar."
+    "bookedPleaseCheckEmail": "This event has been booked, please check your email to add it to you calendar.",
+    "bookingSuccessful": "The booking was successful!",
+    "invitationWasSent": "An invitation was sent to your email."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
@@ -74,6 +76,7 @@
     "day": "Day",
     "defaultFont": "Default font",
     "downloadIcs": "Download .ics",
+    "downloadTheIcsFile": "Download the ICS file",
     "editCalendar": "Edit calendar",
     "email": "Email",
     "end": "End",
@@ -104,6 +107,7 @@
     "searchAppointments": "Search appointments",
     "secondaryTimeZone": "Secondary time zone",
     "selectCalendar": "Select calendar",
+    "sendInvitationToAnotherEmail": "Send invitation to another email",
     "settings": "Settings",
     "showSecondaryTimeZone": "Show secondary time zone",
     "start": "Start",

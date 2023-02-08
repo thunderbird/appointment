@@ -5,6 +5,7 @@ Boot application, authenticate user and provide all API endpoints.
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import timedelta, datetime
 
 # database
 from sqlalchemy.orm import Session
@@ -239,26 +240,24 @@ def read_public_appointment(username: str, slug: str, db: Session = Depends(get_
 
 @app.put("/apmt/{username}/{slug}", response_model=schemas.Attendee)
 def update_public_appointment_slot(username: str, slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
-  """endpoint to update a time slot for an appointment via public link"""
-  db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
-  if db_appointment is None:
-    raise HTTPException(status_code=404, detail="Appointment not found")
-  if not repo.appointment_has_slot(db, appointment_id=db_appointment.id, slot_id=s_a.slot_id):
-    raise HTTPException(status_code=404, detail="Time slot not found for Appointment")
-  if not repo.slot_is_available(db, slot_id=s_a.slot_id):
-    raise HTTPException(status_code=403, detail="Time slot not available anymore")
-  return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
-
-
-# TODO: not necessarily needed, maybe include this endpoint into the previous one
-@app.post("/rmt/apmt/{username}/{slug}", response_model=schemas.Event)
-def create_caldav_event(username: str, slug: str, event: schemas.Event, db: Session = Depends(get_db)):
-  """endpoint to create an event defined by given appointment id and date range in a remote calendar"""
+  """endpoint to update a time slot for an appointment via public link and create an event in remote calendar"""
   db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
   db_calendar = repo.get_calendar(db, calendar_id=db_appointment.calendar_id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
+  if not repo.appointment_has_slot(db, appointment_id=db_appointment.id, slot_id=s_a.slot_id):
+    raise HTTPException(status_code=404, detail="Time slot not found for Appointment")
+  if not repo.slot_is_available(db, slot_id=s_a.slot_id):
+    raise HTTPException(status_code=403, detail="Time slot not available anymore")
+  slot = repo.get_slot(db=db, slot_id=s_a.slot_id)
+  event = schemas.Event(
+    title=db_appointment.title,
+    start=slot.start.isoformat(),
+    end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
+    description=db_appointment.details + '\n\nAttendee:\n' + s_a.attendee.name + ' (' + s_a.attendee.email + ')'
+  )
   con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-  return con.create_event(event=event)
+  con.create_event(event=event)
+  return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)

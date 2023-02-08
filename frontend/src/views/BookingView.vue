@@ -5,13 +5,14 @@
     <div class="text-4xl font-thin text-teal-500">Thunderbird</div>
     <div class="text-4xl font-thin text-sky-500">Appointment</div>
   </header>
-  <!-- booking page content -->
+  <!-- booking page content: loading -->
   <main
     v-if="activeView === views.loading"
     class="h-screen flex-center select-none"
   >
     <div class="w-12 h-12 rounded-full animate-spin border-4 border-white border-t-teal-600"></div>
   </main>
+  <!-- booking page content: invalid link -->
   <main
     v-else-if="activeView === views.invalid"
     class="h-screen px-4 flex-center flex-col gap-8 select-none"
@@ -29,6 +30,33 @@
       @click="null"
     />
   </main>
+  <!-- TODO: booking page content: successful booking -->
+  <main
+    v-else-if="activeView === views.success"
+    class="h-screen px-4 flex-center flex-col gap-8 select-none"
+  >
+    <art-successful-booking class="max-w-sm h-auto my-6" />
+    <div class="text-xl font-semibold text-teal-600">
+      {{ t('info.bookingSuccessful') }}
+    </div>
+    <div class="shadow-lg rounded-lg p-2 flex flex-col gap-2">
+      <div class="rounded-md bg-gray-200 text-gray-700 text-xl font-bold p-4 w-full text-center">
+        {{ activeEvent.title }}
+      </div>
+      <div class="flex flex-col gap-1 text-center">
+        <div class="text-teal-600 font-semibold">{{ dj(activeEvent.start).format('dddd') }}</div>
+        <div class="text-lg">{{ dj(activeEvent.start).format('LL') }}</div>
+        <div class="uppercase">{{ dj(activeEvent.start).format('LT') }}</div>
+      </div>
+    </div>
+    <div class="text-teal-600 underline">{{ t('label.downloadTheIcsFile') }}</div>
+    <div class="text-gray-800">
+      <div>{{ t('info.invitationWasSent') }}</div>
+      <div class="font-bold text-lg">{{ attendee.email }}</div>
+    </div>
+    <div class="text-sky-600 underline">{{ t('label.sendInvitationToAnotherEmail') }}</div>
+  </main>
+  <!-- booking page content: time slot selection -->
   <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
     <div v-if="appointment">
       <div class="text-3xl text-gray-700 mb-4">{{ appointment.title }}</div>
@@ -82,7 +110,9 @@
   <booking-modal
     :open="showBooking"
     :event="activeEvent"
-    @booked="bookEvent"
+    :success="activeView === views.success"
+    @book="bookEvent"
+    @download="downloadIcs"
     @close="closeBookingModal"
   />
 </template>
@@ -92,7 +122,8 @@ import { bookingCalendarViews as views, appointmentState } from '@/definitions';
 import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
+import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
+import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import BookingModal from '@/components/BookingModal';
 import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
@@ -217,20 +248,28 @@ const closeBookingModal = () => {
   activeEvent.value = null;
 };
 
-// attendee confirmed the time slot selection: event is booked
-const bookEvent = async (attendee) => {
+// attendee confirmed the time slot selection: book event
+const attendee = ref(null);
+const bookEvent = async (attendeeData) => {
   // build data object for put request
   const obj = {
     slot_id: activeEvent.value.id,
-    attendee: attendee
+    attendee: attendeeData
   };
   // update server side event
   const { error } = await call("apmt/admin/" + route.params.slug).put(obj).json();
   // disable calendar view if every thing worked fine
   if (!error.value) {
+    attendee.value = attendeeData;
     // update view to prevent reselection
-    activeView.value = views.invalid;
+    activeView.value = views.success;
   }
+};
+
+// download calendar event as .ics
+const downloadIcs = () => {
+  // TODO: create ICS file
+  console.log(activeEvent.value);
 };
 
 </script>

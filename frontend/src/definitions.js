@@ -24,7 +24,8 @@ export const bookingCalendarViews = {
   ...calendarViews,
   weekAfterMonth: 4,
   loading: 10,
-  invalid: 11,
+  success: 11,
+  invalid: 12,
 };
 
 // available appointment views

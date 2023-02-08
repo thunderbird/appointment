@@ -5,14 +5,14 @@
       <x-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
     <div class="text-xl text-teal-500 text-center font-semibold mb-4">
-      {{ !bookingDone ? t('heading.bookSelection') : t('heading.eventBooked') }}
+      {{ !success ? t('heading.bookSelection') : t('heading.eventBooked') }}
     </div>
     <div class="text-gray-500 text-center mb-4">
       <div>{{ event.title }}:</div>
       <div>{{ time }}</div>
     </div>
-    <div v-if="!bookingDone" class="text-sm text-teal-500 text-center underline mb-8">Time zone: Pacific Standart Time</div>
-    <div v-if="!bookingDone" class="flex flex-col gap-4 mb-8">
+    <div v-if="!success" class="text-sm text-teal-500 text-center underline mb-8">Time zone: Pacific Standart Time</div>
+    <div v-if="!success" class="flex flex-col gap-4 mb-8">
       <label>
         <div class="font-medium text-gray-500 mb-1">{{ t('label.name') }}</div>
         <input
@@ -43,15 +43,16 @@
         @click="emit('close')"
       />
       <primary-button
-        v-if="!bookingDone"
+        v-if="!success"
         :label="t('label.bookEvent')"
-        :disabled="!validAttendee"
+        :waiting="waiting"
+        :disabled="!validAttendee || waiting"
         @click="bookIt"
       />
       <primary-button
         v-else
         :label="t('label.downloadIcs')"
-        @click="downloadIcs"
+        @click="emit('download')"
       />
     </div>
   </div>
@@ -65,16 +66,17 @@ import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 
 // icons
-import { XIcon } from "vue-tabler-icons";
+import { XIcon } from 'vue-tabler-icons';
 
 // component constants
 const { t } = useI18n();
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({
-  open: Boolean, // modal state
-  event: Object  // event data to display and book
+  open: Boolean,    // modal state
+  event: Object,    // event data to display and book
+  success: Boolean, // true if booking was successful
 });
 
 // format time
@@ -91,21 +93,18 @@ const validAttendee = computed(() => {
   return attendee.email.length > 2;
 });
 
-// actual booking
+// actual event booking
 const bookingDone = ref(false);
 const bookIt = () => {
   if (validAttendee.value) {
-    emit('booked', attendee);
+    emit('book', attendee);
+    bookingDone.value = true;
   }
-  bookingDone.value = true;
 };
 
-// download calendar event as .ics
-const downloadIcs = () => {
-  // TODO: create ICS file
-  console.log(props.event);
-};
+// loading indication
+const waiting = computed(() => bookingDone.value && !props.success);
 
 // component emits
-const emit = defineEmits(['booked', 'close']);
+const emit = defineEmits(['book', 'download', 'close']);
 </script>

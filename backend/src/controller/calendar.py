@@ -45,7 +45,8 @@ class CalDavConnector:
       events.append(schemas.Event(
         title=str(e.vobject_instance.vevent.summary.value),
         start=str(e.vobject_instance.vevent.dtstart.value),
-        end=str(e.vobject_instance.vevent.dtend.value)
+        end=str(e.vobject_instance.vevent.dtend.value),
+        description=str(e.vobject_instance.vevent.dtend.description)
       ))
     return events
 
@@ -56,7 +57,8 @@ class CalDavConnector:
     calendar.save_event(
       dtstart=datetime.fromisoformat(event.start),
       dtend=datetime.fromisoformat(event.end),
-      summary=event.title
+      summary=event.title,
+      description=event.description
     )
     return event
 
