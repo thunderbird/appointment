@@ -46,7 +46,7 @@ class CalDavConnector:
         title=str(e.vobject_instance.vevent.summary.value),
         start=str(e.vobject_instance.vevent.dtstart.value),
         end=str(e.vobject_instance.vevent.dtend.value),
-        description=str(e.vobject_instance.vevent.dtend.description)
+        # TODO: handle description
       ))
     return events
 
