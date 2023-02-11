@@ -1,9 +1,10 @@
 <template>
-  <button class="
-    relative h-10 text-xl font-semibold whitespace-nowrap rounded-full bg-gradient-to-br hover:shadow-md hover:scale-102 active:scale-98 disabled:scale-100 disabled:shadow-none px-6 transition-all ease-in-out flex items-center justify-center gap-2
-    text-white from-teal-400 to-sky-600 hover:from-sky-400 hover:to-teal-600 disabled:from-teal-200 disabled:to-sky-300
-  "
-  :class="{ 'text-transparent': waiting }"
+  <button
+    class="
+      relative h-10 text-xl font-semibold whitespace-nowrap rounded-full bg-gradient-to-br hover:shadow-md hover:scale-102 active:scale-98 disabled:scale-100 disabled:shadow-none px-6 transition-all ease-in-out flex items-center justify-center gap-2
+      text-white from-teal-400 to-sky-600 hover:from-sky-400 hover:to-teal-600 disabled:from-teal-200 disabled:to-sky-300
+    "
+    :class="{ 'text-transparent': waiting }"
   >
     <div v-if="waiting" class="absolute w-5 h-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
     <copy-icon v-if="icon === 'copy'" class="h-6 w-6 stroke-2 stroke-current fill-transparent" />
@@ -21,8 +22,8 @@ import {
 
 // component properties
 defineProps({
-  label: String,    // button text
-  icon:  String,    // optional icon displayed before label
+  label:   String,  // button text
+  icon:    String,  // optional icon displayed before label
   waiting: Boolean, // if true, spinning animation is shown instead of label
 });
 </script>
