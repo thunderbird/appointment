@@ -1,8 +1,8 @@
-fastapi==0.79.0
-uvicorn==0.18.2
+fastapi==0.91.0
+uvicorn==0.20.0
 sqlalchemy==1.4.40
-sqlalchemy-utils==0.38.3
-alembic==1.8.1
-caldav==0.9.1
-icalendar==4.1.0
-cryptography==39.0.0
+sqlalchemy-utils==0.39.0
+alembic==1.9.3
+caldav==1.0.1
+# icalendar==4.1.0
+cryptography==39.0.1
