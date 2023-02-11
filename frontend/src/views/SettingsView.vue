@@ -114,6 +114,51 @@
       <div v-if="activeView === settingsSections.calendar" class="flex flex-col gap-8">
         <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
         <div class="pl-6 flex flex-col gap-6">
+          <div class="text-lg">Discover CalDAV Calendars</div>
+          <div class="pl-6 flex flex-col gap-4 max-w-2xl">
+            <label class="pl-4 mt-4 flex items-center">
+              <div class="w-full max-w-2xs">principal</div>
+              <input
+                v-model="principal.url"
+                type="text"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
+              <input
+                v-model="principal.user"
+                type="text"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+            <label class="pl-4 flex items-center">
+              <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
+              <input
+                v-model="principal.password"
+                type="password"
+                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+              />
+            </label>
+          </div>
+          <div>
+            <secondary-button
+              :label="'Search for calendars'"
+              class="text-sm !text-teal-500"
+              :waiting="processPrincipal"
+              @click="getRemoteCalendars"
+            />
+          </div>
+          <div v-if="searchResultCalendars.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
+            <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex gap-2 items-center">
+              <div>{{ cal.title }}</div>
+              <div>{{ cal.url }}</div>
+              <button @click="assignCalendar(cal.title, cal.url)" class="ml-auto flex items-center gap-0.5 px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
+                <arrow-right-icon class="h-3.5 w-3.5 stroke-2 stroke-white fill-transparent" />
+                {{ 'Select calendar' }}
+              </button>
+            </div>
+          </div>
           <div class="text-xl">{{ t('heading.calendarConnections') }}</div>
           <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
             <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
@@ -232,6 +277,7 @@ import PrimaryButton from '@/elements/PrimaryButton';
 
 // icons
 import {
+  ArrowRightIcon,
   ChevronRightIcon,
   SearchIcon,
   CalendarIcon,
@@ -295,7 +341,7 @@ const resetInput = () => {
 // set input mode for adding or editing
 const addCalendar = () => {
   inputMode.value = inputModes.add;
-}
+};
 const editCalendar = async (id) => {
   inputMode.value = inputModes.edit;
   calendarInput.id = id;
@@ -303,15 +349,22 @@ const editCalendar = async (id) => {
   for (const attr in data.value) {
     calendarInput.data[attr] = data.value[attr];
   }
-}
+};
+const assignCalendar = (title, url) => {
+  inputMode.value = inputModes.edit;
+  calendarInput.data.title = title;
+  calendarInput.data.url = url;
+  calendarInput.data.user = principal.user;
+  calendarInput.data.user = principal.password;
+};
 
-// actually remove a given calendar connection
+// do remove a given calendar connection
 const deleteCalendar = async (id) => {
   await call("cal/" + id).delete();
   refresh();
-}
+};
 
-// actually save calendar data
+// do save calendar data
 const saveCalendar = async () => {
   if (inputMode.value === inputModes.add) {
     await call("cal").post(calendarInput.data);
@@ -321,7 +374,22 @@ const saveCalendar = async () => {
   }
   refresh();
   resetInput();
-}
+};
+
+// discover calendars by principal
+const principal = reactive({
+  url:      '',
+  user:     '',
+  password: '',
+});
+const processPrincipal = ref(false);
+const searchResultCalendars = ref([]);
+const getRemoteCalendars = async () => {
+  processPrincipal.value = true;
+  const { error, data } = await call("rmt/calendars").post(principal);
+  searchResultCalendars.value = !error.value ? JSON.parse(data.value) : [];
+  processPrincipal.value = false;
+};
 
 // preset of available calendar colors
 const colors = [

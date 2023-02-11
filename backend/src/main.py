@@ -152,7 +152,7 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db)):
   return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 
 
-@app.post("/rmt/calendars", response_model=list[schemas.CalendarConnection])
+@app.post("/rmt/calendars", response_model=list[schemas.CalendarConnectionOut])
 def read_caldav_calendars(connection: schemas.CalendarConnection, db: Session = Depends(get_db)):
   """endpoint to get calendars from a remote CalDAV server"""
   if Auth(db).subscriber is None:
