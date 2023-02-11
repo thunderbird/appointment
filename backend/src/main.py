@@ -256,8 +256,8 @@ def update_public_appointment_slot(username: str, slug: str, s_a: schemas.SlotAt
     title=db_appointment.title,
     start=slot.start.isoformat(),
     end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
-    description=db_appointment.details + '\n\nAttendee:\n' + s_a.attendee.name + ' (' + s_a.attendee.email + ')'
+    description=db_appointment.details
   )
   con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-  con.create_event(event=event)
+  con.create_event(event=event, attendee=s_a.attendee)
   return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)

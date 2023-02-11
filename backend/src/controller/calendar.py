@@ -2,7 +2,7 @@
 
 Handle connection to a CalDAV server.
 """
-import caldav
+from caldav import DAVClient
 from datetime import datetime
 from ..database import schemas
 
@@ -14,7 +14,7 @@ class CalDavConnector:
     self.user = user
     self.password = password
     # connect to CalDAV server
-    self.client = caldav.DAVClient(url=url, username=user, password=password)
+    self.client = DAVClient(url=url, username=user, password=password)
 
 
   def list_calendars(self):
@@ -35,9 +35,10 @@ class CalDavConnector:
   def list_events(self, start, end):
     """find all events in given date range on the remote server"""
     calendar = self.client.calendar(url=self.url)
-    result = calendar.date_search(
+    result = calendar.search(
       start=datetime.strptime(start, '%Y-%m-%d'),
       end=datetime.strptime(end, '%Y-%m-%d'),
+      event=True,
       expand=True
     )
     events = []
@@ -46,20 +47,24 @@ class CalDavConnector:
         title=str(e.vobject_instance.vevent.summary.value),
         start=str(e.vobject_instance.vevent.dtstart.value),
         end=str(e.vobject_instance.vevent.dtend.value),
-        # TODO: handle description
+        description=e.icalendar_component['description'] if 'description' in e.icalendar_component else ''
       ))
     return events
 
 
-  def create_event(self, event: schemas.Event):
+  def create_event(self, event: schemas.Event, attendee: schemas.AttendeeBase):
     """add a new event to the connected calendar"""
     calendar = self.client.calendar(url=self.url)
-    calendar.save_event(
+    # save event
+    caldavEvent = calendar.save_event(
       dtstart=datetime.fromisoformat(event.start),
       dtend=datetime.fromisoformat(event.end),
       summary=event.title,
       description=event.description
     )
+    # save attendee data
+    caldavEvent.add_attendee((attendee.name, attendee.email))
+    caldavEvent.save()
     return event
 
 

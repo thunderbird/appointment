@@ -243,10 +243,7 @@ const selectEvent = d => {
 // handle booking modal
 const showBooking = ref(false);
 const openBookingModal = () => showBooking.value = true;
-const closeBookingModal = () => {
-  showBooking.value = false;
-  activeEvent.value = null;
-};
+const closeBookingModal = () => showBooking.value = false;
 
 // attendee confirmed the time slot selection: book event
 const attendee = ref(null);
