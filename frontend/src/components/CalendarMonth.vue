@@ -31,7 +31,8 @@
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
         :show-details="!placeholder"
-        @click="!placeholder ? emit('daySelected', d.date) : null"
+        :disabled="dateDisabled(d.date)"
+        @click="!placeholder && !dateDisabled(d.date) ? emit('daySelected', d.date) : null"
         @event-selected="eventSelected"
       />
     </div>
@@ -46,20 +47,21 @@ import CalendarMonthDay from '@/elements/CalendarMonthDay';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-} from "vue-tabler-icons";
+} from 'vue-tabler-icons';
 import { appointmentState } from '@/definitions';
 
 // component constants
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({
-  selected: Object,     // currently active date
-  mini: Boolean,        // show small version of monthly calendar
-  nav: Boolean,         // show month navigation
-  placeholder: Boolean, // format appointments as placeholder
-  appointments: Array,  // data of appointments to show
-  events: Array,        // data of calendar events to show
+  selected:     Object,  // currently active date (dayjs object)
+  mini:         Boolean, // show small version of monthly calendar
+  nav:          Boolean, // show month navigation
+  placeholder:  Boolean, // format appointments as placeholder
+  minDate:      Object,  // minimum active date in view (dayjs object)
+  appointments: Array,   // data of appointments to show
+  events:       Array,   // data of calendar events to show
 });
 
 // component emits
@@ -109,9 +111,12 @@ const eventsByDate = (d) => {
 const eventSelected = (d) => {
   emit('eventSelected', d);
 };
+const dateDisabled = (d) => {
+  return props.minDate && dj(d).isBefore(props.minDate, 'day');
+};
 
 // handle nav date (only used if navigation is active)
-const navDate = ref(dj(props.selected)); // current selected date for independent navigation
+const navDate = ref(props.selected); // current selected date for independent navigation
 const dateNav = (forward = true) => {
   if (forward) {
     navDate.value = navDate.value.add(1, 'month');
@@ -143,7 +148,7 @@ const days = computed(() => [
 
 // basic data for selected month
 const today = computed(() => dj().format("YYYY-MM-DD"));
-const date = computed(() => dj(props.selected).format('YYYY-MM-DD'));
+const date = computed(() => props.selected.format('YYYY-MM-DD'));
 const month = computed(() => Number(navDate.value.format("M")));
 const year = computed(() => Number(navDate.value.format("YYYY")));
 const numberOfDaysInMonth = computed(() => dj(navDate.value).daysInMonth());

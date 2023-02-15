@@ -5,7 +5,8 @@
       'cursor-pointer py-2': mini,
       'h-32': !mini,
       'bg-white': isActive,
-      'bg-gray-50 text-gray-400': !isActive,
+      'bg-gray-50 text-gray-400': !isActive || disabled,
+      'cursor-not-allowed': disabled
     }"
     @mouseleave="hideEventPopup"
   >
@@ -15,8 +16,8 @@
         'bg-teal-500 text-white font-semibold': isToday,
         'text-teal-500': isSelected && !isToday,
         'mx-auto': mini,
-        'group-hover/day:bg-sky-600': mini && isToday,
-        'group-hover/day:text-sky-600': mini && !isToday,
+        'group-hover/day:bg-sky-600': mini && isToday && !disabled,
+        'group-hover/day:text-sky-600': mini && !isToday && !disabled,
       }"
     >
       {{ dj(day).format('D') }}
@@ -83,6 +84,7 @@ const props = defineProps({
   placeholder: Boolean, // flag formating events as placeholder
   events:      Array,   // list of events to show on this day or null
   showDetails: Boolean, // flag enabling event popups with details
+  disabled:    Boolean, // flag making this day non-selectable and inactive
 });
 
 // component emits
