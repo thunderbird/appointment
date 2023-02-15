@@ -28,21 +28,21 @@
       v-show="tabActive === calendarViews.month"
       class="w-4/5"
       :selected="activeDate"
-      :appointments="appointments"
+      :appointments="pendingAppointments"
       :events="calendarEvents"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"
       class="w-4/5"
       :selected="activeDate"
-      :appointments="appointments"
+      :appointments="pendingAppointments"
       :events="calendarEvents"
     />
     <calendar-day
       v-show="tabActive === calendarViews.day"
       class="w-4/5"
       :selected="activeDate"
-      :appointments="appointments"
+      :appointments="pendingAppointments"
       :events="calendarEvents"
     />
     <!-- page side bar -->

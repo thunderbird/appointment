@@ -26,15 +26,16 @@
       <div
         v-for="event in events"
         :key="event"
-        class="shrink-0 text-sm text-gray-600 overflow-hidden"
+        class="shrink-0 text-sm text-gray-600 hover:shadow-md"
         :class="{
           'rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5': !placeholder && !event.remote,
           'group/event rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder,
           'flex items-center gap-2 px-2 py-0.5': event.remote,
+          '!border-solid text-black': event.attendee !== null
         }"
         :style="{
-          'border-color': !placeholder && !event.remote ? event.calendar_color : null,
-          'background-color': !placeholder && !event.remote ? event.calendar_color + '22' : null
+          'border-color': eventColor(event).border,
+          'background-color': eventColor(event).background,
         }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
@@ -73,26 +74,44 @@ import EventPopup from '@/elements/EventPopup';
 const dj = inject("dayjs");
 
 // component properties
-defineProps({
-  day: String,          // number of day in its month
-  isActive: Boolean,    // flag showing if the day belongs to active month
-  isSelected: Boolean,  // flag showing if the day is currently selected by user
-  isToday: Boolean,     // flag showing if the day is today
-  mini: Boolean,        // flag showing if this is a day cell of a small calendar
+const props = defineProps({
+  day:         String,  // number of day in its month
+  isActive:    Boolean, // flag showing if the day belongs to active month
+  isSelected:  Boolean, // flag showing if the day is currently selected by user
+  isToday:     Boolean, // flag showing if the day is today
+  mini:        Boolean, // flag showing if this is a day cell of a small calendar
   placeholder: Boolean, // flag formating events as placeholder
-  events: Array,        // list of events to show on this day or null
-  showDetails: Boolean  // flag enabling event popups with details
+  events:      Array,   // list of events to show on this day or null
+  showDetails: Boolean, // flag enabling event popups with details
 });
 
 // component emits
 const emit = defineEmits(['eventSelected']);
 
+// create event color for border and background, inherited from calendar color
+const eventColor = (event) => {
+  const color = {
+    border:     null,
+    background: null,
+  };
+  // only color appointment slots
+  if (!props.placeholder && !event.remote) {
+    color.border = event.calendar_color;
+    color.background = event.calendar_color;
+    // keep solid background only for slots with attendee
+    if (!event.attendee) {
+      color.background += '22';
+    }
+  }
+  return color;
+};
+
 // event details
 const popup = reactive({
-  event: null,
+  event:   null,
   display: 'none',
-  top: 0,
-  left: 0
+  top:     0,
+  left:    0,
 });
 const showEventPopup = (element, event) => {
   popup.event = event;

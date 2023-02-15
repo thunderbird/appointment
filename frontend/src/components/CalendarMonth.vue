@@ -47,6 +47,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "vue-tabler-icons";
+import { appointmentState } from '@/definitions';
 
 // component constants
 const dj = inject("dayjs");
@@ -90,11 +91,17 @@ const events = computed(() => {
   });
   return eventsOnDate;
 });
-// get all events on a given date
+// get all relevant events on a given date (pending, with attendee or remote)
 const eventsByDate = (d) => {
   const key = dj(d).format('YYYY-MM-DD');
   if (key in events.value) {
-    return events.value[key];
+    return props.placeholder
+      ? events.value[key].filter(e => dj(e.start).isAfter(dj()))
+      : events.value[key].filter(
+          e => dj(e.start).add(e.duration, 'minutes').isAfter(dj()) && e.status === appointmentState.pending
+            || e.attendee && e.status === appointmentState.pending
+            || e.remote
+        );
   } else {
     return null;
   }
