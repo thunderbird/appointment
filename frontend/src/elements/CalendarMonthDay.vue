@@ -27,7 +27,7 @@
       <div
         v-for="event in events"
         :key="event"
-        class="shrink-0 text-sm text-gray-600 hover:shadow-md"
+        class="shrink-0 text-sm text-gray-700 hover:shadow-md"
         :class="{
           'rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5': !placeholder && !event.remote,
           'group/event rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder,

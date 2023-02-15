@@ -30,17 +30,17 @@
       @click="null"
     />
   </main>
-  <!-- TODO: booking page content: successful booking -->
+  <!-- booking page content: successful booking -->
   <main
     v-else-if="activeView === views.success"
     class="h-screen px-4 flex-center flex-col gap-8 select-none"
   >
     <art-successful-booking class="max-w-sm h-auto my-6" />
-    <div class="text-xl font-semibold text-teal-600">
+    <div class="text-2xl font-semibold text-teal-600">
       {{ t('info.bookingSuccessful') }}
     </div>
-    <div class="shadow-lg rounded-lg p-2 flex flex-col gap-2">
-      <div class="rounded-md bg-gray-200 text-gray-700 text-xl font-bold p-4 w-full text-center">
+    <div class="w-full max-w-md shadow-lg rounded-lg p-2 flex flex-col gap-2">
+      <div class="rounded-md bg-gray-100 text-gray-500 text-2xl font-bold p-4 w-full text-center">
         {{ activeEvent.title }}
       </div>
       <div class="flex flex-col gap-1 text-center">
@@ -49,12 +49,18 @@
         <div class="uppercase">{{ dj(activeEvent.start).format('LT') }}</div>
       </div>
     </div>
-    <div class="text-teal-600 underline">{{ t('label.downloadTheIcsFile') }}</div>
-    <div class="text-gray-800">
-      <div>{{ t('info.invitationWasSent') }}</div>
-      <div class="font-bold text-lg">{{ attendee.email }}</div>
+    <div class="text-teal-600 text-sm underline underline-offset-2 -mt-4">
+      {{ t('label.downloadTheIcsFile') }}
     </div>
-    <div class="text-sky-600 underline">{{ t('label.sendInvitationToAnotherEmail') }}</div>
+    <div class="text-gray-700 text-lg text-center">
+      <div>{{ t('info.invitationWasSent') }}</div>
+      <div class="font-bold text-lg">
+        {{ attendee.email }}
+      </div>
+    </div>
+    <div class="text-sky-600 text-sm underline underline-offset-2 -mt-4">
+      {{ t('label.sendInvitationToAnotherEmail') }}
+    </div>
   </main>
   <!-- booking page content: time slot selection -->
   <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">

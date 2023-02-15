@@ -15,7 +15,7 @@
       <div class="flex justify-between items-center">
         <router-link
           :to="{ name: 'booking', params: { 'slug': appointment.slug } }"
-          class="text-sm text-teal-500 underline"
+          class="text-sm text-teal-500 underline underline-offset-2"
         >
           {{ t('label.viewBooking') }}
         </router-link>

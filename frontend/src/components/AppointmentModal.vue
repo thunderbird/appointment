@@ -46,7 +46,7 @@
           {{ t('label.bookingLink') }}
         </div>
         <div class="pl-6 truncate">
-          <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank">
+          <a :href="baseurl + appointment.slug" class="text-teal-500 underline underline-offset-2" target="_blank">
             {{ baseurl + appointment.slug }}
           </a>
         </div>
@@ -64,7 +64,7 @@
           {{ t('label.videoLink') }}
         </div>
         <div class="pl-6">
-          <a :href="appointment.location_url" class="text-teal-500 underline" target="_blank">
+          <a :href="appointment.location_url" class="text-teal-500 underline underline-offset-2" target="_blank">
             {{ appointment.location_url }}
           </a>
         </div>

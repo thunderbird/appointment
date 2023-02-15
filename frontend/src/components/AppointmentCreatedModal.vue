@@ -4,8 +4,12 @@
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
       <x-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
-    <div class="text-xl text-teal-500 font-semibold">{{ t('heading.appointmentCreated') }}</div>
-    <div class="max-w-xs text-center">{{ t('text.titleIsReadyForBookings', { title: title }) }}</div>
+    <div class="text-2xl text-teal-500 font-semibold">
+      {{ t('heading.appointmentCreated') }}
+    </div>
+    <div class="max-w-xs text-center">
+      {{ t('text.titleIsReadyForBookings', { title: title }) }}
+    </div>
     <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-4" />
     <div class="flex gap-4">
       <secondary-button :label="t('label.close')" @click="emit('close')" />

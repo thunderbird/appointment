@@ -125,7 +125,7 @@
             <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs truncate">
               <a
                 :href="baseurl + appointment.slug"
-                class="text-teal-500 underline"
+                class="text-teal-500 underline underline-offset-2"
                 target="_blank"
                 @click.stop="null"
               >

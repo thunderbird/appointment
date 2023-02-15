@@ -30,7 +30,7 @@
       <div class="text-sm flex items-center gap-1">
         <link-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         <div class="truncate">
-          <a :href="baseurl + appointment.slug" class="text-teal-500 underline" target="_blank" @click.stop="null">
+          <a :href="baseurl + appointment.slug" class="text-teal-500 underline underline-offset-2" target="_blank" @click.stop="null">
             {{ baseurl + appointment.slug }}
           </a>
         </div>

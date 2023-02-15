@@ -4,14 +4,16 @@
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
       <x-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
     </div>
-    <div class="text-xl text-teal-500 text-center font-semibold mb-4">
+    <div class="text-2xl text-teal-500 text-center font-semibold mb-4">
       {{ !success ? t('heading.bookSelection') : t('heading.eventBooked') }}
     </div>
     <div class="text-gray-500 text-center mb-4">
       <div>{{ event.title }}:</div>
       <div>{{ time }}</div>
     </div>
-    <div v-if="!success" class="text-sm text-teal-500 text-center underline mb-8">Time zone: Pacific Standart Time</div>
+    <div v-if="!success" class="text-sm text-teal-500 text-center underline underline-offset-2 mb-8">
+      Time zone: Pacific Standart Time
+    </div>
     <div v-if="!success" class="flex flex-col gap-4 mb-8">
       <label>
         <div class="font-medium text-gray-500 mb-1">{{ t('label.name') }}</div>
@@ -23,7 +25,9 @@
         />
       </label>
       <label>
-        <div class="font-medium text-gray-500 mb-1">{{ t('label.email') }} <span class="text-red-600">*</span></div>
+        <div class="font-medium text-gray-500 mb-1">
+          {{ t('label.email') }} <span class="text-red-600">*</span>
+        </div>
         <input
           type="text"
           v-model="attendee.email"
@@ -35,7 +39,9 @@
     </div>
     <div v-else class="mb-8 mt-8">
       <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-8 mx-auto" />
-      <div class="text-sm text-gray-500 w-4/5 mx-auto text-center">{{ t('text.invitationSentToAddress', { address: attendee.email }) }}</div>
+      <div class="text-sm text-gray-500 w-4/5 mx-auto text-center">
+        {{ t('text.invitationSentToAddress', { address: attendee.email }) }}
+      </div>
     </div>
     <div class="flex gap-8 w-4/5 mx-auto justify-center items-stretch">
       <secondary-button
@@ -51,7 +57,7 @@
       />
       <primary-button
         v-else
-        :label="t('label.downloadIcs')"
+        :label="t('label.downloadInvitation')"
         @click="emit('download')"
       />
     </div>
