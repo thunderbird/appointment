@@ -6,7 +6,7 @@
         <div>
           <div>{{ appointment.title }}</div>
           <div class="text-sm">
-            {{ hDuration(appointment.duration) }},
+            <span v-if="appointment.duration">{{ hDuration(appointment.duration) }},</span>
             {{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}
           </div>
         </div>

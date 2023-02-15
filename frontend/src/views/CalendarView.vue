@@ -95,7 +95,7 @@
 </template>
 
 <script setup>
-import { creationState, calendarViews } from '@/definitions';
+import { creationState, calendarViews, appointmentState } from '@/definitions';
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -173,15 +173,7 @@ const creationStatus = ref(creationState.hidden);
 
 // list of all pending appointments
 const pendingAppointments = computed(() => {
-  const pending = [];
-  props.appointments?.filter(a => a.status === 2).forEach(event => { // TODO: define appointment status
-    event.slots.forEach(slot => {
-      const extendedEvent = {...event, ...slot };
-      delete extendedEvent.slots;
-      pending.push(extendedEvent);
-    });
-  });
-  return pending.filter(a => dj(a.start) > dj()).slice(0, 4);
+  return props.appointments?.filter(a => a.status === appointmentState.pending);
 });
 
 // get remote calendar data for current month
