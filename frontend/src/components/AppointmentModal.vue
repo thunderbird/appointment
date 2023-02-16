@@ -74,7 +74,7 @@
           <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
           {{ t('label.activeAppointment') }}
         </div>
-        <switch-toggle class="ml-6" :active="appointment.active" />
+        <switch-toggle class="ml-6" :active="appointment.active" :disabled="true" />
       </div>
     </div>
     <div
