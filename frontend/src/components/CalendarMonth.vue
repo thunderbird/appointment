@@ -2,13 +2,13 @@
   <div class="select-none">
     <div v-if="nav" class="flex-center gap-2 mb-2 select-none">
       <div @click="dateNav(false)" class="group cursor-pointer">
-        <chevron-left-icon class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
+        <icon-chevron-left class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
       <div class="text-teal-500 font-semibold text-lg">
         {{ navDate.format('MMMM YYYY')}}
       </div>
       <div @click="dateNav(true)" class="group cursor-pointer">
-        <chevron-right-icon class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
+        <icon-chevron-right class="h-6 w-6 stroke-slate-400 group-hover:stroke-teal-500 stroke-2 fill-transparent" />
       </div>
     </div>
     <div class="grid grid-cols-7 gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
@@ -45,9 +45,9 @@ import CalendarMonthDay from '@/elements/CalendarMonthDay';
 
 // icons
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from 'vue-tabler-icons';
+  IconChevronLeft,
+  IconChevronRight,
+} from '@tabler/icons-vue';
 import { appointmentState } from '@/definitions';
 
 // component constants

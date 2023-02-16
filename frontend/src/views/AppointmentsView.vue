@@ -22,7 +22,7 @@
         </select>
         <div class="w-full relative">
           <label for="appointments-search" class="absolute top-1/2 -translate-y-1/2 left-3 cursor-text">
-            <search-icon class="h-4 w-4 stroke-2 stroke-gray-400 fill-transparent" /> 
+            <icon-search class="h-4 w-4 stroke-2 stroke-gray-400 fill-transparent" /> 
           </label>
           <input v-model="search" type="search" id="appointments-search" class="rounded border border-gray-300 w-full pl-10 text-sm" :placeholder="t('label.searchAppointments')" />
         </div>
@@ -35,7 +35,7 @@
             }"
             @click="view = viewTypes.list"
           >
-            <list-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+            <icon-list class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
           </div>
           <div
             class="py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
@@ -45,7 +45,7 @@
             }"
             @click="view = viewTypes.grid"
           >
-            <layout-grid-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+            <icon-layout-grid class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
           </div>
         </div>
         <div
@@ -58,7 +58,7 @@
           }"
           @click="openAdjustments"
         >
-          <adjustments-icon class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+          <icon-adjustments class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
         </div>
         <div
           v-show="showAdjustments"
@@ -72,7 +72,7 @@
             @click="toggleColumnVisibility(value)"
           >
             <div class="flex items-center">
-              <check-icon v-show="visibleColumns.includes(value)" class="h-4 w-4 stroke-1 stroke-gray-800 fill-transparent" />
+              <icon-check v-show="visibleColumns.includes(value)" class="h-4 w-4 stroke-1 stroke-gray-800 fill-transparent" />
             </div>
             <div class="text-sm">{{ t('label.' + key) }}</div>
           </div>
@@ -192,12 +192,12 @@ import TabBar from '@/components/TabBar';
 
 // icons
 import {
-  AdjustmentsIcon,
-  CheckIcon,
-  LayoutGridIcon,
-  ListIcon,
-  SearchIcon,
-} from "vue-tabler-icons";
+  IconAdjustments,
+  IconCheck,
+  IconLayoutGrid,
+  IconList,
+  IconSearch,
+} from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();

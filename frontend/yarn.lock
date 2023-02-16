@@ -1164,6 +1164,18 @@
   resolved "https://registry.yarnpkg.com/@soda/get-current-script/-/get-current-script-1.0.2.tgz#a53515db25d8038374381b73af20bb4f2e508d87"
   integrity sha512-T7VNNlYVM1SgQ+VsMYhnDkcGmWhQdL0bDyGm5TlQ3GBXnJscEClUUOKduWTmm2zCnvNLC1hc3JpuXjs/nFOc5w==
 
+"@tabler/icons-vue@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@tabler/icons-vue/-/icons-vue-2.4.0.tgz#3ab6595e8cbe8f5176b9e31ddf671d6f97dd3fcb"
+  integrity sha512-3621GqN5Ae/LS8WeULWFBRhw3iyz27hacbLnWDEZRzotP3hprhqQSiS6IBTpC8ytgXC25gaakmPeVMuzH03BAg==
+  dependencies:
+    "@tabler/icons" "2.4.0"
+
+"@tabler/icons@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-2.4.0.tgz#34b1b0d818dc00926b956c3424bff48b89a5b439"
+  integrity sha512-JZY9Kk3UsQoqp7Rw/BuWw1PrkRwv5h0psjJBbj+Cn9UVyhdzr5vztg2mywXBAJ+jFBUL/pjnVcIvOzKFw4CXng==
+
 "@tailwindcss/forms@^0.5.3":
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/@tailwindcss/forms/-/forms-0.5.3.tgz#e4d7989686cbcaf416c53f1523df5225332a86e7"
@@ -5990,11 +6002,6 @@ vue-style-loader@^4.1.0, vue-style-loader@^4.1.3:
   dependencies:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
-
-vue-tabler-icons@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/vue-tabler-icons/-/vue-tabler-icons-2.19.0.tgz#b686feb774bbbd7921949ff12c9a9e190815895e"
-  integrity sha512-BEbMTsIHvmV173+Ooga36Du9mCJgMm9OddIUvxlrcDPcrciwbU6bfZZteSnt19/G02wxDzzg8JCyKwgtVVG0qA==
 
 vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"

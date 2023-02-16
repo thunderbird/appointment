@@ -10,7 +10,7 @@
             {{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}
           </div>
         </div>
-        <dots-vertical-icon class="h-6 w-6 stroke-slate-400 stroke-2 fill-slate-400" />
+        <icon-dots-vertical class="h-6 w-6 stroke-slate-400 stroke-2 fill-slate-400" />
       </div>
       <div class="flex justify-between items-center">
         <router-link
@@ -33,7 +33,7 @@ import { useI18n } from 'vue-i18n';
 import TextButton from '@/elements/TextButton';
 
 // icons
-import { DotsVerticalIcon } from "vue-tabler-icons";
+import { IconDotsVertical } from '@tabler/icons-vue';
 
 // component constants
 const baseurl = inject('baseurl');

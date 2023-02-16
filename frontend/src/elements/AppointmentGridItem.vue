@@ -16,19 +16,23 @@
     >
       <div>{{ appointment.title }}</div>
       <div class="text-sm flex items-center gap-1">
-        <clock-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <icon-clock class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ t('label.' + keyByValue(appointmentState, appointment.status)) }}
       </div>
       <div class="text-sm flex items-center gap-1">
-        <calendar-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <icon-calendar class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         {{ appointment.calendar_title }}
       </div>
       <div class="pr-4 text-sm flex items-center gap-1">
-        <bulb-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
-        <switch-toggle :active="appointment.active" :label="t('label.activeAppointment')" @click.stop="null" />
+        <icon-bulb class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <switch-toggle
+          :active="appointment.active"
+          :label="t('label.activeAppointment')"
+          @click.stop="null"
+        />
       </div>
       <div class="text-sm flex items-center gap-1">
-        <link-icon class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
+        <icon-link class="h-4 w-4 stroke-slate-500 stroke-2 fill-transparent shrink-0" />
         <div class="truncate">
           <a :href="baseurl + appointment.slug" class="text-teal-500 underline underline-offset-2" target="_blank" @click.stop="null">
             {{ baseurl + appointment.slug }}
@@ -48,11 +52,11 @@ import SwitchToggle from '@/elements/SwitchToggle';
 
 // icons
 import {
-  BulbIcon,
-  CalendarIcon,
-  ClockIcon,
-  LinkIcon,
-} from "vue-tabler-icons";
+  IconBulb,
+  IconCalendar,
+  IconClock,
+  IconLink,
+} from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();

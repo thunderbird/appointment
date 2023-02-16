@@ -4,7 +4,7 @@
       <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo">
     </router-link>
     <label class="grow flex items-center relative">
-      <search-icon class="absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 stroke-gray-300 fill-transparent" /> 
+      <icon-search class="absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 stroke-gray-300 fill-transparent" /> 
       <input class="w-full h-full text-xl pl-20 pr-2 border-none" type="search" name="search" :placeholder="t('label.search')">
     </label>
     <nav class="flex gap-8 items-stretch">
@@ -38,7 +38,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 // icons
-import { SearchIcon } from "vue-tabler-icons";
+import { IconSearch } from '@tabler/icons-vue';
 
 // component constants
 const route = useRoute();

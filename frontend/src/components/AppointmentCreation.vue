@@ -7,11 +7,11 @@
     <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
         <span class="font-semibold flex gap-1">
-          <check-icon v-show="validStep1" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
-          <alert-triangle-icon v-show="invalidStep1" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
+          <icon-check v-show="validStep1" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
+          <icon-alert-triangle v-show="invalidStep1" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
           {{ t('label.appointmentDetails') }}
         </span>
-        <chevron-down-icon
+        <icon-chevron-down
           class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-90 transition-transform"
           :class="{ 'rotate-0': activeStep1 }"
         />
@@ -74,11 +74,11 @@
     <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
-          <check-icon v-show="validStep2" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
-          <alert-triangle-icon v-show="invalidStep2" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
+          <icon-check v-show="validStep2" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
+          <icon-alert-triangle v-show="invalidStep2" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
           {{ t('label.chooseYourAvailability') }}
         </span>
-        <chevron-down-icon
+        <icon-chevron-down
           class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-90 transition-transform"
           :class="{ 'rotate-0': activeStep2 }"
         />
@@ -92,7 +92,7 @@
               <div>{{ dj(day).format('LL') }}</div>
               <div>
                 <button @click="addTime(day)" class="flex items-center px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
-                  <plus-icon class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
+                  <icon-plus class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
                   {{ t('label.addTime') }}
                 </button>
               </div>
@@ -115,7 +115,7 @@
                 />
               </label>
               <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
-                <x-icon class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+                <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
               </div>
             </div>
           </div>
@@ -183,12 +183,12 @@ import TabBar from '@/components/TabBar';
 
 // icons
 import {
-  AlertTriangleIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  PlusIcon,
-  XIcon,
-} from "vue-tabler-icons";
+  IconAlertTriangle,
+  IconCheck,
+  IconChevronDown,
+  IconPlus,
+  IconX,
+} from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();

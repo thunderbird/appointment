@@ -4,15 +4,15 @@
     <div class="flex flex-col gap-2">
       <div class="text-lg text-teal-500 font-semibold">{{ event?.title }}</div>
       <div class="text-xs text-gray-700 flex gap-1.5 items-center">
-        <clock-icon class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
+        <icon-clock class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
         {{ eventDateTime }}
       </div>
       <div class="text-xs text-gray-700 flex gap-1.5 items-center">
-        <calendar-icon class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
+        <icon-calendar class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
         {{ event?.calendar_title }}
       </div>
       <div v-if="event?.attendee" class="text-xs text-gray-700 flex gap-1.5 items-center">
-        <users-icon class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
+        <icon-users class="h-4 w-4 stroke-teal-500 stroke-2 fill-transparent" />
         {{ t('label.guest' , { 'count': 1 }) }}
       </div>
     </div>
@@ -25,10 +25,10 @@ import { useI18n } from 'vue-i18n';
 
 // icons
 import {
-  CalendarIcon,
-  ClockIcon,
-  UsersIcon,
-} from "vue-tabler-icons";
+  IconCalendar,
+  IconClock,
+  IconUsers,
+} from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();

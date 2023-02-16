@@ -7,8 +7,8 @@
     :class="{ 'text-transparent': waiting }"
   >
     <div v-if="waiting" class="absolute w-5 h-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-    <copy-icon v-if="icon === 'copy'" class="h-6 w-6 stroke-2 stroke-current fill-transparent" />
-    <check-icon v-if="icon === 'check'" class="h-6 w-6 stroke-2 stroke-current fill-transparent" />
+    <icon-copy v-if="icon === 'copy'" class="h-6 w-6 stroke-2 stroke-current fill-transparent" />
+    <icon-check v-if="icon === 'check'" class="h-6 w-6 stroke-2 stroke-current fill-transparent" />
     {{ label }}
   </button>
 </template>
@@ -16,9 +16,9 @@
 <script setup>
 // icons
 import {
-  CheckIcon,
-  CopyIcon,
-} from "vue-tabler-icons";
+  IconCheck,
+  IconCopy,
+} from '@tabler/icons-vue';
 
 // component properties
 defineProps({
