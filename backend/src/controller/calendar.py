@@ -3,7 +3,7 @@
 Handle connection to a CalDAV server.
 """
 from caldav import DAVClient
-from datetime import datetime
+from datetime import datetime, date
 from ..database import schemas
 
 
@@ -45,6 +45,7 @@ class CalDavConnector:
         title=str(e.vobject_instance.vevent.summary.value),
         start=str(e.vobject_instance.vevent.dtstart.value),
         end=str(e.vobject_instance.vevent.dtend.value),
+        all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
         description=e.icalendar_component['description'] if 'description' in e.icalendar_component else ''
       ))
     return events

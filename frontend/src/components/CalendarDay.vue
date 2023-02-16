@@ -2,8 +2,20 @@
   <div>
     <div class="grid grid-cols-day gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
       <!-- all day events -->
-      <div class="text-center text-gray-400 bg-white py-2">{{ t('label.allDay') }}</div>
-      <div class="bg-white py-2"></div>
+      <template v-if="!booking">
+        <div class="text-gray-400 bg-white flex-center">{{ t('label.allDay') }}</div>
+        <div class="bg-white grid auto-rows-max gap-1 p-1">
+          <div
+            v-for="event in eventsByDate?.allDay"
+            :key="event"
+            class="flex overflow-hidden"
+          >
+            <div class="w-full text-sm truncate rounded bg-amber-300 mx-8 px-2 py-0.5">
+              {{ event.title }}
+            </div>
+          </div>
+        </div>
+      </template>
       <!-- events with times -->
       <div class="text-center text-gray-400 bg-white grid grid-cols-1">
         <div v-for="h in hours" :key="h" class="h-12 lowercase">
@@ -12,7 +24,7 @@
       </div>
       <div class="bg-white grid auto-rows-[1.5rem]">
         <div
-          v-for="event in eventsByDate"
+          v-for="event in eventsByDate?.duringDay"
           :key="event"
           class="flex overflow-hidden"
           :style="{ 'grid-row': event.offset + ' / span ' + event.span }"
@@ -24,8 +36,8 @@
               'border-2 border-dashed': !event.remote
             }"
             :style="{
-              'border-color': event.calendar_color,
-              'background-color': !event.remote ? event.calendar_color + '22' : event.calendar_color + 'aa',
+              'border-color': eventColor(event, false).border,
+              'background-color': !event.remote ? eventColor(event, false).background : event.calendar_color,
             }"
           >
             {{ event.title }}
@@ -51,6 +63,7 @@
 
 <script setup>
 import { computed, inject } from 'vue';
+import { eventColor } from '@/utils';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -58,10 +71,10 @@ const dj = inject("dayjs");
 
 // component properties
 const props = defineProps({
-  selected: Object,    // currently active date
-  booking:  Boolean,   // flag indicating if calendar is used to book time slots
-  appointments: Array, // data of appointments to show
-  events: Array,       // data of calendar events to show
+  selected:     Object,  // currently active date
+  booking:      Boolean, // flag indicating if calendar is used to book time slots
+  appointments: Array,   // data of appointments to show
+  events:       Array,   // data of calendar events to show
 });
 
 // component emits
@@ -110,7 +123,10 @@ const events = computed(() => {
 const eventsByDate = computed(() => {
   const key = dj(props.selected).format('YYYY-MM-DD');
   if (key in events.value) {
-    return events.value[key];
+    return {
+      duringDay: events.value[key].filter(e => !e.all_day),
+      allDay:    events.value[key].filter(e => e.all_day),
+    };
   } else {
     return null;
   }

@@ -25,31 +25,32 @@
     </div>
     <div v-if="events && !mini" class="h-24 flex flex-col gap-1.5 overflow-y-auto">
       <div
-        v-for="event in events"
+        v-for="event in sortedEvents"
         :key="event"
         class="shrink-0 text-sm text-gray-700 hover:shadow-md"
         :class="{
           'rounded bg-sky-400/10 border-2 border-dashed border-sky-400 px-2 py-0.5': !placeholder && !event.remote,
           'group/event rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder,
           'flex items-center gap-2 px-2 py-0.5': event.remote,
-          '!border-solid text-black': event.attendee !== null
+          '!border-solid text-black': event.attendee !== null,
+          'bg-amber-300 rounded': event.all_day
         }"
         :style="{
-          'border-color': eventColor(event).border,
-          'background-color': eventColor(event).background,
+          'border-color': eventColor(event, placeholder).border,
+          'background-color': eventColor(event, placeholder).background,
         }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
       >
         <div
-          v-if="event.remote"
+          v-if="event.remote && !event.all_day"
           class="w-2 h-2 shrink-0 rounded-full bg-sky-400"
           :style="{ 'background-color': event.calendar_color }"
         ></div>
         <div
           class="truncate rounded"
           :class="{
-            'h-10 p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder
+            'h-10 p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder,
           }"
         >
           {{ event.title }}
@@ -69,7 +70,8 @@
 </template>
 
 <script setup>
-import { inject, reactive } from 'vue';
+import { eventColor } from '@/utils';
+import { inject, reactive, computed } from 'vue';
 import EventPopup from '@/elements/EventPopup';
 
 const dj = inject("dayjs");
@@ -90,23 +92,21 @@ const props = defineProps({
 // component emits
 const emit = defineEmits(['eventSelected']);
 
-// create event color for border and background, inherited from calendar color
-const eventColor = (event) => {
-  const color = {
-    border:     null,
-    background: null,
-  };
-  // only color appointment slots
-  if (!props.placeholder && !event.remote) {
-    color.border = event.calendar_color;
-    color.background = event.calendar_color;
-    // keep solid background only for slots with attendee
-    if (!event.attendee) {
-      color.background += '22';
+// bring events to specific order: all day events first, than sorted by start date
+const sortedEvents = computed(() => {
+  return structuredClone(props.events).sort((a,b) => {
+    if (a.all_day && !b.all_day) {
+      return -1;
     }
-  }
-  return color;
-};
+    if (!a.all_day && b.all_day) {
+      return 1;
+    }
+    if (a.all_day && b.all_day || dj(a.start).isSame(dj(b.start))) {
+      return a.title.localeCompare(b.title);
+    }
+    return dj(a.start).isAfter(dj(b.start));
+  })
+});
 
 // event details
 const popup = reactive({
