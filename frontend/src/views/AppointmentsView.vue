@@ -110,7 +110,7 @@
                 :style="{ 'background-color': appointment.calendar_color }"
               ></div>
             </td>
-            <td v-if="columnVisible('title')" class="py-2 px-2">
+            <td v-if="columnVisible('title')" class="py-2 px-2 max-w-2xs truncate">
               <span>{{ appointment.title }}</span>
             </td>
             <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
