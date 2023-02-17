@@ -28,7 +28,7 @@
           class="flex overflow-hidden"
           @mouseenter="element => showEventPopup(element, event)"
         >
-          <div class="w-full text-sm truncate rounded bg-amber-300 px-2 py-0.5">
+          <div class="w-full text-sm truncate rounded bg-amber-400/80 px-2 py-0.5">
             {{ event.title }}
           </div>
         </div>

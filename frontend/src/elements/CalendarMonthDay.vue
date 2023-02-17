@@ -33,7 +33,7 @@
           'group/event rounded-md bg-teal-50 p-1 cursor-pointer hover:shadow-lg hover:text-white hover:bg-gradient-to-b hover:from-teal-500 hover:to-sky-600': placeholder,
           'flex items-center gap-2 px-2 py-0.5': event.remote,
           '!border-solid text-black': event.attendee !== null,
-          'bg-amber-300 rounded': event.all_day
+          'bg-amber-400/80 rounded': event.all_day
         }"
         :style="{
           'border-color': eventColor(event, placeholder).border,

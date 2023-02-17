@@ -10,7 +10,7 @@
             :key="event"
             class="flex overflow-hidden"
           >
-            <div class="w-full text-sm truncate rounded bg-amber-300 mx-8 px-2 py-0.5">
+            <div class="w-full text-sm truncate rounded bg-amber-400/80 mx-8 px-2 py-0.5">
               {{ event.title }}
             </div>
           </div>
