@@ -17,12 +17,12 @@
         </div>
       </template>
       <!-- events with times -->
-      <div class="text-center text-gray-400 bg-white grid grid-cols-1">
-        <div v-for="h in hours" :key="h" class="h-12 lowercase">
+      <div class="text-center text-gray-400 bg-white grid auto-rows-[4rem]">
+        <div v-for="h in hours" :key="h" class="lowercase">
           {{ h }}
         </div>
       </div>
-      <div class="bg-white grid auto-rows-[1.5rem]">
+      <div class="bg-white grid auto-rows-[2rem]">
         <div
           v-for="event in eventsByDate?.duringDay"
           :key="event"
@@ -31,16 +31,44 @@
         >
           <div
             v-if="!booking"
-            class="w-full text-sm truncate rounded bg-sky-400/10 border-sky-400 my-1 mx-8 px-2 py-0.5"
+            class="w-full overflow-hidden rounded flex gap-4 text-gray-700 bg-sky-400/10 border-sky-400 my-1 mx-8 px-3 py-2"
             :class="{
-              'border-2 border-dashed': !event.remote
+              'border-2 border-dashed': !event.remote,
+              'flex-col': event.span > 2,
+              'flex-row': event.span <= 2,
             }"
             :style="{
               'border-color': eventColor(event, false).border,
               'background-color': !event.remote ? eventColor(event, false).background : event.calendar_color,
             }"
           >
-            {{ event.title }}
+            <div class="truncate" :class="{ 'self-center grow': event.span <= 2 }">{{ event.title }}</div>
+            <div
+              class="flex text-xs"
+              :class="{
+                'flex-col gap-1 self-center': event.span <= 2,
+                'items-center gap-4': event.span > 2,
+              }"
+            >
+              <div class="flex gap-2">
+                <icon-clock size="16" class="shrink-0" />
+                <div class="whitespace-nowrap">
+                  {{ event.times }}
+                </div>
+              </div>
+              <div class="flex gap-2" :class="{ 'hidden': event.span <= 1 }">
+                <icon-calendar size="16" class="shrink-0" />
+                <div class="whitespace-nowrap">
+                  {{ event.calendar_title }}
+                </div>
+              </div>
+              <div class="flex gap-2" :class="{ 'hidden': event.span <= 2 }">
+                <icon-link size="16" class="shrink-0" />
+                <a :href="baseurl + event.slug" class="whitespace-nowrap text-teal-500 underline underline-offset-2" target="_blank">
+                  {{ baseurl + event.slug }}
+                </a>
+              </div>
+            </div>
           </div>
           <div
             v-else
@@ -66,8 +94,17 @@ import { computed, inject } from 'vue';
 import { eventColor } from '@/utils';
 import { useI18n } from 'vue-i18n';
 
+// icons
+import {
+  IconCalendar,
+  IconClock,
+  IconLink,
+} from '@tabler/icons-vue';
+
+// component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
+const baseurl = inject("baseurl");
 
 // component properties
 const props = defineProps({
