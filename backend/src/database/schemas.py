@@ -79,7 +79,7 @@ class Appointment(AppointmentFull):
 class AppointmentOut(AppointmentBase):
   id: int
   owner_name: str | None = None
-  slots: list[Slot] = []
+  slots: list[SlotBase] = []
 
 
 """ CALENDAR model schemas

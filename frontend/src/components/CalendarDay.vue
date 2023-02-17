@@ -88,7 +88,7 @@
               class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
               :class="{ 'text-white border-white': event.selected }"
             >
-              {{ event.times }}
+              <div :class="{ 'hidden': event.span <= 1 }">{{ event.times }}</div>
             </div>
           </div>
         </div>

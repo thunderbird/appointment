@@ -174,7 +174,6 @@ const viewTitle = computed(() => {
 // retrieve appointment by slug
 onMounted(async () => {
   // async get appointment data from route
-  // TODO: only get necessary data here
   // TODO: handle username
   const { error, data } = await call("apmt/admin/" + route.params.slug).get().json();
   // check if appointment exists and is open

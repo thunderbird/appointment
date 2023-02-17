@@ -235,7 +235,8 @@ def read_public_appointment(username: str, slug: str, db: Session = Depends(get_
   s = repo.get_subscriber_by_username(db=db, username=username)
   if a is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
-  return schemas.AppointmentOut(id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=a.slots)
+  slots = [schemas.SlotBase(start=sl.start, duration=sl.duration) for sl in a.slots]
+  return schemas.AppointmentOut(id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=slots)
 
 
 @app.put("/apmt/{username}/{slug}", response_model=schemas.Attendee)
