@@ -14,7 +14,7 @@
     <div v-if="!success" class="text-sm text-teal-500 text-center underline underline-offset-2 mb-8">
       Time zone: Pacific Standart Time
     </div>
-    <div v-if="!success" class="flex flex-col gap-4 mb-8">
+    <form v-if="!success" ref="bookingForm" class="flex flex-col gap-4 mb-8">
       <label>
         <div class="font-medium text-gray-500 mb-1">{{ t('label.name') }}</div>
         <input
@@ -29,14 +29,14 @@
           {{ t('label.email') }} <span class="text-red-600">*</span>
         </div>
         <input
-          type="text"
+          type="email"
           v-model="attendee.email"
           :placeholder="t('placeholder.emailAddress')"
           class="rounded-md bg-gray-50 border-gray-200 w-full"
           required
         />
       </label>
-    </div>
+    </form>
     <div v-else class="mb-8 mt-8">
       <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-8 mx-auto" />
       <div class="text-sm text-gray-500 w-4/5 mx-auto text-center">
@@ -100,9 +100,10 @@ const validAttendee = computed(() => {
 });
 
 // actual event booking
+const bookingForm = ref();
 const bookingDone = ref(false);
 const bookIt = () => {
-  if (validAttendee.value) {
+  if (bookingForm.value.reportValidity() && validAttendee.value) {
     emit('book', attendee);
     bookingDone.value = true;
   }
