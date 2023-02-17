@@ -19,7 +19,20 @@ export const eventColor = (event, placeholder) => {
   return color;
 };
 
+// create initials from given name
+export const initials = (name) => {
+  if (name) {
+    const parts = name.split(' ');
+    return parts.length > 1
+      ? parts[0][0] + parts.at(-1)[0]
+      : name[0];
+  } else {
+    return '';
+  }
+};
+
 export default {
 	keyByValue,
 	eventColor,
+  initials,
 };

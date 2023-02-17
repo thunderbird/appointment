@@ -117,8 +117,9 @@ const refresh = inject('refresh');
 
 // view properties
 const props = defineProps({
-  calendars: Array,    // list of calendars from db
-  appointments: Array, // list of appointments from db
+  calendars:    Array,  // list of calendars from db
+  appointments: Array,  // list of appointments from db
+  user:         Object, // currently logged in user, null if not logged in
 });
 
 // current selected date, if not in route: defaults to now

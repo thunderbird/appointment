@@ -5,11 +5,10 @@
   </template>
   <!-- authenticated subscriber content -->
   <template v-else>
-    <nav-bar :nav-items="navItems" />
+    <nav-bar :nav-items="navItems" :user="currentUser" />
     <main class="mt-12 mx-8">
       <div class="w-full max-w-[1740px] mx-auto">
-        <router-view v-if="routeNeedsData" :calendars="calendars" :appointments="appointments" />
-        <router-view v-else />
+        <router-view :calendars="calendars" :appointments="appointments" :user="currentUser" />
       </div>
     </main>
   </template>
@@ -17,10 +16,11 @@
 
 <script setup>
 import { appointmentState } from '@/definitions';
-import { ref, inject, provide, computed, onMounted } from 'vue';
+import { ref, inject, provide, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import NavBar from '@/components/NavBar';
 
+// component constants
 const route = useRoute();
 const call = inject('call');
 const dj = inject('dayjs');
@@ -28,17 +28,13 @@ const dj = inject('dayjs');
 // menu items for main navigation
 const navItems = ['calendar', 'appointments', 'settings'];
 
-// current user
+// current user object
+// structure: { username, email, name, level, timezone, id }
 const currentUser = ref(null);
 
 // db tables
 const calendars = ref([]);
 const appointments = ref([]);
-
-// define which routes need data from db
-const routeNeedsData = computed(() => {
-  return ['calendar', 'appointments', 'settings'].includes(route.name);
-});
 
 // check login state of current user first
 // query db for all calendar and appointments data
@@ -65,7 +61,7 @@ const getDbAppointments = async () => {
 };
 const getDbData = async () => {
   await checkLogin();
-  if (currentUser.value && routeNeedsData.value) {
+  if (currentUser.value) {
     await getDbCalendars();
     await getDbAppointments();
   }

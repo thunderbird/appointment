@@ -296,6 +296,7 @@ const refresh = inject('refresh');
 defineProps({
   calendars:    Array, // list of calendars from db
   appointments: Array, // list of appointments from db
+  user:        Object, // currently logged in user, null if not logged in
 });
 
 // menu navigation of different views

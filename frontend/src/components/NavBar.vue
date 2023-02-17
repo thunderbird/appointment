@@ -24,10 +24,11 @@
         </li>
       </ul>
       <router-link
+        v-if="user"
         :to="{ name: 'profile' }"
         class="w-12 h-12 mx-8 self-center flex-center rounded-full bg-teal-500 text-lg font-bold text-white"
       >
-        JD
+        {{ initials(user.name) }}
       </router-link>
     </nav>
   </header>
@@ -36,6 +37,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import { initials } from '@/utils';
 
 // icons
 import { IconSearch } from '@tabler/icons-vue';
@@ -46,6 +48,7 @@ const { t } = useI18n();
 
 // component properties
 defineProps({
-  navItems: Array // list of route names that are also lang keys (format: label.<key>), used as nav items
+  navItems: Array,  // list of route names that are also lang keys (format: label.<key>), used as nav items
+  user:     Object, // currently logged in user, null if not logged in
 });
 </script>
