@@ -35,15 +35,15 @@
       </div>
     </template>
     <!-- events with times -->
-    <div class="text-center text-gray-400 bg-white grid grid-cols-1">
-      <div v-for="h in hours" :key="h" class="h-12 lowercase">
+    <div class="text-center text-gray-400 bg-white grid auto-rows-[4rem]">
+      <div v-for="h in hours" :key="h" class="lowercase">
         {{ h }}
       </div>
     </div>
     <div
       v-for="d in days"
       :key="d.day"
-      class="bg-white grid auto-rows-[1.5rem]"
+      class="bg-white grid auto-rows-[2rem]"
       @mouseleave="hideEventPopup"
     >
       <div
@@ -55,7 +55,7 @@
       >
         <div
           v-if="!booking"
-          class="w-full text-sm truncate rounded bg-sky-400/10 border-sky-400 m-1 px-2 py-0.5"
+          class="w-full truncate rounded flex bg-sky-400/10 border-sky-400 m-1 px-2 py-0.5"
           :class="{
             'border-2 border-dashed': !event.remote
           }"
@@ -64,7 +64,14 @@
             'background-color': !event.remote ? eventColor(event, false).background : event.calendar_color,
           }"
         >
-          {{ event.title }}
+          <div
+            class="truncate"
+            :class="{
+              'self-center grow text-sm': event.span <= 1,
+            }"
+          >
+            {{ event.title }}
+          </div>
         </div>
         <div
           v-else

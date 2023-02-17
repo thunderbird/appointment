@@ -42,7 +42,15 @@
               'background-color': !event.remote ? eventColor(event, false).background : event.calendar_color,
             }"
           >
-            <div class="truncate" :class="{ 'self-center grow': event.span <= 2 }">{{ event.title }}</div>
+            <div
+              class="truncate"
+              :class="{
+                'self-center grow': event.span <= 2,
+                'text-sm': event.span <= 1,
+              }"
+            >
+              {{ event.title }}
+            </div>
             <div
               class="flex text-xs"
               :class="{
