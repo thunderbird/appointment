@@ -194,9 +194,9 @@ const getRemoteEvents = async (from, to) => {
 };
 
 // initially load data when component gets remounted
-onMounted(() => {
-  refresh();
-  getRemoteEvents(eventsFrom, eventsTo);
+onMounted(async () => {
+  await refresh();
+  await getRemoteEvents(eventsFrom, eventsTo);
 });
 
 // react to user calendar navigation

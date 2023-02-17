@@ -3,6 +3,7 @@ import CalendarView from '@/views/CalendarView';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
+  // instant loaded routes
   { path: '/', redirect: { name: "calendar" } },
   { path: '/calendar', redirect: { name: "calendar" } },
   {
@@ -33,11 +34,13 @@ const routes = [
   },
 ];
 
+// create router object to export
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 });
 
+// set default route parameters
 router.beforeEach(to => {
   if (to.name === 'calendar' && !to.params.view) {
     to.params.view = 'month';
