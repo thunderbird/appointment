@@ -182,16 +182,14 @@ const eventsTo       = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
 const calendarEvents = ref([]);
 
 const getRemoteEvents = async (from, to) => {
-  calendarEvents.value = [];
+  const events = [];
   for (const calendar of props.calendars) {
     const { data } = await call("rmt/cal/" + calendar.id + "/" + from + "/" + to).get().json();
     if (Array.isArray(data.value)) {
-      calendarEvents.value = [
-        ...calendarEvents.value,
-        ...data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') }))
-      ];
+      events.push(...data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
     }
   }
+  calendarEvents.value = events;
 };
 
 // initially load data when component gets remounted
@@ -202,11 +200,11 @@ onMounted(() => {
 
 // react to user calendar navigation
 watch(() => activeDate.value, (newValue, oldValue) => {
-  // remote data is retrieved per month, so data request happens only if the user navigates to a different month
-  if (dj(oldValue).format('M') !== dj(newValue).format('M')) {
+  // remote data is retrieved per year, so data request happens only if the user navigates to a different year
+  if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
     getRemoteEvents(
-      dj(newValue).startOf('month').format('YYYY-MM-DD'),
-      dj(newValue).endOf('month').format('YYYY-MM-DD')
+      dj(newValue).startOf('year').format('YYYY-MM-DD'),
+      dj(newValue).endOf('year').format('YYYY-MM-DD')
     );
   }
 });
