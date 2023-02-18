@@ -149,3 +149,9 @@ class Event(BaseModel):
   description: str | None = None
   calendar_title: str | None = None
   calendar_color: str | None = None
+
+
+class FileDownload(BaseModel):
+  name: str
+  content_type: str
+  data: str

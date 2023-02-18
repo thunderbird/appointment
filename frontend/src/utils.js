@@ -31,8 +31,31 @@ export const initials = (name) => {
   }
 };
 
+// file download
+export const download = (data, filename, contenttype='text/plain') => {
+  let a = document.createElement('a');
+  let file = new Blob([data], { type: contenttype + ';charset=UTF-8', endings: 'native' });
+  // IE10+
+  if (window.navigator.msSaveOrOpenBlob) {
+    window.navigator.msSaveOrOpenBlob(file, filename);
+  }
+  // other browsers
+  else {
+    let url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
+  }
+};
+
 export default {
 	keyByValue,
 	eventColor,
   initials,
+  download,
 };

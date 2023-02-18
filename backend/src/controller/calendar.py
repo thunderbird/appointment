@@ -3,7 +3,8 @@
 Handle connection to a CalDAV server.
 """
 from caldav import DAVClient
-from datetime import datetime, date
+from icalendar import Calendar, Event
+from datetime import datetime, date, timedelta
 from ..database import schemas
 
 
@@ -77,3 +78,19 @@ class CalDavConnector:
         e.delete()
         count += 1
     return count
+
+
+class Tools:
+  def create_vevent(appointment: schemas.Appointment, slot: schemas.Slot):
+    """find all calendars on the remote server"""
+    cal = Calendar()
+    cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
+    cal.add('version', '2.0')
+    event = Event()
+    event.add('summary', appointment.title)
+    event.add('dtstart', slot.start)
+    event.add('dtend', slot.start + timedelta(minutes=slot.duration))
+    event.add('dtstamp', datetime.now())
+    event['description'] = appointment.details
+    cal.add_component(event)
+    return cal.to_ical().decode("utf-8")

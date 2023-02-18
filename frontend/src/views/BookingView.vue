@@ -49,7 +49,7 @@
         <div class="uppercase">{{ dj(activeEvent.start).format('LT') }}</div>
       </div>
     </div>
-    <div class="text-teal-600 text-sm underline underline-offset-2 -mt-4">
+    <div class="text-teal-600 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
       {{ t('label.downloadTheIcsFile') }}
     </div>
     <div class="text-gray-700 text-lg text-center">
@@ -125,6 +125,7 @@
 
 <script setup>
 import { bookingCalendarViews as views, appointmentState } from '@/definitions';
+import { download } from '@/utils';
 import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -269,9 +270,12 @@ const bookEvent = async (attendeeData) => {
 };
 
 // download calendar event as .ics
-const downloadIcs = () => {
-  // TODO: create ICS file
-  console.log(activeEvent.value);
+const downloadIcs = async () => {
+  // download ICS file
+  const { data, error } = await call("serve/ics/" + route.params.slug + "/" + activeEvent.value.id).get().json();
+  if (!error.value) {
+    download(data.value.data, data.value.name, data.value.content_type);
+  }
 };
 
 </script>

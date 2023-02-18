@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from datetime import timedelta, datetime
+from tempfile import NamedTemporaryFile
 
 # database
 from sqlalchemy.orm import Session
@@ -16,7 +17,7 @@ models.Base.metadata.create_all(bind=engine)
 
 # authentication
 from .controller.auth import Auth
-from .controller.calendar import CalDavConnector
+from .controller.calendar import CalDavConnector, Tools
 
 # init app
 app = FastAPI()
@@ -240,7 +241,7 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
   return schemas.AppointmentOut(id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=slots)
 
 
-@app.put("/apmt/public/{slug}", response_model=schemas.Attendee)
+@app.put("/apmt/public/{slug}", response_model=schemas.SlotAttendee)
 def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
   """endpoint to update a time slot for an appointment via public link and create an event in remote calendar"""
   db_appointment = repo.get_public_appointment(db, slug=slug)
@@ -262,10 +263,23 @@ def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Ses
   )
   con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
   con.create_event(event=event, attendee=s_a.attendee)
-  return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
+  repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
+  return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
-# @app.get("/download/ics/{slug}/{slot}")
-# def download_ics(slug: str, slot: int, db: Session = Depends(get_db)):
-#   """endpoint to download ICS file for time slot"""
-#   return FileResponse(path=file_path, filename=file_path, media_type='text/mp4')
+@app.get("/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
+def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
+  """endpoint to serve ICS file for time slot to download"""
+  db_appointment = repo.get_public_appointment(db, slug=slug)
+  if db_appointment is None:
+    raise HTTPException(status_code=404, detail="Appointment not found")
+  if not repo.appointment_has_slot(db, appointment_id=db_appointment.id, slot_id=slot_id):
+    raise HTTPException(status_code=404, detail="Time slot not found for Appointment")
+  slot = repo.get_slot(db=db, slot_id=slot_id)
+  if slot is None:
+    raise HTTPException(status_code=404, detail="Time slot not found")
+  return schemas.FileDownload(
+    name="test",
+    content_type="text/calendar",
+    data=Tools.create_vevent(appointment=db_appointment, slot=slot)
+  )
