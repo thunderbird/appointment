@@ -5,6 +5,7 @@ Boot application, authenticate user and provide all API endpoints.
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from datetime import timedelta, datetime
 
 # database
@@ -228,21 +229,21 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db)):
   return repo.delete_calendar_appointment(db=db, appointment_id=id)
 
 
-@app.get("/apmt/{username}/{slug}", response_model=schemas.AppointmentOut)
-def read_public_appointment(username: str, slug: str, db: Session = Depends(get_db)):
+@app.get("/apmt/public/{slug}", response_model=schemas.AppointmentOut)
+def read_public_appointment(slug: str, db: Session = Depends(get_db)):
   """endpoint to retrieve an appointment from db via public link and only expose necessary data"""
-  a = repo.get_public_appointment(db, username=username, slug=slug)
-  s = repo.get_subscriber_by_username(db=db, username=username)
-  if a is None:
+  a = repo.get_public_appointment(db, slug=slug)
+  s = repo.get_subscriber_by_appointment(db=db, appointment_id=a.id)
+  if a is None or s is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
   slots = [schemas.SlotBase(start=sl.start, duration=sl.duration) for sl in a.slots]
   return schemas.AppointmentOut(id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=slots)
 
 
-@app.put("/apmt/{username}/{slug}", response_model=schemas.Attendee)
-def update_public_appointment_slot(username: str, slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
+@app.put("/apmt/public/{slug}", response_model=schemas.Attendee)
+def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
   """endpoint to update a time slot for an appointment via public link and create an event in remote calendar"""
-  db_appointment = repo.get_public_appointment(db, username=username, slug=slug)
+  db_appointment = repo.get_public_appointment(db, slug=slug)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
   db_calendar = repo.get_calendar(db, calendar_id=db_appointment.calendar_id)
@@ -262,3 +263,9 @@ def update_public_appointment_slot(username: str, slug: str, s_a: schemas.SlotAt
   con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
   con.create_event(event=event, attendee=s_a.attendee)
   return repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
+
+
+# @app.get("/download/ics/{slug}/{slot}")
+# def download_ics(slug: str, slot: int, db: Session = Depends(get_db)):
+#   """endpoint to download ICS file for time slot"""
+#   return FileResponse(path=file_path, filename=file_path, media_type='text/mp4')

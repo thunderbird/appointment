@@ -175,7 +175,7 @@ const viewTitle = computed(() => {
 onMounted(async () => {
   // async get appointment data from route
   // TODO: handle username
-  const { error, data } = await call("apmt/admin/" + route.params.slug).get().json();
+  const { error, data } = await call("apmt/public/" + route.params.slug).get().json();
   // check if appointment exists and is open
   if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
     activeView.value = views.invalid;
@@ -259,7 +259,7 @@ const bookEvent = async (attendeeData) => {
     attendee: attendeeData
   };
   // update server side event
-  const { error } = await call("apmt/admin/" + route.params.slug).put(obj).json();
+  const { error } = await call("apmt/public/" + route.params.slug).put(obj).json();
   // disable calendar view if every thing worked fine
   if (!error.value) {
     attendee.value = attendeeData;

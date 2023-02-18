@@ -24,6 +24,13 @@ def get_subscriber_by_username(db: Session, username: str):
   return db.query(models.Subscriber).filter(models.Subscriber.username == username).first()
 
 
+def get_subscriber_by_appointment(db: Session, appointment_id: int):
+  """retrieve appointment by subscriber username and appointment slug (public)"""
+  if appointment_id:
+    return db.query(models.Subscriber).join(models.Calendar).join(models.Appointment).filter(models.Appointment.id == appointment_id).first()
+  return None
+
+
 def create_subscriber(db: Session, subscriber: schemas.SubscriberBase):
   """create new subscriber"""
   db_subscriber = models.Subscriber(**subscriber.dict())
@@ -127,10 +134,10 @@ def get_appointment(db: Session, appointment_id: int):
   return None
 
 
-def get_public_appointment(db: Session, username: str, slug: str):
-  """retrieve appointment by subscriber username and appointment slug (public)"""
-  if username and slug:
-    return db.query(models.Appointment).join(models.Calendar).join(models.Subscriber).filter(models.Subscriber.username == username, models.Appointment.slug == slug).first()
+def get_public_appointment(db: Session, slug: str):
+  """retrieve appointment by appointment slug (public)"""
+  if slug:
+    return db.query(models.Appointment).filter(models.Appointment.slug == slug).first()
   return None
 
 
