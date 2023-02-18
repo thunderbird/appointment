@@ -40,6 +40,10 @@ class Slot(SlotBase):
     orm_mode = True
 
 
+class SlotOut(SlotBase):
+  id: int
+
+
 class SlotAttendee(BaseModel):
   slot_id: int
   attendee: AttendeeBase
@@ -79,7 +83,7 @@ class Appointment(AppointmentFull):
 class AppointmentOut(AppointmentBase):
   id: int
   owner_name: str | None = None
-  slots: list[SlotBase] = []
+  slots: list[SlotOut] = []
 
 
 """ CALENDAR model schemas
