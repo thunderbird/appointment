@@ -3,7 +3,7 @@
 Handle connection to a CalDAV server.
 """
 from caldav import DAVClient
-from icalendar import Calendar, Event
+from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, date, timedelta
 from ..database import schemas
 
@@ -62,6 +62,7 @@ class CalDavConnector:
       summary=event.title,
       description=event.description
     )
+    # TODO: add organizer data
     # save attendee data
     caldavEvent.add_attendee((attendee.name, attendee.email))
     caldavEvent.save()
@@ -81,16 +82,20 @@ class CalDavConnector:
 
 
 class Tools:
-  def create_vevent(appointment: schemas.Appointment, slot: schemas.Slot):
+  def create_vevent(appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber):
     """find all calendars on the remote server"""
     cal = Calendar()
     cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
     cal.add('version', '2.0')
+    org = vCalAddress('MAILTO:' + organizer.email)
+    org.params['cn'] = vText(organizer.name)
+    org.params['role'] = vText('CHAIR')
     event = Event()
     event.add('summary', appointment.title)
     event.add('dtstart', slot.start)
     event.add('dtend', slot.start + timedelta(minutes=slot.duration))
     event.add('dtstamp', datetime.now())
     event['description'] = appointment.details
+    event['organizer'] = org
     cal.add_component(event)
     return cal.to_ical().decode("utf-8")

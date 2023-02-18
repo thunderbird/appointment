@@ -278,8 +278,9 @@ def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
   slot = repo.get_slot(db=db, slot_id=slot_id)
   if slot is None:
     raise HTTPException(status_code=404, detail="Time slot not found")
+  organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
   return schemas.FileDownload(
     name="test",
     content_type="text/calendar",
-    data=Tools.create_vevent(appointment=db_appointment, slot=slot)
+    data=Tools.create_vevent(db_appointment, slot, organizer)
   )
