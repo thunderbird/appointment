@@ -1,7 +1,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
-  content: ['./index.html', './src/**/*.{vue,js}'],
+  content: ['./public/index.html', './src/**/*.{vue,js}'],
   theme: {
     fontFamily: {
       sans: ['"Open Sans"', ...defaultTheme.fontFamily.sans],
@@ -21,6 +21,7 @@ module.exports = {
       }
     },
   },
+  darkMode: 'class',
   plugins: [
     require('@tailwindcss/forms')
   ],

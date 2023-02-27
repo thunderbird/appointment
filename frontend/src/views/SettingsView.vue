@@ -8,21 +8,37 @@
     <div class="w-1/5 flex flex-col gap-6">
       <!-- search -->
       <label class="flex items-center relative">
-        <icon-search class="absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2 stroke-gray-300 fill-transparent" /> 
-        <input class="w-full text-sm pl-12 pr-2 rounded-md border-gray-300" type="search" name="search" :placeholder="t('label.search')" />
+        <icon-search
+          class="
+            absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2
+            stroke-gray-300 dark:stroke-gray-500 fill-transparent
+          "
+        /> 
+        <input
+          class="w-full text-sm pl-12 pr-2 rounded-md"
+          type="search"
+          name="search"
+          :placeholder="t('label.search')"
+        />
       </label>
       <!-- menu -->
       <div
         v-for="(view, key) in settingsSections"
         :key="key"
-        class="rounded-lg font-semibold text-gray-500 bg-gray-100 p-4 cursor-pointer flex justify-between"
-        :class="{ 'bg-teal-500 text-white': view === activeView }"
+        class="
+          rounded-lg font-semibold p-4 cursor-pointer flex justify-between
+          text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-600
+        "
+        :class="{ '!bg-teal-500 !text-white': view === activeView }"
         @click="show(key)"
       >
         <span>{{ t('label.' + key) }}</span>
         <icon-chevron-right
-          class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-180 transition-transform"
-          :class="{ '!rotate-0 stroke-white': view === activeView }"
+          class="
+            h-6 w-6 stroke-1 fill-transparent rotate-180 transition-transform
+            stroke-gray-800 dark:stroke-gray-300
+          "
+          :class="{ '!rotate-0 !stroke-white': view === activeView }"
         />
       </div>
     </div>
@@ -38,7 +54,7 @@
             <div class="text-lg">{{ t('label.language') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
-              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+              <select class="w-full max-w-sm rounded-md w-full">
                 <option value="en-us">English (US)</option>
                 <option value="de-de">German</option>
               </select>
@@ -48,14 +64,15 @@
             <div class="text-lg">{{ t('label.appearance') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
-              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
+              <select v-model="theme" class="w-full max-w-sm rounded-md w-full">
+                <option v-for="(key, label) in colorSchemes" :key="key" :value="key">
+                  {{ t('label.' + label) }}
+                </option>
               </select>
             </label>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.defaultFont') }}</div>
-              <select class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+              <select class="w-full max-w-sm rounded-md w-full">
                 <option value="os">Open Sans</option>
                 <option value="fs">Fira Sans</option>
               </select>
@@ -88,7 +105,7 @@
             <div class="text-lg">{{ t('label.timeZone') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
-              <select v-model="activeTimezone.primary" class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+              <select v-model="activeTimezone.primary" class="w-full max-w-sm rounded-md w-full">
                 <option v-for="t in timezones" :key="t" :value="t">
                   UTC <span v-if="t > 0">+</span>{{ t }}
                 </option>
@@ -96,11 +113,11 @@
             </label>
             <label class="pl-4 mt-6 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.showSecondaryTimeZone') }}</div>
-              <switch-toggle :active="false" />
+              <switch-toggle :active="true" />
             </label>
             <label class="pl-4 mt-6 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.secondaryTimeZone') }}</div>
-              <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+              <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full">
                 <option v-for="t in timezones" :key="t" :value="t">
                   UTC <span v-if="t > 0">+</span>{{ t }}
                 </option>
@@ -121,7 +138,7 @@
               <input
                 v-model="principal.url"
                 type="text"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
             <label class="pl-4 flex items-center">
@@ -129,7 +146,7 @@
               <input
                 v-model="principal.user"
                 type="text"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
             <label class="pl-4 flex items-center">
@@ -137,7 +154,7 @@
               <input
                 v-model="principal.password"
                 type="password"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
           </div>
@@ -153,7 +170,7 @@
             <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex gap-2 items-center">
               <div>{{ cal.title }}</div>
               <div>{{ cal.url }}</div>
-              <button @click="assignCalendar(cal.title, cal.url)" class="ml-auto flex items-center gap-0.5 px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
+              <button @click="assignCalendar(cal.title, cal.url)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
                 <icon-arrow-right class="h-3.5 w-3.5 stroke-2 stroke-white fill-transparent" />
                 {{ 'Select calendar' }}
               </button>
@@ -166,7 +183,7 @@
                 <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
               </div>
               {{ cal.title }}
-              <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
+              <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
                 <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
                 {{ t('label.editCalendar') }}
               </button>
@@ -191,12 +208,12 @@
               <input
                 v-model="calendarInput.data.title"
                 type="text"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
             <label class="pl-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
-              <select v-model="calendarInput.data.color" class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full">
+              <select v-model="calendarInput.data.color" class="w-full max-w-sm rounded-md w-full">
                 <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
                   {{ color }}
                 </option>
@@ -207,7 +224,7 @@
               <input
                 v-model="calendarInput.data.url"
                 type="url"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
             <label class="pl-4 flex items-center">
@@ -215,7 +232,7 @@
               <input
                 v-model="calendarInput.data.user"
                 type="text"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
             <label class="pl-4 flex items-center">
@@ -223,7 +240,7 @@
               <input
                 v-model="calendarInput.data.password"
                 type="password"
-                class="w-full max-w-sm rounded-md bg-gray-50 border-gray-200 w-full"
+                class="w-full max-w-sm rounded-md w-full"
               />
             </label>
             <div class="self-end flex gap-4">
@@ -267,8 +284,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject } from 'vue';
-import { settingsSections } from '@/definitions';
+import { ref, reactive, inject, watch } from 'vue';
+import { settingsSections, colorSchemes } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import SwitchToggle from '@/elements/SwitchToggle';
@@ -294,9 +311,9 @@ const refresh = inject('refresh');
 
 // view properties
 defineProps({
-  calendars:    Array, // list of calendars from db
-  appointments: Array, // list of appointments from db
-  user:        Object, // currently logged in user, null if not logged in
+  calendars:    Array,  // list of calendars from db
+  appointments: Array,  // list of appointments from db
+  user:         Object, // currently logged in user, null if not logged in
 });
 
 // menu navigation of different views
@@ -305,6 +322,32 @@ const show = (key) => {
   router.replace({ name: route.name, params: { view: key } });
   activeView.value = settingsSections[key];
 };
+
+// handle theme mode
+const initialTheme = !('theme' in localStorage) ? colorSchemes.system : colorSchemes[localStorage.theme]
+const theme = ref(initialTheme);
+watch(theme, (newValue) => {
+	switch (newValue) {
+		case colorSchemes.dark:
+			localStorage.theme = 'dark';
+			document.documentElement.classList.add('dark');
+			break;
+		case colorSchemes.light:
+			localStorage.theme = 'light';
+			document.documentElement.classList.remove('dark');
+			break;
+		case colorSchemes.system:
+			localStorage.removeItem('theme');
+			if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				document.documentElement.classList.remove('dark');
+			} else {
+				document.documentElement.classList.add('dark');
+			}
+			break;
+		default:
+			break;
+	}
+});
 
 // TODO: timezones
 const activeTimezone = reactive({
@@ -394,15 +437,15 @@ const getRemoteCalendars = async () => {
 
 // preset of available calendar colors
 const colors = [
-  '#d8495f',
-  '#cc3284',
-  '#904493',
-  '#8633d0',
-  '#5d73d7',
-  '#32909e',
-  '#328c7b',
-  '#41945e',
-  '#ae7b38',
-  '#d25935',
+  '#ff7b91',
+  '#fe64b6',
+  '#c276c5',
+  '#b865ff',
+  '#8fa5ff',
+  '#64c2d0',
+  '#64bead',
+  '#73c690',
+  '#e0ad6a',
+  '#ff8b67 ',
 ];
 </script>

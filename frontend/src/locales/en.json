@@ -21,11 +21,11 @@
     "yourProfile": "Your Profile"
   },
   "info": {
-    "noPendingAppointmentsInList": "There are currently no pending appointments in this list.",
-    "bookingLinkHasAlreadyBeenUsed": "It seems that this booking link has already been used.",
     "bookedPleaseCheckEmail": "This event has been booked, please check your email to add it to you calendar.",
+    "bookingLinkHasAlreadyBeenUsed": "It seems that this booking link has already been used.",
     "bookingSuccessful": "The booking was successful!",
-    "invitationWasSent": "An invitation was sent to your email."
+    "invitationWasSent": "An invitation was sent to your email.",
+    "noPendingAppointmentsInList": "There are currently no pending appointments in this list."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
@@ -72,6 +72,7 @@
     "copyLink": "Copy link",
     "create": "Create",
     "createAppointments": "Create Appointment",
+    "dark": "Dark",
     "dateFormat": "Date Format",
     "day": "Day",
     "defaultFont": "Default font",
@@ -86,6 +87,7 @@
     "guest": "{count} guests | {count} guest | {count} guests",
     "inPerson": "In person",
     "language": "Language",
+    "light": "Light",
     "location": "Location",
     "month": "Month",
     "name": "Name",
@@ -114,6 +116,7 @@
     "startTime": "Start Time",
     "startUsingTba": "Start using TBA",
     "status": "Status",
+    "system": "System",
     "theme": "Theme",
     "timeFormat": "Time Format",
     "timeZone": "Time Zone",
