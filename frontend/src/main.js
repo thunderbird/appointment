@@ -24,7 +24,7 @@ const messages = {
 	"de": require("@/locales/de.json"), // German
 	"en": require("@/locales/en.json"), // English
 };
-const loc = navigator.language || navigator.userLanguage;
+const loc = localStorage.locale ?? (navigator.language || navigator.userLanguage);
 const i18n = createI18n({
 	legacy: false,
 	globalInjection: true,

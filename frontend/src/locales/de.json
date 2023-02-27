@@ -124,6 +124,10 @@
     "viewBooking": "Buchung anschauen",
     "week": "Woche"
   },
+  "locales": {
+    "de": "Deutsch",
+    "en": "Englisch"
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen…",
     "emailAddress": "max.muster{'@'}beispiel.de",

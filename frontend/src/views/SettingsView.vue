@@ -54,9 +54,10 @@
             <div class="text-lg">{{ t('label.language') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
-              <select class="w-full max-w-sm rounded-md w-full">
-                <option value="en-us">English (US)</option>
-                <option value="de-de">German</option>
+              <select v-model="locale" class="w-full max-w-sm rounded-md w-full">
+                <option v-for="l in availableLocales" :key="l" :value="l">
+                  {{ l.toUpperCase() + ' &mdash; ' + t('locales.' + l) }}
+                </option>
               </select>
             </label>
           </div>
@@ -303,7 +304,7 @@ import {
 } from '@tabler/icons-vue';
 
 // component constants
-const { t } = useI18n();
+const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 const call = inject('call');
@@ -322,6 +323,11 @@ const show = (key) => {
   router.replace({ name: route.name, params: { view: key } });
   activeView.value = settingsSections[key];
 };
+
+// handle ui languages
+watch(locale, (newValue) => {
+  localStorage.locale = newValue;
+});
 
 // handle theme mode
 const initialTheme = !('theme' in localStorage) ? colorSchemes.system : colorSchemes[localStorage.theme]

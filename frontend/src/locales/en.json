@@ -128,6 +128,10 @@
     "viewBooking": "View booking",
     "week": "Week"
   },
+  "locales": {
+    "de": "German",
+    "en": "English"
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
     "emailAddress": "john.doe{'@'}example.com",
