@@ -1,45 +1,50 @@
 <template>
-  <div v-if="open" class="bg-gray-800/50 w-screen h-screen fixed top-0 left-0 z-40" @click="emit('close')"></div>
-  <div v-if="open" class="bg-white fixed z-50 position-center position-center rounded-xl p-12 max-w-lg w-full">
+  <div v-if="open" class="w-screen h-screen fixed top-0 left-0 z-40 bg-gray-800/50" @click="emit('close')"></div>
+  <div
+    v-if="open"
+    class="fixed z-50 position-center position-center rounded-xl p-12 max-w-lg w-full bg-white dark:bg-gray-700"
+  >
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
-      <icon-x class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+      <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-gray-700 dark:stroke-gray-400" />
     </div>
-    <div class="text-2xl text-teal-500 text-center font-semibold mb-4">
+    <div class="text-2xl text-center font-semibold mb-4 text-teal-500">
       {{ !success ? t('heading.bookSelection') : t('heading.eventBooked') }}
     </div>
-    <div class="text-gray-500 text-center mb-4">
+    <div class="text-center mb-4 text-gray-500 dark:text-gray-300">
       <div>{{ event.title }}:</div>
       <div>{{ time }}</div>
     </div>
-    <div v-if="!success" class="text-sm text-teal-500 text-center underline underline-offset-2 mb-8">
+    <div v-if="!success" class="text-sm text-center underline underline-offset-2 mb-8 text-teal-500">
       Time zone: Pacific Standart Time
     </div>
     <form v-if="!success" ref="bookingForm" class="flex flex-col gap-4 mb-8">
       <label>
-        <div class="font-medium text-gray-500 mb-1">{{ t('label.name') }}</div>
+        <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          {{ t('label.name') }}
+        </div>
         <input
           type="text"
           v-model="attendee.name"
           :placeholder="t('placeholder.firstAndLastName')"
-          class="rounded-md bg-gray-50 border-gray-200 w-full"
+          class="rounded-md w-full"
         />
       </label>
       <label>
-        <div class="font-medium text-gray-500 mb-1">
+        <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
           {{ t('label.email') }} <span class="text-red-600">*</span>
         </div>
         <input
           type="email"
           v-model="attendee.email"
           :placeholder="t('placeholder.emailAddress')"
-          class="rounded-md bg-gray-50 border-gray-200 w-full"
+          class="rounded-md w-full"
           required
         />
       </label>
     </form>
     <div v-else class="mb-8 mt-8">
       <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-8 mx-auto" />
-      <div class="text-sm text-gray-500 w-4/5 mx-auto text-center">
+      <div class="text-sm w-4/5 mx-auto text-center text-gray-500">
         {{ t('text.invitationSentToAddress', { address: attendee.email }) }}
       </div>
     </div>

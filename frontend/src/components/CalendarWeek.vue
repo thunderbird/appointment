@@ -1,25 +1,32 @@
 <template>
-  <div class="grid grid-cols-week gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
+  <div class="
+    grid grid-cols-week gap-[1px] w-full border rounded-lg overflow-hidden
+    bg-gray-200 border-gray-200 dark:bg-gray-600 dark:border-gray-600
+  ">
     <!-- header with weekdays -->
-    <div class="bg-white"></div>
+    <div class="bg-white dark:bg-gray-700"></div>
     <div
       v-for="d in days"
       :key="d.day"
-      class="flex flex-col items-center text-gray-700 bg-white py-2"
+      class="flex flex-col items-center py-2 text-gray-500 dark:text-gray-300 bg-white dark:bg-gray-700"
     >
       <div
         class="text-2xl font-semibold w-10 h-10 flex-center"
-        :class="{'text-white rounded-full bg-teal-500': d.active }"
-      >{{ d.day }}</div>
+        :class="{ 'rounded-full text-white bg-teal-500': d.active }"
+      >
+        {{ d.day }}
+      </div>
       <div class="text-lg">{{ d.weekday }}</div>
     </div>
     <!-- all day events -->
     <template v-if="!booking">
-      <div class="text-gray-400 bg-white flex-center">{{ t('label.allDay') }}</div>
+      <div class="flex-center text-gray-400 bg-white dark:bg-gray-700">
+        {{ t('label.allDay') }}
+      </div>
       <div
         v-for="d in days"
         :key="d.day"
-        class="bg-white grid auto-rows-max gap-1 p-1"
+        class="grid auto-rows-max gap-1 p-1 bg-white dark:bg-gray-700"
         @mouseleave="hideEventPopup"
       >
         <div
@@ -28,14 +35,14 @@
           class="flex overflow-hidden"
           @mouseenter="element => showEventPopup(element, event)"
         >
-          <div class="w-full text-sm truncate rounded bg-amber-400/80 px-2 py-0.5">
+          <div class="w-full text-sm truncate rounded px-2 py-0.5 bg-amber-400/80">
             {{ event.title }}
           </div>
         </div>
       </div>
     </template>
     <!-- events with times -->
-    <div class="text-center text-gray-400 bg-white grid auto-rows-[4rem]">
+    <div class="text-center grid auto-rows-[4rem] text-gray-400 bg-white dark:bg-gray-700">
       <div v-for="h in hours" :key="h" class="lowercase">
         {{ h }}
       </div>
@@ -43,7 +50,7 @@
     <div
       v-for="d in days"
       :key="d.day"
-      class="bg-white grid auto-rows-[2rem]"
+      class="grid auto-rows-[2rem] bg-white dark:bg-gray-700"
       @mouseleave="hideEventPopup"
     >
       <div
@@ -55,7 +62,7 @@
       >
         <div
           v-if="!booking"
-          class="w-full truncate rounded flex bg-sky-400/10 border-sky-400 m-1 px-2 py-0.5"
+          class="w-full truncate rounded flex m-1 px-2 py-0.5 bg-sky-400/10 border-sky-400"
           :class="{
             'border-2 border-dashed': !event.remote
           }"
@@ -76,7 +83,10 @@
         <div
           v-else
           @click="bookSlot(event.start)"
-          class="w-full text-sm text-gray-600 overflow-hidden rounded-md bg-teal-50 p-1 m-1 cursor-pointer hover:shadow hover:bg-teal-100 flex"
+          class="
+            w-full text-sm overflow-hidden rounded-md p-1 m-1 cursor-pointer hover:shadow flex
+            text-gray-600 dark:text-gray-300 bg-teal-50 hover:bg-teal-100 dark:bg-teal-800 hover:dark:bg-teal-700
+          "
           :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
         >
           <div

@@ -1,6 +1,11 @@
 <template>
   <!-- fixed header with app title -->
-  <header class="fixed h-24 w-full px-4 shadow-lg bg-white border-b border-gray-300 flex gap-3 items-center">
+  <header
+    class="
+      fixed h-24 w-full px-4 shadow-lg border-b flex gap-3 items-center
+      bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
+    "
+  >
     <img class="h-10 mr-2" src="/appointment_logo.svg" alt="Appointment Logo">
     <div class="text-4xl font-thin text-teal-500">Thunderbird</div>
     <div class="text-4xl font-thin text-sky-500">Appointment</div>
@@ -10,7 +15,7 @@
     v-if="activeView === views.loading"
     class="h-screen flex-center select-none"
   >
-    <div class="w-12 h-12 rounded-full animate-spin border-4 border-white border-t-teal-600"></div>
+    <div class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-600"></div>
   </main>
   <!-- booking page content: invalid link -->
   <main
@@ -21,7 +26,7 @@
     <div class="text-xl font-semibold text-sky-600">
       {{ t('info.bookingLinkHasAlreadyBeenUsed') }}
     </div>
-    <div class="text-gray-800">
+    <div class="text-gray-800 dark:text-gray-300">
       {{ t('info.bookedPleaseCheckEmail') }}
     </div>
     <primary-button
@@ -65,9 +70,9 @@
   <!-- booking page content: time slot selection -->
   <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
     <div v-if="appointment">
-      <div class="text-3xl text-gray-700 mb-4">{{ appointment.title }}</div>
+      <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
       <div class="font-bold">{{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}</div>
-      <div class="text-gray-700 mb-6">{{ appointment.details }}</div>
+      <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
       <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
       <calendar-page-heading
         :nav="false"
@@ -101,8 +106,18 @@
       />
     </div>
     <!-- fixed footer with action button -->
-    <footer class="fixed bottom-0 left-0 h-24 w-full px-4 bg-white border-t border-gray-300">
+    <footer
+      class="
+        fixed bottom-0 left-0 h-24 w-full px-4 border-t
+        bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
+      "
+    >
       <div class="h-full max-w-screen-2xl mx-auto flex justify-end items-center">
+        <!-- <primary-button
+          class="p-7"
+          label="download"
+          @click="downloadIcs"
+        /> -->
         <primary-button
           class="p-7"
           :label="t('label.confirmSelection')"

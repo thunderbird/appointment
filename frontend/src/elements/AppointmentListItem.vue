@@ -10,7 +10,7 @@
             {{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}
           </div>
         </div>
-        <icon-dots-vertical class="h-6 w-6 shrink-0 stroke-slate-400 stroke-2 fill-slate-400" />
+        <icon-dots-vertical class="h-6 w-6 shrink-0 stroke-gray-400 stroke-2 fill-gray-400" />
       </div>
       <div class="flex justify-between items-center">
         <router-link

@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl bg-gray-200">
+  <div class="rounded-2xl bg-gray-200 dark:bg-gray-600">
     <nav class="flex">
       <ul class="flex justify-between w-full gap-4 p-1">
         <li
@@ -7,8 +7,8 @@
           :key="item"
           class="flex whitespace-nowrap leading-8 cursor-pointer px-8 transition-all ease-in-out hover:rounded-xl"
           :class="{
-            'text-gray-900 bg-white rounded-xl shadow': item == active,
-            'text-gray-500 hover:bg-gray-100': item != active,
+            'rounded-xl shadow text-gray-900 dark:text-white bg-white dark:bg-gray-500': item == active,
+            'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700': item != active,
           }"
           @click="activate(key)"
         >

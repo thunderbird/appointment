@@ -1,40 +1,42 @@
 <template>
   <div class="relative flex flex-col gap-4 h-full">
-    <div class="text-teal-500 font-semibold text-center text-xl">
+    <div class="font-semibold text-center text-xl text-teal-500">
       {{ t('heading.createNewAppointment') }}
     </div>
     <!-- step 1 -->
-    <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
+    <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
         <span class="font-semibold flex gap-1">
-          <icon-check v-show="validStep1" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
-          <icon-alert-triangle v-show="invalidStep1" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
+          <icon-check v-show="validStep1" class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
+          <icon-alert-triangle v-show="invalidStep1" class="h-6 w-6 stroke-2 fill-transparent stroke-red-500" />
           {{ t('label.appointmentDetails') }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-90 transition-transform"
+          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
           :class="{ 'rotate-0': activeStep1 }"
         />
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
         <hr />
         <label>
-          <div class="font-medium text-gray-500 mb-1">{{ t('label.appointmentName') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.appointmentName') }}</div>
           <input
             type="text"
             v-model="appointment.title"
             :placeholder="t('placeholder.biWeeklyCafeDates')"
-            class="rounded-md bg-gray-50 border-gray-200 w-full"
+            class="rounded-md w-full"
           />
         </label>
         <label>
-          <div class="font-medium text-gray-500 mb-1">{{ t('label.selectCalendar') }}</div>
-          <select v-model="appointment.calendar_id" class="rounded-md bg-gray-50 border-gray-200 w-full">
-            <option v-for="calendar in calendars" :key="calendar.id" :value="calendar.id">{{ calendar.title }}</option>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.selectCalendar') }}</div>
+          <select v-model="appointment.calendar_id" class="rounded-md w-full">
+            <option v-for="calendar in calendars" :key="calendar.id" :value="calendar.id">
+              {{ calendar.title }}
+            </option>
           </select>
         </label>
         <label>
-          <div class="font-medium text-gray-500 mb-1">{{ t('label.location') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.location') }}</div>
           <tab-bar
             :tab-items="locationTypes"
             :active="appointment.location_type"
@@ -42,20 +44,20 @@
           />
         </label>
         <label>
-          <div class="font-medium text-gray-500 mb-1">{{ t('label.videoLink') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.videoLink') }}</div>
           <input
             type="text"
             v-model="appointment.location_url"
             :placeholder="t('placeholder.zoomCom')"
-            class="rounded-md bg-gray-50 border-gray-200 w-full"
+            class="rounded-md w-full"
           />
         </label>
         <label class="relative">
-          <div class="font-medium text-gray-500 mb-1">{{ t('label.notes') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.notes') }}</div>
           <textarea
             v-model="appointment.details"
             :placeholder="t('placeholder.writeHere')"
-            class="rounded-md bg-gray-50 border-gray-200 w-full text-sm h-40 resize-none"
+            class="rounded-md w-full text-sm h-40 resize-none"
             :maxlength="charLimit"
           ></textarea>
           <div
@@ -71,15 +73,15 @@
       </div>
     </div>
     <!-- step 2 -->
-    <div class="text-gray-700 bg-gray-100 rounded-lg p-4 flex flex-col gap-2">
+    <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
-          <icon-check v-show="validStep2" class="h-6 w-6 stroke-2 stroke-teal-500 fill-transparent" />
-          <icon-alert-triangle v-show="invalidStep2" class="h-6 w-6 stroke-2 stroke-red-500 fill-transparent" />
+          <icon-check v-show="validStep2" class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
+          <icon-alert-triangle v-show="invalidStep2" class="h-6 w-6 stroke-2 fill-transparent stroke-red-500" />
           {{ t('label.chooseYourAvailability') }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 stroke-gray-800 fill-transparent rotate-90 transition-transform"
+          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
           :class="{ 'rotate-0': activeStep2 }"
         />
       </div>
@@ -91,38 +93,38 @@
             <div class="flex justify-between mb-1">
               <div>{{ dj(day).format('LL') }}</div>
               <div>
-                <button @click="addTime(day)" class="flex items-center px-2 py-1 border-r rounded-full bg-teal-500 text-white text-xs">
-                  <icon-plus class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
+                <button @click="addTime(day)" class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white">
+                  <icon-plus class="h-3 w-3 stroke-2 fill-transparent stroke-white" />
                   {{ t('label.addTime') }}
                 </button>
               </div>
             </div>
             <div v-for="(s, i) in list" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
               <label class="flex flex-col">
-                <div class="text-sm text-gray-500">{{ t('label.start') }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-300">{{ t('label.start') }}</div>
                 <input
                   type="time"
                   v-model="s.start"
-                  class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
+                  class="rounded-md text-sm py-1"
                 />
               </label>
               <label class="flex flex-col">
-                <div class="text-sm text-gray-500">{{ t('label.end') }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-300">{{ t('label.end') }}</div>
                 <input
                   type="time"
                   v-model="s.end"
-                  class="rounded-md bg-gray-50 border-gray-200 text-sm py-1"
+                  class="rounded-md text-sm py-1"
                 />
               </label>
               <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
-                <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
+                <icon-x class="h-5 w-5 stroke-2 fill-transparent stroke-red-500" />
               </div>
             </div>
           </div>
         </div>
         <secondary-button
           :label="t('label.addDay')"
-          class="!text-sm !text-teal-500 !h-8 self-center"
+          class="!text-sm !h-8 self-center !text-teal-500"
           @click="showDatePicker = true"
         />
       </div>
@@ -149,7 +151,7 @@
         class="w-1/2"
       />
     </div>
-    <div v-show="showDatePicker" class="absolute position-center rounded-lg bg-white shadow w-11/12 p-4 ">
+    <div v-show="showDatePicker" class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700">
       <!-- monthly mini calendar -->
       <calendar-month
         :selected="activeDate"

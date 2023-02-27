@@ -1,28 +1,33 @@
 <template>
   <div>
-    <div class="grid grid-cols-day gap-[1px] w-full bg-gray-200 border rounded-lg overflow-hidden">
+    <div class="
+      grid grid-cols-day gap-[1px] w-full border rounded-lg overflow-hidden
+      bg-gray-200 border-gray-200 dark:bg-gray-600 dark:border-gray-600
+    ">
       <!-- all day events -->
       <template v-if="!booking">
-        <div class="text-gray-400 bg-white flex-center">{{ t('label.allDay') }}</div>
-        <div class="bg-white grid auto-rows-max gap-1 p-1">
+        <div class="flex-center text-gray-400 bg-white dark:bg-gray-700">
+          {{ t('label.allDay') }}
+        </div>
+        <div class="grid auto-rows-max gap-1 p-1 bg-white dark:bg-gray-700">
           <div
             v-for="event in eventsByDate?.allDay"
             :key="event"
             class="flex overflow-hidden"
           >
-            <div class="w-full text-sm truncate rounded bg-amber-400/80 mx-8 px-2 py-0.5">
+            <div class="w-full text-sm truncate rounded mx-8 px-2 py-0.5 bg-amber-400/80">
               {{ event.title }}
             </div>
           </div>
         </div>
       </template>
       <!-- events with times -->
-      <div class="text-center text-gray-400 bg-white grid auto-rows-[4rem]">
+      <div class="text-center grid auto-rows-[4rem] text-gray-400 bg-white dark:bg-gray-700">
         <div v-for="h in hours" :key="h" class="lowercase">
           {{ h }}
         </div>
       </div>
-      <div class="bg-white grid auto-rows-[2rem]">
+      <div class="grid auto-rows-[2rem] bg-white dark:bg-gray-700">
         <div
           v-for="event in eventsByDate?.duringDay"
           :key="event"
@@ -31,9 +36,12 @@
         >
           <div
             v-if="!booking"
-            class="w-full overflow-hidden rounded flex gap-4 text-gray-700 bg-sky-400/10 border-sky-400 my-1 mx-8 px-3 py-2"
+            class="
+              w-full overflow-hidden rounded flex gap-4 my-1 mx-8 px-3 py-2
+              text-gray-700 bg-sky-400/10 border-sky-400
+            "
             :class="{
-              'border-2 border-dashed': !event.remote,
+              'border-2 border-dashed dark:text-white': !event.remote,
               'flex-col': event.span > 2,
               'flex-row': event.span <= 2,
             }"
@@ -72,7 +80,11 @@
               </div>
               <div class="flex gap-2" :class="{ 'hidden': event.span <= 2 }">
                 <icon-link size="16" class="shrink-0" />
-                <a :href="baseurl + event.slug" class="whitespace-nowrap text-teal-500 underline underline-offset-2" target="_blank">
+                <a
+                  :href="baseurl + event.slug"
+                  class="whitespace-nowrap underline underline-offset-2 text-teal-500"
+                  target="_blank"
+                >
                   {{ baseurl + event.slug }}
                 </a>
               </div>
@@ -81,7 +93,10 @@
           <div
             v-else
             @click="bookSlot(event.start)"
-            class="w-full text-sm text-gray-600 overflow-hidden rounded-md bg-teal-50 p-1 my-1 mx-8 cursor-pointer hover:shadow hover:bg-teal-100 flex"
+            class="
+              w-full text-sm overflow-hidden rounded-md p-1 my-1 mx-8 cursor-pointer hover:shadow flex
+              text-gray-600 dark:text-gray-300 bg-teal-50 hover:bg-teal-100 dark:bg-teal-800 hover:dark:bg-teal-700
+            "
             :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
           >
             <div
