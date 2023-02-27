@@ -68,7 +68,7 @@ export const viewTypes = {
   grid: 2,
 };
 
-// settingsSections
+// sections on settings page
 export const settingsSections = {
   general:                1,
   calendar:               2,
@@ -78,15 +78,23 @@ export const settingsSections = {
   faq:                    6,
 };
 
+// available color schemes for theme
+export const colorSchemes = {
+	system: 1,
+	dark:   2,
+	light:  3,
+};
+
 export default {
-  locationTypes,
-  creationState,
-  calendarViews,
-  bookingCalendarViews,
   appointmentState,
   appointmentViews,
-  listColumns,
+  bookingCalendarViews,
+  calendarViews,
+  colorSchemes,
+  creationState,
   filterOptions,
-  viewTypes,
+  listColumns,
+  locationTypes,
   settingsSections,
+  viewTypes,
 };

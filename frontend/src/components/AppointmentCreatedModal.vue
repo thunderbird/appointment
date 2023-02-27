@@ -1,10 +1,13 @@
 <template>
-  <div v-if="open" class="bg-gray-800/50 w-screen h-screen fixed top-0 left-0 z-40" @click="emit('close')"></div>
-  <div v-if="open" class="bg-white fixed z-50 position-center position-center rounded-xl p-12 max-w-lg w-full flex flex-col items-center gap-6">
+  <div v-if="open" class="w-screen h-screen fixed top-0 left-0 z-40 bg-gray-800/50" @click="emit('close')"></div>
+  <div
+    v-if="open"
+    class="fixed z-50 position-center position-center rounded-xl p-12 max-w-lg w-full flex flex-col items-center gap-6 bg-white dark:bg-gray-700"
+  >
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
-      <icon-x class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+      <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-gray-700 dark:stroke-gray-400" />
     </div>
-    <div class="text-2xl text-teal-500 font-semibold">
+    <div class="text-2xl font-semibold text-teal-500">
       {{ t('heading.appointmentCreated') }}
     </div>
     <div class="max-w-xs text-center">
@@ -16,7 +19,7 @@
       <primary-button :label="t('label.copyLink')" :icon="icon" @click="copy" />
     </div>
     <div>
-      <a :href="publicLink" target="_blank" class="text-sm text-teal-500 cursor-pointer">
+      <a :href="publicLink" target="_blank" class="text-sm cursor-pointer text-teal-500">
         {{ t('label.viewBooking') }}
       </a>
     </div>

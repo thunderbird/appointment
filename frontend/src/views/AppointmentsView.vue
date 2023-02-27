@@ -17,67 +17,79 @@
     <div class="w-4/5">
       <!-- filter bar -->
       <div class="relative flex gap-5 select-none">
-        <select v-model="filter" class="rounded border border-gray-300 text-sm">
+        <select v-model="filter" class="rounded border text-sm">
           <option v-for="(value, key) in filterOptions" :key="key" :value="value">{{ t('label.' + key) }}</option>
         </select>
         <div class="w-full relative">
           <label for="appointments-search" class="absolute top-1/2 -translate-y-1/2 left-3 cursor-text">
-            <icon-search class="h-4 w-4 stroke-2 stroke-gray-400 fill-transparent" /> 
+            <icon-search class="h-4 w-4 stroke-2 stroke-gray-300 dark:stroke-gray-500 fill-transparent" /> 
           </label>
-          <input v-model="search" type="search" id="appointments-search" class="rounded border border-gray-300 w-full pl-10 text-sm" :placeholder="t('label.searchAppointments')" />
+          <input
+            v-model="search"
+            type="search"
+            id="appointments-search"
+            class="rounded w-full pl-10 text-sm"
+            :placeholder="t('label.searchAppointments')"
+          />
         </div>
-        <div class="rounded border border-gray-300 flex">
+        <div class="rounded border border-gray-300 dark:border-gray-500 flex">
           <div
-            class="border-r border-gray-300 py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
+            class="border-r border-gray-300 dark:border-gray-500 py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
             :class="{
-              'bg-gray-300': view === viewTypes.list,
-              'hover:bg-gray-100': view !== viewTypes.list
+              'bg-gray-300 dark:bg-gray-600': view === viewTypes.list,
+              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.list
             }"
             @click="view = viewTypes.list"
           >
-            <icon-list class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+            <icon-list class="h-6 w-6 stroke-1 stroke-gray-700 dark:stroke-gray-300 fill-transparent" />
           </div>
           <div
             class="py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
             :class="{
-              'bg-gray-300': view === viewTypes.grid,
-              'hover:bg-gray-100': view !== viewTypes.grid
+              'bg-gray-300 dark:bg-gray-600': view === viewTypes.grid,
+              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.grid
             }"
             @click="view = viewTypes.grid"
           >
-            <icon-layout-grid class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+            <icon-layout-grid class="h-6 w-6 stroke-1 stroke-gray-700 dark:stroke-gray-300 fill-transparent" />
           </div>
         </div>
         <div
-          class="rounded border border-gray-300 py-1 px-1.5 flex items-center"
+          class="rounded border border-gray-300 dark:border-gray-500 py-1 px-1.5 flex items-center"
           :class="{
-            'bg-gray-300': showAdjustments,
-            'hover:bg-gray-100': !showAdjustments && view === viewTypes.list,
+            'bg-gray-300 dark:bg-gray-600': showAdjustments,
+            'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === viewTypes.list,
             'opacity-30': view === viewTypes.grid,
             'cursor-pointer': view === viewTypes.list
           }"
           @click="openAdjustments"
         >
-          <icon-adjustments class="h-6 w-6 stroke-1 stroke-gray-700 fill-transparent" />
+          <icon-adjustments class="h-6 w-6 stroke-1 stroke-gray-700 dark:stroke-gray-300 fill-transparent" />
         </div>
         <div
           v-show="showAdjustments"
-          class="absolute z-40 top-10 right-0 p-2 rounded shadow-md border border-gray-300 bg-white"
+          class="absolute z-40 top-10 right-0 p-2 rounded shadow-md border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700"
           v-on-click-outside="closeAdjustments"
         >
           <div
             v-for="(value, key) in columns"
             :key="key"
-            class="grid grid-cols-context hover:bg-gray-100 rounded py-1 pl-1 pr-3 cursor-pointer"
+            class="grid grid-cols-context hover:bg-gray-100 dark:hover:bg-gray-500 rounded py-1 pl-1 pr-3 cursor-pointer"
             @click="toggleColumnVisibility(value)"
           >
             <div class="flex items-center">
-              <icon-check v-show="visibleColumns.includes(value)" class="h-4 w-4 stroke-1 stroke-gray-800 fill-transparent" />
+              <icon-check
+                v-show="visibleColumns.includes(value)"
+                class="h-4 w-4 stroke-1 stroke-gray-800 dark:stroke-gray-200 fill-transparent"
+              />
             </div>
             <div class="text-sm">{{ t('label.' + key) }}</div>
           </div>
-          <div class="border-t border-gray-300 my-2"></div>
-          <div class="grid grid-cols-context hover:bg-gray-100 rounded py-1 pl-1 pr-3 cursor-pointer" @click="restoreColumnOrder">
+          <div class="border-t border-gray-300 dark:border-gray-500 my-2"></div>
+          <div
+            class="grid grid-cols-context hover:bg-gray-100 dark:hover:bg-gray-500 rounded py-1 pl-1 pr-3 cursor-pointer"
+            @click="restoreColumnOrder"
+          >
             <div></div>
             <div class="text-sm">{{ t('label.restoreColumnOrder') }}</div>
           </div>
@@ -86,11 +98,11 @@
       <!-- appointments list -->
       <table v-show="view === viewTypes.list" class="w-full mt-4">
         <thead>
-          <tr>
-            <th class="bg-gray-100 py-1"></th>
+          <tr class="bg-gray-100 dark:bg-gray-600">
+            <th class="py-1"></th>
             <template v-for="(_, key) in columns" :key="key">
-              <th v-if="columnVisible(key)" class="group bg-gray-100 font-normal text-left py-1 px-2">
-                <div class="py-1 border-r border-gray-300 group-last:border-none">{{ t('label.' + key) }}</div>
+              <th v-if="columnVisible(key)" class="group font-normal text-left py-1 px-2">
+                <div class="py-1 border-r border-gray-300 dark:border-gray-500 group-last:border-none">{{ t('label.' + key) }}</div>
               </th>
             </template>
           </tr>

@@ -1,11 +1,24 @@
 <template>
-  <header class="h-24 shadow-lg border-b border-gray-300 flex justify-between">
-    <router-link class="py-7 pl-8 pr-12 border-r" :to="{ name: 'calendar' }">
-      <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo">
+  <header class="h-24 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600">
+    <router-link
+      class="py-7 pl-8 pr-12 border-r border-gray-300 dark:border-gray-600"
+      :to="{ name: 'calendar' }"
+    >
+      <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
     <label class="grow flex items-center relative">
-      <icon-search class="absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 stroke-gray-300 fill-transparent" /> 
-      <input class="w-full h-full text-xl pl-20 pr-2 border-none" type="search" name="search" :placeholder="t('label.search')">
+      <icon-search
+        class="
+          absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 fill-transparent 
+          stroke-gray-300 dark:stroke-gray-500
+        "
+      /> 
+      <input
+        class="w-full h-full text-xl pl-20 pr-2 border-none"
+        type="search"
+        name="search"
+        :placeholder="t('label.search')"
+      />
     </label>
     <nav class="flex gap-8 items-stretch">
       <ul class="flex justify-end gap-8">
@@ -15,7 +28,7 @@
           class="flex text-xl border-b-4 border-b-transparent transition-all ease-in-out"
           :class="{
             'font-semibold border-b-teal-500 text-teal-500': route.name == item,
-            'text-gray-600 hover:border-b-gray-200': route.name != item,
+            'text-gray-600 dark:text-gray-300 hover:border-b-gray-200 dark:hover:border-b-gray-400': route.name != item,
           }"
         >
           <router-link class="flex justify-center min-w-[150px] items-center" :to="{ name: item }">

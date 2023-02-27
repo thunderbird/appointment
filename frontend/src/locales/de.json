@@ -21,9 +21,9 @@
     "yourProfile": "Dein Profil"
   },
   "info": {
-    "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine.",
+    "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
-    "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen."
+    "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
@@ -70,6 +70,7 @@
     "copyLink": "Link kopieren",
     "create": "Erstellen",
     "createAppointments": "Termin erstellen",
+    "dark": "Dunkel",
     "dateFormat": "Datumsformat",
     "day": "Tag",
     "defaultFont": "Standard Schriftart",
@@ -83,6 +84,7 @@
     "guest": "{count} Gäste | {count} Gast | {count} Gäste",
     "inPerson": "Vor Ort",
     "language": "Sprache",
+    "light": "Hell",
     "location": "Ort",
     "month": "Monat",
     "name": "Name",
@@ -110,6 +112,7 @@
     "startTime": "Startzeit",
     "startUsingTba": "Starte mit TBA",
     "status": "Status",
+    "system": "System",
     "theme": "Thema",
     "timeFormat": "Zeitformat",
     "timeZone": "Zeitzone",

@@ -1,28 +1,13 @@
 <template>
   <button
     class="
-      h-7
-      font-semibold
-      text-sm
-      whitespace-nowrap
-      text-slate-500
-      border
-      border-slate-400
-      rounded-md
-      hover:shadow-md
-      hover:bg-slate-50
-      px-2
-      transition-all
-      ease-in-out
-      flex
-      items-center
-      justify-center
-      gap-1
+      h-7 font-semibold text-sm whitespace-nowrap border rounded-md hover:shadow-md px-2 transition-all ease-in-out flex items-center justify-center gap-1
+      text-gray-500 dark:text-gray-400 border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800
     "
     @click="copy ? copyToClipboard() : null"
   >
-    <icon-copy v-if="copy && !copied" class="h-4 w-4 stroke-2 stroke-slate-500 fill-transparent" />
-    <icon-check v-if="copy && copied" class="h-4 w-4 stroke-2 stroke-green-500 fill-transparent" />
+    <icon-copy v-if="copy && !copied" class="h-4 w-4 fill-transparent stroke-2 stroke-gray-500 dark:stroke-gray-400" />
+    <icon-check v-if="copy && copied" class="h-4 w-4 fill-transparent stroke-2 stroke-green-500" />
     {{ label }}
   </button>
 </template>

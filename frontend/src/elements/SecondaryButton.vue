@@ -1,8 +1,8 @@
 <template>
   <button
     class="
-      relative h-10 text-xl font-semibold whitespace-nowrap border rounded-full hover:shadow-md hover:scale-102 active:scale-98 px-6 transition-all ease-in-out
-      text-gray-600 bg-white border-teal-500 disabled:from-teal-200 disabled:to-sky-300
+      relative h-10 text-xl font-semibold whitespace-nowrap border rounded-full hover:shadow-md hover:scale-102 active:scale-98 disabled:opacity-50 px-6 transition-all ease-in-out
+      text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-700 border-teal-500
     "
     :class="{ '!text-transparent': waiting }"
   >
