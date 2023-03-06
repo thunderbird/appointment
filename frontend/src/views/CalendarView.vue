@@ -15,7 +15,6 @@
       </button>
       <tab-bar :tab-items="calendarViews" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
-        class="hidden md:block"
         :label="t('label.createAppointments')"
         :disabled="creationStatus !== creationState.hidden"
         @click="creationStatus = creationState.details"
