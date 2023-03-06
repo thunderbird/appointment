@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-2xl bg-gray-200 dark:bg-gray-600">
     <nav class="flex">
-      <ul class="flex justify-between w-full gap-4 p-1">
+      <ul class="flex justify-between w-full md:gap-4 p-1">
         <li
           v-for="(item, key) in tabItems"
           :key="item"
