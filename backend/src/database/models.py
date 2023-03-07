@@ -13,7 +13,7 @@ from ..config import config
 from .database import Base
 
 def secret():
-  return config('db_secret', 'security')
+  return config('DB_SECRET')
 
 def random_slug():
   return ''.join(str(uuid.uuid4()).split('-'))

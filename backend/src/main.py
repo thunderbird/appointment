@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from datetime import timedelta, datetime
 from tempfile import NamedTemporaryFile
+from .config import config
 
 # database
 from sqlalchemy.orm import Session
@@ -25,7 +26,7 @@ app = FastAPI()
 # allow requests from own frontend running on a different port
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["http://localhost:8080"],
+  allow_origins=[config('FRONTEND_URL')],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],

@@ -35,7 +35,7 @@ Run application for development with hot reloading backend and frontend:
     cd appointment
     pip install -r backend/requirements.txt
     touch backend/src/appointment.db # when using sqlite
-    mv backend/src/appointment.ini.example backend/src/appointment.ini
+    mv backend/.env.example backend/.env
     uvicorn backend.src.main:app --reload --port 5000
     ```
 

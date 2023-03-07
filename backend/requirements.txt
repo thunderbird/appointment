@@ -1,8 +1,11 @@
-fastapi==0.91.0
-uvicorn==0.20.0
-sqlalchemy==1.4.40
-sqlalchemy-utils==0.39.0
 alembic==1.9.3
+auth0-python==4.0.0
 caldav==1.0.1
-icalendar==5.0.4
 cryptography==39.0.1
+fastapi-auth0==0.3.2
+fastapi==0.91.0
+icalendar==5.0.4
+python-dotenv==1.0.0
+sqlalchemy-utils==0.39.0
+sqlalchemy==1.4.40
+uvicorn==0.20.0

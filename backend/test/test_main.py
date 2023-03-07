@@ -43,8 +43,8 @@ client = TestClient(app)
 
 
 def test_config():
-    assert config("limit_basic", "connections") == "3"
-    assert config("limit_plus", "connections") == "5"
+    assert config("TIER_BASIC_CALENDAR_LIMIT") == "3"
+    assert config("TIER_PLUS_CALENDAR_LIMIT") == "5"
 
 
 def test_login():
