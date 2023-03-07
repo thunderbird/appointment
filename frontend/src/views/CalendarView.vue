@@ -23,7 +23,7 @@
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col md:flex-row justify-between gap-4 lg:gap-24 mt-8 min-h-[767px] items-stretch"
+    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 min-h-[767px] items-stretch"
     :class="{ 'lg:mt-[60px]': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->
@@ -49,7 +49,7 @@
       :events="calendarEvents"
     />
     <!-- page side bar -->
-    <div class="w-full sm:w-1/2 md:w-1/5 mb-10 md:mb-0 min-w-[310px]">
+    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <div v-if="creationStatus === creationState.hidden" class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month
