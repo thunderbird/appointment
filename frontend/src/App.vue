@@ -6,7 +6,7 @@
   <!-- authenticated subscriber content -->
   <template v-else>
     <nav-bar :nav-items="navItems" :user="currentUser" />
-    <main class="mt-12 mx-8">
+    <main class="mt-12 mx-4 lg:mx-8">
       <div class="w-full max-w-[1740px] mx-auto">
         <router-view :calendars="calendars" :appointments="appointments" :user="currentUser" />
       </div>

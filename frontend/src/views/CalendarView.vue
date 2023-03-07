@@ -1,6 +1,6 @@
 <template>
   <!-- page title area -->
-  <div class="flex justify-between items-start select-none">
+  <div class="flex flex-col lg:flex-row justify-between items-start select-none">
     <calendar-page-heading
       :nav="true"
       :month="activeDate.format('MMMM')"
@@ -9,7 +9,7 @@
       @prev="dateNav('auto', false)"
       @next="dateNav('auto')"
     />
-    <div class="flex gap-8 items-center">
+    <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
       <button @click="selectDate(dj())" class="font-semibold text-xl text-teal-500 px-4">
         {{ t('label.today') }}
       </button>
@@ -23,33 +23,33 @@
   </div>
   <!-- page content -->
   <div
-    class="flex justify-between gap-24 mt-8 min-h-[767px] items-stretch"
-    :class="{ 'mt-[60px]': tabActive === calendarViews.month }"
+    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 min-h-[767px] items-stretch"
+    :class="{ 'lg:mt-[60px]': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month
       v-show="tabActive === calendarViews.month"
-      class="w-4/5"
+      class="w-full md:w-4/5"
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"
-      class="w-4/5"
+      class="w-full md:w-4/5"
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
     />
     <calendar-day
       v-show="tabActive === calendarViews.day"
-      class="w-4/5"
+      class="w-full md:w-4/5"
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
     />
     <!-- page side bar -->
-    <div class="w-1/5 min-w-[310px]">
+    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <div v-if="creationStatus === creationState.hidden" class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month
