@@ -81,11 +81,11 @@
               <div class="flex gap-2" :class="{ 'hidden': event.span <= 2 }">
                 <icon-link size="16" class="shrink-0" />
                 <a
-                  :href="baseurl + event.slug"
+                  :href="bookingUrl + event.slug"
                   class="whitespace-nowrap underline underline-offset-2 text-teal-500"
                   target="_blank"
                 >
-                  {{ baseurl + event.slug }}
+                  {{ bookingUrl + event.slug }}
                 </a>
               </div>
             </div>
@@ -127,7 +127,7 @@ import {
 // component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
-const baseurl = inject("baseurl");
+const bookingUrl = inject("bookingUrl");
 
 // component properties
 const props = defineProps({

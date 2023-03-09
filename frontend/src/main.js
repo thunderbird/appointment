@@ -12,7 +12,7 @@ const call = createFetch({
   },
 })
 app.provide('call', call);
-app.provide('baseurl', 'http://localhost:8080/booking/'); // TODO
+app.provide('bookingUrl', `${process.env.VUE_APP_BASE_URL}/booking/`);
 
 // init router
 import router from '@/router';
