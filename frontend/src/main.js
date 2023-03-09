@@ -3,6 +3,22 @@ import App from '@/App';
 import { createApp } from 'vue';
 const app = createApp(App);
 
+// init auth0
+import { createAuth0 } from '@auth0/auth0-vue';
+app.use(
+  createAuth0({
+    domain: process.env.VUE_APP_AUTH0_DOMAIN,
+    clientId: process.env.VUE_APP_AUTH0_CLIENT_ID,
+    authorizationParams: {
+      redirect_uri: window.location.origin,
+      audience: process.env.VUE_APP_AUTH0_AUDIENCE,
+      // read:calendars is needed for the API
+      // even if the user does not have the scope, we still request it
+      scope: 'profile email read:calendars'
+    },
+  })
+);
+
 // init fetch
 import { createFetch } from '@vueuse/core'
 const protocol = process.env.VUE_APP_API_SECURE === true ? 'https' : 'http';
