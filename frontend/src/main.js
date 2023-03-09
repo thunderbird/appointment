@@ -5,8 +5,10 @@ const app = createApp(App);
 
 // init fetch
 import { createFetch } from '@vueuse/core'
+const protocol = process.env.VUE_APP_API_SECURE === true ? 'https' : 'http';
+const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}:${process.env.VUE_APP_API_PORT}`;
 const call = createFetch({
-  baseUrl: 'http://localhost:5000',
+  baseUrl: apiUrl,
   fetchOptions: {
     mode: 'cors',
   },
