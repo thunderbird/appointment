@@ -211,7 +211,7 @@ onMounted(async () => {
 // react to user calendar navigation
 watch(() => activeDate.value, (newValue, oldValue) => {
   // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-  if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
+  if (dj(oldValue).format('YYYY-MM') !== dj(newValue).format('YYYY-MM')) {
     getRemoteEvents(
       dj(newValue).startOf('year').format('YYYY-MM-DD'),
       dj(newValue).endOf('year').format('YYYY-MM-DD')

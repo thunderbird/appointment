@@ -249,7 +249,7 @@ const dateNav = (unit = 'auto', forward = true) => {
 };
 
 // handle data filter
-const filter = ref(filterOptions.appointmentsToday);
+const filter = ref(filterOptions.appointmentsInMonth);
 
 // handle data search
 const search = ref('');
@@ -340,8 +340,8 @@ const closeAppointmentModal = () => showAppointment.value = null;
 const creationStatus = ref(creationState.hidden);
 
 // initially load data when component gets remounted
-onMounted(() => {
-  refresh();
+onMounted(async () => {
+  await refresh();
 });
 
 // paint elements background or reset it to transparent

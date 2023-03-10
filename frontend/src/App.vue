@@ -1,6 +1,7 @@
 <template>
   <!-- public booking link -->
-  <template v-if="route.name === 'booking'">
+  <template v-if="routeIsPublic">
+    <title-bar />
     <router-view />
   </template>
   <!-- authenticated subscriber content -->
@@ -16,11 +17,14 @@
 
 <script setup>
 import { appointmentState } from '@/definitions';
-import { ref, inject, provide, onMounted } from 'vue';
+import { ref, inject, provide, onMounted, computed } from 'vue';
+import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
 import NavBar from '@/components/NavBar';
+import TitleBar from '@/components/TitleBar';
 
 // component constants
+const auth0 = useAuth0();
 const route = useRoute();
 const call = inject('call');
 const dj = inject('dayjs');
@@ -29,19 +33,26 @@ const dj = inject('dayjs');
 const navItems = ['calendar', 'appointments', 'settings'];
 
 // current user object
-// structure: { username, email, name, level, timezone, id }
+// TODO: structure: { username, email, name, level, timezone, id }
 const currentUser = ref(null);
 
 // db tables
 const calendars = ref([]);
 const appointments = ref([]);
 
+// true if route can be accessed without authentication
+const routeIsPublic = computed(() => {
+  return route.name === 'booking' || (route.name === 'home' && !auth0.isAuthenticated.value);
+});
+
 // check login state of current user first
-// query db for all calendar and appointments data
 const checkLogin = async () => {
-  const { data } = await call("login").get().json();
-  currentUser.value = data.value;
+  currentUser.value = auth0.user.value;
+  // TODO: call backend to create user if they do not exist in database
+  // const { data } = await call("login").get().json();
 };
+
+// query db for all calendar and appointments data
 const getDbCalendars = async () => {
   const { data } = await call("me/calendars").get().json();
   calendars.value = data.value;
@@ -61,7 +72,7 @@ const getDbAppointments = async () => {
 };
 const getDbData = async () => {
   await checkLogin();
-  if (currentUser.value) {
+  if (auth0.isAuthenticated.value) {
     await getDbCalendars();
     await getDbAppointments();
   }
@@ -82,8 +93,8 @@ const getAppointmentStatus = (a) => {
 }
 
 // get the data initially
-onMounted(() => {
-  getDbData();
+onMounted(async () => {
+  await getDbData();
 })
 
 // provide refresh functions for components
