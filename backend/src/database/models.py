@@ -38,9 +38,9 @@ class Subscriber(Base):
   __tablename__ = "subscribers"
 
   id        = Column(Integer, primary_key=True, index=True)
-  username  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
-  email     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
-  name      = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
+  username  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
+  email     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
+  name      = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
   level     = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
   timezone  = Column(Integer, index=True)
 
@@ -53,11 +53,11 @@ class Calendar(Base):
 
   id           = Column(Integer, primary_key=True, index=True)
   owner_id     = Column(Integer, ForeignKey("subscribers.id"))
-  title        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
-  color        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
-  url          = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
-  user         = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
-  password     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
+  title        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
+  color        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=32), index=True)
+  url          = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=2048), index=False)
+  user         = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
+  password     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255))
 
   owner        = relationship("Subscriber", back_populates="calendars")
   appointments = relationship("Appointment", cascade="all,delete", back_populates="calendar")
@@ -71,15 +71,15 @@ class Appointment(Base):
   time_created         = Column(DateTime(timezone=True), server_default=func.now())
   time_updated         = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
   duration             = Column(Integer)
-  title                = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
+  title                = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255))
   location_type        = Column(Enum(LocationType), default=LocationType.inperson)
-  location_suggestions = Column(String)
+  location_suggestions = Column(String(255))
   location_selected    = Column(Integer)
-  location_name        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
-  location_url         = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
-  location_phone       = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
-  details              = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'))
-  slug                 = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), unique=True, index=True)
+  location_name        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255))
+  location_url         = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=2048))
+  location_phone       = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255))
+  details              = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255))
+  slug                 = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
   keep_open            = Column(Boolean)
   status               = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
@@ -91,8 +91,8 @@ class Attendee(Base):
   __tablename__ = "attendees"
 
   id    = Column(Integer, primary_key=True, index=True)
-  email = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
-  name  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5'), index=True)
+  email = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
+  name  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
 
   slots = relationship("Slot", cascade="all,delete", back_populates="attendee")
 

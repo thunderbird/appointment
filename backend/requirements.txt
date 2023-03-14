@@ -6,3 +6,4 @@ alembic==1.9.3
 caldav==1.0.1
 icalendar==5.0.4
 cryptography==39.0.1
+mysqlclient==2.1.1

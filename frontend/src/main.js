@@ -6,13 +6,13 @@ const app = createApp(App);
 // init fetch
 import { createFetch } from '@vueuse/core'
 const call = createFetch({
-  baseUrl: 'http://localhost:5000',
+  baseUrl: process.env.VUE_APP_API_URL || 'http://localhost:5000',
   fetchOptions: {
     mode: 'cors',
   },
 })
 app.provide('call', call);
-app.provide('baseurl', 'http://localhost:8080/booking/'); // TODO
+app.provide('baseurl', process.env.VUE_APP_BASE_URL || 'http://localhost:8080/booking/'); // TODO
 
 // init router
 import router from '@/router';

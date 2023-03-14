@@ -2,6 +2,8 @@
 
 Boot application, authenticate user and provide all API endpoints.
 """
+import os
+
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +27,7 @@ app = FastAPI()
 # allow requests from own frontend running on a different port
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["http://localhost:8080"],
+  allow_origins=[os.getenv('CORS_ORIGIN_URL', 'http://localhost:8080')],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
