@@ -17,6 +17,7 @@
 
 <script setup>
 import { appointmentState } from '@/definitions';
+import { createFetch } from '@vueuse/core'
 import { ref, inject, provide, onMounted, computed } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
@@ -24,10 +25,29 @@ import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';
 
 // component constants
-const auth0 = useAuth0();
-const route = useRoute();
-const call = inject('call');
+const apiUrl = inject('apiUrl');
 const dj = inject('dayjs');
+const route = useRoute();
+
+// handle auth and fetch
+const auth = useAuth0();
+const call = createFetch({
+  baseUrl: apiUrl,
+  options: {
+    async beforeFetch({ options }) {
+      if (auth.isAuthenticated.value) {
+        const token = await auth.getAccessTokenSilently();
+        options.headers.Authorization = `Bearer ${token}`;
+      }
+      return { options };
+    },
+  },
+  fetchOptions: {
+    mode: 'cors',
+  },
+})
+provide('auth', auth);
+provide('call', call);
 
 // menu items for main navigation
 const navItems = ['calendar', 'appointments', 'settings'];
@@ -42,28 +62,38 @@ const appointments = ref([]);
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(() => {
-  return route.name === 'booking' || (route.name === 'home' && !auth0.isAuthenticated.value);
+  return route.name === 'booking' || (route.name === 'home' && !auth.isAuthenticated.value);
 });
 
 // check login state of current user first
 const checkLogin = async () => {
-  currentUser.value = auth0.user.value;
-  // TODO: call backend to create user if they do not exist in database
-  // const { data } = await call("login").get().json();
+  if (auth.isAuthenticated.value) {
+    // call backend to create user if they do not exist in database
+    const { data, error} = await call("login/" + auth.user.value.email).get().json();
+    // assign authed user data
+    if (!error.value && data.value) {
+      currentUser.value = data.value;
+      console.log(auth.user.value); // TODO
+    }
+  }
 };
 
 // query db for all calendar and appointments data
 const getDbCalendars = async () => {
-  const { data } = await call("me/calendars").get().json();
-  calendars.value = data.value;
+  const { data, error } = await call("me/calendars").get().json();
+  if (!error.value) {
+    calendars.value = data.value;
+  }
 };
 const getDbAppointments = async () => {
-  const { data } = await call("me/appointments").get().json();
-  appointments.value = data.value;
+  const { data, error } = await call("me/appointments").get().json();
+  if (!error.value) {
+    appointments.value = data.value;
+  }
   // extend appointments data with active state and calendar title and color
   const calendarsById = {};
-  calendars.value?.forEach(c => { calendarsById[c.id] = c });
-  appointments.value?.forEach(a => {
+  calendars.value.forEach(c => { calendarsById[c.id] = c });
+  appointments.value.forEach(a => {
     a.calendar_title = calendarsById[a.calendar_id]?.title;
     a.calendar_color = calendarsById[a.calendar_id]?.color;
     a.status = getAppointmentStatus(a);
@@ -72,7 +102,7 @@ const getDbAppointments = async () => {
 };
 const getDbData = async () => {
   await checkLogin();
-  if (auth0.isAuthenticated.value) {
+  if (auth.isAuthenticated.value) {
     await getDbCalendars();
     await getDbAppointments();
   }

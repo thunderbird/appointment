@@ -19,17 +19,10 @@ app.use(
   })
 );
 
-// init fetch
-import { createFetch } from '@vueuse/core'
+// init urls
 const protocol = process.env.VUE_APP_API_SECURE === true ? 'https' : 'http';
 const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}:${process.env.VUE_APP_API_PORT}`;
-const call = createFetch({
-  baseUrl: apiUrl,
-  fetchOptions: {
-    mode: 'cors',
-  },
-})
-app.provide('call', call);
+app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${process.env.VUE_APP_BASE_URL}/booking/`);
 
 // init router

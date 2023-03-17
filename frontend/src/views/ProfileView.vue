@@ -14,12 +14,11 @@
 
 <script setup>
 import { inject, onMounted } from 'vue';
-import { useAuth0 } from '@auth0/auth0-vue';
 import { useI18n } from 'vue-i18n';
 import PrimaryButton from '@/elements/PrimaryButton';
 
 // component constants
-const auth0 = useAuth0();
+const auth = inject('auth');
 
 // component constants
 const { t } = useI18n();
@@ -34,7 +33,7 @@ defineProps({
 
 // do log out
 const logout = () => {
-  auth0.logout({
+  auth.logout({
     logoutParams: {
       returnTo: window.location.origin
     }
