@@ -38,6 +38,7 @@ const call = createFetch({
       if (auth.isAuthenticated.value) {
         const token = await auth.getAccessTokenSilently();
         options.headers.Authorization = `Bearer ${token}`;
+        // options.headers.SetCookie = 'SameSite=None; Secure'; // can be adjusted if necessary
       }
       return { options };
     },
