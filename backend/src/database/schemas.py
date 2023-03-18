@@ -26,12 +26,12 @@ class Attendee(AttendeeBase):
 class SlotBase(BaseModel):
   start: datetime
   duration: int | None = None
+  attendee_id: int | None = None
 
 
 class Slot(SlotBase):
   id: int
   appointment_id: int
-  attendee_id: int | None = None
   subscriber_id: int | None = None
   time_updated: datetime | None = None
   attendee: Attendee | None = None

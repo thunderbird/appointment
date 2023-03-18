@@ -9,8 +9,6 @@ from ..src.config import config
 from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL  = "sqlite:///backend/test/test.db"
-# SQLALCHEMY_DATABASE_URL  = "sqlite:///D:\\git\\appointment\\backend\\test\\test.db"
-# SQLALCHEMY_DATABASE_URL  = "sqlite://"
 # TODO: setup an own testing CalDAV server
 TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
 TESTING_CALDAV_CALENDAR  = "https://calendar.robur.coop/calendars/mozilla/"

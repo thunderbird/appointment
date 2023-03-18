@@ -115,7 +115,7 @@ const getAppointmentStatus = (a) => {
     return appointmentState.past;
   }
   // check booked events
-  if (a.slots.filter(s => s.attendee != null).length > 0) {
+  if (a.slots.filter(s => s.attendee_id != null).length > 0) {
     return appointmentState.booked;
   }
   // else event is still wating to be booked

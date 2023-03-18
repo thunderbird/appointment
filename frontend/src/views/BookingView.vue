@@ -179,9 +179,9 @@ const viewTitle = computed(() => {
 // retrieve appointment by slug
 onMounted(async () => {
   // async get appointment data from route
-  // TODO: handle username
   const { error, data } = await call("apmt/public/" + route.params.slug).get().json();
   // check if appointment exists and is open
+  console.log(data.value, getAppointmentStatus(data.value));
   if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
     activeView.value = views.invalid;
   } else {
