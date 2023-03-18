@@ -16,7 +16,7 @@
       <tab-bar :tab-items="calendarViews" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationState.hidden"
+        :disabled="!calendars.length || creationStatus !== creationState.hidden"
         @click="creationStatus = creationState.details"
       />
     </div>
@@ -79,7 +79,7 @@
             <div class="text-center mt-4">{{ t('info.noPendingAppointmentsInList') }}</div>
             <primary-button
               :label="t('label.createAppointments')"
-              :disabled="creationStatus !== creationState.hidden"
+              :disabled="!calendars.length || creationStatus !== creationState.hidden"
               @click="creationStatus = creationState.details"
             />
           </div>

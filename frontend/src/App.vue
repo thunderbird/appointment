@@ -72,8 +72,9 @@ const checkLogin = async () => {
     const { data, error} = await call("login/" + auth.user.value.email).get().json();
     // assign authed user data
     if (!error.value && data.value) {
+      // data.value holds appointment subscriber structure
+      // auth.user.value holds auth0 user structure
       currentUser.value = data.value;
-      console.log(auth.user.value); // TODO
     }
   }
 };

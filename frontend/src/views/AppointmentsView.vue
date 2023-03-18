@@ -6,7 +6,7 @@
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationState.hidden"
+        :disabled="!calendars.length || creationStatus !== creationState.hidden"
         @click="creationStatus = creationState.details"
       />
     </div>

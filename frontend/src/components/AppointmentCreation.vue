@@ -221,7 +221,7 @@ const updateLocationType = type => {
 // defaul appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
   title:         '',
-  calendar_id:   props.calendars[0].id,
+  calendar_id:   props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
   location_url:  '',
   details:       '',
