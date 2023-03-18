@@ -54,7 +54,7 @@ provide('call', call);
 const navItems = ['calendar', 'appointments', 'settings'];
 
 // current user object
-// TODO: structure: { username, email, name, level, timezone, id }
+// structure: { username, email, name, level, timezone, id }
 const currentUser = ref(null);
 
 // db tables

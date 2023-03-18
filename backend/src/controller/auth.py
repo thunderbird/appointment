@@ -41,7 +41,7 @@ class Auth:
           level = models.SubscriberLevel.pro, # TODO
         )
         db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
-      self.subscriber = db_subscriber#
+      self.subscriber = db_subscriber
     return self.subscriber
 
   def init_management_api(self):
