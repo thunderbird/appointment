@@ -70,7 +70,7 @@ const routeIsPublic = computed(() => {
 const checkLogin = async () => {
   if (auth.isAuthenticated.value) {
     // call backend to create user if they do not exist in database
-    const { data, error} = await call("login").get().json();
+    const { data, error } = await call("login").get().json();
     // assign authed user data
     if (!error.value && data.value) {
       // data.value holds appointment subscriber structure
@@ -80,21 +80,37 @@ const checkLogin = async () => {
   }
 };
 
-// query db for all calendar and appointments data
+// query db for all calendar data
 const getDbCalendars = async () => {
   const { data, error } = await call("me/calendars").get().json();
   if (!error.value) {
+    if (data.value === null || typeof data.value === 'undefined') return;
     calendars.value = data.value;
   }
 };
+// query db for all appointments data
 const getDbAppointments = async () => {
   const { data, error } = await call("me/appointments").get().json();
   if (!error.value) {
+    if (data.value === null || typeof data.value === 'undefined') return;
     appointments.value = data.value;
   }
-  // extend appointments data with active state and calendar title and color
+};
+// retrieve calendars and appointments after checking login and persisting user to db
+const getDbData = async () => {
+  await checkLogin();
+  if (auth.isAuthenticated.value) {
+    await Promise.all([getDbCalendars(), getDbAppointments()])
+    extendDbData();
+  }
+};
+
+// extend retrieved data
+const extendDbData = () => {
+  // build { calendarId => calendarData } object for direct lookup
   const calendarsById = {};
   calendars.value.forEach(c => { calendarsById[c.id] = c });
+  // extend appointments data with active state and calendar title and color
   appointments.value.forEach(a => {
     a.calendar_title = calendarsById[a.calendar_id]?.title;
     a.calendar_color = calendarsById[a.calendar_id]?.color;
@@ -102,13 +118,6 @@ const getDbAppointments = async () => {
     a.active = a.status !== appointmentState.past; // TODO
   });
 };
-const getDbData = async () => {
-  await checkLogin();
-  if (auth.isAuthenticated.value) {
-    await getDbCalendars();
-    await getDbAppointments();
-  }
-}
 
 // check appointment status for current state (past|pending|booked)
 const getAppointmentStatus = (a) => {
