@@ -25,17 +25,19 @@ class Auth:
 
   def persist_user(self, db: Session, user: Auth0User):
     """Sync authed user to Appointment db"""
+    if not db:
+      return None
     # get the current user via the authed user
     api = self.init_management_api()
     authenticated_subscriber = api.users.get(user.id)
     # check if user exists as subsriber
-    if db and authenticated_subscriber:
+    if authenticated_subscriber:
       # search for subscriber in Appointment db
       db_subscriber = repo.get_subscriber_by_email(db=db, email=authenticated_subscriber['email'])
       # if authenticated subscriber doesn't exist yet, add them
       if db_subscriber is None:
         subscriber = schemas.SubscriberBase(
-          username = "", # TODO
+          username = authenticated_subscriber['email'], # username == email for now
           email = authenticated_subscriber['email'],
           name = authenticated_subscriber['name'],
           level = models.SubscriberLevel.pro, # TODO
