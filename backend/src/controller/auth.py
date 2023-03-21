@@ -8,7 +8,9 @@ from fastapi import Security
 from fastapi_auth0 import Auth0, Auth0User
 from auth0.authentication import GetToken
 from auth0.management import Auth0 as ManageAuth0
+from auth0.exceptions import Auth0Error, RateLimitError, TokenValidationError
 from ..config import config
+import logging
 
 domain = config('AUTH0_API_DOMAIN')
 api_client_id = config('AUTH0_API_CLIENT_ID')
@@ -29,6 +31,8 @@ class Auth:
       return None
     # get the current user via the authed user
     api = self.init_management_api()
+    if not api:
+      return None
     authenticated_subscriber = api.users.get(user.id)
     # check if user exists as subsriber
     if authenticated_subscriber:
@@ -48,6 +52,18 @@ class Auth:
 
   def init_management_api(self):
     """Helper function to get a management api token"""
-    get_token = GetToken(domain, api_client_id, client_secret=api_secret)
-    token = get_token.client_credentials('https://{}/api/v2/'.format(domain))
-    return ManageAuth0(domain, token['access_token'])
+    try:
+      get_token = GetToken(domain, api_client_id, client_secret=api_secret)
+      token = get_token.client_credentials('https://{}/api/v2/'.format(domain))
+      management = ManageAuth0(domain, token['access_token'])
+    except Auth0Error as error:
+      logging.error(error)
+      return None
+    except RateLimitError as error:
+      logging.error(error)
+      return None
+    except TokenValidationError as error:
+      logging.error(error)
+      return None
+
+    return management

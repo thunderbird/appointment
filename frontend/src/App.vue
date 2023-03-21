@@ -70,7 +70,7 @@ const routeIsPublic = computed(() => {
 const checkLogin = async () => {
   if (auth.isAuthenticated.value) {
     // call backend to create user if they do not exist in database
-    const { data, error} = await call("login/" + auth.user.value.email).get().json();
+    const { data, error} = await call("login").get().json();
     // assign authed user data
     if (!error.value && data.value) {
       // data.value holds appointment subscriber structure
