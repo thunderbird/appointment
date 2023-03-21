@@ -13,16 +13,17 @@ from ..config import config
 from .database import Base
 
 def secret():
-  return config('db_secret', 'security')
+  return config('DB_SECRET')
 
 def random_slug():
   return ''.join(str(uuid.uuid4()).split('-'))
 
 
 class SubscriberLevel(enum.Enum):
-  basic    = 1 # basic tier
-  plus     = 2 # advanced tier
-  pro      = 3 # unlimited tier
+  basic    = 1  # basic tier
+  plus     = 2  # advanced tier
+  pro      = 3  # pro tier
+  admin    = 99 # unlimited tier
 
 class AppointmentStatus(enum.Enum):
   draft    = 1 # appointment was created but not published yet

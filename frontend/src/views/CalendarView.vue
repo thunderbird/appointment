@@ -16,7 +16,7 @@
       <tab-bar :tab-items="calendarViews" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationState.hidden"
+        :disabled="!calendars.length || creationStatus !== creationState.hidden"
         @click="creationStatus = creationState.details"
       />
     </div>
@@ -79,7 +79,7 @@
             <div class="text-center mt-4">{{ t('info.noPendingAppointmentsInList') }}</div>
             <primary-button
               :label="t('label.createAppointments')"
-              :disabled="creationStatus !== creationState.hidden"
+              :disabled="!calendars.length || creationStatus !== creationState.hidden"
               @click="creationStatus = creationState.details"
             />
           </div>
@@ -211,7 +211,7 @@ onMounted(async () => {
 // react to user calendar navigation
 watch(() => activeDate.value, (newValue, oldValue) => {
   // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-  if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
+  if (dj(oldValue).format('YYYY-MM') !== dj(newValue).format('YYYY-MM')) {
     getRemoteEvents(
       dj(newValue).startOf('year').format('YYYY-MM-DD'),
       dj(newValue).endOf('year').format('YYYY-MM-DD')

@@ -19,7 +19,7 @@
         >
           {{ t('label.viewBooking') }}
         </router-link>
-        <text-button :label="t('label.copyLink')" :copy="baseurl + appointment.slug" />
+        <text-button :label="t('label.copyLink')" :copy="bookingUrl + appointment.slug" />
       </div>
     </div>
   </div>
@@ -36,7 +36,7 @@ import TextButton from '@/elements/TextButton';
 import { IconDotsVertical } from '@tabler/icons-vue';
 
 // component constants
-const baseurl = inject('baseurl');
+const bookingUrl = inject('bookingUrl');
 const hDuration = inject('hDuration');
 const { t } = useI18n();
 

@@ -6,7 +6,7 @@
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationState.hidden"
+        :disabled="!calendars.length || creationStatus !== creationState.hidden"
         @click="creationStatus = creationState.details"
       />
     </div>
@@ -136,12 +136,12 @@
             </td>
             <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs truncate">
               <a
-                :href="baseurl + appointment.slug"
+                :href="bookingUrl + appointment.slug"
                 class="text-teal-500 underline underline-offset-2"
                 target="_blank"
                 @click.stop="null"
               >
-                {{ baseurl + appointment.slug }}
+                {{ bookingUrl + appointment.slug }}
               </a>
             </td>
             <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
@@ -216,7 +216,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
-const baseurl = inject('baseurl');
+const bookingUrl = inject('bookingUrl');
 const refresh = inject('refresh');
 
 // view properties
@@ -249,7 +249,7 @@ const dateNav = (unit = 'auto', forward = true) => {
 };
 
 // handle data filter
-const filter = ref(filterOptions.appointmentsToday);
+const filter = ref(filterOptions.appointmentsInMonth);
 
 // handle data search
 const search = ref('');
@@ -340,8 +340,8 @@ const closeAppointmentModal = () => showAppointment.value = null;
 const creationStatus = ref(creationState.hidden);
 
 // initially load data when component gets remounted
-onMounted(() => {
-  refresh();
+onMounted(async () => {
+  await refresh();
 });
 
 // paint elements background or reset it to transparent

@@ -285,7 +285,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject, watch } from 'vue';
+import { ref, reactive, inject, watch, onMounted } from 'vue';
 import { settingsSections, colorSchemes } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -454,4 +454,9 @@ const colors = [
   '#e0ad6a',
   '#ff8b67 ',
 ];
+
+// initially load data when component gets remounted
+onMounted(async () => {
+  await refresh();
+});
 </script>

@@ -35,8 +35,8 @@
       <div class="text-sm flex items-center gap-1">
         <icon-link class="h-4 w-4 stroke-gray-500 stroke-2 fill-transparent shrink-0" />
         <div class="truncate">
-          <a :href="baseurl + appointment.slug" class="text-teal-500 underline underline-offset-2" target="_blank" @click.stop="null">
-            {{ baseurl + appointment.slug }}
+          <a :href="bookingUrl + appointment.slug" class="text-teal-500 underline underline-offset-2" target="_blank" @click.stop="null">
+            {{ bookingUrl + appointment.slug }}
           </a>
         </div>
       </div>
@@ -61,7 +61,7 @@ import {
 
 // component constants
 const { t } = useI18n();
-const baseurl = inject('baseurl');
+const bookingUrl = inject('bookingUrl');
 const paintBackground = inject('paintBackground');
 
 // component properties

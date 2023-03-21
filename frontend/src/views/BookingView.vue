@@ -1,15 +1,4 @@
 <template>
-  <!-- fixed header with app title -->
-  <header
-    class="
-      fixed h-24 w-full px-4 shadow-lg border-b flex gap-3 items-center
-      bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
-    "
-  >
-    <img class="h-10 mr-2" src="/appointment_logo.svg" alt="Appointment Logo">
-    <div class="text-4xl font-thin text-teal-500">Thunderbird</div>
-    <div class="text-4xl font-thin text-sky-500">Appointment</div>
-  </header>
   <!-- booking page content: loading -->
   <main
     v-if="activeView === views.loading"
@@ -190,7 +179,6 @@ const viewTitle = computed(() => {
 // retrieve appointment by slug
 onMounted(async () => {
   // async get appointment data from route
-  // TODO: handle username
   const { error, data } = await call("apmt/public/" + route.params.slug).get().json();
   // check if appointment exists and is open
   if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {

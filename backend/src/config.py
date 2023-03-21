@@ -1,7 +1,6 @@
-import configparser
+from dotenv import dotenv_values, find_dotenv
 
-def config(option, section='DEFAULT'):
-  """get global app configuration"""
-  conf = configparser.ConfigParser()
-  conf.read('src/appointment.ini')
-  return conf[section][option]
+def config(key):
+  """get backend app configuration"""
+  env = dotenv_values(find_dotenv())
+  return env.get(key)

@@ -49,8 +49,8 @@
           {{ t('label.bookingLink') }}
         </div>
         <div class="pl-6 truncate">
-          <a :href="baseurl + appointment.slug" class="underline underline-offset-2 text-teal-500" target="_blank">
-            {{ baseurl + appointment.slug }}
+          <a :href="bookingUrl + appointment.slug" class="underline underline-offset-2 text-teal-500" target="_blank">
+            {{ bookingUrl + appointment.slug }}
           </a>
         </div>
       </div>
@@ -141,7 +141,7 @@ import {
 // component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
-const baseurl = inject("baseurl");
+const bookingUrl = inject("bookingUrl");
 
 // component properties
 const props = defineProps({

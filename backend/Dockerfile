@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 COPY src/ .
 CMD touch /src/appointment.db
-CMD mv /src/appointment.ini.example /src/appointment.ini
+CMD mv /.env.example /.env

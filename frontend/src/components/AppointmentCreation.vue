@@ -196,7 +196,7 @@ import {
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject('call');
-const baseurl = inject('baseurl');
+const bookingUrl = inject('bookingUrl');
 
 // component emits
 const emit = defineEmits(['start', 'next', 'create', 'cancel']);
@@ -221,7 +221,7 @@ const updateLocationType = type => {
 // defaul appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
   title:         '',
-  calendar_id:   props.calendars[0].id,
+  calendar_id:   props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
   location_url:  '',
   details:       '',
@@ -318,7 +318,7 @@ const createAppointment = async () => {
 
   // show confirmation
   createdConfirmation.title = data.value.title;
-  createdConfirmation.publicLink = baseurl + data.value.slug; // TODO
+  createdConfirmation.publicLink = bookingUrl + data.value.slug; // TODO
   createdConfirmation.show = true;
   // reset everything to start again
   for (const attr in defaultAppointment) {
