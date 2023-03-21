@@ -56,7 +56,8 @@ def get_connections_limit(db: Session, subscriber_id: int):
   mapping = {
     models.SubscriberLevel.basic: int(config('TIER_BASIC_CALENDAR_LIMIT')),
     models.SubscriberLevel.plus:  int(config('TIER_PLUS_CALENDAR_LIMIT')),
-    models.SubscriberLevel.pro:   -1
+    models.SubscriberLevel.pro:   int(config('TIER_PRO_CALENDAR_LIMIT')),
+    models.SubscriberLevel.admin: -1
   }
   return mapping[db_subscriber.level]
 

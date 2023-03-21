@@ -20,9 +20,10 @@ def random_slug():
 
 
 class SubscriberLevel(enum.Enum):
-  basic    = 1 # basic tier
-  plus     = 2 # advanced tier
-  pro      = 3 # unlimited tier
+  basic    = 1  # basic tier
+  plus     = 2  # advanced tier
+  pro      = 3  # pro tier
+  admin    = 99 # unlimited tier
 
 class AppointmentStatus(enum.Enum):
   draft    = 1 # appointment was created but not published yet
