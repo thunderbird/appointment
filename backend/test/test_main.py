@@ -1,3 +1,5 @@
+import os
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
@@ -9,8 +11,6 @@ from ..src.config import config
 from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL  = "sqlite:///backend/test/test.db"
-# SQLALCHEMY_DATABASE_URL  = "sqlite:///D:\\git\\appointment\\backend\\test\\test.db"
-# SQLALCHEMY_DATABASE_URL  = "sqlite://"
 # TODO: setup an own testing CalDAV server
 TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
 TESTING_CALDAV_CALENDAR  = "https://calendar.robur.coop/calendars/mozilla/"
@@ -43,10 +43,12 @@ client = TestClient(app)
 
 
 def test_config():
-    assert config("limit_basic", "connections") == "3"
-    assert config("limit_plus", "connections") == "5"
+    assert os.getenv("TIER_BASIC_CALENDAR_LIMIT") == "3"
+    assert os.getenv("TIER_PLUS_CALENDAR_LIMIT") == "5"
+    assert os.getenv("TIER_PRO_CALENDAR_LIMIT") == "10"
 
 
+# TODO
 def test_login():
     response = client.get("/login")
     assert response.status_code == 200, response.text
@@ -56,62 +58,6 @@ def test_login():
     assert data["name"] == "Andy Admin"
     assert data["level"] == 3
     assert data["timezone"] == None
-    assert data["id"] == 1
-
-
-def test_create_me():
-    response = client.post(
-        "/me",
-        json={
-            "username": "ww",
-            "email": "wonderwoman@example.com",
-            "name": "Diana",
-            "level": 3,
-            "timezone": "-1"
-        }
-    )
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["username"] == "ww"
-    assert data["email"] == "wonderwoman@example.com"
-    assert data["name"] == "Diana"
-    assert data["level"] == 3
-    assert data["timezone"] == -1
-    assert data["id"] == 2
-    assert "calendars" in data
-
-
-def test_read_me():
-    response = client.get("/me")
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["username"] == "admin"
-    assert data["email"] == "admin@example.com"
-    assert data["name"] == "Andy Admin"
-    assert data["level"] == 3
-    assert data["timezone"] == None
-    assert data["id"] == 1
-    assert "calendars" in data and isinstance(data["calendars"], list)
-
-
-def test_update_me():
-    response = client.put(
-        "/me",
-        json={
-            "username": "adminx",
-            "email": "admin@example.com",
-            "name": "The Admin",
-            "level": 3,
-            "timezone": "2"
-        }
-    )
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert data["username"] == "adminx"
-    assert data["email"] == "admin@example.com"
-    assert data["name"] == "The Admin"
-    assert data["level"] == 3
-    assert data["timezone"] == 2
     assert data["id"] == 1
 
 

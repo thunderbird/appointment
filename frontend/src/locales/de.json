@@ -86,6 +86,8 @@
     "language": "Sprache",
     "light": "Hell",
     "location": "Ort",
+    "logIn": "Anmelden",
+    "logOut": "Abmelden",
     "month": "Monat",
     "name": "Name",
     "next": "Weiter",

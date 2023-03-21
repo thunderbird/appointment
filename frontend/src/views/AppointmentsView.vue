@@ -1,20 +1,20 @@
 <template>
   <!-- page title area -->
-  <div class="flex justify-between items-start select-none">
-    <div class="text-4xl font-light">{{ t('label.appointments') }}</div>
-    <div class="flex gap-8 items-center">
+  <div class="flex flex-col lg:flex-row justify-between text-center lg:items-start select-none">
+    <div class="text-4xl font-light mb-8 lg:mb-0">{{ t('label.appointments') }}</div>
+    <div class="flex flex-col lg:flex-row gap-8 mx-auto lg:ml-0 lg:mr-0 items-center">
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="creationStatus !== creationState.hidden"
+        :disabled="!calendars.length || creationStatus !== creationState.hidden"
         @click="creationStatus = creationState.details"
       />
     </div>
   </div>
   <!-- page content -->
-  <div class="flex justify-between gap-24 mt-8">
+  <div class="flex flex-col flex-col-reverse lg:flex-row justify-between gap-4 xl:gap-24 mt-8">
     <!-- main section: list/grid of appointments with filter -->
-    <div class="w-4/5">
+    <div class="w-full lg:w-4/5">
       <!-- filter bar -->
       <div class="relative flex gap-5 select-none">
         <select v-model="filter" class="rounded border text-sm">
@@ -136,12 +136,12 @@
             </td>
             <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs truncate">
               <a
-                :href="baseurl + appointment.slug"
+                :href="bookingUrl + appointment.slug"
                 class="text-teal-500 underline underline-offset-2"
                 target="_blank"
                 @click.stop="null"
               >
-                {{ baseurl + appointment.slug }}
+                {{ bookingUrl + appointment.slug }}
               </a>
             </td>
             <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
@@ -151,7 +151,7 @@
         </tbody>
       </table>
       <!-- appointments grid -->
-      <div v-show="view === viewTypes.grid" class="w-full mt-4 grid grid-cols-3 gap-8 p-4">
+      <div v-show="view === viewTypes.grid" class="w-full mt-4 grid grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] xl:grid-cols-3 gap-8 p-4">
         <appointment-grid-item
           v-for="(appointment, i) in filteredAppointments" :key="i"
           :appointment="appointment"
@@ -160,7 +160,7 @@
       </div>
     </div>
     <!-- page side bar -->
-    <div class="w-1/5 min-w-[310px]">
+    <div class="w-full sm:w-1/2 lg:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <div v-if="creationStatus === creationState.hidden">
         <!-- monthly mini calendar -->
         <calendar-month
@@ -216,7 +216,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
-const baseurl = inject('baseurl');
+const bookingUrl = inject('bookingUrl');
 const refresh = inject('refresh');
 
 // view properties
@@ -249,7 +249,7 @@ const dateNav = (unit = 'auto', forward = true) => {
 };
 
 // handle data filter
-const filter = ref(filterOptions.appointmentsToday);
+const filter = ref(filterOptions.appointmentsInMonth);
 
 // handle data search
 const search = ref('');
@@ -340,8 +340,8 @@ const closeAppointmentModal = () => showAppointment.value = null;
 const creationStatus = ref(creationState.hidden);
 
 // initially load data when component gets remounted
-onMounted(() => {
-  refresh();
+onMounted(async () => {
+  await refresh();
 });
 
 // paint elements background or reset it to transparent

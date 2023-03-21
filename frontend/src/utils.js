@@ -22,7 +22,7 @@ export const eventColor = (event, placeholder) => {
 // create initials from given name
 export const initials = (name) => {
   if (name) {
-    const parts = name.split(' ');
+    const parts = name.toUpperCase().split(' ');
     return parts.length > 1
       ? parts[0][0] + parts.at(-1)[0]
       : name[0];
