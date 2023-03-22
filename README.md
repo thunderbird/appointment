@@ -12,6 +12,8 @@ cd appointment
 docker-compose up -d --build
 ```
 
+A Mysql database will be accessible via `localhost:3306` with username and password set to: `tba`
+
 ### Manual Setup
 
 Make sure to have the following prerequisites available:

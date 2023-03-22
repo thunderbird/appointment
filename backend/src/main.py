@@ -2,6 +2,9 @@
 
 Boot application, authenticate user and provide all API endpoints.
 """
+import os
+
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Security
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +12,9 @@ from fastapi.responses import FileResponse
 from fastapi_auth0 import Auth0User
 from datetime import timedelta, datetime
 from tempfile import NamedTemporaryFile
-from .config import config
+
+# load any available .env into env
+load_dotenv()
 
 # database
 from sqlalchemy.orm import Session
@@ -28,7 +33,8 @@ app = FastAPI()
 # allow requests from own frontend running on a different port
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=[config('FRONTEND_URL')],
+  # Work around for now :)
+  allow_origins=[os.getenv('FRONTEND_URL', 'http://localhost:8080')],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
@@ -41,6 +47,12 @@ def get_db():
     yield db
   finally:
     db.close()
+
+
+@app.get("/")
+def health():
+  """Small route with no processing that will be used for health checks"""
+  return {}
 
 
 @app.get("/login", dependencies=[Depends(auth.auth0.implicit_scheme)])

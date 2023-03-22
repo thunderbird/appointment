@@ -7,6 +7,11 @@ services:
     volumes:
       - ./backend:/app
     command: uvicorn src.main:app --reload --host 0.0.0.0 --port 5000
+    environment:
+      - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -15,5 +20,26 @@ services:
       - '/app/node_modules'
     ports:
       - 8080:8080
-    environment: 
+    environment:
       - WATCHPACK_POLLING=true
+
+  mysql:
+    image: mysql:8
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=appointment
+      - MYSQL_USER=tba
+      - MYSQL_PASSWORD=tba
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+
+volumes:
+  db: {}

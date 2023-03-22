@@ -2,6 +2,8 @@
 
 Handle authentification with Auth0 and get subscription data.
 """
+import os
+
 from sqlalchemy.orm import Session
 from ..database import repo, schemas, models
 from fastapi import Security
@@ -9,13 +11,12 @@ from fastapi_auth0 import Auth0, Auth0User
 from auth0.authentication import GetToken
 from auth0.management import Auth0 as ManageAuth0
 from auth0.exceptions import Auth0Error, RateLimitError, TokenValidationError
-from ..config import config
 import logging
 
-domain = config('AUTH0_API_DOMAIN')
-api_client_id = config('AUTH0_API_CLIENT_ID')
-api_secret = config('AUTH0_API_SECRET')
-api_audience = config('AUTH0_API_AUDIENCE')
+domain = os.getenv('AUTH0_API_DOMAIN')
+api_client_id = os.getenv('AUTH0_API_CLIENT_ID')
+api_secret = os.getenv('AUTH0_API_SECRET')
+api_audience = os.getenv('AUTH0_API_AUDIENCE')
 
 
 class Auth:

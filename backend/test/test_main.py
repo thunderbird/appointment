@@ -1,3 +1,5 @@
+import os
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
@@ -41,9 +43,9 @@ client = TestClient(app)
 
 
 def test_config():
-    assert config("TIER_BASIC_CALENDAR_LIMIT") == "3"
-    assert config("TIER_PLUS_CALENDAR_LIMIT") == "5"
-    assert config("TIER_PRO_CALENDAR_LIMIT") == "10"
+    assert os.getenv("TIER_BASIC_CALENDAR_LIMIT") == "3"
+    assert os.getenv("TIER_PLUS_CALENDAR_LIMIT") == "5"
+    assert os.getenv("TIER_PRO_CALENDAR_LIMIT") == "10"
 
 
 # TODO

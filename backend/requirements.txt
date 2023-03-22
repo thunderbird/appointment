@@ -9,3 +9,4 @@ python-dotenv==1.0.0
 sqlalchemy-utils==0.39.0
 sqlalchemy==1.4.40
 uvicorn==0.20.0
+mysqlclient==2.1.1
