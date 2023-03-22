@@ -61,6 +61,11 @@ def login(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.g
   persisted_user = auth.persist_user(db, user)
   if not persisted_user or not auth.subscriber:
     raise HTTPException(status_code=403, detail="User credentials mismatch")
+  db_appointment = repo.get_public_appointment(db, slug='376919885fc048c5aa96132ba9bf3f3f')
+  slot = repo.get_slot(db=db, slot_id=85)
+  organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=26)
+  attendee = schemas.AttendeeBase(email="mail@devmount.de", name="Test User")
+  Tools().send_vevent(appointment=db_appointment, slot=slot, organizer=organizer, attendee=attendee)
   return persisted_user
 
 
@@ -242,9 +247,14 @@ def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Ses
     end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
     description=db_appointment.details
   )
+  # create remote event
   con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
   con.create_event(event=event, attendee=s_a.attendee)
+  # update appointment slot data
   repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
+  # send mail with .ics attachment to attendee
+  organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
+  Tools().send_vevent(db_appointment, slot, organizer, s_a.attendee)
   return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
@@ -263,5 +273,5 @@ def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
   return schemas.FileDownload(
     name="test",
     content_type="text/calendar",
-    data=Tools.create_vevent(db_appointment, slot, organizer)
+    data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8")
   )

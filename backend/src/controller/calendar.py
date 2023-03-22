@@ -2,10 +2,17 @@
 
 Handle connection to a CalDAV server.
 """
+import os
+import smtplib, ssl
+
 from caldav import DAVClient
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, date, timedelta
 from ..database import schemas
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 class CalDavConnector:
@@ -82,8 +89,8 @@ class CalDavConnector:
 
 
 class Tools:
-  def create_vevent(appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber):
-    """find all calendars on the remote server"""
+  def create_vevent(self, appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber):
+    """create an event in ical format for .ics file creation"""
     cal = Calendar()
     cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
     cal.add('version', '2.0')
@@ -98,4 +105,48 @@ class Tools:
     event['description'] = appointment.details
     event['organizer'] = org
     cal.add_component(event)
-    return cal.to_ical().decode("utf-8")
+    return cal.to_ical()
+
+  def send_vevent(self, appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber, attendee: schemas.AttendeeBase):
+    """send a booking confirmation email to attendee with .ics file attached"""
+    # create mail header
+    message = MIMEMultipart()
+    message['Subject'] = 'multipart test'
+    message['From'] = organizer.email
+    message['To'] = attendee.email
+    # add content as text and html
+    message.attach(MIMEText('This message is sent from Appointment.', 'plain'))
+    message.attach(MIMEText('<html><body><p>This message is sent from <b>Appointment</b>.</p></body></html>', 'html'))
+    # create attachment
+    part = MIMEBase('text', 'calendar')
+    filename = 'temp.ics'
+    part.set_payload(self.create_vevent(appointment, slot, organizer))
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', f'attachment; filename={filename}')
+    message.attach(part)
+
+    # get smtp configuration
+    SMTP_SECURITY = os.getenv('SMTP_SECURITY', 'NONE')
+    SMTP_URL      = os.getenv('SMTP_URL', 'localhost')
+    SMTP_PORT     = os.getenv('SMTP_PORT', 25)
+    SMTP_USER     = os.getenv('SMTP_USER')
+    SMTP_PASS     = os.getenv('SMTP_PASS')
+
+    try:
+      # if configured, create a secure SSL context
+      if SMTP_SECURITY == 'SSL':
+        server = smtplib.SMTP_SSL(SMTP_URL, SMTP_PORT, context=ssl.create_default_context())
+        server.login(SMTP_USER, STMP_PASS)
+      elif SMTP_SECURITY == 'STARTTLS':
+        server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
+        server.starttls(context=ssl.create_default_context())
+        server.login(SMTP_USER, STMP_PASS)
+      # fall back to non-secure
+      else:
+        server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
+      # now send email
+      server.sendmail(organizer.email, attendee.email, message.as_string())
+    except Exception as e:
+      print(e)
+    finally:
+      server.quit() 
