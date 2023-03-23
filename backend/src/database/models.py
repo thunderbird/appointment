@@ -14,11 +14,7 @@ from sqlalchemy.sql import func
 from .database import Base
 
 def secret():
-  # Check AWS secret first, it's json encoded so it's a bit annoying
-  db_secret = os.getenv('DB_ENC_SECRET')
-  if db_secret:
-    db_secret = json.loads(db_secret).get('secret')
-  return db_secret or os.getenv('DB_SECRET')
+  return os.getenv('DB_SECRET')
 
 def random_slug():
   return ''.join(str(uuid.uuid4()).split('-'))

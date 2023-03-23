@@ -14,17 +14,11 @@ from auth0.management import Auth0 as ManageAuth0
 from auth0.exceptions import Auth0Error, RateLimitError, TokenValidationError
 import logging
 
-# Get the secrets from aws, and decode the json
-auth0_secrets = os.getenv('AUTH0_SECRETS')
-if auth0_secrets:
-  auth0_secrets = json.loads(auth0_secrets)
-else:
-  auth0_secrets = {}
 
-domain = auth0_secrets.get('domain') or os.getenv('AUTH0_API_DOMAIN')
-api_client_id = auth0_secrets.get('client_id') or os.getenv('AUTH0_API_CLIENT_ID')
-api_secret = auth0_secrets.get('secret') or os.getenv('AUTH0_API_SECRET')
-api_audience = auth0_secrets.get('audience') or os.getenv('AUTH0_API_AUDIENCE')
+domain = os.getenv('AUTH0_API_DOMAIN')
+api_client_id = os.getenv('AUTH0_API_CLIENT_ID')
+api_secret = os.getenv('AUTH0_API_SECRET')
+api_audience = os.getenv('AUTH0_API_AUDIENCE')
 
 
 class Auth:
