@@ -119,7 +119,8 @@ class Tools:
     message.attach(MIMEText('<html><body><p>This message is sent from <b>Appointment</b>.</p></body></html>', 'html'))
     # create attachment
     part = MIMEBase('text', 'calendar')
-    filename = 'temp.ics'
+    filename = 'invite.ics'
+
     part.set_payload(self.create_vevent(appointment, slot, organizer))
     encoders.encode_base64(part)
     part.add_header('Content-Disposition', f'attachment; filename={filename}')
