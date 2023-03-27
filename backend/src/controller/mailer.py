@@ -4,6 +4,7 @@ Handle outgoing emails.
 """
 import os
 import smtplib, ssl
+import validators
 
 from html import escape
 from email import encoders
@@ -80,6 +81,12 @@ class Mailer:
     SMTP_PORT     = os.getenv('SMTP_PORT', 25)
     SMTP_USER     = os.getenv('SMTP_USER')
     SMTP_PASS     = os.getenv('SMTP_PASS')
+
+    # check config
+    url = 'http://' + SMTP_URL + ':' + SMTP_PORT
+    if not validators.url(url):
+      # TODO: logging
+      print('no valid smtp url configured: ' + url)
 
     try:
       # if configured, create a secure SSL context
