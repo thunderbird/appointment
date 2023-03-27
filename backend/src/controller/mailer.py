@@ -88,6 +88,7 @@ class Mailer:
       # TODO: logging
       print('no valid smtp url configured: ' + url)
 
+    server = None
     try:
       # if configured, create a secure SSL context
       if SMTP_SECURITY == 'SSL':
@@ -106,7 +107,8 @@ class Mailer:
       # TODO: logging
       print(e)
     finally:
-      server.quit()
+      if server:
+        server.quit()
 
 
 

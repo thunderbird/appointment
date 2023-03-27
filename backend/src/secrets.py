@@ -36,7 +36,7 @@ def normalize_secrets():
     if smtp_secrets:
         secrets = json.loads(smtp_secrets)
 
-        os.environ['SMTP_SECURITY'] = 'SSL'
+        os.environ['SMTP_SECURITY'] = 'STARTTLS'
         os.environ['SMTP_URL'] = secrets.get('url')
         os.environ['SMTP_PORT'] = secrets.get('port')
         os.environ['SMTP_USER'] = secrets.get('username')
