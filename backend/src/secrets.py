@@ -41,4 +41,5 @@ def normalize_secrets():
         os.environ['SMTP_PORT'] = secrets.get('port')
         os.environ['SMTP_USER'] = secrets.get('username')
         os.environ['SMTP_PASS'] = secrets.get('password')
+        os.environ['SMTP_SENDER'] = secrets.get('sender')
         os.environ['SMTP_SECRETS'] = ''

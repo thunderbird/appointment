@@ -24,7 +24,7 @@ class Attachment:
 
 class Mailer:
   def __init__(self, sender: str, to: str, subject: str = '', html: str = '', plain: str = '', attachments: list = [Attachment]):
-    self.sender      = sender
+    self.sender      = os.getenv('SMTP_SENDER') or sender
     self.to          = to
     self.subject     = subject
     self.body_html   = html
