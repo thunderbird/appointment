@@ -14,8 +14,11 @@ from fastapi_auth0 import Auth0User
 from datetime import timedelta, datetime
 from tempfile import NamedTemporaryFile
 
+from .secrets import normalize_secrets
+
 # load any available .env into env
 load_dotenv()
+normalize_secrets()
 
 # database
 from sqlalchemy.orm import Session

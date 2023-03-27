@@ -20,10 +20,11 @@ app.use(
 );
 
 // init urls
-const protocol = process.env.VUE_APP_API_SECURE === true ? 'https' : 'http';
-const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}:${process.env.VUE_APP_API_PORT}`;
+const protocol = process.env.VUE_APP_API_SECURE === 'true' ? 'https' : 'http';
+const port = process.env.VUE_APP_API_PORT !== undefined ? `:${process.env.VUE_APP_API_PORT}` : '';
+const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
-app.provide('bookingUrl', `${process.env.VUE_APP_BASE_URL}/booking/`);
+app.provide('bookingUrl', `${protocol}://${process.env.VUE_APP_BASE_URL}/booking/`);
 
 // init router
 import router from '@/router';

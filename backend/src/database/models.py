@@ -3,6 +3,7 @@
 Definitions of database tables and their relationships.
 """
 import enum
+import json
 import os
 import uuid
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean

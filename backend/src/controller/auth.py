@@ -2,6 +2,7 @@
 
 Handle authentification with Auth0 and get subscription data.
 """
+import json
 import os
 
 from sqlalchemy.orm import Session
@@ -12,6 +13,7 @@ from auth0.authentication import GetToken
 from auth0.management import Auth0 as ManageAuth0
 from auth0.exceptions import Auth0Error, RateLimitError, TokenValidationError
 import logging
+
 
 domain = os.getenv('AUTH0_API_DOMAIN')
 api_client_id = os.getenv('AUTH0_API_CLIENT_ID')
