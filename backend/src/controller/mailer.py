@@ -105,7 +105,10 @@ class Mailer:
 
 class InvitationMail(Mailer):
   def __init__(self, *args, **kwargs):
-    super(InvitationMail, self).__init__(*args, **kwargs)
-    self.subject    = '[TBA] Invitation sent from Thunderbird Appintment'
-    self.body_html  = '<html><body><p>This message is sent from <b>Appointment</b>.</p></body></html>'
-    self.body_plain = 'This message is sent from Appointment.'
+    """init Mailer with invitation specific defaults"""
+    defaultKwargs = {
+      'subject': '[TBA] Invitation sent from Thunderbird Appintment',
+      'html':    '<html><body><p>This message is sent from <b>Appointment</b>.</p></body></html>',
+      'plain':   'This message is sent from Appointment.',
+    }
+    super(InvitationMail, self).__init__(*args, **defaultKwargs, **kwargs)
