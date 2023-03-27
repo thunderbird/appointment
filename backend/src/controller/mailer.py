@@ -92,11 +92,11 @@ class Mailer:
       # if configured, create a secure SSL context
       if SMTP_SECURITY == 'SSL':
         server = smtplib.SMTP_SSL(SMTP_URL, SMTP_PORT, context=ssl.create_default_context())
-        server.login(SMTP_USER, STMP_PASS)
+        server.login(SMTP_USER, SMTP_PASS)
       elif SMTP_SECURITY == 'STARTTLS':
         server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
         server.starttls(context=ssl.create_default_context())
-        server.login(SMTP_USER, STMP_PASS)
+        server.login(SMTP_USER, SMTP_PASS)
       # fall back to non-secure
       else:
         server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
