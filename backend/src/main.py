@@ -237,7 +237,7 @@ def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Ses
   if not repo.slot_is_available(db, slot_id=s_a.slot_id):
     raise HTTPException(status_code=403, detail="Time slot not available anymore")
   if not validators.email(s_a.attendee.email):
-    raise HTTPException(status_code=400, detail="No valid email required")
+    raise HTTPException(status_code=400, detail="No valid email provided")
   slot = repo.get_slot(db=db, slot_id=s_a.slot_id)
   event = schemas.Event(
     title=db_appointment.title,
