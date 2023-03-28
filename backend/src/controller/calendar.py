@@ -6,6 +6,7 @@ from caldav import DAVClient
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, date, timedelta
 from ..database import schemas
+from ..controller.mailer import Attachment, InvitationMail
 
 
 class CalDavConnector:
@@ -81,9 +82,10 @@ class CalDavConnector:
     return count
 
 
+
 class Tools:
-  def create_vevent(appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber):
-    """find all calendars on the remote server"""
+  def create_vevent(self, appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber):
+    """create an event in ical format for .ics file creation"""
     cal = Calendar()
     cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
     cal.add('version', '2.0')
@@ -98,4 +100,15 @@ class Tools:
     event['description'] = appointment.details
     event['organizer'] = org
     cal.add_component(event)
-    return cal.to_ical().decode("utf-8")
+    return cal.to_ical()
+
+
+  def send_vevent(self, appointment: schemas.Appointment, slot: schemas.Slot, organizer: schemas.Subscriber, attendee: schemas.AttendeeBase):
+    """send a booking confirmation email to attendee with .ics file attached"""
+    invite = Attachment(
+      mime=('text', 'calendar'),
+      filename='invite.ics',
+      data=self.create_vevent(appointment, slot, organizer)
+    )
+    mail = InvitationMail(sender=organizer.email, to=attendee.email, attachments=[invite])
+    mail.send()

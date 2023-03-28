@@ -30,3 +30,16 @@ def normalize_secrets():
 
         os.environ['DB_SECRET'] = secrets.get('secret')
         os.environ['DB_ENC_SECRET'] = ''
+
+    smtp_secrets = os.getenv('SMTP_SECRETS')
+
+    if smtp_secrets:
+        secrets = json.loads(smtp_secrets)
+
+        os.environ['SMTP_SECURITY'] = 'STARTTLS'
+        os.environ['SMTP_URL'] = secrets.get('url')
+        os.environ['SMTP_PORT'] = secrets.get('port')
+        os.environ['SMTP_USER'] = secrets.get('username')
+        os.environ['SMTP_PASS'] = secrets.get('password')
+        os.environ['SMTP_SENDER'] = secrets.get('sender')
+        os.environ['SMTP_SECRETS'] = ''
