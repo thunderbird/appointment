@@ -87,7 +87,7 @@ class Mailer:
     url = 'http://' + SMTP_URL + ':' + SMTP_PORT
     if not validators.url(url):
       # url is not valid
-      logging.error('No valid SMTP url configured: ' + url)
+      logging.error('[mailer.send] No valid SMTP url configured: ' + url)
 
     server = None
     try:
@@ -106,7 +106,7 @@ class Mailer:
       server.sendmail(self.sender, self.to, self.build())
     except Exception as e:
       # sending email was not possible
-      logging.error('An error occured on sending email: ' + str(e))
+      logging.error('[mailer.send] An error occured on sending email: ' + str(e))
     finally:
       if server:
         server.quit()

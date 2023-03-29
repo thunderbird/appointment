@@ -36,8 +36,8 @@ class Auth:
     api = self.init_management_api()
     if not api:
       logging.warning(
-        'A frontend authed user (ID: %s, name: %s) was not found via management API',
-        user.id,
+        '[auth.persist_user] A frontend authed user (ID: %s, name: %s) was not found via management API',
+        str(user.id),
         user.name
       )
       return None
@@ -65,13 +65,13 @@ class Auth:
       token = get_token.client_credentials('https://{}/api/v2/'.format(domain))
       management = ManageAuth0(domain, token['access_token'])
     except Auth0Error as error:
-      logging.error('An Auth0 error occured: ' + error)
+      logging.error('[auth.init_management_api] An Auth0 error occured: ' + str(error))
       return None
     except RateLimitError as error:
-      logging.error('A rate limit error occured: ' + error)
+      logging.error('[auth.init_management_api] A rate limit error occured: ' + str(error))
       return None
     except TokenValidationError as error:
-      logging.error('A token validation error occured' + error)
+      logging.error('[auth.init_management_api] A token validation error occured' + str(error))
       return None
 
     return management

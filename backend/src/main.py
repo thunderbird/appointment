@@ -22,7 +22,12 @@ load_dotenv()
 normalize_secrets()
 
 # init logging
-logging.basicConfig(filename='appointment.log', level=logging.WARNING)
+logging.basicConfig(
+  format='%(asctime)s %(levelname)-8s %(message)s',
+  filename='appointment.log',
+  level=logging.WARNING,
+  datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # database
 from sqlalchemy.orm import Session
