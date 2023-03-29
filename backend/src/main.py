@@ -22,10 +22,11 @@ load_dotenv()
 normalize_secrets()
 
 # init logging
+level = os.getenv('LOG_LEVEL', 'ERROR')
 logging.basicConfig(
   format='%(asctime)s %(levelname)-8s %(message)s',
   filename='appointment.log',
-  level=logging.WARNING,
+  level=getattr(logging, level),
   datefmt='%Y-%m-%d %H:%M:%S'
 )
 
