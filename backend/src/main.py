@@ -1,7 +1,8 @@
 """Module: main
 
-Boot application, authenticate user and provide all API endpoints.
+Boot application, init database, authenticate user and provide all API endpoints.
 """
+import logging
 import os
 import validators
 
@@ -19,6 +20,9 @@ from .secrets import normalize_secrets
 # load any available .env into env
 load_dotenv()
 normalize_secrets()
+
+# init logging
+logging.basicConfig(filename='appointment.log', level=logging.WARNING)
 
 # database
 from sqlalchemy.orm import Session
