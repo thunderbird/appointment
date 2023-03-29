@@ -2,6 +2,7 @@
 
 Handle outgoing emails.
 """
+import logging
 import os
 import smtplib, ssl
 import validators
@@ -85,8 +86,8 @@ class Mailer:
     # check config
     url = 'http://' + SMTP_URL + ':' + SMTP_PORT
     if not validators.url(url):
-      # TODO: logging
-      print('no valid smtp url configured: ' + url)
+      # url is not valid
+      logging.error('[mailer.send] No valid SMTP url configured: ' + url)
 
     server = None
     try:
@@ -104,8 +105,8 @@ class Mailer:
       # now send email
       server.sendmail(self.sender, self.to, self.build())
     except Exception as e:
-      # TODO: logging
-      print(e)
+      # sending email was not possible
+      logging.error('[mailer.send] An error occured on sending email: ' + str(e))
     finally:
       if server:
         server.quit()

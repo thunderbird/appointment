@@ -4,5 +4,6 @@ __pycache__
 dist
 *.db
 *.ini
+*.log
 .env
 venv

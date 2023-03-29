@@ -2,6 +2,7 @@
 
 Handle authentification with Auth0 and get subscription data.
 """
+import logging
 import json
 import os
 
@@ -12,7 +13,6 @@ from fastapi_auth0 import Auth0, Auth0User
 from auth0.authentication import GetToken
 from auth0.management import Auth0 as ManageAuth0
 from auth0.exceptions import Auth0Error, RateLimitError, TokenValidationError
-import logging
 
 
 domain = os.getenv('AUTH0_API_DOMAIN')
@@ -35,6 +35,11 @@ class Auth:
     # get the current user via the authed user
     api = self.init_management_api()
     if not api:
+      logging.warning(
+        '[auth.persist_user] A frontend authed user (ID: %s, name: %s) was not found via management API',
+        str(user.id),
+        user.name
+      )
       return None
     authenticated_subscriber = api.users.get(user.id)
     # check if user exists as subsriber
@@ -60,13 +65,13 @@ class Auth:
       token = get_token.client_credentials('https://{}/api/v2/'.format(domain))
       management = ManageAuth0(domain, token['access_token'])
     except Auth0Error as error:
-      logging.error(error)
+      logging.error('[auth.init_management_api] An Auth0 error occured: ' + str(error))
       return None
     except RateLimitError as error:
-      logging.error(error)
+      logging.error('[auth.init_management_api] A rate limit error occured: ' + str(error))
       return None
     except TokenValidationError as error:
-      logging.error(error)
+      logging.error('[auth.init_management_api] A token validation error occured' + str(error))
       return None
 
     return management
