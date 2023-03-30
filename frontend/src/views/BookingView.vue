@@ -178,6 +178,7 @@ const viewTitle = computed(() => {
 
 // retrieve appointment by slug
 onMounted(async () => {
+  console.log(3);
   // async get appointment data from route
   const { error, data } = await call("apmt/public/" + route.params.slug).get().json();
   // check if appointment exists and is open

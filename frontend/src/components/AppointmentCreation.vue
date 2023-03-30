@@ -318,7 +318,7 @@ const createAppointment = async () => {
 
   // show confirmation
   createdConfirmation.title = data.value.title;
-  createdConfirmation.publicLink = bookingUrl + data.value.slug; // TODO
+  createdConfirmation.publicLink = bookingUrl + data.value.slug;
   createdConfirmation.show = true;
   // reset everything to start again
   for (const attr in defaultAppointment) {

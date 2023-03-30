@@ -42,7 +42,10 @@
       </div>
     </template>
     <!-- events with times -->
-    <div class="text-center grid auto-rows-[4rem] text-gray-400 bg-white dark:bg-gray-700">
+    <div
+      class="text-center grid text-gray-400 bg-white dark:bg-gray-700"
+      :style="{ gridAutoRows: baseRem + 'rem' }"
+    >
       <div v-for="h in hours" :key="h" class="lowercase">
         {{ h }}
       </div>
@@ -50,14 +53,16 @@
     <div
       v-for="d in days"
       :key="d.day"
-      class="grid auto-rows-[2rem] bg-white dark:bg-gray-700"
+      class="grid bg-white dark:bg-gray-700"
+      :style="{ gridAutoRows: unitRem + 'rem' }"
       @mouseleave="hideEventPopup"
     >
       <div
         v-for="event in eventsByDate(d.date)?.duringDay"
         :key="event"
         class="flex overflow-hidden"
-        :style="{ 'grid-row': event.offset + ' / span ' + event.span }"
+        :class="{ 'hidden': event.offset < 0 }"
+        :style="{ gridRow: event.offset + ' / span ' + event.span }"
         @mouseenter="element => !booking ? showEventPopup(element, event) : null"
       >
         <div
@@ -74,7 +79,8 @@
           <div
             class="truncate"
             :class="{
-              'self-center grow text-sm': event.span <= 1,
+              'self-center grow text-sm': event.span < 60,
+              'hidden': event.span < 30,
             }"
           >
             {{ event.title }}
@@ -131,15 +137,18 @@ const props = defineProps({
 const emit = defineEmits(['eventSelected']);
 
 // time borders for display
-const startHour = 6;
-const endHour = 18;
+// TODO: compute limits depending on displayed data
+const startHour   = 5;
+const endHour     = 18;
+const baseRem     = 4;          // height for one hour element in rem
+const unitRem     = baseRem/60; // height for shortest event (1 minute) in rem
 
 // handle events to show
 const timePosition = (start, duration) => {
-  // create position of event based on *half hours* | TODO: handle quarter hours or less
+  // create position of event, smallest unit is one minute
   return {
-    offset: 2*dj(start).format('H') + dj(start).format('m')/30 - 2*startHour + 1,
-    span: Math.round(duration / 30),
+    offset: 60*dj(start).format('H') + 1*dj(start).format('m') - 60*startHour + 1,
+    span: duration,
     times: dj(start).format('LT') + ' - ' + dj(start).add(duration, 'minutes').format('LT'),
   }
 };
