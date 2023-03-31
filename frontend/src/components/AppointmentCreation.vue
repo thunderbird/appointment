@@ -245,7 +245,7 @@ const slotList = computed(() => {
         const start = dj(day + ' ' + slot.start);
         const end = dj(day + ' ' + slot.end);
         list.push({
-          start: start.format('YYYY-MM-DDTHH:mm:ss'),
+          start: start.utc().format('YYYY-MM-DDTHH:mm:ss'), // save local time as UTC
           duration: end.diff(start, 'minutes')
         });
       });

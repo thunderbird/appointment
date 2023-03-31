@@ -186,6 +186,10 @@ onMounted(async () => {
     activeView.value = views.invalid;
   } else {
     appointment.value = data.value;
+    // convert start dates from UTC back to users timezone
+    appointment.value.slots.forEach(s => {
+      s.start = dj.utc(s.start).tz(dj.tz.guess());
+    });
     activeDate.value = dj(appointment.value?.slots[0].start);
     // check appointment slots for appropriate view
     activeView.value = getViewBySlotDistribution(appointment.value.slots);
