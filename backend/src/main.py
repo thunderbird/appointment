@@ -23,6 +23,8 @@ normalize_secrets()
 
 # init logging
 level = os.getenv('LOG_LEVEL', 'ERROR')
+# TODO: limit log file size
+# https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
 logging.basicConfig(
   format='%(asctime)s %(levelname)-8s %(message)s',
   filename='appointment.log',

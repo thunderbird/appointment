@@ -22,28 +22,36 @@
         </div>
       </template>
       <!-- events with times -->
-      <div class="text-center grid auto-rows-[4rem] text-gray-400 bg-white dark:bg-gray-700">
+      <div
+        class="text-center grid text-gray-400 bg-white dark:bg-gray-700"
+        :style="{ gridAutoRows: baseRem + 'rem' }"
+      >
         <div v-for="h in hours" :key="h" class="lowercase">
           {{ h }}
         </div>
       </div>
-      <div class="grid auto-rows-[2rem] bg-white dark:bg-gray-700">
+      <div
+        class="grid bg-white dark:bg-gray-700"
+        :style="{ gridAutoRows: unitRem + 'rem' }"
+      >
         <div
           v-for="event in eventsByDate?.duringDay"
           :key="event"
           class="flex overflow-hidden"
-          :style="{ 'grid-row': event.offset + ' / span ' + event.span }"
+          :class="{ 'hidden': event.offset < 0 }"
+          :style="{ gridRow: event.offset + ' / span ' + event.span }"
         >
           <div
             v-if="!booking"
             class="
-              w-full overflow-hidden rounded flex gap-4 my-1 mx-8 px-3 py-2
+              w-full overflow-hidden rounded flex gap-4 my-1 mx-8 px-3
               text-gray-700 bg-sky-400/10 border-sky-400
             "
             :class="{
               'border-2 border-dashed dark:text-white': !event.remote,
-              'flex-col': event.span > 2,
-              'flex-row': event.span <= 2,
+              'flex-col': event.span > 60,
+              'flex-row': event.span <= 60,
+              'py-2': event.span >= 30,
             }"
             :style="{
               'border-color': eventColor(event, false).border,
@@ -53,8 +61,9 @@
             <div
               class="truncate"
               :class="{
-                'self-center grow': event.span <= 2,
-                'text-sm': event.span <= 1,
+                'self-center grow': event.span <= 60,
+                'text-sm': event.span < 60,
+                'hidden': event.span < 30,
               }"
             >
               {{ event.title }}
@@ -62,8 +71,9 @@
             <div
               class="flex text-xs"
               :class="{
-                'flex-col gap-1 self-center': event.span <= 2,
-                'items-center gap-4': event.span > 2,
+                'items-center gap-4': event.span > 60,
+                'flex-col gap-1 self-center': event.span <= 60,
+                'hidden': event.span < 30,
               }"
             >
               <div class="flex gap-2">
@@ -72,13 +82,13 @@
                   {{ event.times }}
                 </div>
               </div>
-              <div class="flex gap-2" :class="{ 'hidden': event.span <= 1 }">
+              <div class="flex gap-2" :class="{ 'hidden': event.span <= 30 }">
                 <icon-calendar size="16" class="shrink-0" />
                 <div class="whitespace-nowrap">
                   {{ event.calendar_title }}
                 </div>
               </div>
-              <div class="flex gap-2" :class="{ 'hidden': event.span <= 2 }">
+              <div class="flex gap-2" :class="{ 'hidden': event.span <= 60 }">
                 <icon-link size="16" class="shrink-0" />
                 <a
                   :href="bookingUrl + event.slug"
@@ -103,7 +113,7 @@
               class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
               :class="{ 'text-white border-white': event.selected }"
             >
-              <div :class="{ 'hidden': event.span <= 1 }">{{ event.times }}</div>
+              <div :class="{ 'hidden': event.span <= 30 }">{{ event.times }}</div>
             </div>
           </div>
         </div>
@@ -141,15 +151,18 @@ const props = defineProps({
 const emit = defineEmits(['eventSelected']);
 
 // time borders for display
-const startHour = 6;
-const endHour = 18;
+// TODO: compute limits depending on displayed data
+const startHour   = 5;
+const endHour     = 18;
+const baseRem     = 4;          // height for one hour element in rem
+const unitRem     = baseRem/60; // height for shortest event (1 minute) in rem
 
 // handle events to show
 const timePosition = (start, duration) => {
-  // create position of event based on *half hours* | TODO: handle quarter hours or less
+  // create position of event, smallest unit is one minute
   return {
-    offset: 2*dj(start).format('H') + dj(start).format('m')/30 - 2*startHour + 1,
-    span: Math.round(duration / 30),
+    offset: 60*dj(start).format('H') + 1*dj(start).format('m') - 60*startHour + 1,
+    span: duration,
     times: dj(start).format('LT') + ' - ' + dj(start).add(duration, 'minutes').format('LT'),
   }
 };

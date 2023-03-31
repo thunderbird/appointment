@@ -70,8 +70,8 @@ class Appointment(Base):
 
   id                   = Column(Integer, primary_key=True, index=True)
   calendar_id          = Column(Integer, ForeignKey("calendars.id"))
-  time_created         = Column(DateTime(timezone=True), server_default=func.now())
-  time_updated         = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+  time_created         = Column(DateTime, server_default=func.now())
+  time_updated         = Column(DateTime, server_default=func.now(), onupdate=func.now())
   duration             = Column(Integer)
   title                = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255))
   location_type        = Column(Enum(LocationType), default=LocationType.inperson)
@@ -106,8 +106,8 @@ class Slot(Base):
   appointment_id = Column(Integer, ForeignKey("appointments.id"))
   attendee_id    = Column(Integer, ForeignKey("attendees.id"))
   subscriber_id  = Column(Integer, ForeignKey("subscribers.id"))
-  time_updated   = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-  start          = Column(DateTime(timezone=True))
+  time_updated   = Column(DateTime, server_default=func.now(), onupdate=func.now())
+  start          = Column(DateTime)
   duration       = Column(Integer)
 
   appointment    = relationship("Appointment", back_populates="slots")

@@ -116,6 +116,10 @@ const extendDbData = () => {
     a.calendar_color = calendarsById[a.calendar_id]?.color;
     a.status = getAppointmentStatus(a);
     a.active = a.status !== appointmentState.past; // TODO
+    // convert start dates from UTC back to users timezone
+    a.slots.forEach(s => {
+      s.start = dj.utc(s.start).tz(dj.tz.guess());
+    });
   });
 };
 

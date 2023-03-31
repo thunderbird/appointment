@@ -73,7 +73,7 @@
             </label>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.defaultFont') }}</div>
-              <select class="w-full max-w-sm rounded-md w-full">
+              <select class="w-full max-w-sm rounded-md w-full" disabled>
                 <option value="os">Open Sans</option>
                 <option value="fs">Fira Sans</option>
               </select>
@@ -86,19 +86,19 @@
             <div class="text-lg">{{ t('label.timeFormat') }}</div>
             <div class="text-lg">{{ t('label.dateFormat') }}</div>
             <label class="pl-4 flex gap-4 items-center cursor-pointer">
-              <input type="radio" name="timeFormat" class="text-teal-500" />
+              <input type="radio" name="timeFormat" class="text-teal-500" disabled />
               <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
             </label>
             <label class="pl-4 flex gap-4 items-center cursor-pointer">
-              <input type="radio" name="dateFormat" class="text-teal-500" />
+              <input type="radio" name="dateFormat" class="text-teal-500" disabled />
               <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
             </label>
             <label class="pl-4 flex gap-4 items-center cursor-pointer">
-              <input type="radio" name="timeFormat" class="text-teal-500" />
+              <input type="radio" name="timeFormat" class="text-teal-500" disabled />
               <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
             </label>
             <label class="pl-4 flex gap-4 items-center cursor-pointer">
-              <input type="radio" name="dateFormat" class="text-teal-500" />
+              <input type="radio" name="dateFormat" class="text-teal-500" disabled />
               <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div>
             </label>
           </div>
@@ -108,19 +108,19 @@
               <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
               <select v-model="activeTimezone.primary" class="w-full max-w-sm rounded-md w-full">
                 <option v-for="t in timezones" :key="t" :value="t">
-                  UTC <span v-if="t > 0">+</span>{{ t }}
+                  {{ t }}
                 </option>
               </select>
             </label>
             <label class="pl-4 mt-6 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.showSecondaryTimeZone') }}</div>
-              <switch-toggle :active="true" />
+              <switch-toggle :active="false" :disabled="true" />
             </label>
             <label class="pl-4 mt-6 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.secondaryTimeZone') }}</div>
-              <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full">
+              <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full" disabled>
                 <option v-for="t in timezones" :key="t" :value="t">
-                  UTC <span v-if="t > 0">+</span>{{ t }}
+                  {{ t }}
                 </option>
               </select>
             </label>
@@ -309,6 +309,7 @@ const route = useRoute();
 const router = useRouter();
 const call = inject('call');
 const refresh = inject('refresh');
+const dj = inject('dayjs');
 
 // view properties
 defineProps({
@@ -357,10 +358,10 @@ watch(theme, (newValue) => {
 
 // TODO: timezones
 const activeTimezone = reactive({
-  primary:   0,
-  secondary: 4,
+  primary:   dj.tz.guess(),
+  secondary: dj.tz.guess(),
 });
-const timezones = Array.from(new Array(27), (_, i) => i + -12);
+const timezones = Intl.supportedValuesOf('timeZone') ;
 
 // calendar user input to add or edit calendar connection
 const inputModes = {
