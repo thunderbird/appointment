@@ -152,7 +152,7 @@ const emit = defineEmits(['eventSelected']);
 
 // time borders for display
 // TODO: compute limits depending on displayed data
-const startHour   = 4;
+const startHour   = 5;
 const endHour     = 18;
 const baseRem     = 4;          // height for one hour element in rem
 const unitRem     = baseRem/60; // height for shortest event (1 minute) in rem
