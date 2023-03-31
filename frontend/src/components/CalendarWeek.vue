@@ -67,9 +67,10 @@
       >
         <div
           v-if="!booking"
-          class="w-full truncate rounded flex m-1 px-2 py-0.5 bg-sky-400/10 border-sky-400"
+          class="w-full truncate rounded flex m-1 px-2 bg-sky-400/10 border-sky-400"
           :class="{
-            'border-2 border-dashed': !event.remote
+            'border-2 border-dashed': !event.remote,
+            'py-0.5': event.span >= 30,
           }"
           :style="{
             'border-color': eventColor(event, false).border,
@@ -99,7 +100,9 @@
             class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
             :class="{ 'text-white border-white': event.selected }"
           >
-            {{ event.times }}
+            <span :class="{ 'hidden': event.span <= 30 }">
+              {{ event.times }}
+            </span>
           </div>
         </div>
       </div>
