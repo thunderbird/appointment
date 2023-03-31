@@ -55,6 +55,8 @@ import isToday from 'dayjs/plugin/isToday';
 import localeData from 'dayjs/plugin/localeData';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
 dayjs.locale(loc);
@@ -65,6 +67,8 @@ dayjs.extend(isToday);
 dayjs.extend(localeData);
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
+dayjs.extend(utc)
+dayjs.extend(timezone)
 dayjs.extend(weekday);
 // provide the configured dayjs instance as well es some helper functions
 app.provide('dayjs', dayjs);
