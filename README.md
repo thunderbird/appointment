@@ -37,7 +37,7 @@ Run application for development with hot reloading backend and frontend:
     cd appointment
     pip install -r backend/requirements.txt
     touch backend/src/appointment.db # when using sqlite
-    mv backend/.env.example backend/.env
+    cp backend/.env.example backend/.env # add your own configuration here
     uvicorn backend.src.main:app --reload --port 5000
     ```
 
@@ -57,8 +57,10 @@ Run application for development with hot reloading backend and frontend:
 
     ```bash
     cd backend/src
-    alembic current       # check database state
-    alembic upgrade head  # migrate to lates state
+    cp alembic.ini.example alembic.ini # add your own configuration here
+    alembic init migrations # init migrations once
+    alembic current # check database state
+    alembic upgrade head # migrate to latest state
     ```
 
 ## Testing

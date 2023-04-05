@@ -6,6 +6,7 @@ fastapi-auth0==0.3.2
 fastapi==0.91.0
 icalendar==5.0.4
 mysqlclient==2.1.1
+mysql-connector-python==8.0.32
 python-dotenv==1.0.0
 sqlalchemy-utils==0.39.0
 sqlalchemy==1.4.40
