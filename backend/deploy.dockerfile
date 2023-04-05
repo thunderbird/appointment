@@ -11,6 +11,9 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY src/ ./src
+COPY scripts/ ./scripts
+
+RUN cp ./src/alembic.ini.example ./src/alembic.ini
 
 EXPOSE 5000
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["/bin/sh", "./scripts/entry.sh"]

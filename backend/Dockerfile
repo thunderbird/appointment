@@ -11,5 +11,5 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY src/ .
-CMD touch /src/appointment.db
-CMD mv /.env.example /.env
+
+CMD ["/bin/sh", "./scripts/entry.sh"]
