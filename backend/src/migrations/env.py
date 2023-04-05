@@ -7,10 +7,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from backend.src.secrets import normalize_secrets
+# This is ran from src/ so ignore the errors
+from secrets import normalize_secrets
 
-# Load our environment variables if needed
-load_dotenv()
+# Normalize any AWS secrets
 normalize_secrets()
 
 # this is the Alembic Config object, which provides
