@@ -44,7 +44,7 @@ class Subscriber(Base):
   email     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
   name      = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
   level     = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
-  timezone  = Column(Integer, index=True)
+  timezone  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
 
   calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
   slots     = relationship("Slot", cascade="all,delete", back_populates="subscriber")
