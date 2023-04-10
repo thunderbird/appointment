@@ -316,7 +316,7 @@ const refresh = inject('refresh');
 const dj = inject('dayjs');
 
 // view properties
-defineProps({
+const props = defineProps({
   calendars:    Array,  // list of calendars from db
   appointments: Array,  // list of appointments from db
   user:         Object, // currently logged in user, null if not logged in
@@ -360,12 +360,17 @@ watch(theme, (newValue) => {
 	}
 });
 
-// TODO: timezones
+// timezones
 const activeTimezone = reactive({
-  primary:   dj.tz.guess(),
+  primary:   props.user?.timezone ?? dj.tz.guess(),
   secondary: dj.tz.guess(),
 });
 const timezones = Intl.supportedValuesOf('timeZone') ;
+// load user defined timezone on page reload
+watch(
+  () => props.user,
+  (loadedUser) => activeTimezone.primary = loadedUser.timezone
+)
 
 // save timezone config
 const updateTimezone = async () => {

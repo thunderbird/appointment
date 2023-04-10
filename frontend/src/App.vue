@@ -118,7 +118,7 @@ const extendDbData = () => {
     a.active = a.status !== appointmentState.past; // TODO
     // convert start dates from UTC back to users timezone
     a.slots.forEach(s => {
-      s.start = dj.utc(s.start).tz(dj.tz.guess());
+      s.start = dj.utc(s.start).tz(currentUser.value.timezone ?? dj.tz.guess());
     });
   });
 };

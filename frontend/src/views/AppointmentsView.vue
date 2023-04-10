@@ -177,6 +177,7 @@
         v-else
         :status="creationStatus"
         :calendars="calendars"
+        :user="user"
         @start="creationStatus = creationState.details"
         @next="creationStatus = creationState.availability"
         @create="creationStatus = creationState.finished; refresh();"
