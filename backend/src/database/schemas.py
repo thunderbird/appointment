@@ -117,12 +117,14 @@ class CalendarOut(CalendarBase):
 
 """ SUBSCRIBER model schemas
 """
-class SubscriberBase(BaseModel):
+class SubscriberIn(BaseModel):
+  timezone: str | None = None
+
+class SubscriberBase(SubscriberIn):
   username: str
   email: str
   name: str | None = None
   level: SubscriberLevel | None = SubscriberLevel.basic
-  timezone: int | None = None
 
 
 class Subscriber(SubscriberBase):

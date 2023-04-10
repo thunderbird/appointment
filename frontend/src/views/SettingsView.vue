@@ -106,7 +106,11 @@
             <div class="text-lg">{{ t('label.timeZone') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
-              <select v-model="activeTimezone.primary" class="w-full max-w-sm rounded-md w-full">
+              <select
+                v-model="activeTimezone.primary"
+                class="w-full max-w-sm rounded-md w-full"
+                @change="updateTimezone"
+              >
                 <option v-for="t in timezones" :key="t" :value="t">
                   {{ t }}
                 </option>
@@ -362,6 +366,14 @@ const activeTimezone = reactive({
   secondary: dj.tz.guess(),
 });
 const timezones = Intl.supportedValuesOf('timeZone') ;
+
+// save timezone config
+const updateTimezone = async () => {
+  const { error } = await call("me").put({ timezone: activeTimezone.primary }).json();
+  if (!error) {
+    // TODO show some confirmation
+  }
+};
 
 // calendar user input to add or edit calendar connection
 const inputModes = {
