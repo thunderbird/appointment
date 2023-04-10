@@ -106,7 +106,11 @@
             <div class="text-lg">{{ t('label.timeZone') }}</div>
             <label class="pl-4 mt-4 flex items-center">
               <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
-              <select v-model="activeTimezone.primary" class="w-full max-w-sm rounded-md w-full">
+              <select
+                v-model="activeTimezone.primary"
+                class="w-full max-w-sm rounded-md w-full"
+                @change="updateTimezone"
+              >
                 <option v-for="t in timezones" :key="t" :value="t">
                   {{ t }}
                 </option>
@@ -312,7 +316,7 @@ const refresh = inject('refresh');
 const dj = inject('dayjs');
 
 // view properties
-defineProps({
+const props = defineProps({
   calendars:    Array,  // list of calendars from db
   appointments: Array,  // list of appointments from db
   user:         Object, // currently logged in user, null if not logged in
@@ -356,12 +360,25 @@ watch(theme, (newValue) => {
 	}
 });
 
-// TODO: timezones
+// timezones
 const activeTimezone = reactive({
-  primary:   dj.tz.guess(),
+  primary:   props.user?.timezone ?? dj.tz.guess(),
   secondary: dj.tz.guess(),
 });
 const timezones = Intl.supportedValuesOf('timeZone') ;
+// load user defined timezone on page reload
+watch(
+  () => props.user,
+  (loadedUser) => activeTimezone.primary = loadedUser.timezone
+)
+
+// save timezone config
+const updateTimezone = async () => {
+  const { error } = await call("me").put({ timezone: activeTimezone.primary }).json();
+  if (!error) {
+    // TODO show some confirmation
+  }
+};
 
 // calendar user input to add or edit calendar connection
 const inputModes = {
@@ -402,11 +419,11 @@ const editCalendar = async (id) => {
   }
 };
 const assignCalendar = (title, url) => {
-  inputMode.value = inputModes.edit;
+  inputMode.value = inputModes.add;
   calendarInput.data.title = title;
   calendarInput.data.url = url;
   calendarInput.data.user = principal.user;
-  calendarInput.data.user = principal.password;
+  calendarInput.data.password = principal.password;
 };
 
 // do remove a given calendar connection

@@ -80,6 +80,15 @@ def login(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.g
   return persisted_user
 
 
+@app.put("/me", dependencies=[Depends(auth.auth0.implicit_scheme)])
+def update_me(data: schemas.SubscriberIn, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+  """endpoint to update data of authenticated subscriber"""
+  if not auth.subscriber:
+    raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+  me = repo.update_subscriber(db=db, data=data, subscriber_id=auth.subscriber.id)
+  return me
+
+
 @app.get("/me/calendars", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=list[schemas.CalendarOut])
 def read_my_calendars(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
   """get all calendar connections of authenticated subscriber"""

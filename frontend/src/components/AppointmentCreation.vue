@@ -205,6 +205,7 @@ const emit = defineEmits(['start', 'next', 'create', 'cancel']);
 const props = defineProps({
   status:    Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
   calendars: Array,  // list of user defined calendars
+  user:      Object, // currently logged in user, null if not logged in
 });
 
 // calculate the current visible step by given status
@@ -245,7 +246,7 @@ const slotList = computed(() => {
         const start = dj(day + ' ' + slot.start);
         const end = dj(day + ' ' + slot.end);
         list.push({
-          start: start.utc().format('YYYY-MM-DDTHH:mm:ss'), // save local time as UTC
+          start: start.tz(props.user.timezone ?? dj.tz.guess(), true).utc().format('YYYY-MM-DDTHH:mm:ss'), // save local time as UTC
           duration: end.diff(start, 'minutes')
         });
       });

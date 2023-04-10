@@ -94,7 +94,7 @@ const emit = defineEmits(['eventSelected']);
 
 // bring events to specific order: all day events first, than sorted by start date
 const sortedEvents = computed(() => {
-  return structuredClone(props.events).sort((a,b) => {
+  return [...props.events].sort((a,b) => {
     if (a.all_day && !b.all_day) {
       return -1;
     }

@@ -41,10 +41,10 @@ def create_subscriber(db: Session, subscriber: schemas.SubscriberBase):
   return db_subscriber
 
 
-def update_subscriber(db: Session, subscriber: schemas.SubscriberBase, subscriber_id: int):
-  """update existing subscriber by id"""
+def update_subscriber(db: Session, data: schemas.SubscriberIn, subscriber_id: int):
+  """update all subscriber attributes, they can edit themselves"""
   db_subscriber = get_subscriber(db, subscriber_id)
-  for key, value in subscriber:
+  for key, value in data:
     setattr(db_subscriber, key, value)
   db.commit()
   db.refresh(db_subscriber)
