@@ -4,7 +4,7 @@ Handle connection to a CalDAV server.
 """
 from caldav import DAVClient
 from icalendar import Calendar, Event, vCalAddress, vText
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from ..database import schemas
 from ..controller.mailer import Attachment, InvitationMail
 
@@ -94,9 +94,9 @@ class Tools:
     org.params['role'] = vText('CHAIR')
     event = Event()
     event.add('summary', appointment.title)
-    event.add('dtstart', slot.start)
-    event.add('dtend', slot.start + timedelta(minutes=slot.duration))
-    event.add('dtstamp', datetime.now())
+    event.add('dtstart', slot.start.replace(tzinfo=timezone.utc))
+    event.add('dtend', slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration))
+    event.add('dtstamp', datetime.utcnow())
     event['description'] = appointment.details
     event['organizer'] = org
     cal.add_component(event)
