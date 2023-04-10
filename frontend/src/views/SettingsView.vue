@@ -402,11 +402,11 @@ const editCalendar = async (id) => {
   }
 };
 const assignCalendar = (title, url) => {
-  inputMode.value = inputModes.edit;
+  inputMode.value = inputModes.add;
   calendarInput.data.title = title;
   calendarInput.data.url = url;
   calendarInput.data.user = principal.user;
-  calendarInput.data.user = principal.password;
+  calendarInput.data.password = principal.password;
 };
 
 // do remove a given calendar connection
