@@ -2,11 +2,18 @@
 
 Handle connection to a CalDAV server.
 """
+import enum
 from caldav import DAVClient
+from gcsa.google_calendar import GoogleCalendar
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, date, timedelta, timezone
 from ..database import schemas
 from ..controller.mailer import Attachment, InvitationMail
+
+
+class CalDavProvider(enum.Enum):
+  general = 1
+  google  = 2
 
 
 class CalDavConnector:
@@ -15,8 +22,15 @@ class CalDavConnector:
     self.url = url
     self.user = user
     self.password = password
+    provider = CalDavProvider.google if user.endswith('gmail.com') else CalDavProvider.general
+    self.provider = provider
     # connect to CalDAV server
-    self.client = DAVClient(url=url, username=user, password=password)
+    if provider == CalDavProvider.google:
+      # https://google-calendar-simple-api.readthedocs.io/en/latest/authentication.html
+      self.client = GoogleCalendar(credentials_path='./google_credentials.json', save_token=False) # TODO handle tokens
+    else:
+      # https://github.com/python-caldav/caldav/blob/master/examples/basic_usage_examples.py
+      self.client = DAVClient(url=url, username=user, password=password)
 
 
   def list_calendars(self):
@@ -34,22 +48,31 @@ class CalDavConnector:
 
   def list_events(self, start, end):
     """find all events in given date range on the remote server"""
-    calendar = self.client.calendar(url=self.url)
-    result = calendar.search(
-      start=datetime.strptime(start, '%Y-%m-%d'),
-      end=datetime.strptime(end, '%Y-%m-%d'),
-      event=True,
-      expand=True
-    )
     events = []
-    for e in result:
-      events.append(schemas.Event(
-        title=str(e.vobject_instance.vevent.summary.value),
-        start=str(e.vobject_instance.vevent.dtstart.value),
-        end=str(e.vobject_instance.vevent.dtend.value),
-        all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
-        description=e.icalendar_component['description'] if 'description' in e.icalendar_component else ''
-      ))
+    if self.provider == CalDavProvider.google:
+      result = self.client.get_events(
+        datetime.strptime(start, '%Y-%m-%d'),
+        datetime.strptime(end, '%Y-%m-%d'),
+        order_by='startTime'
+      )
+      for e in result:
+        print(e) # TODO
+    else:
+      calendar = self.client.calendar(url=self.url)
+      result = calendar.search(
+        start=datetime.strptime(start, '%Y-%m-%d'),
+        end=datetime.strptime(end, '%Y-%m-%d'),
+        event=True,
+        expand=True
+      )
+      for e in result:
+        events.append(schemas.Event(
+          title=str(e.vobject_instance.vevent.summary.value),
+          start=str(e.vobject_instance.vevent.dtstart.value),
+          end=str(e.vobject_instance.vevent.dtend.value),
+          all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
+          description=e.icalendar_component['description'] if 'description' in e.icalendar_component else ''
+        ))
     return events
 
 
