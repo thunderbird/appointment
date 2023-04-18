@@ -2,7 +2,7 @@
   <header class="h-24 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600">
     <router-link
       class="py-7 pl-8 pr-12 border-r border-gray-300 dark:border-gray-600"
-      :to="{ name: 'home' }"
+      :to="{ name: 'calendar' }"
     >
       <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
