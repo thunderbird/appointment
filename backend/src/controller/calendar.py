@@ -3,13 +3,19 @@
 Handle connection to a CalDAV server.
 """
 import enum
+import os.path
 from caldav import DAVClient
-from gcsa.google_calendar import GoogleCalendar
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, date, timedelta, timezone
 from ..database import schemas
 from ..controller.mailer import Attachment, InvitationMail
 
+SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 class CalDavProvider(enum.Enum):
   general = 1
@@ -26,8 +32,28 @@ class CalDavConnector:
     self.provider = provider
     # connect to CalDAV server
     if provider == CalDavProvider.google:
-      # https://google-calendar-simple-api.readthedocs.io/en/latest/authentication.html
-      self.client = GoogleCalendar(credentials_path='./google_credentials.json', save_token=False) # TODO handle tokens
+      # https://developers.google.com/calendar/api/quickstart/python
+      TOKEN_PATH = './src/tmp/' + user + '.json'
+      creds = None
+      # The file token.json stores the user's access and refresh tokens, and is
+      # created automatically when the authorization flow completes for the first time.
+      if os.path.exists(TOKEN_PATH):
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
+      # If there are no (valid) credentials available, let the user log in.
+      if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+          creds.refresh(Request())
+        else:
+          flow = InstalledAppFlow.from_client_secrets_file('./google_credentials.json', SCOPES)
+          creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open(TOKEN_PATH, 'w') as token:
+          token.write(creds.to_json())
+      try:
+        self.client = build('calendar', 'v3', credentials=creds)
+      except HttpError as error:
+        print('An error occurred: %s' % error)
+
     else:
       # https://github.com/python-caldav/caldav/blob/master/examples/basic_usage_examples.py
       self.client = DAVClient(url=url, username=user, password=password)
@@ -50,12 +76,14 @@ class CalDavConnector:
     """find all events in given date range on the remote server"""
     events = []
     if self.provider == CalDavProvider.google:
-      result = self.client.get_events(
-        datetime.strptime(start, '%Y-%m-%d'),
-        datetime.strptime(end, '%Y-%m-%d'),
-        order_by='startTime'
-      )
-      for e in result:
+      result = self.client.events().list(
+        calendarId='primary',
+        timeMin=datetime.strptime(start, '%Y-%m-%d'),
+        maxResults=10,
+        singleEvents=True,
+        orderBy='startTime'
+      ).execute()
+      for e in result.get('items', []):
         print(e) # TODO
     else:
       calendar = self.client.calendar(url=self.url)

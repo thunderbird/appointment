@@ -4,7 +4,9 @@ caldav==1.0.1
 cryptography==39.0.1
 fastapi-auth0==0.3.2
 fastapi==0.91.0
-gcsa==2.1.0
+google-api-python-client==2.85.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==1.0.0
 icalendar==5.0.4
 mysqlclient==2.1.1
 mysql-connector-python==8.0.32
