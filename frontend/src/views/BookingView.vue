@@ -70,7 +70,6 @@
         :title="viewTitle"
         :backlink="activeView === views.weekAfterMonth"
         @back="activeView = views.month"
-        class="mb-8"
       />
       <calendar-month
         v-if="(activeView === views.month)"

@@ -140,17 +140,44 @@ const props = defineProps({
 const emit = defineEmits(['eventSelected']);
 
 // time borders for display
-// TODO: compute limits depending on displayed data
-const startHour   = 5;
-const endHour     = 18;
 const baseRem     = 4;          // height for one hour element in rem
 const unitRem     = baseRem/60; // height for shortest event (1 minute) in rem
+
+// compute limits depending on displayed data
+// TODO: handle remote events too
+// begin showing events 2 hours before first event or at least 2pm
+const startHour = computed(() => {
+  const start = props.appointments.reduce((p, c) => {
+    const earliestSlot = c.slots.reduce((ps, cs) => {
+      return dj(cs.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
+        ? Math.min(dj(cs.start).format('H'), ps)
+        : ps;
+    }, 16);
+    return Math.min(earliestSlot, p);
+  }, 16);
+  return start - 2 >= 0 ? start - 2 : 0;
+});
+// end showing events 2 hours after first event or at max 10am
+const endHour = computed(() => {
+  const end = props.appointments.reduce((p, c) => {
+    const latestSlot = c.slots.reduce((ps, cs) => {
+      const slotEnd = dj(cs.start).add(cs.duration, 'minutes');
+      return slotEnd.isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
+        ? Math.max(slotEnd.format('H'), ps)
+        : ps;
+    }, 9);
+    return Math.max(latestSlot, p);
+  }, 9);
+  return startHour.value > end
+    ? startHour.value + 8
+    : end + 1 < 24 ? end + 1 : 24;
+});
 
 // handle events to show
 const timePosition = (start, duration) => {
   // create position of event, smallest unit is one minute
   return {
-    offset: 60*dj(start).format('H') + 1*dj(start).format('m') - 60*startHour + 1,
+    offset: 60*dj(start).format('H') + 1*dj(start).format('m') - 60*startHour.value + 1,
     span: duration,
     times: dj(start).format('LT') + ' - ' + dj(start).add(duration, 'minutes').format('LT'),
   }
@@ -213,8 +240,8 @@ const days = computed(() => {
 // generate hours
 const hours = computed(() => {
   const list = [];
-  const range = endHour - startHour;
-  let d = dj().hour(startHour).minute(0);
+  const range = endHour.value - startHour.value;
+  let d = dj().hour(startHour.value).minute(0);
   for (let i = 0; i <= range; i++) {
     list.push(d.format('h:mm A'));
     d = d.add(1, 'hour');
