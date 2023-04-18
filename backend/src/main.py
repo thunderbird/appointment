@@ -43,6 +43,9 @@ from .controller.auth import Auth
 from .controller.calendar import CalDavConnector, Tools
 auth = Auth()
 
+# extra routes
+from .routes import google
+
 # init app
 app = FastAPI()
 
@@ -55,6 +58,9 @@ app.add_middleware(
   allow_methods=["*"],
   allow_headers=["*"],
 )
+
+# Mix in our extra routes
+app.include_router(google.router, prefix='/google')
 
 def get_db():
   """run database session"""
@@ -297,3 +303,4 @@ def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     content_type="text/calendar",
     data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8")
   )
+
