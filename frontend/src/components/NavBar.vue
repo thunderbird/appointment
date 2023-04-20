@@ -1,12 +1,12 @@
 <template>
   <header class="h-24 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600">
     <router-link
-      class="py-7 pl-8 pr-12 border-r border-gray-300 dark:border-gray-600"
-      :to="{ name: 'home' }"
+      class="py-7 pl-8 pr-12 border-r border-gray-300 dark:border-gray-600 shrink-0"
+      :to="{ name: 'calendar' }"
     >
       <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
-    <label class="grow flex items-center relative">
+    <!-- <label class="grow flex items-center relative">
       <icon-search
         class="
           absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 fill-transparent 
@@ -19,7 +19,7 @@
         name="search"
         :placeholder="t('label.search')"
       />
-    </label>
+    </label> -->
     <nav class="flex gap-8 items-stretch">
       <ul class="flex justify-end gap-8">
         <li
@@ -53,7 +53,7 @@ import { useRoute } from 'vue-router';
 import { initials } from '@/utils';
 
 // icons
-import { IconSearch } from '@tabler/icons-vue';
+// import { IconSearch } from '@tabler/icons-vue';
 
 // component constants
 const route = useRoute();

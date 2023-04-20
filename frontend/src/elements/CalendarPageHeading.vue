@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-4 mb-8 mx-auto lg:ml-0 lg:mr-0 lg:mb-0 lg:gap-8 items-center select-none">
+  <div class="flex gap-4 mb-2 mx-auto lg:ml-0 lg:mr-0 lg:mb-8 lg:gap-8 items-center select-none">
     <div v-if="nav" @click="emit('prev')" class="group cursor-pointer select-none">
       <icon-chevron-left class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400 group-hover:stroke-teal-500" />
     </div>
