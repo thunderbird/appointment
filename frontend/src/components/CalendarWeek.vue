@@ -139,34 +139,35 @@ const props = defineProps({
 // component emits
 const emit = defineEmits(['eventSelected']);
 
-// time borders for display
-const baseRem     = 4;          // height for one hour element in rem
-const unitRem     = baseRem/60; // height for shortest event (1 minute) in rem
+// base data for display elements
+const baseRem = 4;          // height for one hour element in rem
+const unitRem = baseRem/60; // height for shortest event (1 minute) in rem
 
-// compute limits depending on displayed data
-// TODO: handle remote events too
+// all elements (appointment slots or remote events) to show in the current view
+const elementsToShow = computed(() => {
+  const slots = props.appointments.reduce((p, c) => [...p, ...c.slots], []);
+  return props.booking ? slots : [...slots, ...props.events]
+});
+
+// compute start limit depending on data in view
 // begin showing events 2 hours before first event or at least 2pm
 const startHour = computed(() => {
-  const start = props.appointments.reduce((p, c) => {
-    const earliestSlot = c.slots.reduce((ps, cs) => {
-      return dj(cs.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
-        ? Math.min(dj(cs.start).format('H'), ps)
-        : ps;
-    }, 16);
-    return Math.min(earliestSlot, p);
+  const start = elementsToShow.value.reduce((p, c) => {
+    return dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
+      ? Math.min(dj(c.start).format('H'), p)
+      : p;
   }, 16);
   return start - 2 >= 0 ? start - 2 : 0;
 });
+
+// compute start limit depending on data in view
 // end showing events 2 hours after first event or at max 10am
 const endHour = computed(() => {
-  const end = props.appointments.reduce((p, c) => {
-    const latestSlot = c.slots.reduce((ps, cs) => {
-      const slotEnd = dj(cs.start).add(cs.duration, 'minutes');
-      return slotEnd.isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
-        ? Math.max(slotEnd.format('H'), ps)
-        : ps;
-    }, 9);
-    return Math.max(latestSlot, p);
+  const end = elementsToShow.value.reduce((p, c) => {
+    const slotEnd = dj(c.start).add(c.duration, 'minutes');
+    return slotEnd.isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
+      ? Math.max(slotEnd.format('H'), p)
+      : p;
   }, 9);
   return startHour.value > end
     ? startHour.value + 8
