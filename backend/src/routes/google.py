@@ -1,4 +1,5 @@
 import os
+import json
 
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
@@ -14,6 +15,7 @@ google_client = GoogleClient(os.getenv("GOOGLE_AUTH_CLIENT_ID"), os.getenv("GOOG
 try:
     google_client.setup()
 except:
+    # TODO: log
     print("WARNING: Google Client could not be setup, bad credentials?")
 
 
@@ -36,9 +38,12 @@ def callback(code: str):
     Sample output:
     {"token": "<the token>", "refresh_token": "<refresh token>", "token_uri": "<token uri>", "client_id": "<client id>", "client_secret": "<client secret>", "scopes": <scopes>, "expiry": "2023-04-18T18:41:10.317778Z"}
     """
-    credentials = creds.to_json()
-    token = credentials.get("token")
-    refresh_token = credentials.get("refresh_token")
+    TOKEN_PATH = './src/tmp/test.json' # TODO
+    credentials = json.loads(creds.to_json())
+    token = credentials["token"]
+    refresh_token = credentials["refresh_token"]
+    with open(TOKEN_PATH, 'w') as token:
+        token.write(creds.to_json())
 
     # And then RedirectResponse back to frontend :)
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")

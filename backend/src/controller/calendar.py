@@ -33,7 +33,7 @@ class CalDavConnector:
     # connect to CalDAV server
     if provider == CalDavProvider.google:
       # https://developers.google.com/calendar/api/quickstart/python
-      TOKEN_PATH = './src/tmp/' + user + '.json'
+      TOKEN_PATH = './src/tmp/test.json' # TODO
       creds = None
       # The file token.json stores the user's access and refresh tokens, and is
       # created automatically when the authorization flow completes for the first time.
@@ -43,12 +43,12 @@ class CalDavConnector:
       if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
           creds.refresh(Request())
-        else:
-          flow = InstalledAppFlow.from_client_secrets_file('./google_credentials.json', SCOPES)
-          creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open(TOKEN_PATH, 'w') as token:
-          token.write(creds.to_json())
+        # else:
+        #   flow = InstalledAppFlow.from_client_secrets_file('./google_credentials.json', SCOPES)
+        #   creds = flow.run_local_server(port=0)
+        # # Save the credentials for the next run
+        # with open(TOKEN_PATH, 'w') as token:
+        #   token.write(creds.to_json())
       try:
         self.client = build('calendar', 'v3', credentials=creds)
       except HttpError as error:
@@ -77,14 +77,21 @@ class CalDavConnector:
     events = []
     if self.provider == CalDavProvider.google:
       result = self.client.events().list(
-        calendarId='primary',
-        timeMin=datetime.strptime(start, '%Y-%m-%d'),
+        calendarId=self.user,
+        timeMin=datetime.strptime(start, '%Y-%m-%d').isoformat() + 'Z',
+        timeMax=datetime.strptime(end, '%Y-%m-%d').isoformat() + 'Z',
         maxResults=10,
         singleEvents=True,
         orderBy='startTime'
       ).execute()
       for e in result.get('items', []):
-        print(e) # TODO
+        events.append(schemas.Event(
+          title=e['summary'],
+          start=e['start']['date'] if 'date' in e['start'] else e['start']['dateTime'],
+          end=e['end']['date'] if 'date' in e['end'] else e['end']['dateTime'],
+          all_day='date' in e['start'],
+          description=e['description'] if 'description' in e else ''
+        ))
     else:
       calendar = self.client.calendar(url=self.url)
       result = calendar.search(
