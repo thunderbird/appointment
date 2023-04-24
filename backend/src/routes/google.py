@@ -31,7 +31,7 @@ def callback(code: str):
     creds = google_client.get_credentials(code)
 
     if creds is None:
-        return {}  # Error?
+        return {}  # TODO log? error?
 
     # Maybe store token/refresh token in db or a session, creds include client secret so don't expose to end-user pls!
     """
