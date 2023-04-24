@@ -94,6 +94,7 @@ class CalendarBase(BaseModel):
 
 
 class CalendarConnectionOut(CalendarBase):
+  provider: int
   url: str
   user: str
 

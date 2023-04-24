@@ -22,15 +22,15 @@
     </div>
     <div class="flex gap-4">
       <secondary-button
-        :label="t('label.addCalendar', { brand: t('label.google') })"
+        :label="t('label.addCalendar', { provider: t('label.google') })"
         class="text-sm !text-teal-500"
-        @click="addCalendar"
+        @click="addCalendar(calendarProviders.google)"
         :disabled="inputMode"
       />
       <secondary-button
-        :label="t('label.addCalendar', { brand: t('label.caldav') })"
+        :label="t('label.addCalendar', { provider: t('label.caldav') })"
         class="text-sm !text-teal-500"
-        @click="addCalendar"
+        @click="addCalendar(calendarProviders.caldav)"
         :disabled="inputMode"
       />
     </div>
@@ -87,7 +87,10 @@
     <!-- set calendar connection data -->
     <div v-if="inputMode" class="pl-6 flex flex-col gap-4 max-w-2xl">
       <div class="text-lg">
-        {{ t('label.caldav') }} &mdash; {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
+        <span v-if="calendarInput.data.provider === calendarProviders.caldav">{{ t('label.caldav') }}</span>
+        <span v-if="calendarInput.data.provider === calendarProviders.google">{{ t('label.google') }}</span>
+        &mdash;
+        {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
       <label class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
@@ -105,7 +108,7 @@
           </option>
         </select>
       </label>
-      <label class="pl-4 flex items-center">
+      <label v-if="calendarInput.data.provider === calendarProviders.caldav" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
         <input
           v-model="calendarInput.data.url"
@@ -121,7 +124,7 @@
           class="w-full max-w-sm rounded-md w-full"
         />
       </label>
-      <label class="pl-4 flex items-center">
+      <label v-if="calendarInput.data.provider === calendarProviders.caldav" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
         <input
           v-model="calendarInput.data.password"
@@ -171,14 +174,21 @@ defineProps({
 });
 
 
-// calendar user input to add or edit calendar connection
+// handle calendar user input to add or edit calendar connections
 const inputModes = {
   hidden: 0,
   add:    1,
   edit:   2,
 };
 const inputMode = ref(inputModes.hidden);
+
+// supported calendar providers
+const calendarProviders = {
+  caldav: 1,
+  google: 2,
+};
 const defaultCalendarInput = {
+  provider: calendarProviders.caldav,
   title:    '',
   color:    '',
   url:      '',
@@ -198,8 +208,9 @@ const resetInput = () => {
 };
 
 // set input mode for adding or editing
-const addCalendar = () => {
+const addCalendar = (provider) => {
   inputMode.value = inputModes.add;
+  calendarInput.data.provider = provider;
 };
 const editCalendar = async (id) => {
   inputMode.value = inputModes.edit;

@@ -171,7 +171,7 @@ def read_caldav_calendars(connection: schemas.CalendarConnection, db: Session = 
   """endpoint to get calendars from a remote CalDAV server"""
   if not auth.subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  con = CalDavConnector(connection.url, connection.user, connection.password)
+  con = CalDavConnector(connection.provider, connection.url, connection.user, connection.password)
   return con.list_calendars()
 
 
@@ -183,7 +183,7 @@ def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
-  con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
+  con = CalDavConnector(db_calendar.provider, db_calendar.url, db_calendar.user, db_calendar.password)
   events = con.list_events(start, end)
   for e in events:
     e.calendar_title = db_calendar.title
@@ -276,7 +276,7 @@ def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Ses
     description=db_appointment.details
   )
   # create remote event
-  con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
+  con = CalDavConnector(db_calendar.provider, db_calendar.url, db_calendar.user, db_calendar.password)
   con.create_event(event=event, attendee=s_a.attendee)
   # update appointment slot data
   repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
@@ -303,4 +303,3 @@ def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     content_type="text/calendar",
     data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8")
   )
-
