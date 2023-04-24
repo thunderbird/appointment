@@ -47,138 +47,9 @@
 
       <!-- general settings -->
       <settings-general v-if="activeView === settingsSections.general" :user="user" />
-
+      
       <!-- calendar settings -->
-      <div v-if="activeView === settingsSections.calendar" class="flex flex-col gap-8">
-        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
-        <div class="pl-6 flex flex-col gap-6">
-          <div class="text-lg">Discover CalDAV Calendars</div>
-          <div class="pl-6 flex flex-col gap-4 max-w-2xl">
-            <label class="pl-4 mt-4 flex items-center">
-              <div class="w-full max-w-2xs">principal</div>
-              <input
-                v-model="principal.url"
-                type="text"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
-              <input
-                v-model="principal.user"
-                type="text"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
-              <input
-                v-model="principal.password"
-                type="password"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-          </div>
-          <div>
-            <secondary-button
-              :label="'Search for calendars'"
-              class="text-sm !text-teal-500"
-              :waiting="processPrincipal"
-              @click="getRemoteCalendars"
-            />
-          </div>
-          <div v-if="searchResultCalendars.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
-            <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex gap-2 items-center">
-              <div>{{ cal.title }}</div>
-              <div>{{ cal.url }}</div>
-              <button @click="assignCalendar(cal.title, cal.url)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
-                <icon-arrow-right class="h-3.5 w-3.5 stroke-2 stroke-white fill-transparent" />
-                {{ 'Select calendar' }}
-              </button>
-            </div>
-          </div>
-          <div class="text-xl">{{ t('heading.calendarConnections') }}</div>
-          <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
-            <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
-              <div class="flex-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
-                <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
-              </div>
-              {{ cal.title }}
-              <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
-                <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
-                {{ t('label.editCalendar') }}
-              </button>
-              <div class="p-0.5 cursor-pointer" @click="deleteCalendar(cal.id)">
-                <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
-              </div>
-            </div>
-          </div>
-          <div v-if="!inputMode">
-            <secondary-button
-              :label="t('label.addCalendar')"
-              class="text-sm !text-teal-500"
-              @click="addCalendar"
-            />
-          </div>
-          <div v-if="inputMode" class="pl-6 flex flex-col gap-4 max-w-2xl">
-            <div class="text-lg">
-              {{ t('label.caldav') }} &mdash; {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
-            </div>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
-              <input
-                v-model="calendarInput.data.title"
-                type="text"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
-              <select v-model="calendarInput.data.color" class="w-full max-w-sm rounded-md w-full">
-                <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
-                  {{ color }}
-                </option>
-              </select>
-            </label>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
-              <input
-                v-model="calendarInput.data.url"
-                type="url"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
-              <input
-                v-model="calendarInput.data.user"
-                type="text"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-            <label class="pl-4 flex items-center">
-              <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
-              <input
-                v-model="calendarInput.data.password"
-                type="password"
-                class="w-full max-w-sm rounded-md w-full"
-              />
-            </label>
-            <div class="self-end flex gap-4">
-              <secondary-button
-                :label="t('label.cancel')"
-                class="text-sm !text-teal-500"
-                @click="resetInput"
-              />
-              <primary-button
-                :label="inputMode === inputModes.add ? t('label.addCalendar') : t('label.saveChanges')"
-                class="text-sm"
-                @click="saveCalendar"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <settings-calendar v-if="activeView === settingsSections.calendar" :calendars="calendars" />
 
       <!-- appointments and booking settings -->
       <div v-if="activeView === settingsSections.appointmentsAndBooking">
@@ -205,30 +76,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject, onMounted } from 'vue';
+import { ref } from 'vue';
 import { settingsSections } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import SettingsGeneral from '@/components/SettingsGeneral';
-import SecondaryButton from '@/elements/SecondaryButton';
-import PrimaryButton from '@/elements/PrimaryButton';
+import SettingsCalendar from '@/components/SettingsCalendar';
 
 // icons
 import {
-  IconArrowRight,
   IconChevronRight,
   IconSearch,
-  IconCalendar,
-  IconPencil,
-  IconX,
 } from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
-const call = inject('call');
-const refresh = inject('refresh');
 
 // view properties
 defineProps({
@@ -243,102 +107,4 @@ const show = (key) => {
   router.replace({ name: route.name, params: { view: key } });
   activeView.value = settingsSections[key];
 };
-
-// calendar user input to add or edit calendar connection
-const inputModes = {
-  hidden: 0,
-  add:    1,
-  edit:   2,
-};
-const inputMode = ref(inputModes.hidden);
-const defaultCalendarInput = {
-  title:    '',
-  color:    '',
-  url:      '',
-  user:     '',
-  password: '',
-};
-const calendarInput = reactive({
-  id: null,
-  data: { ...defaultCalendarInput }
-});
-
-// clear input fields
-const resetInput = () => {
-  calendarInput.id = null;
-  calendarInput.data = { ...defaultCalendarInput };
-  inputMode.value = inputModes.hidden;
-};
-
-// set input mode for adding or editing
-const addCalendar = () => {
-  inputMode.value = inputModes.add;
-};
-const editCalendar = async (id) => {
-  inputMode.value = inputModes.edit;
-  calendarInput.id = id;
-  const { data } = await call('cal/' + id).get().json();
-  for (const attr in data.value) {
-    calendarInput.data[attr] = data.value[attr];
-  }
-};
-const assignCalendar = (title, url) => {
-  inputMode.value = inputModes.add;
-  calendarInput.data.title = title;
-  calendarInput.data.url = url;
-  calendarInput.data.user = principal.user;
-  calendarInput.data.password = principal.password;
-};
-
-// do remove a given calendar connection
-const deleteCalendar = async (id) => {
-  await call("cal/" + id).delete();
-  refresh();
-};
-
-// do save calendar data
-const saveCalendar = async () => {
-  if (inputMode.value === inputModes.add) {
-    await call("cal").post(calendarInput.data);
-  }
-  if (inputMode.value === inputModes.edit) {
-    await call("cal/" + calendarInput.id).put(calendarInput.data);
-  }
-  refresh();
-  resetInput();
-};
-
-// discover calendars by principal
-const principal = reactive({
-  url:      '',
-  user:     '',
-  password: '',
-});
-const processPrincipal = ref(false);
-const searchResultCalendars = ref([]);
-const getRemoteCalendars = async () => {
-  processPrincipal.value = true;
-  const { error, data } = await call("rmt/calendars").post(principal);
-  searchResultCalendars.value = !error.value ? JSON.parse(data.value) : [];
-  processPrincipal.value = false;
-};
-
-// preset of available calendar colors
-const colors = [
-  '#ff7b91',
-  '#fe64b6',
-  '#c276c5',
-  '#b865ff',
-  '#8fa5ff',
-  '#64c2d0',
-  '#64bead',
-  '#73c690',
-  '#e0ad6a',
-  '#ff8b67 ',
-];
-
-// initially load data when component gets remounted
-onMounted(async () => {
-  await refresh();
-});
 </script>
