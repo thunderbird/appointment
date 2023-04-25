@@ -69,13 +69,14 @@ export const viewTypes = {
 };
 
 // sections on settings page
+// TODO: enable implemented sections
 export const settingsSections = {
   general:                1,
   calendar:               2,
-  appointmentsAndBooking: 3,
-  account:                4,
-  privacy:                5,
-  faq:                    6,
+  // appointmentsAndBooking: 3,
+  // account:                4,
+  // privacy:                5,
+  // faq:                    6,
 };
 
 // available color schemes for theme

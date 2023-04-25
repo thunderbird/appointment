@@ -187,9 +187,7 @@ const pendingAppointments = computed(() => {
   return props.appointments?.filter(a => a.status === appointmentState.pending);
 });
 
-// get remote calendar data for current month
-const eventsFrom     = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
-const eventsTo       = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
+// get remote calendar data for current year
 const calendarEvents = ref([]);
 
 const getRemoteEvents = async (from, to) => {
@@ -206,13 +204,15 @@ const getRemoteEvents = async (from, to) => {
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
+  const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
+  const eventsTo   = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);
 });
 
 // react to user calendar navigation
 watch(() => activeDate.value, (newValue, oldValue) => {
   // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-  if (dj(oldValue).format('YYYY-MM') !== dj(newValue).format('YYYY-MM')) {
+  if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
     getRemoteEvents(
       dj(newValue).startOf('year').format('YYYY-MM-DD'),
       dj(newValue).endOf('year').format('YYYY-MM-DD')

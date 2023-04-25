@@ -35,6 +35,10 @@ class LocationType(enum.Enum):
   inperson = 1 # appointment is held in person
   online   = 2 # appointment is held online
 
+class CalendarProvider(enum.Enum):
+  caldav   = 1 # calendar provider serves via CalDAV
+  google   = 2 # calendar provider is Google via its own Rest API
+
 
 class Subscriber(Base):
   __tablename__ = "subscribers"
@@ -55,6 +59,7 @@ class Calendar(Base):
 
   id           = Column(Integer, primary_key=True, index=True)
   owner_id     = Column(Integer, ForeignKey("subscribers.id"))
+  provider     = Column(Enum(CalendarProvider), default=CalendarProvider.caldav)
   title        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
   color        = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=32), index=True)
   url          = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=2048), index=False)
