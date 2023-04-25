@@ -1,7 +1,9 @@
 import os
 import json
+import logging
+import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 
 from src.controller.google import GoogleClient
@@ -15,14 +17,14 @@ google_client = GoogleClient(os.getenv("GOOGLE_AUTH_CLIENT_ID"), os.getenv("GOOG
 try:
     google_client.setup()
 except:
-    # TODO: log
-    print("WARNING: Google Client could not be setup, bad credentials?")
+    # google client setup was not possible
+    logging.warning('[routes.google] Google Client could not be setup, bad credentials?')
 
 
 @router.get("/auth")
 def auth():
     """Starts the google oauth process"""
-    return RedirectResponse(google_client.get_redirect_url())
+    return RedirectResponse(google_client.get_redirect_url(), status_code=303)
 
 
 @router.get("/callback")
@@ -31,7 +33,7 @@ def callback(code: str):
     creds = google_client.get_credentials(code)
 
     if creds is None:
-        return {}  # TODO log? error?
+        raise HTTPException(status_code=401, detail="Google authentication credentials are not valid")
 
     # Maybe store token/refresh token in db or a session, creds include client secret so don't expose to end-user pls!
     """
@@ -39,9 +41,9 @@ def callback(code: str):
     {"token": "<the token>", "refresh_token": "<refresh token>", "token_uri": "<token uri>", "client_id": "<client id>", "client_secret": "<client secret>", "scopes": <scopes>, "expiry": "2023-04-18T18:41:10.317778Z"}
     """
     TOKEN_PATH = './src/tmp/test.json' # TODO
-    credentials = json.loads(creds.to_json())
-    token = credentials["token"]
-    refresh_token = credentials["refresh_token"]
+    # credentials = json.loads(creds.to_json())
+    # token = credentials["token"]
+    # refresh_token = credentials["refresh_token"]
     with open(TOKEN_PATH, 'w') as token:
         token.write(creds.to_json())
 

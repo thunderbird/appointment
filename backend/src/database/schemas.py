@@ -4,7 +4,7 @@ Definitions of valid data shapes for database and query models.
 """
 from datetime import datetime
 from pydantic import BaseModel, Field
-from .models import SubscriberLevel, AppointmentStatus, LocationType, random_slug
+from .models import SubscriberLevel, AppointmentStatus, LocationType, CalendarProvider, random_slug
 
 
 """ ATTENDEE model schemas
@@ -94,7 +94,7 @@ class CalendarBase(BaseModel):
 
 
 class CalendarConnectionOut(CalendarBase):
-  provider: int
+  provider: CalendarProvider | None = CalendarProvider.caldav
   url: str
   user: str
 

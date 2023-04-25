@@ -87,8 +87,8 @@
     <!-- set calendar connection data -->
     <div v-if="inputMode" class="pl-6 flex flex-col gap-4 max-w-2xl">
       <div class="text-lg">
-        <span v-if="calendarInput.data.provider === calendarProviders.caldav">{{ t('label.caldav') }}</span>
-        <span v-if="calendarInput.data.provider === calendarProviders.google">{{ t('label.google') }}</span>
+        <span v-if="isCalDav">{{ t('label.caldav') }}</span>
+        <span v-if="isGoogle">{{ t('label.google') }}</span>
         &mdash;
         {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
@@ -108,7 +108,7 @@
           </option>
         </select>
       </label>
-      <label v-if="calendarInput.data.provider === calendarProviders.caldav" class="pl-4 flex items-center">
+      <label v-if="isCalDav" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
         <input
           v-model="calendarInput.data.url"
@@ -117,14 +117,17 @@
         />
       </label>
       <label class="pl-4 flex items-center">
-        <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
+        <div class="w-full max-w-2xs">
+          <span v-if="isCalDav">{{ t('label.username') }}</span>
+          <span v-if="isGoogle">{{ t('label.email') }}</span>
+        </div>
         <input
           v-model="calendarInput.data.user"
           type="text"
           class="w-full max-w-sm rounded-md w-full"
         />
       </label>
-      <label v-if="calendarInput.data.provider === calendarProviders.caldav" class="pl-4 flex items-center">
+      <label v-if="isCalDav" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
         <input
           v-model="calendarInput.data.password"
@@ -139,7 +142,7 @@
           @click="resetInput"
         />
         <primary-button
-          :label="inputMode === inputModes.add ? t('label.addCalendar') : t('label.saveChanges')"
+          :label="inputMode === inputModes.add ? t('label.connectCalendar') : t('label.saveChanges')"
           class="text-sm"
           @click="saveCalendar"
         />
@@ -150,7 +153,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject, onMounted } from 'vue';
+import { ref, reactive, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import SecondaryButton from '@/elements/SecondaryButton';
 import PrimaryButton from '@/elements/PrimaryButton';
@@ -199,6 +202,12 @@ const calendarInput = reactive({
   id: null,
   data: { ...defaultCalendarInput }
 });
+const isCalDav = computed(() => {
+  return calendarInput.data.provider === calendarProviders.caldav;
+});
+const isGoogle = computed(() => {
+  return calendarInput.data.provider === calendarProviders.google;
+});
 
 // clear input fields
 const resetInput = () => {
@@ -241,6 +250,9 @@ const saveCalendar = async () => {
   }
   if (inputMode.value === inputModes.edit) {
     await call("cal/" + calendarInput.id).put(calendarInput.data);
+  }
+  if (isGoogle.value) {
+    await call("google/auth").get();
   }
   refresh();
   resetInput();

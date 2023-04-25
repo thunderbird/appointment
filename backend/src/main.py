@@ -53,7 +53,7 @@ app = FastAPI()
 app.add_middleware(
   CORSMiddleware,
   # Work around for now :)
-  allow_origins=[os.getenv('FRONTEND_URL', 'http://localhost:8080')],
+  allow_origins=[os.getenv('FRONTEND_URL', 'http://localhost:8080'), 'https://accounts.google.com', 'https://www.googleapis.com/auth/calendar'],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
@@ -137,7 +137,7 @@ def read_my_calendar(id: int, db: Session = Depends(get_db), user: Auth0User = S
     raise HTTPException(status_code=404, detail="Calendar not found")
   if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=auth.subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
-  return schemas.CalendarConnectionOut(id=cal.id, title=cal.title, color=cal.color, url=cal.url, user=cal.user)
+  return schemas.CalendarConnectionOut(id=cal.id, title=cal.title, color=cal.color, provider=cal.provider, url=cal.url, user=cal.user)
 
 
 @app.put("/cal/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.CalendarOut)

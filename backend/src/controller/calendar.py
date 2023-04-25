@@ -76,7 +76,7 @@ class CalDavConnector:
         calendarId=self.user,
         timeMin=datetime.strptime(start, '%Y-%m-%d').isoformat() + 'Z',
         timeMax=datetime.strptime(end, '%Y-%m-%d').isoformat() + 'Z',
-        maxResults=10,
+        maxResults=1000, # TODO
         singleEvents=True,
         orderBy='startTime'
       ).execute()
@@ -109,18 +109,30 @@ class CalDavConnector:
 
   def create_event(self, event: schemas.Event, attendee: schemas.AttendeeBase):
     """add a new event to the connected calendar"""
-    calendar = self.client.calendar(url=self.url)
-    # save event
-    caldavEvent = calendar.save_event(
-      dtstart=datetime.fromisoformat(event.start),
-      dtend=datetime.fromisoformat(event.end),
-      summary=event.title,
-      description=event.description
-    )
-    # TODO: add organizer data
-    # save attendee data
-    caldavEvent.add_attendee((attendee.name, attendee.email))
-    caldavEvent.save()
+    if self.provider == CalendarProvider.google:
+      googleEvent = {
+        'summary': event.title,
+        # 'location': event.location_url, # TODO handle location types
+        'description': event.description,
+        'start': { 'dateTime': event.start + '+00:00' },
+        'end': { 'dateTime': event.end + '+00:00' },
+        'attendees': [{'displaName': attendee.name, 'email': attendee.email}]
+      }
+      self.client.events().insert(calendarId=self.user, body=googleEvent).execute()
+    if self.provider == CalendarProvider.caldav:
+      calendar = self.client.calendar(url=self.url)
+      # save event
+      caldavEvent = calendar.save_event(
+        dtstart=datetime.fromisoformat(event.start),
+        dtend=datetime.fromisoformat(event.end),
+        summary=event.title,
+        # TODO: handle location
+        description=event.description
+      )
+      # TODO: add organizer data
+      # save attendee data
+      caldavEvent.add_attendee((attendee.name, attendee.email))
+      caldavEvent.save()
     return event
 
 
