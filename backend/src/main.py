@@ -15,6 +15,7 @@ from fastapi_auth0 import Auth0User
 from datetime import timedelta, datetime
 from tempfile import NamedTemporaryFile
 
+from .database.models import Subscriber
 from .secrets import normalize_secrets
 
 # load any available .env into env
@@ -42,6 +43,8 @@ models.Base.metadata.create_all(bind=engine)
 from .controller.auth import Auth
 from .controller.calendar import CalDavConnector, Tools
 auth = Auth()
+
+from .dependencies.auth import get_subscriber
 
 # extra routes
 from .routes import google
@@ -95,12 +98,12 @@ def update_me(data: schemas.SubscriberIn, db: Session = Depends(get_db), user: A
   return me
 
 
-@app.get("/me/calendars", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=list[schemas.CalendarOut])
-def read_my_calendars(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.get("/me/calendars", response_model=list[schemas.CalendarOut])
+def read_my_calendars(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """get all calendar connections of authenticated subscriber"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=auth.subscriber.id)
+  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
   return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color) for c in calendars]
 
 

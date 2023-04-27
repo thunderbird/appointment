@@ -127,6 +127,8 @@ class SubscriberBase(SubscriberIn):
   name: str | None = None
   level: SubscriberLevel | None = SubscriberLevel.basic
   google_tkn: str | None = None
+  google_state : str | None = None
+  google_state_expires_at : datetime | None = None
 
 
 class Subscriber(SubscriberBase):

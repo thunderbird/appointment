@@ -50,6 +50,9 @@ class Subscriber(Base):
   level      = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
   timezone   = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
   google_tkn = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=2048), index=False)
+  # Temp storage for verifying google state tokens between authentication
+  google_state = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=512), index=False)
+  google_state_expires_at = Column(DateTime)
 
   calendars  = relationship("Calendar", cascade="all,delete", back_populates="owner")
   slots      = relationship("Slot", cascade="all,delete", back_populates="subscriber")
