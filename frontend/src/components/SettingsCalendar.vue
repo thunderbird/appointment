@@ -252,7 +252,8 @@ const saveCalendar = async () => {
     await call("cal/" + calendarInput.id).put(calendarInput.data);
   }
   if (isGoogle.value) {
-    await call("google/auth").get();
+    const googleUrl = await call("google/auth").get();
+    window.open(googleUrl.data.value.slice(1, -1));
   }
   refresh();
   resetInput();

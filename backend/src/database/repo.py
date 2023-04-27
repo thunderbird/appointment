@@ -51,6 +51,15 @@ def update_subscriber(db: Session, data: schemas.SubscriberIn, subscriber_id: in
   return db_subscriber
 
 
+def set_subscriber_google_tkn(db: Session, tkn: str, subscriber_id: int):
+  """update all subscriber attributes, they can edit themselves"""
+  db_subscriber = get_subscriber(db, subscriber_id)
+  db_subscriber.google_tkn = tkn
+  db.commit()
+  db.refresh(db_subscriber)
+  return db_subscriber
+
+
 def get_connections_limit(db: Session, subscriber_id: int):
   """return the number of allowed connections for given subscriber or -1 for unlimited connections"""
   db_subscriber = get_subscriber(db, subscriber_id)

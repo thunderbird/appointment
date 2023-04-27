@@ -3,6 +3,7 @@
 Handle connection to a CalDAV server.
 """
 import enum
+import json
 import os.path
 from caldav import DAVClient
 from google.auth.transport.requests import Request
@@ -20,7 +21,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 
 class CalDavConnector:
-  def __init__(self, provider: int, url: str, user: str, password: str):
+  def __init__(self, provider: int, url: str, user: str, password: str, google_tkn: str = None):
     # store credentials of remote location
     self.provider = provider
     self.url = url
@@ -29,12 +30,13 @@ class CalDavConnector:
     # connect to CalDAV server
     if provider == CalendarProvider.google:
       # https://developers.google.com/calendar/api/quickstart/python
-      TOKEN_PATH = './src/tmp/test.json' # TODO
+      # TOKEN_PATH = './src/tmp/test.json' # TODO
       creds = None
       # The file token.json stores the user's access and refresh tokens, and is
       # created automatically when the authorization flow completes for the first time.
-      if os.path.exists(TOKEN_PATH):
-        creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
+      if google_tkn:
+        # creds = json.loads(google_tkn)
+        creds = Credentials.from_authorized_user_file(google_tkn, SCOPES)
       # If there are no (valid) credentials available, let the user log in.
       if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:

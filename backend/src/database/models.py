@@ -43,15 +43,16 @@ class CalendarProvider(enum.Enum):
 class Subscriber(Base):
   __tablename__ = "subscribers"
 
-  id        = Column(Integer, primary_key=True, index=True)
-  username  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
-  email     = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
-  name      = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
-  level     = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
-  timezone  = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
+  id         = Column(Integer, primary_key=True, index=True)
+  username   = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
+  email      = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), unique=True, index=True)
+  name       = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
+  level      = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
+  timezone   = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=255), index=True)
+  google_tkn = Column(StringEncryptedType(String, secret, AesEngine, 'pkcs5', length=2048), index=False)
 
-  calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
-  slots     = relationship("Slot", cascade="all,delete", back_populates="subscriber")
+  calendars  = relationship("Calendar", cascade="all,delete", back_populates="owner")
+  slots      = relationship("Slot", cascade="all,delete", back_populates="subscriber")
 
 
 class Calendar(Base):
