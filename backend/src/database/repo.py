@@ -33,6 +33,13 @@ def get_subscriber_by_appointment(db: Session, appointment_id: int):
   return None
 
 
+def get_subscriber_by_google_state(db: Session, state: str):
+  """retrieve subscriber by google state, you'll have to manually check the google_state_expire_at!"""
+  if state is None:
+    return None
+  return db.query(models.Subscriber).filter(models.Subscriber.google_state == state).first()
+
+
 def create_subscriber(db: Session, subscriber: schemas.SubscriberBase):
   """create new subscriber"""
   db_subscriber = models.Subscriber(**subscriber.dict())

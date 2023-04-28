@@ -46,28 +46,23 @@ def google_auth(db: Session = Depends(get_db), subscriber: Subscriber = Depends(
 
 
 @router.get("/callback")
-def google_callback(code: str, state: str|None, db: Session = Depends(get_db)):
+def google_callback(code: str, state: str, db: Session = Depends(get_db)):
     """Callback for google to redirect the user back to us with a code"""
     creds = google_client.get_credentials(code)
 
     if creds is None:
         raise HTTPException(status_code=401, detail="Google authentication credentials are not valid")
 
-    email = google_client.get_email(creds.token)
-    subscriber = repo.get_subscriber_by_email(db, email)
+    subscriber = repo.get_subscriber_by_google_state(db, state)
+
+    if subscriber is None:
+        raise HTTPException(status_code=401, detail="Google authentication failed")
 
     if not subscriber.google_state_expires_at or subscriber.google_state_expires_at < datetime.now():
         # Clear state for our db copy
         repo.set_subscriber_google_state(db, None, subscriber.id)
 
         raise HTTPException(status_code=401, detail="Google authentication session expired, please try again.")
-
-    # State mismatch, auth didn't come from us!
-    if subscriber.google_state != state:
-        # Clear state for our db copy
-        repo.set_subscriber_google_state(db, None, subscriber.id)
-
-        raise HTTPException(status_code=401, detail="Google authentication failed")
 
     # Clear state for our db copy
     repo.set_subscriber_google_state(db, None, subscriber.id)
