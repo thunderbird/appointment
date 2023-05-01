@@ -2,12 +2,14 @@ import logging
 
 import requests
 from google_auth_oauthlib.flow import Flow
-from src.database import repo
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from ..database import repo
 
 class GoogleClient:
     """Authenticates with Google OAuth and allows the retrieval of Google Calendar information"""
     SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
-    client: Flow | None
+    client: Flow | None = None
 
     def __init__(self, client_id, client_secret, project_id, callback_url):
         self.config = {
@@ -24,6 +26,9 @@ class GoogleClient:
         self.client = None
 
     def setup(self):
+        # Ignore if we're already setup!
+        if self.client:
+            return
         """Actually create the client, this is separate, so we can catch any errors without breaking everything"""
         self.client = Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
 
@@ -33,13 +38,13 @@ class GoogleClient:
             return None
 
         # (Url, State ID)
-        url, state = self.client.authorization_url()
+        url, state = self.client.authorization_url(access_type="offline", prompt="consent select_account")
         # Store the state id, so we can refer to it when google redirects the user to our callback
         repo.set_subscriber_google_state(db, state, subscriber_id)
 
         return url
 
-    def get_credentials(self, code):
+    def get_credentials(self, code : str):
         if self.client is None:
             return None
 
@@ -59,3 +64,46 @@ class GoogleClient:
         response = requests.get('https://openidconnect.googleapis.com/v1/userinfo', headers={'Authorization': f"Bearer {token}"})
         userinfo = response.json()
         return userinfo.get('email')
+
+    def list_calendars(self, token):
+        response = {}
+        with build('calendar', 'v3', credentials=token) as service:
+            request = service.calendarList().list()
+            while request is not None:
+                try:
+                    response = request.execute()
+                except HttpError as e:
+                    logging.warning(f"[google.list_calendars] Request Error: {e.status_code}/{e.error_details}")
+
+                request = service.calendarList().list_next(request, response)
+
+        return response.get('items', [])
+
+
+    def list_events(self, calendar_id, time_min, time_max, token):
+        response = {}
+        with build('calendar', 'v3', credentials=token) as service:
+            request = service.events().list(calendarId=calendar_id, timeMin=time_min, timeMax=time_max)
+            while request is not None:
+                try:
+                    response = request.execute()
+                except HttpError as e:
+                    logging.warning(f"[google.list_events] Request Error: {e.status_code}/{e.error_details}")
+
+                request = service.events().list_next(request, response)
+
+        return response.get('items', [])
+
+
+    def create_event(self, calendar_id, body, token):
+        response = None
+        with build('calendar', 'v3', credentials=token) as service:
+            try:
+                response = service.events().insert(calendarId=calendar_id, sendUpdates='all', body=body).execute()
+            except HttpError as e:
+                logging.warning(f"[google.add_event] Request Error: {e.status_code}/{e.error_details}")
+
+        return response
+
+    def delete_event(self, calendar_id, event_id, token):
+        pass

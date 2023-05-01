@@ -2,22 +2,109 @@
 
 Handle connection to a CalDAV server.
 """
-import enum
 import json
-import os.path
 from caldav import DAVClient
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, date, timedelta, timezone
-from ..database import schemas
+
+from .google import GoogleClient
+from ..database import schemas, repo
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+
+class GoogleConnector:
+  """Generic interface for Google Calendar REST API. This should match CaldavConnector (except for the constructor)"""
+  def __init__(self, db, google_client : GoogleClient, calendar_id, subscriber_id, google_tkn: str = None):
+    # store credentials of remote location
+    self.db = db
+    self.google_client = google_client
+    self.provider = CalendarProvider.google
+    self.calendar_id = calendar_id
+    self.subscriber_id = subscriber_id
+    # Create the creds class from our token (this requires a refresh token!!)
+    self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
+
+  def list_calendars(self):
+    """find all calendars on the remote server"""
+    calendars = []
+    remote_calendars = self.google_client.list_calendars(self.google_token)
+    for c in remote_calendars:
+      calendars.append(schemas.CalendarConnectionOut(
+        title=c.summary,
+        url=str(c.id),
+        user=c.id,
+      ))
+
+    return calendars
+
+  def list_events(self, start, end):
+    """find all events in given date range on the remote server"""
+    time_min = datetime.strptime(start, '%Y-%m-%d').isoformat() + 'Z'
+    time_max = datetime.strptime(end, '%Y-%m-%d').isoformat() + 'Z'
+
+    # We're storing google cal id in user...for now.
+    remote_events = self.google_client.list_events(self.calendar_id, time_min, time_max, self.google_token)
+
+    events = []
+    for event in remote_events:
+      status = event.get('status')
+
+      # Ignore cancelled events
+      if status == 'cancelled':
+        continue
+
+      summary = event.get('summary', 'Title not found!')
+      description = event.get('description', '')
+
+      all_day = 'date' in event.get('start')
+
+      start = event.get('start')['date'] if all_day else event.get('start')['dateTime']
+      end = event.get('end')['date'] if all_day else event.get('end')['dateTime']
+
+      events.append(schemas.Event(
+        title=summary,
+        start=start,
+        end=end,
+        all_day=all_day,
+        description=description
+      ))
+
+    return events
+
+  def create_event(self, event: schemas.Event, attendee: schemas.AttendeeBase, organizer: schemas.Subscriber):
+    """add a new event to the connected calendar"""
+
+    description = [event.description]
+
+    # Place url and phone in desc if available:
+    if event.location.url:
+      description.append(f"Join online at: {event.location.url}")
+
+    if event.location.phone:
+      description.append(f"Join by phone: {event.location.phone}")
+
+    body = {
+      'summary': event.title,
+      'location': event.location.name,
+      'description': "\n".join(description),
+      'start': { 'dateTime': event.start + '+00:00' },
+      'end': { 'dateTime': event.end + '+00:00' },
+      'attendees': [
+        {'displayName': organizer.name, 'email': organizer.email},
+        {'displayName': attendee.name, 'email': attendee.email}
+      ]
+    }
+    self.google_client.create_event(calendar_id=self.calendar_id, body=body, token=self.google_token)
+    return event
+
+  def delete_events(self, start):
+    """delete all events in given date range from the server"""
+    # Not used?
+    pass
 
 
 class CalDavConnector:
@@ -27,30 +114,10 @@ class CalDavConnector:
     self.url = url
     self.user = user
     self.password = password
+    self.google_token = google_tkn
     # connect to CalDAV server
     if provider == CalendarProvider.google:
-      # https://developers.google.com/calendar/api/quickstart/python
-      # TOKEN_PATH = './src/tmp/test.json' # TODO
-      creds = None
-      # The file token.json stores the user's access and refresh tokens, and is
-      # created automatically when the authorization flow completes for the first time.
-      if google_tkn:
-        # creds = json.loads(google_tkn)
-        creds = Credentials.from_authorized_user_file(google_tkn, SCOPES)
-      # If there are no (valid) credentials available, let the user log in.
-      if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-          creds.refresh(Request())
-        # else:
-        #   flow = InstalledAppFlow.from_client_secrets_file('./google_credentials.json', SCOPES)
-        #   creds = flow.run_local_server(port=0)
-        # # Save the credentials for the next run
-        # with open(TOKEN_PATH, 'w') as token:
-        #   token.write(creds.to_json())
-      try:
-        self.client = build('calendar', 'v3', credentials=creds)
-      except HttpError as error:
-        print('An error occurred: %s' % error)
+      raise DeprecationWarning()
 
     if provider == CalendarProvider.caldav:
       # https://github.com/python-caldav/caldav/blob/master/examples/basic_usage_examples.py
@@ -109,7 +176,7 @@ class CalDavConnector:
     return events
 
 
-  def create_event(self, event: schemas.Event, attendee: schemas.AttendeeBase):
+  def create_event(self, event: schemas.Event, attendee: schemas.AttendeeBase, organizer: schemas.Subscriber):
     """add a new event to the connected calendar"""
     if self.provider == CalendarProvider.google:
       googleEvent = {
@@ -131,8 +198,8 @@ class CalDavConnector:
         # TODO: handle location
         description=event.description
       )
-      # TODO: add organizer data
       # save attendee data
+      caldavEvent.add_attendee((organizer.name, organizer.email))
       caldavEvent.add_attendee((attendee.name, attendee.email))
       caldavEvent.save()
     return event

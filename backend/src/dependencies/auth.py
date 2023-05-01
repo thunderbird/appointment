@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from fastapi import Depends, Security
 from fastapi_auth0 import Auth0User
 from sqlalchemy.orm import Session
@@ -6,7 +5,6 @@ from sqlalchemy.orm import Session
 from ..controller.auth import Auth
 from ..database import repo
 from ..database.database import SessionLocal
-from ..secrets import normalize_secrets
 
 
 def get_db():

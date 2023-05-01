@@ -84,7 +84,7 @@ class Mailer:
     SMTP_PASS     = os.getenv('SMTP_PASS')
 
     # check config
-    url = 'http://' + SMTP_URL + ':' + SMTP_PORT
+    url = f"http://{SMTP_URL}:{SMTP_PORT}"
     if not validators.url(url):
       # url is not valid
       logging.error('[mailer.send] No valid SMTP url configured: ' + url)

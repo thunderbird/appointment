@@ -147,6 +147,15 @@ class AppointmentSlots(BaseModel):
   slots: list[SlotBase] = []
 
 
+class EventLocation(BaseModel):
+  type: LocationType | None = LocationType.inperson
+  suggestions: str | None = None
+  selected: str | None = None
+  name: str | None = None
+  url: str | None = None
+  phone: str | None = None
+
+
 class Event(BaseModel):
   title: str
   start: str
@@ -155,6 +164,7 @@ class Event(BaseModel):
   description: str | None = None
   calendar_title: str | None = None
   calendar_color: str | None = None
+  location: EventLocation | None = None
 
 
 class FileDownload(BaseModel):

@@ -1,26 +1,21 @@
 import os
-import logging
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Depends, Security
 from fastapi.responses import RedirectResponse
-from fastapi_auth0 import Auth0User
 
 from ..controller.google import GoogleClient
-from ..controller.auth import Auth
 from ..database import repo
 from ..database.database import SessionLocal
 from sqlalchemy.orm import Session
 
+from ..database.schemas import CalendarConnection
 from ..dependencies.auth import get_subscriber
 
-from ..database.models import Subscriber
+from ..database.models import Subscriber, CalendarProvider
+from ..dependencies.google import get_google_client
 
 router = APIRouter()
-
-# Maybe not the best place for this, but works for now!
-google_client = GoogleClient(os.getenv("GOOGLE_AUTH_CLIENT_ID"), os.getenv("GOOGLE_AUTH_SECRET"),
-                             os.getenv("GOOGLE_AUTH_PROJECT_ID"), os.getenv("GOOGLE_AUTH_CALLBACK"))
 
 
 def get_db():
@@ -32,21 +27,15 @@ def get_db():
         db.close()
 
 
-try:
-    google_client.setup()
-except:
-    # google client setup was not possible
-    logging.warning('[routes.google] Google Client could not be setup, bad credentials?')
-
 
 @router.get("/auth")
-def google_auth(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+def google_auth(google_client : GoogleClient = Depends(get_google_client), db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Starts the google oauth process"""
     return google_client.get_redirect_url(db, subscriber.id)
 
 
 @router.get("/callback")
-def google_callback(code: str, state: str, db: Session = Depends(get_db)):
+def google_callback(code: str, state: str, google_client : GoogleClient = Depends(get_google_client), db: Session = Depends(get_db)):
     """Callback for google to redirect the user back to us with a code"""
     creds = google_client.get_credentials(code)
 
@@ -68,19 +57,14 @@ def google_callback(code: str, state: str, db: Session = Depends(get_db)):
     repo.set_subscriber_google_state(db, None, subscriber.id)
 
     # Store credentials in db. Since creds include client secret don't expose to end-user!
-    """
-    Sample output:
-    {"token": "<the token>", "refresh_token": "<refresh token>", "token_uri": "<token uri>", "client_id": "<client id>", "client_secret": "<client secret>", "scopes": <scopes>, "expiry": "2023-04-18T18:41:10.317778Z"}
-    """
-    # TODO get currently logged in user
-    # subscriber = repo.get_subscriber_by_email(db=db, email=user.email)
-    repo.set_subscriber_google_tkn(db, creds.to_json(), subscriber.id)
-    # TOKEN_PATH = './src/tmp/test.json' # TODO
-    # credentials = json.loads(creds.to_json())
-    # token = credentials["token"]
-    # refresh_token = credentials["refresh_token"]
-    # with open(TOKEN_PATH, 'w') as token:
-        # token.write(creds.to_json())
+    creds_serialized = creds.to_json()
+    repo.set_subscriber_google_tkn(db, creds_serialized, subscriber.id)
+
+    # Grab all of the calendars
+    calendars = google_client.list_calendars(creds)
+    for calendar in calendars:
+        cal = CalendarConnection(title=calendar.get('summary'), color=calendar.get('backgroundColor'), user=calendar.get('id'), password='', url=calendar.get('id'), provider=CalendarProvider.google)
+        repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
 
     # And then RedirectResponse back to frontend :)
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")
