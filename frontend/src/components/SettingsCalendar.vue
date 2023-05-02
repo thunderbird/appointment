@@ -92,7 +92,7 @@
         &mdash;
         {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
-      <label class="pl-4 flex items-center">
+      <label v-if="isCalDav || inputMode === inputModes.edit" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
         <input
           v-model="calendarInput.data.title"
@@ -100,13 +100,17 @@
           class="w-full max-w-sm rounded-md w-full"
         />
       </label>
-      <label class="pl-4 flex items-center">
+      <label v-if="isCalDav || inputMode === inputModes.edit" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
-        <select v-model="calendarInput.data.color" class="w-full max-w-sm rounded-md w-full">
-          <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
-            {{ color }}
-          </option>
-        </select>
+        <div class="flex gap-4 items-center w-full max-w-sm">
+          <select v-if="inputMode === inputModes.add" v-model="calendarInput.data.color" class="rounded-md w-full">
+            <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
+              {{ color }}
+            </option>
+          </select>
+          <input v-else type="text" v-model="calendarInput.data.color" class="rounded-md w-full" />
+          <div class="w-8 h-8 rounded-full shrink-0" :style="{ backgroundColor: calendarInput.data.color }"></div>
+        </div>
       </label>
       <label v-if="isCalDav" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
@@ -245,16 +249,20 @@ const deleteCalendar = async (id) => {
 
 // do save calendar data
 const saveCalendar = async () => {
-  if (inputMode.value === inputModes.add) {
+  // add new caldav calendar
+  if (isCalDav.value && inputMode.value === inputModes.add) {
     await call("cal").post(calendarInput.data);
   }
-  if (inputMode.value === inputModes.edit) {
-    await call("cal/" + calendarInput.id).put(calendarInput.data);
-  }
-  if (isGoogle.value) {
+  // add all google calendars connected to given gmail address
+  if (isGoogle.value && inputMode.value === inputModes.add) {
     const googleUrl = await call("google/auth").get();
     window.open(googleUrl.data.value.slice(1, -1));
   }
+  // edit existing calendar connection
+  if (inputMode.value === inputModes.edit) {
+    await call("cal/" + calendarInput.id).put(calendarInput.data);
+  }
+  // refresh list of calendars
   refresh();
   resetInput();
 };
