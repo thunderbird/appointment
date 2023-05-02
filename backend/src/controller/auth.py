@@ -54,7 +54,8 @@ class Auth:
           level = models.SubscriberLevel.pro, # TODO
         )
         db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
-    return db_subscriber
+      return db_subscriber
+    return None
 
   def init_management_api(self):
     """Helper function to get a management api token"""
