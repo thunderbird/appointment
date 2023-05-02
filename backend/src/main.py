@@ -86,17 +86,17 @@ def health():
 def login(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
   """endpoint to check frontend authed user and create user if not existing yet"""
   persisted_user = auth.persist_user(db, user)
-  if not persisted_user or not auth.subscriber:
+  if not persisted_user:
     raise HTTPException(status_code=403, detail="User credentials mismatch")
   return persisted_user
 
 
-@app.put("/me", dependencies=[Depends(auth.auth0.implicit_scheme)])
-def update_me(data: schemas.SubscriberIn, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.put("/me")
+def update_me(data: schemas.SubscriberIn, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to update data of authenticated subscriber"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  me = repo.update_subscriber(db=db, data=data, subscriber_id=auth.subscriber.id)
+  me = repo.update_subscriber(db=db, data=data, subscriber_id=subscriber.id)
   return me
 
 
@@ -109,63 +109,63 @@ def read_my_calendars(db: Session = Depends(get_db), subscriber: Subscriber = De
   return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color) for c in calendars]
 
 
-@app.get("/me/appointments", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=list[schemas.Appointment])
-def read_my_appointments(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.get("/me/appointments", response_model=list[schemas.Appointment])
+def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """get all appointments of authenticated subscriber"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  appointments = repo.get_appointments_by_subscriber(db, subscriber_id=auth.subscriber.id)
+  appointments = repo.get_appointments_by_subscriber(db, subscriber_id=subscriber.id)
   return appointments
 
 
-@app.post("/cal", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.CalendarOut)
-def create_my_calendar(calendar: schemas.CalendarConnection, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.post("/cal", response_model=schemas.CalendarOut)
+def create_my_calendar(calendar: schemas.CalendarConnection, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to add a new calendar connection for authenticated subscriber"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=auth.subscriber.id)
-  limit = repo.get_connections_limit(db=db, subscriber_id=auth.subscriber.id)
+  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
+  limit = repo.get_connections_limit(db=db, subscriber_id=subscriber.id)
   # check for connection limit
   if limit > 0 and len(calendars) >= limit:
     raise HTTPException(status_code=403, detail="Maximum number of calendar connections reached")
-  cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=auth.subscriber.id)
+  cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
   return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 
 
-@app.get("/cal/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.CalendarConnectionOut)
-def read_my_calendar(id: int, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.get("/cal/{id}", response_model=schemas.CalendarConnectionOut)
+def read_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to get a calendar from db"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   cal = repo.get_calendar(db, calendar_id=id)
   if cal is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
-  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=auth.subscriber.id):
+  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   return schemas.CalendarConnectionOut(id=cal.id, title=cal.title, color=cal.color, provider=cal.provider, url=cal.url, user=cal.user)
 
 
-@app.put("/cal/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.CalendarOut)
-def update_my_calendar(id: int, calendar: schemas.CalendarConnection, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.put("/cal/{id}", response_model=schemas.CalendarOut)
+def update_my_calendar(id: int, calendar: schemas.CalendarConnection, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to update an existing calendar connection for authenticated subscriber"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   if not repo.calendar_exists(db, calendar_id=id):
     raise HTTPException(status_code=404, detail="Calendar not found")
-  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=auth.subscriber.id):
+  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   cal = repo.update_subscriber_calendar(db=db, calendar=calendar, calendar_id=id)
   return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 
 
-@app.delete("/cal/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.CalendarOut)
-def delete_my_calendar(id: int, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.delete("/cal/{id}", response_model=schemas.CalendarOut)
+def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to remove a calendar from db"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   if not repo.calendar_exists(db, calendar_id=id):
     raise HTTPException(status_code=404, detail="Calendar not found")
-  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=auth.subscriber.id):
+  if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   cal = repo.delete_subscriber_calendar(db=db, calendar_id=id)
   return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
@@ -214,41 +214,41 @@ def create_my_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = 
   return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 
-@app.get("/apmt/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.Appointment)
-def read_my_appointment(id: str, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.get("/apmt/{id}", response_model=schemas.Appointment)
+def read_my_appointment(id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to get an appointment from db by id"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
-  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=auth.subscriber.id):
+  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Appointment not owned by subscriber")
   return db_appointment
 
 
-@app.put("/apmt/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.Appointment)
-def update_my_appointment(id: int, a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.put("/apmt/{id}", response_model=schemas.Appointment)
+def update_my_appointment(id: int, a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to update an existing appointment with slots"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
-  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=auth.subscriber.id):
+  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Appointment not owned by subscriber")
   return repo.update_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots, appointment_id=id)
 
 
-@app.delete("/apmt/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.Appointment)
-def delete_my_appointment(id: int, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.delete("/apmt/{id}", response_model=schemas.Appointment)
+def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to remove an appointment from db"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_appointment = repo.get_appointment(db, appointment_id=id)
   if db_appointment is None:
     raise HTTPException(status_code=404, detail="Appointment not found")
-  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=auth.subscriber.id):
+  if not repo.appointment_is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Appointment not owned by subscriber")
   return repo.delete_calendar_appointment(db=db, appointment_id=id)
 

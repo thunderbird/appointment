@@ -26,7 +26,6 @@ class Auth:
     """verify Appointment subscription via Auth0, return user or None"""
     scopes = {'read:calendars': 'Read Calendar Ressources'} # TODO
     self.auth0 = Auth0(domain=domain, api_audience=api_audience, scopes=scopes)
-    self.subscriber = None
 
   def persist_user(self, db: Session, user: Auth0User):
     """Sync authed user to Appointment db"""
@@ -55,8 +54,8 @@ class Auth:
           level = models.SubscriberLevel.pro, # TODO
         )
         db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
-      self.subscriber = db_subscriber
-    return self.subscriber
+      return db_subscriber
+    return None
 
   def init_management_api(self):
     """Helper function to get a management api token"""

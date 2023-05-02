@@ -64,6 +64,7 @@ def google_callback(code: str, state: str, google_client : GoogleClient = Depend
     calendars = google_client.list_calendars(creds)
     for calendar in calendars:
         cal = CalendarConnection(title=calendar.get('summary'), color=calendar.get('backgroundColor'), user=calendar.get('id'), password='', url=calendar.get('id'), provider=CalendarProvider.google)
+        # TODO: add calendar only if url doesn't already exist
         repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
 
     # And then RedirectResponse back to frontend :)
