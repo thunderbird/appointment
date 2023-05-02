@@ -8,18 +8,20 @@ import validators
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Security
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi_auth0 import Auth0User
-from datetime import timedelta, datetime
-from tempfile import NamedTemporaryFile
-
+from datetime import timedelta
+from .database.schemas import EventLocation
 from .secrets import normalize_secrets
 
+# Do this before dependencies!!!!
 # load any available .env into env
 load_dotenv()
 normalize_secrets()
+
+from .controller.google import GoogleClient
+from .database.models import Subscriber, CalendarProvider
+from .dependencies.google import get_google_client
 
 # init logging
 level = os.getenv('LOG_LEVEL', 'ERROR')
@@ -40,8 +42,14 @@ models.Base.metadata.create_all(bind=engine)
 
 # authentication
 from .controller.auth import Auth
-from .controller.calendar import CalDavConnector, Tools
+from .controller.calendar import CalDavConnector, Tools, GoogleConnector
+
 auth = Auth()
+
+from .dependencies.auth import get_subscriber
+
+# extra routes
+from .routes import google
 
 # init app
 app = FastAPI()
@@ -50,11 +58,14 @@ app = FastAPI()
 app.add_middleware(
   CORSMiddleware,
   # Work around for now :)
-  allow_origins=[os.getenv('FRONTEND_URL', 'http://localhost:8080')],
+  allow_origins=[os.getenv('FRONTEND_URL', 'http://localhost:8080'), 'https://accounts.google.com', 'https://www.googleapis.com/auth/calendar'],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
 )
+
+# Mix in our extra routes
+app.include_router(google.router, prefix='/google')
 
 def get_db():
   """run database session"""
@@ -89,12 +100,12 @@ def update_me(data: schemas.SubscriberIn, db: Session = Depends(get_db), user: A
   return me
 
 
-@app.get("/me/calendars", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=list[schemas.CalendarOut])
-def read_my_calendars(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.get("/me/calendars", response_model=list[schemas.CalendarOut])
+def read_my_calendars(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """get all calendar connections of authenticated subscriber"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=auth.subscriber.id)
+  calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
   return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color) for c in calendars]
 
 
@@ -131,7 +142,7 @@ def read_my_calendar(id: int, db: Session = Depends(get_db), user: Auth0User = S
     raise HTTPException(status_code=404, detail="Calendar not found")
   if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=auth.subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
-  return schemas.CalendarConnectionOut(id=cal.id, title=cal.title, color=cal.color, url=cal.url, user=cal.user)
+  return schemas.CalendarConnectionOut(id=cal.id, title=cal.title, color=cal.color, provider=cal.provider, url=cal.url, user=cal.user)
 
 
 @app.put("/cal/{id}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.CalendarOut)
@@ -160,24 +171,30 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), user: Auth0User =
   return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 
 
-@app.post("/rmt/calendars", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=list[schemas.CalendarConnectionOut])
-def read_caldav_calendars(connection: schemas.CalendarConnection, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.post("/rmt/calendars", response_model=list[schemas.CalendarConnectionOut])
+def read_caldav_calendars(connection: schemas.CalendarConnection, google_client : GoogleClient = Depends(get_google_client), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to get calendars from a remote CalDAV server"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-  con = CalDavConnector(connection.url, connection.user, connection.password)
+  if connection.provider == CalendarProvider.google:
+    con = GoogleConnector(db=None, google_client=google_client, calendar_id=connection.user, subscriber_id=subscriber.id, google_tkn=subscriber.google_tkn)
+  else:
+    con = CalDavConnector(connection.provider, connection.url, connection.user, connection.password)
   return con.list_calendars()
 
 
-@app.get("/rmt/cal/{id}/{start}/{end}", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=list[schemas.Event])
-def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
+def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_db), google_client : GoogleClient = Depends(get_google_client), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to get events in a given date range from a remote calendar"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   db_calendar = repo.get_calendar(db, calendar_id=id)
   if db_calendar is None:
     raise HTTPException(status_code=404, detail="Calendar not found")
-  con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
+  if db_calendar.provider == CalendarProvider.google:
+    con = GoogleConnector(db=db, google_client=google_client, calendar_id=db_calendar.user, subscriber_id=subscriber.id, google_tkn=subscriber.google_tkn)
+  else:
+    con = CalDavConnector(db_calendar.provider, db_calendar.url, db_calendar.user, db_calendar.password, subscriber.google_tkn)
   events = con.list_events(start, end)
   for e in events:
     e.calendar_title = db_calendar.title
@@ -185,14 +202,14 @@ def read_caldav_events(id: int, start: str, end: str, db: Session = Depends(get_
   return events
 
 
-@app.post("/apmt", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.Appointment)
-def create_my_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@app.post("/apmt", response_model=schemas.Appointment)
+def create_my_calendar_appointment(a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to add a new appointment with slots for a given calendar"""
-  if not auth.subscriber:
+  if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   if not repo.calendar_exists(db, calendar_id=a_s.appointment.calendar_id):
     raise HTTPException(status_code=404, detail="Calendar not found")
-  if not repo.calendar_is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=auth.subscriber.id):
+  if not repo.calendar_is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=subscriber.id):
     raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
   return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
@@ -248,7 +265,7 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
 
 
 @app.put("/apmt/public/{slug}", response_model=schemas.SlotAttendee)
-def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db)):
+def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Session = Depends(get_db), google_client : GoogleClient = Depends(get_google_client)):
   """endpoint to update a time slot for an appointment via public link and create an event in remote calendar"""
   db_appointment = repo.get_public_appointment(db, slug=slug)
   if db_appointment is None:
@@ -267,16 +284,32 @@ def update_public_appointment_slot(slug: str, s_a: schemas.SlotAttendee, db: Ses
     title=db_appointment.title,
     start=slot.start.isoformat(),
     end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
-    description=db_appointment.details
+    description=db_appointment.details,
+    location=EventLocation(
+      type=db_appointment.location_type,
+      suggestions=db_appointment.location_suggestions,
+      selected=db_appointment.location_selected,
+      name=db_appointment.location_name,
+      url=db_appointment.location_url,
+      phone=db_appointment.location_phone
+    )
   )
+  # grab the subscriber
+  organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
+
   # create remote event
-  con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-  con.create_event(event=event, attendee=s_a.attendee)
+  if db_calendar.provider == CalendarProvider.google:
+    con = GoogleConnector(db=db, google_client=google_client, calendar_id=db_calendar.user, subscriber_id=organizer.id, google_tkn=organizer.google_tkn)
+  else:
+    con = CalDavConnector(db_calendar.provider, db_calendar.url, db_calendar.user, db_calendar.password, organizer.google_tkn)
+  con.create_event(event=event, attendee=s_a.attendee, organizer=organizer)
+
   # update appointment slot data
   repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
+
   # send mail with .ics attachment to attendee
-  organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
   Tools().send_vevent(db_appointment, slot, organizer, s_a.attendee)
+
   return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 

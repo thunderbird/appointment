@@ -5,5 +5,7 @@ dist
 *.db
 *.ini
 *.log
+*credentials.json
+*.pickle
 .env
 venv

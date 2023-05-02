@@ -43,3 +43,14 @@ def normalize_secrets():
         os.environ['SMTP_PASS'] = secrets.get('password')
         os.environ['SMTP_SENDER'] = secrets.get('sender')
         os.environ['SMTP_SECRETS'] = ''
+
+    google_oauth_secrets = os.getenv('GOOGLE_OAUTH_SECRETS')
+
+    if google_oauth_secrets:
+        secrets = json.loads(google_oauth_secrets)
+
+        os.environ['GOOGLE_AUTH_CLIENT_ID'] = secrets.get('client_id')
+        os.environ['GOOGLE_AUTH_SECRET'] = secrets.get('secret')
+        os.environ['GOOGLE_AUTH_PROJECT_ID'] = secrets.get('project_id')
+        os.environ['GOOGLE_AUTH_CALLBACK'] = secrets.get('callback_url')
+        os.environ['GOOGLE_OAUTH_SECRETS'] = ''

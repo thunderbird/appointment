@@ -3,6 +3,7 @@
 Repository providing CRUD functions for all database models. 
 """
 import os
+from datetime import timedelta, datetime
 
 from sqlalchemy.orm import Session
 from . import models, schemas
@@ -32,6 +33,13 @@ def get_subscriber_by_appointment(db: Session, appointment_id: int):
   return None
 
 
+def get_subscriber_by_google_state(db: Session, state: str):
+  """retrieve subscriber by google state, you'll have to manually check the google_state_expire_at!"""
+  if state is None:
+    return None
+  return db.query(models.Subscriber).filter(models.Subscriber.google_state == state).first()
+
+
 def create_subscriber(db: Session, subscriber: schemas.SubscriberBase):
   """create new subscriber"""
   db_subscriber = models.Subscriber(**subscriber.dict())
@@ -46,6 +54,30 @@ def update_subscriber(db: Session, data: schemas.SubscriberIn, subscriber_id: in
   db_subscriber = get_subscriber(db, subscriber_id)
   for key, value in data:
     setattr(db_subscriber, key, value)
+  db.commit()
+  db.refresh(db_subscriber)
+  return db_subscriber
+
+
+def set_subscriber_google_tkn(db: Session, tkn: str, subscriber_id: int):
+  """update all subscriber attributes, they can edit themselves"""
+  db_subscriber = get_subscriber(db, subscriber_id)
+  db_subscriber.google_tkn = tkn
+  db.commit()
+  db.refresh(db_subscriber)
+  return db_subscriber
+
+
+def set_subscriber_google_state(db: Session, state: str|None, subscriber_id: int):
+  """temp store the google state so we can refer to it when we get back"""
+  db_subscriber = get_subscriber(db, subscriber_id)
+  db_subscriber.google_state = state
+
+  if state is None:
+    db_subscriber.google_state_expires_at = None
+  else:
+    db_subscriber.google_state_expires_at = datetime.now() + timedelta(minutes=3)
+
   db.commit()
   db.refresh(db_subscriber)
   return db_subscriber
