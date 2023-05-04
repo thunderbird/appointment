@@ -4,6 +4,8 @@ Boot application, init database, authenticate user and provide all API endpoints
 """
 import logging
 import os
+import sys
+
 import validators
 
 from dotenv import load_dotenv
@@ -25,14 +27,20 @@ from .dependencies.google import get_google_client
 
 # init logging
 level = os.getenv('LOG_LEVEL', 'ERROR')
+use_log_stream = os.getenv('LOG_USE_STREAM', False)
 # TODO: limit log file size
 # https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
-logging.basicConfig(
-  format='%(asctime)s %(levelname)-8s %(message)s',
-  filename='appointment.log',
-  level=getattr(logging, level),
-  datefmt='%Y-%m-%d %H:%M:%S'
-)
+log_config = {
+  'format': '%(asctime)s %(levelname)-8s %(message)s',
+  'level': getattr(logging, level),
+  'datefmt': '%Y-%m-%d %H:%M:%S'
+}
+if use_log_stream:
+  log_config['stream'] = sys.stdout
+else:
+  log_config['filename'] = 'appointment.log'
+
+logging.basicConfig(**log_config)
 
 # database
 from sqlalchemy.orm import Session

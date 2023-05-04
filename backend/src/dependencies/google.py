@@ -12,7 +12,6 @@ _google_client = GoogleClient(os.getenv("GOOGLE_AUTH_CLIENT_ID"), os.getenv("GOO
 def get_google_client():
     """Returns the google client instance"""
     try:
-        print("Setting up google client")
         _google_client.setup()
     except Exception as e:
         # google client setup was not possible
