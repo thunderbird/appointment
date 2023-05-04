@@ -8,7 +8,7 @@ from ..database import repo
 
 class GoogleClient:
     """Authenticates with Google OAuth and allows the retrieval of Google Calendar information"""
-    SCOPES = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
+    SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
     client: Flow | None = None
 
     def __init__(self, client_id, client_secret, project_id, callback_url):
