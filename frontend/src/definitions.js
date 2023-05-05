@@ -1,4 +1,12 @@
 // appointment location types
+export const subscriberLevels = {
+  basic: 1,
+  plus:  2,
+  pro:   3,
+  admin: 99,
+};
+
+// appointment location types
 export const locationTypes = {
   inPerson: 1,
   online:   2,
@@ -87,6 +95,7 @@ export const colorSchemes = {
 };
 
 export default {
+  subscriberLevels,
   appointmentState,
   appointmentViews,
   bookingCalendarViews,
