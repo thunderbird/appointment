@@ -90,22 +90,22 @@ def health():
   return {}
 
 
-@app.get("/login", dependencies=[Depends(auth.auth0.implicit_scheme)])
+@app.get("/login", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.SubscriberBase)
 def login(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
   """endpoint to check frontend authed user and create user if not existing yet"""
-  persisted_user = auth.persist_user(db, user)
-  if not persisted_user:
+  me = auth.persist_user(db, user)
+  if not me:
     raise HTTPException(status_code=403, detail="User credentials mismatch")
-  return persisted_user
+  return schemas.SubscriberBase(username=me.username, email=me.email, name=me.name, level=me.level, timezone=me.timezone)
 
 
-@app.put("/me")
+@app.put("/me", response_model=schemas.SubscriberBase)
 def update_me(data: schemas.SubscriberIn, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
   """endpoint to update data of authenticated subscriber"""
   if not subscriber:
     raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
   me = repo.update_subscriber(db=db, data=data, subscriber_id=subscriber.id)
-  return me
+  return schemas.SubscriberBase(username=me.username, email=me.email, name=me.name, level=me.level, timezone=me.timezone)
 
 
 @app.get("/me/calendars", response_model=list[schemas.CalendarOut])

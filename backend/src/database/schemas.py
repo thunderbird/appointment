@@ -126,12 +126,14 @@ class SubscriberBase(SubscriberIn):
   email: str
   name: str | None = None
   level: SubscriberLevel | None = SubscriberLevel.basic
+
+class SubscriberAuth(SubscriberBase):
   google_tkn: str | None = None
   google_state : str | None = None
   google_state_expires_at : datetime | None = None
 
 
-class Subscriber(SubscriberBase):
+class Subscriber(SubscriberAuth):
   id: int
   calendars: list[Calendar] = []
   slots: list[Slot] = []
