@@ -2,25 +2,28 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
-import logging
+from .secrets import normalize_secrets
+
 import os
+
+# load any available .env into env
+if os.getenv('APP_ENV', 'prod') == 'dev':
+  from dotenv import load_dotenv
+  load_dotenv()
+
+# This needs to be ran before any other imports
+normalize_secrets()
+
+import logging
 import sys
 
 import validators
 
-from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_auth0 import Auth0User
 from datetime import timedelta
 from .database.schemas import EventLocation
-from .secrets import normalize_secrets
-
-# Do this before dependencies!!!!
-# load any available .env into env
-load_dotenv()
-normalize_secrets()
-
 from .controller.google import GoogleClient
 from .database.models import Subscriber, CalendarProvider
 from .dependencies.google import get_google_client

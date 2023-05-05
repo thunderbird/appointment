@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL', "sqlite:///src/appointment.db")
+SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL')
 connect_args = {}
 
 if 'sqlite://' in SQLALCHEMY_DATABASE_URL:
