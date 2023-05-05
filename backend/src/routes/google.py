@@ -62,11 +62,13 @@ def google_callback(code: str, state: str, google_client : GoogleClient = Depend
 
     # Grab all of the google calendars
     calendars = google_client.list_calendars(creds)
+    error_occured = False
     for calendar in calendars:
         cal = CalendarConnection(title=calendar.get('summary'), color=calendar.get('backgroundColor'), user=calendar.get('id'), password='', url=calendar.get('id'), provider=CalendarProvider.google)
         # add calendar
         new_cal = repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
-        error_occured = new_cal is None
+        if new_cal is None:
+            error_occured = True
 
     # And then redirect back to frontend
     # TODO: if we have notifications later, send error_occured with url
