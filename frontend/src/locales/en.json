@@ -8,7 +8,7 @@
     "appointmentCreated": "Appointment created!",
     "appointmentsAndBookingSettings": "Appointments & booking settings",
     "bookSelection": "Book selection",
-    "calendarConnections": "Calendar connections",
+    "calendarsConnected": "Calendars connected",
     "calendarSettings": "Calendar settings",
     "createNewAppointment": "Create new appointment",
     "dateAndTimeFormatting": "Date and Time Formatting",
@@ -17,8 +17,7 @@
     "generalSettings": "General settings",
     "languageAndAppearance": "Language & Appearance",
     "pendingAppointments": "Pending Appointments",
-    "privacySettings": "Privacy settings",
-    "yourProfile": "Your Profile"
+    "privacySettings": "Privacy settings"
   },
   "info": {
     "bookedPleaseCheckEmail": "This event has been booked, please check your email to add it to you calendar.",
