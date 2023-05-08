@@ -13,9 +13,6 @@ from ..database import schemas, repo
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 
-SCOPES = ['https://www.googleapis.com/auth/calendar']
-
-
 class GoogleConnector:
   """Generic interface for Google Calendar REST API. This should match CaldavConnector (except for the constructor)"""
   def __init__(self, db, google_client : GoogleClient, calendar_id, subscriber_id, google_tkn: str = None):
