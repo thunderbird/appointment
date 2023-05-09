@@ -5,11 +5,10 @@ Boot application, init database, authenticate user and provide all API endpoints
 from .secrets import normalize_secrets
 
 import os
+from dotenv import load_dotenv
 
 # load any available .env into env
-if os.getenv('APP_ENV', 'prod') == 'dev':
-  from dotenv import load_dotenv
-  load_dotenv()
+load_dotenv()
 
 # This needs to be ran before any other imports
 normalize_secrets()
