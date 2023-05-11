@@ -191,14 +191,17 @@ const pendingAppointments = computed(() => {
 const calendarEvents = ref([]);
 
 const getRemoteEvents = async (from, to) => {
-  const events = [];
-  for (const calendar of props.calendars) {
-    const { data } = await call("rmt/cal/" + calendar.id + "/" + from + "/" + to).get().json();
-    if (Array.isArray(data.value)) {
-      events.push(...data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
-    }
-  }
-  calendarEvents.value = events;
+  calendarEvents.value = [];
+
+  // Wait for all the requests to finish
+  await Promise.all(props.calendars.map((calendar) => {
+    return call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json().then((response) => {
+      if (!Array.isArray(response.data.value)) {
+        return;
+      }
+      calendarEvents.value.push(...response.data.value.map(e => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
+    });
+  }));
 };
 
 // initially load data when component gets remounted
