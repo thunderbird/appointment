@@ -175,7 +175,9 @@
 
 <script setup>
 import { locationTypes } from '@/definitions';
-import { ref, reactive, computed, inject, watch } from 'vue';
+import {
+  ref, reactive, computed, inject, watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
 import CalendarMonth from '@/components/CalendarMonth';
@@ -194,7 +196,7 @@ import {
 
 // component constants
 const { t } = useI18n();
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 const call = inject('call');
 const bookingUrl = inject('bookingUrl');
 
@@ -203,9 +205,9 @@ const emit = defineEmits(['start', 'next', 'create', 'cancel']);
 
 // component properties
 const props = defineProps({
-  status:    Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
-  calendars: Array,  // list of user defined calendars
-  user:      Object, // currently logged in user, null if not logged in
+  status: Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
+  calendars: Array, // list of user defined calendars
+  user: Object, // currently logged in user, null if not logged in
 });
 
 // calculate the current visible step by given status
@@ -215,20 +217,20 @@ const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
 // tab navigation for location types
-const updateLocationType = type => {
+const updateLocationType = (type) => {
   appointment.location_type = locationTypes[type];
 };
 
 // defaul appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
-  title:         '',
-  calendar_id:   props.calendars[0]?.id,
+  title: '',
+  calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
-  location_url:  '',
-  details:       '',
-  status:        2, // appointment is opened | TODO: make configurable sometime
+  location_url: '',
+  details: '',
+  status: 2, // appointment is opened | TODO: make configurable sometime
 };
-const appointment = reactive({...defaultAppointment});
+const appointment = reactive({ ...defaultAppointment });
 
 // date and time selection data
 // an object having the iso date as key and a list of objects holding start and end time for each day
@@ -242,12 +244,12 @@ const slotList = computed(() => {
   for (const day in slots) {
     if (Object.hasOwnProperty.call(slots, day)) {
       const times = slots[day];
-      times.forEach(slot => {
-        const start = dj(day + ' ' + slot.start);
-        const end = dj(day + ' ' + slot.end);
+      times.forEach((slot) => {
+        const start = dj(`${day} ${slot.start}`);
+        const end = dj(`${day} ${slot.end}`);
         list.push({
           start: start.tz(props.user.timezone ?? dj.tz.guess(), true).utc().format('YYYY-MM-DDTHH:mm:ss'), // save local time as UTC
-          duration: end.diff(start, 'minutes')
+          duration: end.diff(start, 'minutes'),
         });
       });
     }
@@ -256,20 +258,20 @@ const slotList = computed(() => {
 });
 
 // handle notes char limit
-const charLimit      = 250;
-const charCount      = computed(() => appointment.details.length);
+const charLimit = 250;
+const charCount = computed(() => appointment.details.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
-const validStep1     = computed(() => appointment.title !== '');
-const validStep2     = computed(() => Object.keys(slots).length > 0);
-const visitedStep1   = ref(false);
-const visitedStep2   = ref(false);
-const invalidStep1   = computed(() => !validStep1.value && visitedStep1.value);
-const invalidStep2   = computed(() => !validStep2.value && visitedStep2.value);
+const validStep1 = computed(() => appointment.title !== '');
+const validStep2 = computed(() => Object.keys(slots).length > 0);
+const visitedStep1 = ref(false);
+const visitedStep2 = ref(false);
+const invalidStep1 = computed(() => !validStep1.value && visitedStep1.value);
+const invalidStep2 = computed(() => !validStep2.value && visitedStep2.value);
 
 // show mini month date picker
 const showDatePicker = ref(false);
-const activeDate     = ref(dj());
+const activeDate = ref(dj());
 
 // handle date and time input of user
 const addDate = (d) => {
@@ -277,7 +279,7 @@ const addDate = (d) => {
   if (!Object.hasOwn(slots, day)) {
     slots[day] = [{
       start: dj(d).add(10, 'hours').format('HH:mm'),
-      end: dj(d).add(11, 'hours').format('HH:mm')
+      end: dj(d).add(11, 'hours').format('HH:mm'),
     }];
   }
   showDatePicker.value = false;
@@ -285,10 +287,10 @@ const addDate = (d) => {
 const addTime = (d) => {
   const day = dj(d).format('YYYY-MM-DD');
   // get latest end time to start next time slot default value with
-  const latestTime = slots[day].reduce((p, c) => c.end > p ? c.end : p, '00:00');
+  const latestTime = slots[day].reduce((p, c) => (c.end > p ? c.end : p), '00:00');
   slots[day].push({
     start: latestTime,
-    end: dj(day + 'T' + latestTime).add(1, 'hour').format('HH:mm')
+    end: dj(`${day}T${latestTime}`).add(1, 'hour').format('HH:mm'),
   });
 };
 const removeTime = (day, index) => {
@@ -303,7 +305,7 @@ const removeTime = (day, index) => {
 const createdConfirmation = reactive({
   show: false,
   title: '',
-  publicLink: ''
+  publicLink: '',
 });
 const closeCreatedModal = () => createdConfirmation.show = false;
 
@@ -311,8 +313,8 @@ const closeCreatedModal = () => createdConfirmation.show = false;
 const createAppointment = async () => {
   // build data object for post request
   const obj = {
-    appointment: appointment,
-    slots: slotList.value
+    appointment,
+    slots: slotList.value,
   };
   // save selected appointment data
   const { data } = await call('apmt').post(obj).json();

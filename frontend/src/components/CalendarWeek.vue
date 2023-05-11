@@ -126,37 +126,35 @@ import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
 
 const { t } = useI18n();
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({
-  selected:     Object,  // currently active date
-  booking:      Boolean, // flag indicating if calendar is used to book time slots
-  appointments: Array,   // data of appointments to show
-  events:       Array,   // data of calendar events to show
+  selected: Object, // currently active date
+  booking: Boolean, // flag indicating if calendar is used to book time slots
+  appointments: Array, // data of appointments to show
+  events: Array, // data of calendar events to show
 });
 
 // component emits
 const emit = defineEmits(['eventSelected']);
 
 // base data for display elements
-const baseRem = 4;          // height for one hour element in rem
-const unitRem = baseRem/60; // height for shortest event (1 minute) in rem
+const baseRem = 4; // height for one hour element in rem
+const unitRem = baseRem / 60; // height for shortest event (1 minute) in rem
 
 // all elements (appointment slots or remote events) to show in the current view
 const elementsToShow = computed(() => {
   const slots = props.appointments.reduce((p, c) => [...p, ...c.slots], []);
-  return props.booking ? slots : [...slots, ...props.events]
+  return props.booking ? slots : [...slots, ...props.events];
 });
 
 // compute start limit depending on data in view
 // begin showing events 2 hours before first event or at least 2pm
 const startHour = computed(() => {
-  const start = elementsToShow.value.reduce((p, c) => {
-    return dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
-      ? Math.min(dj(c.start).format('H'), p)
-      : p;
-  }, 16);
+  const start = elementsToShow.value.reduce((p, c) => (dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
+    ? Math.min(dj(c.start).format('H'), p)
+    : p), 16);
   return start - 2 >= 0 ? start - 2 : 0;
 });
 
@@ -175,21 +173,20 @@ const endHour = computed(() => {
 });
 
 // handle events to show
-const timePosition = (start, duration) => {
+const timePosition = (start, duration) =>
   // create position of event, smallest unit is one minute
-  return {
-    offset: 60*dj(start).format('H') + 1*dj(start).format('m') - 60*startHour.value + 1,
+  ({
+    offset: 60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1,
     span: duration,
-    times: dj(start).format('LT') + ' - ' + dj(start).add(duration, 'minutes').format('LT'),
-  }
-};
+    times: `${dj(start).format('LT')} - ${dj(start).add(duration, 'minutes').format('LT')}`,
+  });
 const events = computed(() => {
   const eventsOnDate = {};
   // add appointments
-  props.appointments?.forEach(event => {
-    event.slots.forEach(slot => {
+  props.appointments?.forEach((event) => {
+    event.slots.forEach((slot) => {
       const key = dj(slot.start).format('YYYY-MM-DD');
-      const extendedEvent = {...event, ...slot, ...timePosition(slot.start, slot.duration)};
+      const extendedEvent = { ...event, ...slot, ...timePosition(slot.start, slot.duration) };
       delete extendedEvent.slots;
       if (key in eventsOnDate) {
         eventsOnDate[key].push(extendedEvent);
@@ -199,9 +196,9 @@ const events = computed(() => {
     });
   });
   // add calendar events
-  props.events?.forEach(event => {
+  props.events?.forEach((event) => {
     const key = dj(event.start).format('YYYY-MM-DD');
-    const extendedEvent = {...event, ...timePosition(event.start, event.duration), remote: true};
+    const extendedEvent = { ...event, ...timePosition(event.start, event.duration), remote: true };
     if (key in eventsOnDate) {
       eventsOnDate[key].push(extendedEvent);
     } else {
@@ -214,12 +211,11 @@ const eventsByDate = (d) => {
   const key = dj(d).format('YYYY-MM-DD');
   if (key in events.value) {
     return {
-      duringDay: events.value[key].filter(e => !e.all_day),
-      allDay:    events.value[key].filter(e => e.all_day),
+      duringDay: events.value[key].filter((e) => !e.all_day),
+      allDay: events.value[key].filter((e) => e.all_day),
     };
-  } else {
-    return null;
   }
+  return null;
 };
 
 // generate names for each day of week
@@ -231,7 +227,7 @@ const days = computed(() => {
       date: day.format('YYYY-MM-DD'),
       day: day.format('D'),
       weekday: day.format('ddd'),
-      active: day.isSame(dj(), 'day')
+      active: day.isSame(dj(), 'day'),
     });
     day = day.add(1, 'day');
   }
@@ -260,13 +256,13 @@ const popup = reactive({
   event: null,
   display: 'none',
   top: 0,
-  left: 0
+  left: 0,
 });
 const showEventPopup = (element, event) => {
   popup.event = event;
   popup.display = 'block';
-  popup.top = element.target.offsetTop + element.target.clientHeight/2 - element.target.parentElement.scrollTop + 'px';
-  popup.left = element.target.offsetLeft + element.target.clientWidth + 'px';
+  popup.top = `${element.target.offsetTop + element.target.clientHeight / 2 - element.target.parentElement.scrollTop}px`;
+  popup.left = `${element.target.offsetLeft + element.target.clientWidth}px`;
 };
 const hideEventPopup = () => {
   popup.event = null;

@@ -13,7 +13,7 @@
             absolute top-1/2 -translate-y-1/2 left-4 cursor-text h-4 w-4 stroke-2
             stroke-gray-300 dark:stroke-gray-500 fill-transparent
           "
-        /> 
+        />
         <input
           class="w-full text-sm pl-12 pr-2 rounded-md"
           type="search"
@@ -47,7 +47,7 @@
 
       <!-- general settings -->
       <settings-general v-if="activeView === settingsSections.general" :user="user" />
-      
+
       <!-- calendar settings -->
       <settings-calendar v-if="activeView === settingsSections.calendar" :calendars="calendars" />
 
@@ -96,9 +96,9 @@ const router = useRouter();
 
 // view properties
 defineProps({
-  calendars:    Array,  // list of calendars from db
-  appointments: Array,  // list of appointments from db
-  user:         Object, // currently logged in user, null if not logged in
+  calendars: Array, // list of calendars from db
+  appointments: Array, // list of appointments from db
+  user: Object, // currently logged in user, null if not logged in
 });
 
 // menu navigation of different views

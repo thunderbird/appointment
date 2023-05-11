@@ -24,7 +24,7 @@ import {
 // component properties
 const props = defineProps({
   label: String, // button text
-  copy: String   // text to copy to clipboard
+  copy: String, // text to copy to clipboard
 });
 
 // state for copy click
@@ -32,7 +32,7 @@ const copied = ref(false);
 
 // copy text to clipboard
 const copyToClipboard = () => {
-  navigator.clipboard.writeText(props.copy).then(function() {
+  navigator.clipboard.writeText(props.copy).then(() => {
     copied.value = true;
     setInterval(() => { copied.value = false; }, 3000);
   });

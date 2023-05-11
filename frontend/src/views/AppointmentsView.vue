@@ -22,7 +22,7 @@
         </select>
         <div class="w-full relative">
           <label for="appointments-search" class="absolute top-1/2 -translate-y-1/2 left-3 cursor-text">
-            <icon-search class="h-4 w-4 stroke-2 stroke-gray-300 dark:stroke-gray-500 fill-transparent" /> 
+            <icon-search class="h-4 w-4 stroke-2 stroke-gray-300 dark:stroke-gray-500 fill-transparent" />
           </label>
           <input
             v-model="search"
@@ -189,10 +189,14 @@
 </template>
 
 <script setup>
-import { appointmentState } from '@/definitions';
+import {
+  appointmentState, listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState,
+} from '@/definitions';
 import { keyByValue } from '@/utils';
-import { listColumns as columns, appointmentViews as views, filterOptions, viewTypes, creationState } from '@/definitions';
-import { ref, inject, provide, computed, onMounted } from 'vue';
+
+import {
+  ref, inject, provide, computed, onMounted,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
@@ -222,9 +226,9 @@ const refresh = inject('refresh');
 
 // view properties
 const props = defineProps({
-  calendars:    Array,  // list of calendars from db
-  appointments: Array,  // list of appointments from db
-  user:         Object, // currently logged in user, null if not logged in
+  calendars: Array, // list of calendars from db
+  appointments: Array, // list of appointments from db
+  user: Object, // currently logged in user, null if not logged in
 });
 
 // handle calendar output
@@ -233,14 +237,14 @@ const selectDate = (d) => activeDate.value = dj(d);
 
 // active menu item for tab navigation of appointment views
 const tabActive = ref(route.params.view ? views[route.params.view] : views.all);
-const updateTab = view => {
-  router.replace({ name: route.name, params: { view: view } });
+const updateTab = (view) => {
+  router.replace({ name: route.name, params: { view } });
   tabActive.value = views[view];
 };
 // date navigation
 const dateNav = (unit = 'auto', forward = true) => {
   if (unit === 'auto') {
-    unit = Object.keys(views).find(key => views[key] === tabActive.value);
+    unit = Object.keys(views).find((key) => views[key] === tabActive.value);
   }
   if (forward) {
     activeDate.value = activeDate.value.add(1, unit);
@@ -274,9 +278,7 @@ const toggleColumnVisibility = (key) => {
     visibleColumns.value.push(key);
   }
 };
-const columnVisible = (key) => {
-  return visibleColumns.value.includes(columns[key]);
-};
+const columnVisible = (key) => visibleColumns.value.includes(columns[key]);
 const restoreColumnOrder = () => {
   visibleColumns.value = Object.values(columns);
 };
@@ -286,18 +288,18 @@ const filteredAppointments = computed(() => {
   let list = props.appointments ? [...props.appointments] : [];
   // by search input
   if (search.value !== '') {
-    list = list.filter(a => a.title.toLowerCase().includes(search.value.toLowerCase()))
+    list = list.filter((a) => a.title.toLowerCase().includes(search.value.toLowerCase()));
   }
   // by active tab
   switch (tabActive.value) {
     case views.booked:
-      list = list.filter(a => a.status === appointmentState.booked);
+      list = list.filter((a) => a.status === appointmentState.booked);
       break;
     case views.pending:
-      list = list.filter(a => a.status === appointmentState.pending);
+      list = list.filter((a) => a.status === appointmentState.pending);
       break;
     case views.past:
-      list = list.filter(a => a.status === appointmentState.past);
+      list = list.filter((a) => a.status === appointmentState.past);
       break;
     case views.all:
     default:
@@ -306,22 +308,22 @@ const filteredAppointments = computed(() => {
   // by select filter
   switch (filter.value) {
     case filterOptions.appointmentsToday:
-      list = list.filter(a => a.slots.reduce((p, c) => p || dj(c.start).isToday(), false));
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday(), false));
       break;
     case filterOptions.appointmentsNext7Days:
-      list = list.filter(a => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(7, 'days')), false));
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(7, 'days')), false));
       break;
     case filterOptions.appointmentsNext14Days:
-      list = list.filter(a => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(14, 'days')), false));
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(14, 'days')), false));
       break;
     case filterOptions.appointmentsNext31Days:
-      list = list.filter(a => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(31, 'days')), false));
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(31, 'days')), false));
       break;
     case filterOptions.appointmentsInMonth:
-      list = list.filter(a => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'), false));
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'), false));
       break;
     case filterOptions.allFutureAppointments:
-      list = list.filter(a => a.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false));
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false));
       break;
     case filterOptions.allAppointments:
     default:
@@ -331,7 +333,7 @@ const filteredAppointments = computed(() => {
 });
 
 // return number of booked slots (replies) for given appointment
-const repliesCount = appointment => appointment.slots.filter(s => s.attendee != null).length;
+const repliesCount = (appointment) => appointment.slots.filter((s) => s.attendee != null).length;
 
 // handle single appointment modal
 const showAppointment = ref(null);
@@ -346,7 +348,7 @@ onMounted(async () => {
 });
 
 // paint elements background or reset it to transparent
-const paintBackground = (element, hexColor, hexTransparency, reset=false) => {
+const paintBackground = (element, hexColor, hexTransparency, reset = false) => {
   if (hexColor) {
     element.currentTarget.style.backgroundColor = reset
       ? 'transparent'

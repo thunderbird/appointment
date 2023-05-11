@@ -32,19 +32,19 @@ const { t } = useI18n();
 
 // component properties
 const props = defineProps({
-  active:   Boolean, // initial toggle state
+  active: Boolean, // initial toggle state
   disabled: Boolean, // flag for making toggle non changable
-  label:    String,  // input label
+  label: String, // input label
 });
 
 // current state
 const state = ref(false);
 onMounted(() => {
-  state.value = props.active
+  state.value = props.active;
 });
 const toggleState = () => {
   if (!props.disabled) {
     state.value = !state.value;
   }
-}
+};
 </script>

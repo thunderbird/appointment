@@ -27,7 +27,7 @@ const { t } = useI18n();
 // component properties
 defineProps({
   tabItems: Object, // list of tab items. Keys are used as lang keys (label.<key>), values as index
-  active: Number    // value of active tab
+  active: Number, // value of active tab
 });
 
 // component emits
@@ -36,5 +36,5 @@ const emit = defineEmits(['update']);
 // handle click events
 const activate = (key) => {
   emit('update', key);
-}
+};
 </script>

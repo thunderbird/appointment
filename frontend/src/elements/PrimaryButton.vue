@@ -22,8 +22,8 @@ import {
 
 // component properties
 defineProps({
-  label:   String,  // button text
-  icon:    String,  // optional icon displayed before label
+  label: String, // button text
+  icon: String, // optional icon displayed before label
   waiting: Boolean, // if true, spinning animation is shown instead of label
 });
 </script>

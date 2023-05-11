@@ -140,24 +140,20 @@ import {
 
 // component constants
 const { t } = useI18n();
-const dj = inject("dayjs");
-const bookingUrl = inject("bookingUrl");
+const dj = inject('dayjs');
+const bookingUrl = inject('bookingUrl');
 
 // component properties
 const props = defineProps({
   open: Boolean, // modal state
-  appointment: Object  // appointment data to display
+  appointment: Object, // appointment data to display
 });
 
 // attendees list
-const attendeesSlots = computed(() => {
-  return props.appointment.slots.filter(s => s.attendee);
-});
+const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 
 // calculate initials
-const initials = name => {
-  return name.split(' ').map(p => p[0]).join('');
-};
+const initials = (name) => name.split(' ').map((p) => p[0]).join('');
 
 // component emits
 const emit = defineEmits(['close']);

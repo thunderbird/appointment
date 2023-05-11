@@ -14,7 +14,7 @@
 <script setup>
 // component properties
 defineProps({
-  label:   String,  // button text
+  label: String, // button text
   waiting: Boolean, // if true, spinning animation is shown instead of label
 });
 </script>

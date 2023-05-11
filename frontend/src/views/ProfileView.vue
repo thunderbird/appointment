@@ -48,22 +48,20 @@ const refresh = inject('refresh');
 
 // view properties
 const props = defineProps({
-  calendars:    Array,  // list of calendars from db
-  appointments: Array,  // list of appointments from db
-  user:         Object, // currently logged in user, null if not logged in
+  calendars: Array, // list of calendars from db
+  appointments: Array, // list of appointments from db
+  user: Object, // currently logged in user, null if not logged in
 });
 
 // list of pending appointments
-const pendingAppointments = computed(() => {
-  return props.appointments.filter(a => a.status === appointmentState.pending)
-});
+const pendingAppointments = computed(() => props.appointments.filter((a) => a.status === appointmentState.pending));
 
 // do log out
 const logout = () => {
   auth.logout({
     logoutParams: {
-      returnTo: window.location.origin
-    }
+      returnTo: window.location.origin,
+    },
   });
 };
 

@@ -41,9 +41,9 @@ const { t } = useI18n();
 
 // component properties
 const props = defineProps({
-  open: Boolean,      // modal state
-  title: String,      // title of created appointment
-  publicLink: String  // public link of created appointment for sharing
+  open: Boolean, // modal state
+  title: String, // title of created appointment
+  publicLink: String, // public link of created appointment for sharing
 });
 
 // component emits
@@ -54,7 +54,7 @@ const icon = ref('copy');
 
 // copy link to clipboard
 const copy = () => {
-  navigator.clipboard.writeText(props.publicLink).then(function() {
+  navigator.clipboard.writeText(props.publicLink).then(() => {
     icon.value = 'check';
   });
 };

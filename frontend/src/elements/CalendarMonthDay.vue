@@ -74,52 +74,50 @@ import { eventColor } from '@/utils';
 import { inject, reactive, computed } from 'vue';
 import EventPopup from '@/elements/EventPopup';
 
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({
-  day:         String,  // number of day in its month
-  isActive:    Boolean, // flag showing if the day belongs to active month
-  isSelected:  Boolean, // flag showing if the day is currently selected by user
-  isToday:     Boolean, // flag showing if the day is today
-  mini:        Boolean, // flag showing if this is a day cell of a small calendar
+  day: String, // number of day in its month
+  isActive: Boolean, // flag showing if the day belongs to active month
+  isSelected: Boolean, // flag showing if the day is currently selected by user
+  isToday: Boolean, // flag showing if the day is today
+  mini: Boolean, // flag showing if this is a day cell of a small calendar
   placeholder: Boolean, // flag formating events as placeholder
-  events:      Array,   // list of events to show on this day or null
+  events: Array, // list of events to show on this day or null
   showDetails: Boolean, // flag enabling event popups with details
-  disabled:    Boolean, // flag making this day non-selectable and inactive
+  disabled: Boolean, // flag making this day non-selectable and inactive
 });
 
 // component emits
 const emit = defineEmits(['eventSelected']);
 
 // bring events to specific order: all day events first, than sorted by start date
-const sortedEvents = computed(() => {
-  return [...props.events].sort((a,b) => {
-    if (a.all_day && !b.all_day) {
-      return -1;
-    }
-    if (!a.all_day && b.all_day) {
-      return 1;
-    }
-    if (a.all_day && b.all_day || dj(a.start).isSame(dj(b.start))) {
-      return a.title.localeCompare(b.title);
-    }
-    return dj(a.start).isAfter(dj(b.start));
-  })
-});
+const sortedEvents = computed(() => [...props.events].sort((a, b) => {
+  if (a.all_day && !b.all_day) {
+    return -1;
+  }
+  if (!a.all_day && b.all_day) {
+    return 1;
+  }
+  if (a.all_day && b.all_day || dj(a.start).isSame(dj(b.start))) {
+    return a.title.localeCompare(b.title);
+  }
+  return dj(a.start).isAfter(dj(b.start));
+}));
 
 // event details
 const popup = reactive({
-  event:   null,
+  event: null,
   display: 'none',
-  top:     0,
-  left:    0,
+  top: 0,
+  left: 0,
 });
 const showEventPopup = (element, event) => {
   popup.event = event;
   popup.display = 'block';
-  popup.top = element.target.offsetTop + element.target.clientHeight/2 - element.target.parentElement.scrollTop + 'px';
-  popup.left = element.target.offsetLeft + element.target.clientWidth + 8 + 'px';
+  popup.top = `${element.target.offsetTop + element.target.clientHeight / 2 - element.target.parentElement.scrollTop}px`;
+  popup.left = `${element.target.offsetLeft + element.target.clientWidth + 8}px`;
 };
 const hideEventPopup = () => {
   popup.event = null;
