@@ -7,7 +7,6 @@ from datetime import date
 
 from ..src.database import models
 from ..src.main import app, get_db
-from ..src.config import config
 from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///backend/test/test.db"
@@ -55,7 +54,7 @@ def test_login():
     assert data["email"] == "admin@example.com"
     assert data["name"] == "Andy Admin"
     assert data["level"] == 3
-    assert data["timezone"] == None
+    assert data["timezone"] is None
     assert data["id"] == 1
 
 
@@ -298,8 +297,8 @@ def test_create_calendar_appointment():
     )
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["time_created"] != None
-    assert data["time_updated"] != None
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
     assert data["calendar_id"] == 5
     assert data["title"] == "Testing new Application feature"
     assert data["duration"] == 180
@@ -331,8 +330,8 @@ def test_create_another_calendar_appointment():
     )
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["time_created"] != None
-    assert data["time_updated"] != None
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
     assert data["calendar_id"] == 5
     assert data["title"] == "Testing again"
     assert data["location_type"] == 1
@@ -379,8 +378,8 @@ def test_read_existing_appointment():
     response = client.get("/apmt/1")
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["time_created"] != None
-    assert data["time_updated"] != None
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
     assert data["calendar_id"] == 5
     assert data["duration"] == 180
     assert data["title"] == "Testing new Application feature"
@@ -428,8 +427,8 @@ def test_update_existing_appointment():
     )
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["time_created"] != None
-    assert data["time_updated"] != None
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
     assert data["duration"] == 90
     assert data["title"] == "Testing new Application featurex"
     assert not data["keep_open"]

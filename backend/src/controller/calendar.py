@@ -6,10 +6,10 @@ import json
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
-from datetime import datetime, date, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 from .google import GoogleClient
-from ..database import schemas, repo
+from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 

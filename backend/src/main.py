@@ -2,6 +2,8 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
+# Ignore "Module level import not at top of file"
+# ruff: noqa: E402
 from .secrets import normalize_secrets
 
 import os

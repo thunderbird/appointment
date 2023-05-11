@@ -4,7 +4,8 @@ Handle outgoing emails.
 """
 import logging
 import os
-import smtplib, ssl
+import smtplib
+import ssl
 import validators
 
 from html import escape

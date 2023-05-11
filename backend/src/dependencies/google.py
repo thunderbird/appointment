@@ -1,7 +1,6 @@
 import logging
 import os
 
-from fastapi import Depends, Security
 from ..controller.google import GoogleClient
 
 

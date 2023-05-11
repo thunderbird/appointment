@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 
 from ..controller.google import GoogleClient

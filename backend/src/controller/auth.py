@@ -3,12 +3,10 @@
 Handle authentification with Auth0 and get subscription data.
 """
 import logging
-import json
 import os
 
 from sqlalchemy.orm import Session
 from ..database import repo, schemas, models
-from fastapi import Security
 from fastapi_auth0 import Auth0, Auth0User
 from auth0.authentication import GetToken
 from auth0.management import Auth0 as ManageAuth0
