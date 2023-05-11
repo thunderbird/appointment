@@ -10,18 +10,16 @@ from ..src.main import app, get_db
 from ..src.config import config
 from ..src.controller.calendar import CalDavConnector
 
-SQLALCHEMY_DATABASE_URL  = "sqlite:///backend/test/test.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///backend/test/test.db"
 # TODO: setup an own testing CalDAV server
 TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
-TESTING_CALDAV_CALENDAR  = "https://calendar.robur.coop/calendars/mozilla/"
-TESTING_CALDAV_USER      = "mozilla"
-TESTING_CALDAV_PASS      = "thunderbird"
+TESTING_CALDAV_CALENDAR = "https://calendar.robur.coop/calendars/mozilla/"
+TESTING_CALDAV_USER = "mozilla"
+TESTING_CALDAV_PASS = "thunderbird"
 
 YYYYMM = str(date.today())[:-3]
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -69,8 +67,8 @@ def test_create_my_calendar():
             "color": "#123456",
             "url": "https://example.com",
             "user": "ww1984",
-            "password": "d14n4"
-        }
+            "password": "d14n4",
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -127,8 +125,8 @@ def test_update_existing_calendar_with_password():
             "color": "#123457",
             "url": "https://example.comx",
             "user": "ww1984x",
-            "password": "d14n4x"
-        }
+            "password": "d14n4x",
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -151,8 +149,8 @@ def test_update_existing_calendar_without_password():
             "color": "#123457",
             "url": "https://example.comx",
             "user": "ww1984x",
-            "password": ""
-        }
+            "password": "",
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -170,12 +168,7 @@ def test_update_existing_calendar_without_password():
 def test_update_foreign_calendar():
     response = client.put(
         "/cal/2",
-        json={
-            "title": "test",
-            "url": "test",
-            "user": "test",
-            "password": "test"
-        }
+        json={"title": "test", "url": "test", "user": "test", "password": "test"},
     )
     assert response.status_code == 403, response.text
 
@@ -194,7 +187,15 @@ def test_delete_existing_calendar():
     data = response.json()
     assert len(data) == 0
     # add own calendar again for further testing
-    client.post("/cal", json={ "title": "My first calendar connection", "url": "https://example.com", "user": "ww1984", "password": "d14n4" })
+    client.post(
+        "/cal",
+        json={
+            "title": "My first calendar connection",
+            "url": "https://example.com",
+            "user": "ww1984",
+            "password": "d14n4",
+        },
+    )
 
 
 def test_delete_missing_calendar():
@@ -210,10 +211,29 @@ def test_delete_foreign_calendar():
 def test_create_too_many_calendars():
     client.put(
         "/me",
-        json={ "username": "adminx", "email": "admin@example.com", "name": "The Admin", "level": 1, "timezone": "2" }
+        json={
+            "username": "adminx",
+            "email": "admin@example.com",
+            "name": "The Admin",
+            "level": 1,
+            "timezone": "2",
+        },
     )
-    cal2 = insert(models.Calendar).values(owner_id="1", title="Another", url="https://test.org", user="abc", password="dce")
-    cal3 = insert(models.Calendar).values(owner_id="1", title="mozilla", color="#978FEE", url=TESTING_CALDAV_CALENDAR, user=TESTING_CALDAV_USER, password=TESTING_CALDAV_PASS)
+    cal2 = insert(models.Calendar).values(
+        owner_id="1",
+        title="Another",
+        url="https://test.org",
+        user="abc",
+        password="dce",
+    )
+    cal3 = insert(models.Calendar).values(
+        owner_id="1",
+        title="mozilla",
+        color="#978FEE",
+        url=TESTING_CALDAV_CALENDAR,
+        user=TESTING_CALDAV_USER,
+        password=TESTING_CALDAV_PASS,
+    )
     db = TestingSessionLocal()
     db.execute(cal2)
     db.execute(cal3)
@@ -224,14 +244,20 @@ def test_create_too_many_calendars():
             "title": "Forbidden 4th calendar",
             "url": "https://example.com",
             "user": "abc",
-            "password": "def"
-        }
+            "password": "def",
+        },
     )
     assert response.status_code == 403, response.text
     # restore current users subscription level again for further testing
     client.put(
         "/me",
-        json={ "username": "adminx", "email": "admin@example.com", "name": "The Admin", "level": 3, "timezone": "2" }
+        json={
+            "username": "adminx",
+            "email": "admin@example.com",
+            "name": "The Admin",
+            "level": 3,
+            "timezone": "2",
+        },
     )
 
 
@@ -241,8 +267,8 @@ def test_get_remote_calendars():
         json={
             "url": TESTING_CALDAV_PRINCIPAL,
             "user": TESTING_CALDAV_USER,
-            "password": TESTING_CALDAV_PASS
-        }
+            "password": TESTING_CALDAV_PASS,
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -264,11 +290,11 @@ def test_create_calendar_appointment():
                 "status": 2,
             },
             "slots": [
-                { "start": YYYYMM + "-01 09:00:00", "duration": 60 },
-                { "start": YYYYMM + "-02 09:00:00", "duration": 15 },
-                { "start": YYYYMM + "-03 09:00:00", "duration": 275 },
-            ]
-        }
+                {"start": YYYYMM + "-01 09:00:00", "duration": 60},
+                {"start": YYYYMM + "-02 09:00:00", "duration": 15},
+                {"start": YYYYMM + "-03 09:00:00", "duration": 275},
+            ],
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -299,9 +325,9 @@ def test_create_another_calendar_appointment():
                 "status": 2,
             },
             "slots": [
-                { "start": YYYYMM + "-04 09:00:00", "duration": 120 },
-            ]
-        }
+                {"start": YYYYMM + "-04 09:00:00", "duration": 120},
+            ],
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -321,9 +347,9 @@ def test_create_missing_calendar_appointment():
     response = client.post(
         "/apmt",
         json={
-            "appointment": { "calendar_id": "30", "duration": "1", "title": "a" },
-            "slots": []
-        }
+            "appointment": {"calendar_id": "30", "duration": "1", "title": "a"},
+            "slots": [],
+        },
     )
     assert response.status_code == 404, response.text
 
@@ -332,9 +358,9 @@ def test_create_foreign_calendar_appointment():
     response = client.post(
         "/apmt",
         json={
-            "appointment": { "calendar_id": "2", "duration": "1", "title": "a" },
-            "slots": []
-        }
+            "appointment": {"calendar_id": "2", "duration": "1", "title": "a"},
+            "slots": [],
+        },
     )
     assert response.status_code == 403, response.text
 
@@ -370,7 +396,12 @@ def test_read_missing_appointment():
 
 
 def test_read_foreign_appointment():
-    stmt = insert(models.Appointment).values(calendar_id="2", duration="60", title="abc", slug="58fe9784f60a42bcaa94eb8f1a7e5c17")
+    stmt = insert(models.Appointment).values(
+        calendar_id="2",
+        duration="60",
+        title="abc",
+        slug="58fe9784f60a42bcaa94eb8f1a7e5c17",
+    )
     db = TestingSessionLocal()
     db.execute(stmt)
     db.commit()
@@ -386,14 +417,14 @@ def test_update_existing_appointment():
                 "calendar_id": "5",
                 "duration": "90",
                 "title": "Testing new Application featurex",
-                "keep_open": "false"
+                "keep_open": "false",
             },
             "slots": [
-                { "start": YYYYMM + "-01 09:00:00", "duration": 60 },
-                { "start": YYYYMM + "-03 10:00:00", "duration": 25 },
-                { "start": YYYYMM + "-05 09:00:00", "duration": 375 },
-            ]
-        }
+                {"start": YYYYMM + "-01 09:00:00", "duration": 60},
+                {"start": YYYYMM + "-03 10:00:00", "duration": 25},
+                {"start": YYYYMM + "-05 09:00:00", "duration": 375},
+            ],
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -411,9 +442,9 @@ def test_update_missing_appointment():
     response = client.put(
         "/apmt/30",
         json={
-            "appointment": { "calendar_id": "2", "duration": "90", "title": "a" },
-            "slots": []
-        }
+            "appointment": {"calendar_id": "2", "duration": "90", "title": "a"},
+            "slots": [],
+        },
     )
     assert response.status_code == 404, response.text
 
@@ -422,9 +453,9 @@ def test_update_foreign_appointment():
     response = client.put(
         "/apmt/3",
         json={
-            "appointment": { "calendar_id": "2", "duration": "90", "title": "a" },
-            "slots": []
-        }
+            "appointment": {"calendar_id": "2", "duration": "90", "title": "a"},
+            "slots": [],
+        },
     )
     assert response.status_code == 403, response.text
 
@@ -451,11 +482,11 @@ def test_delete_existing_appointment():
                 "status": 2,
             },
             "slots": [
-                { "start": YYYYMM + "-01 09:00:00", "duration": 60 },
-                { "start": YYYYMM + "-03 10:00:00", "duration": 25 },
-                { "start": YYYYMM + "-05 09:00:00", "duration": 375 },
-            ]
-        }
+                {"start": YYYYMM + "-01 09:00:00", "duration": 60},
+                {"start": YYYYMM + "-03 10:00:00", "duration": 25},
+                {"start": YYYYMM + "-05 09:00:00", "duration": 375},
+            ],
+        },
     )
 
 
@@ -497,8 +528,8 @@ def test_attendee_selects_appointment_slot():
             "attendee": {
                 "email": "person@test.org",
                 "name": "John Doe",
-            }
-        }
+            },
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -510,10 +541,7 @@ def test_attendee_selects_unavailable_appointment_slot():
     slug = client.get("/apmt/4").json()["slug"]
     response = client.put(
         "/apmt/adminx/" + slug,
-        json={
-            "slot_id": "9",
-            "attendee": { "email": "a", "name": "b" }
-        }
+        json={"slot_id": "9", "attendee": {"email": "a", "name": "b"}},
     )
     assert response.status_code == 403, response.text
 
