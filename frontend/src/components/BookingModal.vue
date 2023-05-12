@@ -15,7 +15,7 @@
       <div>{{ time }}</div>
     </div>
     <div v-if="!success" class="text-sm text-center underline underline-offset-2 mb-8 text-teal-500">
-      Time zone: Pacific Standart Time
+      {{ t('label.timeZone') }}: {{ dj.tz.guess() }}
     </div>
     <form v-if="!success" ref="bookingForm" class="flex flex-col gap-4 mb-8">
       <label>
