@@ -71,8 +71,9 @@ def google_callback(
     creds_serialized = creds.to_json()
     repo.set_subscriber_google_tkn(db, creds_serialized, subscriber.id)
 
-    # Grab all of the calendars
+    # Grab all of the google calendars
     calendars = google_client.list_calendars(creds)
+    error_occured = False
     for calendar in calendars:
         cal = CalendarConnection(
             title=calendar.get("summary"),
@@ -82,8 +83,12 @@ def google_callback(
             url=calendar.get("id"),
             provider=CalendarProvider.google,
         )
-        # TODO: add calendar only if url doesn't already exist
-        repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
+        # add calendar
+        try:
+            repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
+        except:
+            error_occured = True
 
-    # And then RedirectResponse back to frontend :)
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")
+    # And then redirect back to frontend
+    get_str = "?error=1" if error_occured else ""
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar{get_str}")

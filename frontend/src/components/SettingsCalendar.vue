@@ -4,7 +4,7 @@
   <div class="pl-6 flex flex-col gap-6">
 
     <!-- list of calendar connections -->
-    <div class="text-xl">{{ t('heading.calendarConnections') }}</div>
+    <div class="text-xl">{{ t('heading.calendarsConnected') }}</div>
     <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
       <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
         <div class="flex-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">

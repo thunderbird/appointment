@@ -80,12 +80,11 @@ def create_my_calendar(calendar: schemas.CalendarConnection, db: Session = Depen
     """endpoint to add a new calendar connection for authenticated subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-    calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
-    limit = repo.get_connections_limit(db=db, subscriber_id=subscriber.id)
-    # check for connection limit
-    if limit > 0 and len(calendars) >= limit:
-        raise HTTPException(status_code=403, detail="Maximum number of calendar connections reached")
-    cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
+    # create calendar
+    try:
+        cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
+    except:
+        raise HTTPException(status_code=403, detail="Calendar already exists or maximum number of calendars exceeded")
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 
 
