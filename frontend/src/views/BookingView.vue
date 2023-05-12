@@ -4,7 +4,9 @@
     v-if="activeView === views.loading"
     class="h-screen flex-center select-none"
   >
-    <div class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-600"></div>
+    <div
+      class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-600"
+    ></div>
   </main>
   <!-- booking page content: invalid link -->
   <main
@@ -129,7 +131,9 @@
 <script setup>
 import { bookingCalendarViews as views, appointmentState } from '@/definitions';
 import { download } from '@/utils';
-import { ref, inject, onMounted, computed } from 'vue';
+import {
+  ref, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
@@ -144,9 +148,9 @@ import PrimaryButton from '@/elements/PrimaryButton';
 // component constants
 const { t } = useI18n();
 const route = useRoute();
-const dj = inject("dayjs");
-const call = inject("call");
-const getAppointmentStatus = inject("getAppointmentStatus");
+const dj = inject('dayjs');
+const call = inject('call');
+const getAppointmentStatus = inject('getAppointmentStatus');
 
 // appointment data the visitor should see
 const appointment = ref(null);
@@ -157,53 +161,37 @@ const appointment = ref(null);
 // day: time slots are only on one single day, provides selectable slots
 const activeView = ref(views.loading);
 const activeDate = ref(dj());
-const startOfActiveWeek = computed(() => {
-  return activeDate.value.startOf('week');
-});
-const endOfActiveWeek = computed(() => {
-  return activeDate.value.endOf('week');
-});
+const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
+const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 const viewTitle = computed(() => {
   switch (activeView.value) {
     case views.day:
       return activeDate.value.format('dddd Do');
     case views.week:
     case views.weekAfterMonth:
-      return startOfActiveWeek.value.format('ddd Do') + ' - ' + endOfActiveWeek.value.format('ddd Do');
+      return `${startOfActiveWeek.value.format('ddd Do')} - ${endOfActiveWeek.value.format('ddd Do')}`;
     default:
-      return ''
-  }
-});
-
-// retrieve appointment by slug
-onMounted(async () => {
-  // async get appointment data from route
-  const { error, data } = await call("apmt/public/" + route.params.slug).get().json();
-  // check if appointment exists and is open
-  if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
-    activeView.value = views.invalid;
-  } else {
-    appointment.value = data.value;
-    // convert start dates from UTC back to users timezone
-    appointment.value.slots.forEach(s => {
-      s.start = dj.utc(s.start).tz(dj.tz.guess());
-    });
-    activeDate.value = dj(appointment.value?.slots[0].start);
-    // check appointment slots for appropriate view
-    activeView.value = getViewBySlotDistribution(appointment.value.slots);
+      return '';
   }
 });
 
 // check if slots are distributed over different months, weeks, days or only on a single day
 const getViewBySlotDistribution = (slots) => {
-  let monthChanged = false, weekChanged = false, dayChanged = false, lastDate = null;
-  slots.forEach(slot => {
+  let monthChanged = false; let weekChanged = false; let dayChanged = false; let
+    lastDate = null;
+  slots.forEach((slot) => {
     if (!lastDate) {
       lastDate = dj(slot.start);
     } else {
-      if (dj(slot.start).format('YYYYMM') !== lastDate.format('YYYYMM')) monthChanged = true;
-      if (dj(slot.start).startOf('week').format('YYYYMMDD') !== lastDate.startOf('week').format('YYYYMMDD')) weekChanged = true;
-      if (dj(slot.start).format('YYYYMMDD') !== lastDate.format('YYYYMMDD')) dayChanged = true;
+      if (dj(slot.start).format('YYYYMM') !== lastDate.format('YYYYMM')) {
+        monthChanged = true;
+      }
+      if (dj(slot.start).startOf('week').format('YYYYMMDD') !== lastDate.startOf('week').format('YYYYMMDD')) {
+        weekChanged = true;
+      }
+      if (dj(slot.start).format('YYYYMMDD') !== lastDate.format('YYYYMMDD')) {
+        dayChanged = true;
+      }
     }
     lastDate = dj(slot.start);
   });
@@ -211,13 +199,14 @@ const getViewBySlotDistribution = (slots) => {
   if (weekChanged) return views.month;
   if (dayChanged) return views.week;
   if (!dayChanged) return views.day;
+  return views.invalid;
 };
 
 // prepare events to show one placeholder per day
 const dayPlaceholder = computed(() => {
   const apmt = { title: t('label.checkAvailableSlots'), slots: [] };
   const existingDates = [];
-  appointment.value?.slots.forEach(slot => {
+  appointment.value?.slots.forEach((slot) => {
     const key = dj(slot.start).format('YYYY-MM-DD');
     if (!existingDates.includes(key)) {
       existingDates.push(key);
@@ -228,7 +217,7 @@ const dayPlaceholder = computed(() => {
 });
 
 // change from month view to week view
-const showWeek = d => {
+const showWeek = (d) => {
   activeDate.value = dj(d);
   activeView.value = views.weekAfterMonth;
 };
@@ -237,13 +226,13 @@ const showWeek = d => {
 const activeEvent = ref();
 
 // user selected a time slot: mark event as selected
-const selectEvent = d => {
+const selectEvent = (d) => {
   // set event selected
-  for (let i = 0; i < appointment.value.slots.length; i++) {
+  for (let i = 0; i < appointment.value.slots.length; i += 1) {
     const slot = appointment.value.slots[i];
     if (slot.start === d) {
       slot.selected = true;
-      const e = {...appointment.value, ...slot};
+      const e = { ...appointment.value, ...slot };
       delete e.slots;
       activeEvent.value = e;
     } else {
@@ -254,8 +243,12 @@ const selectEvent = d => {
 
 // handle booking modal
 const showBooking = ref(false);
-const openBookingModal = () => showBooking.value = true;
-const closeBookingModal = () => showBooking.value = false;
+const openBookingModal = () => {
+  showBooking.value = true;
+};
+const closeBookingModal = () => {
+  showBooking.value = false;
+};
 
 // attendee confirmed the time slot selection: book event
 const attendee = ref(null);
@@ -263,10 +256,10 @@ const bookEvent = async (attendeeData) => {
   // build data object for put request
   const obj = {
     slot_id: activeEvent.value.id,
-    attendee: attendeeData
+    attendee: attendeeData,
   };
   // update server side event
-  const { error } = await call("apmt/public/" + route.params.slug).put(obj).json();
+  const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
   // disable calendar view if every thing worked fine
   if (!error.value) {
     attendee.value = attendeeData;
@@ -278,10 +271,28 @@ const bookEvent = async (attendeeData) => {
 // download calendar event as .ics
 const downloadIcs = async () => {
   // download ICS file
-  const { data, error } = await call("serve/ics/" + route.params.slug + "/" + activeEvent.value.id).get().json();
+  const { data, error } = await call(`serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
   if (!error.value) {
     download(data.value.data, data.value.name, data.value.content_type);
   }
 };
 
+// retrieve appointment by slug
+onMounted(async () => {
+  // async get appointment data from route
+  const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
+  // check if appointment exists and is open
+  if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
+    activeView.value = views.invalid;
+  } else {
+    appointment.value = data.value;
+    // convert start dates from UTC back to users timezone
+    appointment.value.slots.forEach((s) => {
+      s.start = dj.utc(s.start).tz(dj.tz.guess());
+    });
+    activeDate.value = dj(appointment.value?.slots[0].start);
+    // check appointment slots for appropriate view
+    activeView.value = getViewBySlotDistribution(appointment.value.slots);
+  }
+});
 </script>

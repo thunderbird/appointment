@@ -37,10 +37,10 @@ import {
 
 // component properties
 defineProps({
-  month:    String,  // month of active date
-  year:     String,  // year of active date
-  title:    String,  // title of current calendar view (optional)
-  nav:      Boolean, // show navigation
+  month: String, // month of active date
+  year: String, // year of active date
+  title: String, // title of current calendar view (optional)
+  nav: Boolean, // show navigation
   backlink: Boolean, // show breadcrumb title with backlink
 });
 

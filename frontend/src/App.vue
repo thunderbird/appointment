@@ -17,8 +17,10 @@
 
 <script setup>
 import { appointmentState } from '@/definitions';
-import { createFetch } from '@vueuse/core'
-import { ref, inject, provide, onMounted, computed } from 'vue';
+import { createFetch } from '@vueuse/core';
+import {
+  ref, inject, provide, onMounted, computed,
+} from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
 import NavBar from '@/components/NavBar';
@@ -46,7 +48,7 @@ const call = createFetch({
   fetchOptions: {
     mode: 'cors',
   },
-})
+});
 provide('auth', auth);
 provide('call', call);
 
@@ -62,15 +64,15 @@ const calendars = ref([]);
 const appointments = ref([]);
 
 // true if route can be accessed without authentication
-const routeIsPublic = computed(() => {
-  return route.name === 'booking' || (route.name === 'home' && !auth.isAuthenticated.value);
-});
+const routeIsPublic = computed(
+  () => route.name === 'booking' || (route.name === 'home' && !auth.isAuthenticated.value),
+);
 
 // check login state of current user first
 const checkLogin = async () => {
   if (auth.isAuthenticated.value) {
     // call backend to create user if they do not exist in database
-    const { data, error } = await call("login").get().json();
+    const { data, error } = await call('login').get().json();
     // assign authed user data
     if (!error.value && data.value) {
       // data.value holds appointment subscriber structure
@@ -82,7 +84,7 @@ const checkLogin = async () => {
 
 // query db for all calendar data
 const getDbCalendars = async () => {
-  const { data, error } = await call("me/calendars").get().json();
+  const { data, error } = await call('me/calendars').get().json();
   if (!error.value) {
     if (data.value === null || typeof data.value === 'undefined') return;
     calendars.value = data.value;
@@ -90,57 +92,58 @@ const getDbCalendars = async () => {
 };
 // query db for all appointments data
 const getDbAppointments = async () => {
-  const { data, error } = await call("me/appointments").get().json();
+  const { data, error } = await call('me/appointments').get().json();
   if (!error.value) {
     if (data.value === null || typeof data.value === 'undefined') return;
     appointments.value = data.value;
   }
 };
-// retrieve calendars and appointments after checking login and persisting user to db
-const getDbData = async () => {
-  await checkLogin();
-  if (auth.isAuthenticated.value) {
-    await Promise.all([getDbCalendars(), getDbAppointments()])
-    extendDbData();
+
+// check appointment status for current state (past|pending|booked)
+const getAppointmentStatus = (a) => {
+  // check past events
+  if (a.slots.filter((s) => dj(s.start).isAfter(dj())).length === 0) {
+    return appointmentState.past;
   }
+  // check booked events
+  if (a.slots.filter((s) => s.attendee_id != null).length > 0) {
+    return appointmentState.booked;
+  }
+  // else event is still wating to be booked
+  return appointmentState.pending;
 };
 
 // extend retrieved data
 const extendDbData = () => {
   // build { calendarId => calendarData } object for direct lookup
   const calendarsById = {};
-  calendars.value.forEach(c => { calendarsById[c.id] = c });
+  calendars.value.forEach((c) => { calendarsById[c.id] = c; });
   // extend appointments data with active state and calendar title and color
-  appointments.value.forEach(a => {
+  appointments.value.forEach((a) => {
     a.calendar_title = calendarsById[a.calendar_id]?.title;
     a.calendar_color = calendarsById[a.calendar_id]?.color;
     a.status = getAppointmentStatus(a);
     a.active = a.status !== appointmentState.past; // TODO
     // convert start dates from UTC back to users timezone
-    a.slots.forEach(s => {
+    a.slots.forEach((s) => {
       s.start = dj.utc(s.start).tz(currentUser.value.timezone ?? dj.tz.guess());
     });
   });
 };
 
-// check appointment status for current state (past|pending|booked)
-const getAppointmentStatus = (a) => {
-  // check past events
-  if (a.slots.filter(s => dj(s.start).isAfter(dj())).length === 0) {
-    return appointmentState.past;
+// retrieve calendars and appointments after checking login and persisting user to db
+const getDbData = async () => {
+  await checkLogin();
+  if (auth.isAuthenticated.value) {
+    await Promise.all([getDbCalendars(), getDbAppointments()]);
+    extendDbData();
   }
-  // check booked events
-  if (a.slots.filter(s => s.attendee_id != null).length > 0) {
-    return appointmentState.booked;
-  }
-  // else event is still wating to be booked
-  return appointmentState.pending;
-}
+};
 
 // get the data initially
 onMounted(async () => {
   await getDbData();
-})
+});
 
 // provide refresh functions for components
 provide('refresh', getDbData);

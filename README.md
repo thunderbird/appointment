@@ -79,7 +79,11 @@ pytest
 
 ## Contributing
 
-Contributions are very welcome. Please lint/format code using Ruff and Black
+Contributions are very welcome. Please lint/format code before creating PRs.
+
+### Backend
+
+Backend is formatted using Ruff and Black.
 
 ```bash
 pip install ruff
@@ -91,4 +95,15 @@ Commands (from git root)
 ```bash
 ruff backend
 black backend
+```
+
+### Fronted
+
+Fronted is formatted using ESlint with airbnb rules.
+
+Commands (from /frontend)
+
+```bash
+yarn run lint
+yarn run lint --fix
 ```
