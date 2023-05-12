@@ -12,7 +12,10 @@
       <div class="w-10 h-5 shrink-0 rounded-full ease-in-out bg-gray-300 dark:bg-gray-600">
         <input type="checkbox" class="hidden peer" :checked="state" />
         <icon-circle-dot-filled
-          class="w-5 h-5 rounded-full duration-300 peer-checked:translate-x-5 text-gray-400 dark:text-gray-300 peer-checked:text-teal-500"
+          class="
+            w-5 h-5 rounded-full duration-300 peer-checked:translate-x-5
+            text-gray-400 dark:text-gray-300 peer-checked:text-teal-500
+          "
         />
       </div>
       <div class="text-gray-500">{{ t('label.on') }}</div>

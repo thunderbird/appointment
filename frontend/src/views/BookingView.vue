@@ -4,7 +4,9 @@
     v-if="activeView === views.loading"
     class="h-screen flex-center select-none"
   >
-    <div class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-600"></div>
+    <div
+      class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-600"
+    ></div>
   </main>
   <!-- booking page content: invalid link -->
   <main
@@ -173,25 +175,6 @@ const viewTitle = computed(() => {
   }
 });
 
-// retrieve appointment by slug
-onMounted(async () => {
-  // async get appointment data from route
-  const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
-  // check if appointment exists and is open
-  if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
-    activeView.value = views.invalid;
-  } else {
-    appointment.value = data.value;
-    // convert start dates from UTC back to users timezone
-    appointment.value.slots.forEach((s) => {
-      s.start = dj.utc(s.start).tz(dj.tz.guess());
-    });
-    activeDate.value = dj(appointment.value?.slots[0].start);
-    // check appointment slots for appropriate view
-    activeView.value = getViewBySlotDistribution(appointment.value.slots);
-  }
-});
-
 // check if slots are distributed over different months, weeks, days or only on a single day
 const getViewBySlotDistribution = (slots) => {
   let monthChanged = false; let weekChanged = false; let dayChanged = false; let
@@ -200,9 +183,15 @@ const getViewBySlotDistribution = (slots) => {
     if (!lastDate) {
       lastDate = dj(slot.start);
     } else {
-      if (dj(slot.start).format('YYYYMM') !== lastDate.format('YYYYMM')) monthChanged = true;
-      if (dj(slot.start).startOf('week').format('YYYYMMDD') !== lastDate.startOf('week').format('YYYYMMDD')) weekChanged = true;
-      if (dj(slot.start).format('YYYYMMDD') !== lastDate.format('YYYYMMDD')) dayChanged = true;
+      if (dj(slot.start).format('YYYYMM') !== lastDate.format('YYYYMM')) {
+        monthChanged = true;
+      }
+      if (dj(slot.start).startOf('week').format('YYYYMMDD') !== lastDate.startOf('week').format('YYYYMMDD')) {
+        weekChanged = true;
+      }
+      if (dj(slot.start).format('YYYYMMDD') !== lastDate.format('YYYYMMDD')) {
+        dayChanged = true;
+      }
     }
     lastDate = dj(slot.start);
   });
@@ -210,6 +199,7 @@ const getViewBySlotDistribution = (slots) => {
   if (weekChanged) return views.month;
   if (dayChanged) return views.week;
   if (!dayChanged) return views.day;
+  return views.invalid;
 };
 
 // prepare events to show one placeholder per day
@@ -238,7 +228,7 @@ const activeEvent = ref();
 // user selected a time slot: mark event as selected
 const selectEvent = (d) => {
   // set event selected
-  for (let i = 0; i < appointment.value.slots.length; i++) {
+  for (let i = 0; i < appointment.value.slots.length; i += 1) {
     const slot = appointment.value.slots[i];
     if (slot.start === d) {
       slot.selected = true;
@@ -253,8 +243,12 @@ const selectEvent = (d) => {
 
 // handle booking modal
 const showBooking = ref(false);
-const openBookingModal = () => showBooking.value = true;
-const closeBookingModal = () => showBooking.value = false;
+const openBookingModal = () => {
+  showBooking.value = true;
+};
+const closeBookingModal = () => {
+  showBooking.value = false;
+};
 
 // attendee confirmed the time slot selection: book event
 const attendee = ref(null);
@@ -283,4 +277,22 @@ const downloadIcs = async () => {
   }
 };
 
+// retrieve appointment by slug
+onMounted(async () => {
+  // async get appointment data from route
+  const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
+  // check if appointment exists and is open
+  if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
+    activeView.value = views.invalid;
+  } else {
+    appointment.value = data.value;
+    // convert start dates from UTC back to users timezone
+    appointment.value.slots.forEach((s) => {
+      s.start = dj.utc(s.start).tz(dj.tz.guess());
+    });
+    activeDate.value = dj(appointment.value?.slots[0].start);
+    // check appointment slots for appropriate view
+    activeView.value = getViewBySlotDistribution(appointment.value.slots);
+  }
+});
 </script>

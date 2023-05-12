@@ -1,7 +1,8 @@
 <template>
   <button
     class="
-      h-7 font-semibold text-sm whitespace-nowrap border rounded-md hover:shadow-md px-2 transition-all ease-in-out flex items-center justify-center gap-1
+      h-7 font-semibold text-sm whitespace-nowrap border rounded-md hover:shadow-md px-2
+      transition-all ease-in-out flex items-center justify-center gap-1
       text-gray-500 dark:text-gray-400 border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800
     "
     @click="copy ? copyToClipboard() : null"

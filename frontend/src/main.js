@@ -25,6 +25,10 @@ import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
 
+// language source files
+import de from '@/locales/de.json';
+import en from '@/locales/en.json';
+
 // init basic css with tailwind imports
 import '@/assets/main.css';
 
@@ -51,8 +55,8 @@ app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${protocol}://${process.env.VUE_APP_BASE_URL}/booking/`);
 app.use(router);
 const messages = {
-  de: require('@/locales/de.json'), // German
-  en: require('@/locales/en.json'), // English
+  de, // German
+  en, // English
 };
 const loc = localStorage.locale ?? (navigator.language || navigator.userLanguage);
 const i18n = createI18n({

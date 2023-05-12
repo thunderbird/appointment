@@ -22,6 +22,7 @@ module.exports = {
       vue: 'never',
     }],
     'max-len': ['error', { code: 120 }],
+    'no-param-reassign': 'off',
   },
   settings: {
     'import/resolver': {

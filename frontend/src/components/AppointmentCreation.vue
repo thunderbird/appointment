@@ -93,7 +93,10 @@
             <div class="flex justify-between mb-1">
               <div>{{ dj(day).format('LL') }}</div>
               <div>
-                <button @click="addTime(day)" class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white">
+                <button
+                  @click="addTime(day)"
+                  class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
+                >
                   <icon-plus class="h-3 w-3 stroke-2 fill-transparent stroke-white" />
                   {{ t('label.addTime') }}
                 </button>
@@ -151,7 +154,10 @@
         class="w-1/2"
       />
     </div>
-    <div v-show="showDatePicker" class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700">
+    <div
+      v-show="showDatePicker"
+      class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700"
+    >
       <!-- monthly mini calendar -->
       <calendar-month
         :selected="activeDate"
@@ -216,11 +222,6 @@ const props = defineProps({
 const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
-// tab navigation for location types
-const updateLocationType = (type) => {
-  appointment.location_type = locationTypes[type];
-};
-
 // defaul appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
   title: '',
@@ -232,6 +233,11 @@ const defaultAppointment = {
 };
 const appointment = reactive({ ...defaultAppointment });
 
+// tab navigation for location types
+const updateLocationType = (type) => {
+  appointment.location_type = locationTypes[type];
+};
+
 // date and time selection data
 // an object having the iso date as key and a list of objects holding start and end time for each day
 // format: {'2022-12-01': [{ start: '10:00', end: '11:30'}, ...], ...}
@@ -241,19 +247,19 @@ const slots = reactive({});
 // format: [{ start: '2022-12-01T10:00:00', duration: 90}, ...]
 const slotList = computed(() => {
   const list = [];
-  for (const day in slots) {
-    if (Object.hasOwnProperty.call(slots, day)) {
-      const times = slots[day];
-      times.forEach((slot) => {
-        const start = dj(`${day} ${slot.start}`);
-        const end = dj(`${day} ${slot.end}`);
-        list.push({
-          start: start.tz(props.user.timezone ?? dj.tz.guess(), true).utc().format('YYYY-MM-DDTHH:mm:ss'), // save local time as UTC
-          duration: end.diff(start, 'minutes'),
-        });
+  Object.keys(slots).forEach((day) => {
+    const times = slots[day];
+    times.forEach((slot) => {
+      const start = dj(`${day} ${slot.start}`);
+      const end = dj(`${day} ${slot.end}`);
+      list.push({
+        // save local time as UTC
+        start: start.tz(props.user.timezone ?? dj.tz.guess(), true).utc().format('YYYY-MM-DDTHH:mm:ss'),
+        // calculate duration as difference between start and end
+        duration: end.diff(start, 'minutes'),
       });
-    }
-  }
+    });
+  });
   return list;
 });
 
@@ -307,7 +313,9 @@ const createdConfirmation = reactive({
   title: '',
   publicLink: '',
 });
-const closeCreatedModal = () => createdConfirmation.show = false;
+const closeCreatedModal = () => {
+  createdConfirmation.show = false;
+};
 
 // handle actual appointment creation
 const createAppointment = async () => {
@@ -324,12 +332,12 @@ const createAppointment = async () => {
   createdConfirmation.publicLink = bookingUrl + data.value.slug;
   createdConfirmation.show = true;
   // reset everything to start again
-  for (const attr in defaultAppointment) {
+  Object.keys(defaultAppointment).forEach((attr) => {
     appointment[attr] = defaultAppointment[attr];
-  }
-  for (const attr in slots) {
+  });
+  Object.keys(slots).forEach((attr) => {
     delete slots[attr];
-  }
+  });
   visitedStep1.value = false;
   visitedStep2.value = false;
   emit('create');

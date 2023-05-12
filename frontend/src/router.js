@@ -63,6 +63,7 @@ router.beforeEach((to) => {
     to.params.view = 'all';
     return to;
   }
+  return to;
 });
 
 export default router;

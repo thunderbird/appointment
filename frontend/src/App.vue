@@ -64,7 +64,9 @@ const calendars = ref([]);
 const appointments = ref([]);
 
 // true if route can be accessed without authentication
-const routeIsPublic = computed(() => route.name === 'booking' || (route.name === 'home' && !auth.isAuthenticated.value));
+const routeIsPublic = computed(
+  () => route.name === 'booking' || (route.name === 'home' && !auth.isAuthenticated.value),
+);
 
 // check login state of current user first
 const checkLogin = async () => {
@@ -96,13 +98,19 @@ const getDbAppointments = async () => {
     appointments.value = data.value;
   }
 };
-// retrieve calendars and appointments after checking login and persisting user to db
-const getDbData = async () => {
-  await checkLogin();
-  if (auth.isAuthenticated.value) {
-    await Promise.all([getDbCalendars(), getDbAppointments()]);
-    extendDbData();
+
+// check appointment status for current state (past|pending|booked)
+const getAppointmentStatus = (a) => {
+  // check past events
+  if (a.slots.filter((s) => dj(s.start).isAfter(dj())).length === 0) {
+    return appointmentState.past;
   }
+  // check booked events
+  if (a.slots.filter((s) => s.attendee_id != null).length > 0) {
+    return appointmentState.booked;
+  }
+  // else event is still wating to be booked
+  return appointmentState.pending;
 };
 
 // extend retrieved data
@@ -123,18 +131,13 @@ const extendDbData = () => {
   });
 };
 
-// check appointment status for current state (past|pending|booked)
-const getAppointmentStatus = (a) => {
-  // check past events
-  if (a.slots.filter((s) => dj(s.start).isAfter(dj())).length === 0) {
-    return appointmentState.past;
+// retrieve calendars and appointments after checking login and persisting user to db
+const getDbData = async () => {
+  await checkLogin();
+  if (auth.isAuthenticated.value) {
+    await Promise.all([getDbCalendars(), getDbAppointments()]);
+    extendDbData();
   }
-  // check booked events
-  if (a.slots.filter((s) => s.attendee_id != null).length > 0) {
-    return appointmentState.booked;
-  }
-  // else event is still wating to be booked
-  return appointmentState.pending;
 };
 
 // get the data initially

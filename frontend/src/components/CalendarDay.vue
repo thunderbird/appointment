@@ -163,9 +163,12 @@ const elementsToShow = computed(() => {
 // compute start limit depending on data in view
 // begin showing events 2 hours before first event or at least 2pm
 const startHour = computed(() => {
-  const start = elementsToShow.value.reduce((p, c) => (dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
-    ? Math.min(dj(c.start).format('H'), p)
-    : p), 16);
+  const start = elementsToShow.value.reduce(
+    (p, c) => (dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
+      ? Math.min(dj(c.start).format('H'), p)
+      : p),
+    16,
+  );
   return start - 2 >= 0 ? start - 2 : 0;
 });
 
@@ -178,19 +181,20 @@ const endHour = computed(() => {
       ? Math.max(slotEnd.format('H'), p)
       : p;
   }, 9);
-  return startHour.value > end
-    ? startHour.value + 8
-    : end + 1 < 24 ? end + 1 : 24;
+  if (startHour.value > end) {
+    return startHour.value + 8;
+  }
+  return end + 1 < 24 ? end + 1 : 24;
+});
+
+// create position of event, smallest unit is one minute
+const timePosition = (start, duration) => ({
+  offset: 60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1,
+  span: duration,
+  times: `${dj(start).format('LT')} - ${dj(start).add(duration, 'minutes').format('LT')}`,
 });
 
 // handle events to show
-const timePosition = (start, duration) =>
-  // create position of event, smallest unit is one minute
-  ({
-    offset: 60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1,
-    span: duration,
-    times: `${dj(start).format('LT')} - ${dj(start).add(duration, 'minutes').format('LT')}`,
-  });
 const events = computed(() => {
   const eventsOnDate = {};
   // add appointments
@@ -234,7 +238,7 @@ const hours = computed(() => {
   const list = [];
   const range = endHour.value - startHour.value;
   let d = dj().hour(startHour.value).minute(0);
-  for (let i = 0; i <= range; i++) {
+  for (let i = 0; i <= range; i += 1) {
     list.push(d.format('h:mm A'));
     d = d.add(1, 'hour');
   }

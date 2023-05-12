@@ -92,6 +92,9 @@ const props = defineProps({
   success: Boolean, // true if booking was successful
 });
 
+// component emits
+const emit = defineEmits(['book', 'download', 'close']);
+
 // format time
 const time = computed(() => dj(props.event.start).format('LLLL'));
 
@@ -114,7 +117,4 @@ const bookIt = () => {
 
 // loading indication
 const waiting = computed(() => bookingDone.value && !props.success);
-
-// component emits
-const emit = defineEmits(['book', 'download', 'close']);
 </script>

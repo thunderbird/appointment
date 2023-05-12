@@ -39,7 +39,12 @@ const props = defineProps({
   event: Object, // event to show details in popup for
 });
 
-const eventDateTime = computed(() => (props.event
-  ? dj(props.event.start).format('dddd L, LT - ') + dj(props.event.start).add(props.event.duration, 'minutes').format('LT')
-  : ''));
+const eventDateTime = computed(
+  () => (
+    props.event
+      ? dj(props.event.start).format('dddd L, LT - ')
+        + dj(props.event.start).add(props.event.duration, 'minutes').format('LT')
+      : ''
+  ),
+);
 </script>

@@ -37,9 +37,8 @@ export const download = (data, filename, contenttype = 'text/plain') => {
   // IE10+
   if (window.navigator.msSaveOrOpenBlob) {
     window.navigator.msSaveOrOpenBlob(file, filename);
-  }
-  // other browsers
-  else {
+  } else {
+    // other browsers
     const url = URL.createObjectURL(file);
     a.href = url;
     a.download = filename;

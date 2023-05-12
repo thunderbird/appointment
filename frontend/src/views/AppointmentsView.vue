@@ -34,7 +34,10 @@
         </div>
         <div class="rounded border border-gray-300 dark:border-gray-500 flex">
           <div
-            class="border-r border-gray-300 dark:border-gray-500 py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
+            class="
+              border-r py-1 px-1.5 flex items-center cursor-pointer overflow-hidden
+              border-gray-300 dark:border-gray-500
+            "
             :class="{
               'bg-gray-300 dark:bg-gray-600': view === viewTypes.list,
               'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.list
@@ -68,13 +71,19 @@
         </div>
         <div
           v-show="showAdjustments"
-          class="absolute z-40 top-10 right-0 p-2 rounded shadow-md border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700"
+          class="
+            absolute z-40 top-10 right-0 p-2 rounded shadow-md border
+            border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700
+          "
           v-on-click-outside="closeAdjustments"
         >
           <div
             v-for="(value, key) in columns"
             :key="key"
-            class="grid grid-cols-context hover:bg-gray-100 dark:hover:bg-gray-500 rounded py-1 pl-1 pr-3 cursor-pointer"
+            class="
+              grid grid-cols-context rounded py-1 pl-1 pr-3 cursor-pointer
+              hover:bg-gray-100 dark:hover:bg-gray-500
+            "
             @click="toggleColumnVisibility(value)"
           >
             <div class="flex items-center">
@@ -87,7 +96,10 @@
           </div>
           <div class="border-t border-gray-300 dark:border-gray-500 my-2"></div>
           <div
-            class="grid grid-cols-context hover:bg-gray-100 dark:hover:bg-gray-500 rounded py-1 pl-1 pr-3 cursor-pointer"
+            class="
+              grid grid-cols-context rounded py-1 pl-1 pr-3 cursor-pointer
+              hover:bg-gray-100 dark:hover:bg-gray-500
+            "
             @click="restoreColumnOrder"
           >
             <div></div>
@@ -102,7 +114,9 @@
             <th class="py-1"></th>
             <template v-for="(_, key) in columns" :key="key">
               <th v-if="columnVisible(key)" class="group font-normal text-left py-1 px-2">
-                <div class="py-1 border-r border-gray-300 dark:border-gray-500 group-last:border-none">{{ t('label.' + key) }}</div>
+                <div class="py-1 border-r border-gray-300 dark:border-gray-500 group-last:border-none">
+                  {{ t('label.' + key) }}
+                </div>
               </th>
             </template>
           </tr>
@@ -151,7 +165,10 @@
         </tbody>
       </table>
       <!-- appointments grid -->
-      <div v-show="view === viewTypes.grid" class="w-full mt-4 grid grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] xl:grid-cols-3 gap-8 p-4">
+      <div
+        v-show="view === viewTypes.grid"
+        class="w-full mt-4 grid grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] xl:grid-cols-3 gap-8 p-4"
+      >
         <appointment-grid-item
           v-for="(appointment, i) in filteredAppointments" :key="i"
           :appointment="appointment"
@@ -233,7 +250,9 @@ const props = defineProps({
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
-const selectDate = (d) => activeDate.value = dj(d);
+const selectDate = (d) => {
+  activeDate.value = dj(d);
+};
 
 // active menu item for tab navigation of appointment views
 const tabActive = ref(route.params.view ? views[route.params.view] : views.all);
@@ -266,11 +285,13 @@ const view = ref(viewTypes.list);
 const showAdjustments = ref(false);
 const visibleColumns = ref(Object.values(columns));
 const openAdjustments = () => {
-  if (view.value == viewTypes.list) {
+  if (view.value === viewTypes.list) {
     showAdjustments.value = true;
   }
 };
-const closeAdjustments = () => showAdjustments.value = false;
+const closeAdjustments = () => {
+  showAdjustments.value = false;
+};
 const toggleColumnVisibility = (key) => {
   if (visibleColumns.value.includes(key)) {
     visibleColumns.value = visibleColumns.value.filter((column) => column !== key);
@@ -308,22 +329,52 @@ const filteredAppointments = computed(() => {
   // by select filter
   switch (filter.value) {
     case filterOptions.appointmentsToday:
-      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday(), false));
+      list = list.filter(
+        (a) => a.slots.reduce(
+          (p, c) => p || dj(c.start).isToday(),
+          false,
+        ),
+      );
       break;
     case filterOptions.appointmentsNext7Days:
-      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(7, 'days')), false));
+      list = list.filter(
+        (a) => a.slots.reduce(
+          (p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(7, 'days')),
+          false,
+        ),
+      );
       break;
     case filterOptions.appointmentsNext14Days:
-      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(14, 'days')), false));
+      list = list.filter(
+        (a) => a.slots.reduce(
+          (p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(14, 'days')),
+          false,
+        ),
+      );
       break;
     case filterOptions.appointmentsNext31Days:
-      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(31, 'days')), false));
+      list = list.filter(
+        (a) => a.slots.reduce(
+          (p, c) => p || dj(c.start).isToday() || dj(c.start).isBetween(dj(), dj().add(31, 'days')),
+          false,
+        ),
+      );
       break;
     case filterOptions.appointmentsInMonth:
-      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'), false));
+      list = list.filter(
+        (a) => a.slots.reduce(
+          (p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'),
+          false,
+        ),
+      );
       break;
     case filterOptions.allFutureAppointments:
-      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false));
+      list = list.filter(
+        (a) => a.slots.reduce(
+          (p, c) => p || dj(c.start).isAfter(dj()),
+          false,
+        ),
+      );
       break;
     case filterOptions.allAppointments:
     default:
@@ -337,7 +388,9 @@ const repliesCount = (appointment) => appointment.slots.filter((s) => s.attendee
 
 // handle single appointment modal
 const showAppointment = ref(null);
-const closeAppointmentModal = () => showAppointment.value = null;
+const closeAppointmentModal = () => {
+  showAppointment.value = null;
+};
 
 // appointment creation
 const creationStatus = ref(creationState.hidden);

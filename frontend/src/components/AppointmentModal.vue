@@ -2,7 +2,10 @@
   <div v-if="open" class="w-screen h-screen fixed top-0 left-0 z-40 bg-gray-800/50" @click="emit('close')"></div>
   <div
     v-if="open"
-    class="fixed z-50 position-center position-center rounded-xl p-12 max-w-3xl w-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300"
+    class="
+      fixed z-50 position-center position-center rounded-xl p-12 max-w-3xl w-full
+      bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300
+    "
   >
     <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
       <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-gray-700 dark:stroke-gray-400" />
@@ -39,7 +42,10 @@
           {{ t('label.calendar') }}
         </div>
         <div class="pl-6 flex items-center gap-3">
-          <div class="w-4 h-4 rounded-full shrink-0 bg-sky-400" :style="{ 'background-color': appointment.calendar_color }"></div>
+          <div
+            class="w-4 h-4 rounded-full shrink-0 bg-sky-400"
+            :style="{ 'background-color': appointment.calendar_color }"
+          ></div>
           {{ appointment.calendar_title }}
         </div>
       </div>

@@ -144,7 +144,9 @@ const timezones = Intl.supportedValuesOf('timeZone');
 // load user defined timezone on page reload
 watch(
   () => props.user,
-  (loadedUser) => activeTimezone.primary = loadedUser.timezone,
+  (loadedUser) => {
+    activeTimezone.primary = loadedUser.timezone;
+  },
 );
 
 // save timezone config

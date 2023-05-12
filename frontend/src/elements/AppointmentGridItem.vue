@@ -2,16 +2,19 @@
   <div
     class="rounded border-l-8 border-sky-400"
     :class="{
-      'opacity-50 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400': appointment.status === appointmentState.past,
-      'cursor-pointer hover:shadow-md hover:bg-sky-400/10': appointment.status !== appointmentState.past,
+      'opacity-50 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400': isPast,
+      'cursor-pointer hover:shadow-md hover:bg-sky-400/10': !isPast,
     }"
     :style="{ 'border-color': appointment.calendar_color }"
-    @mouseover="el => appointment.status !== appointmentState.past ? paintBackground(el, appointment.calendar_color, '22') : null"
-    @mouseout="el => appointment.status !== appointmentState.past ? paintBackground(el, appointment.calendar_color, _, true) : null"
+    @mouseover="el => !isPast ? paintBackground(el, appointment.calendar_color, '22') : null"
+    @mouseout="el => !isPast ? paintBackground(el, appointment.calendar_color, _, true) : null"
   >
     <div
-      class="h-full px-4 py-3 rounded-r border-solid border-t-2 border-r-2 border-b-2 border-sky-400 flex flex-col gap-1"
-      :class="{ 'border-dashed': appointment.status == appointmentState.pending }"
+      class="
+        h-full px-4 py-3 rounded-r border-solid border-t-2 border-r-2 border-b-2 flex flex-col gap-1
+        border-sky-400
+      "
+      :class="{ 'border-dashed': isPending }"
       :style="{ 'border-color': appointment.calendar_color }"
     >
       <div>{{ appointment.title }}</div>
@@ -35,7 +38,12 @@
       <div class="text-sm flex items-center gap-1">
         <icon-link class="h-4 w-4 stroke-gray-500 stroke-2 fill-transparent shrink-0" />
         <div class="truncate">
-          <a :href="bookingUrl + appointment.slug" class="text-teal-500 underline underline-offset-2" target="_blank" @click.stop="null">
+          <a
+            :href="bookingUrl + appointment.slug"
+            class="text-teal-500 underline underline-offset-2"
+            target="_blank"
+            @click.stop="null"
+          >
             {{ bookingUrl + appointment.slug }}
           </a>
         </div>
@@ -46,7 +54,7 @@
 
 <script setup>
 import { appointmentState } from '@/definitions';
-import { inject } from 'vue';
+import { inject, computed } from 'vue';
 import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import SwitchToggle from '@/elements/SwitchToggle';
@@ -65,7 +73,13 @@ const bookingUrl = inject('bookingUrl');
 const paintBackground = inject('paintBackground');
 
 // component properties
-defineProps({
+const props = defineProps({
   appointment: Object, // appointment to show details for
 });
+
+// true if an appointment from the past was given
+const isPast = computed(() => props.appointment.status === appointmentState.past);
+
+// true if a pending appointment was given
+const isPending = computed(() => props.appointment.status === appointmentState.pending);
 </script>

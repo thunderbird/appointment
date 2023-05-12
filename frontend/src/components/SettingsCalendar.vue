@@ -11,7 +11,10 @@
           <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
         </div>
         {{ cal.title }}
-        <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
+        <button
+          @click="editCalendar(cal.id)"
+          class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs"
+        >
           <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
           {{ t('label.editCalendar') }}
         </button>
@@ -76,7 +79,10 @@
         <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex gap-2 items-center">
           <div>{{ cal.title }}</div>
           <div>{{ cal.url }}</div>
-          <button @click="assignCalendar(cal.title, cal.url)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
+          <button
+            @click="assignCalendar(cal.title, cal.url)"
+            class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs"
+          >
             <icon-arrow-right class="h-3.5 w-3.5 stroke-2 stroke-white fill-transparent" />
             {{ 'Select calendar' }}
           </button>
@@ -226,16 +232,9 @@ const editCalendar = async (id) => {
   inputMode.value = inputModes.edit;
   calendarInput.id = id;
   const { data } = await call(`cal/${id}`).get().json();
-  for (const attr in data.value) {
+  Object.keys(data.value).forEach((attr) => {
     calendarInput.data[attr] = data.value[attr];
-  }
-};
-const assignCalendar = (title, url) => {
-  inputMode.value = inputModes.add;
-  calendarInput.data.title = title;
-  calendarInput.data.url = url;
-  calendarInput.data.user = principal.user;
-  calendarInput.data.password = principal.password;
+  });
 };
 
 // do remove a given calendar connection
@@ -277,6 +276,15 @@ const getRemoteCalendars = async () => {
   const { error, data } = await call('rmt/calendars').post(principal);
   searchResultCalendars.value = !error.value ? JSON.parse(data.value) : [];
   processPrincipal.value = false;
+};
+
+// fill input form with data from principal discovery
+const assignCalendar = (title, url) => {
+  inputMode.value = inputModes.add;
+  calendarInput.data.title = title;
+  calendarInput.data.url = url;
+  calendarInput.data.user = principal.user;
+  calendarInput.data.password = principal.password;
 };
 
 // preset of available calendar colors

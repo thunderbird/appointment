@@ -105,8 +105,8 @@ const eventsByDate = (d) => {
     return props.placeholder
       ? events.value[key].filter((e) => dj(e.start).isAfter(dj()))
       : events.value[key].filter(
-        (e) => dj(e.start).add(e.duration, 'minutes').isAfter(dj()) && e.status === appointmentState.pending
-            || e.attendee && e.status === appointmentState.pending
+        (e) => (dj(e.start).add(e.duration, 'minutes').isAfter(dj()) && e.status === appointmentState.pending)
+            || (e.attendee && e.status === appointmentState.pending)
             || e.remote,
       );
   }
@@ -140,13 +140,6 @@ const weekdayNames = () => {
   }
   return list;
 };
-
-// all day cells in current month view
-const days = computed(() => [
-  ...previousMonthDays.value,
-  ...currentMonthDays.value,
-  ...nextMonthDays.value,
-]);
 
 // basic data for selected month
 const today = computed(() => dj().format('YYYY-MM-DD'));
@@ -200,4 +193,11 @@ const nextMonthDays = computed(() => {
     active: false,
   }));
 });
+
+// all day cells in current month view
+const days = computed(() => [
+  ...previousMonthDays.value,
+  ...currentMonthDays.value,
+  ...nextMonthDays.value,
+]);
 </script>
