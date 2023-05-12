@@ -3,7 +3,7 @@ name = "Apppointment Backend"
 version = "1.0.0"
 description = "Backend component to Thunderbird Appointment"
 readme = "../README.md"
-requires-python = ">3.8"
+requires-python = ">3.10"
 dynamic = ["dependencies"]
 
 [project.urls]
