@@ -129,11 +129,11 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
   subscriber_calendar_urls = [c.url for c in subscriber_calendars]
   # check if subscriber already holds this calendar by url
   if db_calendar.url in subscriber_calendar_urls:
-    return None
+    raise HTTPException(status_code=403, detail="Calendar already exists")
   # check subscription limitation
   limit = get_connections_limit(db=db, subscriber_id=subscriber.id)
   if limit > 0 and len(subscriber_calendars) >= limit:
-    return None
+    raise HTTPException(status_code=403, detail="Allowed number of calendars has been reached for this subscription")
   # add new calendar
   db.add(db_calendar)
   db.commit()

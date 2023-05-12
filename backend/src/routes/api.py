@@ -81,8 +81,9 @@ def create_my_calendar(calendar: schemas.CalendarConnection, db: Session = Depen
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     # create calendar
-    cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
-    if cal is None:
+    try:
+        cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
+    except:
         raise HTTPException(status_code=403, detail="Calendar already exists or maximum number of calendars exceeded")
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
 

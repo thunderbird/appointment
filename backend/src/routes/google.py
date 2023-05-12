@@ -84,10 +84,11 @@ def google_callback(
             provider=CalendarProvider.google,
         )
         # add calendar
-        new_cal = repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
-        if new_cal is None:
+        try:
+            repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
+        except:
             error_occured = True
 
     # And then redirect back to frontend
-    # TODO: if we have notifications later, send error_occured with url
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")
+    get_str = "?error=1" if error_occured else ""
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar{get_str}")
