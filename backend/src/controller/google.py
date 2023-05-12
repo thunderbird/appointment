@@ -91,8 +91,10 @@ class GoogleClient:
 
     def list_events(self, calendar_id, time_min, time_max, token):
         response = {}
-        with build('calendar', 'v3', credentials=token) as service:
-            request = service.events().list(calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True)
+        with build("calendar", "v3", credentials=token) as service:
+            request = service.events().list(
+                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True
+            )
             while request is not None:
                 try:
                     response = request.execute()

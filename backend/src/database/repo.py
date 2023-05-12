@@ -123,22 +123,24 @@ def get_calendars_by_subscriber(db: Session, subscriber_id: int):
 
 
 def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int):
-  """create new calendar for owner, if not already existing"""
-  db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
-  subscriber_calendars = get_calendars_by_subscriber(db, subscriber_id)
-  subscriber_calendar_urls = [c.url for c in subscriber_calendars]
-  # check if subscriber already holds this calendar by url
-  if db_calendar.url in subscriber_calendar_urls:
-    raise HTTPException(status_code=403, detail="Calendar already exists")
-  # check subscription limitation
-  limit = get_connections_limit(db=db, subscriber_id=subscriber.id)
-  if limit > 0 and len(subscriber_calendars) >= limit:
-    raise HTTPException(status_code=403, detail="Allowed number of calendars has been reached for this subscription")
-  # add new calendar
-  db.add(db_calendar)
-  db.commit()
-  db.refresh(db_calendar)
-  return db_calendar
+    """create new calendar for owner, if not already existing"""
+    db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
+    subscriber_calendars = get_calendars_by_subscriber(db, subscriber_id)
+    subscriber_calendar_urls = [c.url for c in subscriber_calendars]
+    # check if subscriber already holds this calendar by url
+    if db_calendar.url in subscriber_calendar_urls:
+        raise HTTPException(status_code=403, detail="Calendar already exists")
+    # check subscription limitation
+    limit = get_connections_limit(db=db, subscriber_id=subscriber.id)
+    if limit > 0 and len(subscriber_calendars) >= limit:
+        raise HTTPException(
+            status_code=403, detail="Allowed number of calendars has been reached for this subscription"
+        )
+    # add new calendar
+    db.add(db_calendar)
+    db.commit()
+    db.refresh(db_calendar)
+    return db_calendar
 
 
 def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):

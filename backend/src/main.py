@@ -67,4 +67,4 @@ app.add_middleware(
 
 # Mix in our extra routes
 app.include_router(api.router)
-app.include_router(google.router, prefix='/google')
+app.include_router(google.router, prefix="/google")
