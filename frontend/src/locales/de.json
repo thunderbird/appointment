@@ -8,7 +8,7 @@
     "appointmentCreated": "Termin erstellt!",
     "appointmentsAndBookingSettings": "Termine und Events Einstellungen",
     "bookSelection": "Auswahl buchen",
-    "calendarConnections": "Kalender-Anbindung",
+    "calendarsConnected": "Verbundene Kalender",
     "calendarSettings": "Kalender-Einstellungen",
     "createNewAppointment": "Neuen Termin erstellen",
     "dateAndTimeFormatting": "Datums- und Zeitformat",
@@ -17,8 +17,7 @@
     "generalSettings": "Allgemeine Einstellungen",
     "languageAndAppearance": "Sprache & Aussehen",
     "pendingAppointments": "Ausstehende Termine",
-    "privacySettings": "Privatsphäre-Einstellungen",
-    "yourProfile": "Dein Profil"
+    "privacySettings": "Privatsphäre-Einstellungen"
   },
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
