@@ -1,0 +1,54 @@
+# This workflow will check for linting errors
+
+name: Lint Checks
+
+# Stop any pending jobs
+concurrency:
+  group: lint-checker
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Yarn Install
+        run: cd frontend && yarn install
+
+      - name: Run Linter
+        run: cd frontend && yarn run lint
+
+  backend:
+    name: Backend Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: pip Install
+        run: cd backend && pip install . && pip install .[lint]
+
+      - name: Run Linter
+        run: cd backend && ruff .

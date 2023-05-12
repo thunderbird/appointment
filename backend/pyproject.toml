@@ -1,8 +1,7 @@
 [project]
-name = "Apppointment Backend"
+name = "appointment_backend"
 version = "1.0.0"
 description = "Backend component to Thunderbird Appointment"
-readme = "../README.md"
 requires-python = ">3.10"
 dynamic = ["dependencies"]
 
@@ -11,7 +10,7 @@ homepage = "https://appointment.day"
 repository = "https://github.com/thundernest/appointment.git"
 
 [project.optional-dependencies]
-cli = [
+lint = [
     "ruff",
     "black"
 ]
