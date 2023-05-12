@@ -1,10 +1,10 @@
 // get the first key of given object that points to given value
-export const keyByValue = (o, v) => Object.keys(o).find(k => o[k]===v);
+export const keyByValue = (o, v) => Object.keys(o).find((k) => o[k] === v);
 
 // create event color for border and background, inherited from calendar color attribute
 export const eventColor = (event, placeholder) => {
   const color = {
-    border:     null,
+    border: null,
     background: null,
   };
   // only color appointment slots
@@ -26,22 +26,20 @@ export const initials = (name) => {
     return parts.length > 1
       ? parts[0][0] + parts.at(-1)[0]
       : name[0];
-  } else {
-    return '';
   }
+  return '';
 };
 
 // file download
-export const download = (data, filename, contenttype='text/plain') => {
-  let a = document.createElement('a');
-  let file = new Blob([data], { type: contenttype + ';charset=UTF-8', endings: 'native' });
+export const download = (data, filename, contenttype = 'text/plain') => {
+  const a = document.createElement('a');
+  const file = new Blob([data], { type: `${contenttype};charset=UTF-8`, endings: 'native' });
   // IE10+
   if (window.navigator.msSaveOrOpenBlob) {
     window.navigator.msSaveOrOpenBlob(file, filename);
-  }
-  // other browsers
-  else {
-    let url = URL.createObjectURL(file);
+  } else {
+    // other browsers
+    const url = URL.createObjectURL(file);
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -54,8 +52,8 @@ export const download = (data, filename, contenttype='text/plain') => {
 };
 
 export default {
-	keyByValue,
-	eventColor,
+  keyByValue,
+  eventColor,
   initials,
   download,
 };

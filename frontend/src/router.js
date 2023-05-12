@@ -9,52 +9,52 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: HomeView,
   },
   {
     path: '/booking/:slug',
     name: 'booking',
-    component: BookingView
+    component: BookingView,
   },
   {
     path: '/calendar',
-    redirect: { name: "calendar" }
+    redirect: { name: 'calendar' },
   },
   {
     path: '/calendar/:view?/:date?',
     name: 'calendar',
     component: CalendarView,
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
   },
   // lazy-loaded routes
   {
     path: '/appointments/:view?',
     name: 'appointments',
     component: () => import(/* webpackChunkName: "appointments" */ '@/views/AppointmentsView'),
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
   },
   {
     path: '/settings/:view?',
     name: 'settings',
     component: () => import(/* webpackChunkName: "settings" */ '@/views/SettingsView'),
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
   },
   {
     path: '/profile',
     name: 'profile',
     component: () => import(/* webpackChunkName: "profile" */ '@/views/ProfileView'),
-    beforeEnter: authGuard
+    beforeEnter: authGuard,
   },
 ];
 
 // create router object to export
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
 });
 
 // set default route parameters
-router.beforeEach(to => {
+router.beforeEach((to) => {
   if (to.name === 'calendar' && !to.params.view) {
     to.params.view = 'month';
     return to;
@@ -63,6 +63,7 @@ router.beforeEach(to => {
     to.params.view = 'all';
     return to;
   }
+  return null;
 });
 
 export default router;
