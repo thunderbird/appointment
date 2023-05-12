@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build-stage": "vue-cli-service build --mode staging",
-    "lint": "vue-cli-service lint"
+    "lint": "yarn run eslint --ext .js,.vue ./src"
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.0.2",
@@ -24,28 +24,16 @@
     "@babel/eslint-parser": "^7.12.16",
     "@tailwindcss/forms": "^0.5.3",
     "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "autoprefixer": "^10.4.12",
-    "eslint": "^8.22.0",
-    "eslint-plugin-vue": "^9.3.0",
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-import-resolver-webpack": "^0.13.2",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-vue": "^9.12.0",
     "postcss": "^8.4.17",
     "tailwindcss": "^3.1.8"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "rules": {}
   },
   "babel": {
     "presets": [

@@ -70,7 +70,9 @@
 </template>
 
 <script setup>
-import { inject, computed, reactive, ref } from 'vue';
+import {
+  inject, computed, reactive, ref,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import ArtConfetti from '@/elements/arts/ArtConfetti';
 import PrimaryButton from '@/elements/PrimaryButton';
@@ -85,24 +87,23 @@ const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({
-  open: Boolean,    // modal state
-  event: Object,    // event data to display and book
+  open: Boolean, // modal state
+  event: Object, // event data to display and book
   success: Boolean, // true if booking was successful
 });
 
+// component emits
+const emit = defineEmits(['book', 'download', 'close']);
+
 // format time
-const time = computed(() => {
-  return dj(props.event.start).format('LLLL')
-});
+const time = computed(() => dj(props.event.start).format('LLLL'));
 
 // attendee data
 const attendee = reactive({
   name: '',
   email: '',
 });
-const validAttendee = computed(() => {
-  return attendee.email.length > 2;
-});
+const validAttendee = computed(() => attendee.email.length > 2);
 
 // actual event booking
 const bookingForm = ref();
@@ -116,7 +117,4 @@ const bookIt = () => {
 
 // loading indication
 const waiting = computed(() => bookingDone.value && !props.success);
-
-// component emits
-const emit = defineEmits(['book', 'download', 'close']);
 </script>

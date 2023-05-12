@@ -88,7 +88,9 @@
 
 <script setup>
 import { colorSchemes } from '@/definitions';
-import { ref, reactive, inject, watch } from 'vue';
+import {
+  ref, reactive, inject, watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import SwitchToggle from '@/elements/SwitchToggle';
 
@@ -108,46 +110,48 @@ watch(locale, (newValue) => {
 });
 
 // handle theme mode
-const initialTheme = !('theme' in localStorage) ? colorSchemes.system : colorSchemes[localStorage.theme]
+const initialTheme = !('theme' in localStorage) ? colorSchemes.system : colorSchemes[localStorage.theme];
 const theme = ref(initialTheme);
 watch(theme, (newValue) => {
-	switch (newValue) {
-		case colorSchemes.dark:
-			localStorage.theme = 'dark';
-			document.documentElement.classList.add('dark');
-			break;
-		case colorSchemes.light:
-			localStorage.theme = 'light';
-			document.documentElement.classList.remove('dark');
-			break;
-		case colorSchemes.system:
-			localStorage.removeItem('theme');
-			if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
-				document.documentElement.classList.remove('dark');
-			} else {
-				document.documentElement.classList.add('dark');
-			}
-			break;
-		default:
-			break;
-	}
+  switch (newValue) {
+    case colorSchemes.dark:
+      localStorage.theme = 'dark';
+      document.documentElement.classList.add('dark');
+      break;
+    case colorSchemes.light:
+      localStorage.theme = 'light';
+      document.documentElement.classList.remove('dark');
+      break;
+    case colorSchemes.system:
+      localStorage.removeItem('theme');
+      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+      break;
+    default:
+      break;
+  }
 });
 
 // timezones
 const activeTimezone = reactive({
-  primary:   props.user?.timezone ?? dj.tz.guess(),
+  primary: props.user?.timezone ?? dj.tz.guess(),
   secondary: dj.tz.guess(),
 });
-const timezones = Intl.supportedValuesOf('timeZone') ;
+const timezones = Intl.supportedValuesOf('timeZone');
 // load user defined timezone on page reload
 watch(
   () => props.user,
-  (loadedUser) => activeTimezone.primary = loadedUser.timezone
-)
+  (loadedUser) => {
+    activeTimezone.primary = loadedUser.timezone;
+  },
+);
 
 // save timezone config
 const updateTimezone = async () => {
-  const { error } = await call("me").put({ timezone: activeTimezone.primary }).json();
+  const { error } = await call('me').put({ timezone: activeTimezone.primary }).json();
   if (!error) {
     // TODO show some confirmation
   }

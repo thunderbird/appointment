@@ -9,10 +9,10 @@
     <!-- <label class="grow flex items-center relative">
       <icon-search
         class="
-          absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 fill-transparent 
+          absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 fill-transparent
           stroke-gray-300 dark:stroke-gray-500
         "
-      /> 
+      />
       <input
         class="w-full h-full text-xl pl-20 pr-2 border-none"
         type="search"
@@ -61,7 +61,7 @@ const { t } = useI18n();
 
 // component properties
 defineProps({
-  navItems: Array,  // list of route names that are also lang keys (format: label.<key>), used as nav items
-  user:     Object, // currently logged in user, null if not logged in
+  navItems: Array, // list of route names that are also lang keys (format: label.<key>), used as nav items
+  user: Object, // currently logged in user, null if not logged in
 });
 </script>

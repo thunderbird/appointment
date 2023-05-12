@@ -11,7 +11,10 @@
           <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
         </div>
         {{ cal.title }}
-        <button @click="editCalendar(cal.id)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
+        <button
+          @click="editCalendar(cal.id)"
+          class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs"
+        >
           <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
           {{ t('label.editCalendar') }}
         </button>
@@ -76,7 +79,10 @@
         <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex gap-2 items-center">
           <div>{{ cal.title }}</div>
           <div>{{ cal.url }}</div>
-          <button @click="assignCalendar(cal.title, cal.url)" class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs">
+          <button
+            @click="assignCalendar(cal.title, cal.url)"
+            class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs"
+          >
             <icon-arrow-right class="h-3.5 w-3.5 stroke-2 stroke-white fill-transparent" />
             {{ 'Select calendar' }}
           </button>
@@ -157,7 +163,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject, onMounted, computed } from 'vue';
+import {
+  ref, reactive, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import SecondaryButton from '@/elements/SecondaryButton';
 import PrimaryButton from '@/elements/PrimaryButton';
@@ -177,15 +185,14 @@ const refresh = inject('refresh');
 
 // view properties
 defineProps({
-  calendars: Array,  // list of calendars from db
+  calendars: Array, // list of calendars from db
 });
-
 
 // handle calendar user input to add or edit calendar connections
 const inputModes = {
   hidden: 0,
-  add:    1,
-  edit:   2,
+  add: 1,
+  edit: 2,
 };
 const inputMode = ref(inputModes.hidden);
 
@@ -196,22 +203,18 @@ const calendarProviders = {
 };
 const defaultCalendarInput = {
   provider: calendarProviders.caldav,
-  title:    '',
-  color:    '',
-  url:      '',
-  user:     '',
+  title: '',
+  color: '',
+  url: '',
+  user: '',
   password: '',
 };
 const calendarInput = reactive({
   id: null,
-  data: { ...defaultCalendarInput }
+  data: { ...defaultCalendarInput },
 });
-const isCalDav = computed(() => {
-  return calendarInput.data.provider === calendarProviders.caldav;
-});
-const isGoogle = computed(() => {
-  return calendarInput.data.provider === calendarProviders.google;
-});
+const isCalDav = computed(() => calendarInput.data.provider === calendarProviders.caldav);
+const isGoogle = computed(() => calendarInput.data.provider === calendarProviders.google);
 
 // clear input fields
 const resetInput = () => {
@@ -228,22 +231,15 @@ const addCalendar = (provider) => {
 const editCalendar = async (id) => {
   inputMode.value = inputModes.edit;
   calendarInput.id = id;
-  const { data } = await call('cal/' + id).get().json();
-  for (const attr in data.value) {
+  const { data } = await call(`cal/${id}`).get().json();
+  Object.keys(data.value).forEach((attr) => {
     calendarInput.data[attr] = data.value[attr];
-  }
-};
-const assignCalendar = (title, url) => {
-  inputMode.value = inputModes.add;
-  calendarInput.data.title = title;
-  calendarInput.data.url = url;
-  calendarInput.data.user = principal.user;
-  calendarInput.data.password = principal.password;
+  });
 };
 
 // do remove a given calendar connection
 const deleteCalendar = async (id) => {
-  await call("cal/" + id).delete();
+  await call(`cal/${id}`).delete();
   refresh();
 };
 
@@ -251,16 +247,16 @@ const deleteCalendar = async (id) => {
 const saveCalendar = async () => {
   // add new caldav calendar
   if (isCalDav.value && inputMode.value === inputModes.add) {
-    await call("cal").post(calendarInput.data);
+    await call('cal').post(calendarInput.data);
   }
   // add all google calendars connected to given gmail address
   if (isGoogle.value && inputMode.value === inputModes.add) {
-    const googleUrl = await call("google/auth").get();
+    const googleUrl = await call('google/auth').get();
     window.open(googleUrl.data.value.slice(1, -1));
   }
   // edit existing calendar connection
   if (inputMode.value === inputModes.edit) {
-    await call("cal/" + calendarInput.id).put(calendarInput.data);
+    await call(`cal/${calendarInput.id}`).put(calendarInput.data);
   }
   // refresh list of calendars
   refresh();
@@ -269,17 +265,26 @@ const saveCalendar = async () => {
 
 // discover calendars by principal
 const principal = reactive({
-  url:      '',
-  user:     '',
+  url: '',
+  user: '',
   password: '',
 });
 const processPrincipal = ref(false);
 const searchResultCalendars = ref([]);
 const getRemoteCalendars = async () => {
   processPrincipal.value = true;
-  const { error, data } = await call("rmt/calendars").post(principal);
+  const { error, data } = await call('rmt/calendars').post(principal);
   searchResultCalendars.value = !error.value ? JSON.parse(data.value) : [];
   processPrincipal.value = false;
+};
+
+// fill input form with data from principal discovery
+const assignCalendar = (title, url) => {
+  inputMode.value = inputModes.add;
+  calendarInput.data.title = title;
+  calendarInput.data.url = url;
+  calendarInput.data.user = principal.user;
+  calendarInput.data.password = principal.password;
 };
 
 // preset of available calendar colors
