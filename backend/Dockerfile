@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 COPY src/ .
 
-CMD ["/bin/sh", "./scripts/entry.sh"]
+CMD ["/bin/sh", "./scripts/dev-entry.sh"]

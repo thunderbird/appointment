@@ -3,7 +3,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - 5000:5000
+      - 8090:8090
     volumes:
       - ./backend:/app
     environment:
