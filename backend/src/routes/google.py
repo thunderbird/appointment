@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 
 from ..controller.google import GoogleClient
@@ -27,15 +27,23 @@ def get_db():
         db.close()
 
 
-
 @router.get("/auth")
-def google_auth(google_client : GoogleClient = Depends(get_google_client), db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+def google_auth(
+    google_client: GoogleClient = Depends(get_google_client),
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
     """Starts the google oauth process"""
     return google_client.get_redirect_url(db, subscriber.id)
 
 
 @router.get("/callback")
-def google_callback(code: str, state: str, google_client : GoogleClient = Depends(get_google_client), db: Session = Depends(get_db)):
+def google_callback(
+    code: str,
+    state: str,
+    google_client: GoogleClient = Depends(get_google_client),
+    db: Session = Depends(get_db),
+):
     """Callback for google to redirect the user back to us with a code"""
     creds = google_client.get_credentials(code)
 
@@ -51,7 +59,10 @@ def google_callback(code: str, state: str, google_client : GoogleClient = Depend
         # Clear state for our db copy
         repo.set_subscriber_google_state(db, None, subscriber.id)
 
-        raise HTTPException(status_code=401, detail="Google authentication session expired, please try again.")
+        raise HTTPException(
+            status_code=401,
+            detail="Google authentication session expired, please try again.",
+        )
 
     # Clear state for our db copy
     repo.set_subscriber_google_state(db, None, subscriber.id)
@@ -63,7 +74,14 @@ def google_callback(code: str, state: str, google_client : GoogleClient = Depend
     # Grab all of the calendars
     calendars = google_client.list_calendars(creds)
     for calendar in calendars:
-        cal = CalendarConnection(title=calendar.get('summary'), color=calendar.get('backgroundColor'), user=calendar.get('id'), password='', url=calendar.get('id'), provider=CalendarProvider.google)
+        cal = CalendarConnection(
+            title=calendar.get("summary"),
+            color=calendar.get("backgroundColor"),
+            user=calendar.get("id"),
+            password="",
+            url=calendar.get("id"),
+            provider=CalendarProvider.google,
+        )
         # TODO: add calendar only if url doesn't already exist
         repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
 
