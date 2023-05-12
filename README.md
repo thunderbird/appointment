@@ -76,3 +76,19 @@ Then `cd` into the project root und simply run
 ```bash
 pytest
 ```
+
+## Contributing
+
+Contributions are very welcome. Please lint/format code using Ruff and Black
+
+```bash
+pip install ruff
+pip install black
+```
+
+Commands (from git root)
+
+```bash
+ruff backend
+black backend
+```

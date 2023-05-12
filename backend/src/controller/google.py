@@ -6,9 +6,16 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from ..database import repo
 
+
 class GoogleClient:
     """Authenticates with Google OAuth and allows the retrieval of Google Calendar information"""
-    SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
+
+    SCOPES = [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "openid",
+    ]
     client: Flow | None = None
 
     def __init__(self, client_id, client_secret, project_id, callback_url):
@@ -44,7 +51,7 @@ class GoogleClient:
 
         return url
 
-    def get_credentials(self, code : str):
+    def get_credentials(self, code: str):
         if self.client is None:
             return None
 
@@ -61,13 +68,16 @@ class GoogleClient:
             return None
 
         # Reference: https://developers.google.com/identity/openid-connect/openid-connect#obtaininguserprofileinformation
-        response = requests.get('https://openidconnect.googleapis.com/v1/userinfo', headers={'Authorization': f"Bearer {token}"})
+        response = requests.get(
+            "https://openidconnect.googleapis.com/v1/userinfo",
+            headers={"Authorization": f"Bearer {token}"},
+        )
         userinfo = response.json()
-        return userinfo.get('email')
+        return userinfo.get("email")
 
     def list_calendars(self, token):
         response = {}
-        with build('calendar', 'v3', credentials=token) as service:
+        with build("calendar", "v3", credentials=token) as service:
             request = service.calendarList().list()
             while request is not None:
                 try:
@@ -77,8 +87,7 @@ class GoogleClient:
 
                 request = service.calendarList().list_next(request, response)
 
-        return response.get('items', [])
-
+        return response.get("items", [])
 
     def list_events(self, calendar_id, time_min, time_max, token):
         response = {}
@@ -92,14 +101,13 @@ class GoogleClient:
 
                 request = service.events().list_next(request, response)
 
-        return response.get('items', [])
-
+        return response.get("items", [])
 
     def create_event(self, calendar_id, body, token):
         response = None
-        with build('calendar', 'v3', credentials=token) as service:
+        with build("calendar", "v3", credentials=token) as service:
             try:
-                response = service.events().insert(calendarId=calendar_id, sendUpdates='all', body=body).execute()
+                response = service.events().insert(calendarId=calendar_id, sendUpdates="all", body=body).execute()
             except HttpError as e:
                 logging.warning(f"[google.add_event] Request Error: {e.status_code}/{e.error_details}")
 
