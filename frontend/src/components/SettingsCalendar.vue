@@ -251,8 +251,9 @@ const saveCalendar = async () => {
   }
   // add all google calendars connected to given gmail address
   if (isGoogle.value && inputMode.value === inputModes.add) {
-    const googleUrl = await call('google/auth').get();
-    window.open(googleUrl.data.value.slice(1, -1));
+    const urlFriendlyEmail = encodeURIComponent(calendarInput.data.user);
+    const googleUrl = await call(`google/auth?email=${urlFriendlyEmail}`).get();
+    window.location.href = googleUrl.data.value.slice(1, -1);
   }
   // edit existing calendar connection
   if (inputMode.value === inputModes.edit) {
