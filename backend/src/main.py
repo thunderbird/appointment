@@ -38,6 +38,8 @@ else:
 
 logging.basicConfig(**log_config)
 
+logging.debug("Logger started!")
+
 # database
 from .database import models
 from .database.database import engine

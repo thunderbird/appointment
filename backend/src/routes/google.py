@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime
 
@@ -86,7 +87,8 @@ def google_callback(
         # add calendar
         try:
             repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
-        except:
+        except Exception as err:
+            logging.warning(f"[routes.google.google_callback] Error occurred while creating calendar. Error: {str(err)}")
             error_occured = True
 
     # And then redirect back to frontend
