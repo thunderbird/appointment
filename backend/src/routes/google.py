@@ -32,12 +32,13 @@ def get_db():
 
 @router.get("/auth")
 def google_auth(
+    email: str,
     google_client: GoogleClient = Depends(get_google_client),
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Starts the google oauth process"""
-    return google_client.get_redirect_url(db, subscriber.id)
+    return google_client.get_redirect_url(email, db, subscriber.id)
 
 
 @router.get("/callback")
