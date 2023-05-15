@@ -5,6 +5,7 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from ..database import repo
+from ..exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
 class GoogleClient:
@@ -58,9 +59,13 @@ class GoogleClient:
         try:
             self.client.fetch_token(code=code)
             return self.client.credentials
+        except Warning as e:
+            logging.error(f"[google.get_credentials] Google Warning: {str(e)}")
+            # This usually is the "Scope has changed" error.
+            raise GoogleScopeChanged()
         except ValueError as e:
             logging.error(f"[google.get_credentials] Value error while fetching credentials {str(e)}")
-            return None
+            raise GoogleInvalidCredentials()
 
     def get_email(self, token):
         """Retrieve the user's email associated with the token"""
