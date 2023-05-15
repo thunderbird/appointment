@@ -2,7 +2,7 @@
 <div class="flex flex-col gap-8">
   <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
   <div class="pl-6 flex flex-col gap-6">
-    <AlertBox title="Calendar Connect Error" v-if="calendarConnectError">{{calendarConnectError}}</AlertBox>
+    <alert-box title="Calendar Connect Error" v-if="calendarConnectError">{{calendarConnectError}}</alert-box>
 
     <!-- list of calendar connections -->
     <div class="text-xl">{{ t('heading.calendarsConnected') }}</div>
