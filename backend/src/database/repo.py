@@ -5,6 +5,7 @@ Repository providing CRUD functions for all database models.
 import os
 from datetime import timedelta, datetime
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
 
@@ -131,7 +132,7 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     if db_calendar.url in subscriber_calendar_urls:
         raise HTTPException(status_code=403, detail="Calendar already exists")
     # check subscription limitation
-    limit = get_connections_limit(db=db, subscriber_id=subscriber.id)
+    limit = get_connections_limit(db=db, subscriber_id=subscriber_id)
     if limit > 0 and len(subscriber_calendars) >= limit:
         raise HTTPException(
             status_code=403, detail="Allowed number of calendars has been reached for this subscription"
