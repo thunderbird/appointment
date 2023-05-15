@@ -30,12 +30,13 @@ def get_db():
 
 @router.get("/auth")
 def google_auth(
+    email: str,
     google_client: GoogleClient = Depends(get_google_client),
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Starts the google oauth process"""
-    return google_client.get_redirect_url(db, subscriber.id)
+    return google_client.get_redirect_url(email, db, subscriber.id)
 
 
 @router.get("/callback")
@@ -88,7 +89,9 @@ def google_callback(
         try:
             repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
         except Exception as err:
-            logging.warning(f"[routes.google.google_callback] Error occurred while creating calendar. Error: {str(err)}")
+            logging.warning(
+                f"[routes.google.google_callback] Error occurred while creating calendar. Error: {str(err)}"
+            )
             error_occured = True
 
     # And then redirect back to frontend

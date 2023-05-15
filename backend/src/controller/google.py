@@ -39,13 +39,13 @@ class GoogleClient:
         """Actually create the client, this is separate, so we can catch any errors without breaking everything"""
         self.client = Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
 
-    def get_redirect_url(self, db, subscriber_id):
+    def get_redirect_url(self, email, db, subscriber_id):
         """Returns the redirect url for the google oauth flow"""
         if self.client is None:
             return None
 
         # (Url, State ID)
-        url, state = self.client.authorization_url(access_type="offline", prompt="consent select_account")
+        url, state = self.client.authorization_url(access_type="offline", prompt="consent", login_hint=email)
         # Store the state id, so we can refer to it when google redirects the user to our callback
         repo.set_subscriber_google_state(db, state, subscriber_id)
 
