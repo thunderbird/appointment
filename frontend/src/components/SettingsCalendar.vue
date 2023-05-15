@@ -2,6 +2,7 @@
 <div class="flex flex-col gap-8">
   <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
   <div class="pl-6 flex flex-col gap-6">
+    <alert-box title="Calendar Connect Error" v-if="calendarConnectError">{{calendarConnectError}}</alert-box>
 
     <!-- list of calendar connections -->
     <div class="text-xl">{{ t('heading.calendarsConnected') }}</div>
@@ -177,11 +178,15 @@ import {
   IconPencil,
   IconX,
 } from '@tabler/icons-vue';
+import {useRoute, useRouter} from 'vue-router';
+import AlertBox from '@/elements/AlertBox.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
 const refresh = inject('refresh');
+
+const calendarConnectError = ref('');
 
 // view properties
 defineProps({
@@ -299,11 +304,20 @@ const colors = [
   '#64bead',
   '#73c690',
   '#e0ad6a',
-  '#ff8b67 ',
+  '#ff8b67',
 ];
 
 // initially load data when component gets remounted
 onMounted(async () => {
+  const route = useRoute();
+  const router = useRouter();
+
+  // Error should be a string value, so don't worry about any obj deconstruction.
+  if (route.query.error) {
+    calendarConnectError.value = route.query.error;
+    await router.replace(route.path);
+  }
+
   await refresh();
 });
 </script>
