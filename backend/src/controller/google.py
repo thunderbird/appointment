@@ -98,7 +98,7 @@ class GoogleClient:
         response = {}
         with build("calendar", "v3", credentials=token) as service:
             request = service.events().list(
-                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True
+                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy='startTime'
             )
             while request is not None:
                 try:
