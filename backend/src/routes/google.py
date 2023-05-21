@@ -89,7 +89,9 @@ def google_callback(
         )
         # add calendar
         try:
-            repo.create_subscriber_calendar(db=db, calendar=cal, subscriber_id=subscriber.id)
+            repo.update_or_create_subscriber_calendar(
+                db=db, calendar=cal, calendar_url=calendar.get("id"), subscriber_id=subscriber.id
+            )
         except Exception as err:
             logging.warning(
                 f"[routes.google.google_callback] Error occurred while creating calendar. Error: {str(err)}"
