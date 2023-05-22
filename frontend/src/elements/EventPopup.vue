@@ -41,11 +41,18 @@ const props = defineProps({
 });
 
 const eventDateTime = computed(
-  () => (
-    props.event
-      ? dj(props.event.start).format('dddd L, ' + timeFormat() + ' - ')
-        + dj(props.event.start).add(props.event.duration, 'minutes').format(timeFormat())
-      : ''
-  ),
+  () => {
+    let dateTimeString = '';
+    if (props.event) {
+      // calculate date for active event
+      dateTimeString = dj(props.event.start).format('dddd L');
+      if (!props.event.all_day) {
+        // add time if it's not an all day event
+        dateTimeString += dj(props.event.start).format(', ' + timeFormat() + ' - ')
+          + dj(props.event.start).add(props.event.duration, 'minutes').format(timeFormat());
+      }
+    }
+    return dateTimeString;
+  },
 );
 </script>
