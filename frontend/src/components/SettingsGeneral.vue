@@ -37,22 +37,22 @@
     <div class="text-xl">{{ t('heading.dateAndTimeFormatting') }}</div>
     <div class="pl-6 mt-6 inline-grid grid-cols-2 gap-y-8 gap-x-16">
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
-      <div class="text-lg">{{ t('label.dateFormat') }}</div>
+      <div class="text-lg"><!--{{ t('label.dateFormat') }}--></div>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
         <input type="radio" name="timeFormat" :value="12" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="dateFormat" class="text-teal-500" />
-        <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
+        <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
+        <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div> -->
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
         <input type="radio" name="timeFormat" :value="24" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="dateFormat" class="text-teal-500" />
-        <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div>
+        <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
+        <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div> -->
       </label>
     </div>
     <div class="pl-6 mt-6">
