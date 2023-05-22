@@ -24,13 +24,13 @@
           </option>
         </select>
       </label>
-      <label class="pl-4 mt-4 flex items-center">
+      <!-- <label class="pl-4 mt-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.defaultFont') }}</div>
-        <select class="w-full max-w-sm rounded-md w-full" disabled>
+        <select class="w-full max-w-sm rounded-md w-full">
           <option value="os">Open Sans</option>
           <option value="fs">Fira Sans</option>
         </select>
-      </label>
+      </label> -->
     </div>
   </div>
   <div class="pl-6">
@@ -39,19 +39,19 @@
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
       <div class="text-lg">{{ t('label.dateFormat') }}</div>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="timeFormat" class="text-teal-500" disabled />
+        <input type="radio" name="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="dateFormat" class="text-teal-500" disabled />
+        <input type="radio" name="dateFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="timeFormat" class="text-teal-500" disabled />
+        <input type="radio" name="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="dateFormat" class="text-teal-500" disabled />
+        <input type="radio" name="dateFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div>
       </label>
     </div>
@@ -69,18 +69,18 @@
           </option>
         </select>
       </label>
-      <label class="pl-4 mt-6 flex items-center">
+      <!-- <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.showSecondaryTimeZone') }}</div>
-        <switch-toggle :active="false" :disabled="true" />
+        <switch-toggle :active="false" />
       </label>
       <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.secondaryTimeZone') }}</div>
-        <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full" disabled>
+        <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full">
           <option v-for="tz in timezones" :key="tz" :value="tz">
             {{ tz }}
           </option>
         </select>
-      </label>
+      </label> -->
     </div>
   </div>
 </div>
