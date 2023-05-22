@@ -244,7 +244,7 @@ const hours = computed(() => {
   const range = endHour.value - startHour.value;
   let d = dj().hour(startHour.value).minute(0);
   for (let i = 0; i <= range; i += 1) {
-    list.push(d.format('h:mm A'));
+    list.push(d.format(timeFormat()));
     d = d.add(1, 'hour');
   }
   return list;
