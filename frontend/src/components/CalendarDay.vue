@@ -163,7 +163,7 @@ const elementsToShow = computed(() => {
 // compute start limit depending on data in view
 // begin showing events 2 hours before first event or at least 2pm
 const startHour = computed(() => {
-  const start = elementsToShow.value.reduce(
+  const start = elementsToShow.value.filter(e => !e.all_day).reduce(
     (p, c) => (dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
       ? Math.min(dj(c.start).format('H'), p)
       : p),
