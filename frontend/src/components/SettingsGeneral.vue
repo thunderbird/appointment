@@ -139,7 +139,6 @@ watch(theme, (newValue) => {
 const initialTimeFormat = ('timeFormat' in localStorage) ? localStorage.timeFormat : 24;
 const timeFormat = ref(initialTimeFormat);
 watch(timeFormat, (newValue) => {
-  console.log(newValue);
   localStorage.timeFormat = newValue;
 });
 
