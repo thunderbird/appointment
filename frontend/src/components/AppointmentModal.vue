@@ -108,7 +108,7 @@
         <div class="flex gap-4 pl-6">
           <div>{{ dj(s.start).format('LL') }}</div>
           <div>{{ dj(s.start).format(timeFormat()) }}</div>
-          <div>To</div>
+          <div>{{ t('label.to')}}</div>
           <div>{{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}</div>
         </div>
       </template>
