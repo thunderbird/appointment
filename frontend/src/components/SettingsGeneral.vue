@@ -39,7 +39,7 @@
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
       <div class="text-lg">{{ t('label.dateFormat') }}</div>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="timeFormat" class="text-teal-500" />
+        <input type="radio" name="timeFormat" :value="12" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
@@ -47,7 +47,7 @@
         <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="timeFormat" class="text-teal-500" />
+        <input type="radio" name="timeFormat" :value="24" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
@@ -133,6 +133,14 @@ watch(theme, (newValue) => {
     default:
       break;
   }
+});
+
+// handle theme mode
+const initialTimeFormat = ('timeFormat' in localStorage) ? localStorage.timeFormat : 24;
+const timeFormat = ref(initialTimeFormat);
+watch(timeFormat, (newValue) => {
+  console.log(newValue);
+  localStorage.timeFormat = newValue;
 });
 
 // timezones

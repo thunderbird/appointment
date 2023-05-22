@@ -22,6 +22,7 @@
 <script setup>
 import { inject, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { timeFormat } from '@/utils';
 
 // icons
 import {
@@ -42,8 +43,8 @@ const props = defineProps({
 const eventDateTime = computed(
   () => (
     props.event
-      ? dj(props.event.start).format('dddd L, LT - ')
-        + dj(props.event.start).add(props.event.duration, 'minutes').format('LT')
+      ? dj(props.event.start).format('dddd L, ' + timeFormat() + ' - ')
+        + dj(props.event.start).add(props.event.duration, 'minutes').format(timeFormat())
       : ''
   ),
 );

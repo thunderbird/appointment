@@ -51,9 +51,20 @@ export const download = (data, filename, contenttype = 'text/plain') => {
   }
 };
 
+// handle time format, return dayjs format string
+// can be either set by the user (local storage) or detected from system
+export const timeFormat = () => {
+  if ('timeFormat' in localStorage) {
+    return localStorage.timeFormat == 24 ? 'H:mm' : 'h:mm A'
+  } else {
+    return 'LT'
+  }
+};
+
 export default {
   keyByValue,
   eventColor,
   initials,
   download,
+  timeFormat,
 };

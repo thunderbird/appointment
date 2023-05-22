@@ -124,7 +124,7 @@
 
 <script setup>
 import { computed, inject } from 'vue';
-import { eventColor } from '@/utils';
+import { eventColor, timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 
 // icons
@@ -191,7 +191,7 @@ const endHour = computed(() => {
 const timePosition = (start, duration) => ({
   offset: 60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1,
   span: duration,
-  times: `${dj(start).format('LT')} - ${dj(start).add(duration, 'minutes').format('LT')}`,
+  times: `${dj(start).format(timeFormat())} - ${dj(start).add(duration, 'minutes').format(timeFormat())}`,
 });
 
 // handle events to show
