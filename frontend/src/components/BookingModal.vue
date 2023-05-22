@@ -97,7 +97,7 @@ const props = defineProps({
 const emit = defineEmits(['book', 'download', 'close']);
 
 // format time
-const time = computed(() => dj(props.event.start).format('dddd, MMMM D, YYYY ' + timeFormat()));
+const time = computed(() => dj(props.event.start).format(`dddd, MMMM D, YYYY ${timeFormat()}`));
 
 // attendee data
 const attendee = reactive({

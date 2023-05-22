@@ -178,8 +178,8 @@ import {
   IconPencil,
   IconX,
 } from '@tabler/icons-vue';
-import {useRoute, useRouter} from 'vue-router';
-import AlertBox from '@/elements/AlertBox.vue';
+import { useRoute, useRouter } from 'vue-router';
+import AlertBox from '@/elements/AlertBox';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });

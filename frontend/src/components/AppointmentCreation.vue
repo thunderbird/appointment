@@ -309,8 +309,8 @@ const removeTime = (day, index) => {
 };
 const validateEndTime = (day, position) => {
   if (slots[day][position].start >= slots[day][position].end) {
-    slots[day][position].end = dj(`${day}T${slots[day][position].start}`).add(1, 'hour').format('HH:mm')
-  };
+    slots[day][position].end = dj(`${day}T${slots[day][position].start}`).add(1, 'hour').format('HH:mm');
+  }
 };
 
 // show confirmation dialog

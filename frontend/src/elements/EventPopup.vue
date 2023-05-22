@@ -48,7 +48,7 @@ const eventDateTime = computed(
       dateTimeString = dj(props.event.start).format('dddd L');
       if (!props.event.all_day) {
         // add time if it's not an all day event
-        dateTimeString += dj(props.event.start).format(', ' + timeFormat() + ' - ')
+        dateTimeString += dj(props.event.start).format(`, ${timeFormat()} - `)
           + dj(props.event.start).add(props.event.duration, 'minutes').format(timeFormat());
       }
     }
