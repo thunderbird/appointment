@@ -3,6 +3,10 @@
     <div class="font-semibold text-center text-xl text-teal-500">
       {{ t('heading.createNewAppointment') }}
     </div>
+    <alert-box title="Appointment Creation Error" v-if="appointmentCreationError">
+      {{appointmentCreationError}}
+    </alert-box>
+
     <!-- step 1 -->
     <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
@@ -199,6 +203,7 @@ import {
   IconPlus,
   IconX,
 } from '@tabler/icons-vue';
+import AlertBox from '@/elements/AlertBox.vue';
 
 // component constants
 const { t } = useI18n();
@@ -222,7 +227,7 @@ const props = defineProps({
 const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 const activeStep2 = computed(() => props.status === 2);
 
-// defaul appointment object (for start and reset) and appointment form data
+// default appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
   title: '',
   calendar_id: props.calendars[0]?.id,
@@ -232,6 +237,7 @@ const defaultAppointment = {
   status: 2, // appointment is opened | TODO: make configurable sometime
 };
 const appointment = reactive({ ...defaultAppointment });
+const appointmentCreationError = ref(null);
 
 // tab navigation for location types
 const updateLocationType = (type) => {
@@ -317,6 +323,24 @@ const closeCreatedModal = () => {
   createdConfirmation.show = false;
 };
 
+/**
+ * Reset the Appointment creation form
+ */
+const resetAppointment = () => {
+  // reset everything to start again
+  Object.keys(defaultAppointment).forEach((attr) => {
+    appointment[attr] = defaultAppointment[attr];
+  });
+  Object.keys(slots).forEach((attr) => {
+    delete slots[attr];
+  });
+
+  visitedStep1.value = false;
+  visitedStep2.value = false;
+
+  appointmentCreationError.value = null;
+};
+
 // handle actual appointment creation
 const createAppointment = async () => {
   // build data object for post request
@@ -325,21 +349,24 @@ const createAppointment = async () => {
     slots: slotList.value,
   };
   // save selected appointment data
-  const { data } = await call('apmt').post(obj).json();
+  const { data, error } = await call('apmt').post(obj).json();
+
+  console.log(data.value, error.value);
+  if (error.value) {
+    // Error message is in data
+    appointmentCreationError.value = data.value.detail || t('error.unknownAppointmentError');
+    // Open the form
+    emit('start');
+    return;
+  }
 
   // show confirmation
   createdConfirmation.title = data.value.title;
   createdConfirmation.publicLink = bookingUrl + data.value.slug;
   createdConfirmation.show = true;
-  // reset everything to start again
-  Object.keys(defaultAppointment).forEach((attr) => {
-    appointment[attr] = defaultAppointment[attr];
-  });
-  Object.keys(slots).forEach((attr) => {
-    delete slots[attr];
-  });
-  visitedStep1.value = false;
-  visitedStep2.value = false;
+
+  resetAppointment();
+
   emit('create');
 };
 
