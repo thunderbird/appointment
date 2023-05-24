@@ -19,6 +19,9 @@
     "pendingAppointments": "Ausstehende Termine",
     "privacySettings": "Privatsphäre-Einstellungen"
   },
+  "error": {
+    "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal."
+  },
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
