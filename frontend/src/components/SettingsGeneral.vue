@@ -136,7 +136,8 @@ watch(theme, (newValue) => {
 });
 
 // handle theme mode
-const initialTimeFormat = ('timeFormat' in localStorage) ? localStorage.timeFormat : 24;
+const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
+const initialTimeFormat = ('timeFormat' in localStorage) ? localStorage.timeFormat : detectedTimeFormat;
 const timeFormat = ref(initialTimeFormat);
 watch(timeFormat, (newValue) => {
   localStorage.timeFormat = newValue;

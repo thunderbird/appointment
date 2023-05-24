@@ -55,7 +55,7 @@ export const download = (data, filename, contenttype = 'text/plain') => {
 // can be either set by the user (local storage) or detected from system
 export const timeFormat = () => {
   if ('timeFormat' in localStorage) {
-    return parseInt(localStorage.timeFormat, 10) === 24 ? 'H:mm' : 'h:mm A';
+    return Number(localStorage.timeFormat) === 24 ? 'H:mm' : 'h:mm A';
   }
   return 'LT';
 };
