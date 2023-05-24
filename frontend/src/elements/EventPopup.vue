@@ -40,19 +40,22 @@ const props = defineProps({
   event: Object, // event to show details in popup for
 });
 
+// format datetime of event
 const eventDateTime = computed(
   () => {
-    let dateTimeString = [];
+    const eventDateTime = [];
     if (props.event) {
       // calculate date for active event
-      dateTimeString = dj(props.event.start).format('dddd L');
+      const start = dj(props.event.start);
+      eventDateTime.push(start.format('dddd L'));
       if (!props.event.all_day) {
         // add time if it's not an all day event
-        dateTimeString += dj(props.event.start).format(`, ${timeFormat()} - `)
-          + dj(props.event.start).add(props.event.duration, 'minutes').format(timeFormat());
+        const end = start.add(props.event.duration, 'minutes');
+        eventDateTime.push(start.format(`, ${timeFormat()} - `));
+        eventDateTime.push(end.format(timeFormat()));
       }
     }
-    return ''.join(dateTimeString);
+    return eventDateTime.join('');
   },
 );
 </script>
