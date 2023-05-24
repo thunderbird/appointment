@@ -73,6 +73,7 @@
 import {
   inject, computed, reactive, ref,
 } from 'vue';
+import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import ArtConfetti from '@/elements/arts/ArtConfetti';
 import PrimaryButton from '@/elements/PrimaryButton';
@@ -96,7 +97,7 @@ const props = defineProps({
 const emit = defineEmits(['book', 'download', 'close']);
 
 // format time
-const time = computed(() => dj(props.event.start).format('LLLL'));
+const time = computed(() => dj(props.event.start).format(`dddd, MMMM D, YYYY ${timeFormat()}`));
 
 // attendee data
 const attendee = reactive({

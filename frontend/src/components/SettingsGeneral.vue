@@ -24,35 +24,35 @@
           </option>
         </select>
       </label>
-      <label class="pl-4 mt-4 flex items-center">
+      <!-- <label class="pl-4 mt-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.defaultFont') }}</div>
-        <select class="w-full max-w-sm rounded-md w-full" disabled>
+        <select class="w-full max-w-sm rounded-md w-full">
           <option value="os">Open Sans</option>
           <option value="fs">Fira Sans</option>
         </select>
-      </label>
+      </label> -->
     </div>
   </div>
   <div class="pl-6">
     <div class="text-xl">{{ t('heading.dateAndTimeFormatting') }}</div>
     <div class="pl-6 mt-6 inline-grid grid-cols-2 gap-y-8 gap-x-16">
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
-      <div class="text-lg">{{ t('label.dateFormat') }}</div>
+      <div class="text-lg"><!--{{ t('label.dateFormat') }}--></div>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="timeFormat" class="text-teal-500" disabled />
+        <input type="radio" name="timeFormat" :value="12" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="dateFormat" class="text-teal-500" disabled />
-        <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div>
+        <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
+        <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div> -->
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="timeFormat" class="text-teal-500" disabled />
+        <input type="radio" name="timeFormat" :value="24" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
       </label>
       <label class="pl-4 flex gap-4 items-center cursor-pointer">
-        <input type="radio" name="dateFormat" class="text-teal-500" disabled />
-        <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div>
+        <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
+        <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div> -->
       </label>
     </div>
     <div class="pl-6 mt-6">
@@ -69,18 +69,18 @@
           </option>
         </select>
       </label>
-      <label class="pl-4 mt-6 flex items-center">
+      <!-- <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.showSecondaryTimeZone') }}</div>
-        <switch-toggle :active="false" :disabled="true" />
+        <switch-toggle :active="false" />
       </label>
       <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.secondaryTimeZone') }}</div>
-        <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full" disabled>
+        <select v-model="activeTimezone.secondary" class="w-full max-w-sm rounded-md w-full">
           <option v-for="tz in timezones" :key="tz" :value="tz">
             {{ tz }}
           </option>
         </select>
-      </label>
+      </label> -->
     </div>
   </div>
 </div>
@@ -92,7 +92,7 @@ import {
   ref, reactive, inject, watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SwitchToggle from '@/elements/SwitchToggle';
+// import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
@@ -106,20 +106,22 @@ const props = defineProps({
 
 // handle ui languages
 watch(locale, (newValue) => {
-  localStorage.locale = newValue;
+  localStorage.setItem('locale', newValue);
 });
 
 // handle theme mode
-const initialTheme = !('theme' in localStorage) ? colorSchemes.system : colorSchemes[localStorage.theme];
+const initialTheme = localStorage.getItem('theme')
+  ? colorSchemes[localStorage.getItem('theme')]
+  : colorSchemes.system;
 const theme = ref(initialTheme);
 watch(theme, (newValue) => {
   switch (newValue) {
     case colorSchemes.dark:
-      localStorage.theme = 'dark';
+      localStorage.setItem('theme', 'dark');
       document.documentElement.classList.add('dark');
       break;
     case colorSchemes.light:
-      localStorage.theme = 'light';
+      localStorage.setItem('theme', 'light');
       document.documentElement.classList.remove('dark');
       break;
     case colorSchemes.system:
@@ -133,6 +135,14 @@ watch(theme, (newValue) => {
     default:
       break;
   }
+});
+
+// handle theme mode
+const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
+const initialTimeFormat = localStorage.getItem('timeFormat') ?? detectedTimeFormat;
+const timeFormat = ref(initialTimeFormat);
+watch(timeFormat, (newValue) => {
+  localStorage.setItem('timeFormat', newValue);
 });
 
 // timezones

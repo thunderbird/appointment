@@ -60,7 +60,7 @@ const messages = {
   de, // German
   en, // English
 };
-const loc = localStorage.locale ?? (navigator.language || navigator.userLanguage);
+const loc = localStorage.getItem('locale') ?? (navigator.language || navigator.userLanguage);
 const i18n = createI18n({
   legacy: false,
   globalInjection: true,

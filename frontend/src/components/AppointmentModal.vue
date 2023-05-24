@@ -30,8 +30,8 @@
       </div>
       <template v-for="s in appointment.slots" :key="s.start">
         <div class="pl-6">{{ dj(s.start).format('LL') }}</div>
-        <div class="pl-6">{{ dj(s.start).format('LT') }}</div>
-        <div class="pl-6">{{ dj(s.start).add(s.duration, 'minutes').format('LT') }}</div>
+        <div class="pl-6">{{ dj(s.start).format(timeFormat()) }}</div>
+        <div class="pl-6">{{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}</div>
         <div class="pl-6">{{ s.attendee?.email ?? '&mdash;' }}</div>
       </template>
     </div>
@@ -107,9 +107,9 @@
         </div>
         <div class="flex gap-4 pl-6">
           <div>{{ dj(s.start).format('LL') }}</div>
-          <div>{{ dj(s.start).format('LT') }}</div>
-          <div>To</div>
-          <div>{{ dj(s.start).add(s.duration, 'minutes').format('LT') }}</div>
+          <div>{{ dj(s.start).format(timeFormat()) }}</div>
+          <div>{{ t('label.to')}}</div>
+          <div>{{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}</div>
         </div>
       </template>
     </div>
@@ -125,7 +125,7 @@
 
 <script setup>
 import { locationTypes } from '@/definitions';
-import { keyByValue } from '@/utils';
+import { keyByValue, timeFormat } from '@/utils';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import SwitchToggle from '@/elements/SwitchToggle';

@@ -8,7 +8,10 @@
     <link rel="icon" href="<%= BASE_URL %>appointment_logo.svg">
     <script>
       // handle theme color scheme
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      if (
+        localStorage.getItem('theme') === 'dark'
+        || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
@@ -17,7 +20,10 @@
   </head>
   <body class="h-screen bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-100">
     <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      <strong>
+        We're sorry but this application doesn't work properly without JavaScript enabled.
+        Please enable it to continue.
+      </strong>
     </noscript>
     <div id="app" class="h-full"></div>
     <!-- built files will be auto injected -->
