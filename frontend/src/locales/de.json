@@ -20,7 +20,7 @@
     "privacySettings": "Privatsphäre-Einstellungen"
   },
   "error": {
-    "unknownAppointmentError": "There was an issue creating your appointment. Please try again."
+    "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal."
   },
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
