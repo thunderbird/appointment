@@ -204,7 +204,7 @@ import {
   IconPlus,
   IconX,
 } from '@tabler/icons-vue';
-import AlertBox from '@/elements/AlertBox.vue';
+import AlertBox from '@/elements/AlertBox';
 
 // component constants
 const { t } = useI18n();
