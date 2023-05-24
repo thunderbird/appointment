@@ -42,7 +42,7 @@ const props = defineProps({
 
 const eventDateTime = computed(
   () => {
-    let dateTimeString = '';
+    let dateTimeString = [];
     if (props.event) {
       // calculate date for active event
       dateTimeString = dj(props.event.start).format('dddd L');
