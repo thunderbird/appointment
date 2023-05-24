@@ -121,7 +121,7 @@
 
 <script setup>
 import { computed, inject, reactive } from 'vue';
-import { eventColor } from '@/utils';
+import { eventColor, timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
 
@@ -152,7 +152,7 @@ const elementsToShow = computed(() => {
 // compute start limit depending on data in view
 // begin showing events 2 hours before first event or at least 2pm
 const startHour = computed(() => {
-  const start = elementsToShow.value.reduce(
+  const start = elementsToShow.value.filter(e => !e.all_day).reduce(
     (p, c) => (dj(c.start).isBetween(props.selected.startOf('week'), props.selected.endOf('week'))
       ? Math.min(dj(c.start).format('H'), p)
       : p),
@@ -180,7 +180,7 @@ const endHour = computed(() => {
 const timePosition = (start, duration) => ({
   offset: 60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1,
   span: duration,
-  times: `${dj(start).format('LT')} - ${dj(start).add(duration, 'minutes').format('LT')}`,
+  times: `${dj(start).format(timeFormat())} - ${dj(start).add(duration, 'minutes').format(timeFormat())}`,
 });
 
 // handle events to show
@@ -244,7 +244,7 @@ const hours = computed(() => {
   const range = endHour.value - startHour.value;
   let d = dj().hour(startHour.value).minute(0);
   for (let i = 0; i <= range; i += 1) {
-    list.push(d.format('h:mm A'));
+    list.push(d.format(timeFormat()));
     d = d.add(1, 'hour');
   }
   return list;

@@ -22,6 +22,7 @@
 <script setup>
 import { inject, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { timeFormat } from '@/utils';
 
 // icons
 import {
@@ -39,12 +40,22 @@ const props = defineProps({
   event: Object, // event to show details in popup for
 });
 
+// format datetime of event
 const eventDateTime = computed(
-  () => (
-    props.event
-      ? dj(props.event.start).format('dddd L, LT - ')
-        + dj(props.event.start).add(props.event.duration, 'minutes').format('LT')
-      : ''
-  ),
+  () => {
+    const eventDateTime = [];
+    if (props.event) {
+      // calculate date for active event
+      const start = dj(props.event.start);
+      eventDateTime.push(start.format('dddd L'));
+      if (!props.event.all_day) {
+        // add time if it's not an all day event
+        const end = start.add(props.event.duration, 'minutes');
+        eventDateTime.push(start.format(`, ${timeFormat()} - `));
+        eventDateTime.push(end.format(timeFormat()));
+      }
+    }
+    return eventDateTime.join('');
+  },
 );
 </script>

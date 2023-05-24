@@ -9,7 +9,6 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
 
-
 """ SUBSCRIBERS repository functions
 """
 
@@ -118,6 +117,11 @@ def get_calendar(db: Session, calendar_id: int):
     return db.get(models.Calendar, calendar_id)
 
 
+def get_calendar_by_url(db: Session, url: str):
+    """retrieve calendar by calendar url"""
+    return db.query(models.Calendar).filter(models.Calendar.url == url).first()
+
+
 def get_calendars_by_subscriber(db: Session, subscriber_id: int):
     """retrieve list of calendars by owner id"""
     return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
@@ -154,6 +158,18 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     db.commit()
     db.refresh(db_calendar)
     return db_calendar
+
+
+def update_or_create_subscriber_calendar(
+    db: Session, calendar: schemas.CalendarConnection, calendar_url: str, subscriber_id: int
+):
+    """update or create a subscriber calendar"""
+    subscriber_calendar = get_calendar_by_url(db, calendar_url)
+
+    if subscriber_calendar is None:
+        return create_subscriber_calendar(db, calendar, subscriber_id)
+
+    return update_subscriber_calendar(db, calendar, subscriber_calendar.id)
 
 
 def delete_subscriber_calendar(db: Session, calendar_id: int):

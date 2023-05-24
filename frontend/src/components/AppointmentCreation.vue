@@ -112,6 +112,7 @@
                 <input
                   type="time"
                   v-model="s.start"
+                  @change="validateEndTime(day, i)"
                   class="rounded-md text-sm py-1"
                 />
               </label>
@@ -310,6 +311,11 @@ const removeTime = (day, index) => {
     delete slots[day];
   } else {
     slots[day].splice(index, 1);
+  }
+};
+const validateEndTime = (day, position) => {
+  if (slots[day][position].start >= slots[day][position].end) {
+    slots[day][position].end = dj(`${day}T${slots[day][position].start}`).add(1, 'hour').format('HH:mm');
   }
 };
 

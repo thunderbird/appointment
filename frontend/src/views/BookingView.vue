@@ -42,7 +42,7 @@
       <div class="flex flex-col gap-1 text-center">
         <div class="text-teal-600 font-semibold">{{ dj(activeEvent.start).format('dddd') }}</div>
         <div class="text-lg">{{ dj(activeEvent.start).format('LL') }}</div>
-        <div class="uppercase">{{ dj(activeEvent.start).format('LT') }}</div>
+        <div class="uppercase">{{ dj(activeEvent.start).format(timeFormat()) }}</div>
       </div>
     </div>
     <div class="text-teal-600 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
@@ -130,7 +130,7 @@
 
 <script setup>
 import { bookingCalendarViews as views, appointmentState } from '@/definitions';
-import { download } from '@/utils';
+import { download, timeFormat } from '@/utils';
 import {
   ref, inject, onMounted, computed,
 } from 'vue';
