@@ -351,7 +351,6 @@ const createAppointment = async () => {
   // save selected appointment data
   const { data, error } = await call('apmt').post(obj).json();
 
-  console.log(data.value, error.value);
   if (error.value) {
     // Error message is in data
     appointmentCreationError.value = data.value.detail || t('error.unknownAppointmentError');
