@@ -106,20 +106,22 @@ const props = defineProps({
 
 // handle ui languages
 watch(locale, (newValue) => {
-  localStorage.locale = newValue;
+  localStorage.setItem('locale', newValue);
 });
 
 // handle theme mode
-const initialTheme = !('theme' in localStorage) ? colorSchemes.system : colorSchemes[localStorage.theme];
+const initialTheme = localStorage.getItem('theme')
+  ? colorSchemes[localStorage.getItem('theme')]
+  : colorSchemes.system;
 const theme = ref(initialTheme);
 watch(theme, (newValue) => {
   switch (newValue) {
     case colorSchemes.dark:
-      localStorage.theme = 'dark';
+      localStorage.setItem('theme', 'dark');
       document.documentElement.classList.add('dark');
       break;
     case colorSchemes.light:
-      localStorage.theme = 'light';
+      localStorage.setItem('theme', 'light');
       document.documentElement.classList.remove('dark');
       break;
     case colorSchemes.system:
@@ -137,10 +139,10 @@ watch(theme, (newValue) => {
 
 // handle theme mode
 const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
-const initialTimeFormat = ('timeFormat' in localStorage) ? localStorage.timeFormat : detectedTimeFormat;
+const initialTimeFormat = localStorage.getItem('timeFormat') ?? detectedTimeFormat;
 const timeFormat = ref(initialTimeFormat);
 watch(timeFormat, (newValue) => {
-  localStorage.timeFormat = newValue;
+  localStorage.setItem('timeFormat', newValue);
 });
 
 // timezones
