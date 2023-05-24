@@ -5,7 +5,7 @@
     class="h-screen flex-center select-none"
   >
     <div
-      class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-600"
+      class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-500"
     ></div>
   </main>
   <!-- booking page content: invalid link -->
@@ -23,40 +23,54 @@
     <primary-button
       class="p-7 mt-12"
       :label="t('label.startUsingTba')"
-      @click="null"
+      @click="router.push({ name: 'home' })"
     />
   </main>
   <!-- booking page content: successful booking -->
   <main
     v-else-if="activeView === views.success"
-    class="h-screen px-4 flex-center flex-col gap-8 select-none"
+    class="h-screen px-4 pt-24 select-none flex flex-col-reverse md:flex-row justify-evenly items-center"
   >
-    <art-successful-booking class="max-w-sm h-auto my-6" />
-    <div class="text-2xl font-semibold text-teal-600">
-      {{ t('info.bookingSuccessful') }}
-    </div>
-    <div class="w-full max-w-md shadow-lg rounded-lg p-2 flex flex-col gap-2">
-      <div class="rounded-md bg-gray-100 text-gray-500 text-2xl font-bold p-4 w-full text-center">
-        {{ activeEvent.title }}
+    <div class="flex-center flex-col gap-12 min-w-[50%]">
+      <div class="text-2xl font-semibold text-teal-500">
+        {{ t('info.bookingSuccessful') }}
       </div>
-      <div class="flex flex-col gap-1 text-center">
-        <div class="text-teal-600 font-semibold">{{ dj(activeEvent.start).format('dddd') }}</div>
-        <div class="text-lg">{{ dj(activeEvent.start).format('LL') }}</div>
-        <div class="uppercase">{{ dj(activeEvent.start).format(timeFormat()) }}</div>
+      <div class="w-full max-w-sm shadow-lg rounded-lg flex flex-col gap-1">
+        <div class="rounded-t-md bg-teal-500 h-14 flex justify-around items-center">
+          <div v-for="i in 2" :key="i" class="rounded-full bg-white w-4 h-4"></div>
+        </div>
+        <div class="text-2xl font-bold m-2 text-center text-gray-500">
+          {{ activeEvent.title }}
+        </div>
+        <div class="flex flex-col gap-0.5 m-2 py-2 rounded-md text-center bg-gray-100 text-gray-500">
+          <div class="text-teal-500 font-semibold text-sm">{{ dj(activeEvent.start).format('dddd') }}</div>
+          <div class="text-lg">{{ dj(activeEvent.start).format('LL') }}</div>
+          <div class="text-sm uppercase flex-center gap-2">
+            <span>{{ dj(activeEvent.start).format(timeFormat()) }}</span>
+            <span>{{ dj.tz.guess() }}</span>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="text-teal-600 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
-      {{ t('label.downloadTheIcsFile') }}
-    </div>
-    <div class="text-gray-700 text-lg text-center">
-      <div>{{ t('info.invitationWasSent') }}</div>
-      <div class="font-bold text-lg">
-        {{ attendee.email }}
+      <div class="text-teal-500 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
+        {{ t('label.downloadTheIcsFile') }}
       </div>
+      <div class="text-gray-700 text-lg text-center">
+        <div>{{ t('info.invitationWasSent') }}</div>
+        <div class="font-bold text-lg">
+          {{ attendee.email }}
+        </div>
+      </div>
+      <!-- TODO -->
+      <!-- <div class="text-sky-600 text-sm underline underline-offset-2 -mt-4">
+        {{ t('label.sendInvitationToAnotherEmail') }}
+      </div> -->
+      <primary-button
+        class="p-7 mt-12"
+        :label="t('label.startUsingTba')"
+        @click="router.push({ name: 'home' })"
+      />
     </div>
-    <div class="text-sky-600 text-sm underline underline-offset-2 -mt-4">
-      {{ t('label.sendInvitationToAnotherEmail') }}
-    </div>
+    <art-successful-booking class="max-w-sm w-full sm:max-w-md sm:w-auto h-auto m-6" />
   </main>
   <!-- booking page content: time slot selection -->
   <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
@@ -135,7 +149,7 @@ import {
   ref, inject, onMounted, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import BookingModal from '@/components/BookingModal';
@@ -148,6 +162,7 @@ import PrimaryButton from '@/elements/PrimaryButton';
 // component constants
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
 const getAppointmentStatus = inject('getAppointmentStatus');
@@ -223,7 +238,7 @@ const showWeek = (d) => {
 };
 
 // selected event for booking
-const activeEvent = ref();
+const activeEvent = ref(null);
 
 // user selected a time slot: mark event as selected
 const selectEvent = (d) => {
