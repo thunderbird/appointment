@@ -29,7 +29,7 @@
   <!-- booking page content: successful booking -->
   <main
     v-else-if="activeView === views.success"
-    class="h-screen px-4 pt-24 select-none flex flex-col-reverse md:flex-row justify-evenly items-center"
+    class="h-screen px-4 py-24 select-none flex flex-col-reverse md:flex-row justify-evenly items-center"
   >
     <div class="flex-center flex-col gap-12 min-w-[50%]">
       <div class="text-2xl font-semibold text-teal-500">
@@ -70,7 +70,7 @@
         @click="router.push({ name: 'home' })"
       />
     </div>
-    <art-successful-booking class="max-w-sm w-full sm:max-w-md sm:w-auto h-auto m-6" />
+    <art-successful-booking class="max-w-md w-full sm:max-w-md sm:w-auto h-auto m-6" />
   </main>
   <!-- booking page content: time slot selection -->
   <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
