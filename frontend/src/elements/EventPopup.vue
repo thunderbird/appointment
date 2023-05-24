@@ -52,7 +52,7 @@ const eventDateTime = computed(
           + dj(props.event.start).add(props.event.duration, 'minutes').format(timeFormat());
       }
     }
-    return dateTimeString;
+    return ''.join(dateTimeString);
   },
 );
 </script>
