@@ -1,5 +1,6 @@
 ---
 name: New translation
+label: enhancement
 about: Suggest a language to translate this project in
 
 ---
