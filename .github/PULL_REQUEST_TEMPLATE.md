@@ -13,4 +13,4 @@
 
 ## Applicable Issues
 
-<!-- Enter any applicable Issues here -->
+<!-- Enter any applicable issues here -->
