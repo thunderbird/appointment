@@ -57,9 +57,7 @@
       </div>
 
       <!-- account settings -->
-      <div v-if="activeView === settingsSections.account">
-        <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.accountSettings') }}</div>
-      </div>
+      <settings-account v-if="activeView === settingsSections.account" :user="user"></settings-account>
 
       <!-- privacy settings -->
       <div v-if="activeView === settingsSections.privacy">
@@ -88,6 +86,7 @@ import {
   IconChevronRight,
   IconSearch,
 } from '@tabler/icons-vue';
+import SettingsAccount from '@/components/SettingsAccount.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });

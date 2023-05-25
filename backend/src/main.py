@@ -49,6 +49,7 @@ models.Base.metadata.create_all(bind=engine)
 # extra routes
 from .routes import google
 from .routes import api
+from .routes import account
 
 # init app
 app = FastAPI()
@@ -69,4 +70,5 @@ app.add_middleware(
 
 # Mix in our extra routes
 app.include_router(api.router)
+app.include_router(account.router, prefix="/account")
 app.include_router(google.router, prefix="/google")
