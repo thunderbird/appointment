@@ -4,6 +4,8 @@ from zipfile import ZipFile
 
 from ..database import repo
 from ..database.schemas import Subscriber
+from ..download_readme import get_download_readme
+
 
 def model_to_csv_buffer(models):
     """Dumps a DeclarationBase model to csv and returns an in-memory buffer"""
@@ -27,17 +29,34 @@ def model_to_csv_buffer(models):
 
     return string_buffer
 
+
 def download(db, subscriber: Subscriber):
+    """Generate a zip file of csvs that contain a copy of the subscriber's information."""
+    attendees = repo.get_attendees_by_subscriber(db, subscriber_id=subscriber.id)
     appointments = repo.get_appointments_by_subscriber(db, subscriber_id=subscriber.id)
+    calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
+    subscribers = [subscriber]
+    slots = repo.get_slots_by_subscriber(db, subscriber_id=subscriber.id)
+
+    # Clear out the google token (?)
+    subscribers[0].google_tkn = None
+
+    # Convert models to csv
+    attendee_buffer = model_to_csv_buffer(attendees)
     appointment_buffer = model_to_csv_buffer(appointments)
+    calendar_buffer = model_to_csv_buffer(calendars)
+    subscriber_buffer = model_to_csv_buffer(subscribers)
+    slot_buffer = model_to_csv_buffer(slots)
 
-    print("Downloading:")
-
+    # Create an in-memory zip and append our csvs
     zip_buffer = BytesIO()
-
     with ZipFile(zip_buffer, 'w') as data_zip:
+        data_zip.writestr('attendees.csv', attendee_buffer.getvalue())
         data_zip.writestr("appointments.csv", appointment_buffer.getvalue())
+        data_zip.writestr("calendar.csv", calendar_buffer.getvalue())
+        data_zip.writestr("subscriber.csv", subscriber_buffer.getvalue())
+        data_zip.writestr("slot.csv", slot_buffer.getvalue())
+        data_zip.writestr("readme.txt", get_download_readme())
 
-    print(appointment_buffer.read())
-
+    # Return our zip buffer
     return zip_buffer
