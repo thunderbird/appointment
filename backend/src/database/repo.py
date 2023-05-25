@@ -15,13 +15,15 @@ from . import models, schemas
 def get_attendees_by_subscriber(db: Session, subscriber_id: int):
     """For use with the data download. Get attendees by subscriber id."""
     # We need to walk through Calendars to attach Appointments, and Appointments to get Slots
-    slots = db.query(models.Slot) \
-        .join(models.Appointment) \
-        .join(models.Calendar) \
-        .filter(models.Calendar.owner_id == subscriber_id) \
-        .filter(models.Appointment.calendar_id == models.Calendar.id) \
-        .filter(models.Slot.appointment_id == models.Appointment.id) \
+    slots = (
+        db.query(models.Slot)
+        .join(models.Appointment)
+        .join(models.Calendar)
+        .filter(models.Calendar.owner_id == subscriber_id)
+        .filter(models.Appointment.calendar_id == models.Calendar.id)
+        .filter(models.Slot.appointment_id == models.Appointment.id)
         .all()
+    )
 
     attendee_ids = list(map(lambda slot: slot.attendee_id if slot.attendee_id is not None else None, slots))
     attendee_ids = filter(lambda attendee: attendee is not None, attendee_ids)
@@ -328,13 +330,15 @@ def get_slots_by_subscriber(db: Session, subscriber_id: int):
     """retrieve slot by subscriber id"""
 
     # We need to walk through Calendars to attach Appointments, and Appointments to get Slots
-    return db.query(models.Slot) \
-        .join(models.Appointment) \
-        .join(models.Calendar) \
-        .filter(models.Calendar.owner_id == subscriber_id) \
-        .filter(models.Appointment.calendar_id == models.Calendar.id) \
-        .filter(models.Slot.appointment_id == models.Appointment.id) \
+    return (
+        db.query(models.Slot)
+        .join(models.Appointment)
+        .join(models.Calendar)
+        .filter(models.Calendar.owner_id == subscriber_id)
+        .filter(models.Appointment.calendar_id == models.Calendar.id)
+        .filter(models.Slot.appointment_id == models.Appointment.id)
         .all()
+    )
 
 
 def add_appointment_slots(db: Session, slots: list[schemas.SlotBase], appointment_id: int):

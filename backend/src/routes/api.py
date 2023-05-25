@@ -19,6 +19,7 @@ from ..dependencies.database import get_db
 
 router = APIRouter()
 
+
 @router.get("/")
 def health():
     """Small route with no processing that will be used for health checks"""

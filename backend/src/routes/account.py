@@ -12,6 +12,7 @@ from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 
+
 @router.get("/download")
 def download_data(
     db: Session = Depends(get_db),
@@ -21,7 +22,7 @@ def download_data(
     return StreamingResponse(
         iter([zip_buffer.getvalue()]),
         media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": "attachment; filename=data.zip"}
+        headers={"Content-Disposition": "attachment; filename=data.zip"},
     )
 
 

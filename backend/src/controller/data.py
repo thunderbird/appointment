@@ -50,8 +50,8 @@ def download(db, subscriber: Subscriber):
 
     # Create an in-memory zip and append our csvs
     zip_buffer = BytesIO()
-    with ZipFile(zip_buffer, 'w') as data_zip:
-        data_zip.writestr('attendees.csv', attendee_buffer.getvalue())
+    with ZipFile(zip_buffer, "w") as data_zip:
+        data_zip.writestr("attendees.csv", attendee_buffer.getvalue())
         data_zip.writestr("appointments.csv", appointment_buffer.getvalue())
         data_zip.writestr("calendar.csv", calendar_buffer.getvalue())
         data_zip.writestr("subscriber.csv", subscriber_buffer.getvalue())
