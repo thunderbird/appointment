@@ -7,11 +7,11 @@ from fastapi.responses import RedirectResponse
 
 from ..controller.google import GoogleClient
 from ..database import repo
-from ..database.database import SessionLocal
 from sqlalchemy.orm import Session
 
 from ..database.schemas import CalendarConnection
 from ..dependencies.auth import get_subscriber
+from ..dependencies.database import get_db
 
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client
@@ -19,15 +19,6 @@ from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
 
 router = APIRouter()
-
-
-def get_db():
-    """run database session"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get("/auth")

@@ -1,26 +1,16 @@
 from fastapi import APIRouter, Depends
 
 from ..controller import data
-from ..database.database import SessionLocal
 from sqlalchemy.orm import Session
 
 from ..dependencies.auth import get_subscriber
+from ..dependencies.database import get_db
 
 from ..database.models import Subscriber
 
 from fastapi.responses import StreamingResponse
 
 router = APIRouter()
-
-
-def get_db():
-    """run database session"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @router.get("/download")
 def download_data(
@@ -33,3 +23,8 @@ def download_data(
         media_type="application/x-zip-compressed",
         headers={"Content-Disposition": "attachment; filename=data.zip"}
     )
+
+
+@router.delete("/delete")
+def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    return data.delete_account(db, subscriber)

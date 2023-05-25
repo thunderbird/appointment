@@ -60,3 +60,15 @@ def download(db, subscriber: Subscriber):
 
     # Return our zip buffer
     return zip_buffer
+
+
+def delete_account(db, subscriber: Subscriber):
+    # Ok nuke everything
+    ok = repo.delete_attendees_by_subscriber(db, subscriber.id)
+    ok = repo.delete_appointment_slots_by_subscriber_id(db, subscriber.id)
+    ok = repo.delete_calendar_appointments_by_subscriber_id(db, subscriber.id)
+    ok = repo.delete_appointment_slots_by_subscriber_id(db, subscriber.id)
+    ok = repo.delete_subscriber_calendar_by_subscriber_id(db, subscriber.id)
+    ok = repo.delete_subscriber(db, subscriber)
+    print("Done")
+    return ok

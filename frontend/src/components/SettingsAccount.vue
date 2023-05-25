@@ -19,7 +19,7 @@
         <primary-button
             :label="t('label.deleteYourAccount')"
             class="text-sm"
-            @click="downloadData"
+            @click="deleteAccount"
         />
       </div>
     </div>
@@ -33,12 +33,16 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { useAuth0 } from '@auth0/auth0-vue';
+import { useRouter } from 'vue-router';
 // import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject('call');
 const dj = inject('dayjs');
+const router = useRouter();
+const auth0 = useAuth0();
 
 // view properties
 const props = defineProps({
@@ -55,6 +59,25 @@ const downloadData = async () => {
   // Data is a ref to our new blob
   const fileObj = window.URL.createObjectURL(data.value);
   window.location.assign(fileObj);
+};
+
+const deleteAccount = async () => {
+  const { error } = await call('account/delete').delete();
+
+  if (error.value) {
+    console.warn('ERROR: ', error.value);
+    return;
+  }
+
+  if (auth0) {
+    await auth0.logout({
+      logoutParams: {
+        returnTo: window.location.origin,
+      },
+    });
+  } else {
+    await router.push('/');
+  }
 };
 
 // handle ui languages

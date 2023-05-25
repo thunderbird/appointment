@@ -28,6 +28,17 @@ def get_attendees_by_subscriber(db: Session, subscriber_id: int):
     return db.query(models.Attendee).filter(models.Attendee.id.in_(attendee_ids)).all()
 
 
+def delete_attendees_by_subscriber(db: Session, subscriber_id: int):
+    """Delete all attendees by subscriber"""
+    attendees = get_attendees_by_subscriber(db, subscriber_id)
+
+    for attendee in attendees:
+        db.delete(attendee)
+    db.commit()
+
+    return True
+
+
 """ SUBSCRIBERS repository functions
 """
 
@@ -84,6 +95,13 @@ def update_subscriber(db: Session, data: schemas.SubscriberIn, subscriber_id: in
     db.commit()
     db.refresh(db_subscriber)
     return db_subscriber
+
+
+def delete_subscriber(db: Session, subscriber: models.Subscriber):
+    """Delete a subscriber by subscriber id"""
+    db.delete(subscriber)
+    db.commit()
+    return True
 
 
 def set_subscriber_google_tkn(db: Session, tkn: str, subscriber_id: int):
@@ -199,6 +217,14 @@ def delete_subscriber_calendar(db: Session, calendar_id: int):
     return db_calendar
 
 
+def delete_subscriber_calendar_by_subscriber_id(db: Session, subscriber_id: int):
+    """Delete all calendars by subscriber"""
+    calendars = get_calendars_by_subscriber(db, subscriber_id=subscriber_id)
+    for calendar in calendars:
+        delete_subscriber_calendar(db, calendar_id=calendar.id)
+    return True
+
+
 def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
     """check if calendar belongs to subscriber"""
     return (
@@ -279,6 +305,14 @@ def delete_calendar_appointment(db: Session, appointment_id: int):
     return db_appointment
 
 
+def delete_calendar_appointments_by_subscriber_id(db: Session, subscriber_id: int):
+    """Delete all appointments by subscriber"""
+    appointments = get_appointments_by_subscriber(db, subscriber_id=subscriber_id)
+    for appointment in appointments:
+        delete_calendar_appointment(db, appointment_id=appointment.id)
+    return True
+
+
 """ SLOT repository functions
 """
 
@@ -316,6 +350,17 @@ def add_appointment_slots(db: Session, slots: list[schemas.SlotBase], appointmen
 def delete_appointment_slots(db: Session, appointment_id: int):
     """delete all slots for appointment of given id"""
     return db.query(models.Slot).filter(models.Slot.appointment_id == appointment_id).delete()
+
+
+def delete_appointment_slots_by_subscriber_id(db: Session, subscriber_id: int):
+    """Delete all slots by subscriber"""
+    slots = get_slots_by_subscriber(db, subscriber_id)
+
+    for slot in slots:
+        db.delete(slot)
+    db.commit()
+
+    return True
 
 
 def update_slot(db: Session, slot_id: int, attendee: schemas.Attendee):
