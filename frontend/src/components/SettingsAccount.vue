@@ -4,7 +4,6 @@
     <div class="pl-6">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="pl-6 mt-6">
-        <div class="text-lg">{{ t('text.accountDataNotice') }}</div>
         <primary-button
             :label="t('label.downloadYourData')"
             class="text-sm"
@@ -15,8 +14,7 @@
     <div class="pl-6">
       <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
       <div class="pl-6 mt-6">
-        <div class="text-lg">{{ t('text.accountDeletionWarning') }}</div>
-        <primary-button
+        <caution-button
             :label="t('label.deleteYourAccount')"
             class="text-sm"
             @click="deleteAccount"
@@ -24,33 +22,111 @@
       </div>
     </div>
   </div>
+  <!-- Account download modal -->
+    <ConfirmationModal
+      :open="downloadAccountModalOpen"
+      :title="t('label.accountData')"
+      :message="t('text.accountDataNotice')"
+      :confirm-label="t('label.loginToContinue')"
+      :cancel-label="t('label.cancel')"
+      @confirm="() => reauthenticateSubscriber(actuallyDownloadData)"
+      @close="closeModals"
+  ></ConfirmationModal>
+  <!-- Account deletion modals -->
+  <ConfirmationModal
+      :open="deleteAccountFirstModalOpen"
+      :title="t('label.deleteYourAccount')"
+      :message="t('text.accountDeletionWarning')"
+      :confirm-label="t('label.loginToContinue')"
+      :cancel-label="t('label.cancel')"
+      @confirm="() => reauthenticateSubscriber(secondDeleteAccountPrompt)"
+      @close="closeModals"
+  ></ConfirmationModal>
+  <ConfirmationModal
+      :open="deleteAccountSecondModalOpen"
+      :title="t('label.deleteYourAccount')"
+      :message="t('text.accountDeletionFinalWarning')"
+      :confirm-label="t('label.deleteYourAccount')"
+      :cancel-label="t('label.cancel')"
+      @confirm="actuallyDeleteAccount"
+      @close="closeModals"
+  ></ConfirmationModal>
 </template>
 
 <script setup>
-import { colorSchemes } from '@/definitions';
 import {
-  ref, reactive, inject, watch,
+  ref, inject, onMounted,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRouter } from 'vue-router';
-// import SwitchToggle from '@/elements/SwitchToggle';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import CautionButton from '@/elements/CautionButton.vue';
 
 // component constants
-const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
+const { t } = useI18n({ useScope: 'global' });
+const refresh = inject('refresh');
 const call = inject('call');
-const dj = inject('dayjs');
 const router = useRouter();
 const auth0 = useAuth0();
 
-// view properties
-const props = defineProps({
-  user: Object, // currently logged in user, null if not logged in
+const downloadAccountModalOpen = ref(false);
+const deleteAccountFirstModalOpen = ref(false);
+const deleteAccountSecondModalOpen = ref(false);
+
+onMounted(async () => {
+  await refresh();
 });
 
 // do remove a given calendar connection
 const downloadData = async () => {
+  downloadAccountModalOpen.value = true;
+};
+
+const closeModals = () => {
+  downloadAccountModalOpen.value = false;
+  deleteAccountFirstModalOpen.value = false;
+  deleteAccountSecondModalOpen.value = false;
+};
+
+const deleteAccount = async () => {
+  deleteAccountFirstModalOpen.value = true;
+};
+
+const secondDeleteAccountPrompt = async () => {
+  deleteAccountFirstModalOpen.value = false;
+  deleteAccountSecondModalOpen.value = true;
+};
+
+/**
+ * Generic function to run the user through the login screen again
+ * @param callbackFn
+ * @returns {Promise<void>}
+ */
+const reauthenticateSubscriber = async (callbackFn) => {
+  try {
+    // Prompt the user to re-login
+    await auth0.loginWithPopup({
+      authorizationParams: {
+        prompt: 'login',
+      },
+    }, {});
+  } catch (e) {
+    // TODO: Throw an error
+    console.log('Reauth failed', e);
+    closeModals();
+    return;
+  }
+
+  await callbackFn();
+};
+
+/**
+ * Request a data download, and prompt the user to download the data.
+ * @returns {Promise<void>}
+ */
+const actuallyDownloadData = async () => {
   const { data } = await call('account/download').get().blob();
   if (!data || !data.value) {
     console.error('Failed to download blob!!');
@@ -59,9 +135,17 @@ const downloadData = async () => {
   // Data is a ref to our new blob
   const fileObj = window.URL.createObjectURL(data.value);
   window.location.assign(fileObj);
+
+  await closeModals();
 };
 
-const deleteAccount = async () => {
+/**
+ * Request an account deletion, and then log out.
+ * @returns {Promise<void>}
+ */
+const actuallyDeleteAccount = async () => {
+  deleteAccountSecondModalOpen.value = false;
+
   const { error } = await call('account/delete').delete();
 
   if (error.value) {
@@ -80,66 +164,4 @@ const deleteAccount = async () => {
   }
 };
 
-// handle ui languages
-watch(locale, (newValue) => {
-  localStorage.setItem('locale', newValue);
-});
-
-// handle theme mode
-const initialTheme = localStorage.getItem('theme')
-  ? colorSchemes[localStorage.getItem('theme')]
-  : colorSchemes.system;
-const theme = ref(initialTheme);
-watch(theme, (newValue) => {
-  switch (newValue) {
-    case colorSchemes.dark:
-      localStorage.setItem('theme', 'dark');
-      document.documentElement.classList.add('dark');
-      break;
-    case colorSchemes.light:
-      localStorage.setItem('theme', 'light');
-      document.documentElement.classList.remove('dark');
-      break;
-    case colorSchemes.system:
-      localStorage.removeItem('theme');
-      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
-      break;
-    default:
-      break;
-  }
-});
-
-// handle theme mode
-const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
-const initialTimeFormat = localStorage.getItem('timeFormat') ?? detectedTimeFormat;
-const timeFormat = ref(initialTimeFormat);
-watch(timeFormat, (newValue) => {
-  localStorage.setItem('timeFormat', newValue);
-});
-
-// timezones
-const activeTimezone = reactive({
-  primary: props.user?.timezone ?? dj.tz.guess(),
-  secondary: dj.tz.guess(),
-});
-const timezones = Intl.supportedValuesOf('timeZone');
-// load user defined timezone on page reload
-watch(
-  () => props.user,
-  (loadedUser) => {
-    activeTimezone.primary = loadedUser.timezone;
-  },
-);
-
-// save timezone config
-const updateTimezone = async () => {
-  const { error } = await call('me').put({ timezone: activeTimezone.primary }).json();
-  if (!error) {
-    // TODO show some confirmation
-  }
-};
 </script>

@@ -11,7 +11,7 @@ from ..exceptions.account_api import AccountDeletionPartialFail, AccountDeletion
 def model_to_csv_buffer(models):
     """Dumps a DeclarationBase model to csv and returns an in-memory buffer"""
     if len(models) == 0:
-        return None
+        return StringIO()
 
     string_buffer = StringIO()
 

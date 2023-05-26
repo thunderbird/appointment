@@ -1,9 +1,14 @@
+import datetime
+
+
 def get_download_readme():
     """Returns the localized download readme"""
     return """
 ============================================
 Thunderbird Appointment Data Download Readme
 ============================================
+
+Time of download (UTC): {download_time}
 
 Included in this zip is all of your user data from our system in .csv format.
 
@@ -21,6 +26,8 @@ You can open these .csv files in a variety applications like:
 What's Included?
 ============================================
 
+Note: If a file is empty or blank then we don't have that type of data on record for you.
+
 The following files are included:
  - appointments.csv : A list of Appointments from our database
  - attendees.csv : A list of Appointment Slot Attendees from our database
@@ -28,4 +35,4 @@ The following files are included:
  - slots.csv : A list of Appointment Slots from our database.
  - subscriber.csv : The personal information we store about you from our database.
  - readme.txt : This file!
-            """
+            """.format(download_time=datetime.datetime.utcnow())
