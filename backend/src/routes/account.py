@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from ..controller import data
 from sqlalchemy.orm import Session
@@ -10,6 +10,8 @@ from ..database.models import Subscriber
 
 from fastapi.responses import StreamingResponse
 
+from ..exceptions.account_api import AccountDeletionException
+
 router = APIRouter()
 
 
@@ -18,6 +20,7 @@ def download_data(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
+    """Download your account data in zip format! Returns a streaming response with the zip buffer."""
     zip_buffer = data.download(db, subscriber)
     return StreamingResponse(
         iter([zip_buffer.getvalue()]),
@@ -28,4 +31,8 @@ def download_data(
 
 @router.delete("/delete")
 def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    return data.delete_account(db, subscriber)
+    """Delete your account and all the data associated with it forever!"""
+    try:
+        return data.delete_account(db, subscriber)
+    except AccountDeletionException as e:
+        raise HTTPException(status_code=500, detail=e.message)

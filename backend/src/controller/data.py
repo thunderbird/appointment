@@ -5,6 +5,7 @@ from zipfile import ZipFile
 from ..database import repo
 from ..database.schemas import Subscriber
 from ..download_readme import get_download_readme
+from ..exceptions.account_api import AccountDeletionPartialFail, AccountDeletionSubscriberFail
 
 
 def model_to_csv_buffer(models):
@@ -64,11 +65,32 @@ def download(db, subscriber: Subscriber):
 
 def delete_account(db, subscriber: Subscriber):
     # Ok nuke everything
-    ok = repo.delete_attendees_by_subscriber(db, subscriber.id)
-    ok = repo.delete_appointment_slots_by_subscriber_id(db, subscriber.id)
-    ok = repo.delete_calendar_appointments_by_subscriber_id(db, subscriber.id)
-    ok = repo.delete_appointment_slots_by_subscriber_id(db, subscriber.id)
-    ok = repo.delete_subscriber_calendar_by_subscriber_id(db, subscriber.id)
-    ok = repo.delete_subscriber(db, subscriber)
-    print("Done")
-    return ok
+    repo.delete_attendees_by_subscriber(db, subscriber.id)
+    repo.delete_appointment_slots_by_subscriber_id(db, subscriber.id)
+    repo.delete_calendar_appointments_by_subscriber_id(db, subscriber.id)
+    repo.delete_subscriber_calendar_by_subscriber_id(db, subscriber.id)
+
+    empty_check = [
+        len(repo.get_attendees_by_subscriber(db, subscriber.id)),
+        len(repo.get_slots_by_subscriber(db, subscriber.id)),
+        len(repo.get_appointments_by_subscriber(db, subscriber.id)),
+        len(repo.get_calendars_by_subscriber(db, subscriber.id)),
+    ]
+
+    # Check if we have any left-over subscriber data before we nuke the subscriber
+    if any(empty_check) > 0:
+        raise AccountDeletionPartialFail(
+            subscriber.id,
+            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+        )
+
+    repo.delete_subscriber(db, subscriber)
+
+    # Make sure we actually nuked the subscriber
+    if repo.get_subscriber(db, subscriber.id) is not None:
+        raise AccountDeletionSubscriberFail(
+            subscriber.id,
+            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+        )
+
+    return True
