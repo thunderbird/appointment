@@ -79,7 +79,6 @@ onMounted(async () => {
   await refresh();
 });
 
-// do remove a given calendar connection
 const downloadData = async () => {
   downloadAccountModalOpen.value = true;
 };
