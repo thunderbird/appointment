@@ -1,10 +1,12 @@
 <template>
-  <header class="h-24 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600">
+  <header
+    class="h-16 px-4 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600"
+  >
     <router-link
-      class="py-7 pl-8 pr-12 border-r border-gray-300 dark:border-gray-600 shrink-0"
+      class="py-4 pl-4 pr-8 border-r border-gray-300 dark:border-gray-600 shrink-0"
       :to="{ name: 'calendar' }"
     >
-      <img class="h-10" src="/appointment_logo.svg" alt="Appointment Logo" />
+      <img class="h-8" src="/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
     <!-- <label class="grow flex items-center relative">
       <icon-search
@@ -20,26 +22,30 @@
         :placeholder="t('label.search')"
       />
     </label> -->
-    <nav class="flex gap-8 items-stretch">
+    <nav class="flex gap-4 items-stretch">
       <ul class="flex justify-end gap-8">
         <li
           v-for="item in navItems"
           :key="item"
-          class="flex text-xl border-b-4 border-b-transparent transition-all ease-in-out"
+          class="flex text-base border-b-4 border-b-transparent transition-all ease-in-out"
           :class="{
             'font-semibold border-b-teal-500 text-teal-500': route.name == item,
-            'text-gray-600 dark:text-gray-300 hover:border-b-gray-200 dark:hover:border-b-gray-400': route.name != item,
+            'text-gray-600 dark:text-gray-300 hover:border-b-gray-200 dark:hover:border-b-gray-400':
+              route.name != item,
           }"
         >
-          <router-link class="flex justify-center min-w-[150px] items-center" :to="{ name: item }">
-            {{ t('label.' + item) }}
+          <router-link
+            class="flex justify-center min-w-[120px] items-center"
+            :to="{ name: item }"
+          >
+            {{ t("label." + item) }}
           </router-link>
         </li>
       </ul>
       <router-link
         v-if="user"
         :to="{ name: 'profile' }"
-        class="w-12 h-12 mx-8 self-center flex-center rounded-full bg-teal-500 text-lg font-bold text-white"
+        class="w-12 h-12 mr-4 self-center flex-center rounded-full bg-teal-500 text-lg font-normal text-white"
       >
         {{ initials(user.name) }}
       </router-link>
@@ -48,9 +54,9 @@
 </template>
 
 <script setup>
-import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-import { initials } from '@/utils';
+import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
+import { initials } from "@/utils";
 
 // icons
 // import { IconSearch } from '@tabler/icons-vue';

@@ -24,7 +24,7 @@
         :tab-items="calendarViews"
         :active="tabActive"
         @update="updateTab"
-        class="text-xl"
+        class="text-sm"
       />
       <primary-button
         :label="t('label.createAppointments')"
@@ -36,7 +36,7 @@
   <!-- page content -->
   <div
     class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 items-stretch"
-    :class="{ 'lg:mt-[60px]': tabActive === calendarViews.month }"
+    :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month
