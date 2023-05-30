@@ -49,13 +49,17 @@
             "
             :class="{
               'border-2 border-dashed dark:text-white': !event.remote,
+              'border-2': event.tentative,
               'flex-col': event.span > 60,
               'flex-row': event.span <= 60,
               'py-2': event.span >= 30,
             }"
             :style="{
-              'border-color': eventColor(event, false).border,
-              'background-color': !event.remote ? eventColor(event, false).background : event.calendar_color,
+              color: event.tentative ? event.calendar_color : null,
+              borderColor: eventColor(event, false).border,
+              backgroundColor: (!event.remote || event.tentative)
+                ? eventColor(event, false).background
+                : event.calendar_color,
             }"
           >
             <div

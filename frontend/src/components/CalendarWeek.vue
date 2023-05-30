@@ -69,12 +69,16 @@
           v-if="!booking"
           class="w-full truncate rounded flex m-1 px-2 bg-sky-400/10 border-sky-400"
           :class="{
-            'border-2 border-dashed': !event.remote,
+            'border-2': !event.remote || event.tentative,
+            'border-dashed': !event.remote,
             'py-0.5': event.span >= 30,
           }"
           :style="{
-            'border-color': eventColor(event, false).border,
-            'background-color': !event.remote ? eventColor(event, false).background : event.calendar_color,
+            color: event.tentative ? event.calendar_color : null,
+            borderColor: eventColor(event, false).border,
+            backgroundColor: (!event.remote || event.tentative)
+              ? eventColor(event, false).background
+              : event.calendar_color,
           }"
         >
           <div
