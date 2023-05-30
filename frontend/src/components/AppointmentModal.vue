@@ -44,7 +44,7 @@
         <div class="pl-6 flex items-center gap-3">
           <div
             class="w-4 h-4 rounded-full shrink-0 bg-sky-400"
-            :style="{ 'background-color': appointment.calendar_color }"
+            :style="{ backgroundColor: appointment.calendar_color }"
           ></div>
           {{ appointment.calendar_title }}
         </div>

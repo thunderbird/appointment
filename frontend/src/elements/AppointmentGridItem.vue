@@ -5,7 +5,7 @@
       'opacity-50 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400': isPast,
       'cursor-pointer hover:shadow-md hover:bg-sky-400/10': !isPast,
     }"
-    :style="{ 'border-color': appointment.calendar_color }"
+    :style="{ borderColor: appointment.calendar_color }"
     @mouseover="el => !isPast ? paintBackground(el, appointment.calendar_color, '22') : null"
     @mouseout="el => !isPast ? paintBackground(el, appointment.calendar_color, _, true) : null"
   >
@@ -15,7 +15,7 @@
         border-sky-400
       "
       :class="{ 'border-dashed': isPending }"
-      :style="{ 'border-color': appointment.calendar_color }"
+      :style="{ borderColor: appointment.calendar_color }"
     >
       <div>{{ appointment.title }}</div>
       <div class="text-sm flex items-center gap-1">

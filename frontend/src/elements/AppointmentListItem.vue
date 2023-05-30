@@ -1,6 +1,6 @@
 <template>
   <div class="flex gap-2 items-stretch">
-    <div class="w-1.5 rounded-lg shrink-0" :style="{ 'background-color': appointment.calendar_color }"></div>
+    <div class="w-1.5 rounded-lg shrink-0" :style="{ backgroundColor: appointment.calendar_color }"></div>
     <div class="w-[95%]">
       <div class="flex justify-between">
         <div class="overflow-x-hidden">
