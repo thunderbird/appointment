@@ -18,7 +18,7 @@ export const eventColor = (event, placeholder) => {
   }
   // color remote tentative events
   if (event.remote && event.tentative) {
-    color.border = event.calendar_color + 'bb';
+    color.border = `${event.calendar_color}bb`;
     color.background = 'transparent';
   }
   return color;
