@@ -183,6 +183,7 @@ class Event(BaseModel):
     start: str
     end: str
     all_day: bool | None = False
+    tentative: bool | None = False
     description: str | None = None
     calendar_title: str | None = None
     calendar_color: str | None = None

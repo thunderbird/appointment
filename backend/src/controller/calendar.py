@@ -3,6 +3,7 @@
 Handle connection to a CalDAV server.
 """
 import json
+import logging
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
@@ -59,11 +60,17 @@ class GoogleConnector:
 
         events = []
         for event in remote_events:
-            status = event.get("status")
+            status = event.get("status").lower()
 
             # Ignore cancelled events
             if status == "cancelled":
                 continue
+
+            # Mark tentative events
+            attendees = event.get("attendees") or []
+            tentative = any(
+                (attendee.get("self") and attendee.get("responseStatus") == "tentative") for attendee in attendees
+            )
 
             summary = event.get("summary", "Title not found!")
             description = event.get("description", "")
@@ -79,6 +86,7 @@ class GoogleConnector:
                     start=start,
                     end=end,
                     all_day=all_day,
+                    tentative=tentative,
                     description=description,
                 )
             )
@@ -155,49 +163,33 @@ class CalDavConnector:
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
         events = []
-        if self.provider == CalendarProvider.google:
-            result = (
-                self.client.events()
-                .list(
-                    calendarId=self.user,
-                    timeMin=datetime.strptime(start, "%Y-%m-%d").isoformat() + "Z",
-                    timeMax=datetime.strptime(end, "%Y-%m-%d").isoformat() + "Z",
-                    maxResults=1000,  # TODO
-                    singleEvents=True,
-                    orderBy="startTime",
+        calendar = self.client.calendar(url=self.url)
+        result = calendar.search(
+            start=datetime.strptime(start, "%Y-%m-%d"),
+            end=datetime.strptime(end, "%Y-%m-%d"),
+            event=True,
+            expand=True,
+        )
+        for e in result:
+            status = e.icalendar_component["status"].lower() if "status" in e.icalendar_component else ""
+
+            # Ignore cancelled events
+            if status == "cancelled":
+                continue
+
+            # Mark tentative events
+            tentative = status == "tentative"
+
+            events.append(
+                schemas.Event(
+                    title=str(e.vobject_instance.vevent.summary.value),
+                    start=str(e.vobject_instance.vevent.dtstart.value),
+                    end=str(e.vobject_instance.vevent.dtend.value),
+                    all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
+                    tentative=tentative,
+                    description=e.icalendar_component["description"] if "description" in e.icalendar_component else "",
                 )
-                .execute()
             )
-            for e in result.get("items", []):
-                events.append(
-                    schemas.Event(
-                        title=e["summary"],
-                        start=e["start"]["date"] if "date" in e["start"] else e["start"]["dateTime"],
-                        end=e["end"]["date"] if "date" in e["end"] else e["end"]["dateTime"],
-                        all_day="date" in e["start"],
-                        description=e["description"] if "description" in e else "",
-                    )
-                )
-        if self.provider == CalendarProvider.caldav:
-            calendar = self.client.calendar(url=self.url)
-            result = calendar.search(
-                start=datetime.strptime(start, "%Y-%m-%d"),
-                end=datetime.strptime(end, "%Y-%m-%d"),
-                event=True,
-                expand=True,
-            )
-            for e in result:
-                events.append(
-                    schemas.Event(
-                        title=str(e.vobject_instance.vevent.summary.value),
-                        start=str(e.vobject_instance.vevent.dtstart.value),
-                        end=str(e.vobject_instance.vevent.dtend.value),
-                        all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
-                        description=e.icalendar_component["description"]
-                        if "description" in e.icalendar_component
-                        else "",
-                    )
-                )
         return events
 
     def create_event(
