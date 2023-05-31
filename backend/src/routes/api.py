@@ -3,7 +3,6 @@ import validators
 # database
 from sqlalchemy.orm import Session
 from ..database import repo, schemas
-from ..database.database import SessionLocal
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
@@ -16,17 +15,9 @@ from ..controller.google import GoogleClient
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber, auth
+from ..dependencies.database import get_db
 
 router = APIRouter()
-
-
-def get_db():
-    """run database session"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get("/")

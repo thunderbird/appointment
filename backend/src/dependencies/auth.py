@@ -4,16 +4,7 @@ from sqlalchemy.orm import Session
 
 from ..controller.auth import Auth
 from ..database import repo
-from ..database.database import SessionLocal
-
-
-def get_db():
-    """run database session"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from ..dependencies.database import get_db
 
 
 auth = Auth()
