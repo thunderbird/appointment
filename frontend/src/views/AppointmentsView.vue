@@ -133,7 +133,7 @@
             <td class="align-middle">
               <div
                 class="rounded-full w-3 h-3 bg-sky-400 mx-auto"
-                :style="{ 'background-color': appointment.calendar_color }"
+                :style="{ backgroundColor: appointment.calendar_color }"
               ></div>
             </td>
             <td v-if="columnVisible('title')" class="py-2 px-2 max-w-2xs truncate">

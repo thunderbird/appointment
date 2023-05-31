@@ -35,21 +35,28 @@
           'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !event.remote,
           'group/event rounded-md p-1 cursor-pointer hover:shadow-lg hover:bg-gradient-to-b': placeholder,
           'hover:!text-white bg-teal-50 dark:bg-teal-800 hover:from-teal-500 hover:to-sky-600': placeholder,
-          'flex items-center gap-2 px-2 py-0.5': event.remote,
+          'flex items-center gap-1.5 px-2 py-0.5': event.remote,
           '!border-solid text-black': event.attendee !== null,
           'rounded bg-amber-400/80 dark:text-white': event.all_day
         }"
         :style="{
-          'border-color': eventColor(event, placeholder).border,
-          'background-color': eventColor(event, placeholder).background,
+          borderColor: eventColor(event, placeholder).border,
+          backgroundColor: eventColor(event, placeholder).background,
         }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
       >
         <div
           v-if="event.remote && !event.all_day"
-          class="w-2 h-2 shrink-0 rounded-full bg-sky-400"
-          :style="{ 'background-color': event.calendar_color }"
+          class="w-2.5 h-2.5 mt-0.5 shrink-0 rounded-full"
+          :class="{
+            'bg-sky-400': !event.tentative,
+            'border border-dashed border-sky-400/70': event.tentative,
+          }"
+          :style="{
+            borderColor: event.tentative ? event.calendar_color : null,
+            backgroundColor: !event.tentative ? event.calendar_color : null,
+          }"
         ></div>
         <div
           class="truncate rounded"
@@ -64,9 +71,9 @@
     <event-popup
       v-if="(events && showDetails)"
       :style="{
-        'display': popup.display,
-        'top': popup.top,
-        'left': popup.left,
+        display: popup.display,
+        top: popup.top,
+        left: popup.left,
       }"
       :event="popup.event"
     />
