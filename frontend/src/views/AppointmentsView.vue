@@ -238,10 +238,10 @@
               </a>
             </td>
             <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
-              <span
-                >{{ repliesCount(appointment) }}
-                {{ t("label.bookings", repliesCount(appointment)) }}</span
-              >
+              <span>
+                {{ repliesCount(appointment) }}
+                {{ t("label.bookings", repliesCount(appointment)) }}
+              </span>
             </td>
           </tr>
         </tbody>
