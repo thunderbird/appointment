@@ -54,9 +54,9 @@
 </template>
 
 <script setup>
-import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
-import { initials } from "@/utils";
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import { initials } from '@/utils';
 
 // icons
 // import { IconSearch } from '@tabler/icons-vue';

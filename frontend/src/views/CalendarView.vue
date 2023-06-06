@@ -132,25 +132,27 @@
 </template>
 
 <script setup>
-import { creationState, calendarViews, appointmentState } from "@/definitions";
-import { ref, inject, computed, watch, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
-import { useRoute, useRouter } from "vue-router";
-import AppointmentCreation from "@/components/AppointmentCreation";
-import AppointmentListItem from "@/elements/AppointmentListItem";
-import CalendarDay from "@/components/CalendarDay";
-import CalendarMonth from "@/components/CalendarMonth";
-import CalendarPageHeading from "@/elements/CalendarPageHeading";
-import CalendarWeek from "@/components/CalendarWeek";
-import PrimaryButton from "@/elements/PrimaryButton";
-import TabBar from "@/components/TabBar";
+import { creationState, calendarViews, appointmentState } from '@/definitions';
+import {
+  ref, inject, computed, watch, onMounted,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import AppointmentCreation from '@/components/AppointmentCreation';
+import AppointmentListItem from '@/elements/AppointmentListItem';
+import CalendarDay from '@/components/CalendarDay';
+import CalendarMonth from '@/components/CalendarMonth';
+import CalendarPageHeading from '@/elements/CalendarPageHeading';
+import CalendarWeek from '@/components/CalendarWeek';
+import PrimaryButton from '@/elements/PrimaryButton';
+import TabBar from '@/components/TabBar';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject("dayjs");
-const call = inject("call");
-const refresh = inject("refresh");
+const dj = inject('dayjs');
+const call = inject('call');
+const refresh = inject('refresh');
 
 // view properties
 const props = defineProps({
@@ -164,21 +166,21 @@ const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
 const selectDate = (d) => {
   router.replace({
     name: route.name,
-    params: { view: route.params.view, date: dj(d).format("YYYY-MM-DD") },
+    params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') },
   });
   activeDate.value = dj(d);
 };
 
 // date calculations
-const startOfActiveWeek = computed(() => activeDate.value.startOf("week"));
-const endOfActiveWeek = computed(() => activeDate.value.endOf("week"));
+const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
+const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews[route.params.view]);
 const updateTab = (view) => {
   router.replace({
     name: route.name,
-    params: { view, date: route.params.date ?? dj().format("YYYY-MM-DD") },
+    params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') },
   });
   tabActive.value = calendarViews[view];
 };
@@ -187,22 +189,22 @@ const updateTab = (view) => {
 const pageTitle = computed(() => {
   switch (tabActive.value) {
     case calendarViews.day:
-      return activeDate.value.format("dddd Do");
+      return activeDate.value.format('dddd Do');
     case calendarViews.week:
       return `${startOfActiveWeek.value.format(
-        "ddd Do"
-      )} - ${endOfActiveWeek.value.format("ddd Do")}`;
+        'ddd Do',
+      )} - ${endOfActiveWeek.value.format('ddd Do')}`;
     case calendarViews.month:
     default:
-      return "";
+      return '';
   }
 });
 
 // date navigation
-const dateNav = (unit = "auto", forward = true) => {
-  if (unit === "auto") {
+const dateNav = (unit = 'auto', forward = true) => {
+  if (unit === 'auto') {
     unit = Object.keys(calendarViews).find(
-      (key) => calendarViews[key] === tabActive.value
+      (key) => calendarViews[key] === tabActive.value,
     );
   }
   if (forward) {
@@ -216,9 +218,7 @@ const dateNav = (unit = "auto", forward = true) => {
 const creationStatus = ref(creationState.hidden);
 
 // list of all pending appointments
-const pendingAppointments = computed(() =>
-  props.appointments?.filter((a) => a.status === appointmentState.pending)
-);
+const pendingAppointments = computed(() => props.appointments?.filter((a) => a.status === appointmentState.pending));
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);
@@ -234,19 +234,19 @@ const getRemoteEvents = async (from, to) => {
         calendarEvents.value.push(
           ...data.value.map((e) => ({
             ...e,
-            duration: dj(e.end).diff(dj(e.start), "minutes"),
-          }))
+            duration: dj(e.end).diff(dj(e.start), 'minutes'),
+          })),
         );
       }
-    })
+    }),
   );
 };
 
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
-  const eventsFrom = dj(activeDate.value).startOf("year").format("YYYY-MM-DD");
-  const eventsTo = dj(activeDate.value).endOf("year").format("YYYY-MM-DD");
+  const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
+  const eventsTo = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);
 });
 
@@ -255,12 +255,12 @@ watch(
   () => activeDate.value,
   (newValue, oldValue) => {
     // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-    if (dj(oldValue).format("YYYY") !== dj(newValue).format("YYYY")) {
+    if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
       getRemoteEvents(
-        dj(newValue).startOf("year").format("YYYY-MM-DD"),
-        dj(newValue).endOf("year").format("YYYY-MM-DD")
+        dj(newValue).startOf('year').format('YYYY-MM-DD'),
+        dj(newValue).endOf('year').format('YYYY-MM-DD'),
       );
     }
-  }
+  },
 );
 </script>

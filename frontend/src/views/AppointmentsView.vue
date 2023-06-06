@@ -58,7 +58,16 @@
         </div>
         <div class="rounded border border-gray-300 dark:border-gray-500 flex">
           <div
-            class="border-r py-1 px-1.5 flex items-center cursor-pointer overflow-hidden border-gray-300 dark:border-gray-500"
+            class="
+                border-r
+                py-1
+                px-1.5
+                flex
+                items-center
+                cursor-pointer
+                overflow-hidden
+                border-gray-300
+                dark:border-gray-500"
             :class="{
               'bg-gray-300 dark:bg-gray-600': view === viewTypes.list,
               'hover:bg-gray-100 dark:hover:bg-gray-500':
@@ -101,13 +110,34 @@
         </div>
         <div
           v-show="showAdjustments"
-          class="absolute z-40 top-10 right-0 p-2 rounded shadow-md border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700"
+          class="
+              absolute
+              z-40
+              top-10
+              right-0
+              p-2
+              rounded
+              shadow-md
+              border
+              border-gray-300
+              dark:border-gray-500
+              bg-white
+              dark:bg-gray-700"
           v-on-click-outside="closeAdjustments"
         >
           <div
             v-for="(value, key) in columns"
             :key="key"
-            class="grid grid-cols-context rounded py-1 pl-1 pr-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-500"
+            class="
+                grid
+                grid-cols-context
+                rounded
+                py-1
+                pl-1
+                pr-3
+                cursor-pointer
+                hover:bg-gray-100
+                dark:hover:bg-gray-500"
             @click="toggleColumnVisibility(value)"
           >
             <div class="flex items-center">
@@ -120,7 +150,16 @@
           </div>
           <div class="border-t border-gray-300 dark:border-gray-500 my-2"></div>
           <div
-            class="grid grid-cols-context rounded py-1 pl-1 pr-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-500"
+            class="
+                grid
+                grid-cols-context
+                rounded
+                py-1
+                pl-1
+                pr-3
+                cursor-pointer
+                hover:bg-gray-100
+                dark:hover:bg-gray-500"
             @click="restoreColumnOrder"
           >
             <div></div>
@@ -264,19 +303,21 @@ import {
   filterOptions,
   viewTypes,
   creationState,
-} from "@/definitions";
-import { keyByValue } from "@/utils";
+} from '@/definitions';
+import { keyByValue } from '@/utils';
 
-import { ref, inject, provide, computed, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
-import { useRoute, useRouter } from "vue-router";
-import { vOnClickOutside } from "@vueuse/components";
-import AppointmentCreation from "@/components/AppointmentCreation";
-import AppointmentGridItem from "@/elements/AppointmentGridItem";
-import AppointmentModal from "@/components/AppointmentModal";
-import CalendarMonth from "@/components/CalendarMonth";
-import PrimaryButton from "@/elements/PrimaryButton";
-import TabBar from "@/components/TabBar";
+import {
+  ref, inject, provide, computed, onMounted,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { vOnClickOutside } from '@vueuse/components';
+import AppointmentCreation from '@/components/AppointmentCreation';
+import AppointmentGridItem from '@/elements/AppointmentGridItem';
+import AppointmentModal from '@/components/AppointmentModal';
+import CalendarMonth from '@/components/CalendarMonth';
+import PrimaryButton from '@/elements/PrimaryButton';
+import TabBar from '@/components/TabBar';
 
 // icons
 import {
@@ -285,15 +326,15 @@ import {
   IconLayoutGrid,
   IconList,
   IconSearch,
-} from "@tabler/icons-vue";
+} from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject("dayjs");
-const bookingUrl = inject("bookingUrl");
-const refresh = inject("refresh");
+const dj = inject('dayjs');
+const bookingUrl = inject('bookingUrl');
+const refresh = inject('refresh');
 
 // view properties
 const props = defineProps({
@@ -315,8 +356,8 @@ const updateTab = (view) => {
   tabActive.value = views[view];
 };
 // date navigation
-const dateNav = (unit = "auto", forward = true) => {
-  if (unit === "auto") {
+const dateNav = (unit = 'auto', forward = true) => {
+  if (unit === 'auto') {
     unit = Object.keys(views).find((key) => views[key] === tabActive.value);
   }
   if (forward) {
@@ -330,7 +371,7 @@ const dateNav = (unit = "auto", forward = true) => {
 const filter = ref(filterOptions.appointmentsInMonth);
 
 // handle data search
-const search = ref("");
+const search = ref('');
 
 // handle data view
 const view = ref(viewTypes.list);
@@ -349,7 +390,7 @@ const closeAdjustments = () => {
 const toggleColumnVisibility = (key) => {
   if (visibleColumns.value.includes(key)) {
     visibleColumns.value = visibleColumns.value.filter(
-      (column) => column !== key
+      (column) => column !== key,
     );
   } else {
     visibleColumns.value.push(key);
@@ -364,10 +405,8 @@ const restoreColumnOrder = () => {
 const filteredAppointments = computed(() => {
   let list = props.appointments ? [...props.appointments] : [];
   // by search input
-  if (search.value !== "") {
-    list = list.filter((a) =>
-      a.title.toLowerCase().includes(search.value.toLowerCase())
-    );
+  if (search.value !== '') {
+    list = list.filter((a) => a.title.toLowerCase().includes(search.value.toLowerCase()));
   }
   // by active tab
   switch (tabActive.value) {
@@ -387,56 +426,40 @@ const filteredAppointments = computed(() => {
   // by select filter
   switch (filter.value) {
     case filterOptions.appointmentsToday:
-      list = list.filter((a) =>
-        a.slots.reduce((p, c) => p || dj(c.start).isToday(), false)
-      );
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday(), false));
       break;
     case filterOptions.appointmentsNext7Days:
-      list = list.filter((a) =>
-        a.slots.reduce(
-          (p, c) =>
-            p ||
-            dj(c.start).isToday() ||
-            dj(c.start).isBetween(dj(), dj().add(7, "days")),
-          false
-        )
-      );
+      list = list.filter((a) => a.slots.reduce(
+        (p, c) => p
+            || dj(c.start).isToday()
+            || dj(c.start).isBetween(dj(), dj().add(7, 'days')),
+        false,
+      ));
       break;
     case filterOptions.appointmentsNext14Days:
-      list = list.filter((a) =>
-        a.slots.reduce(
-          (p, c) =>
-            p ||
-            dj(c.start).isToday() ||
-            dj(c.start).isBetween(dj(), dj().add(14, "days")),
-          false
-        )
-      );
+      list = list.filter((a) => a.slots.reduce(
+        (p, c) => p
+            || dj(c.start).isToday()
+            || dj(c.start).isBetween(dj(), dj().add(14, 'days')),
+        false,
+      ));
       break;
     case filterOptions.appointmentsNext31Days:
-      list = list.filter((a) =>
-        a.slots.reduce(
-          (p, c) =>
-            p ||
-            dj(c.start).isToday() ||
-            dj(c.start).isBetween(dj(), dj().add(31, "days")),
-          false
-        )
-      );
+      list = list.filter((a) => a.slots.reduce(
+        (p, c) => p
+            || dj(c.start).isToday()
+            || dj(c.start).isBetween(dj(), dj().add(31, 'days')),
+        false,
+      ));
       break;
     case filterOptions.appointmentsInMonth:
-      list = list.filter((a) =>
-        a.slots.reduce(
-          (p, c) =>
-            p || dj(c.start).isToday() || dj(c.start).isSame(dj(), "month"),
-          false
-        )
-      );
+      list = list.filter((a) => a.slots.reduce(
+        (p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'),
+        false,
+      ));
       break;
     case filterOptions.allFutureAppointments:
-      list = list.filter((a) =>
-        a.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false)
-      );
+      list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false));
       break;
     case filterOptions.allAppointments:
     default:
@@ -446,8 +469,7 @@ const filteredAppointments = computed(() => {
 });
 
 // return number of booked slots (replies) for given appointment
-const repliesCount = (appointment) =>
-  appointment.slots.filter((s) => s.attendee != null).length;
+const repliesCount = (appointment) => appointment.slots.filter((s) => s.attendee != null).length;
 
 // handle single appointment modal
 const showAppointment = ref(null);
@@ -467,9 +489,9 @@ onMounted(async () => {
 const paintBackground = (element, hexColor, hexTransparency, reset = false) => {
   if (hexColor) {
     element.currentTarget.style.backgroundColor = reset
-      ? "transparent"
+      ? 'transparent'
       : hexColor + hexTransparency;
   }
 };
-provide("paintBackground", paintBackground);
+provide('paintBackground', paintBackground);
 </script>

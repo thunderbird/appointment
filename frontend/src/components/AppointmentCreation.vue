@@ -238,14 +238,16 @@
 </template>
 
 <script setup>
-import { locationTypes } from "@/definitions";
-import { ref, reactive, computed, inject, watch } from "vue";
-import { useI18n } from "vue-i18n";
-import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
-import CalendarMonth from "@/components/CalendarMonth";
-import PrimaryButton from "@/elements/PrimaryButton";
-import SecondaryButton from "@/elements/SecondaryButton";
-import TabBar from "@/components/TabBar";
+import { locationTypes } from '@/definitions';
+import {
+  ref, reactive, computed, inject, watch,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
+import CalendarMonth from '@/components/CalendarMonth';
+import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
+import TabBar from '@/components/TabBar';
 
 // icons
 import {
@@ -254,17 +256,17 @@ import {
   IconChevronDown,
   IconPlus,
   IconX,
-} from "@tabler/icons-vue";
-import AlertBox from "@/elements/AlertBox";
+} from '@tabler/icons-vue';
+import AlertBox from '@/elements/AlertBox';
 
 // component constants
 const { t } = useI18n();
-const dj = inject("dayjs");
-const call = inject("call");
-const bookingUrl = inject("bookingUrl");
+const dj = inject('dayjs');
+const call = inject('call');
+const bookingUrl = inject('bookingUrl');
 
 // component emits
-const emit = defineEmits(["start", "next", "create", "cancel"]);
+const emit = defineEmits(['start', 'next', 'create', 'cancel']);
 
 // component properties
 const props = defineProps({
@@ -281,11 +283,11 @@ const activeStep2 = computed(() => props.status === 2);
 
 // default appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
-  title: "",
+  title: '',
   calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
-  location_url: "",
-  details: "",
+  location_url: '',
+  details: '',
   status: 2, // appointment is opened | TODO: make configurable sometime
 };
 const appointment = reactive({ ...defaultAppointment });
@@ -315,9 +317,9 @@ const slotList = computed(() => {
         start: start
           .tz(props.user.timezone ?? dj.tz.guess(), true)
           .utc()
-          .format("YYYY-MM-DDTHH:mm:ss"),
+          .format('YYYY-MM-DDTHH:mm:ss'),
         // calculate duration as difference between start and end
-        duration: end.diff(start, "minutes"),
+        duration: end.diff(start, 'minutes'),
       });
     });
   });
@@ -329,7 +331,7 @@ const charLimit = 250;
 const charCount = computed(() => appointment.details.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
-const validStep1 = computed(() => appointment.title !== "");
+const validStep1 = computed(() => appointment.title !== '');
 const validStep2 = computed(() => Object.keys(slots).length > 0);
 const visitedStep1 = ref(false);
 const visitedStep2 = ref(false);
@@ -342,27 +344,27 @@ const activeDate = ref(dj());
 
 // handle date and time input of user
 const addDate = (d) => {
-  const day = dj(d).format("YYYY-MM-DD");
+  const day = dj(d).format('YYYY-MM-DD');
   if (!Object.hasOwn(slots, day)) {
     slots[day] = [
       {
-        start: dj(d).add(10, "hours").format("HH:mm"),
-        end: dj(d).add(11, "hours").format("HH:mm"),
+        start: dj(d).add(10, 'hours').format('HH:mm'),
+        end: dj(d).add(11, 'hours').format('HH:mm'),
       },
     ];
   }
   showDatePicker.value = false;
 };
 const addTime = (d) => {
-  const day = dj(d).format("YYYY-MM-DD");
+  const day = dj(d).format('YYYY-MM-DD');
   // get latest end time to start next time slot default value with
   const latestTime = slots[day].reduce(
     (p, c) => (c.end > p ? c.end : p),
-    "00:00"
+    '00:00',
   );
   slots[day].push({
     start: latestTime,
-    end: dj(`${day}T${latestTime}`).add(1, "hour").format("HH:mm"),
+    end: dj(`${day}T${latestTime}`).add(1, 'hour').format('HH:mm'),
   });
 };
 const removeTime = (day, index) => {
@@ -375,16 +377,16 @@ const removeTime = (day, index) => {
 const validateEndTime = (day, position) => {
   if (slots[day][position].start >= slots[day][position].end) {
     slots[day][position].end = dj(`${day}T${slots[day][position].start}`)
-      .add(1, "hour")
-      .format("HH:mm");
+      .add(1, 'hour')
+      .format('HH:mm');
   }
 };
 
 // show confirmation dialog
 const createdConfirmation = reactive({
   show: false,
-  title: "",
-  publicLink: "",
+  title: '',
+  publicLink: '',
 });
 const closeCreatedModal = () => {
   createdConfirmation.show = false;
@@ -416,14 +418,13 @@ const createAppointment = async () => {
     slots: slotList.value,
   };
   // save selected appointment data
-  const { data, error } = await call("apmt").post(obj).json();
+  const { data, error } = await call('apmt').post(obj).json();
 
   if (error.value) {
     // Error message is in data
-    appointmentCreationError.value =
-      data.value.detail || t("error.unknownAppointmentError");
+    appointmentCreationError.value = data.value.detail || t('error.unknownAppointmentError');
     // Open the form
-    emit("start");
+    emit('start');
     return;
   }
 
@@ -434,11 +435,11 @@ const createAppointment = async () => {
 
   resetAppointment();
 
-  emit("create");
+  emit('create');
 };
 
 // date navigation
-const dateNav = (unit = "month", forward = true) => {
+const dateNav = (unit = 'month', forward = true) => {
   if (forward) {
     activeDate.value = activeDate.value.add(1, unit);
   } else {
@@ -452,6 +453,6 @@ watch(
   (newValue, oldValue) => {
     if (oldValue === 1) visitedStep1.value = true;
     if (oldValue === 2 && newValue !== 3) visitedStep2.value = true;
-  }
+  },
 );
 </script>
