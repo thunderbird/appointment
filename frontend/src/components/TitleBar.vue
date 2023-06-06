@@ -22,8 +22,8 @@
         src="/appointment_logo.svg"
         alt="Appointment Logo"
       />
-      <div class="text-lg font-display tracking-[.25em] text-neutral-700">
-        THUNDERBIRD APPOINTMENT
+      <div class="text-lg font-display tracking-[.25em] text-neutral-700 uppercase">
+        Thunderbird Appointment
       </div>
     </div>
     <div>
