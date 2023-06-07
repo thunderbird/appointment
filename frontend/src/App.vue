@@ -38,8 +38,13 @@ const call = createFetch({
   options: {
     async beforeFetch({ options }) {
       if (auth.isAuthenticated.value) {
-        const token = await auth.getAccessTokenSilently();
-        options.headers.Authorization = `Bearer ${token}`;
+        try {
+          const token = await auth.getAccessTokenSilently();
+          options.headers.Authorization = `Bearer ${token}`;
+        } catch (e) {
+          // We'll want to prompt the user to re-login here due to auth0 error
+          console.warn('Failed to apply bearer token', e);
+        }
         // options.headers.SetCookie = 'SameSite=None; Secure'; // can be adjusted if necessary
       }
       return { options };
