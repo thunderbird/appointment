@@ -3,7 +3,6 @@
 Handle connection to a CalDAV server.
 """
 import json
-import logging
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
@@ -34,6 +33,13 @@ class GoogleConnector:
         self.subscriber_id = subscriber_id
         # Create the creds class from our token (this requires a refresh token!!)
         self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
+
+    def sync_calendars(self):
+        """Sync our google calendars"""
+
+        # We only support google right now!
+        self.google_client.sync_calendars(db=self.db, subscriber_id=self.subscriber_id,
+                                          token=self.google_token)
 
     def list_calendars(self):
         """find all calendars on the remote server"""
@@ -145,6 +151,9 @@ class CalDavConnector:
         if provider == CalendarProvider.caldav:
             # https://github.com/python-caldav/caldav/blob/master/examples/basic_usage_examples.py
             self.client = DAVClient(url=url, username=user, password=password)
+
+    def sync_calendars(self):
+        pass
 
     def list_calendars(self):
         """find all calendars on the remote server"""

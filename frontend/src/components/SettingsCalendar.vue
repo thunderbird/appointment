@@ -4,26 +4,17 @@
   <div class="pl-6 flex flex-col gap-6">
     <alert-box title="Calendar Connect Error" v-if="calendarConnectError">{{calendarConnectError}}</alert-box>
 
+    <!-- list of possible calendars to connect -->
+    <CalendarManagement
+        :title="t('heading.calendarsUnconnected')" :type="calendarManagementType.connect" :calendars="calendars"
+        :loading="loading" @sync="syncCalendars" @modify="connectCalendar"
+    ></CalendarManagement>
+
     <!-- list of calendar connections -->
-    <div class="text-xl">{{ t('heading.calendarsConnected') }}</div>
-    <div v-if="calendars?.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
-      <div v-for="cal in calendars" :key="cal.id" class="flex gap-2 items-center">
-        <div class="flex-center w-6 h-6 rounded-lg" :style="{ backgroundColor: cal.color ?? '#38bdf8' }">
-          <icon-calendar class="w-4 h-4 fill-transparent stroke-2 stroke-white" />
-        </div>
-        {{ cal.title }}
-        <button
-          @click="editCalendar(cal.id)"
-          class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs"
-        >
-          <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent" />
-          {{ t('label.editCalendar') }}
-        </button>
-        <div class="p-0.5 cursor-pointer" @click="deleteCalendar(cal.id)">
-          <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent" />
-        </div>
-      </div>
-    </div>
+    <CalendarManagement
+        :title="t('heading.calendarsConnected')" :type="calendarManagementType.edit" :calendars="calendars"
+        :loading="loading" @remove="deleteCalendar" @modify="editCalendar">
+    </CalendarManagement>
     <div class="flex gap-4">
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.google') })"
@@ -174,12 +165,11 @@ import PrimaryButton from '@/elements/PrimaryButton';
 // icons
 import {
   IconArrowRight,
-  IconCalendar,
-  IconPencil,
-  IconX,
 } from '@tabler/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
+import CalendarManagement from '@/components/CalendarManagement.vue';
+import { calendarManagementType } from '@/definitions';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -187,6 +177,9 @@ const call = inject('call');
 const refresh = inject('refresh');
 
 const calendarConnectError = ref('');
+
+// Temp until we get a store solution rolling
+const loading = ref(false);
 
 // view properties
 defineProps({
@@ -221,6 +214,11 @@ const calendarInput = reactive({
 const isCalDav = computed(() => calendarInput.data.provider === calendarProviders.caldav);
 const isGoogle = computed(() => calendarInput.data.provider === calendarProviders.google);
 
+const refreshData = async () => {
+  await refresh({ onlyConnectedCalendars: false });
+  loading.value = false;
+};
+
 // clear input fields
 const resetInput = () => {
   calendarInput.id = null;
@@ -233,7 +231,21 @@ const addCalendar = (provider) => {
   inputMode.value = inputModes.add;
   calendarInput.data.provider = provider;
 };
+const connectCalendar = async (id) => {
+  loading.value = true;
+
+  await call(`cal/${id}/connect`).post();
+  await refreshData();
+};
+const syncCalendars = async () => {
+  loading.value = true;
+
+  await call('rmt/sync').post();
+  await refreshData();
+};
 const editCalendar = async (id) => {
+  loading.value = true;
+
   inputMode.value = inputModes.edit;
   calendarInput.id = id;
   const { data } = await call(`cal/${id}`).get().json();
@@ -244,12 +256,16 @@ const editCalendar = async (id) => {
 
 // do remove a given calendar connection
 const deleteCalendar = async (id) => {
+  loading.value = true;
+
   await call(`cal/${id}`).delete();
-  refresh();
+  await refreshData();
 };
 
 // do save calendar data
 const saveCalendar = async () => {
+  loading.value = true;
+
   // add new caldav calendar
   if (isCalDav.value && inputMode.value === inputModes.add) {
     await call('cal').post(calendarInput.data);
@@ -265,7 +281,7 @@ const saveCalendar = async () => {
     await call(`cal/${calendarInput.id}`).put(calendarInput.data);
   }
   // refresh list of calendars
-  refresh();
+  await refreshData();
   resetInput();
 };
 
@@ -318,6 +334,6 @@ onMounted(async () => {
     await router.replace(route.path);
   }
 
-  await refresh();
+  await refreshData();
 });
 </script>

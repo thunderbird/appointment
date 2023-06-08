@@ -66,28 +66,7 @@ def google_callback(
     creds_serialized = creds.to_json()
     repo.set_subscriber_google_tkn(db, creds_serialized, subscriber.id)
 
-    # Grab all of the google calendars
-    calendars = google_client.list_calendars(creds)
-    error_occurred = False
-    for calendar in calendars:
-        cal = CalendarConnection(
-            title=calendar.get("summary"),
-            color=calendar.get("backgroundColor"),
-            user=calendar.get("id"),
-            password="",
-            url=calendar.get("id"),
-            provider=CalendarProvider.google,
-        )
-        # add calendar
-        try:
-            repo.update_or_create_subscriber_calendar(
-                db=db, calendar=cal, calendar_url=calendar.get("id"), subscriber_id=subscriber.id
-            )
-        except Exception as err:
-            logging.warning(
-                f"[routes.google.google_callback] Error occurred while creating calendar. Error: {str(err)}"
-            )
-            error_occurred = True
+    error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds)
 
     # And then redirect back to frontend
     if error_occurred:

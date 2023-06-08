@@ -88,8 +88,8 @@ const checkLogin = async () => {
 };
 
 // query db for all calendar data
-const getDbCalendars = async () => {
-  const { data, error } = await call('me/calendars').get().json();
+const getDbCalendars = async (onlyConnected = true) => {
+  const { data, error } = await call(`me/calendars?only_connected=${onlyConnected}`).get().json();
   if (!error.value) {
     if (data.value === null || typeof data.value === 'undefined') return;
     calendars.value = data.value;
@@ -137,10 +137,12 @@ const extendDbData = () => {
 };
 
 // retrieve calendars and appointments after checking login and persisting user to db
-const getDbData = async () => {
+const getDbData = async (options = {}) => {
+  const { onlyConnectedCalendars = true } = options;
+
   await checkLogin();
   if (auth.isAuthenticated.value) {
-    await Promise.all([getDbCalendars(), getDbAppointments()]);
+    await Promise.all([getDbCalendars(onlyConnectedCalendars), getDbAppointments()]);
     extendDbData();
   }
 };

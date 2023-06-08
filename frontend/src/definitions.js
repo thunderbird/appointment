@@ -94,6 +94,11 @@ export const colorSchemes = {
   light: 3,
 };
 
+export const calendarManagementType = {
+  connect: 1,
+  edit: 2,
+};
+
 export default {
   subscriberLevels,
   appointmentState,
