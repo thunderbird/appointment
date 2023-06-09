@@ -1,8 +1,6 @@
 <template>
   <!-- page title area -->
-  <div
-    class="flex flex-col lg:flex-row justify-between items-start select-none"
-  >
+  <div class="flex flex-col lg:flex-row justify-between items-start select-none">
     <calendar-page-heading
       :nav="true"
       :month="activeDate.format('MMMM')"
@@ -11,13 +9,8 @@
       @prev="dateNav('auto', false)"
       @next="dateNav('auto')"
     />
-    <div
-      class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center"
-    >
-      <button
-        @click="selectDate(dj())"
-        class="font-semibold text-base text-teal-500 px-4"
-      >
+    <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
+      <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
         {{ t("label.today") }}
       </button>
       <tab-bar
@@ -62,10 +55,7 @@
     />
     <!-- page side bar -->
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
-      <div
-        v-if="creationStatus === creationState.hidden"
-        class="flex flex-col gap-8"
-      >
+      <div v-if="creationStatus === creationState.hidden" class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month
           :selected="activeDate"
@@ -98,9 +88,7 @@
             </div>
             <primary-button
               :label="t('label.createAppointments')"
-              :disabled="
-                !calendars.length || creationStatus !== creationState.hidden
-              "
+              :disabled="!calendars.length || creationStatus !== creationState.hidden"
               @click="creationStatus = creationState.details"
             />
           </div>
@@ -191,9 +179,7 @@ const pageTitle = computed(() => {
     case calendarViews.day:
       return activeDate.value.format('dddd Do');
     case calendarViews.week:
-      return `${startOfActiveWeek.value.format(
-        'ddd Do',
-      )} - ${endOfActiveWeek.value.format('ddd Do')}`;
+      return `${startOfActiveWeek.value.format('ddd Do')} - ${endOfActiveWeek.value.format('ddd Do')}`;
     case calendarViews.month:
     default:
       return '';
@@ -203,9 +189,7 @@ const pageTitle = computed(() => {
 // date navigation
 const dateNav = (unit = 'auto', forward = true) => {
   if (unit === 'auto') {
-    unit = Object.keys(calendarViews).find(
-      (key) => calendarViews[key] === tabActive.value,
-    );
+    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
   }
   if (forward) {
     selectDate(activeDate.value.add(1, unit));
@@ -225,21 +209,12 @@ const calendarEvents = ref([]);
 
 const getRemoteEvents = async (from, to) => {
   calendarEvents.value = [];
-  await Promise.all(
-    props.calendars.map(async (calendar) => {
-      const { data } = await call(`rmt/cal/${calendar.id}/${from}/${to}`)
-        .get()
-        .json();
-      if (Array.isArray(data.value)) {
-        calendarEvents.value.push(
-          ...data.value.map((e) => ({
-            ...e,
-            duration: dj(e.end).diff(dj(e.start), 'minutes'),
-          })),
-        );
-      }
-    }),
-  );
+  await Promise.all(props.calendars.map(async (calendar) => {
+    const { data } = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
+    if (Array.isArray(data.value)) {
+      calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
+    }
+  }));
 };
 
 // initially load data when component gets remounted

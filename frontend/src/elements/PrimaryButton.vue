@@ -1,29 +1,11 @@
 <template>
   <button
     class="
-        relative
-        h-10 text-base
-        font-semibold
-        whitespace-nowrap
-        rounded-full
-        bg-gradient-to-br
-        hover:shadow-md
-        hover:scale-102
-        active:scale-98
-        disabled:scale-100
-        disabled:shadow-none
-        disabled:opacity-50
-        px-6
-        transition-all
-        ease-in-out
-        flex
-        items-center
-        justify-center
-        gap-2
-        text-white
-        from-teal-400 to-sky-600
-        enabled:hover:from-sky-400
-        enabled:hover:to-teal-600"
+      relative h-10 text-base font-semibold whitespace-nowrap rounded-full bg-gradient-to-br
+      hover:shadow-md hover:scale-102 active:scale-98 disabled:scale-100 disabled:shadow-none disabled:opacity-50 px-6
+      transition-all ease-in-out flex items-center justify-center gap-2
+      text-white from-teal-400 to-sky-600 enabled:hover:from-sky-400 enabled:hover:to-teal-600
+    "
     :class="{ 'text-transparent': waiting }"
   >
     <div

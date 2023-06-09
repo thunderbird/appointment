@@ -43,6 +43,7 @@
     "allDay": "Ganzer Tag",
     "allFutureAppointments": "Alle zukünftigen Termine",
     "appearance": "Aussehen",
+    "appointmentCreationError": "Fehler bei Terminerstellung",
     "appointmentDetails": "Termindetails",
     "appointmentName": "Termin Titel",
     "appointments": "Termine",

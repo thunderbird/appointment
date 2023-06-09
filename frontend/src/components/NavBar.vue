@@ -1,7 +1,5 @@
 <template>
-  <header
-    class="h-16 px-4 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600"
-  >
+  <header class="h-16 px-4 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600">
     <router-link
       class="py-4 pl-4 pr-8 border-r border-gray-300 dark:border-gray-600 shrink-0"
       :to="{ name: 'calendar' }"
@@ -34,10 +32,7 @@
               route.name != item,
           }"
         >
-          <router-link
-            class="flex justify-center min-w-[120px] items-center"
-            :to="{ name: item }"
-          >
+          <router-link class="flex justify-center min-w-[120px] items-center" :to="{ name: item }">
             {{ t("label." + item) }}
           </router-link>
         </li>

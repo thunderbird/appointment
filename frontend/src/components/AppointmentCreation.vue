@@ -3,21 +3,13 @@
     <div class="font-semibold text-center text-xl text-teal-500">
       {{ t("heading.createNewAppointment") }}
     </div>
-    <alert-box
-      title="Appointment Creation Error"
-      v-if="appointmentCreationError"
-    >
+    <alert-box v-if="appointmentCreationError" :title="t('label.appointmentCreationError')">
       {{ appointmentCreationError }}
     </alert-box>
 
     <!-- step 1 -->
-    <div
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
-    >
-      <div
-        class="flex justify-between items-center cursor-pointer"
-        @click="emit('start')"
-      >
+    <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
+      <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
         <span class="font-semibold flex gap-1">
           <icon-check
             v-show="validStep1"
@@ -52,11 +44,7 @@
             {{ t("label.selectCalendar") }}
           </div>
           <select v-model="appointment.calendar_id" class="rounded-md w-full">
-            <option
-              v-for="calendar in calendars"
-              :key="calendar.id"
-              :value="calendar.id"
-            >
+            <option v-for="calendar in calendars" :key="calendar.id" :value="calendar.id">
               {{ calendar.title }}
             </option>
           </select>
@@ -105,13 +93,8 @@
       </div>
     </div>
     <!-- step 2 -->
-    <div
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
-    >
-      <div
-        class="flex justify-between items-center cursor-pointer"
-        @click="emit('next')"
-      >
+    <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
+      <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
           <icon-check
             v-show="validStep2"
@@ -142,9 +125,7 @@
                   @click="addTime(day)"
                   class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
                 >
-                  <icon-plus
-                    class="h-3 w-3 stroke-2 fill-transparent stroke-white"
-                  />
+                  <icon-plus class="h-3 w-3 stroke-2 fill-transparent stroke-white" />
                   {{ t("label.addTime") }}
                 </button>
               </div>
@@ -176,9 +157,7 @@
                 />
               </label>
               <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
-                <icon-x
-                  class="h-5 w-5 stroke-2 fill-transparent stroke-red-500"
-                />
+                <icon-x class="h-5 w-5 stroke-2 fill-transparent stroke-red-500" />
               </div>
             </div>
           </div>
@@ -314,10 +293,7 @@ const slotList = computed(() => {
       const end = dj(`${day} ${slot.end}`);
       list.push({
         // save local time as UTC
-        start: start
-          .tz(props.user.timezone ?? dj.tz.guess(), true)
-          .utc()
-          .format('YYYY-MM-DDTHH:mm:ss'),
+        start: start.tz(props.user.timezone ?? dj.tz.guess(), true).utc().format('YYYY-MM-DDTHH:mm:ss'),
         // calculate duration as difference between start and end
         duration: end.diff(start, 'minutes'),
       });
@@ -346,22 +322,17 @@ const activeDate = ref(dj());
 const addDate = (d) => {
   const day = dj(d).format('YYYY-MM-DD');
   if (!Object.hasOwn(slots, day)) {
-    slots[day] = [
-      {
-        start: dj(d).add(10, 'hours').format('HH:mm'),
-        end: dj(d).add(11, 'hours').format('HH:mm'),
-      },
-    ];
+    slots[day] = [{
+      start: dj(d).add(10, 'hours').format('HH:mm'),
+      end: dj(d).add(11, 'hours').format('HH:mm'),
+    }];
   }
   showDatePicker.value = false;
 };
 const addTime = (d) => {
   const day = dj(d).format('YYYY-MM-DD');
   // get latest end time to start next time slot default value with
-  const latestTime = slots[day].reduce(
-    (p, c) => (c.end > p ? c.end : p),
-    '00:00',
-  );
+  const latestTime = slots[day].reduce((p, c) => (c.end > p ? c.end : p), '00:00');
   slots[day].push({
     start: latestTime,
     end: dj(`${day}T${latestTime}`).add(1, 'hour').format('HH:mm'),
@@ -376,9 +347,7 @@ const removeTime = (day, index) => {
 };
 const validateEndTime = (day, position) => {
   if (slots[day][position].start >= slots[day][position].end) {
-    slots[day][position].end = dj(`${day}T${slots[day][position].start}`)
-      .add(1, 'hour')
-      .format('HH:mm');
+    slots[day][position].end = dj(`${day}T${slots[day][position].start}`).add(1, 'hour').format('HH:mm');
   }
 };
 
