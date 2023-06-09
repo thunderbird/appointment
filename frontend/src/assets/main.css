@@ -13,6 +13,11 @@
   }
 
   @font-face {
+    font-family: 'Raleway';
+    src: url('./fonts/Raleway-Regular.ttf');
+    font-weight: 400;
+  }
+  @font-face {
     font-family: 'Open Sans';
     src: url('./fonts/OpenSans-LightItalic.ttf');
     font-weight: 300;
@@ -85,6 +90,9 @@
     @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
   }
   .flex-center {
-    @apply flex justify-center items-center
+    @apply flex justify-center items-center;
+  }
+  .place-holder {
+    @apply placeholder:text-gray-300 dark:placeholder:text-gray-500;
   }
 }

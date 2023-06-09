@@ -2,7 +2,7 @@
 <div
   class="bg-red-100 border border-red-400 text-red-700 px-4 pr-8 py-3 rounded relative"
   role="alert"
-  :class="{hidden: isHidden}"
+  :class="{ hidden: isHidden }"
 >
   <strong class="font-bold">{{ title }}:</strong>
   <span class="block sm:inline ml-1"><slot></slot></span>

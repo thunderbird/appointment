@@ -10,10 +10,15 @@
       @next="dateNav('auto')"
     />
     <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
-      <button @click="selectDate(dj())" class="font-semibold text-xl text-teal-500 px-4">
-        {{ t('label.today') }}
+      <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
+        {{ t("label.today") }}
       </button>
-      <tab-bar :tab-items="calendarViews" :active="tabActive" @update="updateTab" class="text-xl" />
+      <tab-bar
+        :tab-items="calendarViews"
+        :active="tabActive"
+        @update="updateTab"
+        class="text-sm"
+      />
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="!calendars.length || creationStatus !== creationState.hidden"
@@ -24,7 +29,7 @@
   <!-- page content -->
   <div
     class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 items-stretch"
-    :class="{ 'lg:mt-[60px]': tabActive === calendarViews.month }"
+    :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month
@@ -64,19 +69,23 @@
         <!-- appointments and events list -->
         <div>
           <div class="flex justify-between items-center">
-            <div class="font-semibold text-lg">{{ t('heading.pendingAppointments') }}</div>
+            <div class="font-semibold text-lg">
+              {{ t("heading.pendingAppointments") }}
+            </div>
             <router-link
               class="px-2 py-1 border-r rounded-full text-xs uppercase bg-teal-500 text-white"
               :to="{ name: 'appointments' }"
             >
-              {{ t('label.viewAll') }}
+              {{ t("label.viewAll") }}
             </router-link>
           </div>
           <div
             v-if="pendingAppointments.length === 0"
             class="mt-4 flex flex-col gap-8 justify-center items-center text-gray-500"
           >
-            <div class="text-center mt-4">{{ t('info.noPendingAppointmentsInList') }}</div>
+            <div class="text-center mt-4">
+              {{ t("info.noPendingAppointmentsInList") }}
+            </div>
             <primary-button
               :label="t('label.createAppointments')"
               :disabled="!calendars.length || creationStatus !== creationState.hidden"
@@ -84,7 +93,11 @@
             />
           </div>
           <div v-else class="flex flex-col gap-8 mt-4">
-            <appointment-list-item v-for="a in pendingAppointments" :key="a.id" :appointment="a" />
+            <appointment-list-item
+              v-for="a in pendingAppointments"
+              :key="a.id"
+              :appointment="a"
+            />
           </div>
         </div>
       </div>
@@ -96,12 +109,14 @@
         :user="user"
         @start="creationStatus = creationState.details"
         @next="creationStatus = creationState.availability"
-        @create="creationStatus = creationState.finished; refresh();"
+        @create="
+          creationStatus = creationState.finished;
+          refresh();
+        "
         @cancel="creationStatus = creationState.hidden"
       />
     </div>
   </div>
-
 </template>
 
 <script setup>
@@ -137,7 +152,10 @@ const props = defineProps({
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
 const selectDate = (d) => {
-  router.replace({ name: route.name, params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') } });
+  router.replace({
+    name: route.name,
+    params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') },
+  });
   activeDate.value = dj(d);
 };
 
@@ -148,7 +166,10 @@ const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews[route.params.view]);
 const updateTab = (view) => {
-  router.replace({ name: route.name, params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') } });
+  router.replace({
+    name: route.name,
+    params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') },
+  });
   tabActive.value = calendarViews[view];
 };
 
@@ -205,13 +226,16 @@ onMounted(async () => {
 });
 
 // react to user calendar navigation
-watch(() => activeDate.value, (newValue, oldValue) => {
-  // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-  if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
-    getRemoteEvents(
-      dj(newValue).startOf('year').format('YYYY-MM-DD'),
-      dj(newValue).endOf('year').format('YYYY-MM-DD'),
-    );
-  }
-});
+watch(
+  () => activeDate.value,
+  (newValue, oldValue) => {
+    // remote data is retrieved per year, so data request happens only if the user navigates to a different year
+    if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
+      getRemoteEvents(
+        dj(newValue).startOf('year').format('YYYY-MM-DD'),
+        dj(newValue).endOf('year').format('YYYY-MM-DD'),
+      );
+    }
+  },
+);
 </script>

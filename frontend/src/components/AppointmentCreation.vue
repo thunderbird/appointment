@@ -1,19 +1,25 @@
 <template>
   <div class="relative flex flex-col gap-4 h-full">
     <div class="font-semibold text-center text-xl text-teal-500">
-      {{ t('heading.createNewAppointment') }}
+      {{ t("heading.createNewAppointment") }}
     </div>
-    <alert-box title="Appointment Creation Error" v-if="appointmentCreationError">
-      {{appointmentCreationError}}
+    <alert-box v-if="appointmentCreationError" :title="t('label.appointmentCreationError')">
+      {{ appointmentCreationError }}
     </alert-box>
 
     <!-- step 1 -->
     <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
         <span class="font-semibold flex gap-1">
-          <icon-check v-show="validStep1" class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
-          <icon-alert-triangle v-show="invalidStep1" class="h-6 w-6 stroke-2 fill-transparent stroke-red-500" />
-          {{ t('label.appointmentDetails') }}
+          <icon-check
+            v-show="validStep1"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500"
+          />
+          <icon-alert-triangle
+            v-show="invalidStep1"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-red-500"
+          />
+          {{ t("label.appointmentDetails") }}
         </span>
         <icon-chevron-down
           class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
@@ -23,16 +29,20 @@
       <div v-show="activeStep1" class="flex flex-col gap-2">
         <hr />
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.appointmentName') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.appointmentName") }}
+          </div>
           <input
             type="text"
             v-model="appointment.title"
             :placeholder="t('placeholder.biWeeklyCafeDates')"
-            class="rounded-md w-full"
+            class="rounded-md w-full place-holder"
           />
         </label>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.selectCalendar') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.selectCalendar") }}
+          </div>
           <select v-model="appointment.calendar_id" class="rounded-md w-full">
             <option v-for="calendar in calendars" :key="calendar.id" :value="calendar.id">
               {{ calendar.title }}
@@ -40,7 +50,9 @@
           </select>
         </label>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.location') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.location") }}
+          </div>
           <tab-bar
             :tab-items="locationTypes"
             :active="appointment.location_type"
@@ -48,27 +60,31 @@
           />
         </label>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.videoLink') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.videoLink") }}
+          </div>
           <input
             type="text"
             v-model="appointment.location_url"
             :placeholder="t('placeholder.zoomCom')"
-            class="rounded-md w-full"
+            class="rounded-md w-full place-holder"
           />
         </label>
         <label class="relative">
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">{{ t('label.notes') }}</div>
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.notes") }}
+          </div>
           <textarea
             v-model="appointment.details"
             :placeholder="t('placeholder.writeHere')"
-            class="rounded-md w-full text-sm h-40 resize-none"
+            class="rounded-md w-full text-sm h-40 resize-none place-holder"
             :maxlength="charLimit"
           ></textarea>
           <div
             class="absolute bottom-3.5 right-3 text-xs"
             :class="{
-              'text-orange-500': charCount >= charLimit*0.92,
-              '!text-red-600': charCount === charLimit
+              'text-orange-500': charCount >= charLimit * 0.92,
+              '!text-red-600': charCount === charLimit,
             }"
           >
             {{ charCount }}/{{ charLimit }}
@@ -80,9 +96,15 @@
     <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
       <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
         <span class="font-semibold flex gap-1">
-          <icon-check v-show="validStep2" class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
-          <icon-alert-triangle v-show="invalidStep2" class="h-6 w-6 stroke-2 fill-transparent stroke-red-500" />
-          {{ t('label.chooseYourAvailability') }}
+          <icon-check
+            v-show="validStep2"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500"
+          />
+          <icon-alert-triangle
+            v-show="invalidStep2"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-red-500"
+          />
+          {{ t("label.chooseYourAvailability") }}
         </span>
         <icon-chevron-down
           class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
@@ -91,24 +113,32 @@
       </div>
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr />
-        <div v-show="!validStep2" class="text-sm">{{ t('text.defineDaysAndTimeSlots') }}</div>
+        <div v-show="!validStep2" class="text-sm">
+          {{ t("text.defineDaysAndTimeSlots") }}
+        </div>
         <div v-show="validStep2" class="flex flex-col gap-2">
           <div v-for="(list, day) in slots" :key="day">
             <div class="flex justify-between mb-1">
-              <div>{{ dj(day).format('LL') }}</div>
+              <div>{{ dj(day).format("LL") }}</div>
               <div>
                 <button
                   @click="addTime(day)"
                   class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
                 >
                   <icon-plus class="h-3 w-3 stroke-2 fill-transparent stroke-white" />
-                  {{ t('label.addTime') }}
+                  {{ t("label.addTime") }}
                 </button>
               </div>
             </div>
-            <div v-for="(s, i) in list" :key="s.start" class="flex gap-4 justify-center items-end mb-2">
+            <div
+              v-for="(s, i) in list"
+              :key="s.start"
+              class="flex gap-4 justify-center items-end mb-2"
+            >
               <label class="flex flex-col">
-                <div class="text-sm text-gray-500 dark:text-gray-300">{{ t('label.start') }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-300">
+                  {{ t("label.start") }}
+                </div>
                 <input
                   type="time"
                   v-model="s.start"
@@ -117,7 +147,9 @@
                 />
               </label>
               <label class="flex flex-col">
-                <div class="text-sm text-gray-500 dark:text-gray-300">{{ t('label.end') }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-300">
+                  {{ t("label.end") }}
+                </div>
                 <input
                   type="time"
                   v-model="s.end"
@@ -385,8 +417,11 @@ const dateNav = (unit = 'month', forward = true) => {
 };
 
 // track if steps were already visited
-watch(() => props.status, (newValue, oldValue) => {
-  if (oldValue === 1) visitedStep1.value = true;
-  if (oldValue === 2 && newValue !== 3) visitedStep2.value = true;
-});
+watch(
+  () => props.status,
+  (newValue, oldValue) => {
+    if (oldValue === 1) visitedStep1.value = true;
+    if (oldValue === 2 && newValue !== 3) visitedStep2.value = true;
+  },
+);
 </script>
