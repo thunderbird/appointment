@@ -145,14 +145,10 @@
               <span>{{ appointment.title }}</span>
             </td>
             <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
-              <span>{{
-                t("label." + keyByValue(appointmentState, appointment.status))
-              }}</span>
+              <span>{{ t("label." + keyByValue(appointmentState, appointment.status)) }}</span>
             </td>
             <td v-if="columnVisible('active')" class="py-2 px-2 text-sm">
-              <span>{{
-                appointment.active ? t("label.open") : t("label.closed")
-              }}</span>
+              <span>{{ appointment.active ? t("label.open") : t("label.closed") }}</span>
             </td>
             <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
