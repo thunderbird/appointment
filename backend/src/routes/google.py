@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import datetime
 
@@ -9,11 +8,10 @@ from ..controller.google import GoogleClient
 from ..database import repo
 from sqlalchemy.orm import Session
 
-from ..database.schemas import CalendarConnection
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 
-from ..database.models import Subscriber, CalendarProvider
+from ..database.models import Subscriber
 from ..dependencies.google import get_google_client
 from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged

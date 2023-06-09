@@ -94,7 +94,6 @@ class Calendar(Base):
     appointments = relationship("Appointment", cascade="all,delete", back_populates="calendar")
 
 
-
 class Appointment(Base):
     __tablename__ = "appointments"
 

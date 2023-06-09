@@ -51,11 +51,15 @@ def update_me(
 
 
 @router.get("/me/calendars", response_model=list[schemas.CalendarOut])
-def read_my_calendars(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), only_connected: bool = True):
+def read_my_calendars(
+    db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), only_connected: bool = True
+):
     """get all calendar connections of authenticated subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-    calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id, include_unconnected=not only_connected)
+    calendars = repo.get_calendars_by_subscriber(
+        db, subscriber_id=subscriber.id, include_unconnected=not only_connected
+    )
     return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
 
 
@@ -96,8 +100,13 @@ def read_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscri
     if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
     return schemas.CalendarConnectionOut(
-        id=cal.id, title=cal.title, color=cal.color, provider=cal.provider, url=cal.url, user=cal.user,
-        connected=cal.connected
+        id=cal.id,
+        title=cal.title,
+        color=cal.color,
+        provider=cal.provider,
+        url=cal.url,
+        user=cal.user,
+        connected=cal.connected,
     )
 
 
@@ -371,8 +380,13 @@ def sync_caldav_calendars(
 
     # Create a list of connections and loop through them with sync
     connections = [
-        GoogleConnector(db=db, google_client=google_client, calendar_id=None, subscriber_id=subscriber.id,
-                        google_tkn=subscriber.google_tkn),
+        GoogleConnector(
+            db=db,
+            google_client=google_client,
+            calendar_id=None,
+            subscriber_id=subscriber.id,
+            google_tkn=subscriber.google_tkn,
+        ),
     ]
 
     for connection in connections:

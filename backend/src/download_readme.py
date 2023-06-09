@@ -35,4 +35,6 @@ The following files are included:
  - slots.csv : A list of Appointment Slots from our database.
  - subscriber.csv : The personal information we store about you from our database.
  - readme.txt : This file!
-            """.format(download_time=datetime.datetime.utcnow())
+            """.format(
+        download_time=datetime.datetime.utcnow()
+    )

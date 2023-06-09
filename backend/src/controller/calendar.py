@@ -38,8 +38,7 @@ class GoogleConnector:
         """Sync our google calendars"""
 
         # We only support google right now!
-        self.google_client.sync_calendars(db=self.db, subscriber_id=self.subscriber_id,
-                                          token=self.google_token)
+        self.google_client.sync_calendars(db=self.db, subscriber_id=self.subscriber_id, token=self.google_token)
 
     def list_calendars(self):
         """find all calendars on the remote server"""
