@@ -105,6 +105,7 @@ class AppointmentOut(AppointmentBase):
 class CalendarBase(BaseModel):
     title: str | None = None
     color: str | None = None
+    connected: bool | None = None
 
 
 class CalendarConnectionOut(CalendarBase):

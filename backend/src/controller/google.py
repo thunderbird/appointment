@@ -5,6 +5,8 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from ..database import repo
+from ..database.models import CalendarProvider
+from ..database.schemas import CalendarConnection
 from ..exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
@@ -122,3 +124,29 @@ class GoogleClient:
 
     def delete_event(self, calendar_id, event_id, token):
         pass
+
+    def sync_calendars(self, db, subscriber_id: int, token):
+        # Grab all the Google calendars
+        calendars = self.list_calendars(token)
+        error_occurred = False
+        for calendar in calendars:
+            cal = CalendarConnection(
+                title=calendar.get("summary"),
+                color=calendar.get("backgroundColor"),
+                user=calendar.get("id"),
+                password="",
+                url=calendar.get("id"),
+                provider=CalendarProvider.google,
+            )
+
+            # add calendar
+            try:
+                repo.update_or_create_subscriber_calendar(
+                    db=db, calendar=cal, calendar_url=calendar.get("id"), subscriber_id=subscriber_id
+                )
+            except Exception as err:
+                logging.warning(
+                    f"[controller.google.sync_calendars] Error occurred while creating calendar. Error: {str(err)}"
+                )
+                error_occurred = True
+        return error_occurred

@@ -87,6 +87,8 @@ class Calendar(Base):
     )
     user = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
+    connected = Column(Boolean, index=True, default=False)
+    connected_at = Column(DateTime)
 
     owner = relationship("Subscriber", back_populates="calendars")
     appointments = relationship("Appointment", cascade="all,delete", back_populates="calendar")

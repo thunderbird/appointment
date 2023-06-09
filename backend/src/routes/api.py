@@ -51,12 +51,16 @@ def update_me(
 
 
 @router.get("/me/calendars", response_model=list[schemas.CalendarOut])
-def read_my_calendars(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+def read_my_calendars(
+    db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), only_connected: bool = True
+):
     """get all calendar connections of authenticated subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-    calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
-    return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color) for c in calendars]
+    calendars = repo.get_calendars_by_subscriber(
+        db, subscriber_id=subscriber.id, include_unconnected=not only_connected
+    )
+    return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
 
 
 @router.get("/me/appointments", response_model=list[schemas.Appointment])
@@ -82,7 +86,7 @@ def create_my_calendar(
         cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
     except:
         raise HTTPException(status_code=403, detail="Calendar already exists or maximum number of calendars exceeded")
-    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
+    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
 @router.get("/cal/{id}", response_model=schemas.CalendarConnectionOut)
@@ -96,7 +100,13 @@ def read_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscri
     if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
     return schemas.CalendarConnectionOut(
-        id=cal.id, title=cal.title, color=cal.color, provider=cal.provider, url=cal.url, user=cal.user
+        id=cal.id,
+        title=cal.title,
+        color=cal.color,
+        provider=cal.provider,
+        url=cal.url,
+        user=cal.user,
+        connected=cal.connected,
     )
 
 
@@ -115,7 +125,24 @@ def update_my_calendar(
     if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
     cal = repo.update_subscriber_calendar(db=db, calendar=calendar, calendar_id=id)
-    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
+    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
+
+
+@router.post("/cal/{id}/connect")
+def connect_my_calendar(
+    id: int,
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
+    """endpoint to update an existing calendar connection for authenticated subscriber"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+    if not repo.calendar_exists(db, calendar_id=id):
+        raise HTTPException(status_code=404, detail="Calendar not found")
+    if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
+        raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
+    cal = repo.update_subscriber_calendar_connection(db=db, calendar_id=id, is_connected=True)
+    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
 @router.delete("/cal/{id}", response_model=schemas.CalendarOut)
@@ -128,7 +155,7 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subsc
     if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
     cal = repo.delete_subscriber_calendar(db=db, calendar_id=id)
-    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color)
+    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
 @router.post("/rmt/calendars", response_model=list[schemas.CalendarConnectionOut])
@@ -339,3 +366,33 @@ def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
         content_type="text/calendar",
         data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8"),
     )
+
+
+@router.post("/rmt/sync")
+def sync_caldav_calendars(
+    db: Session = Depends(get_db),
+    google_client: GoogleClient = Depends(get_google_client),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
+    """endpoint to sync calendars from a remote server"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+
+    # Create a list of connections and loop through them with sync
+    connections = [
+        GoogleConnector(
+            db=db,
+            google_client=google_client,
+            calendar_id=None,
+            subscriber_id=subscriber.id,
+            google_tkn=subscriber.google_tkn,
+        ),
+    ]
+
+    for connection in connections:
+        error_occurred = connection.sync_calendars()
+        # And then redirect back to frontend
+        if error_occurred:
+            raise HTTPException(500, "An error occurred while syncing calendars. Please try again later.")
+
+    return True

@@ -161,9 +161,14 @@ def get_calendar_by_url(db: Session, url: str):
     return db.query(models.Calendar).filter(models.Calendar.url == url).first()
 
 
-def get_calendars_by_subscriber(db: Session, subscriber_id: int):
+def get_calendars_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool = True):
     """retrieve list of calendars by owner id"""
-    return db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
+    query = db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
+
+    if not include_unconnected:
+        query = query.filter(models.Calendar.connected == 1)
+
+    return query.all()
 
 
 def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int):
@@ -190,10 +195,29 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
 def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):
     """update existing calendar by id"""
     db_calendar = get_calendar(db, calendar_id)
+
+    keep_if_none = ["password", "connected", "connected_at"]
+
     for key, value in calendar:
-        # if no password is given, keep existing one
-        if not (key == "password" and len(value) == 0):
-            setattr(db_calendar, key, value)
+        # if this key exists in the keep_if_none list, then ignore it
+        if key in keep_if_none and (value is None or len(value) == 0):
+            continue
+
+        setattr(db_calendar, key, value)
+
+    db.commit()
+    db.refresh(db_calendar)
+    return db_calendar
+
+
+def update_subscriber_calendar_connection(db: Session, is_connected: bool, calendar_id: int):
+    """Updates the connected status of a calendar"""
+    db_calendar = get_calendar(db, calendar_id)
+    if not db_calendar.connected:
+        db_calendar.connected_at = datetime.now()
+    elif db_calendar.connected and is_connected is False:
+        db_calendar.connected_at = None
+    db_calendar.connected = is_connected
     db.commit()
     db.refresh(db_calendar)
     return db_calendar
