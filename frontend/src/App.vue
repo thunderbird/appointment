@@ -83,6 +83,9 @@ const checkLogin = async () => {
       // data.value holds appointment subscriber structure
       // auth.user.value holds auth0 user structure
       currentUser.value = data.value;
+    } else if (data.value && data.value.detail === 'Missing bearer token') {
+      // Try logging in if we have an expired refresh token, but a valid authentication id.
+      await auth.loginWithRedirect();
     }
   }
 };
