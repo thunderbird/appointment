@@ -6,6 +6,8 @@ import logging
 import os
 import smtplib
 import ssl
+
+import jinja2
 import validators
 
 from html import escape
@@ -13,6 +15,14 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates("src/templates/email")
+
+
+def get_template(template_name) -> "jinja2.Template":
+    """Retrieves a template under the templates/email folder. Make sure to include the file extension!"""
+    return templates.get_template(template_name)
 
 
 class Attachment:
@@ -119,8 +129,10 @@ class InvitationMail(Mailer):
     def __init__(self, *args, **kwargs):
         """init Mailer with invitation specific defaults"""
         defaultKwargs = {
-            "subject": "[TBA] Invitation sent from Thunderbird Appintment",
-            "html": "<html><body><p>This message is sent from <b>Appointment</b>.</p></body></html>",
+            "subject": "[TBA] Invitation sent from Thunderbird Appointment",
             "plain": "This message is sent from Appointment.",
         }
         super(InvitationMail, self).__init__(*args, **defaultKwargs, **kwargs)
+
+    def html(self):
+        return get_template("invite.jinja2").render()
