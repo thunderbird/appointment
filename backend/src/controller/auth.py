@@ -4,6 +4,8 @@ Handle authentification with Auth0 and get subscription data.
 """
 import logging
 import os
+import hashlib
+import hmac
 
 from sqlalchemy.orm import Session
 from ..database import repo, schemas, models
@@ -72,3 +74,12 @@ class Auth:
             return None
 
         return management
+
+
+def calculate_signature(id: int, username: str):
+    """helper to calculate signature for given user data"""
+    secret = 'MTkxMjYzNTBhOTMyMmQzZDRkM2E1YTFi' # TODO: make that env
+    key = bytes(secret, 'UTF-8')
+    message = f'{username} {id} {secret}'.encode()
+    signature = hmac.new(key, message, hashlib.sha256).hexdigest()
+    return signature

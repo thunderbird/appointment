@@ -1,8 +1,9 @@
 import { authGuard } from '@auth0/auth0-vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import BookingView from '@/views/BookingView';
-import CalendarView from '@/views/CalendarView';
-import HomeView from '@/views/HomeView';
+import BookingView from '@/views/BookingView.vue';
+import AvailabilityView from '@/views/AvailabilityView.vue'; // TODO
+import CalendarView from '@/views/CalendarView.vue';
+import HomeView from '@/views/HomeView.vue';
 
 const routes = [
   // instant loaded routes
@@ -15,6 +16,11 @@ const routes = [
     path: '/booking/:slug',
     name: 'booking',
     component: BookingView,
+  },
+  {
+    path: '/user/:username/:signature',
+    name: 'availability',
+    component: AvailabilityView,
   },
   {
     path: '/calendar',

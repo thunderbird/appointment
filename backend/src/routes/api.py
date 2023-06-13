@@ -12,6 +12,7 @@ from fastapi_auth0 import Auth0User
 from datetime import timedelta
 from ..database.schemas import EventLocation
 from ..controller.google_client import GoogleClient
+from ..controller.auth import calculate_signature
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber, auth
@@ -72,6 +73,15 @@ def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber =
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     appointments = repo.get_appointments_by_subscriber(db, subscriber_id=subscriber.id)
     return appointments
+
+
+@router.get("/me/signature", response_model=str)
+def read_my_signature(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """get signature of authenticated subscriber"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+    db_subscriber = repo.get_subscriber(db, subscriber.id)
+    return calculate_signature(subscriber.id, db_subscriber.username)
 
 
 @router.post("/cal", response_model=schemas.CalendarOut)

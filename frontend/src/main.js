@@ -55,6 +55,7 @@ const port = process.env.VUE_APP_API_PORT !== undefined ? `:${process.env.VUE_AP
 const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${protocol}://${process.env.VUE_APP_BASE_URL}/booking/`);
+app.provide('userUrl', `${protocol}://${process.env.VUE_APP_BASE_URL}/user/`); // TODO: env.VUE_APP_SHORT_BASE_URL
 app.use(router);
 const messages = {
   de, // German

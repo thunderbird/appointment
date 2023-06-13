@@ -25,6 +25,14 @@
           class="w-full max-w-sm rounded-md w-full"
         />
       </label>
+      <label class="pl-4 mt-6 flex items-center">
+        <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
+        <div class="w-full truncate">
+          <a :href="signedUserUrl" target="_blank" class="underline underline-offset-2 text-teal-500">
+            {{ signedUserUrl }}
+          </a>
+        </div>
+      </label>
       <div class="self-end flex gap-4 mt-6">
         <secondary-button
           :label="t('label.saveChanges')"
@@ -85,7 +93,7 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, watch,
+  ref, inject, onMounted, watch, computed
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuth0 } from '@auth0/auth0-vue';
@@ -99,6 +107,7 @@ import CautionButton from '@/elements/CautionButton.vue';
 const { t } = useI18n({ useScope: 'global' });
 const refresh = inject('refresh');
 const call = inject('call');
+const userUrl = inject('userUrl');
 const router = useRouter();
 const auth0 = useAuth0();
 
@@ -122,7 +131,7 @@ watch(
   },
 );
 
-// save timezone config
+// save user data
 const errorUsername = ref(false);
 const updateUser = async () => {
   const inputData = {
@@ -133,10 +142,18 @@ const updateUser = async () => {
   if (!error.value) {
     errorUsername.value = false;
     // TODO show some confirmation
+    await refresh();
   } else {
     errorUsername.value = true;
   }
 };
+
+// calculate signed link
+const signedUserUrl = computed(() => {
+  return props.user
+    ? userUrl + props.user.username + '/' + props.user.signature
+    : '';
+});
 
 onMounted(async () => {
   await refresh();
