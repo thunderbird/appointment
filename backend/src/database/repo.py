@@ -93,7 +93,8 @@ def update_subscriber(db: Session, data: schemas.SubscriberIn, subscriber_id: in
     """update all subscriber attributes, they can edit themselves"""
     db_subscriber = get_subscriber(db, subscriber_id)
     for key, value in data:
-        setattr(db_subscriber, key, value)
+        if value is not None:
+            setattr(db_subscriber, key, value)
     db.commit()
     db.refresh(db_subscriber)
     return db_subscriber

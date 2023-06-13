@@ -44,6 +44,8 @@ def update_me(
     """endpoint to update data of authenticated subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+    if subscriber.username != data.username and repo.get_subscriber_by_username(db, data.username):
+        raise HTTPException(status_code=403, detail="Username not available")
     me = repo.update_subscriber(db=db, data=data, subscriber_id=subscriber.id)
     return schemas.SubscriberBase(
         username=me.username, email=me.email, name=me.name, level=me.level, timezone=me.timezone

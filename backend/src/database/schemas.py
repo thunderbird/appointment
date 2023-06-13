@@ -137,12 +137,12 @@ class CalendarOut(CalendarBase):
 
 class SubscriberIn(BaseModel):
     timezone: str | None = None
+    username: str
+    name: str | None = None
 
 
 class SubscriberBase(SubscriberIn):
-    username: str
     email: str
-    name: str | None = None
     level: SubscriberLevel | None = SubscriberLevel.basic
 
 

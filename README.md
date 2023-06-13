@@ -61,6 +61,7 @@ Run application for development with hot reloading backend and frontend:
     alembic init migrations # init migrations once
     alembic current # check database state
     alembic upgrade head # migrate to latest state
+    alembic revision -m "create ... table" # create a new migration
     ```
 
 ## Testing
