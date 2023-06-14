@@ -97,9 +97,9 @@ ruff backend
 black backend
 ```
 
-### Fronted
+### Frontend
 
-Fronted is formatted using ESlint with airbnb rules.
+Frontend is formatted using ESlint with airbnb rules.
 
 Commands (from /frontend)
 
