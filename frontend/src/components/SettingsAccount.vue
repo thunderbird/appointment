@@ -27,18 +27,15 @@
       </label>
       <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
-        <div class="w-full truncate">
+        <div class="w-full flex justify-between items-center">
           <a :href="signedUserUrl" target="_blank" class="underline underline-offset-2 text-teal-500">
-            {{ signedUserUrl }}
+            {{ t('label.openMyPage')}}
           </a>
+          <text-button :label="t('label.copyLink')" :copy="signedUserUrl" />
         </div>
       </label>
       <div class="self-end flex gap-4 mt-6">
-        <secondary-button
-          :label="t('label.saveChanges')"
-          class="!text-teal-500"
-          @click="updateUser"
-        />
+        <secondary-button :label="t('label.saveChanges')" class="!text-teal-500" @click="updateUser" />
       </div>
     </div>
     <div class="pl-6">
@@ -101,6 +98,7 @@ import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
+import TextButton from '@/elements/TextButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
 
 // component constants
