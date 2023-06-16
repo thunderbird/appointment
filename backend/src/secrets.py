@@ -29,6 +29,8 @@ def normalize_secrets():
         secrets = json.loads(database_enc_secret)
 
         os.environ["DB_SECRET"] = secrets.get("secret")
+        # Technically not db related...might rename this item later.
+        os.environ["SIGNED_SECRET"] = secrets.get("signed_secret")
 
     smtp_secrets = os.getenv("SMTP_SECRETS")
 

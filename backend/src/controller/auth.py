@@ -63,14 +63,14 @@ class Auth:
             get_token = GetToken(domain, api_client_id, client_secret=api_secret)
             token = get_token.client_credentials("https://{}/api/v2/".format(domain))
             management = ManageAuth0(domain, token["access_token"])
-        except Auth0Error as error:
-            logging.error("[auth.init_management_api] An Auth0 error occured: " + str(error))
-            return None
         except RateLimitError as error:
-            logging.error("[auth.init_management_api] A rate limit error occured: " + str(error))
+            logging.error("[auth.init_management_api] A rate limit error occurred: " + str(error))
+            return None
+        except Auth0Error as error:
+            logging.error("[auth.init_management_api] An Auth0 error occurred: " + str(error))
             return None
         except TokenValidationError as error:
-            logging.error("[auth.init_management_api] A token validation error occured" + str(error))
+            logging.error("[auth.init_management_api] A token validation error occurred" + str(error))
             return None
 
         return management
@@ -78,7 +78,11 @@ class Auth:
 
 def calculate_signature(id: int, username: str):
     """helper to calculate signature for given user data"""
-    secret = "MTkxMjYzNTBhOTMyMmQzZDRkM2E1YTFi"  # TODO: make that env
+    secret = os.getenv("SIGNED_SECRET")
+
+    if not secret:
+        raise RuntimeError("Missing signed secret environment variable")
+
     key = bytes(secret, "UTF-8")
     message = f"{username} {id} {secret}".encode()
     signature = hmac.new(key, message, hashlib.sha256).hexdigest()
