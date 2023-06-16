@@ -7,17 +7,18 @@
       text-white from-teal-400 to-sky-600 enabled:hover:from-sky-400 enabled:hover:to-teal-600
     "
     :class="{ 'text-transparent': waiting }"
+    @click="copy ? copyToClipboard() : null"
   >
     <div
       v-if="waiting"
       class="absolute w-5 h-5 animate-spin rounded-full border-2 border-white border-t-transparent"
     ></div>
     <icon-copy
-      v-if="icon === 'copy'"
+      v-if="copy && !copied"
       class="h-6 w-6 stroke-2 stroke-current fill-transparent"
     />
     <icon-check
-      v-if="icon === 'check'"
+      v-if="copy && copied"
       class="h-6 w-6 stroke-2 stroke-current fill-transparent"
     />
     {{ label }}
@@ -25,13 +26,25 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
 // icons
 import { IconCheck, IconCopy } from '@tabler/icons-vue';
 
 // component properties
-defineProps({
+const props = defineProps({
   label: String, // button text
-  icon: String, // optional icon displayed before label
+  copy: String, // text to copy to clipboard
   waiting: Boolean, // if true, spinning animation is shown instead of label
 });
+
+// state for copy click
+const copied = ref(false);
+
+// copy text to clipboard
+const copyToClipboard = async () => {
+  await navigator.clipboard.writeText(props.copy);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 3000);
+};
 </script>

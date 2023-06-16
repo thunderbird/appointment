@@ -114,8 +114,8 @@ const checkLogin = async () => {
     if (!error.value && data.value) {
       // data.value holds appointment subscriber structure
       // auth.user.value holds auth0 user structure
-      currentUser.value = data.value;
       const signature = await call('me/signature').get().json();
+      currentUser.value = data.value;
       if (!signature.error.value && signature.data.value) {
         currentUser.value.signature = signature.data.value;
       }

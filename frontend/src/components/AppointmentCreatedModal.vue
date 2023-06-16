@@ -19,7 +19,7 @@
     <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-4" />
     <div class="flex gap-4">
       <secondary-button :label="t('label.close')" @click="emit('close')" />
-      <primary-button :label="t('label.copyLink')" :icon="icon" @click="copy" />
+      <primary-button :label="t('label.copyLink')" :copy="publicLink" />
     </div>
     <div>
       <a :href="publicLink" target="_blank" class="text-sm cursor-pointer text-teal-500">
@@ -30,7 +30,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ArtConfetti from '@/elements/arts/ArtConfetti';
 import PrimaryButton from '@/elements/PrimaryButton';
@@ -51,14 +50,4 @@ const props = defineProps({
 
 // component emits
 const emit = defineEmits(['close']);
-
-// icon for primary button
-const icon = ref('copy');
-
-// copy link to clipboard
-const copy = () => {
-  navigator.clipboard.writeText(props.publicLink).then(() => {
-    icon.value = 'check';
-  });
-};
 </script>
