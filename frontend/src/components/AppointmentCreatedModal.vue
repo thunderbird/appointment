@@ -42,7 +42,7 @@ import { IconX } from '@tabler/icons-vue';
 const { t } = useI18n();
 
 // component properties
-const props = defineProps({
+defineProps({
   open: Boolean, // modal state
   title: String, // title of created appointment
   publicLink: String, // public link of created appointment for sharing

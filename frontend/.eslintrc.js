@@ -19,7 +19,7 @@ module.exports = {
     'import/extensions': ['error', 'ignorePackages', {
       '': 'never',
       js: 'never',
-      vue: 'never',
+      vue: 'off', // TODO: once migrated to Vite, we should set this to 'always'
     }],
     'max-len': ['error', { code: 120 }],
     'no-param-reassign': 'off',

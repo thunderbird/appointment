@@ -90,7 +90,7 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, watch, computed
+  ref, inject, onMounted, watch, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuth0 } from '@auth0/auth0-vue';
@@ -100,6 +100,11 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import TextButton from '@/elements/TextButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
+
+// view properties
+const props = defineProps({
+  user: Object, // currently logged in user, null if not logged in
+});
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -114,11 +119,6 @@ const activeDisplayName = ref(props.user?.name);
 const downloadAccountModalOpen = ref(false);
 const deleteAccountFirstModalOpen = ref(false);
 const deleteAccountSecondModalOpen = ref(false);
-
-// view properties
-const props = defineProps({
-  user: Object, // currently logged in user, null if not logged in
-});
 
 // load current user data on page reload
 watch(
@@ -147,11 +147,9 @@ const updateUser = async () => {
 };
 
 // calculate signed link
-const signedUserUrl = computed(() => {
-  return props.user
-    ? userUrl + props.user.username + '/' + props.user.signature
-    : '';
-});
+const signedUserUrl = computed(() => (props.user
+  ? `${userUrl + props.user.username}/${props.user.signature}`
+  : ''));
 
 onMounted(async () => {
   await refresh();
@@ -191,7 +189,7 @@ const reauthenticateSubscriber = async (callbackFn) => {
     }, {});
   } catch (e) {
     // TODO: Throw an error
-    console.log('Reauth failed', e);
+    // console.log('Reauth failed', e);
     closeModals();
     return;
   }
@@ -206,7 +204,8 @@ const reauthenticateSubscriber = async (callbackFn) => {
 const actuallyDownloadData = async () => {
   const { data } = await call('account/download').get().blob();
   if (!data || !data.value) {
-    console.error('Failed to download blob!!');
+    // TODO: show error
+    // console.error('Failed to download blob!!');
     return;
   }
   // Data is a ref to our new blob
@@ -226,7 +225,8 @@ const actuallyDeleteAccount = async () => {
   const { error } = await call('account/delete').delete();
 
   if (error.value) {
-    console.warn('ERROR: ', error.value);
+    // TODO: show error
+    // console.warn('ERROR: ', error.value);
     return;
   }
 
