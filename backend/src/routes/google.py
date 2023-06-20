@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 
-from ..controller.google import GoogleClient
+from ..controller.google_client import GoogleClient
 from ..database import repo
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,7 @@ router = APIRouter()
 
 @router.get("/auth")
 def google_auth(
-    email: str,
+    email: str | None = None,
     google_client: GoogleClient = Depends(get_google_client),
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),

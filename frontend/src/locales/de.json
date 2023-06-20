@@ -23,6 +23,8 @@
     "privacySettings": "Privatsphäre-Einstellungen"
   },
   "error": {
+    "actionNeeded": "Action Needed!",
+    "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal."
   },
   "info": {
