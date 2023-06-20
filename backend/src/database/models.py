@@ -68,6 +68,7 @@ class Subscriber(Base):
     # Temp storage for verifying google state tokens between authentication
     google_state = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
     google_state_expires_at = Column(DateTime)
+    short_link_hash = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
 
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")

@@ -292,8 +292,22 @@ const downloadIcs = async () => {
   }
 };
 
+const verifySignature = async () => {
+  // Verify signature
+  const { error } = await call('/verify/signature/').post({
+    url: window.location.href,
+  }).json();
+
+  // Error? Just boot 'em out!
+  if (error.value) {
+    window.location.href = '/';
+  }
+};
+
 // retrieve appointment by slug
 onMounted(async () => {
+  await verifySignature();
+
   // async get appointment data from route
   const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
   // check if appointment exists and is open

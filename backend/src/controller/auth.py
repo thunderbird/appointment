@@ -6,6 +6,7 @@ import logging
 import os
 import hashlib
 import hmac
+import secrets
 
 from sqlalchemy.orm import Session
 from ..database import repo, schemas, models
@@ -54,6 +55,15 @@ class Auth:
                     level=models.SubscriberLevel.pro,  # TODO
                 )
                 db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
+
+            # Generate an initial short link hash if they don't have one already
+            if db_subscriber.short_link_hash is None:
+                repo.update_subscriber(db, schemas.SubscriberAuth(
+                    email=db_subscriber.email,
+                    username=db_subscriber.username,
+                    short_link_hash=secrets.token_hex(32)
+                ), db_subscriber.id)
+
             return db_subscriber
         return None
 
@@ -76,14 +86,14 @@ class Auth:
         return management
 
 
-def calculate_signature(id: int, username: str):
-    """helper to calculate signature for given user data"""
+def sign_url(url: str):
+    """helper to sign a url for given user data"""
     secret = os.getenv("SIGNED_SECRET")
 
     if not secret:
         raise RuntimeError("Missing signed secret environment variable")
 
     key = bytes(secret, "UTF-8")
-    message = f"{username} {id} {secret}".encode()
+    message = f"{url}".encode()
     signature = hmac.new(key, message, hashlib.sha256).hexdigest()
     return signature
