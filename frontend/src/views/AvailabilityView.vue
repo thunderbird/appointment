@@ -294,7 +294,7 @@ const downloadIcs = async () => {
 
 const verifySignature = async () => {
   // Verify signature
-  const { error } = await call('/verify/signature/').post({
+  const { data, error } = await call('/verify/signature/').post({
     url: window.location.href,
   }).json();
 

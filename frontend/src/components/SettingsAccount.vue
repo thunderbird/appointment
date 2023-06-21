@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-8">
     <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.accountSettings') }}</div>
-    <div class="pl-6 flex flex-col max-w-2xl">
+    <div class="pl-6 flex flex-col max-w-3xl">
       <div class="text-xl">{{ t('heading.profile') }}</div>
       <label class="pl-4 mt-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
@@ -9,7 +9,7 @@
           <input
             v-model="activeUsername"
             type="text"
-            class="w-full max-w-sm rounded-md w-full"
+            class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
           />
           <div v-if="errorUsername" class="text-red-500 text-sm">
@@ -22,20 +22,32 @@
         <input
           v-model="activeDisplayName"
           type="text"
-          class="w-full max-w-sm rounded-md w-full"
+          class="w-full rounded-md"
         />
       </label>
       <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
         <div class="w-full flex justify-between items-center">
-          <a :href="signedUserUrl" target="_blank" class="underline underline-offset-2 text-teal-500">
-            {{ t('label.openMyPage')}}
-          </a>
+          <input
+            v-model="signedUserUrl"
+            type="text"
+            class="w-full rounded-md mr-2"
+            readonly
+          />
           <text-button :label="t('label.copyLink')" :copy="signedUserUrl" />
         </div>
       </label>
       <div class="self-end flex gap-4 mt-6">
-        <secondary-button :label="t('label.saveChanges')" class="!text-teal-500" @click="updateUser" />
+        <secondary-button
+            :label="t('label.refreshLink')"
+            class="!text-teal-500"
+            @click="refreshLink"
+        />
+        <secondary-button
+            :label="t('label.saveChanges')"
+            class="!text-teal-500"
+            @click="updateUserCheckForConfirmation"
+        />
       </div>
     </div>
     <div class="pl-6">
@@ -57,6 +69,26 @@
       </div>
     </div>
   </div>
+  <!-- Refresh link confirmation modal -->
+    <ConfirmationModal
+      :open="refreshLinkModalOpen"
+      :title="t('label.refreshLink')"
+      :message="t('text.refreshLinkNotice')"
+      :confirm-label="t('label.refresh')"
+      :cancel-label="t('label.cancel')"
+      @confirm="() => refreshLinkConfirm()"
+      @close="closeModals"
+  ></ConfirmationModal>
+  <!-- Update username confirmation modal -->
+    <ConfirmationModal
+      :open="updateUsernameModalOpen"
+      :title="t('label.updateUsername')"
+      :message="t('text.updateUsernameNotice')"
+      :confirm-label="t('label.saveChanges')"
+      :cancel-label="t('label.cancel')"
+      @confirm="() => updateUser()"
+      @close="closeModals"
+  ></ConfirmationModal>
   <!-- Account download modal -->
     <ConfirmationModal
       :open="downloadAccountModalOpen"
@@ -90,7 +122,7 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, watch, computed,
+  ref, inject, onMounted, watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuth0 } from '@auth0/auth0-vue';
@@ -110,7 +142,6 @@ const props = defineProps({
 const { t } = useI18n({ useScope: 'global' });
 const refresh = inject('refresh');
 const call = inject('call');
-const userUrl = inject('userUrl');
 const router = useRouter();
 const auth0 = useAuth0();
 
@@ -119,6 +150,11 @@ const activeDisplayName = ref(props.user?.name);
 const downloadAccountModalOpen = ref(false);
 const deleteAccountFirstModalOpen = ref(false);
 const deleteAccountSecondModalOpen = ref(false);
+const refreshLinkModalOpen = ref(false);
+const updateUsernameModalOpen = ref(false);
+
+// calculate signed link
+const signedUserUrl = ref('');
 
 // load current user data on page reload
 watch(
@@ -128,6 +164,29 @@ watch(
     activeDisplayName.value = loadedUser.name;
   },
 );
+
+const closeModals = () => {
+  downloadAccountModalOpen.value = false;
+  deleteAccountFirstModalOpen.value = false;
+  deleteAccountSecondModalOpen.value = false;
+  refreshLinkModalOpen.value = false;
+  updateUsernameModalOpen.value = false;
+};
+
+const getSignedUserUrl = async () => {
+  // Retrieve the user short url
+  const { data, error } = await call('me/signature').get().json();
+  if (error.value) {
+    return;
+  }
+
+  signedUserUrl.value = data.value.url;
+};
+
+const refreshData = async () => Promise.all([
+  getSignedUserUrl(),
+  refresh(),
+]);
 
 // save user data
 const errorUsername = ref(false);
@@ -140,29 +199,33 @@ const updateUser = async () => {
   if (!error.value) {
     errorUsername.value = false;
     // TODO show some confirmation
-    await refresh();
+    await refreshData();
   } else {
     errorUsername.value = true;
   }
+
+  closeModals();
 };
 
-// calculate signed link
-const signedUserUrl = computed(() => (props.user
-  ? `${userUrl + props.user.username}/${props.user.signature}`
-  : ''));
+/**
+ * Check if the username has been changed, and open a modal to warn the user their short link is going to change
+ * If it didn't change, then just update the user immediately.
+ */
+const updateUserCheckForConfirmation = async () => {
+  if (activeUsername.value !== props?.user?.username) {
+    updateUsernameModalOpen.value = true;
+    return;
+  }
+
+  await updateUser();
+};
 
 onMounted(async () => {
-  await refresh();
+  await refreshData();
 });
 
 const downloadData = async () => {
   downloadAccountModalOpen.value = true;
-};
-
-const closeModals = () => {
-  downloadAccountModalOpen.value = false;
-  deleteAccountFirstModalOpen.value = false;
-  deleteAccountSecondModalOpen.value = false;
 };
 
 const deleteAccount = async () => {
@@ -172,6 +235,21 @@ const deleteAccount = async () => {
 const secondDeleteAccountPrompt = async () => {
   deleteAccountFirstModalOpen.value = false;
   deleteAccountSecondModalOpen.value = true;
+};
+
+const refreshLink = async () => {
+  refreshLinkModalOpen.value = true;
+};
+
+const refreshLinkConfirm = async () => {
+  const { data, error } = await call('me/signature').post().json();
+
+  if (error.value) {
+    console.log('Error!', data.value);
+  }
+
+  await refreshData();
+  closeModals();
 };
 
 /**

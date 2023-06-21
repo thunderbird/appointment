@@ -1,4 +1,5 @@
 import os
+import secrets
 
 import validators
 import re
@@ -78,7 +79,7 @@ def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber =
     return appointments
 
 
-@router.get("/me/signature", response_model=str)
+@router.get("/me/signature")
 def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
     """Retrieve a subscriber's signed short link"""
     if not subscriber:
@@ -95,7 +96,22 @@ def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
     signature = sign_url(url)
 
     # We return with the signed url signature
-    return f"{base_url}/{subscriber.username}/{signature}"
+    return {'url': f"{base_url}/{subscriber.username}/{signature}"}
+
+
+@router.post("/me/signature")
+def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """Refresh a subscriber's signed short link"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+
+    repo.update_subscriber(db, schemas.SubscriberAuth(
+        email=subscriber.email,
+        username=subscriber.username,
+        short_link_hash=secrets.token_hex(32)
+    ), subscriber.id)
+
+    return True
 
 
 @router.post("/verify/signature")
@@ -104,7 +120,6 @@ def verify_my_signature(url : str = Body(..., embed=True), db: Session = Depends
     # Look for a <username> followed by an optional signature that ends the string
     pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
     match = re.findall(pattern, url)
-    print(match)
 
     if match is None or len(match) == 0:
         raise HTTPException(400, "Unable to validate signature")

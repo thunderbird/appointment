@@ -114,8 +114,6 @@ const checkLogin = async () => {
     if (!error.value && data.value) {
       // data.value holds appointment subscriber structure
       // auth.user.value holds auth0 user structure
-      const {data: signature} = await call('me/signature').get().json();
-      console.log(signature.value);
       currentUser.value = data.value;
     } else if (data.value && data.value.detail === 'Missing bearer token') {
       // Try logging in if we have an expired refresh token, but a valid authentication id.
