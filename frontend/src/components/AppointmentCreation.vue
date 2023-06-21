@@ -270,7 +270,7 @@ const defaultAppointment = {
   status: 2, // appointment is opened | TODO: make configurable sometime
 };
 const appointment = reactive({ ...defaultAppointment });
-const appointmentCreationError = ref(true);
+const appointmentCreationError = ref(null);
 
 // tab navigation for location types
 const updateLocationType = (type) => {
