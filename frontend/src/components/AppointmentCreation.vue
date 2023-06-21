@@ -17,7 +17,7 @@
           />
           <icon-alert-triangle
             v-show="invalidStep1"
-            class="h-6 w-6 stroke-2 fill-transparent stroke-red-500"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-rose-500"
           />
           {{ t("label.appointmentDetails") }}
         </span>
@@ -84,7 +84,7 @@
             class="absolute bottom-3.5 right-3 text-xs"
             :class="{
               'text-orange-500': charCount >= charLimit * 0.92,
-              '!text-red-600': charCount === charLimit,
+              '!text-rose-600': charCount === charLimit,
             }"
           >
             {{ charCount }}/{{ charLimit }}
@@ -102,7 +102,7 @@
           />
           <icon-alert-triangle
             v-show="invalidStep2"
-            class="h-6 w-6 stroke-2 fill-transparent stroke-red-500"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-rose-500"
           />
           {{ t("label.chooseYourAvailability") }}
         </span>
@@ -157,7 +157,7 @@
                 />
               </label>
               <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
-                <icon-x class="h-5 w-5 stroke-2 fill-transparent stroke-red-500" />
+                <icon-x class="h-5 w-5 stroke-2 fill-transparent stroke-rose-500" />
               </div>
             </div>
           </div>
@@ -270,7 +270,7 @@ const defaultAppointment = {
   status: 2, // appointment is opened | TODO: make configurable sometime
 };
 const appointment = reactive({ ...defaultAppointment });
-const appointmentCreationError = ref(null);
+const appointmentCreationError = ref(true);
 
 // tab navigation for location types
 const updateLocationType = (type) => {

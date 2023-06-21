@@ -1,13 +1,19 @@
 <template>
 <div
-  class="bg-red-100 border border-red-400 text-red-700 px-4 pr-8 py-3 rounded relative"
+  class="
+    p-2 leading-none lg:rounded-full flex lg:inline-flex items-center shadow-md dark:shadow-lg
+    bg-rose-600 dark:bg-rose-900 text-white shadow-black/30"
   role="alert"
   :class="{ hidden: isHidden }"
 >
-  <strong class="font-bold">{{ title }}:</strong>
-  <span class="block sm:inline ml-1"><slot></slot></span>
-  <span class="absolute top-0 bottom-0 right-0 px-2 py-3" @click="onClose">
-    <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-red-500 cursor-pointer" />
+  <span class="flex rounded-full bg-rose-500 dark:bg-rose-800 uppercase px-2 py-1 text-xs font-bold mr-3">
+    {{ title }}
+  </span>
+  <span class="block sm:inline ml-1">
+    <slot></slot>
+  </span>
+  <span class="ml-auto place-self-start" @click="onClose">
+    <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-white cursor-pointer" />
   </span>
 </div>
 </template>

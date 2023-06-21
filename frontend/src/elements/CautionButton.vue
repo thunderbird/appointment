@@ -1,10 +1,11 @@
 <template>
   <button
     class="
-      relative h-10 text-xl font-semibold whitespace-nowrap rounded-full bg-gradient-to-br hover:shadow-md
+      relative h-10 text-base font-semibold whitespace-nowrap rounded-full bg-gradient-to-br hover:shadow-md
       hover:scale-102 active:scale-98 disabled:scale-100 disabled:shadow-none disabled:opacity-50 px-6
       transition-all ease-in-out flex items-center justify-center gap-2
-      text-white from-red-400 to-red-600 enabled:hover:from-red-400 enabled:hover:to-red-600
+      text-white from-rose-400 to-rose-600 dark:from-rose-600 dark:to-rose-900 shadow-black
+      enabled:hover:from-rose-600 enabled:hover:to-rose-600
     "
     :class="{ 'text-transparent': waiting }"
   >

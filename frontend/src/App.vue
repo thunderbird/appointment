@@ -6,9 +6,11 @@
   </template>
   <!-- authenticated subscriber content -->
   <template v-else>
-    <site-notification :title="siteNotificationStore.title"
-                       :action-url="siteNotificationStore.actionUrl"
-                       v-if="siteNotificationStore.display">
+    <site-notification
+      v-if="siteNotificationStore.display"
+      :title="siteNotificationStore.title"
+      :action-url="siteNotificationStore.actionUrl"
+    >
       {{ siteNotificationStore.message }}
     </site-notification>
     <nav-bar :nav-items="navItems" :user="currentUser" />
