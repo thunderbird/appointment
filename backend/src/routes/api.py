@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi_auth0 import Auth0User
 from datetime import timedelta
 from ..database.schemas import EventLocation
-from ..controller.google import GoogleClient
+from ..controller.google_client import GoogleClient
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber, auth

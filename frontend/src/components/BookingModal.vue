@@ -31,7 +31,7 @@
       </label>
       <label>
         <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
-          {{ t('label.email') }} <span class="text-red-600">*</span>
+          {{ t('label.email') }} <span class="text-rose-600">*</span>
         </div>
         <input
           type="email"

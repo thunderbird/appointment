@@ -23,6 +23,8 @@
     "privacySettings": "Privacy settings"
   },
   "error": {
+    "actionNeeded": "Action Needed!",
+    "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "unknownAppointmentError": "There was an issue creating your appointment. Please try again."
   },
   "info": {

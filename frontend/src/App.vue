@@ -6,6 +6,13 @@
   </template>
   <!-- authenticated subscriber content -->
   <template v-else>
+    <site-notification
+      v-if="siteNotificationStore.display"
+      :title="siteNotificationStore.title"
+      :action-url="siteNotificationStore.actionUrl"
+    >
+      {{ siteNotificationStore.message }}
+    </site-notification>
     <nav-bar :nav-items="navItems" :user="currentUser" />
     <main class="mt-12 mx-4 lg:mx-8">
       <div class="w-full max-w-[1740px] mx-auto">
@@ -25,6 +32,8 @@ import { useAuth0 } from '@auth0/auth0-vue';
 import { useRoute } from 'vue-router';
 import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';
+import SiteNotification from '@/elements/SiteNotification';
+import { siteNotificationStore } from '@/stores/alert-store';
 
 // component constants
 const apiUrl = inject('apiUrl');
@@ -48,6 +57,29 @@ const call = createFetch({
         // options.headers.SetCookie = 'SameSite=None; Secure'; // can be adjusted if necessary
       }
       return { options };
+    },
+    async onFetchError({ data, response, error }) {
+      // Catch any google refresh error that may occur
+      if (data?.detail?.error === 'google_refresh_error' && siteNotificationStore.value.id !== 'google_refresh_error') {
+        // Ensure other async calls don't reach here
+        siteNotificationStore.value.id = data.detail.error;
+
+        // Retrieve the google auth url, and if that fails send them to calendar settings!
+        const { data: urlData, error: urlError } = await call('google/auth').get();
+        const url = urlError.value ? '/settings/calendar' : urlData.value.slice(1, -1);
+
+        // Update our site notification store with the error details
+        siteNotificationStore.value = {
+          id: data.detail.error,
+          display: true,
+          actionUrl: url,
+          title: 'Action needed!',
+          message: data.detail?.message || 'Please re-connect with Google',
+        };
+      }
+
+      // Pass the error along
+      return { data, response, error };
     },
   },
   fetchOptions: {

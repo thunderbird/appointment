@@ -48,7 +48,9 @@ class GoogleClient:
             return None
 
         # (Url, State ID)
-        url, state = self.client.authorization_url(access_type="offline", prompt="consent", login_hint=email)
+        url, state = self.client.authorization_url(
+            access_type="offline", prompt="consent", login_hint=email if email else None
+        )
         # Store the state id, so we can refer to it when google redirects the user to our callback
         repo.set_subscriber_google_state(db, state, subscriber_id)
 

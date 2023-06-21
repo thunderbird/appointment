@@ -2,6 +2,10 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
+from google.auth.exceptions import RefreshError
+
+from .exceptions.google_api import APIGoogleRefreshError
+
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -20,6 +24,10 @@ import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exception_handlers import (
+    http_exception_handler,
+)
+
 
 # init logging
 level = os.getenv("LOG_LEVEL", "ERROR")
@@ -67,6 +75,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RefreshError)
+async def catch_google_refresh_errors(request, exc):
+    """Catch google refresh errors, and use our error instead."""
+    return await http_exception_handler(request, APIGoogleRefreshError())
+
 
 # Mix in our extra routes
 app.include_router(api.router)
