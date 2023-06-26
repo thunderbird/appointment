@@ -7,8 +7,14 @@
     "
     @click="copy ? copyToClipboard() : null"
   >
-    <icon-copy v-if="copy && !copied" class="h-4 w-4 fill-transparent stroke-2 stroke-gray-500 dark:stroke-gray-400" />
-    <icon-check v-if="copy && copied" class="h-4 w-4 fill-transparent stroke-2 stroke-green-500" />
+    <icon-copy
+      v-if="copy && !copied"
+      class="h-4 w-4 fill-transparent stroke-2 stroke-gray-500 dark:stroke-gray-400"
+    />
+    <icon-check
+      v-if="copy && copied"
+      class="h-4 w-4 fill-transparent stroke-2 stroke-green-500"
+    />
     {{ label }}
   </button>
 </template>
@@ -17,10 +23,7 @@
 import { ref } from 'vue';
 
 // icons
-import {
-  IconCheck,
-  IconCopy,
-} from '@tabler/icons-vue';
+import { IconCheck, IconCopy } from '@tabler/icons-vue';
 
 // component properties
 const props = defineProps({
@@ -32,10 +35,9 @@ const props = defineProps({
 const copied = ref(false);
 
 // copy text to clipboard
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(props.copy).then(() => {
-    copied.value = true;
-    setInterval(() => { copied.value = false; }, 3000);
-  });
+const copyToClipboard = async () => {
+  await navigator.clipboard.writeText(props.copy);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 3000);
 };
 </script>

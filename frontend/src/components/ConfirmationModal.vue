@@ -31,7 +31,7 @@ import SecondaryButton from '@/elements/SecondaryButton';
 import { IconX } from '@tabler/icons-vue';
 
 // component properties
-const props = defineProps({
+defineProps({
   open: Boolean, // modal state
   title: String,
   message: String,

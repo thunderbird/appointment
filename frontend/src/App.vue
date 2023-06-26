@@ -51,8 +51,8 @@ const call = createFetch({
           const token = await auth.getAccessTokenSilently();
           options.headers.Authorization = `Bearer ${token}`;
         } catch (e) {
-          // We'll want to prompt the user to re-login here due to auth0 error
-          console.warn('Failed to apply bearer token', e);
+          // TODO: prompt the user to re-login here due to auth0 error
+          // console.warn('Failed to apply bearer token', e);
         }
         // options.headers.SetCookie = 'SameSite=None; Secure'; // can be adjusted if necessary
       }

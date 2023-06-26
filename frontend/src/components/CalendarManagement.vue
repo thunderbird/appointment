@@ -2,7 +2,11 @@
   <div class="flex max-w-2xl">
     <div class="text-xl">{{ title }}</div>
     <div class="inline-flex mx-auto mr-0" v-if="type === calendarManagementType.connect">
-      <button class="bg-transparent disabled:scale-100 disabled:shadow-none disabled:opacity-50" :disabled="loading" @click="emit('sync')">
+      <button
+        class="bg-transparent disabled:scale-100 disabled:shadow-none disabled:opacity-50"
+        :disabled="loading"
+        @click="emit('sync')"
+      >
         <span class="inline-block mr-2">
           {{ t('label.syncCalendars') }}
         </span>
@@ -22,7 +26,10 @@
           v-if="type === calendarManagementType.connect"
           @click="emit('modify', cal.id)"
           :disabled="loading"
-          class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs disabled:scale-100 disabled:shadow-none disabled:opacity-50"
+          class="
+            ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full text-xs
+            bg-teal-500 text-white disabled:scale-100 disabled:shadow-none disabled:opacity-50
+          "
       >
         <icon-arrow-right class="h-3 w-3 stroke-2 stroke-white fill-transparent"/>
         {{ t('label.connectCalendar') }}
@@ -31,13 +38,21 @@
           v-if="type === calendarManagementType.edit"
           @click="emit('modify', cal.id)"
           :disabled="loading"
-          class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs disabled:scale-100 disabled:shadow-none disabled:opacity-50"
+          class="
+            ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full text-xs
+            bg-teal-500 text-white disabled:scale-100 disabled:shadow-none disabled:opacity-50
+          "
       >
         <icon-pencil class="h-3 w-3 stroke-2 stroke-white fill-transparent"/>
         {{ t('label.editCalendar') }}
       </button>
-      <button v-if="cal.connected" class="bg-transparent p-0.5 disabled:scale-100 disabled:shadow-none disabled:opacity-50" :disabled="loading" @click="emit('remove', cal.id)">
-        <icon-x class="h-5 w-5 stroke-2 stroke-rose-500 fill-transparent"/>
+      <button
+        v-if="cal.connected"
+        class="bg-transparent p-0.5 disabled:scale-100 disabled:shadow-none disabled:opacity-50"
+        :disabled="loading"
+        @click="emit('remove', cal.id)"
+      >
+        <icon-x class="h-5 w-5 stroke-2 stroke-red-500 fill-transparent"/>
       </button>
     </div>
   </div>

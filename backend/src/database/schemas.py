@@ -137,12 +137,12 @@ class CalendarOut(CalendarBase):
 
 class SubscriberIn(BaseModel):
     timezone: str | None = None
+    username: str
+    name: str | None = None
 
 
 class SubscriberBase(SubscriberIn):
-    username: str
     email: str
-    name: str | None = None
     level: SubscriberLevel | None = SubscriberLevel.basic
 
 
@@ -150,6 +150,7 @@ class SubscriberAuth(SubscriberBase):
     google_tkn: str | None = None
     google_state: str | None = None
     google_state_expires_at: datetime | None = None
+    short_link_hash: str | None = None
 
 
 class Subscriber(SubscriberAuth):

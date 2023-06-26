@@ -4,6 +4,9 @@ Handle authentification with Auth0 and get subscription data.
 """
 import logging
 import os
+import hashlib
+import hmac
+import secrets
 
 from sqlalchemy.orm import Session
 from ..database import repo, schemas, models
@@ -52,6 +55,15 @@ class Auth:
                     level=models.SubscriberLevel.pro,  # TODO
                 )
                 db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
+
+            # Generate an initial short link hash if they don't have one already
+            if db_subscriber.short_link_hash is None:
+                repo.update_subscriber(db, schemas.SubscriberAuth(
+                    email=db_subscriber.email,
+                    username=db_subscriber.username,
+                    short_link_hash=secrets.token_hex(32)
+                ), db_subscriber.id)
+
             return db_subscriber
         return None
 
@@ -61,14 +73,27 @@ class Auth:
             get_token = GetToken(domain, api_client_id, client_secret=api_secret)
             token = get_token.client_credentials("https://{}/api/v2/".format(domain))
             management = ManageAuth0(domain, token["access_token"])
-        except Auth0Error as error:
-            logging.error("[auth.init_management_api] An Auth0 error occured: " + str(error))
-            return None
         except RateLimitError as error:
-            logging.error("[auth.init_management_api] A rate limit error occured: " + str(error))
+            logging.error("[auth.init_management_api] A rate limit error occurred: " + str(error))
+            return None
+        except Auth0Error as error:
+            logging.error("[auth.init_management_api] An Auth0 error occurred: " + str(error))
             return None
         except TokenValidationError as error:
-            logging.error("[auth.init_management_api] A token validation error occured" + str(error))
+            logging.error("[auth.init_management_api] A token validation error occurred" + str(error))
             return None
 
         return management
+
+
+def sign_url(url: str):
+    """helper to sign a url for given user data"""
+    secret = os.getenv("SIGNED_SECRET")
+
+    if not secret:
+        raise RuntimeError("Missing signed secret environment variable")
+
+    key = bytes(secret, "UTF-8")
+    message = f"{url}".encode()
+    signature = hmac.new(key, message, hashlib.sha256).hexdigest()
+    return signature

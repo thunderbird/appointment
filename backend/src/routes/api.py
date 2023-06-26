@@ -1,4 +1,8 @@
+import os
+import secrets
+
 import validators
+import re
 
 # database
 from sqlalchemy.orm import Session
@@ -7,11 +11,12 @@ from ..database import repo, schemas
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
 from datetime import timedelta
 from ..database.schemas import EventLocation
 from ..controller.google_client import GoogleClient
+from ..controller.auth import sign_url
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber, auth
@@ -44,6 +49,8 @@ def update_me(
     """endpoint to update data of authenticated subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+    if subscriber.username != data.username and repo.get_subscriber_by_username(db, data.username):
+        raise HTTPException(status_code=403, detail="Username not available")
     me = repo.update_subscriber(db=db, data=data, subscriber_id=subscriber.id)
     return schemas.SubscriberBase(
         username=me.username, email=me.email, name=me.name, level=me.level, timezone=me.timezone
@@ -70,6 +77,75 @@ def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber =
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     appointments = repo.get_appointments_by_subscriber(db, subscriber_id=subscriber.id)
     return appointments
+
+
+@router.get("/me/signature")
+def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
+    """Retrieve a subscriber's signed short link"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+
+    base_url = os.getenv('SHORT_BASE_URL')
+    # If we don't have a short url specified, use the frontend url with the users route
+    if base_url == "" or base_url is None:
+        base_url = f"{os.getenv('FRONTEND_URL')}/user"
+
+    # We sign with a different hash that the end-user doesn't have access to
+    url = f"{base_url}/{subscriber.username}/{subscriber.short_link_hash}"
+
+    signature = sign_url(url)
+
+    # We return with the signed url signature
+    return {'url': f"{base_url}/{subscriber.username}/{signature}"}
+
+
+@router.post("/me/signature")
+def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """Refresh a subscriber's signed short link"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+
+    repo.update_subscriber(db, schemas.SubscriberAuth(
+        email=subscriber.email,
+        username=subscriber.username,
+        short_link_hash=secrets.token_hex(32)
+    ), subscriber.id)
+
+    return True
+
+
+@router.post("/verify/signature")
+def verify_my_signature(url : str = Body(..., embed=True), db: Session = Depends(get_db)):
+    """Verify a signed short link"""
+    # Look for a <username> followed by an optional signature that ends the string
+    pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
+    match = re.findall(pattern, url)
+
+    if match is None or len(match) == 0:
+        raise HTTPException(400, "Unable to validate signature")
+
+    # Flatten
+    match = match[0]
+    clean_url = url
+
+    username = match[0]
+    signature = None
+    if len(match) > 1:
+        signature = match[1]
+        clean_url = clean_url.replace(signature, '')
+
+    subscriber = repo.get_subscriber_by_username(db, username)
+    if not subscriber:
+        raise HTTPException(400, "Unable to validate signature")
+
+    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
+    signed_signature = sign_url(clean_url_with_short_link)
+
+    # Verify the signature matches the incoming one
+    if signed_signature == signature:
+        return True
+
+    raise HTTPException(400, "Invalid signature")
 
 
 @router.post("/cal", response_model=schemas.CalendarOut)
