@@ -2,15 +2,14 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
-from google.auth.exceptions import RefreshError
-
-from .exceptions.google_api import APIGoogleRefreshError
-
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
 
+from google.auth.exceptions import RefreshError
+from .exceptions.google_api import APIGoogleRefreshError
 import os
+
 from dotenv import load_dotenv
 
 # load any available .env into env
@@ -28,6 +27,7 @@ from fastapi.exception_handlers import (
     http_exception_handler,
 )
 
+import sentry_sdk
 
 # init logging
 level = os.getenv("LOG_LEVEL", "ERROR")
@@ -61,6 +61,17 @@ from .routes import account
 
 # init app
 app = FastAPI()
+
+if os.getenv('SENTRY_DSN') != '' or os.getenv('SENTRY_DSN') is not None:
+    sentry_sdk.init(
+        dsn=os.getenv('SENTRY_DSN'),
+
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=1.0,
+        environment=os.getenv('APP_ENV', 'dev')
+    )
 
 # allow requests from own frontend running on a different port
 app.add_middleware(

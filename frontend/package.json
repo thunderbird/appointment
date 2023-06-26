@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.0.2",
+    "@sentry/vue": "^7.56.0",
     "@tabler/icons-vue": "^2.4.0",
     "@vueuse/components": "^9.3.1",
     "@vueuse/core": "^9.3.1",
@@ -22,12 +23,13 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@sentry/webpack-plugin": "^2.3.0",
     "@tailwindcss/forms": "^0.5.3",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "autoprefixer": "^10.4.12",
-    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint": "^8.43.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-plugin-import": "^2.25.2",
