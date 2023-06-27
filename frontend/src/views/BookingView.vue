@@ -33,7 +33,8 @@
   >
     <div class="flex-center flex-col gap-12 min-w-[50%]">
       <div class="text-2xl font-semibold text-teal-500">
-        {{ t('info.bookingSuccessful') }}
+        <span v-if="route.name === 'availability'">{{ t('info.bookingSuccessfullyRequested') }}</span>
+        <span v-else>{{ t('info.bookingSuccessful') }}</span>
       </div>
       <div class="w-full max-w-sm shadow-lg rounded-lg flex flex-col gap-1">
         <div class="rounded-t-md bg-teal-500 h-14 flex justify-around items-center">
@@ -73,10 +74,21 @@
     <art-successful-booking class="max-w-md w-full sm:max-w-md sm:w-auto h-auto m-6" />
   </main>
   <!-- booking page content: time slot selection -->
-  <main v-else class="max-w-screen-2xl mx-auto py-32 px-4 select-none">
+  <main
+    v-else
+    class="max-w-screen-2xl mx-auto py-32 px-4 select-none"
+    :class="{ 'pt-0': route.name === 'availability' }"
+  >
     <div v-if="appointment">
       <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
-      <div class="font-bold">{{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}</div>
+      <div class="flex justify-between font-semibold">
+        <div>
+          {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
+        </div>
+        <div v-if="route.name === 'availability'">
+          {{ t('text.disclaimerGABooking') }}
+        </div>
+      </div>
       <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
       <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
       <calendar-page-heading
@@ -167,7 +179,8 @@ const dj = inject('dayjs');
 const call = inject('call');
 const getAppointmentStatus = inject('getAppointmentStatus');
 
-// appointment data the visitor should see
+// appointment data holding slots the visitor should see
+// can also be a general appointment, holding subscribers general available slots
 const appointment = ref(null);
 
 // handle different view and active date
@@ -292,15 +305,42 @@ const downloadIcs = async () => {
   }
 };
 
-// retrieve appointment by slug
-onMounted(async () => {
-  // async get appointment data from route
-  const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
-  // check if appointment exists and is open
-  if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
-    activeView.value = views.invalid;
+// async get appointment data either from public single appointment link
+// or from a general availability link of a subscriber
+const getAppointment = async () => {
+  if (route.name === 'availability') {
+    const { error, data } = await call('verify/signature').post({ url: route.fullPath }).json();
+    if (error.value || !data.value) {
+      return true;
+    } else {
+      // TODO: here we need to make another API call to get the actual general appointment data or include it
+      //       in the signature verification call. For now, here is fake example data for testing.
+      appointment.value = {
+        "title": "General Available",
+        "details": "These are the time slots that are currently free for you to choose.",
+        "owner_name": "Jane Doe",
+        "slots": [{ "start": "2023-07-03T08:00:00", "duration": 60, "attendee_id": null, "id": 9960 }, { "start": "2023-07-03T09:00:00", "duration": 60, "attendee_id": null, "id": 9961 }, { "start": "2023-07-03T11:00:00", "duration": 60, "attendee_id": null, "id": 9962 }, { "start": "2023-07-03T12:00:00", "duration": 60, "attendee_id": null, "id": 9963 }, { "start": "2023-07-03T13:00:00", "duration": 60, "attendee_id": null, "id": 9964 }, { "start": "2023-07-03T15:00:00", "duration": 60, "attendee_id": null, "id": 9965 }, { "start": "2023-07-04T08:00:00", "duration": 60, "attendee_id": null, "id": 9966 }, { "start": "2023-07-04T09:00:00", "duration": 60, "attendee_id": null, "id": 9967 }, { "start": "2023-07-04T10:00:00", "duration": 60, "attendee_id": null, "id": 9968 }, { "start": "2023-07-04T11:00:00", "duration": 60, "attendee_id": null, "id": 9969 }, { "start": "2023-07-04T12:00:00", "duration": 60, "attendee_id": null, "id": 9970 }, { "start": "2023-07-05T12:00:00", "duration": 60, "attendee_id": null, "id": 9971 }, { "start": "2023-07-05T13:00:00", "duration": 60, "attendee_id": null, "id": 9972 }, { "start": "2023-07-05T14:00:00", "duration": 60, "attendee_id": null, "id": 9973 }, { "start": "2023-07-05T15:00:00", "duration": 60, "attendee_id": null, "id": 9974 }, { "start": "2023-07-06T08:00:00", "duration": 60, "attendee_id": null, "id": 9975 }, { "start": "2023-07-06T15:00:00", "duration": 60, "attendee_id": null, "id": 9976 }, { "start": "2023-07-07T08:00:00", "duration": 60, "attendee_id": null, "id": 9977 }, { "start": "2023-07-07T09:00:00", "duration": 60, "attendee_id": null, "id": 9978 }, { "start": "2023-07-07T10:00:00", "duration": 60, "attendee_id": null, "id": 9979 }, { "start": "2023-07-07T11:00:00", "duration": 60, "attendee_id": null, "id": 9980 }, { "start": "2023-07-07T12:00:00", "duration": 60, "attendee_id": null, "id": 9981 }, { "start": "2023-07-07T13:00:00", "duration": 60, "attendee_id": null, "id": 9982 }, { "start": "2023-07-07T14:00:00", "duration": 60, "attendee_id": null, "id": 9983 }, { "start": "2023-07-07T15:00:00", "duration": 60, "attendee_id": null, "id": 9984}]
+      };
+    }
+  } else
+  if (route.name === 'booking') {
+    const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
+    if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
+      return true;
+    } else {
+      appointment.value = data.value;
+    }
   } else {
-    appointment.value = data.value;
+    return true;
+  }
+  return false;
+};
+
+// initially retrieve slot data and decide which view to show
+onMounted(async () => {
+  const error = await getAppointment();
+  // process appointment data, if everything went fine
+  if (!error) {
     // convert start dates from UTC back to users timezone
     appointment.value.slots.forEach((s) => {
       s.start = dj.utc(s.start).tz(dj.tz.guess());
@@ -308,6 +348,8 @@ onMounted(async () => {
     activeDate.value = dj(appointment.value?.slots[0].start);
     // check appointment slots for appropriate view
     activeView.value = getViewBySlotDistribution(appointment.value.slots);
+  } else {
+    activeView.value = views.invalid;
   }
 });
 </script>

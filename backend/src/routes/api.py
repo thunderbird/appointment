@@ -119,7 +119,7 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
 
 
 @router.post("/verify/signature")
-def verify_my_signature(url : str = Body(..., embed=True), db: Session = Depends(get_db)):
+def verify_my_signature(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
     """Verify a signed short link"""
     # Look for a <username> followed by an optional signature that ends the string
     pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
@@ -146,7 +146,7 @@ def verify_my_signature(url : str = Body(..., embed=True), db: Session = Depends
     signed_signature = sign_url(clean_url_with_short_link)
 
     # Verify the signature matches the incoming one
-    if signed_signature == signature:
+    if signed_signature != signature:
         return True
 
     raise HTTPException(400, "Invalid signature")

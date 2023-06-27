@@ -3,6 +3,12 @@
     "summary": "Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.",
     "title": "Thunderbird Appointment"
   },
+  "error": {
+    "actionNeeded": "Action Needed!",
+    "googleRefreshError": "Error connecting with Google API, please re-connect.",
+    "unknownAppointmentError": "There was an issue creating your appointment. Please try again.",
+    "usernameIsNotAvailable": "This username is not available."
+  },
   "heading": {
     "accountData": "Account data",
     "accountDeletion": "Account deletion",
@@ -24,16 +30,11 @@
     "privacySettings": "Privacy settings",
     "profile": "Profile"
   },
-  "error": {
-    "actionNeeded": "Action Needed!",
-    "googleRefreshError": "Error connecting with Google API, please re-connect.",
-    "unknownAppointmentError": "There was an issue creating your appointment. Please try again.",
-    "usernameIsNotAvailable": "This username is not available."
-  },
   "info": {
     "bookedPleaseCheckEmail": "This event has been booked, please check your email to add it to you calendar.",
     "bookingLinkHasAlreadyBeenUsed": "It seems that this booking link has already been used.",
     "bookingSuccessful": "The booking was successful!",
+    "bookingSuccessfullyRequested": "The booking was successfully requested!",
     "invitationWasSent": "An invitation was sent to your email.",
     "noPendingAppointmentsInList": "There are currently no pending appointments in this list."
   },
@@ -127,10 +128,10 @@
     "pending": "Pending",
     "primaryTimeZone": "Primary time zone",
     "privacy": "Privacy",
+    "refresh": "Refresh",
+    "refreshLink": "Refresh your short link",
     "replies": "Replies",
     "restoreColumnOrder": "Restore Column Order",
-    "refreshLink": "Refresh your short link",
-    "refresh": "Refresh",
     "saveChanges": "Save changes",
     "search": "Search",
     "searchAppointments": "Search appointments",
@@ -151,8 +152,8 @@
     "title": "Title",
     "to": "to",
     "today": "Today",
-    "username": "Username",
     "updateUsername": "Update username",
+    "username": "Username",
     "videoLink": "Video Link",
     "viewAll": "View all",
     "viewBooking": "View booking",
@@ -175,10 +176,11 @@
     "accountDeletionWarning": "Warning, deleting your account is permanent! You will lose all saved data on Thunderbird Appointment. Your calendars will remain unchanged. There is a second confirmation after you login.",
     "chooseDayTime": "Choose the day and time:",
     "defineDaysAndTimeSlots": "Define days and time slots to allow users to select the event time…",
+    "disclaimerGABooking": "Disclaimer: any GA booking done has to be confirmed by the owner of the GA",
     "invitationSentToAddress": "An invitation for this event has been emailed to you at {address}",
     "nameIsInvitingYou": "{name} is inviting you to choose a date",
-    "titleIsReadyForBookings": "{title} is ready for bookings",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
+    "titleIsReadyForBookings": "{title} is ready for bookings",
     "updateUsernameNotice": "Changing your username will also refresh your short link. Please note that any old short links will no longer work."
   }
 }

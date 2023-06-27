@@ -1,7 +1,6 @@
 import { authGuard } from '@auth0/auth0-vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
-import AvailabilityView from '@/views/AvailabilityView.vue'; // TODO
 import CalendarView from '@/views/CalendarView.vue';
 import HomeView from '@/views/HomeView.vue';
 
@@ -20,7 +19,7 @@ const routes = [
   {
     path: '/user/:username/:signature',
     name: 'availability',
-    component: AvailabilityView,
+    component: BookingView,
   },
   {
     path: '/calendar',
