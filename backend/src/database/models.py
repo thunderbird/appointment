@@ -161,6 +161,7 @@ class Appointment(Base):
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
+    schedule = relationship("Schedule", back_populates="appointment")
 
 
 class Attendee(Base):
@@ -210,11 +211,11 @@ class Schedule(Base):
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    appointment = relationship("Appointment", back_populates="slots")
+    appointment = relationship("Appointment", back_populates="schedule")
 
 
 class Availability(Base):
-    __table__ = "availabilities"
+    __tablename__ = "availabilities"
 
     id = Column(Integer, primary_key=True, index=True)
     schedule_id = Column(Integer, ForeignKey("schedules.id"))
