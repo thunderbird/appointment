@@ -146,7 +146,7 @@ def verify_my_signature(url: str = Body(..., embed=True), db: Session = Depends(
     signed_signature = sign_url(clean_url_with_short_link)
 
     # Verify the signature matches the incoming one
-    if signed_signature != signature:
+    if signed_signature == signature:
         return True
 
     raise HTTPException(400, "Invalid signature")
