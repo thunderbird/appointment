@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy import DateTime, false
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
-from database.models import DayOfWeek
+from database.models import AppointmentType
 
 
 def secret():
@@ -32,12 +32,7 @@ def upgrade() -> None:
         sa.Column("appointment_id", sa.Integer),
         sa.Column(
             "name",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=2048),
-            index=False,
-        ),
-        sa.Column(
-            "slug",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=2048),
+            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
             index=False,
         ),
         sa.Column("time_created", DateTime()),
@@ -47,15 +42,40 @@ def upgrade() -> None:
         "availabilities",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("schedule_id", sa.Integer),
-        sa.Column("day_of_week", sa.Enum(DayOfWeek), default=DayOfWeek.Monday),
-        sa.Column("start_time", DateTime()),
-        sa.Column("end_time", DateTime()),
-        sa.Column("booking_cutoff_duration", sa.Integer),
+        sa.Column(
+            "day_of_week",
+            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            index=False,
+        ),
+        sa.Column(
+            "start_time",
+            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+        ),
+        sa.Column(
+            "end_time",
+            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            index=False,
+        ),
+        sa.Column(
+            "min_time_before_meeting",
+            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            index=False,
+        ),
+        sa.Column("slot_duration", sa.Integer),
         sa.Column("time_created", DateTime()),
         sa.Column("time_updated", DateTime()),
+    )
+    op.add_column(
+        "appointments",
+        sa.Column(
+            "appointment_type",
+            sa.Enum(AppointmentType),
+            default=AppointmentType.schedule,
+        ),
     )
 
 
 def downgrade() -> None:
     op.drop_table("schedules")
     op.drop_table("availabilities")
+    op.drop_column("appointments", "appointment_type")
