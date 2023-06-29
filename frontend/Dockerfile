@@ -4,7 +4,10 @@ WORKDIR /app
 
 ENV PATH /app/node_modules/.bin:$PATH
 
+# Get git
+RUN apk add --no-cache git
+
 COPY . .
 RUN yarn install
 
-CMD ["yarn", "serve"]
+CMD vue-cli-service serve

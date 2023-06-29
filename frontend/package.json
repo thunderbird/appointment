@@ -11,6 +11,7 @@
   "dependencies": {
     "@auth0/auth0-vue": "^2.0.2",
     "@sentry/vue": "^7.56.0",
+    "@sentry/webpack-plugin": "^2.3.0",
     "@tabler/icons-vue": "^2.4.0",
     "@vueuse/components": "^9.3.1",
     "@vueuse/core": "^9.3.1",
@@ -23,7 +24,6 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
-    "@sentry/webpack-plugin": "^2.3.0",
     "@tailwindcss/forms": "^0.5.3",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
