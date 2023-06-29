@@ -309,7 +309,7 @@ const downloadIcs = async () => {
 // or from a general availability link of a subscriber
 const getAppointment = async () => {
   if (route.name === 'availability') {
-    const { error, data } = await call('verify/signature').post({ url: route.fullPath }).json();
+    const { error, data } = await call('verify/signature').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
       return true;
     } else {
