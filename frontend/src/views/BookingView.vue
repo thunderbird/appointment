@@ -33,7 +33,7 @@
   >
     <div class="flex-center flex-col gap-12 min-w-[50%]">
       <div class="text-2xl font-semibold text-teal-500">
-        <span v-if="route.name === 'availability'">{{ t('info.bookingSuccessfullyRequested') }}</span>
+        <span v-if="isAvailabilityRoute">{{ t('info.bookingSuccessfullyRequested') }}</span>
         <span v-else>{{ t('info.bookingSuccessful') }}</span>
       </div>
       <div class="w-full max-w-sm shadow-lg rounded-lg flex flex-col gap-1">
@@ -77,7 +77,7 @@
   <main
     v-else
     class="max-w-screen-2xl mx-auto py-32 px-4 select-none"
-    :class="{ 'pt-0': route.name === 'availability' }"
+    :class="{ 'pt-0': isAvailabilityRoute }"
   >
     <div v-if="appointment">
       <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
@@ -85,7 +85,7 @@
         <div>
           {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
         </div>
-        <div v-if="route.name === 'availability'">
+        <div v-if="isAvailabilityRoute">
           {{ t('text.disclaimerGABooking') }}
         </div>
       </div>
@@ -178,6 +178,10 @@ const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
 const getAppointmentStatus = inject('getAppointmentStatus');
+
+// route checks
+const isAvailabilityRoute = computed(() => route.name === 'availability');
+const isBookingRoute = computed(() => route.name === 'booking');
 
 // appointment data holding slots the visitor should see
 // can also be a general appointment, holding subscribers general available slots
@@ -308,7 +312,7 @@ const downloadIcs = async () => {
 // async get appointment data either from public single appointment link
 // or from a general availability link of a subscriber
 const getAppointment = async () => {
-  if (route.name === 'availability') {
+  if (isAvailabilityRoute.value) {
     const { error, data } = await call('verify/signature').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
       return true;
@@ -323,7 +327,7 @@ const getAppointment = async () => {
       };
     }
   } else
-  if (route.name === 'booking') {
+  if (isBookingRoute.value) {
     const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
     if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
       return true;
