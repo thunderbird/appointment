@@ -3,6 +3,12 @@
     "summary": "Lass Freunde und Kollegen Zeiten in deinem Kalender wählen. Terminabsprachen so simple wie möglich.",
     "title": "Thunderbird Appointment"
   },
+  "error": {
+    "actionNeeded": "Aktion erforderlich!",
+    "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
+    "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal.",
+    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
+  },
   "heading": {
     "accountData": "Benutzerkonto Daten",
     "accountDeletion": "Benutzerkonto löschen",
@@ -24,15 +30,12 @@
     "privacySettings": "Privatsphäre-Einstellungen",
     "profile": "Profile"
   },
-  "error": {
-    "actionNeeded": "Aktion erforderlich!",
-    "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
-    "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal.",
-    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
-  },
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
+    "bookingSuccessful": "Die Buchung war erfolgreich!",
+    "bookingSuccessfullyRequested": "Die Buchung wurde erfolgreich angefragt!",
+    "invitationWasSent": "Eine Einladung wurde an deine E-Mail-Adresse gesandt.",
     "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine."
   },
   "label": {
@@ -125,15 +128,16 @@
     "pending": "Ausstehend",
     "primaryTimeZone": "Primäre Zeitzone",
     "privacy": "Datenschutz",
+    "refresh": "Refresh",
+    "refreshLink": "Refresh your short link",
     "replies": "Antworten",
     "restoreColumnOrder": "Spaltenreihenfolge wiederherstellen",
-    "refreshLink": "Refresh your short link",
-    "refresh": "Refresh",
     "saveChanges": "Änderungen speichern",
     "search": "Suche",
     "searchAppointments": "Termine durchsuchen",
     "secondaryTimeZone": "Sekundäre Zeitzone",
     "selectCalendar": "Kalender auswählen",
+    "sendInvitationToAnotherEmail": "Die Einladung an eine andere E-Mail-Adresse senden",
     "settings": "Einstellungen",
     "showSecondaryTimeZone": "Zeige sekundäre Zeitzone",
     "start": "Start",
@@ -148,8 +152,8 @@
     "title": "Titel",
     "to": "bis",
     "today": "Heute",
-    "username": "Benutzername",
     "updateUsername": "Update username",
+    "username": "Benutzername",
     "videoLink": "Konferenz-Link",
     "viewAll": "Alle ansehen",
     "viewBooking": "Buchung anschauen",
@@ -172,10 +176,11 @@
     "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben unverändert. Bestätige die Löschung mit deinen Login-Daten.",
     "chooseDayTime": "Wähle eine Zeit an einem Tag aus:",
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
+    "disclaimerGABooking": "Jede GV-Buchung muss vom Eigentümer der GV bestätigt werden.",
     "invitationSentToAddress": "Eine Einladung für dieses Event wurde dir an {address} geschickt",
     "nameIsInvitingYou": "{name} bittet dich, eine Zeit auszuwählen",
-    "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
+    "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "updateUsernameNotice": "Changing your username will also refresh your short link. Please note that any old short links will no longer work."
   }
 }

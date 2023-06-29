@@ -14,10 +14,13 @@
       <div>{{ event.title }}:</div>
       <div>{{ time }}</div>
     </div>
-    <div v-if="!success" class="text-sm text-center underline underline-offset-2 mb-8 text-teal-500">
+    <div v-if="!success" class="text-sm text-center underline underline-offset-2 mb-4 text-teal-500">
       {{ t('label.timeZone') }}: {{ dj.tz.guess() }}
     </div>
-    <form v-if="!success" ref="bookingForm" class="flex flex-col gap-4 mb-8">
+    <div v-if="!success && route.name === 'availability'" class="text-sm text-center font-semibold">
+      {{ t('text.disclaimerGABooking') }}
+    </div>
+    <form v-if="!success" ref="bookingForm" class="flex flex-col gap-4 my-8">
       <label>
         <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
           {{ t('label.name') }}
@@ -75,6 +78,7 @@ import {
 } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import ArtConfetti from '@/elements/arts/ArtConfetti';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
@@ -84,6 +88,7 @@ import { IconX } from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();
+const route = useRoute();
 const dj = inject('dayjs');
 
 // component properties
