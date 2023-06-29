@@ -44,6 +44,22 @@ class CalendarProvider(enum.Enum):
     google = 2  # calendar provider is Google via its own Rest API
 
 
+class AppointmentType(enum.Enum):
+    oneoff = 1  # An appointment created through "Create Appointment"
+    schedule = 2  # A template appointment used in Scheduling
+
+
+# Use ISO 8601 format to specify day of week
+class DayOfWeek(enum.Enum):
+    Monday = 1
+    Tuesday = 2
+    Wednesday = 3
+    Thursday = 4
+    Friday = 5
+    Saturday = 6
+    Sunday = 7
+
+
 class Subscriber(Base):
     __tablename__ = "subscribers"
 
@@ -118,9 +134,11 @@ class Appointment(Base):
     )
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
+    appointment_type = (Column(Enum(AppointmentType)),)
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
+    schedule = relationship("Schedule", cascade="all,delete", back_populates="appointment")
 
 
 class Attendee(Base):
@@ -147,3 +165,32 @@ class Slot(Base):
     appointment = relationship("Appointment", back_populates="slots")
     attendee = relationship("Attendee", back_populates="slots")
     subscriber = relationship("Subscriber", back_populates="slots")
+
+
+class Schedule(Base):
+    __tablename__ = "schedules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    appointment_id = Column(Integer, ForeignKey("appointments.id"))
+    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    time_created = Column(DateTime, server_default=func.now())
+    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    appointment = relationship("Appointment", cascade="all,delete", back_populates="schedule")
+
+
+class Availability(Base):
+    __tablename__ = "availabilities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    schedule_id = Column(Integer, ForeignKey("schedules.id"))
+    day_of_week = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    start_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    min_time_before_meeting = Column(
+        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True
+    )  # i.e., Can't book if it's less than X minutes before start time.
+    slot_duration = Column(Integer)  # Size of the Slot that can be booked.
+
+    time_created = Column(DateTime, server_default=func.now())
+    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())

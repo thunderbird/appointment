@@ -9,6 +9,8 @@ from .models import (
     AppointmentStatus,
     LocationType,
     CalendarProvider,
+    AppointmentType,
+    DayOfWeek,
     random_slug,
 )
 
@@ -67,6 +69,7 @@ class AppointmentBase(BaseModel):
     title: str
     details: str | None = None
     slug: str | None = Field(default_factory=random_slug)
+    appointment_type: AppointmentType | None = AppointmentType.oneoff
 
 
 class AppointmentFull(AppointmentBase):
@@ -196,3 +199,35 @@ class FileDownload(BaseModel):
     name: str
     content_type: str
     data: str
+
+
+class ScheduleBase(BaseModel):
+    name: str
+
+
+class Schedule(ScheduleBase):
+    id: int
+    appointment_id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+    class Config:
+        orm_mode = True
+
+
+class AvailabilityBase(BaseModel):
+    schedule_id: int
+    day_of_week: DayOfWeek
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    min_time_before_meeting: int
+    duration: int | None = None
+
+
+class Availability(AvailabilityBase):
+    id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+    class Config:
+        orm_mode = True
