@@ -34,7 +34,6 @@ import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';
 import SiteNotification from '@/elements/SiteNotification';
 import { siteNotificationStore } from '@/stores/alert-store';
-
 // component constants
 const apiUrl = inject('apiUrl');
 const dj = inject('dayjs');
