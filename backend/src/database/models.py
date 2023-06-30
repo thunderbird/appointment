@@ -134,7 +134,7 @@ class Appointment(Base):
     )
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
-    appointment_type = (Column(Enum(AppointmentType)),)
+    appointment_type = Column(Enum(AppointmentType))
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")

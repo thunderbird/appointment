@@ -20,7 +20,7 @@ def secret():
 
 # revision identifiers, used by Alembic.
 revision = "f9660871710e"
-down_revision = "da069f44bca7"
+down_revision = "845089644770"
 branch_labels = None
 depends_on = None
 
