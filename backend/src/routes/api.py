@@ -356,9 +356,11 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
 def read_public_appointment(slug: str, db: Session = Depends(get_db)):
     """endpoint to retrieve an appointment from db via public link and only expose necessary data"""
     a = repo.get_public_appointment(db, slug=slug)
-    s = repo.get_subscriber_by_appointment(db=db, appointment_id=a.id)
-    if a is None or s is None:
+    if a is None:
         raise HTTPException(status_code=404, detail="Appointment not found")
+    s = repo.get_subscriber_by_appointment(db=db, appointment_id=a.id)
+    if s is None:
+        raise HTTPException(status_code=404, detail="Subscriber not found")
     slots = [
         schemas.SlotOut(id=sl.id, start=sl.start, duration=sl.duration, attendee_id=sl.attendee_id) for sl in a.slots
     ]
