@@ -164,8 +164,8 @@ def create_my_calendar(
     # create calendar
     try:
         cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)
-    except:
-        raise HTTPException(status_code=403, detail="Calendar already exists or maximum number of calendars exceeded")
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
