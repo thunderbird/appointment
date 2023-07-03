@@ -86,7 +86,7 @@ def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
 
-    short_url = os.getenv('SHORT_BASE_URL')
+    short_url = os.getenv("SHORT_BASE_URL")
     base_url = f"{os.getenv('FRONTEND_URL')}/user"
 
     # If we don't have a short url, then use the default url with /user added to it
@@ -100,7 +100,7 @@ def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
     signature = sign_url(url)
 
     # We return with the signed url signature
-    return {'url': f"{short_url}/{subscriber.username}/{signature}"}
+    return {"url": f"{short_url}/{subscriber.username}/{signature}"}
 
 
 @router.post("/me/signature")
@@ -109,11 +109,13 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
 
-    repo.update_subscriber(db, schemas.SubscriberAuth(
-        email=subscriber.email,
-        username=subscriber.username,
-        short_link_hash=secrets.token_hex(32)
-    ), subscriber.id)
+    repo.update_subscriber(
+        db,
+        schemas.SubscriberAuth(
+            email=subscriber.email, username=subscriber.username, short_link_hash=secrets.token_hex(32)
+        ),
+        subscriber.id,
+    )
 
     return True
 
@@ -136,7 +138,7 @@ def verify_my_signature(url: str = Body(..., embed=True), db: Session = Depends(
     signature = None
     if len(match) > 1:
         signature = match[1]
-        clean_url = clean_url.replace(signature, '')
+        clean_url = clean_url.replace(signature, "")
 
     subscriber = repo.get_subscriber_by_username(db, username)
     if not subscriber:

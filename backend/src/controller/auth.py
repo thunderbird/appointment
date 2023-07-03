@@ -58,11 +58,15 @@ class Auth:
 
             # Generate an initial short link hash if they don't have one already
             if db_subscriber.short_link_hash is None:
-                repo.update_subscriber(db, schemas.SubscriberAuth(
-                    email=db_subscriber.email,
-                    username=db_subscriber.username,
-                    short_link_hash=secrets.token_hex(32)
-                ), db_subscriber.id)
+                repo.update_subscriber(
+                    db,
+                    schemas.SubscriberAuth(
+                        email=db_subscriber.email,
+                        username=db_subscriber.username,
+                        short_link_hash=secrets.token_hex(32),
+                    ),
+                    db_subscriber.id,
+                )
 
             return db_subscriber
         return None
