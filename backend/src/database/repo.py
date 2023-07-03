@@ -177,14 +177,16 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
     subscriber_calendars = get_calendars_by_subscriber(db, subscriber_id)
     subscriber_calendar_urls = [c.url for c in subscriber_calendars]
+    connected_calendars = [calendar for calendar in subscriber_calendars if calendar.connected]
     # check if subscriber already holds this calendar by url
     if db_calendar.url in subscriber_calendar_urls:
         raise HTTPException(status_code=403, detail="Calendar already exists")
     # check subscription limitation
+    # TODO: do this check while connecting calendars, not when adding calendars here
     limit = get_connections_limit(db=db, subscriber_id=subscriber_id)
-    if limit > 0 and len(subscriber_calendars) >= limit:
+    if limit > 0 and len(connected_calendars) >= limit:
         raise HTTPException(
-            status_code=403, detail="Allowed number of calendars has been reached for this subscription"
+            status_code=403, detail="Allowed number of connected calendars has been reached for this subscription"
         )
     # add new calendar
     db.add(db_calendar)
@@ -201,7 +203,7 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
 
     for key, value in calendar:
         # if this key exists in the keep_if_none list, then ignore it
-        if key in keep_if_none and (value is None or len(value) == 0):
+        if key in keep_if_none and (not value or len(str(value)) == 0):
             continue
 
         setattr(db_calendar, key, value)

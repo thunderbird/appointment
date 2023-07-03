@@ -16,9 +16,10 @@ from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 def secret():
     return os.getenv("DB_SECRET")
 
+
 # revision identifiers, used by Alembic.
-revision = '845089644770'
-down_revision = 'da069f44bca7'
+revision = "845089644770"
+down_revision = "da069f44bca7"
 branch_labels = None
 depends_on = None
 

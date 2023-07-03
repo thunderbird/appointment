@@ -136,20 +136,14 @@ class GoogleConnector:
 
 
 class CalDavConnector:
-    def __init__(self, provider: int, url: str, user: str, password: str, google_tkn: str = None):
+    def __init__(self, url: str, user: str, password: str):
         # store credentials of remote location
-        self.provider = provider
+        self.provider = CalendarProvider.caldav
         self.url = url
         self.user = user
         self.password = password
-        self.google_token = google_tkn
         # connect to CalDAV server
-        if provider == CalendarProvider.google:
-            raise DeprecationWarning()
-
-        if provider == CalendarProvider.caldav:
-            # https://github.com/python-caldav/caldav/blob/master/examples/basic_usage_examples.py
-            self.client = DAVClient(url=url, username=user, password=password)
+        self.client = DAVClient(url=url, username=user, password=password)
 
     def sync_calendars(self):
         pass
@@ -207,30 +201,19 @@ class CalDavConnector:
         organizer: schemas.Subscriber,
     ):
         """add a new event to the connected calendar"""
-        if self.provider == CalendarProvider.google:
-            googleEvent = {
-                "summary": event.title,
-                # 'location': event.location_url, # TODO handle location types
-                "description": event.description,
-                "start": {"dateTime": event.start + "+00:00"},
-                "end": {"dateTime": event.end + "+00:00"},
-                "attendees": [{"displaName": attendee.name, "email": attendee.email}],
-            }
-            self.client.events().insert(calendarId=self.user, body=googleEvent).execute()
-        if self.provider == CalendarProvider.caldav:
-            calendar = self.client.calendar(url=self.url)
-            # save event
-            caldavEvent = calendar.save_event(
-                dtstart=datetime.fromisoformat(event.start),
-                dtend=datetime.fromisoformat(event.end),
-                summary=event.title,
-                # TODO: handle location
-                description=event.description,
-            )
-            # save attendee data
-            caldavEvent.add_attendee((organizer.name, organizer.email))
-            caldavEvent.add_attendee((attendee.name, attendee.email))
-            caldavEvent.save()
+        calendar = self.client.calendar(url=self.url)
+        # save event
+        caldavEvent = calendar.save_event(
+            dtstart=datetime.fromisoformat(event.start),
+            dtend=datetime.fromisoformat(event.end),
+            summary=event.title,
+            # TODO: handle location
+            description=event.description,
+        )
+        # save attendee data
+        caldavEvent.add_attendee((organizer.name, organizer.email))
+        caldavEvent.add_attendee((attendee.name, attendee.email))
+        caldavEvent.save()
         return event
 
     def delete_events(self, start):
