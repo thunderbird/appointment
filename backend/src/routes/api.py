@@ -256,7 +256,7 @@ def read_caldav_calendars(
             google_tkn=subscriber.google_tkn,
         )
     else:
-        con = CalDavConnector(connection.provider, connection.url, connection.user, connection.password)
+        con = CalDavConnector(connection.url, connection.user, connection.password)
     return con.list_calendars()
 
 
@@ -284,9 +284,7 @@ def read_caldav_events(
             google_tkn=subscriber.google_tkn,
         )
     else:
-        con = CalDavConnector(
-            db_calendar.provider, db_calendar.url, db_calendar.user, db_calendar.password, subscriber.google_tkn
-        )
+        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
     events = con.list_events(start, end)
     for e in events:
         e.calendar_title = db_calendar.title
@@ -415,9 +413,7 @@ def update_public_appointment_slot(
             google_tkn=organizer.google_tkn,
         )
     else:
-        con = CalDavConnector(
-            db_calendar.provider, db_calendar.url, db_calendar.user, db_calendar.password, organizer.google_tkn
-        )
+        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
     con.create_event(event=event, attendee=s_a.attendee, organizer=organizer)
 
     # update appointment slot data
