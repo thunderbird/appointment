@@ -15,7 +15,6 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
 from datetime import timedelta
-from ..database.schemas import EventLocation
 from ..controller.google_client import GoogleClient
 from ..controller.auth import sign_url
 from ..database.models import Subscriber, CalendarProvider
@@ -395,7 +394,7 @@ def update_public_appointment_slot(
         start=slot.start.isoformat(),
         end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
         description=db_appointment.details,
-        location=EventLocation(
+        location=schemas.EventLocation(
             type=db_appointment.location_type,
             suggestions=db_appointment.location_suggestions,
             selected=db_appointment.location_selected,

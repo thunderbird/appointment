@@ -9,7 +9,8 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
 
-"""ATTENDEES repository functions"""
+"""ATTENDEES repository functions
+"""
 
 
 def get_attendees_by_subscriber(db: Session, subscriber_id: int):
@@ -412,3 +413,53 @@ def slot_is_available(db: Session, slot_id: int):
     """check if slot is still available"""
     db_slot = get_slot(db, slot_id)
     return db_slot and not db_slot.attendee_id and not db_slot.subscriber_id
+
+
+"""SCHEDULES repository functions
+"""
+
+
+def get_schedules_by_subscriber(db: Session, subscriber_id: int):
+    """Get schedules by subscriber id. Should be only one for now (general availability)."""
+    return (
+        db.query(models.Schedule)
+        .join(models.Appointment)
+        .join(models.Calendar)
+        .filter(models.Calendar.owner_id == subscriber_id)
+        .filter(models.Appointment.calendar_id == models.Calendar.id)
+        .filter(models.Schedule.appointment_id == models.Appointment.id)
+        .all()
+    )
+
+
+def get_schedule(db: Session, schedule_id: int):
+    """retrieve schedule by id"""
+    if schedule_id:
+        return db.get(models.Schedule, schedule_id)
+    return None
+
+
+def schedule_is_owned(db: Session, schedule_id: int, subscriber_id: int):
+    """check if the given schedule belongs to subscriber"""
+    schedules = get_schedules_by_subscriber(db, subscriber_id)
+    return any(s.id == schedule_id for s in schedules)
+
+
+def schedule_exists(db: Session, schedule_id: int):
+    """true if schedule of given id exists"""
+    return True if get_schedule(db, schedule_id) is not None else False
+
+
+def update_subscriber_schedule(db: Session, schedule: schemas.ScheduleBase, schedule_id: int):
+    """update existing schedule by id"""
+    db_schedule = get_schedule(db, schedule_id)
+    for key, value in schedule:
+        setattr(db_schedule, key, value)
+    db.commit()
+    db.refresh(db_schedule)
+    return db_schedule
+
+
+def get_availability_by_schedule(db: Session, schedule_id: int):
+    """retrieve availability by schedule id"""
+    return db.query(models.Availability).filter(models.Availability.schedule_id == schedule_id).all()

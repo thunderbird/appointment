@@ -165,6 +165,42 @@ class Subscriber(SubscriberAuth):
         orm_mode = True
 
 
+""" SCHEDULE model schemas
+"""
+
+
+class ScheduleBase(BaseModel):
+    name: str
+
+
+class Schedule(ScheduleBase):
+    id: int
+    appointment_id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+    class Config:
+        orm_mode = True
+
+
+class AvailabilityBase(BaseModel):
+    schedule_id: int
+    day_of_week: DayOfWeek
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    min_time_before_meeting: int
+    duration: int | None = None
+
+
+class Availability(AvailabilityBase):
+    id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+    class Config:
+        orm_mode = True
+
+
 """ other schemas used for requests or data migration
 """
 
@@ -199,35 +235,3 @@ class FileDownload(BaseModel):
     name: str
     content_type: str
     data: str
-
-
-class ScheduleBase(BaseModel):
-    name: str
-
-
-class Schedule(ScheduleBase):
-    id: int
-    appointment_id: int
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
-
-    class Config:
-        orm_mode = True
-
-
-class AvailabilityBase(BaseModel):
-    schedule_id: int
-    day_of_week: DayOfWeek
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-    min_time_before_meeting: int
-    duration: int | None = None
-
-
-class Availability(AvailabilityBase):
-    id: int
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
-
-    class Config:
-        orm_mode = True
