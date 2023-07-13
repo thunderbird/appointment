@@ -29,7 +29,7 @@ router = APIRouter()
 @router.get("/")
 def health():
     """Small route with no processing that will be used for health checks"""
-    return {}
+    return True
 
 
 @router.get("/login", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.SubscriberBase)
