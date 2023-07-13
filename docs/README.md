@@ -13,19 +13,19 @@ This are the general components, Thunderbird Appointment consists of.
 ```mermaid
 C4Component
 
-  ContainerDb(c4, "Database", "Relational Database Schema", "Stores user IDs, Calendar data,<br>Appointment data, etc.")
-  Container(c1, "Frontend", "Vue3 / Tailwind", "Provides all Appointment<br>functionality to customers<br>via their web browser.")
+  ContainerDb(c4, "Database", "MySQL", "Subscribers, calendars,<br>appointments, attendees, ...")
+  Container(c1, "Frontend", "Vue3 / Tailwind", "Provides all Appointment<br>functionality to customers<br>via their web browser")
   Container_Boundary(b1, "Backend") {
-    Component(c3, "Subscriber Area", "FAstAPI, JWT auth", "Provides functionality related<br>to subscriber calendar connections,<br>appointments, general availability etc.")
-    Component(c2, "Auth Controller", "FastAPI", "Redirects to Auth0 and<br>receives the users authentication token<br>and subscription state.")
+    Component(c3, "Subscriber Area", "FAstAPI, JWT auth", "Provides functionality related<br>to calendar connections,<br>appointments, general availability")
+    Component(c2, "Auth Controller", "FastAPI", "Redirects to Auth0 service,<br>authenticates subscriber,<br>gets subscription level")
     Component(c5, "Public Link Area", "FastAPI", "Allows visitors to choose<br>slots in given<br>availability timeline.")
-    System_Ext(e3, "Google Server", "Allows to query and write<br>event data into calendars<br>using Google API.")
-    System_Ext(e2, "CalDAV Server", "Allows to query and write<br>event data into calendars<br>using CalDAV format.")
-    System_Ext(e1, "Auth0", "Allows users to register<br>sign in to their Appointment accounts<br>and subscribe to an Appointment tier.")
+    System_Ext(e3, "Google Server", "Allows to query and write<br>event data into calendars<br>using Google API")
+    System_Ext(e2, "CalDAV Server", "Allows to query and write<br>event data into calendars<br>using CalDAV format")
+    System_Ext(e1, "Auth0", "Allows users to register,<br>sign in and subscribe<br>to an Appointment tier")
   }
   BiRel(c1, c2, "Call Sign up / in", "HTTPS")
   Rel(c2, c3, "Authentication<br>succeeded", "Session")
-  BiRel(c3, c4, "Query Account and<br>Appointment data", "SQL")
+  BiRel(c3, c4, "Query data, migrate data", "SQLAlchemy, Alembic")
   Rel(c1, c5, "Public Link Call", "HTTPS")
   BiRel(c2, e1, "Authenticate Account", "OAuth2")
   BiRel(c3, e2, "Query event data", "JSON/HTTPS")
@@ -44,7 +44,6 @@ C4Component
   UpdateElementStyle(c5, $bgColor="#456789")
   UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
-
 
 ## Entity relations
 
