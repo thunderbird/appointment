@@ -47,9 +47,13 @@ def test_config():
 
 
 def test_health():
+    # existing root route
     response = client.get("/")
     assert response.status_code == 200
     assert response.json()
+    # undefined route
+    response = client.get("/abcdefg")
+    assert response.status_code == 404
 
 
 def test_access_without_authentication_token():
@@ -88,6 +92,12 @@ def test_access_without_authentication_token():
     response = client.delete("/apmt/1")
     assert response.status_code == 403
     response = client.post("/rmt/sync")
+    assert response.status_code == 403
+    response = client.get("/account/download")
+    assert response.status_code == 403
+    response = client.delete("/account/delete")
+    assert response.status_code == 403
+    response = client.get("/google/auth")
     assert response.status_code == 403
 
 
