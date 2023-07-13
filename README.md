@@ -4,6 +4,8 @@ Invite others to grab times on your calendar. Choose a date. Make appointments a
 
 ## Get started
 
+You can either build preconfigured docker containers (database, backend and frontend) or manually set up the application. A more detailed documentation can befound in the [docs folder](./docs/README.md).
+
 ### With Docker
 
 ```bash
