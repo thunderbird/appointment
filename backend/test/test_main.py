@@ -1,13 +1,17 @@
 import os
+import json
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
 from datetime import date
+from http.client import HTTPSConnection
+from urllib.parse import quote_plus
 
 from ..src.database import models
 from ..src.main import app
 from ..src.dependencies.database import get_db
+
 # from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///test/test.db"
@@ -38,6 +42,23 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+
+# handle authentication
+conn = HTTPSConnection(os.getenv("AUTH0_API_DOMAIN"))
+payload = "grant_type=password&username=%s&password=%s&audience=%s&scope=%s&client_id=%s&client_secret=%s" % (
+    os.getenv("AUTH0_TEST_USER"),
+    os.getenv("AUTH0_TEST_PASS"),
+    quote_plus(os.getenv("AUTH0_API_AUDIENCE")),
+    quote_plus("read:calendars"),
+    os.getenv("AUTH0_API_CLIENT_ID"),
+    os.getenv("AUTH0_API_SECRET"),
+)
+headers = {"content-type": "application/x-www-form-urlencoded"}
+conn.request("POST", "/%s/oauth/token" % os.getenv("AUTH0_API_DOMAIN"), payload, headers)
+
+res = conn.getresponse()
+data = res.read()
+access_token = json.loads(data.decode("utf-8"))["access_token"]
 
 
 def test_config():
@@ -101,21 +122,20 @@ def test_access_without_authentication_token():
     assert response.status_code == 403
 
 
+def test_login():
+    response = client.get("/login", headers={"authorization": "Bearer %s" % access_token})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["username"] == os.getenv("AUTH0_TEST_USER")
+    assert data["email"] == os.getenv("AUTH0_TEST_USER")
+    assert data["name"] == os.getenv("AUTH0_TEST_USER")
+    assert data["level"] == 1
+    assert data["timezone"] is None
+
+
 """ TODO: The following tests are old test cases from an earlier version of the application
           and need to be updated to work with the current authentication flow
 """
-
-
-# def test_login():
-#     response = client.get("/login")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["username"] == "admin"
-#     assert data["email"] == "admin@example.com"
-#     assert data["name"] == "Andy Admin"
-#     assert data["level"] == 3
-#     assert data["timezone"] is None
-#     assert data["id"] == 1
 
 
 # def test_create_my_calendar():
