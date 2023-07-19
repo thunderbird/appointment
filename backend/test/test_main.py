@@ -1,6 +1,6 @@
-import os
 import json
 
+from os import getenv as conf
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
@@ -11,6 +11,7 @@ from urllib.parse import quote_plus
 from ..src.database import models
 from ..src.main import app
 from ..src.dependencies.database import get_db
+from ..src.database.models import CalendarProvider
 
 # from ..src.controller.calendar import CalDavConnector
 
@@ -44,17 +45,17 @@ app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 # handle authentication
-conn = HTTPSConnection(os.getenv("AUTH0_API_DOMAIN"))
+conn = HTTPSConnection(conf("AUTH0_API_DOMAIN"))
 payload = "grant_type=password&username=%s&password=%s&audience=%s&scope=%s&client_id=%s&client_secret=%s" % (
-    os.getenv("AUTH0_TEST_USER"),
-    os.getenv("AUTH0_TEST_PASS"),
-    quote_plus(os.getenv("AUTH0_API_AUDIENCE")),
+    conf("AUTH0_TEST_USER"),
+    conf("AUTH0_TEST_PASS"),
+    quote_plus(conf("AUTH0_API_AUDIENCE")),
     quote_plus("read:calendars"),
-    os.getenv("AUTH0_API_CLIENT_ID"),
-    os.getenv("AUTH0_API_SECRET"),
+    conf("AUTH0_API_CLIENT_ID"),
+    conf("AUTH0_API_SECRET"),
 )
 headers = {"content-type": "application/x-www-form-urlencoded"}
-conn.request("POST", "/%s/oauth/token" % os.getenv("AUTH0_API_DOMAIN"), payload, headers)
+conn.request("POST", "/%s/oauth/token" % conf("AUTH0_API_DOMAIN"), payload, headers)
 
 res = conn.getresponse()
 data = res.read()
@@ -67,9 +68,15 @@ headers = {"authorization": "Bearer %s" % access_token}
 
 
 def test_config():
-    assert int(os.getenv("TIER_BASIC_CALENDAR_LIMIT")) == 3
-    assert int(os.getenv("TIER_PLUS_CALENDAR_LIMIT")) == 5
-    assert int(os.getenv("TIER_PRO_CALENDAR_LIMIT")) == 10
+    assert conf("AUTH0_TEST_USER")
+    assert conf("AUTH0_TEST_PASS")
+    assert conf("CALDAV_TEST_PRINCIPAL_URL")
+    assert conf("CALDAV_TEST_CALENDAR_URL")
+    assert conf("CALDAV_TEST_USER")
+    assert conf("CALDAV_TEST_PASS")
+    assert int(conf("TIER_BASIC_CALENDAR_LIMIT")) == 3
+    assert int(conf("TIER_PLUS_CALENDAR_LIMIT")) == 5
+    assert int(conf("TIER_PRO_CALENDAR_LIMIT")) == 10
 
 
 def test_health():
@@ -135,9 +142,9 @@ def test_first_login():
     response = client.get("/login", headers=headers)
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["username"] == os.getenv("AUTH0_TEST_USER")
-    assert data["email"] == os.getenv("AUTH0_TEST_USER")
-    assert data["name"] == os.getenv("AUTH0_TEST_USER")
+    assert data["username"] == conf("AUTH0_TEST_USER")
+    assert data["email"] == conf("AUTH0_TEST_USER")
+    assert data["name"] == conf("AUTH0_TEST_USER")
     assert data["level"] == 1
     assert data["timezone"] is None
 
@@ -146,9 +153,9 @@ def test_second_login():
     response = client.get("/login", headers=headers)
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["username"] == os.getenv("AUTH0_TEST_USER")
-    assert data["email"] == os.getenv("AUTH0_TEST_USER")
-    assert data["name"] == os.getenv("AUTH0_TEST_USER")
+    assert data["username"] == conf("AUTH0_TEST_USER")
+    assert data["email"] == conf("AUTH0_TEST_USER")
+    assert data["name"] == conf("AUTH0_TEST_USER")
     assert data["level"] == 1
     assert data["timezone"] is None
 
@@ -207,226 +214,301 @@ def test_signed_short_link_verification():
     assert response.status_code == 400, response.text
 
 
-""" TODO: The following tests are old test cases from an earlier version of the application
-          and need to be updated to work with the current authentication flow
+""" CALENDARS tests (CalDAV)
 """
 
 
-# def test_create_my_calendar():
-#     response = client.post(
-#         "/cal",
-#         json={
-#             "title": "My first calendar connection",
-#             "color": "#123456",
-#             "url": "https://example.com",
-#             "user": "ww1984",
-#             "password": "d14n4",
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "My first calendar connection"
-#     assert data["color"] == "#123456"
-#     assert "url" not in data
-#     assert "user" not in data
-#     assert "password" not in data
+def test_read_remote_caldav_calendars():
+    response = client.post(
+        "/rmt/calendars",
+        json={
+            "url": conf("CALDAV_TEST_PRINCIPAL_URL"),
+            "user": conf("CALDAV_TEST_USER"),
+            "password": conf("CALDAV_TEST_PASS"),
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) > 0
+    assert any(c["url"] == conf("CALDAV_TEST_CALENDAR_URL") for c in data)
 
 
-# def test_read_my_calendars():
-#     response = client.get("/me/calendars")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert isinstance(data, list)
-#     assert len(data) == 1
-#     assert data[0]["title"] == "My first calendar connection"
-#     assert data[0]["color"] == "#123456"
-#     assert "url" not in data[0]
-#     assert "user" not in data[0]
-#     assert "password" not in data[0]
+def test_read_connected_calendars_before_creation():
+    response = client.get("/me/calendars", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 0
 
 
-# def test_read_existing_calendar():
-#     response = client.get("/cal/1")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "My first calendar connection"
-#     assert data["color"] == "#123456"
-#     assert data["url"] == "https://example.com"
-#     assert data["user"] == "ww1984"
-#     assert "password" not in data
+def test_read_unconnected_calendars_before_creation():
+    response = client.get("/me/calendars", params={"only_connected": False}, headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 0
 
 
-# def test_read_missing_calendar():
-#     response = client.get("/cal/30")
-#     assert response.status_code == 404, response.text
+def test_create_first_caldav_calendar():
+    response = client.post(
+        "/cal",
+        json={
+            "title": "First CalDAV calendar",
+            "color": "#123456",
+            "provider": CalendarProvider.caldav.value,
+            "url": conf("CALDAV_TEST_CALENDAR_URL"),
+            "user": conf("CALDAV_TEST_USER"),
+            "password": conf("CALDAV_TEST_PASS"),
+            "connected": False,
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "First CalDAV calendar"
+    assert data["color"] == "#123456"
+    assert not data["connected"]
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
 
 
-# def test_read_foreign_calendar():
-#     stmt = insert(models.Calendar).values(owner_id="2", title="Cal", url="https://test.org", user="abc", password="dce")
-#     db = TestingSessionLocal()
-#     db.execute(stmt)
-#     db.commit()
-#     response = client.get("/cal/2")
-#     assert response.status_code == 403, response.text
+def test_read_connected_calendars_after_creation():
+    response = client.get("/me/calendars", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 0
 
 
-# def test_update_existing_calendar_with_password():
-#     response = client.put(
-#         "/cal/1",
-#         json={
-#             "title": "My first calendar connectionx",
-#             "color": "#123457",
-#             "url": "https://example.comx",
-#             "user": "ww1984x",
-#             "password": "d14n4x",
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "My first calendar connectionx"
-#     assert data["color"] == "#123457"
-#     assert "url" not in data
-#     assert "user" not in data
-#     assert "password" not in data
-#     stm = select(models.Calendar).where(models.Calendar.id == 1)
-#     db = TestingSessionLocal()
-#     cal = db.scalars(stm).one()
-#     assert cal.password == "d14n4x"
+def test_read_unconnected_calendars_after_creation():
+    response = client.get("/me/calendars", params={"only_connected": False}, headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 1
+    calendar = data[0]
+    assert calendar["title"] == "First CalDAV calendar"
+    assert calendar["color"] == "#123456"
+    assert not calendar["connected"]
+    assert "url" not in calendar
+    assert "user" not in calendar
+    assert "password" not in calendar
 
 
-# def test_update_existing_calendar_without_password():
-#     response = client.put(
-#         "/cal/1",
-#         json={
-#             "title": "My first calendar connectionx",
-#             "color": "#123457",
-#             "url": "https://example.comx",
-#             "user": "ww1984x",
-#             "password": "",
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "My first calendar connectionx"
-#     assert data["color"] == "#123457"
-#     assert "url" not in data
-#     assert "user" not in data
-#     assert "password" not in data
-#     stm = select(models.Calendar).where(models.Calendar.id == 1)
-#     db = TestingSessionLocal()
-#     cal = db.scalars(stm).one()
-#     assert cal.password == "d14n4x"
+def test_read_existing_caldav_calendar():
+    response = client.get("/cal/1", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "First CalDAV calendar"
+    assert data["color"] == "#123456"
+    assert data["provider"] == CalendarProvider.caldav.value
+    assert data["url"] == conf("CALDAV_TEST_CALENDAR_URL")
+    assert data["user"] == conf("CALDAV_TEST_USER")
+    assert not data["connected"]
+    assert "password" not in data
 
 
-# def test_update_foreign_calendar():
-#     response = client.put(
-#         "/cal/2",
-#         json={"title": "test", "url": "test", "user": "test", "password": "test"},
-#     )
-#     assert response.status_code == 403, response.text
+def test_read_missing_calendar():
+    response = client.get("/cal/999", headers=headers)
+    assert response.status_code == 404, response.text
 
 
-# def test_delete_existing_calendar():
-#     response = client.delete("/cal/1")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "My first calendar connectionx"
-#     assert "url" not in data
-#     assert "user" not in data
-#     assert "password" not in data
-#     response = client.get("/cal/1")
-#     assert response.status_code == 404, response.text
-#     response = client.get("/me/calendars")
-#     data = response.json()
-#     assert len(data) == 0
-#     # add own calendar again for further testing
-#     client.post(
-#         "/cal",
-#         json={
-#             "title": "My first calendar connection",
-#             "url": "https://example.com",
-#             "user": "ww1984",
-#             "password": "d14n4",
-#         },
-#     )
+def test_read_foreign_calendar():
+    query = insert(models.Calendar).values(owner_id="2", title="a", url="a", user="a", password="a", provider="caldav")
+    db = TestingSessionLocal()
+    db.execute(query)
+    db.commit()
+    response = client.get("/cal/2", headers=headers)
+    assert response.status_code == 403, response.text
 
 
-# def test_delete_missing_calendar():
-#     response = client.delete("/cal/30")
-#     assert response.status_code == 404, response.text
+def test_update_existing_caldav_calendar_with_password():
+    response = client.put(
+        "/cal/1",
+        json={
+            "title": "First modified CalDAV calendar",
+            "color": "#234567",
+            "url": conf("CALDAV_TEST_CALENDAR_URL") + "x",
+            "user": conf("CALDAV_TEST_USER") + "x",
+            "password": conf("CALDAV_TEST_PASS") + "x",
+            "connected": True,
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "First modified CalDAV calendar"
+    assert data["color"] == "#234567"
+    assert not data["connected"]
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
+    query = select(models.Calendar).where(models.Calendar.id == 1)
+    db = TestingSessionLocal()
+    cal = db.scalars(query).one()
+    assert cal.url == conf("CALDAV_TEST_CALENDAR_URL") + "x"
+    assert cal.user == conf("CALDAV_TEST_USER") + "x"
+    assert cal.password == conf("CALDAV_TEST_PASS") + "x"
 
 
-# def test_delete_foreign_calendar():
-#     response = client.delete("/cal/2")
-#     assert response.status_code == 403, response.text
+def test_update_existing_caldav_calendar_without_password():
+    response = client.put(
+        "/cal/1",
+        json={
+            "title": "First modified CalDAV calendar",
+            "color": "#234567",
+            "url": conf("CALDAV_TEST_CALENDAR_URL"),
+            "user": conf("CALDAV_TEST_USER"),
+            "password": "",
+            "connected": True,
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "First modified CalDAV calendar"
+    assert data["color"] == "#234567"
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
+    query = select(models.Calendar).where(models.Calendar.id == 1)
+    db = TestingSessionLocal()
+    cal = db.scalars(query).one()
+    assert cal.url == conf("CALDAV_TEST_CALENDAR_URL")
+    assert cal.user == conf("CALDAV_TEST_USER")
+    assert cal.password == conf("CALDAV_TEST_PASS") + "x"
 
 
-# def test_create_too_many_calendars():
-#     client.put(
-#         "/me",
-#         json={
-#             "username": "adminx",
-#             "email": "admin@example.com",
-#             "name": "The Admin",
-#             "level": 1,
-#             "timezone": "2",
-#         },
-#     )
-#     cal2 = insert(models.Calendar).values(
-#         owner_id="1",
-#         title="Another",
-#         url="https://test.org",
-#         user="abc",
-#         password="dce",
-#     )
-#     cal3 = insert(models.Calendar).values(
-#         owner_id="1",
-#         title="mozilla",
-#         color="#978FEE",
-#         url=TESTING_CALDAV_CALENDAR,
-#         user=TESTING_CALDAV_USER,
-#         password=TESTING_CALDAV_PASS,
-#     )
-#     db = TestingSessionLocal()
-#     db.execute(cal2)
-#     db.execute(cal3)
-#     db.commit()
-#     response = client.post(
-#         "/cal",
-#         json={
-#             "title": "Forbidden 4th calendar",
-#             "url": "https://example.com",
-#             "user": "abc",
-#             "password": "def",
-#         },
-#     )
-#     assert response.status_code == 403, response.text
-#     # restore current users subscription level again for further testing
-#     client.put(
-#         "/me",
-#         json={
-#             "username": "adminx",
-#             "email": "admin@example.com",
-#             "name": "The Admin",
-#             "level": 3,
-#             "timezone": "2",
-#         },
-#     )
+def test_update_foreign_calendar():
+    response = client.put("/cal/2", json={"title": "b", "url": "b", "user": "b", "password": "b"}, headers=headers)
+    assert response.status_code == 403, response.text
 
 
-# def test_get_remote_calendars():
-#     response = client.post(
-#         "/rmt/calendars",
-#         json={
-#             "url": TESTING_CALDAV_PRINCIPAL,
-#             "user": TESTING_CALDAV_USER,
-#             "password": TESTING_CALDAV_PASS,
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert len(data) == 3
-#     assert data[1]["url"] == TESTING_CALDAV_CALENDAR
+def test_connect_caldav_calendar():
+    response = client.post("/cal/1/connect", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "First modified CalDAV calendar"
+    assert data["color"] == "#234567"
+    assert data["connected"]
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
+
+
+def test_connect_missing_calendar():
+    response = client.post("/cal/999/connect", headers=headers)
+    assert response.status_code == 404, response.text
+
+
+def test_connect_foreign_calendar():
+    response = client.post("/cal/2/connect", headers=headers)
+    assert response.status_code == 403, response.text
+
+
+def test_read_connected_calendars_after_connection():
+    client.post(
+        "/cal",
+        json={
+            "title": "Second CalDAV calendar",
+            "color": "#123456",
+            "provider": CalendarProvider.caldav.value,
+            "url": "test",
+            "user": "test",
+            "password": "test",
+        },
+        headers=headers,
+    )
+    response = client.get("/me/calendars", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 1
+    calendar = data[0]
+    assert calendar["title"] == "First modified CalDAV calendar"
+    assert calendar["color"] == "#234567"
+    assert calendar["connected"]
+    assert "url" not in calendar
+    assert "user" not in calendar
+    assert "password" not in calendar
+
+
+def test_read_unconnected_calendars_after_connection():
+    response = client.get("/me/calendars", params={"only_connected": False}, headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 2
+
+
+def test_delete_existing_calendar():
+    response = client.delete("/cal/1", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "First modified CalDAV calendar"
+    assert data["color"] == "#234567"
+    assert data["connected"]
+    assert "url" not in data
+    assert "user" not in data
+    assert "password" not in data
+    response = client.get("/cal/1", headers=headers)
+    assert response.status_code == 404, response.text
+    response = client.get("/me/calendars", headers=headers)
+    data = response.json()
+    assert len(data) == 0
+    # add own calendar again for further testing
+    client.post(
+        "/cal",
+        json={
+            "title": "First CalDAV calendar",
+            "color": "#123456",
+            "provider": CalendarProvider.caldav.value,
+            "url": conf("CALDAV_TEST_CALENDAR_URL"),
+            "user": conf("CALDAV_TEST_USER"),
+            "password": conf("CALDAV_TEST_PASS"),
+            "connected": True,
+        },
+        headers=headers,
+    )
+
+
+def test_delete_missing_calendar():
+    response = client.delete("/cal/999", headers=headers)
+    assert response.status_code == 404, response.text
+
+
+def test_delete_foreign_calendar():
+    response = client.delete("/cal/2", headers=headers)
+    assert response.status_code == 403, response.text
+
+
+def test_connect_more_calendars_than_tier_allows():
+    cal = {}
+    for i in range(1, int(conf("TIER_BASIC_CALENDAR_LIMIT"))):
+        cal[i] = insert(models.Calendar).values(
+            owner_id="1",
+            title="Calendar" + str(i),
+            color="#123456",
+            provider="caldav",
+            url="a",
+            user="a",
+            password="a",
+            connected=True,
+        )
+    db = TestingSessionLocal()
+    for i in range(1, int(conf("TIER_BASIC_CALENDAR_LIMIT"))):
+        db.execute(cal[i])
+    db.commit()
+    response = client.post("/cal/3/connect", headers=headers)
+    assert response.status_code == 403, response.text
+
+
+""" TODO: The following tests are old test cases from an earlier version of the application
+          and need to be updated to work with the current authentication flow
+"""
 
 
 # def test_create_calendar_appointment():
