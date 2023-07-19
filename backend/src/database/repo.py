@@ -199,11 +199,12 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     """update existing calendar by id"""
     db_calendar = get_calendar(db, calendar_id)
 
-    keep_if_none = ["password", "connected", "connected_at"]
+    ignore = ["connected", "connected_at"]
+    keep_if_none = ["password"]
 
     for key, value in calendar:
         # if this key exists in the keep_if_none list, then ignore it
-        if key in keep_if_none and (not value or len(str(value)) == 0):
+        if key in ignore or (key in keep_if_none and (not value or len(str(value)) == 0)):
             continue
 
         setattr(db_calendar, key, value)
