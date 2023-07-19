@@ -177,17 +177,9 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
     subscriber_calendars = get_calendars_by_subscriber(db, subscriber_id)
     subscriber_calendar_urls = [c.url for c in subscriber_calendars]
-    connected_calendars = [calendar for calendar in subscriber_calendars if calendar.connected]
     # check if subscriber already holds this calendar by url
     if db_calendar.url in subscriber_calendar_urls:
         raise HTTPException(status_code=403, detail="Calendar already exists")
-    # check subscription limitation
-    # TODO: do this check while connecting calendars, not when adding calendars here
-    limit = get_connections_limit(db=db, subscriber_id=subscriber_id)
-    if limit > 0 and len(connected_calendars) >= limit:
-        raise HTTPException(
-            status_code=403, detail="Allowed number of connected calendars has been reached for this subscription"
-        )
     # add new calendar
     db.add(db_calendar)
     db.commit()
@@ -217,6 +209,15 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
 def update_subscriber_calendar_connection(db: Session, is_connected: bool, calendar_id: int):
     """Updates the connected status of a calendar"""
     db_calendar = get_calendar(db, calendar_id)
+    # check subscription limitation on connecting
+    if is_connected:
+        subscriber_calendars = get_calendars_by_subscriber(db, db_calendar.owner_id)
+        connected_calendars = [calendar for calendar in subscriber_calendars if calendar.connected]
+        limit = get_connections_limit(db=db, subscriber_id=db_calendar.owner_id)
+        if limit > 0 and len(connected_calendars) >= limit:
+            raise HTTPException(
+                status_code=403, detail="Allowed number of connected calendars has been reached for this subscription"
+            )
     if not db_calendar.connected:
         db_calendar.connected_at = datetime.now()
     elif db_calendar.connected and is_connected is False:

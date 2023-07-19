@@ -222,7 +222,10 @@ def connect_my_calendar(
         raise HTTPException(status_code=404, detail="Calendar not found")
     if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
-    cal = repo.update_subscriber_calendar_connection(db=db, calendar_id=id, is_connected=True)
+    try:
+        cal = repo.update_subscriber_calendar_connection(db=db, calendar_id=id, is_connected=True)
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
@@ -240,7 +243,7 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subsc
 
 
 @router.post("/rmt/calendars", response_model=list[schemas.CalendarConnectionOut])
-def read_caldav_calendars(
+def read_remote_calendars(
     connection: schemas.CalendarConnection,
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
@@ -262,7 +265,7 @@ def read_caldav_calendars(
 
 
 @router.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
-def read_caldav_events(
+def read_remote_events(
     id: int,
     start: str,
     end: str,
