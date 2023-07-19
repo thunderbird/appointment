@@ -59,6 +59,11 @@ conn.request("POST", "/%s/oauth/token" % os.getenv("AUTH0_API_DOMAIN"), payload,
 res = conn.getresponse()
 data = res.read()
 access_token = json.loads(data.decode("utf-8"))["access_token"]
+headers = {"authorization": "Bearer %s" % access_token}
+
+
+""" general tests for configuration and authentication
+"""
 
 
 def test_config():
@@ -122,8 +127,12 @@ def test_access_without_authentication_token():
     assert response.status_code == 403
 
 
-def test_login():
-    response = client.get("/login", headers={"authorization": "Bearer %s" % access_token})
+""" SUBSCRIBERS tests
+"""
+
+
+def test_first_login():
+    response = client.get("/login", headers=headers)
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["username"] == os.getenv("AUTH0_TEST_USER")
@@ -131,6 +140,71 @@ def test_login():
     assert data["name"] == os.getenv("AUTH0_TEST_USER")
     assert data["level"] == 1
     assert data["timezone"] is None
+
+
+def test_second_login():
+    response = client.get("/login", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["username"] == os.getenv("AUTH0_TEST_USER")
+    assert data["email"] == os.getenv("AUTH0_TEST_USER")
+    assert data["name"] == os.getenv("AUTH0_TEST_USER")
+    assert data["level"] == 1
+    assert data["timezone"] is None
+
+
+def test_update_profile_data():
+    response = client.put(
+        "/me",
+        json={
+            "username": "test",
+            "name": "Test Account",
+            "timezone": "Europe/Berlin",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["username"] == "test"
+    assert data["name"] == "Test Account"
+    assert data["timezone"] == "Europe/Berlin"
+    response = client.get("/login", headers=headers)
+    data = response.json()
+    assert data["username"] == "test"
+    assert data["name"] == "Test Account"
+    assert data["timezone"] == "Europe/Berlin"
+
+
+def test_signed_short_link():
+    response = client.get("/me/signature", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["url"]
+
+
+def test_signed_short_link_refresh():
+    response = client.get("/me/signature", headers=headers)
+    assert response.status_code == 200, response.text
+    url_old = response.json()["url"]
+    response = client.post("/me/signature", headers=headers)
+    assert response.status_code == 200, response.text
+    assert response.json()
+    response = client.get("/me/signature", headers=headers)
+    assert response.status_code == 200, response.text
+    url_new = response.json()["url"]
+    assert url_old != url_new
+
+
+def test_signed_short_link_verification():
+    response = client.get("/me/signature", headers=headers)
+    assert response.status_code == 200, response.text
+    url = response.json()["url"]
+    assert url
+    response = client.post("/verify/signature", json={ "url": url })
+    assert response.status_code == 200, response.text
+    assert response.json()
+    response = client.post("/verify/signature", json={ "url": url + "evil" })
+    assert response.status_code == 400, response.text
 
 
 """ TODO: The following tests are old test cases from an earlier version of the application
