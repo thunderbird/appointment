@@ -1,4 +1,3 @@
-import logging
 import os
 import secrets
 
@@ -112,9 +111,7 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
     repo.update_subscriber(
         db,
         schemas.SubscriberAuth(
-            email=subscriber.email,
-            username=subscriber.username,
-            short_link_hash=secrets.token_hex(32)
+            email=subscriber.email, username=subscriber.username, short_link_hash=secrets.token_hex(32)
         ),
         subscriber.id,
     )

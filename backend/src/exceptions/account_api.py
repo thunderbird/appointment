@@ -7,7 +7,8 @@ class AccountDeletionException(Exception):
         self.subscriber_id = subscriber_id
         self.message = message
 
-        # TODO: These fails are important to follow up on manually. We'll need to raise this in our eventual error reporting service, or email.
+        # TODO: These fails are important to follow up on manually.
+        # We'll need to raise this in our eventual error reporting service, or email.
         logging.error(f"Account deletion error for subscriber {subscriber_id}!")
 
 

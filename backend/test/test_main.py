@@ -200,10 +200,10 @@ def test_signed_short_link_verification():
     assert response.status_code == 200, response.text
     url = response.json()["url"]
     assert url
-    response = client.post("/verify/signature", json={ "url": url })
+    response = client.post("/verify/signature", json={"url": url})
     assert response.status_code == 200, response.text
     assert response.json()
-    response = client.post("/verify/signature", json={ "url": url + "evil" })
+    response = client.post("/verify/signature", json={"url": url + "evil"})
     assert response.status_code == 400, response.text
 
 
