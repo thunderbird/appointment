@@ -307,6 +307,8 @@ def create_my_calendar_appointment(
         raise HTTPException(status_code=404, detail="Calendar not found")
     if not repo.calendar_is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
+    if not repo.calendar_is_connected(db, calendar_id=a_s.appointment.calendar_id):
+        raise HTTPException(status_code=403, detail="Calendar connection is not active")
     return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 

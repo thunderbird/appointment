@@ -152,9 +152,24 @@ def calendar_exists(db: Session, calendar_id: int):
     return True if db.get(models.Calendar, calendar_id) is not None else False
 
 
+def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
+    """check if calendar belongs to subscriber"""
+    return (
+        db.query(models.Calendar)
+        .filter(models.Calendar.id == calendar_id, models.Calendar.owner_id == subscriber_id)
+        .first()
+        is not None
+    )
+
+
 def get_calendar(db: Session, calendar_id: int):
     """retrieve calendar by id"""
     return db.get(models.Calendar, calendar_id)
+
+
+def calendar_is_connected(db: Session, calendar_id: int):
+    """true if calendar of given id exists"""
+    return get_calendar(db, calendar_id).connected
 
 
 def get_calendar_by_url(db: Session, url: str):
@@ -254,16 +269,6 @@ def delete_subscriber_calendar_by_subscriber_id(db: Session, subscriber_id: int)
     for calendar in calendars:
         delete_subscriber_calendar(db, calendar_id=calendar.id)
     return True
-
-
-def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
-    """check if calendar belongs to subscriber"""
-    return (
-        db.query(models.Calendar)
-        .filter(models.Calendar.id == calendar_id, models.Calendar.owner_id == subscriber_id)
-        .first()
-        is not None
-    )
 
 
 """ APPOINTMENT repository functions
