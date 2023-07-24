@@ -78,6 +78,12 @@ Create an Auth0 test user and add the credentials of that user to `AUTH0_TEST_US
 pytest
 ```
 
+Note: Since tests include endpoints that trigger mail sending, there must be a running smtp server on your testing system. You can simply run the Python built in server (according to your environment configuration):
+
+```bash
+python -m smtpd -n -c DebuggingServer localhost:25
+```
+
 ## Contributing
 
 Contributions are very welcome. Please lint/format code before creating PRs.
