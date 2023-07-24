@@ -163,7 +163,7 @@ class Slot(Base):
     duration = Column(Integer)
 
     appointment = relationship("Appointment", back_populates="slots")
-    attendee = relationship("Attendee", back_populates="slots")
+    attendee = relationship("Attendee", cascade="all,delete", back_populates="slots")
     subscriber = relationship("Subscriber", back_populates="slots")
 
 
