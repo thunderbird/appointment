@@ -410,6 +410,7 @@ def update_slot(db: Session, slot_id: int, attendee: schemas.Attendee):
     db.refresh(db_attendee)
     # update slot
     db_slot = get_slot(db, slot_id)
+    # TODO: additionally handle subscriber_id here for already logged in users
     setattr(db_slot, "attendee_id", db_attendee.id)
     db.commit()
     return db_attendee

@@ -4,7 +4,7 @@ from os import getenv as conf
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
-from datetime import date
+from datetime import datetime, timedelta
 from http.client import HTTPSConnection
 from urllib.parse import quote_plus
 
@@ -13,16 +13,15 @@ from ..src.main import app
 from ..src.dependencies.database import get_db
 from ..src.database.models import CalendarProvider
 
-# from ..src.controller.calendar import CalDavConnector
+from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///test/test.db"
-# TODO: setup dedicated testing CalDAV server
-# TESTING_CALDAV_PRINCIPAL = "https://calendar.robur.coop/principals/"
-# TESTING_CALDAV_CALENDAR = "https://calendar.robur.coop/calendars/mozilla/"
-# TESTING_CALDAV_USER = "mozilla"
-# TESTING_CALDAV_PASS = "thunderbird"
 
-YYYYMM = str(date.today())[:-3]
+DAY1 = datetime.today().strftime("%Y-%m-%d")
+DAY2 = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+DAY3 = (datetime.today() + timedelta(days=2)).strftime("%Y-%m-%d")
+DAY4 = (datetime.today() + timedelta(days=3)).strftime("%Y-%m-%d")
+DAY5 = (datetime.today() + timedelta(days=4)).strftime("%Y-%m-%d")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -114,7 +113,7 @@ def test_access_without_authentication_token():
     assert response.status_code == 403
     response = client.post("/rmt/calendars")
     assert response.status_code == 403
-    response = client.get("/rmt/cal/1/" + YYYYMM + "-09/" + YYYYMM + "-11")
+    response = client.get("/rmt/cal/1/" + DAY1 + "/" + DAY5)
     assert response.status_code == 403
     response = client.post("/apmt")
     assert response.status_code == 403
@@ -506,290 +505,422 @@ def test_connect_more_calendars_than_tier_allows():
     assert response.status_code == 403, response.text
 
 
-""" TODO: The following tests are old test cases from an earlier version of the application
-          and need to be updated to work with the current authentication flow
-"""
+def test_create_appointment_on_connected_calendar():
+    response = client.post(
+        "/apmt",
+        json={
+            "appointment": {
+                "calendar_id": 4,
+                "title": "Appointment",
+                "duration": 180,
+                "location_type": 2,
+                "location_name": "Location",
+                "location_url": "https://test.org",
+                "location_phone": "+123456789",
+                "details": "Lorem Ipsum",
+                "status": 2,
+                "keep_open": True,
+                "appointment_type": 1,
+            },
+            "slots": [
+                {"start": DAY1 + " 09:00:00", "duration": 60},
+                {"start": DAY2 + " 09:00:00", "duration": 15},
+                {"start": DAY3 + " 09:00:00", "duration": 275},
+            ],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["title"] == "Appointment"
+    assert data["duration"] == 180
+    assert data["location_type"] == 2
+    assert data["location_name"] == "Location"
+    assert data["location_url"] == "https://test.org"
+    assert data["location_phone"] == "+123456789"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["slug"] is not None, len(data["slug"]) > 8
+    assert data["status"] == 2
+    assert data["keep_open"]
+    assert data["appointment_type"] == 1
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
+    assert data["slots"][0]["duration"] == 60
+    assert data["slots"][1]["start"] == DAY2 + "T09:00:00"
+    assert data["slots"][1]["duration"] == 15
+    assert data["slots"][2]["start"] == DAY3 + "T09:00:00"
+    assert data["slots"][2]["duration"] == 275
 
 
-# def test_create_calendar_appointment():
-#     response = client.post(
-#         "/apmt",
-#         json={
-#             "appointment": {
-#                 "calendar_id": 5,
-#                 "title": "Testing new Application feature",
-#                 "duration": 180,
-#                 "location_type": 2,
-#                 "location_url": "https://test.com",
-#                 "details": "Lorem Ipsum",
-#                 "status": 2,
-#             },
-#             "slots": [
-#                 {"start": YYYYMM + "-01 09:00:00", "duration": 60},
-#                 {"start": YYYYMM + "-02 09:00:00", "duration": 15},
-#                 {"start": YYYYMM + "-03 09:00:00", "duration": 275},
-#             ],
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["time_created"] is not None
-#     assert data["time_updated"] is not None
-#     assert data["calendar_id"] == 5
-#     assert data["title"] == "Testing new Application feature"
-#     assert data["duration"] == 180
-#     assert data["location_type"] == 2
-#     assert data["location_url"] == "https://test.com"
-#     assert data["details"] == "Lorem Ipsum"
-#     assert len(data["slug"]) > 8
-#     assert data["keep_open"]
-#     assert data["status"] == 2
-#     assert len(data["slots"]) == 3
-#     assert data["slots"][2]["start"] == YYYYMM + "-03T09:00:00"
-#     assert data["slots"][2]["duration"] == 275
+def test_create_appointment_on_unconnected_calendar():
+    response = client.post(
+        "/apmt",
+        json={
+            "appointment": {"calendar_id": 3, "title": "a", "duration": 30},
+            "slots": [{"start": DAY1 + " 09:00:00", "duration": 30}],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 403, response.text
 
 
-# def test_create_another_calendar_appointment():
-#     response = client.post(
-#         "/apmt",
-#         json={
-#             "appointment": {
-#                 "calendar_id": 5,
-#                 "title": "Testing again",
-#                 "location_type": 1,
-#                 "status": 2,
-#             },
-#             "slots": [
-#                 {"start": YYYYMM + "-04 09:00:00", "duration": 120},
-#             ],
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["time_created"] is not None
-#     assert data["time_updated"] is not None
-#     assert data["calendar_id"] == 5
-#     assert data["title"] == "Testing again"
-#     assert data["location_type"] == 1
-#     assert len(data["slug"]) > 8
-#     assert data["status"] == 2
-#     assert len(data["slots"]) == 1
-#     assert data["slots"][0]["start"] == YYYYMM + "-04T09:00:00"
-#     assert data["slots"][0]["duration"] == 120
+def test_create_missing_calendar_appointment():
+    response = client.post(
+        "/apmt",
+        json={
+            "appointment": {"calendar_id": "999", "title": "a", "duration": 30},
+            "slots": [{"start": DAY1 + " 09:00:00", "duration": 30}],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 404, response.text
 
 
-# def test_create_missing_calendar_appointment():
-#     response = client.post(
-#         "/apmt",
-#         json={
-#             "appointment": {"calendar_id": "30", "duration": "1", "title": "a"},
-#             "slots": [],
-#         },
-#     )
-#     assert response.status_code == 404, response.text
+def test_create_foreign_calendar_appointment():
+    response = client.post(
+        "/apmt",
+        json={
+            "appointment": {"calendar_id": "2", "title": "a", "duration": 30},
+            "slots": [{"start": DAY1 + " 09:00:00", "duration": 30}],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 403, response.text
 
 
-# def test_create_foreign_calendar_appointment():
-#     response = client.post(
-#         "/apmt",
-#         json={
-#             "appointment": {"calendar_id": "2", "duration": "1", "title": "a"},
-#             "slots": [],
-#         },
-#     )
-#     assert response.status_code == 403, response.text
+def test_read_appointments():
+    response = client.get("/me/appointments", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 1
+    data = data[0]
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["title"] == "Appointment"
+    assert data["duration"] == 180
+    assert data["location_type"] == 2
+    assert data["location_name"] == "Location"
+    assert data["location_url"] == "https://test.org"
+    assert data["location_phone"] == "+123456789"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["slug"] is not None, len(data["slug"]) > 8
+    assert data["status"] == 2
+    assert data["keep_open"]
+    assert data["appointment_type"] == 1
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
+    assert data["slots"][0]["duration"] == 60
+    assert data["slots"][1]["start"] == DAY2 + "T09:00:00"
+    assert data["slots"][1]["duration"] == 15
+    assert data["slots"][2]["start"] == DAY3 + "T09:00:00"
+    assert data["slots"][2]["duration"] == 275
 
 
-# def test_read_my_appointments():
-#     response = client.get("/me/appointments")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert isinstance(data, list)
-#     assert len(data) == 2
-#     assert data[0]["duration"] == 180
-#     assert "calendar_id" in data[0] and data[0]["calendar_id"] == 5
+def test_read_existing_appointment():
+    response = client.get("/apmt/1", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["title"] == "Appointment"
+    assert data["duration"] == 180
+    assert data["location_type"] == 2
+    assert data["location_name"] == "Location"
+    assert data["location_url"] == "https://test.org"
+    assert data["location_phone"] == "+123456789"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["slug"] is not None, len(data["slug"]) > 8
+    assert data["status"] == 2
+    assert data["keep_open"]
+    assert data["appointment_type"] == 1
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
+    assert data["slots"][0]["duration"] == 60
+    assert data["slots"][1]["start"] == DAY2 + "T09:00:00"
+    assert data["slots"][1]["duration"] == 15
+    assert data["slots"][2]["start"] == DAY3 + "T09:00:00"
+    assert data["slots"][2]["duration"] == 275
 
 
-# def test_read_existing_appointment():
-#     response = client.get("/apmt/1")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["time_created"] is not None
-#     assert data["time_updated"] is not None
-#     assert data["calendar_id"] == 5
-#     assert data["duration"] == 180
-#     assert data["title"] == "Testing new Application feature"
-#     assert data["keep_open"]
-#     assert len(data["slots"]) == 3
-#     assert data["slots"][2]["start"] == YYYYMM + "-03T09:00:00"
-#     assert data["slots"][2]["duration"] == 275
+def test_read_missing_appointment():
+    response = client.get("/apmt/999", headers=headers)
+    assert response.status_code == 404, response.text
 
 
-# def test_read_missing_appointment():
-#     response = client.get("/apmt/30")
-#     assert response.status_code == 404, response.text
+def test_read_foreign_appointment():
+    stmt = insert(models.Appointment).values(calendar_id="2", duration="60", title="abc", slug="test")
+    db = TestingSessionLocal()
+    db.execute(stmt)
+    db.commit()
+    response = client.get("/apmt/2", headers=headers)
+    assert response.status_code == 403, response.text
 
 
-# def test_read_foreign_appointment():
-#     stmt = insert(models.Appointment).values(
-#         calendar_id="2",
-#         duration="60",
-#         title="abc",
-#         slug="58fe9784f60a42bcaa94eb8f1a7e5c17",
-#     )
-#     db = TestingSessionLocal()
-#     db.execute(stmt)
-#     db.commit()
-#     response = client.get("/apmt/3")
-#     assert response.status_code == 403, response.text
+def test_update_existing_appointment():
+    response = client.put(
+        "/apmt/1",
+        json={
+            "appointment": {
+                "calendar_id": 4,
+                "title": "Appointmentx",
+                "duration": 90,
+                "location_type": 1,
+                "location_name": "Locationx",
+                "location_url": "https://testx.org",
+                "location_phone": "+1234567890",
+                "details": "Lorem Ipsumx",
+                "status": 1,
+                "keep_open": False,
+                "appointment_type": 2,
+            },
+            "slots": [
+                {"start": DAY1 + " 11:00:00", "duration": 30},
+                {"start": DAY2 + " 11:00:00", "duration": 30},
+                {"start": DAY3 + " 11:00:00", "duration": 30},
+            ],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["title"] == "Appointmentx"
+    assert data["duration"] == 90
+    assert data["location_type"] == 1
+    assert data["location_name"] == "Locationx"
+    assert data["location_url"] == "https://testx.org"
+    assert data["location_phone"] == "+1234567890"
+    assert data["details"] == "Lorem Ipsumx"
+    assert data["slug"] is not None, len(data["slug"]) > 8
+    assert data["status"] == 1
+    assert not data["keep_open"]
+    assert data["appointment_type"] == 2
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["start"] == DAY1 + "T11:00:00"
+    assert data["slots"][0]["duration"] == 30
+    assert data["slots"][1]["start"] == DAY2 + "T11:00:00"
+    assert data["slots"][1]["duration"] == 30
+    assert data["slots"][2]["start"] == DAY3 + "T11:00:00"
+    assert data["slots"][2]["duration"] == 30
 
 
-# def test_update_existing_appointment():
-#     response = client.put(
-#         "/apmt/1",
-#         json={
-#             "appointment": {
-#                 "calendar_id": "5",
-#                 "duration": "90",
-#                 "title": "Testing new Application featurex",
-#                 "keep_open": "false",
-#             },
-#             "slots": [
-#                 {"start": YYYYMM + "-01 09:00:00", "duration": 60},
-#                 {"start": YYYYMM + "-03 10:00:00", "duration": 25},
-#                 {"start": YYYYMM + "-05 09:00:00", "duration": 375},
-#             ],
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["time_created"] is not None
-#     assert data["time_updated"] is not None
-#     assert data["duration"] == 90
-#     assert data["title"] == "Testing new Application featurex"
-#     assert not data["keep_open"]
-#     assert len(data["slots"]) == 3
-#     assert data["slots"][2]["start"] == YYYYMM + "-05T09:00:00"
-#     assert data["slots"][2]["duration"] == 375
+def test_update_missing_appointment():
+    response = client.put(
+        "/apmt/999",
+        json={
+            "appointment": {"calendar_id": "2", "title": "a", "duration": 30},
+            "slots": [{"start": DAY1 + " 09:00:00", "duration": 30}],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 404, response.text
 
 
-# def test_update_missing_appointment():
-#     response = client.put(
-#         "/apmt/30",
-#         json={
-#             "appointment": {"calendar_id": "2", "duration": "90", "title": "a"},
-#             "slots": [],
-#         },
-#     )
-#     assert response.status_code == 404, response.text
+def test_update_foreign_appointment():
+    response = client.put(
+        "/apmt/2",
+        json={
+            "appointment": {"calendar_id": "2", "title": "a", "duration": 30},
+            "slots": [{"start": DAY1 + " 09:00:00", "duration": 30}],
+        },
+        headers=headers,
+    )
+    assert response.status_code == 403, response.text
 
 
-# def test_update_foreign_appointment():
-#     response = client.put(
-#         "/apmt/3",
-#         json={
-#             "appointment": {"calendar_id": "2", "duration": "90", "title": "a"},
-#             "slots": [],
-#         },
-#     )
-#     assert response.status_code == 403, response.text
+def test_delete_existing_appointment():
+    response = client.delete("/apmt/1", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["title"] == "Appointmentx"
+    assert data["duration"] == 90
+    assert data["location_type"] == 1
+    assert data["location_name"] == "Locationx"
+    assert data["location_url"] == "https://testx.org"
+    assert data["location_phone"] == "+1234567890"
+    assert data["details"] == "Lorem Ipsumx"
+    assert data["slug"] is not None, len(data["slug"]) > 8
+    assert data["status"] == 1
+    assert not data["keep_open"]
+    assert data["appointment_type"] == 2
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["start"] == DAY1 + "T11:00:00"
+    assert data["slots"][0]["duration"] == 30
+    assert data["slots"][1]["start"] == DAY2 + "T11:00:00"
+    assert data["slots"][1]["duration"] == 30
+    assert data["slots"][2]["start"] == DAY3 + "T11:00:00"
+    assert data["slots"][2]["duration"] == 30
+    response = client.get("/apmt/1", headers=headers)
+    assert response.status_code == 404, response.text
+    response = client.get("/me/appointments", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 0
+    # add appointment again for further testing
+    client.post(
+        "/apmt",
+        json={
+            "appointment": {
+                "calendar_id": 4,
+                "title": "Appointment",
+                "duration": 180,
+                "location_type": 2,
+                "location_name": "Location",
+                "location_url": "https://test.org",
+                "location_phone": "+123456789",
+                "details": "Lorem Ipsum",
+                "status": 2,
+                "keep_open": True,
+                "appointment_type": 1,
+                "slug": "abcdef",
+            },
+            "slots": [
+                {"start": DAY1 + " 09:00:00", "duration": 60},
+                {"start": DAY2 + " 09:00:00", "duration": 15},
+                {"start": DAY3 + " 09:00:00", "duration": 275},
+            ],
+        },
+        headers=headers,
+    )
 
 
-# def test_delete_existing_appointment():
-#     # response = client.delete("/apmt/1")
-#     # assert response.status_code == 200, response.text
-#     # data = response.json()
-#     # assert data["duration"] == 90
-#     # assert data["title"] == "Testing new Application featurex"
-#     # response = client.get("/apmt/1")
-#     # assert response.status_code == 404, response.text
-#     # response = client.get("/me/appointments")
-#     # data = response.json()
-#     # assert len(data) == 1
-#     # add appointment again for further testing
-#     client.post(
-#         "/apmt",
-#         json={
-#             "appointment": {
-#                 "calendar_id": "5",
-#                 "duration": "90",
-#                 "title": "Testing new Application featurex",
-#                 "status": 2,
-#             },
-#             "slots": [
-#                 {"start": YYYYMM + "-01 09:00:00", "duration": 60},
-#                 {"start": YYYYMM + "-03 10:00:00", "duration": 25},
-#                 {"start": YYYYMM + "-05 09:00:00", "duration": 375},
-#             ],
-#         },
-#     )
+def test_delete_missing_appointment():
+    response = client.delete("/apmt/999", headers=headers)
+    assert response.status_code == 404, response.text
 
 
-# def test_delete_missing_appointment():
-#     response = client.delete("/apmt/30")
-#     assert response.status_code == 404, response.text
+def test_delete_foreign_appointment():
+    response = client.delete("/apmt/2", headers=headers)
+    assert response.status_code == 403, response.text
 
 
-# def test_delete_foreign_appointment():
-#     response = client.delete("/apmt/3")
-#     assert response.status_code == 403, response.text
+def test_read_public_existing_appointment():
+    response = client.get("/apmt/public/abcdef")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert "calendar_id" not in data
+    assert "status" not in data
+    assert data["title"] == "Appointment"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["slug"] == "abcdef"
+    assert data["appointment_type"] == 1
+    assert data["owner_name"] == "Test Account"
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
+    assert data["slots"][0]["duration"] == 60
+    assert data["slots"][1]["start"] == DAY2 + "T09:00:00"
+    assert data["slots"][1]["duration"] == 15
+    assert data["slots"][2]["start"] == DAY3 + "T09:00:00"
+    assert data["slots"][2]["duration"] == 275
 
 
-# def test_read_public_existing_appointment():
-#     slug = client.get("/apmt/4").json()["slug"]
-#     response = client.get("/apmt/adminx/" + slug)
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert "calendar_id" not in data
-#     assert "status" not in data
-#     assert data["title"] == "Testing new Application featurex"
-#     assert data["owner_name"] == "The Admin"
-#     assert len(data["slots"]) == 3
-#     assert data["slots"][2]["start"] == YYYYMM + "-05T09:00:00"
-#     assert data["slots"][2]["duration"] == 375
+def test_read_public_missing_appointment():
+    response = client.get("/apmt/public/missing")
+    assert response.status_code == 404, response.text
 
 
-# def test_read_public_missing_appointment():
-#     response = client.get("/apmt/adminx/missing")
-#     assert response.status_code == 404, response.text
+def test_attendee_selects_appointment_slot():
+    response = client.put(
+        "/apmt/public/abcdef",
+        json={
+            "slot_id": 1,
+            "attendee": {
+                "email": "person@test.org",
+                "name": "John Doe",
+            },
+        },
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["slot_id"] == 1
+    assert data["attendee"]["email"] == "person@test.org"
+    assert data["attendee"]["name"] == "John Doe"
 
 
-# def test_attendee_selects_appointment_slot():
-#     slug = client.get("/apmt/4").json()["slug"]
-#     response = client.put(
-#         "/apmt/adminx/" + slug,
-#         json={
-#             "slot_id": "9",
-#             "attendee": {
-#                 "email": "person@test.org",
-#                 "name": "John Doe",
-#             },
-#         },
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["email"] == "person@test.org"
-#     assert data["name"] == "John Doe"
+def test_read_public_appointment_after_attendee_selection():
+    response = client.get("/apmt/public/abcdef")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert len(data["slots"]) == 3
+    assert data["slots"][0]["attendee_id"] == 1
 
 
-# def test_attendee_selects_unavailable_appointment_slot():
-#     slug = client.get("/apmt/4").json()["slug"]
-#     response = client.put(
-#         "/apmt/adminx/" + slug,
-#         json={"slot_id": "9", "attendee": {"email": "a", "name": "b"}},
-#     )
-#     assert response.status_code == 403, response.text
+def test_attendee_selects_unavailable_appointment_slot():
+    response = client.put(
+        "/apmt/public/abcdef",
+        json={"slot_id": 1, "attendee": {"email": "a", "name": "b"}},
+    )
+    assert response.status_code == 403, response.text
 
 
-# def test_get_remote_events():
-#     response = client.get("/rmt/cal/5/" + YYYYMM + "-09/" + YYYYMM + "-11")
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert len(data) == 1
-#     assert data[0]["title"] == "Testing new Application featurex"
-#     assert data[0]["start"] == YYYYMM + "-03 09:00:00"
-#     assert data[0]["end"] == YYYYMM + "-03 11:00:00"
-#     # delete event again to prevent calendar pollution
-#     con = CalDavConnector(TESTING_CALDAV_CALENDAR, TESTING_CALDAV_USER, TESTING_CALDAV_PASS)
-#     n = con.delete_events(start=YYYYMM + "-10")
-#     assert n == 1
+def test_attendee_selects_missing_appointment_slot():
+    response = client.put(
+        "/apmt/public/missing",
+        json={"slot_id": 1, "attendee": {"email": "a", "name": "b"}},
+    )
+    assert response.status_code == 404, response.text
+
+
+def test_attendee_selects_appointment_missing_slot():
+    response = client.put(
+        "/apmt/public/abcdef",
+        json={"slot_id": 999, "attendee": {"email": "a", "name": "b"}},
+    )
+    assert response.status_code == 404, response.text
+
+
+def test_attendee_provides_invalid_email_address():
+    response = client.put(
+        "/apmt/public/abcdef",
+        json={"slot_id": 2, "attendee": {"email": "a", "name": "b"}},
+    )
+    assert response.status_code == 400, response.text
+
+
+def test_get_remote_caldav_events():
+    response = client.get("/rmt/cal/4/" + DAY1 + "/" + DAY3, headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Appointment"
+    assert data[0]["start"][:19] == DAY1 + " 09:00:00"
+    assert data[0]["end"][:19] == DAY1 + " 10:00:00"
+    # delete event again to prevent calendar pollution
+    con = CalDavConnector(conf("CALDAV_TEST_CALENDAR_URL"), conf("CALDAV_TEST_USER"), conf("CALDAV_TEST_PASS"))
+    n = con.delete_events(start=DAY1)
+    assert n == 1
+
+
+def test_get_invitation_ics_file():
+    response = client.get("/serve/ics/abcdef/1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["name"] == "invite"
+    assert data["content_type"] == "text/calendar"
+    assert "data" in data
+
+
+def test_get_invitation_ics_file_for_missing_appointment():
+    response = client.get("/serve/ics/missing/1")
+    assert response.status_code == 404, response.text
+
+
+def test_get_invitation_ics_file_for_missing_slot():
+    response = client.get("/serve/ics/abcdef/999")
+    assert response.status_code == 404, response.text
+
+
+# TDOD: add sync calendar tests post'rmt/sync'
+# TDOD: add scheduling/availability tests
