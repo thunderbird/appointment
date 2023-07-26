@@ -1,4 +1,3 @@
-import logging
 import os
 import secrets
 
@@ -28,7 +27,7 @@ router = APIRouter()
 @router.get("/")
 def health():
     """Small route with no processing that will be used for health checks"""
-    return {}
+    return True
 
 
 @router.get("/login", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.SubscriberBase)
@@ -222,7 +221,10 @@ def connect_my_calendar(
         raise HTTPException(status_code=404, detail="Calendar not found")
     if not repo.calendar_is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
-    cal = repo.update_subscriber_calendar_connection(db=db, calendar_id=id, is_connected=True)
+    try:
+        cal = repo.update_subscriber_calendar_connection(db=db, calendar_id=id, is_connected=True)
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
@@ -240,7 +242,7 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subsc
 
 
 @router.post("/rmt/calendars", response_model=list[schemas.CalendarConnectionOut])
-def read_caldav_calendars(
+def read_remote_calendars(
     connection: schemas.CalendarConnection,
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
@@ -261,8 +263,37 @@ def read_caldav_calendars(
     return con.list_calendars()
 
 
+@router.post("/rmt/sync")
+def sync_remote_calendars(
+    db: Session = Depends(get_db),
+    google_client: GoogleClient = Depends(get_google_client),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
+    """endpoint to sync calendars from a remote server"""
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
+    # Create a list of connections and loop through them with sync
+    # TODO: Also handle CalDAV connections
+    connections = [
+        GoogleConnector(
+            db=db,
+            google_client=google_client,
+            calendar_id=None,
+            subscriber_id=subscriber.id,
+            google_tkn=subscriber.google_tkn,
+        ),
+    ]
+    for connection in connections:
+        error_occurred = connection.sync_calendars()
+        # And then redirect back to frontend
+        if error_occurred:
+            raise HTTPException(500, "An error occurred while syncing calendars. Please try again later.")
+    return True
+
+
+
 @router.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
-def read_caldav_events(
+def read_remote_events(
     id: int,
     start: str,
     end: str,
@@ -304,6 +335,8 @@ def create_my_calendar_appointment(
         raise HTTPException(status_code=404, detail="Calendar not found")
     if not repo.calendar_is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
+    if not repo.calendar_is_connected(db, calendar_id=a_s.appointment.calendar_id):
+        raise HTTPException(status_code=403, detail="Calendar connection is not active")
     return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 
@@ -445,33 +478,3 @@ def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
         content_type="text/calendar",
         data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8"),
     )
-
-
-@router.post("/rmt/sync")
-def sync_caldav_calendars(
-    db: Session = Depends(get_db),
-    google_client: GoogleClient = Depends(get_google_client),
-    subscriber: Subscriber = Depends(get_subscriber),
-):
-    """endpoint to sync calendars from a remote server"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-
-    # Create a list of connections and loop through them with sync
-    connections = [
-        GoogleConnector(
-            db=db,
-            google_client=google_client,
-            calendar_id=None,
-            subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
-        ),
-    ]
-
-    for connection in connections:
-        error_occurred = connection.sync_calendars()
-        # And then redirect back to frontend
-        if error_occurred:
-            raise HTTPException(500, "An error occurred while syncing calendars. Please try again later.")
-
-    return True

@@ -153,9 +153,24 @@ def calendar_exists(db: Session, calendar_id: int):
     return True if db.get(models.Calendar, calendar_id) is not None else False
 
 
+def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
+    """check if calendar belongs to subscriber"""
+    return (
+        db.query(models.Calendar)
+        .filter(models.Calendar.id == calendar_id, models.Calendar.owner_id == subscriber_id)
+        .first()
+        is not None
+    )
+
+
 def get_calendar(db: Session, calendar_id: int):
     """retrieve calendar by id"""
     return db.get(models.Calendar, calendar_id)
+
+
+def calendar_is_connected(db: Session, calendar_id: int):
+    """true if calendar of given id exists"""
+    return get_calendar(db, calendar_id).connected
 
 
 def get_calendar_by_url(db: Session, url: str):
@@ -178,17 +193,9 @@ def create_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
     subscriber_calendars = get_calendars_by_subscriber(db, subscriber_id)
     subscriber_calendar_urls = [c.url for c in subscriber_calendars]
-    connected_calendars = [calendar for calendar in subscriber_calendars if calendar.connected]
     # check if subscriber already holds this calendar by url
     if db_calendar.url in subscriber_calendar_urls:
         raise HTTPException(status_code=403, detail="Calendar already exists")
-    # check subscription limitation
-    # TODO: do this check while connecting calendars, not when adding calendars here
-    limit = get_connections_limit(db=db, subscriber_id=subscriber_id)
-    if limit > 0 and len(connected_calendars) >= limit:
-        raise HTTPException(
-            status_code=403, detail="Allowed number of connected calendars has been reached for this subscription"
-        )
     # add new calendar
     db.add(db_calendar)
     db.commit()
@@ -200,11 +207,12 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     """update existing calendar by id"""
     db_calendar = get_calendar(db, calendar_id)
 
-    keep_if_none = ["password", "connected", "connected_at"]
+    ignore = ["connected", "connected_at"]
+    keep_if_none = ["password"]
 
     for key, value in calendar:
         # if this key exists in the keep_if_none list, then ignore it
-        if key in keep_if_none and (not value or len(str(value)) == 0):
+        if key in ignore or (key in keep_if_none and (not value or len(str(value)) == 0)):
             continue
 
         setattr(db_calendar, key, value)
@@ -217,6 +225,15 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
 def update_subscriber_calendar_connection(db: Session, is_connected: bool, calendar_id: int):
     """Updates the connected status of a calendar"""
     db_calendar = get_calendar(db, calendar_id)
+    # check subscription limitation on connecting
+    if is_connected:
+        subscriber_calendars = get_calendars_by_subscriber(db, db_calendar.owner_id)
+        connected_calendars = [calendar for calendar in subscriber_calendars if calendar.connected]
+        limit = get_connections_limit(db=db, subscriber_id=db_calendar.owner_id)
+        if limit > 0 and len(connected_calendars) >= limit:
+            raise HTTPException(
+                status_code=403, detail="Allowed number of connected calendars has been reached for this subscription"
+            )
     if not db_calendar.connected:
         db_calendar.connected_at = datetime.now()
     elif db_calendar.connected and is_connected is False:
@@ -253,16 +270,6 @@ def delete_subscriber_calendar_by_subscriber_id(db: Session, subscriber_id: int)
     for calendar in calendars:
         delete_subscriber_calendar(db, calendar_id=calendar.id)
     return True
-
-
-def calendar_is_owned(db: Session, calendar_id: int, subscriber_id: int):
-    """check if calendar belongs to subscriber"""
-    return (
-        db.query(models.Calendar)
-        .filter(models.Calendar.id == calendar_id, models.Calendar.owner_id == subscriber_id)
-        .first()
-        is not None
-    )
 
 
 """ APPOINTMENT repository functions
@@ -404,6 +411,7 @@ def update_slot(db: Session, slot_id: int, attendee: schemas.Attendee):
     db.refresh(db_attendee)
     # update slot
     db_slot = get_slot(db, slot_id)
+    # TODO: additionally handle subscriber_id here for already logged in users
     setattr(db_slot, "attendee_id", db_attendee.id)
     db.commit()
     return db_attendee

@@ -1,0 +1,136 @@
+# Documentation Thunderbird Appointment
+
+This place holds all additional technical documentation for Thunderbird Appointment.
+
+## API endpoints
+
+After starting the backend container, you can find the API documentation here: <http://localhost:8090/docs>
+
+## Project architecture
+
+This are the general components, Thunderbird Appointment consists of.
+
+```mermaid
+C4Component
+
+  ContainerDb(c4, "Database", "MySQL", "Subscribers, calendars,<br>appointments, attendees, ...")
+  Container(c1, "Frontend", "Vue3 / Tailwind", "Provides all Appointment<br>functionality to customers<br>via their web browser")
+  Container_Boundary(b1, "Backend") {
+    Component(c3, "Subscriber Area", "FAstAPI, JWT auth", "Provides functionality related<br>to calendar connections,<br>appointments, general availability")
+    Component(c2, "Auth Controller", "FastAPI", "Redirects to Auth0 service,<br>authenticates subscriber,<br>gets subscription level")
+    Component(c5, "Public Link Area", "FastAPI", "Allows visitors to choose<br>slots in given<br>availability timeline.")
+    System_Ext(e3, "Google Server", "Allows to query and write<br>event data into calendars<br>using Google API")
+    System_Ext(e2, "CalDAV Server", "Allows to query and write<br>event data into calendars<br>using CalDAV format")
+    System_Ext(e1, "Auth0", "Allows users to register,<br>sign in and subscribe<br>to an Appointment tier")
+  }
+  BiRel(c1, c2, "Call Sign up / in", "HTTPS")
+  Rel(c2, c3, "Authentication<br>succeeded", "Session")
+  BiRel(c3, c4, "Query data, migrate data", "SQLAlchemy, Alembic")
+  Rel(c1, c5, "Public Link Call", "HTTPS")
+  BiRel(c2, e1, "Authenticate Account", "OAuth2")
+  BiRel(c3, e2, "Query event data", "JSON/HTTPS")
+  BiRel(c3, e3, "Query event data", "JSON/HTTPS")
+
+  UpdateRelStyle(c1, c2, $textColor="#999", $offsetY="-60", $offsetX="-110")
+  UpdateRelStyle(c2, c3, $textColor="#999", $offsetY="20", $offsetX="-38")
+  UpdateRelStyle(c3, c4, $textColor="#999", $offsetY="-50", $offsetX="10")
+  UpdateRelStyle(c1, c5, $textColor="#999", $offsetY="-60", $offsetX="-60")
+  UpdateRelStyle(c2, e1, $textColor="#999", $offsetY="0", $offsetX="10")
+  UpdateRelStyle(c3, e2, $textColor="#999", $offsetY="0", $offsetX="10")
+  UpdateRelStyle(c3, e3, $textColor="#999", $offsetY="0", $offsetX="10")
+  UpdateElementStyle(c4, $fontColor="black", $bgColor="#eddcea", $borderColor="#a30086")
+  UpdateElementStyle(c2, $bgColor="#456789")
+  UpdateElementStyle(c3, $bgColor="#456789")
+  UpdateElementStyle(c5, $bgColor="#456789")
+  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
+
+## Entity relations
+
+The database contains the following tables and columns.
+
+```mermaid
+erDiagram
+  SUBSCRIBERS {
+    int id PK "Unique user key"
+    string username "URL-friendly username, format is restricted"
+    string email "Preferred email address (synced with Auth0)"
+    string name "Preferred display name"
+    enum level "Subscription level [basic, plus, pro, admin]"
+    int timezone "User selected home timezone, UTC offset"
+    string google_tkn "Google state token for calendar API authentication"
+    string google_state "Temp storage for verifying google state"
+    date google_state_expires_at "Google state expiration date"
+    string short_link_hash "Hash for verifying user link"
+  }
+  SUBSCRIBERS ||--o{ CALENDARS : own
+  CALENDARS {
+    int id PK "Unique calendar key"
+    int owner_id FK "Person who owns this calendar"
+    enum provider "Calendar provider [Google, CalDAV]"
+    string title "Calendar title to identify connection in lists"
+    string color "Color to visually identify calendars"
+    string url "CalDAV url of remote calendar"
+    string user "Username to access the calendar"
+    string password "Passphrase to access the calendar"
+    bool connected "Flag indicating if calendar is actively used"
+    date connected_at "Date calendar was connected"
+  }
+  CALENDARS ||--o{ APPOINTMENTS : create_from
+  APPOINTMENTS {
+    int id PK "Unique appointment key"
+    int calendar_id FK "Calendar connected to the appointment"
+    date time_created "UTC timestamp of appointment creation"
+    date time_updated "UTC timestamp of last appointment modification"
+    int duration "Appointment default duration, number of minutes [10-600]"
+    string title "Short appointment title"
+    enum location_type "[In person, online]"
+    string location_suggestions "Semicolon separated predefined location keys (teams, zoom, jitsy, phone call etc.)"
+    int location_selected "Key of final location selected from suggestions by appointment creator"
+    string location_name "Custom location title"
+    string location_url "URL the appointment is held at"
+    string location_phone "Phone number the appointment is held at"
+    string details "Detailed appointment description or agenda"
+    string slug "Generated random string to build share links for the appointment"
+    bool keep_open "If true appointment accepts selection of multiple slots (future feature)"
+    enum status "Appointment state [draft, ready, close]"
+    enum appointment_type "Single or template appointment [Oneoff, schedule]"
+  }
+  APPOINTMENTS ||--|| SCHEDULES : template_for
+  SCHEDULES {
+    int id PK "Unique schedule key"
+    int appointment_id FK "Appointment serving as template for this schedule"
+    string name "Schedule title"
+    date time_created "UTC timestamp of schedule creation"
+    date time_updated "UTC timestamp of last schedule modification"
+  }
+  SCHEDULES ||--|{ AVAILABILITIES : has
+  AVAILABILITIES {
+    int id PK "Unique availability key"
+    int schedule_id FK "Schedule this availability is for"
+    string day_of_week "Day of week the times are chosen for"
+    date start_time "UTC timestamp of availbale start time"
+    date end_time "UTC timestamp of available end time"
+    string min_time_before_meeting "Can't book if it's less than this many minutes before start time"
+    int slot_duration "Size of the Slot that can be booked in minutes"
+    date time_created "UTC timestamp of schedule creation"
+    date time_updated "UTC timestamp of last schedule modification"
+  }
+  APPOINTMENTS ||--|{ SLOTS : provide
+  SLOTS {
+    int id PK "Unique key of available time slot"
+    int appointment_id FK "Appointment this slot was provided for"
+    int attendee_id FK "Attendee who selected this slot"
+    int subscriber_id FK "Subscriber who chose this slot"
+    date time_updated "UTC timestamp of last slot modification"
+    date start "UTC timestamp of slot starting time"
+    int duration "Custom slot duration, number of minutes [10-600]"
+  }
+  SUBSCRIBERS ||--o{ SLOTS : choose
+  ATTENDEES ||--o{ SLOTS : select
+  ATTENDEES {
+    int id PK "Unique key of attendee"
+    string email "Email address of the attendee"
+    string name "Name of the attendee"
+  }
+```

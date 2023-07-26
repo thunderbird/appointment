@@ -16,10 +16,7 @@ router = APIRouter()
 
 
 @router.get("/download")
-def download_data(
-    db: Session = Depends(get_db),
-    subscriber: Subscriber = Depends(get_subscriber),
-):
+def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Download your account data in zip format! Returns a streaming response with the zip buffer."""
     zip_buffer = data.download(db, subscriber)
     return StreamingResponse(
