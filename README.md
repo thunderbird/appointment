@@ -71,13 +71,19 @@ Run application for development with hot reloading backend and frontend:
 To run tests, first install Pytest
 
 ```bash
-pip install pytest
+pip install pytest httpx
 ```
 
-Then `cd` into the project root und simply run
+Create an Auth0 test user and add the credentials of that user to `AUTH0_TEST_USER` and `AUTH0_TEST_PASS` in your `.env`. Then `cd` into the project root und simply run
 
 ```bash
 pytest
+```
+
+Note: Since tests include endpoints that trigger mail sending, there must be a running smtp server on your testing system. You can simply run the Python built in server (according to your environment configuration):
+
+```bash
+python -m smtpd -n -c DebuggingServer localhost:25
 ```
 
 ## Contributing
