@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 from http.client import HTTPSConnection
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse, parse_qs
 
 from ..src.database import models
 from ..src.main import app
@@ -43,7 +43,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
-# handle authentication
+# handle subscriber authentication
 conn = HTTPSConnection(conf("AUTH0_API_DOMAIN"))
 payload = "grant_type=password&username=%s&password=%s&audience=%s&scope=%s&client_id=%s&client_secret=%s" % (
     conf("AUTH0_TEST_USER"),
@@ -505,6 +505,10 @@ def test_connect_more_calendars_than_tier_allows():
     assert response.status_code == 403, response.text
 
 
+""" APPOINTMENT tests
+"""
+
+
 def test_create_appointment_on_connected_calendar():
     response = client.post(
         "/apmt",
@@ -901,6 +905,80 @@ def test_get_remote_caldav_events():
     con = CalDavConnector(conf("CALDAV_TEST_CALENDAR_URL"), conf("CALDAV_TEST_USER"), conf("CALDAV_TEST_PASS"))
     n = con.delete_events(start=DAY1)
     assert n == 1
+
+
+""" CALENDARS tests (Google)
+"""
+
+
+def test_google_auth():
+    response = client.get("/google/auth?email=" + conf("GOOGLE_TEST_USER"), headers=headers)
+    assert response.status_code == 200, response.text
+    url = response.json()
+    urlobj = urlparse(url)
+    params = parse_qs(urlobj.query)
+    assert urlobj.scheme == "https"
+    assert urlobj.hostname == "accounts.google.com"
+    assert params['client_id'][0] == conf("GOOGLE_AUTH_CLIENT_ID")
+    assert params['client_id'][0]
+    assert params['login_hint'][0] == conf("GOOGLE_TEST_USER")
+
+
+# TODO
+# def test_read_remote_google_calendars():
+#     response = client.post("/rmt/sync", headers=headers)
+#     assert response.status_code == 200, response.text
+#     assert response.json()
+
+
+# TODO
+# def test_create_google_calendar():
+#     response = client.post(
+#         "/cal",
+#         json={
+#             "title": "First Google calendar",
+#             "color": "#123456",
+#             "provider": CalendarProvider.google.value,
+#             "connected": False,
+#         },
+#         headers=headers,
+#     )
+#     assert response.status_code == 200, response.text
+#     data = response.json()
+#     assert data["title"] == "First Google calendar"
+#     assert data["color"] == "#123456"
+#     assert not data["connected"]
+
+
+# TODO
+# def test_read_existing_google_calendar():
+#     response = client.get("/cal/1", headers=headers)
+#     assert response.status_code == 200, response.text
+#     data = response.json()
+#     assert data["title"] == "First Google calendar"
+#     assert data["color"] == "#123456"
+#     assert data["provider"] == CalendarProvider.google.value
+#     assert data["url"] == conf("Google_TEST_CALENDAR_URL")
+#     assert data["user"] == conf("Google_TEST_USER")
+#     assert not data["connected"]
+#     assert "password" not in data
+
+
+# TODO
+# def test_connect_google_calendar():
+#     response = client.post("/cal/1/connect", headers=headers)
+#     assert response.status_code == 200, response.text
+#     data = response.json()
+#     assert data["title"] == "First modified Google calendar"
+#     assert data["color"] == "#234567"
+#     assert data["connected"]
+#     assert "url" not in data
+#     assert "user" not in data
+#     assert "password" not in data
+
+
+""" MISCELLANEOUS tests
+"""
 
 
 def test_get_invitation_ics_file():
