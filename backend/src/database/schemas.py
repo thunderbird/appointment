@@ -9,7 +9,6 @@ from .models import (
     AppointmentStatus,
     LocationType,
     CalendarProvider,
-    AppointmentType,
     DayOfWeek,
     random_slug,
 )
@@ -69,7 +68,6 @@ class AppointmentBase(BaseModel):
     title: str
     details: str | None = None
     slug: str | None = Field(default_factory=random_slug)
-    appointment_type: AppointmentType | None = AppointmentType.oneoff
 
 
 class AppointmentFull(AppointmentBase):
@@ -101,6 +99,54 @@ class AppointmentOut(AppointmentBase):
     slots: list[SlotOut] = []
 
 
+""" SCHEDULE model schemas
+"""
+
+
+class AvailabilityBase(BaseModel):
+    schedule_id: int
+    day_of_week: DayOfWeek
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    min_time_before_meeting: int
+    slot_duration: int | None = None
+
+
+class Availability(AvailabilityBase):
+    id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+    class Config:
+        orm_mode = True
+
+
+class ScheduleBase(BaseModel):
+    name: str
+    location_type: LocationType | None = LocationType.inperson
+    location_url: str | None = None
+    details: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    start_time: str | None = None
+    end_time: str | None = None
+    earliest_booking: int | None = None
+    farthest_booking: int | None = None
+    weekdays: str | None = None
+    slot_duration: int | None = None
+
+
+class Schedule(ScheduleBase):
+    id: int
+    calendar_id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+    availabilities: list[Availability] = []
+
+    class Config:
+        orm_mode = True
+
+
 """ CALENDAR model schemas
 """
 
@@ -125,6 +171,7 @@ class Calendar(CalendarConnection):
     id: int
     owner_id: int
     appointments: list[Appointment] = []
+    schedules: list[Schedule] = []
 
     class Config:
         orm_mode = True
@@ -160,42 +207,6 @@ class Subscriber(SubscriberAuth):
     id: int
     calendars: list[Calendar] = []
     slots: list[Slot] = []
-
-    class Config:
-        orm_mode = True
-
-
-""" SCHEDULE model schemas
-"""
-
-
-class ScheduleBase(BaseModel):
-    name: str
-
-
-class Schedule(ScheduleBase):
-    id: int
-    appointment_id: int
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
-
-    class Config:
-        orm_mode = True
-
-
-class AvailabilityBase(BaseModel):
-    schedule_id: int
-    day_of_week: DayOfWeek
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-    min_time_before_meeting: int
-    duration: int | None = None
-
-
-class Availability(AvailabilityBase):
-    id: int
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
 
     class Config:
         orm_mode = True

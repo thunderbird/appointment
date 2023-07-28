@@ -291,7 +291,6 @@ def sync_remote_calendars(
     return True
 
 
-
 @router.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
 def read_remote_events(
     id: int,

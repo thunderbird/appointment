@@ -524,7 +524,6 @@ def test_create_appointment_on_connected_calendar():
                 "details": "Lorem Ipsum",
                 "status": 2,
                 "keep_open": True,
-                "appointment_type": 1,
             },
             "slots": [
                 {"start": DAY1 + " 09:00:00", "duration": 60},
@@ -549,7 +548,6 @@ def test_create_appointment_on_connected_calendar():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 2
     assert data["keep_open"]
-    assert data["appointment_type"] == 1
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
     assert data["slots"][0]["duration"] == 60
@@ -615,7 +613,6 @@ def test_read_appointments():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 2
     assert data["keep_open"]
-    assert data["appointment_type"] == 1
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
     assert data["slots"][0]["duration"] == 60
@@ -642,7 +639,6 @@ def test_read_existing_appointment():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 2
     assert data["keep_open"]
-    assert data["appointment_type"] == 1
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
     assert data["slots"][0]["duration"] == 60
@@ -681,7 +677,6 @@ def test_update_existing_appointment():
                 "details": "Lorem Ipsumx",
                 "status": 1,
                 "keep_open": False,
-                "appointment_type": 2,
             },
             "slots": [
                 {"start": DAY1 + " 11:00:00", "duration": 30},
@@ -706,7 +701,6 @@ def test_update_existing_appointment():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 1
     assert not data["keep_open"]
-    assert data["appointment_type"] == 2
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T11:00:00"
     assert data["slots"][0]["duration"] == 30
@@ -757,7 +751,6 @@ def test_delete_existing_appointment():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 1
     assert not data["keep_open"]
-    assert data["appointment_type"] == 2
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T11:00:00"
     assert data["slots"][0]["duration"] == 30
@@ -787,7 +780,6 @@ def test_delete_existing_appointment():
                 "details": "Lorem Ipsum",
                 "status": 2,
                 "keep_open": True,
-                "appointment_type": 1,
                 "slug": "abcdef",
             },
             "slots": [
@@ -819,7 +811,6 @@ def test_read_public_existing_appointment():
     assert data["title"] == "Appointment"
     assert data["details"] == "Lorem Ipsum"
     assert data["slug"] == "abcdef"
-    assert data["appointment_type"] == 1
     assert data["owner_name"] == "Test Account"
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
@@ -919,9 +910,8 @@ def test_google_auth():
     params = parse_qs(urlobj.query)
     assert urlobj.scheme == "https"
     assert urlobj.hostname == "accounts.google.com"
-    assert params['client_id'][0] == conf("GOOGLE_AUTH_CLIENT_ID")
-    assert params['client_id'][0]
-    assert params['login_hint'][0] == conf("GOOGLE_TEST_USER")
+    assert params["client_id"][0] == conf("GOOGLE_AUTH_CLIENT_ID")
+    assert params["login_hint"][0] == conf("GOOGLE_TEST_USER")
 
 
 # TODO

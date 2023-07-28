@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=list[schemas.Schedule])
-def read_my_schedules(
+def read_schedules(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
@@ -21,7 +21,7 @@ def read_my_schedules(
 
 
 @router.get("/{id}", response_model=schemas.Schedule)
-def read_my_schedule(
+def read_schedule(
     id: int,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
@@ -38,7 +38,7 @@ def read_my_schedule(
 
 
 @router.put("/{id}", response_model=schemas.Schedule)
-def update_my_schedule(
+def update_schedule(
     id: int,
     schedule: schemas.ScheduleBase,
     db: Session = Depends(get_db),
@@ -55,7 +55,7 @@ def update_my_schedule(
 
 
 @router.get("/{id}/availability", response_model=list[schemas.Availability])
-def read_my_schedule(
+def read_schedule_availabilities(
     id: int,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
