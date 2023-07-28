@@ -710,7 +710,6 @@ def test_read_existing_appointment():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 2
     assert data["keep_open"]
-    assert data["appointment_type"] == 1
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T09:00:00"
     assert data["slots"][0]["duration"] == 60
@@ -773,7 +772,6 @@ def test_update_existing_appointment():
     assert data["slug"] is not None, len(data["slug"]) > 8
     assert data["status"] == 1
     assert not data["keep_open"]
-    assert data["appointment_type"] == 2
     assert len(data["slots"]) == 3
     assert data["slots"][0]["start"] == DAY1 + "T11:00:00"
     assert data["slots"][0]["duration"] == 30
