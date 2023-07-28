@@ -123,6 +123,7 @@ class Availability(AvailabilityBase):
 
 class ScheduleBase(BaseModel):
     name: str
+    calendar_id: int
     location_type: LocationType | None = LocationType.inperson
     location_url: str | None = None
     details: str | None = None
@@ -138,7 +139,6 @@ class ScheduleBase(BaseModel):
 
 class Schedule(ScheduleBase):
     id: int
-    calendar_id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
     availabilities: list[Availability] = []

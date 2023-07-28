@@ -11,6 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy import DateTime
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
+
 # from database.models import AppointmentType
 
 

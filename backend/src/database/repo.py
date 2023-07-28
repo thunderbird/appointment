@@ -427,15 +427,22 @@ def slot_is_available(db: Session, slot_id: int):
 """
 
 
+def create_calendar_schedule(db: Session, schedule: schemas.ScheduleBase):
+    """create new schedule with slots for calendar"""
+    db_schedule = models.Schedule(**schedule.dict())
+    db.add(db_schedule)
+    db.commit()
+    db.refresh(db_schedule)
+    return db_schedule
+
+
 def get_schedules_by_subscriber(db: Session, subscriber_id: int):
     """Get schedules by subscriber id. Should be only one for now (general availability)."""
     return (
         db.query(models.Schedule)
-        .join(models.Appointment)
         .join(models.Calendar)
         .filter(models.Calendar.owner_id == subscriber_id)
-        .filter(models.Appointment.calendar_id == models.Calendar.id)
-        .filter(models.Schedule.appointment_id == models.Appointment.id)
+        .filter(models.Schedule.calendar_id == models.Calendar.id)
         .all()
     )
 
@@ -458,7 +465,7 @@ def schedule_exists(db: Session, schedule_id: int):
     return True if get_schedule(db, schedule_id) is not None else False
 
 
-def update_subscriber_schedule(db: Session, schedule: schemas.ScheduleBase, schedule_id: int):
+def update_calendar_schedule(db: Session, schedule: schemas.ScheduleBase, schedule_id: int):
     """update existing schedule by id"""
     db_schedule = get_schedule(db, schedule_id)
     for key, value in schedule:

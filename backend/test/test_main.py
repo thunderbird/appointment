@@ -22,6 +22,7 @@ DAY2 = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
 DAY3 = (datetime.today() + timedelta(days=2)).strftime("%Y-%m-%d")
 DAY4 = (datetime.today() + timedelta(days=3)).strftime("%Y-%m-%d")
 DAY5 = (datetime.today() + timedelta(days=4)).strftime("%Y-%m-%d")
+DAY14 = (datetime.today() + timedelta(days=13)).strftime("%Y-%m-%d")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -505,6 +506,75 @@ def test_connect_more_calendars_than_tier_allows():
     assert response.status_code == 403, response.text
 
 
+""" CALENDARS tests (Google)
+"""
+
+
+def test_google_auth():
+    response = client.get("/google/auth?email=" + conf("GOOGLE_TEST_USER"), headers=headers)
+    assert response.status_code == 200, response.text
+    url = response.json()
+    urlobj = urlparse(url)
+    params = parse_qs(urlobj.query)
+    assert urlobj.scheme == "https"
+    assert urlobj.hostname == "accounts.google.com"
+    assert params["client_id"][0] == conf("GOOGLE_AUTH_CLIENT_ID")
+    assert params["login_hint"][0] == conf("GOOGLE_TEST_USER")
+
+
+# TODO
+# def test_read_remote_google_calendars():
+#     response = client.post("/rmt/sync", headers=headers)
+#     assert response.status_code == 200, response.text
+#     assert response.json()
+
+
+# TODO
+# def test_create_google_calendar():
+#     response = client.post(
+#         "/cal",
+#         json={
+#             "title": "First Google calendar",
+#             "color": "#123456",
+#             "provider": CalendarProvider.google.value,
+#             "connected": False,
+#         },
+#         headers=headers,
+#     )
+#     assert response.status_code == 200, response.text
+#     data = response.json()
+#     assert data["title"] == "First Google calendar"
+#     assert data["color"] == "#123456"
+#     assert not data["connected"]
+
+
+# TODO
+# def test_read_existing_google_calendar():
+#     response = client.get("/cal/1", headers=headers)
+#     assert response.status_code == 200, response.text
+#     data = response.json()
+#     assert data["title"] == "First Google calendar"
+#     assert data["color"] == "#123456"
+#     assert data["provider"] == CalendarProvider.google.value
+#     assert data["url"] == conf("Google_TEST_CALENDAR_URL")
+#     assert data["user"] == conf("Google_TEST_USER")
+#     assert not data["connected"]
+#     assert "password" not in data
+
+
+# TODO
+# def test_connect_google_calendar():
+#     response = client.post("/cal/1/connect", headers=headers)
+#     assert response.status_code == 200, response.text
+#     data = response.json()
+#     assert data["title"] == "First modified Google calendar"
+#     assert data["color"] == "#234567"
+#     assert data["connected"]
+#     assert "url" not in data
+#     assert "user" not in data
+#     assert "password" not in data
+
+
 """ APPOINTMENT tests
 """
 
@@ -569,7 +639,7 @@ def test_create_appointment_on_unconnected_calendar():
     assert response.status_code == 403, response.text
 
 
-def test_create_missing_calendar_appointment():
+def test_create_appointment_on_missing_calendar():
     response = client.post(
         "/apmt",
         json={
@@ -581,7 +651,7 @@ def test_create_missing_calendar_appointment():
     assert response.status_code == 404, response.text
 
 
-def test_create_foreign_calendar_appointment():
+def test_create_appointment_on_foreign_calendar():
     response = client.post(
         "/apmt",
         json={
@@ -852,7 +922,7 @@ def test_read_public_appointment_after_attendee_selection():
     assert data["slots"][0]["attendee_id"] == 1
 
 
-def test_attendee_selects_unavailable_appointment_slot():
+def test_attendee_selects_slot_of_unavailable_appointment():
     response = client.put(
         "/apmt/public/abcdef",
         json={"slot_id": 1, "attendee": {"email": "a", "name": "b"}},
@@ -860,7 +930,7 @@ def test_attendee_selects_unavailable_appointment_slot():
     assert response.status_code == 403, response.text
 
 
-def test_attendee_selects_missing_appointment_slot():
+def test_attendee_selects_slot_of_missing_appointment():
     response = client.put(
         "/apmt/public/missing",
         json={"slot_id": 1, "attendee": {"email": "a", "name": "b"}},
@@ -868,7 +938,7 @@ def test_attendee_selects_missing_appointment_slot():
     assert response.status_code == 404, response.text
 
 
-def test_attendee_selects_appointment_missing_slot():
+def test_attendee_selects_missing_slot_of_existing_appointment():
     response = client.put(
         "/apmt/public/abcdef",
         json={"slot_id": 999, "attendee": {"email": "a", "name": "b"}},
@@ -898,73 +968,202 @@ def test_get_remote_caldav_events():
     assert n == 1
 
 
-""" CALENDARS tests (Google)
+""" SCHEDULE tests
 """
 
 
-def test_google_auth():
-    response = client.get("/google/auth?email=" + conf("GOOGLE_TEST_USER"), headers=headers)
+def test_create_schedule_on_connected_calendar():
+    response = client.post(
+        "/schedule",
+        json={
+            "calendar_id": 4,
+            "name": "Schedule",
+            "location_type": 2,
+            "location_url": "https://test.org",
+            "details": "Lorem Ipsum",
+            "start_date": DAY1,
+            "end_date": DAY14,
+            "start_time": "10:00",
+            "end_time": "18:00",
+            "earliest_booking": 1440,
+            "farthest_booking": 20160,
+            "weekdays": json.dumps([1, 2, 3, 4, 5]),
+            "slot_duration": 30,
+        },
+        headers=headers,
+    )
     assert response.status_code == 200, response.text
-    url = response.json()
-    urlobj = urlparse(url)
-    params = parse_qs(urlobj.query)
-    assert urlobj.scheme == "https"
-    assert urlobj.hostname == "accounts.google.com"
-    assert params["client_id"][0] == conf("GOOGLE_AUTH_CLIENT_ID")
-    assert params["login_hint"][0] == conf("GOOGLE_TEST_USER")
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["name"] == "Schedule"
+    assert data["location_type"] == 2
+    assert data["location_url"] == "https://test.org"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["start_date"] == DAY1
+    assert data["end_date"] == DAY14
+    assert data["start_time"] == "10:00"
+    assert data["end_time"] == "18:00"
+    assert data["earliest_booking"] == 1440
+    assert data["farthest_booking"] == 20160
+    assert data["weekdays"] is not None
+    weekdays = json.loads(data["weekdays"])
+    assert len(weekdays) == 5
+    assert weekdays == [1, 2, 3, 4, 5]
+    assert data["slot_duration"] == 30
 
 
-# TODO
-# def test_read_remote_google_calendars():
-#     response = client.post("/rmt/sync", headers=headers)
-#     assert response.status_code == 200, response.text
-#     assert response.json()
+def test_create_schedule_on_unconnected_calendar():
+    response = client.post(
+        "/schedule",
+        json={"calendar_id": 3, "name": "Schedule"},
+        headers=headers,
+    )
+    assert response.status_code == 403, response.text
 
 
-# TODO
-# def test_create_google_calendar():
-#     response = client.post(
-#         "/cal",
-#         json={
-#             "title": "First Google calendar",
-#             "color": "#123456",
-#             "provider": CalendarProvider.google.value,
-#             "connected": False,
-#         },
-#         headers=headers,
-#     )
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "First Google calendar"
-#     assert data["color"] == "#123456"
-#     assert not data["connected"]
+def test_create_schedule_on_missing_calendar():
+    response = client.post(
+        "/schedule",
+        json={"calendar_id": 999, "name": "Schedule"},
+        headers=headers,
+    )
+    assert response.status_code == 404, response.text
 
 
-# TODO
-# def test_read_existing_google_calendar():
-#     response = client.get("/cal/1", headers=headers)
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "First Google calendar"
-#     assert data["color"] == "#123456"
-#     assert data["provider"] == CalendarProvider.google.value
-#     assert data["url"] == conf("Google_TEST_CALENDAR_URL")
-#     assert data["user"] == conf("Google_TEST_USER")
-#     assert not data["connected"]
-#     assert "password" not in data
+def test_create_schedule_on_foreign_calendar():
+    response = client.post(
+        "/schedule",
+        json={"calendar_id": 2, "name": "Schedule"},
+        headers=headers,
+    )
+    assert response.status_code == 403, response.text
 
 
-# TODO
-# def test_connect_google_calendar():
-#     response = client.post("/cal/1/connect", headers=headers)
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["title"] == "First modified Google calendar"
-#     assert data["color"] == "#234567"
-#     assert data["connected"]
-#     assert "url" not in data
-#     assert "user" not in data
-#     assert "password" not in data
+def test_read_schedules():
+    response = client.get("/schedule", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert type(data) is list
+    assert len(data) == 1
+    data = data[0]
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["name"] == "Schedule"
+    assert data["location_type"] == 2
+    assert data["location_url"] == "https://test.org"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["start_date"] == DAY1
+    assert data["end_date"] == DAY14
+    assert data["start_time"] == "10:00"
+    assert data["end_time"] == "18:00"
+    assert data["earliest_booking"] == 1440
+    assert data["farthest_booking"] == 20160
+    assert data["weekdays"] is not None
+    weekdays = json.loads(data["weekdays"])
+    assert len(weekdays) == 5
+    assert weekdays == [1, 2, 3, 4, 5]
+    assert data["slot_duration"] == 30
+
+
+def test_read_existing_schedule():
+    response = client.get("/schedule/1", headers=headers)
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["name"] == "Schedule"
+    assert data["location_type"] == 2
+    assert data["location_url"] == "https://test.org"
+    assert data["details"] == "Lorem Ipsum"
+    assert data["start_date"] == DAY1
+    assert data["end_date"] == DAY14
+    assert data["start_time"] == "10:00"
+    assert data["end_time"] == "18:00"
+    assert data["earliest_booking"] == 1440
+    assert data["farthest_booking"] == 20160
+    assert data["weekdays"] is not None
+    weekdays = json.loads(data["weekdays"])
+    assert len(weekdays) == 5
+    assert weekdays == [1, 2, 3, 4, 5]
+    assert data["slot_duration"] == 30
+
+
+def test_read_missing_schedule():
+    response = client.get("/schedule/999", headers=headers)
+    assert response.status_code == 404, response.text
+
+
+def test_read_foreign_schedule():
+    stmt = insert(models.Schedule).values(calendar_id=2, name="abc")
+    db = TestingSessionLocal()
+    db.execute(stmt)
+    db.commit()
+    response = client.get("/schedule/2", headers=headers)
+    assert response.status_code == 403, response.text
+
+
+def test_update_existing_schedule():
+    response = client.put(
+        "/schedule/1",
+        json={
+            "calendar_id": 4,
+            "name": "Schedulex",
+            "location_type": 1,
+            "location_url": "https://testx.org",
+            "details": "Lorem Ipsumx",
+            "start_date": DAY2,
+            "end_date": DAY5,
+            "start_time": "09:00",
+            "end_time": "17:00",
+            "earliest_booking": 1000,
+            "farthest_booking": 20000,
+            "weekdays": json.dumps([2, 4, 6]),
+            "slot_duration": 60,
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["time_created"] is not None
+    assert data["time_updated"] is not None
+    assert data["calendar_id"] == 4
+    assert data["name"] == "Schedulex"
+    assert data["location_type"] == 1
+    assert data["location_url"] == "https://testx.org"
+    assert data["details"] == "Lorem Ipsumx"
+    assert data["start_date"] == DAY2
+    assert data["end_date"] == DAY5
+    assert data["start_time"] == "09:00"
+    assert data["end_time"] == "17:00"
+    assert data["earliest_booking"] == 1000
+    assert data["farthest_booking"] == 20000
+    assert data["weekdays"] is not None
+    weekdays = json.loads(data["weekdays"])
+    assert len(weekdays) == 3
+    assert weekdays == [2, 4, 6]
+    assert data["slot_duration"] == 60
+
+
+def test_update_missing_schedule():
+    response = client.put(
+        "/schedule/999",
+        json={"calendar_id": 1, "name": "Schedule"},
+        headers=headers,
+    )
+    assert response.status_code == 404, response.text
+
+
+def test_update_foreign_schedule():
+    response = client.put(
+        "/schedule/2",
+        json={"calendar_id": 2, "name": "Schedule"},
+        headers=headers,
+    )
+    assert response.status_code == 403, response.text
 
 
 """ MISCELLANEOUS tests
@@ -988,7 +1187,3 @@ def test_get_invitation_ics_file_for_missing_appointment():
 def test_get_invitation_ics_file_for_missing_slot():
     response = client.get("/serve/ics/abcdef/999")
     assert response.status_code == 404, response.text
-
-
-# TDOD: add sync calendar tests post'rmt/sync'
-# TDOD: add scheduling/availability tests
