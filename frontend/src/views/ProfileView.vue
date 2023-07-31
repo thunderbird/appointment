@@ -30,10 +30,11 @@
 </template>
 
 <script setup>
-import { subscriberLevels, appointmentState } from '@/definitions';
 import { inject, computed, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
+import { subscriberLevels, appointmentState } from '@/definitions';
+import { removeUserFromStorage } from '../stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
 
 // icons
@@ -63,6 +64,7 @@ const logout = () => {
       returnTo: window.location.origin,
     },
   });
+  removeUserFromStorage();
 };
 
 // initially load data when component gets remounted

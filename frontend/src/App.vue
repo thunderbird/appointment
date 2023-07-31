@@ -34,6 +34,7 @@ import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';
 import SiteNotification from '@/elements/SiteNotification';
 import { siteNotificationStore } from '@/stores/alert-store';
+import { userStore } from '@/stores/user-store';
 // component constants
 const apiUrl = inject('apiUrl');
 const dj = inject('dayjs');
@@ -93,7 +94,7 @@ const navItems = ['calendar', 'appointments', 'settings'];
 
 // current user object
 // structure: { username, email, name, level, timezone, id }
-const currentUser = ref(null);
+const currentUser = userStore;
 
 // db tables
 const calendars = ref([]);
@@ -107,6 +108,10 @@ const routeIsPublic = computed(
 // check login state of current user first
 const checkLogin = async () => {
   if (auth.isAuthenticated.value) {
+    if (currentUser.value) {
+      // avoid calling the backend unnecessarily
+      return;
+    }
     // call backend to create user if they do not exist in database
     const { data, error } = await call('login').get().json();
     // assign authed user data
