@@ -34,7 +34,11 @@ import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';
 import SiteNotification from '@/elements/SiteNotification';
 import { siteNotificationStore } from '@/stores/alert-store';
-import { userStore } from '@/stores/user-store';
+
+// current user object
+// structure: { username, email, name, level, timezone, id }
+import { userStore as currentUser } from '@/stores/user-store';
+
 // component constants
 const apiUrl = inject('apiUrl');
 const dj = inject('dayjs');
@@ -91,10 +95,6 @@ provide('call', call);
 
 // menu items for main navigation
 const navItems = ['calendar', 'appointments', 'settings'];
-
-// current user object
-// structure: { username, email, name, level, timezone, id }
-const currentUser = userStore;
 
 // db tables
 const calendars = ref([]);
