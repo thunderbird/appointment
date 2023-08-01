@@ -313,12 +313,12 @@ const downloadIcs = async () => {
 // or from a general availability link of a subscriber
 const getAppointment = async () => {
   if (isAvailabilityRoute.value) {
-    const { error, data } = await call('verify/signature').post({ url: window.location.href }).json();
+    const { error, data } = await call('schedule/public/availability').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
       return true;
     } else {
-      // TODO: here we need to make another API call to get the actual general appointment data or include it
-      //       in the signature verification call. For now, here is fake example data for testing.
+      // TODO: now process the actual general appointment data that is returned.
+      //       For now, here is fake example data for testing.
       appointment.value = {
         "title": "General Available",
         "details": "These are the time slots that are currently free for you to choose.",

@@ -3,11 +3,14 @@
 Repository providing CRUD functions for all database models. 
 """
 import os
+import re
 from datetime import timedelta, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
+from ..controller.auth import sign_url
+
 
 """ATTENDEES repository functions
 """
@@ -144,6 +147,40 @@ def get_connections_limit(db: Session, subscriber_id: int):
     return mapping[db_subscriber.level]
 
 
+def verify_subscriber_link(db: Session, url: str):
+    """Check if a given url is a valid signed subscriber profile link
+    Return subscriber if valid.
+    """
+    # Look for a <username> followed by an optional signature that ends the string
+    pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
+    match = re.findall(pattern, url)
+
+    if match is None or len(match) == 0:
+        return False
+
+    # Flatten
+    match = match[0]
+    clean_url = url
+
+    username = match[0]
+    signature = None
+    if len(match) > 1:
+        signature = match[1]
+        clean_url = clean_url.replace(signature, "")
+
+    subscriber = get_subscriber_by_username(db, username)
+    if not subscriber:
+        return False
+
+    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
+    signed_signature = sign_url(clean_url_with_short_link)
+
+    # Verify the signature matches the incoming one
+    if signed_signature == signature:
+        return subscriber
+    return False
+
+
 """ CALENDAR repository functions
 """
 
@@ -207,11 +244,14 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     """update existing calendar by id"""
     db_calendar = get_calendar(db, calendar_id)
 
+    # list of all attributes that must never be updated
+    # # because they have dedicated update functions for security reasons
     ignore = ["connected", "connected_at"]
+    # list of all attributes that will keep their current value if None is passed
     keep_if_none = ["password"]
 
     for key, value in calendar:
-        # if this key exists in the keep_if_none list, then ignore it
+        # skip update, if attribute is ignored or current value should be kept if given value is falsey/empty
         if key in ignore or (key in keep_if_none and (not value or len(str(value)) == 0)):
             continue
 

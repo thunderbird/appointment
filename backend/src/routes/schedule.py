@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
+from ..controller.calendar import Tools
 from ..database import repo, schemas
 from ..database.models import Subscriber, Schedule
 from ..dependencies.auth import get_subscriber
@@ -26,10 +27,7 @@ def create_calendar_schedule(
 
 
 @router.get("/", response_model=list[schemas.Schedule])
-def read_schedules(
-    db: Session = Depends(get_db),
-    subscriber: Subscriber = Depends(get_subscriber),
-):
+def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Gets all of the available schedules for the logged in subscriber (only one for the time being)"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
@@ -70,20 +68,16 @@ def update_schedule(
     return repo.update_calendar_schedule(db=db, schedule=schedule, schedule_id=id)
 
 
-@router.get("/{id}/availability", response_model=list[schemas.Availability])
-def read_schedule_availabilities(
-    id: int,
-    db: Session = Depends(get_db),
-    subscriber: Subscriber = Depends(get_subscriber),
-):
-    """Returns the calculated availability for a given schedule"""
-    # TODO calculate availability given schedule config and existing calendar events
-    # create GeneralAppointment model to provide calculated data to booking page
+@router.post("/public/availability", response_model=list[schemas.AppointmentOut])
+def read_schedule_availabilities(url: str, db: Session = Depends(get_db)):
+    """Returns the calculated availability for the first schedule from a subscribers public profile link"""
+    subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-    schedule = repo.get_schedule(db, schedule_id=id)
+        raise HTTPException(status_code=401, detail="Invalid profile link")
+    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    schedule = schedules[0]
     if schedule is None:
         raise HTTPException(status_code=404, detail="Schedule not found")
-    if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Schedule not owned by subscriber")
-    return repo.get_availability_by_schedule(db, schedule_id=id)
+    availableSlots = Tools.available_slots_from_schedule(schedule)
+    existingEvents = []  # TODO: get events from connected calendar in scheduled date range
+    return Tools.events_set_difference(availableSlots, existingEvents)

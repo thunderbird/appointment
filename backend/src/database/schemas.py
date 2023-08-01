@@ -2,7 +2,7 @@
 
 Definitions of valid data shapes for database and query models.
 """
-from datetime import datetime
+from datetime import datetime, date, time
 from pydantic import BaseModel, Field
 from .models import (
     SubscriberLevel,
@@ -127,14 +127,19 @@ class ScheduleBase(BaseModel):
     location_type: LocationType | None = LocationType.inperson
     location_url: str | None = None
     details: str | None = None
-    start_date: str | None = None
-    end_date: str | None = None
-    start_time: str | None = None
-    end_time: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    start_time: time | None = None
+    end_time: time | None = None
     earliest_booking: int | None = None
     farthest_booking: int | None = None
     weekdays: str | None = None
     slot_duration: int | None = None
+
+    class Config:
+        json_encoders = {
+            time: lambda t: t.strftime("%H:%M"),
+        }
 
 
 class Schedule(ScheduleBase):

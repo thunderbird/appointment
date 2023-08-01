@@ -270,3 +270,15 @@ class Tools:
         )
         mail = InvitationMail(sender=organizer.email, to=attendee.email, attachments=[invite])
         mail.send()
+
+    def available_slots_from_schedule(s: schemas.ScheduleBase):
+        """This helper calculates a list of slots according to the given schedule."""
+        # start = s.start_date
+        return []
+
+    def events_set_difference(a: list[schemas.SlotBase], b: list[schemas.SlotBase]):
+        """This helper removes all events from list A, which have a time collision with any event in list B
+        and returns all remaining elements from A as new list.
+        """
+        # TODO: implement A-B
+        return a

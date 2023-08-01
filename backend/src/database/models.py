@@ -5,7 +5,7 @@ Definitions of database tables and their relationships.
 import enum
 import os
 import uuid
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
@@ -170,10 +170,10 @@ class Schedule(Base):
     location_type = Column(Enum(LocationType), default=LocationType.inperson)
     location_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
     details = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    start_date = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_date = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    start_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    start_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
+    start_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
     earliest_booking = Column(Integer, default=1440)  # defaults to 24 hours
     farthest_booking = Column(Integer, default=20160)  # defaults to 2 weeks
     weekdays = Column("data", JSON)

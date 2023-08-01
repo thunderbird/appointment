@@ -39,19 +39,19 @@ def upgrade() -> None:
     )
     op.add_column(
         "schedules",
-        sa.Column("start_date", StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255), index=True),
+        sa.Column("start_date", StringEncryptedType(sa.Date, secret, AesEngine, "pkcs5", length=255), index=True),
     )
     op.add_column(
         "schedules",
-        sa.Column("end_date", StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255), index=True),
+        sa.Column("end_date", StringEncryptedType(sa.Date, secret, AesEngine, "pkcs5", length=255), index=True),
     )
     op.add_column(
         "schedules",
-        sa.Column("start_time", StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255), index=True),
+        sa.Column("start_time", StringEncryptedType(sa.Time, secret, AesEngine, "pkcs5", length=255), index=True),
     )
     op.add_column(
         "schedules",
-        sa.Column("end_time", StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255), index=True),
+        sa.Column("end_time", StringEncryptedType(sa.Time, secret, AesEngine, "pkcs5", length=255), index=True),
     )
     op.add_column("schedules", sa.Column("earliest_booking", sa.Integer, default=1440))
     op.add_column("schedules", sa.Column("farthest_booking", sa.Integer, default=20160))
