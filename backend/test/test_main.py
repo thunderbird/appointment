@@ -17,12 +17,12 @@ from ..src.controller.calendar import CalDavConnector
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///test/test.db"
 
-DAY1 = datetime.today().strftime("%Y-%m-%d")
-DAY2 = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
-DAY3 = (datetime.today() + timedelta(days=2)).strftime("%Y-%m-%d")
-DAY4 = (datetime.today() + timedelta(days=3)).strftime("%Y-%m-%d")
-DAY5 = (datetime.today() + timedelta(days=4)).strftime("%Y-%m-%d")
-DAY14 = (datetime.today() + timedelta(days=13)).strftime("%Y-%m-%d")
+now = datetime.today()
+DAY1 = now.strftime("%Y-%m-%d")
+DAY2 = (now + timedelta(days=1)).strftime("%Y-%m-%d")
+DAY3 = (now + timedelta(days=2)).strftime("%Y-%m-%d")
+DAY5 = (now + timedelta(days=4)).strftime("%Y-%m-%d")
+DAY14 = (now + timedelta(days=13)).strftime("%Y-%m-%d")
 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
@@ -988,7 +988,7 @@ def test_create_schedule_on_connected_calendar():
             "end_time": "18:00",
             "earliest_booking": 1440,
             "farthest_booking": 20160,
-            "weekdays": json.dumps([1, 2, 3, 4, 5]),
+            "weekdays": [1, 2, 3, 4, 5],
             "slot_duration": 30,
         },
         headers=headers,
@@ -1009,7 +1009,7 @@ def test_create_schedule_on_connected_calendar():
     assert data["earliest_booking"] == 1440
     assert data["farthest_booking"] == 20160
     assert data["weekdays"] is not None
-    weekdays = json.loads(data["weekdays"])
+    weekdays = data["weekdays"]
     assert len(weekdays) == 5
     assert weekdays == [1, 2, 3, 4, 5]
     assert data["slot_duration"] == 30
@@ -1063,7 +1063,7 @@ def test_read_schedules():
     assert data["earliest_booking"] == 1440
     assert data["farthest_booking"] == 20160
     assert data["weekdays"] is not None
-    weekdays = json.loads(data["weekdays"])
+    weekdays = data["weekdays"]
     assert len(weekdays) == 5
     assert weekdays == [1, 2, 3, 4, 5]
     assert data["slot_duration"] == 30
@@ -1087,7 +1087,7 @@ def test_read_existing_schedule():
     assert data["earliest_booking"] == 1440
     assert data["farthest_booking"] == 20160
     assert data["weekdays"] is not None
-    weekdays = json.loads(data["weekdays"])
+    weekdays = data["weekdays"]
     assert len(weekdays) == 5
     assert weekdays == [1, 2, 3, 4, 5]
     assert data["slot_duration"] == 30
@@ -1122,7 +1122,7 @@ def test_update_existing_schedule():
             "end_time": "17:00",
             "earliest_booking": 1000,
             "farthest_booking": 20000,
-            "weekdays": json.dumps([2, 4, 6]),
+            "weekdays": [2, 4, 6],
             "slot_duration": 60,
         },
         headers=headers,
@@ -1143,7 +1143,7 @@ def test_update_existing_schedule():
     assert data["earliest_booking"] == 1000
     assert data["farthest_booking"] == 20000
     assert data["weekdays"] is not None
-    weekdays = json.loads(data["weekdays"])
+    weekdays = data["weekdays"]
     assert len(weekdays) == 3
     assert weekdays == [2, 4, 6]
     assert data["slot_duration"] == 60
@@ -1165,6 +1165,19 @@ def test_update_foreign_schedule():
         headers=headers,
     )
     assert response.status_code == 403, response.text
+
+
+def test_read_schedule_availabilities():
+    response = client.get("/me/signature", headers=headers)
+    url = response.json()["url"]
+    response = client.post("/schedule/public/availability", json={"url": url})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "Schedulex"
+    assert data["details"] == "Lorem Ipsumx"
+    assert data["owner_name"] == "Test Account"
+    assert len(data["slots"]) > 5
+    # TODO: some more assertions are needed here to check for correct slot generation
 
 
 """ MISCELLANEOUS tests

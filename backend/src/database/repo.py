@@ -4,6 +4,7 @@ Repository providing CRUD functions for all database models.
 """
 import os
 import re
+import logging
 from datetime import timedelta, datetime
 
 from fastapi import HTTPException
@@ -480,9 +481,8 @@ def get_schedules_by_subscriber(db: Session, subscriber_id: int):
     """Get schedules by subscriber id. Should be only one for now (general availability)."""
     return (
         db.query(models.Schedule)
-        .join(models.Calendar)
+        .join(models.Calendar, models.Schedule.calendar_id == models.Calendar.id)
         .filter(models.Calendar.owner_id == subscriber_id)
-        .filter(models.Schedule.calendar_id == models.Calendar.id)
         .all()
     )
 

@@ -174,9 +174,9 @@ class Schedule(Base):
     end_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
     start_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
     end_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
-    earliest_booking = Column(Integer, default=1440)  # defaults to 24 hours
-    farthest_booking = Column(Integer, default=20160)  # defaults to 2 weeks
-    weekdays = Column("data", JSON)
+    earliest_booking = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
+    farthest_booking = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
+    weekdays = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration = Column(Integer, default=30)  # defaults to 30 minutes
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -186,6 +186,9 @@ class Schedule(Base):
 
 
 class Availability(Base):
+    """This table will be used as soon as the application provides custom availability
+       in addition to the general availability
+    """
     __tablename__ = "availabilities"
 
     id = Column(Integer, primary_key=True, index=True)

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
+import logging
 
 from sqlalchemy.orm import Session
 from ..controller.calendar import Tools
@@ -68,16 +69,22 @@ def update_schedule(
     return repo.update_calendar_schedule(db=db, schedule=schedule, schedule_id=id)
 
 
-@router.post("/public/availability", response_model=list[schemas.AppointmentOut])
-def read_schedule_availabilities(url: str, db: Session = Depends(get_db)):
+@router.post("/public/availability", response_model=schemas.AppointmentOut)
+def read_schedule_availabilities(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
         raise HTTPException(status_code=401, detail="Invalid profile link")
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
-    schedule = schedules[0]
-    if schedule is None:
+    try:
+        schedule = schedules[0]  # for now we only process the first existing schedule
+    except KeyError:
         raise HTTPException(status_code=404, detail="Schedule not found")
     availableSlots = Tools.available_slots_from_schedule(schedule)
     existingEvents = []  # TODO: get events from connected calendar in scheduled date range
-    return Tools.events_set_difference(availableSlots, existingEvents)
+    return schemas.AppointmentOut(
+        title=schedule.name,
+        details=schedule.details,
+        owner_name=subscriber.name,
+        slots=Tools.events_set_difference(availableSlots, existingEvents),
+    )

@@ -3,6 +3,7 @@
 Handle connection to a CalDAV server.
 """
 import json
+import logging
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
@@ -273,8 +274,37 @@ class Tools:
 
     def available_slots_from_schedule(s: schemas.ScheduleBase):
         """This helper calculates a list of slots according to the given schedule."""
-        # start = s.start_date
-        return []
+        now = datetime.now()
+        earliest_start = now + timedelta(minutes=s.earliest_booking)
+        farthest_end = now + timedelta(minutes=s.farthest_booking)
+        start = max([datetime.combine(s.start_date, s.start_time), earliest_start])
+        end = min([datetime.combine(s.end_date, s.end_time), farthest_end])
+        slots = []
+        # set the first date to an allowed weekday
+        weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
+        if not weekdays or len(weekdays) == 0:
+            weekdays = [1,2,3,4,5]
+        while start.isoweekday() not in weekdays:
+            start = start + timedelta(days=1)
+        # init date generation: pointer holds the current slot start datetime
+        pointer = start
+        counter = 0
+        # set fix event limit of 1000 for now for performance reasons. Can be removed later.
+        while pointer < end and counter < 1000:
+            counter += 1
+            slots.append(schemas.SlotBase(start=pointer, duration=s.slot_duration))
+            next_start = pointer + timedelta(minutes=s.slot_duration)
+            # if the next slot still fits into the current day
+            if next_start.time() < s.end_time:
+                pointer = next_start
+            # if the next slot has to be on the next available day
+            else:
+                next_date = datetime.combine(pointer.date() + timedelta(days=1), s.start_time)
+                # check weekday and skip da if it isn't allowed
+                while next_date.isoweekday() not in weekdays:
+                    next_date = next_date + timedelta(days=1)
+                pointer = next_date
+        return slots
 
     def events_set_difference(a: list[schemas.SlotBase], b: list[schemas.SlotBase]):
         """This helper removes all events from list A, which have a time collision with any event in list B

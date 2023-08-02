@@ -52,7 +52,7 @@ class Slot(SlotBase):
 
 
 class SlotOut(SlotBase):
-    id: int
+    id: int | None = None
 
 
 class SlotAttendee(BaseModel):
@@ -94,7 +94,7 @@ class Appointment(AppointmentFull):
 
 
 class AppointmentOut(AppointmentBase):
-    id: int
+    id: int | None = None
     owner_name: str | None = None
     slots: list[SlotOut] = []
 
@@ -133,7 +133,7 @@ class ScheduleBase(BaseModel):
     end_time: time | None = None
     earliest_booking: int | None = None
     farthest_booking: int | None = None
-    weekdays: str | None = None
+    weekdays: list[int] | None = [1,2,3,4,5]
     slot_duration: int | None = None
 
     class Config:
