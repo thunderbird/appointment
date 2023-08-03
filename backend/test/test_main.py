@@ -1177,7 +1177,11 @@ def test_read_schedule_availabilities():
     assert data["details"] == "Lorem Ipsumx"
     assert data["owner_name"] == "Test Account"
     assert len(data["slots"]) > 5
-    # TODO: some more assertions are needed here to check for correct slot generation
+    # TODO: some more assertions are needed here to check for correct slot generation, like:
+    # no slots on unchecked weekdays
+    # no slots before start or earliest start
+    # no slots after end or farthest end
+    # no slots during existing events
 
 
 """ MISCELLANEOUS tests

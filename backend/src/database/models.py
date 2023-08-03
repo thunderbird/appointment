@@ -187,8 +187,9 @@ class Schedule(Base):
 
 class Availability(Base):
     """This table will be used as soon as the application provides custom availability
-       in addition to the general availability
+    in addition to the general availability
     """
+
     __tablename__ = "availabilities"
 
     id = Column(Integer, primary_key=True, index=True)

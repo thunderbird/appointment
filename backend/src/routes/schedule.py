@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 import logging
 
 from sqlalchemy.orm import Session
-from ..controller.calendar import Tools
+from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
+from ..controller.google_client import GoogleClient
 from ..database import repo, schemas
-from ..database.models import Subscriber, Schedule
+from ..database.models import Subscriber, Schedule, CalendarProvider
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
+from ..dependencies.google import get_google_client
 
 router = APIRouter()
 
@@ -70,7 +72,11 @@ def update_schedule(
 
 
 @router.post("/public/availability", response_model=schemas.AppointmentOut)
-def read_schedule_availabilities(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
+def read_schedule_availabilities(
+    url: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+    google_client: GoogleClient = Depends(get_google_client),
+):
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
@@ -81,7 +87,21 @@ def read_schedule_availabilities(url: str = Body(..., embed=True), db: Session =
     except KeyError:
         raise HTTPException(status_code=404, detail="Schedule not found")
     availableSlots = Tools.available_slots_from_schedule(schedule)
-    existingEvents = []  # TODO: get events from connected calendar in scheduled date range
+    calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    if calendar is None:
+        raise HTTPException(status_code=404, detail="Calendar not found")
+    if calendar.provider == CalendarProvider.google:
+        con = GoogleConnector(
+            db=db,
+            google_client=google_client,
+            calendar_id=calendar.user,
+            subscriber_id=subscriber.id,
+            google_tkn=subscriber.google_tkn,
+        )
+    else:
+        con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+    existingEvents = con.list_events(schedule.start_date.strftime("%Y-%m-%d"), schedule.end_date.strftime("%Y-%m-%d"))
+    logging.info([schedule.start_date, schedule.start_time, schedule.end_date, schedule.end_time])
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,

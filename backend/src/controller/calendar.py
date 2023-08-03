@@ -8,6 +8,7 @@ from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone
+from dateutil.parser import parse
 
 from .google_client import GoogleClient
 from ..database import schemas
@@ -274,7 +275,7 @@ class Tools:
 
     def available_slots_from_schedule(s: schemas.ScheduleBase):
         """This helper calculates a list of slots according to the given schedule."""
-        now = datetime.now()
+        now = datetime.utcnow()
         earliest_start = now + timedelta(minutes=s.earliest_booking)
         farthest_end = now + timedelta(minutes=s.farthest_booking)
         start = max([datetime.combine(s.start_date, s.start_time), earliest_start])
@@ -283,7 +284,7 @@ class Tools:
         # set the first date to an allowed weekday
         weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
         if not weekdays or len(weekdays) == 0:
-            weekdays = [1,2,3,4,5]
+            weekdays = [1, 2, 3, 4, 5]
         while start.isoweekday() not in weekdays:
             start = start + timedelta(days=1)
         # init date generation: pointer holds the current slot start datetime
@@ -306,9 +307,23 @@ class Tools:
                 pointer = next_date
         return slots
 
-    def events_set_difference(a: list[schemas.SlotBase], b: list[schemas.SlotBase]):
+    def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]):
         """This helper removes all events from list A, which have a time collision with any event in list B
         and returns all remaining elements from A as new list.
         """
-        # TODO: implement A-B
-        return a
+        available_slots = []
+        for a in a_list:
+            a_start = a.start
+            a_end = a_start + timedelta(minutes=a.duration)
+            collision_found = False
+            for b in b_list:
+                b_start = parse(b.start)
+                b_end = parse(b.end)
+                # if there is an overlap of both date ranges, a collision was found
+                # see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
+                if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
+                    collision_found = True
+                    break
+            if not collision_found:
+                available_slots.append(a)
+        return available_slots
