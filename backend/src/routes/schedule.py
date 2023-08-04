@@ -109,9 +109,12 @@ def read_schedule_availabilities(
         existingEvents.extend(
             con.list_events(schedule.start_date.strftime("%Y-%m-%d"), schedule.end_date.strftime("%Y-%m-%d"))
         )
+    actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
+    if not actualSlots or len(actualSlots) == 0:
+        raise HTTPException(status_code=404, detail="No possible booking slots found")
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,
         owner_name=subscriber.name,
-        slots=Tools.events_set_difference(availableSlots, existingEvents),
+        slots=actualSlots,
     )
