@@ -86,22 +86,26 @@ def read_schedule_availabilities(
         schedule = schedules[0]  # for now we only process the first existing schedule
     except KeyError:
         raise HTTPException(status_code=404, detail="Schedule not found")
+    # calculate theoretically possible slots from schedule config
     availableSlots = Tools.available_slots_from_schedule(schedule)
-    calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
-    if calendar is None:
-        raise HTTPException(status_code=404, detail="Calendar not found")
-    if calendar.provider == CalendarProvider.google:
-        con = GoogleConnector(
-            db=db,
-            google_client=google_client,
-            calendar_id=calendar.user,
-            subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+    # get all events from all connected calendars in scheduled date range
+    existingEvents = []
+    for calendar in repo.get_calendars_by_subscriber(db, subscriber.id, False):
+        if calendar is None:
+            raise HTTPException(status_code=404, detail="Calendar not found")
+        if calendar.provider == CalendarProvider.google:
+            con = GoogleConnector(
+                db=db,
+                google_client=google_client,
+                calendar_id=calendar.user,
+                subscriber_id=subscriber.id,
+                google_tkn=subscriber.google_tkn,
+            )
+        else:
+            con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+        existingEvents.extend(
+            con.list_events(schedule.start_date.strftime("%Y-%m-%d"), schedule.end_date.strftime("%Y-%m-%d"))
         )
-    else:
-        con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-    existingEvents = con.list_events(schedule.start_date.strftime("%Y-%m-%d"), schedule.end_date.strftime("%Y-%m-%d"))
-    logging.info([schedule.start_date, schedule.start_time, schedule.end_date, schedule.end_time])
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,
