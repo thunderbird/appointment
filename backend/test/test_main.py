@@ -505,6 +505,9 @@ def test_connect_more_calendars_than_tier_allows():
     db.commit()
     response = client.post("/cal/3/connect", headers=headers)
     assert response.status_code == 403, response.text
+    # delete test calendar connections for further testing
+    client.delete("/cal/5", headers=headers)
+    client.delete("/cal/6", headers=headers)
 
 
 """ CALENDARS tests (Google)
@@ -1182,6 +1185,27 @@ def test_read_schedule_availabilities():
     # no slots before start or earliest start
     # no slots after end or farthest end
     # no slots during existing events
+
+
+def test_read_schedule_availabilities_from_invalid_link():
+    response = client.post("/schedule/public/availability", json={"url": "https://evil.corp"})
+    assert response.status_code == 401, response.text
+
+
+# TODO
+# def test_read_schedule_availabilities_with_no_connected_calendars():
+#     response = client.get("/me/signature", headers=headers)
+#     url = response.json()["url"]
+#     response = client.post("/schedule/public/availability", json={"url": url})
+#     assert response.status_code == 404, response.text
+
+
+# TODO
+# def test_read_schedule_availabilities_with_no_existing_schedule():
+#     response = client.get("/me/signature", headers=headers)
+#     url = response.json()["url"]
+#     response = client.post("/schedule/public/availability", json={"url": url})
+#     assert response.status_code == 404, response.text
 
 
 """ MISCELLANEOUS tests
