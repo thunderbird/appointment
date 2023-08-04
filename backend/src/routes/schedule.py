@@ -90,7 +90,10 @@ def read_schedule_availabilities(
     availableSlots = Tools.available_slots_from_schedule(schedule)
     # get all events from all connected calendars in scheduled date range
     existingEvents = []
-    for calendar in repo.get_calendars_by_subscriber(db, subscriber.id, False):
+    calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
+    if not calendars or len(calendars) == 0:
+        raise HTTPException(status_code=404, detail="No calendars found")
+    for calendar in calendars:
         if calendar is None:
             raise HTTPException(status_code=404, detail="Calendar not found")
         if calendar.provider == CalendarProvider.google:
