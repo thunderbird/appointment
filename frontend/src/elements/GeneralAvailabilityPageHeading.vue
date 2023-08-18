@@ -18,11 +18,11 @@
         <span>{{ year }}</span>
       </div>
     </h2>
-    <h2 v-if="!title && !backlink" class="flex gap-3 text-4xl">
+    <h2 v-if="!title && !backlink" class="flex gap-3 text-2xl">
       <span class="font-normal">{{ month }}</span>
       <span class="font-light">{{ year }}</span>
     </h2>
-    <h2 v-if="title && backlink" class="flex gap-4 text-4xl font-light">
+    <!-- <h2 v-if="title && backlink" class="flex gap-4 text-4xl font-light">
       <div
         class="flex gap-3 cursor-pointer border-b-2 text-teal-500 border-teal-500"
         @click="emit('back')"
@@ -34,7 +34,7 @@
         class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400"
       />
       <div>{{ title }}</div>
-    </h2>
+    </h2> -->
     <div
       v-if="nav"
       @click="emit('next')"
