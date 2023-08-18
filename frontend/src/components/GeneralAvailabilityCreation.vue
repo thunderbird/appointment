@@ -110,13 +110,42 @@
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr />
         <div class="flex flex-col gap-2">
-          three rows
-          <br />
-          start date, end data
-          <br />
-          start time, end time
-          <br />
-          available days
+          <div class="flex gap-4 justify-center items-end mb-2">
+            <label class="flex flex-col">
+              <div class="text-sm text-gray-500 dark:text-gray-300">
+                {{ t("label.startDate") }}
+              </div>
+              <input type="date" class="rounded-md text-sm py-1" />
+            </label>
+            <label class="flex flex-col">
+              <div class="text-sm text-gray-500 dark:text-gray-300">
+                {{ t("label.endDate") }}
+              </div>
+              <input type="date" class="rounded-md text-sm py-1" />
+            </label>
+          </div>
+          <div class="flex gap-4 justify-center items-end mb-2">
+            <label class="flex flex-col">
+              <div class="text-sm text-gray-500 dark:text-gray-300">
+                {{ t("label.startTime") }}
+              </div>
+              <input type="time" class="rounded-md text-sm py-1" />
+            </label>
+            <label class="flex flex-col">
+              <div class="text-sm text-gray-500 dark:text-gray-300">
+                {{ t("label.endTime") }}
+              </div>
+              <input type="time" class="rounded-md text-sm py-1" />
+            </label>
+          </div>
+          <div class="flex gap-4 justify-center items-end mb-2">
+            <label class="flex flex-col">
+              <div class="text-sm text-gray-500 dark:text-gray-300">
+                {{ t("label.availableDays") }}
+              </div>
+              <p>Need to do days of week with checkboxes</p>
+            </label>
+          </div>
         </div>
       </div>
     </div>

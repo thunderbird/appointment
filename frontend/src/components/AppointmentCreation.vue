@@ -3,13 +3,21 @@
     <div class="font-semibold text-center text-xl text-teal-500">
       {{ t("heading.createNewAppointment") }}
     </div>
-    <alert-box v-if="appointmentCreationError" :title="t('label.appointmentCreationError')">
+    <alert-box
+      v-if="appointmentCreationError"
+      :title="t('label.appointmentCreationError')"
+    >
       {{ appointmentCreationError }}
     </alert-box>
 
     <!-- step 1 -->
-    <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
-      <div class="flex justify-between items-center cursor-pointer" @click="emit('start')">
+    <div
+      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+    >
+      <div
+        class="flex justify-between items-center cursor-pointer"
+        @click="emit('start')"
+      >
         <span class="font-semibold flex gap-1">
           <icon-check
             v-show="validStep1"
@@ -44,7 +52,11 @@
             {{ t("label.selectCalendar") }}
           </div>
           <select v-model="appointment.calendar_id" class="rounded-md w-full">
-            <option v-for="calendar in calendars" :key="calendar.id" :value="calendar.id">
+            <option
+              v-for="calendar in calendars"
+              :key="calendar.id"
+              :value="calendar.id"
+            >
               {{ calendar.title }}
             </option>
           </select>
@@ -93,8 +105,13 @@
       </div>
     </div>
     <!-- step 2 -->
-    <div class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600">
-      <div class="flex justify-between items-center cursor-pointer" @click="emit('next')">
+    <div
+      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+    >
+      <div
+        class="flex justify-between items-center cursor-pointer"
+        @click="emit('next')"
+      >
         <span class="font-semibold flex gap-1">
           <icon-check
             v-show="validStep2"
@@ -125,7 +142,9 @@
                   @click="addTime(day)"
                   class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
                 >
-                  <icon-plus class="h-3 w-3 stroke-2 fill-transparent stroke-white" />
+                  <icon-plus
+                    class="h-3 w-3 stroke-2 fill-transparent stroke-white"
+                  />
                   {{ t("label.addTime") }}
                 </button>
               </div>
@@ -157,7 +176,9 @@
                 />
               </label>
               <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
-                <icon-x class="h-5 w-5 stroke-2 fill-transparent stroke-rose-500" />
+                <icon-x
+                  class="h-5 w-5 stroke-2 fill-transparent stroke-rose-500"
+                />
               </div>
             </div>
           </div>
@@ -217,16 +238,14 @@
 </template>
 
 <script setup>
-import { locationTypes } from '@/definitions';
-import {
-  ref, reactive, computed, inject, watch,
-} from 'vue';
-import { useI18n } from 'vue-i18n';
-import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
-import CalendarMonth from '@/components/CalendarMonth';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
-import TabBar from '@/components/TabBar';
+import { locationTypes } from "@/definitions";
+import { ref, reactive, computed, inject, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
+import CalendarMonth from "@/components/CalendarMonth";
+import PrimaryButton from "@/elements/PrimaryButton";
+import SecondaryButton from "@/elements/SecondaryButton";
+import TabBar from "@/components/TabBar";
 
 // icons
 import {
@@ -235,17 +254,17 @@ import {
   IconChevronDown,
   IconPlus,
   IconX,
-} from '@tabler/icons-vue';
-import AlertBox from '@/elements/AlertBox';
+} from "@tabler/icons-vue";
+import AlertBox from "@/elements/AlertBox";
 
 // component constants
 const { t } = useI18n();
-const dj = inject('dayjs');
-const call = inject('call');
-const bookingUrl = inject('bookingUrl');
+const dj = inject("dayjs");
+const call = inject("call");
+const bookingUrl = inject("bookingUrl");
 
 // component emits
-const emit = defineEmits(['start', 'next', 'create', 'cancel']);
+const emit = defineEmits(["start", "next", "create", "cancel"]);
 
 // component properties
 const props = defineProps({
@@ -262,11 +281,11 @@ const activeStep2 = computed(() => props.status === 2);
 
 // default appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
-  title: '',
+  title: "",
   calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
-  location_url: '',
-  details: '',
+  location_url: "",
+  details: "",
   status: 2, // appointment is opened | TODO: make configurable sometime
 };
 const appointment = reactive({ ...defaultAppointment });
@@ -293,9 +312,12 @@ const slotList = computed(() => {
       const end = dj(`${day} ${slot.end}`);
       list.push({
         // save local time as UTC
-        start: start.tz(props.user.timezone ?? dj.tz.guess(), true).utc().format('YYYY-MM-DDTHH:mm:ss'),
+        start: start
+          .tz(props.user.timezone ?? dj.tz.guess(), true)
+          .utc()
+          .format("YYYY-MM-DDTHH:mm:ss"),
         // calculate duration as difference between start and end
-        duration: end.diff(start, 'minutes'),
+        duration: end.diff(start, "minutes"),
       });
     });
   });
@@ -307,7 +329,7 @@ const charLimit = 250;
 const charCount = computed(() => appointment.details.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
-const validStep1 = computed(() => appointment.title !== '');
+const validStep1 = computed(() => appointment.title !== "");
 const validStep2 = computed(() => Object.keys(slots).length > 0);
 const visitedStep1 = ref(false);
 const visitedStep2 = ref(false);
@@ -320,22 +342,27 @@ const activeDate = ref(dj());
 
 // handle date and time input of user
 const addDate = (d) => {
-  const day = dj(d).format('YYYY-MM-DD');
+  const day = dj(d).format("YYYY-MM-DD");
   if (!Object.hasOwn(slots, day)) {
-    slots[day] = [{
-      start: dj(d).add(10, 'hours').format('HH:mm'),
-      end: dj(d).add(11, 'hours').format('HH:mm'),
-    }];
+    slots[day] = [
+      {
+        start: dj(d).add(10, "hours").format("HH:mm"),
+        end: dj(d).add(11, "hours").format("HH:mm"),
+      },
+    ];
   }
   showDatePicker.value = false;
 };
 const addTime = (d) => {
-  const day = dj(d).format('YYYY-MM-DD');
+  const day = dj(d).format("YYYY-MM-DD");
   // get latest end time to start next time slot default value with
-  const latestTime = slots[day].reduce((p, c) => (c.end > p ? c.end : p), '00:00');
+  const latestTime = slots[day].reduce(
+    (p, c) => (c.end > p ? c.end : p),
+    "00:00"
+  );
   slots[day].push({
     start: latestTime,
-    end: dj(`${day}T${latestTime}`).add(1, 'hour').format('HH:mm'),
+    end: dj(`${day}T${latestTime}`).add(1, "hour").format("HH:mm"),
   });
 };
 const removeTime = (day, index) => {
@@ -347,15 +374,17 @@ const removeTime = (day, index) => {
 };
 const validateEndTime = (day, position) => {
   if (slots[day][position].start >= slots[day][position].end) {
-    slots[day][position].end = dj(`${day}T${slots[day][position].start}`).add(1, 'hour').format('HH:mm');
+    slots[day][position].end = dj(`${day}T${slots[day][position].start}`)
+      .add(1, "hour")
+      .format("HH:mm");
   }
 };
 
 // show confirmation dialog
 const createdConfirmation = reactive({
   show: false,
-  title: '',
-  publicLink: '',
+  title: "",
+  publicLink: "",
 });
 const closeCreatedModal = () => {
   createdConfirmation.show = false;
@@ -387,13 +416,14 @@ const createAppointment = async () => {
     slots: slotList.value,
   };
   // save selected appointment data
-  const { data, error } = await call('apmt').post(obj).json();
+  const { data, error } = await call("apmt").post(obj).json();
 
   if (error.value) {
     // Error message is in data
-    appointmentCreationError.value = data.value.detail || t('error.unknownAppointmentError');
+    appointmentCreationError.value =
+      data.value.detail || t("error.unknownAppointmentError");
     // Open the form
-    emit('start');
+    emit("start");
     return;
   }
 
@@ -404,11 +434,11 @@ const createAppointment = async () => {
 
   resetAppointment();
 
-  emit('create');
+  emit("create");
 };
 
 // date navigation
-const dateNav = (unit = 'month', forward = true) => {
+const dateNav = (unit = "month", forward = true) => {
   if (forward) {
     activeDate.value = activeDate.value.add(1, unit);
   } else {
@@ -422,6 +452,6 @@ watch(
   (newValue, oldValue) => {
     if (oldValue === 1) visitedStep1.value = true;
     if (oldValue === 2 && newValue !== 3) visitedStep2.value = true;
-  },
+  }
 );
 </script>
