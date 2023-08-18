@@ -179,23 +179,23 @@
           <div class="flex gap-4 justify-center items-end mb-2">
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
-                {{ t("label.startDate") }}
+                {{ t("label.bookingEarliest") }}
               </div>
-              <input type="date" class="rounded-md text-sm py-1" />
+              <input type="number" class="rounded-md text-sm py-1" />
             </label>
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
-                {{ t("label.endDate") }}
+                {{ t("label.bookingLatest") }}
               </div>
-              <input type="date" class="rounded-md text-sm py-1" />
+              <input type="number" class="rounded-md text-sm py-1" />
             </label>
           </div>
           <div class="flex gap-4 justify-center items-end mb-2">
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
-                {{ t("label.startDate") }}
+                {{ t("label.slotLength") }}
               </div>
-              <input type="date" class="rounded-md text-sm py-1" />
+              <input type="number" class="rounded-md text-sm py-1" />
             </label>
           </div>
           <div class="flex gap-4 justify-center items-end mb-2">
@@ -253,7 +253,7 @@
 import { locationTypes } from "@/definitions";
 import { ref, reactive, computed, inject, watch } from "vue";
 import { useI18n } from "vue-i18n";
-
+import CalendarMonth from "@/components/CalendarMonth";
 import PrimaryButton from "@/elements/PrimaryButton";
 import SecondaryButton from "@/elements/SecondaryButton";
 import TabBar from "@/components/TabBar";
@@ -304,5 +304,23 @@ const appointmentCreationError = ref(null);
 // tab navigation for location types
 const updateLocationType = (type) => {
   appointment.location_type = locationTypes[type];
+};
+
+// show mini month date picker
+const showDatePicker = ref(false);
+const activeDate = ref(dj());
+
+// handle date and time input of user
+const addDate = (d) => {
+  const day = dj(d).format("YYYY-MM-DD");
+  // if (!Object.hasOwn(slots, day)) {
+  //   slots[day] = [
+  //     {
+  //       start: dj(d).add(10, "hours").format("HH:mm"),
+  //       end: dj(d).add(11, "hours").format("HH:mm"),
+  //     },
+  //   ];
+  // }
+  showDatePicker.value = false;
 };
 </script>
