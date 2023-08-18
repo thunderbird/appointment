@@ -40,7 +40,7 @@
   >
     <!-- page side bar -->
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
-      <p>sidebar</p>
+      <general-availability-creation />
     </div>
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month
@@ -76,6 +76,7 @@ import { useRoute, useRouter } from "vue-router";
 // import AppointmentListItem from "@/elements/AppointmentListItem";
 import CalendarDay from "@/components/CalendarDay";
 import CalendarMonth from "@/components/CalendarMonth";
+import GeneralAvailabilityCreation from "@/components/GeneralAvailabilityCreation";
 import GeneralAvailabilityPageHeading from "@/elements/GeneralAvailabilityPageHeading";
 import CalendarWeek from "@/components/CalendarWeek";
 import PrimaryButton from "@/elements/PrimaryButton";

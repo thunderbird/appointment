@@ -24,7 +24,7 @@ const routes = [
   },
   {
     path: "/availability",
-    name: "general-availability",
+    name: "generalAvailability",
     component: GeneralAvailabilityView,
     beforeEnter: authGuard,
   },
