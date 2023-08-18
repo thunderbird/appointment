@@ -83,6 +83,109 @@
         </label>
       </div>
     </div>
+    <!-- step 2 -->
+    <div
+      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+    >
+      <div
+        class="flex justify-between items-center cursor-pointer"
+        @click="emit('next')"
+      >
+        <span class="font-semibold flex gap-1">
+          <icon-check
+            v-show="validStep2"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500"
+          />
+          <icon-alert-triangle
+            v-show="invalidStep2"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-rose-500"
+          />
+          {{ t("label.chooseYourAvailability") }}
+        </span>
+        <icon-chevron-down
+          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          :class="{ 'rotate-0': activeStep2 }"
+        />
+      </div>
+      <div v-show="activeStep2" class="flex flex-col gap-3">
+        <hr />
+        <div class="flex flex-col gap-2">
+          three rows
+          <br />
+          start date, end data
+          <br />
+          start time, end time
+          <br />
+          available days
+        </div>
+      </div>
+    </div>
+    <!-- step 3 -->
+    <div
+      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+    >
+      <div
+        class="flex justify-between items-center cursor-pointer"
+        @click="emit('next')"
+      >
+        <span class="font-semibold flex gap-1">
+          <icon-check
+            v-show="validStep3"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500"
+          />
+          <icon-alert-triangle
+            v-show="invalidStep3"
+            class="h-6 w-6 stroke-2 fill-transparent stroke-rose-500"
+          />
+          {{ t("label.availabilityBookingSettings") }}
+        </span>
+        <icon-chevron-down
+          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          :class="{ 'rotate-0': activeStep3 }"
+        />
+      </div>
+      <div v-show="activeStep3" class="flex flex-col gap-3">
+        <hr />
+        <div class="flex flex-col gap-2">not sure</div>
+      </div>
+    </div>
+    <!-- action buttons -->
+    <div class="flex gap-4 mt-auto">
+      <secondary-button
+        :label="t('label.cancel')"
+        @click="emit('cancel')"
+        class="w-1/2"
+      />
+      <primary-button
+        v-show="activeStep1"
+        :label="t('label.next')"
+        :disabled="!validStep1"
+        @click="validStep1 ? emit('next') : null"
+        class="w-1/2"
+      />
+      <primary-button
+        v-show="activeStep2"
+        :label="t('label.create')"
+        :disabled="!validStep1 || !validStep2"
+        @click="validStep1 && validStep2 ? createAppointment() : null"
+        class="w-1/2"
+      />
+    </div>
+    <div
+      v-show="showDatePicker"
+      class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700"
+    >
+      <!-- monthly mini calendar -->
+      <calendar-month
+        :selected="activeDate"
+        :mini="true"
+        :nav="true"
+        :min-date="dj()"
+        @prev="dateNav('month', false)"
+        @next="dateNav('month')"
+        @day-selected="addDate"
+      />
+    </div>
   </div>
 </template>
 <script setup>
@@ -105,6 +208,7 @@ import {
 
 // component constants
 const { t } = useI18n();
+const dj = inject("dayjs");
 
 // component emits
 const emit = defineEmits(["start", "next", "create", "cancel"]);
@@ -120,7 +224,7 @@ const emit = defineEmits(["start", "next", "create", "cancel"]);
 // second step are the availability slots
 // const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 // const activeStep2 = computed(() => props.status === 2);
-const activeStep1 = true;
+const activeStep1 = false;
 const activeStep2 = true;
 const activeStep3 = true;
 
