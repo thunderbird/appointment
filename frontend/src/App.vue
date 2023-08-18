@@ -89,7 +89,7 @@ provide('auth', auth);
 provide('call', call);
 
 // menu items for main navigation
-const navItems = ['calendar', 'appointments', 'settings'];
+const navItems = ['calendar', 'general-availability', 'appointments', 'settings'];
 
 // current user object
 // structure: { username, email, name, level, timezone, id }

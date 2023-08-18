@@ -104,6 +104,7 @@
     "endTime": "End Time",
     "faq": "FAQ",
     "general": "General",
+    "general-availability": "Availability",
     "google": "Google",
     "guest": "{count} guests | {count} guest | {count} guests",
     "inPerson": "In person",

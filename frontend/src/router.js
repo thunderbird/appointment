@@ -1,53 +1,63 @@
-import { authGuard } from '@auth0/auth0-vue';
-import { createRouter, createWebHistory } from 'vue-router';
-import BookingView from '@/views/BookingView.vue';
-import CalendarView from '@/views/CalendarView.vue';
-import HomeView from '@/views/HomeView.vue';
+import { authGuard } from "@auth0/auth0-vue";
+import { createRouter, createWebHistory } from "vue-router";
+import BookingView from "@/views/BookingView.vue";
+import CalendarView from "@/views/CalendarView.vue";
+import GeneralAvailabilityView from "@/views/GeneralAvailabilityView.vue";
+import HomeView from "@/views/HomeView.vue";
 
 const routes = [
   // instant loaded routes
   {
-    path: '/',
-    name: 'home',
+    path: "/",
+    name: "home",
     component: HomeView,
   },
   {
-    path: '/booking/:slug',
-    name: 'booking',
+    path: "/booking/:slug",
+    name: "booking",
     component: BookingView,
   },
   {
-    path: '/user/:username/:signature',
-    name: 'availability',
+    path: "/user/:username/:signature",
+    name: "availability",
     component: BookingView,
   },
   {
-    path: '/calendar',
-    redirect: { name: 'calendar' },
+    path: "/availability",
+    name: "general-availability",
+    component: GeneralAvailabilityView,
+    beforeEnter: authGuard,
   },
   {
-    path: '/calendar/:view?/:date?',
-    name: 'calendar',
+    path: "/calendar",
+    redirect: { name: "calendar" },
+  },
+  {
+    path: "/calendar/:view?/:date?",
+    name: "calendar",
     component: CalendarView,
     beforeEnter: authGuard,
   },
   // lazy-loaded routes
   {
-    path: '/appointments/:view?',
-    name: 'appointments',
-    component: () => import(/* webpackChunkName: "appointments" */ '@/views/AppointmentsView'),
+    path: "/appointments/:view?",
+    name: "appointments",
+    component: () =>
+      import(/* webpackChunkName: "appointments" */ "@/views/AppointmentsView"),
     beforeEnter: authGuard,
   },
   {
-    path: '/settings/:view?',
-    name: 'settings',
-    component: () => import(/* webpackChunkName: "settings" */ '@/views/SettingsView'),
+    path: "/settings/:view?",
+    name: "settings",
+    component: () =>
+      import(/* webpackChunkName: "settings" */ "@/views/SettingsView"),
     beforeEnter: authGuard,
   },
   {
-    path: '/profile',
-    name: 'profile',
-    component: () => import(/* webpackChunkName: "profile" */ '@/views/ProfileView'),
+    path: "/profile",
+    name: "profile",
+    component: () =>
+      import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
     beforeEnter: authGuard,
   },
 ];
@@ -60,12 +70,12 @@ const router = createRouter({
 
 // set default route parameters
 router.beforeEach((to) => {
-  if (to.name === 'calendar' && !to.params.view) {
-    to.params.view = 'month';
+  if (to.name === "calendar" && !to.params.view) {
+    to.params.view = "month";
     return to;
   }
-  if (to.name === 'appointments' && !to.params.view) {
-    to.params.view = 'all';
+  if (to.name === "appointments" && !to.params.view) {
+    to.params.view = "all";
     return to;
   }
   return null;
