@@ -94,17 +94,27 @@ erDiagram
     string slug "Generated random string to build share links for the appointment"
     bool keep_open "If true appointment accepts selection of multiple slots (future feature)"
     enum status "Appointment state [draft, ready, close]"
-    enum appointment_type "Single or template appointment [Oneoff, schedule]"
   }
-  APPOINTMENTS ||--|| SCHEDULES : template_for
+  CALENDARS ||--|{ SCHEDULES : connected_to
   SCHEDULES {
     int id PK "Unique schedule key"
-    int appointment_id FK "Appointment serving as template for this schedule"
+    int calendar_id FK "Calendar which events are created in for this schedule"
     string name "Schedule title"
+    enum location_type "[In person, online]"
+    string location_url "URL events are held at"
+    string details "Detailed event description or agenda"
+    date start_date "UTC start date of scheduled date range"
+    date end_date "UTC end date of scheduled date range"
+    date start_time "UTC start time on selected weekdays"
+    date end_time "UTC end time on selected weekdays"
+    json weekdays "List of selected weekdays (1-7, ISO format)"
+    int earliest_booking "Can't book if it's less than this many minutes before start time"
+    int farthest_booking "Can't book if start time is more than this many minutes away"
+    int slot_duration "Size of the Slot that can be booked in minutes"
     date time_created "UTC timestamp of schedule creation"
     date time_updated "UTC timestamp of last schedule modification"
   }
-  SCHEDULES ||--|{ AVAILABILITIES : has
+  SCHEDULES ||--|{ AVAILABILITIES : hold_custom
   AVAILABILITIES {
     int id PK "Unique availability key"
     int schedule_id FK "Schedule this availability is for"

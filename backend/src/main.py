@@ -55,9 +55,10 @@ from .database.database import engine
 models.Base.metadata.create_all(bind=engine)
 
 # extra routes
-from .routes import google
 from .routes import api
 from .routes import account
+from .routes import google
+from .routes import schedule
 
 # init app
 app = FastAPI()
@@ -97,3 +98,4 @@ async def catch_google_refresh_errors(request, exc):
 app.include_router(api.router)
 app.include_router(account.router, prefix="/account")
 app.include_router(google.router, prefix="/google")
+app.include_router(schedule.router, prefix="/schedule")

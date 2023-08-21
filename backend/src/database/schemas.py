@@ -2,14 +2,13 @@
 
 Definitions of valid data shapes for database and query models.
 """
-from datetime import datetime
+from datetime import datetime, date, time
 from pydantic import BaseModel, Field
 from .models import (
     SubscriberLevel,
     AppointmentStatus,
     LocationType,
     CalendarProvider,
-    AppointmentType,
     DayOfWeek,
     random_slug,
 )
@@ -53,7 +52,7 @@ class Slot(SlotBase):
 
 
 class SlotOut(SlotBase):
-    id: int
+    id: int | None = None
 
 
 class SlotAttendee(BaseModel):
@@ -69,7 +68,6 @@ class AppointmentBase(BaseModel):
     title: str
     details: str | None = None
     slug: str | None = Field(default_factory=random_slug)
-    appointment_type: AppointmentType | None = AppointmentType.oneoff
 
 
 class AppointmentFull(AppointmentBase):
@@ -96,9 +94,62 @@ class Appointment(AppointmentFull):
 
 
 class AppointmentOut(AppointmentBase):
-    id: int
+    id: int | None = None
     owner_name: str | None = None
     slots: list[SlotOut] = []
+
+
+""" SCHEDULE model schemas
+"""
+
+
+class AvailabilityBase(BaseModel):
+    schedule_id: int
+    day_of_week: DayOfWeek
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    min_time_before_meeting: int
+    slot_duration: int | None = None
+
+
+class Availability(AvailabilityBase):
+    id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+    class Config:
+        orm_mode = True
+
+
+class ScheduleBase(BaseModel):
+    name: str
+    calendar_id: int
+    location_type: LocationType | None = LocationType.inperson
+    location_url: str | None = None
+    details: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    start_time: time | None = None
+    end_time: time | None = None
+    earliest_booking: int | None = None
+    farthest_booking: int | None = None
+    weekdays: list[int] | None = [1, 2, 3, 4, 5]
+    slot_duration: int | None = None
+
+    class Config:
+        json_encoders = {
+            time: lambda t: t.strftime("%H:%M"),
+        }
+
+
+class Schedule(ScheduleBase):
+    id: int
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+    availabilities: list[Availability] = []
+
+    class Config:
+        orm_mode = True
 
 
 """ CALENDAR model schemas
@@ -125,6 +176,7 @@ class Calendar(CalendarConnection):
     id: int
     owner_id: int
     appointments: list[Appointment] = []
+    schedules: list[Schedule] = []
 
     class Config:
         orm_mode = True
@@ -199,35 +251,3 @@ class FileDownload(BaseModel):
     name: str
     content_type: str
     data: str
-
-
-class ScheduleBase(BaseModel):
-    name: str
-
-
-class Schedule(ScheduleBase):
-    id: int
-    appointment_id: int
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
-
-    class Config:
-        orm_mode = True
-
-
-class AvailabilityBase(BaseModel):
-    schedule_id: int
-    day_of_week: DayOfWeek
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-    min_time_before_meeting: int
-    duration: int | None = None
-
-
-class Availability(AvailabilityBase):
-    id: int
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
-
-    class Config:
-        orm_mode = True

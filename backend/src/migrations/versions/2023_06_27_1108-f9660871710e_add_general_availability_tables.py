@@ -11,7 +11,8 @@ import sqlalchemy as sa
 from sqlalchemy import DateTime
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
-from database.models import AppointmentType
+
+# from database.models import AppointmentType
 
 
 def secret():
@@ -65,17 +66,17 @@ def upgrade() -> None:
         sa.Column("time_created", DateTime()),
         sa.Column("time_updated", DateTime()),
     )
-    op.add_column(
-        "appointments",
-        sa.Column(
-            "appointment_type",
-            sa.Enum(AppointmentType),
-            default=AppointmentType.schedule,
-        ),
-    )
+    # op.add_column(
+    #     "appointments",
+    #     sa.Column(
+    #         "appointment_type",
+    #         sa.Enum(AppointmentType),
+    #         default=AppointmentType.schedule,
+    #     ),
+    # )
 
 
 def downgrade() -> None:
     op.drop_table("schedules")
     op.drop_table("availabilities")
-    op.drop_column("appointments", "appointment_type")
+    # op.drop_column("appointments", "appointment_type")

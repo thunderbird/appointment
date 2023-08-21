@@ -3,13 +3,18 @@
 Repository providing CRUD functions for all database models. 
 """
 import os
+import re
+import logging
 from datetime import timedelta, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
+from ..controller.auth import sign_url
 
-"""ATTENDEES repository functions"""
+
+"""ATTENDEES repository functions
+"""
 
 
 def get_attendees_by_subscriber(db: Session, subscriber_id: int):
@@ -143,6 +148,40 @@ def get_connections_limit(db: Session, subscriber_id: int):
     return mapping[db_subscriber.level]
 
 
+def verify_subscriber_link(db: Session, url: str):
+    """Check if a given url is a valid signed subscriber profile link
+    Return subscriber if valid.
+    """
+    # Look for a <username> followed by an optional signature that ends the string
+    pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
+    match = re.findall(pattern, url)
+
+    if match is None or len(match) == 0:
+        return False
+
+    # Flatten
+    match = match[0]
+    clean_url = url
+
+    username = match[0]
+    signature = None
+    if len(match) > 1:
+        signature = match[1]
+        clean_url = clean_url.replace(signature, "")
+
+    subscriber = get_subscriber_by_username(db, username)
+    if not subscriber:
+        return False
+
+    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
+    signed_signature = sign_url(clean_url_with_short_link)
+
+    # Verify the signature matches the incoming one
+    if signed_signature == signature:
+        return subscriber
+    return False
+
+
 """ CALENDAR repository functions
 """
 
@@ -206,11 +245,14 @@ def update_subscriber_calendar(db: Session, calendar: schemas.CalendarConnection
     """update existing calendar by id"""
     db_calendar = get_calendar(db, calendar_id)
 
+    # list of all attributes that must never be updated
+    # # because they have dedicated update functions for security reasons
     ignore = ["connected", "connected_at"]
+    # list of all attributes that will keep their current value if None is passed
     keep_if_none = ["password"]
 
     for key, value in calendar:
-        # if this key exists in the keep_if_none list, then ignore it
+        # skip update, if attribute is ignored or current value should be kept if given value is falsey/empty
         if key in ignore or (key in keep_if_none and (not value or len(str(value)) == 0)):
             continue
 
@@ -420,3 +462,59 @@ def slot_is_available(db: Session, slot_id: int):
     """check if slot is still available"""
     db_slot = get_slot(db, slot_id)
     return db_slot and not db_slot.attendee_id and not db_slot.subscriber_id
+
+
+"""SCHEDULES repository functions
+"""
+
+
+def create_calendar_schedule(db: Session, schedule: schemas.ScheduleBase):
+    """create new schedule with slots for calendar"""
+    db_schedule = models.Schedule(**schedule.dict())
+    db.add(db_schedule)
+    db.commit()
+    db.refresh(db_schedule)
+    return db_schedule
+
+
+def get_schedules_by_subscriber(db: Session, subscriber_id: int):
+    """Get schedules by subscriber id. Should be only one for now (general availability)."""
+    return (
+        db.query(models.Schedule)
+        .join(models.Calendar, models.Schedule.calendar_id == models.Calendar.id)
+        .filter(models.Calendar.owner_id == subscriber_id)
+        .all()
+    )
+
+
+def get_schedule(db: Session, schedule_id: int):
+    """retrieve schedule by id"""
+    if schedule_id:
+        return db.get(models.Schedule, schedule_id)
+    return None
+
+
+def schedule_is_owned(db: Session, schedule_id: int, subscriber_id: int):
+    """check if the given schedule belongs to subscriber"""
+    schedules = get_schedules_by_subscriber(db, subscriber_id)
+    return any(s.id == schedule_id for s in schedules)
+
+
+def schedule_exists(db: Session, schedule_id: int):
+    """true if schedule of given id exists"""
+    return True if get_schedule(db, schedule_id) is not None else False
+
+
+def update_calendar_schedule(db: Session, schedule: schemas.ScheduleBase, schedule_id: int):
+    """update existing schedule by id"""
+    db_schedule = get_schedule(db, schedule_id)
+    for key, value in schedule:
+        setattr(db_schedule, key, value)
+    db.commit()
+    db.refresh(db_schedule)
+    return db_schedule
+
+
+def get_availability_by_schedule(db: Session, schedule_id: int):
+    """retrieve availability by schedule id"""
+    return db.query(models.Availability).filter(models.Availability.schedule_id == schedule_id).all()

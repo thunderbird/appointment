@@ -311,20 +311,15 @@ const downloadIcs = async () => {
 
 // async get appointment data either from public single appointment link
 // or from a general availability link of a subscriber
+// returns true if error occured
 const getAppointment = async () => {
   if (isAvailabilityRoute.value) {
-    const { error, data } = await call('verify/signature').post({ url: window.location.href }).json();
+    const { error, data } = await call('schedule/public/availability').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
       return true;
     } else {
-      // TODO: here we need to make another API call to get the actual general appointment data or include it
-      //       in the signature verification call. For now, here is fake example data for testing.
-      appointment.value = {
-        "title": "General Available",
-        "details": "These are the time slots that are currently free for you to choose.",
-        "owner_name": "Jane Doe",
-        "slots": [{ "start": "2023-07-03T08:00:00", "duration": 60, "attendee_id": null, "id": 9960 }, { "start": "2023-07-03T09:00:00", "duration": 60, "attendee_id": null, "id": 9961 }, { "start": "2023-07-03T11:00:00", "duration": 60, "attendee_id": null, "id": 9962 }, { "start": "2023-07-03T12:00:00", "duration": 60, "attendee_id": null, "id": 9963 }, { "start": "2023-07-03T13:00:00", "duration": 60, "attendee_id": null, "id": 9964 }, { "start": "2023-07-03T15:00:00", "duration": 60, "attendee_id": null, "id": 9965 }, { "start": "2023-07-04T08:00:00", "duration": 60, "attendee_id": null, "id": 9966 }, { "start": "2023-07-04T09:00:00", "duration": 60, "attendee_id": null, "id": 9967 }, { "start": "2023-07-04T10:00:00", "duration": 60, "attendee_id": null, "id": 9968 }, { "start": "2023-07-04T11:00:00", "duration": 60, "attendee_id": null, "id": 9969 }, { "start": "2023-07-04T12:00:00", "duration": 60, "attendee_id": null, "id": 9970 }, { "start": "2023-07-05T12:00:00", "duration": 60, "attendee_id": null, "id": 9971 }, { "start": "2023-07-05T13:00:00", "duration": 60, "attendee_id": null, "id": 9972 }, { "start": "2023-07-05T14:00:00", "duration": 60, "attendee_id": null, "id": 9973 }, { "start": "2023-07-05T15:00:00", "duration": 60, "attendee_id": null, "id": 9974 }, { "start": "2023-07-06T08:00:00", "duration": 60, "attendee_id": null, "id": 9975 }, { "start": "2023-07-06T15:00:00", "duration": 60, "attendee_id": null, "id": 9976 }, { "start": "2023-07-07T08:00:00", "duration": 60, "attendee_id": null, "id": 9977 }, { "start": "2023-07-07T09:00:00", "duration": 60, "attendee_id": null, "id": 9978 }, { "start": "2023-07-07T10:00:00", "duration": 60, "attendee_id": null, "id": 9979 }, { "start": "2023-07-07T11:00:00", "duration": 60, "attendee_id": null, "id": 9980 }, { "start": "2023-07-07T12:00:00", "duration": 60, "attendee_id": null, "id": 9981 }, { "start": "2023-07-07T13:00:00", "duration": 60, "attendee_id": null, "id": 9982 }, { "start": "2023-07-07T14:00:00", "duration": 60, "attendee_id": null, "id": 9983 }, { "start": "2023-07-07T15:00:00", "duration": 60, "attendee_id": null, "id": 9984}]
-      };
+      // now assign the actual general appointment data that is returned.
+      appointment.value = data.value;
     }
   } else
   if (isBookingRoute.value) {
