@@ -9,7 +9,7 @@
     >
       <div
         class="flex justify-between items-center cursor-pointer"
-        @click="emit('start')"
+        @click="setStep(1)"
       >
         <span class="font-semibold flex gap-1">
           <icon-check
@@ -89,7 +89,7 @@
     >
       <div
         class="flex justify-between items-center cursor-pointer"
-        @click="emit('next')"
+        @click="setStep(2)"
       >
         <span class="font-semibold flex gap-1">
           <icon-check
@@ -186,7 +186,7 @@
     >
       <div
         class="flex justify-between items-center cursor-pointer"
-        @click="emit('next')"
+        @click="setStep(3)"
       >
         <span class="font-semibold flex gap-1">
           <icon-check
@@ -333,9 +333,29 @@ const emit = defineEmits(["start", "next", "create", "cancel"]);
 // second step are the availability slots
 // const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 // const activeStep2 = computed(() => props.status === 2);
-const activeStep1 = false;
-const activeStep2 = true;
-const activeStep3 = true;
+const activeStep1 = ref(true);
+const activeStep2 = ref(false);
+const activeStep3 = ref(false);
+
+function setStep(num) {
+  activeStep1.value = false;
+  activeStep2.value = false;
+  activeStep3.value = false;
+
+  switch (num) {
+    case 1:
+      activeStep1.value = true;
+      break;
+    case 2:
+      activeStep2.value = true;
+      break;
+    case 3:
+      activeStep3.value = true;
+      break;
+    default:
+      break;
+  }
+}
 
 // default appointment object (for start and reset) and appointment form data
 const defaultAppointment = {
