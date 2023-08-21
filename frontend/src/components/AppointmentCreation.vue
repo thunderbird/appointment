@@ -142,6 +142,7 @@
                   @click="addTime(day)"
                   class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
                 >
+                  this button should trigger it
                   <icon-plus
                     class="h-3 w-3 stroke-2 fill-transparent stroke-white"
                   />
@@ -354,6 +355,7 @@ const addDate = (d) => {
   showDatePicker.value = false;
 };
 const addTime = (d) => {
+  debugger;
   const day = dj(d).format("YYYY-MM-DD");
   // get latest end time to start next time slot default value with
   const latestTime = slots[day].reduce(

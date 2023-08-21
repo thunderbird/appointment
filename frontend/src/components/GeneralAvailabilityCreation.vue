@@ -129,13 +129,21 @@
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.startTime") }}
               </div>
-              <input type="time" class="rounded-md text-sm py-1" />
+              <input
+                type="time"
+                class="rounded-md text-sm py-1"
+                v-model="startTime"
+              />
             </label>
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.endTime") }}
               </div>
-              <input type="time" class="rounded-md text-sm py-1" />
+              <input
+                type="time"
+                class="rounded-md text-sm py-1"
+                v-model="endTime"
+              />
             </label>
           </div>
           <div class="flex flex-col gap-2 mb-2">
@@ -395,6 +403,9 @@ const addDate = (d) => {
 const hoursBefore = ref(24);
 const weeksBefore = ref(2);
 const slotLength = ref(30);
+
+const startTime = ref("09:00");
+const endTime = ref("17:00");
 </script>
 
 <style scoped>
