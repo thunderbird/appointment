@@ -230,7 +230,7 @@
             </label>
           </div>
           <div class="flex flex-col gap-2 mb-3">
-            <label class="flex flex-col">
+            <label class="flex flex-col units-container">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.slotLength") }}
               </div>
@@ -239,6 +239,10 @@
                 class="rounded-md text-sm py-1"
                 v-model="slotLength"
               />
+              <div class="units text-sm">
+                <span>{{ slotLength }}</span>
+                mins
+              </div>
             </label>
           </div>
           <div class="flex gap-4 justify-center items-end mb-2">
@@ -379,5 +383,17 @@ input[type="checkbox"]:checked {
 }
 .input-narrow {
   width: 130px;
+}
+.units-container {
+  position: relative;
+}
+.units {
+  position: absolute;
+  top: 1.61rem;
+  left: 0.9rem;
+}
+
+.units span {
+  visibility: hidden;
 }
 </style>
