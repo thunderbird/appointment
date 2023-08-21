@@ -185,26 +185,26 @@
                   Monday
                 </label>
                 <label class="mb-2">
-                  <input type="checkbox" value="Tuesday" />
+                  <input type="checkbox" value="Tuesday" checked />
                   Tuesday
                 </label>
                 <label class="mb-2">
-                  <input type="checkbox" value="Wednesday" />
+                  <input type="checkbox" value="Wednesday" checked />
                   Wednesday
                 </label>
               </div>
               <div class="flex flex-col">
                 <label class="mb-2">
-                  <input type="checkbox" value="Thursday" />
+                  <input type="checkbox" value="Thursday" checked />
                   Thursday
                 </label>
                 <label class="mb-2">
-                  <input type="checkbox" value="Friday" />
+                  <input type="checkbox" value="Friday" checked />
                   Friday
                 </label>
                 <label class="mb-2">
                   <input type="checkbox" value="Saturday" />
-                  Monday
+                  Saturday
                 </label>
               </div>
             </div>
@@ -298,17 +298,13 @@
         class="w-1/2"
       />
       <primary-button
-        v-show="activeStep1"
+        v-show="activeStep1 || activeStep2"
         :label="t('label.next')"
-        :disabled="!validStep1"
-        @click="validStep1 ? emit('next') : null"
         class="w-1/2"
       />
       <primary-button
-        v-show="activeStep2"
+        v-show="activeStep3"
         :label="t('label.create')"
-        :disabled="!validStep1 || !validStep2"
-        @click="validStep1 && validStep2 ? createAppointment() : null"
         class="w-1/2"
       />
     </div>
@@ -380,8 +376,8 @@ const emit = defineEmits(["start", "next", "create", "cancel"]);
 // second step are the availability slots
 // const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 // const activeStep2 = computed(() => props.status === 2);
-const activeStep1 = ref(false);
-const activeStep2 = ref(true);
+const activeStep1 = ref(true);
+const activeStep2 = ref(false);
 const activeStep3 = ref(false);
 
 function setStep(num) {
