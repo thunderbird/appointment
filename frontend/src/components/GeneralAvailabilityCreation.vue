@@ -110,19 +110,43 @@
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr />
         <div class="flex flex-col gap-2">
-          <div class="flex justify-center items-end mb-2">
+          <div
+            class="flex justify-between items-end mb-2 remove-end-date-container"
+          >
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.startDate") }}
               </div>
-              <input type="date" class="rounded-md text-sm py-1" />
+              <input
+                type="text"
+                v-model="startDate"
+                class="input-narrow rounded-md text-sm py-1"
+                @click="showStartDatePicker = true"
+              />
+              <!-- <input type="date" class="rounded-md text-sm py-1" /> -->
             </label>
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.endDate") }}
               </div>
-              <input type="date" class="rounded-md text-sm py-1" />
+              <input
+                type="text"
+                class="input-narrow rounded-md text-sm py-1 border-2 border-rose-50"
+                v-model="endDate"
+                @click="showEndDatePicker = true"
+              />
+
+              <!-- <input type="date" class="rounded-md text-sm py-1" /> -->
             </label>
+            <div
+              v-if="endDate !== 'never'"
+              class="remove-end-date mb-2 p-1 cursor-pointer"
+              @click="removeEndDate()"
+            >
+              <icon-x
+                class="h-5 w-5 stroke-2 fill-transparent stroke-rose-500"
+              />
+            </div>
           </div>
           <div class="flex gap-4 justify-between items-end mb-2">
             <label class="flex flex-col">
@@ -215,7 +239,7 @@
       <div v-show="activeStep3" class="flex flex-col gap-3 gap-4">
         <hr />
         <div class="flex flex-col gap-2">
-          <div class="flex gap-4 justify-center items-end mb-2">
+          <div class="flex gap-4 justify-between items-end mb-2">
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.bookingEarliest") }}
@@ -289,7 +313,7 @@
       />
     </div>
     <div
-      v-show="showDatePicker"
+      v-show="showStartDatePicker"
       class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700"
     >
       <!-- monthly mini calendar -->
@@ -300,7 +324,22 @@
         :min-date="dj()"
         @prev="dateNav('month', false)"
         @next="dateNav('month')"
-        @day-selected="addDate"
+        @day-selected="setStartDate"
+      />
+    </div>
+    <div
+      v-show="showEndDatePicker"
+      class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700"
+    >
+      <!-- monthly mini calendar -->
+      <calendar-month
+        :selected="activeDate"
+        :mini="true"
+        :nav="true"
+        :min-date="dj()"
+        @prev="dateNav('month', false)"
+        @next="dateNav('month')"
+        @day-selected="setEndDate"
       />
     </div>
   </div>
@@ -341,8 +380,8 @@ const emit = defineEmits(["start", "next", "create", "cancel"]);
 // second step are the availability slots
 // const activeStep1 = computed(() => props.status === 1 || props.status === 3);
 // const activeStep2 = computed(() => props.status === 2);
-const activeStep1 = ref(true);
-const activeStep2 = ref(false);
+const activeStep1 = ref(false);
+const activeStep2 = ref(true);
 const activeStep3 = ref(false);
 
 function setStep(num) {
@@ -382,13 +421,24 @@ const updateLocationType = (type) => {
   appointment.location_type = locationTypes[type];
 };
 
+const hoursBefore = ref(24);
+const weeksBefore = ref(2);
+const slotLength = ref(30);
+
+const startTime = ref("09:00");
+const endTime = ref("17:00");
+const startDate = ref("08/21/2023");
+const endDate = ref("never");
+
 // show mini month date picker
-const showDatePicker = ref(false);
+const showStartDatePicker = ref(false);
+const showEndDatePicker = ref(false);
 const activeDate = ref(dj());
 
 // handle date and time input of user
-const addDate = (d) => {
-  const day = dj(d).format("YYYY-MM-DD");
+const setStartDate = (d) => {
+  // const day = dj(d).format("YYYY-MM-DD");
+  const date = dj(d).format("MM/DD/YYYY");
   // if (!Object.hasOwn(slots, day)) {
   //   slots[day] = [
   //     {
@@ -397,15 +447,28 @@ const addDate = (d) => {
   //     },
   //   ];
   // }
-  showDatePicker.value = false;
+  startDate.value = date;
+  showStartDatePicker.value = false;
+};
+// handle date and time input of user
+const setEndDate = (d) => {
+  // const day = dj(d).format("YYYY-MM-DD");
+  const date = dj(d).format("MM/DD/YYYY");
+  // if (!Object.hasOwn(slots, day)) {
+  //   slots[day] = [
+  //     {
+  //       start: dj(d).add(10, "hours").format("HH:mm"),
+  //       end: dj(d).add(11, "hours").format("HH:mm"),
+  //     },
+  //   ];
+  // }
+  endDate.value = date;
+  showEndDatePicker.value = false;
 };
 
-const hoursBefore = ref(24);
-const weeksBefore = ref(2);
-const slotLength = ref(30);
-
-const startTime = ref("09:00");
-const endTime = ref("17:00");
+function removeEndDate() {
+  endDate.value = "never";
+}
 </script>
 
 <style scoped>
@@ -413,7 +476,7 @@ input[type="checkbox"]:checked {
   background-color: unset;
 }
 .input-narrow {
-  width: 130px;
+  width: 120px;
 }
 .units-container {
   position: relative;
@@ -426,5 +489,14 @@ input[type="checkbox"]:checked {
 
 .units span {
   visibility: hidden;
+}
+.remove-end-date-container {
+  position: relative;
+}
+.remove-end-date {
+  position: absolute;
+  z-index: 9;
+  right: 0;
+  top: 1.61rem;
 }
 </style>
