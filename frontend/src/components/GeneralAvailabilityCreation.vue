@@ -110,7 +110,7 @@
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr />
         <div class="flex flex-col gap-2">
-          <div class="flex gap-4 justify-center items-end mb-2">
+          <div class="flex justify-center items-end mb-2">
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.startDate") }}
@@ -124,7 +124,7 @@
               <input type="date" class="rounded-md text-sm py-1" />
             </label>
           </div>
-          <div class="flex gap-4 justify-center items-end mb-2">
+          <div class="flex gap-4 justify-between items-end mb-2">
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.startTime") }}
@@ -138,13 +138,44 @@
               <input type="time" class="rounded-md text-sm py-1" />
             </label>
           </div>
-          <div class="flex gap-4 justify-center items-end mb-2">
-            <label class="flex flex-col">
-              <div class="text-sm text-gray-500 dark:text-gray-300">
-                {{ t("label.availableDays") }}
+          <div class="flex flex-col gap-2 mb-2">
+            <div class="text-sm text-gray-500 dark:text-gray-300">
+              {{ t("label.availableDays") }}
+            </div>
+            <div class="flex flex-row justify-start">
+              <div class="flex flex-col mr-6">
+                <label class="mb-2">
+                  <input type="checkbox" value="Sunday" />
+                  Sunday
+                </label>
+                <label class="mb-2">
+                  <input type="checkbox" value="Monday" checked />
+                  Monday
+                </label>
+                <label class="mb-2">
+                  <input type="checkbox" value="Tuesday" />
+                  Tuesday
+                </label>
+                <label class="mb-2">
+                  <input type="checkbox" value="Wednesday" />
+                  Wednesday
+                </label>
               </div>
-              <p>Need to do days of week with checkboxes</p>
-            </label>
+              <div class="flex flex-col">
+                <label class="mb-2">
+                  <input type="checkbox" value="Thursday" />
+                  Thursday
+                </label>
+                <label class="mb-2">
+                  <input type="checkbox" value="Friday" />
+                  Friday
+                </label>
+                <label class="mb-2">
+                  <input type="checkbox" value="Saturday" />
+                  Monday
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -173,7 +204,7 @@
           :class="{ 'rotate-0': activeStep3 }"
         />
       </div>
-      <div v-show="activeStep3" class="flex flex-col gap-3">
+      <div v-show="activeStep3" class="flex flex-col gap-3 gap-4">
         <hr />
         <div class="flex flex-col gap-2">
           <div class="flex gap-4 justify-center items-end mb-2">
@@ -181,28 +212,41 @@
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.bookingEarliest") }}
               </div>
-              <input type="number" class="rounded-md text-sm py-1" />
+              <input
+                type="number"
+                class="rounded-md text-sm py-1 input-narrow"
+                v-model="hoursBefore"
+              />
             </label>
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.bookingLatest") }}
               </div>
-              <input type="number" class="rounded-md text-sm py-1" />
+              <input
+                type="number"
+                class="rounded-md text-sm py-1 input-narrow"
+                v-model="weeksBefore"
+              />
             </label>
           </div>
-          <div class="flex gap-4 justify-center items-end mb-2">
+          <div class="flex flex-col gap-2 mb-3">
             <label class="flex flex-col">
               <div class="text-sm text-gray-500 dark:text-gray-300">
                 {{ t("label.slotLength") }}
               </div>
-              <input type="number" class="rounded-md text-sm py-1" />
+              <input
+                type="number"
+                class="rounded-md text-sm py-1"
+                v-model="slotLength"
+              />
             </label>
           </div>
           <div class="flex gap-4 justify-center items-end mb-2">
             <label class="flex flex-col">
               <p>
                 Recipients can schedule an appointment between
-                <b>24 hours</b> and <b>2 weeks</b>
+                <b>{{ hoursBefore }} hours</b> and
+                <b>{{ weeksBefore }} weeks</b>
                 ahead of time.
               </p>
             </label>
@@ -323,4 +367,17 @@ const addDate = (d) => {
   // }
   showDatePicker.value = false;
 };
+
+const hoursBefore = ref(24);
+const weeksBefore = ref(2);
+const slotLength = ref(30);
 </script>
+
+<style scoped>
+input[type="checkbox"]:checked {
+  background-color: unset;
+}
+.input-narrow {
+  width: 130px;
+}
+</style>
