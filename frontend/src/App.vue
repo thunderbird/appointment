@@ -2,9 +2,9 @@
   <!-- authenticated subscriber content -->
   <template v-if="currentUser">
     <site-notification
-    v-if="siteNotificationStore.display"
-    :title="siteNotificationStore.title"
-    :action-url="siteNotificationStore.actionUrl"
+      v-if="siteNotificationStore.display"
+      :title="siteNotificationStore.title"
+      :action-url="siteNotificationStore.actionUrl"
     >
       {{ siteNotificationStore.message }}
     </site-notification>
