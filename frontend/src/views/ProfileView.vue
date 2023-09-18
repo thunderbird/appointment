@@ -59,12 +59,12 @@ const pendingAppointments = computed(() => props.appointments.filter((a) => a.st
 
 // do log out
 const logout = () => {
+  removeUserFromStorage();
   auth.logout({
     logoutParams: {
       returnTo: window.location.origin,
     },
   });
-  removeUserFromStorage();
 };
 
 // initially load data when component gets remounted
