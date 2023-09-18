@@ -306,6 +306,7 @@
         v-show="activeStep3"
         :label="t('label.create')"
         class="w-1/2"
+        @click="createAvailability"
       />
     </div>
     <div
@@ -339,11 +340,19 @@
       />
     </div>
   </div>
+  <!-- modals -->
+  <availability-created-modal
+    :open="createdConfirmation.show"
+    :title="createdConfirmation.title"
+    :public-link="createdConfirmation.publicLink"
+    @close="closeCreatedModal"
+  />
 </template>
 <script setup>
 import { locationTypes } from "@/definitions";
 import { ref, reactive, computed, inject, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import AvailabilityCreatedModal from "@/components/AvailabilityCreatedModal";
 import CalendarMonth from "@/components/CalendarMonth";
 import PrimaryButton from "@/elements/PrimaryButton";
 import SecondaryButton from "@/elements/SecondaryButton";
@@ -430,6 +439,23 @@ const endDate = ref("never");
 const showStartDatePicker = ref(false);
 const showEndDatePicker = ref(false);
 const activeDate = ref(dj());
+
+// show confirmation dialog
+const createdConfirmation = reactive({
+  show: false,
+  title: "",
+  publicLink: "",
+});
+const closeCreatedModal = () => {
+  createdConfirmation.show = false;
+};
+
+function createAvailability() {
+  // show confirmation
+  createdConfirmation.title = appointment.title;
+  createdConfirmation.publicLink = `https://not.a.real.url`;
+  createdConfirmation.show = true;
+}
 
 // handle date and time input of user
 const setStartDate = (d) => {
