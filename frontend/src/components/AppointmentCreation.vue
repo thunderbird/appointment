@@ -31,7 +31,7 @@
         </span>
         <icon-chevron-down
           class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
-          :class="{ 'rotate-0': activeStep1 }"
+          :class="{ '!rotate-0': activeStep1 }"
         />
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
@@ -125,7 +125,7 @@
         </span>
         <icon-chevron-down
           class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
-          :class="{ 'rotate-0': activeStep2 }"
+          :class="{ '!rotate-0': activeStep2 }"
         />
       </div>
       <div v-show="activeStep2" class="flex flex-col gap-3">
@@ -142,7 +142,6 @@
                   @click="addTime(day)"
                   class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
                 >
-                  this button should trigger it
                   <icon-plus
                     class="h-3 w-3 stroke-2 fill-transparent stroke-white"
                   />
@@ -355,7 +354,6 @@ const addDate = (d) => {
   showDatePicker.value = false;
 };
 const addTime = (d) => {
-  debugger;
   const day = dj(d).format("YYYY-MM-DD");
   // get latest end time to start next time slot default value with
   const latestTime = slots[day].reduce(

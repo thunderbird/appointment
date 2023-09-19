@@ -13,11 +13,18 @@ export const locationTypes = {
 };
 
 // appointment creation state
-export const creationState = {
+export const appointmentCreationState = {
   hidden: 0,
   details: 1,
   availability: 2,
   finished: 3,
+};
+
+// schedule creation state
+export const scheduleCreationState = {
+  details: 1,
+  availability: 2,
+  settings: 3,
 };
 
 // available calendar views
@@ -106,7 +113,8 @@ export default {
   bookingCalendarViews,
   calendarViews,
   colorSchemes,
-  creationState,
+  appointmentCreationState,
+  scheduleCreationState,
   filterOptions,
   listColumns,
   locationTypes,

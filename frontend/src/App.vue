@@ -69,12 +69,8 @@ const call = createFetch({
         siteNotificationStore.value.id = data.detail.error;
 
         // Retrieve the google auth url, and if that fails send them to calendar settings!
-        const { data: urlData, error: urlError } = await call(
-          "google/auth"
-        ).get();
-        const url = urlError.value
-          ? "/settings/calendar"
-          : urlData.value.slice(1, -1);
+        const { data: urlData, error: urlError } = await call('google/auth').get();
+        const url = urlError.value ? '/settings/calendar' : urlData.value.slice(1, -1);
 
         // Update our site notification store with the error details
         siteNotificationStore.value = {
@@ -100,7 +96,7 @@ provide("call", call);
 // menu items for main navigation
 const navItems = [
   "calendar",
-  "generalAvailability",
+  "schedule",
   "appointments",
   "settings",
 ];
@@ -139,11 +135,7 @@ const checkLogin = async () => {
 
 // query db for all calendar data
 const getDbCalendars = async (onlyConnected = true) => {
-  const { data, error } = await call(
-    `me/calendars?only_connected=${onlyConnected}`
-  )
-    .get()
-    .json();
+  const { data, error } = await call(`me/calendars?only_connected=${onlyConnected}`).get().json();
   if (!error.value) {
     if (data.value === null || typeof data.value === "undefined") return;
     calendars.value = data.value;

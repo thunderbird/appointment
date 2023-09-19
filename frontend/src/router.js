@@ -2,7 +2,7 @@ import { authGuard } from "@auth0/auth0-vue";
 import { createRouter, createWebHistory } from "vue-router";
 import BookingView from "@/views/BookingView.vue";
 import CalendarView from "@/views/CalendarView.vue";
-import GeneralAvailabilityView from "@/views/GeneralAvailabilityView.vue";
+import ScheduleView from "@/views/ScheduleView.vue";
 import HomeView from "@/views/HomeView.vue";
 
 const routes = [
@@ -23,9 +23,9 @@ const routes = [
     component: BookingView,
   },
   {
-    path: "/availability",
-    name: "generalAvailability",
-    component: GeneralAvailabilityView,
+    path: "/schedule",
+    name: "schedule",
+    component: ScheduleView,
     beforeEnter: authGuard,
   },
   {
