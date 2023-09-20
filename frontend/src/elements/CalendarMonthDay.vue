@@ -32,10 +32,11 @@
         :key="event"
         class="shrink-0 text-sm text-gray-700 dark:text-gray-200 hover:shadow-md"
         :class="{
-          'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !event.remote,
+          'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !event.remote && !event.preview,
           'group/event rounded-md p-1 cursor-pointer hover:shadow-lg hover:bg-gradient-to-b': placeholder,
           'hover:!text-white bg-teal-50 dark:bg-teal-800 hover:from-teal-500 hover:to-sky-600': placeholder,
           'flex items-center gap-1.5 px-2 py-0.5': event.remote,
+          'flex items-center rounded border-l-4 px-2 border-teal-400': event.preview,
           '!border-solid text-black': event.attendee !== null,
           'rounded bg-amber-400/80 dark:text-white': event.all_day
         }"
@@ -64,7 +65,8 @@
             'h-10 p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder,
           }"
         >
-          {{ event.title }}
+          <span v-if="event.preview">{{ formattedTimeRange(event) }}</span>
+          <span v-else>{{ event.title }}</span>
         </div>
       </div>
     </div>
@@ -81,7 +83,7 @@
 </template>
 
 <script setup>
-import { eventColor } from '@/utils';
+import { eventColor, timeFormat } from '@/utils';
 import { inject, reactive, computed } from 'vue';
 import EventPopup from '@/elements/EventPopup';
 
@@ -137,5 +139,12 @@ const showEventPopup = (el, event) => {
 const hideEventPopup = () => {
   popup.event = null;
   popup.display = 'none';
+};
+
+// formatted time range
+const formattedTimeRange = (event) => {
+  const start = dj(event.start);
+  const end = start.add(event.duration, 'minutes');
+  return start.format(`${timeFormat()} - `) + end.format(timeFormat());
 };
 </script>

@@ -152,12 +152,12 @@
             />
           </label>
         </div>
-        <label>
+        <div>
           <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
             {{ t("label.availableDays") }}
           </div>
-          <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white px-4 py-2 rounded-lg">
-            <div v-for="(w, i) in dj.weekdays()" class="flex gap-2 items-center text-sm">
+          <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white p-4 rounded-lg">
+            <label v-for="(w, i) in dj.weekdays()" class="flex gap-2 items-center text-sm select-none cursor-pointer">
               <input
                 type="checkbox"
                 v-model="schedule.weekdays"
@@ -165,9 +165,9 @@
                 class="text-teal-500 w-5 h-5"
               />
               <span>{{ w }}</span>
-            </div>
+            </label>
           </div>
-        </label>
+        </div>
       </div>
     </div>
     <!-- step 3 -->
@@ -281,7 +281,7 @@
 
 <script setup>
 import { locationTypes, scheduleCreationState } from "@/definitions";
-import { ref, reactive, computed, inject } from "vue";
+import { ref, reactive, computed, inject, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
 import CalendarMonth from "@/components/CalendarMonth";
@@ -309,11 +309,13 @@ const emit = defineEmits(["created", "updated"]);
 // component properties
 const props = defineProps({
   calendars: Array, // list of user defined calendars
+  schedule: Object, // existing schedule to update or null
   user: Object, // currently logged in user, null if not logged in
+  maxDate: Object, // dayjs object indicating the last date time slots should be generated for
 });
 
 // schedule creation state indicating the current step
-const state = ref(scheduleCreationState.settings);
+const state = ref(scheduleCreationState.details);
 
 // calculate the current visible step by given status
 // first step are the appointment details
@@ -341,6 +343,43 @@ const defaultSchedule = {
 };
 const schedule = reactive({ ...defaultSchedule });
 const scheduleCreationError = ref(null);
+const scheduledRangeMinutes = computed(() => {
+  const start = dj(`20230101T${schedule.start_time}:00`);
+  const end = dj(`20230101T${schedule.end_time}:00`);
+  return end.diff(start, 'minutes');
+});
+// generate time slots from current schedule configuration
+const getSlots = () => {
+  const slots = [];
+  const end = schedule.end_date
+    ? dj.min(dj(schedule.end_date), props.maxDate)
+    : props.maxDate;
+  let pointerDate = dj(schedule.start_date);
+  while (pointerDate <= end) {
+    if (schedule.weekdays.includes(pointerDate.weekday())) {
+      slots.push({
+        "start": `${pointerDate.format("YYYY-MM-DD")}T${schedule.start_time}:00`,
+        "duration": scheduledRangeMinutes.value ?? 30,
+        "attendee_id": null,
+        "id": null
+      });
+    }
+    pointerDate = pointerDate.add(1, 'day');
+  }
+  return slots;
+};
+// generate an appointment object with slots from current schedule data
+const getScheduleAppointment = () => {
+  return {
+    title: schedule.name,
+    calendar_id: schedule.calendar_id,
+    location_type: schedule.location_type,
+    location_url: schedule.location_url,
+    details: schedule.details,
+    status: 2,
+    slots: getSlots(),
+  }
+};
 
 // tab navigation for location types
 const updateLocationType = (type) => {
@@ -389,11 +428,9 @@ const closeCreatedModal = () => {
   createdConfirmation.show = false;
 };
 
-/**
- * Reset the Appointment creation form
- */
+// reset the Schedule creation form
 const resetSchedule = () => {
-  // reset everything to start again
+  // set default values again
   Object.keys(defaultSchedule).forEach((attr) => {
     schedule[attr] = defaultSchedule[attr];
   });
@@ -409,7 +446,7 @@ const saveSchedule = async () => {
   const { data, error } = await call("schedules").post(obj).json();
 
   if (error.value) {
-    // Error message is in data
+    // error message is in data
     scheduleCreationError.value = data.value.detail || t("error.unknownScheduleError");
     // go back to the start
     state.value = scheduleCreationState.details;
@@ -435,4 +472,18 @@ const dateNav = (unit = "month", forward = true) => {
   }
 };
 
+// send schedule updates
+watch(
+  () => [
+    state.value,
+    schedule.start_date,
+    schedule.end_date,
+    schedule.start_time,
+    schedule.end_time,
+    schedule.weekdays,
+  ],
+  () => {
+    emit('updated', getScheduleAppointment());
+  }
+);
 </script>

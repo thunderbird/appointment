@@ -39,8 +39,10 @@
       <schedule-creation
         :calendars="calendars"
         :user="user"
+        :schedule="null"
+        :max-date="activeDate.endOf('month')"
         @created="refresh()"
-        @updated="null"
+        @updated="schedulePreview"
       />
     </div>
     <!-- main section: big calendar showing active month, week or day -->
@@ -50,6 +52,7 @@
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
+      :schedules="schedules"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"
@@ -155,6 +158,12 @@ const getRemoteEvents = async (from, to) => {
       calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
     }
   }));
+};
+
+// get user configured schedules (only one for now)
+const schedules = ref([]);
+const schedulePreview = (schedule) => {
+  schedules.value = [schedule];
 };
 
 // initially load data when component gets remounted

@@ -67,6 +67,7 @@ const props = defineProps({
   minDate: Object, // minimum active date in view (dayjs object)
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
+  schedules: Array, // data of scheduled event previews to show
 });
 
 // component emits
@@ -96,6 +97,17 @@ const events = computed(() => {
       eventsOnDate[key] = [{ ...event, remote: true }];
     }
   });
+  // add schedules
+  props.schedules?.forEach((event) => {
+    event.slots.forEach((slot) => {
+      const key = dj(slot.start).format('YYYY-MM-DD');
+      if (key in eventsOnDate) {
+        eventsOnDate[key].push({ ...event, ...slot, preview: true });
+      } else {
+        eventsOnDate[key] = [{ ...event, ...slot, preview: true }];
+      }
+    });
+  });
   return eventsOnDate;
 });
 // get all relevant events on a given date (pending, with attendee or remote)
@@ -107,7 +119,8 @@ const eventsByDate = (d) => {
       : events.value[key].filter(
         (e) => (dj(e.start).add(e.duration, 'minutes').isAfter(dj()) && e.status === appointmentState.pending)
             || (e.attendee && e.status === appointmentState.pending)
-            || e.remote,
+            || e.remote
+            || e.preview,
       );
   }
   return null;
