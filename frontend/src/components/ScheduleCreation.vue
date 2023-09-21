@@ -323,7 +323,17 @@ const state = ref(scheduleCreationState.details);
 const activeStep1 = computed(() => state.value === scheduleCreationState.details);
 const activeStep2 = computed(() => state.value === scheduleCreationState.availability);
 const activeStep3 = computed(() => state.value === scheduleCreationState.settings);
+const visitedStep1 = ref(false);
 const nextStep = () => state.value++;
+
+// calculate calendar titles
+const calendarTitles = computed(() => {
+  const calendarsById = {};
+  props.calendars?.forEach((c) => {
+    calendarsById[c.id] = c.title;
+  });
+  return calendarsById;
+});
 
 // default appointment object (for start and reset) and appointment form data
 const defaultSchedule = {
@@ -373,6 +383,7 @@ const getScheduleAppointment = () => {
   return {
     title: schedule.name,
     calendar_id: schedule.calendar_id,
+    calendar_title: calendarTitles.value[schedule.calendar_id],
     location_type: schedule.location_type,
     location_url: schedule.location_url,
     details: schedule.details,
@@ -472,10 +483,20 @@ const dateNav = (unit = "month", forward = true) => {
   }
 };
 
-// send schedule updates
+// track if steps were already visited
+watch(
+  () => state.value,
+  (_, oldValue) => {
+    if (oldValue === 1) visitedStep1.value = true;
+    emit('updated', getScheduleAppointment());
+  }
+);
+
+// track changes and send schedule updates
 watch(
   () => [
-    state.value,
+    schedule.name,
+    schedule.calendar_id,
     schedule.start_date,
     schedule.end_date,
     schedule.start_time,
@@ -484,7 +505,11 @@ watch(
     props.activeDate,
   ],
   () => {
-    emit('updated', getScheduleAppointment());
+    // if an existing schedule was given update anyway
+    // if a new schedule gets created, only update on step 2
+    if (props.schedule || !props.schedule && visitedStep1.value) {
+      emit('updated', getScheduleAppointment());
+    }
   }
 );
 </script>
