@@ -87,7 +87,6 @@ import { IconChevronLeft, IconChevronRight } from "@tabler/icons-vue";
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
 const refresh = inject('refresh');
@@ -112,10 +111,6 @@ const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews.month);
 const updateTab = (view) => {
-  router.replace({
-    name: route.name,
-    params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') },
-  });
   tabActive.value = calendarViews[view];
 };
 
