@@ -478,7 +478,7 @@ def create_calendar_schedule(db: Session, schedule: schemas.ScheduleBase):
 
 
 def get_schedules_by_subscriber(db: Session, subscriber_id: int):
-    """Get schedules by subscriber id. Should be only one for now (general availability)."""
+    """Get schedules by subscriber id"""
     return (
         db.query(models.Schedule)
         .join(models.Calendar, models.Schedule.calendar_id == models.Calendar.id)

@@ -29,7 +29,8 @@
     "languageAndAppearance": "Sprache & Aussehen",
     "pendingAppointments": "Ausstehende Termine",
     "privacySettings": "Privatsphäre-Einstellungen",
-    "profile": "Profile"
+    "profile": "Profile",
+    "scheduleCreated": "Zeitplan erstellt!"
   },
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",

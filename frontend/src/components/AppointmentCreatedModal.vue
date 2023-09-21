@@ -11,7 +11,7 @@
       <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-gray-700 dark:stroke-gray-400" />
     </div>
     <div class="text-2xl font-semibold text-teal-500">
-      {{ t('heading.appointmentCreated') }}
+      {{ t(isSchedule ? 'heading.scheduleCreated' : 'heading.appointmentCreated') }}
     </div>
     <div class="max-w-xs text-center">
       {{ t('text.titleIsReadyForBookings', { title: title }) }}
@@ -44,6 +44,7 @@ const { t } = useI18n();
 // component properties
 defineProps({
   open: Boolean, // modal state
+  isSchedule: Boolean, // confirmation is for a schedule instead of a common appointment
   title: String, // title of created appointment
   publicLink: String, // public link of created appointment for sharing
 });

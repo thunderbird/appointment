@@ -37,9 +37,10 @@
     <!-- schedule creation dialog -->
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <schedule-creation
+        v-if="schedulesReady"
         :calendars="calendars"
         :user="user"
-        :schedule="null"
+        :schedule="firstSchedule"
         :active-date="activeDate"
         @created="refresh()"
         @updated="schedulePreview"
@@ -52,7 +53,7 @@
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
-      :schedules="schedules"
+      :schedules="schedulesPreviews"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"
@@ -75,7 +76,7 @@
 import { calendarViews, appointmentState } from '@/definitions';
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import ScheduleCreation from '@/components/ScheduleCreation';
 import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
@@ -144,7 +145,6 @@ const pendingAppointments = computed(() => props.appointments?.filter((a) => a.s
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);
-
 const getRemoteEvents = async (from, to) => {
   calendarEvents.value = [];
   await Promise.all(props.calendars.map(async (calendar) => {
@@ -155,15 +155,30 @@ const getRemoteEvents = async (from, to) => {
   }));
 };
 
-// get user configured schedules (only one for now)
+// user configured schedules from db (only the first for now, later multiple schedules will be available)
 const schedules = ref([]);
+const firstSchedule = computed(() => schedules.value.length > 0
+  ? schedules.value[0]
+  : null
+);
+const schedulesReady = ref(false);
+const getFirstSchedule = async () => {
+  calendarEvents.value = [];
+  const { data } = await call('schedule').get().json();
+  schedules.value = data.value;
+};
+
+// schedule previews for showing corresponding placeholders in calendar views
+const schedulesPreviews = ref([]);
 const schedulePreview = (schedule) => {
-  schedules.value = [schedule];
+  schedulesPreviews.value = [schedule];
 };
 
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
+  await getFirstSchedule();
+  schedulesReady.value = true;
   const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
   const eventsTo = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);

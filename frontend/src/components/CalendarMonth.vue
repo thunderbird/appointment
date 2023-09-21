@@ -99,7 +99,7 @@ const events = computed(() => {
   });
   // add schedules
   props.schedules?.forEach((event) => {
-    event.slots.forEach((slot) => {
+    event.slots?.forEach((slot) => {
       const key = dj(slot.start).format('YYYY-MM-DD');
       if (key in eventsOnDate) {
         eventsOnDate[key].push({ ...event, ...slot, preview: true });

@@ -254,54 +254,34 @@
         class="w-1/2"
       />
     </div>
-    <div
-      v-show="showDatePicker"
-      class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700"
-    >
-      <!-- monthly mini calendar -->
-      <calendar-month
-        :selected="activeDatePicker"
-        :mini="true"
-        :nav="true"
-        :min-date="dj()"
-        @prev="dateNav('month', false)"
-        @next="dateNav('month')"
-        @day-selected="addDate"
-      />
-    </div>
   </div>
   <!-- modals -->
   <appointment-created-modal
-    :open="createdConfirmation.show"
-    :title="createdConfirmation.title"
-    :public-link="createdConfirmation.publicLink"
+    :open="savedConfirmation.show"
+    :is-schedule="true"
+    :title="savedConfirmation.title"
+    :public-link="savedConfirmation.publicLink"
     @close="closeCreatedModal"
   />
 </template>
 
 <script setup>
 import { locationTypes, scheduleCreationState } from "@/definitions";
-import { ref, reactive, computed, inject, watch } from "vue";
+import { ref, reactive, computed, inject, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
-import CalendarMonth from "@/components/CalendarMonth";
 import PrimaryButton from "@/elements/PrimaryButton";
 import SecondaryButton from "@/elements/SecondaryButton";
 import TabBar from "@/components/TabBar";
 
 // icons
-import {
-  IconChevronDown,
-  IconPlus,
-  IconX,
-} from "@tabler/icons-vue";
+import { IconChevronDown } from "@tabler/icons-vue";
 import AlertBox from "@/elements/AlertBox";
 
 // component constants
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject("call");
-const bookingUrl = inject("bookingUrl");
 
 // component emits
 const emit = defineEmits(["created", "updated"]);
@@ -318,8 +298,9 @@ const props = defineProps({
 const state = ref(scheduleCreationState.details);
 
 // calculate the current visible step by given status
-// first step are the appointment details
-// second step are the availability slots
+// first step are the general details
+// second step is the availability configuration
+// third step are the booking settings
 const activeStep1 = computed(() => state.value === scheduleCreationState.details);
 const activeStep2 = computed(() => state.value === scheduleCreationState.availability);
 const activeStep3 = computed(() => state.value === scheduleCreationState.settings);
@@ -335,10 +316,10 @@ const calendarTitles = computed(() => {
   return calendarsById;
 });
 
-// default appointment object (for start and reset) and appointment form data
+// default schedule object (for start and reset) and schedule form data
 const defaultSchedule = {
-  calendar_id: props.calendars[0]?.id,
   name: "",
+  calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
   location_url: "",
   details: "",
@@ -351,24 +332,28 @@ const defaultSchedule = {
   weekdays: [1,2,3,4,5],
   slot_duration: 30,
 };
-const schedule = reactive({ ...defaultSchedule });
+const schedule = ref({ ...defaultSchedule });
+onMounted(() => {
+  schedule.value = props.schedule ? { ...props.schedule } : { ...defaultSchedule };
+});
+
 const scheduleCreationError = ref(null);
 const scheduledRangeMinutes = computed(() => {
-  const start = dj(`20230101T${schedule.start_time}:00`);
-  const end = dj(`20230101T${schedule.end_time}:00`);
+  const start = dj(`20230101T${schedule.value.start_time}:00`);
+  const end = dj(`20230101T${schedule.value.end_time}:00`);
   return end.diff(start, 'minutes');
 });
 // generate time slots from current schedule configuration
 const getSlots = () => {
   const slots = [];
-  const end = schedule.end_date
-    ? dj.min(dj(schedule.end_date), dj(props.activeDate).endOf('month'))
+  const end = schedule.value.end_date
+    ? dj.min(dj(schedule.value.end_date), dj(props.activeDate).endOf('month'))
     : dj(props.activeDate).endOf('month');
-  let pointerDate = dj.max(dj(schedule.start_date), dj(props.activeDate).startOf('month'));
+  let pointerDate = dj.max(dj(schedule.value.start_date), dj(props.activeDate).startOf('month'));
   while (pointerDate <= end) {
-    if (schedule.weekdays.includes(pointerDate.weekday())) {
+    if (schedule.value.weekdays?.includes(pointerDate.weekday())) {
       slots.push({
-        "start": `${pointerDate.format("YYYY-MM-DD")}T${schedule.start_time}:00`,
+        "start": `${pointerDate.format("YYYY-MM-DD")}T${schedule.value.start_time}:00`,
         "duration": scheduledRangeMinutes.value ?? 30,
         "attendee_id": null,
         "id": null
@@ -381,12 +366,12 @@ const getSlots = () => {
 // generate an appointment object with slots from current schedule data
 const getScheduleAppointment = () => {
   return {
-    title: schedule.name,
-    calendar_id: schedule.calendar_id,
-    calendar_title: calendarTitles.value[schedule.calendar_id],
-    location_type: schedule.location_type,
-    location_url: schedule.location_url,
-    details: schedule.details,
+    title: schedule.value.name,
+    calendar_id: schedule.value.calendar_id,
+    calendar_title: calendarTitles.value[schedule.value.calendar_id],
+    location_type: schedule.value.location_type,
+    location_url: schedule.value.location_url,
+    details: schedule.value.details,
     status: 2,
     slots: getSlots(),
   }
@@ -394,12 +379,12 @@ const getScheduleAppointment = () => {
 
 // tab navigation for location types
 const updateLocationType = (type) => {
-  schedule.location_type = locationTypes[type];
+  schedule.value.location_type = locationTypes[type];
 };
 
 // handle notes char limit
 const charLimit = 250;
-const charCount = computed(() => schedule.details.length);
+const charCount = computed(() => schedule.value.details.length);
 
 // booking options
 const earliestOptions = {};
@@ -408,53 +393,38 @@ const farthestOptions = {};
 [1,2,3,4].forEach(d => farthestOptions[d*60*24*7] = dj.duration(d, "weeks").humanize());
 
 // humanize selected durations
-const earliest = computed(() => dj.duration(schedule.earliest_booking, "minutes").humanize());
-const farthest = computed(() => dj.duration(schedule.farthest_booking, "minutes").humanize());
-
-// show mini month date picker
-const showDatePicker = ref(false);
-const activeDatePicker = ref(dj());
-
-// handle date and time input of user
-const addDate = (d) => {
-  const day = dj(d).format("YYYY-MM-DD");
-  if (!Object.hasOwn(slots, day)) {
-    slots[day] = [
-      {
-        start: dj(d).add(10, "hours").format("HH:mm"),
-        end: dj(d).add(11, "hours").format("HH:mm"),
-      },
-    ];
-  }
-  showDatePicker.value = false;
-};
+const earliest = computed(() => dj.duration(schedule.value.earliest_booking, "minutes").humanize());
+const farthest = computed(() => dj.duration(schedule.value.farthest_booking, "minutes").humanize());
 
 // show confirmation dialog
-const createdConfirmation = reactive({
+const savedConfirmation = reactive({
   show: false,
   title: "",
   publicLink: "",
 });
 const closeCreatedModal = () => {
-  createdConfirmation.show = false;
+  savedConfirmation.show = false;
 };
 
 // reset the Schedule creation form
 const resetSchedule = () => {
-  // set default values again
-  Object.keys(defaultSchedule).forEach((attr) => {
-    schedule[attr] = defaultSchedule[attr];
-  });
   scheduleCreationError.value = null;
   state.value = scheduleCreationState.details;
 };
 
-// handle actual appointment creation
+// handle actual schedule creation/update
 const saveSchedule = async () => {
   // build data object for post request
-  const obj = {...schedule};
-  // save selected appointment data
-  const { data, error } = await call("schedules").post(obj).json();
+  const obj = { ...schedule.value };
+  delete obj.availabilities;
+  delete obj.time_created;
+  delete obj.time_updated;
+  delete obj.id;
+
+  // save schedule data
+  const { data, error } = props.schedule
+    ? await call(`schedule/${props.schedule.id}`).put(obj).json()
+    : await call("schedule").post(obj).json();
 
   if (error.value) {
     // error message is in data
@@ -464,23 +434,20 @@ const saveSchedule = async () => {
     return;
   }
 
+  // Retrieve the user short url
+  const { data: sig_data, error: sig_error } = await call('me/signature').get().json();
+  if (sig_error.value) {
+    return;
+  }
+
   // show confirmation
-  createdConfirmation.title = data.value.title;
-  createdConfirmation.publicLink = bookingUrl + data.value.slug;
-  createdConfirmation.show = true;
+  savedConfirmation.title = data.value.name;
+  savedConfirmation.publicLink = sig_data.value.url;
+  savedConfirmation.show = true;
 
   resetSchedule();
 
   emit("created");
-};
-
-// date navigation
-const dateNav = (unit = "month", forward = true) => {
-  if (forward) {
-    activeDatePicker.value = activeDatePicker.value.add(1, unit);
-  } else {
-    activeDatePicker.value = activeDatePicker.value.subtract(1, unit);
-  }
 };
 
 // track if steps were already visited
@@ -495,13 +462,13 @@ watch(
 // track changes and send schedule updates
 watch(
   () => [
-    schedule.name,
-    schedule.calendar_id,
-    schedule.start_date,
-    schedule.end_date,
-    schedule.start_time,
-    schedule.end_time,
-    schedule.weekdays,
+    schedule.value.name,
+    schedule.value.calendar_id,
+    schedule.value.start_date,
+    schedule.value.end_date,
+    schedule.value.start_time,
+    schedule.value.end_time,
+    schedule.value.weekdays,
     props.activeDate,
   ],
   () => {

@@ -34,7 +34,7 @@ def create_calendar_schedule(
 
 @router.get("/", response_model=list[schemas.Schedule])
 def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    """Gets all of the available schedules for the logged in subscriber (only one for the time being)"""
+    """Gets all of the available schedules for the logged in subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     return repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
