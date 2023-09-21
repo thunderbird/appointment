@@ -9,13 +9,16 @@ from ..database.models import Subscriber, Schedule, CalendarProvider
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.google import get_google_client
+from datetime import datetime, timedelta
 
 router = APIRouter()
 
 
 @router.post("/", response_model=schemas.Schedule)
 def create_calendar_schedule(
-    schedule: schemas.ScheduleBase, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
+    schedule: schemas.ScheduleBase,
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to add a new schedule for a given calendar"""
     if not subscriber:
@@ -106,9 +109,10 @@ def read_schedule_availabilities(
             )
         else:
             con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-        existingEvents.extend(
-            con.list_events(schedule.start_date.strftime("%Y-%m-%d"), schedule.end_date.strftime("%Y-%m-%d"))
-        )
+        farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
+        start = schedule.start_date.strftime("%Y-%m-%d")
+        end = schedule.end_date.strftime("%Y-%m-%d") if schedule.end_date else farthest_end.strftime("%Y-%m-%d")
+        existingEvents.extend(con.list_events(start, end))
     actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
     if not actualSlots or len(actualSlots) == 0:
         raise HTTPException(status_code=404, detail="No possible booking slots found")

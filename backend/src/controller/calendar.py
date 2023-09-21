@@ -279,7 +279,7 @@ class Tools:
         earliest_start = now + timedelta(minutes=s.earliest_booking)
         farthest_end = now + timedelta(minutes=s.farthest_booking)
         start = max([datetime.combine(s.start_date, s.start_time), earliest_start])
-        end = min([datetime.combine(s.end_date, s.end_time), farthest_end])
+        end = min([datetime.combine(s.end_date, s.end_time), farthest_end]) if s.end_date else farthest_end
         slots = []
         # set the first date to an allowed weekday
         weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
