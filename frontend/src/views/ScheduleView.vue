@@ -40,7 +40,7 @@
         :calendars="calendars"
         :user="user"
         :schedule="null"
-        :max-date="activeDate.endOf('month')"
+        :active-date="activeDate"
         @created="refresh()"
         @updated="schedulePreview"
       />

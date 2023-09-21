@@ -260,7 +260,7 @@
     >
       <!-- monthly mini calendar -->
       <calendar-month
-        :selected="activeDate"
+        :selected="activeDatePicker"
         :mini="true"
         :nav="true"
         :min-date="dj()"
@@ -311,7 +311,7 @@ const props = defineProps({
   calendars: Array, // list of user defined calendars
   schedule: Object, // existing schedule to update or null
   user: Object, // currently logged in user, null if not logged in
-  maxDate: Object, // dayjs object indicating the last date time slots should be generated for
+  activeDate: Object, // dayjs object indicating the currently active calendar view date
 });
 
 // schedule creation state indicating the current step
@@ -352,9 +352,9 @@ const scheduledRangeMinutes = computed(() => {
 const getSlots = () => {
   const slots = [];
   const end = schedule.end_date
-    ? dj.min(dj(schedule.end_date), props.maxDate)
-    : props.maxDate;
-  let pointerDate = dj(schedule.start_date);
+    ? dj.min(dj(schedule.end_date), dj(props.activeDate).endOf('month'))
+    : dj(props.activeDate).endOf('month');
+  let pointerDate = dj.max(dj(schedule.start_date), dj(props.activeDate).startOf('month'));
   while (pointerDate <= end) {
     if (schedule.weekdays.includes(pointerDate.weekday())) {
       slots.push({
@@ -402,7 +402,7 @@ const farthest = computed(() => dj.duration(schedule.farthest_booking, "minutes"
 
 // show mini month date picker
 const showDatePicker = ref(false);
-const activeDate = ref(dj());
+const activeDatePicker = ref(dj());
 
 // handle date and time input of user
 const addDate = (d) => {
@@ -466,9 +466,9 @@ const saveSchedule = async () => {
 // date navigation
 const dateNav = (unit = "month", forward = true) => {
   if (forward) {
-    activeDate.value = activeDate.value.add(1, unit);
+    activeDatePicker.value = activeDatePicker.value.add(1, unit);
   } else {
-    activeDate.value = activeDate.value.subtract(1, unit);
+    activeDatePicker.value = activeDatePicker.value.subtract(1, unit);
   }
 };
 
@@ -481,6 +481,7 @@ watch(
     schedule.start_time,
     schedule.end_time,
     schedule.weekdays,
+    props.activeDate,
   ],
   () => {
     emit('updated', getScheduleAppointment());
