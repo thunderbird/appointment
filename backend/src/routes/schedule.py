@@ -89,6 +89,9 @@ def read_schedule_availabilities(
         schedule = schedules[0]  # for now we only process the first existing schedule
     except KeyError:
         raise HTTPException(status_code=404, detail="Schedule not found")
+    # check if schedule is enabled
+    if not schedule.active:
+        raise HTTPException(status_code=404, detail="Schedule not found")
     # calculate theoretically possible slots from schedule config
     availableSlots = Tools.available_slots_from_schedule(schedule)
     # get all events from all connected calendars in scheduled date range

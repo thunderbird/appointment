@@ -1211,6 +1211,14 @@ def test_read_schedule_availabilities_from_invalid_link():
 
 
 # TODO
+# def test_read_schedule_availabilities_on_disabled_schedule():
+#     response = client.get("/me/signature", headers=headers)
+#     url = response.json()["url"]
+#     response = client.post("/schedule/public/availability", json={"url": url})
+#     assert response.status_code == 404, response.text
+
+
+# TODO
 # def test_read_schedule_availabilities_with_no_actual_booking_slots():
 #     response = client.get("/me/signature", headers=headers)
 #     url = response.json()["url"]

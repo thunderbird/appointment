@@ -166,6 +166,7 @@ class Schedule(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     calendar_id = Column(Integer, ForeignKey("calendars.id"))
+    active = Column(Boolean, index=True, default=True)
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     location_type = Column(Enum(LocationType), default=LocationType.inperson)
     location_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))

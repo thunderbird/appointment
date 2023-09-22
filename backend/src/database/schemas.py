@@ -122,6 +122,7 @@ class Availability(AvailabilityBase):
 
 
 class ScheduleBase(BaseModel):
+    active: bool | None = True
     name: str
     calendar_id: int
     location_type: LocationType | None = LocationType.inperson
