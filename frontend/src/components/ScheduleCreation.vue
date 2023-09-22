@@ -1,7 +1,8 @@
 <template>
   <div class="relative flex flex-col gap-4 h-full">
-    <div class="font-semibold text-center text-xl text-teal-500">
-      {{ t("heading.generalAvailability") }}
+    <div class="font-semibold text-center text-xl text-teal-500 flex justify-around items-center">
+      <span>{{ t("heading.generalAvailability") }}</span>
+      <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive" />
     </div>
     <alert-box v-if="scheduleCreationError" :title="t('label.scheduleCreationError')">
       {{ scheduleCreationError }}
@@ -29,8 +30,9 @@
           </div>
           <input
             type="text"
-            v-model="schedule.name"
+            v-model="scheduleInput.name"
             :placeholder="t('placeholder.biWeeklyCafeDates')"
+            :disabled="!scheduleInput.active"
             class="rounded-md w-full place-holder"
           />
         </label>
@@ -38,7 +40,7 @@
           <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
             {{ t("label.selectCalendar") }}
           </div>
-          <select v-model="schedule.calendar_id" class="rounded-md w-full">
+          <select v-model="scheduleInput.calendar_id" class="rounded-md w-full" :disabled="!scheduleInput.active">
             <option
               v-for="calendar in calendars"
               :key="calendar.id"
@@ -54,7 +56,8 @@
           </div>
           <tab-bar
             :tab-items="locationTypes"
-            :active="schedule.location_type"
+            :active="scheduleInput.location_type"
+            :disabled="!scheduleInput.active"
             @update="updateLocationType"
           />
         </label>
@@ -64,8 +67,9 @@
           </div>
           <input
             type="text"
-            v-model="schedule.location_url"
+            v-model="scheduleInput.location_url"
             :placeholder="t('placeholder.zoomCom')"
+            :disabled="!scheduleInput.active"
             class="rounded-md w-full place-holder"
           />
         </label>
@@ -74,8 +78,9 @@
             {{ t("label.notes") }}
           </div>
           <textarea
-            v-model="schedule.details"
+            v-model="scheduleInput.details"
             :placeholder="t('placeholder.writeHere')"
+            :disabled="!scheduleInput.active"
             class="rounded-md w-full text-sm h-24 resize-none place-holder"
             :maxlength="charLimit"
           ></textarea>
@@ -116,7 +121,8 @@
             </div>
             <input
               type="date"
-              v-model="schedule.start_date"
+              v-model="scheduleInput.start_date"
+              :disabled="!scheduleInput.active"
               class="rounded-md w-full"
             />
           </label>
@@ -126,8 +132,9 @@
             </div>
             <input
               type="date"
-              v-model="schedule.end_date"
+              v-model="scheduleInput.end_date"
               :placeholder="t('placeholder.never')"
+              :disabled="!scheduleInput.active"
               class="rounded-md w-full place-holder"
             />
           </label>
@@ -137,7 +144,8 @@
             </div>
             <input
               type="time"
-              v-model="schedule.start_time"
+              v-model="scheduleInput.start_time"
+              :disabled="!scheduleInput.active"
               class="rounded-md w-full"
             />
           </label>
@@ -147,7 +155,8 @@
             </div>
             <input
               type="time"
-              v-model="schedule.end_time"
+              v-model="scheduleInput.end_time"
+              :disabled="!scheduleInput.active"
               class="rounded-md w-full"
             />
           </label>
@@ -160,8 +169,9 @@
             <label v-for="(w, i) in dj.weekdays()" class="flex gap-2 items-center text-sm select-none cursor-pointer">
               <input
                 type="checkbox"
-                v-model="schedule.weekdays"
+                v-model="scheduleInput.weekdays"
                 :value="i"
+                :disabled="!scheduleInput.active"
                 class="text-teal-500 w-5 h-5"
               />
               <span>{{ w }}</span>
@@ -193,7 +203,11 @@
             <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
               {{ t("label.earliestBooking") }}
             </div>
-            <select v-model="schedule.earliest_booking" class="rounded-md w-full">
+            <select
+              v-model="scheduleInput.earliest_booking"
+              class="rounded-md w-full"
+              :disabled="!scheduleInput.active"
+            >
               <option
                 v-for="(label, value) in earliestOptions"
                 :key="value"
@@ -207,7 +221,11 @@
             <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
               {{ t("label.farthestBooking") }}
             </div>
-            <select v-model="schedule.farthest_booking" class="rounded-md w-full">
+            <select
+              v-model="scheduleInput.farthest_booking"
+              class="rounded-md w-full"
+              :disabled="!scheduleInput.active"
+            >
               <option
                 v-for="(label, value) in farthestOptions"
                 :key="value"
@@ -224,7 +242,8 @@
             <input
               type="number"
               min="5"
-              v-model="schedule.slot_duration"
+              v-model="scheduleInput.slot_duration"
+              :disabled="!scheduleInput.active"
               class="rounded-md w-full"
             />
           </label>
@@ -239,18 +258,21 @@
       <secondary-button
         :label="t('label.cancel')"
         @click="resetSchedule()"
+        :disabled="!scheduleInput.active"
         class="w-1/2"
       />
       <primary-button
         v-show="activeStep1 || activeStep2"
         :label="t('label.next')"
         @click="nextStep()"
+        :disabled="!scheduleInput.active"
         class="w-1/2"
       />
       <primary-button
         v-show="activeStep3"
         :label="t('label.save')"
         @click="saveSchedule()"
+        :disabled="!scheduleInput.active"
         class="w-1/2"
       />
     </div>
@@ -277,6 +299,7 @@ import TabBar from "@/components/TabBar";
 // icons
 import { IconChevronDown } from "@tabler/icons-vue";
 import AlertBox from "@/elements/AlertBox";
+import SwitchToggle from "@/elements/SwitchToggle";
 
 // component constants
 const { t } = useI18n();
@@ -292,6 +315,11 @@ const props = defineProps({
   schedule: Object, // existing schedule to update or null
   user: Object, // currently logged in user, null if not logged in
   activeDate: Object, // dayjs object indicating the currently active calendar view date
+});
+
+// check if existing schedule is given
+const existing = computed(() => {
+  return Boolean(props.schedule);
 });
 
 // schedule creation state indicating the current step
@@ -318,6 +346,7 @@ const calendarTitles = computed(() => {
 
 // default schedule object (for start and reset) and schedule form data
 const defaultSchedule = {
+  active: true,
   name: "",
   calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
@@ -332,28 +361,28 @@ const defaultSchedule = {
   weekdays: [1,2,3,4,5],
   slot_duration: 30,
 };
-const schedule = ref({ ...defaultSchedule });
+const scheduleInput = ref({ ...defaultSchedule });
 onMounted(() => {
-  schedule.value = props.schedule ? { ...props.schedule } : { ...defaultSchedule };
+  scheduleInput.value = props.schedule ? { ...props.schedule } : { ...defaultSchedule };
 });
 
 const scheduleCreationError = ref(null);
 const scheduledRangeMinutes = computed(() => {
-  const start = dj(`20230101T${schedule.value.start_time}:00`);
-  const end = dj(`20230101T${schedule.value.end_time}:00`);
+  const start = dj(`20230101T${scheduleInput.value.start_time}:00`);
+  const end = dj(`20230101T${scheduleInput.value.end_time}:00`);
   return end.diff(start, 'minutes');
 });
 // generate time slots from current schedule configuration
 const getSlots = () => {
   const slots = [];
-  const end = schedule.value.end_date
-    ? dj.min(dj(schedule.value.end_date), dj(props.activeDate).endOf('month'))
+  const end = scheduleInput.value.end_date
+    ? dj.min(dj(scheduleInput.value.end_date), dj(props.activeDate).endOf('month'))
     : dj(props.activeDate).endOf('month');
-  let pointerDate = dj.max(dj(schedule.value.start_date), dj(props.activeDate).startOf('month'));
+  let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month'));
   while (pointerDate <= end) {
-    if (schedule.value.weekdays?.includes(pointerDate.weekday())) {
+    if (scheduleInput.value.weekdays?.includes(pointerDate.weekday())) {
       slots.push({
-        "start": `${pointerDate.format("YYYY-MM-DD")}T${schedule.value.start_time}:00`,
+        "start": `${pointerDate.format("YYYY-MM-DD")}T${scheduleInput.value.start_time}:00`,
         "duration": scheduledRangeMinutes.value ?? 30,
         "attendee_id": null,
         "id": null
@@ -366,12 +395,12 @@ const getSlots = () => {
 // generate an appointment object with slots from current schedule data
 const getScheduleAppointment = () => {
   return {
-    title: schedule.value.name,
-    calendar_id: schedule.value.calendar_id,
-    calendar_title: calendarTitles.value[schedule.value.calendar_id],
-    location_type: schedule.value.location_type,
-    location_url: schedule.value.location_url,
-    details: schedule.value.details,
+    title: scheduleInput.value.name,
+    calendar_id: scheduleInput.value.calendar_id,
+    calendar_title: calendarTitles.value[scheduleInput.value.calendar_id],
+    location_type: scheduleInput.value.location_type,
+    location_url: scheduleInput.value.location_url,
+    details: scheduleInput.value.details,
     status: 2,
     slots: getSlots(),
   }
@@ -379,12 +408,12 @@ const getScheduleAppointment = () => {
 
 // tab navigation for location types
 const updateLocationType = (type) => {
-  schedule.value.location_type = locationTypes[type];
+  scheduleInput.value.location_type = locationTypes[type];
 };
 
 // handle notes char limit
 const charLimit = 250;
-const charCount = computed(() => schedule.value.details.length);
+const charCount = computed(() => scheduleInput.value.details.length);
 
 // booking options
 const earliestOptions = {};
@@ -393,8 +422,8 @@ const farthestOptions = {};
 [1,2,3,4].forEach(d => farthestOptions[d*60*24*7] = dj.duration(d, "weeks").humanize());
 
 // humanize selected durations
-const earliest = computed(() => dj.duration(schedule.value.earliest_booking, "minutes").humanize());
-const farthest = computed(() => dj.duration(schedule.value.farthest_booking, "minutes").humanize());
+const earliest = computed(() => dj.duration(scheduleInput.value.earliest_booking, "minutes").humanize());
+const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, "minutes").humanize());
 
 // show confirmation dialog
 const savedConfirmation = reactive({
@@ -413,9 +442,9 @@ const resetSchedule = () => {
 };
 
 // handle actual schedule creation/update
-const saveSchedule = async () => {
+const saveSchedule = async (withConfirmation = true) => {
   // build data object for post request
-  const obj = { ...schedule.value };
+  const obj = { ...scheduleInput.value };
   delete obj.availabilities;
   delete obj.time_created;
   delete obj.time_updated;
@@ -434,47 +463,64 @@ const saveSchedule = async () => {
     return;
   }
 
-  // Retrieve the user short url
-  const { data: sig_data, error: sig_error } = await call('me/signature').get().json();
-  if (sig_error.value) {
-    return;
+  if (withConfirmation) {
+    // Retrieve the user short url
+    const { data: sig_data, error: sig_error } = await call('me/signature').get().json();
+    if (sig_error.value) {
+      return;
+    }
+  
+    // show confirmation
+    savedConfirmation.title = data.value.name;
+    savedConfirmation.publicLink = sig_data.value.url;
+    savedConfirmation.show = true;
   }
 
-  // show confirmation
-  savedConfirmation.title = data.value.name;
-  savedConfirmation.publicLink = sig_data.value.url;
-  savedConfirmation.show = true;
-
+  emit('created');
   resetSchedule();
-
-  emit("created");
 };
+
+// handle schedule activation / deactivation
+const toggleActive = async (newValue) => {
+  scheduleInput.value.active = newValue;
+  await saveSchedule(false);
+};
+
+// track if steps were already visited
+watch(
+  () => scheduleInput.value.active,
+  (newValue) => {
+    emit('updated', newValue ? getScheduleAppointment() : null);
+  }
+);
 
 // track if steps were already visited
 watch(
   () => state.value,
   (_, oldValue) => {
-    if (oldValue === 1) visitedStep1.value = true;
-    emit('updated', getScheduleAppointment());
+    if (scheduleInput.value.active) {
+      if (oldValue === 1) visitedStep1.value = true;
+      emit('updated', getScheduleAppointment());
+    }
   }
 );
 
 // track changes and send schedule updates
 watch(
   () => [
-    schedule.value.name,
-    schedule.value.calendar_id,
-    schedule.value.start_date,
-    schedule.value.end_date,
-    schedule.value.start_time,
-    schedule.value.end_time,
-    schedule.value.weekdays,
+    scheduleInput.value.name,
+    scheduleInput.value.calendar_id,
+    scheduleInput.value.start_date,
+    scheduleInput.value.end_date,
+    scheduleInput.value.start_time,
+    scheduleInput.value.end_time,
+    scheduleInput.value.weekdays,
     props.activeDate,
   ],
   () => {
     // if an existing schedule was given update anyway
     // if a new schedule gets created, only update on step 2
-    if (props.schedule || !props.schedule && visitedStep1.value) {
+    if (props.schedule && props.schedule.active || !props.schedule && visitedStep1.value) {
       emit('updated', getScheduleAppointment());
     }
   }

@@ -42,7 +42,7 @@
         :user="user"
         :schedule="firstSchedule"
         :active-date="activeDate"
-        @created="refresh()"
+        @created="getFirstSchedule"
         @updated="schedulePreview"
       />
     </div>
@@ -171,7 +171,7 @@ const getFirstSchedule = async () => {
 // schedule previews for showing corresponding placeholders in calendar views
 const schedulesPreviews = ref([]);
 const schedulePreview = (schedule) => {
-  schedulesPreviews.value = [schedule];
+  schedulesPreviews.value = schedule ? [schedule] : [];
 };
 
 // initially load data when component gets remounted
