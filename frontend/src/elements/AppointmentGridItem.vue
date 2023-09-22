@@ -29,6 +29,7 @@
       <div class="pr-4 text-sm flex items-center gap-1">
         <icon-bulb class="h-4 w-4 stroke-gray-500 stroke-2 fill-transparent shrink-0" />
         <switch-toggle
+          class="w-full"
           :label="t('label.activeAppointment')"
           :active="appointment.active"
           :disabled="true"
