@@ -5,12 +5,16 @@
         <li
           v-for="(item, key) in tabItems"
           :key="item"
-          class="flex whitespace-nowrap leading-8 cursor-pointer px-8 transition-all ease-in-out hover:rounded-xl"
+          class="flex whitespace-nowrap leading-8 px-8 transition-all ease-in-out hover:rounded-xl"
           :class="{
-            'rounded-xl shadow text-gray-900 dark:text-white bg-white dark:bg-gray-500': item == active,
-            'text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700': item != active,
+            'cursor-pointer': !disabled,
+            'rounded-xl shadow dark:bg-gray-500': item == active,
+            'text-gray-900 dark:text-white bg-white': item == active && !disabled,
+            'text-gray-600 dark:text-gray-300 bg-gray-100': item == active && disabled,
+            'text-gray-500 dark:text-gray-300': item != active,
+            'hover:bg-gray-100 dark:hover:bg-gray-700': item != active && !disabled,
           }"
-          @click="activate(key)"
+          @click="!disabled ? activate(key) : null"
         >
           {{ t('label.' + key) }}
         </li>
@@ -28,6 +32,7 @@ const { t } = useI18n();
 defineProps({
   tabItems: Object, // list of tab items. Keys are used as lang keys (label.<key>), values as index
   active: Number, // value of active tab
+  disabled: Boolean, // flag for making toggle non changable
 });
 
 // component emits
