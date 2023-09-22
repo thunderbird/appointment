@@ -445,6 +445,16 @@ const resetSchedule = () => {
 const saveSchedule = async (withConfirmation = true) => {
   // build data object for post request
   const obj = { ...scheduleInput.value };
+  // convert local input times to utc times
+  obj.start_time = dj(`${dj(obj.start_date).format("YYYY-MM-DD")}T${obj.start_time}:00`)
+    .tz(props.user.timezone ?? dj.tz.guess(), true)
+    .utc()
+    .format("HH:mm");
+  obj.end_time = dj(`${dj(obj.start_date).format("YYYY-MM-DD")}T${obj.end_time}:00`)
+    .tz(props.user.timezone ?? dj.tz.guess(), true)
+    .utc()
+    .format("HH:mm");
+  // remove unwanted properties
   delete obj.availabilities;
   delete obj.time_created;
   delete obj.time_updated;
