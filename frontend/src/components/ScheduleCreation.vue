@@ -166,15 +166,15 @@
             {{ t("label.availableDays") }}
           </div>
           <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white p-4 rounded-lg">
-            <label v-for="(w, i) in dj.weekdays()" class="flex gap-2 items-center text-sm select-none cursor-pointer">
+            <label v-for="w in isoWeekdays" class="flex gap-2 items-center text-sm select-none cursor-pointer">
               <input
                 type="checkbox"
                 v-model="scheduleInput.weekdays"
-                :value="i"
+                :value="w.iso"
                 :disabled="!scheduleInput.active"
                 class="text-teal-500 w-5 h-5"
               />
-              <span>{{ w }}</span>
+              <span>{{ w.long }}</span>
             </label>
           </div>
         </div>
@@ -305,6 +305,7 @@ import SwitchToggle from "@/elements/SwitchToggle";
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject("call");
+const isoWeekdays = inject("isoWeekdays");
 
 // component emits
 const emit = defineEmits(["created", "updated"]);
@@ -380,7 +381,7 @@ const getSlots = () => {
     : dj(props.activeDate).endOf('month');
   let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month'));
   while (pointerDate <= end) {
-    if (scheduleInput.value.weekdays?.includes(pointerDate.weekday())) {
+    if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
         "start": `${pointerDate.format("YYYY-MM-DD")}T${scheduleInput.value.start_time}:00`,
         "duration": scheduledRangeMinutes.value ?? 30,

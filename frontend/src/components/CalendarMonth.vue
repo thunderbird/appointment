@@ -16,12 +16,12 @@
     bg-gray-200 border-gray-200 dark:bg-gray-500 dark:border-gray-500
     ">
       <div
-        v-for="h in weekdayNames()"
+        v-for="h in isoWeekdays"
         :key="h"
         class="text-center py-2 text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-600"
         :class="{ 'font-bold': !mini}"
       >
-        {{ h }}
+        {{ h.min }}
       </div>
       <calendar-month-day
         v-for="d in days"
@@ -57,6 +57,8 @@ import { appointmentState } from '@/definitions';
 
 // component constants
 const dj = inject('dayjs');
+const isoWeekdays = inject("isoWeekdays");
+const isoFirstDayOfWeek = inject("isoFirstDayOfWeek");
 
 // component properties
 const props = defineProps({
@@ -143,17 +145,6 @@ watch(() => props.selected, (selection) => {
   navDate.value = dj(selection);
 });
 
-// generate names for each day of week
-const weekdayNames = () => {
-  const list = props.mini ? dj.weekdaysMin() : dj.weekdaysShort();
-  // handle Monday = 1 as first day of week (default is Sunday = 0)
-  if (dj.localeData().firstDayOfWeek()) {
-    const first = list.shift();
-    list.push(first);
-  }
-  return list;
-};
-
 // basic data for selected month
 const today = computed(() => dj().format('YYYY-MM-DD'));
 const date = computed(() => props.selected.format('YYYY-MM-DD'));
@@ -167,12 +158,12 @@ const currentMonthDays = computed(() => [...Array(numberOfDaysInMonth.value)].ma
 })));
 
 const previousMonthDays = computed(() => {
-  const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).weekday() + 1;
+  const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).isoWeekday();
   const previousMonth = dj(`${year.value}-${month.value}-01`).subtract(1, 'month');
 
   // Cover first day of the month being sunday (firstDayOfTheMonthWeekday === 0)
-  const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday
-    ? firstDayOfTheMonthWeekday - 1
+  const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday !== isoFirstDayOfWeek%7
+    ? firstDayOfTheMonthWeekday - isoFirstDayOfWeek%7
     : 6;
 
   const previousMonthLastMondayDayOfMonth = dj(currentMonthDays.value[0].date)
