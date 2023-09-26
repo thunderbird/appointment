@@ -302,19 +302,39 @@ const closeBookingModal = () => {
 // attendee confirmed the time slot selection: book event
 const attendee = ref(null);
 const bookEvent = async (attendeeData) => {
-  // build data object for put request
-  const obj = {
-    slot_id: activeEvent.value.id,
-    attendee: attendeeData,
-  };
   // update server side event
-  const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
-  // disable calendar view if every thing worked fine
-  if (!error.value) {
-    attendee.value = attendeeData;
-    // update view to prevent reselection
-    activeView.value = views.success;
+  if (isAvailabilityRoute.value) {
+    // build data object for put request
+    const obj = {
+      slot: {
+        start: activeEvent.value.start,
+        duration: activeEvent.value.duration,
+      },
+      attendee: attendeeData,
+    };
+    const { error } = await call('schedule/public/availability').put({ s_a: obj, url: window.location.href }).json();
+    if (error.value) {
+      return true;
+    }
+  } else
+  if (isBookingRoute.value) {
+    // build data object for put request
+    const obj = {
+      slot_id: activeEvent.value.id,
+      attendee: attendeeData,
+    };
+    const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
+    if (error.value) {
+      return true;
+    }
+  } else {
+    return true;
   }
+  // replace calendar view if every thing worked fine
+  attendee.value = attendeeData;
+  // update view to prevent reselection
+  activeView.value = views.success;
+  return false;
 };
 
 // download calendar event as .ics

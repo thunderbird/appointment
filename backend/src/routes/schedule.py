@@ -125,3 +125,56 @@ def read_schedule_availabilities(
         owner_name=subscriber.name,
         slots=actualSlots,
     )
+
+
+@router.put("/public/availability", response_model=schemas.AvailabilitySlotAttendee)
+def update_schedule_availability_slot(
+    s_a: schemas.AvailabilitySlotAttendee,
+    url: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+    google_client: GoogleClient = Depends(get_google_client),
+):
+    """endpoint to update a time slot for a schedule via public link and create an event in remote calendar"""
+    subscriber = repo.verify_subscriber_link(db, url)
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="Invalid profile link")
+    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    try:
+        schedule = schedules[0]  # for now we only process the first existing schedule
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # check if schedule is enabled
+    if not schedule.active:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # get calendar
+    db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    if db_calendar is None:
+        raise HTTPException(status_code=404, detail="Calendar not found")
+    event = schemas.Event(
+        title=schedule.name,
+        start=s_a.slot.start.isoformat(),
+        end=(s_a.slot.start + timedelta(minutes=s_a.slot.duration)).isoformat(),
+        description=schedule.details,
+        location=schemas.EventLocation(
+            type=schedule.location_type,
+            url=schedule.location_url,
+        ),
+    )
+    # create remote event
+    if db_calendar.provider == CalendarProvider.google:
+        con = GoogleConnector(
+            db=db,
+            google_client=google_client,
+            calendar_id=db_calendar.user,
+            subscriber_id=subscriber.id,
+            google_tkn=subscriber.google_tkn,
+        )
+    else:
+        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
+    con.create_event(event=event, attendee=s_a.attendee, organizer=subscriber)
+
+    # send mail with .ics attachment to attendee
+    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
+    Tools().send_vevent(appointment, s_a.slot, subscriber, s_a.attendee)
+
+    return s_a

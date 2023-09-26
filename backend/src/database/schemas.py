@@ -60,6 +60,11 @@ class SlotAttendee(BaseModel):
     attendee: AttendeeBase
 
 
+class AvailabilitySlotAttendee(BaseModel):
+    slot: SlotBase
+    attendee: AttendeeBase
+
+
 """ APPOINTMENT model schemas
 """
 

@@ -233,7 +233,7 @@ class CalDavConnector:
 class Tools:
     def create_vevent(
         self,
-        appointment: schemas.Appointment,
+        appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
     ):
@@ -259,7 +259,7 @@ class Tools:
 
     def send_vevent(
         self,
-        appointment: schemas.Appointment,
+        appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
