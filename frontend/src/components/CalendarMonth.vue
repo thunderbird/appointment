@@ -34,6 +34,7 @@
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
         :show-details="!placeholder"
+        :popup-position="popupPosition"
         :disabled="dateDisabled(d.date)"
         @click="!placeholder && !dateDisabled(d.date) ? emit('daySelected', d.date) : null"
         @event-selected="eventSelected"
@@ -70,6 +71,7 @@ const props = defineProps({
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
   schedules: Array, // data of scheduled event previews to show
+  popupPosition: String, // currently supported: right, left
 });
 
 // component emits

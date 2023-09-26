@@ -54,6 +54,7 @@
       :appointments="pendingAppointments"
       :events="calendarEvents"
       :schedules="schedulesPreviews"
+      popup-position="left"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"

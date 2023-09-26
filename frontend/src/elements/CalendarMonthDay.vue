@@ -76,8 +76,10 @@
         display: popup.display,
         top: popup.top,
         left: popup.left,
+        right: popup.right,
       }"
       :event="popup.event"
+      :position="popupPosition"
     />
   </div>
 </template>
@@ -99,6 +101,7 @@ const props = defineProps({
   placeholder: Boolean, // flag formating events as placeholder
   events: Array, // list of events to show on this day or null
   showDetails: Boolean, // flag enabling event popups with details
+  popupPosition: String, // currently supported: right, left
   disabled: Boolean, // flag making this day non-selectable and inactive
 });
 
@@ -124,7 +127,7 @@ const popup = reactive({
   event: null,
   display: 'none',
   top: 0,
-  left: 0,
+  left: 'initial',
 });
 
 // calculate properties of event popup for given element and show popup
@@ -132,7 +135,12 @@ const showEventPopup = (el, event) => {
   popup.event = event;
   popup.display = 'block';
   popup.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
-  popup.left = `${el.target.offsetLeft + el.target.clientWidth}px`;
+  if (!props.popupPosition || props.popupPosition === 'right') {
+    popup.left = `${el.target.offsetLeft + el.target.clientWidth + 4}px`;
+  }
+  if (props.popupPosition === 'left') {
+    popup.left = 'initial'
+  }
 };
 
 // reset event popup and hide it
