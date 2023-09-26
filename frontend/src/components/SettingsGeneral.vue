@@ -98,7 +98,6 @@ import { useI18n } from 'vue-i18n';
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject('call');
 const dj = inject('dayjs');
-const updateLocale = inject('updateLocale');
 
 // view properties
 const props = defineProps({
@@ -108,7 +107,7 @@ const props = defineProps({
 // handle ui languages
 watch(locale, (newValue) => {
   localStorage.setItem('locale', newValue);
-  updateLocale(newValue);
+  location.reload();
 });
 
 // handle theme mode

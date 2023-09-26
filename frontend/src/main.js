@@ -110,13 +110,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(weekday);
 
-// TODO: provide method to update the locale
-const updateLocale = (newLocale) => {
-  dayjs.locale(newLocale);
-};
-app.provide('updateLocale', updateLocale);
-
 // provide the configured dayjs instance as well es some helper functions
+// TODO: provide method to live update the dayjs locale
 app.provide('dayjs', dayjs);
 const hDuration = (m) => ((m < 60)
   ? dayjs.duration(m, 'minutes').humanize()
