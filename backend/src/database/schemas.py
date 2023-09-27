@@ -60,6 +60,11 @@ class SlotAttendee(BaseModel):
     attendee: AttendeeBase
 
 
+class AvailabilitySlotAttendee(BaseModel):
+    slot: SlotBase
+    attendee: AttendeeBase
+
+
 """ APPOINTMENT model schemas
 """
 
@@ -122,6 +127,7 @@ class Availability(AvailabilityBase):
 
 
 class ScheduleBase(BaseModel):
+    active: bool | None = True
     name: str
     calendar_id: int
     location_type: LocationType | None = LocationType.inperson

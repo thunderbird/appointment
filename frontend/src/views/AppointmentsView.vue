@@ -6,8 +6,8 @@
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="!calendars.length || creationStatus !== creationState.hidden"
-        @click="creationStatus = creationState.details"
+        :disabled="!calendars.length || creationStatus !== appointmentCreationState.hidden"
+        @click="creationStatus = appointmentCreationState.details"
       />
     </div>
   </div>
@@ -187,7 +187,7 @@
     </div>
     <!-- page side bar -->
     <div class="w-full sm:w-1/2 lg:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
-      <div v-if="creationStatus === creationState.hidden">
+      <div v-if="creationStatus === appointmentCreationState.hidden">
         <!-- monthly mini calendar -->
         <calendar-month
           :selected="activeDate"
@@ -204,10 +204,10 @@
         :status="creationStatus"
         :calendars="calendars"
         :user="user"
-        @start="creationStatus = creationState.details"
-        @next="creationStatus = creationState.availability"
-        @create="creationStatus = creationState.finished; refresh();"
-        @cancel="creationStatus = creationState.hidden"
+        @start="creationStatus = appointmentCreationState.details"
+        @next="creationStatus = appointmentCreationState.availability"
+        @create="creationStatus = appointmentCreationState.finished; refresh();"
+        @cancel="creationStatus = appointmentCreationState.hidden"
       />
     </div>
   </div>
@@ -225,7 +225,7 @@ import {
   appointmentViews as views,
   filterOptions,
   viewTypes,
-  creationState,
+  appointmentCreationState,
 } from '@/definitions';
 import { keyByValue } from '@/utils';
 
@@ -401,7 +401,7 @@ const closeAppointmentModal = () => {
 };
 
 // appointment creation
-const creationStatus = ref(creationState.hidden);
+const creationStatus = ref(appointmentCreationState.hidden);
 
 // initially load data when component gets remounted
 onMounted(async () => {

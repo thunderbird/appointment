@@ -1,7 +1,15 @@
 <template>
-  <div class="flex gap-4 mb-2 mx-auto lg:ml-0 lg:mr-0 lg:mb-8 lg:gap-8 items-center select-none">
-    <div v-if="nav" @click="emit('prev')" class="group cursor-pointer select-none">
-      <icon-chevron-left class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400 group-hover:stroke-teal-500" />
+  <div
+    class="flex gap-4 mb-2 mx-auto lg:ml-0 lg:mr-0 lg:mb-8 lg:gap-8 items-center select-none"
+  >
+    <div
+      v-if="nav"
+      @click="emit('prev')"
+      class="group cursor-pointer select-none"
+    >
+      <icon-chevron-left
+        class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400 group-hover:stroke-teal-500"
+      />
     </div>
     <h2 v-if="title && !backlink" class="flex flex-col">
       <div class="text-4xl font-light">{{ title }}</div>
@@ -22,7 +30,9 @@
         <span class="font-normal">{{ month }}</span>
         <span>{{ year }}</span>
       </div>
-      <icon-chevron-right class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400" />
+      <icon-chevron-right
+        class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400"
+      />
       <div>{{ title }}</div>
     </h2>
     <div
@@ -30,14 +40,16 @@
       @click="emit('next')"
       class="group cursor-pointer select-none"
     >
-      <icon-chevron-right class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400 group-hover:stroke-teal-500" />
+      <icon-chevron-right
+        class="h-10 w-10 stroke-1 fill-transparent stroke-gray-400 group-hover:stroke-teal-500"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 // icons
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-vue";
 
 // component properties
 defineProps({
@@ -49,5 +61,5 @@ defineProps({
 });
 
 // component emits
-const emit = defineEmits(['prev', 'next', 'back']);
+const emit = defineEmits(["prev", "next", "back"]);
 </script>

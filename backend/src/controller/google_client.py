@@ -64,11 +64,11 @@ class GoogleClient:
             self.client.fetch_token(code=code)
             return self.client.credentials
         except Warning as e:
-            logging.error(f"[google.get_credentials] Google Warning: {str(e)}")
+            logging.error(f"[google_client.get_credentials] Google Warning: {str(e)}")
             # This usually is the "Scope has changed" error.
             raise GoogleScopeChanged()
         except ValueError as e:
-            logging.error(f"[google.get_credentials] Value error while fetching credentials {str(e)}")
+            logging.error(f"[google_client.get_credentials] Value error while fetching credentials {str(e)}")
             raise GoogleInvalidCredentials()
 
     def get_email(self, token):
@@ -92,7 +92,7 @@ class GoogleClient:
                 try:
                     response = request.execute()
                 except HttpError as e:
-                    logging.warning(f"[google.list_calendars] Request Error: {e.status_code}/{e.error_details}")
+                    logging.warning(f"[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}")
 
                 request = service.calendarList().list_next(request, response)
 
@@ -108,7 +108,7 @@ class GoogleClient:
                 try:
                     response = request.execute()
                 except HttpError as e:
-                    logging.warning(f"[google.list_events] Request Error: {e.status_code}/{e.error_details}")
+                    logging.warning(f"[google_client.list_events] Request Error: {e.status_code}/{e.error_details}")
 
                 request = service.events().list_next(request, response)
 
@@ -120,7 +120,7 @@ class GoogleClient:
             try:
                 response = service.events().insert(calendarId=calendar_id, sendUpdates="all", body=body).execute()
             except HttpError as e:
-                logging.warning(f"[google.add_event] Request Error: {e.status_code}/{e.error_details}")
+                logging.warning(f"[google_client.create_event] Request Error: {e.status_code}/{e.error_details}")
 
         return response
 
@@ -148,7 +148,7 @@ class GoogleClient:
                 )
             except Exception as err:
                 logging.warning(
-                    f"[controller.google.sync_calendars] Error occurred while creating calendar. Error: {str(err)}"
+                    f"[google_client.sync_calendars] Error occurred while creating calendar. Error: {str(err)}"
                 )
                 error_occurred = True
         return error_occurred

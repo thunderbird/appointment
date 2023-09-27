@@ -121,8 +121,8 @@ class GoogleConnector:
             "summary": event.title,
             "location": event.location.name,
             "description": "\n".join(description),
-            "start": {"dateTime": event.start + "+00:00"},
-            "end": {"dateTime": event.end + "+00:00"},
+            "start": {"dateTime": event.start},
+            "end": {"dateTime": event.end},
             "attendees": [
                 {"displayName": organizer.name, "email": organizer.email},
                 {"displayName": attendee.name, "email": attendee.email},
@@ -233,7 +233,7 @@ class CalDavConnector:
 class Tools:
     def create_vevent(
         self,
-        appointment: schemas.Appointment,
+        appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
     ):
@@ -259,7 +259,7 @@ class Tools:
 
     def send_vevent(
         self,
-        appointment: schemas.Appointment,
+        appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
@@ -278,8 +278,8 @@ class Tools:
         now = datetime.utcnow()
         earliest_start = now + timedelta(minutes=s.earliest_booking)
         farthest_end = now + timedelta(minutes=s.farthest_booking)
-        start = max([datetime.combine(s.start_date, s.start_time), earliest_start])
-        end = min([datetime.combine(s.end_date, s.end_time), farthest_end])
+        start = datetime.combine(s.start_date, s.start_time)
+        end = min([datetime.combine(s.end_date, s.end_time), farthest_end]) if s.end_date else farthest_end
         slots = []
         # set the first date to an allowed weekday
         weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
@@ -293,7 +293,8 @@ class Tools:
         # set fix event limit of 1000 for now for performance reasons. Can be removed later.
         while pointer < end and counter < 1000:
             counter += 1
-            slots.append(schemas.SlotBase(start=pointer, duration=s.slot_duration))
+            if pointer >= earliest_start:
+                slots.append(schemas.SlotBase(start=pointer, duration=s.slot_duration))
             next_start = pointer + timedelta(minutes=s.slot_duration)
             # if the next slot still fits into the current day
             if next_start.time() < s.end_time:

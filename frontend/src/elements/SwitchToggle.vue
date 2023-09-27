@@ -1,24 +1,24 @@
 <template>
   <div
-    class="relative flex justify-between items-center w-full"
+    class="relative flex justify-between items-center"
     :class="{
       'cursor-pointer': !disabled,
     }"
     @click.prevent="toggleState"
   >
     <div v-if="label">{{ label }}</div>
-    <div class="flex gap-2">
-      <div class="text-gray-500">{{ t('label.off') }}</div>
-      <div class="w-10 h-5 shrink-0 rounded-full ease-in-out bg-gray-300 dark:bg-gray-600">
+    <div class="flex gap-1.5 items-center">
+      <div v-if="!noLegend" class="text-gray-500 text-xs">{{ t('label.off') }}</div>
+      <div class="w-8 h-4 shrink-0 rounded-full ease-in-out bg-gray-300 dark:bg-gray-600">
         <input type="checkbox" class="hidden peer" :checked="state" />
         <icon-circle-dot-filled
           class="
-            w-5 h-5 rounded-full duration-300 peer-checked:translate-x-5
+            w-4 h-4 rounded-full duration-300 peer-checked:translate-x-4
             text-gray-400 dark:text-gray-300 peer-checked:text-teal-500
           "
         />
       </div>
-      <div class="text-gray-500">{{ t('label.on') }}</div>
+      <div v-if="!noLegend" class="text-gray-500 text-xs">{{ t('label.on') }}</div>
     </div>
   </div>
 </template>
@@ -33,11 +33,15 @@ import { IconCircleDotFilled } from '@tabler/icons-vue';
 // component constants
 const { t } = useI18n();
 
+// component emits
+const emit = defineEmits(["changed"]);
+
 // component properties
 const props = defineProps({
   active: Boolean, // initial toggle state
   disabled: Boolean, // flag for making toggle non changable
   label: String, // input label
+  noLegend: Boolean, // hide "on" and "off" labels
 });
 
 // current state
@@ -48,6 +52,7 @@ onMounted(() => {
 const toggleState = () => {
   if (!props.disabled) {
     state.value = !state.value;
+    emit("changed", state.value);
   }
 };
 </script>

@@ -1,14 +1,7 @@
 <template>
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
-    <calendar-page-heading
-      :nav="true"
-      :month="activeDate.format('MMMM')"
-      :year="activeDate.year().toString()"
-      :title="pageTitle"
-      @prev="dateNav('auto', false)"
-      @next="dateNav('auto')"
-    />
+    <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
     <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
       <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
         {{ t("label.today") }}
@@ -19,11 +12,21 @@
         @update="updateTab"
         class="text-sm"
       />
-      <primary-button
-        :label="t('label.createAppointments')"
-        :disabled="!calendars.length || creationStatus !== appointmentCreationState.hidden"
-        @click="creationStatus = appointmentCreationState.details"
-      />
+      <div class="flex-center gap-2 select-none">
+        <div @click="dateNav('auto', false)" class="cursor-pointer">
+          <icon-chevron-left class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
+        </div>
+        <div class="h-12 flex-center flex-col">
+          <div class="flex gap-2 text-lg">
+            <span class="font-normal">{{ activeDate.format('MMMM') }}</span>
+            <span class="font-light">{{ activeDate.format('YYYY')}}</span>
+          </div>
+          <div v-if="pageTitle" class="text-sm text-center text-gray-500">{{ pageTitle }}</div>
+        </div>
+        <div @click="dateNav('auto')" class="cursor-pointer">
+          <icon-chevron-right class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
+        </div>
+      </div>
     </div>
   </div>
   <!-- page content -->
@@ -31,6 +34,18 @@
     class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 items-stretch"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
+    <!-- schedule creation dialog -->
+    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
+      <schedule-creation
+        v-if="schedulesReady"
+        :calendars="calendars"
+        :user="user"
+        :schedule="firstSchedule"
+        :active-date="activeDate"
+        @created="getFirstSchedule"
+        @updated="schedulePreview"
+      />
+    </div>
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-month
       v-show="tabActive === calendarViews.month"
@@ -38,6 +53,8 @@
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
+      :schedules="schedulesPreviews"
+      popup-position="left"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"
@@ -53,91 +70,25 @@
       :appointments="pendingAppointments"
       :events="calendarEvents"
     />
-    <!-- page side bar -->
-    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
-      <div v-if="creationStatus === appointmentCreationState.hidden" class="flex flex-col gap-8">
-        <!-- monthly mini calendar -->
-        <calendar-month
-          :selected="activeDate"
-          :mini="true"
-          :nav="true"
-          :events="calendarEvents"
-          @prev="dateNav('month', false)"
-          @next="dateNav('month')"
-          @day-selected="selectDate"
-        />
-        <!-- appointments and events list -->
-        <div>
-          <div class="flex justify-between items-center">
-            <div class="font-semibold text-lg">
-              {{ t("heading.pendingAppointments") }}
-            </div>
-            <router-link
-              class="px-2 py-1 border-r rounded-full text-xs uppercase bg-teal-500 text-white"
-              :to="{ name: 'appointments' }"
-            >
-              {{ t("label.viewAll") }}
-            </router-link>
-          </div>
-          <div
-            v-if="pendingAppointments.length === 0"
-            class="mt-4 flex flex-col gap-8 justify-center items-center text-gray-500"
-          >
-            <div class="text-center mt-4">
-              {{ t("info.noPendingAppointmentsInList") }}
-            </div>
-            <primary-button
-              :label="t('label.createAppointments')"
-              :disabled="!calendars.length || creationStatus !== appointmentCreationState.hidden"
-              @click="creationStatus = appointmentCreationState.details"
-            />
-          </div>
-          <div v-else class="flex flex-col gap-8 mt-4">
-            <appointment-list-item
-              v-for="a in pendingAppointments"
-              :key="a.id"
-              :appointment="a"
-            />
-          </div>
-        </div>
-      </div>
-      <!-- appointment creation dialog -->
-      <appointment-creation
-        v-else
-        :status="creationStatus"
-        :calendars="calendars"
-        :user="user"
-        @start="creationStatus = appointmentCreationState.details"
-        @next="creationStatus = appointmentCreationState.availability"
-        @create="
-          creationStatus = appointmentCreationState.finished;
-          refresh();
-        "
-        @cancel="creationStatus = appointmentCreationState.hidden"
-      />
-    </div>
   </div>
 </template>
 
 <script setup>
-import { appointmentCreationState, calendarViews, appointmentState } from '@/definitions';
-import {
-  ref, inject, computed, watch, onMounted,
-} from 'vue';
+import { calendarViews, appointmentState } from '@/definitions';
+import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-import AppointmentCreation from '@/components/AppointmentCreation';
-import AppointmentListItem from '@/elements/AppointmentListItem';
+import { useRoute } from 'vue-router';
+import ScheduleCreation from '@/components/ScheduleCreation';
 import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
-import CalendarPageHeading from '@/elements/CalendarPageHeading';
 import CalendarWeek from '@/components/CalendarWeek';
-import PrimaryButton from '@/elements/PrimaryButton';
 import TabBar from '@/components/TabBar';
+
+// icons
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-vue";
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const dj = inject('dayjs');
 const call = inject('call');
 const refresh = inject('refresh');
@@ -152,10 +103,6 @@ const props = defineProps({
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
 const selectDate = (d) => {
-  router.replace({
-    name: route.name,
-    params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') },
-  });
   activeDate.value = dj(d);
 };
 
@@ -164,12 +111,8 @@ const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
 const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 
 // active menu item for tab navigation of calendar views
-const tabActive = ref(calendarViews[route.params.view]);
+const tabActive = ref(calendarViews.month);
 const updateTab = (view) => {
-  router.replace({
-    name: route.name,
-    params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') },
-  });
   tabActive.value = calendarViews[view];
 };
 
@@ -198,15 +141,11 @@ const dateNav = (unit = 'auto', forward = true) => {
   }
 };
 
-// appointment creation state
-const creationStatus = ref(appointmentCreationState.hidden);
-
 // list of all pending appointments
 const pendingAppointments = computed(() => props.appointments?.filter((a) => a.status === appointmentState.pending));
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);
-
 const getRemoteEvents = async (from, to) => {
   calendarEvents.value = [];
   await Promise.all(props.calendars.map(async (calendar) => {
@@ -217,9 +156,30 @@ const getRemoteEvents = async (from, to) => {
   }));
 };
 
+// user configured schedules from db (only the first for now, later multiple schedules will be available)
+const schedules = ref([]);
+const firstSchedule = computed(() => schedules.value.length > 0
+  ? schedules.value[0]
+  : null
+);
+const schedulesReady = ref(false);
+const getFirstSchedule = async () => {
+  calendarEvents.value = [];
+  const { data } = await call('schedule').get().json();
+  schedules.value = data.value;
+};
+
+// schedule previews for showing corresponding placeholders in calendar views
+const schedulesPreviews = ref([]);
+const schedulePreview = (schedule) => {
+  schedulesPreviews.value = schedule ? [schedule] : [];
+};
+
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
+  await getFirstSchedule();
+  schedulesReady.value = true;
   const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
   const eventsTo = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);

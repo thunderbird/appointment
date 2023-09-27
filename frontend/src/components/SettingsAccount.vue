@@ -270,7 +270,7 @@ const reauthenticateSubscriber = async (callbackFn) => {
     }, {});
   } catch (e) {
     // TODO: Throw an error
-    // console.log('Reauth failed', e);
+    console.log('Reauth failed', e);
     closeModals();
     return;
   }

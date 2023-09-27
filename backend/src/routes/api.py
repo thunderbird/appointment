@@ -12,7 +12,7 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
-from datetime import timedelta
+from datetime import timedelta, timezone
 from ..controller.google_client import GoogleClient
 from ..controller.auth import sign_url
 from ..database.models import Subscriber, CalendarProvider
@@ -396,8 +396,8 @@ def update_public_appointment_slot(
     slot = repo.get_slot(db=db, slot_id=s_a.slot_id)
     event = schemas.Event(
         title=db_appointment.title,
-        start=slot.start.isoformat(),
-        end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
+        start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
+        end=(slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat(),
         description=db_appointment.details,
         location=schemas.EventLocation(
             type=db_appointment.location_type,
@@ -433,8 +433,8 @@ def update_public_appointment_slot(
     return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
-@router.get("/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
-def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
+@router.get("/apmt/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
+def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     """endpoint to serve ICS file for time slot to download"""
     db_appointment = repo.get_public_appointment(db, slug=slug)
     if db_appointment is None:
