@@ -374,7 +374,6 @@ onMounted(() => {
     .utc(true)
     .tz(props.user.timezone ?? dj.tz.guess())
     .format("HH:mm");
-  console.log(scheduleInput.value);
 });
 
 const scheduleCreationError = ref(null);

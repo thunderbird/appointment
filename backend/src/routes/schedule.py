@@ -158,6 +158,7 @@ def update_schedule_availability_slot(
         location=schemas.EventLocation(
             type=schedule.location_type,
             url=schedule.location_url,
+            name=None,
         ),
     )
     # create remote event

@@ -12,7 +12,7 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
-from datetime import timedelta
+from datetime import timedelta, timezone
 from ..controller.google_client import GoogleClient
 from ..controller.auth import sign_url
 from ..database.models import Subscriber, CalendarProvider
@@ -396,8 +396,8 @@ def update_public_appointment_slot(
     slot = repo.get_slot(db=db, slot_id=s_a.slot_id)
     event = schemas.Event(
         title=db_appointment.title,
-        start=slot.start.isoformat(),
-        end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
+        start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
+        end=(slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat(),
         description=db_appointment.details,
         location=schemas.EventLocation(
             type=db_appointment.location_type,
