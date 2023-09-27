@@ -132,6 +132,7 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import TextButton from '@/elements/TextButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
+import { updateUserInStorage } from '@/stores/user-store';
 
 // view properties
 const props = defineProps({
@@ -197,6 +198,8 @@ const updateUser = async () => {
   };
   const { error } = await call('me').put(inputData).json();
   if (!error.value) {
+    // Trigger update to user in localStorage
+    updateUserInStorage(inputData);
     errorUsername.value = false;
     // TODO show some confirmation
     await refreshData();
