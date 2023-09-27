@@ -271,7 +271,8 @@
       <primary-button
         v-show="activeStep3"
         :label="t('label.save')"
-        @click="saveSchedule()"
+        @click="saveSchedule(!existing)"
+        :waiting="savingInProgress"
         :disabled="!scheduleInput.active"
         class="w-1/2"
       />
@@ -364,16 +365,20 @@ const defaultSchedule = {
 };
 const scheduleInput = ref({ ...defaultSchedule });
 onMounted(() => {
-  scheduleInput.value = props.schedule ? { ...props.schedule } : { ...defaultSchedule };
-  // calculate utc back to user timezone
-  scheduleInput.value.start_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`)
-    .utc(true)
-    .tz(props.user.timezone ?? dj.tz.guess())
-    .format("HH:mm");
-  scheduleInput.value.end_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`)
-    .utc(true)
-    .tz(props.user.timezone ?? dj.tz.guess())
-    .format("HH:mm");
+  if (props.schedule) {
+    scheduleInput.value = { ...props.schedule };
+    // calculate utc back to user timezone
+    scheduleInput.value.start_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`)
+      .utc(true)
+      .tz(props.user.timezone ?? dj.tz.guess())
+      .format("HH:mm");
+    scheduleInput.value.end_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`)
+      .utc(true)
+      .tz(props.user.timezone ?? dj.tz.guess())
+      .format("HH:mm");
+  } else {
+    scheduleInput.value = { ...defaultSchedule };
+  }
 });
 
 const scheduleCreationError = ref(null);
@@ -452,7 +457,9 @@ const resetSchedule = () => {
 };
 
 // handle actual schedule creation/update
+const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
+  savingInProgress.value = true;
   // build data object for post request
   const obj = { ...scheduleInput.value };
   // convert local input times to utc times
@@ -480,6 +487,7 @@ const saveSchedule = async (withConfirmation = true) => {
     scheduleCreationError.value = data.value.detail || t("error.unknownScheduleError");
     // go back to the start
     state.value = scheduleCreationState.details;
+    savingInProgress.value = false;
     return;
   }
 
@@ -487,6 +495,7 @@ const saveSchedule = async (withConfirmation = true) => {
     // Retrieve the user short url
     const { data: sig_data, error: sig_error } = await call('me/signature').get().json();
     if (sig_error.value) {
+      savingInProgress.value = false;
       return;
     }
   
@@ -496,6 +505,7 @@ const saveSchedule = async (withConfirmation = true) => {
     savedConfirmation.show = true;
   }
 
+  savingInProgress.value = false;
   emit('created');
   resetSchedule();
 };
