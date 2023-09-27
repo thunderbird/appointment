@@ -365,12 +365,22 @@ const defaultSchedule = {
 const scheduleInput = ref({ ...defaultSchedule });
 onMounted(() => {
   scheduleInput.value = props.schedule ? { ...props.schedule } : { ...defaultSchedule };
+  // calculate utc back to user timezone
+  scheduleInput.value.start_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`)
+    .utc(true)
+    .tz(props.user.timezone ?? dj.tz.guess())
+    .format("HH:mm");
+  scheduleInput.value.end_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`)
+    .utc(true)
+    .tz(props.user.timezone ?? dj.tz.guess())
+    .format("HH:mm");
+  console.log(scheduleInput.value);
 });
 
 const scheduleCreationError = ref(null);
 const scheduledRangeMinutes = computed(() => {
-  const start = dj(`20230101T${scheduleInput.value.start_time}:00`);
-  const end = dj(`20230101T${scheduleInput.value.end_time}:00`);
+  const start = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`);
+  const end = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`);
   return end.diff(start, 'minutes');
 });
 // generate time slots from current schedule configuration
@@ -383,7 +393,7 @@ const getSlots = () => {
   while (pointerDate <= end) {
     if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
-        "start": `${pointerDate.format("YYYY-MM-DD")}T${scheduleInput.value.start_time}:00`,
+        "start": `${pointerDate.format("YYYYMMDD")}T${scheduleInput.value.start_time}:00`,
         "duration": scheduledRangeMinutes.value ?? 30,
         "attendee_id": null,
         "id": null
