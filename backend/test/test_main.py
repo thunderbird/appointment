@@ -1231,7 +1231,7 @@ def test_read_schedule_availabilities_from_invalid_link():
 
 
 def test_get_invitation_ics_file():
-    response = client.get("/serve/ics/abcdef/1")
+    response = client.get("/apmt/serve/ics/abcdef/1")
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["name"] == "invite"
@@ -1240,10 +1240,10 @@ def test_get_invitation_ics_file():
 
 
 def test_get_invitation_ics_file_for_missing_appointment():
-    response = client.get("/serve/ics/missing/1")
+    response = client.get("/apmt/serve/ics/missing/1")
     assert response.status_code == 404, response.text
 
 
 def test_get_invitation_ics_file_for_missing_slot():
-    response = client.get("/serve/ics/abcdef/999")
+    response = client.get("/apmt/serve/ics/abcdef/999")
     assert response.status_code == 404, response.text

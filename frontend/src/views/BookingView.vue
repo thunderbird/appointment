@@ -340,9 +340,25 @@ const bookEvent = async (attendeeData) => {
 // download calendar event as .ics
 const downloadIcs = async () => {
   // download ICS file
-  const { data, error } = await call(`serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
-  if (!error.value) {
-    download(data.value.data, data.value.name, data.value.content_type);
+  if (isAvailabilityRoute.value) {
+    // build data object for put request
+    const obj = {
+      slot: {
+        start: activeEvent.value.start,
+        duration: activeEvent.value.duration,
+      },
+      attendee: attendee.value,
+    };
+    const { data, error } = await call('schedule/serve/ics').put({ s_a: obj, url: window.location.href }).json();
+    if (!error.value) {
+      download(data.value.data, data.value.name, data.value.content_type);
+    }
+  } else
+  if (isBookingRoute.value) {
+    const { data, error } = await call(`apmt/serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
+    if (!error.value) {
+      download(data.value.data, data.value.name, data.value.content_type);
+    }
   }
 };
 

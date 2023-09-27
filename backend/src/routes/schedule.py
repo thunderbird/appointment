@@ -87,7 +87,7 @@ def read_schedule_availabilities(
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
-    except KeyError:
+    except IndexError:
         raise HTTPException(status_code=404, detail="Schedule not found")
     # check if schedule is enabled
     if not schedule.active:
@@ -141,7 +141,7 @@ def update_schedule_availability_slot(
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
-    except KeyError:
+    except IndexError:
         raise HTTPException(status_code=404, detail="Schedule not found")
     # check if schedule is enabled
     if not schedule.active:
@@ -179,3 +179,33 @@ def update_schedule_availability_slot(
     Tools().send_vevent(appointment, s_a.slot, subscriber, s_a.attendee)
 
     return s_a
+
+
+@router.put("/serve/ics", response_model=schemas.FileDownload)
+def schedule_serve_ics(
+    s_a: schemas.AvailabilitySlotAttendee,
+    url: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+):
+    """endpoint to serve ICS file for availability time slot to download"""
+    subscriber = repo.verify_subscriber_link(db, url)
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="Invalid profile link")
+    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    try:
+        schedule = schedules[0]  # for now we only process the first existing schedule
+    except IndexError:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # check if schedule is enabled
+    if not schedule.active:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # get calendar
+    db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    if db_calendar is None:
+        raise HTTPException(status_code=404, detail="Calendar not found")
+    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
+    return schemas.FileDownload(
+        name="invite",
+        content_type="text/calendar",
+        data=Tools().create_vevent(appointment=appointment, slot=s_a.slot, organizer=subscriber).decode("utf-8"),
+    )

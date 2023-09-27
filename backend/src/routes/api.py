@@ -433,8 +433,8 @@ def update_public_appointment_slot(
     return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
-@router.get("/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
-def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
+@router.get("/apmt/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
+def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     """endpoint to serve ICS file for time slot to download"""
     db_appointment = repo.get_public_appointment(db, slug=slug)
     if db_appointment is None:
