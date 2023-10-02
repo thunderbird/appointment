@@ -480,7 +480,7 @@ const saveSchedule = async (withConfirmation = true) => {
   // save schedule data
   const { data, error } = props.schedule
     ? await call(`schedule/${props.schedule.id}`).put(obj).json()
-    : await call("schedule").post(obj).json();
+    : await call("schedule/").post(obj).json();
 
   if (error.value) {
     // error message is in data

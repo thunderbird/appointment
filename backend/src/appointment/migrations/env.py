@@ -9,6 +9,8 @@ from alembic import context
 # This is ran from src/ so ignore the errors
 from secrets import normalize_secrets
 
+import sentry_sdk
+
 # Normalize any AWS secrets
 normalize_secrets()
 
@@ -31,6 +33,17 @@ target_metadata = None
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+# Catch any errors that may run during migrations
+if os.getenv("SENTRY_DSN") != "" or os.getenv("SENTRY_DSN") is not None:
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=1.0,
+        environment=os.getenv("APP_ENV", "dev"),
+    )
 
 
 def run_migrations_offline() -> None:
