@@ -48,21 +48,6 @@ logging.basicConfig(**log_config)
 
 logging.debug("Logger started!")
 
-# database
-from .database import models
-from .database.database import engine
-
-models.Base.metadata.create_all(bind=engine)
-
-# extra routes
-from .routes import api
-from .routes import account
-from .routes import google
-from .routes import schedule
-
-# init app
-app = FastAPI()
-
 if os.getenv("SENTRY_DSN") != "" or os.getenv("SENTRY_DSN") is not None:
     sentry_sdk.init(
         dsn=os.getenv("SENTRY_DSN"),
@@ -73,29 +58,58 @@ if os.getenv("SENTRY_DSN") != "" or os.getenv("SENTRY_DSN") is not None:
         environment=os.getenv("APP_ENV", "dev"),
     )
 
-# allow requests from own frontend running on a different port
-app.add_middleware(
-    CORSMiddleware,
-    # Work around for now :)
-    allow_origins=[
-        os.getenv("FRONTEND_URL", "http://localhost:8080"),
-        "https://accounts.google.com",
-        "https://www.googleapis.com/auth/calendar",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+def server():
+    """
+    Main function for the fast api server
+    """
+    # extra routes
+    from .routes import api
+    from .routes import account
+    from .routes import google
+    from .routes import schedule
+
+    # init app
+    app = FastAPI()
+
+    # allow requests from own frontend running on a different port
+    app.add_middleware(
+        CORSMiddleware,
+        # Work around for now :)
+        allow_origins=[
+            os.getenv("FRONTEND_URL", "http://localhost:8080"),
+            "https://accounts.google.com",
+            "https://www.googleapis.com/auth/calendar",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    @app.exception_handler(RefreshError)
+    async def catch_google_refresh_errors(request, exc):
+        """Catch google refresh errors, and use our error instead."""
+        return await http_exception_handler(request, APIGoogleRefreshError())
+
+    # Mix in our extra routes
+    app.include_router(api.router)
+    app.include_router(account.router, prefix="/account")
+    app.include_router(google.router, prefix="/google")
+    app.include_router(schedule.router, prefix="/schedule")
+
+    return app
 
 
-@app.exception_handler(RefreshError)
-async def catch_google_refresh_errors(request, exc):
-    """Catch google refresh errors, and use our error instead."""
-    return await http_exception_handler(request, APIGoogleRefreshError())
+def cli():
+    """
+    A very simple cli handler
+    """
+    if len(sys.argv) < 2:
+        print("No command specified")
+        return
 
+    command = sys.argv[1:]
 
-# Mix in our extra routes
-app.include_router(api.router)
-app.include_router(account.router, prefix="/account")
-app.include_router(google.router, prefix="/google")
-app.include_router(schedule.router, prefix="/schedule")
+    if command[0] == 'update-db':
+        from .commands import update_db
+        update_db.run()

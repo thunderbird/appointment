@@ -165,7 +165,8 @@ const firstSchedule = computed(() => schedules.value.length > 0
 const schedulesReady = ref(false);
 const getFirstSchedule = async () => {
   calendarEvents.value = [];
-  const { data } = await call('schedule').get().json();
+  // trailing slash to prevent fast api redirect which doesn't work great on our container setup
+  const { data } = await call('schedule/').get().json();
   schedules.value = data.value;
 };
 

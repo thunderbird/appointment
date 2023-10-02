@@ -6,10 +6,18 @@ WORKDIR /app
 ENV PATH="${PATH}:/root/.local/bin"
 ENV PYTHONPATH=.
 
+RUN mkdir scripts
+
 COPY requirements.txt .
+COPY pyproject.toml .
+COPY alembic.ini.example alembic.ini
+COPY scripts/dev-entry.sh scripts/dev-entry.sh
+
+# Dev only
+COPY .env .
+
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install .
 
-COPY src/ .
-
+EXPOSE 5000
 CMD ["/bin/sh", "./scripts/dev-entry.sh"]

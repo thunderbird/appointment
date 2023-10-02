@@ -17,7 +17,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi.templating import Jinja2Templates
 
-templates = Jinja2Templates("src/templates/email")
+templates = Jinja2Templates("src/appointment/templates/email")
 
 
 def get_template(template_name) -> "jinja2.Template":
