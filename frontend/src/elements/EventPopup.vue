@@ -2,14 +2,16 @@
   <div
     class="absolute p-3 -translate-y-1/2 transition-all shadow-lg rounded-md z-30 bg-white dark:bg-gray-800"
     :class="{
-      '-translate-x-full': position === 'left'
+      '-translate-x-full': position === 'left',
+      '-translate-x-1/2': position === 'top'
     }"
   >
     <div
-      class="absolute top-1/2 -translate-y-1/2 rotate-45 w-3 h-3 bg-white dark:bg-gray-800"
+      class="absolute rotate-45 w-3 h-3 bg-white dark:bg-gray-800"
       :class="{
-        '-left-1.5': !position || position === 'right',
-        '-right-1.5': position === 'left',
+        'top-1/2 -translate-y-1/2 -left-1.5': !position || position === 'right',
+        'top-1/2 -translate-y-1/2 -right-1.5': position === 'left',
+        'left-1/2 -translate-x-1/2 -bottom-1.5': position === 'top',
       }"
     ></div>
     <div class="flex flex-col gap-2 text-gray-700 dark:text-gray-200">
@@ -49,7 +51,7 @@ const dj = inject('dayjs');
 // component properties
 const props = defineProps({
   event: Object, // event to show details in popup for
-  position: String, // currently supported: right, left
+  position: String, // currently supported: right, left, top
 });
 
 // format datetime of event
