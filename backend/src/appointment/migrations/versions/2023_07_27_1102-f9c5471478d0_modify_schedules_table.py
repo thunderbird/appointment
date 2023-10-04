@@ -26,8 +26,6 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # op.drop_column("appointments", "appointment_type")
-    #op.drop_constraint("schedules_ibfk_1", "schedules", type_="foreignkey")
     op.drop_column("schedules", "appointment_id")
     op.add_column("schedules", sa.Column("calendar_id", sa.Integer, sa.ForeignKey("calendars.id")))
     op.add_column("schedules", sa.Column("location_type", sa.Enum(LocationType), default=LocationType.online))
