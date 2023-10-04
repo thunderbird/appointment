@@ -14,7 +14,13 @@ cd appointment
 docker-compose up -d --build
 ```
 
-A Mysql database will be accessible via `localhost:3306` with username and password set to: `tba`
+A MySQL database will be accessible via `localhost:3306` with username and password set to: `tba`
+
+To init database or run migrations, the backend offers a cimple CLI interface:
+
+```bash
+run-command update-db
+```
 
 ### Manual Setup
 
@@ -40,7 +46,7 @@ Run application for development with hot reloading backend and frontend:
     pip install -r backend/requirements.txt
     touch backend/src/appointment.db # when using sqlite
     cp backend/.env.example backend/.env # add your own configuration here
-    uvicorn backend.src.main:app --reload --port 5000
+    uvicorn --factory backend.src.appointment.main:server --host 0.0.0.0 --port 5000
     ```
 
     You can now access the backend at [localhost:5000](http://localhost:5000).
@@ -58,7 +64,7 @@ Run application for development with hot reloading backend and frontend:
 4. (optional) Run database migrations
 
     ```bash
-    cd backend/src
+    cd backend
     cp alembic.ini.example alembic.ini # add your own configuration here
     alembic init migrations # init migrations once
     alembic current # check database state

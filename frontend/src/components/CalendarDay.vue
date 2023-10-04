@@ -9,11 +9,15 @@
         <div class="flex-center text-gray-400 bg-white dark:bg-gray-700">
           {{ t('label.allDay') }}
         </div>
-        <div class="grid auto-rows-max gap-1 p-1 bg-white dark:bg-gray-700">
+        <div
+          class="grid auto-rows-max gap-1 p-1 bg-white dark:bg-gray-700"
+          @mouseleave="popup = {...initialEventPopupData}"
+        >
           <div
             v-for="event in eventsByDate?.allDay"
             :key="event"
             class="flex overflow-hidden"
+            @mouseenter="element => popup=showEventPopup(element, event, popupPosition)"
           >
             <div class="w-full text-sm truncate rounded mx-8 px-2 py-0.5 bg-amber-400/80">
               {{ event.title }}
@@ -33,6 +37,7 @@
       <div
         class="grid bg-white dark:bg-gray-700"
         :style="{ gridAutoRows: unitRem + 'rem' }"
+        @mouseleave="popup = {...initialEventPopupData}"
       >
         <div
           v-for="event in eventsByDate?.duringDay"
@@ -40,6 +45,7 @@
           class="flex overflow-hidden"
           :class="{ 'hidden': event.offset < 0 }"
           :style="{ gridRow: event.offset + ' / span ' + event.span }"
+          @mouseenter="element => !booking ? popup=showEventPopup(element, event, popupPosition) : null"
         >
           <div
             v-if="!booking"
@@ -123,13 +129,25 @@
         </div>
       </div>
     </div>
+    <event-popup
+      v-if="(events && !booking)"
+      :style="{
+        display: popup.display,
+        top: popup.top,
+        left: popup.left,
+        right: popup.right,
+      }"
+      :event="popup.event"
+      :position="popupPosition"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, inject } from 'vue';
-import { eventColor, timeFormat } from '@/utils';
+import { computed, inject, ref } from 'vue';
+import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
 import { useI18n } from 'vue-i18n';
+import EventPopup from '@/elements/EventPopup';
 
 // icons
 import {
@@ -149,6 +167,7 @@ const props = defineProps({
   booking: Boolean, // flag indicating if calendar is used to book time slots
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
+  popupPosition: String, // currently supported: right, left, top
 });
 
 // component emits
@@ -253,5 +272,8 @@ const hours = computed(() => {
 const bookSlot = (d) => {
   emit('eventSelected', d);
 };
+
+// event details
+const popup = ref({...initialEventPopupData});
 
 </script>

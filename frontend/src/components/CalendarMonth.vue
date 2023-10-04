@@ -71,7 +71,7 @@ const props = defineProps({
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
   schedules: Array, // data of scheduled event previews to show
-  popupPosition: String, // currently supported: right, left
+  popupPosition: String, // currently supported: right, left, top
 });
 
 // component emits

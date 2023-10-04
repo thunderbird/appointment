@@ -66,17 +66,8 @@ def upgrade() -> None:
         sa.Column("time_created", DateTime()),
         sa.Column("time_updated", DateTime()),
     )
-    # op.add_column(
-    #     "appointments",
-    #     sa.Column(
-    #         "appointment_type",
-    #         sa.Enum(AppointmentType),
-    #         default=AppointmentType.schedule,
-    #     ),
-    # )
 
 
 def downgrade() -> None:
     op.drop_table("schedules")
     op.drop_table("availabilities")
-    # op.drop_column("appointments", "appointment_type")

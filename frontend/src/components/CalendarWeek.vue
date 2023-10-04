@@ -27,13 +27,13 @@
         v-for="d in days"
         :key="d.day"
         class="grid auto-rows-max gap-1 p-1 bg-white dark:bg-gray-700"
-        @mouseleave="hideEventPopup"
+        @mouseleave="popup = {...initialEventPopupData}"
       >
         <div
           v-for="event in eventsByDate(d.date)?.allDay"
           :key="event"
           class="flex overflow-hidden"
-          @mouseenter="element => showEventPopup(element, event)"
+          @mouseenter="element => popup=showEventPopup(element, event, popupPosition)"
         >
           <div class="w-full text-sm truncate rounded px-2 py-0.5 bg-amber-400/80">
             {{ event.title }}
@@ -55,7 +55,7 @@
       :key="d.day"
       class="grid bg-white dark:bg-gray-700"
       :style="{ gridAutoRows: unitRem + 'rem' }"
-      @mouseleave="hideEventPopup"
+      @mouseleave="popup = {...initialEventPopupData}"
     >
       <div
         v-for="event in eventsByDate(d.date)?.duringDay"
@@ -63,7 +63,7 @@
         class="flex overflow-hidden"
         :class="{ 'hidden': event.offset < 0 }"
         :style="{ gridRow: event.offset + ' / span ' + event.span }"
-        @mouseenter="element => !booking ? showEventPopup(element, event) : null"
+        @mouseenter="element => !booking ? popup=showEventPopup(element, event, popupPosition) : null"
       >
         <div
           v-if="!booking"
@@ -114,18 +114,20 @@
     <event-popup
       v-if="(events && !booking)"
       :style="{
-        'display': popup.display,
-        'top': popup.top,
-        'left': popup.left,
+        display: popup.display,
+        top: popup.top,
+        left: popup.left,
+        right: popup.right,
       }"
       :event="popup.event"
+      :position="popupPosition"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, inject, reactive } from 'vue';
-import { eventColor, timeFormat } from '@/utils';
+import { computed, inject, ref } from 'vue';
+import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
 
@@ -138,6 +140,7 @@ const props = defineProps({
   booking: Boolean, // flag indicating if calendar is used to book time slots
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
+  popupPosition: String, // currently supported: right, left, top
 });
 
 // component emits
@@ -260,24 +263,6 @@ const bookSlot = (d) => {
 };
 
 // event details
-const popup = reactive({
-  event: null,
-  display: 'none',
-  top: 0,
-  left: 0,
-});
+const popup = ref({...initialEventPopupData});
 
-// calculate properties of event popup for given element and show popup
-const showEventPopup = (el, event) => {
-  popup.event = event;
-  popup.display = 'block';
-  popup.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
-  popup.left = `${el.target.offsetLeft + el.target.clientWidth}px`;
-};
-
-// reset event popup and hide it
-const hideEventPopup = () => {
-  popup.event = null;
-  popup.display = 'none';
-};
 </script>
