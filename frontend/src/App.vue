@@ -1,11 +1,6 @@
 <template>
-  <!-- public booking link -->
-  <template v-if="routeIsPublic">
-    <title-bar />
-    <router-view />
-  </template>
   <!-- authenticated subscriber content -->
-  <template v-else>
+  <template v-if="currentUser">
     <site-notification
       v-if="siteNotificationStore.display"
       :title="siteNotificationStore.title"
@@ -23,6 +18,11 @@
         />
       </div>
     </main>
+  </template>
+  <!-- for home page and booking page -->
+  <template v-else-if="routeIsPublic">
+    <title-bar />
+    <router-view />
   </template>
 </template>
 

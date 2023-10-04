@@ -59,7 +59,8 @@ if (process.env.VUE_APP_SENTRY_DSN) {
     replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
   });
 }
-
+// Per the [Auth0 docs](https://github.com/auth0/auth0-vue/blob/main/EXAMPLES.md#protecting-a-route), we should register the router before the Auth0 SDK.
+app.use(router);
 app.use(
   createAuth0({
     domain: process.env.VUE_APP_AUTH0_DOMAIN,
@@ -82,7 +83,7 @@ const port = process.env.VUE_APP_API_PORT !== undefined ? `:${process.env.VUE_AP
 const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${protocol}://${process.env.VUE_APP_BASE_URL}/booking/`);
-app.use(router);
+
 const messages = {
   de, // German
   en, // English
