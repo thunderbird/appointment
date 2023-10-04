@@ -73,9 +73,7 @@
 </template>
 
 <script setup>
-import {
-  inject, computed, reactive, ref,
-} from 'vue';
+import { inject, computed, reactive, ref, onMounted } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -94,6 +92,7 @@ const dj = inject('dayjs');
 // component properties
 const props = defineProps({
   open: Boolean, // modal state
+  user: Object, // currently logged in user, null if not logged in
   event: Object, // event data to display and book
   success: Boolean, // true if booking was successful
 });
@@ -108,6 +107,12 @@ const time = computed(() => dj(props.event.start).format(`dddd, MMMM D, YYYY ${t
 const attendee = reactive({
   name: '',
   email: '',
+});
+onMounted(() => {
+  if (props.user) {
+    attendee.name = props.user.name;
+    attendee.email = props.user.email;
+  }
 });
 const validAttendee = computed(() => attendee.email.length > 2);
 
