@@ -24,6 +24,9 @@
     <title-bar />
     <router-view />
   </template>
+  <template v-else>
+    <!-- TODO: handle wrong route -->
+  </template>
 </template>
 
 <script setup>
@@ -114,6 +117,7 @@ const appointments = ref([]);
 const routeIsPublic = computed(
   () =>
     route.name === "booking" ||
+    route.name === "availability" ||
     (route.name === "home" && !auth.isAuthenticated.value)
 );
 
