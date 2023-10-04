@@ -16,12 +16,12 @@
     bg-gray-200 border-gray-200 dark:bg-gray-500 dark:border-gray-500
     ">
       <div
-        v-for="h in weekdayNames()"
+        v-for="h in isoWeekdays"
         :key="h"
         class="text-center py-2 text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-600"
         :class="{ 'font-bold': !mini}"
       >
-        {{ h }}
+        {{ h.min }}
       </div>
       <calendar-month-day
         v-for="d in days"
@@ -34,6 +34,7 @@
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
         :show-details="!placeholder"
+        :popup-position="popupPosition"
         :disabled="dateDisabled(d.date)"
         @click="!placeholder && !dateDisabled(d.date) ? emit('daySelected', d.date) : null"
         @event-selected="eventSelected"
@@ -57,6 +58,8 @@ import { appointmentState } from '@/definitions';
 
 // component constants
 const dj = inject('dayjs');
+const isoWeekdays = inject("isoWeekdays");
+const isoFirstDayOfWeek = inject("isoFirstDayOfWeek");
 
 // component properties
 const props = defineProps({
@@ -67,6 +70,8 @@ const props = defineProps({
   minDate: Object, // minimum active date in view (dayjs object)
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
+  schedules: Array, // data of scheduled event previews to show
+  popupPosition: String, // currently supported: right, left
 });
 
 // component emits
@@ -96,6 +101,17 @@ const events = computed(() => {
       eventsOnDate[key] = [{ ...event, remote: true }];
     }
   });
+  // add schedules
+  props.schedules?.forEach((event) => {
+    event.slots?.forEach((slot) => {
+      const key = dj(slot.start).format('YYYY-MM-DD');
+      if (key in eventsOnDate) {
+        eventsOnDate[key].push({ ...event, ...slot, preview: true });
+      } else {
+        eventsOnDate[key] = [{ ...event, ...slot, preview: true }];
+      }
+    });
+  });
   return eventsOnDate;
 });
 // get all relevant events on a given date (pending, with attendee or remote)
@@ -107,7 +123,8 @@ const eventsByDate = (d) => {
       : events.value[key].filter(
         (e) => (dj(e.start).add(e.duration, 'minutes').isAfter(dj()) && e.status === appointmentState.pending)
             || (e.attendee && e.status === appointmentState.pending)
-            || e.remote,
+            || e.remote
+            || e.preview,
       );
   }
   return null;
@@ -130,17 +147,6 @@ watch(() => props.selected, (selection) => {
   navDate.value = dj(selection);
 });
 
-// generate names for each day of week
-const weekdayNames = () => {
-  const list = props.mini ? dj.weekdaysMin() : dj.weekdaysShort();
-  // handle Monday = 1 as first day of week (default is Sunday = 0)
-  if (dj.localeData().firstDayOfWeek()) {
-    const first = list.shift();
-    list.push(first);
-  }
-  return list;
-};
-
 // basic data for selected month
 const today = computed(() => dj().format('YYYY-MM-DD'));
 const date = computed(() => props.selected.format('YYYY-MM-DD'));
@@ -154,18 +160,17 @@ const currentMonthDays = computed(() => [...Array(numberOfDaysInMonth.value)].ma
 })));
 
 const previousMonthDays = computed(() => {
-  const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).weekday() + 1;
-  const previousMonth = dj(`${year.value}-${month.value}-01`).subtract(1, 'month');
-
   // Cover first day of the month being sunday (firstDayOfTheMonthWeekday === 0)
-  const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday
-    ? firstDayOfTheMonthWeekday - 1
-    : 6;
+  const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).isoWeekday();
+  const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday !== isoFirstDayOfWeek
+    ? firstDayOfTheMonthWeekday - isoFirstDayOfWeek%7
+    : 0;
 
   const previousMonthLastMondayDayOfMonth = dj(currentMonthDays.value[0].date)
     .subtract(visibleNumberOfDaysFromPreviousMonth, 'day')
     .date();
 
+  const previousMonth = dj(`${year.value}-${month.value}-01`).subtract(1, 'month');
   return [...Array(visibleNumberOfDaysFromPreviousMonth)].map(
     (_, index) => ({
       date: dj(
@@ -179,13 +184,11 @@ const previousMonthDays = computed(() => {
 });
 
 const nextMonthDays = computed(() => {
-  const lastDayOfTheMonthWeekday = dj(`${year.value}-${month.value}-${currentMonthDays.value.length}`).weekday() + 1;
+  // fill in rest days in calendar grid
+  const restDays = 7 - (previousMonthDays.value.length+currentMonthDays.value.length)%7;
+  const visibleNumberOfDaysFromNextMonth = restDays === 7 ? 0 : restDays;
+
   const nextMonth = dj(`${year.value}-${month.value}-01`).add(1, 'month');
-
-  const visibleNumberOfDaysFromNextMonth = lastDayOfTheMonthWeekday
-    ? 7 - lastDayOfTheMonthWeekday
-    : lastDayOfTheMonthWeekday;
-
   return [...Array(visibleNumberOfDaysFromNextMonth)].map((_, index) => ({
     date: dj(
       `${nextMonth.year()}-${nextMonth.month() + 1}-${index + 1}`,

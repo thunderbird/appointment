@@ -1,11 +1,13 @@
 services:
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
     ports:
       - 8090:8090
     volumes:
-      - ./backend:/app
+      - ./backend/src:/app/src
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
     depends_on:

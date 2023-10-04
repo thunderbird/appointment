@@ -3,10 +3,12 @@
 Handle connection to a CalDAV server.
 """
 import json
+import logging
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone
+from dateutil.parser import parse
 
 from .google_client import GoogleClient
 from ..database import schemas
@@ -119,8 +121,8 @@ class GoogleConnector:
             "summary": event.title,
             "location": event.location.name,
             "description": "\n".join(description),
-            "start": {"dateTime": event.start + "+00:00"},
-            "end": {"dateTime": event.end + "+00:00"},
+            "start": {"dateTime": event.start},
+            "end": {"dateTime": event.end},
             "attendees": [
                 {"displayName": organizer.name, "email": organizer.email},
                 {"displayName": attendee.name, "email": attendee.email},
@@ -231,7 +233,7 @@ class CalDavConnector:
 class Tools:
     def create_vevent(
         self,
-        appointment: schemas.Appointment,
+        appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
     ):
@@ -257,7 +259,7 @@ class Tools:
 
     def send_vevent(
         self,
-        appointment: schemas.Appointment,
+        appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
@@ -270,3 +272,59 @@ class Tools:
         )
         mail = InvitationMail(sender=organizer.email, to=attendee.email, attachments=[invite])
         mail.send()
+
+    def available_slots_from_schedule(s: schemas.ScheduleBase):
+        """This helper calculates a list of slots according to the given schedule."""
+        now = datetime.utcnow()
+        earliest_start = now + timedelta(minutes=s.earliest_booking)
+        farthest_end = now + timedelta(minutes=s.farthest_booking)
+        start = datetime.combine(s.start_date, s.start_time)
+        end = min([datetime.combine(s.end_date, s.end_time), farthest_end]) if s.end_date else farthest_end
+        slots = []
+        # set the first date to an allowed weekday
+        weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
+        if not weekdays or len(weekdays) == 0:
+            weekdays = [1, 2, 3, 4, 5]
+        while start.isoweekday() not in weekdays:
+            start = start + timedelta(days=1)
+        # init date generation: pointer holds the current slot start datetime
+        pointer = start
+        counter = 0
+        # set fix event limit of 1000 for now for performance reasons. Can be removed later.
+        while pointer < end and counter < 1000:
+            counter += 1
+            if pointer >= earliest_start:
+                slots.append(schemas.SlotBase(start=pointer, duration=s.slot_duration))
+            next_start = pointer + timedelta(minutes=s.slot_duration)
+            # if the next slot still fits into the current day
+            if next_start.time() < s.end_time:
+                pointer = next_start
+            # if the next slot has to be on the next available day
+            else:
+                next_date = datetime.combine(pointer.date() + timedelta(days=1), s.start_time)
+                # check weekday and skip da if it isn't allowed
+                while next_date.isoweekday() not in weekdays:
+                    next_date = next_date + timedelta(days=1)
+                pointer = next_date
+        return slots
+
+    def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]):
+        """This helper removes all events from list A, which have a time collision with any event in list B
+        and returns all remaining elements from A as new list.
+        """
+        available_slots = []
+        for a in a_list:
+            a_start = a.start
+            a_end = a_start + timedelta(minutes=a.duration)
+            collision_found = False
+            for b in b_list:
+                b_start = parse(b.start)
+                b_end = parse(b.end)
+                # if there is an overlap of both date ranges, a collision was found
+                # see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
+                if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
+                    collision_found = True
+                    break
+            if not collision_found:
+                available_slots.append(a)
+        return available_slots

@@ -1,165 +1,162 @@
 <template>
-  <!-- booking page content: loading -->
-  <main
-    v-if="activeView === views.loading"
-    class="h-screen flex-center select-none"
-  >
-    <div
-      class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-500"
-    ></div>
-  </main>
-  <!-- booking page content: invalid link -->
-  <main
-    v-else-if="activeView === views.invalid"
-    class="h-screen px-4 flex-center flex-col gap-8 select-none"
-  >
-    <art-invalid-link class="max-w-sm h-auto my-6" />
-    <div class="text-xl font-semibold text-sky-600">
-      {{ t('info.bookingLinkHasAlreadyBeenUsed') }}
-    </div>
-    <div class="text-gray-800 dark:text-gray-300">
-      {{ t('info.bookedPleaseCheckEmail') }}
-    </div>
-    <primary-button
-      class="p-7 mt-12"
-      :label="t('label.startUsingTba')"
-      @click="router.push({ name: 'home' })"
-    />
-  </main>
-  <!-- booking page content: successful booking -->
-  <main
-    v-else-if="activeView === views.success"
-    class="h-screen px-4 py-24 select-none flex flex-col-reverse md:flex-row justify-evenly items-center"
-  >
-    <div class="flex-center flex-col gap-12 min-w-[50%]">
-      <div class="text-2xl font-semibold text-teal-500">
-        <span v-if="isAvailabilityRoute">{{ t('info.bookingSuccessfullyRequested') }}</span>
-        <span v-else>{{ t('info.bookingSuccessful') }}</span>
+  <div>
+    <!-- booking page content: loading -->
+    <main
+      v-if="activeView === views.loading"
+      class="h-screen flex-center select-none"
+    >
+      <div
+        class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-500"
+      ></div>
+    </main>
+    <!-- booking page content: invalid link -->
+    <main
+      v-else-if="activeView === views.invalid"
+      class="h-screen px-4 flex-center flex-col gap-8 select-none"
+    >
+      <art-invalid-link class="max-w-sm h-auto my-6" />
+      <div class="text-xl font-semibold text-sky-600">
+        {{ t('info.bookingLinkHasAlreadyBeenUsed') }}
       </div>
-      <div class="w-full max-w-sm shadow-lg rounded-lg flex flex-col gap-1">
-        <div class="rounded-t-md bg-teal-500 h-14 flex justify-around items-center">
-          <div v-for="i in 2" :key="i" class="rounded-full bg-white w-4 h-4"></div>
-        </div>
-        <div class="text-2xl font-bold m-2 text-center text-gray-500">
-          {{ activeEvent.title }}
-        </div>
-        <div class="flex flex-col gap-0.5 m-2 py-2 rounded-md text-center bg-gray-100 text-gray-500">
-          <div class="text-teal-500 font-semibold text-sm">{{ dj(activeEvent.start).format('dddd') }}</div>
-          <div class="text-lg">{{ dj(activeEvent.start).format('LL') }}</div>
-          <div class="text-sm uppercase flex-center gap-2">
-            <span>{{ dj(activeEvent.start).format(timeFormat()) }}</span>
-            <span>{{ dj.tz.guess() }}</span>
-          </div>
-        </div>
+      <div class="text-gray-800 dark:text-gray-300">
+        {{ t('info.bookedPleaseCheckEmail') }}
       </div>
-      <div class="text-teal-500 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
-        {{ t('label.downloadTheIcsFile') }}
-      </div>
-      <div class="text-gray-700 text-lg text-center">
-        <div>{{ t('info.invitationWasSent') }}</div>
-        <div class="font-bold text-lg">
-          {{ attendee.email }}
-        </div>
-      </div>
-      <!-- TODO -->
-      <!-- <div class="text-sky-600 text-sm underline underline-offset-2 -mt-4">
-        {{ t('label.sendInvitationToAnotherEmail') }}
-      </div> -->
       <primary-button
         class="p-7 mt-12"
         :label="t('label.startUsingTba')"
         @click="router.push({ name: 'home' })"
       />
-    </div>
-    <art-successful-booking class="max-w-md w-full sm:max-w-md sm:w-auto h-auto m-6" />
-  </main>
-  <!-- booking page content: time slot selection -->
-  <main
-    v-else
-    class="max-w-screen-2xl mx-auto py-32 px-4 select-none"
-    :class="{ 'pt-0': isAvailabilityRoute }"
-  >
-    <div v-if="appointment">
-      <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
-      <div class="flex justify-between font-semibold">
-        <div>
-          {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
-        </div>
-        <div v-if="isAvailabilityRoute">
-          {{ t('text.disclaimerGABooking') }}
-        </div>
-      </div>
-      <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
-      <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
-      <calendar-page-heading
-        :nav="false"
-        :month="activeDate.format('MMMM')"
-        :year="activeDate.year().toString()"
-        :title="viewTitle"
-        :backlink="activeView === views.weekAfterMonth"
-        @back="activeView = views.month"
-      />
-      <calendar-month
-        v-if="(activeView === views.month)"
-        :selected="activeDate"
-        :appointments="dayPlaceholder"
-        :placeholder="true"
-        @event-selected="showWeek"
-      />
-      <calendar-week
-        v-if="(activeView === views.week || activeView === views.weekAfterMonth)"
-        :selected="activeDate"
-        :appointments="[appointment]"
-        :booking="true"
-        @event-selected="selectEvent"
-      />
-      <calendar-day
-        v-if="(activeView === views.day)"
-        :selected="activeDate"
-        :appointments="[appointment]"
-        :booking="true"
-        @event-selected="selectEvent"
-      />
-    </div>
-    <!-- fixed footer with action button -->
-    <footer
-      class="
-        fixed bottom-0 left-0 h-24 w-full px-4 border-t
-        bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
-      "
+    </main>
+    <!-- booking page content: successful booking -->
+    <main
+      v-else-if="activeView === views.success"
+      class="h-screen px-4 py-24 select-none flex flex-col-reverse md:flex-row justify-evenly items-center"
     >
-      <div class="h-full max-w-screen-2xl mx-auto flex justify-end items-center">
-        <!-- <primary-button
-          class="p-7"
-          label="download"
-          @click="downloadIcs"
-        /> -->
+      <div class="flex-center flex-col gap-12 min-w-[50%]">
+        <div class="text-2xl font-semibold text-teal-500">
+          <span v-if="isAvailabilityRoute">{{ t('info.bookingSuccessfullyRequested') }}</span>
+          <span v-else>{{ t('info.bookingSuccessful') }}</span>
+        </div>
+        <div class="w-full max-w-sm shadow-lg rounded-lg flex flex-col gap-1">
+          <div class="rounded-t-md bg-teal-500 h-14 flex justify-around items-center">
+            <div v-for="i in 2" :key="i" class="rounded-full bg-white w-4 h-4"></div>
+          </div>
+          <div class="text-2xl font-bold m-2 text-center text-gray-500">
+            {{ activeEvent.title }}
+          </div>
+          <div class="flex flex-col gap-0.5 m-2 py-2 rounded-md text-center bg-gray-100 text-gray-500">
+            <div class="text-teal-500 font-semibold text-sm">{{ dj(activeEvent.start).format('dddd') }}</div>
+            <div class="text-lg">{{ dj(activeEvent.start).format('LL') }}</div>
+            <div class="text-sm uppercase flex-center gap-2">
+              <span>{{ dj(activeEvent.start).format(timeFormat()) }}</span>
+              <span>{{ dj.tz.guess() }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-teal-500 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
+          {{ t('label.downloadTheIcsFile') }}
+        </div>
+        <div class="text-gray-700 text-lg text-center">
+          <div>{{ t('info.invitationWasSent') }}</div>
+          <div class="font-bold text-lg">
+            {{ attendee.email }}
+          </div>
+        </div>
+        <!-- TODO -->
+        <!-- <div class="text-sky-600 text-sm underline underline-offset-2 -mt-4">
+          {{ t('label.sendInvitationToAnotherEmail') }}
+        </div> -->
         <primary-button
-          class="p-7"
-          :label="t('label.confirmSelection')"
-          :disabled="!activeEvent"
-          @click="openBookingModal"
+          class="p-7 mt-12"
+          :label="t('label.startUsingTba')"
+          @click="router.push({ name: 'home' })"
         />
       </div>
-    </footer>
-  </main>
-  <!-- modals -->
-  <booking-modal
-    :open="showBooking"
-    :event="activeEvent"
-    :success="activeView === views.success"
-    @book="bookEvent"
-    @download="downloadIcs"
-    @close="closeBookingModal"
-  />
+      <art-successful-booking class="max-w-md w-full sm:max-w-md sm:w-auto h-auto m-6" />
+    </main>
+    <!-- booking page content: time slot selection -->
+    <main
+      v-else
+      class="max-w-screen-2xl mx-auto py-32 px-4 select-none"
+      :class="{ 'pt-0': isAvailabilityRoute }"
+    >
+      <div v-if="appointment">
+        <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
+        <div class="flex justify-between font-semibold">
+          <div>
+            {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
+          </div>
+          <div v-if="isAvailabilityRoute">
+            {{ t('text.disclaimerGABooking') }}
+          </div>
+        </div>
+        <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
+        <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
+        <calendar-page-heading
+          :nav="showNavigation && activeView == views.month"
+          :month="activeDate.format('MMMM')"
+          :year="activeDate.year().toString()"
+          :title="viewTitle"
+          :backlink="activeView === views.weekAfterMonth"
+          @prev="dateNav('month', false)"
+          @next="dateNav('month')"
+          @back="activeView = views.month"
+        />
+        <calendar-month
+          v-if="(activeView === views.month)"
+          :selected="activeDate"
+          :appointments="dayPlaceholder"
+          :placeholder="true"
+          @event-selected="showWeek"
+        />
+        <calendar-week
+          v-if="(activeView === views.week || activeView === views.weekAfterMonth)"
+          :selected="activeDate"
+          :appointments="[appointment]"
+          :booking="true"
+          @event-selected="selectEvent"
+        />
+        <calendar-day
+          v-if="(activeView === views.day)"
+          :selected="activeDate"
+          :appointments="[appointment]"
+          :booking="true"
+          @event-selected="selectEvent"
+        />
+      </div>
+      <!-- fixed footer with action button -->
+      <footer
+        class="
+          fixed bottom-0 left-0 h-24 w-full px-4 border-t
+          bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
+        "
+      >
+        <div class="h-full max-w-screen-2xl mx-auto flex justify-end items-center">
+          <primary-button
+            class="p-7"
+            :label="t('label.confirmSelection')"
+            :disabled="!activeEvent"
+            @click="openBookingModal"
+          />
+        </div>
+      </footer>
+    </main>
+    <!-- modals -->
+    <booking-modal
+      :open="showBooking"
+      :event="activeEvent"
+      :success="activeView === views.success"
+      @book="bookEvent"
+      @download="downloadIcs"
+      @close="closeBookingModal"
+    />
+  </div>
 </template>
 
 <script setup>
 import { bookingCalendarViews as views, appointmentState } from '@/definitions';
 import { download, timeFormat } from '@/utils';
-import {
-  ref, inject, onMounted, computed,
-} from 'vue';
+import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
@@ -207,10 +204,21 @@ const viewTitle = computed(() => {
   }
 });
 
+// show navigation only if multiple months in date range
+const showNavigation = ref(false);
+
+// date navigation
+const dateNav = (unit = 'month', forward = true) => {
+  if (forward) {
+    activeDate.value = activeDate.value.add(1, unit);
+  } else {
+    activeDate.value = activeDate.value.subtract(1, unit);
+  }
+};
+
 // check if slots are distributed over different months, weeks, days or only on a single day
 const getViewBySlotDistribution = (slots) => {
-  let monthChanged = false; let weekChanged = false; let dayChanged = false; let
-    lastDate = null;
+  let monthChanged = false; let weekChanged = false; let dayChanged = false; let lastDate = null;
   slots.forEach((slot) => {
     if (!lastDate) {
       lastDate = dj(slot.start);
@@ -227,10 +235,19 @@ const getViewBySlotDistribution = (slots) => {
     }
     lastDate = dj(slot.start);
   });
-  if (monthChanged) return views.month;
-  if (weekChanged) return views.month;
-  if (dayChanged) return views.week;
-  if (!dayChanged) return views.day;
+  if (monthChanged) {
+    showNavigation.value = true;
+    return views.month;
+  }
+  if (weekChanged) {
+    return views.month;
+  }
+  if (dayChanged) {
+    return views.week;
+  }
+  if (!dayChanged) {
+    return views.day;
+  }
   return views.invalid;
 };
 
@@ -285,46 +302,77 @@ const closeBookingModal = () => {
 // attendee confirmed the time slot selection: book event
 const attendee = ref(null);
 const bookEvent = async (attendeeData) => {
-  // build data object for put request
-  const obj = {
-    slot_id: activeEvent.value.id,
-    attendee: attendeeData,
-  };
   // update server side event
-  const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
-  // disable calendar view if every thing worked fine
-  if (!error.value) {
-    attendee.value = attendeeData;
-    // update view to prevent reselection
-    activeView.value = views.success;
+  if (isAvailabilityRoute.value) {
+    // build data object for put request
+    const obj = {
+      slot: {
+        start: activeEvent.value.start,
+        duration: activeEvent.value.duration,
+      },
+      attendee: attendeeData,
+    };
+    const { error } = await call('schedule/public/availability').put({ s_a: obj, url: window.location.href }).json();
+    if (error.value) {
+      return true;
+    }
+  } else
+  if (isBookingRoute.value) {
+    // build data object for put request
+    const obj = {
+      slot_id: activeEvent.value.id,
+      attendee: attendeeData,
+    };
+    const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
+    if (error.value) {
+      return true;
+    }
+  } else {
+    return true;
   }
+  // replace calendar view if every thing worked fine
+  attendee.value = attendeeData;
+  // update view to prevent reselection
+  activeView.value = views.success;
+  return false;
 };
 
 // download calendar event as .ics
 const downloadIcs = async () => {
   // download ICS file
-  const { data, error } = await call(`serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
-  if (!error.value) {
-    download(data.value.data, data.value.name, data.value.content_type);
+  if (isAvailabilityRoute.value) {
+    // build data object for put request
+    const obj = {
+      slot: {
+        start: activeEvent.value.start,
+        duration: activeEvent.value.duration,
+      },
+      attendee: attendee.value,
+    };
+    const { data, error } = await call('schedule/serve/ics').put({ s_a: obj, url: window.location.href }).json();
+    if (!error.value) {
+      download(data.value.data, data.value.name, data.value.content_type);
+    }
+  } else
+  if (isBookingRoute.value) {
+    const { data, error } = await call(`apmt/serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
+    if (!error.value) {
+      download(data.value.data, data.value.name, data.value.content_type);
+    }
   }
 };
 
 // async get appointment data either from public single appointment link
 // or from a general availability link of a subscriber
+// returns true if error occured
 const getAppointment = async () => {
   if (isAvailabilityRoute.value) {
-    const { error, data } = await call('verify/signature').post({ url: window.location.href }).json();
+    const { error, data } = await call('schedule/public/availability').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
       return true;
     } else {
-      // TODO: here we need to make another API call to get the actual general appointment data or include it
-      //       in the signature verification call. For now, here is fake example data for testing.
-      appointment.value = {
-        "title": "General Available",
-        "details": "These are the time slots that are currently free for you to choose.",
-        "owner_name": "Jane Doe",
-        "slots": [{ "start": "2023-07-03T08:00:00", "duration": 60, "attendee_id": null, "id": 9960 }, { "start": "2023-07-03T09:00:00", "duration": 60, "attendee_id": null, "id": 9961 }, { "start": "2023-07-03T11:00:00", "duration": 60, "attendee_id": null, "id": 9962 }, { "start": "2023-07-03T12:00:00", "duration": 60, "attendee_id": null, "id": 9963 }, { "start": "2023-07-03T13:00:00", "duration": 60, "attendee_id": null, "id": 9964 }, { "start": "2023-07-03T15:00:00", "duration": 60, "attendee_id": null, "id": 9965 }, { "start": "2023-07-04T08:00:00", "duration": 60, "attendee_id": null, "id": 9966 }, { "start": "2023-07-04T09:00:00", "duration": 60, "attendee_id": null, "id": 9967 }, { "start": "2023-07-04T10:00:00", "duration": 60, "attendee_id": null, "id": 9968 }, { "start": "2023-07-04T11:00:00", "duration": 60, "attendee_id": null, "id": 9969 }, { "start": "2023-07-04T12:00:00", "duration": 60, "attendee_id": null, "id": 9970 }, { "start": "2023-07-05T12:00:00", "duration": 60, "attendee_id": null, "id": 9971 }, { "start": "2023-07-05T13:00:00", "duration": 60, "attendee_id": null, "id": 9972 }, { "start": "2023-07-05T14:00:00", "duration": 60, "attendee_id": null, "id": 9973 }, { "start": "2023-07-05T15:00:00", "duration": 60, "attendee_id": null, "id": 9974 }, { "start": "2023-07-06T08:00:00", "duration": 60, "attendee_id": null, "id": 9975 }, { "start": "2023-07-06T15:00:00", "duration": 60, "attendee_id": null, "id": 9976 }, { "start": "2023-07-07T08:00:00", "duration": 60, "attendee_id": null, "id": 9977 }, { "start": "2023-07-07T09:00:00", "duration": 60, "attendee_id": null, "id": 9978 }, { "start": "2023-07-07T10:00:00", "duration": 60, "attendee_id": null, "id": 9979 }, { "start": "2023-07-07T11:00:00", "duration": 60, "attendee_id": null, "id": 9980 }, { "start": "2023-07-07T12:00:00", "duration": 60, "attendee_id": null, "id": 9981 }, { "start": "2023-07-07T13:00:00", "duration": 60, "attendee_id": null, "id": 9982 }, { "start": "2023-07-07T14:00:00", "duration": 60, "attendee_id": null, "id": 9983 }, { "start": "2023-07-07T15:00:00", "duration": 60, "attendee_id": null, "id": 9984}]
-      };
+      // now assign the actual general appointment data that is returned.
+      appointment.value = data.value;
     }
   } else
   if (isBookingRoute.value) {

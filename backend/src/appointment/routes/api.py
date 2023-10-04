@@ -2,7 +2,6 @@ import os
 import secrets
 
 import validators
-import re
 
 # database
 from sqlalchemy.orm import Session
@@ -13,8 +12,7 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
-from datetime import timedelta
-from ..database.schemas import EventLocation
+from datetime import timedelta, timezone
 from ..controller.google_client import GoogleClient
 from ..controller.auth import sign_url
 from ..database.models import Subscriber, CalendarProvider
@@ -120,37 +118,11 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
 
 
 @router.post("/verify/signature")
-def verify_my_signature(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
+def verify_signature(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
     """Verify a signed short link"""
-    # Look for a <username> followed by an optional signature that ends the string
-    pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
-    match = re.findall(pattern, url)
-
-    if match is None or len(match) == 0:
-        raise HTTPException(400, "Unable to validate signature")
-
-    # Flatten
-    match = match[0]
-    clean_url = url
-
-    username = match[0]
-    signature = None
-    if len(match) > 1:
-        signature = match[1]
-        clean_url = clean_url.replace(signature, "")
-
-    subscriber = repo.get_subscriber_by_username(db, username)
-    if not subscriber:
-        raise HTTPException(400, "Unable to validate signature")
-
-    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
-    signed_signature = sign_url(clean_url_with_short_link)
-
-    # Verify the signature matches the incoming one
-    if signed_signature == signature:
+    if repo.verify_subscriber_link(db, url):
         return True
-
-    raise HTTPException(400, "Invalid signature")
+    raise HTTPException(400, "Invalid link")
 
 
 @router.post("/cal", response_model=schemas.CalendarOut)
@@ -292,7 +264,6 @@ def sync_remote_calendars(
     return True
 
 
-
 @router.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
 def read_remote_events(
     id: int,
@@ -425,10 +396,10 @@ def update_public_appointment_slot(
     slot = repo.get_slot(db=db, slot_id=s_a.slot_id)
     event = schemas.Event(
         title=db_appointment.title,
-        start=slot.start.isoformat(),
-        end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
+        start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
+        end=(slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat(),
         description=db_appointment.details,
-        location=EventLocation(
+        location=schemas.EventLocation(
             type=db_appointment.location_type,
             suggestions=db_appointment.location_suggestions,
             selected=db_appointment.location_selected,
@@ -462,8 +433,8 @@ def update_public_appointment_slot(
     return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 
 
-@router.get("/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
-def serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
+@router.get("/apmt/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
+def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     """endpoint to serve ICS file for time slot to download"""
     db_appointment = repo.get_public_appointment(db, slug=slug)
     if db_appointment is None:

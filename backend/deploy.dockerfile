@@ -6,14 +6,24 @@ WORKDIR /app
 ENV PATH="${PATH}:/root/.local/bin"
 ENV PYTHONPATH=.
 
+RUN mkdir scripts
+
 COPY requirements.txt .
+COPY pyproject.toml .
+COPY alembic.ini.example alembic.ini
+COPY scripts/entry.sh scripts/entry.sh
+
+# Needed for deploy, we don't have a volume attached
+COPY src .
+
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install .
 
-COPY src/ ./src
-COPY scripts/ ./scripts
-
-RUN cp ./src/alembic.ini.example ./src/alembic.ini
+# install removes the src file and installs the application as /app/appointment
+# that's fine, but uhh let's add this hack to line it up with our dev environment.
+# I'll buy whoever fixes this a coffee.
+RUN mkdir src
+RUN ln -s /app/appointment src/appointment
 
 EXPOSE 5000
 CMD ["/bin/sh", "./scripts/entry.sh"]

@@ -5,6 +5,9 @@ description = "Backend component to Thunderbird Appointment"
 requires-python = ">3.10"
 dynamic = ["dependencies"]
 
+[project.scripts]
+run-command = "src.appointment.main:cli"
+
 [project.urls]
 homepage = "https://appointment.day"
 repository = "https://github.com/thundernest/appointment.git"

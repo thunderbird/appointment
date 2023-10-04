@@ -5,7 +5,7 @@ Definitions of database tables and their relationships.
 import enum
 import os
 import uuid
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
@@ -42,11 +42,6 @@ class LocationType(enum.Enum):
 class CalendarProvider(enum.Enum):
     caldav = 1  # calendar provider serves via CalDAV
     google = 2  # calendar provider is Google via its own Rest API
-
-
-class AppointmentType(enum.Enum):
-    oneoff = 1  # An appointment created through "Create Appointment"
-    schedule = 2  # A template appointment used in Scheduling
 
 
 # Use ISO 8601 format to specify day of week
@@ -109,6 +104,7 @@ class Calendar(Base):
 
     owner = relationship("Subscriber", back_populates="calendars")
     appointments = relationship("Appointment", cascade="all,delete", back_populates="calendar")
+    schedules = relationship("Schedule", cascade="all,delete", back_populates="calendar")
 
 
 class Appointment(Base):
@@ -134,11 +130,9 @@ class Appointment(Base):
     )
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
-    appointment_type = Column(Enum(AppointmentType))
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
-    schedule = relationship("Schedule", cascade="all,delete", back_populates="appointment")
 
 
 class Attendee(Base):
@@ -171,15 +165,32 @@ class Schedule(Base):
     __tablename__ = "schedules"
 
     id = Column(Integer, primary_key=True, index=True)
-    appointment_id = Column(Integer, ForeignKey("appointments.id"))
+    calendar_id = Column(Integer, ForeignKey("calendars.id"))
+    active = Column(Boolean, index=True, default=True)
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    location_type = Column(Enum(LocationType), default=LocationType.inperson)
+    location_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
+    details = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
+    start_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
+    start_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
+    earliest_booking = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
+    farthest_booking = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
+    weekdays = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
+    slot_duration = Column(Integer, default=30)  # defaults to 30 minutes
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    appointment = relationship("Appointment", cascade="all,delete", back_populates="schedule")
+    calendar = relationship("Calendar", back_populates="schedules")
+    availabilities = relationship("Availability", cascade="all,delete", back_populates="schedule")
 
 
 class Availability(Base):
+    """This table will be used as soon as the application provides custom availability
+    in addition to the general availability
+    """
+
     __tablename__ = "availabilities"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -191,6 +202,7 @@ class Availability(Base):
         StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True
     )  # i.e., Can't book if it's less than X minutes before start time.
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
-
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    schedule = relationship("Schedule", back_populates="availabilities")

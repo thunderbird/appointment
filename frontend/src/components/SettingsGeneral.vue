@@ -107,6 +107,7 @@ const props = defineProps({
 // handle ui languages
 watch(locale, (newValue) => {
   localStorage.setItem('locale', newValue);
+  location.reload();
 });
 
 // handle theme mode

@@ -34,7 +34,7 @@ import { inject, computed, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { subscriberLevels, appointmentState } from '@/definitions';
-import { removeUserFromStorage } from '../stores/user-store';
+import { removeUserFromStorage } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
 
 // icons
@@ -59,6 +59,7 @@ const pendingAppointments = computed(() => props.appointments.filter((a) => a.st
 
 // do log out
 const logout = () => {
+  removeUserFromStorage();
   auth.logout({
     logoutParams: {
       returnTo: window.location.origin,

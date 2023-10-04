@@ -6,7 +6,7 @@
       transition-all ease-in-out flex items-center justify-center gap-2
       text-white from-teal-400 to-sky-600 enabled:hover:from-sky-400 enabled:hover:to-teal-600
     "
-    :class="{ 'text-transparent': waiting }"
+    :class="{ '!text-transparent': waiting }"
     @click="copy ? copyToClipboard() : null"
   >
     <div

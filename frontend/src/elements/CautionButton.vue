@@ -7,7 +7,7 @@
       text-white from-rose-400 to-rose-600 dark:from-rose-600 dark:to-rose-900 shadow-black
       enabled:hover:from-rose-600 enabled:hover:to-rose-600
     "
-    :class="{ 'text-transparent': waiting }"
+    :class="{ '!text-transparent': waiting }"
   >
     <div
       v-if="waiting"
