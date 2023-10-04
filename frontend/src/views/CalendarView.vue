@@ -52,6 +52,7 @@
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
+      popup-position="top"
     />
     <!-- page side bar -->
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">

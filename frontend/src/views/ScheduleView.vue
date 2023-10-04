@@ -62,6 +62,7 @@
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
+      popup-position="left"
     />
     <calendar-day
       v-show="tabActive === calendarViews.day"
@@ -69,6 +70,7 @@
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
+      popup-position="top"
     />
   </div>
 </template>

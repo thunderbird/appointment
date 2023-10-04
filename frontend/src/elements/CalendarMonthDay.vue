@@ -8,7 +8,7 @@
       'bg-gray-50 dark:bg-gray-600 text-gray-400': !isActive || disabled,
       'cursor-not-allowed': disabled
     }"
-    @mouseleave="hideEventPopup"
+    @mouseleave="popup = {...initialEventPopupData}"
   >
     <div
       class="w-6 rounded-full text-center relative"
@@ -45,7 +45,7 @@
           backgroundColor: eventColor(event, placeholder).background,
         }"
         @click="emit('eventSelected', day)"
-        @mouseenter="element => showDetails ? showEventPopup(element, event) : null"
+        @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       >
         <div
           v-if="event.remote && !event.all_day"
@@ -85,8 +85,8 @@
 </template>
 
 <script setup>
-import { eventColor, timeFormat } from '@/utils';
-import { inject, reactive, computed } from 'vue';
+import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
+import { inject, computed, ref } from 'vue';
 import EventPopup from '@/elements/EventPopup';
 
 const dj = inject('dayjs');
@@ -101,7 +101,7 @@ const props = defineProps({
   placeholder: Boolean, // flag formating events as placeholder
   events: Array, // list of events to show on this day or null
   showDetails: Boolean, // flag enabling event popups with details
-  popupPosition: String, // currently supported: right, left
+  popupPosition: String, // currently supported: right, left, top
   disabled: Boolean, // flag making this day non-selectable and inactive
 });
 
@@ -123,31 +123,7 @@ const sortedEvents = computed(() => [...props.events].sort((a, b) => {
 }));
 
 // event details
-const popup = reactive({
-  event: null,
-  display: 'none',
-  top: 0,
-  left: 'initial',
-});
-
-// calculate properties of event popup for given element and show popup
-const showEventPopup = (el, event) => {
-  popup.event = event;
-  popup.display = 'block';
-  popup.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
-  if (!props.popupPosition || props.popupPosition === 'right') {
-    popup.left = `${el.target.offsetLeft + el.target.clientWidth + 4}px`;
-  }
-  if (props.popupPosition === 'left') {
-    popup.left = 'initial'
-  }
-};
-
-// reset event popup and hide it
-const hideEventPopup = () => {
-  popup.event = null;
-  popup.display = 'none';
-};
+const popup = ref({...initialEventPopupData});
 
 // formatted time range
 const formattedTimeRange = (event) => {
