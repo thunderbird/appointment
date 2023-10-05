@@ -94,6 +94,7 @@ const dj = inject('dayjs');
 // component properties
 const props = defineProps({
   open: Boolean, // modal state
+  user: Object, // currently logged in user, null if not logged in
   event: Object, // event data to display and book
   success: Boolean, // true if booking was successful
 });

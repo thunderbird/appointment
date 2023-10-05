@@ -65,6 +65,7 @@ const logout = async () => {
       returnTo: window.location.origin,
     },
   });
+  removeUserFromStorage();
 };
 
 // initially load data when component gets remounted
