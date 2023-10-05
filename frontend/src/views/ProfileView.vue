@@ -1,13 +1,13 @@
 <template>
   <!-- page title area -->
-  <div v-if="user" class="flex flex-col gap-2 justify-center items-center">
-    <div class="text-4xl font-light">{{ user.name }}</div>
+  <div v-if="user.exists()" class="flex flex-col gap-2 justify-center items-center">
+    <div class="text-4xl font-light">{{ user.data.name }}</div>
     <div class="flex items-center gap-4">
       <div class="rounded-full text-xs uppercase border border-gray-500 text-gray-500 px-2">
-        {{ keyByValue(subscriberLevels, user.level) }}
+        {{ keyByValue(subscriberLevels, user.data.level) }}
       </div>
       <div class="flex gap-1 text-gray-500">
-        {{ user.timezone }}
+        {{ user.data.timezone }}
         <router-link :to="{ name: 'settings' }" class="pt-0.5 cursor-pointer">
           <icon-pencil class="w-4 h-4 stroke-1.5" />
         </router-link>
@@ -34,7 +34,7 @@ import { inject, computed, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { subscriberLevels, appointmentState } from '@/definitions';
-import { removeUserFromStorage } from '@/stores/user-store';
+import { useUserStore } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
 
 // icons
@@ -42,6 +42,7 @@ import { IconPencil } from '@tabler/icons-vue';
 
 // component constants
 const auth = inject('auth');
+const user = useUserStore();
 
 // component constants
 const { t } = useI18n();
@@ -51,7 +52,6 @@ const refresh = inject('refresh');
 const props = defineProps({
   calendars: Array, // list of calendars from db
   appointments: Array, // list of appointments from db
-  user: Object, // currently logged in user, null if not logged in
 });
 
 // list of pending appointments
@@ -59,13 +59,12 @@ const pendingAppointments = computed(() => props.appointments.filter((a) => a.st
 
 // do log out
 const logout = () => {
-  removeUserFromStorage();
+  user.reset();
   auth.logout({
     logoutParams: {
       returnTo: window.location.origin,
     },
   });
-  removeUserFromStorage();
 };
 
 // initially load data when component gets remounted

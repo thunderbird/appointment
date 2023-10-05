@@ -77,6 +77,7 @@ import { inject, computed, reactive, ref, onMounted } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
 import ArtConfetti from '@/elements/arts/ArtConfetti';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
@@ -85,6 +86,7 @@ import SecondaryButton from '@/elements/SecondaryButton';
 import { IconX } from '@tabler/icons-vue';
 
 // component constants
+const user = useUserStore();
 const { t } = useI18n();
 const route = useRoute();
 const dj = inject('dayjs');
@@ -92,7 +94,6 @@ const dj = inject('dayjs');
 // component properties
 const props = defineProps({
   open: Boolean, // modal state
-  user: Object, // currently logged in user, null if not logged in
   event: Object, // event data to display and book
   success: Boolean, // true if booking was successful
 });
@@ -109,9 +110,9 @@ const attendee = reactive({
   email: '',
 });
 onMounted(() => {
-  if (props.user) {
-    attendee.name = props.user.name;
-    attendee.email = props.user.email;
+  if (user.exists()) {
+    attendee.name = user.data.name;
+    attendee.email = user.data.email;
   }
 });
 const validAttendee = computed(() => attendee.email.length > 2);

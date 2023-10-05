@@ -127,27 +127,23 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import TextButton from '@/elements/TextButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
-import { updateUserInStorage } from '@/stores/user-store';
-
-// view properties
-const props = defineProps({
-  user: Object, // currently logged in user, null if not logged in
-});
 
 // component constants
+const user = useUserStore();
 const { t } = useI18n({ useScope: 'global' });
 const refresh = inject('refresh');
 const call = inject('call');
 const router = useRouter();
 const auth0 = useAuth0();
 
-const activeUsername = ref(props.user?.username);
-const activeDisplayName = ref(props.user?.name);
+const activeUsername = ref(user.data.username);
+const activeDisplayName = ref(user.data.name);
 const downloadAccountModalOpen = ref(false);
 const deleteAccountFirstModalOpen = ref(false);
 const deleteAccountSecondModalOpen = ref(false);
@@ -156,15 +152,6 @@ const updateUsernameModalOpen = ref(false);
 
 // calculate signed link
 const signedUserUrl = ref('');
-
-// load current user data on page reload
-watch(
-  () => props.user,
-  (loadedUser) => {
-    activeUsername.value = loadedUser.username;
-    activeDisplayName.value = loadedUser.name;
-  },
-);
 
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
@@ -198,8 +185,8 @@ const updateUser = async () => {
   };
   const { error } = await call('me').put(inputData).json();
   if (!error.value) {
-    // Trigger update to user in localStorage
-    updateUserInStorage(inputData);
+    // update user in store
+    user.$patch({ data: { ...user.data, ...inputData }});
     errorUsername.value = false;
     // TODO show some confirmation
     await refreshData();
@@ -215,7 +202,7 @@ const updateUser = async () => {
  * If it didn't change, then just update the user immediately.
  */
 const updateUserCheckForConfirmation = async () => {
-  if (activeUsername.value !== props?.user?.username) {
+  if (activeUsername.value !== user.data.username) {
     updateUsernameModalOpen.value = true;
     return;
   }

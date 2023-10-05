@@ -46,7 +46,7 @@
     <div class="w-4/5 pt-14">
 
       <!-- general settings -->
-      <settings-general v-if="activeView === settingsSections.general" :user="user" />
+      <settings-general v-if="activeView === settingsSections.general" />
 
       <!-- calendar settings -->
       <settings-calendar v-if="activeView === settingsSections.calendar" :calendars="calendars" />
@@ -57,7 +57,7 @@
       </div>
 
       <!-- account settings -->
-      <settings-account v-if="activeView === settingsSections.account" :user="user"></settings-account>
+      <settings-account v-if="activeView === settingsSections.account" />
 
       <!-- privacy settings -->
       <div v-if="activeView === settingsSections.privacy">
@@ -97,7 +97,6 @@ const router = useRouter();
 defineProps({
   calendars: Array, // list of calendars from db
   appointments: Array, // list of appointments from db
-  user: Object, // currently logged in user, null if not logged in
 });
 
 // menu navigation of different views

@@ -107,7 +107,6 @@
         v-else
         :status="creationStatus"
         :calendars="calendars"
-        :user="user"
         @start="creationStatus = appointmentCreationState.details"
         @next="creationStatus = appointmentCreationState.availability"
         @create="
@@ -122,9 +121,7 @@
 
 <script setup>
 import { appointmentCreationState, calendarViews, appointmentState } from '@/definitions';
-import {
-  ref, inject, computed, watch, onMounted,
-} from 'vue';
+import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentCreation from '@/components/AppointmentCreation';
@@ -147,7 +144,6 @@ const refresh = inject('refresh');
 const props = defineProps({
   calendars: Array, // list of calendars from db
   appointments: Array, // list of appointments from db
-  user: Object, // currently logged in user, null if not logged in
 });
 
 // current selected date, if not in route: defaults to now

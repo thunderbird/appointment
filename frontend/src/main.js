@@ -2,6 +2,9 @@
 import App from '@/App';
 import { createApp } from 'vue';
 
+// pinia state management
+import { createPinia } from 'pinia'
+
 // init auth0
 import { createAuth0 } from '@auth0/auth0-vue';
 
@@ -59,6 +62,10 @@ if (process.env.VUE_APP_SENTRY_DSN) {
     replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
   });
 }
+
+const pinia = createPinia();
+app.use(pinia);
+
 // Per the [Auth0 docs](https://github.com/auth0/auth0-vue/blob/main/EXAMPLES.md#protecting-a-route), we should register the router before the Auth0 SDK.
 app.use(router);
 app.use(
