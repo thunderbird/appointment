@@ -1,7 +1,7 @@
 <template>
   <header
     class="
-      fixed h-16 w-full px-4 shadow-lg border-b flex items-center justify-between cursor-default select-none
+      fixed z-50 h-16 w-full px-4 shadow-lg border-b flex items-center justify-between cursor-default select-none
       bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
     "
   >

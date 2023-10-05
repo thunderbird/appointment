@@ -203,7 +203,6 @@
         v-else
         :status="creationStatus"
         :calendars="calendars"
-        :user="user"
         @start="creationStatus = appointmentCreationState.details"
         @next="creationStatus = appointmentCreationState.availability"
         @create="creationStatus = appointmentCreationState.finished; refresh();"
@@ -263,7 +262,6 @@ const refresh = inject('refresh');
 const props = defineProps({
   calendars: Array, // list of calendars from db
   appointments: Array, // list of appointments from db
-  user: Object, // currently logged in user, null if not logged in
 });
 
 // handle calendar output

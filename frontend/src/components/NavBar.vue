@@ -1,5 +1,10 @@
 <template>
-  <header class="h-16 px-4 shadow-lg border-b flex justify-between border-gray-300 dark:border-gray-600">
+  <header
+    class="
+      fixed z-50 h-16 w-full px-4 shadow-lg border-b flex justify-between 
+      bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
+    "
+  >
     <router-link
       class="py-4 pl-4 pr-8 border-r border-gray-300 dark:border-gray-600 shrink-0"
       :to="{ name: 'calendar' }"
@@ -38,11 +43,11 @@
         </li>
       </ul>
       <router-link
-        v-if="user"
+        v-if="user.exists()"
         :to="{ name: 'profile' }"
         class="w-12 h-12 mr-4 self-center flex-center rounded-full bg-teal-500 text-lg font-normal text-white"
       >
-        {{ initials(user.name) }}
+        {{ initials(user.data.name) }}
       </router-link>
     </nav>
   </header>
@@ -52,17 +57,18 @@
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { initials } from '@/utils';
+import { useUserStore } from '@/stores/user-store';
 
 // icons
 // import { IconSearch } from '@tabler/icons-vue';
 
 // component constants
+const user = useUserStore();
 const route = useRoute();
 const { t } = useI18n();
 
 // component properties
 defineProps({
   navItems: Array, // list of route names that are also lang keys (format: label.<key>), used as nav items
-  user: Object, // currently logged in user, null if not logged in
 });
 </script>

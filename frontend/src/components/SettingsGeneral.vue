@@ -88,29 +88,26 @@
 
 <script setup>
 import { colorSchemes } from '@/definitions';
-import {
-  ref, reactive, inject, watch,
-} from 'vue';
+import { ref, reactive, inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user-store';
 // import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
+const user = useUserStore();
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject('call');
 const dj = inject('dayjs');
 
-// view properties
-const props = defineProps({
-  user: Object, // currently logged in user, null if not logged in
-});
-
 // handle ui languages
+// TODO: move to settings store
 watch(locale, (newValue) => {
   localStorage.setItem('locale', newValue);
   location.reload();
 });
 
 // handle theme mode
+// TODO: move to settings store
 const initialTheme = localStorage.getItem('theme')
   ? colorSchemes[localStorage.getItem('theme')]
   : colorSchemes.system;
@@ -138,7 +135,8 @@ watch(theme, (newValue) => {
   }
 });
 
-// handle theme mode
+// handle time format
+// TODO: move to settings store
 const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
 const initialTimeFormat = localStorage.getItem('timeFormat') ?? detectedTimeFormat;
 const timeFormat = ref(initialTimeFormat);
@@ -148,22 +146,22 @@ watch(timeFormat, (newValue) => {
 
 // timezones
 const activeTimezone = reactive({
-  primary: props.user?.timezone ?? dj.tz.guess(),
+  primary: user.data.timezone ?? dj.tz.guess(),
   secondary: dj.tz.guess(),
 });
 const timezones = Intl.supportedValuesOf('timeZone');
-// load user defined timezone on page reload
-watch(
-  () => props.user,
-  (loadedUser) => {
-    activeTimezone.primary = loadedUser.timezone;
-  },
-);
 
 // save timezone config
 const updateTimezone = async () => {
-  const { error } = await call('me').put({ timezone: activeTimezone.primary }).json();
-  if (!error) {
+  const obj = {
+    username: user.data.username,
+    timezone: activeTimezone.primary,
+  };
+  console.log(obj)
+  const { error } = await call('me').put(obj).json();
+  if (!error.value) {
+    // update user in store
+    user.data.timezone = activeTimezone.primary;
     // TODO show some confirmation
   }
 };

@@ -39,7 +39,6 @@
       <schedule-creation
         v-if="schedulesReady"
         :calendars="calendars"
-        :user="user"
         :schedule="firstSchedule"
         :active-date="activeDate"
         @created="getFirstSchedule"
@@ -99,7 +98,6 @@ const refresh = inject('refresh');
 const props = defineProps({
   calendars: Array, // list of calendars from db
   appointments: Array, // list of appointments from db
-  user: Object, // currently logged in user, null if not logged in
 });
 
 // current selected date, if not in route: defaults to now

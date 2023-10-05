@@ -292,6 +292,7 @@
 import { locationTypes, scheduleCreationState } from "@/definitions";
 import { ref, reactive, computed, inject, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { useUserStore } from '@/stores/user-store';
 import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
 import PrimaryButton from "@/elements/PrimaryButton";
 import SecondaryButton from "@/elements/SecondaryButton";
@@ -303,6 +304,7 @@ import AlertBox from "@/elements/AlertBox";
 import SwitchToggle from "@/elements/SwitchToggle";
 
 // component constants
+const user = useUserStore();
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject("call");
@@ -315,7 +317,6 @@ const emit = defineEmits(["created", "updated"]);
 const props = defineProps({
   calendars: Array, // list of user defined calendars
   schedule: Object, // existing schedule to update or null
-  user: Object, // currently logged in user, null if not logged in
   activeDate: Object, // dayjs object indicating the currently active calendar view date
 });
 
@@ -370,11 +371,11 @@ onMounted(() => {
     // calculate utc back to user timezone
     scheduleInput.value.start_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`)
       .utc(true)
-      .tz(props.user.timezone ?? dj.tz.guess())
+      .tz(user.data.timezone ?? dj.tz.guess())
       .format("HH:mm");
     scheduleInput.value.end_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`)
       .utc(true)
-      .tz(props.user.timezone ?? dj.tz.guess())
+      .tz(user.data.timezone ?? dj.tz.guess())
       .format("HH:mm");
   } else {
     scheduleInput.value = { ...defaultSchedule };
@@ -464,11 +465,11 @@ const saveSchedule = async (withConfirmation = true) => {
   const obj = { ...scheduleInput.value };
   // convert local input times to utc times
   obj.start_time = dj(`${dj(obj.start_date).format("YYYY-MM-DD")}T${obj.start_time}:00`)
-    .tz(props.user.timezone ?? dj.tz.guess(), true)
+    .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
     .format("HH:mm");
   obj.end_time = dj(`${dj(obj.start_date).format("YYYY-MM-DD")}T${obj.end_time}:00`)
-    .tz(props.user.timezone ?? dj.tz.guess(), true)
+    .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
     .format("HH:mm");
   // remove unwanted properties

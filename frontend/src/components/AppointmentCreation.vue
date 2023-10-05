@@ -241,6 +241,7 @@
 import { locationTypes } from "@/definitions";
 import { ref, reactive, computed, inject, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useUserStore } from '@/stores/user-store';
 import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
 import CalendarMonth from "@/components/CalendarMonth";
 import PrimaryButton from "@/elements/PrimaryButton";
@@ -258,6 +259,7 @@ import {
 import AlertBox from "@/elements/AlertBox";
 
 // component constants
+const user = useUserStore();
 const { t } = useI18n();
 const dj = inject("dayjs");
 const call = inject("call");
@@ -270,7 +272,6 @@ const emit = defineEmits(["start", "next", "create", "cancel"]);
 const props = defineProps({
   status: Number, // dialog creation progress [hidden: 0, details: 1, availability: 2, finished: 3]
   calendars: Array, // list of user defined calendars
-  user: Object, // currently logged in user, null if not logged in
 });
 
 // calculate the current visible step by given status
@@ -313,7 +314,7 @@ const slotList = computed(() => {
       list.push({
         // save local time as UTC
         start: start
-          .tz(props.user.timezone ?? dj.tz.guess(), true)
+          .tz(user.data.timezone ?? dj.tz.guess(), true)
           .utc()
           .format("YYYY-MM-DDTHH:mm:ss"),
         // calculate duration as difference between start and end

@@ -144,7 +144,6 @@
     <!-- modals -->
     <booking-modal
       :open="showBooking"
-      :user="user"
       :event="activeEvent"
       :success="activeView === views.success"
       @book="bookEvent"
@@ -168,11 +167,6 @@ import CalendarMonth from '@/components/CalendarMonth';
 import CalendarPageHeading from '@/elements/CalendarPageHeading';
 import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
-
-// view properties
-const props = defineProps({
-  user: Object, // currently logged in user, null if not logged in
-});
 
 // component constants
 const { t } = useI18n();
