@@ -58,9 +58,9 @@ const props = defineProps({
 const pendingAppointments = computed(() => props.appointments.filter((a) => a.status === appointmentState.pending));
 
 // do log out
-const logout = () => {
+const logout = async () => {
   user.reset();
-  auth.logout({
+  await auth.logout({
     logoutParams: {
       returnTo: window.location.origin,
     },

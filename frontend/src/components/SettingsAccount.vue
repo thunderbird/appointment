@@ -299,6 +299,7 @@ const actuallyDeleteAccount = async () => {
   }
 
   if (auth0) {
+    user.reset();
     await auth0.logout({
       logoutParams: {
         returnTo: window.location.origin,

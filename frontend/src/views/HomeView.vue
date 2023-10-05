@@ -1,6 +1,6 @@
 <template>
   <div class="h-full p-4 flex-center flex-col gap-8 select-none">
-    TODO: Some great introduction visuals and text to make user click the sign up button.
+    <img class="w-full max-w-md" src="/appointment_logo.svg" alt="Appointment Logo" />
   </div>
 </template>
 

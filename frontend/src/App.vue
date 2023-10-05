@@ -1,6 +1,6 @@
 <template>
   <!-- authenticated subscriber content -->
-  <template v-if="currentUser">
+  <template v-if="isAuthenticated">
     <site-notification
       v-if="siteNotificationStore.display"
       :title="siteNotificationStore.title"
@@ -9,23 +9,23 @@
       {{ siteNotificationStore.message }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
-    <main class="mt-12 mx-4 lg:mx-8">
-      <div class="w-full max-w-[1740px] mx-auto">
-        <router-view
-          :calendars="calendars"
-          :appointments="appointments"
-        />
-      </div>
+    <main class="mx-4 pt-24 lg:mx-8 h-full">
+      <router-view
+        :calendars="calendars"
+        :appointments="appointments"
+      />
     </main>
   </template>
   <!-- for home page and booking page -->
   <template v-else-if="routeIsPublic">
     <title-bar />
-    <router-view />
+    <main class="mx-4 pt-24 lg:mx-8 h-full">
+      <router-view />
+    </main>
   </template>
   <template v-else>
     <!-- TODO: handle wrong route -->
-    test
+    A authentication or routing error occured.
   </template>
 </template>
 
@@ -51,6 +51,7 @@ const route = useRoute();
 
 // handle auth and fetch
 const auth = useAuth0();
+const isAuthenticated = computed(() => auth.isAuthenticated.value);
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
@@ -115,17 +116,14 @@ const appointments = ref([]);
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
-  () =>
-    route.name === "booking" ||
-    route.name === "availability" ||
-    (route.name === "home" && !auth.isAuthenticated.value)
+  () => ["booking", "availability", "home"].includes(route.name)
 );
 
 // check login state of current user first
 const checkLogin = async () => {
   console.log(auth.user.value, currentUser.data);
   if (auth.isAuthenticated.value) {
-    if (currentUser.data && currentUser.data.email === auth.user.value.email) {
+    if (currentUser.exists() && currentUser.data.email === auth.user.value.email) {
       // avoid calling the backend unnecessarily
       return;
     }
