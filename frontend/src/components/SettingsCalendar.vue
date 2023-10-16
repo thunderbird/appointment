@@ -144,8 +144,18 @@
           @click="resetInput"
         />
         <primary-button
+          v-if="!isGoogle"
           :label="inputMode === inputModes.add ? t('label.connectCalendar') : t('label.saveChanges')"
           class="text-sm"
+          @click="saveCalendar"
+        />
+        <!-- Google Button -->
+        <img
+          v-if="isGoogle"
+          class="h-[40px] cursor-pointer"
+          :alt="t('label.signInWithGoogle')"
+          :src="GoogleSignInBtn"
+          :srcset="`${GoogleSignInBtn2x} 2x`"
           @click="saveCalendar"
         />
       </div>
@@ -170,6 +180,8 @@ import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
 import CalendarManagement from '@/components/CalendarManagement.vue';
 import { calendarManagementType } from '@/definitions';
+import GoogleSignInBtn from '@/assets/img/google/1x/btn_google_signin_light_normal_web.png';
+import GoogleSignInBtn2x from '@/assets/img/google/2x/btn_google_signin_light_normal_web@2x.png';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
