@@ -7,7 +7,9 @@
     "actionNeeded": "Action Needed!",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "unknownAppointmentError": "There was an issue creating your appointment. Please try again.",
-    "usernameIsNotAvailable": "This username is not available."
+    "usernameIsNotAvailable": "This username is not available.",
+    "noConnectedCalendars": "You have not connected any calendars. Click {0} to get started.",
+    "noConnectedCalendarsLink": "here"
   },
   "heading": {
     "accountData": "Account data",
@@ -191,6 +193,11 @@
     "chooseDayTime": "Choose the day and time:",
     "defineDaysAndTimeSlots": "Define days and time slots to allow users to select the event time…",
     "disclaimerGABooking": "Disclaimer: any GA booking done has to be confirmed by the owner of the GA",
+    "homepageGreetingIntro": "Thunderbird Appointment is a user-first appointment scheduling service brought to you by the fine folks over at {0}.",
+    "homepageGreetingIntroLink": "Thunderbird",
+    "homepageGreetingUnauthenticated": "Thunderbird Appointment is now in closed beta testing. If you are part of the closed beta testing, you can login at the top.",
+    "homepageGreetingAuthenticated": "Thank you for participating in the Thunderbird Appointment closed beta testing. To get started {0}.",
+    "homepageGreetingAuthenticatedLink": "connect a calendar",
     "invitationSentToAddress": "An invitation for this event has been emailed to you at {address}",
     "nameIsInvitingYou": "{name} is inviting you to choose a date",
     "recipientsCanScheduleBetween": "Recipients can schedule an appointment between {earliest} and {farthest} ahead of time. ",
