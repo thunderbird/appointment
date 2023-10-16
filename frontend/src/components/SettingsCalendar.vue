@@ -90,6 +90,21 @@
         &mdash;
         {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
+      <div v-if="isGoogle" class="mb-4">
+        <p class="text-lg mb-2">{{ t('text.googlePermissionDisclaimer') }}</p>
+        <ul class="ml-8 mr-8 text-md list-disc">
+          <li>
+            <strong>
+              {{ t('text.googlePermissionEventsName') }}
+            </strong> - {{ t('text.googlePermissionEventReason') }}
+          </li>
+          <li>
+            <strong>
+              {{ t('text.googlePermissionCalendarName') }}
+            </strong> - {{ t('text.googlePermissionCalendarReason') }}
+          </li>
+        </ul>
+      </div>
       <label v-if="isCalDav || inputMode === inputModes.edit" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
         <input
@@ -121,9 +136,9 @@
       <label class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">
           <span v-if="isCalDav">{{ t('label.username') }}</span>
-          <span v-if="isGoogle">{{ t('label.email') }}</span>
         </div>
         <input
+          v-if="!isGoogle"
           v-model="calendarInput.data.user"
           type="text"
           class="w-full max-w-sm rounded-md w-full"
