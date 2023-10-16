@@ -6,7 +6,7 @@
         {{ $t('text.homepageGreetingIntroLink') }}
       </a>
     </i18n-t>
-    <p v-if="!isAuthenticated">{{ t('text.homepageGreetingUnauthenticated') }}</p>
+    <p v-if="!isAuthenticated">{{ $t('text.homepageGreetingUnauthenticated') }}</p>
     <i18n-t
       v-if="isAuthenticated"
       keypath="text.homepageGreetingAuthenticated"
