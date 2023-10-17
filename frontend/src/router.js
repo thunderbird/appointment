@@ -1,5 +1,5 @@
-import { authGuard } from "@auth0/auth0-vue";
-import { createRouter, createWebHistory } from "vue-router";
+import {authGuard} from "@auth0/auth0-vue";
+import {createRouter, createWebHistory} from "vue-router";
 import BookingView from "@/views/BookingView.vue";
 import CalendarView from "@/views/CalendarView.vue";
 import ScheduleView from "@/views/ScheduleView.vue";
@@ -30,7 +30,7 @@ const routes = [
   },
   {
     path: "/calendar",
-    redirect: { name: "calendar" },
+    redirect: {name: "calendar"},
   },
   {
     path: "/calendar/:view?/:date?",
@@ -60,6 +60,16 @@ const routes = [
       import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
     beforeEnter: authGuard,
   },
+  {
+    path: "/privacy",
+    name: "privacy",
+    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/privacy/websites/' }
+  },
+  {
+    path: "/terms",
+    name: "terms",
+    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/about/legal/terms/mozilla/' }
+  }
 ];
 
 // create router object to export

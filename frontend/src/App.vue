@@ -9,23 +9,25 @@
       {{ siteNotificationStore.message }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
-    <main class="mx-4 pt-24 lg:mx-8 h-full">
+    <main class="mx-4 pt-24 lg:mx-8 min-h-full">
       <router-view
         :calendars="calendars"
         :appointments="appointments"
       />
     </main>
+    <footer-bar />
   </template>
   <!-- for home page and booking page -->
   <template v-else-if="routeIsPublic">
     <title-bar />
-    <main class="mx-4 pt-24 lg:mx-8 h-full">
+    <main class="mx-4 pt-24 lg:mx-8 min-h-full">
       <router-view />
     </main>
+    <footer-bar />
   </template>
   <template v-else>
     <!-- TODO: handle wrong route -->
-    A authentication or routing error occured.
+    A authentication or routing error occurred.
   </template>
 </template>
 
@@ -42,6 +44,7 @@ import { siteNotificationStore } from "@/stores/alert-store";
 
 // stores
 import { useUserStore } from '@/stores/user-store';
+import FooterBar from "@/components/FooterBar.vue";
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }

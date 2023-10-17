@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { IconX } from '@tabler/icons-vue';
 
 const props = defineProps({
