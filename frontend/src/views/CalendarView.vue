@@ -1,4 +1,11 @@
 <template>
+  <div class="flex flex-col lg:flex-row w-full m-8 mt-0 justify-center">
+    <alert-box title="Calendar Setup" scheme="alert" v-if="calendars.length === 0 && !hideUntilRefreshed">
+      <i18n-t keypath="error.noConnectedCalendars" tag="label" for="error.noConnectedCalendars">
+        <a class="underline" href="/settings/calendar" target="_blank">{{ t('error.noConnectedCalendarsLink') }}</a>
+      </i18n-t>
+    </alert-box>
+  </div>
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
     <calendar-page-heading
@@ -121,7 +128,7 @@
 
 <script setup>
 import { appointmentCreationState, calendarViews, appointmentState } from '@/definitions';
-import { ref, inject, computed, watch, onMounted } from 'vue';
+import {ref, inject, computed, watch, onMounted, reactive} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentCreation from '@/components/AppointmentCreation';
@@ -132,6 +139,7 @@ import CalendarPageHeading from '@/elements/CalendarPageHeading';
 import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
 import TabBar from '@/components/TabBar';
+import AlertBox from "@/elements/AlertBox.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -204,6 +212,9 @@ const pendingAppointments = computed(() => props.appointments?.filter((a) => a.s
 // get remote calendar data for current year
 const calendarEvents = ref([]);
 
+// Hides a "No calendars" message until we've called refresh()
+const hideUntilRefreshed = ref(true);
+
 const getRemoteEvents = async (from, to) => {
   calendarEvents.value = [];
   await Promise.all(props.calendars.map(async (calendar) => {
@@ -220,6 +231,8 @@ onMounted(async () => {
   const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
   const eventsTo = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);
+  // Okay, if we still have no calendars, show the ugly message
+  hideUntilRefreshed.value = false;
 });
 
 // react to user calendar navigation

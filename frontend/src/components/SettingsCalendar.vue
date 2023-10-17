@@ -90,6 +90,21 @@
         &mdash;
         {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
+      <div v-if="isGoogle" class="mb-4">
+        <p class="text-lg mb-2">{{ t('text.googlePermissionDisclaimer') }}</p>
+        <ul class="ml-8 mr-8 text-md list-disc">
+          <li>
+            <strong>
+              {{ t('text.googlePermissionEventsName') }}
+            </strong> - {{ t('text.googlePermissionEventReason') }}
+          </li>
+          <li>
+            <strong>
+              {{ t('text.googlePermissionCalendarName') }}
+            </strong> - {{ t('text.googlePermissionCalendarReason') }}
+          </li>
+        </ul>
+      </div>
       <label v-if="isCalDav || inputMode === inputModes.edit" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
         <input
@@ -121,9 +136,9 @@
       <label class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">
           <span v-if="isCalDav">{{ t('label.username') }}</span>
-          <span v-if="isGoogle">{{ t('label.email') }}</span>
         </div>
         <input
+          v-if="!isGoogle"
           v-model="calendarInput.data.user"
           type="text"
           class="w-full max-w-sm rounded-md w-full"
@@ -144,8 +159,18 @@
           @click="resetInput"
         />
         <primary-button
+          v-if="!isGoogle"
           :label="inputMode === inputModes.add ? t('label.connectCalendar') : t('label.saveChanges')"
           class="text-sm"
+          @click="saveCalendar"
+        />
+        <!-- Google Button -->
+        <img
+          v-if="isGoogle"
+          class="h-[40px] cursor-pointer"
+          :alt="t('label.signInWithGoogle')"
+          :src="GoogleSignInBtn"
+          :srcset="`${GoogleSignInBtn2x} 2x`"
           @click="saveCalendar"
         />
       </div>
@@ -170,6 +195,8 @@ import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
 import CalendarManagement from '@/components/CalendarManagement.vue';
 import { calendarManagementType } from '@/definitions';
+import GoogleSignInBtn from '@/assets/img/google/1x/btn_google_signin_light_normal_web.png';
+import GoogleSignInBtn2x from '@/assets/img/google/2x/btn_google_signin_light_normal_web@2x.png';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
