@@ -2,7 +2,7 @@
   <!-- authenticated subscriber content -->
   <template v-if="isAuthenticated">
     <site-notification
-      v-if="siteNotificationStore.display"
+      v-if="siteNotificationStore.isVisible"
       :title="siteNotificationStore.title"
       :action-url="siteNotificationStore.actionUrl"
     >
@@ -40,7 +40,7 @@ import { useRoute } from "vue-router";
 import NavBar from "@/components/NavBar";
 import TitleBar from "@/components/TitleBar";
 import SiteNotification from "@/elements/SiteNotification";
-import { siteNotificationStore } from "@/stores/alert-store";
+import { useSiteNotificationStore } from "@/stores/alert-store";
 
 // stores
 import { useUserStore } from '@/stores/user-store';
@@ -51,6 +51,7 @@ const currentUser = useUserStore(); // data: { username, email, name, level, tim
 const apiUrl = inject("apiUrl");
 const dj = inject("dayjs");
 const route = useRoute();
+const siteNotificationStore = useSiteNotificationStore();
 
 // handle auth and fetch
 const auth = useAuth0();
@@ -74,24 +75,23 @@ const call = createFetch({
     async onFetchError({ data, response, error }) {
       // Catch any google refresh error that may occur
       if (
-        data?.detail?.error === "google_refresh_error" &&
-        siteNotificationStore.value.id !== "google_refresh_error"
+        data?.detail?.error === 'google_refresh_error' &&
+        !siteNotificationStore.isSameNotification('google_refresh_error')
       ) {
         // Ensure other async calls don't reach here
-        siteNotificationStore.value.id = data.detail.error;
+        siteNotificationStore.lock(data.detail.error);
 
         // Retrieve the google auth url, and if that fails send them to calendar settings!
         const { data: urlData, error: urlError } = await call('google/auth').get();
         const url = urlError.value ? '/settings/calendar' : urlData.value.slice(1, -1);
 
         // Update our site notification store with the error details
-        siteNotificationStore.value = {
-          id: data.detail.error,
-          display: true,
-          actionUrl: url,
-          title: "Action needed!",
-          message: data.detail?.message || "Please re-connect with Google",
-        };
+        siteNotificationStore.show(
+          data.detail.error,
+          'Action needed!',
+          data.detail?.message || 'Please re-connect with Google',
+          url,
+        );
       }
 
       // Pass the error along
