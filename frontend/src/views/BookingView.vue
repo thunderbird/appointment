@@ -82,16 +82,11 @@
     >
       <div v-if="appointment">
         <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
-        <div class="flex justify-between font-semibold">
-          <div>
-            {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
-          </div>
-          <div v-if="isAvailabilityRoute">
-            {{ t('text.disclaimerGABooking') }}
-          </div>
+        <div class="font-semibold">
+          {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
         </div>
         <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
-        <div class="text-xl mb-6">{{ t('text.chooseDayTime') }}</div>
+        <div class="text-xl mb-6">{{ t('text.chooseDateAndTime') }}</div>
         <calendar-page-heading
           :nav="showNavigation && activeView == views.month"
           :month="activeDate.format('MMMM')"

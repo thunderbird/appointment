@@ -2,7 +2,7 @@
   <a :href="actionUrl">
     <div
       class="
-        fixed left-1/2 -translate-x-1/2 my-2.5 p-2 leading-none lg:rounded-full
+        z-[999] fixed left-1/2 -translate-x-1/2 my-2.5 p-2 leading-none lg:rounded-full
         flex lg:inline-flex items-center shadow-md dark:shadow-lg
         bg-rose-600 dark:bg-rose-900 text-white shadow-black/30"
       role="alert"
