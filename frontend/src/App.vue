@@ -9,7 +9,7 @@
       {{ siteNotificationStore.message }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
-    <main class="mx-4 pt-24 lg:mx-8 min-h-full">
+    <main class="mx-4 pt-24 lg:mx-8 min-h-full pb-24">
       <router-view
         :calendars="calendars"
         :appointments="appointments"
@@ -20,7 +20,7 @@
   <!-- for home page and booking page -->
   <template v-else-if="routeIsPublic">
     <title-bar />
-    <main class="mx-4 pt-24 lg:mx-8 min-h-full">
+    <main class="mx-4 pt-24 lg:mx-8 min-h-full pb-24">
       <router-view />
     </main>
     <footer-bar />
@@ -124,10 +124,13 @@ const routeIsPublic = computed(
 
 // check login state of current user first
 const checkLogin = async () => {
-  console.log(auth.user.value, currentUser.data);
   if (auth.isAuthenticated.value) {
     if (currentUser.exists() && currentUser.data.email === auth.user.value.email) {
       // avoid calling the backend unnecessarily
+      // TODO: There seems to be an issue with different session durations.
+      //       Somehow the frontend `auth` is still valid, but the backend
+      //       403s calls to the API. Might be Auth0. Check again,
+      //       as soon as Auth0 got replaced by Mozilla accounts.
       return;
     }
     // call backend to create user if they do not exist in database

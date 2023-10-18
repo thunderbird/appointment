@@ -193,7 +193,7 @@
     "accountDeletionWarning": "Warning, deleting your account is permanent! You will lose all saved data on Thunderbird Appointment. Your calendars will remain unchanged. There is a second confirmation after you login.",
     "chooseDayTime": "Choose the day and time:",
     "defineDaysAndTimeSlots": "Define days and time slots to allow users to select the event time…",
-    "disclaimerGABooking": "Disclaimer: any GA booking done has to be confirmed by the owner of the GA",
+    "disclaimerGABooking": "Please note: The calendar owner will confirm your booking.",
     "googlePermissionCalendarName": "See and download any calendar you can access using your Google Calendar",
     "googlePermissionCalendarReason": "Thunderbird Appointment requires this permission in order to display a list of calendars that you can connect with.",
     "googlePermissionDisclaimer": "Thunderbird Appointment requires the following permissions from Google Calendar in order to function correctly",

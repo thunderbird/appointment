@@ -158,10 +158,7 @@ const getRemoteEvents = async (from, to) => {
 
 // user configured schedules from db (only the first for now, later multiple schedules will be available)
 const schedules = ref([]);
-const firstSchedule = computed(() => schedules.value.length > 0
-  ? schedules.value[0]
-  : null
-);
+const firstSchedule = computed(() => schedules.value?.length > 0 ? schedules.value[0] : null );
 const schedulesReady = ref(false);
 const getFirstSchedule = async () => {
   calendarEvents.value = [];
