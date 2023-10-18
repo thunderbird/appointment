@@ -193,7 +193,7 @@
     "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben unverändert. Bestätige die Löschung mit deinen Login-Daten.",
     "chooseDayTime": "Wähle eine Zeit an einem Tag aus:",
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
-    "disclaimerGABooking": "Jede GV-Buchung muss vom Eigentümer der GV bestätigt werden.",
+    "disclaimerGABooking": "Bitte beachten: Der Eigentümer muss die Buchung bestätigen.",
     "googlePermissionCalendarName": "Anzeigen und Herunterladen aller Kalender des Google-Kontos",
     "googlePermissionCalendarReason": "Thunderbird Appointment benötigt diese Berechtigung, um eine Liste von Kalendern anzuzeigen, die verbunden werden können.",
     "googlePermissionDisclaimer": "Thunderbird Appointment benötigt die folgenden Berechtigungen von Google, um korrekt zu funktionieren",
