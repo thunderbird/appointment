@@ -5,16 +5,25 @@
     <alert-box title="Calendar Connect Error" v-if="calendarConnectError">{{calendarConnectError}}</alert-box>
 
     <!-- list of possible calendars to connect -->
-    <CalendarManagement
-        :title="t('heading.calendarsUnconnected')" :type="calendarManagementType.connect" :calendars="calendars"
-        :loading="loading" @sync="syncCalendars" @modify="connectCalendar"
-    ></CalendarManagement>
+    <calendar-management
+      :title="t('heading.calendarsUnconnected')"
+      :type="calendarManagementType.connect"
+      :calendars="calendars"
+      :loading="loading"
+      @sync="syncCalendars"
+      @modify="connectCalendar"
+    />
 
     <!-- list of calendar connections -->
-    <CalendarManagement
-        :title="t('heading.calendarsConnected')" :type="calendarManagementType.edit" :calendars="calendars"
-        :loading="loading" @remove="deleteCalendar" @modify="editCalendar">
-    </CalendarManagement>
+    <calendar-management
+      :title="t('heading.calendarsConnected')"
+      :type="calendarManagementType.edit"
+      :calendars="calendars"
+      :loading="loading"
+      @remove="deleteCalendar"
+      @modify="editCalendar"
+    />
+
     <div class="flex gap-4">
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.google') })"
@@ -180,23 +189,17 @@
 </template>
 
 <script setup>
-import {
-  ref, reactive, inject, onMounted, computed,
-} from 'vue';
+import { calendarManagementType } from '@/definitions';
+import { IconArrowRight } from '@tabler/icons-vue';
+import { ref, reactive, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import SecondaryButton from '@/elements/SecondaryButton';
-import PrimaryButton from '@/elements/PrimaryButton';
-
-// icons
-import {
-  IconArrowRight,
-} from '@tabler/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
 import CalendarManagement from '@/components/CalendarManagement.vue';
-import { calendarManagementType } from '@/definitions';
 import GoogleSignInBtn from '@/assets/img/google/1x/btn_google_signin_light_normal_web.png';
 import GoogleSignInBtn2x from '@/assets/img/google/2x/btn_google_signin_light_normal_web@2x.png';
+import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });

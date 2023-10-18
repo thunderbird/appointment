@@ -20,6 +20,9 @@ module.exports = {
         102: "1.02",
         98: "0.98",
       },
+      strokeWidth: {
+        3: "3",
+      }
     },
   },
   darkMode: "class",

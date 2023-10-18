@@ -21,7 +21,12 @@
       v-if="copy && copied"
       class="h-6 w-6 stroke-2 stroke-current fill-transparent"
     />
-    {{ label }}
+    <template v-if="label">
+      {{ label }}
+    </template>
+    <template v-else>
+      <slot></slot>
+    </template>
   </button>
 </template>
 

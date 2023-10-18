@@ -17,7 +17,9 @@ from ..controller.mailer import Attachment, InvitationMail
 
 
 class GoogleConnector:
-    """Generic interface for Google Calendar REST API. This should match CaldavConnector (except for the constructor)"""
+    """Generic interface for Google Calendar REST API.
+       This should match CaldavConnector (except for the constructor).
+    """
 
     def __init__(
         self,
@@ -33,11 +35,13 @@ class GoogleConnector:
         self.provider = CalendarProvider.google
         self.calendar_id = calendar_id
         self.subscriber_id = subscriber_id
-        # Create the creds class from our token (this requires a refresh token!!)
-        self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
+        self.google_token = None
+        # Create the creds class from our token (requires a refresh token)
+        if google_tkn:
+            self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
 
     def sync_calendars(self):
-        """Sync our google calendars"""
+        """Sync google calendars"""
 
         # We only support google right now!
         self.google_client.sync_calendars(db=self.db, subscriber_id=self.subscriber_id, token=self.google_token)
