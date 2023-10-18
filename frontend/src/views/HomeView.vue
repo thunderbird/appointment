@@ -1,18 +1,22 @@
 <template>
-  <div class="h-full p-4 flex-center flex-col gap-8">
+  <div class="h-full p-4 flex-center flex-col gap-12">
     <img class="w-full max-w-md" src="/appointment_logo.svg" alt="Appointment Logo" />
-    {{ $t('text.homepageGreetingIntro') }}
-    <p v-if="!isAuthenticated">{{ $t('text.homepageGreetingUnauthenticated') }}</p>
-    <i18n-t
-      v-if="isAuthenticated"
-      keypath="text.homepageGreetingAuthenticated"
-      tag="label"
-      for="text.homepageGreetingAuthenticatedLink"
-    >
-      <a class="underline" href="/settings/calendar">
-        {{ $t('text.homepageGreetingAuthenticatedLink') }}
-      </a>
-    </i18n-t>
+    <h2 class="text-2xl pt-6">
+      {{ $t('text.homepageGreetingIntro') }}
+    </h2>
+    <div class="max-w-lg text-center">
+      <p v-if="!isAuthenticated">{{ $t('text.homepageGreetingUnauthenticated') }}</p>
+      <i18n-t
+        v-if="isAuthenticated"
+        keypath="text.homepageGreetingAuthenticated"
+        tag="label"
+        for="text.homepageGreetingAuthenticatedLink"
+      >
+        <a class="underline" href="/settings/calendar">
+          {{ $t('text.homepageGreetingAuthenticatedLink') }}
+        </a>
+      </i18n-t>
+    </div>
   </div>
 
 </template>
