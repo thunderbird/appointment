@@ -4,6 +4,7 @@ import logging
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.google_client import GoogleClient
+from ..controller.mailer import ConfirmationMail
 from ..database import repo, schemas
 from ..database.models import Subscriber, Schedule, CalendarProvider
 from ..dependencies.auth import get_subscriber
@@ -127,14 +128,13 @@ def read_schedule_availabilities(
     )
 
 
-@router.put("/public/availability", response_model=schemas.AvailabilitySlotAttendee)
-def update_schedule_availability_slot(
+@router.put("/public/availability/request")
+def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
     url: str = Body(..., embed=True),
     db: Session = Depends(get_db),
-    google_client: GoogleClient = Depends(get_google_client),
 ):
-    """endpoint to update a time slot for a schedule via public link and create an event in remote calendar"""
+    """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
         raise HTTPException(status_code=401, detail="Invalid profile link")
@@ -150,10 +150,51 @@ def update_schedule_availability_slot(
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
+    # TODO: check if slot still available, might already be taken at this time
+    # TODO: create slot in db with token and expiration date
+    # TODO: create attendee for this slot
+    # TODO: generate confirm and deny links with encoded booking token and owner url
+    # send confirmation mail to owner
+    mail = ConfirmationMail(sender=subscriber.email, to=subscriber.email, attachments=[])
+    mail.send()
+    return True
+
+
+@router.get("/public/availability/booking")
+def request_schedule_availability_slot(
+    s: int, # slot id
+    t: str, # booking token
+    u: str, # owner url
+    c: int, # confirmation, 1 for yes, 0 for no
+    db: Session = Depends(get_db),
+    google_client: GoogleClient = Depends(get_google_client),
+):
+    """endpoint to react to owners decision to a request of a time slot of his public link
+       if confirmed: create an event in remote calendar and send invitation mail
+       TODO: if denied: send information mail to bookee
+    """
+    subscriber = repo.verify_subscriber_link(db, url)
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="Invalid profile link")
+    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    try:
+        schedule = schedules[0]  # for now we only process the first existing schedule
+    except IndexError:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # check if schedule is enabled
+    if not schedule.active:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # get calendar
+    db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    if db_calendar is None:
+        raise HTTPException(status_code=404, detail="Calendar not found")
+    # TODO: check if confirmation = 0, send information to bookee, return false
+    # TODO: get slot
+    # TODO: check if slot exists and token is the same
     event = schemas.Event(
         title=schedule.name,
-        start=s_a.slot.start.isoformat(),
-        end=(s_a.slot.start + timedelta(minutes=s_a.slot.duration)).isoformat(),
+        start=slot.start.isoformat(),
+        end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
         description=schedule.details,
         location=schemas.EventLocation(
             type=schedule.location_type,
@@ -172,13 +213,14 @@ def update_schedule_availability_slot(
         )
     else:
         con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-    con.create_event(event=event, attendee=s_a.attendee, organizer=subscriber)
+    # TODO: get attendee
+    con.create_event(event=event, attendee=attendee, organizer=subscriber)
 
     # send mail with .ics attachment to attendee
     appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
-    Tools().send_vevent(appointment, s_a.slot, subscriber, s_a.attendee)
+    Tools().send_vevent(appointment, slot, subscriber, attendee)
 
-    return s_a
+    return True
 
 
 @router.put("/serve/ics", response_model=schemas.FileDownload)

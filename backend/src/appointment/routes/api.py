@@ -181,7 +181,7 @@ def update_my_calendar(
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.post("/cal/{id}/connect")
+@router.post("/cal/{id}/connect", response_model=schemas.CalendarOut)
 def connect_my_calendar(
     id: int,
     db: Session = Depends(get_db),

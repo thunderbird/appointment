@@ -10,6 +10,7 @@ import ssl
 import jinja2
 import validators
 
+from datetime import datetime
 from html import escape
 from email import encoders
 from email.mime.base import MIMEBase
@@ -51,7 +52,7 @@ class Mailer:
         self.attachments = attachments
 
     def html(self):
-        """provide email body as html"""
+        """provide email body as html per default"""
         return self.body_html
 
     def text(self):
@@ -136,3 +137,27 @@ class InvitationMail(Mailer):
 
     def html(self):
         return get_template("invite.jinja2").render()
+
+
+class ConfirmationMail(Mailer):
+    def __init__(self, *args, **kwargs):
+        """init Mailer with confirmation specific defaults"""
+        self.confirmLink = 'https://test.org/confirm'
+        self.denyLink = 'https://test.org/deny'
+        defaultKwargs = {
+            "subject": "[TBA] Confirm booking from Thunderbird Appointment",
+            "plain": """
+{name} just booked this time slot from your schedule: {date}
+Confirm the booking: {confirm}
+Or deny it: {deny}.
+                """.format(name='Test Attendee', date=datetime.utcnow(), confirm=self.confirmLink, deny=self.denyLink),
+        }
+        super(ConfirmationMail, self).__init__(*args, **defaultKwargs, **kwargs)
+
+    def html(self):
+        return get_template("confirm.jinja2").render(
+            name='Test Attendee',
+            date=datetime.utcnow(),
+            confirm=self.confirmLink,
+            deny=self.denyLink
+        )

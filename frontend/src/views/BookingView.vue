@@ -307,7 +307,7 @@ const bookEvent = async (attendeeData) => {
       },
       attendee: attendeeData,
     };
-    const { error } = await call('schedule/public/availability').put({ s_a: obj, url: window.location.href }).json();
+    const { error } = await call('schedule/public/availability/request').put({ s_a: obj, url: window.location.href }).json();
     if (error.value) {
       return true;
     }
