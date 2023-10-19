@@ -115,6 +115,7 @@ erDiagram
     date time_updated "UTC timestamp of last schedule modification"
   }
   SCHEDULES ||--|{ AVAILABILITIES : hold_custom
+  SCHEDULES ||--|{ SLOTS : provide_on_request
   AVAILABILITIES {
     int id PK "Unique availability key"
     int schedule_id FK "Schedule this availability is for"
@@ -126,15 +127,18 @@ erDiagram
     date time_created "UTC timestamp of schedule creation"
     date time_updated "UTC timestamp of last schedule modification"
   }
-  APPOINTMENTS ||--|{ SLOTS : provide
+  APPOINTMENTS ||--|{ SLOTS : provide_manual_selected
   SLOTS {
     int id PK "Unique key of available time slot"
     int appointment_id FK "Appointment this slot was provided for"
+    int schedule_id FK "Schedule this slot was requested for"
     int attendee_id FK "Attendee who selected this slot"
     int subscriber_id FK "Subscriber who chose this slot"
     date time_updated "UTC timestamp of last slot modification"
     date start "UTC timestamp of slot starting time"
     int duration "Custom slot duration, number of minutes [10-600]"
+    string booking_tkn "Temp storage for verifying booking slot"
+    date booking_expires_at "Booking expiration date"
   }
   SUBSCRIBERS ||--o{ SLOTS : choose
   ATTENDEES ||--o{ SLOTS : select
