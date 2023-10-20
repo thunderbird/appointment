@@ -1,16 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 import logging
+import os
 
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.google_client import GoogleClient
 from ..controller.mailer import ConfirmationMail
 from ..database import repo, schemas
-from ..database.models import Subscriber, Schedule, CalendarProvider
+from ..database.models import Subscriber, Schedule, CalendarProvider, random_slug
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.google import get_google_client
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+from urllib.parse import quote_plus
 
 router = APIRouter()
 
@@ -96,27 +99,10 @@ def read_schedule_availabilities(
     # calculate theoretically possible slots from schedule config
     availableSlots = Tools.available_slots_from_schedule(schedule)
     # get all events from all connected calendars in scheduled date range
-    existingEvents = []
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
     if not calendars or len(calendars) == 0:
         raise HTTPException(status_code=404, detail="No calendars found")
-    for calendar in calendars:
-        if calendar is None:
-            raise HTTPException(status_code=404, detail="Calendar not found")
-        if calendar.provider == CalendarProvider.google:
-            con = GoogleConnector(
-                db=db,
-                google_client=google_client,
-                calendar_id=calendar.user,
-                subscriber_id=subscriber.id,
-                google_tkn=subscriber.google_tkn,
-            )
-        else:
-            con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-        farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
-        start = schedule.start_date.strftime("%Y-%m-%d")
-        end = schedule.end_date.strftime("%Y-%m-%d") if schedule.end_date else farthest_end.strftime("%Y-%m-%d")
-        existingEvents.extend(con.list_events(start, end))
+    existingEvents = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
     actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
     if not actualSlots or len(actualSlots) == 0:
         raise HTTPException(status_code=404, detail="No possible booking slots found")
@@ -151,11 +137,29 @@ def request_schedule_availability_slot(
     if db_calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
     # TODO: check if slot still available, might already be taken at this time
-    # TODO: create slot in db with token and expiration date
-    # TODO: create attendee for this slot
-    # TODO: generate confirm and deny links with encoded booking token and owner url
+    # create slot in db with token and expiration date
+    token = random_slug()
+    slot = schemas.SlotBase(**s_a.slot.dict())
+    slot.booking_tkn = token
+    slot.booking_expires_at = datetime.now() + timedelta(days=1)
+    slot = repo.add_schedule_slot(db, slot, schedule.id)
+    # create attendee for this slot
+    attendee = repo.update_slot(db, slot.id, s_a.attendee)
+    # generate confirm and deny links with encoded booking token and owner url
+    signed_url = quote_plus(f"{os.getenv('FRONTEND_URL')}/user/{subscriber.username}/{subscriber.short_link_hash}")
+    url = f"{signed_url}/confirm/{slot.id}/{token}"
+    # human readable date in subscribers timezone
+    # TODO: handle locale date representation
+    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
     # send confirmation mail to owner
-    mail = ConfirmationMail(sender=subscriber.email, to=subscriber.email, attachments=[])
+    mail = ConfirmationMail(
+        f"{url}/1",
+        f"{url}/0",
+        attendee,
+        f"{date}, {slot.duration} minutes",
+        sender=f"noreply@{os.getenv('SMTP_URL')}",
+        to=subscriber.email
+    )
     mail.send()
     return True
 
@@ -173,7 +177,7 @@ def request_schedule_availability_slot(
        if confirmed: create an event in remote calendar and send invitation mail
        TODO: if denied: send information mail to bookee
     """
-    subscriber = repo.verify_subscriber_link(db, url)
+    subscriber = repo.verify_subscriber_link(db, u)
     if not subscriber:
         raise HTTPException(status_code=401, detail="Invalid profile link")
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
@@ -188,9 +192,10 @@ def request_schedule_availability_slot(
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
-    # TODO: check if confirmation = 0, send information to bookee, return false
+    # TODO: check if confirmation = 0, send information to bookee, delete slot, return false
     # TODO: get slot
     # TODO: check if slot exists and token is the same
+    # TODO: check booking expiration date
     event = schemas.Event(
         title=schedule.name,
         start=slot.start.isoformat(),

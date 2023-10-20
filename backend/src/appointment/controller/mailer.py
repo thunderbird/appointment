@@ -37,14 +37,14 @@ class Attachment:
 class Mailer:
     def __init__(
         self,
-        sender: str,
         to: str,
+        sender: str = os.getenv("SMTP_SENDER"),
         subject: str = "",
         html: str = "",
         plain: str = "",
-        attachments: list = [Attachment],
+        attachments: list[Attachment] = [],
     ):
-        self.sender = os.getenv("SMTP_SENDER") or sender
+        self.sender = sender
         self.to = to
         self.subject = subject
         self.body_html = html
@@ -131,7 +131,7 @@ class InvitationMail(Mailer):
         """init Mailer with invitation specific defaults"""
         defaultKwargs = {
             "subject": "[TBA] Invitation sent from Thunderbird Appointment",
-            "plain": "This message is sent from Appointment.",
+            "plain": "This message is sent from Thunderbird Appointment.",
         }
         super(InvitationMail, self).__init__(*args, **defaultKwargs, **kwargs)
 
@@ -140,24 +140,38 @@ class InvitationMail(Mailer):
 
 
 class ConfirmationMail(Mailer):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, confirmUrl, denyUrl, attendee, date, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
-        self.confirmLink = 'https://test.org/confirm'
-        self.denyLink = 'https://test.org/deny'
+        self.attendee = attendee
+        self.date = date
+        self.confirmUrl = confirmUrl
+        self.denyUrl = denyUrl
         defaultKwargs = {
-            "subject": "[TBA] Confirm booking from Thunderbird Appointment",
+            "subject": "[TBA] Confirm booking request from Thunderbird Appointment",
             "plain": """
-{name} just booked this time slot from your schedule: {date}
-Confirm the booking: {confirm}
-Or deny it: {deny}.
-                """.format(name='Test Attendee', date=datetime.utcnow(), confirm=self.confirmLink, deny=self.denyLink),
+{name} ({email}) just requested this time slot from your schedule: {date}
+
+Visit this link to confirm the booking request:
+{confirm}
+
+Or this link if you want to deny it:
+{deny}
+
+This message is sent from Thunderbird Appointment.
+            """.format(
+                    name=self.attendee.name,
+                    email=self.attendee.email,
+                    date=self.date,
+                    confirm=self.confirmUrl,
+                    deny=self.denyUrl
+                ),
         }
         super(ConfirmationMail, self).__init__(*args, **defaultKwargs, **kwargs)
 
     def html(self):
         return get_template("confirm.jinja2").render(
-            name='Test Attendee',
-            date=datetime.utcnow(),
-            confirm=self.confirmLink,
-            deny=self.denyLink
+            attendee=self.attendee,
+            date=self.date,
+            confirm=self.confirmUrl,
+            deny=self.denyUrl,
         )

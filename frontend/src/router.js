@@ -22,6 +22,11 @@ const routes = [
     name: "availability",
     component: BookingView,
   },
+  // {
+  //   path: "/user/:username/:signature/confirm/:slot/:token/:confirmed",
+  //   name: "confirmation",
+  //   component: BookingConfirmationView,
+  // },
   {
     path: "/schedule",
     name: "schedule",
@@ -42,22 +47,19 @@ const routes = [
   {
     path: "/appointments/:view?",
     name: "appointments",
-    component: () =>
-      import(/* webpackChunkName: "appointments" */ "@/views/AppointmentsView"),
+    component: () => import(/* webpackChunkName: "appointments" */ "@/views/AppointmentsView"),
     beforeEnter: authGuard,
   },
   {
     path: "/settings/:view?",
     name: "settings",
-    component: () =>
-      import(/* webpackChunkName: "settings" */ "@/views/SettingsView"),
+    component: () => import(/* webpackChunkName: "settings" */ "@/views/SettingsView"),
     beforeEnter: authGuard,
   },
   {
     path: "/profile",
     name: "profile",
-    component: () =>
-      import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
+    component: () => import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
     beforeEnter: authGuard,
   },
   {

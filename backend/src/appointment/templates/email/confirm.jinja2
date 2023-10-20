@@ -1,7 +1,38 @@
 <html lang="en">
   <body>
-    <p>{{ name }} just booked this time slot from your schedule: {{ date }}.</p>
-    <p>Confirm the booking: {{ confirm }}.</p>
-    <p>Or deny it: {{ deny }}.</p>
+    <p>
+      {{ attendee.name|title }} ({{ attendee.email }}) just requested this time slot from your schedule: {{ date }}.
+    </p>
+    <p>
+      Click here to confirm the booking request:<br>
+      <a
+        href="{{ confirm }}"
+        style="
+          display:inline-block;
+          padding:.5rem 1rem;
+          color:white;
+          background:#0e757f;
+          border-radius:6px;
+          text-decoration:none;
+        "
+      >Confirm Booking</a>
+    </p>
+    <p>
+      Or here if you want to deny it:<br>
+      <a
+        href="{{ deny }}"
+        style="
+          display:inline-block;
+          padding:.5rem 1rem;
+          color:white;
+          background:#ef8990;
+          border-radius:6px;
+          text-decoration:none;
+        "
+      >Deny Booking</a>
+    </p>
+    <p>
+      This message is sent from <b>Thunderbird Appointment</b>.
+    </p>
   </body>
 </html>

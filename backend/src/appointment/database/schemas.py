@@ -38,6 +38,8 @@ class SlotBase(BaseModel):
     start: datetime
     duration: int | None = None
     attendee_id: int | None = None
+    booking_tkn: str | None = None
+    booking_expires_at: datetime | None = None
 
 
 class Slot(SlotBase):

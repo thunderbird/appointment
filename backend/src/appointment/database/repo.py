@@ -427,6 +427,16 @@ def add_appointment_slots(db: Session, slots: list[schemas.SlotBase], appointmen
     return slots
 
 
+def add_schedule_slot(db: Session, slot: schemas.SlotBase, schedule_id: int):
+    """create new slot for schedule of given id"""
+    db_slot = models.Slot(**slot.dict())
+    db_slot.schedule_id = schedule_id
+    db.add(db_slot)
+    db.commit()
+    db.refresh(db_slot)
+    return db_slot
+
+
 def delete_appointment_slots(db: Session, appointment_id: int):
     """delete all slots for appointment of given id"""
     return db.query(models.Slot).filter(models.Slot.appointment_id == appointment_id).delete()
