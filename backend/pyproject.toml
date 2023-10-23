@@ -10,7 +10,7 @@ run-command = "src.appointment.main:cli"
 
 [project.urls]
 homepage = "https://appointment.day"
-repository = "https://github.com/thundernest/appointment.git"
+repository = "https://github.com/thunderbird/appointment.git"
 
 [project.optional-dependencies]
 cli = [
