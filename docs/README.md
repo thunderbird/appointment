@@ -139,6 +139,7 @@ erDiagram
     int duration "Custom slot duration, number of minutes [10-600]"
     string booking_tkn "Temp storage for verifying booking slot"
     date booking_expires_at "Booking expiration date"
+    enum booking_status "[none, requested, booked]"
   }
   SUBSCRIBERS ||--o{ SLOTS : choose
   ATTENDEES ||--o{ SLOTS : select

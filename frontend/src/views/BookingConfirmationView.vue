@@ -19,7 +19,7 @@
           {{ t('info.bookingSuccessfullyConfirmed') }}
         </div>
         <div class="text-gray-800 dark:text-gray-300">
-          {{ t('info.eventWasCreated') }}
+          {{ t('info.eventWasCreated') }}<br>
           {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
         </div>
       </template>
@@ -28,7 +28,7 @@
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
         <div class="text-gray-800 dark:text-gray-300">
-          {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}
+          {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}<br>
           {{ t('info.slotIsAvailableAgain') }}
         </div>
       </template>
