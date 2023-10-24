@@ -1,6 +1,7 @@
 import {authGuard} from "@auth0/auth0-vue";
 import {createRouter, createWebHistory} from "vue-router";
 import BookingView from "@/views/BookingView.vue";
+import BookingConfirmationView from "@/views/BookingConfirmationView.vue";
 import CalendarView from "@/views/CalendarView.vue";
 import ScheduleView from "@/views/ScheduleView.vue";
 import HomeView from "@/views/HomeView.vue";
@@ -22,11 +23,11 @@ const routes = [
     name: "availability",
     component: BookingView,
   },
-  // {
-  //   path: "/user/:username/:signature/confirm/:slot/:token/:confirmed",
-  //   name: "confirmation",
-  //   component: BookingConfirmationView,
-  // },
+  {
+    path: "/user/:username/:signature/confirm/:slot/:token/:confirmed",
+    name: "confirmation",
+    component: BookingConfirmationView,
+  },
   {
     path: "/schedule",
     name: "schedule",

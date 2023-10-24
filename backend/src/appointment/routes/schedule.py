@@ -146,7 +146,7 @@ def request_schedule_availability_slot(
     # create attendee for this slot
     attendee = repo.update_slot(db, slot.id, s_a.attendee)
     # generate confirm and deny links with encoded booking token and owner url
-    signed_url = quote_plus(f"{os.getenv('FRONTEND_URL')}/user/{subscriber.username}/{subscriber.short_link_hash}")
+    signed_url = f"{os.getenv('FRONTEND_URL')}/user/{quote_plus(subscriber.username)}/{subscriber.short_link_hash}"
     url = f"{signed_url}/confirm/{slot.id}/{token}"
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
@@ -164,7 +164,7 @@ def request_schedule_availability_slot(
     return True
 
 
-@router.get("/public/availability/booking")
+@router.get("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
 def request_schedule_availability_slot(
     s: int, # slot id
     t: str, # booking token
@@ -194,6 +194,7 @@ def request_schedule_availability_slot(
         raise HTTPException(status_code=404, detail="Calendar not found")
     # TODO: check if confirmation = 0, send information to bookee, delete slot, return false
     # TODO: get slot
+    slot = repo.get_slot(db, s)
     # TODO: check if slot exists and token is the same
     # TODO: check booking expiration date
     event = schemas.Event(
@@ -225,7 +226,7 @@ def request_schedule_availability_slot(
     appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
     Tools().send_vevent(appointment, slot, subscriber, attendee)
 
-    return True
+    return schemas.AvailabilitySlotAttendee(slot=slot, attendee=attendee)
 
 
 @router.put("/serve/ics", response_model=schemas.FileDownload)

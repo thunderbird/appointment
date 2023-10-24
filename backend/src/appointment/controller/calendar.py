@@ -344,7 +344,6 @@ class Tools:
         db
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range
-           and returns all remaining elements from A as new list.
         """
         existingEvents = []
         # handle calendar events
