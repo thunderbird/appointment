@@ -468,6 +468,14 @@ def update_slot(db: Session, slot_id: int, attendee: schemas.Attendee):
     return db_attendee
 
 
+def delete_slot(db: Session, slot_id: int):
+    """remove existing slot by id"""
+    db_slot = get_slot(db, slot_id)
+    db.delete(db_slot)
+    db.commit()
+    return db_slot
+
+
 def slot_is_available(db: Session, slot_id: int):
     """check if slot is still available"""
     db_slot = get_slot(db, slot_id)
@@ -528,3 +536,9 @@ def update_calendar_schedule(db: Session, schedule: schemas.ScheduleBase, schedu
 def get_availability_by_schedule(db: Session, schedule_id: int):
     """retrieve availability by schedule id"""
     return db.query(models.Availability).filter(models.Availability.schedule_id == schedule_id).all()
+
+
+def schedule_has_slot(db: Session, schedule_id: int, slot_id: int):
+    """check if slot belongs to schedule"""
+    db_slot = get_slot(db, slot_id)
+    return db_slot and db_slot.schedule_id == schedule_id

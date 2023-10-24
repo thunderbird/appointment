@@ -234,6 +234,13 @@ class AppointmentSlots(BaseModel):
     slots: list[SlotBase] = []
 
 
+class AvailabilitySlotConfirmation(BaseModel):
+    slot_id: int
+    slot_token: str
+    owner_url: str
+    confirmed: bool
+
+
 class EventLocation(BaseModel):
     type: LocationType | None = LocationType.inperson
     suggestions: str | None = None

@@ -164,12 +164,9 @@ def request_schedule_availability_slot(
     return True
 
 
-@router.get("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
+@router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
 def request_schedule_availability_slot(
-    s: int, # slot id
-    t: str, # booking token
-    u: str, # owner url
-    c: int, # confirmation, 1 for yes, 0 for no
+    data: schemas.AvailabilitySlotConfirmation,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
 ):
@@ -177,7 +174,7 @@ def request_schedule_availability_slot(
        if confirmed: create an event in remote calendar and send invitation mail
        TODO: if denied: send information mail to bookee
     """
-    subscriber = repo.verify_subscriber_link(db, u)
+    subscriber = repo.verify_subscriber_link(db, data.owner_url)
     if not subscriber:
         raise HTTPException(status_code=401, detail="Invalid profile link")
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
@@ -189,14 +186,25 @@ def request_schedule_availability_slot(
     if not schedule.active:
         raise HTTPException(status_code=404, detail="Schedule not found")
     # get calendar
-    db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
-    if db_calendar is None:
+    calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    if calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
-    # TODO: check if confirmation = 0, send information to bookee, delete slot, return false
-    # TODO: get slot
-    slot = repo.get_slot(db, s)
-    # TODO: check if slot exists and token is the same
+    # get slot and check if slot exists and is available and token is the same
+    slot = repo.get_slot(db, data.slot_id)
+    if (
+        not slot
+        or not repo.slot_is_available(db, slot.id)
+        or not repo.schedule_has_slot(db, schedule.id, slot.id)
+        or slot.booking_tkn != data.slot_token
+    ):
+        raise HTTPException(status_code=404, detail="Booking slot not found")
     # TODO: check booking expiration date
+    # check if request was denied
+    if not data.confirmed:
+        # TODO: send information to bookee
+        # make the scheduled slot available again
+        repo.delete_slot(slot.id)
+        return None
     event = schemas.Event(
         title=schedule.name,
         start=slot.start.isoformat(),
@@ -209,24 +217,26 @@ def request_schedule_availability_slot(
         ),
     )
     # create remote event
-    if db_calendar.provider == CalendarProvider.google:
+    if calendar.provider == CalendarProvider.google:
         con = GoogleConnector(
             db=db,
             google_client=google_client,
-            calendar_id=db_calendar.user,
+            calendar_id=calendar.user,
             subscriber_id=subscriber.id,
             google_tkn=subscriber.google_tkn,
         )
     else:
-        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-    # TODO: get attendee
-    con.create_event(event=event, attendee=attendee, organizer=subscriber)
+        con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+    con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
 
     # send mail with .ics attachment to attendee
     appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
-    Tools().send_vevent(appointment, slot, subscriber, attendee)
+    Tools().send_vevent(appointment, slot, subscriber, slot.attendee)
 
-    return schemas.AvailabilitySlotAttendee(slot=slot, attendee=attendee)
+    return schemas.AvailabilitySlotAttendee(
+        slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
+        attendee=schemas.AttendeeBase(email=slot.attendee.email, name=slot.attendee.name)
+    )
 
 
 @router.put("/serve/ics", response_model=schemas.FileDownload)

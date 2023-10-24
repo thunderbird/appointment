@@ -1,33 +1,52 @@
 <template>
   <div class="h-full p-4 flex-center flex-col gap-12">
-    <div v-if="isError === null">Loading...</div>
-    <div v-else-if="isError === true" class="px-4 flex-center flex-col gap-8 select-none">
+    <div v-if="isError === null">
+      <loading-spinner />
+    </div>
+    <div v-else-if="isError === true" class="px-4 flex-center flex-col gap-8">
       <art-invalid-link class="max-w-sm h-auto my-6" />
       <div class="text-xl font-semibold text-sky-600">
-        This link seems to be broken.
+        {{ t('info.bookingLinkIsInvalid') }}
       </div>
       <div class="text-gray-800 dark:text-gray-300">
-        Some more explanatory text here, carefully revised by Amy.
+        {{ t('text.invalidOrAlreadyBooked') }}
       </div>
     </div>
-    <div v-else>
-      <div v-if="confirmed">
-        You successfully confirmed the booking.
-      </div>
-      <div v-else="confirmed">
-        You successfully denied the booking.
-      </div>
+    <div v-else class="px-4 flex-center flex-col gap-8">
+      <art-successful-booking class="max-w-sm h-auto my-6" />
+      <template v-if="confirmed">
+        <div class="text-xl font-semibold text-sky-600">
+          {{ t('info.bookingSuccessfullyConfirmed') }}
+        </div>
+        <div class="text-gray-800 dark:text-gray-300">
+          {{ t('info.eventWasCreated') }}
+          {{ t('text.invitationSentToAddress') }}
+        </div>
+      </template>
+      <template v-else="confirmed">
+        <div class="text-xl font-semibold text-sky-600">
+          {{ t('info.bookingSuccessfullyDenied') }}
+        </div>
+        <div class="text-gray-800 dark:text-gray-300">
+          {{ t('text.denialSentToAddress') }}
+          {{ t('info.slotIsAvailableAgain') }}
+        </div>
+      </template>
     </div>
   </div>
 
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from 'vue';
 // import { useAuth0 } from '@auth0/auth0-vue';
+import { ref, inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from "vue-router";
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
+import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
+import LoadingSpinner from '@/elements/LoadingSpinner';
 
+const { t } = useI18n();
 const route = useRoute();
 const call = inject('call');
 
@@ -45,7 +64,14 @@ const attendee = ref(null);
 
 // initially load data when component gets remounted
 onMounted(async () => {
-  const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
+  // build data object for put request
+  const obj = {
+    slot_id: slotId,
+    slot_token: slotToken,
+    owner_url: signedUrl,
+    confirmed: confirmed,
+  };
+  const { error, data } = await call('schedule/public/availability/booking').put(obj).json();
   if (error.value) {
     isError.value = true;
   } else {
