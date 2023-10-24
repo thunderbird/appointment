@@ -437,6 +437,15 @@ def add_schedule_slot(db: Session, slot: schemas.SlotBase, schedule_id: int):
     return db_slot
 
 
+def book_slot(db: Session, slot_id: int):
+    """update booking status for slot of given id"""
+    db_slot = get_slot(db, slot_id)
+    db_slot.booking_status = models.BookingStatus.booked
+    db.commit()
+    db.refresh(db_slot)
+    return db_slot
+
+
 def delete_appointment_slots(db: Session, appointment_id: int):
     """delete all slots for appointment of given id"""
     return db.query(models.Slot).filter(models.Slot.appointment_id == appointment_id).delete()
@@ -477,9 +486,14 @@ def delete_slot(db: Session, slot_id: int):
 
 
 def slot_is_available(db: Session, slot_id: int):
-    """check if slot is still available"""
-    db_slot = get_slot(db, slot_id)
-    return db_slot and not db_slot.attendee_id and not db_slot.subscriber_id
+    """check if slot is still available for booking"""
+    slot = get_slot(db, slot_id)
+    isAttended = slot.attendee_id or slot.subscriber_id
+    if slot.appointment:
+        return slot and not isAttended
+    if slot.schedule:
+        return slot and slot.booking_status == models.BookingStatus.requested
+    return False
 
 
 """SCHEDULES repository functions

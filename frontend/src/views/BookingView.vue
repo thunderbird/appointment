@@ -51,10 +51,14 @@
             </div>
           </div>
         </div>
-        <div class="text-teal-500 text-sm underline underline-offset-2 -mt-4 cursor-pointer" @click="downloadIcs">
+        <div
+          v-if="isBookingRoute"
+          class="text-teal-500 text-sm underline underline-offset-2 -mt-4 cursor-pointer"
+          @click="downloadIcs"
+        >
           {{ t('label.downloadTheIcsFile') }}
         </div>
-        <div class="text-gray-700 text-lg text-center">
+        <div v-if="isBookingRoute" class="text-gray-700 text-lg text-center">
           <div>{{ t('info.invitationWasSent') }}</div>
           <div class="font-bold text-lg">
             {{ attendee.email }}

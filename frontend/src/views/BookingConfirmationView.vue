@@ -20,7 +20,7 @@
         </div>
         <div class="text-gray-800 dark:text-gray-300">
           {{ t('info.eventWasCreated') }}
-          {{ t('text.invitationSentToAddress') }}
+          {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
         </div>
       </template>
       <template v-else="confirmed">
@@ -28,7 +28,7 @@
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
         <div class="text-gray-800 dark:text-gray-300">
-          {{ t('text.denialSentToAddress') }}
+          {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}
           {{ t('info.slotIsAvailableAgain') }}
         </div>
       </template>
@@ -54,7 +54,7 @@ const call = inject('call');
 const [signedUrl] = window.location.href.split('/confirm/');
 const slotId = Number(route.params.slot);
 const slotToken = route.params.token;
-const confirmed = Boolean(route.params.confirmed);
+const confirmed = route.params.confirmed == '1';
 
 // const auth = useAuth0();
 // const isAuthenticated = computed(() => auth.isAuthenticated.value);
@@ -76,8 +76,8 @@ onMounted(async () => {
     isError.value = true;
   } else {
     isError.value = false;
-    event.value = data.value.slot;
-    attendee.value = data.value.attendee;
+    event.value = data.value?.slot;
+    attendee.value = data.value?.attendee;
   }
 });
 </script>

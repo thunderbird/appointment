@@ -34,6 +34,12 @@ class AppointmentStatus(enum.Enum):
     closed = 3  # appointment is published and fulfilled or manually closed for attendees
 
 
+class BookingStatus(enum.Enum):
+    none = 1  # slot status doesn't matter, because the parent object holds the state
+    requested = 2  # booking slot was requested
+    booked = 3  # booking slot was assigned
+
+
 class LocationType(enum.Enum):
     inperson = 1  # appointment is held in person
     online = 2  # appointment is held online
@@ -141,6 +147,7 @@ class Slot(Base):
     # columns for availability bookings
     booking_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
     booking_expires_at = Column(DateTime)
+    booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
     appointment = relationship("Appointment", back_populates="slots")
     schedule = relationship("Schedule", back_populates="slots")
