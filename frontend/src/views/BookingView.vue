@@ -5,9 +5,7 @@
       v-if="activeView === views.loading"
       class="h-screen flex-center select-none"
     >
-      <div
-        class="w-12 h-12 rounded-full animate-spin border-4 border-gray-100 dark:border-gray-600 !border-t-teal-500"
-      ></div>
+      <loading-spinner />
     </main>
     <!-- booking page content: invalid link -->
     <main
@@ -155,6 +153,7 @@ import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
+import LoadingSpinner from '@/elements/LoadingSpinner';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import BookingModal from '@/components/BookingModal';
 import CalendarDay from '@/components/CalendarDay';
