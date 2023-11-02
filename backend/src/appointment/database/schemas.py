@@ -10,7 +10,7 @@ from .models import (
     LocationType,
     CalendarProvider,
     DayOfWeek,
-    random_slug,
+    random_slug, ExternalConnectionType,
 )
 
 
@@ -257,3 +257,12 @@ class FileDownload(BaseModel):
     name: str
     content_type: str
     data: str
+
+
+class ExternalConnection(BaseModel):
+    owner_id: int
+    type: ExternalConnectionType
+    type_id: str
+    token: str
+
+

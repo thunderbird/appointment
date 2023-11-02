@@ -1,7 +1,7 @@
 import logging
 import os
 
-from ..controller.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient
 
 
 _google_client = GoogleClient(

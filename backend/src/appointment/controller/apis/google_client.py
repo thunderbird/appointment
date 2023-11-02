@@ -4,10 +4,10 @@ import requests
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from ..database import repo
-from ..database.models import CalendarProvider
-from ..database.schemas import CalendarConnection
-from ..exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
+from ...database import repo
+from ...database.models import CalendarProvider
+from ...database.schemas import CalendarConnection
+from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
 class GoogleClient:

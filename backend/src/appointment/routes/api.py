@@ -13,7 +13,7 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
 from datetime import timedelta, timezone
-from ..controller.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import sign_url
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client

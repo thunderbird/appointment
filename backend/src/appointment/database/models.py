@@ -55,6 +55,10 @@ class DayOfWeek(enum.Enum):
     Sunday = 7
 
 
+class ExternalConnectionType(enum.Enum):
+    Zoom = 1
+
+
 class Subscriber(Base):
     __tablename__ = "subscribers"
 
@@ -83,6 +87,7 @@ class Subscriber(Base):
 
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
+    external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
 
 
 class Calendar(Base):
@@ -206,3 +211,18 @@ class Availability(Base):
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     schedule = relationship("Schedule", back_populates="availabilities")
+
+
+class ExternalConnections(Base):
+    """This table holds all external service connections to a subscriber."""
+    __tablename__ = "external_connections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey("subscribers.id"))
+    type = Column(Enum(ExternalConnectionType), index=True)
+    type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
+    time_created = Column(DateTime, server_default=func.now())
+    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    owner = relationship("Subscriber", back_populates="external_connections")

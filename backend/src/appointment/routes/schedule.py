@@ -3,7 +3,7 @@ import logging
 
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from ..controller.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient
 from ..database import repo, schemas
 from ..database.models import Subscriber, Schedule, CalendarProvider
 from ..dependencies.auth import get_subscriber

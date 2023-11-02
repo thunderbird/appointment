@@ -10,6 +10,7 @@ from datetime import timedelta, datetime
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
+from .schemas import ExternalConnection
 from ..controller.auth import sign_url
 
 
@@ -518,3 +519,46 @@ def update_calendar_schedule(db: Session, schedule: schemas.ScheduleBase, schedu
 def get_availability_by_schedule(db: Session, schedule_id: int):
     """retrieve availability by schedule id"""
     return db.query(models.Availability).filter(models.Availability.schedule_id == schedule_id).all()
+
+
+"""External Connections repository functions"""
+
+
+def create_subscriber_external_connection(db: Session, external_connection: ExternalConnection):
+    db_external_connection = models.ExternalConnections(
+        **external_connection.dict()
+    )
+    db.add(db_external_connection)
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
+def update_subscriber_external_connection_token(db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None):
+    db_results = get_external_connection_by_type(db, subscriber_id, type, type_id)
+    if db_results is None or len(db_results) == 0:
+        return None
+
+    db_external_connection = db_results[0]
+    db_external_connection.token = token
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
+def get_external_connection_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None):
+    """Return a subscribers external connections by type, and optionally type id"""
+    query = (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.owner_id == subscriber_id)
+        .filter(models.ExternalConnections.type == type)
+    )
+
+    if type_id is not None:
+        query = query.filter(models.ExternalConnections.type_id == type_id)
+
+    result = query.all()
+
+    print("Get EC >> ", result)
+
+    return result

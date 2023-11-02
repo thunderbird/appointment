@@ -10,7 +10,7 @@ from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse
 
-from .google_client import GoogleClient
+from .apis.google_client import GoogleClient
 from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail

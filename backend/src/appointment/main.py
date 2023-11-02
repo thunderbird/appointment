@@ -2,6 +2,8 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
+from starlette.middleware.sessions import SessionMiddleware
+
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -68,9 +70,15 @@ def server():
     from .routes import account
     from .routes import google
     from .routes import schedule
+    from .routes import zoom
 
     # init app
     app = FastAPI()
+
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=os.getenv("SESSION_SECRET")
+    )
 
     # allow requests from own frontend running on a different port
     app.add_middleware(
@@ -86,6 +94,7 @@ def server():
         allow_headers=["*"],
     )
 
+
     @app.exception_handler(RefreshError)
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
@@ -96,6 +105,8 @@ def server():
     app.include_router(account.router, prefix="/account")
     app.include_router(google.router, prefix="/google")
     app.include_router(schedule.router, prefix="/schedule")
+    if os.getenv("ZOOM_API_ENABLED"):
+        app.include_router(zoom.router, prefix="/zoom")
 
     return app
 
