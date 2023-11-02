@@ -38,7 +38,6 @@
 </template>
 
 <script setup>
-// import { useAuth0 } from '@auth0/auth0-vue';
 import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from "vue-router";
@@ -56,8 +55,6 @@ const slotId = Number(route.params.slot);
 const slotToken = route.params.token;
 const confirmed = route.params.confirmed == '1';
 
-// const auth = useAuth0();
-// const isAuthenticated = computed(() => auth.isAuthenticated.value);
 const isError = ref(null);
 const event = ref(null);
 const attendee = ref(null);
