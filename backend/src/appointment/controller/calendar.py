@@ -15,6 +15,8 @@ from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 
+DATEFMT = "%Y-%m-%d"
+
 
 class GoogleConnector:
     """Generic interface for Google Calendar REST API.
@@ -63,8 +65,8 @@ class GoogleConnector:
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
-        time_min = datetime.strptime(start, "%Y-%m-%d").isoformat() + "Z"
-        time_max = datetime.strptime(end, "%Y-%m-%d").isoformat() + "Z"
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + "Z"
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + "Z"
 
         # We're storing google cal id in user...for now.
         remote_events = self.google_client.list_events(self.calendar_id, time_min, time_max, self.google_token)
@@ -174,8 +176,8 @@ class CalDavConnector:
         events = []
         calendar = self.client.calendar(url=self.url)
         result = calendar.search(
-            start=datetime.strptime(start, "%Y-%m-%d"),
-            end=datetime.strptime(end, "%Y-%m-%d"),
+            start=datetime.strptime(start, DATEFMT),
+            end=datetime.strptime(end, DATEFMT),
             event=True,
             expand=True,
         )
@@ -359,8 +361,8 @@ class Tools:
             else:
                 con = CalDavConnector(calendar.url, calendar.user, calendar.password)
             farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
-            start = schedule.start_date.strftime("%Y-%m-%d")
-            end = schedule.end_date.strftime("%Y-%m-%d") if schedule.end_date else farthest_end.strftime("%Y-%m-%d")
+            start = schedule.start_date.strftime(DATEFMT)
+            end = schedule.end_date.strftime(DATEFMT) if schedule.end_date else farthest_end.strftime(DATEFMT)
             existingEvents.extend(con.list_events(start, end))
         # handle already requested time slots
         for slot in schedule.slots:
