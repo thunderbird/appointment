@@ -136,11 +136,13 @@ def request_schedule_availability_slot(
     # get calendar
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
-        raise HTTPException(status_code=404, detail="Calendar not found")
-    # TODO: check if slot still available, might already be taken at this time
+        raise HTTPException(status_code=401, detail="Calendar not found")
+    # check if slot still available, might already be taken at this time
+    slot = schemas.SlotBase(**s_a.slot.dict())
+    if repo.schedule_slot_exists(db, slot, schedule.id):
+        raise HTTPException(status_code=403, detail="Slot not available")
     # create slot in db with token and expiration date
     token = random_slug()
-    slot = schemas.SlotBase(**s_a.slot.dict())
     slot.booking_tkn = token
     slot.booking_expires_at = datetime.now() + timedelta(days=1)
     slot.booking_status = BookingStatus.requested

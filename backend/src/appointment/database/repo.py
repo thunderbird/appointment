@@ -437,6 +437,19 @@ def add_schedule_slot(db: Session, slot: schemas.SlotBase, schedule_id: int):
     return db_slot
 
 
+def schedule_slot_exists(db: Session, slot: schemas.SlotBase, schedule_id: int):
+    """check if given slot already exists for schedule of given id"""
+    db_slot = (
+        db.query(models.Slot)
+            .filter(models.Slot.schedule_id == schedule_id)
+            .filter(models.Slot.start == slot.start)
+            .filter(models.Slot.duration == slot.duration)
+            .filter(models.Slot.booking_status != models.BookingStatus.none)
+            .first()
+    )
+    return db_slot is not None
+
+
 def book_slot(db: Session, slot_id: int):
     """update booking status for slot of given id"""
     db_slot = get_slot(db, slot_id)
