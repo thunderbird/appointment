@@ -15,6 +15,8 @@ from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 
+DATEFMT = "%Y-%m-%d"
+
 
 class GoogleConnector:
     """Generic interface for Google Calendar REST API.
@@ -63,8 +65,8 @@ class GoogleConnector:
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
-        time_min = datetime.strptime(start, "%Y-%m-%d").isoformat() + "Z"
-        time_max = datetime.strptime(end, "%Y-%m-%d").isoformat() + "Z"
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + "Z"
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + "Z"
 
         # We're storing google cal id in user...for now.
         remote_events = self.google_client.list_events(self.calendar_id, time_min, time_max, self.google_token)
@@ -136,8 +138,9 @@ class GoogleConnector:
         return event
 
     def delete_events(self, start):
-        """delete all events in given date range from the server"""
-        # Not used?
+        """delete all events in given date range from the server
+           Not intended to be used in production. For cleaning purposes after testing only.
+        """
         pass
 
 
@@ -173,8 +176,8 @@ class CalDavConnector:
         events = []
         calendar = self.client.calendar(url=self.url)
         result = calendar.search(
-            start=datetime.strptime(start, "%Y-%m-%d"),
-            end=datetime.strptime(end, "%Y-%m-%d"),
+            start=datetime.strptime(start, DATEFMT),
+            end=datetime.strptime(end, DATEFMT),
             event=True,
             expand=True,
         )
@@ -223,7 +226,9 @@ class CalDavConnector:
         return event
 
     def delete_events(self, start):
-        """delete all events in given date range from the server"""
+        """delete all events in given date range from the server
+           Not intended to be used in production. For cleaning purposes after testing only.
+        """
         calendar = self.client.calendar(url=self.url)
         result = calendar.events()
         count = 0
@@ -277,8 +282,8 @@ class Tools:
         mail = InvitationMail(sender=organizer.email, to=attendee.email, attachments=[invite])
         mail.send()
 
-    def available_slots_from_schedule(s: schemas.ScheduleBase):
-        """This helper calculates a list of slots according to the given schedule."""
+    def available_slots_from_schedule(s: schemas.ScheduleBase) -> list[schemas.SlotBase]:
+        """This helper calculates a list of slots according to the given schedule configuration."""
         now = datetime.utcnow()
         earliest_start = now + timedelta(minutes=s.earliest_booking)
         farthest_end = now + timedelta(minutes=s.farthest_booking)
@@ -312,9 +317,9 @@ class Tools:
                 pointer = next_date
         return slots
 
-    def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]):
+    def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
         """This helper removes all events from list A, which have a time collision with any event in list B
-        and returns all remaining elements from A as new list.
+           and returns all remaining elements from A as new list.
         """
         available_slots = []
         for a in a_list:
@@ -332,3 +337,38 @@ class Tools:
             if not collision_found:
                 available_slots.append(a)
         return available_slots
+
+    def existing_events_for_schedule(
+        schedule: schemas.Schedule,
+        calendars: list[schemas.Calendar],
+        subscriber: schemas.Subscriber,
+        google_client: GoogleClient,
+        db
+    ) -> list[schemas.Event]:
+        """This helper retrieves all events existing in given calendars for the scheduled date range
+        """
+        existingEvents = []
+        # handle calendar events
+        for calendar in calendars:
+            if calendar.provider == CalendarProvider.google:
+                con = GoogleConnector(
+                    db=db,
+                    google_client=google_client,
+                    calendar_id=calendar.user,
+                    subscriber_id=subscriber.id,
+                    google_tkn=subscriber.google_tkn,
+                )
+            else:
+                con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+            farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
+            start = schedule.start_date.strftime(DATEFMT)
+            end = schedule.end_date.strftime(DATEFMT) if schedule.end_date else farthest_end.strftime(DATEFMT)
+            existingEvents.extend(con.list_events(start, end))
+        # handle already requested time slots
+        for slot in schedule.slots:
+            existingEvents.append(schemas.Event(
+                title=schedule.name,
+                start=slot.start.isoformat(),
+                end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
+            ))
+        return existingEvents

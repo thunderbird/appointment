@@ -1,6 +1,7 @@
 import {authGuard} from "@auth0/auth0-vue";
 import {createRouter, createWebHistory} from "vue-router";
 import BookingView from "@/views/BookingView.vue";
+import BookingConfirmationView from "@/views/BookingConfirmationView.vue";
 import CalendarView from "@/views/CalendarView.vue";
 import ScheduleView from "@/views/ScheduleView.vue";
 import HomeView from "@/views/HomeView.vue";
@@ -23,6 +24,11 @@ const routes = [
     component: BookingView,
   },
   {
+    path: "/user/:username/:signature/confirm/:slot/:token/:confirmed",
+    name: "confirmation",
+    component: BookingConfirmationView,
+  },
+  {
     path: "/schedule",
     name: "schedule",
     component: ScheduleView,
@@ -42,22 +48,19 @@ const routes = [
   {
     path: "/appointments/:view?",
     name: "appointments",
-    component: () =>
-      import(/* webpackChunkName: "appointments" */ "@/views/AppointmentsView"),
+    component: () => import(/* webpackChunkName: "appointments" */ "@/views/AppointmentsView"),
     beforeEnter: authGuard,
   },
   {
     path: "/settings/:view?",
     name: "settings",
-    component: () =>
-      import(/* webpackChunkName: "settings" */ "@/views/SettingsView"),
+    component: () => import(/* webpackChunkName: "settings" */ "@/views/SettingsView"),
     beforeEnter: authGuard,
   },
   {
     path: "/profile",
     name: "profile",
-    component: () =>
-      import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
+    component: () => import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
     beforeEnter: authGuard,
   },
   {

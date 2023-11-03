@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
 from datetime import timedelta, timezone
 from ..controller.google_client import GoogleClient
-from ..controller.auth import sign_url
+from ..controller.auth import signed_url_by_subscriber
 from ..database.models import Subscriber, CalendarProvider
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber, auth
@@ -82,22 +82,7 @@ def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
     """Retrieve a subscriber's signed short link"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
-
-    short_url = os.getenv("SHORT_BASE_URL")
-    base_url = f"{os.getenv('FRONTEND_URL')}/user"
-
-    # If we don't have a short url, then use the default url with /user added to it
-    if not short_url:
-        short_url = base_url
-
-    # We sign with a different hash that the end-user doesn't have access to
-    # We also need to use the default url, as short urls are currently setup as a redirect
-    url = f"{base_url}/{subscriber.username}/{subscriber.short_link_hash}"
-
-    signature = sign_url(url)
-
-    # We return with the signed url signature
-    return {"url": f"{short_url}/{subscriber.username}/{signature}"}
+    return {"url": signed_url_by_subscriber(subscriber)}
 
 
 @router.post("/me/signature")
@@ -181,7 +166,7 @@ def update_my_calendar(
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.post("/cal/{id}/connect")
+@router.post("/cal/{id}/connect", response_model=schemas.CalendarOut)
 def connect_my_calendar(
     id: int,
     db: Session = Depends(get_db),
