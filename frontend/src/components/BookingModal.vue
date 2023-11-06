@@ -8,7 +8,9 @@
       <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-gray-700 dark:stroke-gray-400" />
     </div>
     <div class="text-2xl text-center font-semibold mb-4 text-teal-500">
-      {{ !success ? t('heading.bookSelection') : t('heading.eventBooked') }}
+      <span v-if="!success">{{ t('heading.bookSelection') }}</span>
+      <span v-else-if="success && !request">{{ t('heading.eventBooked') }}</span>
+      <span v-else-if="success && request">{{ t('info.bookingSuccessfullyRequested') }}</span>
     </div>
     <div class="text-center mb-4 text-gray-500 dark:text-gray-300">
       <div>{{ event.title }}:</div>
@@ -48,7 +50,8 @@
     <div v-else class="mb-8 mt-8">
       <art-confetti class="h-52 w-52 stroke-none fill-transparent mb-8 mx-auto" />
       <div class="text-sm w-4/5 mx-auto text-center text-gray-500">
-        {{ t('text.invitationSentToAddress', { address: attendee.email }) }}
+        <span v-if="!request">{{ t('text.invitationSentToAddress', { address: attendee.email }) }}</span>
+        <span v-else>{{ t('text.requestInformationSentToOwner') }}</span>
       </div>
     </div>
     <div class="flex gap-8 w-4/5 mx-auto justify-center items-stretch">
@@ -64,7 +67,7 @@
         @click="bookIt"
       />
       <primary-button
-        v-else
+        v-else-if="!request"
         :label="t('label.downloadInvitation')"
         @click="emit('download')"
       />
@@ -96,6 +99,7 @@ const props = defineProps({
   open: Boolean, // modal state
   event: Object, // event data to display and book
   success: Boolean, // true if booking was successful
+  request: Boolean, // true if booking was only requested instead of executed directly
 });
 
 // component emits

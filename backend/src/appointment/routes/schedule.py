@@ -5,7 +5,7 @@ import os
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.google_client import GoogleClient
-from ..controller.mailer import ConfirmationMail
+from ..controller.mailer import ConfirmationMail, RejectionMail
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, Schedule, CalendarProvider, random_slug, BookingStatus
@@ -204,7 +204,17 @@ def request_schedule_availability_slot(
     # TODO: check booking expiration date
     # check if request was denied
     if data.confirmed == False:
-        # TODO: send information to bookee
+        # human readable date in subscribers timezone
+        # TODO: handle locale date representation
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
+        # send rejection information to bookee
+        mail = RejectionMail(
+            owner=subscriber,
+            date=f"{date}, {slot.duration} minutes",
+            sender=f"noreply@{os.getenv('SMTP_URL')}",
+            to=slot.attendee.email
+        )
+        mail.send()
         # delete the scheduled slot to make the time available again
         repo.delete_slot(db, slot.id)
     # otherwise, confirm slot and create event

@@ -217,7 +217,8 @@
     "nameIsInvitingYou": "{name} lädt dich ein",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
+    "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "updateUsernameNotice": "Changing your username will also refresh your short link. Please note that any old short links will no longer work."
+    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren."
   }
 }

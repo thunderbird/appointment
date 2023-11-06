@@ -146,6 +146,7 @@
       @book="bookEvent"
       @download="downloadIcs"
       @close="closeBookingModal"
+      request
     />
   </div>
 </template>
