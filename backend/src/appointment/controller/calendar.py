@@ -15,6 +15,7 @@ from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 
+
 DATEFMT = "%Y-%m-%d"
 
 
