@@ -18,7 +18,7 @@
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyConfirmed') }}
         </div>
-        <div class="text-gray-800 dark:text-gray-300">
+        <div class="text-gray-800 dark:text-gray-300 text-center">
           {{ t('info.eventWasCreated') }}<br>
           {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
         </div>
@@ -27,7 +27,7 @@
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
-        <div class="text-gray-800 dark:text-gray-300">
+        <div class="text-gray-800 dark:text-gray-300 text-center">
           {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}<br>
           {{ t('info.slotIsAvailableAgain') }}
         </div>

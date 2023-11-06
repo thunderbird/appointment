@@ -175,3 +175,22 @@ This message is sent from Thunderbird Appointment.
             confirm=self.confirmUrl,
             deny=self.denyUrl,
         )
+
+
+class RejectionMail(Mailer):
+    def __init__(self, owner, date, *args, **kwargs):
+        """init Mailer with rejection specific defaults"""
+        self.owner = owner
+        self.date = date
+        defaultKwargs = {
+            "subject": "[TBA] Booking request declined",
+            "plain": """
+{name} denied your booking request for this time slot: {date}.
+
+This message is sent from Thunderbird Appointment.
+            """.format(name=self.owner.name, date=self.date),
+        }
+        super(RejectionMail, self).__init__(*args, **defaultKwargs, **kwargs)
+
+    def html(self):
+        return get_template("rejected.jinja2").render(owner=self.owner, date=self.date)
