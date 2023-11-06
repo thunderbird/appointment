@@ -37,10 +37,15 @@
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
+    "bookingLinkIsInvalid": "Der Link zur Buchungsbestätigung ist ungültig.",
     "bookingSuccessful": "Erfolgreich gebucht!",
+    "bookingSuccessfullyConfirmed": "Buchung erfolgreich bestätigt!",
+    "bookingSuccessfullyDenied": "Buchung erfolgreich abgelehnt!",
     "bookingSuccessfullyRequested": "Buchung erfolgreich angefragt!",
+    "eventWasCreated": "Das Event wurde in deinem Kalender erstellt.",
     "invitationWasSent": "Eine Einladung wurde an deine E-Mail-Adresse gesandt.",
-    "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine."
+    "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine.",
+    "slotIsAvailableAgain": "Das Zeitfenster ist jetzt wieder buchbar."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
@@ -81,6 +86,7 @@
     "bookings": "Buchungen | Buchung | Buchungen",
     "caldav": "CalDAV",
     "calendar": "Kalender",
+    "calendarDeletion": "Kalendarverbindung trennen",
     "calendarUrl": "Kalender URL",
     "cancel": "Abbrechen",
     "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
@@ -99,6 +105,7 @@
     "defaultFont": "Standard Schriftart",
     "delete": "Löschen",
     "deleteYourAccount": "Benutzerkonto löschen",
+    "disconnect": "Trennen",
     "displayName": "Anzeigename",
     "download": "Download",
     "downloadInvitation": "Termineinladung herunterladen",
@@ -191,8 +198,10 @@
     "accountDataNotice": "Lade all Deine Daten von Thunderbird Appointment herunter.",
     "accountDeletionFinalWarning": "Warnung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben unverändert.",
     "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben unverändert. Bestätige die Löschung mit deinen Login-Daten.",
+    "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalendern gespeichert sind.",
     "chooseDateAndTime": "Wähle einen Tag und eine Zeit für ein Treffen:",
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
+    "denialSentToAddress": "Die Informationen über die Ablehnung der Anfrage wurde per E-Mail an {address} geschickt.",
     "disclaimerGABooking": "Bitte beachten: Der Eigentümer muss die Buchung bestätigen.",
     "googlePermissionCalendarName": "Anzeigen und Herunterladen aller Kalender des Google-Kontos",
     "googlePermissionCalendarReason": "Thunderbird Appointment benötigt diese Berechtigung, um eine Liste von Kalendern anzuzeigen, die verbunden werden können.",
@@ -203,11 +212,13 @@
     "homepageGreetingAuthenticatedLink": "einen Kalender verbinden",
     "homepageGreetingIntro": "Herzlich Willkommen zu Thunderbird Appointment!",
     "homepageGreetingUnauthenticated": "Wir befinden uns derzeit in der Testphase und hoffen, dass wir sie die Anwendung bald produktiv nutzen können. Um sich an den Tests zu beteiligen, bitte anmelden.",
-    "invitationSentToAddress": "Eine Einladung für dieses Event wurde dir an {address} geschickt",
+    "invalidOrAlreadyBooked": "Der Buchungsplatz ist möglicherweise nicht mehr verfügbar oder der Link ist defekt.",
+    "invitationSentToAddress": "Eine Einladung für dieses Event wurde an {address} geschickt.",
     "nameIsInvitingYou": "{name} lädt dich ein",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
+    "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "updateUsernameNotice": "Changing your username will also refresh your short link. Please note that any old short links will no longer work."
+    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren."
   }
 }

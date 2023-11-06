@@ -37,10 +37,15 @@
   "info": {
     "bookedPleaseCheckEmail": "This event has been booked, please check your email to add it to you calendar.",
     "bookingLinkHasAlreadyBeenUsed": "It seems that this booking link has already been used.",
+    "bookingLinkIsInvalid": "This booking confirmation link is invalid.",
     "bookingSuccessful": "Booking successful!",
+    "bookingSuccessfullyConfirmed": "Booking successfully confirmed!",
+    "bookingSuccessfullyDenied": "Booking successfully denied!",
     "bookingSuccessfullyRequested": "Booking successfully requested!",
+    "eventWasCreated": "The event was created in your calendar.",
     "invitationWasSent": "An invitation was sent to your email.",
-    "noPendingAppointmentsInList": "There are currently no pending appointments in this list."
+    "noPendingAppointmentsInList": "There are currently no pending appointments in this list.",
+    "slotIsAvailableAgain": "The time slot is now available for bookings again."
   },
   "label": {
     "12hAmPm": "12h AM/PM",
@@ -81,6 +86,7 @@
     "bookings": "Bookings | Booking | Bookings",
     "caldav": "CalDAV",
     "calendar": "Calendar",
+    "calendarDeletion": "Disconnect Calendar",
     "calendarUrl": "Calendar URL",
     "cancel": "Cancel",
     "checkAvailableSlots": "Check available slots",
@@ -99,6 +105,7 @@
     "defaultFont": "Default font",
     "delete": "Delete",
     "deleteYourAccount": "Delete your account",
+    "disconnect": "Disconnect",
     "displayName": "Display name",
     "download": "Download",
     "downloadInvitation": "Download Invitation",
@@ -191,8 +198,10 @@
     "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
     "accountDeletionFinalWarning": "Last chance! Deleting your account is permanent, and you all of your saved data on Thunderbird Appointment will be removed. Your calendars will remain unchanged.",
     "accountDeletionWarning": "Warning, deleting your account is permanent! You will lose all saved data on Thunderbird Appointment. Your calendars will remain unchanged. There is a second confirmation after you login.",
+    "calendarDeletionWarning": "Disconnecting this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose a date and time to meet:",
     "defineDaysAndTimeSlots": "Define days and time slots to allow users to select the event time…",
+    "denialSentToAddress": "The information about the denial has been emailed to {address}.",
     "disclaimerGABooking": "Please note: The calendar owner will confirm your booking.",
     "googlePermissionCalendarName": "See and download any calendar you can access using your Google Calendar",
     "googlePermissionCalendarReason": "Thunderbird Appointment requires this permission in order to display a list of calendars that you can connect with.",
@@ -203,10 +212,12 @@
     "homepageGreetingAuthenticatedLink": "connect a calendar",
     "homepageGreetingIntro": "Welcome to Thunderbird Appointment!",
     "homepageGreetingUnauthenticated": "We're currently testing and hope to be available to use soon. If you're taking part in the testing, please log in.",
-    "invitationSentToAddress": "An invitation for this event has been emailed to you at {address}",
+    "invalidOrAlreadyBooked": "The booking slot might not be available anymore or the link is broken.",
+    "invitationSentToAddress": "An invitation for this event has been emailed to {address}.",
     "nameIsInvitingYou": "{name} is inviting you",
     "recipientsCanScheduleBetween": "Recipients can schedule an appointment between {earliest} and {farthest} ahead of time. ",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
+    "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
     "updateUsernameNotice": "Changing your username will also refresh your short link. Please note that any old short links will no longer work."
   }

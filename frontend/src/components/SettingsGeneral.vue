@@ -157,7 +157,6 @@ const updateTimezone = async () => {
     username: user.data.username,
     timezone: activeTimezone.primary,
   };
-  console.log(obj)
   const { error } = await call('me').put(obj).json();
   if (!error.value) {
     // update user in store

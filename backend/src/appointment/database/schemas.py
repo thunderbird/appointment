@@ -5,12 +5,13 @@ Definitions of valid data shapes for database and query models.
 from datetime import datetime, date, time
 from pydantic import BaseModel, Field
 from .models import (
-    SubscriberLevel,
     AppointmentStatus,
-    LocationType,
+    BookingStatus,
     CalendarProvider,
     DayOfWeek,
+    LocationType,
     random_slug,
+    SubscriberLevel,
 )
 
 
@@ -38,6 +39,9 @@ class SlotBase(BaseModel):
     start: datetime
     duration: int | None = None
     attendee_id: int | None = None
+    booking_tkn: str | None = None
+    booking_expires_at: datetime | None = None
+    booking_status: BookingStatus | None = BookingStatus.none
 
 
 class Slot(SlotBase):
@@ -230,6 +234,13 @@ class Subscriber(SubscriberAuth):
 class AppointmentSlots(BaseModel):
     appointment: AppointmentFull
     slots: list[SlotBase] = []
+
+
+class AvailabilitySlotConfirmation(BaseModel):
+    slot_id: int
+    slot_token: str
+    owner_url: str
+    confirmed: bool | None = False
 
 
 class EventLocation(BaseModel):

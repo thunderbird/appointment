@@ -186,6 +186,16 @@
     </div>
   </div>
 </div>
+<!-- Calendar disconnect confirmation modal -->
+<ConfirmationModal
+  :open="deleteCalendarModalOpen"
+  :title="t('label.calendarDeletion')"
+  :message="t('text.calendarDeletionWarning')"
+  :confirm-label="t('label.disconnect')"
+  :cancel-label="t('label.cancel')"
+  @confirm="deleteCalendarConfirm"
+  @close="closeModals"
+></ConfirmationModal>
 </template>
 
 <script setup>
@@ -200,6 +210,7 @@ import GoogleSignInBtn from '@/assets/img/google/1x/btn_google_signin_light_norm
 import GoogleSignInBtn2x from '@/assets/img/google/2x/btn_google_signin_light_normal_web@2x.png';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
+import ConfirmationModal from "@/components/ConfirmationModal.vue";
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -207,6 +218,9 @@ const call = inject('call');
 const refresh = inject('refresh');
 
 const calendarConnectError = ref('');
+
+const deleteCalendarModalOpen = ref(false);
+const deleteCalendarModalTarget = ref(null);
 
 // Temp until we get a store solution rolling
 const loading = ref(false);
@@ -243,6 +257,11 @@ const calendarInput = reactive({
 });
 const isCalDav = computed(() => calendarInput.data.provider === calendarProviders.caldav);
 const isGoogle = computed(() => calendarInput.data.provider === calendarProviders.google);
+
+const closeModals = async () => {
+  deleteCalendarModalTarget.value = null;
+  deleteCalendarModalOpen.value = false;
+};
 
 const refreshData = async () => {
   await refresh({ onlyConnectedCalendars: false });
@@ -284,12 +303,18 @@ const editCalendar = async (id) => {
   });
 };
 
-// do remove a given calendar connection
 const deleteCalendar = async (id) => {
+  deleteCalendarModalTarget.value = id;
+  deleteCalendarModalOpen.value = true;
+};
+
+// do remove a given calendar connection
+const deleteCalendarConfirm = async () => {
   loading.value = true;
 
-  await call(`cal/${id}`).delete();
+  await call(`cal/${deleteCalendarModalTarget.value}`).delete();
   await refreshData();
+  await closeModals();
 };
 
 // do save calendar data

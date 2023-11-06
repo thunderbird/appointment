@@ -9,7 +9,7 @@ You can either build preconfigured docker containers (database, backend and fron
 ### With Docker
 
 ```bash
-git clone https://github.com/thundernest/appointment
+git clone https://github.com/thunderbird/appointment
 cd appointment
 docker-compose up -d --build
 ```
@@ -36,7 +36,7 @@ Run application for development with hot reloading backend and frontend:
 1. Get the application data
 
     ```bash
-    git clone https://github.com/thundernest/appointment
+    git clone https://github.com/thunderbird/appointment
     ```
 
 2. Install, configure and run python backend (it's recommended to do this in a virtual environment)

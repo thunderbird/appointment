@@ -34,6 +34,12 @@ class AppointmentStatus(enum.Enum):
     closed = 3  # appointment is published and fulfilled or manually closed for attendees
 
 
+class BookingStatus(enum.Enum):
+    none = 1  # slot status doesn't matter, because the parent object holds the state
+    requested = 2  # booking slot was requested
+    booked = 3  # booking slot was assigned
+
+
 class LocationType(enum.Enum):
     inperson = 1  # appointment is held in person
     online = 2  # appointment is held online
@@ -59,23 +65,12 @@ class Subscriber(Base):
     __tablename__ = "subscribers"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(
-        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255),
-        unique=True,
-        index=True,
-    )
-    email = Column(
-        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255),
-        unique=True,
-        index=True,
-    )
+    username = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
+    email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
     timezone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    google_tkn = Column(
-        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048),
-        index=False,
-    )
+    google_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
     # Temp storage for verifying google state tokens between authentication
     google_state = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
     google_state_expires_at = Column(DateTime)
@@ -93,10 +88,7 @@ class Calendar(Base):
     provider = Column(Enum(CalendarProvider), default=CalendarProvider.caldav)
     title = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     color = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=32), index=True)
-    url = Column(
-        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048),
-        index=False,
-    )
+    url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
     user = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
     connected = Column(Boolean, index=True, default=False)
@@ -123,11 +115,7 @@ class Appointment(Base):
     location_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
     location_phone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
     details = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    slug = Column(
-        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255),
-        unique=True,
-        index=True,
-    )
+    slug = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
@@ -150,13 +138,19 @@ class Slot(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     appointment_id = Column(Integer, ForeignKey("appointments.id"))
+    schedule_id = Column(Integer, ForeignKey("schedules.id"))
     attendee_id = Column(Integer, ForeignKey("attendees.id"))
     subscriber_id = Column(Integer, ForeignKey("subscribers.id"))
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
     start = Column(DateTime)
     duration = Column(Integer)
+    # columns for availability bookings
+    booking_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
+    booking_expires_at = Column(DateTime)
+    booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
     appointment = relationship("Appointment", back_populates="slots")
+    schedule = relationship("Schedule", back_populates="slots")
     attendee = relationship("Attendee", cascade="all,delete", back_populates="slots")
     subscriber = relationship("Subscriber", back_populates="slots")
 
@@ -184,11 +178,12 @@ class Schedule(Base):
 
     calendar = relationship("Calendar", back_populates="schedules")
     availabilities = relationship("Availability", cascade="all,delete", back_populates="schedule")
+    slots = relationship("Slot", cascade="all,delete", back_populates="schedule")
 
 
 class Availability(Base):
     """This table will be used as soon as the application provides custom availability
-    in addition to the general availability
+       in addition to the general availability
     """
 
     __tablename__ = "availabilities"
@@ -198,9 +193,8 @@ class Availability(Base):
     day_of_week = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     start_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     end_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    min_time_before_meeting = Column(
-        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True
-    )  # i.e., Can't book if it's less than X minutes before start time.
+    # Can't book if it's less than X minutes before start time:
+    min_time_before_meeting = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
