@@ -91,7 +91,7 @@ class Auth:
 
 
 def sign_url(url: str):
-    """helper to sign a url for given user data"""
+    """helper to sign a given url"""
     secret = os.getenv("SIGNED_SECRET")
 
     if not secret:
@@ -101,3 +101,22 @@ def sign_url(url: str):
     message = f"{url}".encode()
     signature = hmac.new(key, message, hashlib.sha256).hexdigest()
     return signature
+
+
+def signed_url_by_subscriber(subscriber: schemas.Subscriber):
+    """helper to generated signed url for given subscriber"""
+    short_url = os.getenv("SHORT_BASE_URL")
+    base_url = f"{os.getenv('FRONTEND_URL')}/user"
+
+    # If we don't have a short url, then use the default url with /user added to it
+    if not short_url:
+        short_url = base_url
+
+    # We sign with a different hash that the end-user doesn't have access to
+    # We also need to use the default url, as short urls are currently setup as a redirect
+    url = f"{base_url}/{subscriber.username}/{subscriber.short_link_hash}"
+
+    signature = sign_url(url)
+
+    # We return with the signed url signature
+    return f"{short_url}/{subscriber.username}/{signature}"
