@@ -535,7 +535,7 @@ def create_subscriber_external_connection(db: Session, external_connection: Exte
 
 
 def update_subscriber_external_connection_token(db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None):
-    db_results = get_external_connection_by_type(db, subscriber_id, type, type_id)
+    db_results = get_external_connections_by_type(db, subscriber_id, type, type_id)
     if db_results is None or len(db_results) == 0:
         return None
 
@@ -546,7 +546,18 @@ def update_subscriber_external_connection_token(db: Session, token: str, subscri
     return db_external_connection
 
 
-def get_external_connection_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None):
+def delete_external_connections_by_type_id(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str):
+    connections = get_external_connections_by_type(db, subscriber_id, type, type_id)
+
+    # There should be one by type id, but just in case..
+    for connection in connections:
+        db.delete(connection)
+    db.commit()
+
+    return True
+
+
+def get_external_connections_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None):
     """Return a subscribers external connections by type, and optionally type id"""
     query = (
         db.query(models.ExternalConnections)

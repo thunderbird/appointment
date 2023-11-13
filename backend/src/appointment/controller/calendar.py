@@ -258,6 +258,8 @@ class Tools:
         event.add("dtstamp", datetime.utcnow())
         event["description"] = appointment.details
         event["organizer"] = org
+        if appointment.location_url != "" or appointment.location_url is not None:
+            event.add('location', appointment.location_url)
         cal.add_component(event)
         return cal.to_ical()
 

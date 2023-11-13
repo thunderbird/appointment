@@ -50,6 +50,30 @@
         />
       </div>
     </div>
+    <div class="pl-6 max-w-3xl">
+      <div class="text-xl mb-4">{{ t('heading.zoom') }}</div>
+      <div>
+        <p>{{ t('text.connectZoom') }}</p>
+      </div>
+      <div class="pl-4 mt-4 flex items-center">
+        <div class="w-full max-w-2xs">
+          <p v-if="hasZoomAccountConnected">{{ t('label.connectedAs', { name: zoomAccountName }) }}</p>
+          <p v-if="!hasZoomAccountConnected">{{ t('label.notConnected') }}</p>
+        </div>
+        <div class="mx-auto mr-0">
+          <primary-button
+          v-if="!hasZoomAccountConnected"
+          :label="t('label.connect')"
+          @click="connectZoom"
+        />
+        <caution-button
+          v-if="hasZoomAccountConnected"
+          :label="t('label.disconnect')"
+          @click="disconnectZoom"
+        />
+        </div>
+      </div>
+    </div>
     <div class="pl-6">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="pl-4 mt-4">
@@ -122,7 +146,7 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, watch,
+  ref, inject, onMounted, watch, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuth0 } from '@auth0/auth0-vue';
@@ -141,6 +165,10 @@ const refresh = inject('refresh');
 const call = inject('call');
 const router = useRouter();
 const auth0 = useAuth0();
+
+const externalConnections = ref({});
+const hasZoomAccountConnected = computed(() => (externalConnections.value?.zoom?.length ?? []) > 0);
+const zoomAccountName = computed(() => (externalConnections.value?.zoom[0].name ?? null));
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -171,8 +199,14 @@ const getSignedUserUrl = async () => {
   signedUserUrl.value = data.value.url;
 };
 
+const getExternalConnections = async () => {
+  const { data } = await call('account/external-connections').get().json();
+  externalConnections.value = data.value;
+};
+
 const refreshData = async () => Promise.all([
   getSignedUserUrl(),
+  getExternalConnections(),
   refresh(),
 ]);
 
@@ -213,6 +247,16 @@ const updateUserCheckForConfirmation = async () => {
 onMounted(async () => {
   await refreshData();
 });
+
+const connectZoom = async () => {
+  const { data } = await call('zoom/auth').get().json();
+  // Ship them to the auth link
+  window.location.href = data.value.url;
+};
+const disconnectZoom = async () => {
+  await call('zoom/disconnect').post();
+  await refreshData();
+};
 
 const downloadData = async () => {
   downloadAccountModalOpen.value = true;

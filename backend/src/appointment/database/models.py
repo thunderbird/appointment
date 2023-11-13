@@ -56,7 +56,14 @@ class DayOfWeek(enum.Enum):
 
 
 class ExternalConnectionType(enum.Enum):
-    Zoom = 1
+    zoom = 1
+    google = 2
+
+
+class MeetingLinkProviderType(enum.Enum):
+    none = 0
+    zoom = 1
+    google_meet = 2
 
 
 class Subscriber(Base):
@@ -88,6 +95,10 @@ class Subscriber(Base):
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
     external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
+
+    def get_external_connection(self, type: ExternalConnectionType):
+        """Retrieves the first found external connection by type or returns None if not found"""
+        return next(filter(lambda ec: ec.type == type, self.external_connections), None)
 
 
 class Calendar(Base):
@@ -135,6 +146,10 @@ class Appointment(Base):
     )
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
+
+    # So we can keep track of meetings as we delete them
+    meeting_link_provider = Column(Enum(MeetingLinkProviderType), default=MeetingLinkProviderType.none, index=True)
+    meeting_link_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
@@ -186,6 +201,8 @@ class Schedule(Base):
     slot_duration = Column(Integer, default=30)  # defaults to 30 minutes
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    # If not none, what meeting link to create for appointments
+    meeting_link_provider = Column(Enum(MeetingLinkProviderType), default=MeetingLinkProviderType.none, index=True)
 
     calendar = relationship("Calendar", back_populates="schedules")
     availabilities = relationship("Availability", cascade="all,delete", back_populates="schedule")
@@ -219,6 +236,7 @@ class ExternalConnections(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey("subscribers.id"))
+    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
     type = Column(Enum(ExternalConnectionType), index=True)
     type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)

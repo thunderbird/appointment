@@ -106,6 +106,12 @@ export const calendarManagementType = {
   edit: 2,
 };
 
+export const meetingLinkProviderType = {
+  none: 0,
+  zoom: 1,
+  google_meet: 2,
+};
+
 export default {
   subscriberLevels,
   appointmentState,
@@ -120,4 +126,5 @@ export default {
   locationTypes,
   settingsSections,
   viewTypes,
+  meetingLinkProviderType,
 };

@@ -10,7 +10,9 @@ from .models import (
     LocationType,
     CalendarProvider,
     DayOfWeek,
-    random_slug, ExternalConnectionType,
+    random_slug,
+    ExternalConnectionType,
+    MeetingLinkProviderType,
 )
 
 
@@ -73,6 +75,8 @@ class AppointmentBase(BaseModel):
     title: str
     details: str | None = None
     slug: str | None = Field(default_factory=random_slug)
+    # Needed for ical creation
+    location_url: str | None = None
 
 
 class AppointmentFull(AppointmentBase):
@@ -82,10 +86,11 @@ class AppointmentFull(AppointmentBase):
     location_suggestions: str | None = None
     location_selected: str | None = None
     location_name: str | None = None
-    location_url: str | None = None
     location_phone: str | None = None
     keep_open: bool | None = True
     status: AppointmentStatus | None = AppointmentStatus.draft
+    meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
+    meeting_link_id: str | None = None
 
 
 class Appointment(AppointmentFull):
@@ -141,6 +146,7 @@ class ScheduleBase(BaseModel):
     farthest_booking: int | None = None
     weekdays: list[int] | None = [1, 2, 3, 4, 5]
     slot_duration: int | None = None
+    meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
 
     class Config:
         json_encoders = {
@@ -261,8 +267,15 @@ class FileDownload(BaseModel):
 
 class ExternalConnection(BaseModel):
     owner_id: int
+    name: str
     type: ExternalConnectionType
     type_id: str
     token: str
 
+
+class ExternalConnectionOut(BaseModel):
+    owner_id: int
+    name: str
+    type: str
+    type_id: str
 

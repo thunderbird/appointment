@@ -69,9 +69,21 @@
             type="text"
             v-model="scheduleInput.location_url"
             :placeholder="t('placeholder.zoomCom')"
-            :disabled="!scheduleInput.active"
-            class="rounded-md w-full place-holder"
+            :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== meetingLinkProviderType.none"
+            class="rounded-md w-full place-holder disabled:cursor-not-allowed"
           />
+        </label>
+        <label class="flex">
+          <input
+            type="checkbox"
+            id="test"
+            :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
+            @change="toggleZoomLinkCreation"
+            class="rounded-md ml-2 mr-2 mt-1.5"
+          />
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.generateZoomLink") }}
+          </div>
         </label>
         <label class="relative">
           <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
@@ -289,7 +301,7 @@
 </template>
 
 <script setup>
-import { locationTypes, scheduleCreationState } from "@/definitions";
+import {locationTypes, meetingLinkProviderType, scheduleCreationState} from "@/definitions";
 import { ref, reactive, computed, inject, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from '@/stores/user-store';
@@ -363,6 +375,7 @@ const defaultSchedule = {
   farthest_booking: 20160,
   weekdays: [1,2,3,4,5],
   slot_duration: 30,
+  meeting_link_provider: meetingLinkProviderType.none,
 };
 const scheduleInput = ref({ ...defaultSchedule });
 onMounted(() => {
@@ -515,6 +528,16 @@ const saveSchedule = async (withConfirmation = true) => {
 const toggleActive = async (newValue) => {
   scheduleInput.value.active = newValue;
   await saveSchedule(false);
+};
+
+// Work-around for v-model and value not working for some reason...
+const toggleZoomLinkCreation = () => {
+  if (scheduleInput.value.meeting_link_provider === meetingLinkProviderType.none) {
+    scheduleInput.value.meeting_link_provider = meetingLinkProviderType.zoom;
+    return;
+  }
+
+  scheduleInput.value.meeting_link_provider = meetingLinkProviderType.none;
 };
 
 // track if steps were already visited

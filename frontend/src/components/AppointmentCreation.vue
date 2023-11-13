@@ -78,9 +78,22 @@
           <input
             type="text"
             v-model="appointment.location_url"
+            :disabled="appointment.meeting_link_provider !== meetingLinkProviderType.none"
             :placeholder="t('placeholder.zoomCom')"
-            class="rounded-md w-full place-holder"
+            class="rounded-md w-full place-holder disabled:cursor-not-allowed"
           />
+        </label>
+        <label class="flex">
+          <input
+            type="checkbox"
+            id="test"
+            :checked="appointment.meeting_link_provider === meetingLinkProviderType.zoom"
+            @change="toggleZoomLinkCreation"
+            class="rounded-md ml-2 mr-2 mt-1.5"
+          />
+          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            {{ t("label.generateZoomLink") }}
+          </div>
         </label>
         <label class="relative">
           <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
@@ -238,7 +251,7 @@
 </template>
 
 <script setup>
-import { locationTypes } from "@/definitions";
+import {locationTypes, meetingLinkProviderType} from "@/definitions";
 import { ref, reactive, computed, inject, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from '@/stores/user-store';
@@ -288,9 +301,11 @@ const defaultAppointment = {
   location_url: "",
   details: "",
   status: 2, // appointment is opened | TODO: make configurable sometime
+  meeting_link_provider: 0, // 0 == none
 };
 const appointment = reactive({ ...defaultAppointment });
 const appointmentCreationError = ref(null);
+
 
 // tab navigation for location types
 const updateLocationType = (type) => {
@@ -445,6 +460,16 @@ const dateNav = (unit = "month", forward = true) => {
   } else {
     activeDate.value = activeDate.value.subtract(1, unit);
   }
+};
+
+// Work-around for v-model and value not working for some reason...
+const toggleZoomLinkCreation = () => {
+  if (appointment.meeting_link_provider === meetingLinkProviderType.none) {
+    appointment.meeting_link_provider = meetingLinkProviderType.zoom;
+    return;
+  }
+
+  appointment.meeting_link_provider = meetingLinkProviderType.none;
 };
 
 // track if steps were already visited

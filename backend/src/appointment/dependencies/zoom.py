@@ -20,7 +20,7 @@ def get_zoom_client(
         )
 
         # Grab our zoom connection if it's available, we only support one zoom connection...hopefully
-        zoom_connection = next(filter(lambda ec: ec.type == ExternalConnectionType.Zoom, subscriber.external_connections), None)
+        zoom_connection = subscriber.get_external_connection(ExternalConnectionType.zoom)
         token = zoom_connection.token if zoom_connection is not None else None
 
         _zoom_client.setup(subscriber.id, token)

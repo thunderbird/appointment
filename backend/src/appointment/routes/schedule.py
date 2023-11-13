@@ -1,15 +1,23 @@
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, Body
 import logging
 
+from requests import HTTPError
+from sentry_sdk import capture_exception
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
+from ..controller.mailer import ZoomMeetingFailedMail
 from ..database import repo, schemas
-from ..database.models import Subscriber, Schedule, CalendarProvider
+from ..database.models import Subscriber, Schedule, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta
+
+from ..dependencies.zoom import get_zoom_client
 
 router = APIRouter()
 
@@ -71,6 +79,8 @@ def update_schedule(
         raise HTTPException(status_code=404, detail="Schedule not found")
     if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
         raise HTTPException(status_code=403, detail="Schedule not owned by subscriber")
+    if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
+        raise HTTPException(status_code=400, detail="You need a connected Zoom account in order to create a meeting link")
     return repo.update_calendar_schedule(db=db, schedule=schedule, schedule_id=id)
 
 
@@ -85,20 +95,27 @@ def read_schedule_availabilities(
     if not subscriber:
         raise HTTPException(status_code=401, detail="Invalid profile link")
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
         raise HTTPException(status_code=404, detail="Schedule not found")
+
     # check if schedule is enabled
     if not schedule.active:
         raise HTTPException(status_code=404, detail="Schedule not found")
+
     # calculate theoretically possible slots from schedule config
     availableSlots = Tools.available_slots_from_schedule(schedule)
+
     # get all events from all connected calendars in scheduled date range
     existingEvents = []
+
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
+
     if not calendars or len(calendars) == 0:
         raise HTTPException(status_code=404, detail="No calendars found")
+
     for calendar in calendars:
         if calendar is None:
             raise HTTPException(status_code=404, detail="Calendar not found")
@@ -112,13 +129,17 @@ def read_schedule_availabilities(
             )
         else:
             con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+
         farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
         start = schedule.start_date.strftime("%Y-%m-%d")
         end = schedule.end_date.strftime("%Y-%m-%d") if schedule.end_date else farthest_end.strftime("%Y-%m-%d")
         existingEvents.extend(con.list_events(start, end))
+
     actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
+
     if not actualSlots or len(actualSlots) == 0:
         raise HTTPException(status_code=404, detail="No possible booking slots found")
+
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,
@@ -150,6 +171,31 @@ def update_schedule_availability_slot(
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
+
+    location_url = schedule.location_url
+
+    # FIXME: This is just duplicated from the appointment code. We should find a nice way to merge the two.
+    if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
+        try:
+            zoom_client = get_zoom_client(subscriber)
+            response = zoom_client.create_meeting(schedule.name, s_a.slot.start.isoformat(), s_a.slot.duration, subscriber.timezone)
+            if 'id' in response:
+                location_url = zoom_client.get_meeting(response['id'])['join_url']
+        except HTTPError as err:  # Not fatal, just a bummer
+            logging.error("Zoom meeting creation error: ", err)
+
+            # Ensure sentry captures the error too!
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
+            # Notify the organizer that the meeting link could not be created!
+            mail = ZoomMeetingFailedMail(sender=os.getenv('SERVICE_EMAIL'), to=subscriber.email, appointment_title=schedule.name)
+            mail.send()
+        except SQLAlchemyError as err:  # Not fatal, but could make things tricky
+            logging.error("Failed to save the zoom meeting link to the appointment: ", err)
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
     event = schemas.Event(
         title=schedule.name,
         start=s_a.slot.start.isoformat(),
@@ -157,7 +203,7 @@ def update_schedule_availability_slot(
         description=schedule.details,
         location=schemas.EventLocation(
             type=schedule.location_type,
-            url=schedule.location_url,
+            url=location_url,
             name=None,
         ),
     )
@@ -175,7 +221,7 @@ def update_schedule_availability_slot(
     con.create_event(event=event, attendee=s_a.attendee, organizer=subscriber)
 
     # send mail with .ics attachment to attendee
-    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
+    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=location_url)
     Tools().send_vevent(appointment, s_a.slot, subscriber, s_a.attendee)
 
     return s_a

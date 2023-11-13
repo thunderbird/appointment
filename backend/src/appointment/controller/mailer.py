@@ -136,3 +136,20 @@ class InvitationMail(Mailer):
 
     def html(self):
         return get_template("invite.jinja2").render()
+
+
+class ZoomMeetingFailedMail(Mailer):
+    def __init__(self, appointment_title, *args, **kwargs):
+        """init Mailer with invitation specific defaults"""
+        defaultKwargs = {
+            "subject": "[TBA] Zoom Meeting Link Creation Error",
+        }
+        super(ZoomMeetingFailedMail, self).__init__(*args, **defaultKwargs, **kwargs)
+
+        self.appointment_title = appointment_title
+
+    def html(self):
+        return get_template("errors/zoom_invite_failed.jinja2").render(title=self.appointment_title)
+
+    def text(self):
+        return f"Unfortunately there was an error creating your Zoom meeting for your upcoming appointment: {self.appointment_title}"
