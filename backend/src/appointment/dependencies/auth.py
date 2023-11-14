@@ -18,6 +18,5 @@ def get_subscriber(
 ):
     """Automatically retrieve and return the subscriber based on the authenticated Auth0 user"""
     user = repo.get_subscriber_by_email(db, user.email)
-    request.session['user_id'] = user.id
 
     return user

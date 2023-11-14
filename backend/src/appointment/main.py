@@ -2,8 +2,6 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
-from starlette.middleware.sessions import SessionMiddleware
-
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -34,8 +32,7 @@ import sentry_sdk
 # init logging
 level = os.getenv("LOG_LEVEL", "ERROR")
 use_log_stream = os.getenv("LOG_USE_STREAM", False)
-# TODO: limit log file size
-# https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
+
 log_config = {
     "format": "%(asctime)s %(levelname)-8s %(message)s",
     "level": getattr(logging, level),
@@ -74,11 +71,6 @@ def server():
 
     # init app
     app = FastAPI()
-
-    app.add_middleware(
-        SessionMiddleware,
-        secret_key=os.getenv("SESSION_SECRET")
-    )
 
     # allow requests from own frontend running on a different port
     app.add_middleware(
