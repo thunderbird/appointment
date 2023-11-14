@@ -58,11 +58,9 @@ class ZoomClient:
 
         # Need a subscriber attached to this request in order to save a token
         if self.subscriber_id is None:
-            logging.warn(">>> No subscriber id to save access token for!")
             return
 
         with SessionLocal() as db:
-            logging.info(">>> Saving new access token!")
             repo.update_subscriber_external_connection_token(db, json.dumps(token), self.subscriber_id, models.ExternalConnectionType.zoom)
 
     def get_me(self):
@@ -70,8 +68,6 @@ class ZoomClient:
 
     def create_meeting(self, title, start_time, duration, timezone = None):
         # https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/meetingCreate
-
-        logging.info(">>> Start Time -> {0} | Timezone -> {1}".format(start_time, timezone))
 
         response = self.client.post(f'{self.OAUTH_REQUEST_URL}/users/me/meetings', json={
             'type': 2,  # Scheduled Meeting
