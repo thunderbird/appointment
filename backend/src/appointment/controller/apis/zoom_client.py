@@ -36,8 +36,11 @@ class ZoomClient:
 
         self.subscriber_id = subscriber_id
         self.client = OAuth2Session(self.client_id, redirect_uri=self.callback_url, scope=self.SCOPES,
-                                    auto_refresh_url=self.OAUTH_TOKEN_URL, token=token,
+                                    auto_refresh_url=self.OAUTH_TOKEN_URL,
+                                    auto_refresh_kwargs={"client_id": self.client_id, "client_secret": self.client_secret},
+                                    token=token,
                                     token_updater=self.token_saver)
+
         pass
 
     def get_redirect_url(self, state):
