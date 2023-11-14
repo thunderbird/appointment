@@ -14,16 +14,16 @@ from ..src.main import app
 from ..src.dependencies.database import get_db
 from ..src.database.models import CalendarProvider
 
-from ..src.controller.calendar import CalDavConnector
+from ..src.controller.calendar import CalDavConnector, DATEFMT
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///test/test.db"
 
 now = datetime.today()
-DAY1 = now.strftime("%Y-%m-%d")
-DAY2 = (now + timedelta(days=1)).strftime("%Y-%m-%d")
-DAY3 = (now + timedelta(days=2)).strftime("%Y-%m-%d")
-DAY5 = (now + timedelta(days=4)).strftime("%Y-%m-%d")
-DAY14 = (now + timedelta(days=13)).strftime("%Y-%m-%d")
+DAY1 = now.strftime(DATEFMT)
+DAY2 = (now + timedelta(days=1)).strftime(DATEFMT)
+DAY3 = (now + timedelta(days=2)).strftime(DATEFMT)
+DAY5 = (now + timedelta(days=4)).strftime(DATEFMT)
+DAY14 = (now + timedelta(days=13)).strftime(DATEFMT)
 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})

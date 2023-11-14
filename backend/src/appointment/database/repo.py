@@ -428,6 +428,38 @@ def add_appointment_slots(db: Session, slots: list[schemas.SlotBase], appointmen
     return slots
 
 
+def add_schedule_slot(db: Session, slot: schemas.SlotBase, schedule_id: int):
+    """create new slot for schedule of given id"""
+    db_slot = models.Slot(**slot.dict())
+    db_slot.schedule_id = schedule_id
+    db.add(db_slot)
+    db.commit()
+    db.refresh(db_slot)
+    return db_slot
+
+
+def schedule_slot_exists(db: Session, slot: schemas.SlotBase, schedule_id: int):
+    """check if given slot already exists for schedule of given id"""
+    db_slot = (
+        db.query(models.Slot)
+            .filter(models.Slot.schedule_id == schedule_id)
+            .filter(models.Slot.start == slot.start)
+            .filter(models.Slot.duration == slot.duration)
+            .filter(models.Slot.booking_status != models.BookingStatus.none)
+            .first()
+    )
+    return db_slot is not None
+
+
+def book_slot(db: Session, slot_id: int):
+    """update booking status for slot of given id"""
+    db_slot = get_slot(db, slot_id)
+    db_slot.booking_status = models.BookingStatus.booked
+    db.commit()
+    db.refresh(db_slot)
+    return db_slot
+
+
 def delete_appointment_slots(db: Session, appointment_id: int):
     """delete all slots for appointment of given id"""
     return db.query(models.Slot).filter(models.Slot.appointment_id == appointment_id).delete()
@@ -459,10 +491,23 @@ def update_slot(db: Session, slot_id: int, attendee: schemas.Attendee):
     return db_attendee
 
 
-def slot_is_available(db: Session, slot_id: int):
-    """check if slot is still available"""
+def delete_slot(db: Session, slot_id: int):
+    """remove existing slot by id"""
     db_slot = get_slot(db, slot_id)
-    return db_slot and not db_slot.attendee_id and not db_slot.subscriber_id
+    db.delete(db_slot)
+    db.commit()
+    return db_slot
+
+
+def slot_is_available(db: Session, slot_id: int):
+    """check if slot is still available for booking"""
+    slot = get_slot(db, slot_id)
+    isAttended = slot.attendee_id or slot.subscriber_id
+    if slot.appointment:
+        return slot and not isAttended
+    if slot.schedule:
+        return slot and slot.booking_status == models.BookingStatus.requested
+    return False
 
 
 """SCHEDULES repository functions
@@ -519,6 +564,12 @@ def update_calendar_schedule(db: Session, schedule: schemas.ScheduleBase, schedu
 def get_availability_by_schedule(db: Session, schedule_id: int):
     """retrieve availability by schedule id"""
     return db.query(models.Availability).filter(models.Availability.schedule_id == schedule_id).all()
+
+
+def schedule_has_slot(db: Session, schedule_id: int, slot_id: int):
+    """check if slot belongs to schedule"""
+    db_slot = get_slot(db, slot_id)
+    return db_slot and db_slot.schedule_id == schedule_id
 
 
 """External Connections repository functions"""

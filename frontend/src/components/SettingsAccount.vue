@@ -27,13 +27,18 @@
       </label>
       <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
-        <div class="w-full flex justify-between items-center">
-          <input
-            v-model="signedUserUrl"
-            type="text"
-            class="w-full rounded-md mr-2"
-            readonly
-          />
+        <div class="w-full flex justify-between items-center gap-4">
+          <div class="relative w-full">
+            <input
+              v-model="signedUserUrl"
+              type="text"
+              class="w-full rounded-md mr-2 pr-7"
+              readonly
+            />
+            <a :href="signedUserUrl" target="_blank" class="text-gray-500 absolute right-1.5 top-1/2 -translate-y-1/2">
+              <icon-external-link class="w-5 h-5" />
+            </a>
+          </div>
           <text-button :label="t('label.copyLink')" :copy="signedUserUrl" />
         </div>
       </label>
@@ -146,25 +151,28 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, watch, computed,
+  ref, inject, onMounted, computed,
 } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useAuth0 } from '@auth0/auth0-vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
+import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import TextButton from '@/elements/TextButton.vue';
-import CautionButton from '@/elements/CautionButton.vue';
+
+// icons
+import { IconExternalLink } from '@tabler/icons-vue';
 
 // component constants
-const user = useUserStore();
 const { t } = useI18n({ useScope: 'global' });
-const refresh = inject('refresh');
-const call = inject('call');
-const router = useRouter();
 const auth0 = useAuth0();
+const call = inject('call');
+const refresh = inject('refresh');
+const router = useRouter();
+const user = useUserStore();
 
 const externalConnections = ref({});
 const hasZoomAccountConnected = computed(() => (externalConnections.value?.zoom?.length ?? []) > 0);
@@ -324,7 +332,7 @@ const actuallyDownloadData = async () => {
   const fileObj = window.URL.createObjectURL(data.value);
   window.location.assign(fileObj);
 
-  await closeModals();
+  closeModals();
 };
 
 /**

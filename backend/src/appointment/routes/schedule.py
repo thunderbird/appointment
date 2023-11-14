@@ -2,6 +2,7 @@ import os
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 import logging
+import os
 
 from requests import HTTPError
 from sentry_sdk import capture_exception
@@ -9,13 +10,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
-from ..controller.mailer import ZoomMeetingFailedMail
+from ..controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail
+from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
-from ..database.models import Subscriber, Schedule, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
+from ..database.models import Subscriber, Schedule, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.google import get_google_client
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+from urllib.parse import quote_plus
 
 from ..dependencies.zoom import get_zoom_client
 
@@ -109,32 +113,12 @@ def read_schedule_availabilities(
     availableSlots = Tools.available_slots_from_schedule(schedule)
 
     # get all events from all connected calendars in scheduled date range
-    existingEvents = []
-
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
 
     if not calendars or len(calendars) == 0:
         raise HTTPException(status_code=404, detail="No calendars found")
 
-    for calendar in calendars:
-        if calendar is None:
-            raise HTTPException(status_code=404, detail="Calendar not found")
-        if calendar.provider == CalendarProvider.google:
-            con = GoogleConnector(
-                db=db,
-                google_client=google_client,
-                calendar_id=calendar.user,
-                subscriber_id=subscriber.id,
-                google_tkn=subscriber.google_tkn,
-            )
-        else:
-            con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-
-        farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
-        start = schedule.start_date.strftime("%Y-%m-%d")
-        end = schedule.end_date.strftime("%Y-%m-%d") if schedule.end_date else farthest_end.strftime("%Y-%m-%d")
-        existingEvents.extend(con.list_events(start, end))
-
+    existingEvents = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
     actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
 
     if not actualSlots or len(actualSlots) == 0:
@@ -148,14 +132,13 @@ def read_schedule_availabilities(
     )
 
 
-@router.put("/public/availability", response_model=schemas.AvailabilitySlotAttendee)
-def update_schedule_availability_slot(
+@router.put("/public/availability/request")
+def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
     url: str = Body(..., embed=True),
     db: Session = Depends(get_db),
-    google_client: GoogleClient = Depends(get_google_client),
 ):
-    """endpoint to update a time slot for a schedule via public link and create an event in remote calendar"""
+    """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
         raise HTTPException(status_code=401, detail="Invalid profile link")
@@ -172,59 +155,149 @@ def update_schedule_availability_slot(
     if db_calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
 
-    location_url = schedule.location_url
+    # check if slot still available, might already be taken at this time
+    slot = schemas.SlotBase(**s_a.slot.dict())
+    if repo.schedule_slot_exists(db, slot, schedule.id):
+        raise HTTPException(status_code=403, detail="Slot not available")
 
-    # FIXME: This is just duplicated from the appointment code. We should find a nice way to merge the two.
-    if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
-        try:
-            zoom_client = get_zoom_client(subscriber)
-            response = zoom_client.create_meeting(schedule.name, s_a.slot.start.isoformat(), s_a.slot.duration, subscriber.timezone)
-            if 'id' in response:
-                location_url = zoom_client.get_meeting(response['id'])['join_url']
-        except HTTPError as err:  # Not fatal, just a bummer
-            logging.error("Zoom meeting creation error: ", err)
-
-            # Ensure sentry captures the error too!
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
-
-            # Notify the organizer that the meeting link could not be created!
-            mail = ZoomMeetingFailedMail(sender=os.getenv('SERVICE_EMAIL'), to=subscriber.email, appointment_title=schedule.name)
-            mail.send()
-        except SQLAlchemyError as err:  # Not fatal, but could make things tricky
-            logging.error("Failed to save the zoom meeting link to the appointment: ", err)
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
-
-    event = schemas.Event(
-        title=schedule.name,
-        start=s_a.slot.start.isoformat(),
-        end=(s_a.slot.start + timedelta(minutes=s_a.slot.duration)).isoformat(),
-        description=schedule.details,
-        location=schemas.EventLocation(
-            type=schedule.location_type,
-            url=location_url,
-            name=None,
-        ),
+    # create slot in db with token and expiration date
+    token = random_slug()
+    slot.booking_tkn = token
+    slot.booking_expires_at = datetime.now() + timedelta(days=1)
+    slot.booking_status = BookingStatus.requested
+    slot = repo.add_schedule_slot(db, slot, schedule.id)
+    # create attendee for this slot
+    attendee = repo.update_slot(db, slot.id, s_a.attendee)
+    # generate confirm and deny links with encoded booking token and signed owner url
+    url = f"{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}"
+    # human readable date in subscribers timezone
+    # TODO: handle locale date representation
+    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
+    # send confirmation mail to owner
+    mail = ConfirmationMail(
+        f"{url}/1",
+        f"{url}/0",
+        attendee,
+        f"{date}, {slot.duration} minutes",
+        sender=f"noreply@{os.getenv('SMTP_URL')}",
+        to=subscriber.email
     )
-    # create remote event
-    if db_calendar.provider == CalendarProvider.google:
-        con = GoogleConnector(
-            db=db,
-            google_client=google_client,
-            calendar_id=db_calendar.user,
-            subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+    mail.send()
+    return True
+
+
+@router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
+def request_schedule_availability_slot(
+    data: schemas.AvailabilitySlotConfirmation,
+    db: Session = Depends(get_db),
+    google_client: GoogleClient = Depends(get_google_client),
+):
+    """endpoint to react to owners decision to a request of a time slot of his public link
+       if confirmed: create an event in remote calendar and send invitation mail
+       TODO: if denied: send information mail to bookee
+    """
+    subscriber = repo.verify_subscriber_link(db, data.owner_url)
+    if not subscriber:
+        raise HTTPException(status_code=401, detail="Invalid profile link")
+    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    try:
+        schedule = schedules[0]  # for now we only process the first existing schedule
+    except IndexError:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # check if schedule is enabled
+    if not schedule.active:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    # get calendar
+    calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    if calendar is None:
+        raise HTTPException(status_code=404, detail="Calendar not found")
+    # get slot and check if slot exists and is not booked yet and token is the same
+    slot = repo.get_slot(db, data.slot_id)
+    if (
+        not slot
+        or not repo.slot_is_available(db, slot.id)
+        or not repo.schedule_has_slot(db, schedule.id, slot.id)
+        or slot.booking_tkn != data.slot_token
+    ):
+        raise HTTPException(status_code=404, detail="Booking slot not found")
+    # TODO: check booking expiration date
+    # check if request was denied
+    if data.confirmed == False:
+        # human readable date in subscribers timezone
+        # TODO: handle locale date representation
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
+        # send rejection information to bookee
+        mail = RejectionMail(
+            owner=subscriber,
+            date=f"{date}, {slot.duration} minutes",
+            sender=f"noreply@{os.getenv('SMTP_URL')}",
+            to=slot.attendee.email
         )
+        mail.send()
+        # delete the scheduled slot to make the time available again
+        repo.delete_slot(db, slot.id)
+    # otherwise, confirm slot and create event
     else:
-        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-    con.create_event(event=event, attendee=s_a.attendee, organizer=subscriber)
+        slot = repo.book_slot(db, slot.id)
 
-    # send mail with .ics attachment to attendee
-    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=location_url)
-    Tools().send_vevent(appointment, s_a.slot, subscriber, s_a.attendee)
+        location_url = schedule.location_url
 
-    return s_a
+        # FIXME: This is just duplicated from the appointment code. We should find a nice way to merge the two.
+        if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
+            try:
+                zoom_client = get_zoom_client(subscriber)
+                response = zoom_client.create_meeting(schedule.name, slot.start.isoformat(), slot.duration,
+                                                      subscriber.timezone)
+                if 'id' in response:
+                    location_url = zoom_client.get_meeting(response['id'])['join_url']
+            except HTTPError as err:  # Not fatal, just a bummer
+                logging.error("Zoom meeting creation error: ", err)
+
+                # Ensure sentry captures the error too!
+                if os.getenv('SENTRY_DSN') != '':
+                    capture_exception(err)
+
+                # Notify the organizer that the meeting link could not be created!
+                mail = ZoomMeetingFailedMail(sender=os.getenv('SERVICE_EMAIL'), to=subscriber.email,
+                                             appointment_title=schedule.name)
+                mail.send()
+            except SQLAlchemyError as err:  # Not fatal, but could make things tricky
+                logging.error("Failed to save the zoom meeting link to the appointment: ", err)
+                if os.getenv('SENTRY_DSN') != '':
+                    capture_exception(err)
+
+        event = schemas.Event(
+            title=schedule.name,
+            start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
+            end=(slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat(),
+            description=schedule.details,
+            location=schemas.EventLocation(
+                type=schedule.location_type,
+                url=location_url,
+                name=None,
+            ),
+        )
+        # create remote event
+        if calendar.provider == CalendarProvider.google:
+            con = GoogleConnector(
+                db=db,
+                google_client=google_client,
+                calendar_id=calendar.user,
+                subscriber_id=subscriber.id,
+                google_tkn=subscriber.google_tkn,
+            )
+        else:
+            con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+        con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
+
+        # send mail with .ics attachment to attendee
+        appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=location_url)
+        Tools().send_vevent(appointment, slot, subscriber, slot.attendee)
+
+    return schemas.AvailabilitySlotAttendee(
+        slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
+        attendee=schemas.AttendeeBase(email=slot.attendee.email, name=slot.attendee.name)
+    )
 
 
 @router.put("/serve/ics", response_model=schemas.FileDownload)

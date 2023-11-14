@@ -144,7 +144,10 @@ class GoogleClient:
             # add calendar
             try:
                 repo.update_or_create_subscriber_calendar(
-                    db=db, calendar=cal, calendar_url=calendar.get("id"), subscriber_id=subscriber_id
+                    db=db,
+                    calendar=cal,
+                    calendar_url=calendar.get("id"),
+                    subscriber_id=subscriber_id
                 )
             except Exception as err:
                 logging.warning(
