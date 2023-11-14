@@ -570,6 +570,4 @@ def get_external_connections_by_type(db: Session, subscriber_id: int, type: mode
 
     result = query.all()
 
-    print("Get EC >> ", result)
-
     return result
