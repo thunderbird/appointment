@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 
-from ..database.models import Subscriber, ExternalConnectionType
+from ..database.models import Subscriber
 from ..database import schemas
 
 from fastapi.responses import StreamingResponse

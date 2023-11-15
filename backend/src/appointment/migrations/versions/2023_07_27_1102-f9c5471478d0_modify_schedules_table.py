@@ -8,7 +8,6 @@ Create Date: 2023-07-27 11:02:39.900134
 import os
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import DateTime
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from database.models import LocationType

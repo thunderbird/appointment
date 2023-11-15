@@ -1,5 +1,4 @@
 import json
-import logging
 
 from requests_oauthlib import OAuth2Session
 from ...database import models, repo

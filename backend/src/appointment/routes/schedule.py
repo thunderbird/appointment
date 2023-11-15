@@ -1,4 +1,3 @@
-import os
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 import logging
@@ -13,13 +12,12 @@ from ..controller.apis.google_client import GoogleClient
 from ..controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
-from ..database.models import Subscriber, Schedule, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
+from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
-from urllib.parse import quote_plus
 
 from ..dependencies.zoom import get_zoom_client
 
@@ -187,7 +185,7 @@ def request_schedule_availability_slot(
 
 
 @router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
-def request_schedule_availability_slot(
+def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
@@ -222,7 +220,7 @@ def request_schedule_availability_slot(
         raise HTTPException(status_code=404, detail="Booking slot not found")
     # TODO: check booking expiration date
     # check if request was denied
-    if data.confirmed == False:
+    if data.confirmed is False:
         # human readable date in subscribers timezone
         # TODO: handle locale date representation
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")

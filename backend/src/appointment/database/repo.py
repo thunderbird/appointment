@@ -4,7 +4,6 @@ Repository providing CRUD functions for all database models.
 """
 import os
 import re
-import logging
 from datetime import timedelta, datetime
 
 from fastapi import HTTPException

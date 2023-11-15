@@ -10,7 +10,6 @@ import ssl
 import jinja2
 import validators
 
-from datetime import datetime
 from html import escape
 from email import encoders
 from email.mime.base import MIMEBase

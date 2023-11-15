@@ -3,7 +3,6 @@
 Handle connection to a CalDAV server.
 """
 import json
-import logging
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
