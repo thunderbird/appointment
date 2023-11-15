@@ -36,8 +36,8 @@
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
         <hr />
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.appointmentName") }}
           </div>
           <input
@@ -47,8 +47,8 @@
             class="rounded-md w-full place-holder"
           />
         </label>
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.selectCalendar") }}
           </div>
           <select v-model="appointment.calendar_id" class="rounded-md w-full">
@@ -61,8 +61,8 @@
             </option>
           </select>
         </label>
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.location") }}
           </div>
           <tab-bar
@@ -71,8 +71,8 @@
             @update="updateLocationType"
           />
         </label>
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.videoLink") }}
           </div>
           <input
@@ -83,20 +83,19 @@
             class="rounded-md w-full place-holder disabled:cursor-not-allowed"
           />
         </label>
-        <label class="flex">
+        <label class="flex items-center gap-2">
           <input
             type="checkbox"
-            id="test"
             :checked="appointment.meeting_link_provider === meetingLinkProviderType.zoom"
             @change="toggleZoomLinkCreation"
-            class="rounded-md ml-2 mr-2 mt-1.5"
+            class="rounded-md w-5 h-5"
           />
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.generateZoomLink") }}
           </div>
         </label>
-        <label class="relative">
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="relative flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.notes") }}
           </div>
           <textarea
@@ -106,7 +105,7 @@
             :maxlength="charLimit"
           ></textarea>
           <div
-            class="absolute bottom-3.5 right-3 text-xs"
+            class="absolute bottom-3 right-3 text-xs"
             :class="{
               'text-orange-500': charCount >= charLimit * 0.92,
               '!text-rose-600': charCount === charLimit,
