@@ -300,7 +300,7 @@ const defaultAppointment = {
   location_url: "",
   details: "",
   status: 2, // appointment is opened | TODO: make configurable sometime
-  meeting_link_provider: 0, // 0 == none
+  meeting_link_provider: meetingLinkProviderType.none, // 0 == none
 };
 const appointment = reactive({ ...defaultAppointment });
 const appointmentCreationError = ref(null);

@@ -394,17 +394,21 @@ def update_public_appointment_slot(
     # grab the subscriber
     organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
 
+    location_url = db_appointment.location_url
+
     if db_appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
         try:
             zoom_client = get_zoom_client(subscriber)
             response = zoom_client.create_meeting(db_appointment.title, slot.start.isoformat(), slot.duration, subscriber.timezone)
             if 'id' in response:
-                db_appointment.location_url = zoom_client.get_meeting(response['id'])['join_url']
-                db_appointment.meeting_link_id = response['id']
+                slot.meeting_link_url = zoom_client.get_meeting(response['id'])['join_url']
+                slot.meeting_link_id = response['id']
+
+                location_url = slot.meeting_link_url
 
                 # TODO: If we move to a model-based db functions replace this with a .save()
-                # Save the updated appointment information
-                db.add(db_appointment)
+                # Save the updated slot information
+                db.add(slot)
                 db.commit()
         except HTTPError as err:  # Not fatal, just a bummer
             logging.error("Zoom meeting creation error: ", err)
@@ -431,7 +435,7 @@ def update_public_appointment_slot(
             suggestions=db_appointment.location_suggestions,
             selected=db_appointment.location_selected,
             name=db_appointment.location_name,
-            url=db_appointment.location_url,
+            url=location_url,
             phone=db_appointment.location_phone,
         ),
     )
@@ -470,6 +474,7 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
     if slot is None:
         raise HTTPException(status_code=404, detail="Time slot not found")
     organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
+
     return schemas.FileDownload(
         name="invite",
         content_type="text/calendar",

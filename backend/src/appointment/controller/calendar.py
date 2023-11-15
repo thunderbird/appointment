@@ -263,8 +263,13 @@ class Tools:
         event.add("dtstamp", datetime.utcnow())
         event["description"] = appointment.details
         event["organizer"] = org
-        if appointment.location_url != "" or appointment.location_url is not None:
-            event.add('location', appointment.location_url)
+
+        # Prefer the slot meeting link url over the appointment location url
+        location_url = slot.meeting_link_url if slot.meeting_link_url is not None else appointment.location_url
+
+        if location_url != "" or location_url is not None:
+            event.add('location', location_url)
+
         cal.add_component(event)
         return cal.to_ical()
 

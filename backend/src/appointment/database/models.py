@@ -6,7 +6,7 @@ import enum
 import os
 import uuid
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
-from sqlalchemy_utils import StringEncryptedType
+from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -66,10 +66,10 @@ class ExternalConnectionType(enum.Enum):
     google = 2
 
 
-class MeetingLinkProviderType(enum.Enum):
-    none = 0
-    zoom = 1
-    google_meet = 2
+class MeetingLinkProviderType(enum.StrEnum):
+    none = 'none'
+    zoom = 'zoom'
+    google_meet = 'google_meet'
 
 
 class Subscriber(Base):
@@ -135,9 +135,8 @@ class Appointment(Base):
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
-    # So we can keep track of meetings as we delete them
-    meeting_link_provider = Column(Enum(MeetingLinkProviderType), default=MeetingLinkProviderType.none, index=True)
-    meeting_link_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
+    # What (if any) meeting link will we generate once the meeting is booked
+    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
@@ -165,6 +164,10 @@ class Slot(Base):
     start = Column(DateTime)
     duration = Column(Integer)
 
+    # provider specific id we can use to query against their service
+    meeting_link_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
+    # meeting link override for a appointment or schedule's location url
+    meeting_link_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
 
     # columns for availability bookings
     booking_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
@@ -198,8 +201,9 @@ class Schedule(Base):
     slot_duration = Column(Integer, default=30)  # defaults to 30 minutes
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    # If not none, what meeting link to create for appointments
-    meeting_link_provider = Column(Enum(MeetingLinkProviderType), default=MeetingLinkProviderType.none, index=True)
+
+    # What (if any) meeting link will we generate once the meeting is booked
+    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
 
     calendar = relationship("Calendar", back_populates="schedules")
     availabilities = relationship("Availability", cascade="all,delete", back_populates="schedule")

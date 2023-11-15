@@ -248,6 +248,11 @@ def decide_on_schedule_availability_slot(
                                                       subscriber.timezone)
                 if 'id' in response:
                     location_url = zoom_client.get_meeting(response['id'])['join_url']
+                    slot.meeting_link_id = response['id']
+                    slot.meeting_link_url = location_url
+
+                    db.add(slot)
+                    db.commit()
             except HTTPError as err:  # Not fatal, just a bummer
                 logging.error("Zoom meeting creation error: ", err)
 
@@ -320,7 +325,8 @@ def schedule_serve_ics(
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
         raise HTTPException(status_code=404, detail="Calendar not found")
-    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details)
+
+    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=schedule.location_url)
     return schemas.FileDownload(
         name="invite",
         content_type="text/calendar",

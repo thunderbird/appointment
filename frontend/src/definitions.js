@@ -107,9 +107,9 @@ export const calendarManagementType = {
 };
 
 export const meetingLinkProviderType = {
-  none: 0,
-  zoom: 1,
-  google_meet: 2,
+  none: 'none',
+  zoom: 'zoom',
+  google_meet: 'google_meet',
 };
 
 export default {

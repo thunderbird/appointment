@@ -10,9 +10,11 @@ import os
 from alembic import op
 import sqlalchemy as sa
 
-from database.models import MeetingLinkProviderType
-from sqlalchemy_utils import StringEncryptedType
+from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
+
+from database.models import MeetingLinkProviderType
+
 
 def secret():
     return os.getenv("DB_SECRET")
@@ -25,11 +27,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('appointments', sa.Column("meeting_link_provider", sa.Enum(MeetingLinkProviderType, index=True, default=MeetingLinkProviderType.none)))
-    op.add_column('appointments', sa.Column('meeting_link_id',
-              StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=1024),
-              index=False))
+    op.add_column('appointments', sa.Column("meeting_link_provider", StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), index=False))
 
 def downgrade() -> None:
     op.drop_column('appointments', 'meeting_link_provider')
-    op.drop_column('appointments', 'meeting_link_id')

@@ -44,6 +44,8 @@ class SlotBase(BaseModel):
     booking_tkn: str | None = None
     booking_expires_at: datetime | None = None
     booking_status: BookingStatus | None = BookingStatus.none
+    meeting_link_id: str | None = None
+    meeting_link_url: str | None = None
 
 
 class Slot(SlotBase):
@@ -94,7 +96,6 @@ class AppointmentFull(AppointmentBase):
     keep_open: bool | None = True
     status: AppointmentStatus | None = AppointmentStatus.draft
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
-    meeting_link_id: str | None = None
 
 
 class Appointment(AppointmentFull):
