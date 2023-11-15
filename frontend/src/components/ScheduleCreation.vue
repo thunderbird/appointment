@@ -300,7 +300,7 @@
 </template>
 
 <script setup>
-import {locationTypes, meetingLinkProviderType, scheduleCreationState} from "@/definitions";
+import { locationTypes, meetingLinkProviderType, scheduleCreationState } from "@/definitions";
 import { ref, reactive, computed, inject, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from '@/stores/user-store';
