@@ -73,20 +73,19 @@
             class="rounded-md w-full place-holder disabled:cursor-not-allowed"
           />
         </label>
-        <label class="flex">
+        <label class="flex items-center gap-2">
           <input
             type="checkbox"
-            id="test"
             :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
             @change="toggleZoomLinkCreation"
-            class="rounded-md ml-2 mr-2 mt-1.5"
+            class="rounded-md w-5 h-5"
           />
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.generateZoomLink") }}
           </div>
         </label>
-        <label class="relative">
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="relative flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.notes") }}
           </div>
           <textarea
@@ -97,7 +96,7 @@
             :maxlength="charLimit"
           ></textarea>
           <div
-            class="absolute bottom-3.5 right-3 text-xs"
+            class="absolute bottom-3 right-3 text-xs"
             :class="{
               'text-orange-500': charCount >= charLimit * 0.92,
               '!text-rose-600': charCount === charLimit,
