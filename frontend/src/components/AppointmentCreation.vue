@@ -36,8 +36,8 @@
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
         <hr />
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.appointmentName") }}
           </div>
           <input
@@ -47,8 +47,8 @@
             class="rounded-md w-full place-holder"
           />
         </label>
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.selectCalendar") }}
           </div>
           <select v-model="appointment.calendar_id" class="rounded-md w-full">
@@ -61,8 +61,8 @@
             </option>
           </select>
         </label>
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.location") }}
           </div>
           <tab-bar
@@ -71,19 +71,31 @@
             @update="updateLocationType"
           />
         </label>
-        <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.videoLink") }}
           </div>
           <input
             type="text"
             v-model="appointment.location_url"
+            :disabled="appointment.meeting_link_provider !== meetingLinkProviderType.none"
             :placeholder="t('placeholder.zoomCom')"
-            class="rounded-md w-full place-holder"
+            class="rounded-md w-full place-holder disabled:cursor-not-allowed"
           />
         </label>
-        <label class="relative">
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            :checked="appointment.meeting_link_provider === meetingLinkProviderType.zoom"
+            @change="toggleZoomLinkCreation"
+            class="rounded-md w-5 h-5"
+          />
+          <div class="font-medium text-gray-500 dark:text-gray-300">
+            {{ t("label.generateZoomLink") }}
+          </div>
+        </label>
+        <label class="relative flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.notes") }}
           </div>
           <textarea
@@ -93,7 +105,7 @@
             :maxlength="charLimit"
           ></textarea>
           <div
-            class="absolute bottom-3.5 right-3 text-xs"
+            class="absolute bottom-3 right-3 text-xs"
             :class="{
               'text-orange-500': charCount >= charLimit * 0.92,
               '!text-rose-600': charCount === charLimit,
@@ -238,7 +250,7 @@
 </template>
 
 <script setup>
-import { locationTypes } from "@/definitions";
+import {locationTypes, meetingLinkProviderType} from "@/definitions";
 import { ref, reactive, computed, inject, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from '@/stores/user-store';
@@ -288,9 +300,11 @@ const defaultAppointment = {
   location_url: "",
   details: "",
   status: 2, // appointment is opened | TODO: make configurable sometime
+  meeting_link_provider: meetingLinkProviderType.none, // 0 == none
 };
 const appointment = reactive({ ...defaultAppointment });
 const appointmentCreationError = ref(null);
+
 
 // tab navigation for location types
 const updateLocationType = (type) => {
@@ -445,6 +459,16 @@ const dateNav = (unit = "month", forward = true) => {
   } else {
     activeDate.value = activeDate.value.subtract(1, unit);
   }
+};
+
+// Work-around for v-model and value not working for some reason...
+const toggleZoomLinkCreation = () => {
+  if (appointment.meeting_link_provider === meetingLinkProviderType.none) {
+    appointment.meeting_link_provider = meetingLinkProviderType.zoom;
+    return;
+  }
+
+  appointment.meeting_link_provider = meetingLinkProviderType.none;
 };
 
 // track if steps were already visited

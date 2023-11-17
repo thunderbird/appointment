@@ -69,12 +69,23 @@
             type="text"
             v-model="scheduleInput.location_url"
             :placeholder="t('placeholder.zoomCom')"
-            :disabled="!scheduleInput.active"
-            class="rounded-md w-full place-holder"
+            :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== meetingLinkProviderType.none"
+            class="rounded-md w-full place-holder disabled:cursor-not-allowed"
           />
         </label>
-        <label class="relative">
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+        <label class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
+            @change="toggleZoomLinkCreation"
+            class="rounded-md w-5 h-5"
+          />
+          <div class="font-medium text-gray-500 dark:text-gray-300">
+            {{ t("label.generateZoomLink") }}
+          </div>
+        </label>
+        <label class="relative flex flex-col gap-1">
+          <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.notes") }}
           </div>
           <textarea
@@ -85,7 +96,7 @@
             :maxlength="charLimit"
           ></textarea>
           <div
-            class="absolute bottom-3.5 right-3 text-xs"
+            class="absolute bottom-3 right-3 text-xs"
             :class="{
               'text-orange-500': charCount >= charLimit * 0.92,
               '!text-rose-600': charCount === charLimit,
@@ -289,7 +300,7 @@
 </template>
 
 <script setup>
-import { locationTypes, scheduleCreationState } from "@/definitions";
+import { locationTypes, meetingLinkProviderType, scheduleCreationState } from "@/definitions";
 import { ref, reactive, computed, inject, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStore } from '@/stores/user-store';
@@ -363,6 +374,7 @@ const defaultSchedule = {
   farthest_booking: 20160,
   weekdays: [1,2,3,4,5],
   slot_duration: 30,
+  meeting_link_provider: meetingLinkProviderType.none,
 };
 const scheduleInput = ref({ ...defaultSchedule });
 onMounted(() => {
@@ -515,6 +527,16 @@ const saveSchedule = async (withConfirmation = true) => {
 const toggleActive = async (newValue) => {
   scheduleInput.value.active = newValue;
   await saveSchedule(false);
+};
+
+// Work-around for v-model and value not working for some reason...
+const toggleZoomLinkCreation = () => {
+  if (scheduleInput.value.meeting_link_provider === meetingLinkProviderType.none) {
+    scheduleInput.value.meeting_link_provider = meetingLinkProviderType.zoom;
+    return;
+  }
+
+  scheduleInput.value.meeting_link_provider = meetingLinkProviderType.none;
 };
 
 // track if steps were already visited

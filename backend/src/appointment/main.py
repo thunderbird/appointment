@@ -32,8 +32,7 @@ import sentry_sdk
 # init logging
 level = os.getenv("LOG_LEVEL", "ERROR")
 use_log_stream = os.getenv("LOG_USE_STREAM", False)
-# TODO: limit log file size
-# https://docs.python.org/3/library/logging.handlers.html#rotatingfilehandler
+
 log_config = {
     "format": "%(asctime)s %(levelname)-8s %(message)s",
     "level": getattr(logging, level),
@@ -68,6 +67,7 @@ def server():
     from .routes import account
     from .routes import google
     from .routes import schedule
+    from .routes import zoom
 
     # init app
     app = FastAPI()
@@ -87,6 +87,7 @@ def server():
         allow_headers=["*"],
     )
 
+
     @app.exception_handler(RefreshError)
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
@@ -97,6 +98,8 @@ def server():
     app.include_router(account.router, prefix="/account")
     app.include_router(google.router, prefix="/google")
     app.include_router(schedule.router, prefix="/schedule")
+    if os.getenv("ZOOM_API_ENABLED"):
+        app.include_router(zoom.router, prefix="/zoom")
 
     return app
 

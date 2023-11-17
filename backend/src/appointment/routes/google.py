@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 
-from ..controller.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient
 from ..database import repo
 from sqlalchemy.orm import Session
 

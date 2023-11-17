@@ -6,7 +6,7 @@ import enum
 import os
 import uuid
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
-from sqlalchemy_utils import StringEncryptedType
+from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -61,6 +61,17 @@ class DayOfWeek(enum.Enum):
     Sunday = 7
 
 
+class ExternalConnectionType(enum.Enum):
+    zoom = 1
+    google = 2
+
+
+class MeetingLinkProviderType(enum.StrEnum):
+    none = 'none'
+    zoom = 'zoom'
+    google_meet = 'google_meet'
+
+
 class Subscriber(Base):
     __tablename__ = "subscribers"
 
@@ -78,6 +89,11 @@ class Subscriber(Base):
 
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
+    external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
+
+    def get_external_connection(self, type: ExternalConnectionType):
+        """Retrieves the first found external connection by type or returns None if not found"""
+        return next(filter(lambda ec: ec.type == type, self.external_connections), None)
 
 
 class Calendar(Base):
@@ -119,6 +135,9 @@ class Appointment(Base):
     keep_open = Column(Boolean)
     status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
+    # What (if any) meeting link will we generate once the meeting is booked
+    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
 
@@ -144,6 +163,12 @@ class Slot(Base):
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
     start = Column(DateTime)
     duration = Column(Integer)
+
+    # provider specific id we can use to query against their service
+    meeting_link_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
+    # meeting link override for a appointment or schedule's location url
+    meeting_link_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
+
     # columns for availability bookings
     booking_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
     booking_expires_at = Column(DateTime)
@@ -151,6 +176,7 @@ class Slot(Base):
 
     appointment = relationship("Appointment", back_populates="slots")
     schedule = relationship("Schedule", back_populates="slots")
+
     attendee = relationship("Attendee", cascade="all,delete", back_populates="slots")
     subscriber = relationship("Subscriber", back_populates="slots")
 
@@ -176,6 +202,9 @@ class Schedule(Base):
     time_created = Column(DateTime, server_default=func.now())
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
+    # What (if any) meeting link will we generate once the meeting is booked
+    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+
     calendar = relationship("Calendar", back_populates="schedules")
     availabilities = relationship("Availability", cascade="all,delete", back_populates="schedule")
     slots = relationship("Slot", cascade="all,delete", back_populates="schedule")
@@ -200,3 +229,19 @@ class Availability(Base):
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     schedule = relationship("Schedule", back_populates="availabilities")
+
+
+class ExternalConnections(Base):
+    """This table holds all external service connections to a subscriber."""
+    __tablename__ = "external_connections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey("subscribers.id"))
+    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
+    type = Column(Enum(ExternalConnectionType), index=True)
+    type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
+    time_created = Column(DateTime, server_default=func.now())
+    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    owner = relationship("Subscriber", back_populates="external_connections")
