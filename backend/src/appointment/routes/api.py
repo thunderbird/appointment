@@ -417,7 +417,7 @@ def update_public_appointment_slot(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            mail = ZoomMeetingFailedMail(sender=os.getenv('SERVICE_EMAIL'), to=organizer.email, appointment_title=db_appointment.title)
+            mail = ZoomMeetingFailedMail(to=organizer.email, appointment_title=db_appointment.title)
             mail.send()
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error("Failed to save the zoom meeting link to the appointment: ", err)
