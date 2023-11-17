@@ -31,6 +31,7 @@ def normalize_secrets():
         os.environ["DB_SECRET"] = secrets.get("secret")
         # Technically not db related...might rename this item later.
         os.environ["SIGNED_SECRET"] = secrets.get("signed_secret")
+        os.environ["SESSION_SECRET"] = secrets.get("session_secret")
 
     smtp_secrets = os.getenv("SMTP_SECRETS")
 

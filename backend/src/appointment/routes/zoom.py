@@ -1,7 +1,7 @@
 import json
 import os
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -18,6 +18,7 @@ router = APIRouter()
 
 @router.get("/auth")
 def zoom_auth(
+    request: Request,
     subscriber: Subscriber = Depends(get_subscriber),
     zoom_client: ZoomClient = Depends(get_zoom_client),
 ):
@@ -25,19 +26,34 @@ def zoom_auth(
 
     url, state = zoom_client.get_redirect_url(state=sign_url(str(subscriber.id)))
 
+    # We'll need to store this in session
+    request.session['zoom_state'] = state
+    request.session['zoom_user_id'] = subscriber.id
+
     return {'url': url}
 
 
 @router.get("/callback")
 def zoom_callback(
+    request: Request,
     code: str,
     state: str,
-    zoom_client: ZoomClient = Depends(get_zoom_client),
-    subscriber: Subscriber = Depends(get_subscriber),
     db=Depends(get_db),
 ):
-    if sign_url(str(subscriber.id)) != state:
-        raise RuntimeError("States do not match!")
+    if 'zoom_state' not in request.session or request.session['zoom_state'] != state:
+        raise HTTPException(400, "Invalid state.")
+    if 'zoom_user_id' not in request.session or 'zoom_user_id' == '':
+        raise HTTPException(400, "User ID could not be retrieved.")
+
+    # Retrieve the user id set at the start of the zoom oauth process
+    subscriber = repo.get_subscriber(db, request.session['zoom_user_id'])
+
+    # Clear zoom session keys
+    request.session.pop('zoom_state')
+    request.session.pop('zoom_user_id')
+
+    # Generate the zoom client instance based on our subscriber (this can't be set as a dep injection since subscriber is based on session.
+    zoom_client: ZoomClient = get_zoom_client(subscriber)
 
     creds = zoom_client.get_credentials(code)
 

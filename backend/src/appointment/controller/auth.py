@@ -26,7 +26,7 @@ class Auth:
     def __init__(self):
         """verify Appointment subscription via Auth0, return user or None"""
         scopes = {"read:calendars": "Read Calendar Ressources"}  # TODO
-        self.auth0 = Auth0(domain=domain, api_audience=api_audience, scopes=scopes)
+        self.auth0 = Auth0(domain=domain, api_audience=api_audience, scopes=scopes, auto_error=False)
 
     def persist_user(self, db: Session, user: Auth0User):
         """Sync authed user to Appointment db"""
