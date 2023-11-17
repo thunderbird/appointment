@@ -100,6 +100,7 @@ const call = createFetch({
   },
   fetchOptions: {
     mode: "cors",
+    credentials: "include",
   },
 });
 provide("auth", auth);

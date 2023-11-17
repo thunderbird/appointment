@@ -2,6 +2,8 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
+from starlette.middleware.sessions import SessionMiddleware
+
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -71,6 +73,11 @@ def server():
 
     # init app
     app = FastAPI()
+
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=os.getenv("SESSION_SECRET")
+    )
 
     # allow requests from own frontend running on a different port
     app.add_middleware(
