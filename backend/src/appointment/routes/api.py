@@ -1,10 +1,16 @@
+import logging
 import os
 import secrets
 
 import validators
+from requests import HTTPError
+from sentry_sdk import capture_exception
+from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
+
+from ..controller.mailer import ZoomMeetingFailedMail
 from ..database import repo, schemas
 
 # authentication
@@ -13,12 +19,13 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
 from datetime import timedelta, timezone
-from ..controller.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
-from ..database.models import Subscriber, CalendarProvider
+from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber, auth
 from ..dependencies.database import get_db
+from ..dependencies.zoom import get_zoom_client
 
 router = APIRouter()
 
@@ -294,6 +301,8 @@ def create_my_calendar_appointment(
         raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
     if not repo.calendar_is_connected(db, calendar_id=a_s.appointment.calendar_id):
         raise HTTPException(status_code=403, detail="Calendar connection is not active")
+    if a_s.appointment.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
+        raise HTTPException(status_code=400, detail="You need a connected Zoom account in order to create a meeting link")
     return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 
@@ -364,6 +373,7 @@ def update_public_appointment_slot(
     s_a: schemas.SlotAttendee,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
+    subscriber: Subscriber = Depends(get_subscriber)
 ):
     """endpoint to update a time slot for an appointment via public link and create an event in remote calendar"""
     db_appointment = repo.get_public_appointment(db, slug=slug)
@@ -378,7 +388,43 @@ def update_public_appointment_slot(
         raise HTTPException(status_code=403, detail="Time slot not available anymore")
     if not validators.email(s_a.attendee.email):
         raise HTTPException(status_code=400, detail="No valid email provided")
+
     slot = repo.get_slot(db=db, slot_id=s_a.slot_id)
+
+    # grab the subscriber
+    organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
+
+    location_url = db_appointment.location_url
+
+    if db_appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
+        try:
+            zoom_client = get_zoom_client(subscriber)
+            response = zoom_client.create_meeting(db_appointment.title, slot.start.isoformat(), slot.duration, subscriber.timezone)
+            if 'id' in response:
+                slot.meeting_link_url = zoom_client.get_meeting(response['id'])['join_url']
+                slot.meeting_link_id = response['id']
+
+                location_url = slot.meeting_link_url
+
+                # TODO: If we move to a model-based db functions replace this with a .save()
+                # Save the updated slot information
+                db.add(slot)
+                db.commit()
+        except HTTPError as err:  # Not fatal, just a bummer
+            logging.error("Zoom meeting creation error: ", err)
+
+            # Ensure sentry captures the error too!
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
+            # Notify the organizer that the meeting link could not be created!
+            mail = ZoomMeetingFailedMail(sender=os.getenv('SERVICE_EMAIL'), to=organizer.email, appointment_title=db_appointment.title)
+            mail.send()
+        except SQLAlchemyError as err:  # Not fatal, but could make things tricky
+            logging.error("Failed to save the zoom meeting link to the appointment: ", err)
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
     event = schemas.Event(
         title=db_appointment.title,
         start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
@@ -389,12 +435,10 @@ def update_public_appointment_slot(
             suggestions=db_appointment.location_suggestions,
             selected=db_appointment.location_selected,
             name=db_appointment.location_name,
-            url=db_appointment.location_url,
+            url=location_url,
             phone=db_appointment.location_phone,
         ),
     )
-    # grab the subscriber
-    organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
 
     # create remote event
     if db_calendar.provider == CalendarProvider.google:
@@ -430,6 +474,7 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
     if slot is None:
         raise HTTPException(status_code=404, detail="Time slot not found")
     organizer = repo.get_subscriber_by_appointment(db=db, appointment_id=db_appointment.id)
+
     return schemas.FileDownload(
         name="invite",
         content_type="text/calendar",

@@ -3,14 +3,13 @@
 Handle connection to a CalDAV server.
 """
 import json
-import logging
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse
 
-from .google_client import GoogleClient
+from .apis.google_client import GoogleClient
 from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
@@ -264,6 +263,13 @@ class Tools:
         event.add("dtstamp", datetime.utcnow())
         event["description"] = appointment.details
         event["organizer"] = org
+
+        # Prefer the slot meeting link url over the appointment location url
+        location_url = slot.meeting_link_url if slot.meeting_link_url is not None else appointment.location_url
+
+        if location_url != "" or location_url is not None:
+            event.add('location', location_url)
+
         cal.add_component(event)
         return cal.to_ical()
 

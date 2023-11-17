@@ -4,12 +4,12 @@ Repository providing CRUD functions for all database models.
 """
 import os
 import re
-import logging
 from datetime import timedelta, datetime
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
+from .schemas import ExternalConnection
 from ..controller.auth import sign_url
 
 
@@ -569,3 +569,55 @@ def schedule_has_slot(db: Session, schedule_id: int, slot_id: int):
     """check if slot belongs to schedule"""
     db_slot = get_slot(db, slot_id)
     return db_slot and db_slot.schedule_id == schedule_id
+
+
+"""External Connections repository functions"""
+
+
+def create_subscriber_external_connection(db: Session, external_connection: ExternalConnection):
+    db_external_connection = models.ExternalConnections(
+        **external_connection.dict()
+    )
+    db.add(db_external_connection)
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
+def update_subscriber_external_connection_token(db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None):
+    db_results = get_external_connections_by_type(db, subscriber_id, type, type_id)
+    if db_results is None or len(db_results) == 0:
+        return None
+
+    db_external_connection = db_results[0]
+    db_external_connection.token = token
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
+def delete_external_connections_by_type_id(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str):
+    connections = get_external_connections_by_type(db, subscriber_id, type, type_id)
+
+    # There should be one by type id, but just in case..
+    for connection in connections:
+        db.delete(connection)
+    db.commit()
+
+    return True
+
+
+def get_external_connections_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None):
+    """Return a subscribers external connections by type, and optionally type id"""
+    query = (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.owner_id == subscriber_id)
+        .filter(models.ExternalConnections.type == type)
+    )
+
+    if type_id is not None:
+        query = query.filter(models.ExternalConnections.type_id == type_id)
+
+    result = query.all()
+
+    return result

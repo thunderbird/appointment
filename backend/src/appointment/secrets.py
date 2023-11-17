@@ -53,3 +53,11 @@ def normalize_secrets():
         os.environ["GOOGLE_AUTH_SECRET"] = secrets.get("secret")
         os.environ["GOOGLE_AUTH_PROJECT_ID"] = secrets.get("project_id")
         os.environ["GOOGLE_AUTH_CALLBACK"] = secrets.get("callback_url")
+
+    zoom_secrets = os.getenv("ZOOM_SECRETS")
+
+    if zoom_secrets:
+        secrets = json.loads(zoom_secrets)
+
+        os.environ["ZOOM_AUTH_CLIENT_ID"] = secrets.get("client_id")
+        os.environ["ZOOM_AUTH_SECRET"] = secrets.get("secret")
