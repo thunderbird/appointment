@@ -373,7 +373,6 @@ def update_public_appointment_slot(
     s_a: schemas.SlotAttendee,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
-    subscriber: Subscriber = Depends(get_subscriber)
 ):
     """endpoint to update a time slot for an appointment via public link and create an event in remote calendar"""
     db_appointment = repo.get_public_appointment(db, slug=slug)
@@ -398,8 +397,8 @@ def update_public_appointment_slot(
 
     if db_appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
         try:
-            zoom_client = get_zoom_client(subscriber)
-            response = zoom_client.create_meeting(db_appointment.title, slot.start.isoformat(), slot.duration, subscriber.timezone)
+            zoom_client = get_zoom_client(organizer)
+            response = zoom_client.create_meeting(db_appointment.title, slot.start.isoformat(), slot.duration, organizer.timezone)
             if 'id' in response:
                 slot.meeting_link_url = zoom_client.get_meeting(response['id'])['join_url']
                 slot.meeting_link_id = response['id']
