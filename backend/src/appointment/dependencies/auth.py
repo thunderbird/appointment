@@ -1,3 +1,5 @@
+import os
+
 from fastapi import Depends, Security, Request, HTTPException
 from fastapi_auth0 import Auth0User
 from sqlalchemy.orm import Session

@@ -1,22 +1,24 @@
-import json
+import os
 import time
 
 from os import getenv as conf
+from unittest.mock import patch
+
+from dotenv import load_dotenv, find_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
-from http.client import HTTPSConnection
-from urllib.parse import quote_plus, urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 
-from ..src.database import models
-from ..src.main import app
-from ..src.dependencies.database import get_db
-from ..src.database.models import CalendarProvider
+# load any available .env into env
+load_dotenv(find_dotenv(".env.test"))
 
-from ..src.controller.calendar import CalDavConnector, DATEFMT
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///test/test.db"
+from ..src.appointment.database import models, repo  # noqa: E402
+from ..src.appointment.database.models import CalendarProvider  # noqa: E402
+from ..src.appointment.controller.calendar import CalDavConnector, DATEFMT  # noqa: E402
+from ..src.appointment.dependencies import database, auth  # noqa: E402
+from ..src.appointment.main import server  # noqa: E402
 
 now = datetime.today()
 DAY1 = now.strftime(DATEFMT)
@@ -25,13 +27,24 @@ DAY3 = (now + timedelta(days=2)).strftime(DATEFMT)
 DAY5 = (now + timedelta(days=4)).strftime(DATEFMT)
 DAY14 = (now + timedelta(days=13)).strftime(DATEFMT)
 
-
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
+
+# Setup our test user
+with TestingSessionLocal() as db:
+    subscriber = models.Subscriber(
+        username="test@example.org",
+        email="test@example.org",
+        name="Test Account",
+        level=models.SubscriberLevel.pro
+    )
+    db.add(subscriber)
+    db.commit()
 
 
 def override_get_db():
@@ -42,27 +55,35 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
+def override_get_subscriber():
+    with TestingSessionLocal() as db:
+        return repo.get_subscriber(db, 1)
+
+
+app = server()
+
+app.dependency_overrides[database.get_db] = override_get_db
+app.dependency_overrides[auth.get_subscriber] = override_get_subscriber
 
 client = TestClient(app)
 
 # handle subscriber authentication
-conn = HTTPSConnection(conf("AUTH0_API_DOMAIN"))
-payload = "grant_type=password&username=%s&password=%s&audience=%s&scope=%s&client_id=%s&client_secret=%s" % (
-    conf("AUTH0_TEST_USER"),
-    conf("AUTH0_TEST_PASS"),
-    quote_plus(conf("AUTH0_API_AUDIENCE")),
-    quote_plus("read:calendars"),
-    conf("AUTH0_API_CLIENT_ID"),
-    conf("AUTH0_API_SECRET"),
-)
-headers = {"content-type": "application/x-www-form-urlencoded"}
-conn.request("POST", "/%s/oauth/token" % conf("AUTH0_API_DOMAIN"), payload, headers)
-
-res = conn.getresponse()
-data = res.read()
-access_token = json.loads(data.decode("utf-8"))["access_token"]
-headers = {"authorization": "Bearer %s" % access_token}
+# conn = HTTPSConnection(conf("AUTH0_API_DOMAIN"))
+# payload = "grant_type=password&username=%s&password=%s&audience=%s&scope=%s&client_id=%s&client_secret=%s" % (
+#     conf("AUTH0_TEST_USER"),
+#     conf("AUTH0_TEST_PASS"),
+#     quote_plus(conf("AUTH0_API_AUDIENCE")),
+#     quote_plus("read:calendars"),
+#     conf("AUTH0_API_CLIENT_ID"),
+#     conf("AUTH0_API_SECRET"),
+# )
+# headers = {"content-type": "application/x-www-form-urlencoded"}
+# conn.request("POST", "/%s/oauth/token" % conf("AUTH0_API_DOMAIN"), payload, headers)
+#
+# res = conn.getresponse()
+# data = res.read()
+# access_token = json.loads(data.decode("utf-8"))["access_token"]
+# headers = {"authorization": "Bearer %s" % access_token}
 
 
 """ general tests for configuration and authentication
