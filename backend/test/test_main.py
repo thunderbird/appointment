@@ -2,14 +2,14 @@ import os
 import time
 
 from os import getenv as conf
-from unittest.mock import patch
-
 from dotenv import load_dotenv, find_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, insert, select
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
+
+from sqlalchemy.pool import StaticPool
 
 # load any available .env into env
 load_dotenv(find_dotenv(".env.test"))
@@ -28,18 +28,20 @@ DAY5 = (now + timedelta(days=4)).strftime(DATEFMT)
 DAY14 = (now + timedelta(days=13)).strftime(DATEFMT)
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 models.Base.metadata.drop_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
 
+test_user_email = "test@example.org"
+
 # Setup our test user
 with TestingSessionLocal() as db:
     subscriber = models.Subscriber(
-        username="test@example.org",
-        email="test@example.org",
+        username=test_user_email,
+        email=test_user_email,
         name="Test Account",
         level=models.SubscriberLevel.pro
     )
@@ -57,7 +59,7 @@ def override_get_db():
 
 def override_get_subscriber():
     with TestingSessionLocal() as db:
-        return repo.get_subscriber(db, 1)
+        return repo.get_subscriber_by_email(db, test_user_email)
 
 
 app = server()
@@ -84,7 +86,7 @@ client = TestClient(app)
 # data = res.read()
 # access_token = json.loads(data.decode("utf-8"))["access_token"]
 # headers = {"authorization": "Bearer %s" % access_token}
-
+headers = {}
 
 """ general tests for configuration and authentication
 """
