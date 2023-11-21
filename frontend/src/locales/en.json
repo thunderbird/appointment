@@ -42,7 +42,7 @@
     "bookingLinkIsInvalid": "This booking confirmation link is invalid.",
     "bookingSuccessful": "Booking successful!",
     "bookingSuccessfullyConfirmed": "Booking confirmed",
-    "bookingSuccessfullyDenied": "Booking denied",
+    "bookingSuccessfullyDenied": "Booking rejected. Reach out to the booker to recommend an alternative.",
     "bookingSuccessfullyRequested": "Booking request sent",
     "eventWasCreated": "Event created in your calendar.",
     "invitationWasSent": "An invitation was sent to your email.",
