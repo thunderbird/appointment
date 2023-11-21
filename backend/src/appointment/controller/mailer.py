@@ -37,7 +37,7 @@ class Mailer:
     def __init__(
         self,
         to: str,
-        sender: str = os.getenv("SMTP_SENDER"),
+        sender: str = os.getenv("SERVICE_EMAIL"),
         subject: str = "",
         html: str = "",
         plain: str = "",

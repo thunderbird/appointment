@@ -177,7 +177,6 @@ def request_schedule_availability_slot(
         f"{url}/0",
         attendee,
         f"{date}, {slot.duration} minutes",
-        sender=f"noreply@{os.getenv('SMTP_URL')}",
         to=subscriber.email
     )
     mail.send()
@@ -228,7 +227,6 @@ def decide_on_schedule_availability_slot(
         mail = RejectionMail(
             owner=subscriber,
             date=f"{date}, {slot.duration} minutes",
-            sender=f"noreply@{os.getenv('SMTP_URL')}",
             to=slot.attendee.email
         )
         mail.send()
@@ -261,7 +259,7 @@ def decide_on_schedule_availability_slot(
                     capture_exception(err)
 
                 # Notify the organizer that the meeting link could not be created!
-                mail = ZoomMeetingFailedMail(sender=os.getenv('SERVICE_EMAIL'), to=subscriber.email,
+                mail = ZoomMeetingFailedMail(to=subscriber.email,
                                              appointment_title=schedule.name)
                 mail.send()
             except SQLAlchemyError as err:  # Not fatal, but could make things tricky
