@@ -286,7 +286,7 @@ class Tools:
             filename="invite.ics",
             data=self.create_vevent(appointment, slot, organizer),
         )
-        mail = InvitationMail(sender=organizer.email, to=attendee.email, attachments=[invite])
+        mail = InvitationMail(to=attendee.email, attachments=[invite])
         mail.send()
 
     def available_slots_from_schedule(s: schemas.ScheduleBase) -> list[schemas.SlotBase]:
