@@ -230,7 +230,9 @@
       "setAvailabilityBody": "Choose when and how people can book time with you.",
       "setAvailabilityTitle": "Set your availability",
       "shareWithOthersBody": "Send your personal link via email, or add it to your website.",
-      "shareWithOthersTitle": "Share with others"
+      "shareWithOthersTitle": "Share with others",
+      "screenshotCalendarAlt": "A screenshot of Thunderbird Appointment's calendar page.",
+      "screenshotScheduleAlt": "A screenshot of Thunderbird Appointment's schedule page."
     },
     "invalidOrAlreadyBooked": "The booking slot might not be available anymore or the link is broken.",
     "invitationSentToAddress": "An invitation for this event has been emailed to {address}.",

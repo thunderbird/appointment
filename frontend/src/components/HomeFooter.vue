@@ -3,7 +3,7 @@
     <div class="flex-center mb-16">
       <div class="flex gap-3 items-center">
         <img class="h-8 mr-2 pl-4" src="/appointment_logo.svg" alt="Appointment Logo"/>
-        <div class="text-lg font-display tracking-[.25em] text-white dark:text-neutral-700 uppercase">
+        <div class="text-lg font-display tracking-[.25em] text-white uppercase">
           Thunderbird Appointment
         </div>
       </div>
