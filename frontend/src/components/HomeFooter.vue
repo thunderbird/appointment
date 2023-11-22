@@ -9,12 +9,12 @@
       </div>
     </div>
     <div class="flex-center mb-0 mt-auto">
-      <ul class="flex justify-center gap-8 w-full">
+      <ul class="flex justify-center w-full gap-16">
         <li class="
           flex text-base border-t-4 border-t-transparent transition-all ease-in-out
           text-gray-300 dark:text-gray-300
         ">
-          <router-link class="flex-center min-w-[120px]" :to="{ name: 'privacy' }" target="_blank">
+          <router-link class="flex-center" :to="{ name: 'privacy' }" target="_blank">
             {{ $t('label.privacy') }}
           </router-link>
         </li>
@@ -22,7 +22,7 @@
           flex text-base border-t-4 border-t-transparent transition-all ease-in-out
           text-gray-300 dark:text-gray-300
         ">
-          <router-link class="flex-center min-w-[120px]" :to="{ name: 'terms' }" target="_blank">
+          <router-link class="flex-center" :to="{ name: 'terms' }" target="_blank">
             {{ $t('label.legal') }}
           </router-link>
         </li>

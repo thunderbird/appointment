@@ -5,7 +5,7 @@
       <h2 class="pt-6 font-display tracking-[0.19em] uppercase text-center text-lg md:text-3xl lg:text-5xl">
         {{ $t('app.title') }}
       </h2>
-      <div class="mb-[-3em] md:mb-[-5em] lg:mb-[-7em] xl:mb-[-10em] flex flex-col flex-center">
+      <div class="-mb-12 md:-mb-20 lg:-mb-28 xl:-mb-40 flex flex-col flex-center">
         <h4 class="text-xl tracking-wide leading-9 pt-12 font-light max-w-2xl text-center">
           {{ $t('text.homepage.intro') }}
         </h4>
@@ -18,7 +18,7 @@
         <!-- Padding top is rounded up aspect ratio percentage (height / width) of image -->
         <div class="bg-[url(@/assets/svg/homepage-split.svg)]
         dark:bg-[url(@/assets/svg/homepage-split-dark.svg)]
-        bg-no-repeat bg-contain h-[0] pt-[14%] w-full"
+        bg-no-repeat bg-contain h-0 pt-[14%] w-full"
         ></div>
       </div>
     </div>
@@ -37,7 +37,7 @@
       <div class="bg-[url(@/assets/svg/homepage-wave.svg)] bg-top bg-no-repeat bg-cover w-full">
         <div class="pt-[13%]"></div>
         <div class="w-full flex flex-col md:flex-row relative mx-auto justify-between">
-          <img class="shadow-2xl w-full md:w-[50%]"
+          <img class="shadow-2xl w-full md:w-1/2"
                src="@/assets/img/homepage-screenshot.png"
                alt="A screenshot of Thunderbird Appointment's calendar page."
           />
@@ -53,7 +53,7 @@
       <div class="bg-[url(@/assets/svg/homepage-wave-bottom.svg)] bg-top bg-no-repeat bg-cover w-full pb-8">
         <div class="pt-[5%]"></div>
         <div class="w-full flex flex-col md:flex-row-reverse relative mx-auto justify-between">
-          <img class="shadow-2xl w-full md:w-[50%]"
+          <img class="shadow-2xl w-full md:w-1/2"
                src="@/assets/img/homepage-screenshot-2.png"
                alt="A screenshot of Thunderbird Appointment's schedule page."
           />
