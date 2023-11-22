@@ -176,7 +176,7 @@
           <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
             {{ t("label.availableDays") }}
           </div>
-          <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white p-4 rounded-lg">
+          <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-lgx">
             <label v-for="w in isoWeekdays" class="flex gap-2 items-center text-sm select-none cursor-pointer">
               <input
                 type="checkbox"
@@ -259,7 +259,7 @@
             />
           </label>
         </div>
-        <div class="bg-white px-4 py-6 rounded-lg flex-center text-sm text-center">
+        <div class="bg-white dark:bg-gray-800 px-4 py-6 rounded-lg flex-center text-sm text-center">
           <div>{{ t('text.recipientsCanScheduleBetween', { earliest: earliest, farthest: farthest }) }}</div>
         </div>
       </div>
