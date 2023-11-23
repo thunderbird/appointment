@@ -9,7 +9,7 @@
       {{ siteNotificationStore.message }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
-    <main class="mx-4 pt-24 lg:mx-8 min-h-full pb-24">
+    <main :class="{'mx-4 pt-24 lg:mx-8 min-h-full pb-24': !routeIsHome, 'pt-32': routeIsHome}">
       <router-view
         :calendars="calendars"
         :appointments="appointments"
@@ -20,7 +20,7 @@
   <!-- for home page and booking page -->
   <template v-else-if="routeIsPublic">
     <title-bar />
-    <main class="mx-4 pt-24 lg:mx-8 min-h-full pb-24">
+    <main class="min-h-full">
       <router-view />
     </main>
     <footer-bar />
@@ -55,7 +55,7 @@ const siteNotificationStore = useSiteNotificationStore();
 
 // handle auth and fetch
 const auth = useAuth0();
-const isAuthenticated = computed(() => auth.isAuthenticated.value);
+const isAuthenticated = computed(() => auth?.isAuthenticated.value);
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
@@ -121,6 +121,9 @@ const appointments = ref([]);
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
   () => ["booking", "availability", "home"].includes(route.name)
+);
+const routeIsHome = computed(
+  () => ["home"].includes(route.name)
 );
 
 // check login state of current user first
