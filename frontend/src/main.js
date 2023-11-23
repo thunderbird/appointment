@@ -68,6 +68,7 @@ app.use(pinia);
 
 // Per the [Auth0 docs](https://github.com/auth0/auth0-vue/blob/main/EXAMPLES.md#protecting-a-route), we should register the router before the Auth0 SDK.
 app.use(router);
+
 app.use(
   createAuth0({
     domain: process.env.VUE_APP_AUTH0_DOMAIN,
@@ -83,6 +84,8 @@ app.use(
     },
   }),
 );
+
+
 
 // init urls
 const protocol = process.env.VUE_APP_API_SECURE === 'true' ? 'https' : 'http';
