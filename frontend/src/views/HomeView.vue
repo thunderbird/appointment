@@ -24,7 +24,7 @@
     </div>
   </section>
   <section class="mx-4">
-    <h2 class="text-3xl pb-16 pt-16 text-center text-teal-600">
+    <h2 class="text-3xl pb-16 pt-16 text-center text-teal-600 dark:text-teal-400">
       {{ $t('text.homepage.sectionHeader') }}
     </h2>
     <section class="flex flex-col gap-16 justify-center mx-auto max-w-full md:flex-row md:max-w-7xl">
@@ -34,12 +34,19 @@
     </section>
   </section>
   <section class="w-full">
-      <div class="bg-[url(@/assets/svg/homepage-wave.svg)] bg-top bg-no-repeat bg-cover w-full">
+      <div class="bg-[url(@/assets/svg/homepage-wave.svg)]
+      dark:bg-[url(@/assets/svg/homepage-wave-dark.svg)]
+      bg-top bg-no-repeat bg-cover w-full"
+      >
         <div class="pt-[13%]"></div>
         <div class="w-full flex flex-col md:flex-row relative mx-auto justify-between">
-          <img class="shadow-2xl w-full md:w-1/2"
+          <img class="shadow-2xl my-auto h-full w-full md:w-1/2 dark:hidden"
                src="@/assets/img/homepage-screenshot.png"
-               alt="A screenshot of Thunderbird Appointment's calendar page."
+               :alt="$t('text.homepage.screenshotCalendarAlt')"
+          />
+          <img class="shadow-2xl my-auto h-full w-full md:w-1/2 hidden dark:block"
+               src="@/assets/img/homepage-screenshot-dark.png"
+               :alt="$t('text.homepage.screenshotCalendarAlt')"
           />
           <div class="flex-col mb-20 mt-20 md:w-[45%] flex-center">
             <p class="text-2xl tracking-wide leading-loose font-light w-[70%]">
@@ -49,13 +56,17 @@
         </div>
       </div>
   </section>
-  <section class="w-full pt-32 bg-[#fbfbfc]">
-      <div class="bg-[url(@/assets/svg/homepage-wave-bottom.svg)] bg-top bg-no-repeat bg-cover w-full pb-8">
+  <section class="w-full pt-32 bg-[#fbfbfc] dark:bg-[#1F232A]">
+      <div class="bg-[url(@/assets/svg/homepage-wave-bottom.svg)] dark:bg-[url(@/assets/svg/homepage-wave-bottom-dark.svg)] bg-top bg-no-repeat bg-cover w-full pb-8">
         <div class="pt-[5%]"></div>
         <div class="w-full flex flex-col md:flex-row-reverse relative mx-auto justify-between">
-          <img class="shadow-2xl w-full md:w-1/2"
+          <img class="shadow-2xl my-auto h-full w-full md:w-1/2 dark:hidden"
                src="@/assets/img/homepage-screenshot-2.png"
-               alt="A screenshot of Thunderbird Appointment's schedule page."
+               :alt="$t('text.homepage.screenshotScheduleAlt')"
+          />
+          <img class="shadow-2xl my-auto h-full w-full md:w-1/2 hidden dark:block"
+               src="@/assets/img/homepage-screenshot-2-dark.png"
+               :alt="$t('text.homepage.screenshotScheduleAlt')"
           />
           <div class="flex-col mb-20 mt-20 md:w-[45%] flex-center">
             <p class="text-2xl tracking-wide leading-loose font-light w-[70%]">

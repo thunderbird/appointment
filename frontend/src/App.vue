@@ -1,6 +1,6 @@
 <template>
   <!-- authenticated subscriber content -->
-  <template v-if="isAuthenticated && !routeIsHome">
+  <template v-if="isAuthenticated">
     <site-notification
       v-if="siteNotificationStore.isVisible"
       :title="siteNotificationStore.title"
@@ -9,7 +9,7 @@
       {{ siteNotificationStore.message }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
-    <main class="mx-4 pt-24 lg:mx-8 min-h-full pb-24">
+    <main :class="{'mx-4 pt-24 lg:mx-8 min-h-full pb-24': !routeIsHome, 'pt-32': routeIsHome}">
       <router-view
         :calendars="calendars"
         :appointments="appointments"

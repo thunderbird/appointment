@@ -230,7 +230,9 @@
       "setAvailabilityBody": "Lege fest, wann und wie deine Zeit gebucht wird.",
       "setAvailabilityTitle": "Definiere deine Verfügbarkeit",
       "shareWithOthersBody": "Versende deinen persönlichen Link per E-Mail, oder füge ihn deiner Website hinzu.",
-      "shareWithOthersTitle": "Mit anderen teilen"
+      "shareWithOthersTitle": "Mit anderen teilen",
+      "screenshotCalendarAlt": "Ein Screenshot der Kalenderansicht von Thunderbird Appointment.",
+      "screenshotScheduleAlt": "Ein Screenshot der Verfügbarkeitsansicht von Thunderbird Appointment."
     },
     "invalidOrAlreadyBooked": "Der Buchungsplatz ist möglicherweise nicht mehr verfügbar oder der Link ist defekt.",
     "invitationSentToAddress": "Eine Einladung für dieses Event wurde an {address} geschickt.",
