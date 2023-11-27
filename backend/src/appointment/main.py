@@ -14,12 +14,6 @@ import os
 
 from dotenv import load_dotenv
 
-# load any available .env into env
-load_dotenv()
-
-# This needs to be ran before any other imports
-normalize_secrets()
-
 import logging
 import sys
 
@@ -31,39 +25,51 @@ from fastapi.exception_handlers import (
 
 import sentry_sdk
 
-# init logging
-level = os.getenv("LOG_LEVEL", "ERROR")
-use_log_stream = os.getenv("LOG_USE_STREAM", False)
 
-log_config = {
-    "format": "%(asctime)s %(levelname)-8s %(message)s",
-    "level": getattr(logging, level),
-    "datefmt": "%Y-%m-%d %H:%M:%S",
-}
-if use_log_stream:
-    log_config["stream"] = sys.stdout
-else:
-    log_config["filename"] = "appointment.log"
+def _common_setup():
+    # load any available .env into env
+    load_dotenv()
 
-logging.basicConfig(**log_config)
+    # This needs to be ran before any other imports
+    normalize_secrets()
 
-logging.debug("Logger started!")
+    # init logging
+    level = os.getenv("LOG_LEVEL", "ERROR")
+    use_log_stream = os.getenv("LOG_USE_STREAM", False)
 
-if os.getenv("SENTRY_DSN") != "" or os.getenv("SENTRY_DSN") is not None:
-    sentry_sdk.init(
-        dsn=os.getenv("SENTRY_DSN"),
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production,
-        traces_sample_rate=1.0,
-        environment=os.getenv("APP_ENV", "dev"),
-    )
+    log_config = {
+        "format": "%(asctime)s %(levelname)-8s %(message)s",
+        "level": getattr(logging, level),
+        "datefmt": "%Y-%m-%d %H:%M:%S",
+    }
+    if use_log_stream:
+        log_config["stream"] = sys.stdout
+    else:
+        log_config["filename"] = "appointment.log"
+
+    logging.basicConfig(**log_config)
+
+    logging.debug("Logger started!")
+
+    if os.getenv("SENTRY_DSN") != "" and os.getenv("SENTRY_DSN") is not None:
+        sentry_sdk.init(
+            dsn=os.getenv("SENTRY_DSN"),
+            # Set traces_sample_rate to 1.0 to capture 100%
+            # of transactions for performance monitoring.
+            # We recommend adjusting this value in production,
+            traces_sample_rate=1.0,
+            environment=os.getenv("APP_ENV", "dev"),
+        )
 
 
 def server():
     """
     Main function for the fast api server
     """
+
+    # Run common setup first
+    _common_setup()
+
     # extra routes
     from .routes import api
     from .routes import account
@@ -115,12 +121,18 @@ def cli():
     """
     A very simple cli handler
     """
+
     if len(sys.argv) < 2:
         print("No command specified")
         return
+
+    # Run common setup first
+    _common_setup()
 
     command = sys.argv[1:]
 
     if command[0] == 'update-db':
         from .commands import update_db
         update_db.run()
+
+
