@@ -14,7 +14,7 @@
       @modify="connectCalendar"
     />
 
-    <!-- list of calendar connections -->
+    <!-- list of connected calendars -->
     <calendar-management
       :title="t('heading.calendarsConnected')"
       :type="calendarManagementType.edit"
@@ -39,7 +39,7 @@
       />
     </div>
 
-    <!-- add CalDAV calendar connection -->
+    <!-- CalDAV calendar discovery -->
     <div class="hidden flex flex-col gap-6">
       <div class="text-lg">Discover CalDAV Calendars</div>
       <div class="pl-6 flex flex-col gap-4 max-w-2xl">
@@ -97,9 +97,9 @@
         <span v-if="isCalDav">{{ t('label.caldav') }}</span>
         <span v-if="isGoogle">{{ t('label.google') }}</span>
         &mdash;
-        {{ inputMode === inputModes.add ? t('label.addCalendar') : t('label.editCalendar') }}
+        {{ addMode ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
-      <div v-if="isGoogle" class="mb-4">
+      <div v-if="isGoogle && addMode" class="mb-4">
         <p class="text-lg mb-2">{{ t('text.googlePermissionDisclaimer') }}</p>
         <ul class="ml-8 mr-8 text-md list-disc">
           <li>
@@ -114,7 +114,7 @@
           </li>
         </ul>
       </div>
-      <label v-if="isCalDav || inputMode === inputModes.edit" class="pl-4 flex items-center">
+      <label v-if="isCalDav || editMode" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
         <input
           v-model="calendarInput.data.title"
@@ -122,10 +122,10 @@
           class="w-full max-w-sm rounded-md w-full"
         />
       </label>
-      <label v-if="isCalDav || inputMode === inputModes.edit" class="pl-4 flex items-center">
+      <label v-if="isCalDav || editMode" class="pl-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
         <div class="flex gap-4 items-center w-full max-w-sm">
-          <select v-if="inputMode === inputModes.add" v-model="calendarInput.data.color" class="rounded-md w-full">
+          <select v-if="addMode" v-model="calendarInput.data.color" class="rounded-md w-full">
             <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
               {{ color }}
             </option>
@@ -142,12 +142,9 @@
           class="w-full max-w-sm rounded-md w-full"
         />
       </label>
-      <label class="pl-4 flex items-center">
-        <div class="w-full max-w-2xs">
-          <span v-if="isCalDav">{{ t('label.username') }}</span>
-        </div>
+      <label v-if="isCalDav" class="pl-4 flex items-center">
+        <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
         <input
-          v-if="!isGoogle"
           v-model="calendarInput.data.user"
           type="text"
           class="w-full max-w-sm rounded-md w-full"
@@ -168,14 +165,14 @@
           @click="resetInput"
         />
         <primary-button
-          v-if="!isGoogle"
-          :label="inputMode === inputModes.add ? t('label.connectCalendar') : t('label.saveChanges')"
+          v-if="isCalDav || editMode"
+          :label="addMode ? t('label.connectCalendar') : t('label.saveChanges')"
           class="text-sm"
           @click="saveCalendar"
         />
         <!-- Google Button -->
         <img
-          v-if="isGoogle"
+          v-if="isGoogle && addMode"
           class="h-[40px] cursor-pointer"
           :alt="t('label.signInWithGoogle')"
           :src="GoogleSignInBtn"
@@ -184,6 +181,7 @@
         />
       </div>
     </div>
+
   </div>
 </div>
 <!-- Calendar disconnect confirmation modal -->
@@ -237,6 +235,8 @@ const inputModes = {
   edit: 2,
 };
 const inputMode = ref(inputModes.hidden);
+const addMode = computed(() => inputMode.value === inputModes.add);
+const editMode = computed(() => inputMode.value === inputModes.edit);
 
 // supported calendar providers
 const calendarProviders = {
@@ -273,6 +273,7 @@ const resetInput = () => {
   calendarInput.id = null;
   calendarInput.data = { ...defaultCalendarInput };
   inputMode.value = inputModes.hidden;
+  loading.value = false;
 };
 
 // set input mode for adding or editing
@@ -301,6 +302,8 @@ const editCalendar = async (id) => {
   Object.keys(data.value).forEach((attr) => {
     calendarInput.data[attr] = data.value[attr];
   });
+
+  loading.value = false;
 };
 
 const deleteCalendar = async (id) => {
