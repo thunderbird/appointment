@@ -1,4 +1,5 @@
 import os
+from typing import Annotated
 
 from fastapi import Depends, Security, Request, HTTPException
 from fastapi_auth0 import Auth0User
@@ -9,14 +10,10 @@ from ..database import repo
 from ..dependencies.database import get_db
 
 
-auth = Auth()
-
-
 def get_subscriber(
     request: Request,
     db: Session = Depends(get_db),
-    _=Depends(auth.auth0.implicit_scheme),
-    user: Auth0User = Security(auth.auth0.get_user),
+    user: Auth0User = Security(Auth().auth0.get_user),
 ):
     """Automatically retrieve and return the subscriber based on the authenticated Auth0 user"""
 
