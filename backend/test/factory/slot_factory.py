@@ -5,10 +5,10 @@ from defines import FAKER_RANDOM_VALUE, factory_has_value
 
 
 @pytest.fixture
-def make_appointment_slot(with_db, make_appointment):
+def make_appointment_slot(with_db):
     fake = Faker()
 
-    def _make_appointment_slot(appointment_id=FAKER_RANDOM_VALUE,
+    def _make_appointment_slot(appointment_id=None,
                                start=FAKER_RANDOM_VALUE,
                                duration=FAKER_RANDOM_VALUE,
                                attendee_id=None,
@@ -19,7 +19,7 @@ def make_appointment_slot(with_db, make_appointment):
                                meeting_link_url=None):
         with with_db() as db:
             return repo.add_appointment_slots(db, [schemas.SlotBase(
-                start=start if factory_has_value(start) else fake.datetime(),
+                start=start if factory_has_value(start) else fake.date_time(),
                 duration=duration if factory_has_value(duration) else fake.pyint(15, 60),
                 attendee_id=attendee_id,
                 booking_tkn=booking_tkn,
@@ -27,6 +27,6 @@ def make_appointment_slot(with_db, make_appointment):
                 booking_status=booking_status,
                 meeting_link_id=meeting_link_id,
                 meeting_link_url=meeting_link_url
-            )], appointment_id if factory_has_value(appointment_id) else make_appointment().id)
+            )], appointment_id)
 
     return _make_appointment_slot

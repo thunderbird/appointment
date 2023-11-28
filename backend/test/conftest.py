@@ -7,18 +7,66 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 from fastapi import Request
-from defines import TEST_USER_ID
+from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER
 
 # Factory functions
+from factory.attendee_factory import make_attendee  # noqa: F401
+from factory.appointment_factory import make_appointment  # noqa: F401
 from factory.calendar_factory import make_caldav_calendar  # noqa: F401
+from factory.slot_factory import make_appointment_slot  # noqa: F401
 from factory.subscriber_factory import make_subscriber, make_basic_subscriber, make_pro_subscriber  # noqa: F401
 
 # Load our env
 load_dotenv(find_dotenv(".env.test"))
 
 from backend.src.appointment.main import server  # noqa: E402
-from backend.src.appointment.database import models, repo  # noqa: E402
+from backend.src.appointment.database import models, repo, schemas  # noqa: E402
 from backend.src.appointment.dependencies import database, auth, google  # noqa: E402
+
+
+def _patch_caldav_connector(monkeypatch):
+    """Standard function to patch caldav connector"""
+    # Create a mock caldav connector
+    class MockCaldavConnector:
+        @staticmethod
+        def __init__(self, url, user, password):
+            """We don't want to initialize a client"""
+            pass
+
+        @staticmethod
+        def list_calendars(self):
+            return [
+                schemas.CalendarConnectionOut(
+                    url=TEST_CALDAV_URL,
+                    user=TEST_CALDAV_USER
+                )
+            ]
+
+        @staticmethod
+        def create_event(self, event, attendee, organizer):
+            return True
+
+        @staticmethod
+        def delete_event(self, start):
+            return True
+
+    # Patch up the caldav constructor, and list_calendars
+    from backend.src.appointment.controller.calendar import CalDavConnector
+    monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
+    monkeypatch.setattr(CalDavConnector, "list_calendars", MockCaldavConnector.list_calendars)
+    monkeypatch.setattr(CalDavConnector, "create_event", MockCaldavConnector.create_event)
+    monkeypatch.setattr(CalDavConnector, "delete_events", MockCaldavConnector.delete_event)
+
+
+def _patch_mailer(monkeypatch):
+    """Mocks the base mailer class to not send mail"""
+    class MockMailer:
+        @staticmethod
+        def send(self):
+            return
+
+    from backend.src.appointment.controller.mailer import Mailer
+    monkeypatch.setattr(Mailer, "send", MockMailer.send)
 
 
 @pytest.fixture()
@@ -49,7 +97,7 @@ def with_db():
 
 
 @pytest.fixture()
-def with_client(with_db):
+def with_client(with_db, monkeypatch):
     def override_get_db():
         db = with_db()
         try:
@@ -67,6 +115,10 @@ def with_client(with_db):
 
     def override_get_google_client():
         return None
+
+    # Patch caldav connector
+    _patch_caldav_connector(monkeypatch)
+    _patch_mailer(monkeypatch)
 
     app = server()
 
