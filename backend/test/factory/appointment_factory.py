@@ -38,7 +38,7 @@ def make_appointment(with_db, make_caldav_calendar, make_appointment_slot):
                 keep_open=keep_open,
                 status=status,
                 meeting_link_provider=meeting_link_provider,
-                calendar_id=calendar_id if factory_has_value(calendar_id) else make_caldav_calendar().id
+                calendar_id=calendar_id if factory_has_value(calendar_id) else make_caldav_calendar(connected=True).id
             ), [])
 
             if not factory_has_value(slots):

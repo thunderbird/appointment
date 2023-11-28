@@ -1,4 +1,3 @@
-import os
 from defines import DAY1, DAY2, DAY3, auth_headers
 
 
@@ -413,3 +412,25 @@ class TestAppointment:
         assert data[0]["title"] == generated_appointment.title
         assert data[0]["start"] == str(generated_appointment.slots[0].start)
         assert data[0]["end"] == DAY3
+
+    def test_get_invitation_ics_file(self, with_client, make_appointment):
+        generated_appointment = make_appointment()
+
+        response = with_client.get(f"/apmt/serve/ics/{generated_appointment.slug}/{generated_appointment.slots[0].id}")
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data["name"] == "invite"
+        assert data["content_type"] == "text/calendar"
+        assert "data" in data
+
+    def test_get_invitation_ics_file_for_missing_appointment(self, with_client, make_appointment):
+        generated_appointment = make_appointment()
+
+        response = with_client.get(f"/apmt/serve/ics/{generated_appointment.slug}-doesnt-exist/{generated_appointment.slots[0].id}")
+        assert response.status_code == 404, response.text
+
+    def test_get_invitation_ics_file_for_missing_slot(self, with_client, make_appointment):
+        generated_appointment = make_appointment()
+
+        response = with_client.get(f"/apmt/serve/ics/{generated_appointment.slug}/{generated_appointment.slots[0].id + 1}")
+        assert response.status_code == 404, response.text

@@ -13,6 +13,7 @@ from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER
 from factory.attendee_factory import make_attendee  # noqa: F401
 from factory.appointment_factory import make_appointment  # noqa: F401
 from factory.calendar_factory import make_caldav_calendar  # noqa: F401
+from factory.schedule_factory import make_schedule  # noqa: F401
 from factory.slot_factory import make_appointment_slot  # noqa: F401
 from factory.subscriber_factory import make_subscriber, make_basic_subscriber, make_pro_subscriber  # noqa: F401
 
