@@ -172,7 +172,7 @@ class TestSchedule:
         data = response.json()
         assert data["time_created"] is not None
         assert data["time_updated"] is not None
-        assert data["calendar_id"] == 4
+        assert data["calendar_id"] == generated_schedule.calendar_id
         assert data["name"] == "Schedulex"
         assert data["location_type"] == 1
         assert data["location_url"] == "https://testx.org"
