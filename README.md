@@ -27,7 +27,7 @@ run-command update-db
 Make sure to have the following prerequisites available:
 
 ```plain
-Python >= 3.10
+Python >= 3.11
 Node.js >= 16.0
 ```
 
@@ -85,8 +85,6 @@ After this you can run tests with:
 ```bash
 cd backend/test && python -m pytest
 ```
-
-Tests 
 
 ## Contributing
 
