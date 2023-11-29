@@ -6,7 +6,7 @@ import json
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 from dateutil.parser import parse
 
 from .apis.google_client import GoogleClient
@@ -260,7 +260,7 @@ class Tools:
             "dtend",
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
-        event.add("dtstamp", datetime.utcnow())
+        event.add("dtstamp", datetime.now(UTC))
         event["description"] = appointment.details
         event["organizer"] = org
 
@@ -291,7 +291,7 @@ class Tools:
 
     def available_slots_from_schedule(s: schemas.ScheduleBase) -> list[schemas.SlotBase]:
         """This helper calculates a list of slots according to the given schedule configuration."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         earliest_start = now + timedelta(minutes=s.earliest_booking)
         farthest_end = now + timedelta(minutes=s.farthest_booking)
         start = datetime.combine(s.start_date, s.start_time)
@@ -367,7 +367,7 @@ class Tools:
                 )
             else:
                 con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-            farthest_end = datetime.utcnow() + timedelta(minutes=schedule.farthest_booking)
+            farthest_end = datetime.now(UTC) + timedelta(minutes=schedule.farthest_booking)
             start = schedule.start_date.strftime(DATEFMT)
             end = schedule.end_date.strftime(DATEFMT) if schedule.end_date else farthest_end.strftime(DATEFMT)
             existingEvents.extend(con.list_events(start, end))

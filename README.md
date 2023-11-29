@@ -27,7 +27,7 @@ run-command update-db
 Make sure to have the following prerequisites available:
 
 ```plain
-Python >= 3.10
+Python >= 3.11
 Node.js >= 16.0
 ```
 
@@ -74,22 +74,16 @@ Run application for development with hot reloading backend and frontend:
 
 ## Testing
 
-To run tests, first install Pytest
+To run tests, setup the application manually (you don't need the mysql deps), and then install requirements-test.txt
 
 ```bash
-pip install pytest httpx
+pip install -r requirements-test.txt
 ```
 
-Create an Auth0 test user and add the credentials of that user to `AUTH0_TEST_USER` and `AUTH0_TEST_PASS` in your `.env`. Then `cd` into the project root und simply run
+After this you can run tests with:
 
 ```bash
-pytest
-```
-
-Note: Since tests include endpoints that trigger mail sending, there must be a running smtp server on your testing system. You can simply run the Python built in server (according to your environment configuration):
-
-```bash
-python -m smtpd -n -c DebuggingServer localhost:25
+cd backend/test && python -m pytest
 ```
 
 ## Contributing

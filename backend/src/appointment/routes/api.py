@@ -20,10 +20,10 @@ from fastapi import APIRouter, Depends, HTTPException, Security, Body
 from fastapi_auth0 import Auth0User
 from datetime import timedelta, timezone
 from ..controller.apis.google_client import GoogleClient
-from ..controller.auth import signed_url_by_subscriber
+from ..controller.auth import signed_url_by_subscriber, Auth
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
-from ..dependencies.auth import get_subscriber, auth
+from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
 
@@ -36,10 +36,10 @@ def health():
     return True
 
 
-@router.get("/login", dependencies=[Depends(auth.auth0.implicit_scheme)], response_model=schemas.SubscriberBase)
-def login(db: Session = Depends(get_db), user: Auth0User = Security(auth.auth0.get_user)):
+@router.get("/login", response_model=schemas.SubscriberBase)
+def login(db: Session = Depends(get_db), user: Auth0User = Security(Auth().auth0.get_user)):
     """endpoint to check frontend authed user and create user if not existing yet"""
-    me = auth.persist_user(db, user)
+    me = Auth().persist_user(db, user)
     if not me:
         raise HTTPException(status_code=403, detail="User credentials mismatch")
     return schemas.SubscriberBase(

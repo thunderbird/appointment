@@ -26,6 +26,13 @@ class Auth:
     def __init__(self):
         """verify Appointment subscription via Auth0, return user or None"""
         scopes = {"read:calendars": "Read Calendar Ressources"}  # TODO
+
+        # Ugly hack for testing
+        if os.getenv('APP_ENV') == 'test':
+            from types import SimpleNamespace
+            self.auth0 = SimpleNamespace(implicit_scheme=lambda x: x, get_user=lambda x: x)
+            return
+
         self.auth0 = Auth0(domain=domain, api_audience=api_audience, scopes=scopes, auto_error=False)
 
     def persist_user(self, db: Session, user: Auth0User):
