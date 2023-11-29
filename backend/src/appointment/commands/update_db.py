@@ -1,8 +1,9 @@
 import os
 
 from ..database import models
-from ..database.database import engine
 from alembic.runtime import migration
+
+from ..dependencies.database import get_engine_and_session
 
 
 def run():
@@ -19,6 +20,8 @@ def run():
     # If we have our database url env variable set, use that instead!
     if os.getenv("DATABASE_URL"):
         alembic_cfg.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+
+    engine, _ = get_engine_and_session()
 
     with engine.begin() as connection:
         context = migration.MigrationContext.configure(connection)

@@ -2,7 +2,6 @@ import json
 
 from requests_oauthlib import OAuth2Session
 from ...database import models, repo
-from ...database.database import SessionLocal
 
 
 class ZoomClient:
@@ -53,14 +52,15 @@ class ZoomClient:
     def token_saver(self, token):
         """requests-oauth automagically calls this function when it has a new refresh token for us.
         This makes it a bit awkward but we make it work..."""
+        from appointment.dependencies.database import get_db
+
         self.client.token = token
 
         # Need a subscriber attached to this request in order to save a token
         if self.subscriber_id is None:
             return
 
-        with SessionLocal() as db:
-            repo.update_subscriber_external_connection_token(db, json.dumps(token), self.subscriber_id, models.ExternalConnectionType.zoom)
+        repo.update_subscriber_external_connection_token(get_db(), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.zoom)
 
     def get_me(self):
         return self.client.get(f'{self.OAUTH_REQUEST_URL}/users/me').json()

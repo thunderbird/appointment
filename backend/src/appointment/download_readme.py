@@ -36,5 +36,5 @@ The following files are included:
  - subscriber.csv : The personal information we store about you from our database.
  - readme.txt : This file!
             """.format(
-        download_time=datetime.datetime.utcnow()
+        download_time=datetime.datetime.now(datetime.UTC)
     )

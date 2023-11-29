@@ -2,7 +2,7 @@
 name = "appointment_backend"
 version = "1.0.0"
 description = "Backend component to Thunderbird Appointment"
-requires-python = ">3.10"
+requires-python = ">3.11"
 dynamic = ["dependencies"]
 
 [project.scripts]
