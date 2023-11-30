@@ -37,9 +37,12 @@ def health():
 
 
 @router.get("/login", response_model=schemas.SubscriberBase)
-def login(db: Session = Depends(get_db), user: Auth0User = Security(Auth().auth0.get_user)):
-    """endpoint to check frontend authed user and create user if not existing yet"""
-    me = Auth().persist_user(db, user)
+def login(timezone: str, db: Session = Depends(get_db), user: Auth0User = Security(Auth().auth0.get_user)):
+    """endpoint to check frontend authed user and create user if not existing yet
+       timezone is only for having an initial value when creating a new user
+    """
+    me = Auth().persist_user(db, user, timezone)
+    logging.error(timezone)
     if not me:
         raise HTTPException(status_code=403, detail="User credentials mismatch")
     return schemas.SubscriberBase(
