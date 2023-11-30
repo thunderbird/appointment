@@ -307,9 +307,9 @@ class Tools:
         pointer = start
         counter = 0
         # set fix event limit of 1000 for now for performance reasons. Can be removed later.
-        while pointer < end and counter < 1000:
+        while pointer.timestamp() < end.timestamp() and counter < 1000:
             counter += 1
-            if pointer >= earliest_start:
+            if pointer.timestamp() >= earliest_start.timestamp():
                 slots.append(schemas.SlotBase(start=pointer, duration=s.slot_duration))
             next_start = pointer + timedelta(minutes=s.slot_duration)
             # if the next slot still fits into the current day
