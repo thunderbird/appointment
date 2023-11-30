@@ -73,20 +73,25 @@ export const initialEventPopupData = {
   left: 'initial',
 };
 // calculate properties of event popup for given element and show popup
-export const showEventPopup = (el, event, position='right') => {
+export const showEventPopup = (el, event, position = 'right') => {
   const obj = { ...initialEventPopupData };
   obj.event = event;
   obj.display = 'block';
-  obj.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
+
+  const bounds = el.target.getBoundingClientRect();
+  const top = window.scrollY + bounds.top;
+  const left = window.scrollX + bounds.left;
+
+  obj.top = `${top + bounds.height / 2 - el.target.parentElement.scrollTop}px`;
   if (!position || position === 'right') {
-    obj.left = `${el.target.offsetLeft + el.target.clientWidth + 4}px`;
+    obj.left = `${left + bounds.width + 4}px`;
   }
   if (position === 'left') {
-    obj.left = `${el.target.offsetLeft - 4}px`;;
+    obj.left = `${left - 4}px`;
   }
   if (position === 'top') {
-    obj.left = `${el.target.offsetLeft + el.target.clientWidth/2}px`;
-    obj.top = `${el.target.offsetTop - 50}px`;
+    obj.left = `${left + bounds.width/2}px`;
+    obj.top = `${top - 50}px`;
   }
   return obj;
 };

@@ -30,13 +30,19 @@
         @mouseleave="popup = {...initialEventPopupData}"
       >
         <div
-          v-for="event in eventsByDate(d.date)?.allDay"
-          :key="event"
+          v-for="eventDate in (d.date in allDayEvents ? allDayEvents[d.date] : {})"
+          :key="eventDate"
           class="flex overflow-hidden"
-          @mouseenter="element => popup=showEventPopup(element, event, popupPosition)"
         >
-          <div class="w-full text-sm truncate rounded px-2 py-0.5 bg-amber-400/80">
-            {{ event.title }}
+          <div
+            v-for="event in eventDate.items"
+            :key="event"
+            class="flex overflow-hidden w-full"
+            @mouseenter="element => popup=showEventPopup(element, event, popupPosition)"
+          >
+            <div class="w-full text-sm truncate rounded px-2 py-0.5 bg-amber-400/80">
+              {{ event.title }}
+            </div>
           </div>
         </div>
       </div>
@@ -53,62 +59,72 @@
     <div
       v-for="d in days"
       :key="d.day"
-      class="grid bg-white dark:bg-gray-700"
-      :style="{ gridAutoRows: unitRem + 'rem' }"
+      class="grid bg-white dark:bg-gray-700 relative"
       @mouseleave="popup = {...initialEventPopupData}"
     >
       <div
-        v-for="event in eventsByDate(d.date)?.duringDay"
+        v-for="eventTimeStart in (d.date in events ? events[d.date] : {})"
+        :key="eventTimeStart"
+        class="absolute flex overflow-hidden w-full"
+        :style="{top: eventTimeStart.offset + 'px', zIndex: eventTimeStart.order }"
+      >
+      <div
+        v-for="event in eventTimeStart.items"
         :key="event"
-        class="flex overflow-hidden"
-        :class="{ 'hidden': event.offset < 0 }"
-        :style="{ gridRow: event.offset + ' / span ' + event.span }"
-        @mouseenter="element => !booking ? popup=showEventPopup(element, event, popupPosition) : null"
+        class="grid w-full"
       >
         <div
-          v-if="!booking"
-          class="w-full truncate rounded flex m-1 px-2 bg-sky-400/10 border-sky-400"
-          :class="{
+          class="flex overflow-hidden"
+          :class="{ 'hidden': event.offset < 0 }"
+          :style="{ height: (event.span*unitRem) + 'rem' }"
+          @mouseenter="element => !booking ? popup=showEventPopup(element, event, popupPosition) : null"
+        >
+          <div
+            v-if="!booking"
+            class="w-full truncate rounded flex m-1 px-2 bg-sky-400/10 border-sky-400"
+            :class="{
             'border-2': !event.remote || event.tentative,
             'border-dashed': !event.remote,
             'py-0.5': event.span >= 30,
           }"
-          :style="{
+            :style="{
             color: event.tentative ? event.calendar_color : null,
             borderColor: eventColor(event, false).border,
             backgroundColor: (!event.remote || event.tentative)
               ? eventColor(event, false).background
-              : event.calendar_color,
+              : event.calendar_color + 'cc',
           }"
-        >
-          <div
-            class="truncate"
-            :class="{
+          >
+            <div
+              class="truncate opacity-100 w-full"
+              :class="{
               'self-center grow text-sm': event.span < 60,
               'hidden': event.span < 30,
             }"
-          >
-            {{ event.title }}
+            >
+              {{ event.title }}
+            </div>
           </div>
-        </div>
-        <div
-          v-else
-          @click="bookSlot(event.start)"
-          class="
+          <div
+            v-else
+            @click="bookSlot(event.start)"
+            class="
             w-full text-sm overflow-hidden rounded-md p-1 m-1 cursor-pointer hover:shadow flex
             text-gray-600 dark:text-gray-300 bg-teal-50 hover:bg-teal-100 dark:bg-teal-800 hover:dark:bg-teal-700
           "
-          :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
-        >
-          <div
-            class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
-            :class="{ 'text-white border-white': event.selected }"
+            :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
           >
+            <div
+              class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
+              :class="{ 'text-white border-white': event.selected }"
+            >
             <span :class="{ 'hidden': event.span <= 30 }">
               {{ event.times }}
             </span>
+            </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
     <event-popup
@@ -185,49 +201,97 @@ const endHour = computed(() => {
 
 // create position of event, smallest unit is one minute
 const timePosition = (start, duration) => ({
-  offset: 60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1,
+  offset: (60 * dj(start).format('H') + 1 * dj(start).format('m') - 60 * startHour.value + 1) + 30,
   span: duration,
   times: `${dj(start).format(timeFormat())} - ${dj(start).add(duration, 'minutes').format(timeFormat())}`,
 });
 
-// handle events to show
-const events = computed(() => {
+const processEvents = ((allDays) => {
   const eventsOnDate = {};
-  // add appointments
-  props.appointments?.forEach((event) => {
-    event.slots.forEach((slot) => {
-      const key = dj(slot.start).format('YYYY-MM-DD');
-      const extendedEvent = { ...event, ...slot, ...timePosition(slot.start, slot.duration) };
-      delete extendedEvent.slots;
-      if (key in eventsOnDate) {
-        eventsOnDate[key].push(extendedEvent);
-      } else {
-        eventsOnDate[key] = [extendedEvent];
-      }
+  const offsets = {};
+
+  // add appointments, only for allDays === false
+  if (!allDays) {
+    props.appointments?.forEach((event) => {
+      event.slots.forEach((slot) => {
+        const key = dj(slot.start).format('YYYY-MM-DD');
+        const innerKey = dj(slot.start).format('HH:mm');
+        const extendedEvent = {...event, ...slot, ...timePosition(slot.start, slot.duration)};
+        delete extendedEvent.slots;
+        offsets[extendedEvent.offset] = extendedEvent.offset;
+
+        if (!(key in eventsOnDate)) {
+          eventsOnDate[key] = {};
+        }
+
+        if (innerKey in eventsOnDate[key] && eventsOnDate[key][innerKey]['items'].length < 4) {
+          eventsOnDate[key][innerKey]['items'].push(extendedEvent);
+        } else if (!(innerKey in eventsOnDate[key])) {
+          eventsOnDate[key][innerKey] = {
+            'items': [extendedEvent],
+            'order': 0,
+            'offset': extendedEvent.offset,
+          };
+        }
+
+      });
     });
-  });
+  }
   // add calendar events
   props.events?.forEach((event) => {
+    if (!allDays && event.all_day) {
+      return;
+    } else if (allDays && !event.all_day) {
+      return;
+    }
     const key = dj(event.start).format('YYYY-MM-DD');
+    const innerKey = dj(event.start).format('HH:mm');
     const extendedEvent = { ...event, ...timePosition(event.start, event.duration), remote: true };
-    if (key in eventsOnDate) {
-      eventsOnDate[key].push(extendedEvent);
-    } else {
-      eventsOnDate[key] = [extendedEvent];
+    offsets[extendedEvent.offset] = extendedEvent.offset;
+
+    if (!(key in eventsOnDate)) {
+      eventsOnDate[key] = {};
+    }
+
+    if (innerKey in eventsOnDate[key] && eventsOnDate[key][innerKey]['items'].length < 4) {
+      eventsOnDate[key][innerKey]['items'].push(extendedEvent);
+    } else if (!(innerKey in eventsOnDate[key])) {
+      eventsOnDate[key][innerKey] = {
+        'items': [extendedEvent],
+        'order': 0,
+        'offset': extendedEvent.offset,
+      };
     }
   });
+
+  const orderedOffsets = Object.values(offsets).sort();
+
+  // Sort offset for order - it's ugly sorry.
+  // We don't store offsets by day, so you might see order: 4, and order: 7. Since it's sorted by value it should be fine.
+  Object.keys(eventsOnDate).map((eventDate) => {
+    Object.keys(eventsOnDate[eventDate]).map((eventTime) => {
+      eventsOnDate[eventDate][eventTime]['order'] = orderedOffsets.indexOf(eventsOnDate[eventDate][eventTime]['items'][0].offset);
+    });
+  });
+
   return eventsOnDate;
+})
+
+// handle events to show
+
+// Events excluding all day events
+const events = computed(() => {
+  const evts = processEvents(false);
+  console.log(">> DURING DAY ", evts);
+
+  return evts;
 });
-const eventsByDate = (d) => {
-  const key = dj(d).format('YYYY-MM-DD');
-  if (key in events.value) {
-    return {
-      duringDay: events.value[key].filter((e) => !e.all_day),
-      allDay: events.value[key].filter((e) => e.all_day),
-    };
-  }
-  return null;
-};
+// Events excluding during day events
+const allDayEvents = computed(() => {
+  const evts = processEvents(true);
+  console.log(">> ALL DAY ", evts);
+  return evts;
+});
 
 // generate names for each day of week
 const days = computed(() => {
