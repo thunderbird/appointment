@@ -42,7 +42,6 @@ def login(timezone: str, db: Session = Depends(get_db), user: Auth0User = Securi
        timezone is only for having an initial value when creating a new user
     """
     me = Auth().persist_user(db, user, timezone)
-    logging.error(timezone)
     if not me:
         raise HTTPException(status_code=403, detail="User credentials mismatch")
     return schemas.SubscriberBase(
