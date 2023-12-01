@@ -151,6 +151,21 @@ const checkLogin = async () => {
   }
 };
 
+// provide methods for logging in and out for child components
+const login = () => {
+  auth.loginWithRedirect();
+};
+const logout = async () => {
+  currentUser.reset();
+  await auth.logout({
+    logoutParams: {
+      returnTo: window.location.origin,
+    },
+  });
+};
+provide("login", login);
+provide("logout", logout);
+
 // query db for all calendar data
 const getDbCalendars = async (onlyConnected = true) => {
   const { data, error } = await call(`me/calendars?only_connected=${onlyConnected}`).get().json();

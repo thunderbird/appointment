@@ -87,13 +87,11 @@ import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
 
 const refresh = inject('refresh');
+const login = inject('login');
 
 const auth = useAuth0();
 const isAuthenticated = computed(() => auth?.isAuthenticated.value);
 
-const login = () => {
-  auth.loginWithRedirect();
-};
 const enter = () => {
   window.location = '/calendar';
 };

@@ -12,14 +12,10 @@
 </template>
 
 <script setup>
-import { useAuth0 } from '@auth0/auth0-vue';
 import { useI18n } from 'vue-i18n';
 import PrimaryButton from '@/elements/PrimaryButton';
 
 const { t } = useI18n();
-const auth0 = useAuth0();
+const login = inject('login');
 
-const login = () => {
-  auth0.loginWithRedirect();
-};
 </script>
