@@ -151,7 +151,7 @@ const checkLogin = async () => {
   }
 };
 
-// provide methods for logging in and out for child components
+// provide methods for logging the user in and out for corresponding buttons in child components
 const login = () => {
   auth.loginWithRedirect();
 };

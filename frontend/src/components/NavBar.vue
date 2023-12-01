@@ -25,7 +25,7 @@
         :placeholder="t('label.search')"
       />
     </label> -->
-    <nav class="flex gap-4 items-stretch">
+    <nav v-if="user.exists()" class="flex gap-4 items-stretch">
       <div class="flex justify-end gap-8">
         <nav-bar-item
           v-for="item in navItems"
@@ -35,34 +35,72 @@
           :link-name="item"
         />
       </div>
-      <router-link
-        v-if="user.exists()"
-        :to="{ name: 'profile' }"
-        class="w-12 h-12 mr-4 self-center flex-center rounded-full bg-teal-500 text-lg font-normal text-white"
-      >
-        {{ initials(user.data.name) }}
-      </router-link>
+      <drop-down class="self-center">
+        <template #trigger>
+          <div
+            class="w-12 h-12 mr-4 flex-center rounded-full bg-teal-500 text-lg font-normal text-white"
+          >
+            {{ initials(user.data.name) }}
+          </div>
+        </template>
+        <template #default>
+          <div class="flex flex-col gap-2 rounded-md w-48 p-4 bg-white dark:bg-gray-700 shadow-md">
+            <router-link :to="{ name: 'profile' }" class="p-2">
+              {{ t('label.userProfile') }}
+            </router-link>
+            <a v-show="signedUserUrl" :href="signedUserUrl" target="_blank" class="p-2 flex justify-between items-center">
+              <span>{{ t('label.shareMyLink') }}</span>
+              <icon-external-link class="w-5 h-5 text-gray-500" />
+            </a>
+            <hr class="border-teal-500" />
+            <div @click="logout" class="cursor-pointer p-2">
+              {{ t('label.logOut') }}
+            </div>
+          </div>
+        </template>
+      </drop-down>
     </nav>
   </header>
 </template>
 
 <script setup>
+import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from "@/elements/NavBarItem";
+import DropDown from "@/elements/DropDown";
 
 // icons
+import { IconExternalLink } from '@tabler/icons-vue';
 // import { IconSearch } from '@tabler/icons-vue';
 
 // component constants
 const user = useUserStore();
 const route = useRoute();
 const { t } = useI18n();
+const logout = inject('logout');
+const call = inject('call');
 
 // component properties
 defineProps({
   navItems: Array, // list of route names that are also lang keys (format: label.<key>), used as nav items
+});
+
+const signedUserUrl = ref('');
+
+const getSignedUserUrl = async () => {
+  // Retrieve the user short url
+  const { data, error } = await call('me/signature').get().json();
+  if (error.value) {
+    return;
+  }
+
+  signedUserUrl.value = data.value.url;
+};
+
+onMounted(async () => {
+  await getSignedUserUrl();
 });
 </script>
