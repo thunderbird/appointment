@@ -35,7 +35,7 @@ class Auth:
 
         self.auth0 = Auth0(domain=domain, api_audience=api_audience, scopes=scopes, auto_error=False)
 
-    def persist_user(self, db: Session, user: Auth0User):
+    def persist_user(self, db: Session, user: Auth0User, timezone: str):
         """Sync authed user to Appointment db"""
         if not db:
             return None
@@ -59,6 +59,7 @@ class Auth:
                     username=authenticated_subscriber["email"],  # username == email for now
                     email=authenticated_subscriber["email"],
                     name=authenticated_subscriber["name"],
+                    timezone=timezone,
                     level=models.SubscriberLevel.pro,  # TODO
                 )
                 db_subscriber = repo.create_subscriber(db=db, subscriber=subscriber)
