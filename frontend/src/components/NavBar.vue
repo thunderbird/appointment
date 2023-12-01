@@ -26,22 +26,15 @@
       />
     </label> -->
     <nav class="flex gap-4 items-stretch">
-      <ul class="flex justify-end gap-8">
-        <li
+      <div class="flex justify-end gap-8">
+        <nav-bar-item
           v-for="item in navItems"
           :key="item"
-          class="flex text-base border-b-4 border-b-transparent transition-all ease-in-out"
-          :class="{
-            'font-semibold border-b-teal-500 text-teal-500': route.name == item,
-            'text-gray-600 dark:text-gray-300 hover:border-b-gray-200 dark:hover:border-b-gray-400':
-              route.name != item,
-          }"
-        >
-          <router-link class="flex justify-center min-w-[120px] items-center" :to="{ name: item }">
-            {{ t("label." + item) }}
-          </router-link>
-        </li>
-      </ul>
+          :active="route.name == item"
+          :label="t(`label.${item}`)"
+          :link-name="item"
+        />
+      </div>
       <router-link
         v-if="user.exists()"
         :to="{ name: 'profile' }"
@@ -58,6 +51,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
+import NavBarItem from "@/elements/NavBarItem";
 
 // icons
 // import { IconSearch } from '@tabler/icons-vue';
