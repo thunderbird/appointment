@@ -36,8 +36,12 @@ def health():
     return True
 
 
-@router.get("/login", response_model=schemas.SubscriberBase)
-def login(timezone: str, db: Session = Depends(get_db), user: Auth0User = Security(Auth().auth0.get_user)):
+@router.post("/login", response_model=schemas.SubscriberBase)
+def login(
+    timezone: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+    user: Auth0User = Security(Auth().auth0.get_user)
+):
     """endpoint to check frontend authed user and create user if not existing yet
        timezone is only for having an initial value when creating a new user
     """

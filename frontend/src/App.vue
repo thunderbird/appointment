@@ -138,7 +138,7 @@ const checkLogin = async () => {
       return;
     }
     // call backend to create user if they do not exist in database
-    const { data, error } = await call(`login?timezone=${dj.tz.guess()}`).get().json();
+    const { data, error } = await call("login").post({ timezone: dj.tz.guess() }).json();
     // assign authed user data
     if (!error.value && data.value) {
       // data.value holds appointment subscriber structure
