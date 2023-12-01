@@ -1,14 +1,18 @@
 <template>
   <div
-    class="flex text-base border-b-4 border-b-transparent transition-all ease-in-out"
-    :class="{
-      'font-semibold !border-b-teal-500 text-teal-500': active,
-      'text-gray-600 dark:text-gray-300 hover:border-b-gray-200 dark:hover:border-b-gray-400': !active,
-    }"
+    class="relative group flex font-medium text-base"
+    :class="{ 'text-gray-600 dark:text-gray-300': !active }"
   >
     <router-link class="flex justify-center min-w-[120px] items-center" :to="{ name: linkName }">
       {{ label }}
     </router-link>
+    <div
+      class="absolute rounded bottom-0 h-1 w-full bg-transparent transition-colors ease-in-out"
+      :class="{
+        'bg-gradient-to-r from-teal-500 to-sky-500': active,
+        'group-hover:bg-gray-200 group-hover:dark:bg-gray-400': !active,
+      }"
+    ></div>
   </div>
 </template>
 
