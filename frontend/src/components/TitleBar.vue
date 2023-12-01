@@ -12,6 +12,7 @@
 </template>
 
 <script setup>
+import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PrimaryButton from '@/elements/PrimaryButton';
 
