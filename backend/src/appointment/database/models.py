@@ -77,6 +77,8 @@ class Subscriber(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
+    # Encrypted (here) and hashed (by the associated hashing functions in routes/auth)
+    password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)

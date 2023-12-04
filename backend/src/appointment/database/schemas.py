@@ -299,3 +299,7 @@ class Login(BaseModel):
     username: str
     password: str | None = None
     timezone: str | None = None
+
+
+class TokenData(BaseModel):
+    username: str
