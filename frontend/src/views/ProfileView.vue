@@ -41,7 +41,6 @@ import PrimaryButton from '@/elements/PrimaryButton';
 import { IconPencil } from '@tabler/icons-vue';
 
 // component constants
-const auth = inject('auth');
 const user = useUserStore();
 
 // component constants
@@ -60,11 +59,7 @@ const pendingAppointments = computed(() => props.appointments.filter((a) => a.st
 // do log out
 const logout = async () => {
   user.reset();
-  await auth.logout({
-    logoutParams: {
-      returnTo: window.location.origin,
-    },
-  });
+  window.location = '/';
 };
 
 // initially load data when component gets remounted

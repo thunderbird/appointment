@@ -168,7 +168,6 @@ import { IconExternalLink } from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
-const auth0 = useAuth0();
 const call = inject('call');
 const refresh = inject('refresh');
 const router = useRouter();
@@ -300,6 +299,7 @@ const refreshLinkConfirm = async () => {
  * @returns {Promise<void>}
  */
 const reauthenticateSubscriber = async (callbackFn) => {
+  /*
   try {
     // Prompt the user to re-login
     await auth0.loginWithPopup({
@@ -313,7 +313,7 @@ const reauthenticateSubscriber = async (callbackFn) => {
     closeModals();
     return;
   }
-
+  */
   await callbackFn();
 };
 

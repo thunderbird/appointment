@@ -7,6 +7,7 @@ const initialUserObject = {
   name: null,
   timezone: null,
   username: null,
+  accessToken: null,
 };
 
 export const useUserStore = defineStore('user', {
@@ -15,10 +16,47 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     exists() {
-      return this.data.email !== null;
+      return this.data.accessToken !== null;
     },
     reset() {
       this.$patch({ data: initialUserObject });
     },
+    async profile(fetch) {
+      const { error, data } = await fetch('me').get().json();
+
+      // Failed to get profile data, log this user out and return false
+      if (error.value) {
+        this.reset();
+        return false;
+      }
+
+      this.$patch({
+        data: {
+          username: data.value.username,
+          name: data.value.name,
+          email: data.value.email,
+          level: data.value.level,
+          timezone: data.value.timezone
+        }
+      });
+
+      return true;
+    },
+    async login(fetch, username, password) {
+      const formData = new FormData(document.createElement('form'));
+      formData.set('username', username);
+      formData.set('password', password);
+      const {error, data} = await fetch('token').post(formData).json();
+      console.log(data.value);
+
+      if (!data.value.access_token) {
+        return false;
+      }
+
+      this.data.accessToken = data.value.access_token;
+
+      console.log(this.data.accessToken);
+      return await this.profile(fetch);
+    }
   },
 });

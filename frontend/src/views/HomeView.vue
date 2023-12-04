@@ -80,23 +80,22 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted} from 'vue';
-import { useAuth0 } from '@auth0/auth0-vue';
+import { inject, onMounted} from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
+import { useUserStore } from '@/stores/user-store';
 
 const refresh = inject('refresh');
 
-const auth = useAuth0();
-const isAuthenticated = computed(() => auth?.isAuthenticated.value);
+const isAuthenticated = useUserStore().exists();
 
-const login = () => {
-  auth.loginWithRedirect();
-};
 const enter = () => {
   window.location = '/calendar';
 };
+const login = () => {
+  window.location = '/login';
+}
 
 // initially load data when component gets remounted
 onMounted(async () => {
