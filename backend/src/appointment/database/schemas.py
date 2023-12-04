@@ -30,7 +30,7 @@ class Attendee(AttendeeBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 """ SLOT model schemas
@@ -56,7 +56,7 @@ class Slot(SlotBase):
     attendee: Attendee | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class SlotOut(SlotBase):
@@ -105,7 +105,7 @@ class Appointment(AppointmentFull):
     slots: list[Slot] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AppointmentOut(AppointmentBase):
@@ -133,7 +133,7 @@ class Availability(AvailabilityBase):
     time_updated: datetime | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ScheduleBase(BaseModel):
@@ -166,7 +166,7 @@ class Schedule(ScheduleBase):
     availabilities: list[Availability] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 """ CALENDAR model schemas
@@ -196,7 +196,7 @@ class Calendar(CalendarConnection):
     schedules: list[Schedule] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CalendarOut(CalendarBase):
@@ -231,7 +231,7 @@ class Subscriber(SubscriberAuth):
     slots: list[Slot] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 """ other schemas used for requests or data migration
@@ -290,3 +290,12 @@ class ExternalConnectionOut(BaseModel):
     name: str
     type: str
     type_id: str
+
+
+"""Auth"""
+
+
+class Login(BaseModel):
+    username: str
+    password: str | None = None
+    timezone: str | None = None
