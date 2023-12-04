@@ -266,12 +266,11 @@
     </div>
     <!-- action buttons -->
     <div class="flex justify-center gap-4 mt-auto">
-      <primary-button v-if="publicLink && existing">
-        <a :href="publicLink" target="_blank" class="p-2 flex-center gap-2">
-          <span>{{ t('label.shareMyLink') }}</span>
-          <icon-external-link class="w-5 h-5" />
-        </a>
-      </primary-button>
+      <primary-button
+        v-if="publicLink && existing"
+        :label="t('label.shareMyLink')"
+        :copy="publicLink"
+      />
     </div>
     <div class="flex gap-4 mt-auto">
       <secondary-button

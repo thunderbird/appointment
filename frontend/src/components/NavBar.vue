@@ -48,10 +48,12 @@
             <router-link :to="{ name: 'profile' }" class="p-2">
               {{ t('label.userProfile') }}
             </router-link>
-            <a v-show="signedUserUrl" :href="signedUserUrl" target="_blank" class="p-2 flex justify-between items-center">
-              <span>{{ t('label.shareMyLink') }}</span>
-              <icon-external-link class="w-5 h-5 text-gray-500" />
-            </a>
+            <text-button
+              v-show="signedUserUrl"
+              :label="t('label.shareMyLink')"
+              :copy="signedUserUrl"
+              class="border-none flex-row-reverse justify-between !text-inherit !text-base !font-normal hover:bg-inherit hover:shadow-none"
+            />
             <hr class="border-teal-500" />
             <div @click="logout" class="cursor-pointer p-2">
               {{ t('label.logOut') }}
@@ -71,6 +73,7 @@ import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from "@/elements/NavBarItem";
 import DropDown from "@/elements/DropDown";
+import TextButton from "@/elements/TextButton";
 
 // icons
 import { IconExternalLink } from '@tabler/icons-vue';
