@@ -58,8 +58,6 @@ const call = createFetch({
   baseUrl: apiUrl,
   options: {
     async beforeFetch({ options }) {
-      console.log("USING USER >>",currentUser.data);
-
       if (isAuthenticated.value) {
         const token = await currentUser.data.accessToken;
         options.headers.Authorization = `Bearer ${token}`;

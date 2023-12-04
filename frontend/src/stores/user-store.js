@@ -43,11 +43,13 @@ export const useUserStore = defineStore('user', {
       return true;
     },
     async login(fetch, username, password) {
+      this.reset();
+
+      // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
       formData.set('password', password);
       const {error, data} = await fetch('token').post(formData).json();
-      console.log(data.value);
 
       if (!data.value.access_token) {
         return false;
@@ -55,7 +57,6 @@ export const useUserStore = defineStore('user', {
 
       this.data.accessToken = data.value.access_token;
 
-      console.log(this.data.accessToken);
       return await this.profile(fetch);
     }
   },
