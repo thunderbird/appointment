@@ -96,3 +96,14 @@
     @apply placeholder:text-gray-300 dark:placeholder:text-gray-500;
   }
 }
+
+/* vue specific classes */
+.v-enter-active,
+.v-leave-active {
+  @apply transition-opacity;
+}
+
+.v-enter-from,
+.v-leave-to {
+  @apply opacity-0;
+}
