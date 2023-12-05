@@ -31,6 +31,11 @@ const routes = [
     component: LoginView,
   },
   {
+    path: '/post-login/:token',
+    name: 'post-login',
+    component: LoginView,
+  },
+  {
     path: "/booking/:slug",
     name: "booking",
     component: BookingView,

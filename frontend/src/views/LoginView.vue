@@ -49,6 +49,14 @@ const isFxaAuth = computed(() => process.env?.VUE_APP_AUTH_SCHEME === 'fxa');
 
 // do log out
 const login = async () => {
+  if (isFxaAuth.value) {
+    const { error, data } = await call(`fxa_login?email=${username.value}`).get().json();
+    const { url } = data.value;
+
+    window.location = url;
+    return;
+  }
+
   await user.login(call, username.value, password.value);
   window.location = '/calendar';
 };
