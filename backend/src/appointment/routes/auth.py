@@ -70,7 +70,7 @@ def fxa_callback(
         raise HTTPException(400, "User ID could not be retrieved.")
 
     # Retrieve the user id set at the start of the zoom oauth process
-    subscriber = repo.get_subscriber(db, request.session['fxa_user_id'])
+    subscriber : Subscriber = repo.get_subscriber(db, request.session['fxa_user_id'])
 
     # Clear zoom session keys
     request.session.pop('fxa_state')
@@ -95,6 +95,15 @@ def fxa_callback(
         repo.create_subscriber_external_connection(db, external_connection_schema)
     else:
         repo.update_subscriber_external_connection_token(db, json.dumps(creds), subscriber.id, external_connection_schema.type, external_connection_schema.type_id)
+
+    # Update profile with fxa info
+    data = schemas.SubscriberIn(
+        avatar_url=profile['avatar'],
+        name=profile['displayName'] if 'displayName' in profile else subscriber.name,
+        username=profile['email'],
+        email=profile['email'],
+    )
+    repo.update_subscriber(db, data, subscriber.id)
 
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
@@ -144,5 +153,5 @@ def me(
     """
     return schemas.SubscriberBase(
         username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
-        timezone=subscriber.timezone
+        timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
     )

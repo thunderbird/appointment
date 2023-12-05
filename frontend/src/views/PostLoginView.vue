@@ -9,9 +9,10 @@ import {
   inject, computed, onMounted,
 } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { useRoute } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 
 // component constants
 const user = useUserStore();
@@ -23,11 +24,11 @@ const isFxaAuth = computed(() => process.env?.VUE_APP_AUTH_SCHEME === 'fxa');
 
 onMounted(async () => {
   if (!isFxaAuth.value) {
-    window.location = '/';
+    await router.push('/');
     return;
   }
 
   await user.login(call, route.params.token, null);
-  window.location = '/calendars';
+  await router.push('/calendar');
 });
 </script>

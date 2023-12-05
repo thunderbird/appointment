@@ -47,7 +47,12 @@
         :to="{ name: 'profile' }"
         class="w-12 h-12 mr-4 self-center flex-center rounded-full bg-teal-500 text-lg font-normal text-white"
       >
-        {{ initials(user.data.name) }}
+        <span v-if="user.data.avatarUrl === null">
+          {{ initials(user.data.name) }}
+        </span>
+        <span v-else>
+          <img class="rounded-full" :alt="initials(user.data.name)" :src="user.data.avatarUrl"/>
+        </span>
       </router-link>
     </nav>
   </header>

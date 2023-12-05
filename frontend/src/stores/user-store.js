@@ -7,6 +7,7 @@ const initialUserObject = {
   name: null,
   timezone: null,
   username: null,
+  avatarUrl: null,
   accessToken: null,
 };
 
@@ -36,7 +37,8 @@ export const useUserStore = defineStore('user', {
           name: data.value.name,
           email: data.value.email,
           level: data.value.level,
-          timezone: data.value.timezone
+          timezone: data.value.timezone,
+          avatarUrl: data.value.avatar_url,
         }
       });
 

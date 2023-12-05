@@ -211,6 +211,7 @@ class SubscriberIn(BaseModel):
     timezone: str | None = None
     username: str
     name: str | None = None
+    avatar_url: str | None = None
 
 
 class SubscriberBase(SubscriberIn):

@@ -79,11 +79,13 @@ class Subscriber(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     # Encrypted (here) and hashed (by the associated hashing functions in routes/auth)
-    password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
+    password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
     timezone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    avatar_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
+
     google_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
     # Temp storage for verifying google state tokens between authentication
     google_state = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
@@ -94,7 +96,7 @@ class Subscriber(Base):
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
     external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
 
-    def get_external_connection(self, type: ExternalConnectionType):
+    def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
         return next(filter(lambda ec: ec.type == type, self.external_connections), None)
 

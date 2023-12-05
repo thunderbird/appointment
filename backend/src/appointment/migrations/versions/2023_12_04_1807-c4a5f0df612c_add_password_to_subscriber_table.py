@@ -24,7 +24,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('password', StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=1024), index=False))
+    op.add_column('subscribers', sa.Column('password', StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255), index=False))
 
 
 def downgrade() -> None:
