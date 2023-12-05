@@ -39,13 +39,16 @@ import PrimaryButton from '@/elements/PrimaryButton';
 
 // icons
 import { IconPencil } from '@tabler/icons-vue';
+import { useRouter } from 'vue-router';
 
 // component constants
 const user = useUserStore();
+const router = useRouter();
 
 // component constants
 const { t } = useI18n();
 const refresh = inject('refresh');
+const call = inject('call');
 
 // view properties
 const props = defineProps({
@@ -58,8 +61,8 @@ const pendingAppointments = computed(() => props.appointments.filter((a) => a.st
 
 // do log out
 const logout = async () => {
-  user.reset();
-  window.location = '/';
+  await user.logout(call);
+  await router.push('/');
 };
 
 // initially load data when component gets remounted

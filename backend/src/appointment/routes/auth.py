@@ -19,6 +19,8 @@ from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.database import get_db
 from ..dependencies.auth import get_subscriber
 
+from ..controller.apis.fxa_client import FxaClient
+
 router = APIRouter()
 ph = PasswordHasher()
 
@@ -43,18 +45,47 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 @router.get("/fxa_login")
-def fxa_login(request: Request):
-    from ..controller.apis.fxa_client import FxaClient
-    fxa_client = FxaClient('', os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
-    fxa_client.setup(1)
-    url, state = fxa_client.get_redirect_url(token_urlsafe(32))
+def fxa_login(request: Request, email: str):
+    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
+    fxa_client.setup()
+    url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
 
     request.session['fxa_state'] = state
-    request.session['fxa_user_id'] = 1
+    request.session['fxa_user_email'] = email
 
     return {
         'url': url
     }
+
+
+@router.get("/fxa-profile")
+def fxa_profile(db: Session = Depends(get_db)):
+    subscriber : Subscriber = repo.get_subscriber(db, 1)
+
+    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
+    fxa_client.setup(1, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
+    return fxa_client.get_profile()
+
+
+@router.get("/fxa-token")
+def get_da_token(db: Session = Depends(get_db)):
+    subscriber: Subscriber = repo.get_subscriber(db, 1)
+    return subscriber.get_external_connection(ExternalConnectionType.fxa).token
+
+
+@router.get('/logout')
+def logout(subscriber: Subscriber = Depends(get_subscriber)):
+    """Logout a given subscriber session"""
+
+    # We don't actually have to do anything for non-fxa schemes
+    if os.getenv('AUTH_SCHEME') != 'fxa':
+        return True
+
+    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
+    fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
+    fxa_client.logout()
+
+    return True
 
 
 @router.get("/fxa")
@@ -64,24 +95,43 @@ def fxa_callback(
     state: str,
     db: Session = Depends(get_db),
 ):
+    """Auth callback from fxa. It's a bit of a journey:
+    - We first ensure the state has not changed during the authentication process.
+    - We setup a fxa_client, and retrieve credentials and profile information on the user.
+    - After which we do a lookup on our fxa external connections for a match on profile's uid field.
+        - If not match is made, we create a new subscriber with the given email.
+        - Otherwise we just grab the external connection's owner.
+    - We update the external connection with any new details
+    - We also update (an initial set if the subscriber is new) the profile data for the subscriber.
+    - And finally generate a jwt token for the frontend, and redirect them to a special frontend route with that token.
+    """
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
         raise HTTPException(400, "Invalid state.")
-    if 'fxa_user_id' not in request.session or request.session['fxa_user_id'] == '':
-        raise HTTPException(400, "User ID could not be retrieved.")
+    if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
+        raise HTTPException(400, "Email could not be retrieved.")
 
-    # Retrieve the user id set at the start of the zoom oauth process
-    subscriber : Subscriber = repo.get_subscriber(db, request.session['fxa_user_id'])
+    email = request.session['fxa_user_email']
 
     # Clear zoom session keys
     request.session.pop('fxa_state')
-    request.session.pop('fxa_user_id')
+    request.session.pop('fxa_user_email')
 
-    from ..controller.apis.fxa_client import FxaClient
-    fxa_client = FxaClient('', os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
-    fxa_client.setup(1)
+    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
+    fxa_client.setup()
+
+    # Retrieve credentials and user profile
     creds = fxa_client.get_credentials(code)
-
     profile = fxa_client.get_profile()
+
+    # Check if we have an existing fxa connection by profile's uid
+    external_connection = repo.get_first_external_connection_by_type(db, ExternalConnectionType.fxa, profile['uid'])
+    if not external_connection:
+        subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
+            email=email,
+            username=email,
+        ))
+    else:
+        subscriber = external_connection.owner
 
     external_connection_schema = schemas.ExternalConnection(
         name=profile['email'],
@@ -91,7 +141,7 @@ def fxa_callback(
         token=json.dumps(creds)
     )
 
-    if len(repo.get_external_connections_by_type(db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id)) == 0:
+    if not external_connection:
         repo.create_subscriber_external_connection(db, external_connection_schema)
     else:
         repo.update_subscriber_external_connection_token(db, json.dumps(creds), subscriber.id, external_connection_schema.type, external_connection_schema.type_id)

@@ -65,6 +65,15 @@ export const useUserStore = defineStore('user', {
       }
 
       return await this.profile(fetch);
+    },
+    async logout(fetch) {
+      const { error, data } = await fetch('logout').get().json();
+
+      if (error.value) {
+        console.warn("Error logging out: ", error.value);
+      }
+
+      this.reset();
     }
   },
 });
