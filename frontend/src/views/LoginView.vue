@@ -40,6 +40,7 @@ const user = useUserStore();
 // component constants
 const { t } = useI18n();
 const call = inject('call');
+const dj = inject("dayjs");
 const router = useRouter();
 
 // list of pending appointments
@@ -52,7 +53,7 @@ const isFxaAuth = computed(() => process.env?.VUE_APP_AUTH_SCHEME === 'fxa');
 // do log out
 const login = async () => {
   if (isFxaAuth.value) {
-    const { error, data } = await call(`fxa_login?email=${username.value}`).get().json();
+    const { error, data } = await call(`fxa_login?email=${username.value}&timezone=${dj.tz.guess()}`).get().json();
     const { url } = data.value;
 
     if (error.value) {

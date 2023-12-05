@@ -45,47 +45,19 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 @router.get("/fxa_login")
-def fxa_login(request: Request, email: str):
+def fxa_login(request: Request, email: str, timezone: str|None = None):
+    """Request an authorization url from fxa"""
     fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
     fxa_client.setup()
     url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
 
     request.session['fxa_state'] = state
     request.session['fxa_user_email'] = email
+    request.session['fxa_user_timezone'] = timezone
 
     return {
         'url': url
     }
-
-
-@router.get("/fxa-profile")
-def fxa_profile(db: Session = Depends(get_db)):
-    subscriber : Subscriber = repo.get_subscriber(db, 1)
-
-    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
-    fxa_client.setup(1, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
-    return fxa_client.get_profile()
-
-
-@router.get("/fxa-token")
-def get_da_token(db: Session = Depends(get_db)):
-    subscriber: Subscriber = repo.get_subscriber(db, 1)
-    return subscriber.get_external_connection(ExternalConnectionType.fxa).token
-
-
-@router.get('/logout')
-def logout(subscriber: Subscriber = Depends(get_subscriber)):
-    """Logout a given subscriber session"""
-
-    # We don't actually have to do anything for non-fxa schemes
-    if os.getenv('AUTH_SCHEME') != 'fxa':
-        return True
-
-    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
-    fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
-    fxa_client.logout()
-
-    return True
 
 
 @router.get("/fxa")
@@ -111,10 +83,13 @@ def fxa_callback(
         raise HTTPException(400, "Email could not be retrieved.")
 
     email = request.session['fxa_user_email']
+    # We only use timezone during subscriber creation
+    timezone = request.session['fxa_user_timezone']
 
-    # Clear zoom session keys
+    # Clear session keys
     request.session.pop('fxa_state')
     request.session.pop('fxa_user_email')
+    request.session.pop('fxa_user_timezone')
 
     fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
     fxa_client.setup()
@@ -129,6 +104,7 @@ def fxa_callback(
         subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
             email=email,
             username=email,
+            timezone=timezone,
         ))
     else:
         subscriber = external_connection.owner
@@ -195,12 +171,26 @@ def token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.get('/logout')
+def logout(subscriber: Subscriber = Depends(get_subscriber)):
+    """Logout a given subscriber session"""
+
+    # We don't actually have to do anything for non-fxa schemes
+    if os.getenv('AUTH_SCHEME') != 'fxa':
+        return True
+
+    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
+    fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
+    fxa_client.logout()
+
+    return True
+
+
 @router.get("/me", response_model=schemas.SubscriberBase)
 def me(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
-    """Return the currently authed user model
-    """
+    """Return the currently authed user model"""
     return schemas.SubscriberBase(
         username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
         timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
