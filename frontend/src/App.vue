@@ -116,7 +116,7 @@ const appointments = ref([]);
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
-  () => ['booking', 'availability', 'home', 'login'].includes(route.name),
+  () => ['booking', 'availability', 'home', 'login', 'post-login'].includes(route.name),
 );
 const routeIsHome = computed(
   () => ['home'].includes(route.name),

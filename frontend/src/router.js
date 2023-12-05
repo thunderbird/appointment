@@ -4,7 +4,8 @@ import BookingConfirmationView from "@/views/BookingConfirmationView.vue";
 import CalendarView from "@/views/CalendarView.vue";
 import ScheduleView from "@/views/ScheduleView.vue";
 import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/LoginView.vue"
+import LoginView from "@/views/LoginView.vue";
+import PostLoginView from "@/views/PostLoginView.vue";
 import { useUserStore } from "@/stores/user-store";
 
 const authGuard = (to, from, next) => {
@@ -33,7 +34,7 @@ const routes = [
   {
     path: '/post-login/:token',
     name: 'post-login',
-    component: LoginView,
+    component: PostLoginView,
   },
   {
     path: "/booking/:slug",
