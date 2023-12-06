@@ -28,6 +28,7 @@ class FxaConfig:
         config = FxaConfig()
         config.issuer = response.get('issuer')
         config.authorization_url = response.get('authorization_endpoint')
+        # Not available from the config endpoint, but it's on the same domain as authorization
         config.metrics_flow_url = response.get('authorization_endpoint').replace('authorization', 'metrics-flow')
         config.token_url = response.get('token_endpoint')
         config.profile_url = response.get('userinfo_endpoint')
@@ -38,10 +39,6 @@ class FxaConfig:
 
 
 class FxaClient:
-    OAUTH_API_URL = os.getenv('FXA_OAUTH_URL')
-    ACCOUNTS_API_URL = os.getenv('FXA_ACCOUNTS_URL')
-    PROFILE_API_URL = os.getenv('FXA_PROFILE_URL')
-
     ENTRYPOINT = 'tbappointment'
 
     SCOPES = [
