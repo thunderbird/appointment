@@ -20,6 +20,7 @@ from ..dependencies.database import get_db
 from ..dependencies.auth import get_subscriber
 
 from ..controller.apis.fxa_client import FxaClient
+from ..dependencies.fxa import get_fxa_client
 
 router = APIRouter()
 ph = PasswordHasher()
@@ -45,9 +46,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 @router.get("/fxa_login")
-def fxa_login(request: Request, email: str, timezone: str|None = None):
+def fxa_login(request: Request, email: str, timezone: str|None = None, fxa_client: FxaClient = Depends(get_fxa_client)):
     """Request an authorization url from fxa"""
-    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
     fxa_client.setup()
     url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
 
@@ -66,6 +66,7 @@ def fxa_callback(
     code: str,
     state: str,
     db: Session = Depends(get_db),
+    fxa_client: FxaClient = Depends(get_fxa_client)
 ):
     """Auth callback from fxa. It's a bit of a journey:
     - We first ensure the state has not changed during the authentication process.
@@ -91,7 +92,6 @@ def fxa_callback(
     request.session.pop('fxa_user_email')
     request.session.pop('fxa_user_timezone')
 
-    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
     fxa_client.setup()
 
     # Retrieve credentials and user profile
@@ -99,7 +99,7 @@ def fxa_callback(
     profile = fxa_client.get_profile()
 
     # Check if we have an existing fxa connection by profile's uid
-    external_connection = repo.get_first_external_connection_by_type(db, ExternalConnectionType.fxa, profile['uid'])
+    external_connection = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
     if not external_connection:
         subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
             email=email,
@@ -172,14 +172,13 @@ def token(
 
 
 @router.get('/logout')
-def logout(subscriber: Subscriber = Depends(get_subscriber)):
+def logout(subscriber: Subscriber = Depends(get_subscriber), fxa_client: FxaClient = Depends(get_fxa_client)):
     """Logout a given subscriber session"""
 
     # We don't actually have to do anything for non-fxa schemes
     if os.getenv('AUTH_SCHEME') != 'fxa':
         return True
 
-    fxa_client = FxaClient(os.getenv('FXA_CLIENT_ID'), os.getenv('FXA_SECRET'), os.getenv('FXA_CALLBACK'))
     fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
     fxa_client.logout()
 
