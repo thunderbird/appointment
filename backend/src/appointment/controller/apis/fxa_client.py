@@ -8,11 +8,13 @@ from ...database import models, repo
 
 
 class FxaConfig:
+    issuer: str
     authorization_url: str
     metrics_flow_url: str
     token_url: str
     profile_url: str
     destroy_url: str
+    jwks_url: str
 
     @staticmethod
     def from_url(url):
@@ -24,11 +26,13 @@ class FxaConfig:
             logging.warning("Profile scope not found in supported scopes for fxa!")
 
         config = FxaConfig()
+        config.issuer = response.get('issuer')
         config.authorization_url = response.get('authorization_endpoint')
         config.metrics_flow_url = response.get('authorization_endpoint').replace('authorization', 'metrics-flow')
         config.token_url = response.get('token_endpoint')
         config.profile_url = response.get('userinfo_endpoint')
         config.destroy_url = response.get('revocation_endpoint')
+        config.jwks_url = response.get('jwks_uri')
 
         return config
 
@@ -72,7 +76,7 @@ class FxaClient:
 
     def get_redirect_url(self, state, email):
         utm_campaign = f"{self.ENTRYPOINT}_{os.getenv('APP_ENV')}"
-        utm_source = '/login'
+        utm_source = "login"
 
         try:
             response = self.client.get(url=self.config.metrics_flow_url, params={
@@ -126,9 +130,6 @@ class FxaClient:
         """Retrieve the user's profile information"""
         return self.client.get(url=self.config.profile_url).json()
 
-    def send_metrics_flow_request(self):
-        pass
-
     def logout(self):
         """Invalidate the current refresh token"""
         # I assume a refresh token will destroy its access tokens
@@ -143,3 +144,6 @@ class FxaClient:
 
         resp.raise_for_status()
         return resp
+
+    def get_jwk(self):
+        return requests.get(self.config.jwks_url).json()

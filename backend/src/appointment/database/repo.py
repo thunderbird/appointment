@@ -623,11 +623,11 @@ def get_external_connections_by_type(db: Session, subscriber_id: int, type: mode
     return result
 
 
-def get_first_external_connection_by_type(db: Session, type: models.ExternalConnectionType, type_id: str):
-    """Return an external connections by type, and type id. This is not scoped by subscriber!"""
+def get_subscriber_by_fxa_uid(db: Session, type_id: str):
+    """Return a subscriber from a fxa profile uid"""
     query = (
         db.query(models.ExternalConnections)
-        .filter(models.ExternalConnections.type == type)
+        .filter(models.ExternalConnections.type == models.ExternalConnectionType.fxa)
         .filter(models.ExternalConnections.type_id == type_id)
     )
 
