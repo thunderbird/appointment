@@ -5,7 +5,7 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     ports:
-      - 8090:8090
+      - 5173:5173
     volumes:
       - ./backend/src:/app/src
     environment:

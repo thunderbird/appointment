@@ -38,9 +38,15 @@
       <drop-down class="self-center">
         <template #trigger>
           <div
-            class="w-12 h-12 mr-4 flex-center rounded-full bg-teal-500 text-lg font-normal text-white"
+            class="w-12 h-12 mr-4 self-center flex-center rounded-full text-lg bg-white font-normal text-white"
+            :class="{'bg-teal-500': user.data.avatarUrl === null}"
           >
-            {{ initials(user.data.name) }}
+            <span v-if="user.data.avatarUrl === null">
+              {{ initials(user.data.name) }}
+            </span>
+            <span v-else>
+              <img class="rounded-full w-[48px] h-[48px]" :alt="initials(user.data.name)" :src="user.data.avatarUrl"/>
+            </span>
           </div>
         </template>
         <template #default>
@@ -68,22 +74,18 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from "@/elements/NavBarItem";
 import DropDown from "@/elements/DropDown";
 import TextButton from "@/elements/TextButton";
 
-// icons
-import { IconExternalLink } from '@tabler/icons-vue';
-// import { IconSearch } from '@tabler/icons-vue';
-
 // component constants
 const user = useUserStore();
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
-const logout = inject('logout');
 const call = inject('call');
 
 // component properties
@@ -92,6 +94,12 @@ defineProps({
 });
 
 const signedUserUrl = ref('');
+
+// do log out
+const logout = async () => {
+  await user.logout(call);
+  await router.push('/');
+};
 
 const getSignedUserUrl = async () => {
   // Retrieve the user short url

@@ -5,9 +5,6 @@ import { createApp } from 'vue';
 // pinia state management
 import { createPinia } from 'pinia'
 
-// init auth0
-import { createAuth0 } from '@auth0/auth0-vue';
-
 // init router
 import router from '@/router';
 
@@ -66,26 +63,7 @@ if (process.env.VUE_APP_SENTRY_DSN) {
 const pinia = createPinia();
 app.use(pinia);
 
-// Per the [Auth0 docs](https://github.com/auth0/auth0-vue/blob/main/EXAMPLES.md#protecting-a-route), we should register the router before the Auth0 SDK.
 app.use(router);
-
-app.use(
-  createAuth0({
-    domain: process.env.VUE_APP_AUTH0_DOMAIN,
-    clientId: process.env.VUE_APP_AUTH0_CLIENT_ID,
-    useRefreshTokens: true,
-    cacheLocation: 'localstorage',
-    authorizationParams: {
-      redirect_uri: window.location.origin,
-      audience: process.env.VUE_APP_AUTH0_AUDIENCE,
-      // read:calendars is needed for the API
-      // even if the user does not have the scope, we still request it
-      scope: 'profile email read:calendars',
-    },
-  }),
-);
-
-
 
 // init urls
 const protocol = process.env.VUE_APP_API_SECURE === 'true' ? 'https' : 'http';

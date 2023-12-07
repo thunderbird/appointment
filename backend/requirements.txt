@@ -1,9 +1,11 @@
 alembic==1.9.3
 auth0-python==4.0.0
+argon2-cffi==23.1.0
+argon2-cffi-bindings==21.2.0
 caldav==1.0.1
 cryptography==39.0.1
 fastapi-auth0==0.3.2
-fastapi==0.91.0
+fastapi==0.104.1
 google-api-python-client==2.85.0
 google-auth-httplib2==0.1.0
 google-auth-oauthlib==1.0.0
@@ -13,6 +15,9 @@ itsdangerous==2.1.2
 mysqlclient==2.1.1
 mysql-connector-python==8.0.32
 python-dotenv==1.0.0
+python-jose==3.3.0
+python-multipart==0.0.6
+pydantic==2.5.2
 sentry-sdk==1.26.0
 sqlalchemy-utils==0.39.0
 sqlalchemy==1.4.40

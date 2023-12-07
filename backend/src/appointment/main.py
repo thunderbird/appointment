@@ -72,10 +72,12 @@ def server():
 
     # extra routes
     from .routes import api
+    from .routes import auth
     from .routes import account
     from .routes import google
     from .routes import schedule
     from .routes import zoom
+    from .routes import webhooks
 
     # init app
     app = FastAPI()
@@ -108,9 +110,11 @@ def server():
 
     # Mix in our extra routes
     app.include_router(api.router)
+    app.include_router(auth.router)  # Special case!
     app.include_router(account.router, prefix="/account")
     app.include_router(google.router, prefix="/google")
     app.include_router(schedule.router, prefix="/schedule")
+    app.include_router(webhooks.router, prefix="/webhooks")
     if os.getenv("ZOOM_API_ENABLED"):
         app.include_router(zoom.router, prefix="/zoom")
 
