@@ -118,6 +118,7 @@
     "downloadYourData": "Download your data",
     "earliestBooking": "Bookable after",
     "editCalendar": "Edit calendar",
+    "editProfile": "Edit profile",
     "email": "Email",
     "end": "End",
     "endDate": "End Date",
@@ -235,6 +236,9 @@
       "shareWithOthersTitle": "Share with others",
       "screenshotCalendarAlt": "A screenshot of Thunderbird Appointment's calendar page.",
       "screenshotScheduleAlt": "A screenshot of Thunderbird Appointment's schedule page."
+    },
+    "login": {
+      "continueToFxa": "Enter your email above to continue to Mozilla Accounts"
     },
     "invalidOrAlreadyBooked": "The booking slot might not be available anymore or the link is broken.",
     "invitationSentToAddress": "An invitation for this event has been emailed to {address}.",

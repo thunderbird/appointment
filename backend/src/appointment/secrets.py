@@ -4,16 +4,6 @@ import os
 
 def normalize_secrets():
     """Normalizes AWS secrets for Appointment"""
-    auth0_secrets = os.getenv("AUTH0_SECRETS")
-
-    if auth0_secrets:
-        secrets = json.loads(auth0_secrets)
-
-        os.environ["AUTH0_API_DOMAIN"] = secrets.get("domain")
-        os.environ["AUTH0_API_CLIENT_ID"] = secrets.get("client_id")
-        os.environ["AUTH0_API_SECRET"] = secrets.get("secret")
-        os.environ["AUTH0_API_AUDIENCE"] = secrets.get("audience")
-
     database_secrets = os.getenv("DATABASE_SECRETS")
 
     if database_secrets:
@@ -32,6 +22,7 @@ def normalize_secrets():
         # Technically not db related...might rename this item later.
         os.environ["SIGNED_SECRET"] = secrets.get("signed_secret")
         os.environ["SESSION_SECRET"] = secrets.get("session_secret")
+        os.environ["JWT_SECRET"] = secrets.get("jwt_secret")
 
     smtp_secrets = os.getenv("SMTP_SECRETS")
 
@@ -61,3 +52,14 @@ def normalize_secrets():
 
         os.environ["ZOOM_AUTH_CLIENT_ID"] = secrets.get("client_id")
         os.environ["ZOOM_AUTH_SECRET"] = secrets.get("secret")
+
+    fxa_secrets = os.getenv('FXA_SECRETS')
+
+    if fxa_secrets:
+        secrets = json.loads(fxa_secrets)
+
+        os.environ['FXA_OPEN_ID_CONFIG'] = secrets.get('open_id_config')
+        os.environ['FXA_CLIENT_ID'] = secrets.get('client_id')
+        os.environ['FXA_SECRET'] = secrets.get('secret')
+        os.environ['FXA_CALLBACK'] = secrets.get('callback_url')
+        os.environ['FXA_ALLOW_LIST'] = secrets.get('allow_list')

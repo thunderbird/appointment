@@ -621,3 +621,16 @@ def get_external_connections_by_type(db: Session, subscriber_id: int, type: mode
     result = query.all()
 
     return result
+
+
+def get_subscriber_by_fxa_uid(db: Session, type_id: str):
+    """Return a subscriber from a fxa profile uid"""
+    query = (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.type == models.ExternalConnectionType.fxa)
+        .filter(models.ExternalConnections.type_id == type_id)
+    )
+
+    result = query.first()
+
+    return result

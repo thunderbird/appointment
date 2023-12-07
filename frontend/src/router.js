@@ -1,10 +1,21 @@
-import {authGuard} from "@auth0/auth0-vue";
 import {createRouter, createWebHistory} from "vue-router";
 import BookingView from "@/views/BookingView.vue";
 import BookingConfirmationView from "@/views/BookingConfirmationView.vue";
 import CalendarView from "@/views/CalendarView.vue";
 import ScheduleView from "@/views/ScheduleView.vue";
 import HomeView from "@/views/HomeView.vue";
+import LoginView from "@/views/LoginView.vue";
+import PostLoginView from "@/views/PostLoginView.vue";
+import { useUserStore } from "@/stores/user-store";
+
+const authGuard = (to, from) => {
+  const user = useUserStore();
+
+  // If we're not logged in, drop them to login
+  if (!user?.exists()) {
+    return '/login';
+  }
+};
 
 const routes = [
   // instant loaded routes
@@ -12,6 +23,16 @@ const routes = [
     path: "/",
     name: "home",
     component: HomeView,
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+  },
+  {
+    path: '/post-login/:token',
+    name: 'post-login',
+    component: PostLoginView,
   },
   {
     path: "/booking/:slug",
@@ -72,7 +93,7 @@ const routes = [
     path: "/terms",
     name: "terms",
     beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/about/legal/terms/mozilla/' }
-  }
+  },
 ];
 
 // create router object to export

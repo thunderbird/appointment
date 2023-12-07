@@ -1,7 +1,7 @@
 <template>
   <div>
     <section>
-      <div class="flex-center flex-col gap-12">
+      <div class="flex-center flex-col gap-12 mt-8">
         <img class="w-full max-w-xs md:max-w-sm lg:max-w-md" src="/appointment_logo.svg" alt="Appointment Logo" />
         <h2 class="pt-6 font-display tracking-[0.19em] uppercase text-center text-lg md:text-3xl lg:text-5xl">
           {{ $t('app.title') }}
@@ -82,20 +82,23 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted} from 'vue';
-import { useAuth0 } from '@auth0/auth0-vue';
+import { inject, onMounted} from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
+import { useUserStore } from '@/stores/user-store';
+import { useRouter } from 'vue-router';
 
 const refresh = inject('refresh');
-const login = inject('login');
+const router = useRouter();
 
-const auth = useAuth0();
-const isAuthenticated = computed(() => auth?.isAuthenticated.value);
+const isAuthenticated = useUserStore().exists();
 
 const enter = () => {
-  window.location = '/calendar';
+  router.push('/calendar');
+};
+const login = () => {
+  router.push('/login');
 };
 
 // initially load data when component gets remounted

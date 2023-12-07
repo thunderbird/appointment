@@ -25,7 +25,8 @@
         <div class="text-gray-500 text-center">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
-    <primary-button :label="t('label.logOut')" @click="logout()" />
+    <secondary-button class="mb-8" v-if="isFxaAuth" :label="t('label.editProfile')" @click="editProfile" />
+    <primary-button :label="t('label.logOut')" @click="logout" />
   </div>
 </template>
 
@@ -36,17 +37,22 @@ import { useI18n } from 'vue-i18n';
 import { subscriberLevels, appointmentState } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
 
 // icons
 import { IconPencil } from '@tabler/icons-vue';
+import { useRouter } from 'vue-router';
 
 // component constants
 const user = useUserStore();
-const logout = inject('logout');
+const router = useRouter();
 
 // component constants
 const { t } = useI18n();
 const refresh = inject('refresh');
+const call = inject('call');
+const fxaEditProfileUrl = inject('fxaEditProfileUrl');
+const isFxaAuth = inject('isFxaAuth');
 
 // view properties
 const props = defineProps({
@@ -56,6 +62,16 @@ const props = defineProps({
 
 // list of pending appointments
 const pendingAppointments = computed(() => props.appointments.filter((a) => a.status === appointmentState.pending));
+
+// do log out
+const logout = async () => {
+  await user.logout(call);
+  await router.push('/');
+};
+
+const editProfile = async () => {
+  window.location = fxaEditProfileUrl;
+};
 
 // initially load data when component gets remounted
 onMounted(async () => {
