@@ -1,5 +1,4 @@
 alembic==1.9.3
-auth0-python==4.0.0
 argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
 caldav==1.0.1

@@ -17,10 +17,9 @@ from ..database import repo, schemas
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 
 from fastapi import APIRouter, Depends, HTTPException, Security, Body
-from fastapi_auth0 import Auth0User
 from datetime import timedelta, timezone
 from ..controller.apis.google_client import GoogleClient
-from ..controller.auth import signed_url_by_subscriber, Auth
+from ..controller.auth import signed_url_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber

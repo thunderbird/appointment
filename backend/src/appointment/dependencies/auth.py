@@ -33,7 +33,6 @@ def get_subscriber(
     """Automatically retrieve and return the subscriber"""
     user = get_user_from_token(db, token)
 
-    # Error out if auth0 didn't find a user
     if user is None:
         raise HTTPException(403, detail='Missing bearer token')
 
