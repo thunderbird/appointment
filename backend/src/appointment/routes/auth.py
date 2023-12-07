@@ -148,7 +148,7 @@ def fxa_callback(
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
     access_token = create_access_token(
-        data={"sub": subscriber.username}, expires_delta=access_token_expires
+        data={"sub": f"uid-{subscriber.id}"}, expires_delta=access_token_expires
     )
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{access_token}")
@@ -181,7 +181,7 @@ def token(
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
     access_token = create_access_token(
-        data={"sub": subscriber.username}, expires_delta=access_token_expires
+        data={"sub": f"uid-{subscriber.id}"}, expires_delta=access_token_expires
     )
 
     """Log a user in with the passed username and password information"""
