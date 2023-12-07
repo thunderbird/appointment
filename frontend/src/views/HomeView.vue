@@ -90,11 +90,7 @@ import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
 
 const refresh = inject('refresh');
-<<<<<<< HEAD
 const router = useRouter();
-=======
-const login = inject('login');
->>>>>>> main
 
 const isAuthenticated = useUserStore().exists();
 
