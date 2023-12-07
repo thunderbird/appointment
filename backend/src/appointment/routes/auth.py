@@ -111,13 +111,16 @@ def fxa_callback(
 
     # Check if we have an existing fxa connection by profile's uid
     external_connection = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
-    if not external_connection:
+    # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
+    subscriber = repo.get_subscriber_by_email(db, email)
+
+    if not external_connection and not subscriber:
         subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
             email=email,
             username=email,
             timezone=timezone,
         ))
-    else:
+    elif not subscriber:
         subscriber = external_connection.owner
 
     external_connection_schema = schemas.ExternalConnection(
