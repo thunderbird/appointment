@@ -65,7 +65,6 @@ app.use(pinia);
 
 app.use(router);
 
-
 // init urls
 const protocol = process.env.VUE_APP_API_SECURE === 'true' ? 'https' : 'http';
 const port = process.env.VUE_APP_API_PORT !== undefined ? `:${process.env.VUE_APP_API_PORT}` : '';

@@ -8,15 +8,13 @@ import LoginView from "@/views/LoginView.vue";
 import PostLoginView from "@/views/PostLoginView.vue";
 import { useUserStore } from "@/stores/user-store";
 
-const authGuard = (to, from, next) => {
+const authGuard = (to, from) => {
   const user = useUserStore();
 
   // If we're not logged in, drop them to login
-  if (!user.exists()) {
+  if (!user?.exists()) {
     return '/login';
   }
-
-  return next();
 };
 
 const routes = [

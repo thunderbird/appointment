@@ -25,7 +25,8 @@
         <div class="text-gray-500 text-center">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
-    <primary-button :label="t('label.logOut')" @click="logout()" />
+    <secondary-button class="mb-8" v-if="isFxaAuth" :label="t('label.editProfile')" @click="editProfile" />
+    <primary-button :label="t('label.logOut')" @click="logout" />
   </div>
 </template>
 
@@ -36,6 +37,7 @@ import { useI18n } from 'vue-i18n';
 import { subscriberLevels, appointmentState } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
 
 // icons
 import { IconPencil } from '@tabler/icons-vue';
@@ -49,6 +51,8 @@ const router = useRouter();
 const { t } = useI18n();
 const refresh = inject('refresh');
 const call = inject('call');
+const fxaEditProfileUrl = inject('fxaEditProfileUrl');
+const isFxaAuth = inject('isFxaAuth');
 
 // view properties
 const props = defineProps({
@@ -63,6 +67,10 @@ const pendingAppointments = computed(() => props.appointments.filter((a) => a.st
 const logout = async () => {
   await user.logout(call);
   await router.push('/');
+};
+
+const editProfile = async () => {
+  window.location = fxaEditProfileUrl;
 };
 
 // initially load data when component gets remounted

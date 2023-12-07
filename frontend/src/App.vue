@@ -35,7 +35,7 @@
 import { appointmentState } from "@/definitions";
 import { createFetch } from "@vueuse/core";
 import { ref, inject, provide, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import NavBar from "@/components/NavBar";
 import TitleBar from "@/components/TitleBar";
 import FooterBar from "@/components/FooterBar.vue";
@@ -50,6 +50,7 @@ const currentUser = useUserStore(); // data: { username, email, name, level, tim
 const apiUrl = inject("apiUrl");
 const dj = inject("dayjs");
 const route = useRoute();
+const router = useRouter();
 const siteNotificationStore = useSiteNotificationStore();
 
 // handle auth and fetch
@@ -85,10 +86,9 @@ const call = createFetch({
           url,
         );
       } else if (error.statusCode === 401) {
-        console.log("FAILED, PLS LOGIN");
         // Clear current user data, and ship them to the login screen!
         await currentUser.reset();
-        window.location = '/login';
+        router.push('/login');
       }
 
       // Pass the error along
@@ -101,6 +101,9 @@ const call = createFetch({
   },
 });
 provide("call", call);
+provide('isPasswordAuth', process.env?.VUE_APP_AUTH_SCHEME === 'password');
+provide('isFxaAuth', process.env?.VUE_APP_AUTH_SCHEME === 'fxa');
+provide('fxaEditProfileUrl', process.env?.VUE_APP_FXA_EDIT_PROFILE);
 
 // menu items for main navigation
 const navItems = [
