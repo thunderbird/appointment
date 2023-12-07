@@ -85,10 +85,11 @@ const call = createFetch({
           data.detail?.message || 'Please re-connect with Google',
           url,
         );
-      } else if (error.statusCode === 401) {
+      } else if (response.status === 401) {
         // Clear current user data, and ship them to the login screen!
         await currentUser.reset();
-        router.push('/login');
+        await router.push('/login');
+        return;
       }
 
       // Pass the error along
