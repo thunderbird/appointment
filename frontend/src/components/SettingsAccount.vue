@@ -150,9 +150,7 @@
 </template>
 
 <script setup>
-import {
-  ref, inject, onMounted, computed,
-} from 'vue';
+import { ref, inject, onMounted, computed } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -172,6 +170,7 @@ const call = inject('call');
 const refresh = inject('refresh');
 const router = useRouter();
 const user = useUserStore();
+const logout = inject('logout');
 
 const externalConnections = ref({});
 const hasZoomAccountConnected = computed(() => (externalConnections.value?.zoom?.length ?? []) > 0);
@@ -351,12 +350,7 @@ const actuallyDeleteAccount = async () => {
   }
 
   if (auth0) {
-    user.reset();
-    await auth0.logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-      },
-    });
+    await logout();
   } else {
     await router.push('/');
   }

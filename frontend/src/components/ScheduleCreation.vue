@@ -265,6 +265,13 @@
       </div>
     </div>
     <!-- action buttons -->
+    <div class="flex justify-center gap-4 mt-auto">
+      <primary-button
+        v-if="publicLink && existing"
+        :label="t('label.shareMyLink')"
+        :copy="publicLink"
+      />
+    </div>
     <div class="flex gap-4 mt-auto">
       <secondary-button
         :label="t('label.cancel')"
@@ -294,7 +301,7 @@
     :open="savedConfirmation.show"
     :is-schedule="true"
     :title="savedConfirmation.title"
-    :public-link="savedConfirmation.publicLink"
+    :public-link="publicLink"
     @close="closeCreatedModal"
   />
 </template>
@@ -310,7 +317,7 @@ import SecondaryButton from "@/elements/SecondaryButton";
 import TabBar from "@/components/TabBar";
 
 // icons
-import { IconChevronDown } from "@tabler/icons-vue";
+import { IconChevronDown, IconExternalLink } from "@tabler/icons-vue";
 import AlertBox from "@/elements/AlertBox";
 import SwitchToggle from "@/elements/SwitchToggle";
 
@@ -457,7 +464,6 @@ const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking
 const savedConfirmation = reactive({
   show: false,
   title: "",
-  publicLink: "",
 });
 const closeCreatedModal = () => {
   savedConfirmation.show = false;
@@ -468,6 +474,15 @@ const resetSchedule = () => {
   scheduleCreationError.value = null;
   state.value = scheduleCreationState.details;
 };
+
+// hold public availability link of user
+const publicLink = ref('');
+onMounted(async () => {
+  const { data, error } = await call('me/signature').get().json();
+  if (!error.value) {
+    publicLink.value = data.value.url;
+  }
+});
 
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
@@ -514,7 +529,7 @@ const saveSchedule = async (withConfirmation = true) => {
   
     // show confirmation
     savedConfirmation.title = data.value.name;
-    savedConfirmation.publicLink = sig_data.value.url;
+    publicLink.value = sig_data.value.url;
     savedConfirmation.show = true;
   }
 
