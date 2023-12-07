@@ -208,3 +208,28 @@ def me(
         username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
         timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
     )
+
+
+# @router.get('/test-create-account')
+# def test_create_account(email: str, password: str, timezone: str, db: Session = Depends(get_db)):
+#     """Used to create a test account"""
+#     if os.getenv('APP_ENV') != 'dev':
+#         raise HTTPException(status_code=405)
+#     if os.getenv('AUTH_SCHEME') != 'password':
+#         raise HTTPException(status_code=405)
+#
+#     subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
+#         email=email,
+#         username=email,
+#         name=email.split('@')[0],
+#         timezone=timezone
+#     ))
+#
+#     # Update with password
+#     subscriber.password = get_password_hash(password)
+#
+#     db.add(subscriber)
+#     db.commit()
+#     db.refresh(subscriber)
+#
+#     return subscriber
