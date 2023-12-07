@@ -136,7 +136,7 @@ def fxa_callback(
     # Update profile with fxa info
     data = schemas.SubscriberIn(
         avatar_url=profile['avatar'],
-        name=profile['displayName'] if 'displayName' in profile else subscriber.name,
+        name=profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0],
         username=profile['email'],
         email=profile['email'],
     )
