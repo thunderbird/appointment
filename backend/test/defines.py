@@ -19,6 +19,14 @@ TEST_CALDAV_USER = 'Test'
 # Default value for factories to use a random value
 FAKER_RANDOM_VALUE = '___faker_random_value___'
 
+FXA_CLIENT_PATCH = {
+    'authorization_url': 'https://www.example.org/login',
+    'credentials_code': '1234',
+    'external_connection_type_id': 'abcd',
+    'subscriber_email': 'test2@example.org',
+    'subscriber_avatar_url': 'https://www.example.org/cool_pic.jpg',
+    'subscriber_display_name': 'test2',
+}
 
 def factory_has_value(val) -> bool:
     """For factories"""

@@ -1,5 +1,8 @@
+import os
+
 from defines import FXA_CLIENT_PATCH
 from backend.src.appointment.database import repo, models
+
 
 class TestAuth:
     def test_token(self, with_db, with_client, make_pro_subscriber):
@@ -43,6 +46,7 @@ class TestAuth:
         assert response.status_code == 403, response.text
 
     def test_fxa_login(self, with_client):
+        os.environ['AUTH_SCHEME'] = 'fxa'
         response = with_client.get(
             "/fxa_login",
             params={
@@ -56,6 +60,8 @@ class TestAuth:
 
     def test_fxa_callback(self, with_db, with_client, monkeypatch):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+
         state = 'a1234'
 
         monkeypatch.setattr('starlette.requests.HTTPConnection.session', {

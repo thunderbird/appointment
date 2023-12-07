@@ -5,6 +5,7 @@ import os
 from requests_oauthlib import OAuth2Session
 import requests
 from ...database import models, repo
+from ...exceptions.fxa_api import NotInAllowListException
 
 
 class FxaConfig:
@@ -71,7 +72,19 @@ class FxaClient:
                                     token=token,
                                     token_updater=self.token_saver)
 
+    def is_in_allow_list(self, email: str):
+        """Check this email against our allow list"""
+        allow_list = os.getenv('FXA_ALLOW_LIST')
+        # If we have no allow list, then we allow everyone
+        if not allow_list or allow_list == '':
+            return True
+
+        return email.endswith(tuple(allow_list.split(',')))
+
     def get_redirect_url(self, state, email):
+        if not self.is_in_allow_list(email):
+            raise NotInAllowListException()
+
         utm_campaign = f"{self.ENTRYPOINT}_{os.getenv('APP_ENV')}"
         utm_source = "login"
 

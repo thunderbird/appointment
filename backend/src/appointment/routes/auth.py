@@ -21,6 +21,7 @@ from ..dependencies.auth import get_subscriber
 
 from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
+from ..exceptions.fxa_api import NotInAllowListException
 
 router = APIRouter()
 ph = PasswordHasher()
@@ -48,8 +49,15 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 @router.get("/fxa_login")
 def fxa_login(request: Request, email: str, timezone: str|None = None, fxa_client: FxaClient = Depends(get_fxa_client)):
     """Request an authorization url from fxa"""
+    if os.getenv('AUTH_SCHEME') != 'fxa':
+        raise HTTPException(status_code=405)
+
     fxa_client.setup()
-    url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
+
+    try:
+        url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
+    except NotInAllowListException:
+        raise HTTPException(status_code=403, detail='Your email is not in the allow list')
 
     request.session['fxa_state'] = state
     request.session['fxa_user_email'] = email
@@ -78,6 +86,9 @@ def fxa_callback(
     - We also update (an initial set if the subscriber is new) the profile data for the subscriber.
     - And finally generate a jwt token for the frontend, and redirect them to a special frontend route with that token.
     """
+    if os.getenv('AUTH_SCHEME') != 'fxa':
+        raise HTTPException(status_code=405)
+
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
         raise HTTPException(400, "Invalid state.")
     if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
@@ -145,6 +156,9 @@ def token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
+    if os.getenv('AUTH_SCHEME') == 'fxa':
+        raise HTTPException(status_code=405)
+
     """Retrieve an access token from a given username and password."""
     subscriber = repo.get_subscriber_by_username(db, form_data.username)
     if not subscriber or subscriber.password is None:
