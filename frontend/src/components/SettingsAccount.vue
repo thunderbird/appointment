@@ -349,11 +349,7 @@ const actuallyDeleteAccount = async () => {
     return;
   }
 
-  if (auth0) {
-    await logout();
-  } else {
-    await router.push('/');
-  }
+  await router.push('/');
 };
 
 </script>

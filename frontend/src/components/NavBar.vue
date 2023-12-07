@@ -74,22 +74,18 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from "@/elements/NavBarItem";
 import DropDown from "@/elements/DropDown";
 import TextButton from "@/elements/TextButton";
 
-// icons
-import { IconExternalLink } from '@tabler/icons-vue';
-// import { IconSearch } from '@tabler/icons-vue';
-
 // component constants
 const user = useUserStore();
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
-const logout = inject('logout');
 const call = inject('call');
 
 // component properties
@@ -98,6 +94,12 @@ defineProps({
 });
 
 const signedUserUrl = ref('');
+
+// do log out
+const logout = async () => {
+  await user.logout(call);
+  await router.push('/');
+};
 
 const getSignedUserUrl = async () => {
   // Retrieve the user short url
