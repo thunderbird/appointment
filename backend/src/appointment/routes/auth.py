@@ -109,6 +109,10 @@ def fxa_callback(
     creds = fxa_client.get_credentials(code)
     profile = fxa_client.get_profile()
 
+    if profile['email'] != email:
+        fxa_client.logout()
+        raise HTTPException(400, "Email mismatch.")
+
     # Check if we have an existing fxa connection by profile's uid
     external_connection = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
     # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
