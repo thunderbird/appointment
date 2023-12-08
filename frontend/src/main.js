@@ -3,7 +3,7 @@ import App from '@/App';
 import { createApp } from 'vue';
 
 // pinia state management
-import { createPinia } from 'pinia'
+import { createPinia } from 'pinia';
 
 // init router
 import router from '@/router';
@@ -40,10 +40,10 @@ import * as Sentry from '@sentry/vue';
 
 const app = createApp(App);
 
-if (process.env.VUE_APP_SENTRY_DSN) {
+if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     app,
-    dsn: process.env.VUE_APP_SENTRY_DSN,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
     integrations: [
       new Sentry.BrowserTracing({
         // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
@@ -66,11 +66,11 @@ app.use(pinia);
 app.use(router);
 
 // init urls
-const protocol = process.env.VUE_APP_API_SECURE === 'true' ? 'https' : 'http';
-const port = process.env.VUE_APP_API_PORT !== undefined ? `:${process.env.VUE_APP_API_PORT}` : '';
-const apiUrl = `${protocol}://${process.env.VUE_APP_API_URL}${port}`;
+const protocol = import.meta.env.VITE_API_SECURE === 'true' ? 'https' : 'http';
+const port = import.meta.env.VITE_API_PORT !== undefined ? `:${import.meta.env.VITE_API_PORT}` : '';
+const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
-app.provide('bookingUrl', `${protocol}://${process.env.VUE_APP_BASE_URL}/booking/`);
+app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/booking/`);
 
 const messages = {
   de, // German

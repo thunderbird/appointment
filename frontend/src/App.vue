@@ -102,9 +102,9 @@ const call = createFetch({
   },
 });
 provide("call", call);
-provide('isPasswordAuth', process.env?.VUE_APP_AUTH_SCHEME === 'password');
-provide('isFxaAuth', process.env?.VUE_APP_AUTH_SCHEME === 'fxa');
-provide('fxaEditProfileUrl', process.env?.VUE_APP_FXA_EDIT_PROFILE);
+provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
+provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
+provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
 
 // menu items for main navigation
 const navItems = [

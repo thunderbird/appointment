@@ -3,15 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "build-stage": "vue-cli-service build --mode staging",
-    "lint": "yarn run eslint --ext .js,.vue ./src"
+    "dev": "vite --port 8080",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:unit": "vitest",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "format": "prettier --write src/"
   },
   "dependencies": {
-    "@auth0/auth0-vue": "^2.0.2",
-    "@sentry/vue": "^7.56.0",
-    "@sentry/webpack-plugin": "^2.3.0",
     "@tabler/icons-vue": "^2.4.0",
     "@vueuse/components": "^10.4.1",
     "@vueuse/core": "^10.4.1",
@@ -26,9 +25,8 @@
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
     "@tailwindcss/forms": "^0.5.3",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-router": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@vitejs/plugin-vue": "^4.5.2",
+    "vite": "^5.0.5",
     "autoprefixer": "^10.4.12",
     "eslint": "^8.43.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -37,16 +35,5 @@
     "eslint-plugin-vue": "^9.12.0",
     "postcss": "^8.4.17",
     "tailwindcss": "^3.1.8"
-  },
-  "babel": {
-    "presets": [
-      "@vue/cli-plugin-babel/preset"
-    ]
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+  }
 }

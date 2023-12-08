@@ -20,7 +20,7 @@ module.exports = defineConfig({
 
         // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
         // and need `project:releases` and `org:read` scopes
-        authToken: process.env.SENTRY_AUTH_TOKEN,
+        authToken: import.meta.env.VITE_SENTRY_AUTH_TOKEN,
       }),
     ],
   }
