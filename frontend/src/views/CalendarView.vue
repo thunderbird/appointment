@@ -228,8 +228,8 @@ const getRemoteEvents = async (from, to) => {
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
-  const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
-  const eventsTo = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
+  const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
+  const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);
   // Okay, if we still have no calendars, show the ugly message
   hideUntilRefreshed.value = false;
@@ -240,10 +240,10 @@ watch(
   () => activeDate.value,
   (newValue, oldValue) => {
     // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-    if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
+    if (dj(oldValue).format('MM') !== dj(newValue).format('MM')) {
       getRemoteEvents(
-        dj(newValue).startOf('year').format('YYYY-MM-DD'),
-        dj(newValue).endOf('year').format('YYYY-MM-DD'),
+        dj(newValue).startOf('month').format('YYYY-MM-DD'),
+        dj(newValue).endOf('month').format('YYYY-MM-DD'),
       );
     }
   },
