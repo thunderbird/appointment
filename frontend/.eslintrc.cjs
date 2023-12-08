@@ -1,3 +1,6 @@
+/* eslint-env node */
+require('@rushstack/eslint-patch/modern-module-resolution');
+
 module.exports = {
   env: {
     browser: true,
@@ -19,16 +22,18 @@ module.exports = {
     'import/extensions': ['error', 'ignorePackages', {
       '': 'never',
       js: 'never',
-      vue: 'off', // TODO: once migrated to Vite, we should set this to 'always'
+      vue: 'off',
     }],
-    'max-len': ['error', { code: 120 }],
+    'max-len': ['error', {code: 120}],
     'no-param-reassign': 'off',
   },
   settings: {
-    // This uses the default `vite.config.js` file and the Vite configuration is an object.
     'import/resolver': {
-      vite: {
-        namedExport: 'viteConfig',
+      alias: {
+        map: [
+          ['@', './src'],
+        ],
+        extensions: ['.js', '.vue'],
       },
     },
   },
