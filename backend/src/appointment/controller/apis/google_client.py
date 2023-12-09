@@ -109,7 +109,9 @@ class GoogleClient:
                 'items/description',
                 'items/attendees',
                 'items/start',
-                'items/end'
+                'items/end',
+                # Top level stuff
+                'nextPageToken',
             )
         )
 
