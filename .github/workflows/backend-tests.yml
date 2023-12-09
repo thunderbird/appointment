@@ -1,0 +1,28 @@
+# This workflow will install backend's requirements and run tests
+
+name: Run Backend Tests
+
+on: [push]
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        cd ./backend
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+        python -m pip install -r requirements-test.txt
+    - name: Test with pytest
+      run: |
+        cd ./backend/test && python -m pytest
