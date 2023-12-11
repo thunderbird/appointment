@@ -11,8 +11,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - &&\
 apt-get install -y nodejs
 
 # Build site
-RUN cd /build/frontend && npm install
-RUN cd /build/frontend && npm run build -- --mode staging
+RUN cd /build/frontend && yarn install
+RUN cd /build/frontend && yarn build -- --mode stage
 
 # Use our custom nginx config
 RUN rm /etc/nginx/conf.d/default.conf
