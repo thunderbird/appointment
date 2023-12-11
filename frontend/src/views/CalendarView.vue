@@ -239,8 +239,8 @@ onMounted(async () => {
 watch(
   () => activeDate.value,
   (newValue, oldValue) => {
-    // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-    if (dj(oldValue).format('MM') !== dj(newValue).format('MM')) {
+    // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
+    if (dj(oldValue).format('YYYYMM') !== dj(newValue).format('YYYYMM')) {
       getRemoteEvents(
         dj(newValue).startOf('month').format('YYYY-MM-DD'),
         dj(newValue).endOf('month').format('YYYY-MM-DD'),
