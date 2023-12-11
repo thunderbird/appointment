@@ -8,7 +8,7 @@
     <calendar-management
       :title="t('heading.calendarsUnconnected')"
       :type="calendarManagementType.connect"
-      :calendars="calendars"
+      :calendars="calendarStore.unconnectedCalendars"
       :loading="loading"
       @sync="syncCalendars"
       @modify="connectCalendar"
@@ -18,7 +18,7 @@
     <calendar-management
       :title="t('heading.calendarsConnected')"
       :type="calendarManagementType.edit"
-      :calendars="calendars"
+      :calendars="calendarStore.connectedCalendars"
       :loading="loading"
       @remove="deleteCalendar"
       @modify="editCalendar"
@@ -199,7 +199,9 @@
 <script setup>
 import { calendarManagementType } from '@/definitions';
 import { IconArrowRight } from '@tabler/icons-vue';
-import { ref, reactive, inject, onMounted, computed } from 'vue';
+import {
+  ref, reactive, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
@@ -208,12 +210,14 @@ import GoogleSignInBtn from '@/assets/img/google/1x/btn_google_signin_light_norm
 import GoogleSignInBtn2x from '@/assets/img/google/2x/btn_google_signin_light_normal_web@2x.png';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
-import ConfirmationModal from "@/components/ConfirmationModal.vue";
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { useCalendarStore } from '@/stores/calendar-store';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
 const refresh = inject('refresh');
+const calendarStore = useCalendarStore();
 
 const calendarConnectError = ref('');
 
@@ -222,11 +226,6 @@ const deleteCalendarModalTarget = ref(null);
 
 // Temp until we get a store solution rolling
 const loading = ref(false);
-
-// view properties
-defineProps({
-  calendars: Array, // list of calendars from db
-});
 
 // handle calendar user input to add or edit calendar connections
 const inputModes = {
@@ -264,7 +263,9 @@ const closeModals = async () => {
 };
 
 const refreshData = async () => {
-  await refresh({ onlyConnectedCalendars: false });
+  // Invalidate our calendar store
+  await calendarStore.reset();
+  await refresh();
   loading.value = false;
 };
 
@@ -391,7 +392,5 @@ onMounted(async () => {
     calendarConnectError.value = route.query.error;
     await router.replace(route.path);
   }
-
-  await refreshData();
 });
 </script>

@@ -38,7 +38,7 @@
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <schedule-creation
         v-if="schedulesReady"
-        :calendars="calendars"
+        :calendars="calendarStore.connectedCalendars"
         :schedule="firstSchedule"
         :active-date="activeDate"
         @created="getFirstSchedule"
@@ -50,7 +50,7 @@
       v-show="tabActive === calendarViews.month"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="pendingAppointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
       :schedules="schedulesPreviews"
       popup-position="left"
@@ -59,7 +59,7 @@
       v-show="tabActive === calendarViews.week"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="pendingAppointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
       popup-position="left"
     />
@@ -67,7 +67,7 @@
       v-show="tabActive === calendarViews.day"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="pendingAppointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
       popup-position="top"
     />
@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { calendarViews, appointmentState } from '@/definitions';
+import { calendarViews } from '@/definitions';
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -87,6 +87,9 @@ import TabBar from '@/components/TabBar';
 
 // icons
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-vue";
+// stores
+import { useAppointmentStore } from '@/stores/appointment-store';
+import { useCalendarStore } from '@/stores/calendar-store';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -94,11 +97,8 @@ const dj = inject('dayjs');
 const call = inject('call');
 const refresh = inject('refresh');
 
-// view properties
-const props = defineProps({
-  calendars: Array, // list of calendars from db
-  appointments: Array, // list of appointments from db
-});
+const appointmentStore = useAppointmentStore();
+const calendarStore = useCalendarStore();
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
@@ -141,14 +141,11 @@ const dateNav = (unit = 'auto', forward = true) => {
   }
 };
 
-// list of all pending appointments
-const pendingAppointments = computed(() => props.appointments?.filter((a) => a.status === appointmentState.pending));
-
 // get remote calendar data for current year
 const calendarEvents = ref([]);
 const getRemoteEvents = async (from, to) => {
   calendarEvents.value = [];
-  await Promise.all(props.calendars.map(async (calendar) => {
+  await Promise.all(calendarStore.connectedCalendars.map(async (calendar) => {
     const { data } = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
     if (Array.isArray(data.value)) {
       calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
@@ -158,7 +155,7 @@ const getRemoteEvents = async (from, to) => {
 
 // user configured schedules from db (only the first for now, later multiple schedules will be available)
 const schedules = ref([]);
-const firstSchedule = computed(() => schedules.value?.length > 0 ? schedules.value[0] : null );
+const firstSchedule = computed(() => schedules.value?.length > 0 ? schedules.value[0] : null);
 const schedulesReady = ref(false);
 const getFirstSchedule = async () => {
   calendarEvents.value = [];
