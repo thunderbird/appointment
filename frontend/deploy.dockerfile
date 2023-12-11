@@ -10,6 +10,8 @@ RUN mv /build/frontend/.env.staging.example /build/frontend/.env.staging
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - &&\
 apt-get install -y nodejs
 
+RUN npm install --global yarn
+
 # Build site
 RUN cd /build/frontend && yarn install
 RUN cd /build/frontend && yarn build -- --mode stage
