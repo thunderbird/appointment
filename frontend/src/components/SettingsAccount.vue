@@ -151,7 +151,6 @@
 
 <script setup>
 import { ref, inject, onMounted, computed } from 'vue';
-import { useAuth0 } from '@auth0/auth0-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -170,7 +169,6 @@ import { useExternalConnectionsStore } from '@/stores/external-connections-store
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
-const refresh = inject('refresh');
 const router = useRouter();
 const user = useUserStore();
 const externalConnectionsStore = useExternalConnectionsStore();
@@ -210,7 +208,6 @@ const getSignedUserUrl = async () => {
 const refreshData = async () => Promise.all([
   getSignedUserUrl(),
   externalConnectionsStore.fetch(call),
-  refresh(),
 ]);
 
 // save user data
