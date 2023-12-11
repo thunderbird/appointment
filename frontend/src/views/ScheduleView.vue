@@ -178,8 +178,8 @@ onMounted(async () => {
   await refresh();
   await getFirstSchedule();
   schedulesReady.value = true;
-  const eventsFrom = dj(activeDate.value).startOf('year').format('YYYY-MM-DD');
-  const eventsTo = dj(activeDate.value).endOf('year').format('YYYY-MM-DD');
+  const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
+  const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);
 });
 
@@ -187,11 +187,11 @@ onMounted(async () => {
 watch(
   () => activeDate.value,
   (newValue, oldValue) => {
-    // remote data is retrieved per year, so data request happens only if the user navigates to a different year
-    if (dj(oldValue).format('YYYY') !== dj(newValue).format('YYYY')) {
+    // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
+    if (dj(oldValue).format('YYYYMM') !== dj(newValue).format('YYYYMM')) {
       getRemoteEvents(
-        dj(newValue).startOf('year').format('YYYY-MM-DD'),
-        dj(newValue).endOf('year').format('YYYY-MM-DD'),
+        dj(newValue).startOf('month').format('YYYY-MM-DD'),
+        dj(newValue).endOf('month').format('YYYY-MM-DD'),
       );
     }
   },
