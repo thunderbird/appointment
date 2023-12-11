@@ -29,6 +29,10 @@ export const useCalendarStore = defineStore('calendars', {
       this.$patch({ data: structuredClone(initialData) });
     },
     async fetch(call) {
+      if (this.isLoaded) {
+        return;
+      }
+
       const { data, error } = await call('me/calendars?only_connected=false').get().json();
       if (!error.value) {
         if (data.value === null || typeof data.value === 'undefined') return;

@@ -128,9 +128,6 @@ const routeIsHome = computed(
 
 // query db for all calendar data
 const getDbCalendars = async () => {
-  if (calendarStore.isLoaded) {
-    return;
-  }
   await calendarStore.fetch(call);
 };
 // query db for all appointments data
