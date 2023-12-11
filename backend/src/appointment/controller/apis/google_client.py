@@ -86,33 +86,55 @@ class GoogleClient:
 
     def list_calendars(self, token):
         response = {}
+        items = []
         with build("calendar", "v3", credentials=token) as service:
             request = service.calendarList().list()
             while request is not None:
                 try:
                     response = request.execute()
+
+                    items += response.get('items', [])
                 except HttpError as e:
                     logging.warning(f"[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}")
 
                 request = service.calendarList().list_next(request, response)
 
-        return response.get("items", [])
+        return items
 
     def list_events(self, calendar_id, time_min, time_max, token):
         response = {}
+        items = []
+
+        # Limit the fields we request
+        fields = ','.join(
+            (
+                'items/status',
+                'items/summary',
+                'items/description',
+                'items/attendees',
+                'items/start',
+                'items/end',
+                # Top level stuff
+                'nextPageToken',
+            )
+        )
+
         with build("calendar", "v3", credentials=token) as service:
             request = service.events().list(
-                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime"
+                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime",
+                fields=fields
             )
             while request is not None:
                 try:
                     response = request.execute()
+
+                    items += response.get('items', [])
                 except HttpError as e:
                     logging.warning(f"[google_client.list_events] Request Error: {e.status_code}/{e.error_details}")
 
                 request = service.events().list_next(request, response)
 
-        return response.get("items", [])
+        return items
 
     def create_event(self, calendar_id, body, token):
         response = None

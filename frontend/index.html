@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="">
   <head>
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>appointment_logo.svg">
+    <meta charset="UTF-8">
+    <link rel="icon" href="/appointment_logo.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thunderbird Appointment</title>
     <script>
       // handle theme color scheme
       if (
@@ -26,6 +25,6 @@
       </strong>
     </noscript>
     <div id="app" class="h-full"></div>
-    <!-- built files will be auto injected -->
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -1,20 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "esnext",
-    "baseUrl": "./",
     "moduleResolution": "node",
-    "jsx": "preserve",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
-  }
+      "@/*": ["./src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
 }

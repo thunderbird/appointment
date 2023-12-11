@@ -10,4 +10,4 @@ RUN apk add --no-cache git
 COPY . .
 RUN yarn install
 
-CMD vue-cli-service serve
+CMD vite dev --port 8080

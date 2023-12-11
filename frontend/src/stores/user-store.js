@@ -47,7 +47,7 @@ export const useUserStore = defineStore('user', {
     async login(fetch, username, password) {
       this.reset();
 
-      if (process.env?.VUE_APP_AUTH_SCHEME === 'password') {
+      if (import.meta.env?.VUE_AUTH_SCHEME === 'password') {
         // fastapi wants us to send this as formdata :|
         const formData = new FormData(document.createElement('form'));
         formData.set('username', username);
@@ -59,7 +59,7 @@ export const useUserStore = defineStore('user', {
         }
 
         this.data.accessToken = data.value.access_token;
-      } else if (process.env?.VUE_APP_AUTH_SCHEME === 'fxa') {
+      } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
         // For FXA we re-use the username parameter as our access token
         this.data.accessToken = username;
       }

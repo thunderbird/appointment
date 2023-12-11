@@ -20,7 +20,7 @@ const user = useUserStore();
 // component constants
 const call = inject('call');
 
-const isFxaAuth = computed(() => process.env?.VUE_APP_AUTH_SCHEME === 'fxa');
+const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 
 onMounted(async () => {
   if (!isFxaAuth.value) {
