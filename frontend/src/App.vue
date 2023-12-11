@@ -48,7 +48,6 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
 const apiUrl = inject('apiUrl');
-const dj = inject('dayjs');
 const route = useRoute();
 const router = useRouter();
 const siteNotificationStore = useSiteNotificationStore();
@@ -126,16 +125,6 @@ const routeIsHome = computed(
   () => ['home'].includes(route.name),
 );
 
-// query db for all calendar data
-const getDbCalendars = async () => {
-  await calendarStore.fetch(call);
-};
-// query db for all appointments data
-const getDbAppointments = async () => {
-  // We don't have a good way to determine stale slots, so always grab appointments
-  await appointmentStore.fetch(call);
-};
-
 // check appointment status for current state (past|pending|booked)
 const getAppointmentStatus = (a) => appointmentStore.status(a);
 
@@ -154,8 +143,8 @@ const extendDbData = () => {
 const getDbData = async () => {
   if (currentUser?.exists()) {
     await Promise.all([
-      getDbCalendars(),
-      getDbAppointments(),
+      calendarStore.fetch(call),
+      appointmentStore.fetch(call),
     ]);
     extendDbData();
   }

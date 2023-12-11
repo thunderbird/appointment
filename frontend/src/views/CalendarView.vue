@@ -127,8 +127,8 @@
 </template>
 
 <script setup>
-import { appointmentCreationState, calendarViews, appointmentState } from '@/definitions';
-import {ref, inject, computed, watch, onMounted, reactive} from 'vue';
+import { appointmentCreationState, calendarViews } from '@/definitions';
+import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentCreation from '@/components/AppointmentCreation';
