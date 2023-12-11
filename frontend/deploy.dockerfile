@@ -12,7 +12,7 @@ apt-get install -y nodejs
 
 # Build site
 RUN cd /build/frontend && npm install
-RUN cd /build/frontend && npm run build-stage
+RUN cd /build/frontend && npm run build -- --mode staging
 
 # Use our custom nginx config
 RUN rm /etc/nginx/conf.d/default.conf
