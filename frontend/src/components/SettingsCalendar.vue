@@ -95,9 +95,7 @@
     <div v-if="inputMode" class="pl-6 flex flex-col gap-4 max-w-2xl">
       <div class="text-lg">
         <span v-if="isCalDav">{{ t('label.caldav') }}</span>
-        <span v-if="isGoogle">{{ t('label.google') }}</span>
-        &mdash;
-        {{ addMode ? t('label.addCalendar') : t('label.editCalendar') }}
+        <span v-if="isGoogle">{{ t('label.googleCalendar') }}</span>
       </div>
       <div v-if="isGoogle && addMode" class="mb-4">
         <p class="text-lg mb-2">{{ t('text.googlePermissionDisclaimer') }}</p>
@@ -171,12 +169,10 @@
           @click="saveCalendar"
         />
         <!-- Google Button -->
-        <img
-          v-if="isGoogle && addMode"
-          class="h-[40px] cursor-pointer"
-          :alt="t('label.signInWithGoogle')"
-          :src="GoogleSignInBtn"
-          :srcset="`${GoogleSignInBtn2x} 2x`"
+        <primary-button
+          v-if="isGoogle || editMode"
+          :label="addMode ? t('label.signInWithGoogle') : t('label.saveChanges')"
+          class="text-sm"
           @click="saveCalendar"
         />
       </div>
@@ -204,8 +200,6 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
 import CalendarManagement from '@/components/CalendarManagement.vue';
-import GoogleSignInBtn from '@/assets/img/google/1x/btn_google_signin_light_normal_web.png';
-import GoogleSignInBtn2x from '@/assets/img/google/2x/btn_google_signin_light_normal_web@2x.png';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 import ConfirmationModal from "@/components/ConfirmationModal.vue";
