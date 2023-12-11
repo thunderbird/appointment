@@ -104,9 +104,25 @@ class GoogleClient:
     def list_events(self, calendar_id, time_min, time_max, token):
         response = {}
         items = []
+
+        # Limit the fields we request
+        fields = ','.join(
+            (
+                'items/status',
+                'items/summary',
+                'items/description',
+                'items/attendees',
+                'items/start',
+                'items/end',
+                # Top level stuff
+                'nextPageToken',
+            )
+        )
+
         with build("calendar", "v3", credentials=token) as service:
             request = service.events().list(
-                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime"
+                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime",
+                fields=fields
             )
             while request is not None:
                 try:

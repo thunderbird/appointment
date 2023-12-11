@@ -79,8 +79,11 @@ def server():
     from .routes import zoom
     from .routes import webhooks
 
+    # Hide openapi url (which will also hide docs/redoc) if we're not dev
+    openapi_url = '/openapi.json' if os.getenv('APP_ENV') == 'dev' else None
+
     # init app
-    app = FastAPI()
+    app = FastAPI(openapi_url=openapi_url)
 
     app.add_middleware(
         SessionMiddleware,
