@@ -19,7 +19,7 @@ RUN npm install --global yarn
 
 # Build site
 RUN cd /build/frontend && yarn install
-RUN cd /build/frontend && yarn build -- --mode stage
+RUN cd /build/frontend && yarn build --mode staging
 
 # Use our custom nginx config
 RUN rm /etc/nginx/conf.d/default.conf
