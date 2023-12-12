@@ -161,7 +161,6 @@ const call = inject('call');
 const refresh = inject('refresh');
 const router = useRouter();
 const user = useUserStore();
-const logout = inject('logout');
 
 const externalConnections = ref({});
 const hasZoomAccountConnected = computed(() => (externalConnections.value?.zoom?.length ?? []) > 0);
@@ -326,6 +325,8 @@ const actuallyDeleteAccount = async () => {
     return;
   }
 
+  // We can't logout since we've deleted the user by now, so just delete local storage data.
+  await user.reset();
   await router.push('/');
 };
 
