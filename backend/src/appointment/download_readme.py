@@ -31,9 +31,12 @@ Note: If a file is empty or blank then we don't have that type of data on record
 The following files are included:
  - appointments.csv : A list of Appointments from our database
  - attendees.csv : A list of Appointment Slot Attendees from our database
+ - availability.csv : Not used right now
  - calendars.csv : A list of Calendars from our database
- - slots.csv : A list of Appointment Slots from our database.
- - subscriber.csv : The personal information we store about you from our database.
+ - external_connections.csv : A list of external services you've connected to your account
+ - slots.csv : A list of Appointment Slots from our database
+ - schedules.csv : Your general availability schedule
+ - subscriber.csv : The personal information we store about you from our database
  - readme.txt : This file!
             """.format(
         download_time=datetime.datetime.now(datetime.UTC)

@@ -14,7 +14,7 @@ def model_to_csv_buffer(models):
         return StringIO()
 
     # Don't write out these columns
-    scrub_columns = ['password', 'google_tkn', 'token']
+    scrub_columns = ['password', 'google_tkn', 'google_state', 'google_state_expires_at', 'token']
 
     string_buffer = StringIO()
 
