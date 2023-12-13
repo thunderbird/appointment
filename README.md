@@ -116,3 +116,7 @@ Commands (from /frontend)
 yarn run lint
 yarn run lint --fix
 ```
+
+### Localization
+
+This project uses [Fluent](https://projectfluent.org/) for localization. Files are located in their respective `l10n/<locale>/*.ftl`.

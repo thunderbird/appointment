@@ -5,6 +5,10 @@
 # Should indicate application wellness.
 health-ok = System is operational
 
+## General Exceptions
+
+account-delete-fail = There was a problem deleting your data. This incident has been logged and your data will manually be removed.
+
 ## Google Exceptions
 
 google-connection-error = Error connecting with Google API, please re-connect.
@@ -13,6 +17,15 @@ google-invalid-creds = Google authentication credentials are not valid.
 google-auth-fail = Google authentication failed.
 google-auth-expired = Google authentication session expired, please try again.
 google-sync-fail = An error occurred while syncing calendars. Please try again later.
+
+## Emails
+
+invite-mail-subject = Invitation sent from Thunderbird Appointment
+invite-mail-body = This message is sent from Appointment.
+
+# Variables:
+# $title (String) - The title of the appointment
+zoom-meeting-failed = Unfortunately there was an error creating your Zoom meeting for your upcoming appointment: { $title }
 
 ## Frontend Facing Strings
 
@@ -28,7 +41,6 @@ join-online = Join online at: { $url }
 # Variables:
 # $phone (String) - An unformatted phone number for the meeting
 join-phone = Join by phone: { $phone }
-
 
 ## Account Data Readme
 

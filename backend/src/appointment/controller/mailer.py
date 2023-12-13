@@ -17,6 +17,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi.templating import Jinja2Templates
 
+from appointment.l10n import l10n
+
 templates = Jinja2Templates("src/appointment/templates/email")
 
 
@@ -119,7 +121,7 @@ class Mailer:
             server.sendmail(self.sender, self.to, self.build())
         except Exception as e:
             # sending email was not possible
-            logging.error("[mailer.send] An error occured on sending email: " + str(e))
+            logging.error("[mailer.send] An error occurred on sending email: " + str(e))
         finally:
             if server:
                 server.quit()
@@ -129,8 +131,8 @@ class InvitationMail(Mailer):
     def __init__(self, *args, **kwargs):
         """init Mailer with invitation specific defaults"""
         defaultKwargs = {
-            "subject": "[TBA] Invitation sent from Thunderbird Appointment",
-            "plain": "This message is sent from Thunderbird Appointment.",
+            "subject": l10n('invite-mail-subject'),
+            "plain": l10n('invite-mail-body'),
         }
         super(InvitationMail, self).__init__(*args, **defaultKwargs, **kwargs)
 
