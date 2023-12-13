@@ -206,8 +206,7 @@
   },
   "text": {
     "accountDataNotice": "Lade all Deine Daten von Thunderbird Appointment herunter.",
-    "accountDeletionFinalWarning": "Warnung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben unverändert.",
-    "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben unverändert. Bestätige die Löschung mit deinen Login-Daten.",
+    "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben selbstverständlich unverändert. Du kannst jederzeit ein neues Konto erstellen.",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalendern gespeichert sind.",
     "chooseDateAndTime": "Wähle einen Tag und eine Zeit für ein Treffen:",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erweitern.",

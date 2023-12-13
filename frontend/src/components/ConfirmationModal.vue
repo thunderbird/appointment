@@ -18,7 +18,8 @@
     </div>
     <div class="flex gap-4">
       <secondary-button :label="cancelLabel" @click="emit('close')" />
-      <primary-button :label="confirmLabel" @click="emit('confirm')" />
+      <primary-button v-if="!useCautionButton" :label="confirmLabel" @click="emit('confirm')" />
+      <caution-button v-else :label="confirmLabel" @click="emit('confirm')" />
     </div>
   </div>
 </template>
@@ -26,6 +27,7 @@
 <script setup>
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
+import CautionButton from '@/elements/CautionButton';
 
 // icons
 import { IconX } from '@tabler/icons-vue';
@@ -37,6 +39,7 @@ defineProps({
   message: String,
   confirmLabel: String,
   cancelLabel: String,
+  useCautionButton: Boolean,
 });
 
 // component emits
