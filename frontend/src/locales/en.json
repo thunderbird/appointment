@@ -207,8 +207,7 @@
   },
   "text": {
     "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
-    "accountDeletionFinalWarning": "Your account and data on Thunderbird Appointment will be deleted. But you can create a new account with us anytime.",
-    "accountDeletionWarning": "Are you sure? Deleting your account is permanent and your saved data will be lost. This does not impact your linked calendars.",
+    "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
     "calendarDeletionWarning": "Disconnecting this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
     "connectZoom": "You can connect your Zoom account to enable instant meeting invites with your appointments.",

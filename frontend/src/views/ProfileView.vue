@@ -16,7 +16,7 @@
     <div class="grid grid-cols-2 mt-8 mb-12 gap-8">
       <!-- calendars -->
       <div class="flex flex-col items-center">
-        <div class="text-3xl font-semibold">{{ calendars.length }}/&infin;</div>
+        <div class="text-3xl font-semibold">{{ calendars.length }}</div>
         <div class="text-gray-500 text-center">{{ t('heading.calendarsConnected') }}</div>
       </div>
       <!-- appointments -->
