@@ -3,7 +3,10 @@
 Boot application, init database, authenticate user and provide all API endpoints.
 """
 from starlette.middleware.sessions import SessionMiddleware
+from starlette_context.middleware import RawContextMiddleware
 
+from .l10n import l10n
+from .middleware.l10n import L10n
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -22,6 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exception_handlers import (
     http_exception_handler,
 )
+from starlette_context import context
 
 import sentry_sdk
 
@@ -86,6 +90,13 @@ def server():
     app = FastAPI(openapi_url=openapi_url)
 
     app.add_middleware(
+        RawContextMiddleware,
+        plugins=(
+            L10n(),
+        )
+    )
+
+    app.add_middleware(
         SessionMiddleware,
         secret_key=os.getenv("SESSION_SECRET")
     )
@@ -105,11 +116,10 @@ def server():
         allow_headers=["*"],
     )
 
-
     @app.exception_handler(RefreshError)
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
-        return await http_exception_handler(request, APIGoogleRefreshError())
+        return await http_exception_handler(request, APIGoogleRefreshError(message=l10n('google-connection-error')))
 
     # Mix in our extra routes
     app.include_router(api.router)

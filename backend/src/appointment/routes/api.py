@@ -3,6 +3,7 @@ import os
 import secrets
 
 import validators
+from google.auth.exceptions import RefreshError
 from requests import HTTPError
 from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
@@ -15,8 +16,7 @@ from ..database import repo, schemas
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-
-from fastapi import APIRouter, Depends, HTTPException, Security, Body
+from fastapi import APIRouter, Depends, HTTPException, Body
 from datetime import timedelta, timezone
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
@@ -25,6 +25,7 @@ from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
+from ..l10n import l10n
 
 router = APIRouter()
 
@@ -32,7 +33,7 @@ router = APIRouter()
 @router.get("/")
 def health():
     """Small route with no processing that will be used for health checks"""
-    return True
+    return l10n('health-ok')
 
 
 @router.put("/me", response_model=schemas.SubscriberBase)

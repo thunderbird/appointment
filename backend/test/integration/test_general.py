@@ -18,6 +18,17 @@ class TestGeneral:
         response = with_client.get("/abcdefg")
         assert response.status_code == 404
 
+    def test_health_for_locale(self, with_client):
+        # Try english first
+        response = with_client.get("/", headers={'accept-language': 'en'})
+        assert response.status_code == 200
+        assert response.json() == 'System is operational'
+
+        # Try german next
+        response = with_client.get("/", headers={'accept-language': 'de'})
+        assert response.status_code == 200
+        assert response.json() == 'Das System ist betriebsbereit'
+
     def test_access_without_authentication_token(self, with_client):
         # response = client.get("/login")
         # assert response.status_code == 403
