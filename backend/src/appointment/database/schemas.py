@@ -108,6 +108,12 @@ class Appointment(AppointmentFull):
         from_attributes = True
 
 
+class AppointmentWithCalendarOut(Appointment):
+    """For /me/appointments"""
+    calendar_title: str
+    calendar_color: str
+
+
 class AppointmentOut(AppointmentBase):
     id: int | None = None
     owner_name: str | None = None

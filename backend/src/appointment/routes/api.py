@@ -63,12 +63,17 @@ def read_my_calendars(
     return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
 
 
-@router.get("/me/appointments", response_model=list[schemas.Appointment])
+@router.get("/me/appointments", response_model=list[schemas.AppointmentWithCalendarOut])
 def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """get all appointments of authenticated subscriber"""
     if not subscriber:
         raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     appointments = repo.get_appointments_by_subscriber(db, subscriber_id=subscriber.id)
+    # Mix in calendar title and color.
+    # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
+    appointments = map(
+        lambda x: schemas.AppointmentWithCalendarOut(**x.__dict__, slots=x.slots, calendar_title=x.calendar.title,
+                                                     calendar_color=x.calendar.color), appointments)
     return appointments
 
 
