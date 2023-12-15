@@ -82,14 +82,12 @@
 </template>
 
 <script setup>
-import { inject, onMounted} from 'vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
 
-const refresh = inject('refresh');
 const router = useRouter();
 
 const isAuthenticated = useUserStore().exists();
@@ -100,9 +98,4 @@ const enter = () => {
 const login = () => {
   router.push('/login');
 };
-
-// initially load data when component gets remounted
-onMounted(async () => {
-  await refresh();
-});
 </script>

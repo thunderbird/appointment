@@ -49,7 +49,7 @@
       <settings-general v-if="activeView === settingsSections.general" />
 
       <!-- calendar settings -->
-      <settings-calendar v-if="activeView === settingsSections.calendar" :calendars="calendars" />
+      <settings-calendar v-if="activeView === settingsSections.calendar" />
 
       <!-- appointments and booking settings -->
       <div v-if="activeView === settingsSections.appointmentsAndBooking">
@@ -92,12 +92,6 @@ import SettingsAccount from '@/components/SettingsAccount.vue';
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
-
-// view properties
-defineProps({
-  calendars: Array, // list of calendars from db
-  appointments: Array, // list of appointments from db
-});
 
 // menu navigation of different views
 const activeView = ref(route.params.view ? settingsSections[route.params.view] : settingsSections.general);

@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row w-full m-8 mt-0 justify-center">
-    <alert-box title="Calendar Setup" scheme="alert" v-if="calendars.length === 0 && !hideUntilRefreshed">
+    <alert-box title="Calendar Setup" scheme="alert" v-if="calendarStore.connectedCalendars.length === 0 && !hideUntilRefreshed">
       <i18n-t keypath="error.noConnectedCalendars" tag="label" for="error.noConnectedCalendars">
         <a class="underline" href="/settings/calendar" target="_blank">{{ t('error.noConnectedCalendarsLink') }}</a>
       </i18n-t>
@@ -28,7 +28,7 @@
       />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="!calendars.length || creationStatus !== appointmentCreationState.hidden"
+        :disabled="!calendarStore.connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
         @click="creationStatus = appointmentCreationState.details"
       />
     </div>
@@ -43,21 +43,21 @@
       v-show="tabActive === calendarViews.month"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="pendingAppointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
     />
     <calendar-week
       v-show="tabActive === calendarViews.week"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="pendingAppointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
     />
     <calendar-day
       v-show="tabActive === calendarViews.day"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="pendingAppointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
       popup-position="top"
     />
@@ -88,7 +88,7 @@
             </router-link>
           </div>
           <div
-            v-if="pendingAppointments.length === 0"
+            v-if="appointmentStore.pendingAppointments.length === 0"
             class="mt-4 flex flex-col gap-8 justify-center items-center text-gray-500"
           >
             <div class="text-center mt-4">
@@ -96,13 +96,13 @@
             </div>
             <primary-button
               :label="t('label.createAppointments')"
-              :disabled="!calendars.length || creationStatus !== appointmentCreationState.hidden"
+              :disabled="!calendarStore.connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
               @click="creationStatus = appointmentCreationState.details"
             />
           </div>
           <div v-else class="flex flex-col gap-8 mt-4">
             <appointment-list-item
-              v-for="a in pendingAppointments"
+              v-for="a in appointmentStore.pendingAppointments"
               :key="a.id"
               :appointment="a"
             />
@@ -113,7 +113,7 @@
       <appointment-creation
         v-else
         :status="creationStatus"
-        :calendars="calendars"
+        :calendars="calendarStore.connectedCalendars"
         @start="creationStatus = appointmentCreationState.details"
         @next="creationStatus = appointmentCreationState.availability"
         @create="
@@ -127,8 +127,8 @@
 </template>
 
 <script setup>
-import { appointmentCreationState, calendarViews, appointmentState } from '@/definitions';
-import {ref, inject, computed, watch, onMounted, reactive} from 'vue';
+import { appointmentCreationState, calendarViews } from '@/definitions';
+import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentCreation from '@/components/AppointmentCreation';
@@ -139,7 +139,9 @@ import CalendarPageHeading from '@/elements/CalendarPageHeading';
 import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
 import TabBar from '@/components/TabBar';
-import AlertBox from "@/elements/AlertBox.vue";
+import AlertBox from '@/elements/AlertBox.vue';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -148,11 +150,8 @@ const dj = inject('dayjs');
 const call = inject('call');
 const refresh = inject('refresh');
 
-// view properties
-const props = defineProps({
-  calendars: Array, // list of calendars from db
-  appointments: Array, // list of appointments from db
-});
+const appointmentStore = useAppointmentStore();
+const calendarStore = useCalendarStore();
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
@@ -206,9 +205,6 @@ const dateNav = (unit = 'auto', forward = true) => {
 // appointment creation state
 const creationStatus = ref(appointmentCreationState.hidden);
 
-// list of all pending appointments
-const pendingAppointments = computed(() => props.appointments?.filter((a) => a.status === appointmentState.pending));
-
 // get remote calendar data for current year
 const calendarEvents = ref([]);
 
@@ -217,7 +213,7 @@ const hideUntilRefreshed = ref(true);
 
 const getRemoteEvents = async (from, to) => {
   calendarEvents.value = [];
-  await Promise.all(props.calendars.map(async (calendar) => {
+  await Promise.all(calendarStore.connectedCalendars.map(async (calendar) => {
     const { data } = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
     if (Array.isArray(data.value)) {
       calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));

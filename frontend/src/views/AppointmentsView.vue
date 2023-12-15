@@ -6,7 +6,7 @@
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="!calendars.length || creationStatus !== appointmentCreationState.hidden"
+        :disabled="!calendarStore.connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
         @click="creationStatus = appointmentCreationState.details"
       />
     </div>
@@ -202,7 +202,7 @@
       <appointment-creation
         v-else
         :status="creationStatus"
-        :calendars="calendars"
+        :calendars="calendarStore.connectedCalendars"
         @start="creationStatus = appointmentCreationState.details"
         @next="creationStatus = appointmentCreationState.availability"
         @create="creationStatus = appointmentCreationState.finished; refresh();"
@@ -249,6 +249,8 @@ import {
   IconList,
   IconSearch,
 } from '@tabler/icons-vue';
+import {useAppointmentStore} from "@/stores/appointment-store";
+import {useCalendarStore} from "@/stores/calendar-store";
 
 // component constants
 const { t } = useI18n();
@@ -258,11 +260,8 @@ const dj = inject('dayjs');
 const bookingUrl = inject('bookingUrl');
 const refresh = inject('refresh');
 
-// view properties
-const props = defineProps({
-  calendars: Array, // list of calendars from db
-  appointments: Array, // list of appointments from db
-});
+const appointmentStore = useAppointmentStore();
+const calendarStore = useCalendarStore();
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
@@ -324,7 +323,7 @@ const restoreColumnOrder = () => {
 
 // handle filtered appointments list
 const filteredAppointments = computed(() => {
-  let list = props.appointments ? [...props.appointments] : [];
+  let list = appointmentStore.appointments ? [...appointmentStore.appointments] : [];
   // by search input
   if (search.value !== '') {
     list = list.filter((a) => a.title.toLowerCase().includes(search.value.toLowerCase()));
