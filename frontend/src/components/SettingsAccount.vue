@@ -123,9 +123,9 @@
       :open="downloadAccountModalOpen"
       :title="t('label.accountData')"
       :message="t('text.accountDataNotice')"
-      :confirm-label="t('label.loginToContinue')"
+      :confirm-label="t('label.continue')"
       :cancel-label="t('label.cancel')"
-      @confirm="() => reauthenticateSubscriber(actuallyDownloadData)"
+      @confirm="actuallyDownloadData"
       @close="closeModals"
   ></ConfirmationModal>
   <!-- Account deletion modals -->
@@ -133,17 +133,9 @@
       :open="deleteAccountFirstModalOpen"
       :title="t('label.deleteYourAccount')"
       :message="t('text.accountDeletionWarning')"
-      :confirm-label="t('label.loginToContinue')"
-      :cancel-label="t('label.cancel')"
-      @confirm="() => reauthenticateSubscriber(secondDeleteAccountPrompt)"
-      @close="closeModals"
-  ></ConfirmationModal>
-  <ConfirmationModal
-      :open="deleteAccountSecondModalOpen"
-      :title="t('label.deleteYourAccount')"
-      :message="t('text.accountDeletionFinalWarning')"
       :confirm-label="t('label.deleteYourAccount')"
       :cancel-label="t('label.cancel')"
+      :use-caution-button="true"
       @confirm="actuallyDeleteAccount"
       @close="closeModals"
   ></ConfirmationModal>
@@ -294,21 +286,7 @@ const refreshLinkConfirm = async () => {
  * @returns {Promise<void>}
  */
 const reauthenticateSubscriber = async (callbackFn) => {
-  /*
-  try {
-    // Prompt the user to re-login
-    await auth0.loginWithPopup({
-      authorizationParams: {
-        prompt: 'login',
-      },
-    }, {});
-  } catch (e) {
-    // TODO: Throw an error
-    console.log('Reauth failed', e);
-    closeModals();
-    return;
-  }
-  */
+  // Currently not supported
   await callbackFn();
 };
 
@@ -345,6 +323,8 @@ const actuallyDeleteAccount = async () => {
     return;
   }
 
+  // We can't logout since we've deleted the user by now, so just delete local storage data.
+  await user.reset();
   await router.push('/');
 };
 
