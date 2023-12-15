@@ -392,5 +392,7 @@ onMounted(async () => {
     calendarConnectError.value = route.query.error;
     await router.replace(route.path);
   }
+
+  await refresh();
 });
 </script>

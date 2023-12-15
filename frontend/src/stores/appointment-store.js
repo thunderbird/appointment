@@ -40,12 +40,10 @@ export const useAppointmentStore = defineStore('appointments', {
     reset() {
       this.$patch({ data: structuredClone(initialData) });
     },
-    async mergeCalendarInfo(calendarsById) {
+    async postFetchProcess() {
       const userStore = useUserStore();
 
       this.data.appointments.forEach((a) => {
-        a.calendar_title = calendarsById[a.calendar_id]?.title;
-        a.calendar_color = calendarsById[a.calendar_id]?.color;
         a.status = this.status(a);
         a.active = a.status !== appointmentState.past; // TODO
         // convert start dates from UTC back to users timezone
@@ -61,6 +59,8 @@ export const useAppointmentStore = defineStore('appointments', {
         this.data.appointments = data.value;
         this.data.isInit = true;
       }
+      // After we fetch the data, apply some processing
+      await this.postFetchProcess();
     },
   },
 });

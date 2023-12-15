@@ -128,17 +128,6 @@ const routeIsHome = computed(
 // check appointment status for current state (past|pending|booked)
 const getAppointmentStatus = (a) => appointmentStore.status(a);
 
-// extend retrieved data
-const extendDbData = () => {
-  // build { calendarId => calendarData } object for direct lookup
-  const calendarsById = {};
-  calendarStore.allCalendars.forEach((c) => {
-    calendarsById[c.id] = c;
-  });
-  // extend appointments data with active state and calendar title and color
-  appointmentStore.mergeCalendarInfo(calendarsById);
-};
-
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
   if (currentUser?.exists()) {
@@ -146,14 +135,8 @@ const getDbData = async () => {
       calendarStore.fetch(call),
       appointmentStore.fetch(call),
     ]);
-    extendDbData();
   }
 };
-
-// get the data initially
-onMounted(async () => {
-  await getDbData();
-});
 
 // provide refresh functions for components
 provide('refresh', getDbData);
