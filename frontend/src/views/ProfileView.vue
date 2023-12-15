@@ -16,12 +16,12 @@
     <div class="grid grid-cols-2 mt-8 mb-12 gap-8">
       <!-- calendars -->
       <div class="flex flex-col items-center">
-        <div class="text-3xl font-semibold">{{ calendars.length }}</div>
+        <div class="text-3xl font-semibold">{{ calendarStore.connectedCalendars.length }}/&infin;</div>
         <div class="text-gray-500 text-center">{{ t('heading.calendarsConnected') }}</div>
       </div>
       <!-- appointments -->
       <div class="flex flex-col items-center">
-        <div class="text-3xl font-semibold">{{ pendingAppointments.length }}</div>
+        <div class="text-3xl font-semibold">{{ appointmentStore.pendingAppointments.length }}</div>
         <div class="text-gray-500 text-center">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
@@ -31,10 +31,10 @@
 </template>
 
 <script setup>
-import { inject, computed, onMounted } from 'vue';
+import { inject } from 'vue';
 import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
-import { subscriberLevels, appointmentState } from '@/definitions';
+import { subscriberLevels } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
@@ -43,25 +43,22 @@ import SecondaryButton from '@/elements/SecondaryButton';
 import { IconPencil } from '@tabler/icons-vue';
 import { useRouter } from 'vue-router';
 
+// Stores
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
+
 // component constants
 const user = useUserStore();
 const router = useRouter();
 
 // component constants
 const { t } = useI18n();
-const refresh = inject('refresh');
 const call = inject('call');
 const fxaEditProfileUrl = inject('fxaEditProfileUrl');
 const isFxaAuth = inject('isFxaAuth');
 
-// view properties
-const props = defineProps({
-  calendars: Array, // list of calendars from db
-  appointments: Array, // list of appointments from db
-});
-
-// list of pending appointments
-const pendingAppointments = computed(() => props.appointments.filter((a) => a.status === appointmentState.pending));
+const appointmentStore = useAppointmentStore();
+const calendarStore = useCalendarStore();
 
 // do log out
 const logout = async () => {
@@ -72,9 +69,4 @@ const logout = async () => {
 const editProfile = async () => {
   window.location = fxaEditProfileUrl;
 };
-
-// initially load data when component gets remounted
-onMounted(async () => {
-  await refresh();
-});
 </script>

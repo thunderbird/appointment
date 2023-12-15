@@ -155,16 +155,19 @@ import TextButton from '@/elements/TextButton.vue';
 // icons
 import { IconExternalLink } from '@tabler/icons-vue';
 
+// stores
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
-const refresh = inject('refresh');
 const router = useRouter();
 const user = useUserStore();
+const externalConnectionsStore = useExternalConnectionsStore();
 
-const externalConnections = ref({});
-const hasZoomAccountConnected = computed(() => (externalConnections.value?.zoom?.length ?? []) > 0);
-const zoomAccountName = computed(() => (externalConnections.value?.zoom[0].name ?? null));
+// Currently we only support one zoom account being connected at once.
+const hasZoomAccountConnected = computed(() => (externalConnectionsStore.zoom.length) > 0);
+const zoomAccountName = computed(() => (externalConnectionsStore.zoom[0]?.name ?? null));
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -195,15 +198,9 @@ const getSignedUserUrl = async () => {
   signedUserUrl.value = data.value.url;
 };
 
-const getExternalConnections = async () => {
-  const { data } = await call('account/external-connections').get().json();
-  externalConnections.value = data.value;
-};
-
 const refreshData = async () => Promise.all([
   getSignedUserUrl(),
-  getExternalConnections(),
-  refresh(),
+  externalConnectionsStore.fetch(call),
 ]);
 
 // save user data
@@ -251,6 +248,7 @@ const connectZoom = async () => {
 };
 const disconnectZoom = async () => {
   await call('zoom/disconnect').post();
+  await useExternalConnectionsStore().reset();
   await refreshData();
 };
 
