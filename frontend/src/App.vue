@@ -30,9 +30,7 @@
 
 <script setup>
 import { createFetch } from '@vueuse/core';
-import {
-  inject, provide, onMounted, computed,
-} from 'vue';
+import { inject, provide, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';

@@ -173,8 +173,9 @@ const router = useRouter();
 const user = useUserStore();
 const externalConnectionsStore = useExternalConnectionsStore();
 
+// Currently we only support one zoom account being connected at once.
 const hasZoomAccountConnected = computed(() => (externalConnectionsStore.zoom.length) > 0);
-const zoomAccountName = computed(() => (externalConnectionsStore.zoom[0].name ?? null));
+const zoomAccountName = computed(() => (externalConnectionsStore.zoom[0]?.name ?? null));
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
