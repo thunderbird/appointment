@@ -10,10 +10,7 @@
     </site-notification>
     <nav-bar :nav-items="navItems" />
     <main :class="{'mx-4 pt-24 lg:mx-8 min-h-full pb-24': !routeIsHome, 'pt-32': routeIsHome}">
-      <router-view
-        :calendars="calendars"
-        :appointments="appointments"
-      />
+      <router-view />
     </main>
     <footer-bar />
   </template>
@@ -32,23 +29,23 @@
 </template>
 
 <script setup>
-import { appointmentState } from "@/definitions";
-import { createFetch } from "@vueuse/core";
-import { ref, inject, provide, onMounted, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import NavBar from "@/components/NavBar";
-import TitleBar from "@/components/TitleBar";
-import FooterBar from "@/components/FooterBar.vue";
-import SiteNotification from "@/elements/SiteNotification";
-import { useSiteNotificationStore } from "@/stores/alert-store";
+import { createFetch } from '@vueuse/core';
+import { inject, provide, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import NavBar from '@/components/NavBar';
+import TitleBar from '@/components/TitleBar';
+import FooterBar from '@/components/FooterBar.vue';
+import SiteNotification from '@/elements/SiteNotification';
+import { useSiteNotificationStore } from '@/stores/alert-store';
 
 // stores
 import { useUserStore } from '@/stores/user-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
-const apiUrl = inject("apiUrl");
-const dj = inject("dayjs");
+const apiUrl = inject('apiUrl');
 const route = useRoute();
 const router = useRouter();
 const siteNotificationStore = useSiteNotificationStore();
@@ -68,8 +65,8 @@ const call = createFetch({
     async onFetchError({ data, response, error }) {
       // Catch any google refresh error that may occur
       if (
-        data?.detail?.error === 'google_refresh_error' &&
-        !siteNotificationStore.isSameNotification('google_refresh_error')
+        data?.detail?.error === 'google_refresh_error'
+        && !siteNotificationStore.isSameNotification('google_refresh_error')
       ) {
         // Ensure other async calls don't reach here
         siteNotificationStore.lock(data.detail.error);
@@ -97,26 +94,26 @@ const call = createFetch({
     },
   },
   fetchOptions: {
-    mode: "cors",
-    credentials: "include",
+    mode: 'cors',
+    credentials: 'include',
   },
 });
-provide("call", call);
+provide('call', call);
 provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
 provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
 
 // menu items for main navigation
 const navItems = [
-  "calendar",
-  "schedule",
-  "appointments",
-  "settings",
+  'calendar',
+  'schedule',
+  'appointments',
+  'settings',
 ];
 
 // db tables
-const calendars = ref([]);
-const appointments = ref([]);
+const calendarStore = useCalendarStore();
+const appointmentStore = useAppointmentStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
@@ -126,76 +123,20 @@ const routeIsHome = computed(
   () => ['home'].includes(route.name),
 );
 
-// query db for all calendar data
-const getDbCalendars = async (onlyConnected = true) => {
-  const { data, error } = await call(`me/calendars?only_connected=${onlyConnected}`).get().json();
-  if (!error.value) {
-    if (data.value === null || typeof data.value === "undefined") return;
-    calendars.value = data.value;
-  }
-};
-// query db for all appointments data
-const getDbAppointments = async () => {
-  const { data, error } = await call("me/appointments").get().json();
-  if (!error.value) {
-    if (data.value === null || typeof data.value === "undefined") return;
-    appointments.value = data.value;
-  }
-};
-
 // check appointment status for current state (past|pending|booked)
-const getAppointmentStatus = (a) => {
-  // check past events
-  if (a.slots.filter((s) => dj(s.start).isAfter(dj())).length === 0) {
-    return appointmentState.past;
-  }
-  // check booked events
-  if (a.slots.filter((s) => s.attendee_id != null).length > 0) {
-    return appointmentState.booked;
-  }
-  // else event is still wating to be booked
-  return appointmentState.pending;
-};
-
-// extend retrieved data
-const extendDbData = () => {
-  // build { calendarId => calendarData } object for direct lookup
-  const calendarsById = {};
-  calendars.value.forEach((c) => {
-    calendarsById[c.id] = c;
-  });
-  // extend appointments data with active state and calendar title and color
-  appointments.value.forEach((a) => {
-    a.calendar_title = calendarsById[a.calendar_id]?.title;
-    a.calendar_color = calendarsById[a.calendar_id]?.color;
-    a.status = getAppointmentStatus(a);
-    a.active = a.status !== appointmentState.past; // TODO
-    // convert start dates from UTC back to users timezone
-    a.slots.forEach((s) => {
-      s.start = dj.utc(s.start).tz(currentUser.data.timezone ?? dj.tz.guess());
-    });
-  });
-};
+const getAppointmentStatus = (a) => appointmentStore.status(a);
 
 // retrieve calendars and appointments after checking login and persisting user to db
-const getDbData = async (options = {}) => {
-  const { onlyConnectedCalendars = true } = options;
-
+const getDbData = async () => {
   if (currentUser?.exists()) {
     await Promise.all([
-      getDbCalendars(onlyConnectedCalendars),
-      getDbAppointments(),
+      calendarStore.fetch(call),
+      appointmentStore.fetch(call),
     ]);
-    extendDbData();
   }
 };
 
-// get the data initially
-onMounted(async () => {
-  await getDbData();
-});
-
 // provide refresh functions for components
-provide("refresh", getDbData);
-provide("getAppointmentStatus", getAppointmentStatus);
+provide('refresh', getDbData);
+provide('getAppointmentStatus', getAppointmentStatus);
 </script>

@@ -123,9 +123,9 @@
       :open="downloadAccountModalOpen"
       :title="t('label.accountData')"
       :message="t('text.accountDataNotice')"
-      :confirm-label="t('label.loginToContinue')"
+      :confirm-label="t('label.continue')"
       :cancel-label="t('label.cancel')"
-      @confirm="() => reauthenticateSubscriber(actuallyDownloadData)"
+      @confirm="actuallyDownloadData"
       @close="closeModals"
   ></ConfirmationModal>
   <!-- Account deletion modals -->
@@ -133,17 +133,9 @@
       :open="deleteAccountFirstModalOpen"
       :title="t('label.deleteYourAccount')"
       :message="t('text.accountDeletionWarning')"
-      :confirm-label="t('label.loginToContinue')"
-      :cancel-label="t('label.cancel')"
-      @confirm="() => reauthenticateSubscriber(secondDeleteAccountPrompt)"
-      @close="closeModals"
-  ></ConfirmationModal>
-  <ConfirmationModal
-      :open="deleteAccountSecondModalOpen"
-      :title="t('label.deleteYourAccount')"
-      :message="t('text.accountDeletionFinalWarning')"
       :confirm-label="t('label.deleteYourAccount')"
       :cancel-label="t('label.cancel')"
+      :use-caution-button="true"
       @confirm="actuallyDeleteAccount"
       @close="closeModals"
   ></ConfirmationModal>
@@ -151,7 +143,6 @@
 
 <script setup>
 import { ref, inject, onMounted, computed } from 'vue';
-import { useAuth0 } from '@auth0/auth0-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -164,17 +155,19 @@ import TextButton from '@/elements/TextButton.vue';
 // icons
 import { IconExternalLink } from '@tabler/icons-vue';
 
+// stores
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
-const refresh = inject('refresh');
 const router = useRouter();
 const user = useUserStore();
-const logout = inject('logout');
+const externalConnectionsStore = useExternalConnectionsStore();
 
-const externalConnections = ref({});
-const hasZoomAccountConnected = computed(() => (externalConnections.value?.zoom?.length ?? []) > 0);
-const zoomAccountName = computed(() => (externalConnections.value?.zoom[0].name ?? null));
+// Currently we only support one zoom account being connected at once.
+const hasZoomAccountConnected = computed(() => (externalConnectionsStore.zoom.length) > 0);
+const zoomAccountName = computed(() => (externalConnectionsStore.zoom[0]?.name ?? null));
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -205,15 +198,9 @@ const getSignedUserUrl = async () => {
   signedUserUrl.value = data.value.url;
 };
 
-const getExternalConnections = async () => {
-  const { data } = await call('account/external-connections').get().json();
-  externalConnections.value = data.value;
-};
-
 const refreshData = async () => Promise.all([
   getSignedUserUrl(),
-  getExternalConnections(),
-  refresh(),
+  externalConnectionsStore.fetch(call),
 ]);
 
 // save user data
@@ -261,6 +248,7 @@ const connectZoom = async () => {
 };
 const disconnectZoom = async () => {
   await call('zoom/disconnect').post();
+  await useExternalConnectionsStore().reset();
   await refreshData();
 };
 
@@ -298,21 +286,7 @@ const refreshLinkConfirm = async () => {
  * @returns {Promise<void>}
  */
 const reauthenticateSubscriber = async (callbackFn) => {
-  /*
-  try {
-    // Prompt the user to re-login
-    await auth0.loginWithPopup({
-      authorizationParams: {
-        prompt: 'login',
-      },
-    }, {});
-  } catch (e) {
-    // TODO: Throw an error
-    console.log('Reauth failed', e);
-    closeModals();
-    return;
-  }
-  */
+  // Currently not supported
   await callbackFn();
 };
 
@@ -349,6 +323,8 @@ const actuallyDeleteAccount = async () => {
     return;
   }
 
+  // We can't logout since we've deleted the user by now, so just delete local storage data.
+  await user.reset();
   await router.push('/');
 };
 

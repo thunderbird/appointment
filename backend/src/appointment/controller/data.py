@@ -14,10 +14,13 @@ def model_to_csv_buffer(models):
     if len(models) == 0:
         return StringIO()
 
+    # Don't write out these columns
+    scrub_columns = ['password', 'google_tkn', 'google_state', 'google_state_expires_at', 'token']
+
     string_buffer = StringIO()
 
     writer = csv.writer(string_buffer)
-    columns = models[0].__table__.c
+    columns = list(filter(lambda c: c.name not in scrub_columns, models[0].__table__.c))
 
     writer.writerow(columns)
     for model in models:
@@ -39,9 +42,9 @@ def download(db, subscriber: Subscriber):
     calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
     subscribers = [subscriber]
     slots = repo.get_slots_by_subscriber(db, subscriber_id=subscriber.id)
-
-    # Clear out the google token (?)
-    subscribers[0].google_tkn = None
+    external_connections = subscriber.external_connections
+    schedules = repo.get_schedules_by_subscriber(db, subscriber.id)
+    availability = [repo.get_availability_by_schedule(db, schedule.id) for schedule in schedules]
 
     # Convert models to csv
     attendee_buffer = model_to_csv_buffer(attendees)
@@ -49,6 +52,13 @@ def download(db, subscriber: Subscriber):
     calendar_buffer = model_to_csv_buffer(calendars)
     subscriber_buffer = model_to_csv_buffer(subscribers)
     slot_buffer = model_to_csv_buffer(slots)
+    external_connections_buffer = model_to_csv_buffer(external_connections)
+    schedules_buffer = model_to_csv_buffer(schedules)
+
+    # Unique behaviour because we can have lists of lists..too annoying to not do it this way.
+    availability_buffer = ''
+    for avail in availability:
+        availability_buffer += model_to_csv_buffer(avail).getvalue()
 
     # Create an in-memory zip and append our csvs
     zip_buffer = BytesIO()
@@ -58,6 +68,9 @@ def download(db, subscriber: Subscriber):
         data_zip.writestr("calendar.csv", calendar_buffer.getvalue())
         data_zip.writestr("subscriber.csv", subscriber_buffer.getvalue())
         data_zip.writestr("slot.csv", slot_buffer.getvalue())
+        data_zip.writestr("external_connection.csv", external_connections_buffer.getvalue())
+        data_zip.writestr("schedules.csv", schedules_buffer.getvalue())
+        data_zip.writestr("availability.csv", availability_buffer)
         data_zip.writestr("readme.txt", l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)}))
 
     # Return our zip buffer
@@ -65,31 +78,27 @@ def download(db, subscriber: Subscriber):
 
 
 def delete_account(db, subscriber: Subscriber):
-    # Ok nuke everything
-    repo.delete_attendees_by_subscriber(db, subscriber.id)
-    repo.delete_appointment_slots_by_subscriber_id(db, subscriber.id)
-    repo.delete_calendar_appointments_by_subscriber_id(db, subscriber.id)
-    repo.delete_subscriber_calendar_by_subscriber_id(db, subscriber.id)
+    # Ok nuke everything (thanks cascade=all,delete)
+    repo.delete_subscriber(db, subscriber)
+
+    # Make sure we actually nuked the subscriber
+    if repo.get_subscriber(db, subscriber.id) is not None:
+        raise AccountDeletionSubscriberFail(
+            subscriber.id,
+            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+        )
 
     empty_check = [
         len(repo.get_attendees_by_subscriber(db, subscriber.id)),
         len(repo.get_slots_by_subscriber(db, subscriber.id)),
         len(repo.get_appointments_by_subscriber(db, subscriber.id)),
         len(repo.get_calendars_by_subscriber(db, subscriber.id)),
+        len(repo.get_schedules_by_subscriber(db, subscriber.id))
     ]
 
-    # Check if we have any left-over subscriber data before we nuke the subscriber
+    # Check if we have any left-over subscriber data
     if any(empty_check) > 0:
         raise AccountDeletionPartialFail(
-            subscriber.id,
-            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
-        )
-
-    repo.delete_subscriber(db, subscriber)
-
-    # Make sure we actually nuked the subscriber
-    if repo.get_subscriber(db, subscriber.id) is not None:
-        raise AccountDeletionSubscriberFail(
             subscriber.id,
             "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
         )

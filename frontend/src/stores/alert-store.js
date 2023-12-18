@@ -13,7 +13,7 @@ const initialSiteNotificationObject = {
 // eslint-disable-next-line import/prefer-default-export
 export const useSiteNotificationStore = defineStore('siteNotification', {
   state: () => ({
-    data: initialSiteNotificationObject,
+    data: structuredClone(initialSiteNotificationObject),
   }),
   getters: {
     isVisible() {
@@ -50,7 +50,7 @@ export const useSiteNotificationStore = defineStore('siteNotification', {
       });
     },
     reset() {
-      this.$patch({ data: initialSiteNotificationObject });
+      this.$patch({ data: structuredClone(initialSiteNotificationObject) });
     },
   },
 });

@@ -20,7 +20,7 @@ export const useUserStore = defineStore('user', {
       return this.data.accessToken !== null;
     },
     reset() {
-      this.$patch({ data: initialUserObject });
+      this.$patch({ data: structuredClone(initialUserObject) });
     },
     async profile(fetch) {
       const { error, data } = await fetch('me').get().json();
