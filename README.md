@@ -74,16 +74,16 @@ Run application for development with hot reloading backend and frontend:
 
 ## Testing
 
-To run tests, setup the application manually (you don't need the mysql deps), and then install requirements-test.txt
+To run tests, simply install the package in editing mode:
 
 ```bash
-pip install -r requirements-test.txt
+cd backend && pip install -e .
 ```
 
 After this you can run tests with:
 
 ```bash
-cd backend/test && python -m pytest
+cd backend && python -m pytest
 ```
 
 ## Contributing

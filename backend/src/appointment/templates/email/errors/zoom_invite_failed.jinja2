@@ -1,5 +1,6 @@
-<html lang="en">
+<html lang="{{ l10n('locale') }}">
   <body>
-    <p>Unfortunately there was an error creating your Zoom meeting for your upcoming appointment: {{ title }}.</p>
+    <p>{{ l10n('zoom-invite-failed-html-heading', {'title': title}) }}</p>
+    {% include 'includes/footer.jinja2' %}
   </body>
 </html>

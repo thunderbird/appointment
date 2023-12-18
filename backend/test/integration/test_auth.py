@@ -1,7 +1,7 @@
 import os
 
 from defines import FXA_CLIENT_PATCH
-from backend.src.appointment.database import repo, models
+from appointment.database import repo, models
 
 
 class TestAuth:

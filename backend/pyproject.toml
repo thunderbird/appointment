@@ -17,6 +17,16 @@ cli = [
     "ruff",
     "black"
 ]
+db = [
+    "mysqlclient==2.1.1",
+    "mysql-connector-python==8.0.32",
+]
+test = [
+    "Faker==20.1.0",
+    "httpx==0.25.1",
+    "pytest==7.4.3",
+]
+deploy = ['appointment_backend[cli]', 'appointment_backend[db]']
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
@@ -70,3 +80,6 @@ max-complexity = 10
 
 [tool.black]
 line-length = 120
+
+[tool.pytest.ini_options]
+pythonpath = "test"

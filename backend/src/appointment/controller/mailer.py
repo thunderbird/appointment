@@ -17,13 +17,23 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi.templating import Jinja2Templates
 
-from appointment.l10n import l10n
+from ..l10n import l10n
 
-templates = Jinja2Templates("src/appointment/templates/email")
+
+def get_jinja():
+
+    path = 'src/appointment/templates/email'
+
+    templates = Jinja2Templates(path)
+    # Add our l10n function
+    templates.env.globals.update(l10n=l10n)
+
+    return templates
 
 
 def get_template(template_name) -> "jinja2.Template":
     """Retrieves a template under the templates/email folder. Make sure to include the file extension!"""
+    templates = get_jinja()
     return templates.get_template(template_name)
 
 
@@ -130,11 +140,11 @@ class Mailer:
 class InvitationMail(Mailer):
     def __init__(self, *args, **kwargs):
         """init Mailer with invitation specific defaults"""
-        defaultKwargs = {
+        default_kwargs = {
             "subject": l10n('invite-mail-subject'),
             "plain": l10n('invite-mail-body'),
         }
-        super(InvitationMail, self).__init__(*args, **defaultKwargs, **kwargs)
+        super(InvitationMail, self).__init__(*args, **default_kwargs, **kwargs)
 
     def html(self):
         return get_template("invite.jinja2").render()
@@ -143,10 +153,10 @@ class InvitationMail(Mailer):
 class ZoomMeetingFailedMail(Mailer):
     def __init__(self, appointment_title, *args, **kwargs):
         """init Mailer with invitation specific defaults"""
-        defaultKwargs = {
-            "subject": "[TBA] Zoom Meeting Link Creation Error",
+        default_kwargs = {
+            "subject": l10n('zoom-invite-failed-subject')
         }
-        super(ZoomMeetingFailedMail, self).__init__(*args, **defaultKwargs, **kwargs)
+        super(ZoomMeetingFailedMail, self).__init__(*args, **default_kwargs, **kwargs)
 
         self.appointment_title = appointment_title
 
@@ -154,37 +164,30 @@ class ZoomMeetingFailedMail(Mailer):
         return get_template("errors/zoom_invite_failed.jinja2").render(title=self.appointment_title)
 
     def text(self):
-        return f"Unfortunately there was an error creating your Zoom meeting for your upcoming appointment: {self.appointment_title}"
+        return l10n('zoom-invite-failed-plain', {'title': self.appointment_title})
 
 
 class ConfirmationMail(Mailer):
-    def __init__(self, confirmUrl, denyUrl, attendee, date, *args, **kwargs):
+    def __init__(self, confirm_url, deny_url, attendee, date, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
         self.attendee = attendee
+        self.attendee.name = self.attendee.name.title()
         self.date = date
-        self.confirmUrl = confirmUrl
-        self.denyUrl = denyUrl
-        defaultKwargs = {
-            "subject": "[TBA] Confirm booking request from Thunderbird Appointment",
-            "plain": """
-{name} ({email}) just requested this time slot from your schedule: {date}
-
-Visit this link to confirm the booking request:
-{confirm}
-
-Or this link if you want to deny it:
-{deny}
-
-This message is sent from Thunderbird Appointment.
-            """.format(
-                    name=self.attendee.name,
-                    email=self.attendee.email,
-                    date=self.date,
-                    confirm=self.confirmUrl,
-                    deny=self.denyUrl
-                ),
+        self.confirmUrl = confirm_url
+        self.denyUrl = deny_url
+        default_kwargs = {
+            "subject": l10n('confirm-mail-subject')
         }
-        super(ConfirmationMail, self).__init__(*args, **defaultKwargs, **kwargs)
+        super(ConfirmationMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n('confirm-mail-plain', {
+            'attendee_name': self.attendee.name,
+            'attendee_email': self.attendee.email,
+            'date': self.date,
+            'confirm_url': self.confirmUrl,
+            'deny_url': self.denyUrl,
+        })
 
     def html(self):
         return get_template("confirm.jinja2").render(
@@ -200,15 +203,16 @@ class RejectionMail(Mailer):
         """init Mailer with rejection specific defaults"""
         self.owner = owner
         self.date = date
-        defaultKwargs = {
-            "subject": "[TBA] Booking request declined",
-            "plain": """
-{name} denied your booking request for this time slot: {date}.
-
-This message is sent from Thunderbird Appointment.
-            """.format(name=self.owner.name, date=self.date),
+        default_kwargs = {
+            "subject": l10n('reject-mail-subject')
         }
-        super(RejectionMail, self).__init__(*args, **defaultKwargs, **kwargs)
+        super(RejectionMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n('reject-mail-plain', {
+            'owner_name': self.owner.name,
+            'date': self.date
+        })
 
     def html(self):
         return get_template("rejected.jinja2").render(owner=self.owner, date=self.date)

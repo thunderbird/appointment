@@ -17,7 +17,7 @@ COPY scripts/dev-entry.sh scripts/dev-entry.sh
 COPY .env .
 
 RUN pip install --upgrade pip
-RUN pip install .
+RUN pip install .'[deploy]'
 
 EXPOSE 5000
 CMD ["/bin/sh", "./scripts/dev-entry.sh"]

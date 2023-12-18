@@ -1,5 +1,8 @@
 ### Thunderbird Appointment Backend Strings
 
+# Locale code
+locale = de
+
 ## Health Check
 
 # Should indicate application wellness.

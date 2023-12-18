@@ -31,10 +31,8 @@ class L10n(Plugin):
 
         return parsed_locales
 
-    async def process_request(
-        self, request: Request
-    ):
-        supported_locales = self.parse_accept_language(request.headers.get('accept-language', FALLBACK_LOCALE))
+    def get_fluent(self, accept_languages):
+        supported_locales = self.parse_accept_language(accept_languages)
 
         # Make sure our fallback locale is always in supported_locales
         if FALLBACK_LOCALE not in supported_locales:
@@ -42,11 +40,12 @@ class L10n(Plugin):
 
         base_url = "src/appointment/l10n"
 
-        # TODO: Fix this nonsense...Tests run from a different base directory.
-        if os.getenv('APP_ENV') == 'test':
-            base_url = f"../{base_url}"
-
         loader = FluentResourceLoader(f"{base_url}/{{locale}}")
-        fluent = FluentLocalization(supported_locales, ["main.ftl"], loader)
+        fluent = FluentLocalization(supported_locales, ["main.ftl", "email.ftl"], loader)
 
         return fluent.format_value
+
+    async def process_request(
+        self, request: Request
+    ):
+        return self.get_fluent(request.headers.get('accept-language', FALLBACK_LOCALE))

@@ -7,6 +7,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 from fastapi import Request
+from starlette_context import request_cycle_context
+
 from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER, FXA_CLIENT_PATCH
 
 # Factory functions
@@ -20,9 +22,10 @@ from factory.subscriber_factory import make_subscriber, make_basic_subscriber, m
 # Load our env
 load_dotenv(find_dotenv(".env.test"))
 
-from backend.src.appointment.main import server  # noqa: E402
-from backend.src.appointment.database import models, repo, schemas  # noqa: E402
-from backend.src.appointment.dependencies import database, auth, google  # noqa: E402
+from appointment.main import server  # noqa: E402
+from appointment.database import models, repo, schemas  # noqa: E402
+from appointment.dependencies import database, auth, google  # noqa: E402
+from appointment.middleware.l10n import L10n  # noqa: E402
 
 
 def _patch_caldav_connector(monkeypatch):
@@ -52,7 +55,7 @@ def _patch_caldav_connector(monkeypatch):
             return True
 
     # Patch up the caldav constructor, and list_calendars
-    from backend.src.appointment.controller.calendar import CalDavConnector
+    from appointment.controller.calendar import CalDavConnector
     monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
     monkeypatch.setattr(CalDavConnector, "list_calendars", MockCaldavConnector.list_calendars)
     monkeypatch.setattr(CalDavConnector, "create_event", MockCaldavConnector.create_event)
@@ -66,7 +69,7 @@ def _patch_mailer(monkeypatch):
         def send(self):
             return
 
-    from backend.src.appointment.controller.mailer import Mailer
+    from appointment.controller.mailer import Mailer
     monkeypatch.setattr(Mailer, "send", MockMailer.send)
 
 
@@ -101,7 +104,7 @@ def _patch_fxa_client(monkeypatch):
         def get_jwk(self):
             return {}
 
-    from backend.src.appointment.controller.apis.fxa_client import FxaClient
+    from appointment.controller.apis.fxa_client import FxaClient
     monkeypatch.setattr(FxaClient, "setup", MockFxaClient.setup)
     monkeypatch.setattr(FxaClient, "get_redirect_url", MockFxaClient.get_redirect_url)
     monkeypatch.setattr(FxaClient, "get_credentials", MockFxaClient.get_credentials)
@@ -171,3 +174,13 @@ def with_client(with_db, monkeypatch):
     client = TestClient(app)
 
     yield client
+
+
+@pytest.fixture()
+def with_l10n():
+    """Creates a fake starlette_context context with just the l10n function, only needed for unit tests. Only supports english for now!"""
+    l10n_plugin = L10n()
+    l10n_fn = l10n_plugin.get_fluent('en')
+
+    with request_cycle_context({'l10n': l10n_fn}):
+        yield

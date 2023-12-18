@@ -1,5 +1,8 @@
 ### Thunderbird Appointment Backend Strings
 
+# Locale code
+locale = en
+
 ## Health Check
 
 # Should indicate application wellness.
@@ -17,15 +20,6 @@ google-invalid-creds = Google authentication credentials are not valid.
 google-auth-fail = Google authentication failed.
 google-auth-expired = Google authentication session expired, please try again.
 google-sync-fail = An error occurred while syncing calendars. Please try again later.
-
-## Emails
-
-invite-mail-subject = Invitation sent from Thunderbird Appointment
-invite-mail-body = This message is sent from Appointment.
-
-# Variables:
-# $title (String) - The title of the appointment
-zoom-meeting-failed = Unfortunately there was an error creating your Zoom meeting for your upcoming appointment: { $title }
 
 ## Frontend Facing Strings
 
