@@ -11,6 +11,7 @@ health-ok = System is operational
 ## General Exceptions
 
 account-delete-fail = There was a problem deleting your data. This incident has been logged and your data will manually be removed.
+protected-route-fail = No valid authentication credentials provided
 
 ## Google Exceptions
 

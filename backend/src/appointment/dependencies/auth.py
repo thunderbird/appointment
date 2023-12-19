@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..database import repo, schemas
 from ..dependencies.database import get_db
+from ..exceptions.validation import APISubscriberNotFound
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -34,6 +35,6 @@ def get_subscriber(
     user = get_user_from_token(db, token)
 
     if user is None:
-        raise HTTPException(403, detail='Missing bearer token')
+        raise APISubscriberNotFound()
 
     return user
