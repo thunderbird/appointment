@@ -11,7 +11,29 @@ health-ok = System is operational
 ## General Exceptions
 
 account-delete-fail = There was a problem deleting your data. This incident has been logged and your data will manually be removed.
-protected-route-fail = No valid authentication credentials provided
+protected-route-fail = No valid authentication credentials provided.
+username-not-available = This username has already been taken.
+invalid-link = This link is no longer valid.
+subscriber-not-found = The subscriber could not be found.
+calendar-not-found = The calendar could not be found.
+calendar-not-auth = You are not authorized to view or modify this calendar.
+calendar-sync-fail = An error occurred while syncing calendars. Please try again later.
+calendar-not-active = The calendar connection is not active.
+appointment-not-found = The appointment could not be found.
+appointment-not-auth = You are not authorized to view or modify this appointment.
+slot-not-found = The time slot you have selected could not be found. Please try again.
+slot-already-taken = The time slot you have selected is no longer available. Please try again.
+slot-invalid-email = The email you have provided was not valid. Please try again.
+slot-not-auth = You are not authorized to view or modify this time slot.
+
+## Authentication Exceptions
+
+email-mismatch = Email mismatch.
+invalid-credentials = The provided credentials are not valid.
+
+## Zoom Exceptions
+
+zoom-not-connected = You need a connected Zoom account in order to create a meeting link.
 
 ## Google Exceptions
 
