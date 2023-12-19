@@ -1,12 +1,12 @@
 [project]
-name = "appointment_backend"
+name = "appointment"
 version = "0.2.0"
 description = "Backend component to Thunderbird Appointment"
 requires-python = ">3.11"
 dynamic = ["dependencies"]
 
 [project.scripts]
-run-command = "src.appointment.main:cli"
+run-command = "appointment.main:cli"
 
 [project.urls]
 homepage = "https://appointment.day"
@@ -26,7 +26,7 @@ test = [
     "httpx==0.25.1",
     "pytest==7.4.3",
 ]
-deploy = ['appointment_backend[cli]', 'appointment_backend[db]']
+deploy = ['appointment[cli]', 'appointment[db]']
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

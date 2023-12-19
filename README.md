@@ -43,10 +43,10 @@ Run application for development with hot reloading backend and frontend:
 
     ```bash
     cd appointment
-    pip install -r backend/requirements.txt
+    pip install .
     touch backend/src/appointment.db # when using sqlite
     cp backend/.env.example backend/.env # add your own configuration here
-    uvicorn --factory backend.src.appointment.main:server --host 0.0.0.0 --port 5000
+    uvicorn --factory appointment.main:server --host 0.0.0.0 --port 5000
     ```
 
     You can now access the backend at [localhost:5000](http://localhost:5000).
