@@ -23,6 +23,14 @@ class InvalidTokenException(APIException):
         return l10n('protected-route-fail')
 
 
+class InvalidLinkException(APIException):
+    """Raise when verify_subscriber_link fails"""
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('invalid-link')
+
+
 class SubscriberNotFoundException(APIException):
     """Raise when the calendar is not found during route validation"""
     status_code = 404
@@ -85,6 +93,30 @@ class ScheduleNotAuthorizedException(APIException):
 
     def get_msg(self):
         return l10n('schedule-not-auth')
+
+
+class SlotNotFoundException(APIException):
+    """Raise when a timeslot is not found during route validation"""
+    status_code = 404
+
+    def get_msg(self):
+        return l10n('slot-not-found')
+
+
+class SlotAlreadyTakenException(APIException):
+    """Raise when a timeslot is already taken during route validation"""
+    status_code = 403
+
+    def get_msg(self):
+        return l10n('slot-already-taken')
+
+
+class SlotNotAuthorizedException(APIException):
+    """Raise when a slot is owned by someone else during route validation"""
+    status_code = 403
+    
+    def get_msg(self):
+        return l10n('slot-not-auth')
 
 
 class ZoomNotConnectedException(APIException):

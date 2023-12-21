@@ -29,6 +29,7 @@ username-not-available = This username has already been taken.
 invalid-link = This link is no longer valid.
 calendar-sync-fail = An error occurred while syncing calendars. Please try again later.
 calendar-not-active = The calendar connection is not active.
+slot-not-found = There are no available time slots to book.
 slot-already-taken = The time slot you have selected is no longer available. Please try again.
 slot-invalid-email = The email you have provided was not valid. Please try again.
 
