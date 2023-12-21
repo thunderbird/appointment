@@ -37,6 +37,7 @@ slot-invalid-email = The email you have provided was not valid. Please try again
 
 email-mismatch = Email mismatch.
 invalid-credentials = The provided credentials are not valid.
+oauth-error = There was an error with the authentication flow. Please try again.
 
 ## Zoom Exceptions
 

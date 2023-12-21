@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, Body
 import logging
 import os
 
