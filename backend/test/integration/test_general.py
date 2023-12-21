@@ -22,12 +22,12 @@ class TestGeneral:
         # Try english first
         response = with_client.get("/", headers={'accept-language': 'en'})
         assert response.status_code == 200
-        assert response.json() == 'System is operational'
+        assert response.json() == 'Health OK'
 
         # Try german next
         response = with_client.get("/", headers={'accept-language': 'de'})
         assert response.status_code == 200
-        assert response.json() == 'Das System ist betriebsbereit'
+        assert response.json() == 'Gesundheitlich OK'
 
     def test_access_without_authentication_token(self, with_client):
         # response = client.get("/login")

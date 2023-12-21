@@ -6,7 +6,7 @@ locale = en
 ## Health Check
 
 # Should indicate application wellness.
-health-ok = System is operational
+health-ok = Health OK
 
 ## General Exceptions
 

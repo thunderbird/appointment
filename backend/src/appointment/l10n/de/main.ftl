@@ -7,4 +7,4 @@ locale = de
 
 # Should indicate application wellness.
 # (This was google translated, sorry.)
-health-ok = Das System ist betriebsbereit
+health-ok = Gesundheitlich OK
