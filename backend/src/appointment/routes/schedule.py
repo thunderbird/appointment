@@ -20,6 +20,9 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
+from ..exceptions.validation import CalendarNotFoundException, CalendarNotAuthorizedException, ScheduleNotFoundException, \
+    ScheduleNotAuthorizedException, ZoomNotConnectedException, CalendarNotConnectedException
+from ..l10n import l10n
 
 router = APIRouter()
 
@@ -31,22 +34,18 @@ def create_calendar_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to add a new schedule for a given calendar"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     if not repo.calendar_exists(db, calendar_id=schedule.calendar_id):
-        raise HTTPException(status_code=404, detail="Calendar not found")
+        raise CalendarNotFoundException()
     if not repo.calendar_is_owned(db, calendar_id=schedule.calendar_id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
+        raise CalendarNotAuthorizedException()
     if not repo.calendar_is_connected(db, calendar_id=schedule.calendar_id):
-        raise HTTPException(status_code=403, detail="Calendar connection is not active")
+        raise CalendarNotConnectedException()
     return repo.create_calendar_schedule(db=db, schedule=schedule)
 
 
 @router.get("/", response_model=list[schemas.Schedule])
 def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Gets all of the available schedules for the logged in subscriber"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     return repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
 
 
@@ -57,13 +56,11 @@ def read_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Gets information regarding a specific schedule"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     schedule = repo.get_schedule(db, schedule_id=id)
     if schedule is None:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise ScheduleNotFoundException()
     if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Schedule not owned by subscriber")
+        raise ScheduleNotAuthorizedException()
     return schedule
 
 
@@ -75,14 +72,12 @@ def update_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to update an existing calendar connection for authenticated subscriber"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     if not repo.schedule_exists(db, schedule_id=id):
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise ScheduleNotFoundException()
     if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Schedule not owned by subscriber")
+        raise ScheduleNotAuthorizedException()
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
-        raise HTTPException(status_code=400, detail="You need a connected Zoom account in order to create a meeting link")
+        raise ZoomNotConnectedException()
     return repo.update_calendar_schedule(db=db, schedule=schedule, schedule_id=id)
 
 
@@ -95,17 +90,17 @@ def read_schedule_availabilities(
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
-        raise HTTPException(status_code=401, detail="Invalid profile link")
+        raise HTTPException(status_code=401, detail=l10n('invalid-link'))
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
 
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise ScheduleNotFoundException()
 
     # check if schedule is enabled
     if not schedule.active:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise ScheduleNotFoundException()
 
     # calculate theoretically possible slots from schedule config
     availableSlots = Tools.available_slots_from_schedule(schedule)

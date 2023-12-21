@@ -3,37 +3,93 @@ from fastapi import HTTPException
 from ..l10n import l10n
 
 
-class APIInvalidToken(HTTPException):
+class APIException(HTTPException):
+    """Base exception for all custom API exceptions
+    Custom messages are defined in a function, because l10n needs context set before use."""
+    status_code = 500
+
+    def __init__(self, **kwargs):
+        super().__init__(status_code=self.status_code, detail=self.get_msg(), **kwargs)
+
+    def get_msg(self):
+        return l10n('unknown-error')
+
+
+class InvalidTokenException(APIException):
     """Raise when the subscriber could not be parsed from the auth token"""
-    def __init__(self, **kwargs):
-        super().__init__(status_code=401, detail=l10n('protected-route-fail'), **kwargs)
+    status_code = 401
+
+    def get_msg(self):
+        return l10n('protected-route-fail')
 
 
-class APISubscriberNotFound(HTTPException):
+class SubscriberNotFoundException(APIException):
     """Raise when the calendar is not found during route validation"""
-    def __init__(self, **kwargs):
-        super().__init__(status_code=404, detail=l10n('calendar-not-found'), **kwargs)
+    status_code = 404
+
+    def get_msg(self):
+        return l10n('subscriber-not-found')
 
 
-class APICalendarNotFound(HTTPException):
+class CalendarNotFoundException(APIException):
     """Raise when the calendar is not found during route validation"""
-    def __init__(self, **kwargs):
-        super().__init__(status_code=404, detail=l10n('calendar-not-found'), **kwargs)
+    status_code = 404
+
+    def get_msg(self):
+        return l10n('calendar-not-found')
 
 
-class APICalendarNotAuthorized(HTTPException):
+class CalendarNotAuthorizedException(APIException):
     """Raise when the calendar is owned by someone else during route validation"""
-    def __init__(self, **kwargs):
-        super().__init__(status_code=403, detail=l10n('calendar-not-auth'), **kwargs)
+    status_code = 403
+
+    def get_msg(self):
+        return l10n('calendar-not-auth')
 
 
-class APIAppointmentNotFound(HTTPException):
+class CalendarNotConnectedException(APIException):
+    """Raise when the calendar is owned by someone else during route validation"""
+    status_code = 403
+
+    def get_msg(self):
+        return l10n('calendar-not-active')
+
+
+class AppointmentNotFoundException(APIException):
     """Raise when the appointment is not found during route validation"""
-    def __init__(self, **kwargs):
-        super().__init__(status_code=404, detail=l10n('appointment-not-found'), **kwargs)
+    status_code = 404
+
+    def get_msg(self):
+        return l10n('appointment-not-found')
 
 
-class APIAppointmentNotAuthorized(HTTPException):
+class AppointmentNotAuthorizedException(APIException):
     """Raise when the appointment is owned by someone else during route validation"""
-    def __init__(self, **kwargs):
-        super().__init__(status_code=403, detail=l10n('appointment-not-auth'), **kwargs)
+    status_code = 403
+
+    def get_msg(self):
+        return l10n('appointment-not-auth')
+
+
+class ScheduleNotFoundException(APIException):
+    """Raise when the schedule is not found during route validation"""
+    status_code = 404
+
+    def get_msg(self):
+        return l10n('schedule-not-found')
+    
+
+class ScheduleNotAuthorizedException(APIException):
+    """Raise when the schedule is owned by someone else during route validation"""
+    status_code = 403
+
+    def get_msg(self):
+        return l10n('schedule-not-auth')
+
+
+class ZoomNotConnectedException(APIException):
+    """Raise if the user requires a zoom connection during route validation"""
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('zoom-not-connected')
