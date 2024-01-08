@@ -6,7 +6,7 @@ from typing import Dict
 from requests_oauthlib import OAuth2Session
 import requests
 from ...database import models, repo
-from ...exceptions.fxa_api import NotInAllowListException
+from ...exceptions.fxa_api import NotInAllowListException, MissingRefreshTokenException
 
 
 class FxaConfig:
@@ -145,6 +145,9 @@ class FxaClient:
         """Invalidate the current refresh token"""
         # I assume a refresh token will destroy its access tokens
         refresh_token = self.client.token.get('refresh_token')
+
+        if refresh_token is None:
+            raise MissingRefreshTokenException()
 
         # This route doesn't want auth! (Because we're destroying it)
         resp = requests.post(self.config.destroy_url, json={
