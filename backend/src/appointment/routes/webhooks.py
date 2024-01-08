@@ -11,7 +11,7 @@ from ..dependencies.fxa import get_webhook_auth, get_fxa_client
 router = APIRouter()
 
 
-@router.get("/fxa-process")
+@router.post("/fxa-process")
 def fxa_process(
     request: Request,
     db: Session = Depends(get_db),
