@@ -47,8 +47,6 @@ def fxa_process(
                     logging.warning("Subscriber doesn't have refresh token.")
                 except requests.exceptions.HTTPError as ex:
                     logging.error(f"Error logging out user: {ex.response}")
-                    logging.error(json.dumps(ex.request))
-                    logging.error(json.dumps(ex.response))
             case 'https://schemas.accounts.firefox.com/event/profile-change':
                 if event_data.get('email') is not None:
                     # Update the subscriber's email (and username for now)
