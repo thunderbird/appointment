@@ -15,7 +15,7 @@ router = APIRouter()
 def fxa_process(
     request: Request,
     db: Session = Depends(get_db),
-    decoded_token = Depends(get_webhook_auth),
+    decoded_token: dict = Depends(get_webhook_auth),
     fxa_client: FxaClient = Depends(get_fxa_client)
 ):
     """Main for webhooks regarding fxa"""
@@ -27,7 +27,7 @@ def fxa_process(
 
     fxa_client.setup(subscriber.id, subscriber.get_external_connection(models.ExternalConnectionType.fxa).token)
 
-    for event, event_data in decoded_token.get('events', default={}).items():
+    for event, event_data in decoded_token.get('events', {}).items():
         match event:
             case 'https://schemas.accounts.firefox.com/event/password-change':
                 # We also get `changeTime` in event_data, but let's just log them out.
