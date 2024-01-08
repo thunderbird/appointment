@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from typing import Dict
 
 from requests_oauthlib import OAuth2Session
 import requests
@@ -155,5 +156,7 @@ class FxaClient:
         resp.raise_for_status()
         return resp
 
-    def get_jwk(self):
-        return requests.get(self.config.jwks_url).json()
+    def get_jwk(self) -> Dict:
+        """Retrieve the keys object on the jwks url"""
+        response = requests.get(self.config.jwks_url).json()
+        return response.get('keys', [])
