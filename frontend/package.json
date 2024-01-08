@@ -7,8 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --ignore-path .gitignore",
-    "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "test": "vitest"
+    "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.0.2",
@@ -18,7 +17,7 @@
     "@tailwindcss/forms": "^0.5.3",
     "@vitejs/plugin-vue": "^4.5.2",
     "@vueuse/components": "^10.4.1",
-    "@vueuse/core": "^10.7.0",
+    "@vueuse/core": "^10.4.1",
     "core-js": "^3.8.3",
     "dayjs": "^1.11.5",
     "pinia": "^2.1.6",
@@ -38,11 +37,7 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-vue": "^9.19.2",
-    "jsdom": "^23.0.1",
-    "msw": "^2.0.11",
-    "node-fetch": "^3.3.2",
     "postcss": "^8.4.17",
-    "vite-plugin-eslint": "^1.8.1",
-    "vitest": "^1.1.0"
+    "vite-plugin-eslint": "^1.8.1"
   }
 }
