@@ -47,7 +47,7 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
         logging.error(f"Error decoding token. Key ID ({headers.get('kid')}) is missing from public list.")
         return None
 
-    decoded_jwt = jwt.decode(header_token, jwk_pem, algorithms='RS256')
+    decoded_jwt = jwt.decode(header_token, jwk_pem, audience=fxa_client.client_id, algorithms='RS256')
 
     # Final verification
     if decoded_jwt.get('iss') != fxa_client.config.issuer:
