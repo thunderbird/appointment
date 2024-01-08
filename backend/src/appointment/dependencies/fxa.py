@@ -51,6 +51,6 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
 
     # Final verification
     if decoded_jwt.get('iss') != fxa_client.config.issuer:
-        logging.warning(f"Issuer is not valid: ({decoded_jwt.get('iss')}) vs ({fxa_client.config.issuer})")
+        logging.error(f"Issuer is not valid: ({decoded_jwt.get('iss')}) vs ({fxa_client.config.issuer})")
 
     return decoded_jwt
