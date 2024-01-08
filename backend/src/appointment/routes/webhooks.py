@@ -15,7 +15,7 @@ router = APIRouter()
 def fxa_process(
     request: Request,
     db: Session = Depends(get_db),
-    decoded_token: dict = Depends(get_webhook_auth),
+    decoded_token = Depends(get_webhook_auth),
     fxa_client: FxaClient = Depends(get_fxa_client)
 ):
     """Main for webhooks regarding fxa"""

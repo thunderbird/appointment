@@ -636,4 +636,7 @@ def get_subscriber_by_fxa_uid(db: Session, type_id: str):
 
     result = query.first()
 
-    return result
+    if result is not None:
+        return result.owner
+
+    return None
