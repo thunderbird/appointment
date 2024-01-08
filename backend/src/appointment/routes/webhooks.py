@@ -34,10 +34,10 @@ def fxa_process(
     for event, event_data in decoded_token.get('events', {}).items():
         match event:
             case 'https://schemas.accounts.firefox.com/event/password-change':
-                # TODO: What timezone is this in? UTC?
-                logging.info(f">> Event Data -> {json.dumps(event_data)}")
-                # Ensure we ignore out of date requests
-                if subscriber_external_connection.time_updated < event_data.get('changeTime'):
+                # Ensure we ignore out of date requests, also .timestamp() returns seconds, but we get the time in ms.
+                # TODO: We may need a last update timestamp JUST for token field changes.
+                token_last_updated = subscriber_external_connection.time_updated.timestamp() * 1000
+                if token_last_updated > event_data.get('changeTime'):
                     logging.info("Ignoring out of date logout request.")
                     break
 
