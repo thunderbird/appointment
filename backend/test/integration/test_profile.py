@@ -1,6 +1,6 @@
 import os
 from defines import auth_headers
-from backend.src.appointment.database import repo
+from appointment.database import repo
 
 
 class TestProfile:

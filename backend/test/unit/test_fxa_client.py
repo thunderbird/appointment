@@ -1,6 +1,6 @@
 import os
 
-from backend.src.appointment.controller.apis.fxa_client import FxaClient
+from appointment.controller.apis.fxa_client import FxaClient
 
 
 class TestFxaClient:

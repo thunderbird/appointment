@@ -24,8 +24,9 @@ export const useUserStore = defineStore('user', {
     },
     async profile(fetch) {
       const { error, data } = await fetch('me').get().json();
+
       // Failed to get profile data, log this user out and return false
-      if (error.value) {
+      if (error.value || !data.value) {
         this.reset();
         return false;
       }
@@ -46,14 +47,14 @@ export const useUserStore = defineStore('user', {
     async login(fetch, username, password) {
       this.reset();
 
-      if (import.meta.env?.VITE_AUTH_SCHEME === 'password') {
+      if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
         // fastapi wants us to send this as formdata :|
         const formData = new FormData(document.createElement('form'));
         formData.set('username', username);
         formData.set('password', password);
         const {error, data} = await fetch('token').post(formData).json();
-        console.log(error, data);
-        if (error.value || !data.value.access_token) {
+
+        if (!data.value.access_token) {
           return false;
         }
 

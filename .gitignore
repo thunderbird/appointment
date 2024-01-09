@@ -10,3 +10,4 @@ dist
 .env
 venv
 .idea
+*.egg-info

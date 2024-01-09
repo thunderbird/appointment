@@ -1,11 +1,12 @@
 import json
 import logging
 import os
+from typing import Dict
 
 from requests_oauthlib import OAuth2Session
 import requests
 from ...database import models, repo
-from ...exceptions.fxa_api import NotInAllowListException
+from ...exceptions.fxa_api import NotInAllowListException, MissingRefreshTokenException
 
 
 class FxaConfig:
@@ -145,6 +146,9 @@ class FxaClient:
         # I assume a refresh token will destroy its access tokens
         refresh_token = self.client.token.get('refresh_token')
 
+        if refresh_token is None:
+            raise MissingRefreshTokenException()
+
         # This route doesn't want auth! (Because we're destroying it)
         resp = requests.post(self.config.destroy_url, json={
             'refresh_token': refresh_token,
@@ -155,5 +159,7 @@ class FxaClient:
         resp.raise_for_status()
         return resp
 
-    def get_jwk(self):
-        return requests.get(self.config.jwks_url).json()
+    def get_jwk(self) -> Dict:
+        """Retrieve the keys object on the jwks url"""
+        response = requests.get(self.config.jwks_url).json()
+        return response.get('keys', [])

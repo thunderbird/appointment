@@ -1,5 +1,7 @@
+import json
 import logging
 
+import requests
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
@@ -7,11 +9,12 @@ from ..controller.apis.fxa_client import FxaClient
 from ..database import repo, models
 from ..dependencies.database import get_db
 from ..dependencies.fxa import get_webhook_auth, get_fxa_client
+from ..exceptions.fxa_api import MissingRefreshTokenException
 
 router = APIRouter()
 
 
-@router.get("/fxa-process")
+@router.post("/fxa-process")
 def fxa_process(
     request: Request,
     db: Session = Depends(get_db),
@@ -25,13 +28,25 @@ def fxa_process(
         logging.warning("Webhook event received for non-existent user.")
         return
 
-    fxa_client.setup(subscriber.id, subscriber.get_external_connection(models.ExternalConnectionType.fxa).token)
+    subscriber_external_connection = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
+    fxa_client.setup(subscriber.id, token=subscriber_external_connection.token)
 
-    for event, event_data in decoded_token.get('events', default={}).items():
+    for event, event_data in decoded_token.get('events', {}).items():
         match event:
             case 'https://schemas.accounts.firefox.com/event/password-change':
-                # We also get `changeTime` in event_data, but let's just log them out.
-                fxa_client.logout()
+                # Ensure we ignore out of date requests, also .timestamp() returns seconds, but we get the time in ms.
+                # TODO: We may need a last update timestamp JUST for token field changes.
+                token_last_updated = subscriber_external_connection.time_updated.timestamp() * 1000
+                if token_last_updated > event_data.get('changeTime'):
+                    logging.info("Ignoring out of date logout request.")
+                    break
+
+                try:
+                    fxa_client.logout()
+                except MissingRefreshTokenException:
+                    logging.warning("Subscriber doesn't have refresh token.")
+                except requests.exceptions.HTTPError as ex:
+                    logging.error(f"Error logging out user: {ex.response}")
             case 'https://schemas.accounts.firefox.com/event/profile-change':
                 if event_data.get('email') is not None:
                     # Update the subscriber's email (and username for now)

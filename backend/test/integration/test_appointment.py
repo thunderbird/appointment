@@ -330,7 +330,7 @@ class TestAppointment:
 
         # db.refresh doesn't work because it only refreshes instances created by the current db session?
         with with_db() as db:
-            from backend.src.appointment.database import models
+            from appointment.database import models
             generated_appointment = db.get(models.Appointment, generated_appointment.id)
             # Reload slots
             generated_appointment.slots
@@ -348,7 +348,7 @@ class TestAppointment:
 
         # db.refresh doesn't work because it only refreshes instances created by the current db session?
         with with_db() as db:
-            from backend.src.appointment.database import models
+            from appointment.database import models
             generated_appointment = db.get(models.Appointment, generated_appointment.id)
             # Reload slots
             generated_appointment.slots
@@ -388,11 +388,11 @@ class TestAppointment:
 
     def test_get_remote_caldav_events(self, with_client, make_appointment, monkeypatch):
         """Test against a fake remote caldav, we're testing the route controller, not the actual caldav connector here!"""
-        from backend.src.appointment.controller.calendar import CalDavConnector
+        from appointment.controller.calendar import CalDavConnector
         generated_appointment = make_appointment()
 
         def list_events(self, start, end):
-            from backend.src.appointment.database import schemas
+            from appointment.database import schemas
             return [schemas.Event(
                 title=generated_appointment.title,
                 start=str(generated_appointment.slots[0].start),

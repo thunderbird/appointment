@@ -1,0 +1,2 @@
+SUPPORTED_LOCALES = ['en', 'de']
+FALLBACK_LOCALE = 'en'

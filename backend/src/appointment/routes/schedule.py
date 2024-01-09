@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, Body
 import logging
 import os
 
@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
+from ..exceptions import validation
 
 router = APIRouter()
 
@@ -31,22 +32,18 @@ def create_calendar_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to add a new schedule for a given calendar"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     if not repo.calendar_exists(db, calendar_id=schedule.calendar_id):
-        raise HTTPException(status_code=404, detail="Calendar not found")
+        raise validation.CalendarNotFoundException()
     if not repo.calendar_is_owned(db, calendar_id=schedule.calendar_id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Calendar not owned by subscriber")
+        raise validation.CalendarNotAuthorizedException()
     if not repo.calendar_is_connected(db, calendar_id=schedule.calendar_id):
-        raise HTTPException(status_code=403, detail="Calendar connection is not active")
+        raise validation.CalendarNotConnectedException()
     return repo.create_calendar_schedule(db=db, schedule=schedule)
 
 
 @router.get("/", response_model=list[schemas.Schedule])
 def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Gets all of the available schedules for the logged in subscriber"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     return repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
 
 
@@ -57,13 +54,11 @@ def read_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Gets information regarding a specific schedule"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     schedule = repo.get_schedule(db, schedule_id=id)
     if schedule is None:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
     if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Schedule not owned by subscriber")
+        raise validation.ScheduleNotAuthorizedException()
     return schedule
 
 
@@ -75,14 +70,12 @@ def update_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to update an existing calendar connection for authenticated subscriber"""
-    if not subscriber:
-        raise HTTPException(status_code=401, detail="No valid authentication credentials provided")
     if not repo.schedule_exists(db, schedule_id=id):
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
     if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
-        raise HTTPException(status_code=403, detail="Schedule not owned by subscriber")
+        raise validation.ScheduleNotAuthorizedException()
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
-        raise HTTPException(status_code=400, detail="You need a connected Zoom account in order to create a meeting link")
+        raise validation.ZoomNotConnectedException()
     return repo.update_calendar_schedule(db=db, schedule=schedule, schedule_id=id)
 
 
@@ -95,17 +88,18 @@ def read_schedule_availabilities(
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
-        raise HTTPException(status_code=401, detail="Invalid profile link")
+        raise validation.InvalidLinkException()
+
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
 
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
 
     # check if schedule is enabled
     if not schedule.active:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
 
     # calculate theoretically possible slots from schedule config
     availableSlots = Tools.available_slots_from_schedule(schedule)
@@ -114,13 +108,13 @@ def read_schedule_availabilities(
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
 
     if not calendars or len(calendars) == 0:
-        raise HTTPException(status_code=404, detail="No calendars found")
+        raise validation.CalendarNotFoundException()
 
     existingEvents = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
     actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
 
     if not actualSlots or len(actualSlots) == 0:
-        raise HTTPException(status_code=404, detail="No possible booking slots found")
+        raise validation.SlotNotFoundException()
 
     return schemas.AppointmentOut(
         title=schedule.name,
@@ -139,24 +133,27 @@ def request_schedule_availability_slot(
     """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
-        raise HTTPException(status_code=401, detail="Invalid profile link")
+        raise validation.InvalidLinkException
+
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
+
     # check if schedule is enabled
     if not schedule.active:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
+
     # get calendar
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
-        raise HTTPException(status_code=404, detail="Calendar not found")
+        raise validation.CalendarNotFoundException()
 
     # check if slot still available, might already be taken at this time
     slot = schemas.SlotBase(**s_a.slot.dict())
     if repo.schedule_slot_exists(db, slot, schedule.id):
-        raise HTTPException(status_code=403, detail="Slot not available")
+        raise validation.SlotAlreadyTakenException()
 
     # create slot in db with token and expiration date
     token = random_slug()
@@ -195,19 +192,22 @@ def decide_on_schedule_availability_slot(
     """
     subscriber = repo.verify_subscriber_link(db, data.owner_url)
     if not subscriber:
-        raise HTTPException(status_code=401, detail="Invalid profile link")
+        raise validation.InvalidLinkException()
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
+
     # check if schedule is enabled
     if not schedule.active:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
+
     # get calendar
     calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if calendar is None:
-        raise HTTPException(status_code=404, detail="Calendar not found")
+        raise validation.CalendarNotFoundException()
+
     # get slot and check if slot exists and is not booked yet and token is the same
     slot = repo.get_slot(db, data.slot_id)
     if (
@@ -216,7 +216,8 @@ def decide_on_schedule_availability_slot(
         or not repo.schedule_has_slot(db, schedule.id, slot.id)
         or slot.booking_tkn != data.slot_token
     ):
-        raise HTTPException(status_code=404, detail="Booking slot not found")
+        raise validation.SlotNotFoundException()
+
     # TODO: check booking expiration date
     # check if request was denied
     if data.confirmed is False:
@@ -310,19 +311,22 @@ def schedule_serve_ics(
     """endpoint to serve ICS file for availability time slot to download"""
     subscriber = repo.verify_subscriber_link(db, url)
     if not subscriber:
-        raise HTTPException(status_code=401, detail="Invalid profile link")
+        raise validation.InvalidLinkException
+
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
+
     # check if schedule is enabled
     if not schedule.active:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise validation.ScheduleNotFoundException()
+
     # get calendar
     db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
-        raise HTTPException(status_code=404, detail="Calendar not found")
+        raise validation.CalendarNotFoundException()
 
     appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=schedule.location_url)
     return schemas.FileDownload(

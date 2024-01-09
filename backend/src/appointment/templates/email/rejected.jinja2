@@ -1,10 +1,8 @@
-<html lang="en">
+<html lang="{{ l10n('locale') }}">
   <body>
     <p>
-      {{ owner.name|title }} denied your booking request for this time slot: {{ date }}.
+      {{ l10n('reject-mail-html-heading', {'owner_name': owner.name, 'date': date}) }}
     </p>
-    <p>
-      This message is sent from <b>Thunderbird Appointment</b>.
-    </p>
+    {% include 'includes/footer.jinja2' %}
   </body>
 </html>
