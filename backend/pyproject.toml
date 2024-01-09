@@ -1,12 +1,12 @@
 [project]
-name = "appointment_backend"
+name = "appointment"
 version = "0.2.0"
 description = "Backend component to Thunderbird Appointment"
 requires-python = ">3.11"
 dynamic = ["dependencies"]
 
 [project.scripts]
-run-command = "src.appointment.main:cli"
+run-command = "appointment.main:cli"
 
 [project.urls]
 homepage = "https://appointment.day"
@@ -17,6 +17,17 @@ cli = [
     "ruff",
     "black"
 ]
+db = [
+    "mysqlclient==2.1.1",
+    "mysql-connector-python==8.0.32",
+]
+test = [
+    "Faker==20.1.0",
+    "httpx==0.25.1",
+    "pytest==7.4.3",
+    "freezegun==1.4.0",
+]
+deploy = ['appointment[cli]', 'appointment[db]']
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
@@ -70,3 +81,6 @@ max-complexity = 10
 
 [tool.black]
 line-length = 120
+
+[tool.pytest.ini_options]
+pythonpath = "test"

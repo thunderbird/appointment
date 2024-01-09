@@ -15,6 +15,7 @@ from ..database.models import Subscriber
 from ..dependencies.google import get_google_client
 from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
+from ..l10n import l10n
 
 router = APIRouter()
 
@@ -42,20 +43,20 @@ def google_callback(
     try:
         creds = google_client.get_credentials(code)
     except GoogleScopeChanged:
-        return google_callback_error("You must enable Calendar and Event access to use Thunderbird Appointment.")
+        return google_callback_error(l10n('google-scope-changed'))
     except GoogleInvalidCredentials:
-        return google_callback_error("Google authentication credentials are not valid")
+        return google_callback_error(l10n('google-invalid-creds'))
 
     subscriber = repo.get_subscriber_by_google_state(db, state)
 
     if subscriber is None:
-        return google_callback_error("Google authentication failed")
+        return google_callback_error(l10n('google-auth-fail'))
 
     if not subscriber.google_state_expires_at or subscriber.google_state_expires_at < datetime.now():
         # Clear state for our db copy
         repo.set_subscriber_google_state(db, None, subscriber.id)
 
-        return google_callback_error("Google authentication session expired, please try again.")
+        return google_callback_error(l10n('google-auth-expired'))
 
     # Clear state for our db copy
     repo.set_subscriber_google_state(db, None, subscriber.id)
@@ -68,7 +69,7 @@ def google_callback(
 
     # And then redirect back to frontend
     if error_occurred:
-        return google_callback_error("An error occurred while syncing calendars. Please try again later.")
+        return google_callback_error(l10n('google-sync-fail'))
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")
 

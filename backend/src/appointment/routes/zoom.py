@@ -12,6 +12,7 @@ from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
+from ..l10n import l10n
 
 router = APIRouter()
 
@@ -41,9 +42,9 @@ def zoom_callback(
     db=Depends(get_db),
 ):
     if 'zoom_state' not in request.session or request.session['zoom_state'] != state:
-        raise HTTPException(400, "Invalid state.")
+        raise HTTPException(400, l10n('oauth-error'))
     if 'zoom_user_id' not in request.session or 'zoom_user_id' == '':
-        raise HTTPException(400, "User ID could not be retrieved.")
+        raise HTTPException(400, l10n('oauth-error'))
 
     # Retrieve the user id set at the start of the zoom oauth process
     subscriber = repo.get_subscriber(db, request.session['zoom_user_id'])

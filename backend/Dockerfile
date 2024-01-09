@@ -17,7 +17,12 @@ COPY scripts/dev-entry.sh scripts/dev-entry.sh
 COPY .env .
 
 RUN pip install --upgrade pip
-RUN pip install .
+RUN pip install .'[deploy]'
+
+# Add this hack to line it up with our dev environment.
+# I'll buy whoever fixes this a coffee.
+RUN mkdir src
+RUN ln -s /app/appointment src/appointment
 
 EXPOSE 5000
 CMD ["/bin/sh", "./scripts/dev-entry.sh"]

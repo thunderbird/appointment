@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..database import repo, schemas
 from ..dependencies.database import get_db
+from ..exceptions.validation import InvalidTokenException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -19,9 +20,9 @@ def get_user_from_token(db, token: str):
         sub = payload.get("sub")
         iat = payload.get("iat")
         if sub is None:
-            raise HTTPException(401, "Could not validate credentials")
+            raise InvalidTokenException()
     except JWTError:
-        raise HTTPException(401, "Could not validate credentials")
+        raise InvalidTokenException()
 
     id = sub.replace('uid-', '')
     subscriber = repo.get_subscriber(db, int(id))
@@ -43,6 +44,6 @@ def get_subscriber(
     user = get_user_from_token(db, token)
 
     if user is None:
-        raise HTTPException(403, detail='Missing bearer token')
+        raise InvalidTokenException()
 
     return user

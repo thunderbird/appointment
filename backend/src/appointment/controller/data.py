@@ -1,11 +1,12 @@
 import csv
+import datetime
 from io import StringIO, BytesIO
 from zipfile import ZipFile
 
 from ..database import repo
-from ..database.models import Subscriber
-from ..download_readme import get_download_readme
+from ..database.schemas import Subscriber
 from ..exceptions.account_api import AccountDeletionPartialFail, AccountDeletionSubscriberFail
+from ..l10n import l10n
 
 
 def model_to_csv_buffer(models):
@@ -70,7 +71,7 @@ def download(db, subscriber: Subscriber):
         data_zip.writestr("external_connection.csv", external_connections_buffer.getvalue())
         data_zip.writestr("schedules.csv", schedules_buffer.getvalue())
         data_zip.writestr("availability.csv", availability_buffer)
-        data_zip.writestr("readme.txt", get_download_readme())
+        data_zip.writestr("readme.txt", l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)}))
 
     # Return our zip buffer
     return zip_buffer

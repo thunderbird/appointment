@@ -1,10 +1,10 @@
-<html lang="en">
+<html lang="{{ l10n('locale') }}">
   <body>
     <p>
-      {{ attendee.name|title }} ({{ attendee.email }}) just requested this time slot from your schedule: {{ date }}.
+      {{ l10n('confirm-mail-html-heading', {'attendee_name': attendee.name, 'attendee_email': attendee.email, 'date': date}) }}
     </p>
     <p>
-      Click here to confirm the booking request:<br>
+      {{ l10n('confirm-mail-html-confirm-text') }}<br>
       <a
         href="{{ confirm }}"
         style="
@@ -15,10 +15,10 @@
           border-radius:6px;
           text-decoration:none;
         "
-      >Confirm Booking</a>
+      >{{ l10n('confirm-mail-html-confirm-action') }}</a>
     </p>
     <p>
-      Or here if you want to deny it:<br>
+      {{ l10n('confirm-mail-html-deny-text') }}<br>
       <a
         href="{{ deny }}"
         style="
@@ -29,10 +29,8 @@
           border-radius:6px;
           text-decoration:none;
         "
-      >Deny Booking</a>
+      >{{ l10n('confirm-mail-html-deny-action') }}</a>
     </p>
-    <p>
-      This message is sent from <b>Thunderbird Appointment</b>.
-    </p>
+    {% include 'includes/footer.jinja2' %}
   </body>
 </html>

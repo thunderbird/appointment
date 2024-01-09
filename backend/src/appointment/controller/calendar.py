@@ -13,7 +13,7 @@ from .apis.google_client import GoogleClient
 from ..database import schemas
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
-
+from ..l10n import l10n
 
 DATEFMT = "%Y-%m-%d"
 
@@ -118,10 +118,10 @@ class GoogleConnector:
 
         # Place url and phone in desc if available:
         if event.location.url:
-            description.append(f"Join online at: {event.location.url}")
+            description.append(l10n('join-online', {'url': event.location.url}))
 
         if event.location.phone:
-            description.append(f"Join by phone: {event.location.phone}")
+            description.append(l10n('join-phone', {'phone': event.location.phone}))
 
         body = {
             "summary": event.title,

@@ -25,8 +25,7 @@ jobs:
       run: |
         cd ./backend
         python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt
-        python -m pip install -r requirements-test.txt
+        python -m pip install .'[test]'
     - name: Test with pytest
       run: |
-        cd ./backend/test && python -m pytest
+        cd ./backend && python -m pytest
