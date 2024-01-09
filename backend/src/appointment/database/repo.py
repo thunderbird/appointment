@@ -50,7 +50,7 @@ def delete_attendees_by_subscriber(db: Session, subscriber_id: int):
 """
 
 
-def get_subscriber(db: Session, subscriber_id: int):
+def get_subscriber(db: Session, subscriber_id: int) -> models.Subscriber | None:
     """retrieve subscriber by id"""
     return db.get(models.Subscriber, subscriber_id)
 

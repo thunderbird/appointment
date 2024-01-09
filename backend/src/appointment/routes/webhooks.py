@@ -5,6 +5,7 @@ import requests
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
 from ..database import repo, models
 from ..dependencies.database import get_db
@@ -42,7 +43,7 @@ def fxa_process(
                     break
 
                 try:
-                    fxa_client.logout()
+                    auth.logout(db, subscriber, fxa_client)
                 except MissingRefreshTokenException:
                     logging.warning("Subscriber doesn't have refresh token.")
                 except requests.exceptions.HTTPError as ex:
@@ -54,6 +55,14 @@ def fxa_process(
                     subscriber.username = subscriber.email
                     db.add(subscriber)
                     db.commit()
+
+                    # Finally log the subscriber out
+                    try:
+                        auth.logout(db, subscriber, fxa_client)
+                    except MissingRefreshTokenException:
+                        logging.warning("Subscriber doesn't have refresh token.")
+                    except requests.exceptions.HTTPError as ex:
+                        logging.error(f"Error logging out user: {ex.response}")
             case 'https://schemas.accounts.firefox.com/event/delete-user':
                 # TODO: We have a delete function, but it's not up-to-date
                 logging.warning(f"Deletion request came in for {subscriber.id}")

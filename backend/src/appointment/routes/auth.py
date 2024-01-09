@@ -19,6 +19,7 @@ from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.database import get_db
 from ..dependencies.auth import get_subscriber
 
+from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
 from ..exceptions.fxa_api import NotInAllowListException
@@ -41,7 +42,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    to_encode.update({
+        "exp": expire,
+        "iat": int(datetime.now(UTC).timestamp())
+    })
     encoded_jwt = jwt.encode(to_encode, os.getenv('JWT_SECRET'), algorithm=os.getenv('JWT_ALGO'))
     return encoded_jwt
 
@@ -193,15 +197,13 @@ def token(
 
 
 @router.get('/logout')
-def logout(subscriber: Subscriber = Depends(get_subscriber), fxa_client: FxaClient = Depends(get_fxa_client)):
+def logout(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), fxa_client: FxaClient = Depends(get_fxa_client)):
     """Logout a given subscriber session"""
 
-    # We don't actually have to do anything for non-fxa schemes
-    if os.getenv('AUTH_SCHEME') != 'fxa':
-        return True
+    if os.getenv('AUTH_SCHEME') == 'fxa':
+        fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
 
-    fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
-    fxa_client.logout()
+    auth.logout(db, subscriber, fxa_client)
 
     return True
 
