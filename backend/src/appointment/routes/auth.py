@@ -114,18 +114,18 @@ def fxa_callback(
         raise HTTPException(400, "Email mismatch.")
 
     # Check if we have an existing fxa connection by profile's uid
-    external_connection = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
+    fxa_subscriber = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
     # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
     subscriber = repo.get_subscriber_by_email(db, email)
 
-    if not external_connection and not subscriber:
+    if not fxa_subscriber and not subscriber:
         subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
             email=email,
             username=email,
             timezone=timezone,
         ))
     elif not subscriber:
-        subscriber = external_connection.owner
+        subscriber = fxa_subscriber
 
     external_connection_schema = schemas.ExternalConnection(
         name=profile['email'],
@@ -135,7 +135,7 @@ def fxa_callback(
         token=json.dumps(creds)
     )
 
-    if not external_connection:
+    if not fxa_subscriber:
         repo.create_subscriber_external_connection(db, external_connection_schema)
     else:
         repo.update_subscriber_external_connection_token(db, json.dumps(creds), subscriber.id, external_connection_schema.type, external_connection_schema.type_id)
