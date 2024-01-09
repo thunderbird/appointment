@@ -87,7 +87,7 @@ class GoogleClient:
     def list_calendars(self, token):
         response = {}
         items = []
-        with build("calendar", "v3", credentials=token) as service:
+        with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
             request = service.calendarList().list()
             while request is not None:
                 try:
@@ -119,7 +119,7 @@ class GoogleClient:
             )
         )
 
-        with build("calendar", "v3", credentials=token) as service:
+        with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
             request = service.events().list(
                 calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime",
                 fields=fields
@@ -138,7 +138,7 @@ class GoogleClient:
 
     def create_event(self, calendar_id, body, token):
         response = None
-        with build("calendar", "v3", credentials=token) as service:
+        with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
             try:
                 response = service.events().insert(calendarId=calendar_id, sendUpdates="all", body=body).execute()
             except HttpError as e:
