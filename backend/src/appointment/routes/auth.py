@@ -203,7 +203,8 @@ def logout(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_s
     if os.getenv('AUTH_SCHEME') == 'fxa':
         fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
 
-    auth.logout(db, subscriber, fxa_client)
+    # Don't set a minimum_valid_iat_time here.
+    auth.logout(db, subscriber, fxa_client, deny_previous_tokens=False)
 
     return True
 

@@ -14,11 +14,12 @@ from .apis.fxa_client import FxaClient
 from ..database import repo, schemas, models
 
 
-def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient|None):
+def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | None, deny_previous_tokens=True):
     """Sets a minimum valid issued at time (time). This prevents access tokens issued earlier from working."""
-    subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
-    db.add(subscriber)
-    db.commit()
+    if deny_previous_tokens:
+        subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+        db.add(subscriber)
+        db.commit()
 
     if os.getenv('AUTH_SCHEME') == 'fxa':
         fxa_client.logout()
