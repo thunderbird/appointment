@@ -17,7 +17,7 @@ COPY scripts/entry.sh scripts/entry.sh
 COPY src .
 
 RUN pip install --upgrade pip
-RUN pip install .
+RUN pip install .'[deploy]'
 
 # install removes the src file and installs the application as /app/appointment
 # that's fine, but uhh let's add this hack to line it up with our dev environment.

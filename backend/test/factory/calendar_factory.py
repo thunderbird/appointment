@@ -1,6 +1,6 @@
 import pytest
 from faker import Faker
-from backend.src.appointment.database import repo, schemas, models
+from appointment.database import repo, schemas, models
 from defines import TEST_USER_ID, FAKER_RANDOM_VALUE, factory_has_value
 
 
