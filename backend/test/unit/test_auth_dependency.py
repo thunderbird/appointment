@@ -1,18 +1,18 @@
 import datetime
 import os
 
-import fastapi
 import pytest
 from freezegun import freeze_time
 
 from appointment.database import repo
 from appointment.dependencies.auth import get_user_from_token
+from appointment.exceptions.validation import InvalidTokenException
 from appointment.routes.auth import create_access_token
 
 
 class TestAuthDependency:
 
-    def test_get_user_from_token(self, with_db, make_pro_subscriber):
+    def test_get_user_from_token(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
         access_token_expires = datetime.timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
 
@@ -43,7 +43,7 @@ class TestAuthDependency:
         with freeze_time("Feb 1st 2024"):
             with with_db() as db:
                 # Internally raises ExpiredSignatureError, but we catch it and send a HTTPException instead.
-                with pytest.raises(fastapi.exceptions.HTTPException):
+                with pytest.raises(InvalidTokenException):
                     get_user_from_token(db, access_token)
 
         # Update the subscriber to have a minimum_valid_iat_time
@@ -59,5 +59,5 @@ class TestAuthDependency:
         with freeze_time("Jan 9th 2024"):
             with with_db() as db:
                 # Internally raises ExpiredSignatureError, but we catch it and send a HTTPException instead.
-                with pytest.raises(fastapi.exceptions.HTTPException):
+                with pytest.raises(InvalidTokenException):
                     get_user_from_token(db, access_token)
