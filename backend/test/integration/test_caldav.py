@@ -1,8 +1,8 @@
 import os
 
-from backend.src.appointment.database.models import CalendarProvider
-from backend.src.appointment.controller.calendar import CalDavConnector
-from backend.src.appointment.database import schemas, models, repo
+from appointment.database.models import CalendarProvider
+from appointment.controller.calendar import CalDavConnector
+from appointment.database import schemas, models, repo
 
 from sqlalchemy import insert, select
 

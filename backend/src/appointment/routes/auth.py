@@ -22,6 +22,7 @@ from ..dependencies.auth import get_subscriber
 from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
 from ..exceptions.fxa_api import NotInAllowListException
+from ..l10n import l10n
 
 router = APIRouter()
 ph = PasswordHasher()
@@ -111,7 +112,7 @@ def fxa_callback(
 
     if profile['email'] != email:
         fxa_client.logout()
-        raise HTTPException(400, "Email mismatch.")
+        raise HTTPException(400, l10n('email-mismatch'))
 
     # Check if we have an existing fxa connection by profile's uid
     fxa_subscriber = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
@@ -169,13 +170,13 @@ def token(
     """Retrieve an access token from a given username and password."""
     subscriber = repo.get_subscriber_by_username(db, form_data.username)
     if not subscriber or subscriber.password is None:
-        raise HTTPException(status_code=403, detail="User credentials mismatch")
+        raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
     # Verify the incoming password, and re-hash our password if needed
     try:
         verify_password(form_data.password, subscriber.password)
     except argon2.exceptions.VerifyMismatchError:
-        raise HTTPException(status_code=403, detail="User credentials mismatch")
+        raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
     if ph.check_needs_rehash(subscriber.password):
         subscriber.password = get_password_hash(form_data.password)

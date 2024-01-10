@@ -43,10 +43,10 @@ Run application for development with hot reloading backend and frontend:
 
     ```bash
     cd appointment
-    pip install -r backend/requirements.txt
+    pip install .
     touch backend/src/appointment.db # when using sqlite
     cp backend/.env.example backend/.env # add your own configuration here
-    uvicorn --factory backend.src.appointment.main:server --host 0.0.0.0 --port 5000
+    uvicorn --factory appointment.main:server --host 0.0.0.0 --port 5000
     ```
 
     You can now access the backend at [localhost:5000](http://localhost:5000).
@@ -74,16 +74,16 @@ Run application for development with hot reloading backend and frontend:
 
 ## Testing
 
-To run tests, setup the application manually (you don't need the mysql deps), and then install requirements-test.txt
+To run tests, simply install the package in editing mode:
 
 ```bash
-pip install -r requirements-test.txt
+cd backend && pip install -e .
 ```
 
 After this you can run tests with:
 
 ```bash
-cd backend/test && python -m pytest
+cd backend && python -m pytest
 ```
 
 ## Contributing
@@ -116,3 +116,7 @@ Commands (from /frontend)
 yarn run lint
 yarn run lint --fix
 ```
+
+### Localization
+
+This project uses [Fluent](https://projectfluent.org/) for localization. Files are located in their respective `l10n/<locale>/*.ftl`.

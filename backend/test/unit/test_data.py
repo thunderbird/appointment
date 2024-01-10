@@ -1,6 +1,6 @@
 from argon2 import PasswordHasher
 
-from backend.src.appointment.controller.data import model_to_csv_buffer, delete_account
+from appointment.controller.data import model_to_csv_buffer, delete_account
 
 
 class TestData:
