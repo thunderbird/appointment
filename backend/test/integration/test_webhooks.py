@@ -118,3 +118,38 @@ class TestFXAWebhooks:
             subscriber = repo.get_subscriber(db, subscriber_id)
             assert subscriber.email == NEW_EMAIL
             assert subscriber.minimum_valid_iat_time is not None
+
+    def test_fxa_process_delete_user(self, with_db, with_client, make_pro_subscriber, make_external_connections, make_appointment, make_caldav_calendar):
+        """Ensure the delete user event is handled correctly"""
+        FXA_USER_ID = 'abc-789'
+
+        def override_get_webhook_auth():
+            return {
+                "iss": "https://accounts.firefox.com/",
+                "sub": FXA_USER_ID,
+                "aud": "REMOTE_SYSTEM",
+                "iat": 1565720810,
+                "jti": "1b3d623a-300a-4ab8-9241-855c35586809",
+                "events": {
+                    "https://schemas.accounts.firefox.com/event/delete-user": {}
+                }
+            }
+
+        # Override get_webhook_auth so we don't have to mock up a valid jwt token
+        with_client.app.dependency_overrides[get_webhook_auth] = override_get_webhook_auth
+
+        subscriber = make_pro_subscriber()
+        make_external_connections(subscriber.id, type=models.ExternalConnectionType.fxa, type_id=FXA_USER_ID)
+        calendar = make_caldav_calendar(subscriber.id)
+        appointment = make_appointment(calendar_id=calendar.id)
+
+        response = with_client.post(
+            "/webhooks/fxa-process",
+        )
+        assert response.status_code == 200, response.text
+
+        with with_db() as db:
+            # Make sure everything we created is gone. A more exhaustive check is done in the delete account test
+            assert repo.get_subscriber(db, subscriber.id) is None
+            assert repo.get_calendar(db, calendar.id) is None
+            assert repo.get_appointment(db, appointment.id) is None

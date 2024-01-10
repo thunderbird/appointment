@@ -5,11 +5,12 @@ import requests
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from ..controller import auth
+from ..controller import auth, data
 from ..controller.apis.fxa_client import FxaClient
 from ..database import repo, models
 from ..dependencies.database import get_db
 from ..dependencies.fxa import get_webhook_auth, get_fxa_client
+from ..exceptions.account_api import AccountDeletionSubscriberFail
 from ..exceptions.fxa_api import MissingRefreshTokenException
 
 router = APIRouter()
@@ -62,8 +63,10 @@ def fxa_process(
                     except requests.exceptions.HTTPError as ex:
                         logging.error(f"Error logging out user: {ex.response}")
             case 'https://schemas.accounts.firefox.com/event/delete-user':
-                # TODO: We have a delete function, but it's not up-to-date
-                logging.warning(f"Deletion request came in for {subscriber.id}")
+                try:
+                    data.delete_account(db, subscriber)
+                except AccountDeletionSubscriberFail as ex:
+                    logging.error(f"Account deletion webhook failed: {ex.message}")
 
             case _:
                 logging.warning(f"Ignoring event {event}")
