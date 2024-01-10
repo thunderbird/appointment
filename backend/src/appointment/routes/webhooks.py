@@ -17,7 +17,6 @@ router = APIRouter()
 
 @router.post("/fxa-process")
 def fxa_process(
-    request: Request,
     db: Session = Depends(get_db),
     decoded_token: dict = Depends(get_webhook_auth),
     fxa_client: FxaClient = Depends(get_fxa_client)
@@ -52,7 +51,6 @@ def fxa_process(
                 if event_data.get('email') is not None:
                     # Update the subscriber's email (and username for now)
                     subscriber.email = event_data.get('email')
-                    subscriber.username = subscriber.email
                     db.add(subscriber)
                     db.commit()
 
@@ -66,5 +64,6 @@ def fxa_process(
             case 'https://schemas.accounts.firefox.com/event/delete-user':
                 # TODO: We have a delete function, but it's not up-to-date
                 logging.warning(f"Deletion request came in for {subscriber.id}")
+
             case _:
                 logging.warning(f"Ignoring event {event}")
