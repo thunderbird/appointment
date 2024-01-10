@@ -34,7 +34,8 @@ def upgrade() -> None:
 def downgrade() -> None:
     for table in affected_tables:
         op.drop_column(table, 'time_created')
-        op.drop_column(table, 'time_updated')
+        if table != 'slots':
+            op.drop_column(table, 'time_updated')
 
     for table in index_tables:
         op.drop_index('ix_time_created', table)
