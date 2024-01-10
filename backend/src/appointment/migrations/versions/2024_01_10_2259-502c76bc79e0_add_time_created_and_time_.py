@@ -23,7 +23,7 @@ def upgrade() -> None:
         op.add_column(table, sa.Column('time_created', sa.DateTime, server_default=func.now(), index=True))
         # Slots already has this column...
         if table != 'slots':
-            op.add_column(table, sa.Column('time_updated', sa.DateTime, server_default=func.now(), onupdate=func.now(), index=True))
+            op.add_column(table, sa.Column('time_updated', sa.DateTime, server_default=func.now(), index=True))
 
     # Fix some existing time_* columns
     for table in index_tables:
