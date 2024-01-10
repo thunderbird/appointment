@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from ..controller import auth, data
 from ..controller.apis.fxa_client import FxaClient
-from ..database import repo, models
+from ..database import repo, models, schemas
 from ..dependencies.database import get_db
 from ..dependencies.fxa import get_webhook_auth, get_fxa_client
 from ..exceptions.account_api import AccountDeletionSubscriberFail
@@ -50,18 +50,29 @@ def fxa_process(
                     logging.error(f"Error logging out user: {ex.response}")
             case 'https://schemas.accounts.firefox.com/event/profile-change':
                 if event_data.get('email') is not None:
-                    # Update the subscriber's email (and username for now)
+                    # Update the subscriber's email, we do this first in case there's a problem with get_profile()
                     subscriber.email = event_data.get('email')
                     db.add(subscriber)
                     db.commit()
 
-                    # Finally log the subscriber out
-                    try:
-                        auth.logout(db, subscriber, fxa_client)
-                    except MissingRefreshTokenException:
-                        logging.warning("Subscriber doesn't have refresh token.")
-                    except requests.exceptions.HTTPError as ex:
-                        logging.error(f"Error logging out user: {ex.response}")
+                try:
+                    profile = fxa_client.get_profile()
+                    # Update profile with fxa info
+                    repo.update_subscriber(db, schemas.SubscriberIn(
+                        avatar_url=profile['avatar'],
+                        name=profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0],
+                        username=subscriber.username
+                    ), subscriber.id)
+                except Exception as ex:
+                    logging.error(f"Error updating user: {ex}")
+
+                # Finally log the subscriber out
+                try:
+                    auth.logout(db, subscriber, fxa_client)
+                except MissingRefreshTokenException:
+                    logging.warning("Subscriber doesn't have refresh token.")
+                except requests.exceptions.HTTPError as ex:
+                    logging.error(f"Error logging out user: {ex.response}")
             case 'https://schemas.accounts.firefox.com/event/delete-user':
                 try:
                     data.delete_account(db, subscriber)

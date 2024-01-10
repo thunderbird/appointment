@@ -4,6 +4,7 @@ from freezegun import freeze_time
 from appointment.database import models, repo
 
 from appointment.dependencies.fxa import get_webhook_auth
+from defines import FXA_CLIENT_PATCH
 
 
 class TestFXAWebhooks:
@@ -107,6 +108,8 @@ class TestFXAWebhooks:
 
         assert subscriber.minimum_valid_iat_time is None
         assert subscriber.email == OLD_EMAIL
+        assert subscriber.avatar_url != FXA_CLIENT_PATCH.get('subscriber_avatar_url')
+        assert subscriber.name != FXA_CLIENT_PATCH.get('subscriber_display_name')
 
         response = with_client.post(
             "/webhooks/fxa-process",
@@ -118,6 +121,10 @@ class TestFXAWebhooks:
             subscriber = repo.get_subscriber(db, subscriber_id)
             assert subscriber.email == NEW_EMAIL
             assert subscriber.minimum_valid_iat_time is not None
+
+            # Ensure our profile update occured
+            assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
+            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
 
     def test_fxa_process_delete_user(self, with_db, with_client, make_pro_subscriber, make_external_connections, make_appointment, make_caldav_calendar):
         """Ensure the delete user event is handled correctly"""
