@@ -93,7 +93,7 @@ class Subscriber(Base):
     short_link_hash = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
-    minimum_valid_iat_time = Column(DateTime, index=True)
+    minimum_valid_iat_time = Column('minimum_valid_iat_time', StringEncryptedType(DateTime, secret, AesEngine, "pkcs5", length=255))
 
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
