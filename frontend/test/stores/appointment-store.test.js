@@ -46,7 +46,7 @@ const restHandlers = [
 
 const server = setupServer(...restHandlers);
 server.events.on('request:start', ({ request }) => {
-  console.log('Outgoing:', request.method, request.url);
+  // console.log('Outgoing:', request.method, request.url);
 });
 
 describe('Appointment Store', () => {
