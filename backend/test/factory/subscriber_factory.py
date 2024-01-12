@@ -14,7 +14,7 @@ def make_subscriber(with_db):
             subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
                 name=name if factory_has_value(name) else fake.name(),
                 username=username if factory_has_value(username) else fake.name(),
-                email=email if factory_has_value(FAKER_RANDOM_VALUE) else fake.email(),
+                email=email if factory_has_value(email) else fake.email(),
                 level=level,
                 timezone='America/Vancouver'
             ))

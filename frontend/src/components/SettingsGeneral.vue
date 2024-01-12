@@ -102,28 +102,28 @@ const dj = inject('dayjs');
 // handle ui languages
 // TODO: move to settings store
 watch(locale, (newValue) => {
-  localStorage.setItem('locale', newValue);
-  location.reload();
+  localStorage?.setItem('locale', newValue);
+  window.location.reload();
 });
 
 // handle theme mode
 // TODO: move to settings store
-const initialTheme = localStorage.getItem('theme')
-  ? colorSchemes[localStorage.getItem('theme')]
+const initialTheme = localStorage?.getItem('theme')
+  ? colorSchemes[localStorage?.getItem('theme')]
   : colorSchemes.system;
 const theme = ref(initialTheme);
 watch(theme, (newValue) => {
   switch (newValue) {
     case colorSchemes.dark:
-      localStorage.setItem('theme', 'dark');
+      localStorage?.setItem('theme', 'dark');
       document.documentElement.classList.add('dark');
       break;
     case colorSchemes.light:
-      localStorage.setItem('theme', 'light');
+      localStorage?.setItem('theme', 'light');
       document.documentElement.classList.remove('dark');
       break;
     case colorSchemes.system:
-      localStorage.removeItem('theme');
+      localStorage?.removeItem('theme');
       if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.remove('dark');
       } else {
@@ -138,10 +138,10 @@ watch(theme, (newValue) => {
 // handle time format
 // TODO: move to settings store
 const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
-const initialTimeFormat = localStorage.getItem('timeFormat') ?? detectedTimeFormat;
+const initialTimeFormat = localStorage?.getItem('timeFormat') ?? detectedTimeFormat;
 const timeFormat = ref(initialTimeFormat);
 watch(timeFormat, (newValue) => {
-  localStorage.setItem('timeFormat', newValue);
+  localStorage?.setItem('timeFormat', newValue);
 });
 
 // timezones
