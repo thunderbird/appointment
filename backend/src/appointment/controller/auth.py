@@ -6,8 +6,23 @@ import logging
 import os
 import hashlib
 import hmac
+import datetime
 
-from ..database import repo, schemas
+from sqlalchemy.orm import Session
+
+from .apis.fxa_client import FxaClient
+from ..database import repo, schemas, models
+
+
+def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | None, deny_previous_tokens=True):
+    """Sets a minimum valid issued at time (time). This prevents access tokens issued earlier from working."""
+    if deny_previous_tokens:
+        subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+        db.add(subscriber)
+        db.commit()
+
+    if os.getenv('AUTH_SCHEME') == 'fxa':
+        fxa_client.logout()
 
 
 def sign_url(url: str):

@@ -25,6 +25,7 @@ test = [
     "Faker==20.1.0",
     "httpx==0.25.1",
     "pytest==7.4.3",
+    "freezegun==1.4.0",
 ]
 deploy = ['appointment[cli]', 'appointment[db]']
 

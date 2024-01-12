@@ -18,13 +18,22 @@ def get_user_from_token(db, token: str):
     try:
         payload = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=[os.getenv('JWT_ALGO')])
         sub = payload.get("sub")
+        iat = payload.get("iat")
         if sub is None:
             raise InvalidTokenException()
     except JWTError:
         raise InvalidTokenException()
 
     id = sub.replace('uid-', '')
-    return repo.get_subscriber(db, int(id))
+    subscriber = repo.get_subscriber(db, int(id))
+
+    # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
+    if subscriber.minimum_valid_iat_time and not iat:
+        raise InvalidTokenException()
+    elif subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat):
+        raise InvalidTokenException()
+
+    return subscriber
 
 
 def get_subscriber(
