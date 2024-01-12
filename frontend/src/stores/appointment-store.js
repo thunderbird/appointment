@@ -2,6 +2,11 @@ import { defineStore } from 'pinia';
 import { appointmentState } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import dj from 'dayjs';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dj.extend(utc);
+dj.extend(timezone);
 
 const initialData = {
   appointments: [],
