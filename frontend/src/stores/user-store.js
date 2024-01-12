@@ -54,7 +54,7 @@ export const useUserStore = defineStore('user', {
         formData.set('password', password);
         const {error, data} = await fetch('token').post(formData).json();
 
-        if (!data.value.access_token) {
+        if (error.value || !data.value.access_token) {
           return false;
         }
 

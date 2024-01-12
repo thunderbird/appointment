@@ -61,7 +61,8 @@ const login = async () => {
   }
 
   if (isFxaAuth) {
-    const { error, data } = await call(`fxa_login?email=${username.value}&timezone=${dj.tz.guess()}`).get().json();
+    const email = encodeURIComponent(username.value);
+    const { error, data } = await call(`fxa_login?email=${email}&timezone=${dj.tz.guess()}`).get().json();
     const { url } = data.value;
 
     if (error.value) {

@@ -50,7 +50,7 @@ def delete_attendees_by_subscriber(db: Session, subscriber_id: int):
 """
 
 
-def get_subscriber(db: Session, subscriber_id: int):
+def get_subscriber(db: Session, subscriber_id: int) -> models.Subscriber | None:
     """retrieve subscriber by id"""
     return db.get(models.Subscriber, subscriber_id)
 
@@ -610,7 +610,7 @@ def delete_external_connections_by_type_id(db: Session, subscriber_id: int, type
     return True
 
 
-def get_external_connections_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None):
+def get_external_connections_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None) -> models.ExternalConnections | None:
     """Return a subscribers external connections by type, and optionally type id"""
     query = (
         db.query(models.ExternalConnections)
