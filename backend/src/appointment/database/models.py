@@ -8,9 +8,8 @@ import uuid
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, as_declarative, declared_attr
 from sqlalchemy.sql import func
-from .database import Base
 
 
 def secret():
@@ -73,6 +72,17 @@ class MeetingLinkProviderType(enum.StrEnum):
     google_meet = 'google_meet'
 
 
+@as_declarative()
+class Base:
+    """Base model, contains anything we want to be on every model."""
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+    time_created = Column(DateTime, server_default=func.now(), index=True)
+    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now(), index=True)
+
+
 class Subscriber(Base):
     __tablename__ = "subscribers"
 
@@ -128,8 +138,6 @@ class Appointment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     calendar_id = Column(Integer, ForeignKey("calendars.id"))
-    time_created = Column(DateTime, server_default=func.now())
-    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
     duration = Column(Integer)
     title = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
     location_type = Column(Enum(LocationType), default=LocationType.inperson)
@@ -207,8 +215,6 @@ class Schedule(Base):
     farthest_booking = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
     weekdays = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration = Column(Integer, default=30)  # defaults to 30 minutes
-    time_created = Column(DateTime, server_default=func.now())
-    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
@@ -233,8 +239,6 @@ class Availability(Base):
     # Can't book if it's less than X minutes before start time:
     min_time_before_meeting = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
-    time_created = Column(DateTime, server_default=func.now())
-    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     schedule = relationship("Schedule", back_populates="availabilities")
 
@@ -249,7 +253,4 @@ class ExternalConnections(Base):
     type = Column(Enum(ExternalConnectionType), index=True)
     type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
-    time_created = Column(DateTime, server_default=func.now())
-    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
-
     owner = relationship("Subscriber", back_populates="external_connections")
