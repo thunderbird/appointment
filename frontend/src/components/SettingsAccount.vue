@@ -30,16 +30,16 @@
         <div class="w-full flex justify-between items-center gap-4">
           <div class="relative w-full">
             <input
-              v-model="signedUserUrl"
+              :value="user.data.signedUrl"
               type="text"
               class="w-full rounded-md mr-2 pr-7"
               readonly
             />
-            <a :href="signedUserUrl" target="_blank" class="text-gray-500 absolute right-1.5 top-1/2 -translate-y-1/2">
+            <a :href="user.data.signedUrl" target="_blank" class="text-gray-500 absolute right-1.5 top-1/2 -translate-y-1/2">
               <icon-external-link class="w-5 h-5" />
             </a>
           </div>
-          <text-button :label="t('label.copyLink')" :copy="signedUserUrl" />
+          <text-button :label="t('label.copyLink')" :copy="user.data.signedUrl" />
         </div>
       </label>
       <div class="self-end flex gap-4 mt-6">
@@ -177,9 +177,6 @@ const deleteAccountSecondModalOpen = ref(false);
 const refreshLinkModalOpen = ref(false);
 const updateUsernameModalOpen = ref(false);
 
-// calculate signed link
-const signedUserUrl = ref('');
-
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
   deleteAccountFirstModalOpen.value = false;
@@ -188,18 +185,8 @@ const closeModals = () => {
   updateUsernameModalOpen.value = false;
 };
 
-const getSignedUserUrl = async () => {
-  // Retrieve the user short url
-  const { data, error } = await call('me/signature').get().json();
-  if (error.value) {
-    return;
-  }
-
-  signedUserUrl.value = data.value.url;
-};
-
 const refreshData = async () => Promise.all([
-  getSignedUserUrl(),
+  user.updateSignedUrl(call),
   externalConnectionsStore.fetch(call),
 ]);
 
@@ -214,6 +201,7 @@ const updateUser = async () => {
   if (!error.value) {
     // update user in store
     user.$patch({ data: { ...user.data, ...inputData }});
+    await user.updateSignedUrl(call);
     errorUsername.value = false;
     // TODO show some confirmation
     await refreshData();
@@ -270,12 +258,7 @@ const refreshLink = async () => {
 };
 
 const refreshLinkConfirm = async () => {
-  const { data, error } = await call('me/signature').post().json();
-
-  if (error.value) {
-    console.log('Error!', data.value);
-  }
-
+  await user.changeSignedUrl(call);
   await refreshData();
   closeModals();
 };

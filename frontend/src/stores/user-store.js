@@ -7,6 +7,7 @@ const initialUserObject = {
   name: null,
   timezone: null,
   username: null,
+  signedUrl: null,
   avatarUrl: null,
   accessToken: null,
 };
@@ -42,7 +43,31 @@ export const useUserStore = defineStore('user', {
         }
       });
 
+      return await this.signedUrl(fetch);
+    },
+    // retrieve the current signed url and update store
+    async updateSignedUrl(fetch) {
+      const { error, data } = await fetch('me/signature').get().json();
+
+      if (error.value || !data.value.url) {
+        console.error(error.value, data.value);
+        return false;
+      }
+
+      this.data.signedUrl = data.value.url;
+
       return true;
+    },
+    // invalidate the current signed url and replace it with a new one
+    async changeSignedUrl(fetch) {
+      const { error, data } = await fetch('me/signature').post().json();
+
+      if (error.value) {
+        console.error(error.value, data.value);
+        return false;
+      }
+
+      return this.updateSignedUrl(fetch);
     },
     async login(fetch, username, password) {
       this.reset();
@@ -67,7 +92,7 @@ export const useUserStore = defineStore('user', {
       return await this.profile(fetch);
     },
     async logout(fetch) {
-      const { error, data } = await fetch('logout').get().json();
+      const { error } = await fetch('logout').get().json();
 
       if (error.value) {
         console.warn("Error logging out: ", error.value);

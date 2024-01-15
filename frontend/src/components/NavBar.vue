@@ -45,9 +45,9 @@
               {{ t('label.userProfile') }}
             </router-link>
             <text-button
-              v-show="signedUserUrl"
+              v-show="user.data.signedUrl"
               :label="t('label.shareMyLink')"
-              :copy="signedUserUrl"
+              :copy="user.data.signedUrl"
               class="border-none flex-row-reverse justify-between !text-inherit !text-base !font-normal hover:bg-inherit hover:shadow-none"
             />
             <hr class="border-teal-500" />
@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from 'vue';
+import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -83,25 +83,9 @@ defineProps({
   navItems: Array, // list of route names that are also lang keys (format: label.<key>), used as nav items
 });
 
-const signedUserUrl = ref('');
-
 // do log out
 const logout = async () => {
   await user.logout(call);
   await router.push('/');
 };
-
-const getSignedUserUrl = async () => {
-  // Retrieve the user short url
-  const { data, error } = await call('me/signature').get().json();
-  if (error.value) {
-    return;
-  }
-
-  signedUserUrl.value = data.value.url;
-};
-
-onMounted(async () => {
-  await getSignedUserUrl();
-});
 </script>

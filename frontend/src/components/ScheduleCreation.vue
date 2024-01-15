@@ -267,9 +267,9 @@
     <!-- action buttons -->
     <div class="flex justify-center gap-4 mt-auto">
       <primary-button
-        v-if="publicLink && existing"
+        v-if="user.data.signedUrl && existing"
         :label="t('label.shareMyLink')"
-        :copy="publicLink"
+        :copy="user.data.signedUrl"
       />
     </div>
     <div class="flex gap-4 mt-auto">
@@ -301,7 +301,7 @@
     :open="savedConfirmation.show"
     :is-schedule="true"
     :title="savedConfirmation.title"
-    :public-link="publicLink"
+    :public-link="user.data.signedUrl"
     @close="closeCreatedModal"
   />
 </template>
@@ -475,15 +475,6 @@ const resetSchedule = () => {
   state.value = scheduleCreationState.details;
 };
 
-// hold public availability link of user
-const publicLink = ref('');
-onMounted(async () => {
-  const { data, error } = await call('me/signature').get().json();
-  if (!error.value) {
-    publicLink.value = data.value.url;
-  }
-});
-
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -519,17 +510,9 @@ const saveSchedule = async (withConfirmation = true) => {
     return;
   }
 
-  if (withConfirmation) {
-    // Retrieve the user short url
-    const { data: sig_data, error: sig_error } = await call('me/signature').get().json();
-    if (sig_error.value) {
-      savingInProgress.value = false;
-      return;
-    }
-  
+  if (withConfirmation) {  
     // show confirmation
     savedConfirmation.title = data.value.name;
-    publicLink.value = sig_data.value.url;
     savedConfirmation.show = true;
   }
 
