@@ -297,7 +297,8 @@ class Tools:
 
         now = datetime.now()
 
-        # FIXME: Currently the earliest booking acts in normal days, not within the scheduled days. (So if they have the schedule setup for weekdays, it will count weekends too.)
+        # FIXME: Currently the earliest booking acts in normal days, not within the scheduled days.
+        # So if they have the schedule setup for weekdays, it will count weekends too.
         earliest_booking = now + timedelta(minutes=s.earliest_booking)
         # We add a day here because it should be inclusive of the final day.
         farthest_booking = now + timedelta(days=1, minutes=s.farthest_booking)
@@ -312,7 +313,7 @@ class Tools:
         if start_time > end_time:
             end_time += timedelta(days=1)
 
-        # TODO: Why wouldn't weekdays be a list or empty?
+        # All user defined weekdays, falls back to working week if invalid
         weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
         if not weekdays or len(weekdays) == 0:
             weekdays = [1, 2, 3, 4, 5]
