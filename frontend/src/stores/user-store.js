@@ -14,7 +14,7 @@ const initialUserObject = {
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    data: useLocalStorage('tba/user', initialUserObject),
+    data: useLocalStorage('tba/user', structuredClone(initialUserObject)),
   }),
   actions: {
     exists() {
@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', {
         }
       });
 
-      return await this.signedUrl(fetch);
+      return await this.updateSignedUrl(fetch);
     },
     // retrieve the current signed url and update store
     async updateSignedUrl(fetch) {

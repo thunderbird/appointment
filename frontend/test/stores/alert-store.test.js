@@ -12,34 +12,34 @@ describe('Site Notifications Store', () => {
   test('visible', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
-    expect(alert.isVisible === true);
+    expect(alert.isVisible).toBe(true);
   });
   test('attributes', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
-    expect(alert.title === 'title');
-    expect(alert.actionUrl === 'url');
-    expect(alert.message === 'message');
+    expect(alert.title).toBe('title');
+    expect(alert.actionUrl).toBe('url');
+    expect(alert.message).toBe('message');
   });
   test('same', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
-    expect(alert.isSameNotification(123) === true);
+    expect(alert.isSameNotification(123)).toBe(true);
   });
   test('invisible at start', () => {
     const alert = useSiteNotificationStore();
-    expect(alert.isVisible === false);
+    expect(alert.isVisible).toBe(false);
   });
   test('invisible after reset', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
     alert.reset();
-    expect(alert.isVisible === false);
+    expect(alert.isVisible).toBe(false);
   });
   test('lock', () => {
     const alert = useSiteNotificationStore();
     alert.lock(123);
-    expect(alert.isVisible === false);
-    expect(alert.isSameNotification(123) === true);
+    expect(alert.isVisible).toBe(false);
+    expect(alert.isSameNotification(123)).toBe(true);
   });
 });

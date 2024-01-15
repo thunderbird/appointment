@@ -17,6 +17,14 @@ const API_URL = 'http://localhost';
 const TEST_USERNAME = 'test';
 const TEST_PASSWORD = 'password';
 
+const beforeFetch = async (options, user) => {
+  if (user.exists()) {
+    const token = await user.data.accessToken;
+    options.headers.Authorization = `Bearer ${token}`;
+  }
+  return { options };
+};
+
 const restHandlers = [
   http.post(`${API_URL}/token`, async ({ request }) => {
     const formData = await request.formData();
@@ -29,7 +37,7 @@ const restHandlers = [
     }
 
     return HttpResponse.json({
-      accessToken: 'You have access!',
+      access_token: 'You have access!',
     });
   }),
   http.get(`${API_URL}/me`, async (request) => {
@@ -51,11 +59,25 @@ const restHandlers = [
       avatarUrl: null,
     });
   }),
+  http.get(`${API_URL}/me/signature`, async (request) => {
+    const headers = await request.request.headers;
+
+    // Fail without an access token
+    if (!headers.get('authorization')) {
+      return HttpResponse.json({
+        detail: 'Not authenticated',
+      }, { status: 403 });
+    }
+
+    return HttpResponse.json({
+      url: 'https://blah',
+    });
+  }),
 ];
 
 const server = setupServer(...restHandlers);
 server.events.on('request:start', ({ request }) => {
-  // console.log('Outgoing:', request.method, request.url);
+  console.log('Outgoing:', request.method, request.url);
 });
 
 describe('User Store', () => {
@@ -76,11 +98,12 @@ describe('User Store', () => {
   test('exists', () => {
     const user = useUserStore();
     user.data.accessToken = 'abc';
-    expect(user.exists() === true);
+    expect(user.exists()).toBe(true);
   });
   test('does not exist', () => {
     const user = useUserStore();
-    expect(user.exists() === false);
+    user.reset();
+    expect(user.exists()).toBe(false);
   });
   test('reset', () => {
     const user = useUserStore();
@@ -101,9 +124,10 @@ describe('User Store', () => {
     user.reset();
 
     // Ensure our data is null/don't exist
-    expect(user.exists() === false);
-    expect(user.data.name === null);
-    expect(user.data.email === null);
+    expect(user.exists()).toBe(false);
+    expect(user.data.name).toBeNull();
+    expect(user.data.email).toBeNull();
+    expect(user.data.signedUrl).toBeNull();
   });
   test('login fails', async () => {
     const user = useUserStore();
@@ -119,15 +143,19 @@ describe('User Store', () => {
 
     const response = await user.login(createFetch({
       baseUrl: API_URL,
+      options: {
+        beforeFetch: async ({ options }) => beforeFetch(options, user),
+      },
     }), TEST_USERNAME, `${TEST_PASSWORD}`);
 
-    expect(response === true);
-    expect(user.exists());
-    expect(user.data.accessToken);
-    expect(user.data.username);
-    expect(user.data.email);
-    expect(user.data.name);
-    expect(user.data.level);
-    expect(user.data.timezone);
+    expect(response).toBe(true);
+    expect(user.exists()).toBe(true);
+    expect(user.data.accessToken).toBeTruthy();
+    expect(user.data.username).toBeTruthy();
+    expect(user.data.email).toBeTruthy();
+    expect(user.data.name).toBeTruthy();
+    expect(user.data.level).toBeTruthy();
+    expect(user.data.timezone).toBeTruthy();
+    expect(user.data.signedUrl).toBeTruthy();
   });
 });

@@ -56,26 +56,26 @@ describe('Calendar Store', () => {
 
   test('init', () => {
     const calStore = useCalendarStore();
-    expect(calStore.isLoaded === false);
-    expect(calStore.allCalendars.length === 0);
+    expect(calStore.isLoaded).toBe(false);
+    expect(calStore.allCalendars.length).toBe(0);
   });
 
   test('fetch', async () => {
     const calStore = useCalendarStore();
     await calStore.fetch(createFetch({ baseUrl: API_URL }));
-    expect(calStore.allCalendars.length === 2);
+    expect(calStore.allCalendars.length).toBe(2);
   });
 
   test('unconnected', async () => {
     const calStore = useCalendarStore();
     await calStore.fetch(createFetch({ baseUrl: API_URL }));
-    expect(calStore.unconnectedCalendars.length === 1);
+    expect(calStore.unconnectedCalendars.length).toBe(1);
   });
 
   test('connected', async () => {
     const calStore = useCalendarStore();
     await calStore.fetch(createFetch({ baseUrl: API_URL }));
-    expect(calStore.connectedCalendars.length === 1);
+    expect(calStore.connectedCalendars.length).toBe(1);
   });
 
   test('reset', async () => {
@@ -83,14 +83,14 @@ describe('Calendar Store', () => {
     await calStore.fetch(createFetch({ baseUrl: API_URL }));
 
     // Check if calendars exist
-    expect(calStore.isLoaded === true);
-    expect(calStore.allCalendars.length === 2);
+    expect(calStore.isLoaded).toBe(true);
+    expect(calStore.allCalendars.length).toBe(2);
 
     // Reset the user which should null all user data.
     calStore.reset();
 
     // Ensure our data is null/don't exist
-    expect(calStore.isLoaded === false);
-    expect(calStore.allCalendars.length === 0);
+    expect(calStore.isLoaded).toBe(false);
+    expect(calStore.allCalendars.length).toBe(0);
   });
 });

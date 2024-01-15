@@ -66,21 +66,21 @@ describe('Appointment Store', () => {
 
   test('init', () => {
     const apmt = useAppointmentStore();
-    expect(apmt.isLoaded === false);
-    expect(apmt.appointments.length === 0);
+    expect(apmt.isLoaded).toBe(false);
+    expect(apmt.appointments.length).toBe(0);
   });
 
   test('fetch', async () => {
     const apmt = useAppointmentStore();
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
-    expect(apmt.appointments.length === 2);
-    expect(apmt.appointments[0].slots.length === 3);
+    expect(apmt.appointments.length).toBe(2);
+    expect(apmt.appointments[0].slots.length).toBe(3);
   });
 
   test('pending', async () => {
     const apmt = useAppointmentStore();
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
-    expect(apmt.pendingAppointments.length === 1);
+    expect(apmt.pendingAppointments.length).toBe(1);
   });
 
   test('reset', async () => {
@@ -88,14 +88,14 @@ describe('Appointment Store', () => {
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
 
     // Check if appointments exist
-    expect(apmt.isLoaded === true);
-    expect(apmt.appointments.length === 2);
+    expect(apmt.isLoaded).toBe(true);
+    expect(apmt.appointments.length).toBe(2);
 
     // Reset the user which should null all user data.
     apmt.reset();
 
     // Ensure our data is null/don't exist
-    expect(apmt.isLoaded === false);
-    expect(apmt.appointments.length === 0);
+    expect(apmt.isLoaded).toBe(false);
+    expect(apmt.appointments.length).toBe(0);
   });
 });
