@@ -44,5 +44,12 @@
     "postcss": "^8.4.17",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^1.1.0"
-  }
+  },
+  "postcss": {
+		"plugins": {
+			"tailwindcss": {},
+			"autoprefixer": {}
+		}
+	},
+  "type": "module"
 }

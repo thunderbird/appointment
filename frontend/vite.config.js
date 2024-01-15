@@ -4,12 +4,16 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue(), sentryVitePlugin({
+const plugins = [vue()];
+if (import.meta.env?.VITE_SENTRY_DSN) {
+  plugins.push(sentryVitePlugin({
     org: 'thunderbird',
     project: 'appointment-frontend',
-  })],
+  }));
+}
+
+export default defineConfig({
+  plugins: plugins,
 
   resolve: {
     alias: {
