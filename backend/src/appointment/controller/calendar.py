@@ -7,10 +7,11 @@ from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
+from zoneinfo import ZoneInfo
 from dateutil.parser import parse
 
 from .apis.google_client import GoogleClient
-from ..database import schemas
+from ..database import schemas, models
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 from ..l10n import l10n
@@ -289,39 +290,46 @@ class Tools:
         mail = InvitationMail(to=attendee.email, attachments=[invite])
         mail.send()
 
-    def available_slots_from_schedule(s: schemas.ScheduleBase) -> list[schemas.SlotBase]:
+    @staticmethod
+    def available_slots_from_schedule(s: models.Schedule) -> list[schemas.SlotBase]:
         """This helper calculates a list of slots according to the given schedule configuration."""
-        now = datetime.now(UTC)
-        earliest_start = now + timedelta(minutes=s.earliest_booking)
-        farthest_end = now + timedelta(minutes=s.farthest_booking)
-        start = datetime.combine(s.start_date, s.start_time)
-        end = min([datetime.combine(s.end_date, s.end_time), farthest_end]) if s.end_date else farthest_end
         slots = []
-        # set the first date to an allowed weekday
+
+        now = datetime.now()
+
+        # FIXME: Currently the earliest booking acts in normal days, not within the scheduled days.
+        # So if they have the schedule setup for weekdays, it will count weekends too.
+        earliest_booking = now + timedelta(minutes=s.earliest_booking)
+        # We add a day here because it should be inclusive of the final day.
+        farthest_booking = now + timedelta(days=1, minutes=s.farthest_booking)
+
+        schedule_start = datetime.combine(s.start_date, s.start_time)
+        schedule_end = min([datetime.combine(s.end_date, s.end_time), farthest_booking]) if s.end_date else farthest_booking
+
+        start_time = datetime.combine(now.min, s.start_time) - datetime.min
+        end_time = datetime.combine(now.min, s.end_time) - datetime.min
+
+        # Thanks to timezone conversion end_time can wrap around to the next day
+        if start_time > end_time:
+            end_time += timedelta(days=1)
+
+        # All user defined weekdays, falls back to working week if invalid
         weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
         if not weekdays or len(weekdays) == 0:
             weekdays = [1, 2, 3, 4, 5]
-        while start.isoweekday() not in weekdays:
-            start = start + timedelta(days=1)
-        # init date generation: pointer holds the current slot start datetime
-        pointer = start
-        counter = 0
-        # set fix event limit of 1000 for now for performance reasons. Can be removed later.
-        while pointer.timestamp() < end.timestamp() and counter < 1000:
-            counter += 1
-            if pointer.timestamp() >= earliest_start.timestamp():
-                slots.append(schemas.SlotBase(start=pointer, duration=s.slot_duration))
-            next_start = pointer + timedelta(minutes=s.slot_duration)
-            # if the next slot still fits into the current day
-            if next_start.time() < s.end_time:
-                pointer = next_start
-            # if the next slot has to be on the next available day
-            else:
-                next_date = datetime.combine(pointer.date() + timedelta(days=1), s.start_time)
-                # check weekday and skip da if it isn't allowed
-                while next_date.isoweekday() not in weekdays:
-                    next_date = next_date + timedelta(days=1)
-                pointer = next_date
+
+        # Between the available booking time
+        for day in range(earliest_booking.day, schedule_end.day):
+            current_datetime = datetime(year=schedule_start.year, month=schedule_start.month, day=day)
+            # Check if this weekday is within our schedule
+            if current_datetime.isoweekday() in weekdays:
+                # Generate each timeslot based on the selected duration
+                # We just loop through the start and end time and step by slot duration in seconds.
+                slots += [
+                    schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=s.slot_duration)
+                    for time in range(int(start_time.total_seconds()), int(end_time.total_seconds()), s.slot_duration * 60)
+                ]
+
         return slots
 
     def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
