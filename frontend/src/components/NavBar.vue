@@ -37,17 +37,7 @@
       </div>
       <drop-down class="self-center">
         <template #trigger>
-          <div
-            class="w-12 h-12 mr-4 self-center flex-center rounded-full text-lg bg-white font-normal text-white"
-            :class="{'bg-teal-500': user.data.avatarUrl === null}"
-          >
-            <span v-if="user.data.avatarUrl === null">
-              {{ initials(user.data.name) }}
-            </span>
-            <span v-else>
-              <img class="rounded-full w-[48px] h-[48px]" :alt="initials(user.data.name)" :src="user.data.avatarUrl"/>
-            </span>
-          </div>
+          <avatar />
         </template>
         <template #default>
           <div class="flex flex-col gap-2 rounded-md w-48 p-4 bg-white dark:bg-gray-700 shadow-md">
@@ -55,9 +45,9 @@
               {{ t('label.userProfile') }}
             </router-link>
             <text-button
-              v-show="signedUserUrl"
+              v-show="user.data.signedUrl"
               :label="t('label.shareMyLink')"
-              :copy="signedUserUrl"
+              :copy="user.data.signedUrl"
               class="border-none flex-row-reverse justify-between !text-inherit !text-base !font-normal hover:bg-inherit hover:shadow-none"
             />
             <hr class="border-teal-500" />
@@ -72,13 +62,13 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from 'vue';
+import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
-import NavBarItem from "@/elements/NavBarItem";
+import Avatar from "@/elements/Avatar";
 import DropDown from "@/elements/DropDown";
+import NavBarItem from "@/elements/NavBarItem";
 import TextButton from "@/elements/TextButton";
 
 // component constants
@@ -93,25 +83,9 @@ defineProps({
   navItems: Array, // list of route names that are also lang keys (format: label.<key>), used as nav items
 });
 
-const signedUserUrl = ref('');
-
 // do log out
 const logout = async () => {
   await user.logout(call);
   await router.push('/');
 };
-
-const getSignedUserUrl = async () => {
-  // Retrieve the user short url
-  const { data, error } = await call('me/signature').get().json();
-  if (error.value) {
-    return;
-  }
-
-  signedUserUrl.value = data.value.url;
-};
-
-onMounted(async () => {
-  await getSignedUserUrl();
-});
 </script>
