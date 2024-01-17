@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from fastapi import Request
 from starlette_context import request_cycle_context
 
+from appointment.exceptions.validation import InvalidTokenException
 from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER, FXA_CLIENT_PATCH
 
 # Factory functions
@@ -151,10 +152,8 @@ def with_client(with_db, monkeypatch):
             db.close()
 
     def override_get_subscriber(request : Request):
-        from fastapi import HTTPException
-
         if 'authorization' not in request.headers:
-            raise HTTPException(403, detail='Missing bearer token')
+            raise InvalidTokenException
 
         return repo.get_subscriber_by_email(with_db(), os.getenv('TEST_USER_EMAIL'))
 
