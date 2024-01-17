@@ -11,7 +11,7 @@ from .middleware.l10n import L10n
 # ruff: noqa: E402
 from .secrets import normalize_secrets
 
-from google.auth.exceptions import RefreshError
+from google.auth.exceptions import RefreshError, DefaultCredentialsError
 from .exceptions.google_api import APIGoogleRefreshError
 import os
 
@@ -116,10 +116,12 @@ def server():
         allow_headers=["*"],
     )
 
+    @app.exception_handler(DefaultCredentialsError)
     @app.exception_handler(RefreshError)
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
-        return await http_exception_handler(request, APIGoogleRefreshError(message=l10n('google-connection-error')))
+        return await http_exception_handler(request, APIGoogleRefreshError())
+
 
     # Mix in our extra routes
     app.include_router(api.router)
