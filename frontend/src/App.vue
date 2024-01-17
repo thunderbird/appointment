@@ -65,8 +65,8 @@ const call = createFetch({
     async onFetchError({ data, response, error }) {
       // Catch any google refresh error that may occur
       if (
-        data?.detail?.error === 'google_refresh_error'
-        && !siteNotificationStore.isSameNotification('google_refresh_error')
+        data?.detail?.id === 'GOOGLE_REFRESH_ERROR'
+        && !siteNotificationStore.isSameNotification('GOOGLE_REFRESH_ERROR')
       ) {
         // Ensure other async calls don't reach here
         siteNotificationStore.lock(data.detail.error);
@@ -82,7 +82,7 @@ const call = createFetch({
           data.detail?.message || 'Please re-connect with Google',
           url,
         );
-      } else if (response.status === 401) {
+      } else if (response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
         // Clear current user data, and ship them to the login screen!
         await currentUser.reset();
         await router.push('/login');
