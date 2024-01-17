@@ -20,12 +20,12 @@ from dotenv import load_dotenv
 import logging
 import sys
 
+import typer
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exception_handlers import (
     http_exception_handler,
 )
-from starlette_context import context
 
 import sentry_sdk
 
@@ -136,20 +136,14 @@ def server():
 
 def cli():
     """
-    A very simple cli handler
+    Entrypoint for our typer cli
     """
-
-    if len(sys.argv) < 2:
-        print("No command specified")
-        return
 
     # Run common setup first
     _common_setup()
 
-    command = sys.argv[1:]
+    from .routes import console
 
-    if command[0] == 'update-db':
-        from .commands import update_db
-        update_db.run()
-
-
+    app = typer.Typer()
+    app.add_typer(console.router, name="main")
+    app()

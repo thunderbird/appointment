@@ -12,6 +12,11 @@ COPY requirements.txt .
 COPY pyproject.toml .
 COPY alembic.ini.example alembic.ini
 COPY scripts/entry.sh scripts/entry.sh
+COPY scripts/cron /etc/cron.d/appointment-cron
+
+# Setup cron permissions
+RUN chmod 0644 /etc/cron.d/appointment-cron
+RUN crontab /etc/cron.d/appointment-cron
 
 # Needed for deploy, we don't have a volume attached
 COPY src .
@@ -24,6 +29,7 @@ RUN pip install .'[deploy]'
 # I'll buy whoever fixes this a coffee.
 RUN mkdir src
 RUN ln -s /app/appointment src/appointment
+
 
 EXPOSE 5000
 CMD ["/bin/sh", "./scripts/entry.sh"]
