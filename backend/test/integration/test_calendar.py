@@ -23,69 +23,75 @@ def get_calendar_factory():
         yield provider, factory_name
 
 
+def get_mock_connector_class():
+    """Provide two fake connectors, the original connector (for monkeypatching), and the test data"""
+    test_url = "https://caldav.thunderbird.net/"
+    test_user = "thunderbird"
+
+    class MockCaldavConnector:
+        @staticmethod
+        def __init__(self, url, user, password):
+            """We don't want to initialize a client"""
+            pass
+
+        @staticmethod
+        def list_calendars(self):
+            return [
+                schemas.CalendarConnectionOut(
+                    provider=schemas.CalendarProvider.caldav,
+                    url=test_url,
+                    user=test_user
+                )
+            ]
+
+    class MockGoogleConnector:
+        @staticmethod
+        def __init__(self, db, google_client, calendar_id, subscriber_id, google_tkn: str = None):
+            pass
+
+        @staticmethod
+        def list_calendars(self):
+            return [
+                schemas.CalendarConnectionOut(
+                    provider=schemas.CalendarProvider.google,
+                    url=test_url,
+                    user=test_user
+                )
+            ]
+
+    connectors = [
+        (MockCaldavConnector, CalDavConnector, schemas.CalendarProvider.caldav.value, test_url, test_user),
+        (MockGoogleConnector, GoogleConnector, schemas.CalendarProvider.google.value, test_url, test_user)
+    ]
+
+    for connector in connectors:
+        # This is pretty ugly
+        yield connector[0], connector[1], connector[2], connector[3], connector[4]
+
 class TestCalendar:
-    def test_read_remote_calendars(self, monkeypatch, with_client):
-        test_url = "https://caldav.thunderbird.net/"
-        test_user = "thunderbird"
-
-        # Create a mock caldav connector
-        class MockConnector:
-            @staticmethod
-            def __init__(self, url, user, password):
-                """We don't want to initialize a client"""
-                pass
-
-            @staticmethod
-            def __google_init__(self, db, google_client, calendar_id, subscriber_id, google_tkn: str = None):
-                pass
-
-            @staticmethod
-            def list_calendars(self):
-                return [
-                    schemas.CalendarConnectionOut(
-                        provider=schemas.CalendarProvider.caldav,
-                        url=test_url,
-                        user=test_user
-                    )
-                ]
-
-            @staticmethod
-            def list_google_calendars(self):
-                return [
-                    schemas.CalendarConnectionOut(
-                        provider=schemas.CalendarProvider.google,
-                        url=test_url,
-                        user=test_user
-                    )
-                ]
+    @pytest.mark.parametrize("mock_connector,connector,provider,test_url,test_user", get_mock_connector_class())
+    def test_read_remote_calendars(self, monkeypatch, with_client, mock_connector, connector, provider, test_url, test_user):
 
         # Patch up the caldav constructor, and list_calendars
-        monkeypatch.setattr(CalDavConnector, "__init__", MockConnector.__init__)
-        monkeypatch.setattr(CalDavConnector, "list_calendars", MockConnector.list_calendars)
+        monkeypatch.setattr(connector, "__init__", mock_connector.__init__)
+        monkeypatch.setattr(connector, "list_calendars", mock_connector.list_calendars)
 
-        # Basically the same here for google connector
-        monkeypatch.setattr(GoogleConnector, "__init__", MockConnector.__google_init__)
-        monkeypatch.setattr(GoogleConnector, "list_calendars", MockConnector.list_google_calendars)
-
-        providers = [schemas.CalendarProvider.caldav.value, schemas.CalendarProvider.google.value]
-
-        for provider in providers:
-            response = with_client.post(
-                "/rmt/calendars",
-                json={
-                    "provider": provider,
-                    "url": test_url,
-                    "user": test_user,
-                    "password": "caw",
-                },
-                headers=auth_headers,
-            )
-            assert response.status_code == 200, response.text
-            data = response.json()
-            assert type(data) is list
-            assert len(data) > 0
-            assert any(c["url"] == test_url for c in data)
-            assert any(c["provider"] == provider for c in data)
+        response = with_client.post(
+            "/rmt/calendars",
+            json={
+                "provider": provider,
+                "url": test_url,
+                "user": test_user,
+                "password": "caw",
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert type(data) is list
+        assert len(data) > 0
+        assert any(c["url"] == test_url for c in data)
+        assert any(c["provider"] == provider for c in data)
 
     def test_read_connected_calendars_before_creation(self, with_client):
         response = with_client.get("/me/calendars", headers=auth_headers)
