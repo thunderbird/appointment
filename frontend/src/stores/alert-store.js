@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
 
 const initialSiteNotificationObject = {
   // Ensure we don't need to set the same notification twice
