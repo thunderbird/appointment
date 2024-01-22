@@ -101,15 +101,15 @@ def read_schedule_availabilities(
     if not schedule.active:
         raise validation.ScheduleNotFoundException()
 
-    # calculate theoretically possible slots from schedule config
-    available_slots = Tools.available_slots_from_schedule(schedule)
-
-    # get all events from all connected calendars in scheduled date range
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
 
     if not calendars or len(calendars) == 0:
         raise validation.CalendarNotFoundException()
 
+    # calculate theoretically possible slots from schedule config
+    available_slots = Tools.available_slots_from_schedule(schedule)
+
+    # get all events from all connected calendars in scheduled date range
     existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
     actual_slots = Tools.events_set_difference(available_slots, existing_slots)
 
