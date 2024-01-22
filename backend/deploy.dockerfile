@@ -6,6 +6,8 @@ WORKDIR /app
 ENV PATH="${PATH}:/root/.local/bin"
 ENV PYTHONPATH=.
 
+RUN apt update && apt install -y cron
+
 RUN mkdir scripts
 
 COPY requirements.txt .
