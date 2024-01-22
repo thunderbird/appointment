@@ -279,7 +279,19 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
             assert slots[0]['start'] == '2025-06-02T09:00:00'
-            # Based off the farthest_booking our latest slot is 4:30pm
             assert slots[-1]['start'] == '2025-06-13T16:30:00'
+
+        # Check availability with a start date day greater than the farthest_booking day
+        with freeze_time(date(2025, 6, 27)):
+            response = with_client.post(
+                "/schedule/public/availability",
+                json={"url": signed_url},
+                headers=auth_headers,
+            )
+            assert response.status_code == 200, response.text
+            data = response.json()
+            slots = data['slots']
+
+            assert slots[0]['start'] == '2025-06-30T09:00:00'
+            assert slots[-1]['start'] == '2025-07-11T16:30:00'
