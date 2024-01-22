@@ -212,9 +212,12 @@ const calendarEvents = ref([]);
 const hideUntilRefreshed = ref(true);
 
 const getRemoteEvents = async (from, to) => {
+  // Most calendar impl are non-inclusive of the last day, so just add one to the day.
+  const inclusiveTo = dj(to).add(1, 'day').format('YYYY-MM-DD');
+
   calendarEvents.value = [];
   await Promise.all(calendarStore.connectedCalendars.map(async (calendar) => {
-    const { data } = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
+    const { data } = await call(`rmt/cal/${calendar.id}/${from}/${inclusiveTo}`).get().json();
     if (Array.isArray(data.value)) {
       calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));
     }
