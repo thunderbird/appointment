@@ -22,6 +22,7 @@
             v-model="password"
             type="password"
             class="w-full rounded-md mr-6"
+            @keyup.enter="login"
           />
         </label>
       </div>
