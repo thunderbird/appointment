@@ -320,7 +320,7 @@ class Tools:
 
         # Between the available booking time
         for day in range(earliest_booking.day, schedule_end.day):
-            current_datetime = datetime(year=schedule_start.year, month=schedule_start.month, day=day)
+            current_datetime = datetime(year=earliest_booking.year, month=earliest_booking.month, day=day)
             # Check if this weekday is within our schedule
             if current_datetime.isoweekday() in weekdays:
                 # Generate each timeslot based on the selected duration
