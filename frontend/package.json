@@ -46,10 +46,10 @@
     "vitest": "^1.1.0"
   },
   "postcss": {
-		"plugins": {
-			"tailwindcss": {},
-			"autoprefixer": {}
-		}
-	},
+    "plugins": {
+      "tailwindcss": {},
+      "autoprefixer": {}
+    }
+  },
   "type": "module"
 }
