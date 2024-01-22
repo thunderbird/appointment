@@ -15,7 +15,7 @@ from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER, FXA_CLIENT_
 # Factory functions
 from factory.attendee_factory import make_attendee  # noqa: F401
 from factory.appointment_factory import make_appointment  # noqa: F401
-from factory.calendar_factory import make_caldav_calendar  # noqa: F401
+from factory.calendar_factory import make_caldav_calendar, make_google_calendar  # noqa: F401
 from factory.external_connection_factory import make_external_connections  # noqa: F401
 from factory.schedule_factory import make_schedule  # noqa: F401
 from factory.slot_factory import make_appointment_slot  # noqa: F401
