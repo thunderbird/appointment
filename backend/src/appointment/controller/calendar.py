@@ -303,7 +303,7 @@ class Tools:
         # We add a day here because it should be inclusive of the final day.
         farthest_booking = now + timedelta(days=1, minutes=s.farthest_booking)
 
-        schedule_start = datetime.combine(s.start_date, s.start_time)
+        schedule_start = max([datetime.combine(s.start_date, s.start_time), earliest_booking])
         schedule_end = min([datetime.combine(s.end_date, s.end_time), farthest_booking]) if s.end_date else farthest_booking
 
         start_time = datetime.combine(now.min, s.start_time) - datetime.min
@@ -319,8 +319,9 @@ class Tools:
             weekdays = [1, 2, 3, 4, 5]
 
         # Between the available booking time
-        for day in range(earliest_booking.day, schedule_end.day):
-            current_datetime = datetime(year=earliest_booking.year, month=earliest_booking.month, day=day)
+        for ordinal in range(earliest_booking.toordinal(), schedule_end.toordinal()):
+            date = datetime.fromordinal(ordinal)
+            current_datetime = datetime(year=date.year, month=date.month, day=date.day)
             # Check if this weekday is within our schedule
             if current_datetime.isoweekday() in weekdays:
                 # Generate each timeslot based on the selected duration
