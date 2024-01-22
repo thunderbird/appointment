@@ -1,6 +1,5 @@
-from typing import Any, Optional, Dict
-
-from fastapi import HTTPException
+from .validation import APIException
+from ..l10n import l10n
 
 
 class GoogleScopeChanged(Exception):
@@ -15,16 +14,10 @@ class GoogleInvalidCredentials(Exception):
     pass
 
 
-class APIGoogleRefreshError(HTTPException):
+class APIGoogleRefreshError(APIException):
     """Raise when you need to signal to the end-user that they need to re-connect to Google."""
+    id_code = 'GOOGLE_REFRESH_ERROR'
+    status_code = 401
 
-    def __init__(
-        self,
-        message: str = None,
-        headers: Optional[Dict[str, Any]] = None,
-    ) -> None:
-        detail = {
-            "error": "google_refresh_error",
-            "message": message if message is not None else "Error connecting with Google API, please re-connect.",
-        }
-        super().__init__(status_code=401, detail=detail, headers=headers)
+    def get_msg(self):
+        return l10n('google-connection-error')

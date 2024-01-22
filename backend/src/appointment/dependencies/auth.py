@@ -11,7 +11,7 @@ from ..database import repo, schemas
 from ..dependencies.database import get_db
 from ..exceptions.validation import InvalidTokenException
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
 def get_user_from_token(db, token: str):
@@ -40,6 +40,9 @@ def get_subscriber(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Session = Depends(get_db),
 ):
+    if token is None:
+        raise InvalidTokenException()
+
     """Automatically retrieve and return the subscriber"""
     user = get_user_from_token(db, token)
 
