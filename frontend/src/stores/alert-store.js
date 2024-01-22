@@ -1,3 +1,4 @@
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 
 const initialSiteNotificationObject = {
@@ -11,46 +12,26 @@ const initialSiteNotificationObject = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const useSiteNotificationStore = defineStore('siteNotification', {
-  state: () => ({
-    data: structuredClone(initialSiteNotificationObject),
-  }),
-  getters: {
-    isVisible() {
-      return this.data.display;
-    },
-    title() {
-      return this.data.title;
-    },
-    actionUrl() {
-      return this.data.actionUrl;
-    },
-    message() {
-      return this.data.message;
-    },
-  },
-  actions: {
-    isSameNotification(id) {
-      return this.data.id === id;
-    },
-    lock(id) {
-      this.$patch({
-        data: { id },
-      });
-    },
-    show(id, title, message, actionUrl) {
-      this.$patch({
-        data: {
-          id,
-          display: true,
-          title,
-          message,
-          actionUrl,
-        },
-      });
-    },
-    reset() {
-      this.$patch({ data: structuredClone(initialSiteNotificationObject) });
-    },
-  },
+export const useSiteNotificationStore = defineStore('siteNotification', () => {
+  const data = ref(structuredClone(initialSiteNotificationObject));
+
+  const isVisible = computed(() => data.value.display);
+  const title = computed(() => data.value.title);
+  const actionUrl = computed(() => data.value.actionUrl);
+  const message = computed(() => data.value.message);
+
+  const isSameNotification = (id) => data.value.id === id;
+  const lock = (id) => data.value.id = id;
+  const show = (id, title, message, actionUrl) => {
+    data.value = {
+      id,
+      display: true,
+      title,
+      message,
+      actionUrl,
+    };
+  };
+  const reset = () => data.value = structuredClone(initialSiteNotificationObject);
+
+  return { data, isVisible, title, actionUrl, message, isSameNotification, lock, show, reset };
 });
