@@ -13,7 +13,7 @@ def make_subscriber(with_db):
         with with_db() as db:
             subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
                 name=name if factory_has_value(name) else fake.name(),
-                username=username if factory_has_value(username) else fake.name(),
+                username=username if factory_has_value(username) else fake.name().replace(' ', '_'),
                 email=email if factory_has_value(email) else fake.email(),
                 level=level,
                 timezone='America/Vancouver'
