@@ -102,7 +102,7 @@ def read_schedule_availabilities(
         raise validation.ScheduleNotFoundException()
 
     # calculate theoretically possible slots from schedule config
-    availableSlots = Tools.available_slots_from_schedule(schedule)
+    available_slots = Tools.available_slots_from_schedule(schedule)
 
     # get all events from all connected calendars in scheduled date range
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
@@ -110,17 +110,17 @@ def read_schedule_availabilities(
     if not calendars or len(calendars) == 0:
         raise validation.CalendarNotFoundException()
 
-    existingEvents = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
-    actualSlots = Tools.events_set_difference(availableSlots, existingEvents)
+    existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
+    actual_slots = Tools.events_set_difference(available_slots, existing_slots)
 
-    if not actualSlots or len(actualSlots) == 0:
+    if not actual_slots or len(actual_slots) == 0:
         raise validation.SlotNotFoundException()
 
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,
         owner_name=subscriber.name,
-        slots=actualSlots,
+        slots=actual_slots,
     )
 
 

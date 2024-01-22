@@ -319,7 +319,7 @@ class Tools:
             weekdays = [1, 2, 3, 4, 5]
 
         # Between the available booking time
-        for ordinal in range(earliest_booking.toordinal(), schedule_end.toordinal()):
+        for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
             date = datetime.fromordinal(ordinal)
             current_datetime = datetime(year=date.year, month=date.month, day=date.day)
             # Check if this weekday is within our schedule

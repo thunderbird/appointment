@@ -218,8 +218,6 @@ class TestSchedule:
         assert response.status_code == 403, response.text
 
     def test_public_availability(self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule):
-        test_user = 'ABC'
-        test_url = 'http://localhost'
         class MockCaldavConnector:
             @staticmethod
             def __init__(self, url, user, password):
@@ -239,7 +237,7 @@ class TestSchedule:
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
-        generated_schedule = make_schedule(
+        make_schedule(
             calendar_id=generated_calendar.id,
             active=True,
             start_date=start_date,
