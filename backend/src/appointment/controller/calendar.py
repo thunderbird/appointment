@@ -214,8 +214,8 @@ class CalDavConnector:
         calendar = self.client.calendar(url=self.url)
         # save event
         caldavEvent = calendar.save_event(
-            dtstart=datetime.fromisoformat(event.start),
-            dtend=datetime.fromisoformat(event.end),
+            dtstart=event.start,
+            dtend=event.end,
             summary=event.title,
             # TODO: handle location
             description=event.description,
