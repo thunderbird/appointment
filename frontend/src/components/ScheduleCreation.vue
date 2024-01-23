@@ -503,7 +503,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
   if (error.value) {
     // error message is in data
-    scheduleCreationError.value = data.value.detail || t("error.unknownScheduleError");
+    scheduleCreationError.value = data.value?.detail?.message || t("error.unknownScheduleError");
     // go back to the start
     state.value = scheduleCreationState.details;
     savingInProgress.value = false;
