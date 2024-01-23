@@ -82,7 +82,7 @@ jobs:
         task-definition: ${{ env.ECS_TASK_DEFINITION }}
         container-name: ${{ env.CONTAINER_BACKEND }}
         image: ${{ steps.build-backend.outputs.image_backend }}
-        environment-variables: "RELEASE_VERSION=${{ GITHUB_SHA }}"
+        environment-variables: "RELEASE_VERSION=${{ github.sha }}"
 
     - name: Fill in the new frontend image ID in the Amazon ECS task definition
       id: task-def-frontend
