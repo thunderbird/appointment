@@ -4,7 +4,11 @@
       <span>{{ t("heading.generalAvailability") }}</span>
       <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive" />
     </div>
-    <alert-box v-if="scheduleCreationError" :title="t('label.scheduleCreationError')">
+    <alert-box
+      @close="scheduleCreationError = ''"
+      v-if="scheduleCreationError"
+      :title="t('label.scheduleCreationError')"
+    >
       {{ scheduleCreationError }}
     </alert-box>
 

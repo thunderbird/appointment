@@ -4,6 +4,7 @@
       {{ t("heading.createNewAppointment") }}
     </div>
     <alert-box
+      @close="appointmentCreationError = ''"
       v-if="appointmentCreationError"
       :title="t('label.appointmentCreationError')"
     >
