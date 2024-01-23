@@ -62,6 +62,8 @@ def _common_setup():
             # of transactions for performance monitoring.
             # We recommend adjusting this value in production,
             traces_sample_rate=1.0,
+            # Only profile staging for now
+            profiles_sample_rate=1.0 if os.getenv("APP_ENV", "stage") else 0.0,
             environment=os.getenv("APP_ENV", "dev"),
         )
 

@@ -354,8 +354,9 @@ class Tools:
                 available_slots.append(a)
         return available_slots
 
+    @staticmethod
     def existing_events_for_schedule(
-        schedule: schemas.Schedule,
+        schedule: models.Schedule,
         calendars: list[schemas.Calendar],
         subscriber: schemas.Subscriber,
         google_client: GoogleClient,
@@ -363,7 +364,8 @@ class Tools:
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range
         """
-        existingEvents = []
+        existing_events = []
+
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
@@ -376,15 +378,22 @@ class Tools:
                 )
             else:
                 con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-            farthest_end = datetime.now(UTC) + timedelta(minutes=schedule.farthest_booking)
-            start = schedule.start_date.strftime(DATEFMT)
-            end = schedule.end_date.strftime(DATEFMT) if schedule.end_date else farthest_end.strftime(DATEFMT)
-            existingEvents.extend(con.list_events(start, end))
+
+            now = datetime.now()
+
+            earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
+            farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
+
+            start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
+            end = min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking]) if schedule.end_date else farthest_booking
+            existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
+
         # handle already requested time slots
         for slot in schedule.slots:
-            existingEvents.append(schemas.Event(
+            existing_events.append(schemas.Event(
                 title=schedule.name,
                 start=slot.start.isoformat(),
                 end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
             ))
-        return existingEvents
+
+        return existing_events
