@@ -128,8 +128,8 @@ class GoogleConnector:
             "summary": event.title,
             "location": event.location.name,
             "description": "\n".join(description),
-            "start": {"dateTime": event.start},
-            "end": {"dateTime": event.end},
+            "start": {"dateTime": event.start.isoformat()},
+            "end": {"dateTime": event.end.isoformat()},
             "attendees": [
                 {"displayName": organizer.name, "email": organizer.email},
                 {"displayName": attendee.name, "email": attendee.email},
