@@ -33,6 +33,8 @@ slot-not-found = There are no available time slots to book.
 slot-already-taken = The time slot you have selected is no longer available. Please try again.
 slot-invalid-email = The email you have provided was not valid. Please try again.
 
+remote-calendar-connection-error = The remote calendar could not be reached. Please verify your connection information and try again.
+
 ## Authentication Exceptions
 
 email-mismatch = Email mismatch.

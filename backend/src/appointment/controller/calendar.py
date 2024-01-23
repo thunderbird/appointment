@@ -3,6 +3,9 @@
 Handle connection to a CalDAV server.
 """
 import json
+
+import caldav.lib.error
+import requests
 from caldav import DAVClient
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
@@ -42,6 +45,10 @@ class GoogleConnector:
         # Create the creds class from our token (requires a refresh token)
         if google_tkn:
             self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
+
+    def test_connection(self) -> bool:
+        """This occurs during Google OAuth login"""
+        return bool(self.google_token)
 
     def sync_calendars(self):
         """Sync google calendars"""
@@ -154,6 +161,22 @@ class CalDavConnector:
         self.password = password
         # connect to CalDAV server
         self.client = DAVClient(url=url, username=user, password=password)
+
+    def test_connection(self) -> bool:
+        """Ensure the connection information is correct and the calendar connection works"""
+        cal = self.client.calendar(url=self.url)
+
+        try:
+            supported_comps = cal.get_supported_components()
+        except IndexError:  # Library has an issue with top level urls, probably due to caldav spec?
+            return False
+        except requests.exceptions.RequestException:  # Max retries exceeded, bad connection, missing schema, etc...
+            return False
+        except caldav.lib.error.NotFoundError:  # Good server, bad url.
+            return False
+
+        # They need at least VEVENT support for appointment to work.
+        return 'VEVENT' in supported_comps
 
     def sync_calendars(self):
         pass
