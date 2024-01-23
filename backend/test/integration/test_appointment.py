@@ -1,3 +1,5 @@
+import dateutil.parser
+
 from defines import DAY1, DAY2, DAY3, auth_headers
 
 
@@ -392,10 +394,11 @@ class TestAppointment:
         generated_appointment = make_appointment()
 
         def list_events(self, start, end):
+            end = dateutil.parser.parse(end)
             from appointment.database import schemas
             return [schemas.Event(
                 title=generated_appointment.title,
-                start=str(generated_appointment.slots[0].start),
+                start=generated_appointment.slots[0].start,
                 end=end,
                 all_day=False,
                 description=generated_appointment.details,
@@ -410,8 +413,8 @@ class TestAppointment:
         data = response.json()
         assert len(data) == 1
         assert data[0]["title"] == generated_appointment.title
-        assert data[0]["start"] == str(generated_appointment.slots[0].start)
-        assert data[0]["end"] == DAY3
+        assert data[0]["start"] == generated_appointment.slots[0].start.isoformat()
+        assert data[0]["end"] == dateutil.parser.parse(DAY3).isoformat()
 
     def test_get_invitation_ics_file(self, with_client, make_appointment):
         generated_appointment = make_appointment()

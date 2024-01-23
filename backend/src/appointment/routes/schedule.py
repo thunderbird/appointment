@@ -270,8 +270,8 @@ def decide_on_schedule_availability_slot(
 
         event = schemas.Event(
             title=schedule.name,
-            start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
-            end=(slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat(),
+            start=slot.start.replace(tzinfo=timezone.utc),
+            end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
             description=schedule.details,
             location=schemas.EventLocation(
                 type=schedule.location_type,

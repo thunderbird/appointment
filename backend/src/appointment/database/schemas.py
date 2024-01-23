@@ -268,8 +268,8 @@ class EventLocation(BaseModel):
 
 class Event(BaseModel):
     title: str
-    start: str
-    end: str
+    start: datetime
+    end: datetime
     all_day: bool | None = False
     tentative: bool | None = False
     description: str | None = None

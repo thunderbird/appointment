@@ -400,8 +400,8 @@ def update_public_appointment_slot(
 
     event = schemas.Event(
         title=db_appointment.title,
-        start=slot.start.replace(tzinfo=timezone.utc).isoformat(),
-        end=(slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat(),
+        start=slot.start.replace(tzinfo=timezone.utc),
+        end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         description=db_appointment.details,
         location=schemas.EventLocation(
             type=db_appointment.location_type,
