@@ -56,12 +56,17 @@ def _patch_caldav_connector(monkeypatch):
         def delete_event(self, start):
             return True
 
+        @staticmethod
+        def test_connection(self):
+            return True
+
     # Patch up the caldav constructor, and list_calendars
     from appointment.controller.calendar import CalDavConnector
     monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
     monkeypatch.setattr(CalDavConnector, "list_calendars", MockCaldavConnector.list_calendars)
     monkeypatch.setattr(CalDavConnector, "create_event", MockCaldavConnector.create_event)
     monkeypatch.setattr(CalDavConnector, "delete_events", MockCaldavConnector.delete_event)
+    monkeypatch.setattr(CalDavConnector, "test_connection", MockCaldavConnector.test_connection)
 
 
 def _patch_mailer(monkeypatch):
