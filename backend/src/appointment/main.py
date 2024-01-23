@@ -56,6 +56,12 @@ def _common_setup():
     logging.debug("Logger started!")
 
     if os.getenv("SENTRY_DSN") != "" and os.getenv("SENTRY_DSN") is not None:
+
+        release_string = None
+        release_version = os.getenv('RELEASE_VERSION')
+        if release_version:
+            release_string = f"appointment-backend@{release_version}"
+
         sentry_sdk.init(
             dsn=os.getenv("SENTRY_DSN"),
             # Set traces_sample_rate to 1.0 to capture 100%
@@ -65,6 +71,7 @@ def _common_setup():
             # Only profile staging for now
             profiles_sample_rate=1.0 if os.getenv("APP_ENV", "stage") else 0.0,
             environment=os.getenv("APP_ENV", "dev"),
+            release=release_string,
         )
 
 
