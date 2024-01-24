@@ -9,7 +9,7 @@
     'bg-orange-400 dark:bg-orange-700': isAlert,
   }"
 >
-  <span class="flex rounded-full uppercase px-2 py-1 text-xs font-bold mr-3"
+  <span class="flex rounded-full uppercase px-2 py-1 text-center text-xs font-bold mr-3"
     :class="{
       'bg-rose-500 dark:bg-rose-800': isError,
       'bg-orange-500 dark:bg-orange-800': isAlert,
@@ -20,7 +20,7 @@
   <span class="block sm:inline ml-1">
     <slot></slot>
   </span>
-  <span class="ml-auto place-self-start" @click="emit('close')">
+  <span class="ml-auto" @click="emit('close')">
     <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-white cursor-pointer" />
   </span>
 </div>
