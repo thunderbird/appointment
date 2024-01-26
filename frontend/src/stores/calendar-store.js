@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
 
 const initialData = {
   calendars: [],
@@ -6,39 +7,28 @@ const initialData = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const useCalendarStore = defineStore('calendars', {
-  state: () => ({
-    data: structuredClone(initialData),
-  }),
-  getters: {
-    isLoaded() {
-      return this.data.isInit;
-    },
-    unconnectedCalendars() {
-      return this.data.calendars.filter((cal) => !cal.connected);
-    },
-    connectedCalendars() {
-      return this.data.calendars.filter((cal) => cal.connected);
-    },
-    allCalendars() {
-      return this.data.calendars;
-    },
-  },
-  actions: {
-    reset() {
-      this.$patch({ data: structuredClone(initialData) });
-    },
-    async fetch(call) {
-      if (this.isLoaded) {
-        return;
-      }
+export const useCalendarStore = defineStore('calendars', () => {
+  const data = ref(structuredClone(initialData));
 
-      const { data, error } = await call('me/calendars?only_connected=false').get().json();
-      if (!error.value) {
-        if (data.value === null || typeof data.value === 'undefined') return;
-        this.data.calendars = data.value;
-        this.data.isInit = true;
-      }
-    },
-  },
+  const isLoaded = computed(() => data.value.isInit);
+  const unconnectedCalendars = computed(() => data.value.calendars.filter((cal) => !cal.connected));
+  const connectedCalendars = computed(() => data.value.calendars.filter((cal) => cal.connected));
+  const allCalendars = computed(() => data.value.calendars);
+
+  const fetch = async (call) => {
+    if (isLoaded.value) {
+      return;
+    }
+
+    const { data: calData, error } = await call('me/appointments').get().json();
+    if (!error.value) {
+      if (calData.value === null || typeof calData.value === 'undefined') return;
+      data.value.calendars = calData.value;
+      data.value.isInit = true;
+    }
+  };
+
+  const reset = () => data.value = structuredClone(initialData);
+  
+  return { data, isLoaded, unconnectedCalendars, connectedCalendars, allCalendars, fetch, reset };
 });

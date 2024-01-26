@@ -10,7 +10,7 @@ const initialData = {
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
-  // TODO: needs to be provided in the testing file
+  // TODO: needs to be provided somehow in the testing file
   const dj = inject('dayjs');
 
   const data = ref(structuredClone(initialData));
