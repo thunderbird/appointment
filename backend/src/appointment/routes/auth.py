@@ -100,7 +100,7 @@ def fxa_callback(
         raise HTTPException(400, "Email could not be retrieved.")
 
     email = request.session['fxa_user_email']
-    # We only use timezone during subscriber creation
+    # We only use timezone during subscriber creation, or if their timezone is None
     timezone = request.session['fxa_user_timezone']
 
     # Clear session keys
@@ -151,6 +151,7 @@ def fxa_callback(
         name=profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0],
         username=profile['email'],
         email=profile['email'],
+        timezone=timezone if subscriber.timezone is None else None
     )
     repo.update_subscriber(db, data, subscriber.id)
 
