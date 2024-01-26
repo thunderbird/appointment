@@ -91,8 +91,8 @@ class GoogleConnector:
 
             all_day = "date" in event.get("start")
 
-            start = event.get("start")["date"] if all_day else event.get("start")["dateTime"]
-            end = event.get("end")["date"] if all_day else event.get("end")["dateTime"]
+            start = datetime.strptime(event.get("start")["date"], DATEFMT) if all_day else datetime.fromisoformat(event.get("start")["dateTime"])
+            end = datetime.strptime(event.get("end")["date"], DATEFMT) if all_day else datetime.fromisoformat(event.get("end")["dateTime"])
 
             events.append(
                 schemas.Event(
@@ -128,8 +128,8 @@ class GoogleConnector:
             "summary": event.title,
             "location": event.location.name,
             "description": "\n".join(description),
-            "start": {"dateTime": event.start},
-            "end": {"dateTime": event.end},
+            "start": {"dateTime": event.start.isoformat()},
+            "end": {"dateTime": event.end.isoformat()},
             "attendees": [
                 {"displayName": organizer.name, "email": organizer.email},
                 {"displayName": attendee.name, "email": attendee.email},
@@ -194,9 +194,9 @@ class CalDavConnector:
 
             events.append(
                 schemas.Event(
-                    title=str(e.vobject_instance.vevent.summary.value),
-                    start=str(e.vobject_instance.vevent.dtstart.value),
-                    end=str(e.vobject_instance.vevent.dtend.value),
+                    title=e.vobject_instance.vevent.summary.value,
+                    start=e.vobject_instance.vevent.dtstart.value,
+                    end=e.vobject_instance.vevent.dtend.value,
                     all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
                     tentative=tentative,
                     description=e.icalendar_component["description"] if "description" in e.icalendar_component else "",
@@ -214,8 +214,8 @@ class CalDavConnector:
         calendar = self.client.calendar(url=self.url)
         # save event
         caldavEvent = calendar.save_event(
-            dtstart=datetime.fromisoformat(event.start),
-            dtend=datetime.fromisoformat(event.end),
+            dtstart=event.start,
+            dtend=event.end,
             summary=event.title,
             # TODO: handle location
             description=event.description,
@@ -343,8 +343,8 @@ class Tools:
             a_end = a_start + timedelta(minutes=a.duration)
             collision_found = False
             for b in b_list:
-                b_start = parse(b.start)
-                b_end = parse(b.end)
+                b_start = b.start
+                b_end = b.end
                 # if there is an overlap of both date ranges, a collision was found
                 # see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
                 if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
@@ -352,6 +352,7 @@ class Tools:
                     break
             if not collision_found:
                 available_slots.append(a)
+
         return available_slots
 
     @staticmethod
@@ -392,8 +393,8 @@ class Tools:
         for slot in schedule.slots:
             existing_events.append(schemas.Event(
                 title=schedule.name,
-                start=slot.start.isoformat(),
-                end=(slot.start + timedelta(minutes=slot.duration)).isoformat(),
+                start=slot.start,
+                end=slot.start + timedelta(minutes=slot.duration),
             ))
 
         return existing_events
