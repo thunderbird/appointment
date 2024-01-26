@@ -410,7 +410,12 @@ class Tools:
 
             start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
             end = min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking]) if schedule.end_date else farthest_booking
-            existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
+
+            try:
+                existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
+            except requests.exceptions.ConnectionError:
+                # Connection error with remote caldav calendar, don't crash this route.
+                pass
 
         # handle already requested time slots
         for slot in schedule.slots:
