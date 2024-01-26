@@ -154,7 +154,9 @@
 <script setup>
 import { bookingCalendarViews as views, appointmentState } from '@/definitions';
 import { download, timeFormat } from '@/utils';
-import { ref, inject, onMounted, computed } from 'vue';
+import {
+  ref, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
@@ -316,19 +318,19 @@ const bookEvent = async (attendeeData) => {
       return true;
     }
   } else
-  if (isBookingRoute.value) {
+    if (isBookingRoute.value) {
     // build data object for put request
-    const obj = {
-      slot_id: activeEvent.value.id,
-      attendee: attendeeData,
-    };
-    const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
-    if (error.value) {
+      const obj = {
+        slot_id: activeEvent.value.id,
+        attendee: attendeeData,
+      };
+      const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
+      if (error.value) {
+        return true;
+      }
+    } else {
       return true;
     }
-  } else {
-    return true;
-  }
   // replace calendar view if every thing worked fine
   attendee.value = attendeeData;
   // update view to prevent reselection
@@ -353,12 +355,12 @@ const downloadIcs = async () => {
       download(data.value.data, data.value.name, data.value.content_type);
     }
   } else
-  if (isBookingRoute.value) {
-    const { data, error } = await call(`apmt/serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
-    if (!error.value) {
-      download(data.value.data, data.value.name, data.value.content_type);
+    if (isBookingRoute.value) {
+      const { data, error } = await call(`apmt/serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
+      if (!error.value) {
+        download(data.value.data, data.value.name, data.value.content_type);
+      }
     }
-  }
 };
 
 // async get appointment data either from public single appointment link
@@ -369,21 +371,19 @@ const getAppointment = async () => {
     const { error, data } = await call('schedule/public/availability').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
       return true;
-    } else {
-      // now assign the actual general appointment data that is returned.
-      appointment.value = data.value;
     }
+    // now assign the actual general appointment data that is returned.
+    appointment.value = data.value;
   } else
-  if (isBookingRoute.value) {
-    const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
-    if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
-      return true;
-    } else {
+    if (isBookingRoute.value) {
+      const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
+      if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
+        return true;
+      }
       appointment.value = data.value;
+    } else {
+      return true;
     }
-  } else {
-    return true;
-  }
   return false;
 };
 
