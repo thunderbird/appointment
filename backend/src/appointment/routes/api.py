@@ -25,6 +25,7 @@ from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
+from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 
 router = APIRouter()
@@ -107,8 +108,27 @@ def create_my_calendar(
     calendar: schemas.CalendarConnection,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to add a new calendar connection for authenticated subscriber"""
+
+    # Test the connection first
+    if calendar.provider == CalendarProvider.google:
+        # I don't believe google cal touches this route, but just in case!
+        con = GoogleConnector(
+            db=db,
+            google_client=google_client,
+            calendar_id=calendar.user,
+            subscriber_id=subscriber.id,
+            google_tkn=subscriber.google_tkn,
+        )
+    else:
+        con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+
+    # Make sure we can connect to the calendar before we save it
+    if not con.test_connection():
+        raise RemoteCalendarConnectionError()
+
     # create calendar
     try:
         cal = repo.create_subscriber_calendar(db=db, calendar=calendar, subscriber_id=subscriber.id)

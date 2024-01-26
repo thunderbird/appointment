@@ -4,6 +4,7 @@
       {{ t("heading.createNewAppointment") }}
     </div>
     <alert-box
+      @close="appointmentCreationError = ''"
       v-if="appointmentCreationError"
       :title="t('label.appointmentCreationError')"
     >
@@ -435,8 +436,7 @@ const createAppointment = async () => {
 
   if (error.value) {
     // Error message is in data
-    appointmentCreationError.value =
-      data.value.detail || t("error.unknownAppointmentError");
+    appointmentCreationError.value = data.value?.detail?.message || t("error.unknownAppointmentError");
     // Open the form
     emit("start");
     return;

@@ -2,7 +2,11 @@
 <div class="flex flex-col gap-8">
   <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
   <div class="pl-6 flex flex-col gap-6">
-    <alert-box title="Calendar Connect Error" v-if="calendarConnectError">{{calendarConnectError}}</alert-box>
+    <alert-box
+      @close="calendarConnectError = ''"
+      title="Calendar Connect Error"
+      v-if="calendarConnectError"
+    >{{calendarConnectError}}</alert-box>
 
     <!-- list of possible calendars to connect -->
     <calendar-management
@@ -327,7 +331,14 @@ const saveCalendar = async () => {
 
   // add new caldav calendar
   if (isCalDav.value && inputMode.value === inputModes.add) {
-    await call('cal').post(calendarInput.data);
+    const { error, data } = await call('cal').post(calendarInput.data).json();
+    if (error.value) {
+      calendarConnectError.value = data.value?.detail?.message;
+      loading.value = false;
+      // Show them the error message because I haven't thought this ux process through.
+      window.scrollTo(0, 0);
+      return;
+    }
   }
   // add all google calendars connected to given gmail address
   if (isGoogle.value && inputMode.value === inputModes.add) {

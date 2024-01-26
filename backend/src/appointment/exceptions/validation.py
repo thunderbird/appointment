@@ -144,3 +144,11 @@ class ZoomNotConnectedException(APIException):
 
     def get_msg(self):
         return l10n('zoom-not-connected')
+
+
+class RemoteCalendarConnectionError(APIException):
+    id_code = 'REMOTE_CALENDAR_CONNECTION_ERROR'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('remote-calendar-connection-error')

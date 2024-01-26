@@ -5,12 +5,11 @@
     text-white shadow-black/30"
   role="alert"
   :class="{
-    hidden: isHidden,
     'bg-rose-600 dark:bg-rose-900': isError,
     'bg-orange-400 dark:bg-orange-700': isAlert,
   }"
 >
-  <span class="flex rounded-full uppercase px-2 py-1 text-xs font-bold mr-3"
+  <span class="flex rounded-full uppercase px-2 py-1 text-center text-xs font-bold mr-3"
     :class="{
       'bg-rose-500 dark:bg-rose-800': isError,
       'bg-orange-500 dark:bg-orange-800': isAlert,
@@ -21,14 +20,14 @@
   <span class="block sm:inline ml-1">
     <slot></slot>
   </span>
-  <span class="ml-auto place-self-start" @click="onClose">
+  <span class="ml-auto" @click="emit('close')">
     <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-white cursor-pointer" />
   </span>
 </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { IconX } from '@tabler/icons-vue';
 
 const props = defineProps({
@@ -42,7 +41,6 @@ const props = defineProps({
 const isError = computed(() => props.scheme === 'error');
 const isAlert = computed(() => props.scheme === 'alert');
 
-const isHidden = ref(false);
-const onClose = () => { isHidden.value = true; };
+const emit = defineEmits(['close']);
 
 </script>

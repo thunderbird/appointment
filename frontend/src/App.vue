@@ -62,7 +62,9 @@ const call = createFetch({
       }
       return { options };
     },
-    async onFetchError({ data, response, error }) {
+    updateDataOnError: true, // Needed to access the actual error message...
+    async onFetchError(context) {
+      const { data, response } = context;
       // Catch any google refresh error that may occur
       if (
         data?.detail?.id === 'GOOGLE_REFRESH_ERROR'
@@ -86,11 +88,11 @@ const call = createFetch({
         // Clear current user data, and ship them to the login screen!
         await currentUser.reset();
         await router.push('/login');
-        return;
+        return context;
       }
 
       // Pass the error along
-      return { data, response, error };
+      return context;
     },
   },
   fetchOptions: {
