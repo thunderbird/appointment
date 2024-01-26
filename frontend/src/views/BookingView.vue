@@ -14,10 +14,10 @@
     >
       <art-invalid-link class="max-w-sm h-auto my-6" />
       <div class="text-xl font-semibold text-sky-600">
-        {{ t('info.bookingLinkHasAlreadyBeenUsed') }}
+        {{ bookingErrors.heading ?? t('info.bookingLinkHasAlreadyBeenUsed') }}
       </div>
       <div class="text-gray-800 dark:text-gray-300">
-        {{ t('info.bookedPleaseCheckEmail') }}
+        {{ bookingErrors.body ?? t('info.bookedPleaseCheckEmail') }}
       </div>
       <primary-button
         class="p-7 mt-12"
@@ -184,6 +184,12 @@ const isBookingRoute = computed(() => route.name === 'booking');
 // appointment data holding slots the visitor should see
 // can also be a general appointment, holding subscribers general available slots
 const appointment = ref(null);
+
+// Error messages
+const bookingErrors = ref({
+  heading: null,
+  body: null,
+});
 
 // handle different view and active date
 // month: there are multiple weeks of availability, leads to week view for selection
@@ -370,6 +376,20 @@ const getAppointment = async () => {
   if (isAvailabilityRoute.value) {
     const { error, data } = await call('schedule/public/availability').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
+      // Reset our error messages
+      bookingErrors.value = {
+        heading: null,
+        body: null,
+      };
+
+      // Special case, it's the only important user-facing message.
+      if (data?.value?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
+        bookingErrors.value = {
+          heading: '',
+          body: data.value.detail.message,
+        };
+      }
+
       return true;
     }
     // now assign the actual general appointment data that is returned.
