@@ -2,6 +2,8 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 from starlette.middleware.sessions import SessionMiddleware
 from starlette_context.middleware import RawContextMiddleware
 
@@ -70,8 +72,17 @@ def _common_setup():
             traces_sample_rate=1.0,
             # Only profile staging for now
             profiles_sample_rate=1.0 if os.getenv("APP_ENV", "stage") else 0.0,
+            send_default_pii=True if os.getenv("APP_ENV", "stage") else False,
             environment=os.getenv("APP_ENV", "dev"),
             release=release_string,
+            integrations=[
+                StarletteIntegration(
+                    transaction_style="endpoint"
+                ),
+                FastApiIntegration(
+                    transaction_style="endpoint"
+                ),
+            ],
         )
 
 
