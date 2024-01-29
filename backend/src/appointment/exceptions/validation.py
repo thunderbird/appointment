@@ -99,6 +99,15 @@ class ScheduleNotFoundException(APIException):
 
     def get_msg(self):
         return l10n('schedule-not-found')
+
+
+class ScheduleNotActive(APIException):
+    """Raise when the schedule is not active"""
+    id_code = 'SCHEDULE_NOT_ACTIVE'
+    status_code = 404
+
+    def get_msg(self):
+        return l10n('schedule-not-active')
     
 
 class ScheduleNotAuthorizedException(APIException):

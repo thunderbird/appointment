@@ -14,10 +14,10 @@
     >
       <art-invalid-link class="max-w-sm h-auto my-6" />
       <div class="text-xl font-semibold text-sky-600">
-        {{ t('info.bookingLinkHasAlreadyBeenUsed') }}
+        {{ bookingErrors.heading ?? t('info.bookingLinkHasAlreadyBeenUsed') }}
       </div>
       <div class="text-gray-800 dark:text-gray-300">
-        {{ t('info.bookedPleaseCheckEmail') }}
+        {{ bookingErrors.body ?? t('info.bookedPleaseCheckEmail') }}
       </div>
       <primary-button
         class="p-7 mt-12"
@@ -154,7 +154,9 @@
 <script setup>
 import { bookingCalendarViews as views, appointmentState } from '@/definitions';
 import { download, timeFormat } from '@/utils';
-import { ref, inject, onMounted, computed } from 'vue';
+import {
+  ref, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
@@ -182,6 +184,12 @@ const isBookingRoute = computed(() => route.name === 'booking');
 // appointment data holding slots the visitor should see
 // can also be a general appointment, holding subscribers general available slots
 const appointment = ref(null);
+
+// Error messages
+const bookingErrors = ref({
+  heading: null,
+  body: null,
+});
 
 // handle different view and active date
 // month: there are multiple weeks of availability, leads to week view for selection
@@ -316,19 +324,19 @@ const bookEvent = async (attendeeData) => {
       return true;
     }
   } else
-  if (isBookingRoute.value) {
+    if (isBookingRoute.value) {
     // build data object for put request
-    const obj = {
-      slot_id: activeEvent.value.id,
-      attendee: attendeeData,
-    };
-    const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
-    if (error.value) {
+      const obj = {
+        slot_id: activeEvent.value.id,
+        attendee: attendeeData,
+      };
+      const { error } = await call(`apmt/public/${route.params.slug}`).put(obj).json();
+      if (error.value) {
+        return true;
+      }
+    } else {
       return true;
     }
-  } else {
-    return true;
-  }
   // replace calendar view if every thing worked fine
   attendee.value = attendeeData;
   // update view to prevent reselection
@@ -353,12 +361,12 @@ const downloadIcs = async () => {
       download(data.value.data, data.value.name, data.value.content_type);
     }
   } else
-  if (isBookingRoute.value) {
-    const { data, error } = await call(`apmt/serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
-    if (!error.value) {
-      download(data.value.data, data.value.name, data.value.content_type);
+    if (isBookingRoute.value) {
+      const { data, error } = await call(`apmt/serve/ics/${route.params.slug}/${activeEvent.value.id}`).get().json();
+      if (!error.value) {
+        download(data.value.data, data.value.name, data.value.content_type);
+      }
     }
-  }
 };
 
 // async get appointment data either from public single appointment link
@@ -368,22 +376,34 @@ const getAppointment = async () => {
   if (isAvailabilityRoute.value) {
     const { error, data } = await call('schedule/public/availability').post({ url: window.location.href }).json();
     if (error.value || !data.value) {
+      // Reset our error messages
+      bookingErrors.value = {
+        heading: null,
+        body: null,
+      };
+
+      // Special case, it's the only important user-facing message.
+      if (data?.value?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
+        bookingErrors.value = {
+          heading: '',
+          body: data.value.detail.message,
+        };
+      }
+
       return true;
-    } else {
-      // now assign the actual general appointment data that is returned.
-      appointment.value = data.value;
     }
+    // now assign the actual general appointment data that is returned.
+    appointment.value = data.value;
   } else
-  if (isBookingRoute.value) {
-    const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
-    if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
-      return true;
-    } else {
+    if (isBookingRoute.value) {
+      const { error, data } = await call(`apmt/public/${route.params.slug}`).get().json();
+      if (error.value || getAppointmentStatus(data.value) !== appointmentState.pending) {
+        return true;
+      }
       appointment.value = data.value;
+    } else {
+      return true;
     }
-  } else {
-    return true;
-  }
   return false;
 };
 

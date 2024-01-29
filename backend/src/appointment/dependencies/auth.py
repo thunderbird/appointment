@@ -1,7 +1,7 @@
 import os
 from typing import Annotated
 
-from fastapi import Depends, Request, HTTPException
+from fastapi import Depends, Request, HTTPException, Body
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..database import repo, schemas
 from ..dependencies.database import get_db
+from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
@@ -50,3 +51,15 @@ def get_subscriber(
         raise InvalidTokenException()
 
     return user
+
+
+def get_subscriber_from_signed_url(
+    url: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+):
+    """Retrieve a subscriber based off a signed url from the body. Requires `url` param to be used in the request."""
+    subscriber = repo.verify_subscriber_link(db, url)
+    if not subscriber:
+        raise validation.InvalidLinkException
+
+    return subscriber

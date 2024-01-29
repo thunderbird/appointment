@@ -13,7 +13,7 @@ from ..controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFail
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
-from ..dependencies.auth import get_subscriber
+from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
 from ..dependencies.database import get_db
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
@@ -81,14 +81,14 @@ def update_schedule(
 
 @router.post("/public/availability", response_model=schemas.AppointmentOut)
 def read_schedule_availabilities(
-    url: str = Body(..., embed=True),
+    subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
-    subscriber = repo.verify_subscriber_link(db, url)
-    if not subscriber:
-        raise validation.InvalidLinkException()
+    # Raise a schedule not found exception if the schedule owner does not have a timezone set.
+    if subscriber.timezone is None:
+        raise validation.ScheduleNotFoundException()
 
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
 
@@ -99,7 +99,7 @@ def read_schedule_availabilities(
 
     # check if schedule is enabled
     if not schedule.active:
-        raise validation.ScheduleNotFoundException()
+        raise validation.ScheduleNotActive()
 
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
 
@@ -127,15 +127,17 @@ def read_schedule_availabilities(
 @router.put("/public/availability/request")
 def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
-    url: str = Body(..., embed=True),
+    subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
 ):
     """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner"""
-    subscriber = repo.verify_subscriber_link(db, url)
-    if not subscriber:
-        raise validation.InvalidLinkException
+
+    # Raise a schedule not found exception if the schedule owner does not have a timezone set.
+    if subscriber.timezone is None:
+        raise validation.ScheduleNotFoundException()
 
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
@@ -193,6 +195,11 @@ def decide_on_schedule_availability_slot(
     subscriber = repo.verify_subscriber_link(db, data.owner_url)
     if not subscriber:
         raise validation.InvalidLinkException()
+
+    # Raise a schedule not found exception if the schedule owner does not have a timezone set.
+    if subscriber.timezone is None:
+        raise validation.ScheduleNotFoundException()
+
     schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
