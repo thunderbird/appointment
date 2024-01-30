@@ -69,7 +69,7 @@ class FxaClient:
         self.subscriber_id = subscriber_id
         self.client = OAuth2Session(self.client_id, redirect_uri=self.callback_url, scope=self.SCOPES,
                                     auto_refresh_url=self.config.token_url,
-                                    auto_refresh_kwargs={"client_id": self.client_id, "client_secret": self.client_secret},
+                                    auto_refresh_kwargs={"client_id": self.client_id, "client_secret": self.client_secret, 'include_client_id': True},
                                     token=token,
                                     token_updater=self.token_saver)
 
