@@ -112,6 +112,13 @@ export const meetingLinkProviderType = {
   google_meet: 'google_meet',
 };
 
+export const modalStates = {
+  loading: 1, // Modal is loading, this includes submission requests
+  open: 2, // Modal is open for editing
+  error: 3, // Modal is open for editing but contains errors
+  finished: 4, // Modal is finished, so either self-close, or show a success screen
+};
+
 export default {
   subscriberLevels,
   appointmentState,
