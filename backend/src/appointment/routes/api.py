@@ -94,7 +94,7 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
     return True
 
 
-@router.post("/verify/signature")
+@router.post("/verify/signature", deprecated=True)
 def verify_signature(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
     """Verify a signed short link"""
     if repo.verify_subscriber_link(db, url):
@@ -300,7 +300,7 @@ def create_my_calendar_appointment(
     return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 
-@router.get("/apmt/{id}", response_model=schemas.Appointment)
+@router.get("/apmt/{id}", response_model=schemas.Appointment, deprecated=True)
 def read_my_appointment(id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to get an appointment from db by id"""
     db_appointment = repo.get_appointment(db, appointment_id=id)
@@ -313,7 +313,7 @@ def read_my_appointment(id: str, db: Session = Depends(get_db), subscriber: Subs
     return db_appointment
 
 
-@router.put("/apmt/{id}", response_model=schemas.Appointment)
+@router.put("/apmt/{id}", response_model=schemas.Appointment, deprecated=True)
 def update_my_appointment(
     id: int,
     a_s: schemas.AppointmentSlots,
@@ -331,7 +331,7 @@ def update_my_appointment(
     return repo.update_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots, appointment_id=id)
 
 
-@router.delete("/apmt/{id}", response_model=schemas.Appointment)
+@router.delete("/apmt/{id}", response_model=schemas.Appointment, deprecated=True)
 def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to remove an appointment from db"""
     db_appointment = repo.get_appointment(db, appointment_id=id)

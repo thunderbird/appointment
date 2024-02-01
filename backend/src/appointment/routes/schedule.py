@@ -47,7 +47,7 @@ def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depen
     return repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
 
 
-@router.get("/{id}", response_model=schemas.Schedule)
+@router.get("/{id}", response_model=schemas.Schedule, deprecated=True)
 def read_schedule(
     id: int,
     db: Session = Depends(get_db),
