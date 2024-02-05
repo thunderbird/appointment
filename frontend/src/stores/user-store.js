@@ -43,6 +43,9 @@ export const useUserStore = defineStore('user', () => {
     }
 
     data.value = {
+      // Include the previous values first
+      ...data.value,
+      // Then the new ones!
       username: userData.value.username,
       name: userData.value.name,
       email: userData.value.email,
