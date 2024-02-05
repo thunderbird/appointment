@@ -12,7 +12,7 @@ export default defineConfig({
   },
   test: {
     setupFiles: [
-      '/test/setup/fixFetch.js',
+      '/test/setup/fix-fetch.js',
     ],
     globals: true,
     environment: 'jsdom',

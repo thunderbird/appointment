@@ -1,6 +1,6 @@
 # This workflow will install backend's requirements and run tests
 
-name: Run Backend Tests
+name: Run Tests
 
 on:
   push:
@@ -18,9 +18,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
     - name: Install dependencies
       run: |
         cd ./backend
@@ -29,3 +30,20 @@ jobs:
     - name: Test with pytest
       run: |
         cd ./backend && python -m pytest
+  vitest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'yarn'
+        cache-dependency-path: 'frontend/yarn.lock'
+    - name: Install dependencies
+      run: |
+        cd ./frontend
+        yarn install
+    - name: Test with vitest
+      run: |
+        cd ./frontend && yarn test --run
