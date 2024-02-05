@@ -55,8 +55,8 @@ Run application for development with hot reloading backend and frontend:
 
     ```bash
     cd frontend
-    yarn install
-    yarn serve
+    npm install
+    npm run dev
     ```
 
     You can now access the frontend at [localhost:8080](http://localhost:8080).
@@ -74,7 +74,7 @@ Run application for development with hot reloading backend and frontend:
 
 ## Testing
 
-To run tests, simply install the package in editing mode:
+To run tests in the backend, simply install the package in editing mode:
 
 ```bash
 cd backend && pip install -e .
@@ -84,6 +84,12 @@ After this you can run tests with:
 
 ```bash
 cd backend && python -m pytest
+```
+
+To run tests in the frontend, do:
+
+```bash
+cd frontend && npm test
 ```
 
 ## Contributing
@@ -113,8 +119,8 @@ Frontend is formatted using ESlint with airbnb rules.
 Commands (from /frontend)
 
 ```bash
-yarn run lint
-yarn run lint --fix
+npm run lint
+npm run lint --fix
 ```
 
 ### Localization
