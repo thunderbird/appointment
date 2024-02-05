@@ -54,6 +54,19 @@ reject-mail-html-heading = { $owner_name } denied your booking request for this 
 reject-mail-plain = { $owner_name } denied your booking request for this time slot: { $date }.
                     {-brand-footer}
 
+## Pending Appointment
+pending-mail-subject = Your booking request is pending approval
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+pending-mail-html-heading = { $owner_name } has been notified of your booking request for this time slot: { $date }. You will receive another email once that request has been approved or declined.
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+pending-mail-plain = { $owner_name } has been notified of your booking request for this time slot: { $date }.
+                    You will receive another email once that request has been approved or declined.
+                    {-brand-footer}
+
 ## Zoom Invite Link Failed
 
 zoom-invite-failed-subject = Zoom Meeting Link Creation Error

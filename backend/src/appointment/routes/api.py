@@ -15,7 +15,7 @@ from ..database import repo, schemas
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks
 from datetime import timedelta, timezone
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
@@ -27,6 +27,7 @@ from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
+from ..tasks.emails import send_zoom_meeting_failed_email
 
 router = APIRouter()
 
@@ -365,6 +366,7 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
 def update_public_appointment_slot(
     slug: str,
     s_a: schemas.SlotAttendee,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
 ):
@@ -411,8 +413,8 @@ def update_public_appointment_slot(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            mail = ZoomMeetingFailedMail(to=organizer.email, appointment_title=db_appointment.title)
-            mail.send()
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=organizer.email, appointment=db_appointment.title)
+
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error("Failed to save the zoom meeting link to the appointment: ", err)
             if os.getenv('SENTRY_DSN') != '':
@@ -450,7 +452,7 @@ def update_public_appointment_slot(
     repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
 
     # send mail with .ics attachment to attendee
-    Tools().send_vevent(db_appointment, slot, organizer, s_a.attendee)
+    Tools().send_vevent(background_tasks, db_appointment, slot, organizer, s_a.attendee)
 
     return schemas.SlotAttendee(slot_id=s_a.slot_id, attendee=s_a.attendee)
 

@@ -7,6 +7,7 @@ import json
 import caldav.lib.error
 import requests
 from caldav import DAVClient
+from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
@@ -18,6 +19,7 @@ from ..database import schemas, models
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment, InvitationMail
 from ..l10n import l10n
+from ..tasks.emails import send_invite_email
 
 DATEFMT = "%Y-%m-%d"
 
@@ -299,6 +301,7 @@ class Tools:
 
     def send_vevent(
         self,
+        background_tasks: BackgroundTasks,
         appointment: schemas.Appointment | schemas.AppointmentBase,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
@@ -310,8 +313,7 @@ class Tools:
             filename="invite.ics",
             data=self.create_vevent(appointment, slot, organizer),
         )
-        mail = InvitationMail(to=attendee.email, attachments=[invite])
-        mail.send()
+        background_tasks.add_task(send_invite_email, to=attendee.email, attachment=invite)
 
     @staticmethod
     def available_slots_from_schedule(s: models.Schedule) -> list[schemas.SlotBase]:

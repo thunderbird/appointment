@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, BackgroundTasks
 import logging
 import os
 
@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
-from ..controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail
+from ..controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, PendingRequestMail
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
@@ -21,6 +21,8 @@ from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
+from ..tasks.emails import send_pending_email, send_confirmation_email, send_rejection_email, \
+    send_zoom_meeting_failed_email
 
 router = APIRouter()
 
@@ -127,6 +129,7 @@ def read_schedule_availabilities(
 @router.put("/public/availability/request")
 def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
+    background_tasks: BackgroundTasks,
     subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
 ):
@@ -170,21 +173,21 @@ def request_schedule_availability_slot(
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
     date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
-    # send confirmation mail to owner
-    mail = ConfirmationMail(
-        f"{url}/1",
-        f"{url}/0",
-        attendee,
-        f"{date}, {slot.duration} minutes",
-        to=subscriber.email
-    )
-    mail.send()
+    date = f"{date}, {slot.duration} minutes"
+
+    # Sending confirmation email to owner
+    background_tasks.add_task(send_confirmation_email, url=url, attendee=attendee, date=date, to=subscriber.email)
+
+    # Sending pending email to attendee
+    background_tasks.add_task(send_pending_email, owner=subscriber, date=date, to=slot.attendee.email)
+
     return True
 
 
 @router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
 def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
 ):
@@ -231,13 +234,9 @@ def decide_on_schedule_availability_slot(
         # human readable date in subscribers timezone
         # TODO: handle locale date representation
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
+        date = f"{date}, {slot.duration} minutes"
         # send rejection information to bookee
-        mail = RejectionMail(
-            owner=subscriber,
-            date=f"{date}, {slot.duration} minutes",
-            to=slot.attendee.email
-        )
-        mail.send()
+        background_tasks.add_task(send_rejection_email, owner=subscriber, date=date, to=slot.attendee.email)
         # delete the scheduled slot to make the time available again
         repo.delete_slot(db, slot.id)
     # otherwise, confirm slot and create event
@@ -267,9 +266,7 @@ def decide_on_schedule_availability_slot(
                     capture_exception(err)
 
                 # Notify the organizer that the meeting link could not be created!
-                mail = ZoomMeetingFailedMail(to=subscriber.email,
-                                             appointment_title=schedule.name)
-                mail.send()
+                background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.email, appointment_title=schedule.name)
             except SQLAlchemyError as err:  # Not fatal, but could make things tricky
                 logging.error("Failed to save the zoom meeting link to the appointment: ", err)
                 if os.getenv('SENTRY_DSN') != '':
@@ -301,7 +298,7 @@ def decide_on_schedule_availability_slot(
 
         # send mail with .ics attachment to attendee
         appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=location_url)
-        Tools().send_vevent(appointment, slot, subscriber, slot.attendee)
+        Tools().send_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
