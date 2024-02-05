@@ -94,7 +94,6 @@ describe('User Store', () => {
   // Reset handlers after each test `important for test isolation`
   afterEach(() => server.resetHandlers());
 
-
   test('exists', () => {
     const user = useUserStore();
     user.data.accessToken = 'abc';
