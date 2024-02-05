@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', () => {
     };
 
     return await updateSignedUrl(fetch);
-  }
+  };
 
   // invalidate the current signed url and replace it with a new one
   const changeSignedUrl = async (fetch) => {
@@ -87,6 +87,8 @@ export const useUserStore = defineStore('user', () => {
     } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
       // For FXA we re-use the username parameter as our access token
       data.value.accessToken = username;
+    } else {
+      return false;
     }
 
     return await profile(fetch);
@@ -96,12 +98,13 @@ export const useUserStore = defineStore('user', () => {
     const { error } = await fetch('logout').get().json();
 
     if (error.value) {
-      console.warn("Error logging out: ", error.value);
+      console.warn('Error logging out: ', error.value);
     }
 
     reset();
   };
 
-  return { data, exists, reset, updateSignedUrl, profile, changeSignedUrl, login, logout };
-
+  return {
+    data, exists, reset, updateSignedUrl, profile, changeSignedUrl, login, logout,
+  };
 });

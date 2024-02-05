@@ -8,40 +8,39 @@ import {
   afterEach,
 } from 'vitest';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { createPinia, setActivePinia } from 'pinia';
+import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
+import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/me/appointments`, async (request) => {
-    return HttpResponse.json([
-      {
-        calendar_id: 1,
-        title: "title",
-        duration: 180,
-        location_type: 2,
-        slots: [
-          { start: "3000-01-01T09:00:00Z", duration: 60 },
-          { start: "3000-01-01T11:00:00Z", duration: 15 },
-          { start: "3000-01-01T15:00:00Z", duration: 275 },
-        ],
-      },
-      {
-        calendar_id: 1,
-        title: "title",
-        duration: 180,
-        location_type: 2,
-        slots: [
-          { start: "2024-01-01T09:00:00Z", duration: 60 },
-          { start: "2024-01-01T11:00:00Z", duration: 15, attendee_id: 1 },
-          { start: "2024-01-01T15:00:00Z", duration: 275 },
-        ],
-      },
-    ]);
-  }),
+  http.get(`${API_URL}/me/appointments`, async (request) => HttpResponse.json([
+    {
+      calendar_id: 1,
+      title: 'title',
+      duration: 180,
+      location_type: 2,
+      slots: [
+        { start: '3000-01-01T09:00:00Z', duration: 60 },
+        { start: '3000-01-01T11:00:00Z', duration: 15 },
+        { start: '3000-01-01T15:00:00Z', duration: 275 },
+      ],
+    },
+    {
+      calendar_id: 1,
+      title: 'title',
+      duration: 180,
+      location_type: 2,
+      slots: [
+        { start: '2024-01-01T09:00:00Z', duration: 60 },
+        { start: '2024-01-01T11:00:00Z', duration: 15, attendee_id: 1 },
+        { start: '2024-01-01T15:00:00Z', duration: 275 },
+      ],
+    },
+  ])),
 ];
 
 const server = setupServer(...restHandlers);
@@ -50,9 +49,12 @@ server.events.on('request:start', ({ request }) => {
 });
 
 describe('Appointment Store', () => {
+  let app = null;
+
   // Create a pinia instance before each test
   beforeEach(() => {
-    setActivePinia(createPinia());
+    app = withSetup();
+    app.use(createPinia());
   });
   // Start server before all tests
   beforeAll(() => server.listen());
@@ -61,8 +63,10 @@ describe('Appointment Store', () => {
   afterAll(() => server.close());
 
   // Reset handlers after each test `important for test isolation`
-  afterEach(() => server.resetHandlers());
-
+  afterEach(() => {
+    server.resetHandlers();
+    app?.unmount();
+  });
 
   test('init', () => {
     const apmt = useAppointmentStore();
