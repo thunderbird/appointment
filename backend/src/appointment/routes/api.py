@@ -2,6 +2,7 @@ import logging
 import os
 import secrets
 
+import requests.exceptions
 import validators
 from requests import HTTPError
 from sentry_sdk import capture_exception
@@ -223,7 +224,13 @@ def read_remote_calendars(
         )
     else:
         con = CalDavConnector(connection.url, connection.user, connection.password)
-    return con.list_calendars()
+
+    try:
+        calendars = con.list_calendars()
+    except requests.exceptions.RequestException:
+        raise RemoteCalendarConnectionError()
+
+    return calendars
 
 
 @router.post("/rmt/sync")
@@ -277,7 +284,12 @@ def read_remote_events(
         )
     else:
         con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-    events = con.list_events(start, end)
+
+    try:
+        events = con.list_events(start, end)
+    except requests.exceptions.RequestException:
+        raise RemoteCalendarConnectionError()
+
     for e in events:
         e.calendar_title = db_calendar.title
         e.calendar_color = db_calendar.color
