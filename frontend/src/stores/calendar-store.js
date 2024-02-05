@@ -20,7 +20,7 @@ export const useCalendarStore = defineStore('calendars', () => {
       return;
     }
 
-    const { data: calData, error } = await call('me/appointments').get().json();
+    const { data: calData, error } = await call('me/calendars?only_connected=false').get().json();
     if (!error.value) {
       if (calData.value === null || typeof calData.value === 'undefined') return;
       data.value.calendars = calData.value;
