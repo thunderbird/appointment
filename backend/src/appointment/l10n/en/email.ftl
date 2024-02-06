@@ -15,7 +15,7 @@ invite-mail-html = {-brand-footer}
 
 ## Confirm Appointment
 
-confirm-mail-subject = Confirm booking request from Thunderbird Appointment
+confirm-mail-subject = Confirm booking request from {-brand-name}
 # Variables:
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
@@ -30,7 +30,7 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested thi
                     Or this link if you want to deny it:
                     { $deny_url }
 
-                    This message is sent from Thunderbird Appointment.
+                    {-brand-footer}
 # Variables:
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
@@ -52,6 +52,19 @@ reject-mail-html-heading = { $owner_name } denied your booking request for this 
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
 reject-mail-plain = { $owner_name } denied your booking request for this time slot: { $date }.
+                    {-brand-footer}
+
+## Pending Appointment
+pending-mail-subject = Your booking request is pending approval
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+pending-mail-html-heading = { $owner_name } has been notified of your booking request for this time slot: { $date }. You will receive another email once that request has been approved or declined.
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+pending-mail-plain = { $owner_name } has been notified of your booking request for this time slot: { $date }.
+                    You will receive another email once that request has been approved or declined.
                     {-brand-footer}
 
 ## Zoom Invite Link Failed

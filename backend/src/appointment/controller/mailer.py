@@ -216,3 +216,23 @@ class RejectionMail(Mailer):
 
     def html(self):
         return get_template("rejected.jinja2").render(owner=self.owner, date=self.date)
+
+
+class PendingRequestMail(Mailer):
+    def __init__(self, owner, date, *args, **kwargs):
+        """init Mailer with pending specific defaults"""
+        self.owner = owner
+        self.date = date
+        default_kwargs = {
+            "subject": l10n('pending-mail-subject')
+        }
+        super(PendingRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n('pending-mail-plain', {
+            'owner_name': self.owner.name,
+            'date': self.date
+        })
+
+    def html(self):
+        return get_template("pending.jinja2").render(owner=self.owner, date=self.date)
