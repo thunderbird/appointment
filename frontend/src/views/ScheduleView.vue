@@ -38,7 +38,7 @@
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <schedule-creation
         v-if="schedulesReady"
-        :calendars="calendarStore.connectedCalendars"
+        :calendars="connectedCalendars"
         :schedule="firstSchedule"
         :active-date="activeDate"
         @created="getFirstSchedule"
@@ -50,7 +50,7 @@
       v-show="tabActive === calendarViews.month"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
+      :appointments="pendingAppointments"
       :events="calendarEvents"
       :schedules="schedulesPreviews"
       popup-position="left"
@@ -59,7 +59,7 @@
       v-show="tabActive === calendarViews.week"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
+      :appointments="pendingAppointments"
       :events="calendarEvents"
       popup-position="left"
     />
@@ -67,7 +67,7 @@
       v-show="tabActive === calendarViews.day"
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
+      :appointments="pendingAppointments"
       :events="calendarEvents"
       popup-position="top"
     />
@@ -79,6 +79,7 @@ import { calendarViews } from '@/definitions';
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import ScheduleCreation from '@/components/ScheduleCreation';
 import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
@@ -99,6 +100,8 @@ const refresh = inject('refresh');
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
+const { pendingAppointments } = storeToRefs(appointmentStore);
+const { connectedCalendars } = storeToRefs(calendarStore);
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
@@ -148,7 +151,7 @@ const getRemoteEvents = async (from, to) => {
   const inclusiveTo = dj(to).add(1, 'day').format('YYYY-MM-DD');
 
   calendarEvents.value = [];
-  await Promise.all(calendarStore.connectedCalendars.map(async (calendar) => {
+  await Promise.all(connectedCalendars.value.map(async (calendar) => {
     const { data } = await call(`rmt/cal/${calendar.id}/${from}/${inclusiveTo}`).get().json();
     if (Array.isArray(data.value)) {
       calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));

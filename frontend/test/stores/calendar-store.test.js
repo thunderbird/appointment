@@ -57,13 +57,13 @@ describe('Calendar Store', () => {
   test('init', () => {
     const calStore = useCalendarStore();
     expect(calStore.isLoaded).toBe(false);
-    expect(calStore.allCalendars.length).toBe(0);
+    expect(calStore.calendars.length).toBe(0);
   });
 
   test('fetch', async () => {
     const calStore = useCalendarStore();
     await calStore.fetch(createFetch({ baseUrl: API_URL }));
-    expect(calStore.allCalendars.length).toBe(2);
+    expect(calStore.calendars.length).toBe(2);
   });
 
   test('unconnected', async () => {
@@ -84,13 +84,13 @@ describe('Calendar Store', () => {
 
     // Check if calendars exist
     expect(calStore.isLoaded).toBe(true);
-    expect(calStore.allCalendars.length).toBe(2);
+    expect(calStore.calendars.length).toBe(2);
 
     // Reset the user which should null all user data.
     calStore.reset();
 
     // Ensure our data is null/don't exist
     expect(calStore.isLoaded).toBe(false);
-    expect(calStore.allCalendars.length).toBe(0);
+    expect(calStore.calendars.length).toBe(0);
   });
 });

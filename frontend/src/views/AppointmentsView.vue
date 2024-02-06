@@ -6,7 +6,7 @@
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="!calendarStore.connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
+        :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
         @click="creationStatus = appointmentCreationState.details"
       />
     </div>
@@ -202,7 +202,7 @@
       <appointment-creation
         v-else
         :status="creationStatus"
-        :calendars="calendarStore.connectedCalendars"
+        :calendars="connectedCalendars"
         @start="creationStatus = appointmentCreationState.details"
         @next="creationStatus = appointmentCreationState.availability"
         @create="creationStatus = appointmentCreationState.finished; refresh();"
@@ -265,6 +265,7 @@ const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
 
 const { appointments } = storeToRefs(appointmentStore);
+const { connectedCalendars } = storeToRefs(calendarStore);
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
