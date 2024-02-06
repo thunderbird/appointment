@@ -3,24 +3,21 @@ import { ref, computed, inject } from 'vue';
 import { appointmentState } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 
-const initialData = {
-  appointments: [],
-  isInit: false,
-};
-
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
-  // TODO: needs to be provided somehow in the testing file
   const dj = inject('dayjs');
 
-  const data = ref(structuredClone(initialData));
+  // State
+  const isLoaded = ref(false);
 
-  const isLoaded = computed(() => data.value.isInit);
-  const appointments = computed(() => data.value.appointments);
+  // Data
+  const appointments = ref([]);
+
   const pendingAppointments = computed(
-    () => data.value.appointments.filter((a) => a.status === appointmentState.pending)
+    () => appointments.value.filter((a) => a.status === appointmentState.pending)
   );
 
+  // Retrieve appointment status from related time slots
   const status = (appointment) => {
     // check past events
     if (appointment.slots.filter((s) => dj(s.start).isAfter(dj())).length === 0) {
@@ -33,10 +30,12 @@ export const useAppointmentStore = defineStore('appointments', () => {
     // else event is still wating to be booked
     return appointmentState.pending;
   };
+
+  // Append additional data to retrieved appointments
   const postFetchProcess = async () => {
     const userStore = useUserStore();
 
-    data.value.appointments.forEach((a) => {
+    appointments.value.forEach((a) => {
       a.status = status(a);
       a.active = a.status !== appointmentState.past; // TODO
       // convert start dates from UTC back to users timezone
@@ -45,17 +44,23 @@ export const useAppointmentStore = defineStore('appointments', () => {
       });
     });
   };
+
+  // Get all appointments for current user
   const fetch = async (call) => {
-    const { data: apmtData, error } = await call('me/appointments').get().json();
+    const { data, error } = await call('me/appointments').get().json();
     if (!error.value) {
-      if (apmtData.value === null || typeof apmtData.value === 'undefined') return;
-      data.value.appointments = apmtData.value;
-      data.value.isInit = true;
+      if (data.value === null || typeof data.value === 'undefined') return;
+      appointments.value = data.value;
+      isLoaded.value = true;
     }
     // After we fetch the data, apply some processing
     await postFetchProcess();
   };
-  const reset = () => data.value = structuredClone(initialData);
 
-  return { data, isLoaded, appointments, pendingAppointments, status, postFetchProcess, fetch, reset };
+  const reset = () => {
+    appointments.value = [];
+    isLoaded.value = false;
+  };
+
+  return { isLoaded, appointments, pendingAppointments, status, postFetchProcess, fetch, reset };
 });

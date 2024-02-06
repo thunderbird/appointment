@@ -135,9 +135,6 @@ const routeIsHome = computed(
   () => ['home'].includes(route.name),
 );
 
-// check appointment status for current state (past|pending|booked)
-const getAppointmentStatus = (a) => appointmentStore.status(a);
-
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
   if (currentUser?.exists()) {
@@ -150,5 +147,4 @@ const getDbData = async () => {
 
 // provide refresh functions for components
 provide('refresh', getDbData);
-provide('getAppointmentStatus', getAppointmentStatus);
 </script>

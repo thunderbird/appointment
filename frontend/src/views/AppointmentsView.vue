@@ -249,8 +249,9 @@ import {
   IconList,
   IconSearch,
 } from '@tabler/icons-vue';
-import {useAppointmentStore} from "@/stores/appointment-store";
-import {useCalendarStore} from "@/stores/calendar-store";
+import { useAppointmentStore } from "@/stores/appointment-store";
+import { useCalendarStore } from "@/stores/calendar-store";
+import { storeToRefs } from 'pinia';
 
 // component constants
 const { t } = useI18n();
@@ -262,6 +263,8 @@ const refresh = inject('refresh');
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
+
+const { appointments } = storeToRefs(appointmentStore);
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
@@ -323,7 +326,7 @@ const restoreColumnOrder = () => {
 
 // handle filtered appointments list
 const filteredAppointments = computed(() => {
-  let list = appointmentStore.appointments ? [...appointmentStore.appointments] : [];
+  let list = appointments.value ? [...appointments.value] : [];
   // by search input
   if (search.value !== '') {
     list = list.filter((a) => a.title.toLowerCase().includes(search.value.toLowerCase()));
