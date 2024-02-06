@@ -1,37 +1,36 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-
-const initialSiteNotificationObject = {
-  // Ensure we don't need to set the same notification twice
-  id: null,
-  // Details
-  display: false,
-  title: '',
-  message: '',
-  actionUrl: '',
-};
+import { ref } from 'vue';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useSiteNotificationStore = defineStore('siteNotification', () => {
-  const data = ref(structuredClone(initialSiteNotificationObject));
+  // State
+  const isVisible = ref(false);
 
-  const isVisible = computed(() => data.value.display);
-  const title = computed(() => data.value.title);
-  const actionUrl = computed(() => data.value.actionUrl);
-  const message = computed(() => data.value.message);
+  // Data
+  const id = ref(null);
+  const title = ref('');
+  const actionUrl = ref('');
+  const message = ref('');
 
-  const isSameNotification = (id) => data.value.id === id;
-  const lock = (id) => data.value.id = id;
-  const show = (id, title, message, actionUrl) => {
-    data.value = {
-      id,
-      display: true,
-      title,
-      message,
-      actionUrl,
-    };
+  const isSame = (checkId) => id.value === checkId;
+
+  const lock = (lockId) => id.value = lockId;
+
+  const show = (showId, showTitle, showMessage, showActionUrl) => {
+    isVisible.value = true;
+    id.value = showId;
+    title.value = showTitle;
+    actionUrl.value = showActionUrl;
+    message.value = showMessage;
   };
-  const reset = () => data.value = structuredClone(initialSiteNotificationObject);
 
-  return { data, isVisible, title, actionUrl, message, isSameNotification, lock, show, reset };
+  const reset = () => {
+    isVisible.value = false;
+    id.value = null;
+    title.value = '';
+    actionUrl.value = '';
+    message.value = '';
+  };
+
+  return { isVisible, title, actionUrl, message, isSame, lock, show, reset };
 });
