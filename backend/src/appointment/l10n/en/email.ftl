@@ -15,7 +15,7 @@ invite-mail-html = {-brand-footer}
 
 ## Confirm Appointment
 
-confirm-mail-subject = Confirm booking request from Thunderbird Appointment
+confirm-mail-subject = Confirm booking request from {-brand-name}
 # Variables:
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
@@ -30,7 +30,7 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested thi
                     Or this link if you want to deny it:
                     { $deny_url }
 
-                    This message is sent from Thunderbird Appointment.
+                    {-brand-footer}
 # Variables:
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
