@@ -4,22 +4,28 @@ Invite others to grab times on your calendar. Choose a date. Make appointments a
 
 ## Get started
 
-You can either build preconfigured docker containers (database, backend and frontend) or manually set up the application. A more detailed documentation can befound in the [docs folder](./docs/README.md).
+You can either build preconfigured docker containers (database, backend and frontend) or manually set up the application. A more detailed documentation can be found in the [docs folder](./docs/README.md).
 
 ### With Docker
 
 ```bash
 git clone https://github.com/thunderbird/appointment
+cp appointment/backend/.env.example appointment/backend/.env
+cp appointment/frontend/.env.example appointment/frontend/.env
 cd appointment
 docker-compose up -d --build
 ```
 
+* Frontend can be accessed via: http://localhost:8080
+* Backend can be accessed via: http://localhost:5173
+* OpenAPI docs can be accessed via: http://localhost:5173/docs or http://localhost:5173/redoc
+
 A MySQL database will be accessible via `localhost:3306` with username and password set to: `tba`
 
-To init database or run migrations, the backend offers a cimple CLI interface:
+To init database or run migrations, the backend offers a simple CLI interface:
 
 ```bash
-run-command update-db
+run-command main update-db
 ```
 
 ### Manual Setup
