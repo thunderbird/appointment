@@ -85,6 +85,12 @@ const routes = [
     beforeEnter: authGuard,
   },
   {
+    path: "/contact",
+    name: "contact",
+    component: () => import(/* webpackChunkName: "contact" */ "@/views/ContactView"),
+    beforeEnter: authGuard,
+  },
+  {
     path: "/privacy",
     name: "privacy",
     beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/privacy/websites/' }

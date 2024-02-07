@@ -247,7 +247,7 @@ class SupportRequestMail(Mailer):
         default_kwargs = {
             "subject": l10n('support-mail-subject', { 'topic': topic })
         }
-        super(SupportRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
+        super(SupportRequestMail, self).__init__(os.getenv("SUPPORT_EMAIL"), *args, **default_kwargs, **kwargs)
 
     def text(self):
         return l10n('support-mail-plain', {

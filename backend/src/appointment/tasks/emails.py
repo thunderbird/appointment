@@ -42,11 +42,10 @@ def send_zoom_meeting_failed_email(to, appointment_title):
     mail.send()
 
 
-def send_support_email(requestee, topic, details, to):
-    mail = PendingRequestMail(
+def send_support_email(requestee, topic, details):
+    mail = SupportRequestMail(
         requestee=requestee,
         topic=topic,
         details=details,
-        to=to
     )
     mail.send()

@@ -50,6 +50,9 @@
               :copy="user.data.signedUrl"
               class="border-none flex-row-reverse justify-between !text-inherit !text-base !font-normal hover:bg-inherit hover:shadow-none"
             />
+            <router-link :to="{ name: 'contact' }" class="p-2">
+              {{ t('label.contact') }}
+            </router-link>
             <hr class="border-teal-500" />
             <div @click="logout" class="cursor-pointer p-2">
               {{ t('label.logOut') }}

@@ -490,7 +490,7 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
     )
 
 
-@router.get("/support")
+@router.post("/support")
 def get_my_signature(
     form_data: schemas.SupportRequest,
     background_tasks: BackgroundTasks,
@@ -502,6 +502,5 @@ def get_my_signature(
         requestee=subscriber,
         topic=form_data.topic,
         details=form_data.details,
-        to=organizer.email
     )
     return True
