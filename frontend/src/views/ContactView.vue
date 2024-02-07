@@ -95,7 +95,7 @@ const send = async () => {
   }
   const { error, data } = await call('support').post({ topic: topic.value, details: details.value }).json();
   if (!error.value && data.value) {
-    sendingState.value = alertSchemes.succes;
+    sendingState.value = alertSchemes.success;
     resetForm();
   } else {
     sendingState.value = alertSchemes.error;
