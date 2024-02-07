@@ -99,7 +99,7 @@ support-mail-html-details = { $details }
 # $requestee_email (String) - Email address of the person who did the request
 # $topic (String) - Topic selected by the person who did the request
 # $details (String) - Detailed description given by the person who did the request
-support-mail-plain = { $requestee_name } ({ $requestee_email }) send the following request via the support form on {-brand-name}.
+support-mail-plain = { $requestee_name } ({ $requestee_email }) sent the following request via the support form on {-brand-name}.
                     Topic: { $topic }
                     Details: { $details }
                     {-brand-footer}
