@@ -15,7 +15,7 @@
     :class="{
       'bg-rose-500 dark:bg-rose-800': scheme === alertSchemes.error,
       'bg-orange-500 dark:bg-orange-800': scheme === alertSchemes.warning,
-      'bg-green-500 dark:bg-green-800': scheme === alertSchemes.succes,
+      'bg-green-500 dark:bg-green-800': scheme === alertSchemes.success,
       'bg-teal-500 dark:bg-teal-800': scheme === alertSchemes.info,
     }"
   >
