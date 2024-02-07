@@ -47,7 +47,7 @@
     "bookingSuccessfullyRequested": "Booking request sent",
     "eventWasCreated": "Event created in your calendar.",
     "invitationWasSent": "An invitation was sent to your email.",
-    "messageWasSent": "Your message was sent to our support team.",
+    "messageWasSent": "Your message has been sent to our support team.",
     "messageWasNotSent": "Your message couldn't be sent. Please try again.",
     "noPendingAppointmentsInList": "You have no pending events.",
     "slotIsAvailableAgain": "Time slot now available for bookings."
