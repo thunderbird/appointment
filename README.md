@@ -16,9 +16,9 @@ cd appointment
 docker-compose up -d --build
 ```
 
-* Frontend can be accessed via: http://localhost:8080
-* Backend can be accessed via: http://localhost:5173
-* OpenAPI docs can be accessed via: http://localhost:5173/docs or http://localhost:5173/redoc
+* Frontend can be accessed via: <http://localhost:8080>
+* Backend can be accessed via: <http://localhost:5173>
+* OpenAPI docs can be accessed via: <http://localhost:5173/docs> or <http://localhost:5173/redoc>
 
 A MySQL database will be accessible via `localhost:3306` with username and password set to: `tba`
 
