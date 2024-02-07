@@ -302,7 +302,7 @@ def decide_on_schedule_availability_slot(
         con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
 
         # send mail with .ics attachment to attendee
-        appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=location_url)
+        appointment = schemas.AppointmentBase(title=title, details=schedule.details, location_url=location_url)
         Tools().send_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
     return schemas.AvailabilitySlotAttendee(
