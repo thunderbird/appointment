@@ -18,7 +18,11 @@ export const useUserStore = defineStore('user', () => {
   const exists = () => data.value.accessToken !== null;
   const $reset = () => data.value = structuredClone(initialUserObject);
 
-  // retrieve the current signed url and update store
+  /**
+   * Retrieve the current signed url and update store
+   * @param {function} fetch preconfigured API fetch function
+   * @return {boolean}
+   */
   const updateSignedUrl = async (fetch) => {
     const { error, data: sigData } = await fetch('me/signature').get().json();
 
@@ -32,7 +36,11 @@ export const useUserStore = defineStore('user', () => {
     return true;
   };
 
-  // update store with profile data from db
+  /**
+   * Update store with profile data from db
+   * @param {function} fetch preconfigured API fetch function
+   * @return {boolean}
+   */
   const profile = async (fetch) => {
     const { error, data: userData } = await fetch('me').get().json();
 
@@ -54,10 +62,14 @@ export const useUserStore = defineStore('user', () => {
       avatarUrl: userData.value.avatar_url,
     };
 
-    return await updateSignedUrl(fetch);
+    return updateSignedUrl(fetch);
   };
 
-  // invalidate the current signed url and replace it with a new one
+  /**
+   * Invalidate the current signed url and replace it with a new one
+   * @param {function} fetch preconfigured API fetch function
+   * @return {boolean}
+   */
   const changeSignedUrl = async (fetch) => {
     const { error, data: sigData } = await fetch('me/signature').post().json();
 
@@ -66,9 +78,16 @@ export const useUserStore = defineStore('user', () => {
       return false;
     }
 
-    return await updateSignedUrl(fetch);
+    return updateSignedUrl(fetch);
   };
 
+  /**
+   * Request subscriber login
+   * @param {function} fetch preconfigured API fetch function
+   * @param {string} username
+   * @param {string} password
+   * @returns {boolean} true if login was successful
+   */
   const login = async (fetch, username, password) => {
     $reset();
 
@@ -91,9 +110,13 @@ export const useUserStore = defineStore('user', () => {
       return false;
     }
 
-    return await profile(fetch);
+    return profile(fetch);
   };
 
+  /**
+   * Do subscriber logout and reset store
+   * @param {function} fetch preconfigured API fetch function
+   */
   const logout = async (fetch) => {
     const { error } = await fetch('logout').get().json();
 

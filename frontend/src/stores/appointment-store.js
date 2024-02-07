@@ -12,12 +12,15 @@ export const useAppointmentStore = defineStore('appointments', () => {
 
   // Data
   const appointments = ref([]);
-
   const pendingAppointments = computed(
     () => appointments.value.filter((a) => a.status === appointmentState.pending)
   );
 
-  // Retrieve appointment status from related time slots
+  /**
+   * Retrieve appointment status from related time slots
+   * @param {object} appointment Single appointment object
+   * @returns {appointmentState}
+   */
   const status = (appointment) => {
     // check past events
     if (appointment.slots.filter((s) => dj(s.start).isAfter(dj())).length === 0) {
@@ -31,7 +34,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
     return appointmentState.pending;
   };
 
-  // Append additional data to retrieved appointments
+  /**
+   * Append additional data to retrieved appointments
+   */
   const postFetchProcess = async () => {
     const userStore = useUserStore();
 
@@ -45,7 +50,10 @@ export const useAppointmentStore = defineStore('appointments', () => {
     });
   };
 
-  // Get all appointments for current user
+  /**
+   * Get all appointments for current user
+   * @param {function} call preconfigured API fetch function
+   */
   const fetch = async (call) => {
     const { data, error } = await call('me/appointments').get().json();
     if (!error.value) {
@@ -57,6 +65,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
     await postFetchProcess();
   };
 
+  /**
+   * Restore default state, empty and unload appointments
+   */
   const $reset = () => {
     appointments.value = [];
     isLoaded.value = false;

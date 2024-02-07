@@ -17,6 +17,9 @@ export const useBookingViewStore = defineStore('bookingView', () => {
   const appointment = ref(null);
   const attendee = ref(null);
 
+  /**
+   * Restore default state, set date to today and remove other data
+   */
   const $reset = () => {
     activeView.value = bookingCalendarViews.loading;
     activeDate.value = dj();

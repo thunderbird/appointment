@@ -14,7 +14,10 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     fxa: fxa.value,
   }));
 
-  // Get all external connections for current user
+  /**
+   * Get all external connections for current user
+   * @param {function} call preconfigured API fetch function
+   */
   const fetch = async (call) => {
     if (isLoaded.value) {
       return;
@@ -26,6 +29,9 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     isLoaded.value = true;
   };
 
+  /**
+   * Restore default state, empty and unload connections
+   */
   const $reset = () => {
     zoom.value = [];
     fxa.value = [];

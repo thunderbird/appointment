@@ -13,17 +13,26 @@ export const useBookingModalStore = defineStore('bookingModal', () => {
   const hasErrors = computed(() => state.value === modalStates.error);
   const isEditable = computed(() => [modalStates.open, modalStates.error].indexOf(state.value) !== -1);
 
+  /**
+   * Restore default state, close modal and remove data
+   */
   const $reset = () => {
     open.value = false;
     state.value = modalStates.open;
     stateData.value = null;
   };
 
+  /**
+   * Remove previous data and open modal
+   */
   const openModal = () => {
     $reset();
     open.value = true;
   };
 
+  /**
+   * Remove previous data and close modal
+   */
   const closeModal = () => {
     $reset();
     open.value = false;
