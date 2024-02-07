@@ -7,7 +7,7 @@
   :class="{
     'bg-rose-600 dark:bg-rose-900': scheme === alertSchemes.error,
     'bg-orange-400 dark:bg-orange-700': scheme === alertSchemes.warning,
-    'bg-green-400 dark:bg-green-700': scheme === alertSchemes.succes,
+    'bg-green-400 dark:bg-green-700': scheme === alertSchemes.success,
     'bg-teal-400 dark:bg-teal-700': scheme === alertSchemes.info,
   }"
 >
