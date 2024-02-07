@@ -4,7 +4,7 @@
     <div class="text-4xl font-light">{{ t('heading.contactRequest') }}</div>
     <div class="w-full max-w-lg">{{ t('text.contactRequestForm') }}</div>
     <alert-box
-      v-if="sendingState === alertSchemes.succes"
+      v-if="sendingState === alertSchemes.success"
       :title="t('label.success')"
       @close="sendingState = 0"
       :scheme="alertSchemes.succes"
