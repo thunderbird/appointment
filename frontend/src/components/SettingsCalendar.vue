@@ -268,7 +268,7 @@ const closeModals = async () => {
 
 const refreshData = async () => {
   // Invalidate our calendar store
-  await calendarStore.reset();
+  await calendarStore.$reset();
   await refresh();
   loading.value = false;
 };

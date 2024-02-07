@@ -57,10 +57,10 @@ export const useAppointmentStore = defineStore('appointments', () => {
     await postFetchProcess();
   };
 
-  const reset = () => {
+  const $reset = () => {
     appointments.value = [];
     isLoaded.value = false;
   };
 
-  return { isLoaded, appointments, pendingAppointments, status, postFetchProcess, fetch, reset };
+  return { isLoaded, appointments, pendingAppointments, status, postFetchProcess, fetch, $reset };
 });

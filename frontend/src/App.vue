@@ -96,7 +96,7 @@ const call = createFetch({
         );
       } else if (response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
         // Clear current user data, and ship them to the login screen!
-        await currentUser.reset();
+        await currentUser.$reset();
         await router.push('/login');
         return context;
       }

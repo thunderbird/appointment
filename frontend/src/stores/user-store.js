@@ -16,7 +16,7 @@ export const useUserStore = defineStore('user', () => {
   const data = useLocalStorage('tba/user', structuredClone(initialUserObject));
 
   const exists = () => data.value.accessToken !== null;
-  const reset = () => data.value = structuredClone(initialUserObject);
+  const $reset = () => data.value = structuredClone(initialUserObject);
 
   // retrieve the current signed url and update store
   const updateSignedUrl = async (fetch) => {
@@ -38,7 +38,7 @@ export const useUserStore = defineStore('user', () => {
 
     // Failed to get profile data, log this user out and return false
     if (error.value || !userData.value) {
-      reset();
+      $reset();
       return false;
     }
 
@@ -70,7 +70,7 @@ export const useUserStore = defineStore('user', () => {
   };
 
   const login = async (fetch, username, password) => {
-    reset();
+    $reset();
 
     if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
       // fastapi wants us to send this as formdata :|
@@ -101,10 +101,10 @@ export const useUserStore = defineStore('user', () => {
       console.warn('Error logging out: ', error.value);
     }
 
-    reset();
+    $reset();
   };
 
   return {
-    data, exists, reset, updateSignedUrl, profile, changeSignedUrl, login, logout,
+    data, exists, $reset, updateSignedUrl, profile, changeSignedUrl, login, logout,
   };
 });

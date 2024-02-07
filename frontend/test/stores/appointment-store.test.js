@@ -96,7 +96,7 @@ describe('Appointment Store', () => {
     expect(apmt.appointments.length).toBe(2);
 
     // Reset the user which should null all user data.
-    apmt.reset();
+    apmt.$reset();
 
     // Ensure our data is null/don't exist
     expect(apmt.isLoaded).toBe(false);

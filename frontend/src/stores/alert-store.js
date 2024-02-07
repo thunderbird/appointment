@@ -24,7 +24,7 @@ export const useSiteNotificationStore = defineStore('siteNotification', () => {
     message.value = showMessage;
   };
 
-  const reset = () => {
+  const $reset = () => {
     isVisible.value = false;
     id.value = null;
     title.value = '';
@@ -32,5 +32,5 @@ export const useSiteNotificationStore = defineStore('siteNotification', () => {
     message.value = '';
   };
 
-  return { isVisible, title, actionUrl, message, isSame, lock, show, reset };
+  return { isVisible, title, actionUrl, message, isSame, lock, show, $reset };
 });

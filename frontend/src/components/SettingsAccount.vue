@@ -165,7 +165,7 @@ const call = inject('call');
 const router = useRouter();
 const user = useUserStore();
 const externalConnectionsStore = useExternalConnectionsStore();
-const { zoom: zoomConnections, reset: resetConnections } = storeToRefs(externalConnectionsStore);
+const { zoom: zoomConnections, $reset: resetConnections } = storeToRefs(externalConnectionsStore);
 
 // Currently we only support one zoom account being connected at once.
 const hasZoomAccountConnected = computed(() => (zoomConnections.value.length) > 0);
@@ -309,7 +309,7 @@ const actuallyDeleteAccount = async () => {
   }
 
   // We can't logout since we've deleted the user by now, so just delete local storage data.
-  await user.reset();
+  await user.$reset();
   await router.push('/');
 };
 

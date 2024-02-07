@@ -32,7 +32,7 @@ describe('Site Notifications Store', () => {
   test('invisible after reset', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
-    alert.reset();
+    alert.$reset();
     expect(alert.isVisible).toBe(false);
   });
   test('lock', () => {

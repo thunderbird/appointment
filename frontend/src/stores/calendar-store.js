@@ -1,15 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-// const initialData = {
-//   calendars: [],
-//   isInit: false,
-// };
-
 // eslint-disable-next-line import/prefer-default-export
 export const useCalendarStore = defineStore('calendars', () => {
-  // const data = ref(structuredClone(initialData));
-
   // State
   const isLoaded = ref(false);
 
@@ -32,10 +25,10 @@ export const useCalendarStore = defineStore('calendars', () => {
     }
   };
 
-  const reset = () => {
+  const $reset = () => {
     calendars.value = [];
     isLoaded.value = false;
   };
   
-  return { isLoaded, calendars, unconnectedCalendars, connectedCalendars, fetch, reset };
+  return { isLoaded, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset };
 });
