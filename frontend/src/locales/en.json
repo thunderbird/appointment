@@ -219,7 +219,7 @@
     "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
     "calendarDeletionWarning": "Disconnecting this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
-    "contactRequestForm": "Please use the contact form below to send any feedback on Thunderbird Appointment, questions, support requests or angry rants.",
+    "contactRequestForm": "Please use the contact form below to send any feedback, questions, or concerns to our support team. If needed we will try and contact you for further information as soon as possible.",
     "connectZoom": "You can connect your Zoom account to enable instant meeting invites with your appointments.",
     "defineDaysAndTimeSlots": "Choose the days and times this event can be booked.",
     "denialSentToAddress": "We've let the booker ({address}) know you can't make this event.",
