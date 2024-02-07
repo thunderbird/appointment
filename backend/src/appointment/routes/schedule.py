@@ -272,8 +272,13 @@ def decide_on_schedule_availability_slot(
                 if os.getenv('SENTRY_DSN') != '':
                     capture_exception(err)
 
+        attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+        subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
+
+        title = f"Appointment - {subscriber_name} and {attendee_name}"
+
         event = schemas.Event(
-            title=schedule.name,
+            title=title,
             start=slot.start.replace(tzinfo=timezone.utc),
             end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
             description=schedule.details,

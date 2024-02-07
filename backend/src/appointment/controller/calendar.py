@@ -310,7 +310,7 @@ class Tools:
         """send a booking confirmation email to attendee with .ics file attached"""
         invite = Attachment(
             mime=("text", "calendar"),
-            filename="invite.ics",
+            filename="AppointmentInvite.ics",
             data=self.create_vevent(appointment, slot, organizer),
         )
         background_tasks.add_task(send_invite_email, to=attendee.email, attachment=invite)
