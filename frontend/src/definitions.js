@@ -122,7 +122,7 @@ export const modalStates = {
 export const alertSchemes = {
   error: 1, // Alert indicates something's gone wrong
   warning: 2, // Alert indicates something important
-  succes: 3, // Alert indicates something's gone right
+  success: 3, // Alert indicates something's gone right
   info: 4, // Alert indicates some neutral information
 };
 
