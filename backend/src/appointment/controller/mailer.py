@@ -78,16 +78,16 @@ class Mailer:
     def build(self):
         """build email header, body and attachments"""
         # create mail header
-        message = MIMEMultipart()
+        message = MIMEMultipart('alternative')
         message["Subject"] = self.subject
         message["From"] = self.sender
         message["To"] = self.to
 
         # add body as html and text parts
-        if self.html():
-            message.attach(MIMEText(self.html(), "html"))
         if self.text():
             message.attach(MIMEText(self.text(), "plain"))
+        if self.html():
+            message.attach(MIMEText(self.html(), "html"))
 
         # add attachment(s) as multimedia parts
         for a in self.attachments:
@@ -142,7 +142,7 @@ class InvitationMail(Mailer):
         """init Mailer with invitation specific defaults"""
         default_kwargs = {
             "subject": l10n('invite-mail-subject'),
-            "plain": l10n('invite-mail-body'),
+            "plain": l10n('invite-mail-plain'),
         }
         super(InvitationMail, self).__init__(*args, **default_kwargs, **kwargs)
 
