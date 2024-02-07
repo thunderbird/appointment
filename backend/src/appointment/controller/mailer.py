@@ -236,3 +236,26 @@ class PendingRequestMail(Mailer):
 
     def html(self):
         return get_template("pending.jinja2").render(owner=self.owner, date=self.date)
+
+
+class SupportRequestMail(Mailer):
+    def __init__(self, requestee, topic, details, *args, **kwargs):
+        """init Mailer with support specific defaults"""
+        self.requestee = requestee
+        self.topic = topic
+        self.details = details
+        default_kwargs = {
+            "subject": l10n('support-mail-subject', { 'topic': topic })
+        }
+        super(SupportRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n('support-mail-plain', {
+            'requestee_name': self.requestee.name,
+            'requestee_email': self.requestee.email,
+            'topic': self.topic,
+            'details': self.details,
+        })
+
+    def html(self):
+        return get_template("support.jinja2").render(requestee=self.requestee, topic=self.topic, details=self.details)

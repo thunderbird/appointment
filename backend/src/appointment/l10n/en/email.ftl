@@ -55,6 +55,7 @@ reject-mail-plain = { $owner_name } denied your booking request for this time sl
                     {-brand-footer}
 
 ## Pending Appointment
+
 pending-mail-subject = Your booking request is pending approval
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
@@ -77,3 +78,28 @@ zoom-invite-failed-html-heading = Unfortunately there was an error creating your
 # $title - The appointment's title
 zoom-invite-failed-plain = Unfortunately there was an error creating your Zoom meeting for your upcoming appointment: { $title }.
                            {-brand-footer}
+
+## Support Request
+
+# Variables:
+# $topic (String) - Custom subject from the requestee
+support-mail-subject = Support request: { $topic }
+# Variables:
+# $requestee_name (String) - Name of the person who did the request
+# $requestee_email (String) - Email address of the person who did the request
+support-mail-html-heading = { $requestee_name } ({ $requestee_email }) send the following request via the support form on {-brand-name}.
+# Variables:
+# $topic (String) - Topic selected by the person who did the request
+support-mail-html-topic = { $topic }
+# Variables:
+# $details (String) - Detailed description given by the person who did the request
+support-mail-html-details = { $details }
+# Variables:
+# $requestee_name (String) - Name of the person who did the request
+# $requestee_email (String) - Email address of the person who did the request
+# $topic (String) - Topic selected by the person who did the request
+# $details (String) - Detailed description given by the person who did the request
+support-mail-plain = { $requestee_name } ({ $requestee_email }) send the following request via the support form on {-brand-name}.
+                    Topic: { $topic }
+                    Details: { $details }
+                    {-brand-footer}

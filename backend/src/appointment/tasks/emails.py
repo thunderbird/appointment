@@ -1,5 +1,5 @@
 from appointment.controller.mailer import PendingRequestMail, ConfirmationMail, InvitationMail, ZoomMeetingFailedMail, \
-    RejectionMail
+    RejectionMail, SupportRequestMail
 
 
 def send_invite_email(to, attachment):
@@ -39,4 +39,14 @@ def send_rejection_email(owner, date, to):
 
 def send_zoom_meeting_failed_email(to, appointment_title):
     mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title)
+    mail.send()
+
+
+def send_support_email(requestee, topic, details, to):
+    mail = PendingRequestMail(
+        requestee=requestee,
+        topic=topic,
+        details=details,
+        to=to
+    )
     mail.send()

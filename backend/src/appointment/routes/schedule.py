@@ -9,7 +9,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
-from ..controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, PendingRequestMail
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType

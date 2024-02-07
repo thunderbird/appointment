@@ -1,0 +1,12 @@
+<html lang="{{ l10n('locale') }}">
+  <body>
+    <p>
+      {{ l10n('support-mail-html-heading', {'requestee_name': requestee.name, 'requestee_email': requestee.email}) }}
+    </p>
+    <p>
+      <b>{{ l10n('support-mail-html-topic', {'topic': topic}) }}</b><br>
+      {{ l10n('support-mail-html-details', {'details': details}) }}
+    </p>
+    {% include 'includes/footer.jinja2' %}
+  </body>
+</html>
