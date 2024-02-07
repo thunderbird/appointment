@@ -2,11 +2,11 @@
   <!-- authenticated subscriber content -->
   <template v-if="isAuthenticated">
     <site-notification
-      v-if="siteNotificationStore.isVisible"
-      :title="siteNotificationStore.title"
-      :action-url="siteNotificationStore.actionUrl"
+      v-if="visibleNotification"
+      :title="notificationTitle"
+      :action-url="notificationActionUrl"
     >
-      {{ siteNotificationStore.message }}
+      {{ notificationMessage }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
     <main :class="{'mx-4 pt-24 lg:mx-8 min-h-full pb-24': !routeIsHome, 'pt-32': routeIsHome}">
@@ -37,6 +37,7 @@ import TitleBar from '@/components/TitleBar';
 import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification';
 import { useSiteNotificationStore } from '@/stores/alert-store';
+import { storeToRefs } from 'pinia';
 
 // stores
 import { useUserStore } from '@/stores/user-store';
@@ -49,6 +50,15 @@ const apiUrl = inject('apiUrl');
 const route = useRoute();
 const router = useRouter();
 const siteNotificationStore = useSiteNotificationStore();
+const {
+  isVisible: visibleNotification,
+  title: notificationTitle,
+  actionUrl: notificationActionUrl,
+  message: notificationMessage,
+  isSame: isSameNotification,
+  lock: lockNotification,
+  show: showNotification
+} = storeToRefs(siteNotificationStore);
 
 // handle auth and fetch
 const isAuthenticated = computed(() => currentUser?.exists());
@@ -68,17 +78,17 @@ const call = createFetch({
       // Catch any google refresh error that may occur
       if (
         data?.detail?.id === 'GOOGLE_REFRESH_ERROR'
-        && !siteNotificationStore.isSameNotification('GOOGLE_REFRESH_ERROR')
+        && !isSameNotification('GOOGLE_REFRESH_ERROR')
       ) {
         // Ensure other async calls don't reach here
-        siteNotificationStore.lock(data.detail.error);
+        lockNotification(data.detail.error);
 
         // Retrieve the google auth url, and if that fails send them to calendar settings!
         const { data: urlData, error: urlError } = await call('google/auth').get();
         const url = urlError.value ? '/settings/calendar' : urlData.value.slice(1, -1);
 
         // Update our site notification store with the error details
-        siteNotificationStore.show(
+        showNotification(
           data.detail.error,
           'Action needed!',
           data.detail?.message || 'Please re-connect with Google',
@@ -86,7 +96,7 @@ const call = createFetch({
         );
       } else if (response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
         // Clear current user data, and ship them to the login screen!
-        await currentUser.reset();
+        await currentUser.$reset();
         await router.push('/login');
         return context;
       }
@@ -125,9 +135,6 @@ const routeIsHome = computed(
   () => ['home'].includes(route.name),
 );
 
-// check appointment status for current state (past|pending|booked)
-const getAppointmentStatus = (a) => appointmentStore.status(a);
-
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
   if (currentUser?.exists()) {
@@ -140,5 +147,4 @@ const getDbData = async () => {
 
 // provide refresh functions for components
 provide('refresh', getDbData);
-provide('getAppointmentStatus', getAppointmentStatus);
 </script>

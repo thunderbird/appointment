@@ -2,7 +2,6 @@ import { expect, test, beforeEach, describe } from 'vitest';
 import { useSiteNotificationStore } from '@/stores/alert-store';
 import { createPinia, setActivePinia } from 'pinia';
 
-
 describe('Site Notifications Store', () => {
   // Create a pinia instance before each test
   beforeEach(() => {
@@ -24,7 +23,7 @@ describe('Site Notifications Store', () => {
   test('same', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
-    expect(alert.isSameNotification(123)).toBe(true);
+    expect(alert.isSame(123)).toBe(true);
   });
   test('invisible at start', () => {
     const alert = useSiteNotificationStore();
@@ -33,13 +32,13 @@ describe('Site Notifications Store', () => {
   test('invisible after reset', () => {
     const alert = useSiteNotificationStore();
     alert.show(123, 'title', 'message', 'url');
-    alert.reset();
+    alert.$reset();
     expect(alert.isVisible).toBe(false);
   });
   test('lock', () => {
     const alert = useSiteNotificationStore();
     alert.lock(123);
     expect(alert.isVisible).toBe(false);
-    expect(alert.isSameNotification(123)).toBe(true);
+    expect(alert.isSame(123)).toBe(true);
   });
 });

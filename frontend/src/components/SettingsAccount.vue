@@ -146,6 +146,7 @@ import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
+import { storeToRefs } from 'pinia';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -164,10 +165,11 @@ const call = inject('call');
 const router = useRouter();
 const user = useUserStore();
 const externalConnectionsStore = useExternalConnectionsStore();
+const { zoom: zoomConnections, $reset: resetConnections } = storeToRefs(externalConnectionsStore);
 
 // Currently we only support one zoom account being connected at once.
-const hasZoomAccountConnected = computed(() => (externalConnectionsStore.zoom.length) > 0);
-const zoomAccountName = computed(() => (externalConnectionsStore.zoom[0]?.name ?? null));
+const hasZoomAccountConnected = computed(() => (zoomConnections.value.length) > 0);
+const zoomAccountName = computed(() => (zoomConnections.value[0]?.name ?? null));
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -236,7 +238,7 @@ const connectZoom = async () => {
 };
 const disconnectZoom = async () => {
   await call('zoom/disconnect').post();
-  await useExternalConnectionsStore().reset();
+  await resetConnections();
   await refreshData();
 };
 
@@ -307,7 +309,7 @@ const actuallyDeleteAccount = async () => {
   }
 
   // We can't logout since we've deleted the user by now, so just delete local storage data.
-  await user.reset();
+  await user.$reset();
   await router.push('/');
 };
 

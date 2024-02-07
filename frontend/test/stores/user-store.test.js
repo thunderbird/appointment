@@ -101,7 +101,7 @@ describe('User Store', () => {
   });
   test('does not exist', () => {
     const user = useUserStore();
-    user.reset();
+    user.$reset();
     expect(user.exists()).toBe(false);
   });
   test('reset', () => {
@@ -120,7 +120,7 @@ describe('User Store', () => {
     expect(user.exists() === true);
 
     // Reset the user which should null all user data.
-    user.reset();
+    user.$reset();
 
     // Ensure our data is null/don't exist
     expect(user.exists()).toBe(false);

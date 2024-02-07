@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row w-full m-8 mt-0 justify-center">
-    <alert-box title="Calendar Setup" scheme="alert" v-if="calendarStore.connectedCalendars.length === 0 && !hideUntilRefreshed">
+    <alert-box title="Calendar Setup" scheme="alert" v-if="connectedCalendars.length === 0 && !hideUntilRefreshed">
       <i18n-t keypath="error.noConnectedCalendars" tag="label" for="error.noConnectedCalendars">
         <a class="underline" href="/settings/calendar" target="_blank">{{ t('error.noConnectedCalendarsLink') }}</a>
       </i18n-t>
@@ -28,7 +28,7 @@
       />
       <primary-button
         :label="t('label.createAppointments')"
-        :disabled="!calendarStore.connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
+        :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
         @click="creationStatus = appointmentCreationState.details"
       />
     </div>
@@ -96,7 +96,7 @@
             </div>
             <primary-button
               :label="t('label.createAppointments')"
-              :disabled="!calendarStore.connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
+              :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
               @click="creationStatus = appointmentCreationState.details"
             />
           </div>
@@ -113,7 +113,7 @@
       <appointment-creation
         v-else
         :status="creationStatus"
-        :calendars="calendarStore.connectedCalendars"
+        :calendars="connectedCalendars"
         @start="creationStatus = appointmentCreationState.details"
         @next="creationStatus = appointmentCreationState.availability"
         @create="
@@ -142,6 +142,7 @@ import TabBar from '@/components/TabBar';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import { storeToRefs } from 'pinia';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -152,6 +153,7 @@ const refresh = inject('refresh');
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
+const { connectedCalendars } = storeToRefs(calendarStore);
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
@@ -216,7 +218,7 @@ const getRemoteEvents = async (from, to) => {
   const inclusiveTo = dj(to).add(1, 'day').format('YYYY-MM-DD');
 
   calendarEvents.value = [];
-  await Promise.all(calendarStore.connectedCalendars.map(async (calendar) => {
+  await Promise.all(connectedCalendars.value.map(async (calendar) => {
     const { data } = await call(`rmt/cal/${calendar.id}/${from}/${inclusiveTo}`).get().json();
     if (Array.isArray(data.value)) {
       calendarEvents.value.push(...data.value.map((e) => ({ ...e, duration: dj(e.end).diff(dj(e.start), 'minutes') })));

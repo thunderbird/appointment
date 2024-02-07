@@ -1,30 +1,42 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-const initialData = {
-  isInit: false,
-  zoom: [],
-  fxa: [],
-};
-
 // eslint-disable-next-line import/prefer-default-export
 export const useExternalConnectionsStore = defineStore('externalConnections', () => {
-  const data = ref(structuredClone(initialData));
+  // State
+  const isLoaded = ref(false);
 
-  const connections = computed(() => data.value);
-  const isLoaded = computed(() => data.value.isInit);
-  const fxa = computed(() => data.value.fxa ?? []);
-  const zoom = computed(() => data.value.zoom ?? []);
+  // Data
+  const zoom = ref([]);
+  const fxa = ref([]);
+  const connections = computed(() => ({
+    zoom: zoom.value,
+    fxa: fxa.value,
+  }));
 
+  /**
+   * Get all external connections for current user
+   * @param {function} call preconfigured API fetch function
+   */
   const fetch = async (call) => {
     if (isLoaded.value) {
       return;
     }
 
-    const { data: connectionsData } = await call('account/external-connections').get().json();
-    data.value = { ...connectionsData.value, isInit: true };
+    const { data } = await call('account/external-connections').get().json();
+    zoom.value = data.value?.zoom ?? [];
+    fxa.value = data.value?.fxa ?? [];
+    isLoaded.value = true;
   };
-  const reset = () => data.value = structuredClone(initialData);
 
-  return { data, connections, isLoaded, fxa, zoom, fetch, reset };
+  /**
+   * Restore default state, empty and unload connections
+   */
+  const $reset = () => {
+    zoom.value = [];
+    fxa.value = [];
+    isLoaded.value = false;
+  };
+
+  return { connections, isLoaded, fxa, zoom, fetch, $reset };
 });

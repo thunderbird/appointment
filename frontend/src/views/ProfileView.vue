@@ -16,12 +16,12 @@
     <div class="grid grid-cols-2 mt-8 mb-12 gap-8">
       <!-- calendars -->
       <div class="flex flex-col items-center">
-        <div class="text-3xl font-semibold">{{ calendarStore.connectedCalendars.length }}/&infin;</div>
+        <div class="text-3xl font-semibold">{{ connectedCalendars.length }}</div>
         <div class="text-gray-500 text-center">{{ t('heading.calendarsConnected') }}</div>
       </div>
       <!-- appointments -->
       <div class="flex flex-col items-center">
-        <div class="text-3xl font-semibold">{{ appointmentStore.pendingAppointments.length }}</div>
+        <div class="text-3xl font-semibold">{{ pendingAppointments.length }}</div>
         <div class="text-gray-500 text-center">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
@@ -36,6 +36,7 @@ import { keyByValue } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { subscriberLevels } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
+import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 
@@ -59,6 +60,8 @@ const isFxaAuth = inject('isFxaAuth');
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
+const { pendingAppointments } = storeToRefs(appointmentStore);
+const { connectedCalendars } = storeToRefs(calendarStore);
 
 // do log out
 const logout = async () => {
