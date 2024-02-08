@@ -5,14 +5,18 @@
     text-white shadow-black/30"
   role="alert"
   :class="{
-    'bg-rose-600 dark:bg-rose-900': isError,
-    'bg-orange-400 dark:bg-orange-700': isAlert,
+    'bg-rose-600 dark:bg-rose-900': scheme === alertSchemes.error,
+    'bg-orange-400 dark:bg-orange-700': scheme === alertSchemes.warning,
+    'bg-green-400 dark:bg-green-700': scheme === alertSchemes.success,
+    'bg-teal-400 dark:bg-teal-700': scheme === alertSchemes.info,
   }"
 >
   <span class="flex rounded-full uppercase px-2 py-1 text-center text-xs font-bold mr-3"
     :class="{
-      'bg-rose-500 dark:bg-rose-800': isError,
-      'bg-orange-500 dark:bg-orange-800': isAlert,
+      'bg-rose-500 dark:bg-rose-800': scheme === alertSchemes.error,
+      'bg-orange-500 dark:bg-orange-800': scheme === alertSchemes.warning,
+      'bg-green-500 dark:bg-green-800': scheme === alertSchemes.success,
+      'bg-teal-500 dark:bg-teal-800': scheme === alertSchemes.info,
     }"
   >
     {{ title }}
@@ -27,19 +31,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import { IconX } from '@tabler/icons-vue';
+import { alertSchemes } from "@/definitions";
 
 const props = defineProps({
   title: String,
   scheme: {
-    type: String,
-    default: 'error',
+    type: Number,
+    default: alertSchemes.error,
   },
 });
-
-const isError = computed(() => props.scheme === 'error');
-const isAlert = computed(() => props.scheme === 'alert');
 
 const emit = defineEmits(['close']);
 

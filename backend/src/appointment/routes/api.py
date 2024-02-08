@@ -10,8 +10,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
-
-from ..controller.mailer import ZoomMeetingFailedMail
 from ..database import repo, schemas
 
 # authentication
@@ -28,7 +26,7 @@ from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
-from ..tasks.emails import send_zoom_meeting_failed_email
+from ..tasks.emails import send_zoom_meeting_failed_email, send_support_email
 
 router = APIRouter()
 
@@ -490,3 +488,19 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
         content_type="text/calendar",
         data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8"),
     )
+
+
+@router.post("/support")
+def get_my_signature(
+    form_data: schemas.SupportRequest,
+    background_tasks: BackgroundTasks,
+    subscriber: Subscriber = Depends(get_subscriber)
+):
+    """Send a subscriber's support request to the configured support email address"""
+    background_tasks.add_task(
+        send_support_email,
+        requestee=subscriber,
+        topic=form_data.topic,
+        details=form_data.details,
+    )
+    return True

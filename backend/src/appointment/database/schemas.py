@@ -299,6 +299,11 @@ class ExternalConnectionOut(BaseModel):
     type_id: str
 
 
+class SupportRequest(BaseModel):
+    topic: str
+    details: str
+
+
 """Auth"""
 
 

@@ -69,19 +69,25 @@ const routes = [
   {
     path: "/appointments/:view?",
     name: "appointments",
-    component: () => import(/* webpackChunkName: "appointments" */ "@/views/AppointmentsView"),
+    component: () => import("@/views/AppointmentsView"),
     beforeEnter: authGuard,
   },
   {
     path: "/settings/:view?",
     name: "settings",
-    component: () => import(/* webpackChunkName: "settings" */ "@/views/SettingsView"),
+    component: () => import("@/views/SettingsView"),
     beforeEnter: authGuard,
   },
   {
     path: "/profile",
     name: "profile",
-    component: () => import(/* webpackChunkName: "profile" */ "@/views/ProfileView"),
+    component: () => import("@/views/ProfileView"),
+    beforeEnter: authGuard,
+  },
+  {
+    path: "/contact",
+    name: "contact",
+    component: () => import("@/views/ContactView"),
     beforeEnter: authGuard,
   },
   {

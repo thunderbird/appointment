@@ -1,6 +1,10 @@
 <template>
   <div class="flex flex-col lg:flex-row w-full m-8 mt-0 justify-center">
-    <alert-box title="Calendar Setup" scheme="alert" v-if="connectedCalendars.length === 0 && !hideUntilRefreshed">
+    <alert-box
+      title="Calendar Setup"
+      :scheme="alertSchemes.warning"
+      v-if="connectedCalendars.length === 0 && !hideUntilRefreshed"
+    >
       <i18n-t keypath="error.noConnectedCalendars" tag="label" for="error.noConnectedCalendars">
         <a class="underline" href="/settings/calendar" target="_blank">{{ t('error.noConnectedCalendarsLink') }}</a>
       </i18n-t>
@@ -127,7 +131,7 @@
 </template>
 
 <script setup>
-import { appointmentCreationState, calendarViews } from '@/definitions';
+import { appointmentCreationState, calendarViews, alertSchemes } from '@/definitions';
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';

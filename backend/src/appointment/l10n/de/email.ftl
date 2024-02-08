@@ -77,3 +77,28 @@ zoom-invite-failed-html-heading = Leider ist bei der Erstellung des Zoom-Meeting
 # $title - The appointment's title
 zoom-invite-failed-plain = Leider ist bei der Erstellung des Zoom-Meetings für Deinen nächsten Termin ein Fehler aufgetreten: { $title }.
                            {-brand-footer}
+
+## Support Request
+
+# Variables:
+# $topic (String) - Custom subject from the requestee
+support-mail-subject = Supportanfrage: { $topic }
+# Variables:
+# $requestee_name (String) - Name of the person who did the request
+# $requestee_email (String) - Email address of the person who did the request
+support-mail-html-heading = { $requestee_name } ({ $requestee_email }) hat folgende Supportanfrage per Kontaktformular auf {-brand-name} gestellt.
+# Variables:
+# $topic (String) - Topic selected by the person who did the request
+support-mail-html-topic = { $topic }
+# Variables:
+# $details (String) - Detailed description given by the person who did the request
+support-mail-html-details = { $details }
+# Variables:
+# $requestee_name (String) - Name of the person who did the request
+# $requestee_email (String) - Email address of the person who did the request
+# $topic (String) - Topic selected by the person who did the request
+# $details (String) - Detailed description given by the person who did the request
+support-mail-plain = { $requestee_name } ({ $requestee_email }) hat folgende Supportanfrage per Kontaktformular auf {-brand-name}.
+                    Thema: { $topic }
+                    Inhalt: { $details }
+                    {-brand-footer}

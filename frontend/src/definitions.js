@@ -119,6 +119,13 @@ export const modalStates = {
   finished: 4, // Modal is finished, so either self-close, or show a success screen
 };
 
+export const alertSchemes = {
+  error: 1, // Alert indicates something's gone wrong
+  warning: 2, // Alert indicates something important
+  success: 3, // Alert indicates something's gone right
+  info: 4, // Alert indicates some neutral information
+};
+
 export default {
   subscriberLevels,
   appointmentState,
