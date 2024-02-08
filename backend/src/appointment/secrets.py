@@ -34,6 +34,7 @@ def normalize_secrets():
         os.environ["SMTP_PORT"] = secrets.get("port")
         os.environ["SMTP_USER"] = secrets.get("username")
         os.environ["SMTP_PASS"] = secrets.get("password")
+        os.environ["SUPPORT_EMAIL"] = secrets.get("support")
 
     google_oauth_secrets = os.getenv("GOOGLE_OAUTH_SECRETS")
 

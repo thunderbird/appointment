@@ -1,5 +1,5 @@
 import os
-from defines import DAY1, DAY5
+from defines import DAY1, DAY5, auth_headers
 
 
 class TestGeneral:
@@ -72,3 +72,14 @@ class TestGeneral:
         assert response.status_code == 401
         response = with_client.get("/google/auth")
         assert response.status_code == 401
+
+    def test_send_feedback(self, with_client):
+        response = with_client.post(
+            "/support",
+            json={
+                'topic': 'Hello World',
+                'details': 'Hello World but longer'
+            },
+            headers=auth_headers)
+        assert response.status_code == 200
+

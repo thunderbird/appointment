@@ -24,7 +24,7 @@ from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
-from ..exceptions.validation import RemoteCalendarConnectionError
+from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
 from ..tasks.emails import send_zoom_meeting_failed_email, send_support_email
 
@@ -491,12 +491,15 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
 
 
 @router.post("/support")
-def get_my_signature(
+def send_feedback(
     form_data: schemas.SupportRequest,
     background_tasks: BackgroundTasks,
     subscriber: Subscriber = Depends(get_subscriber)
 ):
     """Send a subscriber's support request to the configured support email address"""
+    if not os.getenv("SUPPORT_EMAIL"):
+        raise APIException()
+
     background_tasks.add_task(
         send_support_email,
         requestee=subscriber,
