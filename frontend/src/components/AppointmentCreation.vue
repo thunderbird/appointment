@@ -99,21 +99,11 @@
           <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.notes") }}
           </div>
-          <textarea
+          <text-input
             v-model="appointment.details"
             :placeholder="t('placeholder.writeHere')"
-            class="rounded-md w-full text-sm h-40 resize-none place-holder"
-            :maxlength="charLimit"
-          ></textarea>
-          <div
-            class="absolute bottom-3 right-3 text-xs"
-            :class="{
-              'text-orange-500': charCount >= charLimit * 0.92,
-              '!text-rose-600': charCount === charLimit,
-            }"
-          >
-            {{ charCount }}/{{ charLimit }}
-          </div>
+            :maxlength="250"
+          />
         </label>
       </div>
     </div>
@@ -259,6 +249,7 @@ import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
 import CalendarMonth from "@/components/CalendarMonth";
 import PrimaryButton from "@/elements/PrimaryButton";
 import SecondaryButton from "@/elements/SecondaryButton";
+import TextInput from '@/elements/TextInput.vue';
 import TabBar from "@/components/TabBar";
 
 // icons
@@ -339,10 +330,6 @@ const slotList = computed(() => {
   });
   return list;
 });
-
-// handle notes char limit
-const charLimit = 250;
-const charCount = computed(() => appointment.details.length);
 
 // calculate validity of input data for each step (to show corresponding indicators)
 const validStep1 = computed(() => appointment.title !== "");

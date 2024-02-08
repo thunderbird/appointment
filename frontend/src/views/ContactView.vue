@@ -7,7 +7,7 @@
       v-if="sendingState === alertSchemes.success"
       :title="t('label.success')"
       @close="sendingState = 0"
-      :scheme="alertSchemes.succes"
+      :scheme="alertSchemes.success"
     >
       {{ t('info.messageWasSent') }}
     </alert-box>
@@ -26,26 +26,15 @@
         </div>
         <input type="text" v-model="topic" class="rounded-md w-full" required />
       </label>
-      <label class="relative flex flex-col gap-1">
+      <label class="flex flex-col gap-1">
         <div class="font-medium text-gray-500 dark:text-gray-300">
           {{ t("label.message") }}
         </div>
-        <textarea
+        <text-input
           v-model="details"
           :placeholder="t('placeholder.writeHere')"
-          class="rounded-md w-full text-sm h-40 place-holder"
-          :maxlength="charLimit"
-          required
-        ></textarea>
-        <div
-          class="absolute bottom-3 right-3 text-xs"
-          :class="{
-            'text-orange-500': charCount >= charLimit * 0.92,
-            '!text-rose-600': charCount === charLimit,
-          }"
-        >
-          {{ charCount }}/{{ charLimit }}
-        </div>
+          :maxlength="2500"
+        />
       </label>
     </form>
     <primary-button @click="send">
@@ -56,12 +45,13 @@
 </template>
 
 <script setup>
-import { inject, ref, computed } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { alertSchemes } from '@/definitions';
 import PrimaryButton from '@/elements/PrimaryButton';
 import AlertBox from '@/elements/AlertBox.vue';
+import TextInput from '@/elements/TextInput.vue';
 
 // icons
 import { IconSend } from '@tabler/icons-vue';
@@ -76,10 +66,6 @@ const form = ref(null);
 const topic = ref('');
 const details = ref('');
 const sendingState = ref(0);
-
-// handle notes char limit
-const charLimit = 2500;
-const charCount = computed(() => details.value.length);
 
 // empty all form inputs
 const resetForm = () => {
