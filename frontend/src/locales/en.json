@@ -9,7 +9,13 @@
     "noConnectedCalendars": "Calendar setup required. Connect a calendar to continue. {0}.",
     "noConnectedCalendarsLink": "Go to settings",
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
-    "usernameIsNotAvailable": "Username not available. Please choose another."
+    "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
+    "usernameIsNotAvailable": "Username not available. Please choose another.",
+    "minimumValue": "{field} should be at least {value}."
+  },
+  "fields": {
+    "slot_duration": "Slot Duration",
+    "unknown": "Unknown"
   },
   "heading": {
     "accountData": "Account data",
@@ -257,5 +263,9 @@
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
     "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work."
+  },
+  "units": {
+    "minutes": "{value} minutes",
+    "none": "{value}"
   }
 }
