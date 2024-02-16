@@ -16,6 +16,15 @@
       @next="dateNav('month')"
       @back="activeView = views.month"
     />
+    <calendar-qalendar
+      class="w-full md:w-4/5"
+      :selected="activeDate"
+      :appointments="[appointment]"
+      :booking="true"
+      @event-selected="selectEvent"
+    >
+    </calendar-qalendar>
+    <!--
     <calendar-month
       v-if="(activeView === views.month)"
       :selected="activeDate"
@@ -37,6 +46,7 @@
       :booking="true"
       @event-selected="selectEvent"
     />
+    -->
   </div>
   <!-- fixed footer with action button -->
   <footer
@@ -68,6 +78,7 @@ import CalendarPageHeading from '@/elements/CalendarPageHeading';
 import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
 import { computed, inject } from 'vue';
+import CalendarQalendar from '@/components/CalendarQalendar.vue';
 
 const { t } = useI18n();
 const dj = inject('dayjs');
@@ -151,7 +162,7 @@ const selectEvent = (day) => {
   // set event selected
   for (let i = 0; i < appointment.value.slots.length; i += 1) {
     const slot = appointment.value.slots[i];
-    if (slot.start === day) {
+    if (slot.start.format('YYYY-MM-DD HH:mm') === day) {
       slot.selected = true;
       const e = { ...appointment.value, ...slot };
       delete e.slots;
