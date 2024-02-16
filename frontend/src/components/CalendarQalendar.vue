@@ -4,6 +4,8 @@ import {
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
+import CalendarMonthDay from '@/elements/CalendarMonthDay.vue';
+import QalendarMonthDay from '@/elements/QalendarMonthDay.vue';
 
 // component constants
 const dj = inject('dayjs');
@@ -35,6 +37,7 @@ const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split('
 const timeFormat = ref(Number(localStorage?.getItem('timeFormat')) ?? detectedTimeFormat);
 const displayFormat = ref(timeFormat.value === 12 ? dateFormatStrings.display12Hour : dateFormatStrings.display24Hour);
 const calendarColors = ref({});
+const selectedDate = ref(null);
 
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
@@ -50,8 +53,8 @@ const config = ref({
   },
   defaultMode: 'month',
   dayIntervals: {
-    length: 10, // Length in minutes of each interval. Accepts values 15, 30 and 60 (the latter is the default)
-    height: 50, // The height of each interval
+    length: 15, // Length in minutes of each interval. Accepts values 15, 30 and 60 (the latter is the default)
+    height: 40, // The height of each interval
     // displayClickableInterval: true, // Needs to be set explicitly to true, if you want to display clickable intervals
   },
   dayBoundaries: {
@@ -66,6 +69,8 @@ const config = ref({
 
 /* Event Handlers */
 const eventSelected = (evt) => {
+  console.log('Selected', evt.clickedEvent.id);
+  selectedDate.value = evt.clickedEvent.id;
   emit('eventSelected', evt.clickedEvent.id);
 };
 const dateChange = (evt) => {
@@ -121,6 +126,7 @@ const calendarEvents = computed(() => {
     description: event.description,
   })) ?? [];
 
+  console.log(appointments.value);
   // Mix in appointments
   const evtApmts = appointments?.value?.map((appointment) => appointment.slots.map((slot) => ({
     id: appointment.id ?? applyTimezone(slot.start).format(dateFormatStrings.qalendar),
@@ -137,6 +143,16 @@ const calendarEvents = computed(() => {
     },
     description: appointment.details,
     with: slot.attendee ? [slot.attendee].map((attendee) => `${attendee.name} <${attendee.email}>`).join(', ') : '',
+    customData: {
+      booking_status: slot?.booking_status ?? 1,
+      calendar_title: 'booking',
+      calendar_color: 'rgb(45, 212, 191)',
+      duration: slot.duration,
+      preview: false,
+      all_day: false,
+      remote: false,
+    },
+    isCustom: true,
   }))).flat(1) ?? [];
 
   return [...evts, ...evtApmts];
@@ -163,16 +179,27 @@ const calendarEvents = computed(() => {
     </template>
 
       <template #weekDayEvent="eventProps">
-        <!-- TODO: Replace these with our custom styles -->
-      <div :style="{ backgroundColor: 'cornflowerblue', color: '#fff', width: '100%', height: '100%', overflow: 'hidden' }">
-          <span>{{ eventProps.eventData.time.start }}</span>
-
-          <span>{{ eventProps.eventData.title }}</span>
-        </div>
+        <QalendarMonthDay
+          :isActive="true"
+          :isSelected="selectedDate === eventProps.eventData.id"
+          :isToday="false"
+          :showDetails="false"
+          :disabled="false"
+          :placeholder="true"
+          :event="eventProps.eventData"
+        ></QalendarMonthDay>
       </template>
 
       <template #monthEvent="monthEventProps">
-        <span>{{ monthEventProps.eventData.title }}</span>
+        <QalendarMonthDay
+          :isActive="true"
+          :isSelected="selectedDate === monthEventProps.eventData.id"
+          :isToday="false"
+          :showDetails="false"
+          :disabled="false"
+          :placeholder="true"
+          :event="monthEventProps.eventData"
+        ></QalendarMonthDay>
       </template>
     </Qalendar>
   </div>
@@ -196,6 +223,7 @@ const calendarEvents = computed(() => {
   }
 }
 
+/* Override some of Qalendar's css variables */
 .calendar-root-wrapper * {
   /** Font overrides */
   --qalendar-font-3xs: theme('fontSize.xs') !important;
@@ -219,12 +247,19 @@ const calendarEvents = computed(() => {
   --qalendar-dark-mode-line-color: var(--qalendar-appointment-border-color);
 }
 
+/* Ensure month days are at minimum 8rem */
+.calendar-root-wrapper .calendar-month__weekday {
+  min-height: theme('height.32') !important;
+}
+
+/* Adjust the background of the entire component */
 .calendar-root-wrapper .calendar-root {
   background-color: var(--qalendar-appointment-bg) !important;
   border-radius: var(--qalendar-appointment-border-radius) !important;
   border-color: var(--qalendar-appointment-border-color) !important;
 }
 
+/* Make the header are our cool foreground colour */
 .calendar-root-wrapper .calendar-header,
 .calendar-root-wrapper .calendar-month__week-day-names,
 .calendar-root-wrapper .week-timeline {
@@ -233,6 +268,7 @@ const calendarEvents = computed(() => {
   background-color: var(--qalendar-appointment-fg) !important;
 }
 
+/* Make trailing days (days not in this month) our cool foreground colour */
 .calendar-root-wrapper .trailing-or-leading {
   background-color: var(--qalendar-appointment-fg);
 }

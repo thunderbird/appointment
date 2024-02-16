@@ -17,7 +17,7 @@
       @back="activeView = views.month"
     />
     <calendar-qalendar
-      class="w-full md:w-4/5"
+      class="w-full"
       :selected="activeDate"
       :appointments="[appointment]"
       :booking="true"
