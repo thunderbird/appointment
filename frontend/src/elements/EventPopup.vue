@@ -22,9 +22,9 @@
       </div>
       <div class="text-xs flex gap-1.5 items-center">
         <icon-calendar class="h-4 w-4 stroke-2 fill-transparent stroke-teal-500" />
-        {{ event?.calendar_title }}
+        {{ event?.customData?.calendar_title }}
       </div>
-      <div v-if="event?.attendee" class="text-xs flex gap-1.5 items-center">
+      <div v-if="event?.customData?.attendee" class="text-xs flex gap-1.5 items-center">
         <icon-users class="h-4 w-4 stroke-2 fill-transparent stroke-teal-500" />
         {{ t('label.guest' , { 'count': 1 }) }}
       </div>
@@ -33,7 +33,9 @@
 </template>
 
 <script setup>
-import { inject, computed } from 'vue';
+import {
+  inject, computed, toRefs, toRef,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { timeFormat } from '@/utils';
 
@@ -54,17 +56,19 @@ const props = defineProps({
   position: String, // currently supported: right, left, top
 });
 
+const { event } = toRefs(props);
+
 // format datetime of event
 const eventDateTime = computed(
   () => {
     const dateTimeParts = [];
     if (props.event) {
       // calculate date for active event
-      const start = dj(props.event.start);
+      const start = dj(props.event.time.start);
       dateTimeParts.push(start.format('dddd L'));
-      if (!props.event.all_day) {
+      if (!props.event.customData.all_day) {
         // add time if it's not an all day event
-        const end = start.add(props.event.duration, 'minutes');
+        const end = dj(props.event.time.end);
         dateTimeParts.push(start.format(`, ${timeFormat()} - `));
         dateTimeParts.push(end.format(timeFormat()));
       }

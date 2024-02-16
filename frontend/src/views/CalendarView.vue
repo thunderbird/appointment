@@ -46,11 +46,10 @@
     <calendar-qalendar
       class="w-full md:w-4/5"
       :selected="activeDate"
-      :appointments="appointmentStore.appointments"
+      :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
       @date-change="onDateChange"
-    >
-    </calendar-qalendar>
+    />
     <!--
     <calendar-month
       v-show="tabActive === calendarViews.month"

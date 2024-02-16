@@ -20,7 +20,7 @@
       class="w-full"
       :selected="activeDate"
       :appointments="[appointment]"
-      :booking="true"
+      :is-booking-route="true"
       @event-selected="selectEvent"
     >
     </calendar-qalendar>

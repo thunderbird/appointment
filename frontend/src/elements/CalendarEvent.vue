@@ -2,43 +2,29 @@
   <div
     class="group/day"
     :class="{
-      'cursor-pointer py-2': mini,
-      'bg-white dark:bg-gray-700': isActive,
-      'bg-gray-50 dark:bg-gray-600 text-gray-400': !isActive || disabled,
-      'cursor-not-allowed': disabled
+      'text-gray-400': !isActive || disabled,
+      'cursor-not-allowed': disabled,
+      'h-full': !monthView
     }"
     @mouseleave="popup = {...initialEventPopupData}">
-    <div
-      class="w-6 rounded-full text-center relative"
-      :class="{
-        'bg-teal-500 text-white font-semibold': isToday,
-        'text-teal-500': isSelected && !isToday,
-        'mx-auto': mini,
-        'group-hover/day:bg-sky-600': mini && isToday && !disabled,
-        'group-hover/day:text-sky-600': mini && !isToday && !disabled,
-      }"
-    >
-      <div
-        v-if="mini"
-        class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-teal-600 rounded-full"
-      ></div>
-    </div>
-    <div v-if="!mini" class="flex flex-col gap-1.5 overflow-y-auto" :style="`height: ${elementHeight}px`">
+    <div class="flex flex-col gap-1.5 overflow-y-auto" :class="{'h-full': !monthView}" :style="`height: ${elementHeight}px`">
       <div
         class="h-[95%] w-[95%] shrink-0 text-sm text-gray-700 dark:text-gray-200 hover:shadow-md m-auto"
         :class="{
           'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !eventData.remote && !eventData.preview,
           'group/event rounded-md p-1 cursor-pointer hover:shadow-lg hover:bg-gradient-to-b': placeholder,
-          'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': isSelected,
           'hover:!text-white bg-teal-50 dark:bg-teal-800 hover:from-teal-500 hover:to-sky-600': placeholder,
           'flex items-center gap-1.5 px-2 py-0.5': eventData.remote,
           'flex items-center rounded border-l-4 px-2 border-teal-400': eventData.preview,
           '!border-solid text-black': eventData.attendee !== null,
-          'rounded bg-amber-400/80 dark:text-white': eventData.all_day
+          'rounded bg-amber-400/80 dark:text-white': eventData.all_day,
+          'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': isSelected,
+          'rounded h-full': !monthView,
         }"
         :style="{
           borderColor: eventColor(eventData, placeholder).border,
-          backgroundColor: eventColor(eventData, placeholder).background,
+          backgroundColor: monthView ? eventColor(eventData, placeholder).background : eventData.calendar_color,
+          color: monthView ? getAccessibleColor(eventColor(eventData, placeholder).background) : getAccessibleColor(eventData.calendar_color),
         }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
@@ -53,10 +39,11 @@
           :style="{
             borderColor: eventData.tentative ? eventData.calendar_color : null,
             backgroundColor: !eventData.tentative ? eventData.calendar_color : null,
+            color: !eventData.tentative ? getAccessibleColor(eventData.calendar_color) : null,
           }"
         ></div>
         <div
-          class="truncate rounded"
+          class="truncate rounded "
           :class="{
             'h-full p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder,
             'border-white': isSelected,
@@ -83,7 +70,7 @@
 
 <script setup>
 import {
-  eventColor, timeFormat, initialEventPopupData, showEventPopup,
+  eventColor, timeFormat, initialEventPopupData, showEventPopup, getAccessibleColor,
 } from '@/utils';
 import {
   computed, inject, ref, toRefs,
@@ -98,19 +85,20 @@ const props = defineProps({
   isActive: Boolean, // flag showing if the day belongs to active month
   isSelected: Boolean, // flag showing if the day is currently selected by user
   isToday: Boolean, // flag showing if the day is today
-  mini: Boolean, // flag showing if this is a day cell of a small calendar
   placeholder: Boolean, // flag formating events as placeholder
+  monthView: Boolean, // flag, are we in month view?
   event: Object, // the event to show
   showDetails: Boolean, // flag enabling event popups with details
   popupPosition: String, // currently supported: right, left, top
   disabled: Boolean, // flag making this day non-selectable and inactive
+  timeSlotDuration: Number, // minimum time shown: [15, 30, 60]
+  timeSlotHeight: Number, // height in pixels of each minimum time instance.
 });
 
-const { event } = toRefs(props);
+const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
 
 const eventData = event.value.customData;
-// TODO: Fix this, right now we are hard coded to 15 minute intervals at 40px per interval.
-const elementHeight = computed(() => (eventData.duration / 15) * 40);
+const elementHeight = computed(() => (eventData.duration / timeSlotDuration.value) * timeSlotHeight.value);
 
 // component emits
 const emit = defineEmits(['eventSelected']);
@@ -120,8 +108,9 @@ const popup = ref({ ...initialEventPopupData });
 
 // formatted time range
 const formattedTimeRange = (event) => {
-  const start = dj(event.time.start);
-  const end = dj(event.time.end);
+  console.log(event);
+  const start = dj(event.start);
+  const end = dj(event.end);
   return start.format(`${timeFormat()} - `) + end.format(timeFormat());
 };
 </script>

@@ -4,8 +4,9 @@ import {
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
-import CalendarMonthDay from '@/elements/CalendarMonthDay.vue';
-import QalendarMonthDay from '@/elements/QalendarMonthDay.vue';
+import CalendarEvent from '@/elements/CalendarEvent.vue';
+import { appointmentState } from '@/definitions';
+import { timeFormat } from '@/utils';
 
 // component constants
 const dj = inject('dayjs');
@@ -30,17 +31,30 @@ const dateFormatStrings = {
   qalendar: 'YYYY-MM-DD HH:mm',
   qalendarFullDay: 'YYYY-MM-DD',
   // Display formats
-  display12Hour: 'hh:mm',
+  display12Hour: 'hh:mma',
   display24Hour: 'HH:mm',
 };
-const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
-const timeFormat = ref(Number(localStorage?.getItem('timeFormat')) ?? detectedTimeFormat);
-const displayFormat = ref(timeFormat.value === 12 ? dateFormatStrings.display12Hour : dateFormatStrings.display24Hour);
+const displayFormat = timeFormat();
 const calendarColors = ref({});
 const selectedDate = ref(null);
+const calendarMode = ref('month');
 
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
+
+const timeSlotDuration = computed(() => {
+  if (appointments?.value?.length === 0) {
+    return 15;
+  }
+  const duration = appointments?.value[0].slots[0].duration;
+  if (duration <= 15) {
+    return 15;
+  } if (duration <= 30) {
+    return 30;
+  }
+  return 60;
+});
+const timeSlotHeight = ref(40);
 
 const config = ref({
   week: {
@@ -53,8 +67,8 @@ const config = ref({
   },
   defaultMode: 'month',
   dayIntervals: {
-    length: 15, // Length in minutes of each interval. Accepts values 15, 30 and 60 (the latter is the default)
-    height: 40, // The height of each interval
+    length: timeSlotDuration.value, // Length in minutes of each interval. Accepts values 15, 30 and 60 (the latter is the default)
+    height: timeSlotHeight.value, // The height of each interval
     // displayClickableInterval: true, // Needs to be set explicitly to true, if you want to display clickable intervals
   },
   dayBoundaries: {
@@ -62,19 +76,24 @@ const config = ref({
     end: 18,
   },
   eventDialog: {
-    isCustom: true,
-    isDisabled: !isBookingRoute.value,
+    // isCustom: true,
+    isDisabled: true, //! isBookingRoute.value,
   },
 });
 
 /* Event Handlers */
 const eventSelected = (evt) => {
-  console.log('Selected', evt.clickedEvent.id);
+  if (!isBookingRoute.value) {
+    return;
+  }
   selectedDate.value = evt.clickedEvent.id;
   emit('eventSelected', evt.clickedEvent.id);
 };
 const dateChange = (evt) => {
   emit('dateChange', evt);
+};
+const modeChange = (evt) => {
+  calendarMode.value = evt?.mode ?? 'month';
 };
 
 /* Functions */
@@ -111,6 +130,7 @@ const applyTimezone = (d) => dj.utc(d).tz(dj.tz.guess());
  * @type {ComputedRef<*[]>}
  */
 const calendarEvents = computed(() => {
+  console.log('Events -> ', events?.value, appointments?.value);
   const evts = events?.value?.map((event) => ({
     id: event.title,
     title: event.title,
@@ -124,15 +144,26 @@ const calendarEvents = computed(() => {
         : dj(event.end).format(dateFormatStrings.qalendar),
     },
     description: event.description,
+    customData: {
+      attendee: null,
+      booking_status: appointmentState.booked,
+      calendar_title: event.calendar_title,
+      calendar_color: event.calendar_color,
+      duration: event.duration,
+      preview: false,
+      all_day: event.all_day,
+      remote: true,
+      tentative: event.tentative,
+    },
+    isCustom: true,
   })) ?? [];
 
-  console.log(appointments.value);
   // Mix in appointments
   const evtApmts = appointments?.value?.map((appointment) => appointment.slots.map((slot) => ({
     id: appointment.id ?? applyTimezone(slot.start).format(dateFormatStrings.qalendar),
-    title: isBookingRoute.value
+    title: !isBookingRoute.value
       ? appointment.title
-      : `${applyTimezone(slot.start).format(displayFormat.value)} - ${applyTimezone(slot.start).add(slot.duration, 'minutes').format(displayFormat.value)}`,
+      : `${applyTimezone(slot.start).format(displayFormat)} - ${applyTimezone(slot.start).add(slot.duration, 'minutes').format(displayFormat)}`,
     colorScheme: processCalendarColorScheme(
       appointment?.calendar_title ?? 'booking',
       appointment?.calendar_color ?? 'rgb(45, 212, 191)',
@@ -144,13 +175,15 @@ const calendarEvents = computed(() => {
     description: appointment.details,
     with: slot.attendee ? [slot.attendee].map((attendee) => `${attendee.name} <${attendee.email}>`).join(', ') : '',
     customData: {
-      booking_status: slot?.booking_status ?? 1,
-      calendar_title: 'booking',
-      calendar_color: 'rgb(45, 212, 191)',
+      attendee: null,
+      booking_status: appointment.status,
+      calendar_title: appointment.calendar_title,
+      calendar_color: appointment.calendar_color,
       duration: slot.duration,
       preview: false,
       all_day: false,
       remote: false,
+      tentative: false,
     },
     isCustom: true,
   }))).flat(1) ?? [];
@@ -165,41 +198,33 @@ const calendarEvents = computed(() => {
       :config="config"
       @event-was-clicked="eventSelected"
       @updated-period="dateChange"
+      @updated-mode="modeChange"
     >
-      <template #eventDialog="props">
-      <div v-if="(props.eventDialogData && props.eventDialogData.title)">
-        <div :style="{marginBottom: '8px'}">Edit event</div>
-
-        <input class="flyout-input" type="text" :style="{ width: '90%', padding: '8px', marginBottom: '8px' }" >
-
-        <button class="close-flyout" @click="props.closeEventDialog">
-          Finished!
-        </button>
-      </div>
-    </template>
-
       <template #weekDayEvent="eventProps">
-        <QalendarMonthDay
+        <CalendarEvent
           :isActive="true"
           :isSelected="selectedDate === eventProps.eventData.id"
           :isToday="false"
-          :showDetails="false"
+          :showDetails="!isBookingRoute"
           :disabled="false"
-          :placeholder="true"
+          :placeholder="isBookingRoute"
           :event="eventProps.eventData"
-        ></QalendarMonthDay>
+          :popup-position="calendarMode === 'day' ? 'top' : 'right'"
+          :month-view="false"
+        ></CalendarEvent>
       </template>
 
       <template #monthEvent="monthEventProps">
-        <QalendarMonthDay
+        <CalendarEvent
           :isActive="true"
           :isSelected="selectedDate === monthEventProps.eventData.id"
           :isToday="false"
-          :showDetails="false"
+          :showDetails="!isBookingRoute"
           :disabled="false"
-          :placeholder="true"
+          :placeholder="isBookingRoute"
           :event="monthEventProps.eventData"
-        ></QalendarMonthDay>
+          :month-view="true"
+        ></CalendarEvent>
       </template>
     </Qalendar>
   </div>
@@ -249,7 +274,12 @@ const calendarEvents = computed(() => {
 
 /* Ensure month days are at minimum 8rem */
 .calendar-root-wrapper .calendar-month__weekday {
-  min-height: theme('height.32') !important;
+  @media (min-width: theme('screens.sm')) {
+    min-height: theme('height.16') !important;
+  }
+  @media (min-width: theme('screens.md')) {
+    min-height: theme('height.32') !important;
+  }
 }
 
 /* Adjust the background of the entire component */
@@ -257,6 +287,14 @@ const calendarEvents = computed(() => {
   background-color: var(--qalendar-appointment-bg) !important;
   border-radius: var(--qalendar-appointment-border-radius) !important;
   border-color: var(--qalendar-appointment-border-color) !important;
+}
+
+/* Fix overflow:hidden preventing event details popup from clipping calendar */
+.calendar-root-wrapper .calendar-week__event,
+.calendar-root-wrapper .calendar-week__events,
+.calendar-root-wrapper .calendar-week__wrapper,
+.calendar-root-wrapper .calendar-month {
+  overflow: visible !important;
 }
 
 /* Make the header are our cool foreground colour */
