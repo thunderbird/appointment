@@ -6,10 +6,16 @@
   "error": {
     "actionNeeded": "Aktion erforderlich!",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
+    "minimumValue": "{field} sollte wenigstens {value} sein.",
     "noConnectedCalendars": "Kalendereinrichtung zum Fortfahren erforderlich. {0}.",
     "noConnectedCalendarsLink": "Zu den Einstellungen wechseln.",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal.",
+    "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
     "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
+  },
+  "fields": {
+    "slot_duration": "Dauer",
+    "unknown": "Unbekannt"
   },
   "heading": {
     "accountData": "Benutzerkonto Daten",
@@ -122,6 +128,7 @@
     "downloadYourData": "Benutzerdaten herunterladen",
     "earliestBooking": "Früheste Buchung",
     "editCalendar": "Kalender bearbeiten",
+    "editProfile": "Profil bearbeiten",
     "email": "E-Mail",
     "end": "Ende",
     "endDate": "Enddatum",
@@ -247,11 +254,18 @@
     },
     "invalidOrAlreadyBooked": "Der Buchungsplatz ist möglicherweise nicht mehr verfügbar oder der Link ist defekt.",
     "invitationSentToAddress": "Eine Einladung für dieses Event wurde an {address} geschickt.",
+    "login": {
+      "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
+    },
     "nameIsInvitingYou": "{name} lädt dich ein",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren."
+  },
+  "units": {
+    "minutes": "{value} Minuten",
+    "none": "{value}"
   }
 }

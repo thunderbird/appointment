@@ -6,12 +6,12 @@
   "error": {
     "actionNeeded": "Action needed",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
+    "minimumValue": "{field} should be at least {value}.",
     "noConnectedCalendars": "Calendar setup required. Connect a calendar to continue. {0}.",
     "noConnectedCalendarsLink": "Go to settings",
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
     "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
-    "usernameIsNotAvailable": "Username not available. Please choose another.",
-    "minimumValue": "{field} should be at least {value}."
+    "usernameIsNotAvailable": "Username not available. Please choose another."
   },
   "fields": {
     "slot_duration": "Slot Duration",
