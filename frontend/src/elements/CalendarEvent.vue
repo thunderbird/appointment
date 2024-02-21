@@ -4,12 +4,12 @@
     :class="{
       'text-gray-400': !isActive || disabled,
       'cursor-not-allowed': disabled,
-      'h-full': !monthView
+      'h-full': !monthView,
     }"
     @mouseleave="popup = {...initialEventPopupData}">
     <div class="flex flex-col gap-1.5 overflow-y-auto" :class="{'h-full': !monthView}" :style="`height: ${elementHeight}px`">
       <div
-        class="h-[95%] w-[95%] shrink-0 text-sm text-gray-700 dark:text-gray-200 hover:shadow-md m-auto"
+        class="h-[95%] w-[95%] shrink-0 text-sm text-gray-700 dark:text-gray-200 hover:shadow-md m-auto is-preview"
         :class="{
           'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !eventData.remote && !eventData.preview,
           'group/event rounded-md p-1 cursor-pointer hover:shadow-lg hover:bg-gradient-to-b': placeholder,

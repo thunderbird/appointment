@@ -170,7 +170,7 @@ const calendarEvents = computed(() => {
         : `${start.format(displayFormat)} - ${end.format(displayFormat)}`,
       colorScheme: processCalendarColorScheme(
         appointment?.calendar_title ?? 'booking',
-        appointment?.calendar_color ?? 'rgb(45, 212, 191)',
+        appointment?.calendar_color ?? 'rgb(20, 184, 166)',
       ),
       time: {
         start: start.format(dateFormatStrings.qalendar),
@@ -182,7 +182,7 @@ const calendarEvents = computed(() => {
         attendee: null,
         booking_status: appointment.status,
         calendar_title: appointment.calendar_title,
-        calendar_color: appointment.calendar_color,
+        calendar_color: appointment?.calendar_color ?? 'rgb(20, 184, 166)',
         duration: slot.duration,
         preview: appointment?.type === 'schedule',
         all_day: false,
@@ -361,6 +361,18 @@ const config = ref({
   @media (min-width: theme('screens.md')) {
     min-height: theme('height.32') !important;
   }
+}
+
+/* Add some minimum spacing to the numbered day, so events line up even with the "today" highlight. */
+.calendar-root-wrapper .calendar-month__day-date {
+    @media (min-width: theme('screens.lg')) {
+      min-height: theme('height.8') !important;
+    }
+}
+
+/* Add some spacing to the event list */
+.calendar-root-wrapper .mode-is-month .is-event {
+  margin-bottom: theme('margin.2');
 }
 
 /* Ignore text blocking pointer events for mobile day selection on month view */
