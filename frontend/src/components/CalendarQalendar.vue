@@ -280,7 +280,7 @@ watch(currentDate, () => {
     <Qalendar
       :events="calendarEvents"
       :config="config"
-      :selected-date="currentDate.toDate()"
+      :selected-date="currentDate?.toDate()"
       @event-was-clicked="eventSelected"
       @updated-period="dateChange"
       @updated-mode="modeChange"
