@@ -66,7 +66,7 @@ def read_schedule(
 @router.put("/{id}", response_model=schemas.Schedule)
 def update_schedule(
     id: int,
-    schedule: schemas.ScheduleBase,
+    schedule: schemas.ScheduleValidationIn,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):

@@ -3,6 +3,8 @@
 Definitions of valid data shapes for database and query models.
 """
 from datetime import datetime, date, time
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 from .models import (
     AppointmentStatus,
@@ -173,6 +175,11 @@ class Schedule(ScheduleBase):
 
     class Config:
         from_attributes = True
+
+
+class ScheduleValidationIn(ScheduleBase):
+    """ScheduleBase but with specific fields overridden to add validation."""
+    slot_duration: Annotated[int, Field(ge=10, default=30)]
 
 
 """ CALENDAR model schemas
