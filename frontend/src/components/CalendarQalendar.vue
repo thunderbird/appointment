@@ -13,19 +13,18 @@ const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({
-  selected: Object, // currently active date (dayjs object)
   mini: Boolean, // show small version of monthly calendar
-  nav: Boolean, // show month navigation
   placeholder: Boolean, // format appointments as placeholder
   minDate: Object, // minimum active date in view (dayjs object)
   appointments: Array, // data of appointments to show
   events: Array, // data of calendar events to show
   schedules: Array, // data of scheduled event previews to show
-  popupPosition: String, // currently supported: right, left, top
   isBookingRoute: Boolean,
 });
 
-const { events, appointments, isBookingRoute } = toRefs(props);
+const {
+  events, appointments, schedules, isBookingRoute,
+} = toRefs(props);
 
 const dateFormatStrings = {
   qalendar: 'YYYY-MM-DD HH:mm',
@@ -156,10 +155,13 @@ const calendarEvents = computed(() => {
     };
   }) ?? [];
 
+  // Merge appointment and schedule preview data, they're the same { appointment: { ...slots: [...] } } data structure.
+  const appointmentsAndSchedules = [...appointments?.value ?? [], ...schedules?.value ?? []];
+
   // Mix in appointments
-  const evtApmts = appointments?.value?.map((appointment) => appointment.slots.map((slot) => {
+  const evtApmts = appointmentsAndSchedules?.map((appointment) => appointment.slots.map((slot) => {
     const start = applyTimezone(dj(slot.start));
-    const end = applyTimezone(slot.start).add(slot.duration, 'minutes');
+    const end = start.add(slot.duration, 'minutes');
 
     return {
       id: appointment.id ?? start.format(dateFormatStrings.qalendar),
@@ -182,7 +184,7 @@ const calendarEvents = computed(() => {
         calendar_title: appointment.calendar_title,
         calendar_color: appointment.calendar_color,
         duration: slot.duration,
-        preview: false,
+        preview: appointment?.type === 'schedule',
         all_day: false,
         remote: false,
         tentative: false,
@@ -202,15 +204,31 @@ const dayBoundary = computed(() => {
   let startHour = 99;
   let endHour = 0;
 
+  // console.log('Running dayBoundary');
+  if (calendarEvents?.value.length === 0) {
+    // console.log('Rip');
+    return {
+      start: 0,
+      end: 24,
+    };
+  }
+
   calendarEvents.value.forEach((event) => {
     // Calculate start/end hours
     startHour = Math.min(startHour, dj(event.time.start).hour());
     endHour = Math.max(endHour, dj(event.time.end).hour());
   });
 
-  return {
+  /*
+  console.log('Ye', {
     start: startHour - 2,
     end: endHour + 2,
+  });
+
+   */
+  return {
+    start: Math.max(0, startHour - 2),
+    end: Math.min(24, endHour + 2),
   };
 });
 

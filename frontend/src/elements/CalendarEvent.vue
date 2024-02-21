@@ -108,9 +108,8 @@ const popup = ref({ ...initialEventPopupData });
 
 // formatted time range
 const formattedTimeRange = (event) => {
-  console.log(event);
-  const start = dj(event.start);
-  const end = dj(event.end);
-  return start.format(`${timeFormat()} - `) + end.format(timeFormat());
+  const start = dj(event.time.start);
+  const end = dj(event.time.end);
+  return `${start.format(timeFormat())} - ${end.format(timeFormat())}`;
 };
 </script>

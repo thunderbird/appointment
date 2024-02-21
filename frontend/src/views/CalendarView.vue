@@ -12,28 +12,7 @@
   </div>
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
-    <!--
-    <calendar-page-heading
-      :nav="true"
-      :month="activeDate.format('MMMM')"
-      :year="activeDate.year().toString()"
-      :title="pageTitle"
-      @prev="dateNav('auto', false)"
-      @next="dateNav('auto')"
-    />
-    -->
-    <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
-      <!--
-      <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
-        {{ t("label.today") }}
-      </button>
-      <tab-bar
-        :tab-items="calendarViews"
-        :active="tabActive"
-        @update="updateTab"
-        class="text-sm"
-      />
-      -->
+    <div class="flex flex-col gap-8 md:flex-row mx-auto md:mr-0 items-center">
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
@@ -54,30 +33,6 @@
       :events="calendarEvents"
       @date-change="onDateChange"
     />
-    <!--
-    <calendar-month
-      v-show="tabActive === calendarViews.month"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
-      :events="calendarEvents"
-    />
-    <calendar-week
-      v-show="tabActive === calendarViews.week"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
-      :events="calendarEvents"
-    />
-    <calendar-day
-      v-show="tabActive === calendarViews.day"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
-      :events="calendarEvents"
-      popup-position="top"
-    />
-    -->
     <!-- page side bar -->
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
       <div v-if="creationStatus === appointmentCreationState.hidden" class="flex flex-col gap-8">
@@ -146,18 +101,14 @@
 <script setup>
 import { appointmentCreationState, calendarViews, alertSchemes } from '@/definitions';
 import {
-  ref, inject, computed, watch, onMounted,
+  ref, inject, computed, onMounted,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentCreation from '@/components/AppointmentCreation';
 import AppointmentListItem from '@/elements/AppointmentListItem';
-import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
-import CalendarPageHeading from '@/elements/CalendarPageHeading';
-import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
-import TabBar from '@/components/TabBar';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
@@ -250,6 +201,10 @@ const getRemoteEvents = async (from, to) => {
   }));
 };
 
+/**
+ * Retrieve new events if a user navigates to a different month
+ * @param dateObj
+ */
 const onDateChange = (dateObj) => {
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
@@ -273,20 +228,4 @@ onMounted(async () => {
   // Okay, if we still have no calendars, show the ugly message
   hideUntilRefreshed.value = false;
 });
-
-// react to user calendar navigation
-/*
-watch(
-  () => activeDate.value,
-  (newValue, oldValue) => {
-    // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-    if (dj(oldValue).format('YYYYMM') !== dj(newValue).format('YYYYMM')) {
-      getRemoteEvents(
-        dj(newValue).startOf('month').format('YYYY-MM-DD'),
-        dj(newValue).endOf('month').format('YYYY-MM-DD'),
-      );
-    }
-  },
-);
- */
 </script>

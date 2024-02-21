@@ -311,29 +311,33 @@
 </template>
 
 <script setup>
-import { locationTypes, meetingLinkProviderType, scheduleCreationState } from "@/definitions";
-import { ref, reactive, computed, inject, watch, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
+import { locationTypes, meetingLinkProviderType, scheduleCreationState } from '@/definitions';
+import {
+  ref, reactive, computed, inject, watch, onMounted,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import AppointmentCreatedModal from "@/components/AppointmentCreatedModal";
-import PrimaryButton from "@/elements/PrimaryButton";
-import SecondaryButton from "@/elements/SecondaryButton";
-import TabBar from "@/components/TabBar";
+import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
+import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
+import TabBar from '@/components/TabBar';
 
 // icons
-import { IconChevronDown, IconExternalLink } from "@tabler/icons-vue";
-import AlertBox from "@/elements/AlertBox";
-import SwitchToggle from "@/elements/SwitchToggle";
+import { IconChevronDown } from '@tabler/icons-vue';
+import AlertBox from '@/elements/AlertBox';
+import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
 const user = useUserStore();
 const { t } = useI18n();
-const dj = inject("dayjs");
-const call = inject("call");
-const isoWeekdays = inject("isoWeekdays");
+const dj = inject('dayjs');
+const call = inject('call');
+const isoWeekdays = inject('isoWeekdays');
+
+const dateFormat = 'YYYY-MM-DD';
 
 // component emits
-const emit = defineEmits(["created", "updated"]);
+const emit = defineEmits(['created', 'updated']);
 
 // component properties
 const props = defineProps({
@@ -343,9 +347,7 @@ const props = defineProps({
 });
 
 // check if existing schedule is given
-const existing = computed(() => {
-  return Boolean(props.schedule);
-});
+const existing = computed(() => Boolean(props.schedule));
 
 // schedule creation state indicating the current step
 const state = ref(scheduleCreationState.details);
@@ -372,18 +374,18 @@ const calendarTitles = computed(() => {
 // default schedule object (for start and reset) and schedule form data
 const defaultSchedule = {
   active: true,
-  name: "",
+  name: '',
   calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
-  location_url: "",
-  details: "",
-  start_date: dj().format("YYYY-MM-DD"),
+  location_url: '',
+  details: '',
+  start_date: dj().format(dateFormat),
   end_date: null,
-  start_time: "09:00",
-  end_time: "17:00",
+  start_time: '09:00',
+  end_time: '17:00',
   earliest_booking: 1440,
   farthest_booking: 20160,
-  weekdays: [1,2,3,4,5],
+  weekdays: [1, 2, 3, 4, 5],
   slot_duration: 30,
   meeting_link_provider: meetingLinkProviderType.none,
 };
@@ -392,14 +394,14 @@ onMounted(() => {
   if (props.schedule) {
     scheduleInput.value = { ...props.schedule };
     // calculate utc back to user timezone
-    scheduleInput.value.start_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`)
+    scheduleInput.value.start_time = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`)
       .utc(true)
       .tz(user.data.timezone ?? dj.tz.guess())
-      .format("HH:mm");
-    scheduleInput.value.end_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`)
+      .format('HH:mm');
+    scheduleInput.value.end_time = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`)
       .utc(true)
       .tz(user.data.timezone ?? dj.tz.guess())
-      .format("HH:mm");
+      .format('HH:mm');
   } else {
     scheduleInput.value = { ...defaultSchedule };
   }
@@ -407,10 +409,11 @@ onMounted(() => {
 
 const scheduleCreationError = ref(null);
 const scheduledRangeMinutes = computed(() => {
-  const start = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`);
-  const end = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`);
+  const start = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`);
+  const end = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`);
   return end.diff(start, 'minutes');
 });
+
 // generate time slots from current schedule configuration
 const getSlots = () => {
   const slots = [];
@@ -421,10 +424,10 @@ const getSlots = () => {
   while (pointerDate <= end) {
     if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
-        "start": `${pointerDate.format("YYYYMMDD")}T${scheduleInput.value.start_time}:00`,
-        "duration": scheduledRangeMinutes.value ?? 30,
-        "attendee_id": null,
-        "id": null
+        start: `${pointerDate.format(dateFormat)}T${scheduleInput.value.start_time}:00`,
+        duration: scheduledRangeMinutes.value ?? 30,
+        attendee_id: null,
+        id: null,
       });
     }
     pointerDate = pointerDate.add(1, 'day');
@@ -432,18 +435,17 @@ const getSlots = () => {
   return slots;
 };
 // generate an appointment object with slots from current schedule data
-const getScheduleAppointment = () => {
-  return {
-    title: scheduleInput.value.name,
-    calendar_id: scheduleInput.value.calendar_id,
-    calendar_title: calendarTitles.value[scheduleInput.value.calendar_id],
-    location_type: scheduleInput.value.location_type,
-    location_url: scheduleInput.value.location_url,
-    details: scheduleInput.value.details,
-    status: 2,
-    slots: getSlots(),
-  }
-};
+const getScheduleAppointment = () => ({
+  title: scheduleInput.value.name,
+  calendar_id: scheduleInput.value.calendar_id,
+  calendar_title: calendarTitles.value[scheduleInput.value.calendar_id],
+  location_type: scheduleInput.value.location_type,
+  location_url: scheduleInput.value.location_url,
+  details: scheduleInput.value.details,
+  status: 2,
+  slots: getSlots(),
+  type: 'schedule',
+});
 
 // tab navigation for location types
 const updateLocationType = (type) => {
@@ -456,18 +458,18 @@ const charCount = computed(() => scheduleInput.value.details.length);
 
 // booking options
 const earliestOptions = {};
-[0.5,1,2,3,4,5].forEach(d => earliestOptions[d*60*24] = dj.duration(d, "days").humanize());
+[0.5, 1, 2, 3, 4, 5].forEach((d) => earliestOptions[d * 60 * 24] = dj.duration(d, 'days').humanize());
 const farthestOptions = {};
-[1,2,3,4].forEach(d => farthestOptions[d*60*24*7] = dj.duration(d, "weeks").humanize());
+[1, 2, 3, 4].forEach((d) => farthestOptions[d * 60 * 24 * 7] = dj.duration(d, 'weeks').humanize());
 
 // humanize selected durations
-const earliest = computed(() => dj.duration(scheduleInput.value.earliest_booking, "minutes").humanize());
-const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, "minutes").humanize());
+const earliest = computed(() => dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize());
+const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
 
 // show confirmation dialog
 const savedConfirmation = reactive({
   show: false,
-  title: "",
+  title: '',
 });
 const closeCreatedModal = () => {
   savedConfirmation.show = false;
@@ -486,14 +488,14 @@ const saveSchedule = async (withConfirmation = true) => {
   // build data object for post request
   const obj = { ...scheduleInput.value };
   // convert local input times to utc times
-  obj.start_time = dj(`${dj(obj.start_date).format("YYYY-MM-DD")}T${obj.start_time}:00`)
+  obj.start_time = dj(`${dj(obj.start_date).format('YYYY-MM-DD')}T${obj.start_time}:00`)
     .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
-    .format("HH:mm");
-  obj.end_time = dj(`${dj(obj.start_date).format("YYYY-MM-DD")}T${obj.end_time}:00`)
+    .format('HH:mm');
+  obj.end_time = dj(`${dj(obj.start_date).format('YYYY-MM-DD')}T${obj.end_time}:00`)
     .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
-    .format("HH:mm");
+    .format('HH:mm');
   // remove unwanted properties
   delete obj.availabilities;
   delete obj.time_created;
@@ -503,18 +505,18 @@ const saveSchedule = async (withConfirmation = true) => {
   // save schedule data
   const { data, error } = props.schedule
     ? await call(`schedule/${props.schedule.id}`).put(obj).json()
-    : await call("schedule/").post(obj).json();
+    : await call('schedule/').post(obj).json();
 
   if (error.value) {
     // error message is in data
-    scheduleCreationError.value = data.value?.detail?.message || t("error.unknownScheduleError");
+    scheduleCreationError.value = data.value?.detail?.message || t('error.unknownScheduleError');
     // go back to the start
     state.value = scheduleCreationState.details;
     savingInProgress.value = false;
     return;
   }
 
-  if (withConfirmation) {  
+  if (withConfirmation) {
     // show confirmation
     savedConfirmation.title = data.value.name;
     savedConfirmation.show = true;
@@ -546,7 +548,7 @@ watch(
   () => scheduleInput.value.active,
   (newValue) => {
     emit('updated', newValue ? getScheduleAppointment() : null);
-  }
+  },
 );
 
 // track if steps were already visited
@@ -557,7 +559,7 @@ watch(
       if (oldValue === 1) visitedStep1.value = true;
       emit('updated', getScheduleAppointment());
     }
-  }
+  },
 );
 
 // track changes and send schedule updates
@@ -578,6 +580,6 @@ watch(
     if (props.schedule && props.schedule.active || !props.schedule && visitedStep1.value) {
       emit('updated', getScheduleAppointment());
     }
-  }
+  },
 );
 </script>

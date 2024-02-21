@@ -6,18 +6,6 @@
     </div>
     <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
     <div class="text-xl mb-6">{{ t('text.chooseDateAndTime') }}</div>
-  <!--
-    <calendar-page-heading
-      :nav="showNavigation && activeView === views.month"
-      :month="activeDate.format('MMMM')"
-      :year="activeDate.year().toString()"
-      :title="viewTitle"
-      :backlink="activeView === views.weekAfterMonth"
-      @prev="dateNav('month', false)"
-      @next="dateNav('month')"
-      @back="activeView = views.month"
-    />
-    -->
     <calendar-qalendar
       class="w-full"
       :selected="activeDate"
@@ -26,29 +14,6 @@
       @event-selected="selectEvent"
     >
     </calendar-qalendar>
-    <!--
-    <calendar-month
-      v-if="(activeView === views.month)"
-      :selected="activeDate"
-      :appointments="dayPlaceholder"
-      :placeholder="true"
-      @event-selected="showWeek"
-    />
-    <calendar-week
-      v-if="(activeView === views.week || activeView === views.weekAfterMonth)"
-      :selected="activeDate"
-      :appointments="[appointment]"
-      :booking="true"
-      @event-selected="selectEvent"
-    />
-    <calendar-day
-      v-if="(activeView === views.day)"
-      :selected="activeDate"
-      :appointments="[appointment]"
-      :booking="true"
-      @event-selected="selectEvent"
-    />
-    -->
   </div>
   <!-- fixed footer with action button -->
   <footer
