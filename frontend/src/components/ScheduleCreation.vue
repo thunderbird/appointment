@@ -2,12 +2,11 @@
   <div class="relative flex flex-col gap-4 h-full">
     <div class="font-semibold text-center text-xl text-teal-500 flex justify-around items-center">
       <span>{{ t("heading.generalAvailability") }}</span>
-      <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive" />
+      <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive"/>
     </div>
     <alert-box
       @close="scheduleCreationError = ''"
       v-if="scheduleCreationError"
-      :title="t('label.scheduleCreationError')"
     >
       {{ scheduleCreationError }}
     </alert-box>
@@ -27,7 +26,7 @@
         />
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
-        <hr />
+        <hr/>
         <label>
           <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
             {{ t("heading.generalAvailability") }} {{ t("label.name") }}
@@ -128,7 +127,7 @@
         />
       </div>
       <div v-show="activeStep2" class="flex flex-col gap-3">
-        <hr />
+        <hr/>
         <div class="grid grid-cols-2 gap-4">
           <label>
             <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
@@ -212,7 +211,7 @@
         />
       </div>
       <div v-show="activeStep3" class="flex flex-col gap-3">
-        <hr />
+        <hr/>
         <div class="grid grid-cols-2 gap-4">
           <label>
             <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
@@ -256,7 +255,7 @@
             </div>
             <input
               type="number"
-              min="5"
+              min="10"
               v-model="scheduleInput.slot_duration"
               :disabled="!scheduleInput.active"
               class="rounded-md w-full"
@@ -264,7 +263,7 @@
           </label>
         </div>
         <div class="bg-white dark:bg-gray-800 px-4 py-6 rounded-lg flex-center text-sm text-center">
-          <div>{{ t('text.recipientsCanScheduleBetween', { earliest: earliest, farthest: farthest }) }}</div>
+          <div>{{ t('text.recipientsCanScheduleBetween', {earliest: earliest, farthest: farthest}) }}</div>
         </div>
       </div>
     </div>
@@ -323,7 +322,7 @@ import SecondaryButton from '@/elements/SecondaryButton';
 import TabBar from '@/components/TabBar';
 
 // icons
-import { IconChevronDown } from '@tabler/icons-vue';
+import { IconChevronDown, IconExternalLink } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
 
@@ -333,8 +332,8 @@ const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
-
 const dateFormat = 'YYYY-MM-DD';
+
 
 // component emits
 const emit = defineEmits(['created', 'updated']);
@@ -481,6 +480,48 @@ const resetSchedule = () => {
   state.value = scheduleCreationState.details;
 };
 
+const handleErrorResponse = (responseData) => {
+  scheduleCreationError.value = null;
+
+  const { value } = responseData;
+
+  if (value?.detail?.message) {
+    scheduleCreationError.value = value?.detail?.message;
+  } else if (value?.detail instanceof Array) {
+    // TODO: Move logic to backend (https://github.com/thunderbird/appointment/issues/270)
+
+    // List of fields to units
+    const fieldUnits = {
+      slot_duration: 'units.minutes',
+      unknown: 'units.none',
+    };
+
+    // Create a list of localized error messages, this is temp code because it shouldn't live here.
+    // We do a look-up on field, and the field's unit (if any) along with the error type.
+    const errorDetails = value.detail.map((err) => {
+      const field = err.loc[1] ?? 'unknown';
+      const fieldLocalized = t(`fields.${field}`);
+      let message = t('error.unknownScheduleError');
+
+      if (err.type === 'greater_than_equal') {
+        const contextValue = err.ctx.ge;
+        const valueLocalized = t(fieldUnits[field] ?? 'units.none', { value: contextValue });
+
+        message = t('error.minimumValue', {
+          field: fieldLocalized,
+          value: valueLocalized,
+        });
+      }
+
+      return message;
+    });
+
+    scheduleCreationError.value = errorDetails.join('\n');
+  } else {
+    scheduleCreationError.value = t('error.unknownScheduleError');
+  }
+};
+
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -509,7 +550,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
   if (error.value) {
     // error message is in data
-    scheduleCreationError.value = data.value?.detail?.message || t('error.unknownScheduleError');
+    handleErrorResponse(data);
     // go back to the start
     state.value = scheduleCreationState.details;
     savingInProgress.value = false;

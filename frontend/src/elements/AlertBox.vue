@@ -18,6 +18,7 @@
       'bg-green-500 dark:bg-green-800': scheme === alertSchemes.success,
       'bg-teal-500 dark:bg-teal-800': scheme === alertSchemes.info,
     }"
+        v-if="title"
   >
     {{ title }}
   </span>
@@ -32,7 +33,7 @@
 
 <script setup>
 import { IconX } from '@tabler/icons-vue';
-import { alertSchemes } from "@/definitions";
+import { alertSchemes } from '@/definitions';
 
 const props = defineProps({
   title: String,
