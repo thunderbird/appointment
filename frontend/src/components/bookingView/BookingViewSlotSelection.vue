@@ -6,6 +6,7 @@
     </div>
     <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
     <div class="text-xl mb-6">{{ t('text.chooseDateAndTime') }}</div>
+  <!--
     <calendar-page-heading
       :nav="showNavigation && activeView === views.month"
       :month="activeDate.format('MMMM')"
@@ -16,6 +17,7 @@
       @next="dateNav('month')"
       @back="activeView = views.month"
     />
+    -->
     <calendar-qalendar
       class="w-full"
       :selected="activeDate"

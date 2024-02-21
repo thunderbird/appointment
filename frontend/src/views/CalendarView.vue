@@ -12,6 +12,7 @@
   </div>
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
+    <!--
     <calendar-page-heading
       :nav="true"
       :month="activeDate.format('MMMM')"
@@ -20,7 +21,9 @@
       @prev="dateNav('auto', false)"
       @next="dateNav('auto')"
     />
+    -->
     <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
+      <!--
       <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
         {{ t("label.today") }}
       </button>
@@ -30,6 +33,7 @@
         @update="updateTab"
         class="text-sm"
       />
+      -->
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"

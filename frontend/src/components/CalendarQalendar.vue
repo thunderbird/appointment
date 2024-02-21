@@ -42,46 +42,33 @@ const calendarMode = ref('month');
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
 
+/**
+ * Calculate the minimum amount of time we want to display
+ * Qalendar only supports [15, 30, 60] as values.
+ * @type {ComputedRef<number>}
+ */
 const timeSlotDuration = computed(() => {
   if (appointments?.value?.length === 0) {
     return 15;
   }
+  // Duration on slots are fixed, so grab the first one.
   const duration = appointments?.value[0].slots[0].duration;
   if (duration <= 15) {
     return 15;
-  } if (duration <= 30) {
+  }
+  if (duration <= 30) {
     return 30;
   }
   return 60;
 });
 const timeSlotHeight = ref(40);
 
-const config = ref({
-  week: {
-    startsOn: 'sunday',
-  },
-  style: {
-    // When adding a custom font, please also set the fallback(s) yourself
-    fontFamily: 'Open Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji',
-    colorSchemes: calendarColors,
-  },
-  defaultMode: 'month',
-  dayIntervals: {
-    length: timeSlotDuration.value, // Length in minutes of each interval. Accepts values 15, 30 and 60 (the latter is the default)
-    height: timeSlotHeight.value, // The height of each interval
-    // displayClickableInterval: true, // Needs to be set explicitly to true, if you want to display clickable intervals
-  },
-  dayBoundaries: {
-    start: 6,
-    end: 18,
-  },
-  eventDialog: {
-    // isCustom: true,
-    isDisabled: true, //! isBookingRoute.value,
-  },
-});
-
 /* Event Handlers */
+
+/**
+ * On event click / selected. Only emits on booking route
+ * @param evt
+ */
 const eventSelected = (evt) => {
   if (!isBookingRoute.value) {
     return;
@@ -89,9 +76,16 @@ const eventSelected = (evt) => {
   selectedDate.value = evt.clickedEvent.id;
   emit('eventSelected', evt.clickedEvent.id);
 };
+/**
+ * On Date Change. Any internal date change triggers this.
+ * @param evt
+ */
 const dateChange = (evt) => {
   emit('dateChange', evt);
 };
+/**
+ * On mode change. e.g. month, week, day.
+ */
 const modeChange = (evt) => {
   calendarMode.value = evt?.mode ?? 'month';
 };
@@ -130,69 +124,132 @@ const applyTimezone = (d) => dj.utc(d).tz(dj.tz.guess());
  * @type {ComputedRef<*[]>}
  */
 const calendarEvents = computed(() => {
-  console.log('Events -> ', events?.value, appointments?.value);
-  const evts = events?.value?.map((event) => ({
-    id: event.title,
-    title: event.title,
-    colorScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
-    time: {
-      start: event.all_day
-        ? dj(event.start).format(dateFormatStrings.qalendarFullDay)
-        : dj(event.start).format(dateFormatStrings.qalendar),
-      end: event.all_day
-        ? dj(event.end).format(dateFormatStrings.qalendarFullDay)
-        : dj(event.end).format(dateFormatStrings.qalendar),
-    },
-    description: event.description,
-    customData: {
-      attendee: null,
-      booking_status: appointmentState.booked,
-      calendar_title: event.calendar_title,
-      calendar_color: event.calendar_color,
-      duration: event.duration,
-      preview: false,
-      all_day: event.all_day,
-      remote: true,
-      tentative: event.tentative,
-    },
-    isCustom: true,
-  })) ?? [];
+  const evts = events?.value?.map((event) => {
+    const start = dj(event.start);
+    const end = dj(event.end);
+
+    return {
+      id: event.title,
+      title: event.title,
+      colorScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
+      time: {
+        start: event.all_day
+          ? start.format(dateFormatStrings.qalendarFullDay)
+          : start.format(dateFormatStrings.qalendar),
+        end: event.all_day
+          ? end.format(dateFormatStrings.qalendarFullDay)
+          : end.format(dateFormatStrings.qalendar),
+      },
+      description: event.description,
+      customData: {
+        attendee: null,
+        booking_status: appointmentState.booked,
+        calendar_title: event.calendar_title,
+        calendar_color: event.calendar_color,
+        duration: event.duration,
+        preview: false,
+        all_day: event.all_day,
+        remote: true,
+        tentative: event.tentative,
+      },
+      isCustom: true,
+    };
+  }) ?? [];
 
   // Mix in appointments
-  const evtApmts = appointments?.value?.map((appointment) => appointment.slots.map((slot) => ({
-    id: appointment.id ?? applyTimezone(slot.start).format(dateFormatStrings.qalendar),
-    title: !isBookingRoute.value
-      ? appointment.title
-      : `${applyTimezone(slot.start).format(displayFormat)} - ${applyTimezone(slot.start).add(slot.duration, 'minutes').format(displayFormat)}`,
-    colorScheme: processCalendarColorScheme(
-      appointment?.calendar_title ?? 'booking',
-      appointment?.calendar_color ?? 'rgb(45, 212, 191)',
-    ),
-    time: {
-      start: applyTimezone(slot.start).format(dateFormatStrings.qalendar),
-      end: applyTimezone(slot.start).add(slot.duration, 'minutes').format(dateFormatStrings.qalendar),
-    },
-    description: appointment.details,
-    with: slot.attendee ? [slot.attendee].map((attendee) => `${attendee.name} <${attendee.email}>`).join(', ') : '',
-    customData: {
-      attendee: null,
-      booking_status: appointment.status,
-      calendar_title: appointment.calendar_title,
-      calendar_color: appointment.calendar_color,
-      duration: slot.duration,
-      preview: false,
-      all_day: false,
-      remote: false,
-      tentative: false,
-    },
-    isCustom: true,
-  }))).flat(1) ?? [];
+  const evtApmts = appointments?.value?.map((appointment) => appointment.slots.map((slot) => {
+    const start = applyTimezone(dj(slot.start));
+    const end = applyTimezone(slot.start).add(slot.duration, 'minutes');
+
+    return {
+      id: appointment.id ?? start.format(dateFormatStrings.qalendar),
+      title: !isBookingRoute.value
+        ? appointment.title
+        : `${start.format(displayFormat)} - ${end.format(displayFormat)}`,
+      colorScheme: processCalendarColorScheme(
+        appointment?.calendar_title ?? 'booking',
+        appointment?.calendar_color ?? 'rgb(45, 212, 191)',
+      ),
+      time: {
+        start: start.format(dateFormatStrings.qalendar),
+        end: end.format(dateFormatStrings.qalendar),
+      },
+      description: appointment.details,
+      with: slot.attendee ? [slot.attendee].map((attendee) => `${attendee.name} <${attendee.email}>`).join(', ') : '',
+      customData: {
+        attendee: null,
+        booking_status: appointment.status,
+        calendar_title: appointment.calendar_title,
+        calendar_color: appointment.calendar_color,
+        duration: slot.duration,
+        preview: false,
+        all_day: false,
+        remote: false,
+        tentative: false,
+      },
+      isCustom: true,
+    };
+  })).flat(1) ?? [];
 
   return [...evts, ...evtApmts];
+});
+
+/**
+ * Calculate the start and end times, and then space them our by 2 hours for style!
+ * @type {ComputedRef<{start, end}>}
+ */
+const dayBoundary = computed(() => {
+  let startHour = 99;
+  let endHour = 0;
+
+  calendarEvents.value.forEach((event) => {
+    // Calculate start/end hours
+    startHour = Math.min(startHour, dj(event.time.start).hour());
+    endHour = Math.max(endHour, dj(event.time.end).hour());
+  });
+
+  return {
+    start: startHour - 2,
+    end: endHour + 2,
+  };
+});
+
+/**
+ * Calendar Config Object
+ */
+const config = ref({
+  week: {
+    startsOn: 'sunday',
+  },
+  style: {
+    // Just the pre-calculated list from tailwind, could use some fine-tuning.
+    fontFamily: [
+      '"Open Sans"',
+      'ui-sans-serif',
+      'system-ui',
+      'sans-serif',
+      '"Apple Color Emoji"',
+      '"Segoe UI Emoji"',
+      '"Segoe UI Symbol"',
+      '"Noto Color Emoji"',
+    ].join(', '),
+    colorSchemes: calendarColors,
+  },
+  defaultMode: calendarMode.value, // mode happens to match up with our mode!
+  dayIntervals: {
+    length: timeSlotDuration.value, // Accepts [15, 30, 60]
+    height: timeSlotHeight.value, // pixel height of each length
+  },
+  dayBoundaries: dayBoundary,
+  eventDialog: {
+    // We roll our own
+    isDisabled: true,
+  },
 });
 </script>
 <template>
   <div class="w-full">
+    <div class="tailwind-sucks"></div>
     <Qalendar
       :events="calendarEvents"
       :config="config"
@@ -234,10 +291,15 @@ const calendarEvents = computed(() => {
  * Re-theme of Qalendar for Appointment
  */
 :root {
-  --qalendar-appointment-bg: theme('backgroundColor.gray.300');
+  --qalendar-appointment-bg: theme('backgroundColor.white');
   --qalendar-appointment-fg: theme('backgroundColor.gray.100');
   --qalendar-appointment-border-color: theme('borderColor.gray.200');
   --qalendar-appointment-border-radius: theme('borderRadius.xl');
+  --qalendar-appointment-text: theme('colors.gray.600');
+
+  --qalendar-appointment-button-color: linear-gradient(to bottom right, theme('gradientColorStops.teal.400'), theme('gradientColorStops.sky.400'));
+  --qalendar-appointment-button-hover-color: linear-gradient(to top left, theme('gradientColorStops.teal.400'), theme('gradientColorStops.sky.400'));
+  --qalendar-appointment-button-hover-scale: theme('scale.102');
 }
 
 @media (prefers-color-scheme: dark) {
@@ -245,6 +307,7 @@ const calendarEvents = computed(() => {
     --qalendar-appointment-bg: theme('backgroundColor.gray.700');
     --qalendar-appointment-fg: theme('backgroundColor.gray.600');
     --qalendar-appointment-border-color: theme('borderColor.gray.500');
+    --qalendar-appointment-text: theme('colors.gray.300');
   }
 }
 
@@ -261,10 +324,10 @@ const calendarEvents = computed(() => {
   /* Sizing overrides */
   --qalendar-border-gray-thin: theme('borderWidth.DEFAULT') solid var(--qalendar-appointment-border-color) !important;
   --qalendar-border-radius: var(--qalendar-appointment-border-radius) !important;
-  /* Colours */
+  /* Colour overrides */
   --qalendar-blue: theme('colors.teal.500') !important;
   --qalendar-blue-transparent: theme('colors.teal.500') / 90% !important;
-  --qalendar-gray-quite-dark: theme('colors.gray.300') !important;
+  --qalendar-gray-quite-dark: var(--qalendar-appointment-text) !important;
   --qalendar-gray: var(--qalendar-appointment-fg) !important;
   --qalendar-green: var(--qalendar-blue) !important;
   --qalendar-theme-color: var(--qalendar-blue) !important;
@@ -282,6 +345,11 @@ const calendarEvents = computed(() => {
   }
 }
 
+/* Ignore text blocking pointer events for mobile day selection on month view */
+.calendar-root-wrapper .calendar-month__day-date {
+  pointer-events: none;
+}
+
 /* Adjust the background of the entire component */
 .calendar-root-wrapper .calendar-root {
   background-color: var(--qalendar-appointment-bg) !important;
@@ -291,6 +359,7 @@ const calendarEvents = computed(() => {
 
 /* Fix overflow:hidden preventing event details popup from clipping calendar */
 .calendar-root-wrapper .calendar-week__event,
+.calendar-root-wrapper .calendar-week__events,
 .calendar-root-wrapper .calendar-week__events,
 .calendar-root-wrapper .calendar-week__wrapper,
 .calendar-root-wrapper .calendar-month {
@@ -309,6 +378,35 @@ const calendarEvents = computed(() => {
 /* Make trailing days (days not in this month) our cool foreground colour */
 .calendar-root-wrapper .trailing-or-leading {
   background-color: var(--qalendar-appointment-fg);
+}
+
+/* Unset calendar mode background and border radius to normalize it. */
+.calendar-root-wrapper .calendar-header__mode-picker .calendar-header__mode-value {
+  background-color: unset !important;
+  border-radius: unset !important;
+  display: flex;
+  justify-content: center;
+  color: white;
+}
+
+/* Follow-up fix for mode dropdown text colour */
+.calendar-root-wrapper .calendar-header__mode-picker {
+    color: var(--qalendar-appointment-text) !important;
+}
+
+/* Create some space between week day names */
+.calendar-root-wrapper .date-picker__day-names.week {
+  gap: theme('gap.2');
+}
+
+/* Apply our primary-btn style to the two buttons.
+This was a fancy layer class, but @apply in sfc with custom layer classes is a nightmare. */
+.calendar-root-wrapper .date-picker__value-display,
+.calendar-root-wrapper .calendar-header__mode-picker {
+  @apply relative h-10 text-base font-semibold whitespace-nowrap rounded-full bg-gradient-to-br
+  hover:shadow-md disabled:scale-100 disabled:shadow-none disabled:opacity-50 px-6
+  transition-all ease-in-out flex items-center justify-center gap-2
+  text-white from-teal-400 to-sky-600 enabled:hover:from-sky-400 enabled:hover:to-teal-600 md:min-w-32;
 }
 
 </style>

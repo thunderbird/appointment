@@ -94,8 +94,10 @@ export const showEventPopup = (el, event, position = 'right') => {
  * via: https://stackoverflow.com/a/11868398
  */
 export const getAccessibleColor = (hexcolor) => {
+  // TODO: Move this to utility and pull it into Vue.
+  const defaultColor = localStorage?.getItem('theme') === 'dark' ?? !window.matchMedia('(prefers-color-scheme: dark)').matches ? 'white' : 'black';
   if (!hexcolor) {
-    return 'white';
+    return defaultColor;
   }
   const r = parseInt(hexcolor.substring(1, 3), 16);
   const g = parseInt(hexcolor.substring(3, 5), 16);
