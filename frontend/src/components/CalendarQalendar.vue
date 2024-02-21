@@ -276,7 +276,6 @@ watch(currentDate, () => {
 </script>
 <template>
   <div class="w-full">
-    <div class="tailwind-sucks"></div>
     <Qalendar
       :events="calendarEvents"
       :config="config"
