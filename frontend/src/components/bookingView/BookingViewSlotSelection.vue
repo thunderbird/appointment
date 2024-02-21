@@ -8,7 +8,7 @@
     <div class="text-xl mb-6">{{ t('text.chooseDateAndTime') }}</div>
     <calendar-qalendar
       class="w-full"
-      :selected="activeDate"
+      :current-date="currentDateObject"
       :appointments="[appointment]"
       :is-booking-route="true"
       @event-selected="selectEvent"
@@ -53,6 +53,7 @@ const {
   appointment, activeView, activeDate, selectedEvent,
 } = storeToRefs(useBookingViewStore());
 
+const currentDateObject = computed(() => activeDate?.value.toDate());
 const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
 const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 

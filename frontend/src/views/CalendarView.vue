@@ -28,7 +28,7 @@
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
       class="w-full md:w-4/5"
-      :selected="activeDate"
+      :current-date="activeDate"
       :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
       @date-change="onDateChange"
@@ -128,17 +128,10 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
-const activeDateRange = ref({
+const activeDateRange = computed(() => ({
   start: activeDate.value.startOf('month'),
   end: activeDate.value.endOf('month'),
-});
-const selectDate = (d) => {
-  router.replace({
-    name: route.name,
-    params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') },
-  });
-  activeDate.value = dj(d);
-};
+}));
 
 // date calculations
 const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
@@ -167,18 +160,6 @@ const pageTitle = computed(() => {
   }
 });
 
-// date navigation
-const dateNav = (unit = 'auto', forward = true) => {
-  if (unit === 'auto') {
-    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
-  }
-  if (forward) {
-    selectDate(activeDate.value.add(1, unit));
-  } else {
-    selectDate(activeDate.value.subtract(1, unit));
-  }
-};
-
 // appointment creation state
 const creationStatus = ref(appointmentCreationState.hidden);
 
@@ -205,17 +186,42 @@ const getRemoteEvents = async (from, to) => {
  * Retrieve new events if a user navigates to a different month
  * @param dateObj
  */
-const onDateChange = (dateObj) => {
+const onDateChange = async (dateObj) => {
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
 
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-  if (dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
-  || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')) {
-    getRemoteEvents(
-      dj(start).format('YYYY-MM-DD'),
-      dj(end).format('YYYY-MM-DD'),
+  if ((dj(activeDateRange.value.end).format('YYYYMM') !== end.format('YYYYMM')
+    || dj(activeDateRange.value.start).format('YYYYMM') !== start.format('YYYYMM'))) {
+    await getRemoteEvents(
+      start.format('YYYY-MM-DD'),
+      end.format('YYYY-MM-DD'),
     );
+  }
+};
+
+const selectDate = async (d) => {
+  const date = dj(d);
+  await router.replace({
+    name: route.name,
+    params: { view: route.params.view, date: date.format('YYYY-MM-DD') },
+  });
+  // Check if we need to pull remote events
+  await onDateChange({ start: date.startOf('month'), end: date.endOf('month') });
+
+  // Update our activeDate
+  activeDate.value = date;
+};
+
+// date navigation
+const dateNav = (unit = 'auto', forward = true) => {
+  if (unit === 'auto') {
+    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
+  }
+  if (forward) {
+    selectDate(activeDate.value.add(1, unit));
+  } else {
+    selectDate(activeDate.value.subtract(1, unit));
   }
 };
 

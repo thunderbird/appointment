@@ -1,6 +1,6 @@
 <script setup>
 import {
-  ref, computed, inject, toRefs,
+  ref, computed, inject, toRefs, watch,
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
@@ -20,11 +20,14 @@ const props = defineProps({
   events: Array, // data of calendar events to show
   schedules: Array, // data of scheduled event previews to show
   isBookingRoute: Boolean,
+  currentDate: Object,
 });
 
 const {
-  events, appointments, schedules, isBookingRoute,
+  events, appointments, schedules, isBookingRoute, currentDate,
 } = toRefs(props);
+
+const qalendarRef = ref();
 
 const dateFormatStrings = {
   qalendar: 'YYYY-MM-DD HH:mm',
@@ -204,9 +207,7 @@ const dayBoundary = computed(() => {
   let startHour = 99;
   let endHour = 0;
 
-  // console.log('Running dayBoundary');
   if (calendarEvents?.value.length === 0) {
-    // console.log('Rip');
     return {
       start: 0,
       end: 24,
@@ -219,13 +220,6 @@ const dayBoundary = computed(() => {
     endHour = Math.max(endHour, dj(event.time.end).hour());
   });
 
-  /*
-  console.log('Ye', {
-    start: startHour - 2,
-    end: endHour + 2,
-  });
-
-   */
   return {
     start: Math.max(0, startHour - 2),
     end: Math.min(24, endHour + 2),
@@ -264,6 +258,21 @@ const config = ref({
     isDisabled: true,
   },
 });
+
+/**
+ * Qalendar's selectedDate is only set on init and never updated. So we have to poke at their internals...
+ */
+watch(currentDate, () => {
+  const period = {
+    start: currentDate.value.startOf('month').toDate(),
+    end: currentDate.value.endOf('month').toDate(),
+    selectedDate: currentDate.value.toDate(),
+  };
+
+  qalendarRef.value.handleUpdatedPeriod(period);
+  qalendarRef.value.$refs.appHeader.handlePeriodChange(period);
+});
+
 </script>
 <template>
   <div class="w-full">
@@ -271,9 +280,11 @@ const config = ref({
     <Qalendar
       :events="calendarEvents"
       :config="config"
+      :selected-date="currentDate.toDate()"
       @event-was-clicked="eventSelected"
       @updated-period="dateChange"
       @updated-mode="modeChange"
+      ref="qalendarRef"
     >
       <template #weekDayEvent="eventProps">
         <CalendarEvent
@@ -365,9 +376,9 @@ const config = ref({
 
 /* Add some minimum spacing to the numbered day, so events line up even with the "today" highlight. */
 .calendar-root-wrapper .calendar-month__day-date {
-    @media (min-width: theme('screens.lg')) {
-      min-height: theme('height.8') !important;
-    }
+  @media (min-width: theme('screens.lg')) {
+    min-height: theme('height.8') !important;
+  }
 }
 
 /* Add some spacing to the event list */
@@ -421,7 +432,7 @@ const config = ref({
 
 /* Follow-up fix for mode dropdown text colour */
 .calendar-root-wrapper .calendar-header__mode-picker {
-    color: var(--qalendar-appointment-text) !important;
+  color: var(--qalendar-appointment-text) !important;
 }
 
 /* Create some space between week day names */
@@ -434,9 +445,37 @@ This was a fancy layer class, but @apply in sfc with custom layer classes is a n
 .calendar-root-wrapper .date-picker__value-display,
 .calendar-root-wrapper .calendar-header__mode-picker {
   @apply relative h-10 text-base font-semibold whitespace-nowrap rounded-full bg-gradient-to-br
-  hover:shadow-md disabled:scale-100 disabled:shadow-none disabled:opacity-50 px-6
-  transition-all ease-in-out flex items-center justify-center gap-2
-  text-white from-teal-400 to-sky-600 enabled:hover:from-sky-400 enabled:hover:to-teal-600 md:min-w-32;
+  md:px-2 transition-all ease-in-out flex items-center justify-center gap-2
+  text-white from-teal-400 to-sky-600 md:min-w-32;
 }
 
+/* @apply doesn't seem to mesh well with states */
+.calendar-root-wrapper .date-picker__value-display:hover,
+.calendar-root-wrapper .calendar-header__mode-picker:hover {
+  @apply from-sky-400 to-teal-600 shadow-md
+}
+
+/* ditto */
+.calendar-root-wrapper .date-picker__value-display:disabled,
+.calendar-root-wrapper .calendar-header__mode-picker:disabled {
+  @apply opacity-50 shadow-none
+}
+
+/*
+Loading bar, mostly works but needs some work and maybe a div relocation
+.calendar-root-wrapper .calendar-root .top-bar-loader {
+  z-index: 2;
+  width: 100%;
+  left: 0;
+  top: 4.5rem;
+  border-radius: var(--qalendar-appointment-border-radius) !important;
+
+  @media (min-width: theme('screens.md')) {
+    top: 4.5rem;
+  }
+  @media (min-width: theme('screens.lg')) {
+    top: 5.5rem;
+  }
+}
+*/
 </style>

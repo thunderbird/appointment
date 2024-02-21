@@ -23,8 +23,8 @@
         }"
         :style="{
           borderColor: eventColor(eventData, placeholder).border,
-          backgroundColor: monthView ? eventColor(eventData, placeholder).background : eventData.calendar_color,
-          color: monthView ? getAccessibleColor(eventColor(eventData, placeholder).background) : getAccessibleColor(eventData.calendar_color),
+          backgroundColor: monthView || placeholder ? eventColor(eventData, placeholder).background : eventData.calendar_color,
+          color: monthView || placeholder ? getAccessibleColor(eventColor(eventData, placeholder).background) : getAccessibleColor(eventData.calendar_color),
         }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"

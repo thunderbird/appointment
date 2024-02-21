@@ -2,40 +2,14 @@
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
     <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
-    <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
-      <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
-        {{ t("label.today") }}
-      </button>
-      <tab-bar
-        :tab-items="calendarViews"
-        :active="tabActive"
-        @update="updateTab"
-        class="text-sm"
-      />
-      <div class="flex-center gap-2 select-none">
-        <div @click="dateNav('auto', false)" class="cursor-pointer">
-          <icon-chevron-left class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
-        </div>
-        <div class="h-12 flex-center flex-col">
-          <div class="flex gap-2 text-lg">
-            <span class="font-normal">{{ activeDate.format('MMMM') }}</span>
-            <span class="font-light">{{ activeDate.format('YYYY')}}</span>
-          </div>
-          <div v-if="pageTitle" class="text-sm text-center text-gray-500">{{ pageTitle }}</div>
-        </div>
-        <div @click="dateNav('auto')" class="cursor-pointer">
-          <icon-chevron-right class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
-        </div>
-      </div>
-    </div>
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 items-stretch"
+    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 mt-8 items-stretch"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
-    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
+    <div class="w-full sm:w-1/2 md:w-1/4 mx-auto mb-10 md:mb-0 min-w-[360px]">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -47,7 +21,7 @@
     </div>
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
-      class="w-full md:w-4/5"
+      class="w-full"
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
