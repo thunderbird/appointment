@@ -103,7 +103,7 @@ const modeChange = (evt) => {
  */
 const processCalendarColorScheme = (calendarTitle, calendarColor) => {
   // TODO: Replace the replace pattern with some regex
-  const slug = calendarTitle.replace(' ', '_').replace('@', '_').toLowerCase();
+  const slug = calendarTitle.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
   if (!calendarColors.value[slug]) {
     calendarColors.value[slug] = {
       color: '#fff',
@@ -286,7 +286,7 @@ watch(currentDate, () => {
       ref="qalendarRef"
     >
       <template #weekDayEvent="eventProps">
-        <CalendarEvent
+        <calendar-event
           :isActive="true"
           :isSelected="selectedDate === eventProps.eventData.id"
           :isToday="false"

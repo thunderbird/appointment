@@ -146,8 +146,10 @@ const onDateChange = (dateObj) => {
   const end = dj(dateObj.end);
 
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-  if (dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
-  || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')) {
+  if (
+      dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
+      || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
+  ) {
     getRemoteEvents(
       dj(start).format('YYYY-MM-DD'),
       dj(end).format('YYYY-MM-DD'),
