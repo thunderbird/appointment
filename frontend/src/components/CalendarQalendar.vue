@@ -103,7 +103,7 @@ const modeChange = (evt) => {
  */
 const processCalendarColorScheme = (calendarTitle, calendarColor) => {
   // TODO: Replace the replace pattern with some regex
-  const slug = calendarTitle.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
+  const slug = calendarTitle.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
   if (!calendarColors.value[slug]) {
     calendarColors.value[slug] = {
       color: '#fff',
@@ -276,7 +276,7 @@ watch(currentDate, () => {
 </script>
 <template>
   <div class="w-full">
-    <Qalendar
+    <qalendar
       :events="calendarEvents"
       :config="config"
       :selected-date="currentDate?.toDate()"
@@ -296,11 +296,11 @@ watch(currentDate, () => {
           :event="eventProps.eventData"
           :popup-position="calendarMode === 'day' ? 'top' : 'right'"
           :month-view="false"
-        ></CalendarEvent>
+        ></calendar-event>
       </template>
 
       <template #monthEvent="monthEventProps">
-        <CalendarEvent
+        <calendar-event
           :isActive="true"
           :isSelected="selectedDate === monthEventProps.eventData.id"
           :isToday="false"
@@ -309,9 +309,9 @@ watch(currentDate, () => {
           :placeholder="isBookingRoute"
           :event="monthEventProps.eventData"
           :month-view="true"
-        ></CalendarEvent>
+        ></calendar-event>
       </template>
-    </Qalendar>
+    </qalendar>
   </div>
 </template>
 <style>
