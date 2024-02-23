@@ -310,7 +310,9 @@
 </template>
 
 <script setup>
-import { locationTypes, meetingLinkProviderType, scheduleCreationState } from '@/definitions';
+import {
+  dateFormatStrings, locationTypes, meetingLinkProviderType, scheduleCreationState,
+} from '@/definitions';
 import {
   ref, reactive, computed, inject, watch, onMounted,
 } from 'vue';
@@ -322,7 +324,7 @@ import SecondaryButton from '@/elements/SecondaryButton';
 import TabBar from '@/components/TabBar';
 
 // icons
-import { IconChevronDown, IconExternalLink } from '@tabler/icons-vue';
+import { IconChevronDown } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
 
@@ -332,8 +334,7 @@ const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
-const dateFormat = 'YYYY-MM-DD';
-
+const dateFormat = dateFormatStrings.qalendarFullDay;
 
 // component emits
 const emit = defineEmits(['created', 'updated']);

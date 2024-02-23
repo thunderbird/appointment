@@ -5,8 +5,8 @@ import {
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/CalendarEvent.vue';
-import { appointmentState } from '@/definitions';
-import { timeFormat } from '@/utils';
+import { appointmentState, colorSchemes, dateFormatStrings } from '@/definitions';
+import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 
 // component constants
 const dj = inject('dayjs');
@@ -29,17 +29,11 @@ const {
 
 const qalendarRef = ref();
 
-const dateFormatStrings = {
-  qalendar: 'YYYY-MM-DD HH:mm',
-  qalendarFullDay: 'YYYY-MM-DD',
-  // Display formats
-  display12Hour: 'hh:mma',
-  display24Hour: 'HH:mm',
-};
 const displayFormat = timeFormat();
 const calendarColors = ref({});
 const selectedDate = ref(null);
 const calendarMode = ref('month');
+const preferredTheme = getPreferredTheme();
 
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
@@ -259,6 +253,12 @@ const config = ref({
   },
 });
 
+// We only support two locales right now so just stick this in.
+const locale = getLocale();
+if (locale) {
+  config.value.locale = locale === 'de' ? 'de-DE' : 'en-US';
+}
+
 /**
  * Qalendar's selectedDate is only set on init and never updated. So we have to poke at their internals...
  */
@@ -275,7 +275,7 @@ watch(currentDate, () => {
 
 </script>
 <template>
-  <div class="w-full">
+  <div class="w-full" :style="{'color-scheme': preferredTheme === colorSchemes.dark ? 'dark' : null}" :class="{'is-light-mode': preferredTheme === colorSchemes.light}">
     <qalendar
       :events="calendarEvents"
       :config="config"
@@ -318,7 +318,7 @@ watch(currentDate, () => {
 /*
  * Re-theme of Qalendar for Appointment
  */
-:root {
+.calendar-root-wrapper {
   --qalendar-appointment-bg: theme('backgroundColor.white');
   --qalendar-appointment-fg: theme('backgroundColor.gray.100');
   --qalendar-appointment-border-color: theme('borderColor.gray.200');
@@ -330,13 +330,11 @@ watch(currentDate, () => {
   --qalendar-appointment-button-hover-scale: theme('scale.102');
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --qalendar-appointment-bg: theme('backgroundColor.gray.700');
-    --qalendar-appointment-fg: theme('backgroundColor.gray.600');
-    --qalendar-appointment-border-color: theme('borderColor.gray.500');
-    --qalendar-appointment-text: theme('colors.gray.300');
-  }
+.dark .calendar-root-wrapper {
+  --qalendar-appointment-bg: theme('backgroundColor.gray.700');
+  --qalendar-appointment-fg: theme('backgroundColor.gray.600');
+  --qalendar-appointment-border-color: theme('borderColor.gray.500');
+  --qalendar-appointment-text: theme('colors.gray.300');
 }
 
 /* Override some of Qalendar's css variables */

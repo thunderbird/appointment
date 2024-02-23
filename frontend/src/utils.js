@@ -1,4 +1,6 @@
 // get the first key of given object that points to given value
+import { colorSchemes } from '@/definitions.js';
+
 export const keyByValue = (o, v) => Object.keys(o).find((k) => o[k] === v);
 
 // create event color for border and background, inherited from calendar color attribute
@@ -91,11 +93,45 @@ export const showEventPopup = (el, event, position = 'right') => {
 };
 
 /**
+ * Returns the stored locale setting or null if none is set.
+ * TODO: This should be moved to a settings store
+ * @returns {string|null}
+ */
+export const getLocale = () => {
+  const locale = localStorage?.getItem('locale');
+  if (!locale) {
+    return null;
+  }
+  return locale;
+};
+
+/**
+ * Returns the stored theme value. If the stored value does not exist, it will guess based on prefers-color-scheme.
+ * TODO: This should be moved to a settings store
+ * @returns {colorSchemes} - Colour theme value
+ */
+export const getPreferredTheme = () => {
+  const theme = localStorage?.getItem('theme');
+  if (!theme) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? colorSchemes.dark : colorSchemes.light;
+  }
+
+  switch (theme) {
+    case 'dark':
+      return colorSchemes.dark;
+    case 'light':
+      return colorSchemes.light;
+    default:
+      // This would be colorSchemes.system, but I feel like we need a definitive answer here.
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? colorSchemes.dark : colorSchemes.light;
+  }
+};
+
+/**
  * via: https://stackoverflow.com/a/11868398
  */
 export const getAccessibleColor = (hexcolor) => {
-  // TODO: Move this to utility and pull it into Vue.
-  const defaultColor = localStorage?.getItem('theme') === 'dark' ?? !window.matchMedia('(prefers-color-scheme: dark)').matches ? 'white' : 'black';
+  const defaultColor = getPreferredTheme() === colorSchemes.dark ? 'white' : 'black';
   if (!hexcolor) {
     return defaultColor;
   }
@@ -115,4 +151,5 @@ export default {
   initialEventPopupData,
   showEventPopup,
   getAccessibleColor,
+  getLocale,
 };

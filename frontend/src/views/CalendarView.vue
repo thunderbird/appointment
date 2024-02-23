@@ -133,32 +133,8 @@ const activeDateRange = computed(() => ({
   end: activeDate.value.endOf('month'),
 }));
 
-// date calculations
-const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
-const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
-
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews[route.params.view]);
-const updateTab = (view) => {
-  router.replace({
-    name: route.name,
-    params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') },
-  });
-  tabActive.value = calendarViews[view];
-};
-
-// calculate page title
-const pageTitle = computed(() => {
-  switch (tabActive.value) {
-    case calendarViews.day:
-      return activeDate.value.format('dddd Do');
-    case calendarViews.week:
-      return `${startOfActiveWeek.value.format('ddd Do')} - ${endOfActiveWeek.value.format('ddd Do')}`;
-    case calendarViews.month:
-    default:
-      return '';
-  }
-});
 
 // appointment creation state
 const creationStatus = ref(appointmentCreationState.hidden);

@@ -1,3 +1,17 @@
+/**
+ * Available date format strings
+ * @readonly
+ * @enum
+ */
+export const dateFormatStrings = {
+  // Qalendar specific formats (These have to be in this format for qalendar to understand them)
+  qalendar: 'YYYY-MM-DD HH:mm',
+  qalendarFullDay: 'YYYY-MM-DD',
+  // Time display formats
+  display12Hour: 'hh:mma',
+  display24Hour: 'HH:mm',
+};
+
 // appointment location types
 export const subscriberLevels = {
   basic: 1,
@@ -94,7 +108,11 @@ export const settingsSections = {
   // faq:                    6,
 };
 
-// available color schemes for theme
+/**
+ * available color schemes for theme
+ * @readonly
+ * @enum
+ */
 export const colorSchemes = {
   system: 1,
   dark: 2,
@@ -141,4 +159,5 @@ export default {
   settingsSections,
   viewTypes,
   meetingLinkProviderType,
+  dateFormatStrings,
 };
