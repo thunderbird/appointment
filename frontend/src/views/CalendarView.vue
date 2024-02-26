@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col lg:flex-row w-full m-8 mt-0 justify-center">
+  <div class="m-8 mt-0 flex w-full flex-col justify-center lg:flex-row">
     <alert-box
       title="Calendar Setup"
       :scheme="alertSchemes.warning"
@@ -11,8 +11,8 @@
     </alert-box>
   </div>
   <!-- page title area -->
-  <div class="flex flex-col lg:flex-row justify-between items-start select-none">
-    <div class="flex flex-col gap-8 md:flex-row mx-auto md:mr-0 items-center">
+  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
+    <div class="mx-auto flex flex-col items-center gap-8 md:mr-0 md:flex-row">
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
@@ -22,7 +22,7 @@
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-8 mt-8 items-stretch"
+    class="mt-8 flex flex-col flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->
@@ -34,7 +34,7 @@
       @date-change="onDateChange"
     />
     <!-- page side bar -->
-    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
+    <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 md:w-1/5">
       <div v-if="creationStatus === appointmentCreationState.hidden" class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month
@@ -48,12 +48,12 @@
         />
         <!-- appointments and events list -->
         <div>
-          <div class="flex justify-between items-center">
-            <div class="font-semibold text-lg">
+          <div class="flex items-center justify-between">
+            <div class="text-lg font-semibold">
               {{ t("heading.pendingAppointments") }}
             </div>
             <router-link
-              class="px-2 py-1 border-r rounded-full text-xs uppercase bg-teal-500 text-white"
+              class="rounded-full border-r bg-teal-500 px-2 py-1 text-xs uppercase text-white"
               :to="{ name: 'appointments' }"
             >
               {{ t("label.viewAll") }}
@@ -61,9 +61,9 @@
           </div>
           <div
             v-if="appointmentStore.pendingAppointments.length === 0"
-            class="mt-4 flex flex-col gap-8 justify-center items-center text-gray-500"
+            class="mt-4 flex flex-col items-center justify-center gap-8 text-gray-500"
           >
-            <div class="text-center mt-4">
+            <div class="mt-4 text-center">
               {{ t("info.noPendingAppointmentsInList") }}
             </div>
             <primary-button
@@ -72,7 +72,7 @@
               @click="creationStatus = appointmentCreationState.details"
             />
           </div>
-          <div v-else class="flex flex-col gap-8 mt-4">
+          <div v-else class="mt-4 flex flex-col gap-8">
             <appointment-list-item
               v-for="a in appointmentStore.pendingAppointments"
               :key="a.id"

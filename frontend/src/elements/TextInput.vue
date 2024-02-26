@@ -3,7 +3,7 @@
     <textarea
       v-model="details"
       :placeholder="placeholder"
-      class="rounded-md w-full text-sm h-40 place-holder"
+      class="place-holder h-40 w-full rounded-md text-sm"
       :maxlength="maxlength"
       required
     ></textarea>

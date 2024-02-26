@@ -1,7 +1,7 @@
 <template>
 <div class="flex flex-col gap-8">
-  <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.calendarSettings') }}</div>
-  <div class="pl-6 flex flex-col gap-6">
+  <div class="text-3xl font-semibold text-gray-500">{{ t('heading.calendarSettings') }}</div>
+  <div class="flex flex-col gap-6 pl-6">
     <alert-box
       @close="calendarConnectError = ''"
       title="Calendar Connect Error"
@@ -44,31 +44,31 @@
     </div>
 
     <!-- CalDAV calendar discovery -->
-    <div class="hidden flex flex-col gap-6">
+    <div class="flex hidden flex-col gap-6">
       <div class="text-lg">Discover CalDAV Calendars</div>
-      <div class="pl-6 flex flex-col gap-4 max-w-2xl">
-        <label class="pl-4 mt-4 flex items-center">
+      <div class="flex max-w-2xl flex-col gap-4 pl-6">
+        <label class="mt-4 flex items-center pl-4">
           <div class="w-full max-w-2xs">principal</div>
           <input
             v-model="principal.url"
             type="text"
-            class="w-full max-w-sm rounded-md w-full"
+            class="w-full max-w-sm rounded-md"
           />
         </label>
-        <label class="pl-4 flex items-center">
+        <label class="flex items-center pl-4">
           <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
           <input
             v-model="principal.user"
             type="text"
-            class="w-full max-w-sm rounded-md w-full"
+            class="w-full max-w-sm rounded-md"
           />
         </label>
-        <label class="pl-4 flex items-center">
+        <label class="flex items-center pl-4">
           <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
           <input
             v-model="principal.password"
             type="password"
-            class="w-full max-w-sm rounded-md w-full"
+            class="w-full max-w-sm rounded-md"
           />
         </label>
       </div>
@@ -80,15 +80,15 @@
           @click="getRemoteCalendars"
         />
       </div>
-      <div v-if="searchResultCalendars.length" class="pl-6 flex flex-col gap-2 max-w-2xl">
-        <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex gap-2 items-center">
+      <div v-if="searchResultCalendars.length" class="flex max-w-2xl flex-col gap-2 pl-6">
+        <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex items-center gap-2">
           <div>{{ cal.title }}</div>
           <div>{{ cal.url }}</div>
           <button
             @click="assignCalendar(cal.title, cal.url)"
-            class="ml-auto flex items-center gap-0.5 px-2 py-1 rounded-full bg-teal-500 text-white text-xs"
+            class="ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1 text-xs text-white"
           >
-            <icon-arrow-right class="h-3.5 w-3.5 stroke-2 stroke-white fill-transparent" />
+            <icon-arrow-right class="size-3.5 fill-transparent stroke-white stroke-2" />
             {{ 'Select calendar' }}
           </button>
         </div>
@@ -96,7 +96,7 @@
     </div>
 
     <!-- set calendar connection data -->
-    <div v-if="inputMode" class="pl-6 flex flex-col gap-4 max-w-2xl">
+    <div v-if="inputMode" class="flex max-w-2xl flex-col gap-4 pl-6">
       <div class="text-lg">
         <span v-if="isCalDav">{{ t('label.caldav') }}</span>
         <span v-if="isGoogle">{{ t('label.google') }}</span>
@@ -104,8 +104,8 @@
         {{ addMode ? t('label.addCalendar') : t('label.editCalendar') }}
       </div>
       <div v-if="isGoogle && addMode" class="mb-4">
-        <p class="text-lg mb-2">{{ t('text.googlePermissionDisclaimer') }}</p>
-        <ul class="ml-8 mr-8 text-md list-disc">
+        <p class="mb-2 text-lg">{{ t('text.googlePermissionDisclaimer') }}</p>
+        <ul class="text-md mx-8 list-disc">
           <li>
             <strong>
               {{ t('text.googlePermissionEventsName') }}
@@ -118,51 +118,51 @@
           </li>
         </ul>
       </div>
-      <label v-if="isCalDav || editMode" class="pl-4 flex items-center">
+      <label v-if="isCalDav || editMode" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
         <input
           v-model="calendarInput.data.title"
           type="text"
-          class="w-full max-w-sm rounded-md w-full"
+          class="w-full max-w-sm rounded-md"
         />
       </label>
-      <label v-if="isCalDav || editMode" class="pl-4 flex items-center">
+      <label v-if="isCalDav || editMode" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
-        <div class="flex gap-4 items-center w-full max-w-sm">
-          <select v-if="addMode" v-model="calendarInput.data.color" class="rounded-md w-full">
+        <div class="flex w-full max-w-sm items-center gap-4">
+          <select v-if="addMode" v-model="calendarInput.data.color" class="w-full rounded-md">
             <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
               {{ color }}
             </option>
           </select>
-          <input v-else type="text" v-model="calendarInput.data.color" class="rounded-md w-full" />
-          <div class="w-8 h-8 rounded-full shrink-0" :style="{ backgroundColor: calendarInput.data.color }"></div>
+          <input v-else type="text" v-model="calendarInput.data.color" class="w-full rounded-md" />
+          <div class="size-8 shrink-0 rounded-full" :style="{ backgroundColor: calendarInput.data.color }"></div>
         </div>
       </label>
-      <label v-if="isCalDav" class="pl-4 flex items-center">
+      <label v-if="isCalDav" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
         <input
           v-model="calendarInput.data.url"
           type="url"
-          class="w-full max-w-sm rounded-md w-full"
+          class="w-full max-w-sm rounded-md"
         />
       </label>
-      <label v-if="isCalDav" class="pl-4 flex items-center">
+      <label v-if="isCalDav" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
         <input
           v-model="calendarInput.data.user"
           type="text"
-          class="w-full max-w-sm rounded-md w-full"
+          class="w-full max-w-sm rounded-md"
         />
       </label>
-      <label v-if="isCalDav" class="pl-4 flex items-center">
+      <label v-if="isCalDav" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
         <input
           v-model="calendarInput.data.password"
           type="password"
-          class="w-full max-w-sm rounded-md w-full"
+          class="w-full max-w-sm rounded-md"
         />
       </label>
-      <div class="self-end flex gap-4">
+      <div class="flex gap-4 self-end">
         <secondary-button
           :label="t('label.cancel')"
           class="text-sm !text-teal-500"

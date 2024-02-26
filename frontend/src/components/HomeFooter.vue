@@ -1,26 +1,26 @@
 <template>
-  <section class="bg-gray-700 p-4 lg:p-8 flex flex-col">
+  <section class="flex flex-col bg-gray-700 p-4 lg:p-8">
     <div class="flex-center mb-16">
-      <div class="flex gap-3 items-center">
-        <img class="h-8 mr-2 pl-4" src="/appointment_logo.svg" alt="Appointment Logo"/>
-        <div class="text-lg font-display tracking-[.25em] text-white uppercase">
+      <div class="flex items-center gap-3">
+        <img class="mr-2 h-8 pl-4" src="/appointment_logo.svg" alt="Appointment Logo"/>
+        <div class="font-display text-lg uppercase tracking-[.25em] text-white">
           Thunderbird Appointment
         </div>
       </div>
     </div>
     <div class="flex-center mb-0 mt-auto">
-      <ul class="flex justify-center w-full gap-16">
+      <ul class="flex w-full justify-center gap-16">
         <li class="
-          flex text-base border-t-4 border-t-transparent transition-all ease-in-out
-          text-gray-300 dark:text-gray-300
+          flex border-t-4 border-t-transparent text-base text-gray-300 transition-all
+          ease-in-out dark:text-gray-300
         ">
           <router-link class="flex-center" :to="{ name: 'privacy' }" target="_blank">
             {{ $t('label.privacy') }}
           </router-link>
         </li>
         <li class="
-          flex text-base border-t-4 border-t-transparent transition-all ease-in-out
-          text-gray-300 dark:text-gray-300
+          flex border-t-4 border-t-transparent text-base text-gray-300 transition-all
+          ease-in-out dark:text-gray-300
         ">
           <router-link class="flex-center" :to="{ name: 'terms' }" target="_blank">
             {{ $t('label.legal') }}
@@ -28,7 +28,7 @@
         </li>
       </ul>
     </div>
-    <div class="flex-center mb-0 mt-8 text-gray-300 text-center">
+    <div class="flex-center mb-0 mt-8 text-center text-gray-300">
       <p class="md:w-1/2">
         <i18n-t keypath="text.homepage.copywrite">
           <template v-slot:mzlaLink>

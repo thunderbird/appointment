@@ -1,6 +1,6 @@
 <template>
-  <div class="relative flex flex-col gap-4 h-full">
-    <div class="font-semibold text-center text-xl text-teal-500">
+  <div class="relative flex h-full flex-col gap-4">
+    <div class="text-center text-xl font-semibold text-teal-500">
       {{ t("heading.createNewAppointment") }}
     </div>
     <alert-box
@@ -13,25 +13,25 @@
 
     <!-- step 1 -->
     <div
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
     >
       <div
-        class="flex justify-between items-center cursor-pointer"
+        class="flex cursor-pointer items-center justify-between"
         @click="emit('start')"
       >
-        <span class="font-semibold flex gap-1">
+        <span class="flex gap-1 font-semibold">
           <icon-check
             v-show="validStep1"
-            class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500"
+            class="size-6 fill-transparent stroke-teal-500 stroke-2"
           />
           <icon-alert-triangle
             v-show="invalidStep1"
-            class="h-6 w-6 stroke-2 fill-transparent stroke-rose-500"
+            class="size-6 fill-transparent stroke-rose-500 stroke-2"
           />
           {{ t("label.appointmentDetails") }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep1 }"
         />
       </div>
@@ -45,14 +45,14 @@
             type="text"
             v-model="appointment.title"
             :placeholder="t('placeholder.biWeeklyCafeDates')"
-            class="rounded-md w-full place-holder"
+            class="place-holder w-full rounded-md"
           />
         </label>
         <label class="flex flex-col gap-1">
           <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.selectCalendar") }}
           </div>
-          <select v-model="appointment.calendar_id" class="rounded-md w-full">
+          <select v-model="appointment.calendar_id" class="w-full rounded-md">
             <option
               v-for="calendar in calendars"
               :key="calendar.id"
@@ -81,7 +81,7 @@
             v-model="appointment.location_url"
             :disabled="appointment.meeting_link_provider !== meetingLinkProviderType.none"
             :placeholder="t('placeholder.zoomCom')"
-            class="rounded-md w-full place-holder disabled:cursor-not-allowed"
+            class="place-holder w-full rounded-md disabled:cursor-not-allowed"
           />
         </label>
         <label class="flex items-center gap-2">
@@ -89,7 +89,7 @@
             type="checkbox"
             :checked="appointment.meeting_link_provider === meetingLinkProviderType.zoom"
             @change="toggleZoomLinkCreation"
-            class="rounded-md w-5 h-5"
+            class="size-5 rounded-md"
           />
           <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.generateZoomLink") }}
@@ -109,25 +109,25 @@
     </div>
     <!-- step 2 -->
     <div
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
     >
       <div
-        class="flex justify-between items-center cursor-pointer"
+        class="flex cursor-pointer items-center justify-between"
         @click="emit('next')"
       >
-        <span class="font-semibold flex gap-1">
+        <span class="flex gap-1 font-semibold">
           <icon-check
             v-show="validStep2"
-            class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500"
+            class="size-6 fill-transparent stroke-teal-500 stroke-2"
           />
           <icon-alert-triangle
             v-show="invalidStep2"
-            class="h-6 w-6 stroke-2 fill-transparent stroke-rose-500"
+            class="size-6 fill-transparent stroke-rose-500 stroke-2"
           />
           {{ t("label.chooseYourAvailability") }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep2 }"
         />
       </div>
@@ -138,15 +138,15 @@
         </div>
         <div v-show="validStep2" class="flex flex-col gap-2">
           <div v-for="(list, day) in slots" :key="day">
-            <div class="flex justify-between mb-1">
+            <div class="mb-1 flex justify-between">
               <div>{{ dj(day).format("LL") }}</div>
               <div>
                 <button
                   @click="addTime(day)"
-                  class="flex items-center px-2 py-1 rounded-full text-xs bg-teal-500 text-white"
+                  class="flex items-center rounded-full bg-teal-500 px-2 py-1 text-xs text-white"
                 >
                   <icon-plus
-                    class="h-3 w-3 stroke-2 fill-transparent stroke-white"
+                    class="size-3 fill-transparent stroke-white stroke-2"
                   />
                   {{ t("label.addTime") }}
                 </button>
@@ -155,7 +155,7 @@
             <div
               v-for="(s, i) in list"
               :key="s.start"
-              class="flex gap-4 justify-center items-end mb-2"
+              class="mb-2 flex items-end justify-center gap-4"
             >
               <label class="flex flex-col">
                 <div class="text-sm text-gray-500 dark:text-gray-300">
@@ -165,7 +165,7 @@
                   type="time"
                   v-model="s.start"
                   @change="validateEndTime(day, i)"
-                  class="rounded-md text-sm py-1"
+                  class="rounded-md py-1 text-sm"
                 />
               </label>
               <label class="flex flex-col">
@@ -175,12 +175,12 @@
                 <input
                   type="time"
                   v-model="s.end"
-                  class="rounded-md text-sm py-1"
+                  class="rounded-md py-1 text-sm"
                 />
               </label>
-              <div class="mb-2 p-1 cursor-pointer" @click="removeTime(day, i)">
+              <div class="mb-2 cursor-pointer p-1" @click="removeTime(day, i)">
                 <icon-x
-                  class="h-5 w-5 stroke-2 fill-transparent stroke-rose-500"
+                  class="size-5 fill-transparent stroke-rose-500 stroke-2"
                 />
               </div>
             </div>
@@ -188,13 +188,13 @@
         </div>
         <secondary-button
           :label="t('label.addDay')"
-          class="!text-sm !h-8 self-center !text-teal-500"
+          class="!h-8 self-center !text-sm !text-teal-500"
           @click="showDatePicker = true"
         />
       </div>
     </div>
     <!-- action buttons -->
-    <div class="flex gap-4 mt-auto">
+    <div class="mt-auto flex gap-4">
       <secondary-button
         :label="t('label.cancel')"
         @click="emit('cancel')"
@@ -217,7 +217,7 @@
     </div>
     <div
       v-show="showDatePicker"
-      class="absolute position-center rounded-lg shadow w-11/12 p-4 bg-white dark:bg-gray-700"
+      class="position-center absolute w-11/12 rounded-lg bg-white p-4 shadow dark:bg-gray-700"
     >
       <!-- monthly mini calendar -->
       <calendar-month

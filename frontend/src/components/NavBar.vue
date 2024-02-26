@@ -1,12 +1,12 @@
 <template>
   <header
     class="
-      fixed z-50 h-16 w-full px-4 shadow-lg border-b flex justify-between
-      bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
+      fixed z-50 flex h-16 w-full justify-between border-b border-gray-300 bg-white
+      px-4 shadow-lg dark:border-gray-600 dark:bg-gray-700
     "
   >
     <router-link
-      class="py-4 pl-4 pr-8 border-r border-gray-300 dark:border-gray-600 shrink-0"
+      class="shrink-0 border-r border-gray-300 py-4 pl-4 pr-8 dark:border-gray-600"
       :to="{ name: 'calendar' }"
     >
       <img class="h-8" src="/appointment_logo.svg" alt="Appointment Logo" />
@@ -25,7 +25,7 @@
         :placeholder="t('label.search')"
       />
     </label> -->
-    <nav v-if="user.exists()" class="flex gap-4 items-stretch">
+    <nav v-if="user.exists()" class="flex items-stretch gap-4">
       <div class="flex justify-end gap-8">
         <nav-bar-item
           v-for="item in navItems"
@@ -40,7 +40,7 @@
           <user-avatar />
         </template>
         <template #default>
-          <div class="flex flex-col gap-2 rounded-md w-48 p-4 bg-white dark:bg-gray-700 shadow-md">
+          <div class="flex w-48 flex-col gap-2 rounded-md bg-white p-4 shadow-md dark:bg-gray-700">
             <router-link :to="{ name: 'profile' }" class="p-2">
               {{ t('label.userProfile') }}
             </router-link>
@@ -48,7 +48,7 @@
               v-show="user.data.signedUrl"
               :label="t('label.shareMyLink')"
               :copy="user.data.signedUrl"
-              class="border-none flex-row-reverse justify-between !text-inherit !text-base !font-normal hover:bg-inherit hover:shadow-none"
+              class="flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
             />
             <router-link :to="{ name: 'contact' }" class="p-2">
               {{ t('label.contact') }}

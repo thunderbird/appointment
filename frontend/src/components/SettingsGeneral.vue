@@ -1,24 +1,24 @@
 <template>
 <div class="flex flex-col gap-8">
-  <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.generalSettings') }}</div>
+  <div class="text-3xl font-semibold text-gray-500">{{ t('heading.generalSettings') }}</div>
   <div class="pl-6">
     <div class="text-xl">{{ t('heading.languageAndAppearance') }}</div>
-    <div class="pl-6 mt-6">
+    <div class="mt-6 pl-6">
       <div class="text-lg">{{ t('label.language') }}</div>
-      <label class="pl-4 mt-4 flex items-center">
+      <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
-        <select v-model="locale" class="w-full max-w-sm rounded-md w-full">
+        <select v-model="locale" class="w-full max-w-sm rounded-md">
           <option v-for="l in availableLocales" :key="l" :value="l">
             {{ l.toUpperCase() + ' &mdash; ' + t('locales.' + l) }}
           </option>
         </select>
       </label>
     </div>
-    <div class="pl-6 mt-6">
+    <div class="mt-6 pl-6">
       <div class="text-lg">{{ t('label.appearance') }}</div>
-      <label class="pl-4 mt-4 flex items-center">
+      <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
-        <select v-model="theme" class="w-full max-w-sm rounded-md w-full">
+        <select v-model="theme" class="w-full max-w-sm rounded-md">
           <option v-for="(key, label) in colorSchemes" :key="key" :value="key">
             {{ t('label.' + label) }}
           </option>
@@ -35,33 +35,33 @@
   </div>
   <div class="pl-6">
     <div class="text-xl">{{ t('heading.dateAndTimeFormatting') }}</div>
-    <div class="pl-6 mt-6 inline-grid grid-cols-2 gap-y-8 gap-x-16">
+    <div class="mt-6 inline-grid grid-cols-2 gap-x-16 gap-y-8 pl-6">
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
       <div class="text-lg"><!--{{ t('label.dateFormat') }}--></div>
-      <label class="pl-4 flex gap-4 items-center cursor-pointer">
+      <label class="flex cursor-pointer items-center gap-4 pl-4">
         <input type="radio" name="timeFormat" :value="12" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
       </label>
-      <label class="pl-4 flex gap-4 items-center cursor-pointer">
+      <label class="flex cursor-pointer items-center gap-4 pl-4">
         <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div> -->
       </label>
-      <label class="pl-4 flex gap-4 items-center cursor-pointer">
+      <label class="flex cursor-pointer items-center gap-4 pl-4">
         <input type="radio" name="timeFormat" :value="24" v-model="timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
       </label>
-      <label class="pl-4 flex gap-4 items-center cursor-pointer">
+      <label class="flex cursor-pointer items-center gap-4 pl-4">
         <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div> -->
       </label>
     </div>
-    <div class="pl-6 mt-6">
+    <div class="mt-6 pl-6">
       <div class="text-lg">{{ t('label.timeZone') }}</div>
-      <label class="pl-4 mt-4 flex items-center">
+      <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
         <select
           v-model="activeTimezone.primary"
-          class="w-full max-w-sm rounded-md w-full"
+          class="w-full max-w-sm rounded-md"
           @change="updateTimezone"
         >
           <option v-for="tz in timezones" :key="tz" :value="tz">

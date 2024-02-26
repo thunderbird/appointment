@@ -1,8 +1,6 @@
 <template>
 <div
-  class="
-    p-2 leading-none lg:rounded-full flex lg:inline-flex items-center shadow-md dark:shadow-lg
-    text-white shadow-black/30"
+  class="flex items-center p-2 leading-none text-white shadow-md shadow-black/30 dark:shadow-lg lg:inline-flex lg:rounded-full"
   role="alert"
   :class="{
     'bg-rose-600 dark:bg-rose-900': scheme === alertSchemes.error,
@@ -11,7 +9,7 @@
     'bg-teal-400 dark:bg-teal-700': scheme === alertSchemes.info,
   }"
 >
-  <span class="flex rounded-full uppercase px-2 py-1 text-center text-xs font-bold mr-3"
+  <span class="mr-3 flex rounded-full px-2 py-1 text-center text-xs font-bold uppercase"
     :class="{
       'bg-rose-500 dark:bg-rose-800': scheme === alertSchemes.error,
       'bg-orange-500 dark:bg-orange-800': scheme === alertSchemes.warning,
@@ -22,11 +20,11 @@
   >
     {{ title }}
   </span>
-  <span class="block sm:inline ml-1">
+  <span class="ml-1 block sm:inline">
     <slot></slot>
   </span>
   <span class="ml-auto" @click="emit('close')">
-    <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-white cursor-pointer" />
+    <icon-x class="size-6 cursor-pointer fill-transparent stroke-white stroke-1" />
   </span>
 </div>
 </template>

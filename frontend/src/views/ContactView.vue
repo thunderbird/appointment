@@ -1,6 +1,6 @@
 <template>
   <!-- page title area -->
-  <div v-if="user.exists()" class="flex flex-col gap-4 justify-center items-center">
+  <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-4">
     <div class="text-4xl font-light">{{ t('heading.contactRequest') }}</div>
     <div class="w-full max-w-lg">{{ t('text.contactRequestForm') }}</div>
     <alert-box
@@ -19,12 +19,12 @@
     >
       {{ t('info.messageWasNotSent') }}
     </alert-box>
-    <form class="flex flex-col gap-2 w-full max-w-lg" ref="form">
+    <form class="flex w-full max-w-lg flex-col gap-2" ref="form">
       <label class="flex flex-col gap-1">
         <div class="font-medium text-gray-500 dark:text-gray-300">
           {{ t("label.topic") }}
         </div>
-        <input type="text" v-model="topic" class="rounded-md w-full" required />
+        <input type="text" v-model="topic" class="w-full rounded-md" required />
       </label>
       <label class="flex flex-col gap-1">
         <div class="font-medium text-gray-500 dark:text-gray-300">

@@ -3,14 +3,14 @@
     <!-- booking page content: loading -->
     <main
       v-if="activeView === views.loading"
-      class="h-screen flex-center select-none"
+      class="flex-center h-screen select-none"
     >
       <loading-spinner/>
     </main>
     <!-- booking page content: invalid link -->
     <main
       v-else-if="activeView === views.invalid"
-      class="h-screen px-4 flex-center flex-col gap-8 select-none"
+      class="flex-center h-screen select-none flex-col gap-8 px-4"
     >
       <booking-view-invalid-link
         :heading="errorHeading"
@@ -20,7 +20,7 @@
     <!-- booking page content: successful booking -->
     <main
       v-else-if="activeView === views.success"
-      class="h-screen px-4 py-24 select-none flex flex-col-reverse md:flex-row justify-evenly items-center"
+      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 py-24 md:flex-row"
     >
       <booking-view-success
         :attendee-email="attendee.email"
@@ -33,7 +33,7 @@
     <!-- booking page content: time slot selection -->
     <main
       v-else
-      class="max-w-screen-2xl mx-auto py-32 px-4 select-none"
+      class="mx-auto max-w-screen-2xl select-none px-4 py-32"
       :class="{ 'pt-0': isAvailabilityRoute }"
     >
       <booking-view-slot-selection

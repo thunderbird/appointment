@@ -1,6 +1,6 @@
 <template>
-  <div class="relative flex flex-col gap-4 h-full">
-    <div class="font-semibold text-center text-xl text-teal-500 flex justify-around items-center">
+  <div class="relative flex h-full flex-col gap-4">
+    <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
       <span>{{ t("heading.generalAvailability") }}</span>
       <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive"/>
     </div>
@@ -14,21 +14,21 @@
     <!-- step 1 -->
     <div
       @click="state = scheduleCreationState.details"
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
     >
-      <div class="flex justify-between items-center cursor-pointer">
+      <div class="flex cursor-pointer items-center justify-between">
         <span class="font-semibold">
           {{ t("label.generalDetails") }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep1 }"
         />
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
         <hr/>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("heading.generalAvailability") }} {{ t("label.name") }}
           </div>
           <input
@@ -36,14 +36,14 @@
             v-model="scheduleInput.name"
             :placeholder="t('placeholder.biWeeklyCafeDates')"
             :disabled="!scheduleInput.active"
-            class="rounded-md w-full place-holder"
+            class="place-holder w-full rounded-md"
           />
         </label>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.selectCalendar") }}
           </div>
-          <select v-model="scheduleInput.calendar_id" class="rounded-md w-full" :disabled="!scheduleInput.active">
+          <select v-model="scheduleInput.calendar_id" class="w-full rounded-md" :disabled="!scheduleInput.active">
             <option
               v-for="calendar in calendars"
               :key="calendar.id"
@@ -54,7 +54,7 @@
           </select>
         </label>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.location") }}
           </div>
           <tab-bar
@@ -65,7 +65,7 @@
           />
         </label>
         <label>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.videoLink") }}
           </div>
           <input
@@ -73,7 +73,7 @@
             v-model="scheduleInput.location_url"
             :placeholder="t('placeholder.zoomCom')"
             :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== meetingLinkProviderType.none"
-            class="rounded-md w-full place-holder disabled:cursor-not-allowed"
+            class="place-holder w-full rounded-md disabled:cursor-not-allowed"
           />
         </label>
         <label class="flex items-center gap-2">
@@ -81,7 +81,7 @@
             type="checkbox"
             :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
             @change="toggleZoomLinkCreation"
-            class="rounded-md w-5 h-5"
+            class="size-5 rounded-md"
           />
           <div class="font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.generateZoomLink") }}
@@ -95,7 +95,7 @@
             v-model="scheduleInput.details"
             :placeholder="t('placeholder.writeHere')"
             :disabled="!scheduleInput.active"
-            class="rounded-md w-full text-sm h-24 resize-none place-holder"
+            class="place-holder h-24 w-full resize-none rounded-md text-sm"
             :maxlength="charLimit"
           ></textarea>
           <div
@@ -112,17 +112,17 @@
     </div>
     <!-- step 2 -->
     <div
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
     >
       <div
         @click="state = scheduleCreationState.availability"
-        class="flex justify-between items-center cursor-pointer"
+        class="flex cursor-pointer items-center justify-between"
       >
         <span class="font-semibold">
           {{ t("label.chooseYourAvailability") }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep2 }"
         />
       </div>
@@ -130,18 +130,18 @@
         <hr/>
         <div class="grid grid-cols-2 gap-4">
           <label>
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.startDate") }}
             </div>
             <input
               type="date"
               v-model="scheduleInput.start_date"
               :disabled="!scheduleInput.active"
-              class="rounded-md w-full"
+              class="w-full rounded-md"
             />
           </label>
           <label>
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.endDate") }}
             </div>
             <input
@@ -149,48 +149,48 @@
               v-model="scheduleInput.end_date"
               :placeholder="t('placeholder.never')"
               :disabled="!scheduleInput.active"
-              class="rounded-md w-full place-holder"
+              class="place-holder w-full rounded-md"
             />
           </label>
           <label>
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.startTime") }}
             </div>
             <input
               type="time"
               v-model="scheduleInput.start_time"
               :disabled="!scheduleInput.active"
-              class="rounded-md w-full"
+              class="w-full rounded-md"
             />
           </label>
           <label>
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.endTime") }}
             </div>
             <input
               type="time"
               v-model="scheduleInput.end_time"
               :disabled="!scheduleInput.active"
-              class="rounded-md w-full"
+              class="w-full rounded-md"
             />
           </label>
         </div>
         <div>
-          <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.availableDays") }}
           </div>
-          <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-lg">
+          <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg bg-white p-4 dark:bg-gray-800">
             <label
               v-for="w in isoWeekdays"
               :key="w.iso"
-              class="flex gap-2 items-center text-sm select-none cursor-pointer"
+              class="flex cursor-pointer select-none items-center gap-2 text-sm"
             >
               <input
                 type="checkbox"
                 v-model="scheduleInput.weekdays"
                 :value="w.iso"
                 :disabled="!scheduleInput.active"
-                class="text-teal-500 w-5 h-5"
+                class="size-5 text-teal-500"
               />
               <span>{{ w.long }}</span>
             </label>
@@ -200,17 +200,17 @@
     </div>
     <!-- step 3 -->
     <div
-      class="rounded-lg p-4 flex flex-col gap-2 text-gray-700 dark:text-gray-100 bg-gray-100 dark:bg-gray-600"
+      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
     >
       <div
         @click="state = scheduleCreationState.settings"
-        class="flex justify-between items-center cursor-pointer"
+        class="flex cursor-pointer items-center justify-between"
       >
         <span class="font-semibold">
           {{ t("label.bookingSettings") }}
         </span>
         <icon-chevron-down
-          class="h-6 w-6 stroke-1 fill-transparent rotate-90 transition-transform stroke-gray-800 dark:stroke-gray-100"
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep3 }"
         />
       </div>
@@ -218,12 +218,12 @@
         <hr/>
         <div class="grid grid-cols-2 gap-4">
           <label>
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.earliestBooking") }}
             </div>
             <select
               v-model="scheduleInput.earliest_booking"
-              class="rounded-md w-full"
+              class="w-full rounded-md"
               :disabled="!scheduleInput.active"
             >
               <option
@@ -236,12 +236,12 @@
             </select>
           </label>
           <label>
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.farthestBooking") }}
             </div>
             <select
               v-model="scheduleInput.farthest_booking"
-              class="rounded-md w-full"
+              class="w-full rounded-md"
               :disabled="!scheduleInput.active"
             >
               <option
@@ -254,7 +254,7 @@
             </select>
           </label>
           <label class="col-span-2">
-            <div class="font-medium mb-1 text-gray-500 dark:text-gray-300">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.slotLength") }}
             </div>
             <input
@@ -262,24 +262,24 @@
               min="10"
               v-model="scheduleInput.slot_duration"
               :disabled="!scheduleInput.active"
-              class="rounded-md w-full"
+              class="w-full rounded-md"
             />
           </label>
         </div>
-        <div class="bg-white dark:bg-gray-800 px-4 py-6 rounded-lg flex-center text-sm text-center">
+        <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
           <div>{{ t('text.recipientsCanScheduleBetween', {earliest: earliest, farthest: farthest}) }}</div>
         </div>
       </div>
     </div>
     <!-- action buttons -->
-    <div class="flex justify-center gap-4 mt-auto">
+    <div class="mt-auto flex justify-center gap-4">
       <primary-button
         v-if="user.data.signedUrl && existing"
         :label="t('label.shareMyLink')"
         :copy="user.data.signedUrl"
       />
     </div>
-    <div class="flex gap-4 mt-auto">
+    <div class="mt-auto flex gap-4">
       <secondary-button
         :label="t('label.cancel')"
         @click="resetSchedule()"

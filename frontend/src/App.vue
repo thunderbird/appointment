@@ -9,7 +9,7 @@
       {{ notificationMessage }}
     </site-notification>
     <nav-bar :nav-items="navItems" />
-    <main :class="{'mx-4 pt-24 lg:mx-8 min-h-full pb-24': !routeIsHome, 'pt-32': routeIsHome}">
+    <main :class="{'mx-4 min-h-full py-24 lg:mx-8': !routeIsHome, 'pt-32': routeIsHome}">
       <router-view />
     </main>
     <footer-bar />

@@ -1,15 +1,15 @@
 <template>
   <!-- page title area -->
-  <div class="flex flex-col lg:flex-row justify-between items-start select-none">
+  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
     <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 mt-8 items-stretch"
+    class="mt-8 flex flex-col flex-col-reverse items-stretch justify-between gap-4 md:flex-row"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
-    <div class="w-full sm:w-1/2 md:w-1/4 mx-auto mb-10 md:mb-0 min-w-[360px]">
+    <div class="mx-auto mb-10 w-full min-w-[360px] sm:w-1/2 md:mb-0 md:w-1/4">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -33,7 +33,9 @@
 
 <script setup>
 import { calendarViews } from '@/definitions';
-import { ref, inject, computed, onMounted } from 'vue';
+import {
+  ref, inject, computed, onMounted,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';

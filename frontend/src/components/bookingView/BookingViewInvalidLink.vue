@@ -1,5 +1,5 @@
 <template>
-  <art-invalid-link class="max-w-sm h-auto my-6"/>
+  <art-invalid-link class="my-6 h-auto max-w-sm"/>
   <div class="text-xl font-semibold text-sky-600">
     {{ heading ?? t('info.bookingLinkHasAlreadyBeenUsed') }}
   </div>
@@ -7,7 +7,7 @@
     {{ body ?? t('info.bookedPleaseCheckEmail') }}
   </div>
   <primary-button
-    class="p-7 mt-12"
+    class="mt-12 p-7"
     :label="t('label.startUsingTba')"
     @click="router.push({ name: 'home' })"
   />

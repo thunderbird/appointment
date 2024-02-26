@@ -15,8 +15,6 @@ const authGuard = (to, from) => {
   if (!user?.exists()) {
     return '/login';
   }
-
-  return;
 };
 
 const routes = [

@@ -9,17 +9,17 @@
     @mouseleave="popup = {...initialEventPopupData}">
     <div class="flex flex-col gap-1.5 overflow-y-auto" :class="{'h-full': !monthView}" :style="`height: ${elementHeight}px`">
       <div
-        class="h-[95%] w-[95%] shrink-0 text-sm text-gray-700 dark:text-gray-200 hover:shadow-md m-auto is-preview"
+        class="is-preview m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
         :class="{
-          'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !eventData.remote && !eventData.preview,
-          'group/event rounded-md p-1 cursor-pointer hover:shadow-lg hover:bg-gradient-to-b': placeholder,
-          'hover:!text-white bg-teal-50 dark:bg-teal-800 hover:from-teal-500 hover:to-sky-600': placeholder,
+          'rounded border-2 border-dashed border-sky-400 bg-sky-400/10 px-2 py-0.5': !placeholder && !eventData.remote && !eventData.preview,
+          'group/event cursor-pointer rounded-md p-1 hover:bg-gradient-to-b hover:shadow-lg': placeholder,
+          'bg-teal-50 hover:from-teal-500 hover:to-sky-600 hover:!text-white dark:bg-teal-800': placeholder,
           'flex items-center gap-1.5 px-2 py-0.5': eventData.remote,
-          'flex items-center rounded border-l-4 px-2 border-teal-400': eventData.preview,
+          'flex items-center rounded border-l-4 border-teal-400 px-2': eventData.preview,
           '!border-solid text-black': eventData.attendee !== null,
           'rounded bg-amber-400/80 dark:text-white': eventData.all_day,
-          'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': isSelected,
-          'rounded h-full': !monthView,
+          'bg-gradient-to-b from-teal-500 to-sky-600 shadow-lg': isSelected,
+          'h-full rounded': !monthView,
         }"
         :style="{
           borderColor: eventColor(eventData, placeholder).border,
@@ -31,7 +31,7 @@
       >
         <div
           v-if="eventData.remote && !eventData.all_day"
-          class="w-2.5 h-2.5 mt-0.5 shrink-0 rounded-full"
+          class="mt-0.5 size-2.5 shrink-0 rounded-full"
           :class="{
             'bg-sky-400': !eventData.tentative,
             'border border-dashed border-sky-400/70': eventData.tentative,
@@ -45,7 +45,7 @@
         <div
           class="truncate rounded "
           :class="{
-            'h-full p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder,
+            'h-full border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
             'border-white': isSelected,
           }"
         >

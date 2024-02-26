@@ -1,10 +1,10 @@
 <template>
-  <div class="h-full p-4 flex-center flex-col gap-12">
+  <div class="flex-center h-full flex-col gap-12 p-4">
     <div v-if="isError === null">
       <loading-spinner />
     </div>
-    <div v-else-if="isError === true" class="px-4 flex-center flex-col gap-8">
-      <art-invalid-link class="max-w-sm h-auto my-6" />
+    <div v-else-if="isError === true" class="flex-center flex-col gap-8 px-4">
+      <art-invalid-link class="my-6 h-auto max-w-sm" />
       <div class="text-xl font-semibold text-sky-600">
         {{ t('info.bookingLinkIsInvalid') }}
       </div>
@@ -12,13 +12,13 @@
         {{ t('text.invalidOrAlreadyBooked') }}
       </div>
     </div>
-    <div v-else class="px-4 flex-center flex-col gap-8">
-      <art-successful-booking class="max-w-sm h-auto my-6" />
+    <div v-else class="flex-center flex-col gap-8 px-4">
+      <art-successful-booking class="my-6 h-auto max-w-sm" />
       <template v-if="confirmed">
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyConfirmed') }}
         </div>
-        <div class="text-gray-800 dark:text-gray-300 text-center">
+        <div class="text-center text-gray-800 dark:text-gray-300">
           {{ t('info.eventWasCreated') }}<br>
           {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
         </div>
@@ -27,7 +27,7 @@
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
-        <div class="text-gray-800 dark:text-gray-300 text-center">
+        <div class="text-center text-gray-800 dark:text-gray-300">
           {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}<br>
           {{ t('info.slotIsAvailableAgain') }}
         </div>
