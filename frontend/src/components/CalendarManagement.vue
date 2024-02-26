@@ -61,7 +61,9 @@
 <script setup>
 import { calendarManagementType } from '@/definitions';
 import { computed } from 'vue';
-import { IconArrowRight, IconCalendar, IconPencil, IconX, IconRefresh } from '@tabler/icons-vue';
+import {
+  IconArrowRight, IconCalendar, IconPencil, IconX, IconRefresh,
+} from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
 import SecondaryButton from '@/elements/SecondaryButton';
 

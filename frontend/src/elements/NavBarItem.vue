@@ -19,8 +19,8 @@
 <script setup>
 // component properties
 defineProps({
-  active: Boolean,  // indicator for currently active item
-  label: String,    // item text label
+  active: Boolean, // indicator for currently active item
+  label: String, // item text label
   linkName: String, // name of the route link target
 });
 </script>

@@ -40,7 +40,7 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from "vue-router";
+import { useRoute } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import LoadingSpinner from '@/elements/LoadingSpinner';
@@ -66,7 +66,7 @@ onMounted(async () => {
     slot_id: slotId,
     slot_token: slotToken,
     owner_url: signedUrl,
-    confirmed: confirmed,
+    confirmed,
   };
   const { error, data } = await call('schedule/public/availability/booking').put(obj).json();
   if (error.value) {

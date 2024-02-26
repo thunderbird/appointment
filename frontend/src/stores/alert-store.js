@@ -51,5 +51,7 @@ export const useSiteNotificationStore = defineStore('siteNotification', () => {
     message.value = '';
   };
 
-  return { isVisible, title, actionUrl, message, isSame, lock, show, $reset };
+  return {
+    isVisible, title, actionUrl, message, isSame, lock, show, $reset,
+  };
 });

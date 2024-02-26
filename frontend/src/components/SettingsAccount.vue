@@ -142,7 +142,9 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, computed } from 'vue';
+import {
+  ref, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -202,7 +204,7 @@ const updateUser = async () => {
   const { error } = await call('me').put(inputData).json();
   if (!error.value) {
     // update user in store
-    user.$patch({ data: { ...user.data, ...inputData }});
+    user.$patch({ data: { ...user.data, ...inputData } });
     await user.updateSignedUrl(call);
     errorUsername.value = false;
     // TODO show some confirmation

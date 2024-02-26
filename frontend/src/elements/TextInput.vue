@@ -33,7 +33,7 @@ const details = defineModel();
 
 // handle textarea char limit
 const charCount = computed(() => details.value.length);
-const limitIsClose = computed(() => charCount.value >= props.maxlength * 0.92)
-const limitIsReached = computed(() => charCount.value >= props.maxlength)
+const limitIsClose = computed(() => charCount.value >= props.maxlength * 0.92);
+const limitIsReached = computed(() => charCount.value >= props.maxlength);
 
 </script>

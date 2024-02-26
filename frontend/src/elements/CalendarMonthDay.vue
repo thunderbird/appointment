@@ -85,7 +85,9 @@
 </template>
 
 <script setup>
-import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
+import {
+  eventColor, timeFormat, initialEventPopupData, showEventPopup,
+} from '@/utils';
 import { inject, computed, ref } from 'vue';
 import EventPopup from '@/elements/EventPopup';
 
@@ -123,7 +125,7 @@ const sortedEvents = computed(() => [...props.events].sort((a, b) => {
 }));
 
 // event details
-const popup = ref({...initialEventPopupData});
+const popup = ref({ ...initialEventPopupData });
 
 // formatted time range
 const formattedTimeRange = (event) => {

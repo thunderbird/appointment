@@ -1,12 +1,12 @@
-import {createRouter, createWebHistory} from "vue-router";
-import BookingView from "@/views/BookingView.vue";
-import BookingConfirmationView from "@/views/BookingConfirmationView.vue";
-import CalendarView from "@/views/CalendarView.vue";
-import ScheduleView from "@/views/ScheduleView.vue";
-import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/LoginView.vue";
-import PostLoginView from "@/views/PostLoginView.vue";
-import { useUserStore } from "@/stores/user-store";
+import { createRouter, createWebHistory } from 'vue-router';
+import BookingView from '@/views/BookingView.vue';
+import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
+import CalendarView from '@/views/CalendarView.vue';
+import ScheduleView from '@/views/ScheduleView.vue';
+import HomeView from '@/views/HomeView.vue';
+import LoginView from '@/views/LoginView.vue';
+import PostLoginView from '@/views/PostLoginView.vue';
+import { useUserStore } from '@/stores/user-store';
 
 const authGuard = (to, from) => {
   const user = useUserStore();
@@ -20,8 +20,8 @@ const authGuard = (to, from) => {
 const routes = [
   // instant loaded routes
   {
-    path: "/",
-    name: "home",
+    path: '/',
+    name: 'home',
     component: HomeView,
   },
   {
@@ -35,70 +35,70 @@ const routes = [
     component: PostLoginView,
   },
   {
-    path: "/booking/:slug",
-    name: "booking",
+    path: '/booking/:slug',
+    name: 'booking',
     component: BookingView,
   },
   {
-    path: "/user/:username/:signature",
-    name: "availability",
+    path: '/user/:username/:signature',
+    name: 'availability',
     component: BookingView,
   },
   {
-    path: "/user/:username/:signature/confirm/:slot/:token/:confirmed",
-    name: "confirmation",
+    path: '/user/:username/:signature/confirm/:slot/:token/:confirmed',
+    name: 'confirmation',
     component: BookingConfirmationView,
   },
   {
-    path: "/schedule",
-    name: "schedule",
+    path: '/schedule',
+    name: 'schedule',
     component: ScheduleView,
     beforeEnter: authGuard,
   },
   {
-    path: "/calendar",
-    redirect: {name: "calendar"},
+    path: '/calendar',
+    redirect: { name: 'calendar' },
   },
   {
-    path: "/calendar/:view?/:date?",
-    name: "calendar",
+    path: '/calendar/:view?/:date?',
+    name: 'calendar',
     component: CalendarView,
     beforeEnter: authGuard,
   },
   // lazy-loaded routes
   {
-    path: "/appointments/:view?",
-    name: "appointments",
-    component: () => import("@/views/AppointmentsView"),
+    path: '/appointments/:view?',
+    name: 'appointments',
+    component: () => import('@/views/AppointmentsView'),
     beforeEnter: authGuard,
   },
   {
-    path: "/settings/:view?",
-    name: "settings",
-    component: () => import("@/views/SettingsView"),
+    path: '/settings/:view?',
+    name: 'settings',
+    component: () => import('@/views/SettingsView'),
     beforeEnter: authGuard,
   },
   {
-    path: "/profile",
-    name: "profile",
-    component: () => import("@/views/ProfileView"),
+    path: '/profile',
+    name: 'profile',
+    component: () => import('@/views/ProfileView'),
     beforeEnter: authGuard,
   },
   {
-    path: "/contact",
-    name: "contact",
-    component: () => import("@/views/ContactView"),
+    path: '/contact',
+    name: 'contact',
+    component: () => import('@/views/ContactView'),
     beforeEnter: authGuard,
   },
   {
-    path: "/privacy",
-    name: "privacy",
-    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/privacy/websites/' }
+    path: '/privacy',
+    name: 'privacy',
+    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/privacy/websites/'; },
   },
   {
-    path: "/terms",
-    name: "terms",
-    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/about/legal/terms/mozilla/' }
+    path: '/terms',
+    name: 'terms',
+    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/about/legal/terms/mozilla/'; },
   },
 ];
 
@@ -110,12 +110,12 @@ const router = createRouter({
 
 // set default route parameters
 router.beforeEach((to) => {
-  if (to.name === "calendar" && !to.params.view) {
-    to.params.view = "month";
+  if (to.name === 'calendar' && !to.params.view) {
+    to.params.view = 'month';
     return to;
   }
-  if (to.name === "appointments" && !to.params.view) {
-    to.params.view = "all";
+  if (to.name === 'appointments' && !to.params.view) {
+    to.params.view = 'all';
     return to;
   }
   return null;

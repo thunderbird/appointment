@@ -127,7 +127,9 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
+import {
+  eventColor, timeFormat, initialEventPopupData, showEventPopup,
+} from '@/utils';
 import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
 
@@ -263,6 +265,6 @@ const bookSlot = (d) => {
 };
 
 // event details
-const popup = ref({...initialEventPopupData});
+const popup = ref({ ...initialEventPopupData });
 
 </script>

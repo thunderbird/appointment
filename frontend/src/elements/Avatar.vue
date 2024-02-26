@@ -15,5 +15,6 @@
 <script setup>
 import { initials } from '@/utils';
 import { useUserStore } from '@/stores/user-store';
+
 const user = useUserStore();
 </script>

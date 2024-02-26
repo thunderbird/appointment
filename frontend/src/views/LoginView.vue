@@ -46,7 +46,7 @@ const user = useUserStore();
 // component constants
 const { t } = useI18n();
 const call = inject('call');
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 const router = useRouter();
 const isPasswordAuth = inject('isPasswordAuth');
 const isFxaAuth = inject('isFxaAuth');

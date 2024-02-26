@@ -49,7 +49,7 @@
 
 <script setup>
 // icons
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-vue";
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
 
 // component properties
 defineProps({
@@ -61,5 +61,5 @@ defineProps({
 });
 
 // component emits
-const emit = defineEmits(["prev", "next", "back"]);
+const emit = defineEmits(['prev', 'next', 'back']);
 </script>

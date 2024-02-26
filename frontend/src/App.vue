@@ -57,7 +57,7 @@ const {
   message: notificationMessage,
   isSame: isSameNotification,
   lock: lockNotification,
-  show: showNotification
+  show: showNotification,
 } = storeToRefs(siteNotificationStore);
 
 // handle auth and fetch

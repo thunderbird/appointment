@@ -1,7 +1,7 @@
 <template>
   <header
     class="
-      fixed z-50 h-16 w-full px-4 shadow-lg border-b flex justify-between 
+      fixed z-50 h-16 w-full px-4 shadow-lg border-b flex justify-between
       bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
     "
   >
@@ -69,10 +69,10 @@ import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import Avatar from "@/elements/Avatar";
-import DropDown from "@/elements/DropDown";
-import NavBarItem from "@/elements/NavBarItem";
-import TextButton from "@/elements/TextButton";
+import Avatar from '@/elements/Avatar';
+import DropDown from '@/elements/DropDown';
+import NavBarItem from '@/elements/NavBarItem';
+import TextButton from '@/elements/TextButton';
 
 // component constants
 const user = useUserStore();

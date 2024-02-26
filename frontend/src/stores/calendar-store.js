@@ -35,6 +35,8 @@ export const useCalendarStore = defineStore('calendars', () => {
     calendars.value = [];
     isLoaded.value = false;
   };
-  
-  return { isLoaded, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset };
+
+  return {
+    isLoaded, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset,
+  };
 });

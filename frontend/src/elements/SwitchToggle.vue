@@ -34,7 +34,7 @@ import { IconCircleDotFilled } from '@tabler/icons-vue';
 const { t } = useI18n();
 
 // component emits
-const emit = defineEmits(["changed"]);
+const emit = defineEmits(['changed']);
 
 // component properties
 const props = defineProps({
@@ -52,7 +52,7 @@ onMounted(() => {
 const toggleState = () => {
   if (!props.disabled) {
     state.value = !state.value;
-    emit("changed", state.value);
+    emit('changed', state.value);
   }
 };
 </script>

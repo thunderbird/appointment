@@ -9,13 +9,13 @@ export default defineConfig({
   plugins: [
     vue({
       script: {
-        defineModel: true
-      }
+        defineModel: true,
+      },
     }),
     sentryVitePlugin({
       org: 'thunderbird',
       project: 'appointment-frontend',
-    })
+    }),
   ],
   resolve: {
     alias: {

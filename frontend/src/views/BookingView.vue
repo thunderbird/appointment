@@ -56,7 +56,9 @@
 <script setup>
 import { bookingCalendarViews as views, appointmentState, modalStates } from '@/definitions';
 import { download } from '@/utils';
-import { computed, inject, onMounted, ref } from 'vue';
+import {
+  computed, inject, onMounted, ref,
+} from 'vue';
 import { useRoute } from 'vue-router';
 import LoadingSpinner from '@/elements/LoadingSpinner';
 import BookingModal from '@/components/BookingModal';
