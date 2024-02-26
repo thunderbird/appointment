@@ -12,24 +12,7 @@
   </div>
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
-    <calendar-page-heading
-      :nav="true"
-      :month="activeDate.format('MMMM')"
-      :year="activeDate.year().toString()"
-      :title="pageTitle"
-      @prev="dateNav('auto', false)"
-      @next="dateNav('auto')"
-    />
-    <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
-      <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
-        {{ t("label.today") }}
-      </button>
-      <tab-bar
-        :tab-items="calendarViews"
-        :active="tabActive"
-        @update="updateTab"
-        class="text-sm"
-      />
+    <div class="flex flex-col gap-8 md:flex-row mx-auto md:mr-0 items-center">
       <primary-button
         :label="t('label.createAppointments')"
         :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
@@ -39,31 +22,16 @@
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 items-stretch"
+    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-8 mt-8 items-stretch"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->
-    <calendar-month
-      v-show="tabActive === calendarViews.month"
+    <calendar-qalendar
       class="w-full md:w-4/5"
-      :selected="activeDate"
+      :current-date="activeDate"
       :appointments="appointmentStore.pendingAppointments"
       :events="calendarEvents"
-    />
-    <calendar-week
-      v-show="tabActive === calendarViews.week"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
-      :events="calendarEvents"
-    />
-    <calendar-day
-      v-show="tabActive === calendarViews.day"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="appointmentStore.pendingAppointments"
-      :events="calendarEvents"
-      popup-position="top"
+      @date-change="onDateChange"
     />
     <!-- page side bar -->
     <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
@@ -132,21 +100,20 @@
 
 <script setup>
 import { appointmentCreationState, calendarViews, alertSchemes } from '@/definitions';
-import { ref, inject, computed, watch, onMounted } from 'vue';
+import {
+  ref, inject, computed, onMounted,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentCreation from '@/components/AppointmentCreation';
 import AppointmentListItem from '@/elements/AppointmentListItem';
-import CalendarDay from '@/components/CalendarDay';
 import CalendarMonth from '@/components/CalendarMonth';
-import CalendarPageHeading from '@/elements/CalendarPageHeading';
-import CalendarWeek from '@/components/CalendarWeek';
 import PrimaryButton from '@/elements/PrimaryButton';
-import TabBar from '@/components/TabBar';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { storeToRefs } from 'pinia';
+import CalendarQalendar from '@/components/CalendarQalendar.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -161,52 +128,13 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
-const selectDate = (d) => {
-  router.replace({
-    name: route.name,
-    params: { view: route.params.view, date: dj(d).format('YYYY-MM-DD') },
-  });
-  activeDate.value = dj(d);
-};
-
-// date calculations
-const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
-const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
+const activeDateRange = computed(() => ({
+  start: activeDate.value.startOf('month'),
+  end: activeDate.value.endOf('month'),
+}));
 
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews[route.params.view]);
-const updateTab = (view) => {
-  router.replace({
-    name: route.name,
-    params: { view, date: route.params.date ?? dj().format('YYYY-MM-DD') },
-  });
-  tabActive.value = calendarViews[view];
-};
-
-// calculate page title
-const pageTitle = computed(() => {
-  switch (tabActive.value) {
-    case calendarViews.day:
-      return activeDate.value.format('dddd Do');
-    case calendarViews.week:
-      return `${startOfActiveWeek.value.format('ddd Do')} - ${endOfActiveWeek.value.format('ddd Do')}`;
-    case calendarViews.month:
-    default:
-      return '';
-  }
-});
-
-// date navigation
-const dateNav = (unit = 'auto', forward = true) => {
-  if (unit === 'auto') {
-    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
-  }
-  if (forward) {
-    selectDate(activeDate.value.add(1, unit));
-  } else {
-    selectDate(activeDate.value.subtract(1, unit));
-  }
-};
 
 // appointment creation state
 const creationStatus = ref(appointmentCreationState.hidden);
@@ -230,6 +158,49 @@ const getRemoteEvents = async (from, to) => {
   }));
 };
 
+/**
+ * Retrieve new events if a user navigates to a different month
+ * @param dateObj
+ */
+const onDateChange = async (dateObj) => {
+  const start = dj(dateObj.start);
+  const end = dj(dateObj.end);
+
+  // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
+  if ((dj(activeDateRange.value.end).format('YYYYMM') !== end.format('YYYYMM')
+    || dj(activeDateRange.value.start).format('YYYYMM') !== start.format('YYYYMM'))) {
+    await getRemoteEvents(
+      start.format('YYYY-MM-DD'),
+      end.format('YYYY-MM-DD'),
+    );
+  }
+};
+
+const selectDate = async (d) => {
+  const date = dj(d);
+  await router.replace({
+    name: route.name,
+    params: { view: route.params.view, date: date.format('YYYY-MM-DD') },
+  });
+  // Check if we need to pull remote events
+  await onDateChange({ start: date.startOf('month'), end: date.endOf('month') });
+
+  // Update our activeDate
+  activeDate.value = date;
+};
+
+// date navigation
+const dateNav = (unit = 'auto', forward = true) => {
+  if (unit === 'auto') {
+    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
+  }
+  if (forward) {
+    selectDate(activeDate.value.add(1, unit));
+  } else {
+    selectDate(activeDate.value.subtract(1, unit));
+  }
+};
+
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
@@ -239,18 +210,4 @@ onMounted(async () => {
   // Okay, if we still have no calendars, show the ugly message
   hideUntilRefreshed.value = false;
 });
-
-// react to user calendar navigation
-watch(
-  () => activeDate.value,
-  (newValue, oldValue) => {
-    // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-    if (dj(oldValue).format('YYYYMM') !== dj(newValue).format('YYYYMM')) {
-      getRemoteEvents(
-        dj(newValue).startOf('month').format('YYYY-MM-DD'),
-        dj(newValue).endOf('month').format('YYYY-MM-DD'),
-      );
-    }
-  },
-);
 </script>

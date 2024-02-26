@@ -310,7 +310,9 @@
 </template>
 
 <script setup>
-import { locationTypes, meetingLinkProviderType, scheduleCreationState } from '@/definitions';
+import {
+  dateFormatStrings, locationTypes, meetingLinkProviderType, scheduleCreationState,
+} from '@/definitions';
 import {
   ref, reactive, computed, inject, watch, onMounted,
 } from 'vue';
@@ -322,7 +324,7 @@ import SecondaryButton from '@/elements/SecondaryButton';
 import TabBar from '@/components/TabBar';
 
 // icons
-import { IconChevronDown, IconExternalLink } from '@tabler/icons-vue';
+import { IconChevronDown } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
 
@@ -332,6 +334,7 @@ const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
+const dateFormat = dateFormatStrings.qalendarFullDay;
 
 // component emits
 const emit = defineEmits(['created', 'updated']);
@@ -376,7 +379,7 @@ const defaultSchedule = {
   location_type: locationTypes.inPerson,
   location_url: '',
   details: '',
-  start_date: dj().format('YYYY-MM-DD'),
+  start_date: dj().format(dateFormat),
   end_date: null,
   start_time: '09:00',
   end_time: '17:00',
@@ -391,11 +394,11 @@ onMounted(() => {
   if (props.schedule) {
     scheduleInput.value = { ...props.schedule };
     // calculate utc back to user timezone
-    scheduleInput.value.start_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`)
+    scheduleInput.value.start_time = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`)
       .utc(true)
       .tz(user.data.timezone ?? dj.tz.guess())
       .format('HH:mm');
-    scheduleInput.value.end_time = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`)
+    scheduleInput.value.end_time = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`)
       .utc(true)
       .tz(user.data.timezone ?? dj.tz.guess())
       .format('HH:mm');
@@ -406,10 +409,11 @@ onMounted(() => {
 
 const scheduleCreationError = ref(null);
 const scheduledRangeMinutes = computed(() => {
-  const start = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`);
-  const end = dj(`${dj().format('YYYYMMDD')}T${scheduleInput.value.end_time}:00`);
+  const start = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`);
+  const end = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`);
   return end.diff(start, 'minutes');
 });
+
 // generate time slots from current schedule configuration
 const getSlots = () => {
   const slots = [];
@@ -420,7 +424,7 @@ const getSlots = () => {
   while (pointerDate <= end) {
     if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
-        start: `${pointerDate.format('YYYYMMDD')}T${scheduleInput.value.start_time}:00`,
+        start: `${pointerDate.format(dateFormat)}T${scheduleInput.value.start_time}:00`,
         duration: scheduledRangeMinutes.value ?? 30,
         attendee_id: null,
         id: null,
@@ -440,6 +444,7 @@ const getScheduleAppointment = () => ({
   details: scheduleInput.value.details,
   status: 2,
   slots: getSlots(),
+  type: 'schedule',
 });
 
 // tab navigation for location types

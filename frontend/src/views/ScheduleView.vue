@@ -2,40 +2,14 @@
   <!-- page title area -->
   <div class="flex flex-col lg:flex-row justify-between items-start select-none">
     <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
-    <div class="flex flex-col gap-8 md:flex-row mx-auto lg:ml-0 lg:mr-0 items-center">
-      <button @click="selectDate(dj())" class="font-semibold text-base text-teal-500 px-4">
-        {{ t("label.today") }}
-      </button>
-      <tab-bar
-        :tab-items="calendarViews"
-        :active="tabActive"
-        @update="updateTab"
-        class="text-sm"
-      />
-      <div class="flex-center gap-2 select-none">
-        <div @click="dateNav('auto', false)" class="cursor-pointer">
-          <icon-chevron-left class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
-        </div>
-        <div class="h-12 flex-center flex-col">
-          <div class="flex gap-2 text-lg">
-            <span class="font-normal">{{ activeDate.format('MMMM') }}</span>
-            <span class="font-light">{{ activeDate.format('YYYY')}}</span>
-          </div>
-          <div v-if="pageTitle" class="text-sm text-center text-gray-500">{{ pageTitle }}</div>
-        </div>
-        <div @click="dateNav('auto')" class="cursor-pointer">
-          <icon-chevron-right class="h-6 w-6 stroke-2 fill-transparent stroke-teal-500" />
-        </div>
-      </div>
-    </div>
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 lg:gap-24 mt-8 items-stretch"
+    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 mt-8 items-stretch"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
-    <div class="w-full sm:w-1/2 md:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
+    <div class="w-full sm:w-1/2 md:w-1/4 mx-auto mb-10 md:mb-0 min-w-[360px]">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -46,51 +20,34 @@
       />
     </div>
     <!-- main section: big calendar showing active month, week or day -->
-    <calendar-month
-      v-show="tabActive === calendarViews.month"
-      class="w-full md:w-4/5"
+    <calendar-qalendar
+      class="w-full"
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"
       :schedules="schedulesPreviews"
-      popup-position="left"
-    />
-    <calendar-week
-      v-show="tabActive === calendarViews.week"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="pendingAppointments"
-      :events="calendarEvents"
-      popup-position="left"
-    />
-    <calendar-day
-      v-show="tabActive === calendarViews.day"
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="pendingAppointments"
-      :events="calendarEvents"
-      popup-position="top"
+      @date-change="onDateChange"
     />
   </div>
 </template>
 
 <script setup>
 import { calendarViews } from '@/definitions';
-import { ref, inject, computed, watch, onMounted } from 'vue';
+import {
+  ref, inject, computed, onMounted,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import ScheduleCreation from '@/components/ScheduleCreation';
-import CalendarDay from '@/components/CalendarDay';
-import CalendarMonth from '@/components/CalendarMonth';
-import CalendarWeek from '@/components/CalendarWeek';
 import TabBar from '@/components/TabBar';
 
 // icons
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-vue";
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
 // stores
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
+import CalendarQalendar from '@/components/CalendarQalendar.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -105,6 +62,10 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 
 // current selected date, if not in route: defaults to now
 const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
+const activeDateRange = ref({
+  start: activeDate.value.startOf('month'),
+  end: activeDate.value.endOf('month'),
+});
 const selectDate = (d) => {
   activeDate.value = dj(d);
 };
@@ -161,7 +122,7 @@ const getRemoteEvents = async (from, to) => {
 
 // user configured schedules from db (only the first for now, later multiple schedules will be available)
 const schedules = ref([]);
-const firstSchedule = computed(() => schedules.value?.length > 0 ? schedules.value[0] : null);
+const firstSchedule = computed(() => (schedules.value?.length > 0 ? schedules.value[0] : null));
 const schedulesReady = ref(false);
 const getFirstSchedule = async () => {
   calendarEvents.value = [];
@@ -176,6 +137,26 @@ const schedulePreview = (schedule) => {
   schedulesPreviews.value = schedule ? [schedule] : [];
 };
 
+/**
+ * Retrieve new events if a user navigates to a different month
+ * @param dateObj
+ */
+const onDateChange = (dateObj) => {
+  const start = dj(dateObj.start);
+  const end = dj(dateObj.end);
+
+  // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
+  if (
+      dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
+      || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
+  ) {
+    getRemoteEvents(
+      dj(start).format('YYYY-MM-DD'),
+      dj(end).format('YYYY-MM-DD'),
+    );
+  }
+};
+
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
@@ -185,18 +166,4 @@ onMounted(async () => {
   const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
   await getRemoteEvents(eventsFrom, eventsTo);
 });
-
-// react to user calendar navigation
-watch(
-  () => activeDate.value,
-  (newValue, oldValue) => {
-    // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-    if (dj(oldValue).format('YYYYMM') !== dj(newValue).format('YYYYMM')) {
-      getRemoteEvents(
-        dj(newValue).startOf('month').format('YYYY-MM-DD'),
-        dj(newValue).endOf('month').format('YYYY-MM-DD'),
-      );
-    }
-  },
-);
 </script>
