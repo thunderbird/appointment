@@ -29,9 +29,15 @@
         {{ $t('text.homepage.sectionHeader') }}
       </h2>
       <section class="flex flex-col gap-16 justify-center mx-auto max-w-full md:flex-row md:max-w-7xl">
-        <InfoBox :title="$t('text.homepage.planEventTitle')">{{ $t('text.homepage.planEventBody') }}</InfoBox>
-        <InfoBox :title="$t('text.homepage.setAvailabilityTitle')">{{ $t('text.homepage.setAvailabilityBody') }}</InfoBox>
-        <InfoBox :title="$t('text.homepage.shareWithOthersTitle')">{{ $t('text.homepage.shareWithOthersBody') }}</InfoBox>
+        <info-box :title="$t('text.homepage.planEventTitle')">
+          {{ $t('text.homepage.planEventBody') }}
+        </info-box>
+        <info-box :title="$t('text.homepage.setAvailabilityTitle')">
+          {{ $t('text.homepage.setAvailabilityBody') }}
+        </info-box>
+        <info-box :title="$t('text.homepage.shareWithOthersTitle')">
+          {{ $t('text.homepage.shareWithOthersBody') }}
+        </info-box>
       </section>
     </section>
     <section class="w-full">
@@ -77,7 +83,7 @@
           </div>
       </div>
     </section>
-    <HomeFooter></HomeFooter>
+    <home-footer></home-footer>
   </div>
 </template>
 

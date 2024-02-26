@@ -33,9 +33,7 @@
 </template>
 
 <script setup>
-import {
-  inject, computed, toRefs, toRef,
-} from 'vue';
+import { inject, computed, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { timeFormat } from '@/utils';
 

@@ -35,7 +35,11 @@
               class="w-full rounded-md mr-2 pr-7"
               readonly
             />
-            <a :href="user.data.signedUrl" target="_blank" class="text-gray-500 absolute right-1.5 top-1/2 -translate-y-1/2">
+            <a
+              :href="user.data.signedUrl"
+              target="_blank"
+              class="text-gray-500 absolute right-1.5 top-1/2 -translate-y-1/2"
+            >
               <icon-external-link class="w-5 h-5" />
             </a>
           </div>
@@ -252,11 +256,6 @@ const deleteAccount = async () => {
   deleteAccountFirstModalOpen.value = true;
 };
 
-const secondDeleteAccountPrompt = async () => {
-  deleteAccountFirstModalOpen.value = false;
-  deleteAccountSecondModalOpen.value = true;
-};
-
 const refreshLink = async () => {
   refreshLinkModalOpen.value = true;
 };
@@ -265,16 +264,6 @@ const refreshLinkConfirm = async () => {
   await user.changeSignedUrl(call);
   await refreshData();
   closeModals();
-};
-
-/**
- * Generic function to run the user through the login screen again
- * @param callbackFn
- * @returns {Promise<void>}
- */
-const reauthenticateSubscriber = async (callbackFn) => {
-  // Currently not supported
-  await callbackFn();
 };
 
 /**

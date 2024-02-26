@@ -35,7 +35,7 @@
 import { IconX } from '@tabler/icons-vue';
 import { alertSchemes } from '@/definitions';
 
-const props = defineProps({
+defineProps({
   title: String,
   scheme: {
     type: Number,

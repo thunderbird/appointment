@@ -53,7 +53,7 @@ const call = inject('call');
 const [signedUrl] = window.location.href.split('/confirm/');
 const slotId = Number(route.params.slot);
 const slotToken = route.params.token;
-const confirmed = route.params.confirmed == '1';
+const confirmed = parseInt(route.params.confirmed) === 1;
 
 const isError = ref(null);
 const event = ref(null);

@@ -180,7 +180,11 @@
             {{ t("label.availableDays") }}
           </div>
           <div class="grid grid-cols-2 grid-rows-4 grid-flow-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-lg">
-            <label v-for="w in isoWeekdays" class="flex gap-2 items-center text-sm select-none cursor-pointer">
+            <label
+              v-for="w in isoWeekdays"
+              :key="w.iso"
+              class="flex gap-2 items-center text-sm select-none cursor-pointer"
+            >
               <input
                 type="checkbox"
                 v-model="scheduleInput.weekdays"
@@ -458,9 +462,13 @@ const charCount = computed(() => scheduleInput.value.details.length);
 
 // booking options
 const earliestOptions = {};
-[0.5, 1, 2, 3, 4, 5].forEach((d) => earliestOptions[d * 60 * 24] = dj.duration(d, 'days').humanize());
+[0.5, 1, 2, 3, 4, 5].forEach((d) => {
+  earliestOptions[d * 60 * 24] = dj.duration(d, 'days').humanize();
+});
 const farthestOptions = {};
-[1, 2, 3, 4].forEach((d) => farthestOptions[d * 60 * 24 * 7] = dj.duration(d, 'weeks').humanize());
+[1, 2, 3, 4].forEach((d) => {
+  farthestOptions[d * 60 * 24 * 7] = dj.duration(d, 'weeks').humanize();
+});
 
 // humanize selected durations
 const earliest = computed(() => dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize());
@@ -619,7 +627,7 @@ watch(
   () => {
     // if an existing schedule was given update anyway
     // if a new schedule gets created, only update on step 2
-    if (props.schedule && props.schedule.active || !props.schedule && visitedStep1.value) {
+    if ((props.schedule && props.schedule.active) || (!props.schedule && visitedStep1.value)) {
       emit('updated', getScheduleAppointment());
     }
   },

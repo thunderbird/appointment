@@ -1,3 +1,3 @@
 <template>
-  <!-- Empty for now! -->
+  <div><!-- Empty for now! --></div>
 </template>

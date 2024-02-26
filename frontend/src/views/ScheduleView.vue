@@ -33,17 +33,12 @@
 
 <script setup>
 import { calendarViews } from '@/definitions';
-import {
-  ref, inject, computed, onMounted,
-} from 'vue';
+import { ref, inject, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import ScheduleCreation from '@/components/ScheduleCreation';
-import TabBar from '@/components/TabBar';
 
-// icons
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
 // stores
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';

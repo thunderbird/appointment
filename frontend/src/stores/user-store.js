@@ -16,7 +16,9 @@ export const useUserStore = defineStore('user', () => {
   const data = useLocalStorage('tba/user', structuredClone(initialUserObject));
 
   const exists = () => data.value.accessToken !== null;
-  const $reset = () => data.value = structuredClone(initialUserObject);
+  const $reset = () => {
+    data.value = structuredClone(initialUserObject);
+  };
 
   /**
    * Retrieve the current signed url and update store
@@ -27,7 +29,7 @@ export const useUserStore = defineStore('user', () => {
     const { error, data: sigData } = await fetch('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
-      console.error(error.value, sigData.value);
+      // console.error(error.value, sigData.value);
       return false;
     }
 
@@ -74,7 +76,7 @@ export const useUserStore = defineStore('user', () => {
     const { error, data: sigData } = await fetch('me/signature').post().json();
 
     if (error.value) {
-      console.error(error.value, sigData.value);
+      // console.error(error.value, sigData.value);
       return false;
     }
 
@@ -121,6 +123,7 @@ export const useUserStore = defineStore('user', () => {
     const { error } = await fetch('logout').get().json();
 
     if (error.value) {
+      // TODO: show error message
       console.warn('Error logging out: ', error.value);
     }
 

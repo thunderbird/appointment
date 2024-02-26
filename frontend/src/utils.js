@@ -1,5 +1,5 @@
 // get the first key of given object that points to given value
-import { colorSchemes } from '@/definitions.js';
+import { colorSchemes } from '@/definitions';
 
 export const keyByValue = (o, v) => Object.keys(o).find((k) => o[k] === v);
 

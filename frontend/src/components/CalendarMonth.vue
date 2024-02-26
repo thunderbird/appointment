@@ -163,7 +163,7 @@ const previousMonthDays = computed(() => {
   // Cover first day of the month being sunday (firstDayOfTheMonthWeekday === 0)
   const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).isoWeekday();
   const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday !== isoFirstDayOfWeek
-    ? firstDayOfTheMonthWeekday - isoFirstDayOfWeek % 7
+    ? firstDayOfTheMonthWeekday - (isoFirstDayOfWeek % 7)
     : 0;
 
   const previousMonthLastMondayDayOfMonth = dj(currentMonthDays.value[0].date)
@@ -185,7 +185,7 @@ const previousMonthDays = computed(() => {
 
 const nextMonthDays = computed(() => {
   // fill in rest days in calendar grid
-  const restDays = 7 - (previousMonthDays.value.length + currentMonthDays.value.length) % 7;
+  const restDays = 7 - ((previousMonthDays.value.length + currentMonthDays.value.length) % 7);
   const visibleNumberOfDaysFromNextMonth = restDays === 7 ? 0 : restDays;
 
   const nextMonth = dj(`${year.value}-${month.value}-01`).add(1, 'month');

@@ -37,7 +37,7 @@
       </div>
       <drop-down class="self-center">
         <template #trigger>
-          <avatar />
+          <user-avatar />
         </template>
         <template #default>
           <div class="flex flex-col gap-2 rounded-md w-48 p-4 bg-white dark:bg-gray-700 shadow-md">
@@ -69,7 +69,7 @@ import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import Avatar from '@/elements/Avatar';
+import UserAvatar from '@/elements/UserAvatar';
 import DropDown from '@/elements/DropDown';
 import NavBarItem from '@/elements/NavBarItem';
 import TextButton from '@/elements/TextButton';

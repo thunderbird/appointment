@@ -84,7 +84,6 @@ const { status: appointmentStatus } = storeToRefs(appointmentStore);
 const errorHeading = ref(null);
 const errorBody = ref(null);
 
-const bookingError = ref(null);
 const bookingRequestFinished = ref(false);
 
 const showNavigation = ref(false);
