@@ -79,7 +79,7 @@ const call = inject('call');
 const appointmentStore = useAppointmentStore();
 const bookingViewStore = useBookingViewStore();
 const bookingModalStore = useBookingModalStore();
-const { status: appointmentStatus } = storeToRefs(appointmentStore);
+const { status: appointmentStatus } = appointmentStore;
 
 const errorHeading = ref(null);
 const errorBody = ref(null);

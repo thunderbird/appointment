@@ -12,14 +12,15 @@
         class="is-preview m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
         :class="{
           'rounded border-2 border-dashed border-sky-400 bg-sky-400/10 px-2 py-0.5': !placeholder && !eventData.remote && !eventData.preview,
-          'group/event cursor-pointer rounded-md p-1 hover:bg-gradient-to-b hover:shadow-lg': placeholder,
-          'bg-teal-50 hover:from-teal-500 hover:to-sky-600 hover:!text-white dark:bg-teal-800': placeholder,
+          'group/event cursor-pointer rounded-md p-1 hover:bg-gradient-to-b hover:shadow-lg': placeholder && !isBooked,
+          'bg-teal-50 hover:from-teal-500 hover:to-sky-600 hover:!text-white dark:bg-teal-800': placeholder && !isBooked,
           'flex items-center gap-1.5 px-2 py-0.5': eventData.remote,
           'flex items-center rounded border-l-4 border-teal-400 px-2': eventData.preview,
           '!border-solid text-black': eventData.attendee !== null,
           'rounded bg-amber-400/80 dark:text-white': eventData.all_day,
           'bg-gradient-to-b from-teal-500 to-sky-600 shadow-lg': isSelected,
           'h-full rounded': !monthView,
+          '!cursor-not-allowed rounded-md bg-gray-200 p-1 dark:!bg-gray-800': isBooked,
         }"
         :style="{
           borderColor: eventColor(eventData, placeholder).border,
@@ -46,10 +47,12 @@
           class="truncate rounded "
           :class="{
             'h-full border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
+            '!border-none': isBooked,
             'border-white': isSelected,
           }"
         >
           <span v-if="eventData.preview">{{ formattedTimeRange(event) }}</span>
+          <span v-else-if="isBooked">{{ t('label.busy') }}</span>
           <span v-else>{{ event.title }}</span>
         </div>
       </div>
@@ -75,8 +78,11 @@ import {
 import {
   computed, inject, ref, toRefs,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
+import { bookingSlotStatus as BookingStatus } from '@/definitions';
 
+const { t } = useI18n();
 const dj = inject('dayjs');
 
 // component properties
@@ -99,6 +105,7 @@ const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
 
 const eventData = event.value.customData;
 const elementHeight = computed(() => (eventData.duration / timeSlotDuration.value) * timeSlotHeight.value);
+const isBooked = computed(() => eventData.slot_status === BookingStatus.booked);
 
 // component emits
 const emit = defineEmits(['eventSelected']);

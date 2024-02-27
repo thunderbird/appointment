@@ -112,7 +112,7 @@ def read_schedule_availabilities(
 
     # get all events from all connected calendars in scheduled date range
     existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
-    actual_slots = Tools.events_set_difference(available_slots, existing_slots)
+    actual_slots = Tools.events_roll_up_difference(available_slots, existing_slots)
 
     if not actual_slots or len(actual_slots) == 0:
         raise validation.SlotNotFoundException()

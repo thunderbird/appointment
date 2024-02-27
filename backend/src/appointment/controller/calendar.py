@@ -16,7 +16,7 @@ from dateutil.parser import parse
 
 from .apis.google_client import GoogleClient
 from ..database import schemas, models
-from ..database.models import CalendarProvider
+from ..database.models import CalendarProvider, BookingStatus
 from ..controller.mailer import Attachment, InvitationMail
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email
@@ -358,15 +358,18 @@ class Tools:
 
         return slots
 
-    def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
-        """This helper removes all events from list A, which have a time collision with any event in list B
+    @staticmethod
+    def events_roll_up_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
+        """This helper rolls up all events from list A, which have a time collision with any event in list B
            and returns all remaining elements from A as new list.
         """
         available_slots = []
+        collision_duration = 0
         for a in a_list:
             a_start = a.start
             a_end = a_start + timedelta(minutes=a.duration)
             collision_found = False
+
             for b in b_list:
                 b_start = b.start
                 b_end = b.end
@@ -375,8 +378,30 @@ class Tools:
                 if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
                     collision_found = True
                     break
-            if not collision_found:
-                available_slots.append(a)
+
+            if collision_found:
+                collision_duration += a.duration
+                continue
+
+            if collision_duration > 0:
+                collision = schemas.SlotBase(
+                    start=a_start - timedelta(minutes=collision_duration),
+                    duration=collision_duration,
+                    booking_status=BookingStatus.booked
+                )
+                available_slots.append(collision)
+                collision_duration = 0
+
+            available_slots.append(a)
+
+        # FIXME: Lack of coffee == duplicate code. Re-work this code so we don't need a tail append.
+        if collision_duration > 0:
+            collision = schemas.SlotBase(
+                start=a_list[-1].start - timedelta(minutes=collision_duration),
+                duration=collision_duration,
+                booking_status=BookingStatus.booked
+            )
+            available_slots.append(collision)
 
         return available_slots
 

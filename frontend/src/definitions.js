@@ -55,6 +55,17 @@ export const bookingCalendarViews = {
   invalid: 12,
 };
 
+/**
+ * Booking status for slots. This mirrors models.BookingStatus on the backend
+ * @enum
+ * @readonly
+ */
+export const bookingSlotStatus = {
+  none: 1,
+  requested: 2,
+  booked: 3,
+};
+
 // available appointment views
 export const appointmentState = {
   booked: 1,
