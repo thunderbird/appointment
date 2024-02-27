@@ -29,7 +29,7 @@ export const useUserStore = defineStore('user', () => {
     const { error, data: sigData } = await fetch('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
-      // console.error(error.value, sigData.value);
+      console.error(error.value, sigData.value);
       return false;
     }
 
@@ -76,7 +76,7 @@ export const useUserStore = defineStore('user', () => {
     const { error, data: sigData } = await fetch('me/signature').post().json();
 
     if (error.value) {
-      // console.error(error.value, sigData.value);
+      console.error(error.value, sigData.value);
       return false;
     }
 
