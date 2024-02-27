@@ -315,7 +315,7 @@
 
 <script setup>
 import {
-  dateFormatStrings, locationTypes, meetingLinkProviderType, scheduleCreationState,
+  dateFormatStrings, defaultSlotDuration, locationTypes, meetingLinkProviderType, scheduleCreationState,
 } from '@/definitions';
 import {
   ref, reactive, computed, inject, watch, onMounted,
@@ -390,7 +390,7 @@ const defaultSchedule = {
   earliest_booking: 1440,
   farthest_booking: 20160,
   weekdays: [1, 2, 3, 4, 5],
-  slot_duration: 30,
+  slot_duration: defaultSlotDuration,
   meeting_link_provider: meetingLinkProviderType.none,
 };
 const scheduleInput = ref({ ...defaultSchedule });

@@ -12,6 +12,12 @@ export const dateFormatStrings = {
   display24Hour: 'HH:mm',
 };
 
+/**
+ * The amount of time in minutes a schedule's slot duration will default to
+ * @type {number}
+ */
+export const defaultSlotDuration = 30;
+
 // appointment location types
 export const subscriberLevels = {
   basic: 1,

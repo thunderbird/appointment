@@ -5,7 +5,9 @@ import {
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/CalendarEvent.vue';
-import { appointmentState, colorSchemes, dateFormatStrings } from '@/definitions';
+import {
+  appointmentState, colorSchemes, dateFormatStrings, defaultSlotDuration,
+} from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 
 // component constants
@@ -48,7 +50,7 @@ const timeSlotDuration = computed(() => {
     return 15;
   }
   // Duration on slots are fixed, so grab the first one.
-  const duration = appointments?.value[0].slots[0].duration;
+  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
   if (duration <= 15) {
     return 15;
   }
@@ -57,7 +59,24 @@ const timeSlotDuration = computed(() => {
   }
   return 60;
 });
-const timeSlotHeight = ref(40);
+
+/**
+ * The height in pixels of an individual bookable slot.
+ * This defaults to 40px, but if the slot duration is set to less than 15 minutes, it will be bumped to 60px.
+ * @type {ComputedRef<number>}
+ */
+const timeSlotHeight = computed(() => {
+  if (appointments?.value?.length === 0) {
+    return 40;
+  }
+
+  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
+  if (duration >= 15) {
+    return 40;
+  }
+
+  return 60;
+});
 
 /* Event Handlers */
 
