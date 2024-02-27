@@ -3,7 +3,7 @@
     <textarea
       v-model="details"
       :placeholder="placeholder"
-      class="rounded-md w-full text-sm h-40 place-holder"
+      class="place-holder h-40 w-full rounded-md text-sm"
       :maxlength="maxlength"
       required
     ></textarea>
@@ -33,7 +33,7 @@ const details = defineModel();
 
 // handle textarea char limit
 const charCount = computed(() => details.value.length);
-const limitIsClose = computed(() => charCount.value >= props.maxlength * 0.92)
-const limitIsReached = computed(() => charCount.value >= props.maxlength)
+const limitIsClose = computed(() => charCount.value >= props.maxlength * 0.92);
+const limitIsReached = computed(() => charCount.value >= props.maxlength);
 
 </script>

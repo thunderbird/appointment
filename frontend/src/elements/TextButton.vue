@@ -1,19 +1,15 @@
 <template>
   <button
-    class="
-      h-7 font-semibold text-sm whitespace-nowrap border rounded-md hover:shadow-md px-2
-      transition-all ease-in-out flex items-center justify-center gap-1
-      text-gray-500 dark:text-gray-400 border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800
-    "
+    class="flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-gray-400 px-2 text-sm font-semibold text-gray-500 transition-all ease-in-out hover:bg-gray-50 hover:shadow-md dark:text-gray-400 dark:hover:bg-gray-800"
     @click.stop="copy ? copyToClipboard() : null"
   >
     <icon-copy
       v-if="copy && !copied"
-      class="h-4 w-4 fill-transparent stroke-2 stroke-gray-500 dark:stroke-gray-400"
+      class="size-4 fill-transparent stroke-gray-500 stroke-2 dark:stroke-gray-400"
     />
     <icon-check
       v-if="copy && copied"
-      class="h-4 w-4 fill-transparent stroke-2 stroke-green-500"
+      class="size-4 fill-transparent stroke-green-500 stroke-2"
     />
     {{ label }}
   </button>

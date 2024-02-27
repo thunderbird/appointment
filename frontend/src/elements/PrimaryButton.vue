@@ -1,25 +1,20 @@
 <template>
   <button
-    class="
-      relative h-10 text-base font-semibold whitespace-nowrap rounded-full bg-gradient-to-br
-      hover:shadow-md hover:scale-102 active:scale-98 disabled:scale-100 disabled:shadow-none disabled:opacity-50 px-6
-      transition-all ease-in-out flex items-center justify-center gap-2
-      text-white from-teal-400 to-sky-600 enabled:hover:from-sky-400 enabled:hover:to-teal-600
-    "
+    class="relative flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-br from-teal-400 to-sky-600 px-6 text-base font-semibold text-white transition-all ease-in-out hover:scale-102 hover:shadow-md active:scale-98 enabled:hover:from-sky-400 enabled:hover:to-teal-600 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
     :class="{ '!text-transparent': waiting }"
     @click="copy ? copyToClipboard() : null"
   >
     <div
       v-if="waiting"
-      class="absolute w-5 h-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+      class="absolute size-5 animate-spin rounded-full border-2 border-white border-t-transparent"
     ></div>
     <icon-copy
       v-if="copy && !copied"
-      class="h-6 w-6 stroke-2 stroke-current fill-transparent"
+      class="size-6 fill-transparent stroke-current stroke-2"
     />
     <icon-check
       v-if="copy && copied"
-      class="h-6 w-6 stroke-2 stroke-current fill-transparent"
+      class="size-6 fill-transparent stroke-current stroke-2"
     />
     <template v-if="label">
       {{ label }}

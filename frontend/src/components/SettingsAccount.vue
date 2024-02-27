@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-8">
-    <div class="text-3xl text-gray-500 font-semibold">{{ t('heading.accountSettings') }}</div>
-    <div class="pl-6 flex flex-col max-w-3xl">
+    <div class="text-3xl font-semibold text-gray-500">{{ t('heading.accountSettings') }}</div>
+    <div class="flex max-w-3xl flex-col pl-6">
       <div class="text-xl">{{ t('heading.profile') }}</div>
-      <label class="pl-4 mt-4 flex items-center">
+      <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
         <div class="w-full">
           <input
@@ -12,12 +12,12 @@
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
           />
-          <div v-if="errorUsername" class="text-red-500 text-sm">
+          <div v-if="errorUsername" class="text-sm text-red-500">
             {{ t('error.usernameIsNotAvailable')}}
           </div>
         </div>
       </label>
-      <label class="pl-4 mt-4 flex items-center">
+      <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
         <input
           v-model="activeDisplayName"
@@ -25,24 +25,28 @@
           class="w-full rounded-md"
         />
       </label>
-      <label class="pl-4 mt-6 flex items-center">
+      <label class="mt-6 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
-        <div class="w-full flex justify-between items-center gap-4">
+        <div class="flex w-full items-center justify-between gap-4">
           <div class="relative w-full">
             <input
               :value="user.data.signedUrl"
               type="text"
-              class="w-full rounded-md mr-2 pr-7"
+              class="mr-2 w-full rounded-md pr-7"
               readonly
             />
-            <a :href="user.data.signedUrl" target="_blank" class="text-gray-500 absolute right-1.5 top-1/2 -translate-y-1/2">
-              <icon-external-link class="w-5 h-5" />
+            <a
+              :href="user.data.signedUrl"
+              target="_blank"
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              <icon-external-link class="size-5" />
             </a>
           </div>
           <text-button :label="t('label.copyLink')" :copy="user.data.signedUrl" />
         </div>
       </label>
-      <div class="self-end flex gap-4 mt-6">
+      <div class="mt-6 flex gap-4 self-end">
         <secondary-button
             :label="t('label.refreshLink')"
             class="!text-teal-500"
@@ -55,12 +59,12 @@
         />
       </div>
     </div>
-    <div class="pl-6 max-w-3xl">
-      <div class="text-xl mb-4">{{ t('heading.zoom') }}</div>
+    <div class="max-w-3xl pl-6">
+      <div class="mb-4 text-xl">{{ t('heading.zoom') }}</div>
       <div>
         <p>{{ t('text.connectZoom') }}</p>
       </div>
-      <div class="pl-4 mt-4 flex items-center">
+      <div class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">
           <p v-if="hasZoomAccountConnected">{{ t('label.connectedAs', { name: zoomAccountName }) }}</p>
           <p v-if="!hasZoomAccountConnected">{{ t('label.notConnected') }}</p>
@@ -81,7 +85,7 @@
     </div>
     <div class="pl-6">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
-      <div class="pl-4 mt-4">
+      <div class="mt-4 pl-4">
         <primary-button
           :label="t('label.downloadYourData')"
           @click="downloadData"
@@ -90,7 +94,7 @@
     </div>
     <div class="pl-6">
       <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
-      <div class="pl-4 mt-4">
+      <div class="mt-4 pl-4">
         <caution-button
           :label="t('label.deleteYourAccount')"
           @click="deleteAccount"
@@ -142,7 +146,9 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, computed } from 'vue';
+import {
+  ref, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -202,7 +208,7 @@ const updateUser = async () => {
   const { error } = await call('me').put(inputData).json();
   if (!error.value) {
     // update user in store
-    user.$patch({ data: { ...user.data, ...inputData }});
+    user.$patch({ data: { ...user.data, ...inputData } });
     await user.updateSignedUrl(call);
     errorUsername.value = false;
     // TODO show some confirmation
@@ -250,11 +256,6 @@ const deleteAccount = async () => {
   deleteAccountFirstModalOpen.value = true;
 };
 
-const secondDeleteAccountPrompt = async () => {
-  deleteAccountFirstModalOpen.value = false;
-  deleteAccountSecondModalOpen.value = true;
-};
-
 const refreshLink = async () => {
   refreshLinkModalOpen.value = true;
 };
@@ -263,16 +264,6 @@ const refreshLinkConfirm = async () => {
   await user.changeSignedUrl(call);
   await refreshData();
   closeModals();
-};
-
-/**
- * Generic function to run the user through the login screen again
- * @param callbackFn
- * @returns {Promise<void>}
- */
-const reauthenticateSubscriber = async (callbackFn) => {
-  // Currently not supported
-  await callbackFn();
 };
 
 /**

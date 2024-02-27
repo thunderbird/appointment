@@ -38,6 +38,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-tailwindcss": "^3.14.3",
     "eslint-plugin-vue": "^9.19.2",
     "jsdom": "^24.0.0",
     "msw": "^2.0.11",

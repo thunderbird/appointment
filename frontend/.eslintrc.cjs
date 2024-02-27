@@ -8,6 +8,7 @@ module.exports = {
   },
   extends: [
     'plugin:vue/vue3-essential',
+    'plugin:tailwindcss/recommended',
     'airbnb-base',
   ],
   overrides: [],
@@ -24,7 +25,7 @@ module.exports = {
       js: 'never',
       vue: 'off',
     }],
-    'max-len': ['error', {code: 120}],
+    'max-len': ['error', { code: 120 }],
     'no-param-reassign': 'off',
   },
   settings: {

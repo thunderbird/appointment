@@ -1,8 +1,8 @@
 <template>
   <!-- page title area -->
-  <div class="flex flex-col lg:flex-row justify-between text-center lg:items-start select-none">
-    <div class="text-4xl font-light mb-8 lg:mb-0">{{ t('label.appointments') }}</div>
-    <div class="flex flex-col lg:flex-row gap-8 mx-auto lg:ml-0 lg:mr-0 items-center">
+  <div class="flex select-none flex-col justify-between text-center lg:flex-row lg:items-start">
+    <div class="mb-8 text-4xl font-light lg:mb-0">{{ t('label.appointments') }}</div>
+    <div class="mx-auto flex flex-col items-center gap-8 lg:mx-0 lg:flex-row">
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
       <primary-button
         :label="t('label.createAppointments')"
@@ -12,36 +12,36 @@
     </div>
   </div>
   <!-- page content -->
-  <div class="flex flex-col flex-col-reverse lg:flex-row justify-between gap-4 xl:gap-24 mt-8">
+  <div class="mt-8 flex flex-col flex-col-reverse justify-between gap-4 lg:flex-row xl:gap-24">
     <!-- main section: list/grid of appointments with filter -->
     <div class="w-full lg:w-4/5">
       <!-- filter bar -->
-      <div class="relative flex gap-5 select-none">
+      <div class="relative flex select-none gap-5">
         <select v-model="filter" class="rounded border text-sm">
           <option v-for="(value, key) in filterOptions" :key="key" :value="value">
             {{ t("label." + key) }}
           </option>
         </select>
-        <div class="w-full relative">
+        <div class="relative w-full">
           <label
             for="appointments-search"
-            class="absolute top-1/2 -translate-y-1/2 left-3 cursor-text"
+            class="absolute left-3 top-1/2 -translate-y-1/2 cursor-text"
           >
-            <icon-search class="h-4 w-4 stroke-2 stroke-gray-300 dark:stroke-gray-500 fill-transparent" />
+            <icon-search class="size-4 fill-transparent stroke-gray-300 stroke-2 dark:stroke-gray-500" />
           </label>
           <input
             v-model="search"
             type="search"
             id="appointments-search"
-            class="rounded w-full pl-10 text-sm"
+            class="w-full rounded pl-10 text-sm"
             :placeholder="t('label.searchAppointments')"
           />
         </div>
-        <div class="rounded border border-gray-300 dark:border-gray-500 flex">
+        <div class="flex rounded border border-gray-300 dark:border-gray-500">
           <div
             class="
-              border-r py-1 px-1.5 flex items-center cursor-pointer overflow-hidden
-              border-gray-300 dark:border-gray-500
+              flex cursor-pointer items-center overflow-hidden border-r border-gray-300 px-1.5
+              py-1 dark:border-gray-500
             "
             :class="{
               'bg-gray-300 dark:bg-gray-600': view === viewTypes.list,
@@ -49,21 +49,21 @@
             }"
             @click="view = viewTypes.list"
           >
-            <icon-list class="h-6 w-6 stroke-1 stroke-gray-700 dark:stroke-gray-300 fill-transparent" />
+            <icon-list class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
           </div>
           <div
-            class="py-1 px-1.5 flex items-center cursor-pointer overflow-hidden"
+            class="flex cursor-pointer items-center overflow-hidden px-1.5 py-1"
             :class="{
               'bg-gray-300 dark:bg-gray-600': view === viewTypes.grid,
               'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.grid,
             }"
             @click="view = viewTypes.grid"
           >
-            <icon-layout-grid class="h-6 w-6 stroke-1 stroke-gray-700 dark:stroke-gray-300 fill-transparent" />
+            <icon-layout-grid class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
           </div>
         </div>
         <div
-          class="rounded border border-gray-300 dark:border-gray-500 py-1 px-1.5 flex items-center"
+          class="flex items-center rounded border border-gray-300 px-1.5 py-1 dark:border-gray-500"
           :class="{
             'bg-gray-300 dark:bg-gray-600': showAdjustments,
             'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === viewTypes.list,
@@ -72,13 +72,13 @@
           }"
           @click="openAdjustments"
         >
-          <icon-adjustments class="h-6 w-6 stroke-1 stroke-gray-700 dark:stroke-gray-300 fill-transparent" />
+          <icon-adjustments class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
         </div>
         <div
           v-show="showAdjustments"
           class="
-            absolute z-40 top-10 right-0 p-2 rounded shadow-md border
-            border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700
+            absolute right-0 top-10 z-40 rounded border border-gray-300 bg-white
+            p-2 shadow-md dark:border-gray-500 dark:bg-gray-700
           "
           v-on-click-outside="closeAdjustments"
         >
@@ -86,7 +86,7 @@
             v-for="(value, key) in columns"
             :key="key"
             class="
-              grid grid-cols-context rounded py-1 pl-1 pr-3 cursor-pointer
+              grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
               hover:bg-gray-100 dark:hover:bg-gray-500
             "
             @click="toggleColumnVisibility(value)"
@@ -94,15 +94,15 @@
             <div class="flex items-center">
               <icon-check
                 v-show="visibleColumns.includes(value)"
-                class="h-4 w-4 stroke-1 stroke-gray-800 dark:stroke-gray-200 fill-transparent"
+                class="size-4 fill-transparent stroke-gray-800 stroke-1 dark:stroke-gray-200"
               />
             </div>
             <div class="text-sm">{{ t("label." + key) }}</div>
           </div>
-          <div class="border-t border-gray-300 dark:border-gray-500 my-2"></div>
+          <div class="my-2 border-t border-gray-300 dark:border-gray-500"></div>
           <div
             class="
-              grid grid-cols-context rounded py-1 pl-1 pr-3 cursor-pointer
+              grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
               hover:bg-gray-100 dark:hover:bg-gray-500
             "
             @click="restoreColumnOrder"
@@ -113,13 +113,13 @@
         </div>
       </div>
       <!-- appointments list -->
-      <table v-show="view === viewTypes.list" class="w-full mt-4">
+      <table v-show="view === viewTypes.list" class="mt-4 w-full">
         <thead>
           <tr class="bg-gray-100 dark:bg-gray-600">
             <th class="py-1"></th>
             <template v-for="(_, key) in columns" :key="key">
-              <th v-if="columnVisible(key)" class="group font-normal text-left py-1 px-2">
-                <div class="py-1 border-r border-gray-300 dark:border-gray-500 group-last:border-none">
+              <th v-if="columnVisible(key)" class="group px-2 py-1 text-left font-normal">
+                <div class="border-r border-gray-300 py-1 group-last:border-none dark:border-gray-500">
                   {{ t("label." + key) }}
                 </div>
               </th>
@@ -130,30 +130,30 @@
           <tr
             v-for="(appointment, i) in filteredAppointments"
             :key="i"
-            class="hover:bg-sky-400/10 hover:shadow-lg cursor-pointer"
+            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
             @mouseout="(el) => paintBackground(el, appointment.calendar_color, _, true)"
             @click="showAppointment = appointment"
           >
             <td class="align-middle">
               <div
-                class="rounded-full w-3 h-3 bg-sky-400 mx-auto"
+                class="mx-auto size-3 rounded-full bg-sky-400"
                 :style="{ backgroundColor: appointment.calendar_color }"
               ></div>
             </td>
-            <td v-if="columnVisible('title')" class="py-2 px-2 max-w-2xs truncate">
+            <td v-if="columnVisible('title')" class="max-w-2xs truncate p-2">
               <span>{{ appointment.title }}</span>
             </td>
-            <td v-if="columnVisible('status')" class="py-2 px-2 text-sm">
+            <td v-if="columnVisible('status')" class="p-2 text-sm">
               <span>{{ t("label." + keyByValue(appointmentState, appointment.status)) }}</span>
             </td>
-            <td v-if="columnVisible('active')" class="py-2 px-2 text-sm">
+            <td v-if="columnVisible('active')" class="p-2 text-sm">
               <span>{{ appointment.active ? t("label.open") : t("label.closed") }}</span>
             </td>
-            <td v-if="columnVisible('calendar')" class="py-2 px-2 text-sm">
+            <td v-if="columnVisible('calendar')" class="p-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
             </td>
-            <td v-if="columnVisible('bookingLink')" class="py-2 px-2 text-sm max-w-2xs truncate">
+            <td v-if="columnVisible('bookingLink')" class="max-w-2xs truncate p-2 text-sm">
               <a
                 :href="bookingUrl + appointment.slug"
                 class="text-teal-500 underline underline-offset-2"
@@ -163,7 +163,7 @@
                 {{ bookingUrl + appointment.slug }}
               </a>
             </td>
-            <td v-if="columnVisible('replies')" class="py-2 px-2 text-sm">
+            <td v-if="columnVisible('replies')" class="p-2 text-sm">
               <span>
                 {{ repliesCount(appointment) }}
                 {{ t("label.bookings", repliesCount(appointment)) }}
@@ -175,7 +175,7 @@
       <!-- appointments grid -->
       <div
         v-show="view === viewTypes.grid"
-        class="w-full mt-4 grid grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] xl:grid-cols-3 gap-8 p-4"
+        class="mt-4 grid w-full grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] gap-8 p-4 xl:grid-cols-3"
       >
         <appointment-grid-item
           v-for="(appointment, i) in filteredAppointments"
@@ -186,7 +186,7 @@
       </div>
     </div>
     <!-- page side bar -->
-    <div class="w-full sm:w-1/2 lg:w-1/5 mx-auto mb-10 md:mb-0 min-w-[310px]">
+    <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 lg:w-1/5">
       <div v-if="creationStatus === appointmentCreationState.hidden">
         <!-- monthly mini calendar -->
         <calendar-month
@@ -249,8 +249,8 @@ import {
   IconList,
   IconSearch,
 } from '@tabler/icons-vue';
-import { useAppointmentStore } from "@/stores/appointment-store";
-import { useCalendarStore } from "@/stores/calendar-store";
+import { useAppointmentStore } from '@/stores/appointment-store';
+import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
 
 // component constants

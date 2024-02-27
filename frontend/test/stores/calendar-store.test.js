@@ -16,22 +16,20 @@ import { createFetch } from '@vueuse/core';
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/me/calendars`, async (request) => {
-    return HttpResponse.json([
-      {
-        id: 1,
-        title: "title",
-        color: "#123456",
-        connected: true,
-      },
-      {
-        id: 2,
-        title: "title",
-        color: "#123456",
-        connected: false,
-      },
-    ]);
-  }),
+  http.get(`${API_URL}/me/calendars`, async (request) => HttpResponse.json([
+    {
+      id: 1,
+      title: 'title',
+      color: '#123456',
+      connected: true,
+    },
+    {
+      id: 2,
+      title: 'title',
+      color: '#123456',
+      connected: false,
+    },
+  ])),
 ];
 
 const server = setupServer(...restHandlers);
@@ -52,7 +50,6 @@ describe('Calendar Store', () => {
 
   // Reset handlers after each test `important for test isolation`
   afterEach(() => server.resetHandlers());
-
 
   test('init', () => {
     const calStore = useCalendarStore();

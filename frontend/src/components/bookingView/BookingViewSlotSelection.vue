@@ -1,11 +1,11 @@
 <template>
   <div v-if="appointment">
-    <div class="text-3xl text-gray-700 dark:text-gray-400 mb-4">{{ appointment.title }}</div>
+    <div class="mb-4 text-3xl text-gray-700 dark:text-gray-400">{{ appointment.title }}</div>
     <div class="font-semibold">
       {{ t('text.nameIsInvitingYou', {name: appointment.owner_name}) }}
     </div>
-    <div class="text-gray-700 dark:text-gray-400 mb-6">{{ appointment.details }}</div>
-    <div class="text-xl mb-6">{{ t('text.chooseDateAndTime') }}</div>
+    <div class="mb-6 text-gray-700 dark:text-gray-400">{{ appointment.details }}</div>
+    <div class="mb-6 text-xl">{{ t('text.chooseDateAndTime') }}</div>
     <calendar-qalendar
       class="w-full"
       :current-date="activeDate"
@@ -17,12 +17,9 @@
   </div>
   <!-- fixed footer with action button -->
   <footer
-    class="
-          fixed bottom-0 left-0 h-24 w-full px-4 border-t
-          bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600
-        "
+    class="fixed bottom-0 left-0 h-24 w-full border-t border-gray-300 bg-white px-4 dark:border-gray-600 dark:bg-gray-700"
   >
-    <div class="h-full max-w-screen-2xl mx-auto flex justify-end items-center">
+    <div class="mx-auto flex h-full max-w-screen-2xl items-center justify-end">
       <primary-button
         class="p-7"
         :label="t('label.confirmSelection')"

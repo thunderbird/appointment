@@ -275,7 +275,11 @@ watch(currentDate, () => {
 
 </script>
 <template>
-  <div class="w-full" :style="{'color-scheme': preferredTheme === colorSchemes.dark ? 'dark' : null}" :class="{'is-light-mode': preferredTheme === colorSchemes.light}">
+  <div
+    class="w-full"
+    :style="{'color-scheme': preferredTheme === colorSchemes.dark ? 'dark' : null}"
+    :class="{'is-light-mode': preferredTheme === colorSchemes.light}"
+  >
     <qalendar
       :events="calendarEvents"
       :config="config"

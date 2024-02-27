@@ -1,10 +1,10 @@
 <template>
-  <div class="h-full p-4 flex-center flex-col gap-12">
+  <div class="flex-center h-full flex-col gap-12 p-4">
     <div v-if="isError === null">
       <loading-spinner />
     </div>
-    <div v-else-if="isError === true" class="px-4 flex-center flex-col gap-8">
-      <art-invalid-link class="max-w-sm h-auto my-6" />
+    <div v-else-if="isError === true" class="flex-center flex-col gap-8 px-4">
+      <art-invalid-link class="my-6 h-auto max-w-sm" />
       <div class="text-xl font-semibold text-sky-600">
         {{ t('info.bookingLinkIsInvalid') }}
       </div>
@@ -12,13 +12,13 @@
         {{ t('text.invalidOrAlreadyBooked') }}
       </div>
     </div>
-    <div v-else class="px-4 flex-center flex-col gap-8">
-      <art-successful-booking class="max-w-sm h-auto my-6" />
+    <div v-else class="flex-center flex-col gap-8 px-4">
+      <art-successful-booking class="my-6 h-auto max-w-sm" />
       <template v-if="confirmed">
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyConfirmed') }}
         </div>
-        <div class="text-gray-800 dark:text-gray-300 text-center">
+        <div class="text-center text-gray-800 dark:text-gray-300">
           {{ t('info.eventWasCreated') }}<br>
           {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
         </div>
@@ -27,7 +27,7 @@
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
-        <div class="text-gray-800 dark:text-gray-300 text-center">
+        <div class="text-center text-gray-800 dark:text-gray-300">
           {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}<br>
           {{ t('info.slotIsAvailableAgain') }}
         </div>
@@ -40,7 +40,7 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from "vue-router";
+import { useRoute } from 'vue-router';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import LoadingSpinner from '@/elements/LoadingSpinner';
@@ -53,7 +53,7 @@ const call = inject('call');
 const [signedUrl] = window.location.href.split('/confirm/');
 const slotId = Number(route.params.slot);
 const slotToken = route.params.token;
-const confirmed = route.params.confirmed == '1';
+const confirmed = parseInt(route.params.confirmed) === 1;
 
 const isError = ref(null);
 const event = ref(null);
@@ -66,7 +66,7 @@ onMounted(async () => {
     slot_id: slotId,
     slot_token: slotToken,
     owner_url: signedUrl,
-    confirmed: confirmed,
+    confirmed,
   };
   const { error, data } = await call('schedule/public/availability/booking').put(obj).json();
   if (error.value) {

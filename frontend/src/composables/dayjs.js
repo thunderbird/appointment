@@ -45,7 +45,8 @@ export function useDayJS(app, locale) {
   // provide unified list of locale weekdays with Monday=1 to Sunday=7 (isoweekdays)
   // taking locale first day of week into account
   const isoWeekdays = [];
-  const order = isoFirstDayOfWeek === 7 ? [7, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 7]; // TODO: generate for all starts
+  // TODO: generate order list for all starting days
+  const order = isoFirstDayOfWeek === 7 ? [7, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 7];
   order.forEach((i) => {
     const n = i === 7 ? 0 : i;
     isoWeekdays.push({

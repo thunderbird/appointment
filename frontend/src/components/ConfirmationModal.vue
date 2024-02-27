@@ -1,14 +1,11 @@
 <template>
-  <div v-if="open" class="w-screen h-screen fixed top-0 left-0 z-40 bg-gray-800/50" @click="emit('close')"></div>
+  <div v-if="open" class="fixed left-0 top-0 z-40 h-screen w-screen bg-gray-800/50" @click="emit('close')"></div>
   <div
     v-if="open"
-    class="
-      fixed z-50 position-center position-center rounded-xl p-12 max-w-lg w-full flex flex-col items-center gap-6
-      bg-white dark:bg-gray-700
-    "
+    class="position-center fixed z-50 flex w-full max-w-lg flex-col items-center gap-6 rounded-xl bg-white p-12 dark:bg-gray-700"
   >
-    <div class="absolute top-8 right-8 cursor-pointer" @click="emit('close')">
-      <icon-x class="h-6 w-6 stroke-1 fill-transparent stroke-gray-700 dark:stroke-gray-400" />
+    <div class="absolute right-8 top-8 cursor-pointer" @click="emit('close')">
+      <icon-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400" />
     </div>
     <div class="text-2xl font-semibold text-teal-500">
       {{ title }}

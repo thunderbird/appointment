@@ -38,5 +38,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     isLoaded.value = false;
   };
 
-  return { connections, isLoaded, fxa, zoom, fetch, $reset };
+  return {
+    connections, isLoaded, fxa, zoom, fetch, $reset,
+  };
 });

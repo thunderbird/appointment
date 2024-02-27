@@ -1,18 +1,18 @@
 <template>
   <div class="
-    grid grid-cols-week gap-[1px] w-full border rounded-lg overflow-hidden
-    bg-gray-200 border-gray-200 dark:bg-gray-600 dark:border-gray-600
+    grid w-full grid-cols-week gap-[1px] overflow-hidden rounded-lg border
+    border-gray-200 bg-gray-200 dark:border-gray-600 dark:bg-gray-600
   ">
     <!-- header with weekdays -->
     <div class="bg-white dark:bg-gray-700"></div>
     <div
       v-for="d in days"
       :key="d.day"
-      class="flex flex-col items-center py-2 text-gray-500 dark:text-gray-300 bg-white dark:bg-gray-700"
+      class="flex flex-col items-center bg-white py-2 text-gray-500 dark:bg-gray-700 dark:text-gray-300"
     >
       <div
-        class="text-2xl font-semibold w-10 h-10 flex-center"
-        :class="{ 'rounded-full text-white bg-teal-500': d.active }"
+        class="flex-center size-10 text-2xl font-semibold"
+        :class="{ 'rounded-full bg-teal-500 text-white': d.active }"
       >
         {{ d.day }}
       </div>
@@ -20,13 +20,13 @@
     </div>
     <!-- all day events -->
     <template v-if="!booking">
-      <div class="flex-center text-gray-400 bg-white dark:bg-gray-700">
+      <div class="flex-center bg-white text-gray-400 dark:bg-gray-700">
         {{ t('label.allDay') }}
       </div>
       <div
         v-for="d in days"
         :key="d.day"
-        class="grid auto-rows-max gap-1 p-1 bg-white dark:bg-gray-700"
+        class="grid auto-rows-max gap-1 bg-white p-1 dark:bg-gray-700"
         @mouseleave="popup = {...initialEventPopupData}"
       >
         <div
@@ -35,7 +35,7 @@
           class="flex overflow-hidden"
           @mouseenter="element => popup=showEventPopup(element, event, popupPosition)"
         >
-          <div class="w-full text-sm truncate rounded px-2 py-0.5 bg-amber-400/80">
+          <div class="w-full truncate rounded bg-amber-400/80 px-2 py-0.5 text-sm">
             {{ event.title }}
           </div>
         </div>
@@ -43,7 +43,7 @@
     </template>
     <!-- events with times -->
     <div
-      class="text-center grid text-gray-400 bg-white dark:bg-gray-700"
+      class="grid bg-white text-center text-gray-400 dark:bg-gray-700"
       :style="{ gridAutoRows: baseRem + 'rem' }"
     >
       <div v-for="h in hours" :key="h" class="lowercase">
@@ -67,7 +67,7 @@
       >
         <div
           v-if="!booking"
-          class="w-full truncate rounded flex m-1 px-2 bg-sky-400/10 border-sky-400"
+          class="m-1 flex w-full truncate rounded border-sky-400 bg-sky-400/10 px-2"
           :class="{
             'border-2': !event.remote || event.tentative,
             'border-dashed': !event.remote,
@@ -84,7 +84,7 @@
           <div
             class="truncate"
             :class="{
-              'self-center grow text-sm': event.span < 60,
+              'grow self-center text-sm': event.span < 60,
               'hidden': event.span < 30,
             }"
           >
@@ -95,14 +95,14 @@
           v-else
           @click="bookSlot(event.start)"
           class="
-            w-full text-sm overflow-hidden rounded-md p-1 m-1 cursor-pointer hover:shadow flex
-            text-gray-600 dark:text-gray-300 bg-teal-50 hover:bg-teal-100 dark:bg-teal-800 hover:dark:bg-teal-700
+            m-1 flex w-full cursor-pointer overflow-hidden rounded-md bg-teal-50 p-1 text-sm
+            text-gray-600 hover:bg-teal-100 hover:shadow dark:bg-teal-800 dark:text-gray-300 hover:dark:bg-teal-700
           "
-          :class="{ 'shadow-lg bg-gradient-to-b from-teal-500 to-sky-600': event.selected }"
+          :class="{ 'bg-gradient-to-b from-teal-500 to-sky-600 shadow-lg': event.selected }"
         >
           <div
-            class="w-full truncate rounded lowercase p-1 font-semibold border-2 border-dashed border-teal-500"
-            :class="{ 'text-white border-white': event.selected }"
+            class="w-full truncate rounded border-2 border-dashed border-teal-500 p-1 font-semibold lowercase"
+            :class="{ 'border-white text-white': event.selected }"
           >
             <span :class="{ 'hidden': event.span <= 30 }">
               {{ event.times }}
@@ -127,7 +127,9 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
+import {
+  eventColor, timeFormat, initialEventPopupData, showEventPopup,
+} from '@/utils';
 import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
 
@@ -263,6 +265,6 @@ const bookSlot = (d) => {
 };
 
 // event details
-const popup = ref({...initialEventPopupData});
+const popup = ref({ ...initialEventPopupData });
 
 </script>

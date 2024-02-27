@@ -1,27 +1,32 @@
 <template>
   <!-- page title area -->
-  <div class="flex w-full h-screen flex-center bg-gray-100 dark:bg-gray-600">
-    <div class="flex flex-col gap-2 justify-center items-center shadow-lg px-4 py-12 my-auto w-1/2 max-w-lg bg-white dark:bg-gray-700">
-      <img class="w-full max-w-[8rem] mb-2" src="/appointment_logo.svg" alt="Appointment Logo" />
-      <div class="text-4xl font-light text-center">{{ t('app.title') }}</div>
-      <div class="grid my-8 w-full" :class="{'gap-8': isPasswordAuth, 'grid-rows-2': isPasswordAuth, 'gap-4': isFxaAuth}">
-        <label class="pl-4 mt-4 flex items-center">
-          <span class="w-full" :class="{'max-w-[4em]': isFxaAuth, 'max-w-[6rem]': isPasswordAuth}">{{ t('label.email') }}</span>
+  <div class="flex-center flex h-screen w-full bg-gray-100 dark:bg-gray-600">
+    <div class="my-auto flex w-1/2 max-w-lg flex-col items-center justify-center gap-2 bg-white px-4 py-12 shadow-lg dark:bg-gray-700">
+      <img class="mb-2 w-full max-w-[8rem]" src="/appointment_logo.svg" alt="Appointment Logo" />
+      <div class="text-center text-4xl font-light">{{ t('app.title') }}</div>
+      <div
+        class="my-8 grid w-full"
+        :class="{'gap-8': isPasswordAuth, 'grid-rows-2': isPasswordAuth, 'gap-4': isFxaAuth}"
+      >
+        <label class="mt-4 flex items-center pl-4">
+          <span class="w-full" :class="{'max-w-[4em]': isFxaAuth, 'max-w-[6rem]': isPasswordAuth}">
+            {{ t('label.email') }}
+          </span>
           <input
             v-model="username"
             type="email"
-            class="w-full rounded-md mr-6"
+            class="mr-6 w-full rounded-md"
             :class="{'mr-4': isFxaAuth}"
             @keydown.enter="isFxaAuth ? login() : null"
           />
         </label>
-        <div v-if="isFxaAuth" class="text-sm text-center">{{ t('text.login.continueToFxa') }}</div>
-        <label v-if="isPasswordAuth" class="pl-4 mt-4 flex items-center">
+        <div v-if="isFxaAuth" class="text-center text-sm">{{ t('text.login.continueToFxa') }}</div>
+        <label v-if="isPasswordAuth" class="mt-4 flex items-center pl-4">
           <span class="w-full max-w-[6rem]">{{ t('label.password') }}</span>
           <input
             v-model="password"
             type="password"
-            class="w-full rounded-md mr-6"
+            class="mr-6 w-full rounded-md"
             @keyup.enter="login"
           />
         </label>
@@ -46,7 +51,7 @@ const user = useUserStore();
 // component constants
 const { t } = useI18n();
 const call = inject('call');
-const dj = inject("dayjs");
+const dj = inject('dayjs');
 const router = useRouter();
 const isPasswordAuth = inject('isPasswordAuth');
 const isFxaAuth = inject('isFxaAuth');

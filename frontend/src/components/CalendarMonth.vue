@@ -1,24 +1,24 @@
 <template>
   <div class="select-none">
-    <div v-if="nav" class="flex-center gap-2 mb-2 select-none">
+    <div v-if="nav" class="flex-center mb-2 select-none gap-2">
       <div @click="dateNav(false)" class="group cursor-pointer">
-        <icon-chevron-left class="h-6 w-6 stroke-2 fill-transparent stroke-slate-400 group-hover:stroke-teal-500" />
+        <icon-chevron-left class="size-6 fill-transparent stroke-slate-400 stroke-2 group-hover:stroke-teal-500" />
       </div>
-      <div class="text-teal-500 font-semibold text-lg">
+      <div class="text-lg font-semibold text-teal-500">
         {{ navDate.format('MMMM YYYY')}}
       </div>
       <div @click="dateNav(true)" class="group cursor-pointer">
-        <icon-chevron-right class="h-6 w-6 stroke-2 fill-transparent stroke-slate-400 group-hover:stroke-teal-500" />
+        <icon-chevron-right class="size-6 fill-transparent stroke-slate-400 stroke-2 group-hover:stroke-teal-500" />
       </div>
     </div>
     <div class="
-      grid grid-cols-7 gap-[1px] w-full border rounded-lg overflow-hidden
-    bg-gray-200 border-gray-200 dark:bg-gray-500 dark:border-gray-500
+      grid w-full grid-cols-7 gap-[1px] overflow-hidden rounded-lg border
+    border-gray-200 bg-gray-200 dark:border-gray-500 dark:bg-gray-500
     ">
       <div
         v-for="h in isoWeekdays"
         :key="h"
-        class="text-center py-2 text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-600"
+        class="bg-gray-100 py-2 text-center text-gray-500 dark:bg-gray-600 dark:text-gray-300"
         :class="{ 'font-bold': !mini}"
       >
         {{ h.min }}
@@ -58,8 +58,8 @@ import { appointmentState } from '@/definitions';
 
 // component constants
 const dj = inject('dayjs');
-const isoWeekdays = inject("isoWeekdays");
-const isoFirstDayOfWeek = inject("isoFirstDayOfWeek");
+const isoWeekdays = inject('isoWeekdays');
+const isoFirstDayOfWeek = inject('isoFirstDayOfWeek');
 
 // component properties
 const props = defineProps({
@@ -163,7 +163,7 @@ const previousMonthDays = computed(() => {
   // Cover first day of the month being sunday (firstDayOfTheMonthWeekday === 0)
   const firstDayOfTheMonthWeekday = dj(currentMonthDays.value[0].date).isoWeekday();
   const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday !== isoFirstDayOfWeek
-    ? firstDayOfTheMonthWeekday - isoFirstDayOfWeek%7
+    ? firstDayOfTheMonthWeekday - (isoFirstDayOfWeek % 7)
     : 0;
 
   const previousMonthLastMondayDayOfMonth = dj(currentMonthDays.value[0].date)
@@ -185,7 +185,7 @@ const previousMonthDays = computed(() => {
 
 const nextMonthDays = computed(() => {
   // fill in rest days in calendar grid
-  const restDays = 7 - (previousMonthDays.value.length+currentMonthDays.value.length)%7;
+  const restDays = 7 - ((previousMonthDays.value.length + currentMonthDays.value.length) % 7);
   const visibleNumberOfDaysFromNextMonth = restDays === 7 ? 0 : restDays;
 
   const nextMonth = dj(`${year.value}-${month.value}-01`).add(1, 'month');

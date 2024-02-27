@@ -1,15 +1,15 @@
 <template>
   <!-- page title area -->
-  <div class="flex flex-col lg:flex-row justify-between items-start select-none">
+  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
     <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
   </div>
   <!-- page content -->
   <div
-    class="flex flex-col flex-col-reverse md:flex-row justify-between gap-4 mt-8 items-stretch"
+    class="mt-8 flex flex-col flex-col-reverse items-stretch justify-between gap-4 md:flex-row"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
-    <div class="w-full sm:w-1/2 md:w-1/4 mx-auto mb-10 md:mb-0 min-w-[360px]">
+    <div class="mx-auto mb-10 w-full min-w-[360px] sm:w-1/2 md:mb-0 md:w-1/4">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -40,10 +40,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import ScheduleCreation from '@/components/ScheduleCreation';
-import TabBar from '@/components/TabBar';
 
-// icons
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
 // stores
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -147,7 +144,7 @@ const onDateChange = (dateObj) => {
 
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
   if (
-      dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
+    dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
       || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
   ) {
     getRemoteEvents(

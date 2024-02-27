@@ -1,6 +1,6 @@
 <template>
-  <div class="flex gap-2 items-stretch">
-    <div class="w-1.5 rounded-lg shrink-0" :style="{ backgroundColor: appointment.calendar_color }"></div>
+  <div class="flex items-stretch gap-2">
+    <div class="w-1.5 shrink-0 rounded-lg" :style="{ backgroundColor: appointment.calendar_color }"></div>
     <div class="w-[95%]">
       <div class="flex justify-between">
         <div class="overflow-x-hidden">
@@ -10,12 +10,12 @@
             {{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}
           </div>
         </div>
-        <icon-dots-vertical class="h-6 w-6 shrink-0 stroke-gray-400 stroke-2 fill-gray-400" />
+        <icon-dots-vertical class="size-6 shrink-0 fill-gray-400 stroke-gray-400 stroke-2" />
       </div>
-      <div class="flex justify-between items-center">
+      <div class="flex items-center justify-between">
         <router-link
           :to="{ name: 'booking', params: { 'slug': appointment.slug } }"
-          class="text-sm shrink text-teal-500 underline underline-offset-2"
+          class="shrink text-sm text-teal-500 underline underline-offset-2"
         >
           {{ t('label.viewBooking') }}
         </router-link>

@@ -13,7 +13,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
   // Data
   const appointments = ref([]);
   const pendingAppointments = computed(
-    () => appointments.value.filter((a) => a.status === appointmentState.pending)
+    () => appointments.value.filter((a) => a.status === appointmentState.pending),
   );
 
   /**
@@ -73,5 +73,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
     isLoaded.value = false;
   };
 
-  return { isLoaded, appointments, pendingAppointments, status, postFetchProcess, fetch, $reset };
+  return {
+    isLoaded, appointments, pendingAppointments, status, postFetchProcess, fetch, $reset,
+  };
 });

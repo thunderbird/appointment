@@ -1,13 +1,13 @@
 <template>
   <div>
     <section>
-      <div class="flex-center flex-col gap-12 mt-8">
+      <div class="flex-center mt-8 flex-col gap-12">
         <img class="w-full max-w-xs md:max-w-sm lg:max-w-md" src="/appointment_logo.svg" alt="Appointment Logo" />
-        <h2 class="pt-6 font-display tracking-[0.19em] uppercase text-center text-lg md:text-3xl lg:text-5xl">
+        <h2 class="pt-6 text-center font-display text-lg uppercase tracking-[0.19em] md:text-3xl lg:text-5xl">
           {{ $t('app.title') }}
         </h2>
-        <div class="-mb-12 md:-mb-20 lg:-mb-28 xl:-mb-40 flex flex-col flex-center">
-          <h4 class="text-xl tracking-wide leading-9 pt-12 font-light max-w-2xl text-center">
+        <div class="flex-center -mb-12 flex flex-col md:-mb-20 lg:-mb-28 xl:-mb-40">
+          <h4 class="max-w-2xl pt-12 text-center text-xl font-light leading-9 tracking-wide">
             {{ $t('text.homepage.intro') }}
           </h4>
           <div class="mt-16">
@@ -17,67 +17,71 @@
         </div>
         <div class="w-full">
           <!-- Padding top is rounded up aspect ratio percentage (height / width) of image -->
-          <div class="bg-[url(@/assets/svg/homepage-split.svg)]
-          dark:bg-[url(@/assets/svg/homepage-split-dark.svg)]
-          bg-no-repeat bg-contain h-0 pt-[14%] w-full"
-          ></div>
+          <div class="h-0 w-full bg-[url(@/assets/svg/homepage-split.svg)] bg-contain bg-no-repeat pt-[14%] dark:bg-[url(@/assets/svg/homepage-split-dark.svg)]"></div>
         </div>
       </div>
     </section>
     <section class="mx-4">
-      <h2 class="text-3xl pb-16 pt-16 text-center text-teal-600 dark:text-teal-400">
+      <h2 class="py-16 text-center text-3xl text-teal-600 dark:text-teal-400">
         {{ $t('text.homepage.sectionHeader') }}
       </h2>
-      <section class="flex flex-col gap-16 justify-center mx-auto max-w-full md:flex-row md:max-w-7xl">
-        <InfoBox :title="$t('text.homepage.planEventTitle')">{{ $t('text.homepage.planEventBody') }}</InfoBox>
-        <InfoBox :title="$t('text.homepage.setAvailabilityTitle')">{{ $t('text.homepage.setAvailabilityBody') }}</InfoBox>
-        <InfoBox :title="$t('text.homepage.shareWithOthersTitle')">{{ $t('text.homepage.shareWithOthersBody') }}</InfoBox>
+      <section class="mx-auto flex max-w-full flex-col justify-center gap-16 md:max-w-7xl md:flex-row">
+        <info-box :title="$t('text.homepage.planEventTitle')">
+          {{ $t('text.homepage.planEventBody') }}
+        </info-box>
+        <info-box :title="$t('text.homepage.setAvailabilityTitle')">
+          {{ $t('text.homepage.setAvailabilityBody') }}
+        </info-box>
+        <info-box :title="$t('text.homepage.shareWithOthersTitle')">
+          {{ $t('text.homepage.shareWithOthersBody') }}
+        </info-box>
       </section>
     </section>
     <section class="w-full">
-        <div class="bg-[url(@/assets/svg/homepage-wave.svg)]
-        dark:bg-[url(@/assets/svg/homepage-wave-dark.svg)]
-        bg-top bg-no-repeat bg-cover w-full"
-        >
+        <div class="w-full bg-[url(@/assets/svg/homepage-wave.svg)] bg-cover bg-top bg-no-repeat dark:bg-[url(@/assets/svg/homepage-wave-dark.svg)]">
           <div class="pt-[13%]"></div>
-          <div class="w-full flex flex-col md:flex-row relative mx-auto justify-between">
-            <img class="shadow-2xl my-auto h-full w-full md:w-1/2 dark:hidden"
-                 src="@/assets/img/homepage-screenshot.png"
-                 :alt="$t('text.homepage.screenshotCalendarAlt')"
+          <div class="relative mx-auto flex w-full flex-col justify-between md:flex-row">
+            <img
+              class="my-auto size-full shadow-2xl dark:hidden md:w-1/2"
+              src="@/assets/img/homepage-screenshot.png"
+              :alt="$t('text.homepage.screenshotCalendarAlt')"
             />
-            <img class="shadow-2xl my-auto h-full w-full md:w-1/2 hidden dark:block"
-                 src="@/assets/img/homepage-screenshot-dark.png"
-                 :alt="$t('text.homepage.screenshotCalendarAlt')"
+            <img
+              class="my-auto hidden size-full shadow-2xl dark:block md:w-1/2"
+              src="@/assets/img/homepage-screenshot-dark.png"
+              :alt="$t('text.homepage.screenshotCalendarAlt')"
             />
-            <div class="flex-col mb-20 mt-20 md:w-[45%] flex-center">
-              <p class="text-2xl tracking-wide leading-loose font-light w-[70%]">
+            <div class="flex-center my-20 flex-col md:w-[45%]">
+              <p class="w-[70%] text-2xl font-light leading-loose tracking-wide">
                 {{ $t('text.homepage.calendarCopy') }}
               </p>
             </div>
           </div>
         </div>
     </section>
-    <section class="w-full pt-32 bg-[#fbfbfc] dark:bg-[#1F232A]">
-        <div class="bg-[url(@/assets/svg/homepage-wave-bottom.svg)] dark:bg-[url(@/assets/svg/homepage-wave-bottom-dark.svg)] bg-top bg-no-repeat bg-cover w-full pb-8">
+    <section class="w-full bg-[#fbfbfc] pt-32 dark:bg-[#1F232A]">
+        <div class="w-full bg-[url(@/assets/svg/homepage-wave-bottom.svg)] bg-cover bg-top bg-no-repeat pb-8 dark:bg-[url(@/assets/svg/homepage-wave-bottom-dark.svg)]">
           <div class="pt-[5%]"></div>
-          <div class="w-full flex flex-col md:flex-row-reverse relative mx-auto justify-between">
-            <img class="shadow-2xl my-auto h-full w-full md:w-1/2 dark:hidden"
-                 src="@/assets/img/homepage-screenshot-2.png"
-                 :alt="$t('text.homepage.screenshotScheduleAlt')"
+          <div class="relative mx-auto flex w-full flex-col justify-between md:flex-row-reverse">
+            <img
+              class="my-auto size-full shadow-2xl dark:hidden md:w-1/2"
+              src="@/assets/img/homepage-screenshot-2.png"
+              :alt="$t('text.homepage.screenshotScheduleAlt')"
             />
-            <img class="shadow-2xl my-auto h-full w-full md:w-1/2 hidden dark:block"
-                 src="@/assets/img/homepage-screenshot-2-dark.png"
-                 :alt="$t('text.homepage.screenshotScheduleAlt')"
+            <img
+              class="my-auto hidden size-full shadow-2xl dark:block md:w-1/2"
+              src="@/assets/img/homepage-screenshot-2-dark.png"
+              :alt="$t('text.homepage.screenshotScheduleAlt')"
             />
-            <div class="flex-col mb-20 mt-20 md:w-[45%] flex-center">
-              <p class="text-2xl tracking-wide leading-loose font-light w-[70%]">
+            <div class="flex-center my-20 flex-col md:w-[45%]">
+              <p class="w-[70%] text-2xl font-light leading-loose tracking-wide">
                 {{ $t('text.homepage.scheduleCopy') }}
               </p>
             </div>
           </div>
       </div>
     </section>
-    <HomeFooter></HomeFooter>
+    <home-footer></home-footer>
   </div>
 </template>
 

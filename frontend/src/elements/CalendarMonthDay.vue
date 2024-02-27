@@ -1,19 +1,19 @@
 <template>
   <div
-    class="p-1 group/day"
+    class="group/day p-1"
     :class="{
       'cursor-pointer py-2': mini,
       'h-32': !mini,
       'bg-white dark:bg-gray-700': isActive,
-      'bg-gray-50 dark:bg-gray-600 text-gray-400': !isActive || disabled,
+      'bg-gray-50 text-gray-400 dark:bg-gray-600': !isActive || disabled,
       'cursor-not-allowed': disabled
     }"
     @mouseleave="popup = {...initialEventPopupData}"
   >
     <div
-      class="w-6 rounded-full text-center relative"
+      class="relative w-6 rounded-full text-center"
       :class="{
-        'bg-teal-500 text-white font-semibold': isToday,
+        'bg-teal-500 font-semibold text-white': isToday,
         'text-teal-500': isSelected && !isToday,
         'mx-auto': mini,
         'group-hover/day:bg-sky-600': mini && isToday && !disabled,
@@ -23,20 +23,20 @@
       {{ dj(day).format('D') }}
       <div
         v-if="mini && events"
-        class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-teal-600 rounded-full"
+        class="absolute -bottom-1 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-teal-600"
       ></div>
     </div>
-    <div v-if="events && !mini" class="h-24 flex flex-col gap-1.5 overflow-y-auto">
+    <div v-if="events && !mini" class="flex h-24 flex-col gap-1.5 overflow-y-auto">
       <div
         v-for="event in sortedEvents"
         :key="event"
-        class="shrink-0 text-sm text-gray-700 dark:text-gray-200 hover:shadow-md"
+        class="shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
         :class="{
-          'rounded border-2 border-dashed px-2 py-0.5 border-sky-400 bg-sky-400/10': !placeholder && !event.remote && !event.preview,
-          'group/event rounded-md p-1 cursor-pointer hover:shadow-lg hover:bg-gradient-to-b': placeholder,
-          'hover:!text-white bg-teal-50 dark:bg-teal-800 hover:from-teal-500 hover:to-sky-600': placeholder,
+          'rounded border-2 border-dashed border-sky-400 bg-sky-400/10 px-2 py-0.5': !placeholder && !event.remote && !event.preview,
+          'group/event cursor-pointer rounded-md p-1 hover:bg-gradient-to-b hover:shadow-lg': placeholder,
+          'bg-teal-50 hover:from-teal-500 hover:to-sky-600 hover:!text-white dark:bg-teal-800': placeholder,
           'flex items-center gap-1.5 px-2 py-0.5': event.remote,
-          'flex items-center rounded border-l-4 px-2 border-teal-400': event.preview,
+          'flex items-center rounded border-l-4 border-teal-400 px-2': event.preview,
           '!border-solid text-black': event.attendee !== null,
           'rounded bg-amber-400/80 dark:text-white': event.all_day
         }"
@@ -49,7 +49,7 @@
       >
         <div
           v-if="event.remote && !event.all_day"
-          class="w-2.5 h-2.5 mt-0.5 shrink-0 rounded-full"
+          class="mt-0.5 size-2.5 shrink-0 rounded-full"
           :class="{
             'bg-sky-400': !event.tentative,
             'border border-dashed border-sky-400/70': event.tentative,
@@ -62,7 +62,7 @@
         <div
           class="truncate rounded"
           :class="{
-            'h-10 p-1 font-semibold border-2 border-dashed border-teal-500 group-hover/event:border-white': placeholder,
+            'h-10 border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
           }"
         >
           <span v-if="event.preview">{{ formattedTimeRange(event) }}</span>
@@ -85,7 +85,9 @@
 </template>
 
 <script setup>
-import { eventColor, timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
+import {
+  eventColor, timeFormat, initialEventPopupData, showEventPopup,
+} from '@/utils';
 import { inject, computed, ref } from 'vue';
 import EventPopup from '@/elements/EventPopup';
 
@@ -123,7 +125,7 @@ const sortedEvents = computed(() => [...props.events].sort((a, b) => {
 }));
 
 // event details
-const popup = ref({...initialEventPopupData});
+const popup = ref({ ...initialEventPopupData });
 
 // formatted time range
 const formattedTimeRange = (event) => {
