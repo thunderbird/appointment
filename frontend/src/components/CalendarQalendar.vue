@@ -6,7 +6,7 @@ import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/CalendarEvent.vue';
 import {
-  appointmentState, colorSchemes, dateFormatStrings, defaultSlotDuration,
+  appointmentState, colorSchemes, dateFormatStrings, defaultSlotDuration, qalendarSlotDurations,
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 
@@ -47,17 +47,18 @@ const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
  */
 const timeSlotDuration = computed(() => {
   if (appointments?.value?.length === 0) {
-    return 15;
+    return qalendarSlotDurations['15'];
   }
   // Duration on slots are fixed, so grab the first one.
+  // This is the same data on schedule.slot_duration, but we never actually pull that info down to the frontend.
   const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
   if (duration <= 15) {
-    return 15;
+    return qalendarSlotDurations['15'];
   }
   if (duration <= 30) {
-    return 30;
+    return qalendarSlotDurations['30'];
   }
-  return 60;
+  return qalendarSlotDurations['60'];
 });
 
 /**

@@ -150,6 +150,19 @@ export const alertSchemes = {
   info: 4, // Alert indicates some neutral information
 };
 
+/**
+ * Only available duration values supported for Qalendar
+ * This defines basically the number of intervals there will be.
+ * See: https://tomosterlund.github.io/qalendar/guide.html#intervals
+ * @enum
+ * @readonly
+ */
+export const qalendarSlotDurations = {
+  15: 15,
+  30: 30,
+  60: 60,
+};
+
 export default {
   subscriberLevels,
   appointmentState,
