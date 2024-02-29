@@ -5,7 +5,9 @@ import {
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/CalendarEvent.vue';
-import { appointmentState, colorSchemes, dateFormatStrings } from '@/definitions';
+import {
+  appointmentState, colorSchemes, dateFormatStrings, defaultSlotDuration, qalendarSlotDurations,
+} from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 
 // component constants
@@ -45,19 +47,37 @@ const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
  */
 const timeSlotDuration = computed(() => {
   if (appointments?.value?.length === 0) {
-    return 15;
+    return qalendarSlotDurations['15'];
   }
   // Duration on slots are fixed, so grab the first one.
-  const duration = appointments?.value[0].slots[0].duration;
+  // This is the same data on schedule.slot_duration, but we never actually pull that info down to the frontend.
+  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
   if (duration <= 15) {
-    return 15;
+    return qalendarSlotDurations['15'];
   }
   if (duration <= 30) {
-    return 30;
+    return qalendarSlotDurations['30'];
   }
+  return qalendarSlotDurations['60'];
+});
+
+/**
+ * The height in pixels of an individual bookable slot.
+ * This defaults to 40px, but if the slot duration is set to less than 15 minutes, it will be bumped to 60px.
+ * @type {ComputedRef<number>}
+ */
+const timeSlotHeight = computed(() => {
+  if (appointments?.value?.length === 0) {
+    return 40;
+  }
+
+  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
+  if (duration >= 15) {
+    return 40;
+  }
+
   return 60;
 });
-const timeSlotHeight = ref(40);
 
 /* Event Handlers */
 

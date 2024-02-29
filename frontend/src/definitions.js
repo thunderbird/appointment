@@ -12,6 +12,12 @@ export const dateFormatStrings = {
   display24Hour: 'HH:mm',
 };
 
+/**
+ * The amount of time in minutes a schedule's slot duration will default to
+ * @type {number}
+ */
+export const defaultSlotDuration = 30;
+
 // appointment location types
 export const subscriberLevels = {
   basic: 1,
@@ -142,6 +148,19 @@ export const alertSchemes = {
   warning: 2, // Alert indicates something important
   success: 3, // Alert indicates something's gone right
   info: 4, // Alert indicates some neutral information
+};
+
+/**
+ * Only available duration values supported for Qalendar
+ * This defines basically the number of intervals there will be.
+ * See: https://tomosterlund.github.io/qalendar/guide.html#intervals
+ * @enum
+ * @readonly
+ */
+export const qalendarSlotDurations = {
+  15: 15,
+  30: 30,
+  60: 60,
 };
 
 export default {
