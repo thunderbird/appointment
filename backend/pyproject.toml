@@ -26,6 +26,7 @@ test = [
     "httpx==0.25.1",
     "pytest==7.4.3",
     "freezegun==1.4.0",
+    "coverage==7.4.3",
 ]
 deploy = ['appointment[cli]', 'appointment[db]']
 
@@ -84,3 +85,9 @@ line-length = 120
 
 [tool.pytest.ini_options]
 pythonpath = "test"
+
+[tool.coverage.run]
+omit = [
+    # Omit test folder
+    "test/*"
+]

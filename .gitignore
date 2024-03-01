@@ -11,3 +11,6 @@ dist
 venv
 .idea
 *.egg-info
+.coverage
+htmlcov
+caldav
