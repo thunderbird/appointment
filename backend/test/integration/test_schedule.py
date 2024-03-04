@@ -1,4 +1,3 @@
-import os
 from datetime import date, time
 
 from freezegun import freeze_time
@@ -220,7 +219,7 @@ class TestSchedule:
     def test_public_availability(self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule):
         class MockCaldavConnector:
             @staticmethod
-            def __init__(self, url, user, password):
+            def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
                 """We don't want to initialize a client"""
                 pass
 

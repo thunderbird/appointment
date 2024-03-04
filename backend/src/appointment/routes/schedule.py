@@ -13,7 +13,7 @@ from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
-from ..dependencies.database import get_db
+from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -188,6 +188,7 @@ def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
+    redis = Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to react to owners decision to a request of a time slot of his public link
@@ -291,13 +292,22 @@ def decide_on_schedule_availability_slot(
         if calendar.provider == CalendarProvider.google:
             con = GoogleConnector(
                 db=db,
+                redis_instance=redis,
                 google_client=google_client,
-                calendar_id=calendar.user,
+                remote_calendar_id=calendar.user,
                 subscriber_id=subscriber.id,
+                calendar_id=calendar.id,
                 google_tkn=subscriber.google_tkn,
             )
         else:
-            con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+            con = CalDavConnector(
+                redis_instance=redis,
+                subscriber_id=subscriber.id,
+                calendar_id=calendar.id,
+                url=calendar.url, 
+                user=calendar.user, 
+                password=calendar.password
+            )
         con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
 
         # send mail with .ics attachment to attendee
