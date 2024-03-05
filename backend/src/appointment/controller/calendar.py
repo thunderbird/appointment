@@ -485,7 +485,8 @@ class Tools:
         calendars: list[schemas.Calendar],
         subscriber: schemas.Subscriber,
         google_client: GoogleClient,
-        db
+        db,
+        redis = None
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range
         """
@@ -496,7 +497,7 @@ class Tools:
             if calendar.provider == CalendarProvider.google:
                 con = GoogleConnector(
                     db=db,
-                    redis_instance=None,
+                    redis_instance=redis,
                     google_client=google_client,
                     remote_calendar_id=calendar.user,
                     calendar_id=calendar.id,
@@ -505,7 +506,7 @@ class Tools:
                 )
             else:
                 con = CalDavConnector(
-                    redis_instance=None,
+                    redis_instance=redis,
                     url=calendar.url,
                     user=calendar.user,
                     password=calendar.password,
