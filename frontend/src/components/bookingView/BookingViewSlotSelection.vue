@@ -11,7 +11,7 @@
       :current-date="activeDate"
       :appointments="[appointment]"
       :is-booking-route="true"
-      :fixed-duration="activeSchedules[0]?.slot_duration"
+      :fixed-duration="appointment?.slot_duration ?? activeSchedules[0]?.slot_duration"
       @event-selected="selectEvent"
     >
     </calendar-qalendar>

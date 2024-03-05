@@ -368,7 +368,7 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
         schemas.SlotOut(id=sl.id, start=sl.start, duration=sl.duration, attendee_id=sl.attendee_id) for sl in a.slots
     ]
     return schemas.AppointmentOut(
-        id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=slots
+        id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=slots, slot_duration=slots[0].duration if len(slots) > 0 else 0
     )
 
 

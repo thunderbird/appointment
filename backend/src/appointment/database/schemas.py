@@ -120,6 +120,7 @@ class AppointmentOut(AppointmentBase):
     id: int | None = None
     owner_name: str | None = None
     slots: list[SlotBase|SlotOut] = []
+    slot_duration: int
 
 
 """ SCHEDULE model schemas

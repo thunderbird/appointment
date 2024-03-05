@@ -122,6 +122,7 @@ def read_schedule_availabilities(
         details=schedule.details,
         owner_name=subscriber.name,
         slots=actual_slots,
+        slot_duration=schedule.slot_duration
     )
 
 
