@@ -11,6 +11,7 @@
       :current-date="activeDate"
       :appointments="[appointment]"
       :is-booking-route="true"
+      :fixed-duration="activeSchedules[0]?.slot_duration"
       @event-selected="selectEvent"
     >
     </calendar-qalendar>
@@ -38,11 +39,13 @@ import { dateFormatStrings } from '@/definitions';
 
 import PrimaryButton from '@/elements/PrimaryButton';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
+import { useScheduleStore } from '@/stores/schedule-store.js';
 
 const { t } = useI18n();
 const {
   appointment, activeDate, selectedEvent,
 } = storeToRefs(useBookingViewStore());
+const { activeSchedules } = storeToRefs(useScheduleStore());
 
 const emit = defineEmits(['openModal']);
 defineProps({

@@ -28,10 +28,11 @@ const props = defineProps({
   schedules: Array, // data of scheduled event previews to show
   isBookingRoute: Boolean,
   currentDate: Object,
+  fixedDuration: Number,
 });
 
 const {
-  events, appointments, schedules, isBookingRoute, currentDate,
+  events, appointments, schedules, isBookingRoute, currentDate, fixedDuration,
 } = toRefs(props);
 
 const qalendarRef = ref();
@@ -51,12 +52,9 @@ const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
  * @type {ComputedRef<number>}
  */
 const timeSlotDuration = computed(() => {
-  if (appointments?.value?.length === 0) {
-    return qalendarSlotDurations['15'];
-  }
   // Duration on slots are fixed, so grab the first one.
   // This is the same data on schedule.slot_duration, but we never actually pull that info down to the frontend.
-  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
+  const duration = fixedDuration.value ?? defaultSlotDuration;
   if (duration <= 15) {
     return qalendarSlotDurations['15'];
   }
@@ -72,11 +70,7 @@ const timeSlotDuration = computed(() => {
  * @type {ComputedRef<number>}
  */
 const timeSlotHeight = computed(() => {
-  if (appointments?.value?.length === 0) {
-    return 40;
-  }
-
-  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
+  const duration = fixedDuration.value ?? defaultSlotDuration;
   if (duration >= 15) {
     return 40;
   }
