@@ -436,6 +436,8 @@ watch(currentDate, () => onCurrentDateChange(currentDate.value));
 /* Add some minimum spacing to the numbered day, so events line up even with the "today" highlight. */
 .calendar-root-wrapper .calendar-month__day-date {
   @media (min-width: theme('screens.lg')) {
+    text-align: center;
+    min-width: theme('width.8') !important;
     min-height: theme('height.8') !important;
   }
 }
