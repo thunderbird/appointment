@@ -4,11 +4,7 @@
     <div class="mb-8 text-4xl font-light lg:mb-0">{{ t('label.appointments') }}</div>
     <div class="mx-auto flex flex-col items-center gap-8 lg:mx-0 lg:flex-row">
       <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
-      <primary-button
-        :label="t('label.createAppointments')"
-        :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
-        @click="creationStatus = appointmentCreationState.details"
-      />
+
     </div>
   </div>
   <!-- page content -->
@@ -187,7 +183,7 @@
     </div>
     <!-- page side bar -->
     <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 lg:w-1/5">
-      <div v-if="creationStatus === appointmentCreationState.hidden">
+      <div>
         <!-- monthly mini calendar -->
         <calendar-month
           :selected="activeDate"
@@ -198,16 +194,6 @@
           @day-selected="selectDate"
         />
       </div>
-      <!-- appointment creation dialog -->
-      <appointment-creation
-        v-else
-        :status="creationStatus"
-        :calendars="connectedCalendars"
-        @start="creationStatus = appointmentCreationState.details"
-        @next="creationStatus = appointmentCreationState.availability"
-        @create="creationStatus = appointmentCreationState.finished; refresh();"
-        @cancel="creationStatus = appointmentCreationState.hidden"
-      />
     </div>
   </div>
   <appointment-modal
@@ -224,7 +210,6 @@ import {
   appointmentViews as views,
   filterOptions,
   viewTypes,
-  appointmentCreationState,
 } from '@/definitions';
 import { keyByValue } from '@/utils';
 
@@ -234,11 +219,9 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
-import AppointmentCreation from '@/components/AppointmentCreation';
 import AppointmentGridItem from '@/elements/AppointmentGridItem';
 import AppointmentModal from '@/components/AppointmentModal';
 import CalendarMonth from '@/components/CalendarMonth';
-import PrimaryButton from '@/elements/PrimaryButton';
 import TabBar from '@/components/TabBar';
 
 // icons
@@ -265,7 +248,6 @@ const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
 
 const { appointments } = storeToRefs(appointmentStore);
-const { connectedCalendars } = storeToRefs(calendarStore);
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
@@ -400,9 +382,6 @@ const showAppointment = ref(null);
 const closeAppointmentModal = () => {
   showAppointment.value = null;
 };
-
-// appointment creation
-const creationStatus = ref(appointmentCreationState.hidden);
 
 // initially load data when component gets remounted
 onMounted(async () => {

@@ -32,14 +32,6 @@ export const locationTypes = {
   online: 2,
 };
 
-// appointment creation state
-export const appointmentCreationState = {
-  hidden: 0,
-  details: 1,
-  availability: 2,
-  finished: 3,
-};
-
 // schedule creation state
 export const scheduleCreationState = {
   details: 1,
@@ -170,7 +162,6 @@ export default {
   bookingCalendarViews,
   calendarViews,
   colorSchemes,
-  appointmentCreationState,
   scheduleCreationState,
   filterOptions,
   listColumns,

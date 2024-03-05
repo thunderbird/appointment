@@ -10,16 +10,6 @@
       </i18n-t>
     </alert-box>
   </div>
-  <!-- page title area -->
-  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
-    <div class="mx-auto flex flex-col items-center gap-8 md:mr-0 md:flex-row">
-      <primary-button
-        :label="t('label.createAppointments')"
-        :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
-        @click="creationStatus = appointmentCreationState.details"
-      />
-    </div>
-  </div>
   <!-- page content -->
   <div
     class="mt-8 flex flex-col flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
@@ -35,7 +25,7 @@
     />
     <!-- page side bar -->
     <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 md:w-1/5">
-      <div v-if="creationStatus === appointmentCreationState.hidden" class="flex flex-col gap-8">
+      <div class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
         <calendar-month
           :selected="activeDate"
@@ -66,11 +56,6 @@
             <div class="mt-4 text-center">
               {{ t("info.noPendingAppointmentsInList") }}
             </div>
-            <primary-button
-              :label="t('label.createAppointments')"
-              :disabled="!connectedCalendars.length || creationStatus !== appointmentCreationState.hidden"
-              @click="creationStatus = appointmentCreationState.details"
-            />
           </div>
           <div v-else class="mt-4 flex flex-col gap-8">
             <appointment-list-item
@@ -81,34 +66,19 @@
           </div>
         </div>
       </div>
-      <!-- appointment creation dialog -->
-      <appointment-creation
-        v-else
-        :status="creationStatus"
-        :calendars="connectedCalendars"
-        @start="creationStatus = appointmentCreationState.details"
-        @next="creationStatus = appointmentCreationState.availability"
-        @create="
-          creationStatus = appointmentCreationState.finished;
-          refresh();
-        "
-        @cancel="creationStatus = appointmentCreationState.hidden"
-      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { appointmentCreationState, calendarViews, alertSchemes } from '@/definitions';
+import { calendarViews, alertSchemes } from '@/definitions';
 import {
   ref, inject, computed, onMounted,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import AppointmentCreation from '@/components/AppointmentCreation';
 import AppointmentListItem from '@/elements/AppointmentListItem';
 import CalendarMonth from '@/components/CalendarMonth';
-import PrimaryButton from '@/elements/PrimaryButton';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
@@ -135,9 +105,6 @@ const activeDateRange = computed(() => ({
 
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews[route.params.view]);
-
-// appointment creation state
-const creationStatus = ref(appointmentCreationState.hidden);
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);

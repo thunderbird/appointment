@@ -295,7 +295,7 @@ def read_remote_events(
     return events
 
 
-@router.post("/apmt", response_model=schemas.Appointment)
+@router.post("/apmt", response_model=schemas.Appointment, deprecated=True)
 def create_my_calendar_appointment(
     a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
 ):
