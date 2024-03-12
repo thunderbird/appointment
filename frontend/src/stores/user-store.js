@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import { i18n } from '@/composables/i18n';
 
 const initialUserObject = {
   email: null,
@@ -14,7 +15,6 @@ const initialUserObject = {
 };
 
 export const useUserStore = defineStore('user', () => {
-  const { t } = useI18n();
   const data = useLocalStorage('tba/user', structuredClone(initialUserObject));
 
   const exists = () => data.value.accessToken !== null;
@@ -109,7 +109,7 @@ export const useUserStore = defineStore('user', () => {
       // For FXA we re-use the username parameter as our access token
       data.value.accessToken = username;
     } else {
-      return { error: t('error.loginMethodNotSupported') };
+      return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
     return profile(fetch);
