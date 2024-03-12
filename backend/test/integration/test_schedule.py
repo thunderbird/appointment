@@ -232,8 +232,9 @@ class TestSchedule:
         monkeypatch.setattr(CalDavConnector, "list_events", MockCaldavConnector.list_events)
 
         start_date = date(2024, 3, 1)
-        start_time = time(9)
-        end_time = time(17)
+        start_time = time(16)
+        # Next day
+        end_time = time(0)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)

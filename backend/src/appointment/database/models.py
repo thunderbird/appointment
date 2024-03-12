@@ -229,13 +229,13 @@ class Schedule(Base):
     @property
     def start_time_local(self) -> datetime.time:
         """Start Time in the Schedule's Calendar's Owner's timezone"""
-        time_of_save = self.time_updated.replace(hour=self.start_time.hour, minute=self.start_time.minute, second=0)
+        time_of_save = self.time_updated.replace(hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc)
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
     @property
     def end_time_local(self) -> datetime.time:
         """End Time in the Schedule's Calendar's Owner's timezone"""
-        time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0)
+        time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc)
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
 
