@@ -171,7 +171,7 @@ def request_schedule_availability_slot(
             remote_calendar_id=db_calendar.user,
             subscriber_id=subscriber.id,
             calendar_id=db_calendar.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
         )
     else:
         con = CalDavConnector(
@@ -331,7 +331,7 @@ def decide_on_schedule_availability_slot(
                 remote_calendar_id=calendar.user,
                 subscriber_id=subscriber.id,
                 calendar_id=calendar.id,
-                google_tkn=subscriber.google_tkn,
+                google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
             )
         else:
             con = CalDavConnector(

@@ -123,7 +123,7 @@ def create_my_calendar(
             remote_calendar_id=calendar.user,
             calendar_id=None,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
         )
     else:
         con = CalDavConnector(
@@ -231,7 +231,7 @@ def read_remote_calendars(
             remote_calendar_id=connection.user,
             subscriber_id=subscriber.id,
             calendar_id=None,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
         )
     else:
         con = CalDavConnector(
@@ -269,7 +269,7 @@ def sync_remote_calendars(
             remote_calendar_id=None,
             calendar_id=None,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
         ),
     ]
     for connection in connections:
@@ -304,7 +304,7 @@ def read_remote_events(
             remote_calendar_id=db_calendar.user,
             calendar_id=db_calendar.id,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
         )
     else:
         con = CalDavConnector(
@@ -489,7 +489,7 @@ def update_public_appointment_slot(
             remote_calendar_id=db_calendar.user,
             calendar_id=db_calendar.id,
             subscriber_id=organizer.id,
-            google_tkn=organizer.google_tkn,
+            google_tkn=organizer.get_external_connection(schemas.ExternalConnectionType.google).token,
         )
     else:
         con = CalDavConnector(

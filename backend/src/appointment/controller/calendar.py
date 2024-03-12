@@ -483,7 +483,7 @@ class Tools:
     def existing_events_for_schedule(
         schedule: models.Schedule,
         calendars: list[schemas.Calendar],
-        subscriber: schemas.Subscriber,
+        subscriber: models.Subscriber,
         google_client: GoogleClient,
         db,
         redis = None
@@ -502,7 +502,7 @@ class Tools:
                     remote_calendar_id=calendar.user,
                     calendar_id=calendar.id,
                     subscriber_id=subscriber.id,
-                    google_tkn=subscriber.google_tkn,
+                    google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
                 )
             else:
                 con = CalDavConnector(
