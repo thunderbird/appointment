@@ -287,7 +287,7 @@ onMounted(async () => {
   if (appointment.value) {
     // convert start dates from UTC back to users timezone
     appointment.value.slots.forEach((s) => {
-      s.start = dj.utc(s.start).tz(dj.tz.guess());
+      s.start = dj(s.start).tz(dj.tz.guess());
     });
     activeDate.value = dj(appointment.value?.slots[0].start);
     // check appointment slots for appropriate view
