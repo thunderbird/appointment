@@ -1,3 +1,5 @@
+from functools import cache
+
 from argon2 import PasswordHasher
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
@@ -13,6 +15,8 @@ def verify_password(password, hashed_password):
 def get_password_hash(password):
     return ph.hash(password)
 
+
+@cache
 def setup_encryption_engine():
     engine = AesEngine()
     # Yes we need to use protected methods to set this up.

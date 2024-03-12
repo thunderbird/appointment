@@ -15,7 +15,7 @@ from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
 
 from .. import utils
-from ..defines import REDIS_REMOVE_EVENTS_KEY, DATEFMT
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
 from .apis.google_client import GoogleClient
 from ..database import schemas, models
 from ..database.models import CalendarProvider
@@ -45,14 +45,14 @@ class BaseConnector:
             
         return ":".join(parts)
 
-    def get_cache_events(self, key_scope):
+    def get_cached_events(self, key_scope):
         """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
         if self.redis_instance is None:
             return None
         
         key_scope = self.obscure_key(key_scope)
 
-        encrypted_events = self.redis_instance.get(f'{REDIS_REMOVE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
+        encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
         if encrypted_events is None:
             return None
 
@@ -66,7 +66,7 @@ class BaseConnector:
         key_scope = self.obscure_key(key_scope)
 
         encrypted_events = json.dumps([event.model_dump_redis() for event in events])
-        self.redis_instance.set(f'{REDIS_REMOVE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}',
+        self.redis_instance.set(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}',
                                 value=encrypted_events, ex=expiry)
 
         return True
@@ -78,7 +78,7 @@ class BaseConnector:
             return False
 
         # Scan returns a tuple like: (Cursor start, [...keys found])
-        ret = self.redis_instance.scan(0, f'{REDIS_REMOVE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*')
+        ret = self.redis_instance.scan(0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*')
         
         if len(ret[1]) == 0:
             return False
@@ -145,7 +145,7 @@ class GoogleConnector(BaseConnector):
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
         cache_scope = f"{start}_{end}"
-        cached_events = self.get_cache_events(cache_scope)
+        cached_events = self.get_cached_events(cache_scope)
         if cached_events:
             return cached_events
 
@@ -283,7 +283,7 @@ class CalDavConnector(BaseConnector):
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
         cache_scope = f"{start}_{end}"
-        cached_events = self.get_cache_events(cache_scope)
+        cached_events = self.get_cached_events(cache_scope)
         if cached_events:
             return cached_events
 

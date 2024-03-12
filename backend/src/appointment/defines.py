@@ -4,4 +4,4 @@ FALLBACK_LOCALE = 'en'
 DATEFMT = "%Y-%m-%d"
 
 # list of redis keys
-REDIS_REMOVE_EVENTS_KEY = 'rmt_events'
+REDIS_REMOTE_EVENTS_KEY = 'rmt_events'
