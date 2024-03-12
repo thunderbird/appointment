@@ -2,10 +2,12 @@
 
 Definitions of valid data shapes for database and query models.
 """
+import json
 from datetime import datetime, date, time
 from typing import Annotated
 
 from pydantic import BaseModel, Field
+
 from .models import (
     AppointmentStatus,
     BookingStatus,
@@ -17,7 +19,7 @@ from .models import (
     ExternalConnectionType,
     MeetingLinkProviderType,
 )
-
+from .. import utils
 
 """ ATTENDEE model schemas
 """
@@ -284,6 +286,23 @@ class Event(BaseModel):
     calendar_color: str | None = None
     location: EventLocation | None = None
 
+    """Ideally this would just be a mixin, but I'm having issues figuring out a good
+    static constructor that will work for anything."""
+    def model_dump_redis(self):
+        """Dumps our event into an encrypted json blob for redis"""
+        values_json = self.model_dump_json()
+
+        return utils.setup_encryption_engine().encrypt(values_json)
+
+    @staticmethod
+    def model_load_redis(encrypted_blob):
+        """Loads and decrypts our encrypted json blob from redis"""
+
+        values_json = utils.setup_encryption_engine().decrypt(encrypted_blob)
+        values = json.loads(values_json)
+
+        return Event(**values)
+    
 
 class FileDownload(BaseModel):
     name: str

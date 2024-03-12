@@ -35,7 +35,7 @@ def _patch_caldav_connector(monkeypatch):
     # Create a mock caldav connector
     class MockCaldavConnector:
         @staticmethod
-        def __init__(self, url, user, password):
+        def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
             """We don't want to initialize a client"""
             pass
 
@@ -175,6 +175,8 @@ def with_client(with_db, monkeypatch):
     app.dependency_overrides[database.get_db] = override_get_db
     app.dependency_overrides[auth.get_subscriber] = override_get_subscriber
     app.dependency_overrides[google.get_google_client] = override_get_google_client
+    # For now we don't use redis in our tests
+    app.dependency_overrides[database.get_redis] = lambda: None
 
     client = TestClient(app)
 
