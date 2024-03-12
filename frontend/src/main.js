@@ -8,14 +8,9 @@ import { createPinia } from 'pinia';
 // init router
 import router from '@/router';
 
-// init localization
-import { createI18n } from 'vue-i18n';
-
-// language source files
-import de from '@/locales/de.json';
-import en from '@/locales/en.json';
-
+// init composables
 import { useDayJS } from '@/composables/dayjs';
+import i18ninstance from '@/composables/i18n';
 
 // init basic css with tailwind imports
 import '@/assets/main.css';
@@ -63,19 +58,8 @@ const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/booking/`);
 
-const messages = {
-  de, // German
-  en, // English
-};
 const loc = localStorage?.getItem('locale') ?? (navigator.language || navigator.userLanguage);
-const i18n = createI18n({
-  legacy: false,
-  globalInjection: true,
-  locale: loc,
-  fallbackLocale: 'en',
-  messages,
-});
-app.use(i18n);
+app.use(i18ninstance);
 useDayJS(app, loc);
 
 // ready? let's go!

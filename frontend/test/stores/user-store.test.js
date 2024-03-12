@@ -147,7 +147,7 @@ describe('User Store', () => {
       },
     }), TEST_USERNAME, `${TEST_PASSWORD}`);
 
-    expect(response).toBe(true);
+    expect(response.error).toBe(false);
     expect(user.exists()).toBe(true);
     expect(user.data.accessToken).toBeTruthy();
     expect(user.data.username).toBeTruthy();

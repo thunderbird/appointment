@@ -5,11 +5,13 @@
   },
   "error": {
     "actionNeeded": "Aktion erforderlich!",
+    "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
+    "loginMethodNotSupported": "Login-Methode wird nicht unterstützt. Bitte nochmal versuchen.",
     "minimumValue": "{field} sollte wenigstens {value} sein.",
     "noConnectedCalendars": "Kalendereinrichtung zum Fortfahren erforderlich. {0}.",
     "noConnectedCalendarsLink": "Zu den Einstellungen wechseln.",
-    "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte versuche es noch einmal.",
+    "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
     "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
   },

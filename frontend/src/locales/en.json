@@ -5,7 +5,9 @@
   },
   "error": {
     "actionNeeded": "Action needed",
+    "credentialsIncomplete": "Please provide login credentials.",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
+    "loginMethodNotSupported": "Login method not supported. Please try again.",
     "minimumValue": "{field} should be at least {value}.",
     "noConnectedCalendars": "Calendar setup required. Connect a calendar to continue. {0}.",
     "noConnectedCalendarsLink": "Go to settings",
