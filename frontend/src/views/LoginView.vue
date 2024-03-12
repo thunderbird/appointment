@@ -4,7 +4,7 @@
     <div class="my-auto flex w-1/2 max-w-lg flex-col items-center justify-center gap-2 bg-white px-4 py-12 shadow-lg dark:bg-gray-700">
       <img class="mb-2 w-full max-w-[8rem]" src="/appointment_logo.svg" alt="Appointment Logo" />
       <div class="text-center text-4xl font-light">{{ t('app.title') }}</div>
-      <alert-box v-if="loginError" @close="loginError = null">
+      <alert-box v-if="loginError" @close="loginError = null" class="mt-4">
         {{ loginError }}
       </alert-box>
       <div
