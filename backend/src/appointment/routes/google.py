@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 
-from ..database.models import Subscriber, ExternalConnectionType
+from ..database.models import Subscriber, ExternalConnectionType, ExternalConnections
 from ..dependencies.google import get_google_client
 from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
@@ -77,6 +77,12 @@ def google_callback(
         return google_callback_error(l10n('google-auth-fail'))
 
     external_connection = repo.get_external_connections_by_type(db, subscriber.id, ExternalConnectionType.google, google_id)
+
+    # Create an artificial limit of one google account per account, mainly because we didn't plan for multiple accounts!
+    remainder = list(filter(lambda ec: ec.type_id != google_id, repo.get_external_connections_by_type(db, subscriber.id, ExternalConnectionType.google)))
+
+    if len(remainder) > 0:
+        return google_callback_error(l10n('google-only-one'))
 
     # Create or update the external connection
     if not external_connection:

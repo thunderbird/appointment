@@ -610,7 +610,7 @@ def delete_external_connections_by_type_id(db: Session, subscriber_id: int, type
     return True
 
 
-def get_external_connections_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None) -> models.ExternalConnections | None:
+def get_external_connections_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None) -> list[models.ExternalConnections] | None:
     """Return a subscribers external connections by type, and optionally type id"""
     query = (
         db.query(models.ExternalConnections)
