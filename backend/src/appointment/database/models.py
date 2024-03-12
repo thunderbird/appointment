@@ -6,6 +6,8 @@ import datetime
 import enum
 import os
 import uuid
+import zoneinfo
+
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
@@ -223,6 +225,18 @@ class Schedule(Base):
     calendar: Calendar = relationship("Calendar", back_populates="schedules")
     availabilities: "Availability" = relationship("Availability", cascade="all,delete", back_populates="schedule")
     slots: list[Slot] = relationship("Slot", cascade="all,delete", back_populates="schedule")
+
+    @property
+    def start_time_local(self) -> datetime.time:
+        """Start Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(hour=self.start_time.hour, minute=self.start_time.minute, second=0)
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
+
+    @property
+    def end_time_local(self) -> datetime.time:
+        """End Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0)
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
 
 class Availability(Base):
