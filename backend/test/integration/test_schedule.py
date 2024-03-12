@@ -231,7 +231,7 @@ class TestSchedule:
         monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
         monkeypatch.setattr(CalDavConnector, "list_events", MockCaldavConnector.list_events)
 
-        start_date = date(2024, 4, 1)
+        start_date = date(2024, 3, 1)
         start_time = time(9)
         end_time = time(17)
 
@@ -262,9 +262,11 @@ class TestSchedule:
             slots = data['slots']
 
             # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
-            assert slots[0]['start'] == '2024-04-02T09:00:00'
+            # Note: this should be in PST (Pacific Standard Time)
+            assert slots[0]['start'] == '2024-03-04T09:00:00-08:00'
             # Based off the farthest_booking our latest slot is 4:30pm
-            assert slots[-1]['start'] == '2024-04-15T16:30:00'
+            # Note: This should be in PDT (Pacific Daylight Time)
+            assert slots[-1]['start'] == '2024-03-15T16:30:00-07:00'
 
         # Check availability over a year from now
         with freeze_time(date(2025, 6, 1)):
@@ -277,8 +279,8 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-02T09:00:00'
-            assert slots[-1]['start'] == '2025-06-13T16:30:00'
+            assert slots[0]['start'] == '2025-06-02T09:00:00-07:00'
+            assert slots[-1]['start'] == '2025-06-13T16:30:00-07:00'
 
         # Check availability with a start date day greater than the farthest_booking day
         with freeze_time(date(2025, 6, 27)):
@@ -291,5 +293,5 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-30T09:00:00'
-            assert slots[-1]['start'] == '2025-07-11T16:30:00'
+            assert slots[0]['start'] == '2025-06-30T09:00:00-07:00'
+            assert slots[-1]['start'] == '2025-07-11T16:30:00-07:00'
