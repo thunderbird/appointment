@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from appointment.controller.calendar import DATEFMT
+DATEFMT = "%Y-%m-%d"
 
 now = datetime.today()
 DAY1 = now.strftime(DATEFMT)

@@ -8,11 +8,11 @@ import argon2.exceptions
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from sqlalchemy.orm import Session
-from argon2 import PasswordHasher
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
+from .. import utils
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 
@@ -26,15 +26,6 @@ from ..exceptions.fxa_api import NotInAllowListException
 from ..l10n import l10n
 
 router = APIRouter()
-ph = PasswordHasher()
-
-
-def verify_password(password, hashed_password):
-    ph.verify(hashed_password, password)
-
-
-def get_password_hash(password):
-    return ph.hash(password)
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -52,7 +43,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 @router.get("/fxa_login")
-def fxa_login(request: Request, email: str, timezone: str|None = None, fxa_client: FxaClient = Depends(get_fxa_client)):
+def fxa_login(request: Request, email: str, timezone: str | None = None,
+              fxa_client: FxaClient = Depends(get_fxa_client)):
     """Request an authorization url from fxa"""
     if os.getenv('AUTH_SCHEME') != 'fxa':
         raise HTTPException(status_code=405)
@@ -143,7 +135,9 @@ def fxa_callback(
     if not fxa_subscriber:
         repo.create_subscriber_external_connection(db, external_connection_schema)
     else:
-        repo.update_subscriber_external_connection_token(db, json.dumps(creds), subscriber.id, external_connection_schema.type, external_connection_schema.type_id)
+        repo.update_subscriber_external_connection_token(db, json.dumps(creds), subscriber.id,
+                                                         external_connection_schema.type,
+                                                         external_connection_schema.type_id)
 
     # Update profile with fxa info
     data = schemas.SubscriberIn(
@@ -179,12 +173,12 @@ def token(
 
     # Verify the incoming password, and re-hash our password if needed
     try:
-        verify_password(form_data.password, subscriber.password)
+        utils.verify_password(form_data.password, subscriber.password)
     except argon2.exceptions.VerifyMismatchError:
         raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
-    if ph.check_needs_rehash(subscriber.password):
-        subscriber.password = get_password_hash(form_data.password)
+    if utils.ph.check_needs_rehash(subscriber.password):
+        subscriber.password = utils.get_password_hash(form_data.password)
         db.add(subscriber)
         db.commit()
 
@@ -199,7 +193,8 @@ def token(
 
 
 @router.get('/logout')
-def logout(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), fxa_client: FxaClient = Depends(get_fxa_client)):
+def logout(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber),
+           fxa_client: FxaClient = Depends(get_fxa_client)):
     """Logout a given subscriber session"""
 
     if os.getenv('AUTH_SCHEME') == 'fxa':
@@ -220,7 +215,6 @@ def me(
         username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
         timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
     )
-
 
 # @router.get('/test-create-account')
 # def test_create_account(email: str, password: str, timezone: str, db: Session = Depends(get_db)):

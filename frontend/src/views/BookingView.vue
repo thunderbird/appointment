@@ -155,60 +155,6 @@ const getViewBySlotDistribution = (slots) => {
 };
 
 /**
- * Book or request to book a selected time.
- * @param attendeeData
- * @returns {Promise<void>}
- */
-const bookEvent = async (attendeeData) => {
-  let request = null;
-
-  bookingRequestFinished.value = false;
-
-  if (isAvailabilityRoute.value) {
-    const obj = {
-      slot: {
-        start: selectedEvent.value.start,
-        duration: selectedEvent.value.duration,
-      },
-      attendee: attendeeData,
-    };
-
-    request = call('schedule/public/availability/request').put({
-      s_a: obj,
-      url: window.location.href,
-    });
-  } else if (isBookingRoute.value) {
-    const obj = {
-      slot_id: selectedEvent.value.id,
-      attendee: attendeeData,
-    };
-
-    request = call(`apmt/public/${route.params.slug}`).put(obj);
-  } else {
-    modalState.value = modalStates.error;
-    // Generic unknown error, they shouldn't hit here though!
-    modalStateData.value = t('error.unknownAppointmentError');
-    return;
-  }
-
-  // Data should just be true here.
-  const { data, error } = await request.json();
-
-  if (error.value || !data.value) {
-    modalState.value = modalStates.error;
-    modalStateData.value = data?.value?.detail?.message ?? t('error.unknownAppointmentError');
-    return;
-  }
-
-  // replace calendar view if every thing worked fine
-  attendee.value = attendeeData;
-  // update view to prevent reselection
-  activeView.value = views.success;
-  // update modal view as well
-  modalState.value = modalStates.finished;
-};
-
-/**
  * Download an appointment as a ics file.
  * @returns {Promise<void>}
  */
@@ -274,7 +220,67 @@ const getAppointment = async () => {
     return null;
   }
 
+  // convert start dates from UTC back to users timezone
+  data.value.slots.forEach((s) => {
+    s.start = dj(s.start).tz(dj.tz.guess());
+  });
+
   return data.value;
+};
+
+/**
+ * Book or request to book a selected time.
+ * @param attendeeData
+ * @returns {Promise<void>}
+ */
+const bookEvent = async (attendeeData) => {
+  let request = null;
+
+  bookingRequestFinished.value = false;
+
+  if (isAvailabilityRoute.value) {
+    const obj = {
+      slot: {
+        start: selectedEvent.value.start,
+        duration: selectedEvent.value.duration,
+      },
+      attendee: attendeeData,
+    };
+
+    request = call('schedule/public/availability/request').put({
+      s_a: obj,
+      url: window.location.href,
+    });
+  } else if (isBookingRoute.value) {
+    const obj = {
+      slot_id: selectedEvent.value.id,
+      attendee: attendeeData,
+    };
+
+    request = call(`apmt/public/${route.params.slug}`).put(obj);
+  } else {
+    modalState.value = modalStates.error;
+    // Generic unknown error, they shouldn't hit here though!
+    modalStateData.value = t('error.unknownAppointmentError');
+    return;
+  }
+
+  // Data should just be true here.
+  const { data, error } = await request.json();
+
+  if (error.value || !data.value) {
+    modalState.value = modalStates.error;
+    modalStateData.value = data?.value?.detail?.message ?? t('error.unknownAppointmentError');
+    appointment.value = await getAppointment();
+    return;
+  }
+
+  // replace calendar view if every thing worked fine
+  attendee.value = attendeeData;
+  // update view to prevent reselection
+  activeView.value = views.success;
+  // update modal view as well
+  modalState.value = modalStates.finished;
 };
 
 // initially retrieve slot data and decide which view to show
@@ -285,10 +291,6 @@ onMounted(async () => {
   appointment.value = await getAppointment();
   // process appointment data, if everything went fine
   if (appointment.value) {
-    // convert start dates from UTC back to users timezone
-    appointment.value.slots.forEach((s) => {
-      s.start = dj(s.start).tz(dj.tz.guess());
-    });
     activeDate.value = dj(appointment.value?.slots[0].start);
     // check appointment slots for appropriate view
     activeView.value = getViewBySlotDistribution(appointment.value.slots);

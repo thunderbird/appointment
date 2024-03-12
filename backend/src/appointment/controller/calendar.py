@@ -4,15 +4,19 @@ Handle connection to a CalDAV server.
 """
 import json
 import zoneinfo
+import os
 
 import caldav.lib.error
 import requests
+from redis import Redis
 from caldav import DAVClient
 from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
 
+from .. import utils
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
 from .apis.google_client import GoogleClient
 from ..database import schemas, models
 from ..database.models import CalendarProvider
@@ -20,28 +24,93 @@ from ..controller.mailer import Attachment
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email
 
-DATEFMT = "%Y-%m-%d"
+
+class BaseConnector:
+    redis_instance: Redis | None
+    subscriber_id: int
+    calendar_id: int
+
+    def __init__(self, subscriber_id: int, calendar_id: int | None, redis_instance: Redis | None = None):
+        self.redis_instance = redis_instance
+        self.subscriber_id = subscriber_id
+        self.calendar_id = calendar_id
+        
+    def obscure_key(self, key):
+        """Obscure part of a key with our encryption algo"""
+        return utils.setup_encryption_engine().encrypt(key)
+
+    def get_key_body(self, only_subscriber = False):
+        parts = [self.obscure_key(self.subscriber_id)]
+        if not only_subscriber:
+            parts.append(self.obscure_key(self.calendar_id))
+            
+        return ":".join(parts)
+
+    def get_cached_events(self, key_scope):
+        """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
+        if self.redis_instance is None:
+            return None
+        
+        key_scope = self.obscure_key(key_scope)
+
+        encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
+        if encrypted_events is None:
+            return None
+
+        return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
+
+    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS')):
+        """Sets the passed cached events with an option to set a custom expiry time."""
+        if self.redis_instance is None:
+            return False
+
+        key_scope = self.obscure_key(key_scope)
+
+        encrypted_events = json.dumps([event.model_dump_redis() for event in events])
+        self.redis_instance.set(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}',
+                                value=encrypted_events, ex=expiry)
+
+        return True
+
+    def bust_cached_events(self, all_calendars = False):
+        """Delete cached events for a specific subscriber/calendar. 
+        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber."""
+        if self.redis_instance is None:
+            return False
+
+        # Scan returns a tuple like: (Cursor start, [...keys found])
+        ret = self.redis_instance.scan(0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*')
+        
+        if len(ret[1]) == 0:
+            return False
+
+        # Expand the list in position 1, which is a list of keys found from the scan
+        self.redis_instance.delete(*ret[1])
+
+        return True
 
 
-class GoogleConnector:
+class GoogleConnector(BaseConnector):
     """Generic interface for Google Calendar REST API.
        This should match CaldavConnector (except for the constructor).
     """
 
     def __init__(
         self,
-        db,
-        google_client: GoogleClient,
-        calendar_id,
         subscriber_id,
+        calendar_id,
+        redis_instance,
+        db,
+        remote_calendar_id,
+        google_client: GoogleClient,
         google_tkn: str = None,
     ):
-        # store credentials of remote location
+        super().__init__(subscriber_id, calendar_id, redis_instance)
+        
         self.db = db
         self.google_client = google_client
         self.provider = CalendarProvider.google
-        self.calendar_id = calendar_id
-        self.subscriber_id = subscriber_id
+        self.remote_calendar_id = remote_calendar_id
         self.google_token = None
         # Create the creds class from our token (requires a refresh token)
         if google_tkn:
@@ -56,6 +125,8 @@ class GoogleConnector:
 
         # We only support google right now!
         self.google_client.sync_calendars(db=self.db, subscriber_id=self.subscriber_id, token=self.google_token)
+        # We should refresh any events we might have for every calendar
+        self.bust_cached_events(all_calendars=True)
 
     def list_calendars(self):
         """find all calendars on the remote server"""
@@ -74,11 +145,16 @@ class GoogleConnector:
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
+        cache_scope = f"{start}_{end}"
+        cached_events = self.get_cached_events(cache_scope)
+        if cached_events:
+            return cached_events
+
         time_min = datetime.strptime(start, DATEFMT).isoformat() + "Z"
         time_max = datetime.strptime(end, DATEFMT).isoformat() + "Z"
 
         # We're storing google cal id in user...for now.
-        remote_events = self.google_client.list_events(self.calendar_id, time_min, time_max, self.google_token)
+        remote_events = self.google_client.list_events(self.remote_calendar_id, time_min, time_max, self.google_token)
 
         events = []
         for event in remote_events:
@@ -99,8 +175,10 @@ class GoogleConnector:
 
             all_day = "date" in event.get("start")
 
-            start = datetime.strptime(event.get("start")["date"], DATEFMT) if all_day else datetime.fromisoformat(event.get("start")["dateTime"])
-            end = datetime.strptime(event.get("end")["date"], DATEFMT) if all_day else datetime.fromisoformat(event.get("end")["dateTime"])
+            start = datetime.strptime(event.get("start")["date"], DATEFMT) if all_day else datetime.fromisoformat(
+                event.get("start")["dateTime"])
+            end = datetime.strptime(event.get("end")["date"], DATEFMT) if all_day else datetime.fromisoformat(
+                event.get("end")["dateTime"])
 
             events.append(
                 schemas.Event(
@@ -112,6 +190,8 @@ class GoogleConnector:
                     description=description,
                 )
             )
+
+        self.put_cached_events(cache_scope, events)
 
         return events
 
@@ -144,6 +224,9 @@ class GoogleConnector:
             ],
         }
         self.google_client.create_event(calendar_id=self.calendar_id, body=body, token=self.google_token)
+        
+        self.bust_cached_events()
+        
         return event
 
     def delete_events(self, start):
@@ -153,13 +236,14 @@ class GoogleConnector:
         pass
 
 
-class CalDavConnector:
-    def __init__(self, url: str, user: str, password: str):
-        # store credentials of remote location
+class CalDavConnector(BaseConnector):
+    def __init__(self, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str):
+        super().__init__(subscriber_id, calendar_id, redis_instance)
+        
         self.provider = CalendarProvider.caldav
         self.url = url
-        self.user = user
         self.password = password
+        self.user = user
         # connect to CalDAV server
         self.client = DAVClient(url=url, username=user, password=password)
 
@@ -180,7 +264,8 @@ class CalDavConnector:
         return 'VEVENT' in supported_comps
 
     def sync_calendars(self):
-        pass
+        # We don't sync anything for caldav, but might as well bust event cache.
+        self.bust_cached_events(all_calendars=True)
 
     def list_calendars(self):
         """find all calendars on the remote server"""
@@ -198,6 +283,11 @@ class CalDavConnector:
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
+        cache_scope = f"{start}_{end}"
+        cached_events = self.get_cached_events(cache_scope)
+        if cached_events:
+            return cached_events
+
         events = []
         calendar = self.client.calendar(url=self.url)
         result = calendar.search(
@@ -226,6 +316,9 @@ class CalDavConnector:
                     description=e.icalendar_component["description"] if "description" in e.icalendar_component else "",
                 )
             )
+
+        self.put_cached_events(cache_scope, events)
+
         return events
 
     def create_event(
@@ -248,6 +341,9 @@ class CalDavConnector:
         caldavEvent.add_attendee((organizer.name, organizer.email))
         caldavEvent.add_attendee((attendee.name, attendee.email))
         caldavEvent.save()
+
+        self.bust_cached_events()
+        
         return event
 
     def delete_events(self, start):
@@ -261,6 +357,9 @@ class CalDavConnector:
             if str(e.vobject_instance.vevent.dtstart.value).startswith(start):
                 e.delete()
                 count += 1
+
+        self.bust_cached_events()
+        
         return count
 
 
@@ -395,7 +494,8 @@ class Tools:
         calendars: list[schemas.Calendar],
         subscriber: schemas.Subscriber,
         google_client: GoogleClient,
-        db
+        db,
+        redis = None
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range
         """
@@ -406,13 +506,22 @@ class Tools:
             if calendar.provider == CalendarProvider.google:
                 con = GoogleConnector(
                     db=db,
+                    redis_instance=redis,
                     google_client=google_client,
-                    calendar_id=calendar.user,
+                    remote_calendar_id=calendar.user,
+                    calendar_id=calendar.id,
                     subscriber_id=subscriber.id,
                     google_tkn=subscriber.google_tkn,
                 )
             else:
-                con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+                con = CalDavConnector(
+                    redis_instance=redis,
+                    url=calendar.url,
+                    user=calendar.user,
+                    password=calendar.password,
+                    subscriber_id=subscriber.id,
+                    calendar_id=calendar.id,
+                )
 
             now = datetime.now()
 
@@ -420,7 +529,8 @@ class Tools:
             farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
 
             start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
-            end = min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking]) if schedule.end_date else farthest_booking
+            end = min([datetime.combine(schedule.end_date, schedule.end_time),
+                       farthest_booking]) if schedule.end_date else farthest_booking
 
             try:
                 existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
