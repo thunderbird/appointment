@@ -5,9 +5,7 @@
 </template>
 
 <script setup>
-import {
-  inject, computed, onMounted,
-} from 'vue';
+import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 
