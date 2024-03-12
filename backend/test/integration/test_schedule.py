@@ -391,5 +391,3 @@ class TestSchedule:
         assert response.status_code == 200, response.text
         data = response.json()
         assert data is True
-
->>>>>>> main
