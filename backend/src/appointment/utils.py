@@ -16,6 +16,10 @@ def get_password_hash(password):
     return ph.hash(password)
 
 
+def list_first(items: list, default=None):
+    """Returns the first item of a list or the default value."""
+    return next(iter(items), default)
+
 @cache
 def setup_encryption_engine():
     engine = AesEngine()

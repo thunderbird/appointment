@@ -7,6 +7,8 @@ from requests import HTTPError
 from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from .. import utils
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
@@ -20,6 +22,7 @@ from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
+from ..exceptions.validation import RemoteCalendarConnectionError
 from ..tasks.emails import send_pending_email, send_confirmation_email, send_rejection_email, \
     send_zoom_meeting_failed_email
 
@@ -164,6 +167,11 @@ def request_schedule_availability_slot(
     
     # We need to verify that the time is actually available on the remote calendar
     if db_calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         con = GoogleConnector(
             db=db,
             redis_instance=redis,
@@ -171,7 +179,7 @@ def request_schedule_availability_slot(
             remote_calendar_id=db_calendar.user,
             subscriber_id=subscriber.id,
             calendar_id=db_calendar.id,
-            google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
+            google_tkn=external_connection.token,
         )
     else:
         con = CalDavConnector(
@@ -324,6 +332,11 @@ def decide_on_schedule_availability_slot(
         )
         # create remote event
         if calendar.provider == CalendarProvider.google:
+            external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+            if external_connection is None or external_connection.token is None:
+                raise RemoteCalendarConnectionError()
+
             con = GoogleConnector(
                 db=db,
                 redis_instance=redis,
@@ -331,7 +344,7 @@ def decide_on_schedule_availability_slot(
                 remote_calendar_id=calendar.user,
                 subscriber_id=subscriber.id,
                 calendar_id=calendar.id,
-                google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
+                google_tkn=external_connection.token,
             )
         else:
             con = CalDavConnector(

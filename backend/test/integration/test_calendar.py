@@ -8,7 +8,7 @@ from appointment.database import schemas, models
 
 from sqlalchemy import select
 
-from defines import auth_headers
+from defines import auth_headers, TEST_USER_ID
 
 
 def get_calendar_factory():
@@ -68,9 +68,14 @@ def get_mock_connector_class():
         # This is pretty ugly
         yield connector[0], connector[1], connector[2], connector[3], connector[4]
 
+
 class TestCalendar:
     @pytest.mark.parametrize("mock_connector,connector,provider,test_url,test_user", get_mock_connector_class())
-    def test_read_remote_calendars(self, monkeypatch, with_client, mock_connector, connector, provider, test_url, test_user):
+    def test_read_remote_calendars(self, monkeypatch, with_client, mock_connector, connector, provider, test_url, test_user, make_external_connections):
+
+        # Ensure we have an external connection for google
+        if provider == schemas.CalendarProvider.google.value:
+            make_external_connections(TEST_USER_ID, type=schemas.ExternalConnectionType.google)
 
         # Patch up the caldav constructor, and list_calendars
         monkeypatch.setattr(connector, "__init__", mock_connector.__init__)
