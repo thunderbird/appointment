@@ -326,11 +326,12 @@ class CalDavConnector(BaseConnector):
         event: schemas.Event,
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
+        organizer_email: str
     ):
         """add a new event to the connected calendar"""
         calendar = self.client.calendar(url=self.url)
         # save event
-        caldavEvent = calendar.save_event(
+        caldav_event = calendar.save_event(
             dtstart=event.start,
             dtend=event.end,
             summary=event.title,
@@ -338,9 +339,9 @@ class CalDavConnector(BaseConnector):
             description=event.description,
         )
         # save attendee data
-        caldavEvent.add_attendee((organizer.name, organizer.email))
-        caldavEvent.add_attendee((attendee.name, attendee.email))
-        caldavEvent.save()
+        caldav_event.add_attendee((organizer.name, organizer_email))
+        caldav_event.add_attendee((attendee.name, attendee.email))
+        caldav_event.save()
 
         self.bust_cached_events()
         
