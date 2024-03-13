@@ -29,7 +29,9 @@ def get_user_from_token(db, token: str):
     subscriber = repo.get_subscriber(db, int(id))
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
-    if subscriber.minimum_valid_iat_time and not iat:
+    if subscriber is None:
+        raise InvalidTokenException()
+    elif subscriber.minimum_valid_iat_time and not iat:
         raise InvalidTokenException()
     elif subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat):
         raise InvalidTokenException()
