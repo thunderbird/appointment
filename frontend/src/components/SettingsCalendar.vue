@@ -175,11 +175,10 @@
           @click="saveCalendar"
         />
         <!-- Google Button -->
-        <img
+        <google-calendar-button
           v-if="isGoogle && addMode"
-          class="h-[40px] cursor-pointer"
-          :alt="t('label.signInWithGoogle')"
-          :src="GoogleSignInBtn"
+          class="cursor-pointer"
+          :label="t('label.signInWithGoogle')"
           @click="saveCalendar"
         />
       </div>
@@ -202,14 +201,12 @@
 <script setup>
 import { calendarManagementType } from '@/definitions';
 import { IconArrowRight } from '@tabler/icons-vue';
-import {
-  ref, reactive, inject, onMounted, computed,
-} from 'vue';
+import { ref, reactive, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';
 import CalendarManagement from '@/components/CalendarManagement.vue';
-import GoogleSignInBtn from '@/assets/img/google/btn_connect_google_cal.png';
+import GoogleCalendarButton from '@/elements/GoogleCalendarButton';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
