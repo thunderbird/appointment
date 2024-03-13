@@ -17,9 +17,10 @@ from datetime import datetime, timedelta, timezone, UTC
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
 from .apis.google_client import GoogleClient
-from ..database import schemas, models
+from ..database import schemas, models, repo
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment
+from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email
 
@@ -497,6 +498,11 @@ class Tools:
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
+                external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+                if external_connection is None or external_connection.token is None:
+                    raise RemoteCalendarConnectionError()
+
                 con = GoogleConnector(
                     db=db,
                     redis_instance=redis,
@@ -504,7 +510,7 @@ class Tools:
                     remote_calendar_id=calendar.user,
                     calendar_id=calendar.id,
                     subscriber_id=subscriber.id,
-                    google_tkn=subscriber.get_external_connection(schemas.ExternalConnectionType.google).token,
+                    google_tkn=external_connection.token,
                 )
             else:
                 con = CalDavConnector(
