@@ -222,7 +222,7 @@ class GoogleConnector(BaseConnector):
                 {"displayName": attendee.name, "email": attendee.email},
             ],
         }
-        self.google_client.create_event(calendar_id=self.calendar_id, body=body, token=self.google_token)
+        self.google_client.create_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
         
         self.bust_cached_events()
         
