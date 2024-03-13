@@ -504,12 +504,16 @@ def update_public_appointment_slot(
         ),
     )
 
+    organizer_email = organizer.email
+
     # create remote event
     if db_calendar.provider == CalendarProvider.google:
         external_connection = utils.list_first(repo.get_external_connections_by_type(db, organizer.id, schemas.ExternalConnectionType.google))
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
+
+        organizer_email = external_connection.name
 
         con = GoogleConnector(
             db=db,
@@ -529,7 +533,7 @@ def update_public_appointment_slot(
             subscriber_id=organizer.id,
             calendar_id=db_calendar.id,
         )
-    con.create_event(event=event, attendee=s_a.attendee, organizer=organizer)
+    con.create_event(event=event, attendee=s_a.attendee, organizer=organizer, organizer_email=organizer_email)
 
     # update appointment slot data
     repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)

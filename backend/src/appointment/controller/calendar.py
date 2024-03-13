@@ -199,6 +199,7 @@ class GoogleConnector(BaseConnector):
         event: schemas.Event,
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
+        organizer_email: str,
     ):
         """add a new event to the connected calendar"""
 
@@ -218,7 +219,7 @@ class GoogleConnector(BaseConnector):
             "start": {"dateTime": event.start.isoformat()},
             "end": {"dateTime": event.end.isoformat()},
             "attendees": [
-                {"displayName": organizer.name, "email": organizer.email},
+                {"displayName": organizer.name, "email": organizer_email},
                 {"displayName": attendee.name, "email": attendee.email},
             ],
         }

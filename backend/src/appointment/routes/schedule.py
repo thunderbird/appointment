@@ -14,6 +14,7 @@ from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
+from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
@@ -331,12 +332,18 @@ def decide_on_schedule_availability_slot(
                 name=None,
             ),
         )
+
+        organizer_email = subscriber.email
+
         # create remote event
         if calendar.provider == CalendarProvider.google:
-            external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+            external_connection: ExternalConnection|None = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
             if external_connection is None or external_connection.token is None:
                 raise RemoteCalendarConnectionError()
+
+            # Email is stored in the name
+            organizer_email = external_connection.name
 
             con = GoogleConnector(
                 db=db,
@@ -358,7 +365,7 @@ def decide_on_schedule_availability_slot(
             )
 
         try:
-            con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
+            con.create_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
         except EventNotCreatedException:
             raise EventCouldNotBeAccepted
 
