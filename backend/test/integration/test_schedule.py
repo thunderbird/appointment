@@ -232,9 +232,10 @@ class TestSchedule:
         monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
         monkeypatch.setattr(CalDavConnector, "list_events", MockCaldavConnector.list_events)
 
-        start_date = date(2024, 4, 1)
-        start_time = time(9)
-        end_time = time(17)
+        start_date = date(2024, 3, 1)
+        start_time = time(16)
+        # Next day
+        end_time = time(0)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -263,9 +264,11 @@ class TestSchedule:
             slots = data['slots']
 
             # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
-            assert slots[0]['start'] == '2024-04-02T09:00:00'
+            # Note: this should be in PST (Pacific Standard Time)
+            assert slots[0]['start'] == '2024-03-04T09:00:00-08:00'
             # Based off the farthest_booking our latest slot is 4:30pm
-            assert slots[-1]['start'] == '2024-04-15T16:30:00'
+            # Note: This should be in PDT (Pacific Daylight Time)
+            assert slots[-1]['start'] == '2024-03-15T16:30:00-07:00'
 
         # Check availability over a year from now
         with freeze_time(date(2025, 6, 1)):
@@ -278,8 +281,8 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-02T09:00:00'
-            assert slots[-1]['start'] == '2025-06-13T16:30:00'
+            assert slots[0]['start'] == '2025-06-02T09:00:00-07:00'
+            assert slots[-1]['start'] == '2025-06-13T16:30:00-07:00'
 
         # Check availability with a start date day greater than the farthest_booking day
         with freeze_time(date(2025, 6, 27)):
@@ -292,8 +295,9 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-30T09:00:00'
-            assert slots[-1]['start'] == '2025-07-11T16:30:00'
+            assert slots[0]['start'] == '2025-06-30T09:00:00-07:00'
+            assert slots[-1]['start'] == '2025-07-11T16:30:00-07:00'
+
 
     def test_request_schedule_availability_slot(self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule):
         start_date = date(2024, 4, 1)
@@ -387,4 +391,3 @@ class TestSchedule:
         assert response.status_code == 200, response.text
         data = response.json()
         assert data is True
-

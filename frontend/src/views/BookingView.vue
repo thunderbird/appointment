@@ -222,7 +222,7 @@ const getAppointment = async () => {
 
   // convert start dates from UTC back to users timezone
   data.value.slots.forEach((s) => {
-    s.start = dj.utc(s.start).tz(dj.tz.guess());
+    s.start = dj(s.start).tz(dj.tz.guess());
   });
 
   return data.value;
