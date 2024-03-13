@@ -22,7 +22,8 @@ from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
-from ..exceptions.validation import RemoteCalendarConnectionError
+from ..exceptions.calendar import EventNotCreatedException
+from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeAccepted
 from ..tasks.emails import send_pending_email, send_confirmation_email, send_rejection_email, \
     send_zoom_meeting_failed_email
 
@@ -355,7 +356,11 @@ def decide_on_schedule_availability_slot(
                 user=calendar.user, 
                 password=calendar.password
             )
-        con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
+
+        try:
+            con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
+        except EventNotCreatedException:
+            raise EventCouldNotBeAccepted
 
         # send mail with .ics attachment to attendee
         appointment = schemas.AppointmentBase(title=title, details=schedule.details, location_url=location_url)

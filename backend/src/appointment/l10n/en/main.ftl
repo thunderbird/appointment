@@ -37,6 +37,8 @@ schedule-not-active = The schedule has been turned off. Please contact the sched
 
 remote-calendar-connection-error = The remote calendar could not be reached. Please verify your connection information and try again.
 
+event-could-not-be-accepted = There was an error accepting the booking details. Please try again later.
+
 ## Authentication Exceptions
 
 email-mismatch = Email mismatch.

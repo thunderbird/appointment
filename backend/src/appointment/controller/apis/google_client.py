@@ -7,6 +7,7 @@ from googleapiclient.errors import HttpError
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
+from ...exceptions.calendar import EventNotCreatedException
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
@@ -136,6 +137,7 @@ class GoogleClient:
                 response = service.events().insert(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
                 logging.warning(f"[google_client.create_event] Request Error: {e.status_code}/{e.error_details}")
+                raise EventNotCreatedException()
 
         return response
 
