@@ -53,6 +53,7 @@
     "bookingSuccessfullyConfirmed": "Buchung erfolgreich bestätigt!",
     "bookingSuccessfullyDenied": "Buchung erfolgreich abgelehnt!",
     "bookingSuccessfullyRequested": "Buchung erfolgreich angefragt!",
+    "copiedToClipboard": "In Zwischenablage kopiert",
     "eventWasCreated": "Das Event wurde in deinem Kalender erstellt.",
     "invitationWasSent": "Eine Einladung wurde an deine E-Mail-Adresse gesandt.",
     "messageWasNotSent": "Die Nachricht konnte nicht gesendet werden. Bitte nochmal versuchen.",
