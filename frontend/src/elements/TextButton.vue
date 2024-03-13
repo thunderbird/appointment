@@ -1,25 +1,37 @@
 <template>
   <button
-    class="flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-gray-400 px-2 text-sm font-semibold text-gray-500 transition-all ease-in-out hover:bg-gray-50 hover:shadow-md dark:text-gray-400 dark:hover:bg-gray-800"
+    class="
+      relative flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-gray-400 px-2
+      text-sm font-semibold text-gray-500 transition-all ease-in-out hover:shadow-md
+      hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800
+    "
     @click.stop="copy ? copyToClipboard() : null"
   >
     <icon-copy
       v-if="copy && !copied"
       class="size-4 fill-transparent stroke-gray-500 stroke-2 dark:stroke-gray-400"
     />
-    <icon-check
+    <icon-clipboard-check
       v-if="copy && copied"
-      class="size-4 fill-transparent stroke-green-500 stroke-2"
+      class="size-4 fill-transparent stroke-teal-500 stroke-2"
     />
     {{ label }}
+    <transition>
+      <tooltip v-show="copied" :content="t('info.copiedToClipboard')" />
+    </transition>
   </button>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Tooltip from '@/elements/Tooltip';
 
 // icons
-import { IconCheck, IconCopy } from '@tabler/icons-vue';
+import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';
+
+// component constants
+const { t } = useI18n();
 
 // component properties
 const props = defineProps({
@@ -34,6 +46,6 @@ const copied = ref(false);
 const copyToClipboard = async () => {
   await navigator.clipboard.writeText(props.copy);
   copied.value = true;
-  setTimeout(() => { copied.value = false; }, 3000);
+  setTimeout(() => { copied.value = false; }, 4000);
 };
 </script>

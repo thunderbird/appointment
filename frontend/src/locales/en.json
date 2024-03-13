@@ -53,6 +53,7 @@
     "bookingSuccessfullyConfirmed": "Booking confirmed",
     "bookingSuccessfullyDenied": "Booking rejected. Reach out to the booker to recommend an alternative.",
     "bookingSuccessfullyRequested": "Booking request sent",
+    "copiedToClipboard": "Copied to clipboard",
     "eventWasCreated": "Event created in your calendar.",
     "invitationWasSent": "An invitation was sent to your email.",
     "messageWasNotSent": "Your message couldn't be sent. Please try again.",
