@@ -223,7 +223,7 @@ class Schedule(Base):
     meeting_link_provider: MeetingLinkProviderType = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
 
     calendar: Calendar = relationship("Calendar", back_populates="schedules")
-    availabilities: "Availability" = relationship("Availability", cascade="all,delete", back_populates="schedule")
+    availabilities: list(Availability) = relationship("Availability", cascade="all,delete", back_populates="schedule")
     slots: list[Slot] = relationship("Slot", cascade="all,delete", back_populates="schedule")
 
     @property
