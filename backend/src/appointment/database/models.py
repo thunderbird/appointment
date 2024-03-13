@@ -96,10 +96,6 @@ class Subscriber(Base):
     timezone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     avatar_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
 
-    google_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
-    # Temp storage for verifying google state tokens between authentication
-    google_state = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
-    google_state_expires_at = Column(DateTime)
     short_link_hash = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token

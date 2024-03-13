@@ -112,30 +112,6 @@ def delete_subscriber(db: Session, subscriber: models.Subscriber):
     return True
 
 
-def set_subscriber_google_tkn(db: Session, tkn: str, subscriber_id: int):
-    """update all subscriber attributes, they can edit themselves"""
-    db_subscriber = get_subscriber(db, subscriber_id)
-    db_subscriber.google_tkn = tkn
-    db.commit()
-    db.refresh(db_subscriber)
-    return db_subscriber
-
-
-def set_subscriber_google_state(db: Session, state: str | None, subscriber_id: int):
-    """temp store the google state so we can refer to it when we get back"""
-    db_subscriber = get_subscriber(db, subscriber_id)
-    db_subscriber.google_state = state
-
-    if state is None:
-        db_subscriber.google_state_expires_at = None
-    else:
-        db_subscriber.google_state_expires_at = datetime.now() + timedelta(minutes=3)
-
-    db.commit()
-    db.refresh(db_subscriber)
-    return db_subscriber
-
-
 def get_connections_limit(db: Session, subscriber_id: int):
     """return the number of allowed connections for given subscriber or -1 for unlimited connections"""
     # db_subscriber = get_subscriber(db, subscriber_id)
