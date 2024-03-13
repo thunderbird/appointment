@@ -3,6 +3,7 @@
 Handle connection to a CalDAV server.
 """
 import json
+import zoneinfo
 import os
 
 import caldav.lib.error
@@ -413,46 +414,54 @@ class Tools:
         background_tasks.add_task(send_invite_email, to=attendee.email, attachment=invite)
 
     @staticmethod
-    def available_slots_from_schedule(s: models.Schedule) -> list[schemas.SlotBase]:
+    def available_slots_from_schedule(schedule: models.Schedule) -> list[schemas.SlotBase]:
         """This helper calculates a list of slots according to the given schedule configuration."""
         slots = []
 
         now = datetime.now()
 
+        subscriber = schedule.calendar.owner
+        timezone = zoneinfo.ZoneInfo(subscriber.timezone)
+
+        # Start and end time in the subscriber's timezone
+        start_time_local = schedule.start_time_local
+        end_time_local = schedule.end_time_local
+
         # FIXME: Currently the earliest booking acts in normal days, not within the scheduled days.
         # So if they have the schedule setup for weekdays, it will count weekends too.
-        earliest_booking = now + timedelta(minutes=s.earliest_booking)
+        earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
         # We add a day here because it should be inclusive of the final day.
-        farthest_booking = now + timedelta(days=1, minutes=s.farthest_booking)
+        farthest_booking = now + timedelta(days=1, minutes=schedule.farthest_booking)
 
-        schedule_start = max([datetime.combine(s.start_date, s.start_time), earliest_booking])
-        schedule_end = min(
-            [datetime.combine(s.end_date, s.end_time), farthest_booking]) if s.end_date else farthest_booking
+        schedule_start = max([datetime.combine(schedule.start_date, start_time_local), earliest_booking])
+        schedule_end = min([datetime.combine(schedule.end_date, end_time_local), farthest_booking]) if schedule.end_date else farthest_booking
 
-        start_time = datetime.combine(now.min, s.start_time) - datetime.min
-        end_time = datetime.combine(now.min, s.end_time) - datetime.min
+        start_time = datetime.combine(now.min, start_time_local) - datetime.min
+        end_time = datetime.combine(now.min, end_time_local) - datetime.min
 
         # Thanks to timezone conversion end_time can wrap around to the next day
         if start_time > end_time:
             end_time += timedelta(days=1)
 
         # All user defined weekdays, falls back to working week if invalid
-        weekdays = s.weekdays if type(s.weekdays) == list else json.loads(s.weekdays)
+        weekdays = schedule.weekdays if type(schedule.weekdays) is list else json.loads(schedule.weekdays)
         if not weekdays or len(weekdays) == 0:
             weekdays = [1, 2, 3, 4, 5]
+
+        # Difference of the start and end time. Since our times are localized we start at 0, and go until we hit the diff.
+        total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
 
         # Between the available booking time
         for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
             date = datetime.fromordinal(ordinal)
-            current_datetime = datetime(year=date.year, month=date.month, day=date.day)
+            current_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=start_time_local.hour, minute=start_time_local.minute, tzinfo=timezone)
             # Check if this weekday is within our schedule
             if current_datetime.isoweekday() in weekdays:
                 # Generate each timeslot based on the selected duration
-                # We just loop through the start and end time and step by slot duration in seconds.
+                # We just loop through the difference of the start and end time and step by slot duration in seconds.
                 slots += [
-                    schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=s.slot_duration)
-                    for time in
-                    range(int(start_time.total_seconds()), int(end_time.total_seconds()), s.slot_duration * 60)
+                    schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration)
+                    for time in range(0, total_time, schedule.slot_duration * 60)
                 ]
 
         return slots
