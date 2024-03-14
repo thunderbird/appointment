@@ -18,9 +18,10 @@ from datetime import datetime, timedelta, timezone, UTC
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
 from .apis.google_client import GoogleClient
-from ..database import schemas, models
+from ..database import schemas, models, repo
 from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment
+from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email
 
@@ -200,6 +201,7 @@ class GoogleConnector(BaseConnector):
         event: schemas.Event,
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
+        organizer_email: str,
     ):
         """add a new event to the connected calendar"""
 
@@ -219,11 +221,11 @@ class GoogleConnector(BaseConnector):
             "start": {"dateTime": event.start.isoformat()},
             "end": {"dateTime": event.end.isoformat()},
             "attendees": [
-                {"displayName": organizer.name, "email": organizer.email},
+                {"displayName": organizer.name, "email": organizer_email},
                 {"displayName": attendee.name, "email": attendee.email},
             ],
         }
-        self.google_client.create_event(calendar_id=self.calendar_id, body=body, token=self.google_token)
+        self.google_client.create_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
         
         self.bust_cached_events()
         
@@ -326,11 +328,12 @@ class CalDavConnector(BaseConnector):
         event: schemas.Event,
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
+        organizer_email: str
     ):
         """add a new event to the connected calendar"""
         calendar = self.client.calendar(url=self.url)
         # save event
-        caldavEvent = calendar.save_event(
+        caldav_event = calendar.save_event(
             dtstart=event.start,
             dtend=event.end,
             summary=event.title,
@@ -338,9 +341,9 @@ class CalDavConnector(BaseConnector):
             description=event.description,
         )
         # save attendee data
-        caldavEvent.add_attendee((organizer.name, organizer.email))
-        caldavEvent.add_attendee((attendee.name, attendee.email))
-        caldavEvent.save()
+        caldav_event.add_attendee((organizer.name, organizer_email))
+        caldav_event.add_attendee((attendee.name, attendee.email))
+        caldav_event.save()
 
         self.bust_cached_events()
         
@@ -492,7 +495,7 @@ class Tools:
     def existing_events_for_schedule(
         schedule: models.Schedule,
         calendars: list[schemas.Calendar],
-        subscriber: schemas.Subscriber,
+        subscriber: models.Subscriber,
         google_client: GoogleClient,
         db,
         redis = None
@@ -504,6 +507,11 @@ class Tools:
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
+                external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+                if external_connection is None or external_connection.token is None:
+                    raise RemoteCalendarConnectionError()
+
                 con = GoogleConnector(
                     db=db,
                     redis_instance=redis,
@@ -511,7 +519,7 @@ class Tools:
                     remote_calendar_id=calendar.user,
                     calendar_id=calendar.id,
                     subscriber_id=subscriber.id,
-                    google_tkn=subscriber.google_tkn,
+                    google_tkn=external_connection.token,
                 )
             else:
                 con = CalDavConnector(

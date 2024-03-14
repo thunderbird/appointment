@@ -7,6 +7,7 @@ from googleapiclient.errors import HttpError
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
+from ...exceptions.calendar import EventNotCreatedException
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
@@ -42,19 +43,15 @@ class GoogleClient:
         """Actually create the client, this is separate, so we can catch any errors without breaking everything"""
         self.client = Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
 
-    def get_redirect_url(self, email, db, subscriber_id):
+    def get_redirect_url(self, email):
         """Returns the redirect url for the google oauth flow"""
         if self.client is None:
             return None
 
         # (Url, State ID)
-        url, state = self.client.authorization_url(
+        return self.client.authorization_url(
             access_type="offline", prompt="consent", login_hint=email if email else None
         )
-        # Store the state id, so we can refer to it when google redirects the user to our callback
-        repo.set_subscriber_google_state(db, state, subscriber_id)
-
-        return url
 
     def get_credentials(self, code: str):
         if self.client is None:
@@ -71,18 +68,15 @@ class GoogleClient:
             logging.error(f"[google_client.get_credentials] Value error while fetching credentials {str(e)}")
             raise GoogleInvalidCredentials()
 
-    def get_email(self, token):
-        """Retrieve the user's email associated with the token"""
+    def get_profile(self, token):
+        """Retrieve the user's profile associated with the token"""
         if self.client is None:
             return None
 
-        # Reference: https://developers.google.com/identity/openid-connect/openid-connect#obtaininguserprofileinformation
-        response = requests.get(
-            "https://openidconnect.googleapis.com/v1/userinfo",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        userinfo = response.json()
-        return userinfo.get("email")
+        user_info_service = build('oauth2', 'v2', credentials=token)
+        user_info = user_info_service.userinfo().get().execute()
+
+        return user_info
 
     def list_calendars(self, token):
         response = {}
@@ -143,6 +137,7 @@ class GoogleClient:
                 response = service.events().insert(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
                 logging.warning(f"[google_client.create_event] Request Error: {e.status_code}/{e.error_details}")
+                raise EventNotCreatedException()
 
         return response
 

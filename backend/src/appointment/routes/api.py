@@ -11,6 +11,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
+
+from .. import utils
 from ..database import repo, schemas
 
 # authentication
@@ -115,6 +117,11 @@ def create_my_calendar(
 
     # Test the connection first
     if calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         # I don't believe google cal touches this route, but just in case!
         con = GoogleConnector(
             db=db,
@@ -123,7 +130,7 @@ def create_my_calendar(
             remote_calendar_id=calendar.user,
             calendar_id=None,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
         con = CalDavConnector(
@@ -221,9 +228,15 @@ def read_remote_calendars(
     connection: schemas.CalendarConnection,
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
+    db: Session = Depends(get_db),
 ):
     """endpoint to get calendars from a remote CalDAV server"""
     if connection.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         con = GoogleConnector(
             db=None,
             redis_instance=None,
@@ -231,7 +244,7 @@ def read_remote_calendars(
             remote_calendar_id=connection.user,
             subscriber_id=subscriber.id,
             calendar_id=None,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
         con = CalDavConnector(
@@ -254,13 +267,20 @@ def read_remote_calendars(
 @router.post("/rmt/sync")
 def sync_remote_calendars(
     db: Session = Depends(get_db),
-    redis = Depends(get_redis),
+    redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to sync calendars from a remote server"""
     # Create a list of connections and loop through them with sync
     # TODO: Also handle CalDAV connections
+
+    external_connection = utils.list_first(
+        repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+    if external_connection is None or external_connection.token is None:
+        raise RemoteCalendarConnectionError()
+
     connections = [
         GoogleConnector(
             db=db,
@@ -269,7 +289,7 @@ def sync_remote_calendars(
             remote_calendar_id=None,
             calendar_id=None,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         ),
     ]
     for connection in connections:
@@ -297,6 +317,11 @@ def read_remote_events(
         raise validation.CalendarNotFoundException()
 
     if db_calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         con = GoogleConnector(
             db=db,
             redis_instance=redis_instance,
@@ -304,7 +329,7 @@ def read_remote_events(
             remote_calendar_id=db_calendar.user,
             calendar_id=db_calendar.id,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
         con = CalDavConnector(
@@ -338,8 +363,7 @@ def create_my_calendar_appointment(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar_is_connected(db, calendar_id=a_s.appointment.calendar_id):
         raise validation.CalendarNotConnectedException()
-    if a_s.appointment.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(
-        ExternalConnectionType.zoom) is None:
+    if a_s.appointment.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
         raise validation.ZoomNotConnectedException()
     return repo.create_calendar_appointment(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
@@ -480,8 +504,17 @@ def update_public_appointment_slot(
         ),
     )
 
+    organizer_email = organizer.email
+
     # create remote event
     if db_calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, organizer.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        organizer_email = external_connection.name
+
         con = GoogleConnector(
             db=db,
             redis_instance=None,
@@ -489,7 +522,7 @@ def update_public_appointment_slot(
             remote_calendar_id=db_calendar.user,
             calendar_id=db_calendar.id,
             subscriber_id=organizer.id,
-            google_tkn=organizer.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
         con = CalDavConnector(
@@ -500,7 +533,7 @@ def update_public_appointment_slot(
             subscriber_id=organizer.id,
             calendar_id=db_calendar.id,
         )
-    con.create_event(event=event, attendee=s_a.attendee, organizer=organizer)
+    con.create_event(event=event, attendee=s_a.attendee, organizer=organizer, organizer_email=organizer_email)
 
     # update appointment slot data
     repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)

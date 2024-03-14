@@ -161,3 +161,11 @@ class RemoteCalendarConnectionError(APIException):
 
     def get_msg(self):
         return l10n('remote-calendar-connection-error')
+
+
+class EventCouldNotBeAccepted(APIException):
+    id_code = 'EVENT_COULD_NOT_BE_ACCEPTED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('event-could-not-be-accepted')

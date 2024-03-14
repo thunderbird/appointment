@@ -49,7 +49,7 @@ def _patch_caldav_connector(monkeypatch):
             ]
 
         @staticmethod
-        def create_event(self, event, attendee, organizer):
+        def create_event(self, event, attendee, organizer, organizer_email):
             return True
 
         @staticmethod
