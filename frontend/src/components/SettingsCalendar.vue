@@ -178,7 +178,8 @@
         <google-calendar-button
           v-if="isGoogle && addMode"
           class="cursor-pointer"
-          :label="t('label.signInWithGoogle')"
+          :title="t('label.signInWithGoogle')"
+          :label="t('label.connectGoogleCalendar')"
           @click="saveCalendar"
         />
       </div>

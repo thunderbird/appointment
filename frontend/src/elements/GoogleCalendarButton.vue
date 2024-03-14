@@ -2,7 +2,8 @@
   <button
     class="
       relative flex h-10 items-center justify-center gap-4 whitespace-nowrap rounded-full
-      px-6 text-base font-semibold text-gray-600 dark:text-gray-400 transition-all ease-in-out
+      px-4 text-base font-roboto text-gray-600 dark:text-gray-400 transition-all ease-in-out
+      border border-gray-500 bg-white dark:bg-gray-800
       hover:scale-102 hover:shadow-md active:scale-98 disabled:scale-100 disabled:opacity-50 disabled:shadow-none
     "
   >

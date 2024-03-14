@@ -110,6 +110,7 @@
     "confirmSelection": "Confirm selection",
     "connect": "Connect",
     "connectCalendar": "Connect calendar",
+    "connectGoogleCalendar": "Connect Google Calendar",
     "connectedAs": "Connected as {name}",
     "contact": "Contact",
     "continue": "Continue",
