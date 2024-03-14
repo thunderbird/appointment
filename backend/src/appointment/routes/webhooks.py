@@ -60,7 +60,7 @@ def fxa_process(
                     # Update profile with fxa info
                     repo.update_subscriber(db, schemas.SubscriberIn(
                         avatar_url=profile['avatar'],
-                        name=profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0],
+                        name=subscriber.name,
                         username=subscriber.username
                     ), subscriber.id)
                 except Exception as ex:
