@@ -1,6 +1,6 @@
 <template>
   <!-- authenticated subscriber content -->
-  <template v-if="isAuthenticated || routeIsPublic">
+  <template v-if="router.hasRoute(route.name) && (isAuthenticated || routeIsPublic)">
     <site-notification
       v-if="isAuthenticated && visibleNotification"
       :title="notificationTitle"
@@ -15,7 +15,7 @@
     </main>
     <footer-bar/>
   </template>
-  <template v-else-if="!routeIsPublic">
+  <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
     <not-authenticated-view/>
   </template>
   <template v-else>
