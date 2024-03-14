@@ -18,6 +18,10 @@
     font-weight: 400;
   }
   @font-face {
+    font-family: 'Roboto';
+    src: url('./fonts/Roboto-Medium.ttf');
+  }
+  @font-face {
     font-family: 'Open Sans';
     src: url('./fonts/OpenSans-LightItalic.ttf');
     font-weight: 300;

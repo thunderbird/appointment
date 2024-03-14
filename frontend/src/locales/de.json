@@ -111,6 +111,7 @@
     "confirmSelection": "Auswahl bestätigen",
     "connect": "Verbinden",
     "connectCalendar": "Kalender verbinden",
+    "connectGoogleCalendar": "Google Kalender verbinden",
     "connectedAs": "Verbunden als {name}",
     "contact": "Kontakt",
     "continue": "Weiter",
