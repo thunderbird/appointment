@@ -12,9 +12,9 @@ const authGuard = (to, from) => {
   const user = useUserStore();
 
   // If we're not logged in, drop them to login
-  if (!user?.exists()) {
-    return '/login';
-  }
+  // if (!user?.exists()) {
+  //  return '/login';
+  // }
 };
 
 const routes = [

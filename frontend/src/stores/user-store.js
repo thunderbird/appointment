@@ -87,8 +87,8 @@ export const useUserStore = defineStore('user', () => {
    * Request subscriber login
    * @param {function} fetch preconfigured API fetch function
    * @param {string} username
-   * @param {string} password
-   * @returns {boolean} true if login was successful
+   * @param {string|null} password or null if fxa authentication
+   * @returns {Promise<boolean>} true if login was successful
    */
   const login = async (fetch, username, password) => {
     $reset();
