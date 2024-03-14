@@ -37,6 +37,8 @@ schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Inform
 
 remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden. Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
 
+event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
+
 ## Authentication Exceptions
 
 email-mismatch = E-Mail-Adresse stimmen nicht überein.
@@ -55,6 +57,7 @@ google-invalid-creds = Die Anmeldedaten für die Google-Authentifizierung sind n
 google-auth-fail = Google-Authentifizierung fehlgeschlagen.
 google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte erneut versuchen.
 google-sync-fail = Bei der Synchronisierung von Kalendern ist ein Fehler aufgetreten. Bitte später noch einmal versuchen.
+google-only-one = Es kann nur ein einziges Google-Konto verbunden sein.
 
 ## Frontend Facing Strings
 
