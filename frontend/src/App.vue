@@ -23,8 +23,7 @@
     <footer-bar />
   </template>
   <template v-else>
-    <!-- TODO: handle wrong route -->
-    An authentication or routing error occurred.
+    <route-not-found-view />
   </template>
 </template>
 
@@ -43,6 +42,7 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
