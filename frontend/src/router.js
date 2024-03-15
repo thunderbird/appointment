@@ -6,17 +6,11 @@ import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
-import { useUserStore } from '@/stores/user-store';
 
-const authGuard = (to, from) => {
-  const user = useUserStore();
-
-  // If we're not logged in, drop them to login
-  if (!user?.exists()) {
-    return '/login';
-  }
-};
-
+/**
+ * Defined routes for Thunderbird Appointment
+ * Note: All routes require authentication unless otherwise specified in App.vue::routeIsPublic
+ */
 const routes = [
   // instant loaded routes
   {
@@ -53,7 +47,6 @@ const routes = [
     path: '/schedule',
     name: 'schedule',
     component: ScheduleView,
-    beforeEnter: authGuard,
   },
   {
     path: '/calendar',
@@ -63,32 +56,27 @@ const routes = [
     path: '/calendar/:view?/:date?',
     name: 'calendar',
     component: CalendarView,
-    beforeEnter: authGuard,
   },
   // lazy-loaded routes
   {
     path: '/appointments/:view?',
     name: 'appointments',
     component: () => import('@/views/AppointmentsView'),
-    beforeEnter: authGuard,
   },
   {
     path: '/settings/:view?',
     name: 'settings',
     component: () => import('@/views/SettingsView'),
-    beforeEnter: authGuard,
   },
   {
     path: '/profile',
     name: 'profile',
     component: () => import('@/views/ProfileView'),
-    beforeEnter: authGuard,
   },
   {
     path: '/contact',
     name: 'contact',
     component: () => import('@/views/ContactView'),
-    beforeEnter: authGuard,
   },
   {
     path: '/privacy',

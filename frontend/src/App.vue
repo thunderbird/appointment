@@ -1,30 +1,25 @@
 <template>
   <!-- authenticated subscriber content -->
-  <template v-if="isAuthenticated">
+  <template v-if="router.hasRoute(route.name) && (isAuthenticated || routeIsPublic)">
     <site-notification
-      v-if="visibleNotification"
+      v-if="isAuthenticated && visibleNotification"
       :title="notificationTitle"
       :action-url="notificationActionUrl"
     >
       {{ notificationMessage }}
     </site-notification>
-    <nav-bar :nav-items="navItems" />
-    <main :class="{'mx-4 min-h-full py-24 lg:mx-8': !routeIsHome, 'pt-32': routeIsHome}">
-      <router-view />
+    <nav-bar v-if="isAuthenticated" :nav-items="navItems"/>
+    <title-bar v-if="routeIsPublic"/>
+    <main :class="{'mx-4 min-h-full py-24 lg:mx-8': !routeIsHome && !routeIsPublic, 'pt-32': routeIsHome, 'min-h-full': routeIsPublic}">
+      <router-view/>
     </main>
-    <footer-bar />
+    <footer-bar/>
   </template>
-  <!-- for home page and booking page -->
-  <template v-else-if="routeIsPublic">
-    <title-bar />
-    <main class="min-h-full">
-      <router-view />
-    </main>
-    <footer-bar />
+  <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
+    <not-authenticated-view/>
   </template>
   <template v-else>
-    <!-- TODO: handle wrong route -->
-    An authentication or routing error occurred.
+    <route-not-found-view/>
   </template>
 </template>
 
@@ -43,6 +38,8 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
+import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
