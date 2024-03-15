@@ -5,12 +5,14 @@
   },
   "error": {
     "actionNeeded": "Aktion erforderlich!",
+    "authenticationRequired": "Sorry, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
     "loginMethodNotSupported": "Login-Methode wird nicht unterstützt. Bitte nochmal versuchen.",
     "minimumValue": "{field} sollte wenigstens {value} sein.",
     "noConnectedCalendars": "Kalendereinrichtung zum Fortfahren erforderlich. {0}.",
     "noConnectedCalendarsLink": "Zu den Einstellungen wechseln.",
+    "routeNotFound": "Sorry, diese Seite wurde nicht gefunden.",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
     "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
@@ -143,6 +145,7 @@
     "general": "Allgemein",
     "generalDetails": "Allgemeine Infos",
     "generateZoomLink": "Zoom Meeting generieren",
+    "goBack": "Zurück",
     "google": "Google",
     "guest": "{count} Gäste | {count} Gast | {count} Gäste",
     "inPerson": "Vor Ort",
