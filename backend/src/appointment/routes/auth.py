@@ -115,7 +115,9 @@ def fxa_callback(
     # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
     subscriber = repo.get_subscriber_by_email(db, email)
 
-    if not fxa_subscriber and not subscriber:
+    new_subscriber_flow = not fxa_subscriber and not subscriber
+
+    if new_subscriber_flow:
         subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
             email=email,
             username=email,
@@ -142,11 +144,17 @@ def fxa_callback(
     # Update profile with fxa info
     data = schemas.SubscriberIn(
         avatar_url=profile['avatar'],
-        name=profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0],
-        username=profile['email'],
+        name=subscriber.name,
+        username=subscriber.username,
         email=profile['email'],
         timezone=timezone if subscriber.timezone is None else None
     )
+
+    # If they're a new subscriber we should fill in some defaults!
+    if new_subscriber_flow:
+        data.name = profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0]
+        data.username = profile['email']
+
     repo.update_subscriber(db, data, subscriber.id)
 
     # Generate our jwt token, we only store the username on the token
