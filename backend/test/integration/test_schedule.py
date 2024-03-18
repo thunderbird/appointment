@@ -1,4 +1,4 @@
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 
 from freezegun import freeze_time
 
@@ -319,6 +319,11 @@ class TestSchedule:
                         start=start_datetime,
                         end=datetime.combine(start_date, end_time)
                     ),
+                    schemas.Event(
+                        title="A second blocker!",
+                        start=start_datetime + timedelta(minutes=10),
+                        end=datetime.combine(start_date, end_time) + timedelta(minutes=20)
+                    ),
                 ]
             
             @staticmethod
@@ -374,7 +379,7 @@ class TestSchedule:
         assert data.get('detail').get('id') == validation.SlotAlreadyTakenException.id_code
 
         # Okay change up the time
-        start_time = time(10)
+        start_time = time(11)
 
         slot_availability['slot']['start'] = datetime.combine(start_date, start_time).isoformat()
 

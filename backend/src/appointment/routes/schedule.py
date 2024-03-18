@@ -198,10 +198,10 @@ def request_schedule_availability_slot(
     con.bust_cached_events(True)
     calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
     existing_remote_events = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
-    has_collision = Tools.events_set_difference([slot], existing_remote_events)
+    has_collision = Tools.events_roll_up_difference([slot], existing_remote_events)
     
-    # If we have no entries in this list then it means our slot is not available.
-    if len(has_collision) == 0:
+    # If we only have booked entries in this list then it means our slot is not available.
+    if all(evt.booking_status == BookingStatus.booked for evt in has_collision):
         raise validation.SlotAlreadyTakenException()
 
     # create slot in db with token and expiration date
