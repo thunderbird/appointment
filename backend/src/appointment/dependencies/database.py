@@ -1,5 +1,6 @@
 import os
 
+from redis import Redis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -28,3 +29,16 @@ def get_db():
         db.close()
 
 
+def get_redis() -> Redis | None:
+    """Retrieves a redis instance or None if redis isn't available."""
+    # TODO: Create pool and simply grab instance?
+    if os.getenv('REDIS_URL') is None:
+        return None
+
+    return Redis(
+        host=os.getenv('REDIS_URL'),
+        port=os.getenv('REDIS_PORT'),
+        db=os.getenv('REDIS_DB'),
+        password=os.getenv('REDIS_PASSWORD'),
+        decode_responses=True,
+    )

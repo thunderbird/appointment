@@ -7,19 +7,24 @@ from requests import HTTPError
 from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from .. import utils
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
+from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
-from ..dependencies.database import get_db
+from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
+from ..exceptions.calendar import EventNotCreatedException
+from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeAccepted
 from ..tasks.emails import send_pending_email, send_confirmation_email, send_rejection_email, \
     send_zoom_meeting_failed_email
 
@@ -84,6 +89,7 @@ def update_schedule(
 def read_schedule_availabilities(
     subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
+    redis = Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
@@ -111,7 +117,7 @@ def read_schedule_availabilities(
     available_slots = Tools.available_slots_from_schedule(schedule)
 
     # get all events from all connected calendars in scheduled date range
-    existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db)
+    existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
     actual_slots = Tools.events_roll_up_difference(available_slots, existing_slots)
 
     if not actual_slots or len(actual_slots) == 0:
@@ -132,6 +138,8 @@ def request_schedule_availability_slot(
     background_tasks: BackgroundTasks,
     subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
+    redis = Depends(get_redis),
+    google_client = Depends(get_google_client),
 ):
     """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner"""
 
@@ -158,6 +166,42 @@ def request_schedule_availability_slot(
     # check if slot still available, might already be taken at this time
     slot = schemas.SlotBase(**s_a.slot.dict())
     if repo.schedule_slot_exists(db, slot, schedule.id):
+        raise validation.SlotAlreadyTakenException()
+    
+    # We need to verify that the time is actually available on the remote calendar
+    if db_calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        con = GoogleConnector(
+            db=db,
+            redis_instance=redis,
+            google_client=google_client,
+            remote_calendar_id=db_calendar.user,
+            subscriber_id=subscriber.id,
+            calendar_id=db_calendar.id,
+            google_tkn=external_connection.token,
+        )
+    else:
+        con = CalDavConnector(
+            redis_instance=redis,
+            subscriber_id=subscriber.id,
+            calendar_id=db_calendar.id,
+            url=db_calendar.url, 
+            user=db_calendar.user, 
+            password=db_calendar.password
+        )
+
+    # Ok we need to clear the cache for all calendars, because we need to recheck them.
+    con.bust_cached_events(True)
+    calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
+    existing_remote_events = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
+    has_collision = Tools.events_set_difference([slot], existing_remote_events)
+    
+    # If we have no entries in this list then it means our slot is not available.
+    if len(has_collision) == 0:
         raise validation.SlotAlreadyTakenException()
 
     # create slot in db with token and expiration date
@@ -189,6 +233,7 @@ def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
+    redis = Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to react to owners decision to a request of a time slot of his public link
@@ -288,18 +333,42 @@ def decide_on_schedule_availability_slot(
                 name=None,
             ),
         )
+
+        organizer_email = subscriber.email
+
         # create remote event
         if calendar.provider == CalendarProvider.google:
+            external_connection: ExternalConnection|None = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+            if external_connection is None or external_connection.token is None:
+                raise RemoteCalendarConnectionError()
+
+            # Email is stored in the name
+            organizer_email = external_connection.name
+
             con = GoogleConnector(
                 db=db,
+                redis_instance=redis,
                 google_client=google_client,
-                calendar_id=calendar.user,
+                remote_calendar_id=calendar.user,
                 subscriber_id=subscriber.id,
-                google_tkn=subscriber.google_tkn,
+                calendar_id=calendar.id,
+                google_tkn=external_connection.token,
             )
         else:
-            con = CalDavConnector(calendar.url, calendar.user, calendar.password)
-        con.create_event(event=event, attendee=slot.attendee, organizer=subscriber)
+            con = CalDavConnector(
+                redis_instance=redis,
+                subscriber_id=subscriber.id,
+                calendar_id=calendar.id,
+                url=calendar.url, 
+                user=calendar.user, 
+                password=calendar.password
+            )
+
+        try:
+            con.create_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
+        except EventNotCreatedException:
+            raise EventCouldNotBeAccepted
 
         # send mail with .ics attachment to attendee
         appointment = schemas.AppointmentBase(title=title, details=schedule.details, location_url=location_url)

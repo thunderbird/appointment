@@ -4,12 +4,15 @@ import secrets
 
 import requests.exceptions
 import validators
+from redis import Redis
 from requests import HTTPError
 from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
+
+from .. import utils
 from ..database import repo, schemas
 
 # authentication
@@ -21,7 +24,7 @@ from ..controller.auth import signed_url_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
-from ..dependencies.database import get_db
+from ..dependencies.database import get_db, get_redis
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
@@ -114,16 +117,30 @@ def create_my_calendar(
 
     # Test the connection first
     if calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         # I don't believe google cal touches this route, but just in case!
         con = GoogleConnector(
             db=db,
+            redis_instance=None,
             google_client=google_client,
-            calendar_id=calendar.user,
+            remote_calendar_id=calendar.user,
+            calendar_id=None,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
-        con = CalDavConnector(calendar.url, calendar.user, calendar.password)
+        con = CalDavConnector(
+            redis_instance=None,
+            url=calendar.url,
+            user=calendar.user,
+            password=calendar.password,
+            subscriber_id=subscriber.id,
+            calendar_id=None,
+        )
 
     # Make sure we can connect to the calendar before we save it
     if not con.test_connection():
@@ -211,18 +228,33 @@ def read_remote_calendars(
     connection: schemas.CalendarConnection,
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
+    db: Session = Depends(get_db),
 ):
     """endpoint to get calendars from a remote CalDAV server"""
     if connection.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         con = GoogleConnector(
             db=None,
+            redis_instance=None,
             google_client=google_client,
-            calendar_id=connection.user,
+            remote_calendar_id=connection.user,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            calendar_id=None,
+            google_tkn=external_connection.token,
         )
     else:
-        con = CalDavConnector(connection.url, connection.user, connection.password)
+        con = CalDavConnector(
+            redis_instance=None,
+            url=connection.url,
+            user=connection.user,
+            password=connection.password,
+            subscriber_id=subscriber.id,
+            calendar_id=None,
+        )
 
     try:
         calendars = con.list_calendars()
@@ -235,19 +267,29 @@ def read_remote_calendars(
 @router.post("/rmt/sync")
 def sync_remote_calendars(
     db: Session = Depends(get_db),
+    redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to sync calendars from a remote server"""
     # Create a list of connections and loop through them with sync
     # TODO: Also handle CalDAV connections
+
+    external_connection = utils.list_first(
+        repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+    if external_connection is None or external_connection.token is None:
+        raise RemoteCalendarConnectionError()
+
     connections = [
         GoogleConnector(
             db=db,
+            redis_instance=redis,
             google_client=google_client,
+            remote_calendar_id=None,
             calendar_id=None,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         ),
     ]
     for connection in connections:
@@ -266,6 +308,7 @@ def read_remote_events(
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
+    redis_instance: Redis | None = Depends(get_redis),
 ):
     """endpoint to get events in a given date range from a remote calendar"""
     db_calendar = repo.get_calendar(db, calendar_id=id)
@@ -274,15 +317,29 @@ def read_remote_events(
         raise validation.CalendarNotFoundException()
 
     if db_calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
         con = GoogleConnector(
             db=db,
+            redis_instance=redis_instance,
             google_client=google_client,
-            calendar_id=db_calendar.user,
+            remote_calendar_id=db_calendar.user,
+            calendar_id=db_calendar.id,
             subscriber_id=subscriber.id,
-            google_tkn=subscriber.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
-        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
+        con = CalDavConnector(
+            redis_instance=redis_instance,
+            url=db_calendar.url,
+            user=db_calendar.user,
+            password=db_calendar.password,
+            subscriber_id=subscriber.id,
+            calendar_id=db_calendar.id,
+        )
 
     try:
         events = con.list_events(start, end)
@@ -404,7 +461,8 @@ def update_public_appointment_slot(
     if db_appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
         try:
             zoom_client = get_zoom_client(organizer)
-            response = zoom_client.create_meeting(db_appointment.title, slot.start.isoformat(), slot.duration, organizer.timezone)
+            response = zoom_client.create_meeting(db_appointment.title, slot.start.isoformat(), slot.duration,
+                                                  organizer.timezone)
             if 'id' in response:
                 slot.meeting_link_url = zoom_client.get_meeting(response['id'])['join_url']
                 slot.meeting_link_id = response['id']
@@ -423,7 +481,8 @@ def update_public_appointment_slot(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(send_zoom_meeting_failed_email, to=organizer.email, appointment=db_appointment.title)
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=organizer.email,
+                                      appointment=db_appointment.title)
 
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error("Failed to save the zoom meeting link to the appointment: ", err)
@@ -445,18 +504,36 @@ def update_public_appointment_slot(
         ),
     )
 
+    organizer_email = organizer.email
+
     # create remote event
     if db_calendar.provider == CalendarProvider.google:
+        external_connection = utils.list_first(repo.get_external_connections_by_type(db, organizer.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        organizer_email = external_connection.name
+
         con = GoogleConnector(
             db=db,
+            redis_instance=None,
             google_client=google_client,
-            calendar_id=db_calendar.user,
+            remote_calendar_id=db_calendar.user,
+            calendar_id=db_calendar.id,
             subscriber_id=organizer.id,
-            google_tkn=organizer.google_tkn,
+            google_tkn=external_connection.token,
         )
     else:
-        con = CalDavConnector(db_calendar.url, db_calendar.user, db_calendar.password)
-    con.create_event(event=event, attendee=s_a.attendee, organizer=organizer)
+        con = CalDavConnector(
+            redis_instance=None,
+            url=db_calendar.url,
+            user=db_calendar.user,
+            password=db_calendar.password,
+            subscriber_id=organizer.id,
+            calendar_id=db_calendar.id,
+        )
+    con.create_event(event=event, attendee=s_a.attendee, organizer=organizer, organizer_email=organizer_email)
 
     # update appointment slot data
     repo.update_slot(db=db, slot_id=s_a.slot_id, attendee=s_a.attendee)
@@ -476,7 +553,7 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
 
     if not repo.appointment_has_slot(db, appointment_id=db_appointment.id, slot_id=slot_id):
         raise validation.SlotNotFoundException()
-    
+
     slot = repo.get_slot(db=db, slot_id=slot_id)
     if slot is None:
         raise validation.SlotNotFoundException()

@@ -241,6 +241,12 @@ export const qalendarSlotDurations = {
   60: 60,
 };
 
+/**
+ * Used as the session storage key for the location the user wanted to go to before logging in.
+ * @type {string}
+ */
+export const loginRedirectKey = 'loginRedirect';
+
 export default {
   subscriberLevels,
   appointmentState,

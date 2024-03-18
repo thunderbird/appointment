@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
+import { i18n } from '@/composables/i18n';
 
 const initialUserObject = {
   email: null,
@@ -29,13 +31,12 @@ export const useUserStore = defineStore('user', () => {
     const { error, data: sigData } = await fetch('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
-      console.error(error.value, sigData.value);
-      return false;
+      return { error: sigData.value?.detail ?? error.value };
     }
 
     data.value.signedUrl = sigData.value.url;
 
-    return true;
+    return { error: false };
   };
 
   /**
@@ -49,7 +50,7 @@ export const useUserStore = defineStore('user', () => {
     // Failed to get profile data, log this user out and return false
     if (error.value || !userData.value) {
       $reset();
-      return false;
+      return { error: userData.value?.detail ?? error.value };
     }
 
     data.value = {
@@ -73,11 +74,10 @@ export const useUserStore = defineStore('user', () => {
    * @return {boolean}
    */
   const changeSignedUrl = async (fetch) => {
-    const { error, data: sigData } = await fetch('me/signature').post().json();
+    const { error, data } = await fetch('me/signature').post().json();
 
     if (error.value) {
-      console.error(error.value, sigData.value);
-      return false;
+      return { error: data.value?.detail ?? error.value };
     }
 
     return updateSignedUrl(fetch);
@@ -87,8 +87,8 @@ export const useUserStore = defineStore('user', () => {
    * Request subscriber login
    * @param {function} fetch preconfigured API fetch function
    * @param {string} username
-   * @param {string} password
-   * @returns {boolean} true if login was successful
+   * @param {string|null} password or null if fxa authentication
+   * @returns {Promise<boolean>} true if login was successful
    */
   const login = async (fetch, username, password) => {
     $reset();
@@ -101,7 +101,7 @@ export const useUserStore = defineStore('user', () => {
       const { error, data: tokenData } = await fetch('token').post(formData).json();
 
       if (error.value || !tokenData.value.access_token) {
-        return false;
+        return { error: tokenData.value?.detail ?? error.value };
       }
 
       data.value.accessToken = tokenData.value.access_token;
@@ -109,7 +109,7 @@ export const useUserStore = defineStore('user', () => {
       // For FXA we re-use the username parameter as our access token
       data.value.accessToken = username;
     } else {
-      return false;
+      return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
     return profile(fetch);

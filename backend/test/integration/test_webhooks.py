@@ -104,6 +104,7 @@ class TestFXAWebhooks:
         # Make a guy with a middleschool-era email they would like to change
         subscriber = make_pro_subscriber(email=OLD_EMAIL)
         subscriber_id = subscriber.id
+        subscriber_name = subscriber.name
         make_external_connections(subscriber_id, type=models.ExternalConnectionType.fxa, type_id=FXA_USER_ID)
 
         assert subscriber.minimum_valid_iat_time is None
@@ -124,7 +125,9 @@ class TestFXAWebhooks:
 
             # Ensure our profile update occured
             assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
-            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
+            # Ensure name does not change
+            assert subscriber.name != FXA_CLIENT_PATCH.get('subscriber_display_name')
+            assert subscriber.name == subscriber_name
 
     def test_fxa_process_delete_user(self, with_db, with_client, make_pro_subscriber, make_external_connections, make_appointment, make_caldav_calendar):
         """Ensure the delete user event is handled correctly"""

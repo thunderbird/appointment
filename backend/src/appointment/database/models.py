@@ -2,9 +2,12 @@
 
 Definitions of database tables and their relationships.
 """
+import datetime
 import enum
 import os
 import uuid
+import zoneinfo
+
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
@@ -96,10 +99,6 @@ class Subscriber(Base):
     timezone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     avatar_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
 
-    google_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
-    # Temp storage for verifying google state tokens between authentication
-    google_state = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
-    google_state_expires_at = Column(DateTime)
     short_link_hash = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
@@ -128,9 +127,9 @@ class Calendar(Base):
     connected = Column(Boolean, index=True, default=False)
     connected_at = Column(DateTime)
 
-    owner = relationship("Subscriber", back_populates="calendars")
-    appointments = relationship("Appointment", cascade="all,delete", back_populates="calendar")
-    schedules = relationship("Schedule", cascade="all,delete", back_populates="calendar")
+    owner: Subscriber = relationship("Subscriber", back_populates="calendars")
+    appointments: list["Appointment"] = relationship("Appointment", cascade="all,delete", back_populates="calendar")
+    schedules: list["Schedule"] = relationship("Schedule", cascade="all,delete", back_populates="calendar")
 
 
 class Appointment(Base):
@@ -200,28 +199,40 @@ class Slot(Base):
 class Schedule(Base):
     __tablename__ = "schedules"
 
-    id = Column(Integer, primary_key=True, index=True)
-    calendar_id = Column(Integer, ForeignKey("calendars.id"))
-    active = Column(Boolean, index=True, default=True)
-    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    location_type = Column(Enum(LocationType), default=LocationType.inperson)
-    location_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
-    details = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    start_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
-    start_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
-    earliest_booking = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
-    farthest_booking = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
-    weekdays = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
-    slot_duration = Column(Integer, default=30)  # defaults to 30 minutes
+    id: int = Column(Integer, primary_key=True, index=True)
+    calendar_id: int = Column(Integer, ForeignKey("calendars.id"))
+    active: bool = Column(Boolean, index=True, default=True)
+    name: str = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    location_type: LocationType = Column(Enum(LocationType), default=LocationType.inperson)
+    location_url: str = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
+    details: str = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
+    start_date: datetime.date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_date: datetime.date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
+    start_time: datetime.time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
+    end_time: datetime.time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
+    earliest_booking: int = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
+    farthest_booking: int = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
+    weekdays: str | dict = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
+    slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider: MeetingLinkProviderType = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
 
-    calendar = relationship("Calendar", back_populates="schedules")
-    availabilities = relationship("Availability", cascade="all,delete", back_populates="schedule")
-    slots = relationship("Slot", cascade="all,delete", back_populates="schedule")
+    calendar: Calendar = relationship("Calendar", back_populates="schedules")
+    availabilities: list["Availability"] = relationship("Availability", cascade="all,delete", back_populates="schedule")
+    slots: list[Slot] = relationship("Slot", cascade="all,delete", back_populates="schedule")
+
+    @property
+    def start_time_local(self) -> datetime.time:
+        """Start Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc)
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
+
+    @property
+    def end_time_local(self) -> datetime.time:
+        """End Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc)
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
 
 class Availability(Base):

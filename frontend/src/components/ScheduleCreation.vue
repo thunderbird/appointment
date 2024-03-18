@@ -538,11 +538,12 @@ const saveSchedule = async (withConfirmation = true) => {
   // build data object for post request
   const obj = { ...scheduleInput.value };
   // convert local input times to utc times
-  obj.start_time = dj(`${dj(obj.start_date).format('YYYY-MM-DD')}T${obj.start_time}:00`)
+
+  obj.start_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.start_time}:00`)
     .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
     .format('HH:mm');
-  obj.end_time = dj(`${dj(obj.start_date).format('YYYY-MM-DD')}T${obj.end_time}:00`)
+  obj.end_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.end_time}:00`)
     .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
     .format('HH:mm');

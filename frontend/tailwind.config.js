@@ -6,6 +6,7 @@ module.exports = {
     fontFamily: {
       sans: ['"Open Sans"', ...defaultTheme.fontFamily.sans],
       display: ['"Raleway"', ...defaultTheme.fontFamily.sans],
+      roboto: ['"Roboto"', ...defaultTheme.fontFamily.sans],
     },
     extend: {
       gridTemplateColumns: {
