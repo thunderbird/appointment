@@ -8,7 +8,7 @@
     </div>
   </div>
   <!-- page content -->
-  <div class="mt-8 flex flex-col flex-col-reverse justify-between gap-4 lg:flex-row xl:gap-24">
+  <div class="mt-8 flex flex-col justify-between gap-4 lg:flex-row xl:gap-24">
     <!-- main section: list/grid of appointments with filter -->
     <div class="w-full lg:w-4/5">
       <!-- filter bar -->
@@ -141,29 +141,16 @@
               <span>{{ appointment.title }}</span>
             </td>
             <td v-if="columnVisible('status')" class="p-2 text-sm">
-              <span>{{ t("label." + keyByValue(appointmentState, appointment.status)) }}</span>
-            </td>
-            <td v-if="columnVisible('active')" class="p-2 text-sm">
-              <span>{{ appointment.active ? t("label.open") : t("label.closed") }}</span>
+              <span>{{ t('label.' + keyByValue(bookingStatus, appointment?.slots[0].booking_status ?? 'Unknown')) }}</span>
             </td>
             <td v-if="columnVisible('calendar')" class="p-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
             </td>
-            <td v-if="columnVisible('bookingLink')" class="max-w-2xs truncate p-2 text-sm">
-              <a
-                :href="bookingUrl + appointment.slug"
-                class="text-teal-500 underline underline-offset-2"
-                target="_blank"
-                @click.stop="null"
-              >
-                {{ bookingUrl + appointment.slug }}
-              </a>
-            </td>
-            <td v-if="columnVisible('replies')" class="p-2 text-sm">
-              <span>
-                {{ repliesCount(appointment) }}
-                {{ t("label.bookings", repliesCount(appointment)) }}
-              </span>
+            <td v-if="columnVisible('time')" class="p-2 text-sm">
+              <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
+              <div>{{ dj(appointment?.slots[0].start).format(timeFormat()) }}</div>
+              <div>{{ t('label.to')}}</div>
+              <div>{{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}</div>
             </td>
           </tr>
         </tbody>
@@ -209,9 +196,9 @@ import {
   listColumns as columns,
   appointmentViews as views,
   filterOptions,
-  viewTypes,
+  viewTypes, bookingStatus,
 } from '@/definitions';
-import { keyByValue } from '@/utils';
+import { keyByValue, timeFormat } from '@/utils';
 
 import {
   ref, inject, provide, computed, onMounted,
@@ -317,13 +304,13 @@ const filteredAppointments = computed(() => {
   // by active tab
   switch (tabActive.value) {
     case views.booked:
-      list = list.filter((a) => a.status === appointmentState.booked);
+      list = list.filter((a) => a.slots[0].booking_status === bookingStatus.booked);
       break;
     case views.pending:
-      list = list.filter((a) => a.status === appointmentState.pending);
+      list = list.filter((a) => a.slots[0].booking_status === bookingStatus.requested);
       break;
     case views.past:
-      list = list.filter((a) => a.status === appointmentState.past);
+      list = list.filter((a) => a.slots[0].start < dj());
       break;
     case views.all:
     default:

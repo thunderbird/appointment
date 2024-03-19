@@ -16,46 +16,29 @@
     >
       <div>{{ appointment.title }}</div>
       <div class="flex items-center gap-1 text-sm">
-        <icon-clock class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2" />
-        {{ t('label.' + keyByValue(appointmentState, appointment.status)) }}
+        <icon-bulb class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
+        {{ t('label.' + keyByValue(bookingStatus, appointment?.slots[0].booking_status ?? 'Unknown')) }}
       </div>
       <div class="flex items-center gap-1 text-sm">
-        <icon-calendar class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2" />
+        <icon-calendar class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
         {{ appointment.calendar_title }}
       </div>
-      <div class="flex items-center gap-1 pr-4 text-sm">
-        <icon-bulb class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2" />
-        <switch-toggle
-          class="w-full"
-          :label="t('label.activeAppointment')"
-          :active="appointment.active"
-          :disabled="true"
-          @click.stop="null"
-        />
-      </div>
       <div class="flex items-center gap-1 text-sm">
-        <icon-link class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2" />
-        <div class="truncate">
-          <a
-            :href="bookingUrl + appointment.slug"
-            class="text-teal-500 underline underline-offset-2"
-            target="_blank"
-            @click.stop="null"
-          >
-            {{ bookingUrl + appointment.slug }}
-          </a>
-        </div>
+        <icon-clock class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
+        <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
+        <div>{{ dj(appointment?.slots[0].start).format(timeFormat()) }}</div>
+        <div>{{ t('label.to') }}</div>
+        <div>{{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { appointmentState } from '@/definitions';
+import { appointmentState, bookingStatus } from '@/definitions';
 import { inject, computed } from 'vue';
-import { keyByValue } from '@/utils';
+import { keyByValue, timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
-import SwitchToggle from '@/elements/SwitchToggle';
 
 // icons
 import {
@@ -69,6 +52,7 @@ import {
 const { t } = useI18n();
 const bookingUrl = inject('bookingUrl');
 const paintBackground = inject('paintBackground');
+const dj = inject('dayjs');
 
 // component properties
 const props = defineProps({

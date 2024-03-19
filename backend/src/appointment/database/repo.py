@@ -296,13 +296,14 @@ def delete_subscriber_calendar_by_subscriber_id(db: Session, subscriber_id: int)
 """
 
 
-def create_calendar_appointment(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase]):
+def create_calendar_appointment(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase] = []):
     """create new appointment with slots for calendar"""
     db_appointment = models.Appointment(**appointment.dict())
     db.add(db_appointment)
     db.commit()
     db.refresh(db_appointment)
-    add_appointment_slots(db, slots, db_appointment.id)
+    if len(slots) > 0:
+        add_appointment_slots(db, slots, db_appointment.id)
     return db_appointment
 
 
@@ -480,9 +481,6 @@ def delete_slot(db: Session, slot_id: int):
 def slot_is_available(db: Session, slot_id: int):
     """check if slot is still available for booking"""
     slot = get_slot(db, slot_id)
-    isAttended = slot.attendee_id or slot.subscriber_id
-    if slot.appointment:
-        return slot and not isAttended
     if slot.schedule:
         return slot and slot.booking_status == models.BookingStatus.requested
     return False

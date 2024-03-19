@@ -216,9 +216,11 @@ const getAppointment = async () => {
     return null;
   }
 
+  /*
   if (isBookingRoute.value && appointmentStatus(data.value) !== appointmentState.pending) {
     return null;
   }
+   */
 
   // convert start dates from UTC back to users timezone
   data.value.slots.forEach((s) => {
