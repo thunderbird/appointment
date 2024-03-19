@@ -515,7 +515,7 @@ class Tools:
             available_slots.append(a)
 
         # FIXME: Lack of coffee == duplicate code. Re-work this code so we don't need a tail append.
-        if collision_duration > 0 and last_collision and last_collision.end.timestamp() < (a_list[-1].timestamp() - collision_duration):
+        if collision_duration > 0 and last_collision and last_collision.end.timestamp() < (a_list[-1].start.timestamp() - collision_duration):
             collision_duration = 0
         elif collision_duration > 0:
             collision = schemas.SlotBase(
