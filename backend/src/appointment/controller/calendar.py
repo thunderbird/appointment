@@ -476,6 +476,8 @@ class Tools:
         """
         available_slots = []
         collision_duration = 0
+        last_collision = None
+        
         for a in a_list:
             a_start = a.start
             a_end = a_start + timedelta(minutes=a.duration)
@@ -487,6 +489,7 @@ class Tools:
                 # if there is an overlap of both date ranges, a collision was found
                 # see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
                 if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
+                    last_collision = b
                     collision_found = True
                     break
 
@@ -494,7 +497,13 @@ class Tools:
                 collision_duration += a.duration
                 continue
 
-            if collision_duration > 0:
+            # If our last collision doesn't actually collide with our slot's start time minus the collision duration,
+            # then don't mark it as a collision
+            # e.g. Schedule 10:00 - 16:00, A = {day 2, start: 10:00, end: 11:00},  B = {day 1, start: 15:30, end: 16:30}
+            # ^ Would be caught here, and an entry before A would not be created.
+            if collision_duration > 0 and last_collision and last_collision.end.timestamp() < (a_start.timestamp() - collision_duration):
+                collision_duration = 0
+            elif collision_duration > 0:
                 collision = schemas.SlotBase(
                     start=a_start - timedelta(minutes=collision_duration),
                     duration=collision_duration,
@@ -506,7 +515,9 @@ class Tools:
             available_slots.append(a)
 
         # FIXME: Lack of coffee == duplicate code. Re-work this code so we don't need a tail append.
-        if collision_duration > 0:
+        if collision_duration > 0 and last_collision and last_collision.end.timestamp() < (a_list[-1].timestamp() - collision_duration):
+            collision_duration = 0
+        elif collision_duration > 0:
             collision = schemas.SlotBase(
                 start=a_list[-1].start - timedelta(minutes=collision_duration),
                 duration=collision_duration,
