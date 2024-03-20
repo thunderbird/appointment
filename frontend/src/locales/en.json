@@ -7,7 +7,7 @@
     "actionNeeded": "Action needed",
     "authenticationRequired": "Sorry, this page requires you to be logged in.",
     "credentialsIncomplete": "Please provide login credentials.",
-    "generalBookingError": "Sorry, there was a problem retrieving schedule details. Please try again later.",
+    "generalBookingError": "Sorry, there was a problem retrieving the schedule details. Please try again later.",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "loginMethodNotSupported": "Login method not supported. Please try again.",
     "minimumValue": "{field} should be at least {value}.",
