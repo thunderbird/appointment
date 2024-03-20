@@ -375,7 +375,7 @@ def delete_calendar_appointments_by_subscriber_id(db: Session, subscriber_id: in
 """
 
 
-def get_slot(db: Session, slot_id: int):
+def get_slot(db: Session, slot_id: int) -> models.Slot | None:
     """retrieve slot by id"""
     if slot_id:
         return db.get(models.Slot, slot_id)
@@ -430,7 +430,7 @@ def schedule_slot_exists(db: Session, slot: schemas.SlotBase, schedule_id: int):
     return db_slot is not None
 
 
-def book_slot(db: Session, slot_id: int):
+def book_slot(db: Session, slot_id: int) -> models.Slot | None:
     """update booking status for slot of given id"""
     db_slot = get_slot(db, slot_id)
     db_slot.booking_status = models.BookingStatus.booked

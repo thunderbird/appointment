@@ -8,7 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
 
-from .l10n import l10n
+from .defines import APP_ENV_DEV, APP_ENV_TEST
 from .middleware.l10n import L10n
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
@@ -141,10 +141,15 @@ def server():
     async def warn_about_deprecated_routes(request: Request, call_next):
         """Warn about clients using deprecated routes"""
         response = await call_next(request)
-        if (os.getenv('APP_ENV') == 'dev'
-            and request.scope.get('route')
-            and request.scope['route'].deprecated):
-            logging.warning(f"Use of deprecated route: `{request.scope['route'].path}`!")
+        if request.scope.get('route') and request.scope['route'].deprecated:
+            app_env = os.getenv('APP_ENV')
+            if app_env == APP_ENV_DEV:
+                logging.warning(f"Use of deprecated route: `{request.scope['route'].path}`!")
+            elif app_env == APP_ENV_TEST:
+                # Stale test runtime error
+                #raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
+                # Just log for this PR, we'll fix it another PR.
+                logging.error(f"Test uses deprecated route: `{request.scope['route'].path}`!")
         return response
 
     @app.exception_handler(DefaultCredentialsError)

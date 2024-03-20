@@ -189,11 +189,11 @@ class Slot(Base):
     booking_expires_at = Column(DateTime)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
-    appointment = relationship("Appointment", back_populates="slots")
-    schedule = relationship("Schedule", back_populates="slots")
+    appointment: Appointment = relationship("Appointment", back_populates="slots")
+    schedule: 'Schedule' = relationship("Schedule", back_populates="slots")
 
-    attendee = relationship("Attendee", cascade="all,delete", back_populates="slots")
-    subscriber = relationship("Subscriber", back_populates="slots")
+    attendee: Attendee = relationship("Attendee", cascade="all,delete", back_populates="slots")
+    subscriber: Subscriber = relationship("Subscriber", back_populates="slots")
 
 
 class Schedule(Base):

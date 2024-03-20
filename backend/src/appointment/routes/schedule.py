@@ -221,7 +221,7 @@ def request_schedule_availability_slot(
     date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
     date = f"{date}, {slot.duration} minutes"
 
-    # Create an pending appointment
+    # Create a pending appointment
     attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
     subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
     title = f"Appointment - {subscriber_name} and {attendee_name}"
@@ -247,7 +247,13 @@ def request_schedule_availability_slot(
     # Sending pending email to attendee
     background_tasks.add_task(send_pending_email, owner=subscriber, date=date, to=slot.attendee.email)
 
-    return True
+    # Mini version of slot, so we can grab the newly created slot id for tests
+    return schemas.SlotOut(
+        id=slot.id,
+        start=slot.start,
+        duration=slot.duration,
+        attendee_id=slot.attendee_id,
+    )
 
 
 @router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
@@ -345,10 +351,13 @@ def decide_on_schedule_availability_slot(
                 if os.getenv('SENTRY_DSN') != '':
                     capture_exception(err)
 
-        attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
-        subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
+        if not slot.appointment:
+            attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+            subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
 
-        title = f"Appointment - {subscriber_name} and {attendee_name}"
+            title = f"Appointment - {subscriber_name} and {attendee_name}"
+        else:
+            title = slot.appointment.title
 
         event = schemas.Event(
             title=title,
