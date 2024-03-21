@@ -1,4 +1,7 @@
 terraform_binary = "tofu"
+terraform_version_constraint = ">= 1.6.2"
+terragrunt_version_constraint = ">= 0.55.15"
+
 
 locals {
   project_vars = yamldecode(file("project_vars.yaml"))
