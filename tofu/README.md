@@ -5,5 +5,4 @@
 3. <env>/services/backend
 4. <env>/data-store/cache
 5. <env>/data-store/database
-6. <env>/network/cdn
-7. <end>/services/frontend
+6. <end>/services/frontend
