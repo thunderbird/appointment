@@ -12,7 +12,7 @@
       v-else-if="activeView === views.invalid"
       class="flex-center h-screen select-none flex-col gap-8 px-4"
     >
-      <booking-view-invalid-link
+      <booking-view-error
         :heading="errorHeading"
         :body="errorBody"
       />
@@ -69,7 +69,7 @@ import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
-import BookingViewInvalidLink from '@/components/bookingView/BookingViewInvalidLink.vue';
+import BookingViewError from '@/components/bookingView/BookingViewError.vue';
 
 // component constants
 const route = useRoute();
