@@ -1,5 +1,5 @@
 <template>
-  <div class="relative flex h-full flex-col gap-4">
+  <div class="sticky top-24 flex flex-col gap-4">
     <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
       <span>{{ t("heading.generalAvailability") }}</span>
       <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive"/>
@@ -272,14 +272,14 @@
       </div>
     </div>
     <!-- action buttons -->
-    <div class="mt-auto flex justify-center gap-4">
+    <div class="my-8 flex justify-center gap-4">
       <primary-button
         v-if="user.data.signedUrl && existing"
         :label="t('label.shareMyLink')"
         :copy="user.data.signedUrl"
       />
     </div>
-    <div class="mt-auto flex gap-4">
+    <div class="flex gap-4">
       <secondary-button
         :label="t('label.cancel')"
         @click="resetSchedule()"
