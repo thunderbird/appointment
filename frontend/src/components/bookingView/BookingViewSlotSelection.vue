@@ -1,11 +1,20 @@
 <template>
   <div v-if="appointment">
-    <div class="mb-4 text-3xl text-gray-700 dark:text-gray-400">{{ appointment.title }}</div>
-    <div class="font-semibold">
-      {{ t('text.nameIsInvitingYou', {name: appointment.owner_name}) }}
+    <div class="mb-4 text-3xl text-gray-700 dark:text-gray-400">
+      {{ appointment.title }}
     </div>
-    <div class="mb-6 text-gray-700 dark:text-gray-400">{{ appointment.details }}</div>
-    <div class="mb-6 text-xl">{{ t('text.chooseDateAndTime') }}</div>
+    <div class="mb-4 font-semibold">
+      {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
+    </div>
+    <div v-if="appointment.details" class="mb-6 text-gray-700 dark:text-gray-400">
+      {{ appointment.details }}
+    </div>
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-center">
+      <div class="text-xl">{{ t('text.chooseDateAndTime') }}</div>
+      <div class="text-sm text-teal-600 dark:text-teal-500">
+        {{ t('text.timesAreDisplayedInLocalTimezone', { timezone: dj.tz.guess() }) }}
+      </div>
+    </div>
     <calendar-qalendar
       class="w-full"
       :current-date="activeDate"
@@ -30,6 +39,7 @@
   </footer>
 </template>
 <script setup>
+import { inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
@@ -40,16 +50,14 @@ import PrimaryButton from '@/elements/PrimaryButton';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
 
 const { t } = useI18n();
-const {
-  appointment, activeDate, selectedEvent,
-} = storeToRefs(useBookingViewStore());
+const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
+const dj = inject('dayjs');
 
 const emit = defineEmits(['openModal']);
+
 defineProps({
   showNavigation: Boolean,
 });
-
-// Computed
 
 /**
  * Select a specific time slot
