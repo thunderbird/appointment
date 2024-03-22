@@ -268,6 +268,7 @@
     "recipientsCanScheduleBetween": "Bookers can schedule time with you between {earliest} and {farthest}.",
     "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
+    "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
     "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work."
   },

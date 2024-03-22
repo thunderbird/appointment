@@ -231,7 +231,7 @@
     "accountDataNotice": "Lade all Deine Daten von Thunderbird Appointment herunter.",
     "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben selbstverständlich unverändert. Du kannst jederzeit ein neues Konto erstellen.",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalendern gespeichert sind.",
-    "chooseDateAndTime": "Wähle einen Tag und eine Zeit für ein Treffen:",
+    "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erweitern.",
     "contactRequestForm": "Bitte verwende das nachstehende Kontaktformular, um Feedback, Fragen oder Anliegen an unser Support-Team zu senden. Wir werden ggf. versuchen, so schnell wie möglich zu antworten.",
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
@@ -268,6 +268,7 @@
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
+    "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren."
   },
