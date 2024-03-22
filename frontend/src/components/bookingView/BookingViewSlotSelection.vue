@@ -11,7 +11,7 @@
     </div>
     <div class="mb-6 flex flex-col md:flex-row justify-between items-center">
       <div class="text-xl">{{ t('text.chooseDateAndTime') }}</div>
-      <div class="text-sm text-teal-500">
+      <div class="text-sm text-teal-600 dark:text-teal-500">
         {{ t('text.timesAreDisplayedInLocalTimezone', { timezone: dj.tz.guess() }) }}
       </div>
     </div>
