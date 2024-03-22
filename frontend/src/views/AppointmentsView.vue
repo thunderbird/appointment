@@ -148,9 +148,11 @@
             </td>
             <td v-if="columnVisible('time')" class="p-2 text-sm">
               <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
-              <div>{{ dj(appointment?.slots[0].start).format(timeFormat()) }}</div>
-              <div>{{ t('label.to')}}</div>
-              <div>{{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}</div>
+              <div>
+                {{ dj(appointment?.slots[0].start).format(timeFormat()) }}
+                {{ t('label.to')}}
+                {{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}
+              </div>
             </td>
           </tr>
         </tbody>
@@ -192,11 +194,11 @@
 
 <script setup>
 import {
-  appointmentState,
+  bookingStatus,
   listColumns as columns,
   appointmentViews as views,
   filterOptions,
-  viewTypes, bookingStatus,
+  viewTypes,
 } from '@/definitions';
 import { keyByValue, timeFormat } from '@/utils';
 
