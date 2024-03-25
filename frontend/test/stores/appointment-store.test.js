@@ -12,6 +12,7 @@ import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
+import { bookingStatus } from '@/definitions';
 import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
@@ -23,6 +24,7 @@ const restHandlers = [
       title: 'title',
       duration: 180,
       location_type: 2,
+      status: bookingStatus.none,
       slots: [
         { start: '3000-01-01T09:00:00Z', duration: 60 },
         { start: '3000-01-01T11:00:00Z', duration: 15 },
@@ -34,6 +36,7 @@ const restHandlers = [
       title: 'title',
       duration: 180,
       location_type: 2,
+      status: bookingStatus.requested,
       slots: [
         { start: '2024-01-01T09:00:00Z', duration: 60 },
         { start: '2024-01-01T11:00:00Z', duration: 15, attendee_id: 1 },
