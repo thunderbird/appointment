@@ -5,7 +5,7 @@ from freezegun import freeze_time
 
 from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
-from appointment.database import schemas, models
+from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
 from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
 
@@ -387,7 +387,8 @@ class TestSchedule:
                 slot = slots_dict[iso]
                 assert slot['booking_status'] == models.BookingStatus.none.value if expected_assert else models.BookingStatus.booked.value
 
-    def test_request_schedule_availability_slot(self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule):
+    def test_request_schedule_availability_slot(self, monkeypatch, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule):
+        """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
         start_time = time(9)
         start_datetime = datetime.combine(start_date, start_time)
@@ -424,7 +425,7 @@ class TestSchedule:
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
-        make_schedule(
+        schedule = make_schedule(
             calendar_id=generated_calendar.id,
             active=True,
             start_date=start_date,
@@ -458,7 +459,7 @@ class TestSchedule:
             },
             headers=auth_headers,
         )
-        print(response.status_code, response.json())
+
         assert response.status_code == 403, response.text
         data = response.json()
 
@@ -483,4 +484,11 @@ class TestSchedule:
         )
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data is True
+        assert data.get('id')
+
+        slot_id = data.get('id')
+
+        # Look up the slot
+        with with_db() as db:
+            slot = repo.get_slot(db, slot_id)
+            assert slot.appointment_id

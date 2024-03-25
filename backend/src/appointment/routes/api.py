@@ -412,7 +412,7 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
     return repo.delete_calendar_appointment(db=db, appointment_id=id)
 
 
-@router.get("/apmt/public/{slug}", response_model=schemas.AppointmentOut)
+@router.get("/apmt/public/{slug}", response_model=schemas.AppointmentOut, deprecated=True)
 def read_public_appointment(slug: str, db: Session = Depends(get_db)):
     """endpoint to retrieve an appointment from db via public link and only expose necessary data"""
     a = repo.get_public_appointment(db, slug=slug)
@@ -429,7 +429,7 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
     )
 
 
-@router.put("/apmt/public/{slug}", response_model=schemas.SlotAttendee)
+@router.put("/apmt/public/{slug}", response_model=schemas.SlotAttendee, deprecated=True)
 def update_public_appointment_slot(
     slug: str,
     s_a: schemas.SlotAttendee,

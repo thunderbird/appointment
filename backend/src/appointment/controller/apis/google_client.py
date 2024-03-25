@@ -1,6 +1,5 @@
 import logging
 
-import requests
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -79,10 +78,12 @@ class GoogleClient:
         return user_info
 
     def list_calendars(self, token):
+        """List the calendars a token has access to with the minAccessRole of writer.
+        Ref: https://developers.google.com/calendar/api/v3/reference/calendarList/list"""
         response = {}
         items = []
         with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
-            request = service.calendarList().list()
+            request = service.calendarList().list(minAccessRole='writer')
             while request is not None:
                 try:
                     response = request.execute()

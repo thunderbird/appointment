@@ -84,9 +84,7 @@
 </template>
 
 <script setup>
-import {
-  inject, computed, reactive, ref, onMounted,
-} from 'vue';
+import { inject, computed, reactive, ref, onMounted } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';

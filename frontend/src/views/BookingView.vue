@@ -12,7 +12,7 @@
       v-else-if="activeView === views.invalid"
       class="flex-center h-screen select-none flex-col gap-8 px-4"
     >
-      <booking-view-invalid-link
+      <booking-view-error
         :heading="errorHeading"
         :body="errorBody"
       />
@@ -20,7 +20,7 @@
     <!-- booking page content: successful booking -->
     <main
       v-else-if="activeView === views.success"
-      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 py-24 md:flex-row"
+      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
     >
       <booking-view-success
         :attendee-email="attendee.email"
@@ -33,8 +33,7 @@
     <!-- booking page content: time slot selection -->
     <main
       v-else
-      class="mx-auto max-w-screen-2xl select-none px-4 py-32"
-      :class="{ 'pt-0': isAvailabilityRoute }"
+      class="mx-auto max-w-screen-2xl select-none px-4"
     >
       <booking-view-slot-selection
         :show-navigation="showNavigation"
@@ -56,20 +55,18 @@
 <script setup>
 import { bookingCalendarViews as views, appointmentState, modalStates } from '@/definitions';
 import { download } from '@/utils';
-import {
-  computed, inject, onMounted, ref,
-} from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import LoadingSpinner from '@/elements/LoadingSpinner';
-import BookingModal from '@/components/BookingModal';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
+import LoadingSpinner from '@/elements/LoadingSpinner';
+import BookingModal from '@/components/BookingModal';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
-import BookingViewInvalidLink from '@/components/bookingView/BookingViewInvalidLink.vue';
+import BookingViewError from '@/components/bookingView/BookingViewError.vue';
 
 // component constants
 const route = useRoute();
@@ -216,9 +213,11 @@ const getAppointment = async () => {
     return null;
   }
 
+  /*
   if (isBookingRoute.value && appointmentStatus(data.value) !== appointmentState.pending) {
     return null;
   }
+   */
 
   // convert start dates from UTC back to users timezone
   data.value.slots.forEach((s) => {

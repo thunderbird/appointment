@@ -1,10 +1,10 @@
 <template>
   <art-invalid-link class="my-6 h-auto max-w-sm"/>
   <div class="text-xl font-semibold text-sky-600">
-    {{ heading ?? t('info.bookingLinkHasAlreadyBeenUsed') }}
+    {{ heading ?? t('error.somethingWentWrong') }}
   </div>
   <div class="text-gray-800 dark:text-gray-300">
-    {{ body ?? t('info.bookedPleaseCheckEmail') }}
+    {{ body ?? t('error.generalBookingError') }}
   </div>
   <primary-button
     class="mt-12 p-7"
