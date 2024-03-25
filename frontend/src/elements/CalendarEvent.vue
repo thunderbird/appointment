@@ -7,7 +7,12 @@
       'h-full': !monthView,
     }"
     @mouseleave="popup = {...initialEventPopupData}">
-    <div class="flex flex-col gap-1.5 overflow-y-auto" :class="{'h-full': !monthView}" :style="`height: ${elementHeight}px`">
+    <div class="flex flex-col gap-1.5 overflow-y-auto"
+         :class="{
+            'h-full': !monthView,
+            'px-1' : isBooked,
+          }"
+         :style="`height: ${elementHeight}px`">
       <div
         class="is-preview m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
         :class="{
@@ -20,7 +25,7 @@
           'rounded bg-amber-400/80 dark:text-white': eventData.all_day,
           'bg-gradient-to-b from-teal-500 to-sky-600 shadow-lg': isSelected,
           'h-full rounded': !monthView,
-          '!cursor-not-allowed rounded-md bg-gray-200 p-1 dark:!bg-gray-800': isBooked,
+          '!cursor-not-allowed rounded-md bg-gray-100 p-1 dark:bg-gray-600': isBooked,
         }"
         :style="{
           borderColor: eventColor(eventData, placeholder).border,
