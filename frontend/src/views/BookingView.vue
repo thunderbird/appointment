@@ -53,13 +53,14 @@
 </template>
 
 <script setup>
-import { bookingCalendarViews as views, appointmentState, modalStates } from '@/definitions';
+import { bookingCalendarViews as views, modalStates } from '@/definitions';
 import { download } from '@/utils';
-import { computed, inject, onMounted, ref } from 'vue';
+import {
+  computed, inject, onMounted, ref,
+} from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useAppointmentStore } from '@/stores/appointment-store';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
 import LoadingSpinner from '@/elements/LoadingSpinner';
@@ -73,10 +74,8 @@ const route = useRoute();
 const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
-const appointmentStore = useAppointmentStore();
 const bookingViewStore = useBookingViewStore();
 const bookingModalStore = useBookingModalStore();
-const { status: appointmentStatus } = storeToRefs(appointmentStore);
 
 const errorHeading = ref(null);
 const errorBody = ref(null);
@@ -212,12 +211,6 @@ const getAppointment = async () => {
 
     return null;
   }
-
-  /*
-  if (isBookingRoute.value && appointmentStatus(data.value) !== appointmentState.pending) {
-    return null;
-  }
-   */
 
   // convert start dates from UTC back to users timezone
   data.value.slots.forEach((s) => {

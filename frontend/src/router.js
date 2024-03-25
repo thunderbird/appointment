@@ -6,6 +6,7 @@ import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
+import AppointmentsView from '@/views/AppointmentsView.vue';
 
 /**
  * Defined routes for Thunderbird Appointment
@@ -27,11 +28,6 @@ const routes = [
     path: '/post-login/:token',
     name: 'post-login',
     component: PostLoginView,
-  },
-  {
-    path: '/booking/:slug',
-    name: 'booking',
-    component: BookingView,
   },
   {
     path: '/user/:username/:signature',
@@ -59,7 +55,7 @@ const routes = [
   },
   // lazy-loaded routes
   {
-    path: '/appointments/:view?',
+    path: '/appointments/:view?/:slug?',
     name: 'appointments',
     component: () => import('@/views/AppointmentsView'),
   },

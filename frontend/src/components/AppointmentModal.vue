@@ -140,7 +140,6 @@ const user = useUserStore();
 // component constants
 const { t } = useI18n();
 const dj = inject('dayjs');
-const bookingUrl = inject('bookingUrl');
 
 // component properties
 const props = defineProps({
