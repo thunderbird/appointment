@@ -474,56 +474,44 @@ class Tools:
         """This helper rolls up all events from list A, which have a time collision with any event in list B
            and returns all remaining elements from A as new list.
         """
+
+        def is_blocker(a_start: datetime, a_end: datetime, b_start: datetime, b_end: datetime):
+            """
+            if there is an overlap of both date ranges, a collision was found
+            see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
+            """
+            return a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp()
+
         available_slots = []
-        collision_duration = 0
-        last_collision = None
-        
-        for a in a_list:
-            a_start = a.start
-            a_end = a_start + timedelta(minutes=a.duration)
-            collision_found = False
+        collisions = []
 
-            for b in b_list:
-                b_start = b.start
-                b_end = b.end
-                # if there is an overlap of both date ranges, a collision was found
-                # see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
-                if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
-                    last_collision = b
-                    collision_found = True
-                    break
+        for slot in a_list:
+            slot_start = slot.start
+            slot_end = slot.start + timedelta(minutes=slot.duration)
 
-            if collision_found:
-                collision_duration += a.duration
-                continue
+            # If any of the events are overlap the slot time...
+            if any([is_blocker(slot_start, slot_end, event.start, event.end) for event in b_list]):
+                previous_collision_end = collisions[-1].start + timedelta(minutes=collisions[-1].duration) if len(collisions) else None
 
-            # If our last collision doesn't actually collide with our slot's start time minus the collision duration,
-            # then don't mark it as a collision
-            # e.g. Schedule 10:00 - 16:00, A = {day 2, start: 10:00, end: 11:00},  B = {day 1, start: 15:30, end: 16:30}
-            # ^ Would be caught here, and an entry before A would not be created.
-            if collision_duration > 0 and last_collision and last_collision.end.timestamp() < (a_start.timestamp() - collision_duration):
-                collision_duration = 0
-            elif collision_duration > 0:
-                collision = schemas.SlotBase(
-                    start=a_start - timedelta(minutes=collision_duration),
-                    duration=collision_duration,
-                    booking_status=BookingStatus.booked
-                )
-                available_slots.append(collision)
-                collision_duration = 0
+                # ...and the last item was a previous collision then extend the previous collision's duration
+                if previous_collision_end and previous_collision_end.timestamp() == slot_start.timestamp():
+                    collisions[-1].duration += slot.duration
+                else:
+                    # ...if the last item was a normal available time, then create a new collision
+                    collisions.append(schemas.SlotBase(
+                        start=slot_start,
+                        duration=slot.duration,
+                        booking_status=BookingStatus.booked
+                    ))
+            else:
+                # ...Otherwise, just append the normal available time.
+                available_slots.append(slot)
 
-            available_slots.append(a)
+        # Append the two lists
+        available_slots = available_slots + collisions
 
-        # FIXME: Lack of coffee == duplicate code. Re-work this code so we don't need a tail append.
-        if collision_duration > 0 and last_collision and last_collision.end.timestamp() < (a_list[-1].start.timestamp() - collision_duration):
-            collision_duration = 0
-        elif collision_duration > 0:
-            collision = schemas.SlotBase(
-                start=a_list[-1].start - timedelta(minutes=collision_duration),
-                duration=collision_duration,
-                booking_status=BookingStatus.booked
-            )
-            available_slots.append(collision)
+        # And sort!
+        available_slots = sorted(available_slots, key=lambda slot: slot.start.timestamp())
 
         return available_slots
 
