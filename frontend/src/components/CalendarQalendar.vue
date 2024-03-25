@@ -7,7 +7,7 @@ import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/CalendarEvent.vue';
 import {
   appointmentState,
-  bookingSlotStatus as BookingStatus,
+  bookingStatus,
   colorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
@@ -90,7 +90,7 @@ const eventSelected = (evt) => {
   }
   const selectedEvent = evt.clickedEvent;
 
-  if (selectedEvent?.customData?.slot_status === BookingStatus.booked) {
+  if (selectedEvent?.customData?.slot_status === bookingStatus.booked) {
     return;
   }
 

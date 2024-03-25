@@ -80,7 +80,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import EventPopup from '@/elements/EventPopup';
-import { bookingSlotStatus as BookingStatus } from '@/definitions';
+import { bookingStatus } from '@/definitions';
 
 const { t } = useI18n();
 const dj = inject('dayjs');
@@ -105,7 +105,7 @@ const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
 
 const eventData = event.value.customData;
 const elementHeight = computed(() => (eventData.duration / timeSlotDuration.value) * timeSlotHeight.value);
-const isBooked = computed(() => eventData.slot_status === BookingStatus.booked);
+const isBooked = computed(() => eventData.slot_status === bookingStatus.booked);
 
 // component emits
 const emit = defineEmits(['eventSelected']);
