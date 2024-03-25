@@ -15,7 +15,12 @@
     ></div>
     <icon-copy v-if="icon === 'copy'" class="size-6 fill-transparent stroke-current stroke-2" />
     <icon-check v-if="icon === 'check'" class="size-6 fill-transparent stroke-current stroke-2" />
-    {{ label }}
+    <template v-if="label">
+      {{ label }}
+    </template>
+    <template v-else>
+      <slot></slot>
+    </template>
   </button>
 </template>
 

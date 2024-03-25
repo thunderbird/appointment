@@ -306,25 +306,6 @@ class TestAppointment:
         response = with_client.get(f"/apmt/public/{generated_appointment.slug}-that-isnt-real")
         assert response.status_code == 404, response.text
 
-    def test_attendee_selects_appointment_slot(self, with_client, make_appointment):
-        generated_appointment = make_appointment()
-
-        response = with_client.put(
-            f"/apmt/public/{generated_appointment.slug}",
-            json={
-                "slot_id": generated_appointment.slots[0].id,
-                "attendee": {
-                    "email": "person@test.org",
-                    "name": "John Doe",
-                },
-            },
-        )
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert data["slot_id"] == generated_appointment.slots[0].id
-        assert data["attendee"]["email"] == "person@test.org"
-        assert data["attendee"]["name"] == "John Doe"
-
     def test_read_public_appointment_after_attendee_selection(self, with_db, with_client, make_appointment, make_attendee, make_appointment_slot):
         generated_appointment = make_appointment()
         generated_attendee = make_attendee()
@@ -378,15 +359,6 @@ class TestAppointment:
             json={"slot_id": generated_appointment.slots[0].id + 1, "attendee": {"email": "a", "name": "b"}},
         )
         assert response.status_code == 404, response.text
-
-    def test_attendee_provides_invalid_email_address(self, with_client, make_appointment):
-        generated_appointment = make_appointment()
-
-        response = with_client.put(
-            f"/apmt/public/{generated_appointment.slug}",
-            json={"slot_id": generated_appointment.slots[0].id, "attendee": {"email": "a", "name": "b"}},
-        )
-        assert response.status_code == 400, response.text
 
     def test_get_remote_caldav_events(self, with_client, make_appointment, monkeypatch):
         """Test against a fake remote caldav, we're testing the route controller, not the actual caldav connector here!"""

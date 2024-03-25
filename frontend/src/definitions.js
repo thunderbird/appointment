@@ -55,11 +55,17 @@ export const bookingCalendarViews = {
   invalid: 12,
 };
 
-// available appointment views
+// available appointment views - This doesn't align with anything anymore!
 export const appointmentState = {
   booked: 1,
   pending: 2,
   past: 3,
+};
+
+export const bookingStatus = {
+  none: 1,
+  requested: 2,
+  booked: 3,
 };
 
 // available appointment views
@@ -72,10 +78,11 @@ export const appointmentViews = {
 export const listColumns = {
   title: 1,
   status: 2,
-  active: 3,
-  calendar: 4,
-  bookingLink: 5,
-  replies: 6,
+  // active: 3,
+  calendar: 3,
+  time: 4,
+  // bookingLink: 4,
+  // replies: 4,
 };
 
 // appointments list filter options

@@ -12,7 +12,7 @@ from .. import utils
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
-from ..database import repo, schemas
+from ..database import repo, schemas, models
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
 from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
@@ -209,14 +209,37 @@ def request_schedule_availability_slot(
     slot.booking_expires_at = datetime.now() + timedelta(days=1)
     slot.booking_status = BookingStatus.requested
     slot = repo.add_schedule_slot(db, slot, schedule.id)
+
     # create attendee for this slot
     attendee = repo.update_slot(db, slot.id, s_a.attendee)
+
     # generate confirm and deny links with encoded booking token and signed owner url
     url = f"{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}"
+
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
     date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
     date = f"{date}, {slot.duration} minutes"
+
+    # Create a pending appointment
+    attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+    subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
+    title = f"Appointment - {subscriber_name} and {attendee_name}"
+
+    appointment = repo.create_calendar_appointment(db, schemas.AppointmentFull(
+        title=title,
+        details=schedule.details,
+        calendar_id=db_calendar.id,
+        duration=slot.duration,
+        status=models.AppointmentStatus.opened,
+        location_type=schedule.location_type,
+        location_url=schedule.location_url,
+    ))
+
+    # Update the slot
+    slot.appointment_id = appointment.id
+    db.add(slot)
+    db.commit()
 
     # Sending confirmation email to owner
     background_tasks.add_task(send_confirmation_email, url=url, attendee=attendee, date=date, to=subscriber.email)
@@ -224,7 +247,13 @@ def request_schedule_availability_slot(
     # Sending pending email to attendee
     background_tasks.add_task(send_pending_email, owner=subscriber, date=date, to=slot.attendee.email)
 
-    return True
+    # Mini version of slot, so we can grab the newly created slot id for tests
+    return schemas.SlotOut(
+        id=slot.id,
+        start=slot.start,
+        duration=slot.duration,
+        attendee_id=slot.attendee_id,
+    )
 
 
 @router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
@@ -281,8 +310,14 @@ def decide_on_schedule_availability_slot(
         date = f"{date}, {slot.duration} minutes"
         # send rejection information to bookee
         background_tasks.add_task(send_rejection_email, owner=subscriber, date=date, to=slot.attendee.email)
-        # delete the scheduled slot to make the time available again
-        repo.delete_slot(db, slot.id)
+
+        if slot.appointment_id:
+            # delete the appointment, this will also delete the slot.
+            repo.delete_calendar_appointment(db, slot.appointment_id)
+        else:
+            # delete the scheduled slot to make the time available again
+            repo.delete_slot(db, slot.id)
+
     # otherwise, confirm slot and create event
     else:
         slot = repo.book_slot(db, slot.id)
@@ -316,10 +351,13 @@ def decide_on_schedule_availability_slot(
                 if os.getenv('SENTRY_DSN') != '':
                     capture_exception(err)
 
-        attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
-        subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
+        if not slot.appointment:
+            attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+            subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
 
-        title = f"Appointment - {subscriber_name} and {attendee_name}"
+            title = f"Appointment - {subscriber_name} and {attendee_name}"
+        else:
+            title = slot.appointment.title
 
         event = schemas.Event(
             title=title,
