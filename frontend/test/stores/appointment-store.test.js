@@ -24,11 +24,8 @@ const restHandlers = [
       title: 'title',
       duration: 180,
       location_type: 2,
-      status: bookingStatus.none,
       slots: [
-        { start: '3000-01-01T09:00:00Z', duration: 60 },
-        { start: '3000-01-01T11:00:00Z', duration: 15 },
-        { start: '3000-01-01T15:00:00Z', duration: 275 },
+        { start: '3000-01-01T09:00:00Z', duration: 60, booking_status: bookingStatus.none },
       ],
     },
     {
@@ -36,11 +33,10 @@ const restHandlers = [
       title: 'title',
       duration: 180,
       location_type: 2,
-      status: bookingStatus.requested,
       slots: [
-        { start: '2024-01-01T09:00:00Z', duration: 60 },
-        { start: '2024-01-01T11:00:00Z', duration: 15, attendee_id: 1 },
-        { start: '2024-01-01T15:00:00Z', duration: 275 },
+        {
+          start: '2024-01-01T09:00:00Z', duration: 60, attendee_id: 1, booking_status: bookingStatus.requested,
+        },
       ],
     },
   ])),
@@ -81,7 +77,7 @@ describe('Appointment Store', () => {
     const apmt = useAppointmentStore();
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
     expect(apmt.appointments.length).toBe(2);
-    expect(apmt.appointments[0].slots.length).toBe(3);
+    expect(apmt.appointments[0].slots.length).toBe(1);
   });
 
   test('pending', async () => {
