@@ -15,9 +15,9 @@ terraform {
 dependency "backend" {
   config_path = "../../services/backend"
 
-  mock_outputs_allowed_terraform_commands = ["validate","destroy"]
+  mock_outputs_allowed_terraform_commands = ["validate", "destroy"]
   mock_outputs = {
-    id       = "mock_alb_id"
+    alb_id   = "mock_alb_id"
     dns_name = "mock_dns_name"
   }
 }
@@ -41,6 +41,6 @@ inputs = {
   region           = local.region
   tags             = local.tags
   ssl_cert         = local.ssl_cert
-  backend_id       = dependency.backend.outputs.id
+  backend_id       = dependency.backend.outputs.alb_id
   backend_dns_name = dependency.backend.outputs.dns_name
 }
