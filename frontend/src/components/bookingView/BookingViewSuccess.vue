@@ -1,8 +1,7 @@
 <template>
   <div class="flex-center min-w-[50%] flex-col gap-12">
     <div class="text-2xl font-semibold text-teal-500">
-      <span v-if="isAvailabilityRoute">{{ t('info.bookingSuccessfullyRequested') }}</span>
-      <span v-else>{{ t('info.bookingSuccessful') }}</span>
+      <span>{{ t('info.bookingSuccessfullyRequested') }}</span>
     </div>
     <div class="flex w-full max-w-sm flex-col gap-1 rounded-lg shadow-lg">
       <div class="flex h-14 items-center justify-around rounded-t-md bg-teal-500">
@@ -18,19 +17,6 @@
           <span>{{ dj(selectedEvent.start).format(timeFormat()) }}</span>
           <span>{{ dj.tz.guess() }}</span>
         </div>
-      </div>
-    </div>
-    <div
-      v-if="isBookingRoute"
-      class="-mt-4 cursor-pointer text-sm text-teal-500 underline underline-offset-2"
-      @click="emit('download')"
-    >
-      {{ t('label.downloadTheIcsFile') }}
-    </div>
-    <div v-if="isBookingRoute" class="text-center text-lg text-gray-700">
-      <div>{{ t('info.invitationWasSent') }}</div>
-      <div class="text-lg font-bold">
-        {{ attendeeEmail }}
       </div>
     </div>
     <primary-button
@@ -56,12 +42,9 @@ const router = useRouter();
 
 const dj = inject('dayjs');
 
-const emit = defineEmits(['download']);
 defineProps({
   selectedEvent: Object,
   attendeeEmail: String,
-  isAvailabilityRoute: Boolean,
-  isBookingRoute: Boolean,
 });
 
 </script>
