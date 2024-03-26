@@ -21,9 +21,28 @@ jobs:
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.tg_version }}/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
-      - name: validate
+      - name: validate vpc
         run: |
-          cd ./tofu/environments/${{ env.environment }}/terraform/tfbackend
+          cd ./tofu/environments/${{ env.environment }}/network/vpc
           terragrunt init
           terragrunt validate
-
+      - name: validate backend
+        run: |
+          cd ../../services/backend-infra
+          terragrunt init
+          terragrunt validate
+      - name: validate cache
+        run: |
+          cd ../../data-store/cache
+          terragrunt init
+          terragrunt validate
+      - name: validate database
+        run: |
+          cd ../../data-store/database
+          terragrunt init
+          terragrunt validate
+      - name: validate frontend
+        run: |
+          cd ../../services/frontend
+          terragrunt init
+          terragrunt validate
