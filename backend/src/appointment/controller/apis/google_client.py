@@ -135,7 +135,7 @@ class GoogleClient:
         response = None
         with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().insert(calendarId=calendar_id, body=body).execute()
+                response = service.events().import_(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
                 logging.warning(f"[google_client.create_event] Request Error: {e.status_code}/{e.error_details}")
                 raise EventNotCreatedException()
