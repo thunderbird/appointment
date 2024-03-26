@@ -44,6 +44,7 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 
@@ -129,6 +130,7 @@ const navItems = [
 // db tables
 const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
+const scheduleStore = useScheduleStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
@@ -144,6 +146,7 @@ const getDbData = async () => {
     await Promise.all([
       calendarStore.fetch(call),
       appointmentStore.fetch(call),
+      scheduleStore.fetch(call),
     ]);
   }
 };

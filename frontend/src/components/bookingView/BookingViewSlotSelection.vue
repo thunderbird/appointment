@@ -9,7 +9,7 @@
     <div v-if="appointment.details" class="mb-6 text-gray-700 dark:text-gray-400">
       {{ appointment.details }}
     </div>
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-center">
+    <div class="mb-6 flex flex-col items-center justify-between md:flex-row">
       <div class="text-xl">{{ t('text.chooseDateAndTime') }}</div>
       <div class="text-sm text-teal-600 dark:text-teal-500">
         {{ t('text.timesAreDisplayedInLocalTimezone', { timezone: dj.tz.guess() }) }}
@@ -20,6 +20,7 @@
       :current-date="activeDate"
       :appointments="[appointment]"
       :is-booking-route="true"
+      :fixed-duration="appointment?.slot_duration ?? activeSchedules[0]?.slot_duration"
       @event-selected="selectEvent"
     >
     </calendar-qalendar>
@@ -48,8 +49,10 @@ import { dateFormatStrings } from '@/definitions';
 
 import PrimaryButton from '@/elements/PrimaryButton';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 const { t } = useI18n();
+const { activeSchedules } = storeToRefs(useScheduleStore());
 const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
 const dj = inject('dayjs');
 

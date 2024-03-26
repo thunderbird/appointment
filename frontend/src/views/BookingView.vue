@@ -24,10 +24,7 @@
     >
       <booking-view-success
         :attendee-email="attendee.email"
-        :is-availability-route="isAvailabilityRoute"
-        :is-booking-route="isBookingRoute"
         :selected-event="selectedEvent"
-        @download="downloadIcs"
       />
     </main>
     <!-- booking page content: time slot selection -->
@@ -44,7 +41,7 @@
     <booking-modal
       :open="showBookingModal"
       :event="selectedEvent"
-      :requires-confirmation="isAvailabilityRoute"
+      :requires-confirmation="true"
       @book="bookEvent"
       @download="downloadIcs"
       @close="closeModal()"
@@ -56,9 +53,8 @@
 import { bookingCalendarViews as views, modalStates } from '@/definitions';
 import { download } from '@/utils';
 import {
-  computed, inject, onMounted, ref,
+  inject, onMounted, ref,
 } from 'vue';
-import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';
@@ -70,7 +66,6 @@ import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue'
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
 
 // component constants
-const route = useRoute();
 const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
@@ -84,17 +79,6 @@ const bookingRequestFinished = ref(false);
 
 const showNavigation = ref(false);
 const showBookingModal = ref(false);
-
-/**
- * For general availability / scheduling the owner has to accept or decline booking requests.
- * @type {ComputedRef<boolean>}
- */
-const isAvailabilityRoute = computed(() => route.name === 'availability');
-/**
- * For one-off appointment bookings. The booking auto-confirms and no action is needed on the owner's part.
- * @type {ComputedRef<boolean>}
- */
-const isBookingRoute = computed(() => route.name === 'booking');
 
 const {
   appointment,
@@ -155,22 +139,14 @@ const getViewBySlotDistribution = (slots) => {
  * @returns {Promise<void>}
  */
 const downloadIcs = async () => {
-  let request = null;
-
-  if (isAvailabilityRoute.value) {
-    const obj = {
-      slot: {
-        start: selectedEvent.value.start,
-        duration: selectedEvent.value.duration,
-      },
-      attendee: attendee.value,
-    };
-    request = call('schedule/serve/ics').put({ s_a: obj, url: window.location.href });
-  } else if (isBookingRoute.value) {
-    request = call(`apmt/serve/ics/${route.params.slug}/${selectedEvent.value.id}`).get();
-  } else {
-    return;
-  }
+  const obj = {
+    slot: {
+      start: selectedEvent.value.start,
+      duration: selectedEvent.value.duration,
+    },
+    attendee: attendee.value,
+  };
+  const request = call('schedule/serve/ics').put({ s_a: obj, url: window.location.href });
 
   const { data, error } = await request.json();
 
@@ -188,15 +164,7 @@ const downloadIcs = async () => {
  * @returns {Promise<Object|null>}
  */
 const getAppointment = async () => {
-  let request = null;
-
-  if (isAvailabilityRoute.value) {
-    request = call('schedule/public/availability').post({ url: window.location.href });
-  } else if (isBookingRoute.value) {
-    request = call(`apmt/public/${route.params.slug}`).get();
-  } else {
-    return null;
-  }
+  const request = call('schedule/public/availability').post({ url: window.location.href });
 
   const { data, error } = await request.json();
 
@@ -226,36 +194,20 @@ const getAppointment = async () => {
  * @returns {Promise<void>}
  */
 const bookEvent = async (attendeeData) => {
-  let request = null;
-
   bookingRequestFinished.value = false;
 
-  if (isAvailabilityRoute.value) {
-    const obj = {
-      slot: {
-        start: selectedEvent.value.start,
-        duration: selectedEvent.value.duration,
-      },
-      attendee: attendeeData,
-    };
+  const obj = {
+    slot: {
+      start: selectedEvent.value.start,
+      duration: selectedEvent.value.duration,
+    },
+    attendee: attendeeData,
+  };
 
-    request = call('schedule/public/availability/request').put({
-      s_a: obj,
-      url: window.location.href,
-    });
-  } else if (isBookingRoute.value) {
-    const obj = {
-      slot_id: selectedEvent.value.id,
-      attendee: attendeeData,
-    };
-
-    request = call(`apmt/public/${route.params.slug}`).put(obj);
-  } else {
-    modalState.value = modalStates.error;
-    // Generic unknown error, they shouldn't hit here though!
-    modalStateData.value = t('error.unknownAppointmentError');
-    return;
-  }
+  const request = call('schedule/public/availability/request').put({
+    s_a: obj,
+    url: window.location.href,
+  });
 
   // Data should just be true here.
   const { data, error } = await request.json();

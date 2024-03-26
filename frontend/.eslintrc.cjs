@@ -27,6 +27,7 @@ module.exports = {
     }],
     'max-len': ['error', { code: 120 }],
     'no-param-reassign': 'off',
+    'tailwindcss/no-custom-classname': 'off',
   },
   settings: {
     'import/resolver': {

@@ -18,7 +18,11 @@ export const dateFormatStrings = {
  */
 export const defaultSlotDuration = 30;
 
-// appointment location types
+/**
+ * Appointment subscriber levels
+ * @enum
+ * @readonly
+ */
 export const subscriberLevels = {
   basic: 1,
   plus: 2,
@@ -26,27 +30,55 @@ export const subscriberLevels = {
   admin: 99,
 };
 
-// appointment location types
+/**
+ * Appointment location types for schedules
+ * @enum
+ * @readonly
+ */
 export const locationTypes = {
   inPerson: 1,
   online: 2,
 };
 
-// schedule creation state
+/**
+ * Appointment creation state
+ * @enum
+ * @readonly
+ */
+export const appointmentCreationState = {
+  hidden: 0,
+  details: 1,
+  availability: 2,
+  finished: 3,
+};
+
+/**
+ * Schedule creation state
+ * @enum
+ * @readonly
+ */
 export const scheduleCreationState = {
   details: 1,
   availability: 2,
   settings: 3,
 };
 
-// available calendar views
+/**
+ * Calendar view mode
+ * @enum
+ * @readonly
+ */
 export const calendarViews = {
   day: 1,
   week: 2,
   month: 3,
 };
 
-// extended calendar views for booking
+/**
+ * Booking calendar view modes
+ * @enum
+ * @readonly
+ */
 export const bookingCalendarViews = {
   ...calendarViews,
   weekAfterMonth: 4,
@@ -55,6 +87,11 @@ export const bookingCalendarViews = {
   invalid: 12,
 };
 
+/**
+ * Available appointment states
+ * @enum
+ * @readonly
+ */
 // available appointment views - This doesn't align with anything anymore!
 export const appointmentState = {
   booked: 1,
@@ -62,6 +99,11 @@ export const appointmentState = {
   past: 3,
 };
 
+/**
+ * Booking status for slots. This mirrors models.BookingStatus on the backend
+ * @enum
+ * @readonly
+ */
 export const bookingStatus = {
   none: 1,
   requested: 2,
@@ -74,7 +116,11 @@ export const appointmentViews = {
   all: 4,
 };
 
-// columns for appointments list view
+/**
+ * List columns for bookings page
+ * @enum
+ * @readonly
+ */
 export const listColumns = {
   title: 1,
   status: 2,
@@ -85,7 +131,11 @@ export const listColumns = {
   // replies: 4,
 };
 
-// appointments list filter options
+/**
+ * Filter options for bookings page
+ * @enum
+ * @readonly
+ */
 export const filterOptions = {
   allAppointments: 1,
   appointmentsToday: 2,
@@ -96,14 +146,21 @@ export const filterOptions = {
   allFutureAppointments: 7,
 };
 
-// data view types
+/**
+ * View types for the bookings page
+ * @enum
+ * @readonly
+ */
 export const viewTypes = {
   list: 1,
   grid: 2,
 };
 
-// sections on settings page
-// TODO: enable implemented sections
+/**
+ * Settings page sections
+ * @enum
+ * @readonly
+ */
 export const settingsSections = {
   general: 1,
   calendar: 2,
@@ -124,17 +181,32 @@ export const colorSchemes = {
   light: 3,
 };
 
+/**
+ * Calendar management type states
+ * @enum
+ * @readonly
+ */
 export const calendarManagementType = {
   connect: 1,
   edit: 2,
 };
 
+/**
+ * Meeting provider types (matches the backends version)
+ * @enum
+ * @readonly
+ */
 export const meetingLinkProviderType = {
   none: 'none',
   zoom: 'zoom',
   google_meet: 'google_meet',
 };
 
+/**
+ * Model states
+ * @enum
+ * @readonly
+ */
 export const modalStates = {
   loading: 1, // Modal is loading, this includes submission requests
   open: 2, // Modal is open for editing
@@ -142,6 +214,11 @@ export const modalStates = {
   finished: 4, // Modal is finished, so either self-close, or show a success screen
 };
 
+/**
+ * Alert levels
+ * @enum
+ * @readonly
+ */
 export const alertSchemes = {
   error: 1, // Alert indicates something's gone wrong
   warning: 2, // Alert indicates something important
@@ -183,4 +260,5 @@ export default {
   viewTypes,
   meetingLinkProviderType,
   dateFormatStrings,
+  qalendarSlotDurations,
 };

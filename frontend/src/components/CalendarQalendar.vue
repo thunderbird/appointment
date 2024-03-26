@@ -6,7 +6,12 @@ import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/CalendarEvent.vue';
 import {
-  appointmentState, colorSchemes, dateFormatStrings, defaultSlotDuration, qalendarSlotDurations,
+  appointmentState,
+  bookingStatus,
+  colorSchemes,
+  dateFormatStrings,
+  defaultSlotDuration,
+  qalendarSlotDurations,
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 
@@ -23,10 +28,11 @@ const props = defineProps({
   schedules: Array, // data of scheduled event previews to show
   isBookingRoute: Boolean,
   currentDate: Object,
+  fixedDuration: Number,
 });
 
 const {
-  events, appointments, schedules, isBookingRoute, currentDate,
+  events, appointments, schedules, isBookingRoute, currentDate, fixedDuration,
 } = toRefs(props);
 
 const qalendarRef = ref();
@@ -46,12 +52,9 @@ const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
  * @type {ComputedRef<number>}
  */
 const timeSlotDuration = computed(() => {
-  if (appointments?.value?.length === 0) {
-    return qalendarSlotDurations['15'];
-  }
   // Duration on slots are fixed, so grab the first one.
   // This is the same data on schedule.slot_duration, but we never actually pull that info down to the frontend.
-  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
+  const duration = fixedDuration.value ?? defaultSlotDuration;
   if (duration <= 15) {
     return qalendarSlotDurations['15'];
   }
@@ -67,11 +70,7 @@ const timeSlotDuration = computed(() => {
  * @type {ComputedRef<number>}
  */
 const timeSlotHeight = computed(() => {
-  if (appointments?.value?.length === 0) {
-    return 40;
-  }
-
-  const duration = appointments?.value[0].slots[0].duration ?? defaultSlotDuration;
+  const duration = fixedDuration.value ?? defaultSlotDuration;
   if (duration >= 15) {
     return 40;
   }
@@ -89,9 +88,16 @@ const eventSelected = (evt) => {
   if (!isBookingRoute.value) {
     return;
   }
-  selectedDate.value = evt.clickedEvent.id;
-  emit('eventSelected', evt.clickedEvent.id);
+  const selectedEvent = evt.clickedEvent;
+
+  if (selectedEvent?.customData?.slot_status === bookingStatus.booked) {
+    return;
+  }
+
+  selectedDate.value = selectedEvent.id;
+  emit('eventSelected', selectedDate.value);
 };
+
 /**
  * On Date Change. Any internal date change triggers this.
  * @param evt
@@ -107,6 +113,34 @@ const modeChange = (evt) => {
 };
 
 /* Functions */
+
+const onCurrentDateChange = (date) => {
+  const period = {
+    start: date.startOf('month').toDate(),
+    end: date.endOf('month').toDate(),
+    selectedDate: date.toDate(),
+  };
+
+  qalendarRef.value.handleUpdatedPeriod(period);
+  qalendarRef.value.$refs.appHeader.handlePeriodChange(period);
+};
+
+/**
+ * If we're in mobile view and we select a date, jump to that date in day mode.
+ * @param date {string}
+ */
+const dateSelected = (date) => {
+  if (!qalendarRef?.value?.isSmall) {
+    return;
+  }
+
+  const newDate = dj(date);
+
+  // Update the calendars date
+  onCurrentDateChange(newDate);
+  // Change the calendar to day mode
+  qalendarRef.value.handleChangeMode('day');
+};
 
 /**
  * Processes a calendar colour for a specific event.
@@ -159,6 +193,7 @@ const calendarEvents = computed(() => {
       description: event.description,
       customData: {
         attendee: null,
+        slot_status: null,
         booking_status: appointmentState.booked,
         calendar_title: event.calendar_title,
         calendar_color: event.calendar_color,
@@ -197,6 +232,7 @@ const calendarEvents = computed(() => {
       with: slot.attendee ? [slot.attendee].map((attendee) => `${attendee.name} <${attendee.email}>`).join(', ') : '',
       customData: {
         attendee: null,
+        slot_status: slot.booking_status,
         booking_status: appointment.status,
         calendar_title: appointment.calendar_title,
         calendar_color: appointment?.calendar_color ?? 'rgb(20, 184, 166)',
@@ -244,6 +280,9 @@ const dayBoundary = computed(() => {
  * Calendar Config Object
  */
 const config = ref({
+  month: {
+    showEventsOnMobileView: false,
+  },
   week: {
     startsOn: 'sunday',
   },
@@ -282,16 +321,7 @@ if (locale) {
 /**
  * Qalendar's selectedDate is only set on init and never updated. So we have to poke at their internals...
  */
-watch(currentDate, () => {
-  const period = {
-    start: currentDate.value.startOf('month').toDate(),
-    end: currentDate.value.endOf('month').toDate(),
-    selectedDate: currentDate.value.toDate(),
-  };
-
-  qalendarRef.value.handleUpdatedPeriod(period);
-  qalendarRef.value.$refs.appHeader.handlePeriodChange(period);
-});
+watch(currentDate, () => onCurrentDateChange(currentDate.value));
 
 </script>
 <template>
@@ -305,6 +335,7 @@ watch(currentDate, () => {
       :config="config"
       :selected-date="currentDate?.toDate()"
       @event-was-clicked="eventSelected"
+      @date-was-clicked="dateSelected"
       @updated-period="dateChange"
       @updated-mode="modeChange"
       ref="qalendarRef"
@@ -335,6 +366,7 @@ watch(currentDate, () => {
           :month-view="true"
         ></calendar-event>
       </template>
+
     </qalendar>
   </div>
 </template>
@@ -385,6 +417,12 @@ watch(currentDate, () => {
   --qalendar-dark-mode-line-color: var(--qalendar-appointment-border-color);
 }
 
+/* Ensure smol mode is clickable, and noticeable! */
+.calendar-root-wrapper .qalendar-is-small .calendar-month__weekday:hover {
+  cursor: pointer;
+  background-color: var(--qalendar-appointment-fg);
+}
+
 /* Ensure month days are at minimum 8rem */
 .calendar-root-wrapper .calendar-month__weekday {
   @media (min-width: theme('screens.sm')) {
@@ -398,6 +436,8 @@ watch(currentDate, () => {
 /* Add some minimum spacing to the numbered day, so events line up even with the "today" highlight. */
 .calendar-root-wrapper .calendar-month__day-date {
   @media (min-width: theme('screens.lg')) {
+    text-align: center;
+    min-width: theme('width.8') !important;
     min-height: theme('height.8') !important;
   }
 }

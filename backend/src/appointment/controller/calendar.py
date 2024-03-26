@@ -18,8 +18,8 @@ from datetime import datetime, timedelta, timezone, UTC
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
 from .apis.google_client import GoogleClient
+from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
-from ..database.models import CalendarProvider
 from ..controller.mailer import Attachment
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
@@ -469,25 +469,49 @@ class Tools:
 
         return slots
 
-    def events_set_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
-        """This helper removes all events from list A, which have a time collision with any event in list B
+    @staticmethod
+    def events_roll_up_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
+        """This helper rolls up all events from list A, which have a time collision with any event in list B
            and returns all remaining elements from A as new list.
         """
+
+        def is_blocker(a_start: datetime, a_end: datetime, b_start: datetime, b_end: datetime):
+            """
+            if there is an overlap of both date ranges, a collision was found
+            see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
+            """
+            return a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp()
+
         available_slots = []
-        for a in a_list:
-            a_start = a.start
-            a_end = a_start + timedelta(minutes=a.duration)
-            collision_found = False
-            for b in b_list:
-                b_start = b.start
-                b_end = b.end
-                # if there is an overlap of both date ranges, a collision was found
-                # see https://en.wikipedia.org/wiki/De_Morgan%27s_laws
-                if a_start.timestamp() < b_end.timestamp() and a_end.timestamp() > b_start.timestamp():
-                    collision_found = True
-                    break
-            if not collision_found:
-                available_slots.append(a)
+        collisions = []
+
+        for slot in a_list:
+            slot_start = slot.start
+            slot_end = slot.start + timedelta(minutes=slot.duration)
+
+            # If any of the events are overlap the slot time...
+            if any([is_blocker(slot_start, slot_end, event.start, event.end) for event in b_list]):
+                previous_collision_end = collisions[-1].start + timedelta(minutes=collisions[-1].duration) if len(collisions) else None
+
+                # ...and the last item was a previous collision then extend the previous collision's duration
+                if previous_collision_end and previous_collision_end.timestamp() == slot_start.timestamp():
+                    collisions[-1].duration += slot.duration
+                else:
+                    # ...if the last item was a normal available time, then create a new collision
+                    collisions.append(schemas.SlotBase(
+                        start=slot_start,
+                        duration=slot.duration,
+                        booking_status=BookingStatus.booked
+                    ))
+            else:
+                # ...Otherwise, just append the normal available time.
+                available_slots.append(slot)
+
+        # Append the two lists
+        available_slots = available_slots + collisions
+
+        # And sort!
+        available_slots = sorted(available_slots, key=lambda slot: slot.start.timestamp())
 
         return available_slots
 
