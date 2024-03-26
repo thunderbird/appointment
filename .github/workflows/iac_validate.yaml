@@ -22,27 +22,27 @@ jobs:
           sudo chmod +x /bin/terragrunt
           terragrunt -v
       - name: validate vpc
+        working-directory: ./tofu/environments/${{ env.environment}}/network/vpc
         run: |
-          cd ./tofu/environments/${{ env.environment }}/network/vpc
           terragrunt init
           terragrunt validate
       - name: validate backend
+        working-directory: ./tofu/environments/${{ env.environment}}/services/backend-infra
         run: |
-          cd ../../services/backend-infra
           terragrunt init
           terragrunt validate
       - name: validate cache
+        working-directory: ./tofu/environments/${{ env.environment}}/data-store/cache
         run: |
-          cd ../../data-store/cache
           terragrunt init
           terragrunt validate
       - name: validate database
+        working-directory: ./tofu/environments/${{ env.environment}}/data-store/database
         run: |
-          cd ../../data-store/database
           terragrunt init
           terragrunt validate
       - name: validate frontend
+        working-directory: ./tofu/environments/${{ env.environment}}/services/frontend
         run: |
-          cd ../../services/frontend
           terragrunt init
           terragrunt validate
