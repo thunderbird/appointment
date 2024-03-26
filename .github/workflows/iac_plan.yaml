@@ -1,6 +1,7 @@
 name: plan-iac
 
 on:
+  push:
   workflow_call:
   workflow_run:
     workflows: [validate-iac]
