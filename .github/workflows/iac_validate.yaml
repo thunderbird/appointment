@@ -16,6 +16,7 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with: 
           tofu_version: ${{ env.tf_version }}
+          tofu_wrapper: false
       - name: install terragrunt
         run: |
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.tg_version }}/terragrunt_linux_amd64"
