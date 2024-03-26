@@ -28,8 +28,8 @@ dependency "backend-infra" {
   mock_outputs = {
     target_group_key = "MOCK_KEY"
     log_group        = "MOCK_LOGS"
-    ecs_cluster = "MOCK_CLUSTER_ID"
-    security_group = "MOCK_SG"
+    ecs_cluster      = "MOCK_CLUSTER_ID"
+    security_group   = "MOCK_SG"
   }
 }
 
@@ -48,7 +48,7 @@ inputs = {
   subnets          = dependency.vpc.outputs.private_subnets
   log_group        = dependency.backend-infra.outputs.log_group
   target_group_arn = dependency.backend-infra.outputs.target_group_arn
-  security_group = dependency.backend-infra.outputs.security_group_id
+  security_group   = dependency.backend-infra.outputs.security_group_id
   ecs_cluster      = dependency.backend-infra.outputs.cluster_id
   tags             = local.tags
 }

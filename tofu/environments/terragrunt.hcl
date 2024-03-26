@@ -1,5 +1,5 @@
-terraform_binary = "tofu"
-terraform_version_constraint = ">= 1.6.2"
+terraform_binary              = "tofu"
+terraform_version_constraint  = ">= 1.6.2"
 terragrunt_version_constraint = ">= 0.55.15"
 
 
@@ -21,7 +21,7 @@ locals {
 generate "backend" {
   path      = "backend.tf"
   if_exists = "overwrite_terragrunt"
-  contents = <<EOF
+  contents  = <<EOF
 terraform {
   backend "s3" {
     bucket         = "tb-${local.short_name}-${local.env}-state"
