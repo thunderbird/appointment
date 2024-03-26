@@ -8,6 +8,10 @@ env:
   environment: 'stage'
   AWS_REGION: us-east-1
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   validate-iac:
     runs-on: ubuntu-latest
