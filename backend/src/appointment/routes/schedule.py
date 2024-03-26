@@ -359,6 +359,8 @@ def decide_on_schedule_availability_slot(
             title = f"Appointment - {subscriber_name} and {attendee_name}"
         else:
             title = slot.appointment.title
+            # Update the appointment to closed
+            repo.update_appointment_status(db, slot.appointment_id, models.AppointmentStatus.closed)
 
         event = schemas.Event(
             title=title,

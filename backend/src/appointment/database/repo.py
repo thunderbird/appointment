@@ -307,7 +307,7 @@ def create_calendar_appointment(db: Session, appointment: schemas.AppointmentFul
     return db_appointment
 
 
-def get_appointment(db: Session, appointment_id: int):
+def get_appointment(db: Session, appointment_id: int) -> models.Appointment|None:
     """retrieve appointment by id (private)"""
     if appointment_id:
         return db.get(models.Appointment, appointment_id)
@@ -369,6 +369,15 @@ def delete_calendar_appointments_by_subscriber_id(db: Session, subscriber_id: in
     for appointment in appointments:
         delete_calendar_appointment(db, appointment_id=appointment.id)
     return True
+
+
+def update_appointment_status(db: Session, appointment_id: int, status: models.AppointmentStatus):
+    appointment = get_appointment(db, appointment_id)
+    if not appointment:
+        return False
+
+    appointment.status = status
+    db.commit()
 
 
 """ SLOT repository functions

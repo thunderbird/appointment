@@ -13,7 +13,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
   // Data
   const appointments = ref([]);
   const pendingAppointments = computed(
-    () => appointments.value.filter((a) => a.status === bookingStatus.requested),
+    () => appointments.value.filter((a) => a?.slots[0]?.booking_status === bookingStatus.requested),
   );
 
   /**

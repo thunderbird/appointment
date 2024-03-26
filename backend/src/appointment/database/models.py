@@ -148,7 +148,7 @@ class Appointment(Base):
     details = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
     slug = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     keep_open = Column(Boolean)
-    status = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
+    status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
