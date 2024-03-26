@@ -16,10 +16,11 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with: 
           tofu_version: ${{ env.tf_version }}
-      - name: install tgenv
-        run: git clone --depth 1 --branch main https://github.com/tgenv/tgenv.git ~/.tgenv
       - name: install terragrunt
-        run: ~/.tgenv/bin/tgenv install ${{ env.tg_version }}
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.tg_version }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
       - name: validate
         run: |
           cd ./tofu/environments/${{ env.environment }}/terraform/tfbackend
