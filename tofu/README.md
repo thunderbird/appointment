@@ -105,3 +105,12 @@ These should be deployed in the following order and generally will only be updat
    3. `terragrunt validate`
    4. `terragrunt plan -out tfplan`
    5. `terragrunt apply tfplan`
+
+### Application Stacks
+
+1. tofu/environments/\<env>/services/backend-service
+   1. `cd tofu/environments/<env>/services/backend-service`
+   2. `terragrun init`
+   3. `terragrunt validate`
+   4. `terragrunt plan -out tfplan`
+   5. `terragrunt apply tfplan`
