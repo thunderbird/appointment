@@ -17,8 +17,7 @@ jobs:
           tofu_version: ${{ env.tf_version }}
       - run: |
           git clone --depth 1 --branch main https://github.com/tgenv/tgenv.git ~/.tgenv
-          sudo ln -s ~/.tgenv/bin* /usr/local/bin
-          tgenv install ${{ env.tg_version }}
+          ~/.tgenv/bin/tgenv install ${{ env.tg_version }}
       - run: |
           cd ./tofu/environments/${{ env.environment }}/terraform/tfbackend
           terragrun init
