@@ -41,6 +41,6 @@ inputs = {
   region           = local.region
   tags             = local.tags
   ssl_cert         = local.ssl_cert
-  backend_id       = dependency.backend.outputs.id
+  backend_id       = dependency.backend.outputs.alb_id
   backend_dns_name = dependency.backend.outputs.dns_name
 }
