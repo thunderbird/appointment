@@ -24,6 +24,6 @@ jobs:
       - name: validate
         run: |
           cd ./tofu/environments/${{ env.environment }}/terraform/tfbackend
-          terragrun init
+          terragrunt init
           terragrunt validate
 
