@@ -9,7 +9,7 @@ data "aws_prefix_list" "s3" {
 }
 
 locals {
-  target_group_key = "${var.name_prefix}-ecs-backend"
+  target_group_key = "${var.name_prefix}-backend"
 }
 
 module "ecs_cluster" {
@@ -27,28 +27,6 @@ module "ecs_cluster" {
   }
   tags = var.tags
 }
-
-/*resource "aws_ecs_service" "backend_service" {
-  name    = "${var.name_prefix}-backend"
-  cluster = module.ecs_cluster.id
-
-  launch_type = "FARGATE"
-
-  load_balancer {
-    target_group_arn = module.backend_alb.target_groups["${local.target_group_key}"].arn
-    container_name   = "backend"
-    container_port   = 5000
-  }
-
-  network_configuration {
-    security_groups = [aws_security_group.backend.id]
-    subnets         = var.subnets
-  }
-
-  #task_definition = "arn:aws:ecs:${var.region}:768512802988:task-definition/${var.name_prefix}-backend"
-  desired_count   = 1
-  tags            = var.tags
-}*/
 
 module "backend_alb" {
   source  = "terraform-aws-modules/alb/aws"

@@ -9,7 +9,7 @@ include "environment" {
 }
 
 terraform {
-  source = "../../../../modules/services/backend"
+  source = "../../../../modules/services/backend-infra"
 }
 
 dependency "vpc" {

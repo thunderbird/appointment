@@ -47,3 +47,9 @@ variable "database_subnet_cidrs" {
   description = "Database subnet CIDRs"
   type        = list
 }
+
+variable "backend_image" {
+  description = "Backend image ECR URI"
+  type = string
+  default = "public.ecr.aws/amazonlinux/amazonlinux:minimal"
+}
