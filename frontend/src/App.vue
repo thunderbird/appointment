@@ -14,7 +14,7 @@
       :class="{
         'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
         '!pt-24': routeIsHome || isAuthenticated,
-        'min-h-full pt-8 pb-32': routeIsPublic,
+        'min-h-full pb-32 pt-8': routeIsPublic,
       }"
       >
       <router-view/>
@@ -134,7 +134,7 @@ const scheduleStore = useScheduleStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
-  () => ['booking', 'availability', 'home', 'login', 'post-login', 'confirmation'].includes(route.name),
+  () => ['availability', 'home', 'login', 'post-login', 'confirmation'].includes(route.name),
 );
 const routeIsHome = computed(
   () => ['home'].includes(route.name),

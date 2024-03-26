@@ -129,7 +129,7 @@
             class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
             @mouseout="(el) => paintBackground(el, appointment.calendar_color, _, true)"
-            @click="showAppointment = appointment"
+            @click="showAppointmentModal(appointment)"
           >
             <td class="align-middle">
               <div
@@ -166,7 +166,7 @@
           v-for="(appointment, i) in filteredAppointments"
           :key="i"
           :appointment="appointment"
-          @click="showAppointment = appointment"
+          @click="showAppointmentModal(appointment)"
         />
       </div>
     </div>
@@ -230,11 +230,9 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject('dayjs');
-const bookingUrl = inject('bookingUrl');
 const refresh = inject('refresh');
 
 const appointmentStore = useAppointmentStore();
-const calendarStore = useCalendarStore();
 
 const { appointments } = storeToRefs(appointmentStore);
 
@@ -249,6 +247,18 @@ const tabActive = ref(route.params.view ? views[route.params.view] : views.all);
 const updateTab = (view) => {
   router.replace({ name: route.name, params: { view } });
   tabActive.value = views[view];
+};
+const tabActiveToParam = (view) => {
+  switch (view) {
+    case views.booked:
+      return 'booked';
+    case views.pending:
+      return 'pending';
+    case views.past:
+      return 'past';
+    default:
+      return 'all';
+  }
 };
 // date navigation
 const dateNav = (unit = 'auto', forward = true) => {
@@ -363,18 +373,27 @@ const filteredAppointments = computed(() => {
   return list;
 });
 
-// return number of booked slots (replies) for given appointment
-const repliesCount = (appointment) => appointment.slots.filter((s) => s.attendee != null).length;
-
 // handle single appointment modal
 const showAppointment = ref(null);
+const showAppointmentModal = (appointment) => {
+  showAppointment.value = appointment;
+  router.replace(`/appointments/${tabActiveToParam(tabActive.value)}/${appointment.slug}`);
+};
 const closeAppointmentModal = () => {
   showAppointment.value = null;
+
+  // Shuffle them back to the appointments route.
+  router.replace(`/appointments/${tabActiveToParam(tabActive.value)}`);
 };
 
 // initially load data when component gets remounted
 onMounted(async () => {
   await refresh();
+
+  // If we've got a slug
+  if (route.params?.slug) {
+    showAppointmentModal(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
+  }
 });
 
 // paint elements background or reset it to transparent

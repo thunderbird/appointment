@@ -14,12 +14,11 @@
       </div>
       <div class="flex items-center justify-between">
         <router-link
-          :to="{ name: 'booking', params: { 'slug': appointment.slug } }"
+          :to="{ name: 'appointments', params: { 'slug': appointment.slug } }"
           class="shrink text-sm text-teal-500 underline underline-offset-2"
         >
           {{ t('label.viewBooking') }}
         </router-link>
-        <text-button :label="t('label.copyLink')" :copy="bookingUrl + appointment.slug" />
       </div>
     </div>
   </div>
@@ -30,13 +29,11 @@ import { inject } from 'vue';
 import { keyByValue } from '@/utils';
 import { locationTypes } from '@/definitions';
 import { useI18n } from 'vue-i18n';
-import TextButton from '@/elements/TextButton';
 
 // icons
 import { IconDotsVertical } from '@tabler/icons-vue';
 
 // component constants
-const bookingUrl = inject('bookingUrl');
 const hDuration = inject('hDuration');
 const { t } = useI18n();
 

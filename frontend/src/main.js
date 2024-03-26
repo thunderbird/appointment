@@ -56,7 +56,7 @@ const protocol = import.meta.env.VITE_API_SECURE === 'true' ? 'https' : 'http';
 const port = import.meta.env.VITE_API_PORT !== undefined ? `:${import.meta.env.VITE_API_PORT}` : '';
 const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
-app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/booking/`);
+app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
 
 const loc = localStorage?.getItem('locale') ?? (navigator.language || navigator.userLanguage);
 app.use(i18ninstance);
