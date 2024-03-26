@@ -12,13 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
         with: 
           tofu_version: ${{ env.tf_version }}
-      - run: |
-          git clone --depth 1 --branch main https://github.com/tgenv/tgenv.git ~/.tgenv
-          ~/.tgenv/bin/tgenv install ${{ env.tg_version }}
-      - run: |
+      - name: install tgenv
+        run: git clone --depth 1 --branch main https://github.com/tgenv/tgenv.git ~/.tgenv
+      - name: install terragrunt
+        run: ~/.tgenv/bin/tgenv install ${{ env.tg_version }}
+      - name: validate
+        run: |
           cd ./tofu/environments/${{ env.environment }}/terraform/tfbackend
           terragrun init
           terragrunt validate
