@@ -1,7 +1,9 @@
 name: validate-iac
+
 on: 
   push:
   workflow_call:
+
 env:
   tf_version: '1.6.2'
   tg_version: '0.55.15'
