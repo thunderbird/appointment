@@ -6,7 +6,6 @@ import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
-import AppointmentsView from '@/views/AppointmentsView.vue';
 
 /**
  * Defined routes for Thunderbird Appointment
