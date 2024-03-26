@@ -45,12 +45,10 @@ import {
   IconBulb,
   IconCalendar,
   IconClock,
-  IconLink,
 } from '@tabler/icons-vue';
 
 // component constants
 const { t } = useI18n();
-const bookingUrl = inject('bookingUrl');
 const paintBackground = inject('paintBackground');
 const dj = inject('dayjs');
 

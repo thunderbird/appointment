@@ -29,11 +29,6 @@ const routes = [
     component: PostLoginView,
   },
   {
-    path: '/booking/:slug',
-    name: 'booking',
-    component: BookingView,
-  },
-  {
     path: '/user/:username/:signature',
     name: 'availability',
     component: BookingView,
@@ -59,7 +54,7 @@ const routes = [
   },
   // lazy-loaded routes
   {
-    path: '/appointments/:view?',
+    path: '/appointments/:view?/:slug?',
     name: 'appointments',
     component: () => import('@/views/AppointmentsView'),
   },
