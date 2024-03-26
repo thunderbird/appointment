@@ -321,8 +321,6 @@ def decide_on_schedule_availability_slot(
 
     # otherwise, confirm slot and create event
     else:
-        slot = repo.book_slot(db, slot.id)
-
         location_url = schedule.location_url
 
         # FIXME: This is just duplicated from the appointment code. We should find a nice way to merge the two.
@@ -372,6 +370,7 @@ def decide_on_schedule_availability_slot(
                 url=location_url,
                 name=None,
             ),
+            uuid=slot.appointment.uuid if slot.appointment else None
         )
 
         organizer_email = subscriber.email
@@ -410,9 +409,10 @@ def decide_on_schedule_availability_slot(
         except EventNotCreatedException:
             raise EventCouldNotBeAccepted
 
-        # send mail with .ics attachment to attendee
-        appointment = schemas.AppointmentBase(title=title, details=schedule.details, location_url=location_url)
-        Tools().send_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        # Book the slot at the end
+        slot = repo.book_slot(db, slot.id)
+
+        Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),

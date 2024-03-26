@@ -3,6 +3,8 @@
 Handle connection to a CalDAV server.
 """
 import json
+import logging
+import uuid
 import zoneinfo
 import os
 
@@ -35,7 +37,7 @@ class BaseConnector:
         self.redis_instance = redis_instance
         self.subscriber_id = subscriber_id
         self.calendar_id = calendar_id
-        
+
     def obscure_key(self, key):
         """Obscure part of a key with our encryption algo"""
         return utils.setup_encryption_engine().encrypt(key)
@@ -44,14 +46,14 @@ class BaseConnector:
         parts = [self.obscure_key(self.subscriber_id)]
         if not only_subscriber:
             parts.append(self.obscure_key(self.calendar_id))
-            
+
         return ":".join(parts)
 
     def get_cached_events(self, key_scope):
         """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
         if self.redis_instance is None:
             return None
-        
+
         key_scope = self.obscure_key(key_scope)
 
         encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
@@ -81,7 +83,7 @@ class BaseConnector:
 
         # Scan returns a tuple like: (Cursor start, [...keys found])
         ret = self.redis_instance.scan(0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*')
-        
+
         if len(ret[1]) == 0:
             return False
 
@@ -107,7 +109,7 @@ class GoogleConnector(BaseConnector):
         google_tkn: str = None,
     ):
         super().__init__(subscriber_id, calendar_id, redis_instance)
-        
+
         self.db = db
         self.google_client = google_client
         self.provider = CalendarProvider.google
@@ -215,6 +217,7 @@ class GoogleConnector(BaseConnector):
             description.append(l10n('join-phone', {'phone': event.location.phone}))
 
         body = {
+            "iCalUID": event.uuid.hex,
             "summary": event.title,
             "location": event.location.name,
             "description": "\n".join(description),
@@ -224,11 +227,15 @@ class GoogleConnector(BaseConnector):
                 {"displayName": organizer.name, "email": organizer_email},
                 {"displayName": attendee.name, "email": attendee.email},
             ],
+            "organizer": {
+                "displayName": organizer.name,
+                "email": self.remote_calendar_id,
+            }
         }
         self.google_client.create_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
-        
+
         self.bust_cached_events()
-        
+
         return event
 
     def delete_events(self, start):
@@ -241,7 +248,7 @@ class GoogleConnector(BaseConnector):
 class CalDavConnector(BaseConnector):
     def __init__(self, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str):
         super().__init__(subscriber_id, calendar_id, redis_instance)
-        
+
         self.provider = CalendarProvider.caldav
         self.url = url
         self.password = password
@@ -251,11 +258,15 @@ class CalDavConnector(BaseConnector):
 
     def test_connection(self) -> bool:
         """Ensure the connection information is correct and the calendar connection works"""
-        cal = self.client.calendar(url=self.url)
 
         try:
+            cal = self.client.calendar(url=self.url)
             supported_comps = cal.get_supported_components()
-        except IndexError:  # Library has an issue with top level urls, probably due to caldav spec?
+        except IndexError as ex:  # Library has an issue with top level urls, probably due to caldav spec?
+            logging.error(f"Error testing connection {ex}")
+            return False
+        except KeyError as ex:
+            logging.error(f"Error testing connection {ex}")
             return False
         except requests.exceptions.RequestException:  # Max retries exceeded, bad connection, missing schema, etc...
             return False
@@ -334,6 +345,7 @@ class CalDavConnector(BaseConnector):
         calendar = self.client.calendar(url=self.url)
         # save event
         caldav_event = calendar.save_event(
+            uid=event.uuid,
             dtstart=event.start,
             dtend=event.end,
             summary=event.title,
@@ -346,7 +358,7 @@ class CalDavConnector(BaseConnector):
         caldav_event.save()
 
         self.bust_cached_events()
-        
+
         return event
 
     def delete_events(self, start):
@@ -362,14 +374,14 @@ class CalDavConnector(BaseConnector):
                 count += 1
 
         self.bust_cached_events()
-        
+
         return count
 
 
 class Tools:
     def create_vevent(
         self,
-        appointment: schemas.Appointment | schemas.AppointmentBase,
+        appointment: schemas.Appointment,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
     ):
@@ -381,6 +393,7 @@ class Tools:
         org.params["cn"] = vText(organizer.name)
         org.params["role"] = vText("CHAIR")
         event = Event()
+        event.add("uid", appointment.uuid.hex)
         event.add("summary", appointment.title)
         event.add("dtstart", slot.start.replace(tzinfo=timezone.utc))
         event.add(
@@ -403,7 +416,7 @@ class Tools:
     def send_vevent(
         self,
         background_tasks: BackgroundTasks,
-        appointment: schemas.Appointment | schemas.AppointmentBase,
+        appointment: models.Appointment,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
