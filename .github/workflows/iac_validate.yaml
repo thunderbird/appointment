@@ -6,12 +6,20 @@ env:
   tf_version: '1.6.2'
   tg_version: '0.55.15'
   environment: 'stage'
+  AWS_REGION: us-east-1
 
 jobs:
   validate-iac:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
         with: 
