@@ -15,7 +15,7 @@ terraform {
 dependency "backend" {
   config_path = "../../services/backend-infra"
 
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "destroy"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = {
     alb_id   = "mock_alb_id"
     dns_name = "mock_dns_name"
