@@ -22,14 +22,12 @@ jobs:
     strategy:
       matrix:
         environment: [stage, production]
-        module: [terraform/tfbackend, network/vpc, services/backend-infra, data-store/cache, data-store/database, services/frontend]
     uses: ./.github/workflows/iac_verify.yaml
     with:
       tf_version: 1.6.2
       tg_version: 0.55.15
       aws_region: us-east-1
       environment: ${{ matrix.environment }}
-      module: ${{ matrix.module }}
     secrets: inherit
 
   apply:
@@ -37,13 +35,11 @@ jobs:
     strategy:
       matrix:
         environment: [stage]
-        module: [terraform/tfbackend, network/vpc, services/backend-infra, data-store/cache, data-store/database, services/frontend]
     uses: ./.github/workflows/iac_apply.yaml
     with:
       tf_version: 1.6.2
       tg_version: 0.55.15
       aws_region: us-east-1
       environment: ${{ matrix.environment }}
-      module: ${{ matrix.module }}
     secrets: inherit
 
