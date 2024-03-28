@@ -6,6 +6,10 @@ concurrency:
 
 on:
   push:
+    paths:
+      - tofu/environments/**
+      - tofu/modules/**
+      - .github/workflows/*
 
 permissions:
   id-token: write
