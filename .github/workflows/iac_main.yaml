@@ -1,14 +1,29 @@
 name: IaC Main
 
+concurrency:
+  group: iac
+  cancel-in-progress: true
+
 on:
   push:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
-  tf_version: '1.6.2'
-  tg_version: '0.55.15'
-  aws_region: us-east-1
+  TF_VERSION: '1.6.2'
+  TG_VERSION: '0.55.15'
+  AWS_REGION: us-east-1
 
 jobs:
+  dummy:
+    runs-on: ubuntu/latest
+    steps:
+      - name: some crap
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{env.AWS_REGION }}
   verify:
     if: github.ref != 'refs/heads/main'
     strategy:
@@ -17,9 +32,9 @@ jobs:
         module: [terraform/tfbackend, network/vpc, services/backend-infra, data-store/cache, data-store/database, services/frontend]
     uses: ./.github/workflows/iac_verify.yaml
     with:
-      tf_version: '$tf_version'
-      tg_version: '$tg_version'
-      aws_region: '$aws_region'
+      tf_version: ${{ env.TF_VERSION }}
+      tg_version: ${{ env.TG_VERSION }}
+      aws_region: ${{ env.AWS_REGION }}
       environment: ${{ matrix.environment }}
       module: ${{ matrix.module }}
     secrets: inherit
@@ -32,9 +47,9 @@ jobs:
         module: [terraform/tfbackend, network/vpc, services/backend-infra, data-store/cache, data-store/database, services/frontend]
     uses: ./.github/workflows/iac_apply.yaml
     with:
-      tf_version: '$tf_version'
-      tg_version: '$tg_version'
-      aws_region: '$aws_region'
+      tf_version: ${{ env.TF_VERSION }}
+      tg_version: ${{ env.TG_VERSION }}
+      aws_region: ${{ env.AWS_REGION }}
       environment: ${{ matrix.environment }}
       module: ${{ matrix.module }}
     secrets: inherit
