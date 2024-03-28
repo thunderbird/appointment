@@ -1,7 +1,6 @@
 name: verify-iac
 
 on: 
-  push:
   workflow_call:
     inputs:
       tf_version:
