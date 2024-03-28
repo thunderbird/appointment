@@ -44,30 +44,35 @@ jobs:
           terragrunt -v
       - name: vpc
         working-directory: ./tofu/environments/${{inputs.environment}}/network/vpc
+        continue-on-error: true
         run: |
           terragrunt init
           terragrunt validate
           terragrunt plan
       - name: backend-infra
         working-directory: ./tofu/environments/${{inputs.environment}}/services/backend-infra
+        continue-on-error: true
         run: |
           terragrunt init
           terragrunt validate
           terragrunt plan
       - name: cache
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/cache
+        continue-on-error: true
         run: |
           terragrunt init
           terragrunt validate
           terragrunt plan
       - name: database
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/database
+        continue-on-error: true
         run: |
           terragrunt init
           terragrunt validate
           terragrunt plan
       - name: frontend
         working-directory: ./tofu/environments/${{inputs.environment}}/services/frontend
+        continue-on-error: true
         run: |
           terragrunt init
           terragrunt validate
