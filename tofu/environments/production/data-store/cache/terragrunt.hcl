@@ -26,7 +26,7 @@ dependency "vpc" {
 dependency "backend" {
   config_path = "../../services/backend-infra"
 
-  mock_outputs_allowed_terraform_commands = ["init", "validate", "destroy"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan", "destroy"]
   mock_outputs = {
     security_group_id = "mock_sg_id"
   }
