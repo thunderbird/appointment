@@ -72,7 +72,6 @@ jobs:
           terragrunt plan
       - name: frontend
         working-directory: ./tofu/environments/${{inputs.environment}}/services/frontend
-        continue-on-error: true
         run: |
           terragrunt init
           terragrunt validate
