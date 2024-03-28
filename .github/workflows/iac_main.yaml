@@ -6,10 +6,6 @@ concurrency:
 
 on:
   push:
-    paths:
-      - tofu/environments/**
-      - tofu/modules/**
-      - .github/workflows/*
 
 permissions:
   id-token: write
@@ -21,8 +17,23 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  iac-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run-iac: ${{ steps.check.outputs.run-iac }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: check
+        with:
+          filters: |
+            run-iac:
+              - 'tofu/**'
+              - '.github/workflows/**'
+
   verify:
-    if: github.ref != 'refs/heads/main'
+    needs: iac-changes
+    if: github.ref != 'refs/heads/main' && needs.iac-changes.outputs.run-iac == 'true'
     strategy:
       max-parallel: 1
       matrix:
@@ -36,7 +47,8 @@ jobs:
     secrets: inherit
 
   apply:
-    if: github.ref == 'refs/heads/main'
+    needs: iac-changes
+    if: github.ref == 'refs/heads/main' && needs.iac-changes.outputs.run-iac == 'true'
     strategy:
       max-parallel: 1
       matrix:
