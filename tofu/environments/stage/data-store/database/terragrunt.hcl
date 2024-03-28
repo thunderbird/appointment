@@ -15,7 +15,7 @@ terraform {
 dependency "vpc" {
   config_path = "../../network/vpc"
 
-  mock_outputs_allowed_terraform_commands = ["validate"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate"]
   mock_outputs = {
     vpc_id                 = "mock_vpc_id"
     subnets                = []
@@ -26,7 +26,7 @@ dependency "vpc" {
 dependency "cache" {
   config_path = "../cache"
 
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
     security_group_id = "mock_sg_id"
   }
@@ -35,7 +35,7 @@ dependency "cache" {
 dependency "backend" {
   config_path = "../../services/backend-infra"
 
-  mock_outputs_allowed_terraform_commands = ["validate", "destroy"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "destroy"]
   mock_outputs = {
     security_group_id = "sg-mocksecuritygroup"
   }
