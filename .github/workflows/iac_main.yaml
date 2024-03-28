@@ -20,6 +20,7 @@ jobs:
   verify:
     if: github.ref != 'refs/heads/main'
     strategy:
+      max-parallel: 1
       matrix:
         environment: [stage, production]
     uses: ./.github/workflows/iac_verify.yaml
@@ -33,6 +34,7 @@ jobs:
   apply:
     if: github.ref == 'refs/heads/main'
     strategy:
+      max-parallel: 1
       matrix:
         environment: [stage]
     uses: ./.github/workflows/iac_apply.yaml
