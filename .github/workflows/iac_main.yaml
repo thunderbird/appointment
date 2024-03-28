@@ -32,9 +32,9 @@ jobs:
         module: [terraform/tfbackend, network/vpc, services/backend-infra, data-store/cache, data-store/database, services/frontend]
     uses: ./.github/workflows/iac_verify.yaml
     with:
-      tf_version: ${{ env.TF_VERSION }}
-      tg_version: ${{ env.TG_VERSION }}
-      aws_region: ${{ env.AWS_REGION }}
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
       environment: ${{ matrix.environment }}
       module: ${{ matrix.module }}
     secrets: inherit
@@ -47,9 +47,9 @@ jobs:
         module: [terraform/tfbackend, network/vpc, services/backend-infra, data-store/cache, data-store/database, services/frontend]
     uses: ./.github/workflows/iac_apply.yaml
     with:
-      tf_version: ${{ env.TF_VERSION }}
-      tg_version: ${{ env.TG_VERSION }}
-      aws_region: ${{ env.AWS_REGION }}
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
       environment: ${{ matrix.environment }}
       module: ${{ matrix.module }}
     secrets: inherit
