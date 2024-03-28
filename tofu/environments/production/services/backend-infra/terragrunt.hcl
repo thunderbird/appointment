@@ -19,6 +19,7 @@ dependency "vpc" {
   mock_outputs = {
     vpc_id                          = "mock_vpc_id"
     subnets                         = []
+    private_subnets                 = []
     ecr_endpoint_security_group     = "mock_sg"
     secrets_endpoint_security_group = "mock_sg"
     logs_endpoint_security_group    = "mock_sg"
