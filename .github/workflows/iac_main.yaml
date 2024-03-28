@@ -17,13 +17,6 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  dummy:
-    runs-on: ubuntu/latest
-    steps:
-      - name: some crap
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{env.AWS_REGION }}
   verify:
     if: github.ref != 'refs/heads/main'
     strategy:
