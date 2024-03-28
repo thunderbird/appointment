@@ -1,0 +1,60 @@
+name: apply-iac
+
+on: 
+  push:
+  workflow_call:
+    inputs:
+      tf_version:
+        required: true
+        type: string
+      tg_version:
+        required: true
+        type: string
+      aws_region:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      module:
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-iac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{secrets.IAM_ROLE}}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{inputs.aws_region}}
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{inputs.tf_version}}
+          tofu_wrapper: false
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.tg_version }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+      - name: init
+        working-directory: ./tofu/environments/${{inputs.environment}}/${{inputs.module}}
+        run: terragrunt init
+      - name: validate
+        working-directory: ./tofu/environments/${{inputs.environment}}/${{inputs.module}}
+        run: terragrunt validate
+      - name: plan
+        working-directory: ./tofu/environments/${{inputs.environment}}/${{inputs.module}}
+        run: terragrunt plan -out tfplan
+      - name: apply
+        working-directory: ./tofu/environments/${{inputs.environment}}/${{inputs.module}}
+        run: terragrunt apply tfplan
