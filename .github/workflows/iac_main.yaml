@@ -19,7 +19,7 @@ jobs:
     with:
       tf_version: $tf_version
       tg_version: $tg_version
-      aws_region: $env.aws_region
+      aws_region: $aws_region
       environment: ${{ matrix.environment }}
       module: ${{ matrix.module }}
     secrets: inherit
@@ -34,7 +34,7 @@ jobs:
     with:
       tf_version: $tf_version
       tg_version: $tg_version
-      aws_region: $env.aws_region
+      aws_region: $aws_region
       environment: ${{ matrix.environment }}
       module: ${{ matrix.module }}
     secrets: inherit
