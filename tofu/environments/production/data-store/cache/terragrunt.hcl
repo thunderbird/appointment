@@ -18,8 +18,8 @@ dependency "vpc" {
   mock_outputs_allowed_terraform_commands = ["init", "validate"]
   mock_outputs = {
     vpc_id                 = "mock_vpc_id"
-    database_subnets       = []
-    source_security_groups = []
+    database_subnets       = ["subnet-mocksubnet1234567"]
+    source_security_groups = ["sg-mocksecuritygroup"]
   }
 }
 
