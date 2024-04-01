@@ -26,10 +26,10 @@ dependency "backend-infra" {
 
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
-    target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:768512802988:targetgroup/mocktg/12345678901234"
-    log_group        = "MOCK_LOGS"
-    cluster_id      = "MOCK_CLUSTER_ID"
-    security_group_id   = "MOCK_SG"
+    target_group_arn  = "arn:aws:elasticloadbalancing:us-east-1:768512802988:targetgroup/mocktg/12345678901234"
+    log_group         = "MOCK_LOGS"
+    cluster_id        = "MOCK_CLUSTER_ID"
+    security_group_id = "MOCK_SG"
   }
 }
 
