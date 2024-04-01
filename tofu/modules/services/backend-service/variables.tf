@@ -37,3 +37,8 @@ variable "security_group" {
   description = "Backend security group"
   type = string
 }
+
+variable "image" {
+  description = "Backend Docker image"
+  type = string
+}

@@ -35,7 +35,7 @@ resource "aws_ecs_task_definition" "backend" {
   container_definitions = jsonencode([
     {
       name      = "backend"
-      image     = "backend-latest"
+      image     = var.image
       cpu       = 0
       essential = true
       portMappings = [
