@@ -75,7 +75,7 @@ jobs:
 
   verify-backend:
     needs: detect-changes
-    if: github.ref != 'refs/heads/main' && needs.detect-changes.outputs.run-backend == 'true'
+    if: github.ref != 'refs/heads/main' && needs.detect-changes.outputs.run-iac == 'true'
     strategy:
       max-parallel: 1
       matrix:
