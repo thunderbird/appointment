@@ -33,10 +33,10 @@ jobs:
         node-version: '18.x'
 
     - name: Install dependencies
-      run: cd frontend && npm install
+      run: cd frontend && yarn install
 
     - name: Build project
-      run: cd frontend && npm run build
+      run: cd frontend && yarn build
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
