@@ -1,0 +1,40 @@
+name: Deploy Frontend
+
+# Stop any pending jobs
+concurrency:
+  group: frontend
+  cancel-in-progress: true
+
+on:
+  workflow_call:
+    inputs:
+      aws_region:
+        required: true
+        type: string
+      bucket:
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{secrets.IAM_ROLE}}
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{inputs.aws_region}}
+
+    - name: Deploy Frontend
+      run: aws s3 sync frontend s3://${{inputs.bucket}}
+
+
