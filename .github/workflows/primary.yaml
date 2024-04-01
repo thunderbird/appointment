@@ -109,6 +109,6 @@ jobs:
     uses: ./.github/workflows/deploy-frontend.yaml
     with:
       aws_region: us-east-1
-      bucket: tb-appointment-stage-frontend
+      bucket: tb-apmt-stage-frontend
     secrets: inherit
 
