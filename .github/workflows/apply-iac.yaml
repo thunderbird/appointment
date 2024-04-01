@@ -32,16 +32,19 @@ jobs:
           role-to-assume: ${{secrets.IAM_ROLE}}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{inputs.aws_region}}
+
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
         with: 
           tofu_version: ${{inputs.tf_version}}
           tofu_wrapper: false
+
       - name: install terragrunt
         run: |
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ inputs.tg_version }}/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
+
       - name: vpc
         working-directory: ./tofu/environments/${{inputs.environment}}/network/vpc
         run: |
@@ -49,6 +52,7 @@ jobs:
           terragrunt validate
           terragrunt plan tfplan
           terragrunt apply tfplan
+
       - name: backend-infra
         working-directory: ./tofu/environments/${{inputs.environment}}/services/backend-infra
         run: |
@@ -56,6 +60,7 @@ jobs:
           terragrunt validate
           terragrunt plan
           terragrunt apply tfplan
+
       - name: cache
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/cache
         run: |
@@ -63,6 +68,7 @@ jobs:
           terragrunt validate
           terragrunt plan
           terragrunt apply tfplan
+
       - name: database
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/database
         run: |
@@ -70,6 +76,7 @@ jobs:
           terragrunt validate
           terragrunt plan
           terragrunt apply tfplan
+          
       - name: frontend
         working-directory: ./tofu/environments/${{inputs.environment}}/services/frontend
         run: |
