@@ -110,4 +110,5 @@ jobs:
     with:
       aws_region: us-east-1
       bucket: tb-appointment-stage-frontend
+    secrets: inherit
 
