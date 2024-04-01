@@ -33,7 +33,7 @@ permissions:
   contents: read
 
 jobs:
-  deploy-backend:
+  validate-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -64,19 +64,6 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
       with:
         mask-password: 'true'
-
-    - name: Build, tag, and push backend image to Amazon ECR
-      id: build-backend
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: backend-${{ github.sha }}
-      run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./backend -f ./backend/deploy.dockerfile
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image_backend=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
     - name: backend-service
       working-directory: ./tofu/environments/${{inputs.environment}}/services/backend-service

@@ -73,6 +73,21 @@ jobs:
     if: github.ref == 'refs/heads/main' && (needs.detect-changes.outputs.run-backend == 'true' || needs.detect-changes.outputs.run-frontend == 'true')
     uses: ./.github/workflows/ci-tests.yaml
 
+  verify-backend:
+    needs: detect-changes
+    if: github.ref != 'refs/heads/main' && needs.detect-changes.outputs.run-backend == 'true'
+    strategy:
+      max-parallel: 1
+      matrix:
+        environment: [stage, production]
+    uses: ./.github/workflows/verify-backend.yaml
+    with:
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
+      environment: ${{ matrix.environment }}
+    secrets: inherit
+
   deploy-backend:
     needs: detect-changes
     if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.run-backend == 'true'
