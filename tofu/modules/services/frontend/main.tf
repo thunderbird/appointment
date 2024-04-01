@@ -154,7 +154,9 @@ resource "aws_cloudfront_distribution" "appointment" {
 
   viewer_certificate {
     acm_certificate_arn = var.ssl_cert
+    cloudfront_default_certificate = false
     ssl_support_method  = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 }
 
