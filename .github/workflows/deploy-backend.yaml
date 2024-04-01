@@ -22,10 +22,7 @@ on:
         type: string
 
 env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: appointments
-  ECS_SERVICE: appointments-service
-  ECS_CLUSTER: appointments
+  ECR_REPOSITORY: appointment
 
 permissions:
   id-token: write

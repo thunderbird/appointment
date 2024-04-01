@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 jobs:
-  deploy-backend:
+  deploy-frontend:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,5 +36,3 @@ jobs:
 
     - name: Deploy Frontend
       run: aws s3 sync frontend s3://${{inputs.bucket}}
-
-
