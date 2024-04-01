@@ -15,16 +15,16 @@ terraform {
 dependency "vpc" {
   config_path = "../../network/vpc"
 
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
-    private_subnets = ["subnet-mocksubnet1234567", "plan"]
+    private_subnets = ["subnet-mocksubnet1234567"]
   }
 }
 
 dependency "backend-infra" {
   config_path = "../backend-infra"
 
-  mock_outputs_allowed_terraform_commands = ["validate"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
     target_group_key = "MOCK_KEY"
     log_group        = "MOCK_LOGS"
