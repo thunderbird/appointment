@@ -15,9 +15,9 @@ terraform {
 dependency "vpc" {
   config_path = "../../network/vpc"
 
-  mock_outputs_allowed_terraform_commands = ["validate"]
+  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
   mock_outputs = {
-    private_subnets = ["subnet-mocksubnet1234567"]
+    private_subnets = ["subnet-mocksubnet1234567", "plan"]
   }
 }
 
