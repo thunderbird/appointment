@@ -46,4 +46,4 @@ jobs:
         aws-region: ${{inputs.aws_region}}
 
     - name: Deploy Frontend
-      run: aws s3 sync frontend s3://${{inputs.bucket}} --delete
+      run: aws s3 sync frontend/dist s3://${{inputs.bucket}} --delete
