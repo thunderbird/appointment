@@ -70,5 +70,5 @@ jobs:
       run: |
         terragrunt init
         terragrunt validate
-        terragrunt plan -var 'image=$IMAGE'
+        terragrunt plan -var 'image=${{env.IMAGE}}'
 
