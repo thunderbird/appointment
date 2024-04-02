@@ -321,8 +321,6 @@ def decide_on_schedule_availability_slot(
 
     # otherwise, confirm slot and create event
     else:
-        slot = repo.book_slot(db, slot.id)
-
         location_url = schedule.location_url
 
         # FIXME: This is just duplicated from the appointment code. We should find a nice way to merge the two.
@@ -372,6 +370,7 @@ def decide_on_schedule_availability_slot(
                 url=location_url,
                 name=None,
             ),
+            uuid=slot.appointment.uuid if slot.appointment else None
         )
 
         organizer_email = subscriber.email
@@ -410,45 +409,12 @@ def decide_on_schedule_availability_slot(
         except EventNotCreatedException:
             raise EventCouldNotBeAccepted
 
-        # send mail with .ics attachment to attendee
-        appointment = schemas.AppointmentBase(title=title, details=schedule.details, location_url=location_url)
-        Tools().send_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        # Book the slot at the end
+        slot = repo.book_slot(db, slot.id)
+
+        Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
         attendee=schemas.AttendeeBase(email=slot.attendee.email, name=slot.attendee.name)
-    )
-
-
-@router.put("/serve/ics", response_model=schemas.FileDownload)
-def schedule_serve_ics(
-    s_a: schemas.AvailabilitySlotAttendee,
-    url: str = Body(..., embed=True),
-    db: Session = Depends(get_db),
-):
-    """endpoint to serve ICS file for availability time slot to download"""
-    subscriber = repo.verify_subscriber_link(db, url)
-    if not subscriber:
-        raise validation.InvalidLinkException
-
-    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
-    try:
-        schedule = schedules[0]  # for now we only process the first existing schedule
-    except IndexError:
-        raise validation.ScheduleNotFoundException()
-
-    # check if schedule is enabled
-    if not schedule.active:
-        raise validation.ScheduleNotFoundException()
-
-    # get calendar
-    db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
-    if db_calendar is None:
-        raise validation.CalendarNotFoundException()
-
-    appointment = schemas.AppointmentBase(title=schedule.name, details=schedule.details, location_url=schedule.location_url)
-    return schemas.FileDownload(
-        name="invite",
-        content_type="text/calendar",
-        data=Tools().create_vevent(appointment=appointment, slot=s_a.slot, organizer=subscriber).decode("utf-8"),
     )

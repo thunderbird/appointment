@@ -43,7 +43,6 @@
       :event="selectedEvent"
       :requires-confirmation="true"
       @book="bookEvent"
-      @download="downloadIcs"
       @close="closeModal()"
     />
   </div>
@@ -132,30 +131,6 @@ const getViewBySlotDistribution = (slots) => {
     return views.day;
   }
   return views.invalid;
-};
-
-/**
- * Download an appointment as a ics file.
- * @returns {Promise<void>}
- */
-const downloadIcs = async () => {
-  const obj = {
-    slot: {
-      start: selectedEvent.value.start,
-      duration: selectedEvent.value.duration,
-    },
-    attendee: attendee.value,
-  };
-  const request = call('schedule/serve/ics').put({ s_a: obj, url: window.location.href });
-
-  const { data, error } = await request.json();
-
-  if (!error.value) {
-    // TODO: Error here
-    return;
-  }
-
-  download(data.value.data, data.value.name, data.value.content_type);
 };
 
 /**

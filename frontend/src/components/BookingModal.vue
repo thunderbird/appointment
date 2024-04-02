@@ -73,18 +73,15 @@
           :disabled="!validAttendee || isLoading"
           @click="bookIt"
         />
-        <primary-button
-          v-else-if="!requiresConfirmation"
-          :label="t('label.downloadInvitation')"
-          @click="emit('download')"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { inject, computed, reactive, ref, onMounted } from 'vue';
+import {
+  inject, computed, reactive, ref, onMounted,
+} from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -105,7 +102,7 @@ const { t } = useI18n();
 const route = useRoute();
 const dj = inject('dayjs');
 
-const emit = defineEmits(['book', 'download', 'close']);
+const emit = defineEmits(['book', 'close']);
 
 const props = defineProps({
   event: Object, // event data to display and book

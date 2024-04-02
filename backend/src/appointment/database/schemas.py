@@ -3,6 +3,7 @@
 Definitions of valid data shapes for database and query models.
 """
 import json
+from uuid import UUID
 from datetime import datetime, date, time
 from typing import Annotated
 
@@ -104,6 +105,7 @@ class AppointmentFull(AppointmentBase):
 
 class Appointment(AppointmentFull):
     id: int
+    uuid: UUID
     time_created: datetime | None = None
     time_updated: datetime | None = None
     slots: list[Slot] = []
@@ -283,6 +285,7 @@ class Event(BaseModel):
     calendar_title: str | None = None
     calendar_color: str | None = None
     location: EventLocation | None = None
+    uuid: UUID | None = None
 
     """Ideally this would just be a mixin, but I'm having issues figuring out a good
     static constructor that will work for anything."""
