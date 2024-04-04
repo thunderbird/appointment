@@ -38,16 +38,6 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   restrict_public_buckets = true
 }
 
-/*resource "aws_s3_bucket_website_configuration" "frontend" {
-  bucket = aws_s3_bucket.frontend.id
-  index_document {
-    suffix = "index.html"
-  }
-  error_document {
-    key = "error.html"
-  }
-}*/
-
 resource "aws_s3_bucket_policy" "allow_access_from_cloudfront" {
   bucket = aws_s3_bucket.frontend.id
   policy = data.aws_iam_policy_document.allow_access_from_cloudfront.json
@@ -82,6 +72,8 @@ resource "aws_cloudfront_distribution" "appointment" {
   enabled             = true
   default_root_object = "index.html"
 
+  aliases = ["${var.environment}.appointment.day"]
+
   origin {
     origin_id                = "${var.name_prefix}-frontend"
     domain_name              = aws_s3_bucket.frontend.bucket_domain_name
@@ -93,7 +85,7 @@ resource "aws_cloudfront_distribution" "appointment" {
     domain_name = var.backend_dns_name
     custom_origin_config {
       http_port              = 80
-      https_port             = 443
+      https_port             = 5000
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }

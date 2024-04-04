@@ -61,13 +61,17 @@ module "backend_alb" {
   }
 
   listeners = {
-    http = {
-      port     = 5000
-      protocol = "HTTP"
 
-      forward = {
-        target_group_key = local.target_group_key
+    https = {
+      port     = 5000
+      protocol = "HTTPS"
+      certificate_arn = var.ssl_cert
+      fixed_response = {
+        content_type = "text/plain"
+        message_body = ""
+        status_code = 503
       }
+
       rules = {
         custom-header = {
           actions = [{
@@ -87,8 +91,8 @@ module "backend_alb" {
 
   target_groups = {
     "${local.target_group_key}" = {
-      name                              = "${var.name_prefix}-ecs-backend"
-      protocol                          = "HTTP"
+      name                              = "${var.name_prefix}-backend"
+      protocol                          = "HTTPS"
       port                              = 5000
       target_type                       = "ip"
       deregistration_delay              = 5
@@ -101,7 +105,7 @@ module "backend_alb" {
         matcher             = "200"
         path                = "/api/v1"
         port                = "traffic-port"
-        protocol            = "HTTP"
+        protocol            = "HTTPS"
         timeout             = 5
         unhealthy_threshold = 2
       }

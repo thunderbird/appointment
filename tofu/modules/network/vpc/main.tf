@@ -228,6 +228,15 @@ resource "aws_security_group" "ecr_endpoint" {
   })
 }
 
+resource "aws_security_group_rule" "ecr_endpoint_ingress" {
+  type              = "ingress"
+  from_port         = 5000
+  to_port           = 5000
+  protocol          = "tcp"
+  cidr_blocks       = [module.vpc.vpc_cidr_block]
+  security_group_id = aws_security_group.ecr_endpoint.id
+}
+
 # Secrets endpoint SG
 resource "aws_security_group" "secrets_endpoint" {
   name        = "${var.name_prefix}-secrets"
@@ -238,6 +247,15 @@ resource "aws_security_group" "secrets_endpoint" {
   })
 }
 
+resource "aws_security_group_rule" "secrets_endpoint_ingress" {
+  type              = "ingress"
+  from_port         = 5000
+  to_port           = 5000
+  protocol          = "tcp"
+  cidr_blocks       = [module.vpc.vpc_cidr_block]
+  security_group_id = aws_security_group.secrets_endpoint.id
+}
+
 # Logs endpoint SG
 resource "aws_security_group" "logs_endpoint" {
   name        = "${var.name_prefix}-logs"
@@ -246,4 +264,13 @@ resource "aws_security_group" "logs_endpoint" {
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-logs-endpoint"
   })
+}
+
+resource "aws_security_group_rule" "logs_endpoint_ingress" {
+  type              = "ingress"
+  from_port         = 5000
+  to_port           = 5000
+  protocol          = "tcp"
+  cidr_blocks       = [module.vpc.vpc_cidr_block]
+  security_group_id = aws_security_group.logs_endpoint.id
 }

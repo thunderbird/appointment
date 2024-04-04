@@ -53,3 +53,8 @@ variable "backend_image" {
   type = string
   default = "public.ecr.aws/amazonlinux/amazonlinux:minimal"
 }
+
+variable "ssl_cert" {
+  description = "SSL certificate ARN in AWS Certificate Manager"
+  type        = string
+}
