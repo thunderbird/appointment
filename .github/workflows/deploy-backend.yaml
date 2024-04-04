@@ -79,6 +79,6 @@ jobs:
       run: |
         terragrunt init
         terragrunt validate
-        terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}'
+        terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
         terragrunt apply tfplan
 
