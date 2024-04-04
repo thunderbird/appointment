@@ -96,6 +96,8 @@ resource "aws_cloudfront_distribution" "appointment" {
     include_cookies = true
   }
 
+  aliases = ["${var.environment}.appointment.day"]
+
   origin {
     origin_id                = "${var.name_prefix}-frontend"
     domain_name              = aws_s3_bucket.frontend.bucket_domain_name
