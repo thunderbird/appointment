@@ -90,7 +90,6 @@ jobs:
 
   deploy-backend:
     needs: detect-changes
-    if: github.ref != 'refs/heads/main' && needs.detect-changes.outputs.run-backend == 'true'
     strategy:
       max-parallel: 1
       matrix:
@@ -105,7 +104,7 @@ jobs:
 
   deploy-frontend:
     needs: detect-changes
-    if: github.ref != 'refs/heads/main' && needs.detect-changes.outputs.run-frontend == 'true'
+    if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.run-frontend == 'true'
     uses: ./.github/workflows/deploy-frontend.yaml
     with:
       aws_region: us-east-1
