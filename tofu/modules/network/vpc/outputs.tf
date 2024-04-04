@@ -33,3 +33,7 @@ output "secrets_endpoint_security_group" {
 output "logs_endpoint_security_group" {
   value = aws_security_group.logs_endpoint.id
 }
+
+output "ecs_execution_role" {
+  value = module.ecs_task_execution_role.iam_role_arn
+}

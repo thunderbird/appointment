@@ -18,6 +18,7 @@ dependency "vpc" {
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
     private_subnets = ["subnet-mocksubnet1234567"]
+    ecs_execution_role = "mockrolearn"
   }
 }
 
@@ -50,5 +51,6 @@ inputs = {
   target_group_arn = dependency.backend-infra.outputs.target_group_arn
   security_group   = dependency.backend-infra.outputs.security_group_id
   ecs_cluster      = dependency.backend-infra.outputs.cluster_id
+  task_execution_role = dependency.vpc.outputs.ecs_execution_role
   tags             = local.tags
 }

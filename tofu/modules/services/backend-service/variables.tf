@@ -42,3 +42,8 @@ variable "image" {
   description = "Backend Docker image"
   type = string
 }
+
+variable "task_execution_role" {
+  description = "ECS task execution role"
+  type = string
+}

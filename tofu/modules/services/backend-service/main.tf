@@ -22,7 +22,7 @@ resource "aws_ecs_service" "backend_service" {
 
 resource "aws_ecs_task_definition" "backend" {
   family                   = "appointment-definition"
-  execution_role_arn       = "arn:aws:iam::768512802988:role/apointments-ci-role"
+  execution_role_arn       = var.task_execution_role
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "512"
