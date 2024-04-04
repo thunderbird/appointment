@@ -462,7 +462,12 @@ const charCount = computed(() => scheduleInput.value.details.length);
 
 // booking options
 const earliestOptions = {};
-[0.5, 1, 2, 3, 4, 5].forEach((d) => {
+[0, 0.5, 1, 2, 3, 4, 5].forEach((d) => {
+  // Special case to avoid "in a few seconds"
+  if (d === 0) {
+    earliestOptions[0] = t('label.immediately');
+    return;
+  }
   earliestOptions[d * 60 * 24] = dj.duration(d, 'days').humanize();
 });
 const farthestOptions = {};
@@ -471,7 +476,8 @@ const farthestOptions = {};
 });
 
 // humanize selected durations
-const earliest = computed(() => dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize());
+const earliest = computed(() => (parseInt(scheduleInput.value.earliest_booking, 10) === 0
+  ? t('label.immediately') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
 
 // show confirmation dialog
