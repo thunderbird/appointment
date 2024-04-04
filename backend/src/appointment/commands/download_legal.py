@@ -17,12 +17,14 @@ def run():
         privacy_policy = os.getenv('TBA_PRIVACY_POLICY_URL').format(locale=locale)
         terms_of_use = os.getenv('TBA_TERMS_OF_USE_URL').format(locale=locale)
 
+        os.makedirs(f'{os.path.dirname(__file__)}/../tmp/legal/{locale}', exist_ok=True)
+
         if privacy_policy:
             print("Privacy policy url found.")
             contents = requests.get(privacy_policy).text
             html = markupsafe.Markup(markdown.markdown(contents, extensions=extensions))
 
-            with open(f'{os.path.dirname(__file__)}/../templates/legal/{locale}/privacy.jinja2', 'w') as fh:
+            with open(f'{os.path.dirname(__file__)}/../tmp/legal/{locale}/privacy.html', 'w') as fh:
                 fh.write(html)
 
         if terms_of_use:
@@ -30,7 +32,7 @@ def run():
             contents = requests.get(terms_of_use).text
             html = markupsafe.Markup(markdown.markdown(contents, extensions=extensions))
 
-            with open(f'{os.path.dirname(__file__)}/../templates/legal/{locale}/terms.jinja2', 'w') as fh:
+            with open(f'{os.path.dirname(__file__)}/../tmp/legal/{locale}/terms.html', 'w') as fh:
                 fh.write(html)
 
-    print("Done!")
+    print("Done! Copy them over to the frontend/src/assets/legal!")

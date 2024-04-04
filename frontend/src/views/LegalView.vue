@@ -5,26 +5,22 @@
 
 <script setup>
 import {
-  inject, computed, onMounted, ref,
+  computed, onMounted, ref,
 } from 'vue';
 import { useRoute } from 'vue-router';
+import privacy from '@/assets/legal/en/privacy.html?raw';
+import terms from '@/assets/legal/en/terms.html?raw';
 
 const route = useRoute();
-
-// component constants
-const call = inject('call');
 
 const pageContents = ref('');
 const isTerms = computed(() => route.name === 'terms');
 
 onMounted(async () => {
-  const url = isTerms.value ? 'terms' : 'privacy';
-  console.log(route.name);
-
-  const response = await (await call(url)).json();
-
-  if (response?.data) {
-    pageContents.value = response?.data?.value;
+  if (isTerms.value) {
+    pageContents.value = terms;
+  } else {
+    pageContents.value = privacy;
   }
 });
 </script>
