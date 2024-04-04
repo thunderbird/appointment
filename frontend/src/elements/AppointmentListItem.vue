@@ -7,7 +7,6 @@
           <div class="truncate">{{ appointment.title }}</div>
           <div class="text-sm">
             <span v-if="appointment.duration">{{ hDuration(appointment.duration) }},</span>
-            {{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}
           </div>
         </div>
         <icon-dots-vertical class="size-6 shrink-0 fill-gray-400 stroke-gray-400 stroke-2" />
