@@ -230,8 +230,8 @@ resource "aws_security_group" "ecr_endpoint" {
 
 resource "aws_security_group_rule" "ecr_endpoint_ingress" {
   type              = "ingress"
-  from_port         = 5000
-  to_port           = 5000
+  from_port         = 443
+  to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = [module.vpc.vpc_cidr_block]
   security_group_id = aws_security_group.ecr_endpoint.id
@@ -249,8 +249,8 @@ resource "aws_security_group" "secrets_endpoint" {
 
 resource "aws_security_group_rule" "secrets_endpoint_ingress" {
   type              = "ingress"
-  from_port         = 5000
-  to_port           = 5000
+  from_port         = 443
+  to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = [module.vpc.vpc_cidr_block]
   security_group_id = aws_security_group.secrets_endpoint.id
@@ -268,8 +268,8 @@ resource "aws_security_group" "logs_endpoint" {
 
 resource "aws_security_group_rule" "logs_endpoint_ingress" {
   type              = "ingress"
-  from_port         = 5000
-  to_port           = 5000
+  from_port         = 443
+  to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = [module.vpc.vpc_cidr_block]
   security_group_id = aws_security_group.logs_endpoint.id
