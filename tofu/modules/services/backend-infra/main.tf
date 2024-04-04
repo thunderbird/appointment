@@ -92,7 +92,7 @@ module "backend_alb" {
   target_groups = {
     "${local.target_group_key}" = {
       name                              = "${var.name_prefix}-backend"
-      protocol                          = "HTTPS"
+      protocol                          = "HTTP"
       port                              = 5000
       target_type                       = "ip"
       deregistration_delay              = 5
@@ -100,12 +100,12 @@ module "backend_alb" {
 
       health_check = {
         enabled             = true
-        healthy_threshold   = 5
-        interval            = 30
+        healthy_threshold   = 2
+        interval            = 10
         matcher             = "200"
-        path                = "/api/v1"
+        path                = "/"
         port                = "traffic-port"
-        protocol            = "HTTPS"
+        protocol            = "HTTP"
         timeout             = 5
         unhealthy_threshold = 2
       }
