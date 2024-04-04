@@ -15,6 +15,7 @@ resource "aws_ecs_service" "backend_service" {
     subnets         = var.subnets
   }
 
+  health_check_grace_period_seconds = 180
   task_definition = aws_ecs_task_definition.backend.arn
   desired_count   = 1
   tags            = var.tags
