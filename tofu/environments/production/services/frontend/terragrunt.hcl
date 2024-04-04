@@ -32,7 +32,7 @@ locals {
   tags             = "${merge(local.project_tags, local.environment_tags)}"
 
 
-  ssl_cert = "arn:aws:acm:us-east-1:768512802988:certificate/b826074c-ed59-454f-a3e6-8c3a7e2be1f4"
+  ssl_cert = "arn:aws:acm:us-east-1:768512802988:certificate/4a53e27b-0cd3-4855-a13f-5bac50015e43"
 }
 
 inputs = {

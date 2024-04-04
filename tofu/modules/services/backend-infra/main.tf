@@ -156,7 +156,7 @@ module "backend_alb" {
         matcher             = "200"
         path                = "/"
         port                = "traffic-port"
-        protocol            = "HTTP"
+        protocol            = "HTTPS"
         timeout             = 5
         unhealthy_threshold = 2
       }
