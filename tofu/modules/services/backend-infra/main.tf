@@ -91,7 +91,7 @@ module "backend_alb" {
 
   target_groups = {
     "${local.target_group_key}" = {
-      name                              = "${var.name_prefix}-backend"
+      name                              = "${var.name_prefix}-backend-test"
       protocol                          = "HTTP"
       port                              = 5000
       target_type                       = "ip"
