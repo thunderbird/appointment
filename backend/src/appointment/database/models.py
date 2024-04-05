@@ -90,19 +90,19 @@ class Subscriber(Base):
     __tablename__ = "subscribers"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
+    username = Column(String(length=255), unique=True, index=True)
     # Encrypted (here) and hashed (by the associated hashing functions in routes/auth)
-    password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
-    email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
-    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    password = Column(String(length=255), index=False)
+    email = Column(String(length=255), unique=True, index=True)
+    name = Column(String(length=255), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
-    timezone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    avatar_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
+    timezone = Column(String(length=255), index=True)
+    avatar_url = Column(String(length=2048), index=False)
 
-    short_link_hash = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
+    short_link_hash = Column(String(length=255), index=False)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
-    minimum_valid_iat_time = Column('minimum_valid_iat_time', StringEncryptedType(DateTime, secret, AesEngine, "pkcs5", length=255))
+    minimum_valid_iat_time = Column('minimum_valid_iat_time', DateTime)
 
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
@@ -119,11 +119,11 @@ class Calendar(Base):
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey("subscribers.id"))
     provider = Column(Enum(CalendarProvider), default=CalendarProvider.caldav)
-    title = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    color = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=32), index=True)
-    url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
-    user = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
+    title = Column(String(length=255), index=True)
+    color = Column(String(length=32), index=True)
+    url = Column(String(length=2048), index=False)
+    user = Column(String(length=255), index=True)
+    password = Column(String(length=255))
     connected = Column(Boolean, index=True, default=False)
     connected_at = Column(DateTime)
 
@@ -139,20 +139,20 @@ class Appointment(Base):
     uuid = Column(UUIDType(native=False), default=uuid.uuid4(), index=True)
     calendar_id = Column(Integer, ForeignKey("calendars.id"))
     duration = Column(Integer)
-    title = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
+    title = Column(String(length=255))
     location_type = Column(Enum(LocationType), default=LocationType.inperson)
     location_suggestions = Column(String(255))
     location_selected = Column(Integer)
-    location_name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    location_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
-    location_phone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    details = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    slug = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
+    location_name = Column(String(length=255))
+    location_url = Column(String(length=2048))
+    location_phone = Column(String(length=255))
+    details = Column(String(length=255))
+    slug = Column(String(length=255), unique=True, index=True)
     keep_open = Column(Boolean)
     status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider = Column(ChoiceType(MeetingLinkProviderType), default=MeetingLinkProviderType.none, index=False)
 
     calendar = relationship("Calendar", back_populates="appointments")
     slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
@@ -162,8 +162,8 @@ class Attendee(Base):
     __tablename__ = "attendees"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    email = Column(String(length=255), index=True)
+    name = Column(String(length=255), index=True)
 
     slots = relationship("Slot", cascade="all,delete", back_populates="attendee")
 
@@ -181,12 +181,12 @@ class Slot(Base):
     duration = Column(Integer)
 
     # provider specific id we can use to query against their service
-    meeting_link_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=1024), index=False)
+    meeting_link_id = Column(String(length=1024), index=False)
     # meeting link override for a appointment or schedule's location url
-    meeting_link_url = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
+    meeting_link_url = Column(String(length=2048))
 
     # columns for availability bookings
-    booking_tkn = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=512), index=False)
+    booking_tkn = Column(String(length=512), index=False)
     booking_expires_at = Column(DateTime)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
@@ -203,21 +203,21 @@ class Schedule(Base):
     id: int = Column(Integer, primary_key=True, index=True)
     calendar_id: int = Column(Integer, ForeignKey("calendars.id"))
     active: bool = Column(Boolean, index=True, default=True)
-    name: str = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    name: str = Column(String(length=255), index=True)
     location_type: LocationType = Column(Enum(LocationType), default=LocationType.inperson)
-    location_url: str = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048))
-    details: str = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255))
-    start_date: datetime.date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_date: datetime.date = Column(StringEncryptedType(Date, secret, AesEngine, "pkcs5", length=255), index=True)
-    start_time: datetime.time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_time: datetime.time = Column(StringEncryptedType(Time, secret, AesEngine, "pkcs5", length=255), index=True)
+    location_url: str = Column(String(length=2048))
+    details: str = Column(String(length=255))
+    start_date: datetime.date = Column(Date, index=True)
+    end_date: datetime.date = Column(Date, index=True)
+    start_time: datetime.time = Column(Time, index=True)
+    end_time: datetime.time = Column(Time, index=True)
     earliest_booking: int = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
     farthest_booking: int = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
     weekdays: str | dict = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider: MeetingLinkProviderType = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider: MeetingLinkProviderType = Column(ChoiceType(MeetingLinkProviderType), default=MeetingLinkProviderType.none, index=False)
 
     calendar: Calendar = relationship("Calendar", back_populates="schedules")
     availabilities: list["Availability"] = relationship("Availability", cascade="all,delete", back_populates="schedule")
@@ -245,11 +245,11 @@ class Availability(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     schedule_id = Column(Integer, ForeignKey("schedules.id"))
-    day_of_week = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    start_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    end_time = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    day_of_week = Column(String(length=255), index=True)
+    start_time = Column(String(length=255), index=True)
+    end_time = Column(String(length=255), index=True)
     # Can't book if it's less than X minutes before start time:
-    min_time_before_meeting = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    min_time_before_meeting = Column(String(length=255), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
 
     schedule = relationship("Schedule", back_populates="availabilities")
@@ -261,8 +261,8 @@ class ExternalConnections(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey("subscribers.id"))
-    name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
+    name = Column(String(length=255), index=False)
     type = Column(Enum(ExternalConnectionType), index=True)
-    type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
-    token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
+    type_id = Column(String(length=255), index=True)
+    token = Column(String(length=2048), index=False)
     owner = relationship("Subscriber", back_populates="external_connections")
