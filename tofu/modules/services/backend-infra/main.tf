@@ -62,10 +62,10 @@ module "backend_alb" {
 
   listeners = {
 
-    https = {
+    http = {
       port     = 5000
-      protocol = "HTTPS"
-      certificate_arn = var.ssl_cert
+      protocol = "HTTP"
+      #certificate_arn = var.ssl_cert
       fixed_response = {
         content_type = "text/plain"
         message_body = ""
