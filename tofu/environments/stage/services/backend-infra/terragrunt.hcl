@@ -19,7 +19,7 @@ dependency "vpc" {
   mock_outputs = {
     vpc_id                          = "mock_vpc_id"
     subnets                         = []
-    private_subnets                 = []
+    public_subnets                 = []
     ecr_endpoint_security_group     = "mock_sg"
     secrets_endpoint_security_group = "mock_sg"
     logs_endpoint_security_group    = "mock_sg"
@@ -42,7 +42,7 @@ inputs = {
   name_prefix                     = local.name_prefix
   region                          = local.region
   vpc                             = dependency.vpc.outputs.vpc_id
-  subnets                         = dependency.vpc.outputs.private_subnets
+  subnets                         = dependency.vpc.outputs.public_subnets
   ecr_endpoint_security_group     = dependency.vpc.outputs.ecr_endpoint_security_group
   secrets_endpoint_security_group = dependency.vpc.outputs.secrets_endpoint_security_group
   logs_endpoint_security_group    = dependency.vpc.outputs.logs_endpoint_security_group

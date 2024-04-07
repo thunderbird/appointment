@@ -84,7 +84,7 @@ resource "aws_cloudfront_distribution" "appointment" {
     origin_id   = var.backend_id
     domain_name = var.backend_dns_name
     custom_origin_config {
-      http_port              = 80
+      http_port              = 5000
       https_port             = 5000
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
@@ -111,7 +111,7 @@ resource "aws_cloudfront_distribution" "appointment" {
       }
     }
 
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
@@ -131,7 +131,28 @@ resource "aws_cloudfront_distribution" "appointment" {
       }
     }
 
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+
+  }
+
+  ordered_cache_behavior {
+    path_pattern     = "/fxa"
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = var.backend_id
+
+    forwarded_values {
+      query_string = true
+
+      cookies {
+        forward = "all"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400

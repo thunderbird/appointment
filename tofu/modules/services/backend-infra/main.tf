@@ -44,8 +44,8 @@ module "backend_alb" {
 
   security_group_ingress_rules = {
     inbound = {
-      from_port                    = 5000
-      to_port                      = 5000
+      from_port                    = 80
+      to_port                      = 80
       ip_protocol                  = "tcp"
       prefix_list_id = data.aws_ec2_managed_prefix_list.cloudfront.id
     }
@@ -63,7 +63,7 @@ module "backend_alb" {
   listeners = {
 
     http = {
-      port     = 5000
+      port     = 80
       protocol = "HTTP"
       #certificate_arn = var.ssl_cert
       fixed_response = {
@@ -91,7 +91,7 @@ module "backend_alb" {
 
   target_groups = {
     "${local.target_group_key}" = {
-      name                              = "${var.name_prefix}-backend-test"
+      name                              = "${var.name_prefix}-backend"
       protocol                          = "HTTP"
       port                              = 5000
       target_type                       = "ip"
