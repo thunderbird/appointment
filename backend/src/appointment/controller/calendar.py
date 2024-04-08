@@ -439,6 +439,10 @@ class Tools:
         subscriber = schedule.calendar.owner
         timezone = zoneinfo.ZoneInfo(subscriber.timezone)
 
+        now_tz = datetime.now(tz=timezone)
+        not_tz_midnight = now_tz.replace(hour=0, minute=0, second=0, microsecond=0)
+        now_tz_total_seconds = now_tz.timestamp() - not_tz_midnight.timestamp()
+
         # Start and end time in the subscriber's timezone
         start_time_local = schedule.start_time_local
         end_time_local = schedule.end_time_local
@@ -450,7 +454,8 @@ class Tools:
         farthest_booking = now + timedelta(days=1, minutes=schedule.farthest_booking)
 
         schedule_start = max([datetime.combine(schedule.start_date, start_time_local), earliest_booking])
-        schedule_end = min([datetime.combine(schedule.end_date, end_time_local), farthest_booking]) if schedule.end_date else farthest_booking
+        schedule_end = min([datetime.combine(schedule.end_date, end_time_local),
+                            farthest_booking]) if schedule.end_date else farthest_booking
 
         start_time = datetime.combine(now.min, start_time_local) - datetime.min
         end_time = datetime.combine(now.min, end_time_local) - datetime.min
@@ -467,23 +472,41 @@ class Tools:
         # Difference of the start and end time. Since our times are localized we start at 0, and go until we hit the diff.
         total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
 
+        slot_duration_seconds = schedule.slot_duration * 60
+
         # Between the available booking time
         for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
+            time_start = 0
+
+            # If it's today and now is greater than our normal start time...
+            if now_tz.toordinal() == ordinal and now_tz_total_seconds > start_time.total_seconds():
+                # Note: This is in seconds!
+                # Get the offset from now to 0:00:00, and adjust it so 0 aligns with our start_time.
+                # (So if the date is today it's 9am, and our start time is also 9am then time_start should be 0)
+                time_start = int(now_tz_total_seconds - start_time.total_seconds())
+
+                # Round up to the nearest slot duration, I'm bad at math...
+                # Get the remainder of the slow, subtract that from our time_start, then add the slot duration back in.
+                time_start -= (time_start % slot_duration_seconds)
+                time_start += slot_duration_seconds
+
             date = datetime.fromordinal(ordinal)
-            current_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=start_time_local.hour, minute=start_time_local.minute, tzinfo=timezone)
+            current_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=start_time_local.hour,
+                                        minute=start_time_local.minute, tzinfo=timezone)
             # Check if this weekday is within our schedule
             if current_datetime.isoweekday() in weekdays:
                 # Generate each timeslot based on the selected duration
                 # We just loop through the difference of the start and end time and step by slot duration in seconds.
                 slots += [
                     schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration)
-                    for time in range(0, total_time, schedule.slot_duration * 60)
+                    for time in range(time_start, total_time, slot_duration_seconds)
                 ]
 
         return slots
 
     @staticmethod
-    def events_roll_up_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[schemas.SlotBase]:
+    def events_roll_up_difference(a_list: list[schemas.SlotBase], b_list: list[schemas.Event]) -> list[
+        schemas.SlotBase]:
         """This helper rolls up all events from list A, which have a time collision with any event in list B
            and returns all remaining elements from A as new list.
         """
