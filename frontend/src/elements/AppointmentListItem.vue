@@ -6,7 +6,7 @@
         <div class="overflow-x-hidden">
           <div class="truncate">{{ appointment.title }}</div>
           <div class="text-sm">
-            <span v-if="appointment.duration">{{ hDuration(appointment.duration) }},</span>
+            <span v-if="appointment.duration">{{ hDuration(appointment.duration) }}</span>
           </div>
         </div>
         <icon-dots-vertical class="size-6 shrink-0 fill-gray-400 stroke-gray-400 stroke-2" />
