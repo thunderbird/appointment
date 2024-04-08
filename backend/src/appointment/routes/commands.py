@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import os
 
 import typer
-from ..commands import update_db
+from ..commands import update_db, download_legal
 
 router = typer.Typer()
 
@@ -29,3 +29,7 @@ def cron_lock(lock_name):
 def update_database():
     update_db.run()
 
+
+@router.command('download-legal')
+def download_legal_docs():
+    download_legal.run()

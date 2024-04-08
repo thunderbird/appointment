@@ -76,12 +76,12 @@ const routes = [
   {
     path: '/privacy',
     name: 'privacy',
-    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/privacy/websites/'; },
+    component: () => import('@/views/LegalView'),
   },
   {
     path: '/terms',
     name: 'terms',
-    beforeEnter: () => { location.href = 'https://www.mozilla.org/en-US/about/legal/terms/mozilla/'; },
+    component: () => import('@/views/LegalView'),
   },
 ];
 
