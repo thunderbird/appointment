@@ -55,17 +55,6 @@
         </label>
         <label>
           <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-            {{ t("label.location") }}
-          </div>
-          <tab-bar
-            :tab-items="locationTypes"
-            :active="scheduleInput.location_type"
-            :disabled="!scheduleInput.active"
-            @update="updateLocationType"
-          />
-        </label>
-        <label>
-          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.videoLink") }}
           </div>
           <input
@@ -325,7 +314,6 @@ import { useUserStore } from '@/stores/user-store';
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
-import TabBar from '@/components/TabBar';
 
 // icons
 import { IconChevronDown } from '@tabler/icons-vue';
@@ -364,7 +352,9 @@ const activeStep1 = computed(() => state.value === scheduleCreationState.details
 const activeStep2 = computed(() => state.value === scheduleCreationState.availability);
 const activeStep3 = computed(() => state.value === scheduleCreationState.settings);
 const visitedStep1 = ref(false);
-const nextStep = () => state.value++;
+const nextStep = () => {
+  state.value += 1;
+};
 
 // calculate calendar titles
 const calendarTitles = computed(() => {
@@ -450,11 +440,6 @@ const getScheduleAppointment = () => ({
   slots: getSlots(),
   type: 'schedule',
 });
-
-// tab navigation for location types
-const updateLocationType = (type) => {
-  scheduleInput.value.location_type = locationTypes[type];
-};
 
 // handle notes char limit
 const charLimit = 250;

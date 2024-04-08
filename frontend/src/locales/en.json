@@ -166,6 +166,7 @@
     "name": "Name",
     "next": "Next",
     "notConnected": "Not connected",
+    "notProvided": "Not Provided",
     "notes": "Notes",
     "off": "Off",
     "on": "On",
