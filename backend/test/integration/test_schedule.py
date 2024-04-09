@@ -197,6 +197,23 @@ class TestSchedule:
         assert weekdays == [2, 4, 6]
         assert data["slot_duration"] == 60
 
+    def test_update_existing_schedule_with_html(self, with_client, make_schedule):
+        generated_schedule = make_schedule()
+
+        response = with_client.put(
+            f"/schedule/{generated_schedule.id}",
+            json={
+                "calendar_id": generated_schedule.calendar_id,
+                "name": "<i>Schedule</i>",
+                "details": "Lorem <p>test</p> Ipsum<br><script>run_evil();</script>",
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data["name"] == "Schedule"
+        assert data["details"] == "Lorem test Ipsum"
+
     def test_update_missing_schedule(self, with_client, make_schedule):
         generated_schedule = make_schedule()
 
