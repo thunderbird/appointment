@@ -89,4 +89,3 @@ class TestAuth:
             fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
             assert fxa
             assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
-

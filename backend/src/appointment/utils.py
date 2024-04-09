@@ -1,3 +1,5 @@
+import json
+
 from functools import cache
 
 from argon2 import PasswordHasher
@@ -19,6 +21,16 @@ def get_password_hash(password):
 def list_first(items: list, default=None):
     """Returns the first item of a list or the default value."""
     return next(iter(items), default)
+
+
+def is_json(jsonstring: str):
+    """Return true if given string is valid JSON."""
+    try:
+        json.loads(jsonstring)
+    except ValueError as e:
+        return False
+    return True
+
 
 @cache
 def setup_encryption_engine():

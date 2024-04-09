@@ -2,6 +2,7 @@ import json
 import logging
 import nh3
 from starlette.types import ASGIApp, Scope, Receive, Send
+from ..utils import is_json
 
 
 class SanitizeMiddleware:
@@ -37,20 +38,18 @@ class SanitizeMiddleware:
         async def sanitize_request_body():
             message = await receive()
             body = message.get("body")
-            if not body:
+            if not body or not isinstance(body, bytes):
                 return message
-            if not isinstance(body, bytes) :
-                return message
-            json_body = json.loads(body)
-            for key, value in json_body.items():
-                logging.error(key)
-                if isinstance(value, dict):
-                    json_body[key] = __class__.sanitize_dict(value)
-                elif isinstance(value, list):
-                    json_body[key] = __class__.sanitize_list(value)
-                else:
-                    json_body[key] = __class__.sanitize_str(value)
-            message["body"] = bytes(json.dumps(json_body), encoding="utf-8")
+            if is_json(body):
+                json_body = json.loads(body)
+                for key, value in json_body.items():
+                    if isinstance(value, dict):
+                        json_body[key] = __class__.sanitize_dict(value)
+                    elif isinstance(value, list):
+                        json_body[key] = __class__.sanitize_list(value)
+                    else:
+                        json_body[key] = __class__.sanitize_str(value)
+                message["body"] = bytes(json.dumps(json_body), encoding="utf-8")
 
             return message
 
