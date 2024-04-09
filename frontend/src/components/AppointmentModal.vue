@@ -5,7 +5,7 @@
   <transition>
     <div
       v-if="open"
-      class=" position-center fixed z-50 w-full max-w-3xl rounded-xl bg-white
+      class=" position-center fixed z-50 w-full max-w-4xl rounded-xl bg-white
         p-12 text-gray-500 dark:bg-gray-700 dark:text-gray-300
       "
     >
@@ -53,20 +53,16 @@
         </div>
         <div>
           <div class="mb-1 flex items-center gap-2 font-semibold">
-            <icon-map-pin class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
-            {{ t('label.location') }}
-          </div>
-          <div class="pl-6">{{ t('label.' + keyByValue(locationTypes, appointment.location_type)) }}</div>
-        </div>
-        <div>
-          <div class="mb-1 flex items-center gap-2 font-semibold">
             <icon-video class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
             {{ t('label.videoLink') }}
           </div>
           <div class="pl-6">
-            <a :href="appointment.location_url" class="text-teal-500 underline underline-offset-2" target="_blank">
+            <a v-if="appointment.location_url" :href="appointment.location_url" class="text-teal-500 underline underline-offset-2" target="_blank">
               {{ appointment.location_url }}
             </a>
+            <p v-else>
+              {{ t('label.notProvided') }}
+            </p>
           </div>
         </div>
       </div>
@@ -119,8 +115,8 @@
 </template>
 
 <script setup>
-import { bookingStatus, locationTypes } from '@/definitions';
-import { keyByValue, timeFormat } from '@/utils';
+import { bookingStatus } from '@/definitions';
+import { timeFormat } from '@/utils';
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -129,7 +125,6 @@ import {
   IconCalendar,
   IconCalendarEvent,
   IconClock,
-  IconMapPin,
   IconNotes,
   IconUsers,
   IconVideo,

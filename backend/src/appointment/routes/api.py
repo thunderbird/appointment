@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
+from starlette.responses import HTMLResponse
 
 from .. import utils
 from ..database import repo, schemas
@@ -584,3 +585,17 @@ def send_feedback(
         details=form_data.details,
     )
     return True
+
+
+@router.get('/privacy')
+def privacy():
+    with open(f'{os.path.dirname(__file__)}/../templates/legal/en/privacy.jinja2') as fh:
+        contents = fh.read()
+    return HTMLResponse(contents)
+
+
+@router.get('/terms')
+def terms():
+    with open(f'{os.path.dirname(__file__)}/../templates/legal/en/terms.jinja2') as fh:
+        contents = fh.read()
+    return HTMLResponse(contents)

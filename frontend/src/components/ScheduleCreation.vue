@@ -55,17 +55,6 @@
         </label>
         <label>
           <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-            {{ t("label.location") }}
-          </div>
-          <tab-bar
-            :tab-items="locationTypes"
-            :active="scheduleInput.location_type"
-            :disabled="!scheduleInput.active"
-            @update="updateLocationType"
-          />
-        </label>
-        <label>
-          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.videoLink") }}
           </div>
           <input
@@ -325,7 +314,6 @@ import { useUserStore } from '@/stores/user-store';
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
 import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
-import TabBar from '@/components/TabBar';
 
 // icons
 import { IconChevronDown } from '@tabler/icons-vue';
@@ -364,7 +352,9 @@ const activeStep1 = computed(() => state.value === scheduleCreationState.details
 const activeStep2 = computed(() => state.value === scheduleCreationState.availability);
 const activeStep3 = computed(() => state.value === scheduleCreationState.settings);
 const visitedStep1 = ref(false);
-const nextStep = () => state.value++;
+const nextStep = () => {
+  state.value += 1;
+};
 
 // calculate calendar titles
 const calendarTitles = computed(() => {
@@ -451,18 +441,18 @@ const getScheduleAppointment = () => ({
   type: 'schedule',
 });
 
-// tab navigation for location types
-const updateLocationType = (type) => {
-  scheduleInput.value.location_type = locationTypes[type];
-};
-
 // handle notes char limit
 const charLimit = 250;
 const charCount = computed(() => scheduleInput.value.details.length);
 
 // booking options
 const earliestOptions = {};
-[0.5, 1, 2, 3, 4, 5].forEach((d) => {
+[0, 0.5, 1, 2, 3, 4, 5].forEach((d) => {
+  // Special case to avoid "in a few seconds"
+  if (d === 0) {
+    earliestOptions[0] = t('label.immediately');
+    return;
+  }
   earliestOptions[d * 60 * 24] = dj.duration(d, 'days').humanize();
 });
 const farthestOptions = {};
@@ -471,7 +461,8 @@ const farthestOptions = {};
 });
 
 // humanize selected durations
-const earliest = computed(() => dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize());
+const earliest = computed(() => (parseInt(scheduleInput.value.earliest_booking, 10) === 0
+  ? t('label.immediately') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
 
 // show confirmation dialog
