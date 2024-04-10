@@ -12,6 +12,23 @@ locals {
   target_group_key = "${var.name_prefix}-backend"
 }
 
+resource "random_string" "x_allow_value" {
+  length = 128
+  lower = true
+  numeric = true
+  special = true
+  upper = true
+}
+
+resource "aws_secretsmanager_secret" "x_allow_secret" {
+  name = "${var.name_prefix}-x-allow-secret"
+}
+
+resource "aws_secretsmanager_secret_version" "x_allow_secret_version" {
+  secret_id = aws_secretsmanager_secret.x_allow_secret.name
+  secret_string = random_string.x_allow_value.result
+}
+
 module "ecs_cluster" {
   source = "github.com/terraform-aws-modules/terraform-aws-ecs/modules/cluster"
 
@@ -44,8 +61,8 @@ module "backend_alb" {
 
   security_group_ingress_rules = {
     inbound = {
-      from_port                    = 80
-      to_port                      = 80
+      from_port                    = 5000
+      to_port                      = 5000
       ip_protocol                  = "tcp"
       prefix_list_id = data.aws_ec2_managed_prefix_list.cloudfront.id
     }
@@ -63,9 +80,9 @@ module "backend_alb" {
   listeners = {
 
     http = {
-      port     = 80
-      protocol = "HTTP"
-      #certificate_arn = var.ssl_cert
+      port     = 5000
+      protocol = "HTTPS"
+      certificate_arn = var.ssl_cert
       fixed_response = {
         content_type = "text/plain"
         message_body = ""
@@ -81,7 +98,7 @@ module "backend_alb" {
           conditions = [{
             http_header = {
               http_header_name = "X-Allow"
-              values           = ["test"]
+              values           = [random_string.x_allow_value.result]
             }
           }]
         }

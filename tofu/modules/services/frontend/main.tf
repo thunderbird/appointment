@@ -67,6 +67,18 @@ data "aws_iam_policy_document" "allow_access_from_cloudfront" {
 }
 
 # Cloudfront Distribution
+data "aws_cloudfront_cache_policy" "CachingDisabled" {
+  name = "Managed-CachingDisabled"
+}
+
+data "aws_cloudfront_origin_request_policy" "AllViewer" {
+  name = "Managed-AllViewer"
+} 
+
+data "aws_secretsmanager_secret_version" "x_allow_value" {
+  secret_id = "${var.name_prefix}-x-allow-secret"
+}
+
 resource "aws_cloudfront_distribution" "appointment" {
   comment             = "appointment ${var.environment} frontend"
   enabled             = true
@@ -84,7 +96,7 @@ resource "aws_cloudfront_distribution" "appointment" {
     origin_id   = var.backend_id
     domain_name = var.backend_dns_name
     custom_origin_config {
-      http_port              = 5000
+      http_port              = 80
       https_port             = 5000
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
@@ -92,7 +104,7 @@ resource "aws_cloudfront_distribution" "appointment" {
 
     custom_header {
       name  = "X-Allow"
-      value = "test"
+      value = data.aws_secretsmanager_secret_version.x_allow_value.secret_string
     }
   }
 
@@ -123,12 +135,12 @@ resource "aws_cloudfront_distribution" "appointment" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = var.backend_id
 
-    forwarded_values {
-      query_string = true
+    cache_policy_id = data.aws_cloudfront_cache_policy.CachingDisabled.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.AllViewer.id
 
-      cookies {
-        forward = "all"
-      }
+    function_association {
+      event_type = "viewer-request"
+      function_arn = aws_cloudfront_function.rewrite_api.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"
@@ -144,13 +156,8 @@ resource "aws_cloudfront_distribution" "appointment" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = var.backend_id
 
-    forwarded_values {
-      query_string = true
-
-      cookies {
-        forward = "all"
-      }
-    }
+    cache_policy_id = data.aws_cloudfront_cache_policy.CachingDisabled.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.AllViewer.id
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
@@ -179,3 +186,36 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
+
+resource "aws_cloudfront_function" "rewrite_api" {
+  name = "rewrite_api"
+  runtime = "cloudfront-js-2.0"
+  code = <<EOT
+  async function handler(event) {
+    const request = event.request;
+    const apiPath = "/api/v1";
+
+    // If our api path is the first thing that's found in the uri then remove it from the uri.
+    if (request.uri.indexOf(apiPath) === 0) {
+        return request.uri.replace(apiPath, "");
+    }
+
+    // else carry on like normal.
+    return request;
+  }
+  EOT
+}
+
+/*resource "aws_cloudfront_function" "rewrite_apmt" {
+  name = "rewrite_apmt"
+  runtime = "cloudfront-js-2.0"
+  code = <<EOT
+  async function handler(event) {
+    const request = event.request;
+    
+    request.uri = request.uri.replace("apmt.day", "appointment.day/user")
+
+    return request;
+  }
+  EOT
+}*/
