@@ -10,6 +10,7 @@ from fastapi import Request
 
 from .defines import APP_ENV_DEV, APP_ENV_TEST
 from .middleware.l10n import L10n
+from .middleware.SanitizeMiddleware import SanitizeMiddleware
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -116,6 +117,9 @@ def server():
             L10n(),
         )
     )
+
+    # strip html tags from input requests
+    app.add_middleware(SanitizeMiddleware)
 
     app.add_middleware(
         SessionMiddleware,
