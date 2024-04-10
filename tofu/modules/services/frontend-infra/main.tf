@@ -113,7 +113,7 @@ resource "aws_cloudfront_distribution" "appointment" {
     origin_id   = var.backend_id
     domain_name = var.backend_dns_name
     custom_origin_config {
-      http_port              = 5000
+      http_port              = 80
       https_port             = 5000
       origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
