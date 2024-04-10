@@ -25,9 +25,11 @@ module.exports = {
       js: 'never',
       vue: 'off',
     }],
-    'max-len': ['error', { code: 120 }],
+    'max-len': 'off', // ['error', { code: 120 }],
     'no-param-reassign': 'off',
     'tailwindcss/no-custom-classname': 'off',
+    'import/prefer-default-export': 'off',
+    'radix': 'off',
   },
   settings: {
     'import/resolver': {

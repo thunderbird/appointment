@@ -13,7 +13,7 @@ import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
 
-export function useDayJS(app, locale) {
+export default function useDayJS(app, locale) {
   dayjs.locale(locale);
   dayjs.extend(advancedFormat);
   dayjs.extend(duration);

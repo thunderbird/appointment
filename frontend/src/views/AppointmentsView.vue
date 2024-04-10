@@ -222,7 +222,6 @@ import {
   IconSearch,
 } from '@tabler/icons-vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
 
 // component constants

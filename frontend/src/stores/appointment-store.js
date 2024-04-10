@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
-import { appointmentState, bookingStatus } from '@/definitions';
+import { bookingStatus } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 
 // eslint-disable-next-line import/prefer-default-export

@@ -50,10 +50,7 @@
 
 <script setup>
 import { bookingCalendarViews as views, modalStates } from '@/definitions';
-import { download } from '@/utils';
-import {
-  inject, onMounted, ref,
-} from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';

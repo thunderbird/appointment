@@ -12,7 +12,7 @@
   </div>
   <!-- page content -->
   <div
-    class="mt-8 flex flex-col flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
+    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- main section: big calendar showing active month, week or day -->

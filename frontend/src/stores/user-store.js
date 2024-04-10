@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
-import { useI18n } from 'vue-i18n';
 import { i18n } from '@/composables/i18n';
 
 const initialUserObject = {
@@ -74,10 +73,10 @@ export const useUserStore = defineStore('user', () => {
    * @return {boolean}
    */
   const changeSignedUrl = async (fetch) => {
-    const { error, data } = await fetch('me/signature').post().json();
+    const { error, data: sigData } = await fetch('me/signature').post().json();
 
     if (error.value) {
-      return { error: data.value?.detail ?? error.value };
+      return { error: sigData.value?.detail ?? error.value };
     }
 
     return updateSignedUrl(fetch);

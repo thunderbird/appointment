@@ -119,9 +119,9 @@ const emit = defineEmits(['eventSelected']);
 const popup = ref({ ...initialEventPopupData });
 
 // formatted time range
-const formattedTimeRange = (event) => {
-  const start = dj(event.time.start);
-  const end = dj(event.time.end);
+const formattedTimeRange = (eventObj) => {
+  const start = dj(eventObj.time.start);
+  const end = dj(eventObj.time.end);
   return `${start.format(timeFormat())} - ${end.format(timeFormat())}`;
 };
 </script>

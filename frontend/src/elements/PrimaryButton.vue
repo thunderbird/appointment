@@ -1,7 +1,7 @@
 <template>
   <button
     class="
-      relative flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-br 
+      relative flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-br
       from-teal-400 to-sky-600 px-6 text-base font-semibold text-white transition-all ease-in-out
       hover:scale-102 hover:shadow-md active:scale-98 enabled:hover:from-sky-400 enabled:hover:to-teal-600
       disabled:scale-100 disabled:opacity-50 disabled:shadow-none
@@ -28,7 +28,7 @@
       <slot></slot>
     </template>
     <transition>
-      <tooltip v-show="copied" :content="t('info.copiedToClipboard')" />
+      <tool-tip v-show="copied" :content="t('info.copiedToClipboard')" />
     </transition>
   </button>
 </template>
@@ -36,7 +36,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Tooltip from '@/elements/Tooltip';
+import ToolTip from '@/elements/ToolTip';
 
 // icons
 import { IconClipboardCheck, IconCopy } from '@tabler/icons-vue';
