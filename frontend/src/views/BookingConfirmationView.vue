@@ -23,7 +23,7 @@
           {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
         </div>
       </template>
-      <template v-else="confirmed">
+      <template v-else>
         <div class="text-xl font-semibold text-sky-600">
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>

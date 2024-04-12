@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import { useDayJS } from '@/composables/dayjs';
+import useDayJS from '@/composables/dayjs';
 
 /**
  * Mount a fake VueJS app

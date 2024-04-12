@@ -23,7 +23,7 @@ export const useSiteNotificationStore = defineStore('siteNotification', () => {
    * Lock the given id
    * @param {string} lockId notification id to lock in
    */
-  const lock = (lockId) => id.value = lockId;
+  const lock = (lockId) => { id.value = lockId; };
 
   /**
    * Make a notification with given configuration appear

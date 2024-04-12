@@ -5,7 +5,7 @@
   </div>
   <!-- page content -->
   <div
-    class="mt-8 flex flex-col flex-col-reverse items-stretch justify-between gap-4 md:flex-row"
+    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
@@ -63,44 +63,9 @@ const activeDateRange = ref({
   start: activeDate.value.startOf('month'),
   end: activeDate.value.endOf('month'),
 });
-const selectDate = (d) => {
-  activeDate.value = dj(d);
-};
-
-// date calculations
-const startOfActiveWeek = computed(() => activeDate.value.startOf('week'));
-const endOfActiveWeek = computed(() => activeDate.value.endOf('week'));
 
 // active menu item for tab navigation of calendar views
 const tabActive = ref(calendarViews.month);
-const updateTab = (view) => {
-  tabActive.value = calendarViews[view];
-};
-
-// calculate page title
-const pageTitle = computed(() => {
-  switch (tabActive.value) {
-    case calendarViews.day:
-      return activeDate.value.format('dddd Do');
-    case calendarViews.week:
-      return `${startOfActiveWeek.value.format('ddd Do')} - ${endOfActiveWeek.value.format('ddd Do')}`;
-    case calendarViews.month:
-    default:
-      return '';
-  }
-});
-
-// date navigation
-const dateNav = (unit = 'auto', forward = true) => {
-  if (unit === 'auto') {
-    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
-  }
-  if (forward) {
-    selectDate(activeDate.value.add(1, unit));
-  } else {
-    selectDate(activeDate.value.subtract(1, unit));
-  }
-};
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);

@@ -9,7 +9,7 @@ import { createPinia } from 'pinia';
 import router from '@/router';
 
 // init composables
-import { useDayJS } from '@/composables/dayjs';
+import useDayJS from '@/composables/dayjs';
 import i18ninstance from '@/composables/i18n';
 
 // init basic css with tailwind imports

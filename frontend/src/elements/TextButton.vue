@@ -2,8 +2,8 @@
   <button
     class="
       relative flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-gray-400 px-2
-      text-sm font-semibold text-gray-500 transition-all ease-in-out hover:shadow-md
-      hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800
+      text-sm font-semibold text-gray-500 transition-all ease-in-out hover:bg-gray-50
+      hover:shadow-md dark:text-gray-400 dark:hover:bg-gray-800
     "
     @click.stop="copy ? copyToClipboard() : null"
   >
@@ -17,7 +17,7 @@
     />
     {{ label }}
     <transition>
-      <tooltip v-show="copied" :content="t('info.copiedToClipboard')" />
+      <tool-tip v-show="copied" :content="t('info.copiedToClipboard')" />
     </transition>
   </button>
 </template>
@@ -25,7 +25,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import Tooltip from '@/elements/Tooltip';
+import ToolTip from '@/elements/ToolTip';
 
 // icons
 import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';

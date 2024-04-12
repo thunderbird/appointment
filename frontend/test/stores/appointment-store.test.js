@@ -18,7 +18,7 @@ import withSetup from '../utils/with-setup';
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/me/appointments`, async (request) => HttpResponse.json([
+  http.get(`${API_URL}/me/appointments`, async () => HttpResponse.json([
     {
       calendar_id: 1,
       title: 'title',
@@ -43,9 +43,9 @@ const restHandlers = [
 ];
 
 const server = setupServer(...restHandlers);
-server.events.on('request:start', ({ request }) => {
-  // console.log('Outgoing:', request.method, request.url);
-});
+/*server.events.on('request:start', ({ request }) => {
+  console.log('Outgoing:', request.method, request.url);
+});*/
 
 describe('Appointment Store', () => {
   let app = null;

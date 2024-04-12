@@ -44,7 +44,7 @@
     </div>
 
     <!-- CalDAV calendar discovery -->
-    <div class="flex hidden flex-col gap-6">
+    <div class="hidden flex-col gap-6">
       <div class="text-lg">Discover CalDAV Calendars</div>
       <div class="flex max-w-2xl flex-col gap-4 pl-6">
         <label class="mt-4 flex items-center pl-4">
@@ -202,7 +202,9 @@
 <script setup>
 import { calendarManagementType } from '@/definitions';
 import { IconArrowRight } from '@tabler/icons-vue';
-import { ref, reactive, inject, onMounted, computed } from 'vue';
+import {
+  ref, reactive, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox';

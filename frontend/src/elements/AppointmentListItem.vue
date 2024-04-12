@@ -25,8 +25,6 @@
 
 <script setup>
 import { inject } from 'vue';
-import { keyByValue } from '@/utils';
-import { locationTypes } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 
 // icons

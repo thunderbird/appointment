@@ -2,9 +2,9 @@
   <button
     class="
       relative flex h-10 items-center justify-center gap-4 whitespace-nowrap rounded-full
-      px-4 text-base font-roboto text-gray-600 dark:text-gray-400 transition-all ease-in-out
-      border border-gray-500 bg-white dark:bg-gray-800
-      hover:scale-102 hover:shadow-md active:scale-98 disabled:scale-100 disabled:opacity-50 disabled:shadow-none
+      border border-gray-500 bg-white px-4 font-roboto text-base text-gray-600
+      transition-all ease-in-out hover:scale-102 hover:shadow-md
+      active:scale-98 disabled:scale-100 disabled:opacity-50 disabled:shadow-none dark:bg-gray-800 dark:text-gray-400
     "
   >
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 666.66669 666.66669" class="size-6">
@@ -28,7 +28,7 @@
 
 <script setup>
 // component properties
-const props = defineProps({
+defineProps({
   label: String, // button text
 });
 </script>
