@@ -109,5 +109,6 @@ jobs:
     with:
       aws_region: us-east-1
       bucket: tb-apmt-stage-frontend
+      build_environment: staging
     secrets: inherit
 
