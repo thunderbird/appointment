@@ -60,11 +60,17 @@ module "backend_alb" {
   enable_deletion_protection = false #var.environment != "sandbox" ? true : false
 
   security_group_ingress_rules = {
-    inbound = {
+    inbound_5000 = {
       from_port                    = 5000
       to_port                      = 5000
       ip_protocol                  = "tcp"
       prefix_list_id = data.aws_ec2_managed_prefix_list.cloudfront.id
+    },
+    inbound_80 = {
+      from_port                    = 80
+      to_port                      = 80
+      ip_protocol                  = "tcp"
+      cidr_ipv4 = "0.0.0.0/0"
     }
   }
 
@@ -79,7 +85,7 @@ module "backend_alb" {
 
   listeners = {
 
-    http = {
+    https = {
       port     = 5000
       protocol = "HTTPS"
       certificate_arn = var.ssl_cert
@@ -102,6 +108,18 @@ module "backend_alb" {
             }
           }]
         }
+      }
+    },
+    shortlink = {
+      port = 80
+      protocol = "HTTP"
+
+      redirect = {
+        status_code = "HTTP_302"
+        host = "${var.environment}.appointment.day"
+        path = "/user/#{path}"
+        port = 443
+        protocol = "HTTPS"
       }
     }
   }

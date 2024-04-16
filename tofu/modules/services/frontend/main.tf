@@ -1,6 +1,7 @@
 # S3 Bucket
 locals {
   bucket = "${var.name_prefix}-frontend"
+  log_bucket = "${var.name_prefix}-frontend-logs"
 }
 
 resource "aws_s3_bucket" "frontend" {
@@ -13,14 +14,14 @@ resource "aws_s3_bucket" "frontend" {
   })
 }
 
-resource "aws_s3_bucket_versioning" "enabled" {
+resource "aws_s3_bucket_versioning" "frontend" {
   bucket = aws_s3_bucket.frontend.bucket
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "frontend" {
   bucket = aws_s3_bucket.frontend.bucket
 
   rule {
@@ -30,7 +31,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "public_access" {
+resource "aws_s3_bucket_public_access_block" "frontend" {
   bucket                  = aws_s3_bucket.frontend.bucket
   block_public_acls       = true
   block_public_policy     = true
@@ -86,6 +87,11 @@ resource "aws_cloudfront_distribution" "appointment" {
 
   aliases = ["${var.environment}.appointment.day"]
 
+  logging_config {
+    bucket = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"
+    include_cookies = true
+  }
+
   origin {
     origin_id                = "${var.name_prefix}-frontend"
     domain_name              = aws_s3_bucket.frontend.bucket_domain_name
@@ -124,9 +130,6 @@ resource "aws_cloudfront_distribution" "appointment" {
     }
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
   }
 
   ordered_cache_behavior {
@@ -144,9 +147,6 @@ resource "aws_cloudfront_distribution" "appointment" {
     }
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
 
   }
 
@@ -160,9 +160,6 @@ resource "aws_cloudfront_distribution" "appointment" {
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.AllViewer.id
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
 
   }
 
@@ -188,7 +185,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 resource "aws_cloudfront_function" "rewrite_api" {
-  name = "rewrite_api"
+  name = "${var.name_prefix}-rewrite-api"
   runtime = "cloudfront-js-2.0"
   code = <<EOT
   async function handler(event) {
@@ -197,25 +194,61 @@ resource "aws_cloudfront_function" "rewrite_api" {
 
     // If our api path is the first thing that's found in the uri then remove it from the uri.
     if (request.uri.indexOf(apiPath) === 0) {
-        return request.uri.replace(apiPath, "");
+        request.uri = request.uri.replace(apiPath, "");
     }
-
+    // Remove the index.html default root object added by Cloudfront
+    if (request.uri.endsWith('index.html')) {
+        request.uri = request.uri.replace('index.html', "");
+    }
     // else carry on like normal.
     return request;
   }
   EOT
 }
 
-/*resource "aws_cloudfront_function" "rewrite_apmt" {
-  name = "rewrite_apmt"
-  runtime = "cloudfront-js-2.0"
-  code = <<EOT
-  async function handler(event) {
-    const request = event.request;
-    
-    request.uri = request.uri.replace("apmt.day", "appointment.day/user")
+resource "aws_s3_bucket" "request_logs" {
+  bucket = local.log_bucket
+  force_destroy = true
 
-    return request;
+  tags = merge(var.tags, {
+    Name = "${local.bucket}-request-logs"
+  })
+}
+
+resource "aws_s3_bucket_versioning" "request_logs" {
+  bucket = aws_s3_bucket.request_logs.bucket
+  versioning_configuration {
+    status = "Enabled"
   }
-  EOT
-}*/
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "request_logs" {
+  bucket = aws_s3_bucket.request_logs.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "request_logs" {
+  bucket                  = aws_s3_bucket.request_logs.bucket
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "request_logs" {
+  bucket = aws_s3_bucket.request_logs.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "request_logs" {
+  depends_on = [aws_s3_bucket_ownership_controls.request_logs]
+  bucket = aws_s3_bucket.request_logs.id
+  acl = "private"
+}
