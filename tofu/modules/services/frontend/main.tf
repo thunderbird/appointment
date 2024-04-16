@@ -98,6 +98,11 @@ resource "aws_cloudfront_distribution" "appointment" {
 
   aliases = ["${var.environment}.appointment.day"]
 
+  logging_config {
+    bucket = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"
+    include_cookies = true
+  }
+
   origin {
     origin_id                = "${var.name_prefix}-frontend"
     domain_name              = aws_s3_bucket.frontend.bucket_domain_name
@@ -211,7 +216,6 @@ resource "aws_cloudfront_function" "rewrite_api" {
       // If we're not in one of the ignorePaths then force them to /index.html
       request.uri = '/index.html';
     }
-
     // else carry on like normal.
     return request;
   }
