@@ -75,6 +75,11 @@ class MeetingLinkProviderType(enum.StrEnum):
     google_meet = 'google_meet'
 
 
+class InviteStatus(enum.Enum):
+    active = 1  # The code is still valid. It may be already used or is still to be used
+    revoked = 2  # The code is no longer valid and cannot be used for sign up anymore
+
+
 @as_declarative()
 class Base:
     """Base model, contains anything we want to be on every model."""
@@ -107,6 +112,7 @@ class Subscriber(Base):
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
     external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
+    invite: "Invite" = relationship("Invite", back_populates="subscriber")
 
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
@@ -266,3 +272,15 @@ class ExternalConnections(Base):
     type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
     owner = relationship("Subscriber", back_populates="external_connections")
+
+
+class Invite(Base):
+    """This table holds all invite codes for code based sign-ups."""
+    __tablename__ = "invites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    subscriber_id = Column(Integer, ForeignKey("subscribers.id"))
+    code = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
+    status = Column(Enum(InviteStatus), index=True)
+
+    subscriber = relationship("Subscriber", back_populates="invite")

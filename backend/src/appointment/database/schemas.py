@@ -19,6 +19,7 @@ from .models import (
     SubscriberLevel,
     ExternalConnectionType,
     MeetingLinkProviderType,
+    InviteStatus,
 )
 from .. import utils
 
@@ -248,6 +249,18 @@ class Subscriber(SubscriberAuth):
 
     class Config:
         from_attributes = True
+
+
+""" INVITE model schemas
+"""
+
+
+class Invite(BaseModel):
+    subscriber_id: int | None = None
+    code: str
+    status: InviteStatus = InviteStatus.active
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
 
 
 """ other schemas used for requests or data migration

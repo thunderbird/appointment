@@ -26,18 +26,23 @@ This project is deployed with Mozilla Accounts (known as fxa in the code.) Since
 
 Backend has a light selection of cli commands available to be run inside a container.
 
-```
+```bash
 run-command main --help
- Usage: run-command main [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                  
-                                                                                                                                                                                                                      
+```
+
+```plain
+ Usage: run-command main [OPTIONS] COMMAND [ARGS]...
+
 ╭─ Options ──────────────────────────────────────────────────────╮
-│ --help          Show this message and exit.                                                                                                                                                                        │
+│ --help          Show this message and exit.                    │
 ╰────────────────────────────────────────────────────────────────╯
 ╭─ Commands ─────────────────────────────────────────────────────╮
-│ download-legal                                                                                                                                                                                                     │
-│ update-db                                                                                                                                                                                                          │
+│ download-legal                                                 │
+│ update-db                                                      │
+│ create-invite-codes                                            │
 ╰────────────────────────────────────────────────────────────────╯
 ```
 
-* Download-legal is an internal command to process privacy policy and terms of service files that will be served by the frontend.
-* Update-db runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
+* `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
+* `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
+* `create-invite-codes --n 50` is an internal command to create invite codes which can be used for registrations. The `--n` argument specifies the amount of codes generated, defaults to 50 if left empty.
