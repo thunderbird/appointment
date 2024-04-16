@@ -216,7 +216,10 @@ resource "aws_cloudfront_function" "rewrite" {
       // If we're not in one of the ignorePaths then force them to /index.html
       request.uri = '/index.html';
     }
-
+    // Remove the index.html default root object added by Cloudfront
+    if (request.uri.endsWith('index.html')) {
+        request.uri = request.uri.replace('index.html', "");
+    }
     // else carry on like normal.
     return request;
   }
