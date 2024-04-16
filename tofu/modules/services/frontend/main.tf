@@ -83,7 +83,7 @@ data "aws_secretsmanager_secret_version" "x_allow_value" {
 resource "aws_cloudfront_distribution" "appointment" {
   comment             = "appointment ${var.environment} frontend"
   enabled             = true
-  default_root_object = "index.html"
+  //default_root_object = "index.html"
 
   aliases = ["${var.environment}.appointment.day"]
 
@@ -197,15 +197,36 @@ resource "aws_cloudfront_function" "rewrite_api" {
         request.uri = request.uri.replace(apiPath, "");
     }
     // Remove the index.html default root object added by Cloudfront
-    if (request.uri.endsWith('index.html')) {
-        request.uri = request.uri.replace('index.html', "");
-    }
+    //if (request.uri.endsWith('index.html')) {
+    //    request.uri = request.uri.replace('index.html', "");
+    //}
     // else carry on like normal.
     return request;
   }
   EOT
 }
 
+resource "aws_cloudfront_function" "add_index" {
+  name = "${var.name_prefix}-add-index"
+  runtime = "cloudfront-js-2.0"
+  code = <<EOT
+  async function handler(event) {
+    const request = event.request;
+    const uri = request.uri;
+    
+    // Check whether the URI is missing a file name.
+    if (uri.endsWith('/')) {
+        request.uri += 'index.html';
+    } 
+    // Check whether the URI is missing a file extension.
+    else if (uri == '') {
+        request.uri += '/index.html';
+    }
+
+    return request;
+}
+  EOT
+}
 resource "aws_s3_bucket" "request_logs" {
   bucket = local.log_bucket
   force_destroy = true
