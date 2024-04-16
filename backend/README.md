@@ -1,6 +1,6 @@
 # Thunderbird Appointment Backend
 
-This is the backend component of Thunderbird Appointment written in Python using FastAPI, SQLAlchemy, and pytest. 
+This is the backend component of Thunderbird Appointment written in Python using FastAPI, SQLAlchemy, and pytest.
 
 ## Installation / Running
 
@@ -20,7 +20,7 @@ You will want to ensure any variable ending with `_SECRET` has a secret value as
 
 ### Authentication
 
-This project is deployed with Mozilla Accounts (known as fxa in the code.) Since Mozilla Accounts is for internal use you will need to use password authentication. Note: password authentication does not currently have a registration flow. 
+This project is deployed with Mozilla Accounts (known as fxa in the code.) Since Mozilla Accounts is for internal use you will need to use password authentication. Note: password authentication does not currently have a registration flow.
 
 ## Commands
 
