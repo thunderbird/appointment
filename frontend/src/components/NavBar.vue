@@ -1,8 +1,8 @@
 <template>
   <header
     class="
-      fixed z-50 flex h-16 w-full justify-between border-b border-gray-300 bg-white
-      px-4 shadow-lg dark:border-gray-600 dark:bg-gray-700
+      fixed z-50 flex h-16 w-full justify-between overflow-x-scroll border-b border-gray-300
+      bg-white px-4 shadow-lg dark:border-gray-600 dark:bg-gray-700 md:overflow-hidden
     "
   >
     <router-link
