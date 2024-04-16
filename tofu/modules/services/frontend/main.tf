@@ -222,6 +222,27 @@ resource "aws_cloudfront_function" "rewrite_api" {
   EOT
 }
 
+resource "aws_cloudfront_function" "add_index" {
+  name = "${var.name_prefix}-add-index"
+  runtime = "cloudfront-js-2.0"
+  code = <<EOT
+  async function handler(event) {
+    const request = event.request;
+    const uri = request.uri;
+    
+    // Check whether the URI is missing a file name.
+    if (uri.endsWith('/')) {
+        request.uri += 'index.html';
+    } 
+    // Check whether the URI is missing a file extension.
+    else if (uri == '') {
+        request.uri += '/index.html';
+    }
+
+    return request;
+}
+  EOT
+}
 resource "aws_s3_bucket" "request_logs" {
   bucket        = local.log_bucket
   force_destroy = true

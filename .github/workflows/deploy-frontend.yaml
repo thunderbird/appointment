@@ -39,7 +39,9 @@ jobs:
       run: cd frontend && yarn install
 
     - name: Build project
-      run: cd frontend && yarn build --mode ${{inputs.build_environment}}
+      run: |
+        cp /build/frontend/.env.staging.example /build/frontend/.env.staging
+        cd frontend && yarn build --mode ${{inputs.build_environment}}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
