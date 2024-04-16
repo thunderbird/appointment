@@ -14,6 +14,9 @@ on:
       bucket:
         required: true
         type: string
+      build_environment:
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -36,7 +39,7 @@ jobs:
       run: cd frontend && yarn install
 
     - name: Build project
-      run: cd frontend && yarn build
+      run: cd frontend && yarn build --mode ${{inputs.build_environment}}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
