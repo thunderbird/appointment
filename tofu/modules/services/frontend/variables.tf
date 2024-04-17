@@ -37,3 +37,8 @@ variable "backend_dns_name" {
   description = "Backend DNS name"
   type        = string
 }
+
+variable "x_allow_secret" {
+  description = "X-Allow header secret"
+  type = string
+}

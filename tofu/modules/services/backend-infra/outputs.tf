@@ -25,3 +25,7 @@ output "log_group" {
 output "cluster_id" {
   value = module.ecs_cluster.id
 }
+
+output "x_allow_secret" {
+  value = aws_secretsmanager_secret.x_allow_secret.name
+}

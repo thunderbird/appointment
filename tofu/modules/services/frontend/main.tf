@@ -81,7 +81,7 @@ data "aws_cloudfront_origin_request_policy" "AllViewer" {
 } 
 
 data "aws_secretsmanager_secret_version" "x_allow_value" {
-  secret_id = "${var.name_prefix}-x-allow-secret"
+  secret_id = var.x_allow_secret
 }
 
 resource "aws_cloudfront_distribution" "appointment" {
@@ -199,10 +199,6 @@ resource "aws_cloudfront_function" "rewrite_api" {
     if (request.uri.indexOf(apiPath) === 0) {
         request.uri = request.uri.replace(apiPath, "");
     }
-    // Remove the index.html default root object added by Cloudfront
-    //if (request.uri.endsWith('index.html')) {
-    //    request.uri = request.uri.replace('index.html', "");
-    //}
     // else carry on like normal.
     return request;
   }
@@ -222,7 +218,7 @@ resource "aws_cloudfront_function" "add_index" {
         request.uri += 'index.html';
     } 
     // Check whether the URI is missing a file extension.
-    else if (uri == '') {
+    else if (!uri.includes('.')) {
         request.uri += '/index.html';
     }
 
