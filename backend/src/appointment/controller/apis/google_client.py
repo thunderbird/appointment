@@ -114,10 +114,18 @@ class GoogleClient:
             )
         )
 
+        # Explicitly ignore workingLocation events
+        # See: https://developers.google.com/calendar/api/v3/reference/events#eventType
+        event_types = [
+            'default',
+            'focusTime',
+            'outOfOffice'
+        ]
+
         with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
             request = service.events().list(
                 calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime",
-                fields=fields
+                eventTypes=event_types, fields=fields
             )
             while request is not None:
                 try:
