@@ -289,3 +289,13 @@ class Invite(Base):
     def is_used(self) -> bool:
         """True if the invite code is assigned to a subscriber"""
         return self.subscriber_id is not None
+
+    @property
+    def is_revoked(self) -> bool:
+        """True if the invite code is assigned to a subscriber"""
+        return self.status == InviteStatus.revoked
+
+    @property
+    def is_available(self) -> bool:
+        """True if the invite code is assigned to a subscriber"""
+        return self.subscriber_id is None and self.status == InviteStatus.active
