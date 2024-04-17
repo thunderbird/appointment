@@ -1,8 +1,8 @@
 <template>
   <header
     class="
-      fixed z-50 flex h-16 w-full justify-between overflow-x-scroll border-b border-gray-300
-      bg-white px-4 shadow-lg dark:border-gray-600 dark:bg-gray-700 md:overflow-hidden
+      fixed z-50 flex h-16 w-full justify-between overflow-x-auto overflow-y-visible border-b border-gray-300
+      bg-white px-4 shadow-lg dark:border-gray-600 dark:bg-gray-700 md:overflow-visible
     "
   >
     <router-link
@@ -40,7 +40,7 @@
           <user-avatar />
         </template>
         <template #default>
-          <div class="flex w-48 flex-col gap-2 rounded-md bg-white p-4 shadow-md dark:bg-gray-700">
+          <div class="fixed left-0 top-16 flex w-full flex-col gap-2 rounded-md bg-white p-4 shadow-md dark:bg-gray-700 md:static md:left-auto md:top-auto md:w-48">
             <router-link :to="{ name: 'profile' }" class="p-2">
               {{ t('label.userProfile') }}
             </router-link>
