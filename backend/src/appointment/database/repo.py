@@ -564,7 +564,7 @@ def schedule_has_slot(db: Session, schedule_id: int, slot_id: int):
 def use_invite_code(db: Session, code: str, subscriber_id: int):
     """set existing invite code status to revoked"""
     db_invite = db.query(models.Invite).filter(models.Invite.code == code).first()
-    if db_invite.status == models.InviteStatus.active:
+    if db_invite.status == models.InviteStatus.active and not db_invite.is_used:
         db_invite.subscriber_id = subscriber_id
         db.commit()
         db.refresh(db_invite)

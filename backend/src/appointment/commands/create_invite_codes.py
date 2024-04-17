@@ -5,7 +5,7 @@ from ..database import models, schemas
 from ..dependencies.database import get_engine_and_session
 
 
-def run(n: int = 50):
+def run(n: int):
     print(f"Generating {n} new invite codes...")
 
     codes = [str(uuid.uuid4()) for _ in range(n)]

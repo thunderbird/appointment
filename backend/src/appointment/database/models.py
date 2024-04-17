@@ -284,3 +284,8 @@ class Invite(Base):
     status = Column(Enum(InviteStatus), index=True)
 
     subscriber = relationship("Subscriber", back_populates="invite")
+
+    @property
+    def is_used(self) -> bool:
+        """True if the invite code is assigned to a subscriber"""
+        return self.subscriber_id is not None

@@ -36,5 +36,5 @@ def download_legal_docs():
 
 
 @router.command('create-invite-codes')
-def create_app_invite_codes(n: int = 50):
+def create_app_invite_codes(n: int):
     create_invite_codes.run(n)
