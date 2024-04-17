@@ -20,8 +20,16 @@ resource "random_string" "x_allow_value" {
   upper = true
 }
 
+resource "random_string" "x_allow_suffix" {
+  length = 8
+  lower = true
+  numeric = false
+  special = false
+  upper = true
+}
+
 resource "aws_secretsmanager_secret" "x_allow_secret" {
-  name = "${var.name_prefix}-x-allow-secret"
+  name = "${var.name_prefix}-x-allow-secret-${random_string.x_allow_suffix.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "x_allow_secret_version" {
@@ -220,4 +228,13 @@ resource "aws_vpc_security_group_egress_rule" "allow_tls_to_s3_endpoint" {
   to_port           = 443
   ip_protocol       = "tcp"
   prefix_list_id    = data.aws_prefix_list.s3.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_tls_to_all" {
+  security_group_id = aws_security_group.backend.id
+  description       = "TLS to internet"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4 = "0.0.0.0/0"
 }

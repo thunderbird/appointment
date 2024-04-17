@@ -110,7 +110,7 @@ resource "aws_ecs_task_definition" "backend" {
       secrets = [
         {
           "name" : "DATABASE_SECRETS",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/db-mysql-Ixf6qD"
+          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"
         },
         {
           "name" : "DB_ENC_SECRET",
