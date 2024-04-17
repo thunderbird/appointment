@@ -45,7 +45,7 @@ module "db" {
   parameters = [
     {
       name  = "require_secure_transport"
-      value = 1
+      value = 0
     }
   ]
 
