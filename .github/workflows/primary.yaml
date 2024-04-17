@@ -40,7 +40,7 @@ jobs:
 
   verify-iac:
     needs: detect-changes
-    if: github.ref != 'refs/heads/main' && needs.detect-changes.outputs.run-iac == 'true'
+    if: github.ref != 'refs/heads/add-tf-iac' && needs.detect-changes.outputs.run-iac == 'true'
     strategy:
       max-parallel: 1
       matrix:
