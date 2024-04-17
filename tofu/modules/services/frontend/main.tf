@@ -219,7 +219,7 @@ resource "aws_cloudfront_function" "add_index" {
     } 
     // Check whether the URI is missing a file extension.
     else if (!uri.includes('.')) {
-        request.uri += '/index.html';
+        request.uri = '/index.html';
     }
 
     return request;
