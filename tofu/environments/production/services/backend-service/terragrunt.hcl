@@ -18,7 +18,7 @@ dependency "vpc" {
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
   mock_outputs = {
     private_subnets = ["subnet-mocksubnet1234567"]
-    ecs_execution_role = "arn:mockrolearn"
+    ecs_execution_role = "arn:aws:iam::768512802988:role/mockrolearn"
   }
 }
 
