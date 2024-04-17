@@ -216,10 +216,6 @@ resource "aws_cloudfront_function" "rewrite" {
       // If we're not in one of the ignorePaths then force them to /index.html
       request.uri = '/index.html';
     }
-    // Remove the index.html default root object added by Cloudfront
-    //if (request.uri.endsWith('index.html')) {
-    //    request.uri = request.uri.replace('index.html', "");
-    //}
     // else carry on like normal.
     return request;
   }
@@ -239,7 +235,7 @@ resource "aws_cloudfront_function" "add_index" {
         request.uri += 'index.html';
     } 
     // Check whether the URI is missing a file extension.
-    else if (uri == '') {
+    else if (!uri.includes('.')) {
         request.uri += '/index.html';
     }
 
