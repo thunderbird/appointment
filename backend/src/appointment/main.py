@@ -102,6 +102,7 @@ def server():
     from .routes import account
     from .routes import google
     from .routes import schedule
+    from .routes import invite
     from .routes import zoom
     from .routes import webhooks
 
@@ -169,6 +170,7 @@ def server():
     app.include_router(account.router, prefix="/account")
     app.include_router(google.router, prefix="/google")
     app.include_router(schedule.router, prefix="/schedule")
+    app.include_router(invite.router, prefix="/invite")
     app.include_router(webhooks.router, prefix="/webhooks")
     if os.getenv("ZOOM_API_ENABLED"):
         app.include_router(zoom.router, prefix="/zoom")

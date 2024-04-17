@@ -605,7 +605,7 @@ def invite_code_is_available(db: Session, code: str):
 
 
 def use_invite_code(db: Session, code: str, subscriber_id: int):
-    """set existing invite code status to revoked"""
+    """assign given subscriber to an invite"""
     db_invite = get_invite_by_code(db, code)
     if db_invite and db_invite.is_available:
         db_invite.subscriber_id = subscriber_id
