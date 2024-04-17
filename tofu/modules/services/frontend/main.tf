@@ -72,6 +72,10 @@ data "aws_cloudfront_cache_policy" "CachingDisabled" {
   name = "Managed-CachingDisabled"
 }
 
+data "aws_cloudfront_cache_policy" "CachingOptimized" {
+  name = "Managed-CachingOptimized"
+}
+
 data "aws_cloudfront_origin_request_policy" "AllViewer" {
   name = "Managed-AllViewer"
 } 
@@ -121,12 +125,11 @@ resource "aws_cloudfront_distribution" "appointment" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "${var.name_prefix}-frontend"
 
-    forwarded_values {
-      query_string = false
+    cache_policy_id = data.aws_cloudfront_cache_policy.CachingOptimized.id
 
-      cookies {
-        forward = "none"
-      }
+    function_association {
+      event_type = "viewer-request"
+      function_arn = aws_cloudfront_function.add_index.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"

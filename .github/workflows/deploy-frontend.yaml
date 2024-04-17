@@ -40,7 +40,7 @@ jobs:
 
     - name: Build project
       run: |
-        cp frontend/.env.staging.example frontend/.env.staging
+        cp frontend/.env.${{inputs.build_environment}}.example frontend/.env.${{inputs.build_environment}}
         cd frontend && yarn build --mode ${{inputs.build_environment}}
 
     - name: Configure AWS credentials
