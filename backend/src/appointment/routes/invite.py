@@ -12,6 +12,11 @@ from ..exceptions import validation
 router = APIRouter()
 
 
+@router.get('/', response_model=list[schemas.Invite])
+def get_all_invites(db: Session = Depends(get_db)):
+    return db.query(models.Invite).all()
+
+
 @router.post("/generate/{n}", response_model=list[schemas.Invite])
 def generate_invite_codes(n: int, db: Session = Depends(get_db)):
     raise NotImplementedError

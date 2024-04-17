@@ -90,6 +90,11 @@ const routes = [
     name: 'terms',
     component: LegalView,
   },
+  {
+    path: '/admin/invites',
+    name: 'admin-invite-panel',
+    component: () => import('@/views/InvitePanelView.vue'),
+  },
 ];
 
 // create router object to export
