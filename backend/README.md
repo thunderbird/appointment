@@ -1,6 +1,6 @@
 # Thunderbird Appointment Backend
 
-This is the backend component of Thunderbird Appointment written in Python using FastAPI, SQLAlchemy, and pytest. 
+This is the backend component of Thunderbird Appointment written in Python using FastAPI, SQLAlchemy, and pytest.
 
 ## Installation / Running
 
@@ -20,24 +20,29 @@ You will want to ensure any variable ending with `_SECRET` has a secret value as
 
 ### Authentication
 
-This project is deployed with Mozilla Accounts (known as fxa in the code.) Since Mozilla Accounts is for internal use you will need to use password authentication. Note: password authentication does not currently have a registration flow. 
+This project is deployed with Mozilla Accounts (known as fxa in the code.) Since Mozilla Accounts is for internal use you will need to use password authentication. Note: password authentication does not currently have a registration flow.
 
 ## Commands
 
 Backend has a light selection of cli commands available to be run inside a container.
 
-```
+```bash
 run-command main --help
- Usage: run-command main [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                  
-                                                                                                                                                                                                                      
+```
+
+```plain
+ Usage: run-command main [OPTIONS] COMMAND [ARGS]...
+
 ╭─ Options ──────────────────────────────────────────────────────╮
-│ --help          Show this message and exit.                                                                                                                                                                        │
+│ --help          Show this message and exit.                    │
 ╰────────────────────────────────────────────────────────────────╯
 ╭─ Commands ─────────────────────────────────────────────────────╮
-│ download-legal                                                                                                                                                                                                     │
-│ update-db                                                                                                                                                                                                          │
+│ download-legal                                                 │
+│ update-db                                                      │
+│ create-invite-codes                                            │
 ╰────────────────────────────────────────────────────────────────╯
 ```
 
-* Download-legal is an internal command to process privacy policy and terms of service files that will be served by the frontend.
-* Update-db runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
+* `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
+* `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
+* `create-invite-codes n` is an internal command to create invite codes which can be used for user registrations. The `n` argument is an integer that specifies the amount of codes to be generated.

@@ -32,6 +32,7 @@ calendar-not-active = Der Kalender ist nicht verbunden.
 slot-not-found = Es gibt keine freien Zeitfenster zu buchen.
 slot-already-taken = Das gewählte Zeitfenster ist nicht mehr verfügbar. Bitte erneut versuchen.
 slot-invalid-email = Die angegebene E-Mail-Adresse war nicht gültig. Bitte erneut versuchen.
+invite-code-not-valid = Der Einladungscode ist leider nicht gültig.
 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 
