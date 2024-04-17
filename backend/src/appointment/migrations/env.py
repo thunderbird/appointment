@@ -7,7 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 # This is ran from src/ so ignore the errors
-from secrets import normalize_secrets
+from appointment.secrets import normalize_secrets
 
 import sentry_sdk
 

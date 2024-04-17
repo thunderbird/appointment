@@ -5,6 +5,8 @@ Revises: c5b9fc31b555
 Create Date: 2024-04-16 12:41:53.550102
 
 """
+import os
+
 from alembic import op
 import sqlalchemy as sa
 from database.models import InviteStatus
