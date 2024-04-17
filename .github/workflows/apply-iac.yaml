@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-iac:
+  apply-iac:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
         run: |
           terragrunt init
           terragrunt validate
-          terragrunt plan tfplan
+          terragrunt plan -out tfplan
           terragrunt apply tfplan
 
       - name: backend-infra
@@ -58,7 +58,7 @@ jobs:
         run: |
           terragrunt init
           terragrunt validate
-          terragrunt plan
+          terragrunt plan -out tfplan
           terragrunt apply tfplan
 
       - name: cache
@@ -66,7 +66,7 @@ jobs:
         run: |
           terragrunt init
           terragrunt validate
-          terragrunt plan
+          terragrunt plan -out tfplan
           terragrunt apply tfplan
 
       - name: database
@@ -74,7 +74,7 @@ jobs:
         run: |
           terragrunt init
           terragrunt validate
-          terragrunt plan
+          terragrunt plan -out tfplan
           terragrunt apply tfplan
           
       - name: frontend
@@ -82,5 +82,5 @@ jobs:
         run: |
           terragrunt init
           terragrunt validate
-          terragrunt plan
+          terragrunt plan -out tfplan
           terragrunt apply tfplan
