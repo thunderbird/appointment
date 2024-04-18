@@ -188,7 +188,7 @@ def cli():
 
     from .routes import commands
 
-    app = typer.Typer()
+    app = typer.Typer(pretty_exceptions_enable=False)
     # We don't have too many commands, so just dump them under main for now.
     app.add_typer(commands.router, name="main")
     app()
