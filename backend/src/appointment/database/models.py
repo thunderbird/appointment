@@ -170,6 +170,7 @@ class Attendee(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
+    timezone = Column(String(255), index=True)
 
     slots = relationship("Slot", cascade="all,delete", back_populates="attendee")
 
