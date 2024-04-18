@@ -30,7 +30,7 @@ from .. import utils
 class AttendeeBase(BaseModel):
     email: str
     name: str | None = None
-    timezone: str
+    timezone: str = ''
 
 
 class Attendee(AttendeeBase):
