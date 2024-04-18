@@ -40,7 +40,7 @@
     "eventBooked": "Event booked!",
     "externalConnections": "Connections",
     "frequentlyAskedQuestions": "Frequently asked Questions",
-    "generalAvailability": "General Availability",
+    "generalAvailability": "Set General Availability",
     "generalSettings": "General settings",
     "languageAndAppearance": "Language & Appearance",
     "pendingAppointments": "Pending bookings",
@@ -228,6 +228,7 @@
   },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
+    "mySchedule": "My Schedule",
     "emailAddress": "john.doe{'@'}example.com",
     "firstAndLastName": "First and last name",
     "never": "never",

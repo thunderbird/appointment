@@ -18,7 +18,7 @@
       @date-change="onDateChange"
     />
     <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 md:w-1/4">
+    <div class="mx-auto mb-10 w-full min-w-[310px] rounded-2xl bg-zinc-100 px-1 py-4 sm:w-1/2 md:mb-0 md:w-1/4">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"

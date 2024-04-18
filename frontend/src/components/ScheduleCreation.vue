@@ -1,7 +1,7 @@
 <template>
   <div class="sticky top-24 flex flex-col gap-4">
     <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
-      <span>{{ t("heading.generalAvailability") }}</span>
+      <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
       <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive"/>
     </div>
     <alert-box
@@ -11,10 +11,23 @@
       {{ scheduleCreationError }}
     </alert-box>
 
+    <div class="px-4">
+      <label for="scheduleName">
+        <input
+          id="scheduleName"
+          type="text"
+          v-model="scheduleInput.name"
+          :placeholder="t('placeholder.mySchedule')"
+          :disabled="!scheduleInput.active"
+          class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0"
+        />
+      </label>
+    </div>
     <!-- step 1 -->
     <div
       @click="state = scheduleCreationState.details"
-      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      :class="{'bg-neutral-50':state === scheduleCreationState.details}"
     >
       <div class="flex cursor-pointer items-center justify-between">
         <span class="font-semibold">
@@ -27,18 +40,6 @@
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-2">
         <hr/>
-        <label>
-          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-            {{ t("heading.generalAvailability") }} {{ t("label.name") }}
-          </div>
-          <input
-            type="text"
-            v-model="scheduleInput.name"
-            :placeholder="t('placeholder.biWeeklyCafeDates')"
-            :disabled="!scheduleInput.active"
-            class="place-holder w-full rounded-md"
-          />
-        </label>
         <label>
           <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.selectCalendar") }}
@@ -101,7 +102,8 @@
     </div>
     <!-- step 2 -->
     <div
-      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      :class="{'bg-neutral-50':state === scheduleCreationState.availability}"
     >
       <div
         @click="state = scheduleCreationState.availability"
@@ -189,7 +191,8 @@
     </div>
     <!-- step 3 -->
     <div
-      class="flex flex-col gap-2 rounded-lg bg-gray-100 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      :class="{'bg-neutral-50':state === scheduleCreationState.settings}"
     >
       <div
         @click="state = scheduleCreationState.settings"
