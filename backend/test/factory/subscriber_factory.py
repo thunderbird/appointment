@@ -11,7 +11,7 @@ def make_subscriber(with_db):
 
     def _make_subscriber(level, name=FAKER_RANDOM_VALUE, username=FAKER_RANDOM_VALUE, email=FAKER_RANDOM_VALUE, password=None):
         with with_db() as db:
-            subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
+            subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
                 name=name if factory_has_value(name) else fake.name(),
                 username=username if factory_has_value(username) else fake.name().replace(' ', '_'),
                 email=email if factory_has_value(email) else fake.email(),

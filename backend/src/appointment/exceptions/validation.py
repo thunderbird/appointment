@@ -30,7 +30,7 @@ class InvalidTokenException(APIException):
 
 
 class InvalidLinkException(APIException):
-    """Raise when verify_subscriber_link fails"""
+    """Raise when subscriber.verify_link fails"""
     id_code = 'INVALID_LINK'
     status_code = 400
 

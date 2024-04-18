@@ -169,7 +169,7 @@ class GoogleClient:
 
             # add calendar
             try:
-                repo.update_or_create_subscriber_calendar(
+                repo.calendar.update_or_create(
                     db=db,
                     calendar=cal,
                     calendar_url=calendar.get("id"),

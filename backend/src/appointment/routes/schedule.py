@@ -38,19 +38,19 @@ def create_calendar_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to add a new schedule for a given calendar"""
-    if not repo.calendar_exists(db, calendar_id=schedule.calendar_id):
+    if not repo.calendar.exists(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotFoundException()
-    if not repo.calendar_is_owned(db, calendar_id=schedule.calendar_id, subscriber_id=subscriber.id):
+    if not repo.calendar.is_owned(db, calendar_id=schedule.calendar_id, subscriber_id=subscriber.id):
         raise validation.CalendarNotAuthorizedException()
-    if not repo.calendar_is_connected(db, calendar_id=schedule.calendar_id):
+    if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
-    return repo.create_calendar_schedule(db=db, schedule=schedule)
+    return repo.schedule.create(db=db, schedule=schedule)
 
 
 @router.get("/", response_model=list[schemas.Schedule])
 def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Gets all of the available schedules for the logged in subscriber"""
-    return repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    return repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
 
 
 @router.get("/{id}", response_model=schemas.Schedule, deprecated=True)
@@ -60,10 +60,10 @@ def read_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Gets information regarding a specific schedule"""
-    schedule = repo.get_schedule(db, schedule_id=id)
+    schedule = repo.schedule.get(db, schedule_id=id)
     if schedule is None:
         raise validation.ScheduleNotFoundException()
-    if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
+    if not repo.schedule.is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
         raise validation.ScheduleNotAuthorizedException()
     return schedule
 
@@ -76,13 +76,13 @@ def update_schedule(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """endpoint to update an existing calendar connection for authenticated subscriber"""
-    if not repo.schedule_exists(db, schedule_id=id):
+    if not repo.schedule.exists(db, schedule_id=id):
         raise validation.ScheduleNotFoundException()
-    if not repo.schedule_is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
+    if not repo.schedule.is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
         raise validation.ScheduleNotAuthorizedException()
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
         raise validation.ZoomNotConnectedException()
-    return repo.update_calendar_schedule(db=db, schedule=schedule, schedule_id=id)
+    return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
 
 @router.post("/public/availability", response_model=schemas.AppointmentOut)
@@ -97,7 +97,7 @@ def read_schedule_availabilities(
     if subscriber.timezone is None:
         raise validation.ScheduleNotFoundException()
 
-    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    schedules = repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
 
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
@@ -108,7 +108,7 @@ def read_schedule_availabilities(
     if not schedule.active:
         raise validation.ScheduleNotActive()
 
-    calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
+    calendars = repo.calendar.get_by_subscriber(db, subscriber.id, False)
 
     if not calendars or len(calendars) == 0:
         raise validation.CalendarNotFoundException()
@@ -147,7 +147,7 @@ def request_schedule_availability_slot(
     if subscriber.timezone is None:
         raise validation.ScheduleNotFoundException()
 
-    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    schedules = repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
 
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
@@ -159,18 +159,18 @@ def request_schedule_availability_slot(
         raise validation.ScheduleNotFoundException()
 
     # get calendar
-    db_calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    db_calendar = repo.calendar.get(db, calendar_id=schedule.calendar_id)
     if db_calendar is None:
         raise validation.CalendarNotFoundException()
 
     # check if slot still available, might already be taken at this time
     slot = schemas.SlotBase(**s_a.slot.dict())
-    if repo.schedule_slot_exists(db, slot, schedule.id):
+    if repo.slot.exists_on_schedule(db, slot, schedule.id):
         raise validation.SlotAlreadyTakenException()
     
     # We need to verify that the time is actually available on the remote calendar
     if db_calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -196,7 +196,7 @@ def request_schedule_availability_slot(
 
     # Ok we need to clear the cache for all calendars, because we need to recheck them.
     con.bust_cached_events(True)
-    calendars = repo.get_calendars_by_subscriber(db, subscriber.id, False)
+    calendars = repo.calendar.get_by_subscriber(db, subscriber.id, False)
     existing_remote_events = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
     has_collision = Tools.events_roll_up_difference([slot], existing_remote_events)
     
@@ -209,10 +209,10 @@ def request_schedule_availability_slot(
     slot.booking_tkn = token
     slot.booking_expires_at = datetime.now() + timedelta(days=1)
     slot.booking_status = BookingStatus.requested
-    slot = repo.add_schedule_slot(db, slot, schedule.id)
+    slot = repo.slot.add_for_schedule(db, slot, schedule.id)
 
     # create attendee for this slot
-    attendee = repo.update_slot(db, slot.id, s_a.attendee)
+    attendee = repo.slot.update(db, slot.id, s_a.attendee)
 
     # generate confirm and deny links with encoded booking token and signed owner url
     url = f"{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}"
@@ -232,7 +232,7 @@ def request_schedule_availability_slot(
     subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
     title = f"Appointment - {subscriber_name} and {attendee_name}"
 
-    appointment = repo.create_calendar_appointment(db, schemas.AppointmentFull(
+    appointment = repo.appointment.create(db, schemas.AppointmentFull(
         title=title,
         details=schedule.details,
         calendar_id=db_calendar.id,
@@ -274,7 +274,7 @@ def decide_on_schedule_availability_slot(
        if confirmed: create an event in remote calendar and send invitation mail
        TODO: if denied: send information mail to bookee
     """
-    subscriber = repo.verify_subscriber_link(db, data.owner_url)
+    subscriber = repo.subscriber.verify_link(db, data.owner_url)
     if not subscriber:
         raise validation.InvalidLinkException()
 
@@ -282,7 +282,7 @@ def decide_on_schedule_availability_slot(
     if subscriber.timezone is None:
         raise validation.ScheduleNotFoundException()
 
-    schedules = repo.get_schedules_by_subscriber(db, subscriber_id=subscriber.id)
+    schedules = repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
@@ -293,16 +293,16 @@ def decide_on_schedule_availability_slot(
         raise validation.ScheduleNotFoundException()
 
     # get calendar
-    calendar = repo.get_calendar(db, calendar_id=schedule.calendar_id)
+    calendar = repo.calendar.get(db, calendar_id=schedule.calendar_id)
     if calendar is None:
         raise validation.CalendarNotFoundException()
 
     # get slot and check if slot exists and is not booked yet and token is the same
-    slot = repo.get_slot(db, data.slot_id)
+    slot = repo.slot.get(db, data.slot_id)
     if (
         not slot
-        or not repo.slot_is_available(db, slot.id)
-        or not repo.schedule_has_slot(db, schedule.id, slot.id)
+        or not repo.slot.is_available(db, slot.id)
+        or not repo.schedule.has_slot(db, schedule.id, slot.id)
         or slot.booking_tkn != data.slot_token
     ):
         raise validation.SlotNotFoundException()
@@ -319,10 +319,10 @@ def decide_on_schedule_availability_slot(
 
         if slot.appointment_id:
             # delete the appointment, this will also delete the slot.
-            repo.delete_calendar_appointment(db, slot.appointment_id)
+            repo.appointment.delete(db, slot.appointment_id)
         else:
             # delete the scheduled slot to make the time available again
-            repo.delete_slot(db, slot.id)
+            repo.slot.delete(db, slot.id)
 
     # otherwise, confirm slot and create event
     else:
@@ -363,7 +363,7 @@ def decide_on_schedule_availability_slot(
         else:
             title = slot.appointment.title
             # Update the appointment to closed
-            repo.update_appointment_status(db, slot.appointment_id, models.AppointmentStatus.closed)
+            repo.appointment.update_status(db, slot.appointment_id, models.AppointmentStatus.closed)
 
         event = schemas.Event(
             title=title,
@@ -382,7 +382,7 @@ def decide_on_schedule_availability_slot(
 
         # create remote event
         if calendar.provider == CalendarProvider.google:
-            external_connection: ExternalConnection|None = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+            external_connection: ExternalConnection|None = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
             if external_connection is None or external_connection.token is None:
                 raise RemoteCalendarConnectionError()
@@ -415,7 +415,7 @@ def decide_on_schedule_availability_slot(
             raise EventCouldNotBeAccepted
 
         # Book the slot at the end
-        slot = repo.book_slot(db, slot.id)
+        slot = repo.slot.book(db, slot.id)
 
         Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 

@@ -82,7 +82,7 @@ class TestAuth:
         assert response.status_code == 307, response.text
 
         with with_db() as db:
-            subscriber = repo.get_subscriber_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
             assert subscriber
             assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
             assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')

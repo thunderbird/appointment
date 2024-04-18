@@ -37,14 +37,14 @@ def model_to_csv_buffer(models):
 
 def download(db, subscriber: Subscriber):
     """Generate a zip file of csvs that contain a copy of the subscriber's information."""
-    attendees = repo.get_attendees_by_subscriber(db, subscriber_id=subscriber.id)
-    appointments = repo.get_appointments_by_subscriber(db, subscriber_id=subscriber.id)
-    calendars = repo.get_calendars_by_subscriber(db, subscriber_id=subscriber.id)
+    attendees = repo.attendee.get_by_subscriber(db, subscriber_id=subscriber.id)
+    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id)
+    calendars = repo.calendar.get_by_subscriber(db, subscriber_id=subscriber.id)
     subscribers = [subscriber]
-    slots = repo.get_slots_by_subscriber(db, subscriber_id=subscriber.id)
+    slots = repo.slot.get_by_subscriber(db, subscriber_id=subscriber.id)
     external_connections = subscriber.external_connections
-    schedules = repo.get_schedules_by_subscriber(db, subscriber.id)
-    availability = [repo.get_availability_by_schedule(db, schedule.id) for schedule in schedules]
+    schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
+    availability = [repo.schedule.get_availability(db, schedule.id) for schedule in schedules]
 
     # Convert models to csv
     attendee_buffer = model_to_csv_buffer(attendees)
@@ -79,21 +79,21 @@ def download(db, subscriber: Subscriber):
 
 def delete_account(db, subscriber: Subscriber):
     # Ok nuke everything (thanks cascade=all,delete)
-    repo.delete_subscriber(db, subscriber)
+    repo.subscriber.delete(db, subscriber)
 
     # Make sure we actually nuked the subscriber
-    if repo.get_subscriber(db, subscriber.id) is not None:
+    if repo.subscriber.get(db, subscriber.id) is not None:
         raise AccountDeletionSubscriberFail(
             subscriber.id,
             "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
         )
 
     empty_check = [
-        len(repo.get_attendees_by_subscriber(db, subscriber.id)),
-        len(repo.get_slots_by_subscriber(db, subscriber.id)),
-        len(repo.get_appointments_by_subscriber(db, subscriber.id)),
-        len(repo.get_calendars_by_subscriber(db, subscriber.id)),
-        len(repo.get_schedules_by_subscriber(db, subscriber.id))
+        len(repo.attendee.get_by_subscriber(db, subscriber.id)),
+        len(repo.slot.get_by_subscriber(db, subscriber.id)),
+        len(repo.appointment.get_by_subscriber(db, subscriber.id)),
+        len(repo.calendar.get_by_subscriber(db, subscriber.id)),
+        len(repo.schedule.get_by_subscriber(db, subscriber.id))
     ]
 
     # Check if we have any left-over subscriber data

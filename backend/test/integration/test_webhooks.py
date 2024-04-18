@@ -40,7 +40,7 @@ class TestFXAWebhooks:
         with freeze_time('Aug 13th 2019'):
             # Update the external connection time to match our freeze_time
             with with_db() as db:
-                fxa_connection = repo.get_external_connections_by_type(db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID)[0]
+                fxa_connection = repo.external_connection.get_by_type(db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID)[0]
                 fxa_connection.time_updated = datetime.datetime.now()
                 db.add(fxa_connection)
                 db.commit()
@@ -51,19 +51,19 @@ class TestFXAWebhooks:
             assert response.status_code == 200, response.text
 
             with with_db() as db:
-                subscriber = repo.get_subscriber(db, subscriber_id)
+                subscriber = repo.subscriber.get(db, subscriber_id)
                 assert subscriber.minimum_valid_iat_time is not None
 
         # Update the external connection time to match our current time
         # This will make the change password event out of date
         with with_db() as db:
-            fxa_connection = repo.get_external_connections_by_type(db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID)[0]
+            fxa_connection = repo.external_connection.get_by_type(db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID)[0]
             fxa_connection.time_updated = datetime.datetime.now()
             db.add(fxa_connection)
             db.commit()
 
             # Reset our minimum_valid_iat_time, so we can ensure it stays None
-            subscriber = repo.get_subscriber(db, subscriber_id)
+            subscriber = repo.subscriber.get(db, subscriber_id)
             subscriber.minimum_valid_iat_time = None
             db.add(subscriber)
             db.commit()
@@ -74,7 +74,7 @@ class TestFXAWebhooks:
         )
         assert response.status_code == 200, response.text
         with with_db() as db:
-            subscriber = repo.get_subscriber(db, subscriber_id)
+            subscriber = repo.subscriber.get(db, subscriber_id)
             assert subscriber.minimum_valid_iat_time is None
 
     def test_fxa_process_change_primary_email(self, with_db, with_client, make_pro_subscriber, make_external_connections):
@@ -119,7 +119,7 @@ class TestFXAWebhooks:
 
         # Refresh the subscriber and test minimum_valid_iat_time (they should be logged out), and email address
         with with_db() as db:
-            subscriber = repo.get_subscriber(db, subscriber_id)
+            subscriber = repo.subscriber.get(db, subscriber_id)
             assert subscriber.email == NEW_EMAIL
             assert subscriber.minimum_valid_iat_time is not None
 
@@ -160,6 +160,6 @@ class TestFXAWebhooks:
 
         with with_db() as db:
             # Make sure everything we created is gone. A more exhaustive check is done in the delete account test
-            assert repo.get_subscriber(db, subscriber.id) is None
-            assert repo.get_calendar(db, calendar.id) is None
-            assert repo.get_appointment(db, appointment.id) is None
+            assert repo.subscriber.get(db, subscriber.id) is None
+            assert repo.calendar.get(db, calendar.id) is None
+            assert repo.appointment.get(db, appointment.id) is None

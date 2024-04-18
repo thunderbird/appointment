@@ -24,7 +24,7 @@ def fxa_process(
 ):
     """Main for webhooks regarding fxa"""
 
-    subscriber: models.Subscriber = repo.get_subscriber_by_fxa_uid(db, decoded_token.get('sub'))
+    subscriber: models.Subscriber = repo.external_connection.get_subscriber_by_fxa_uid(db, decoded_token.get('sub'))
     if not subscriber:
         logging.warning("Webhook event received for non-existent user.")
         return
@@ -58,7 +58,7 @@ def fxa_process(
                 try:
                     profile = fxa_client.get_profile()
                     # Update profile with fxa info
-                    repo.update_subscriber(db, schemas.SubscriberIn(
+                    repo.subscriber.update(db, schemas.SubscriberIn(
                         avatar_url=profile['avatar'],
                         name=subscriber.name,
                         username=subscriber.username

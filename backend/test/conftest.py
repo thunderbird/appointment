@@ -160,7 +160,7 @@ def with_client(with_db, monkeypatch):
         if 'authorization' not in request.headers:
             raise InvalidTokenException
 
-        return repo.get_subscriber_by_email(with_db(), os.getenv('TEST_USER_EMAIL'))
+        return repo.subscriber.get_by_email(with_db(), os.getenv('TEST_USER_EMAIL'))
 
     def override_get_google_client():
         return None

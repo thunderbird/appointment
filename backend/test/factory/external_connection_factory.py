@@ -14,7 +14,7 @@ def make_external_connections(with_db):
                                    type_id=FAKER_RANDOM_VALUE,
                                    token=FAKER_RANDOM_VALUE):
         with with_db() as db:
-            return repo.create_subscriber_external_connection(db, schemas.ExternalConnection(
+            return repo.external_connection.create(db, schemas.ExternalConnection(
                 owner_id=subscriber_id,
                 name=name if factory_has_value(name) else fake.name(),
                 type=type if factory_has_value(type) else fake.random_element(

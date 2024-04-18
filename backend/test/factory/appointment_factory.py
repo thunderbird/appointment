@@ -24,7 +24,7 @@ def make_appointment(with_db, make_caldav_calendar, make_appointment_slot):
                           slots=FAKER_RANDOM_VALUE
                           ):
         with with_db() as db:
-            appointment = repo.create_calendar_appointment(db, schemas.AppointmentFull(
+            appointment = repo.appointment.create(db, schemas.AppointmentFull(
                 title=title if factory_has_value(title) else fake.name(),
                 details=details if factory_has_value(details) else fake.sentence(),
                 duration=duration if factory_has_value(duration) else fake.pyint(15, 60),
@@ -44,7 +44,7 @@ def make_appointment(with_db, make_caldav_calendar, make_appointment_slot):
             if not factory_has_value(slots):
                 make_appointment_slot(appointment_id=appointment.id)
             else:
-                repo.add_appointment_slots(db, slots, appointment.id)
+                repo.slot.add_for_appointment(db, slots, appointment.id)
 
             # Refresh our appointment now that is has slot data
             db.refresh(appointment)
