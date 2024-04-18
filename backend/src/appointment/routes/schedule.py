@@ -421,5 +421,9 @@ def decide_on_schedule_availability_slot(
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
-        attendee=schemas.AttendeeBase(email=slot.attendee.email, name=slot.attendee.name)
+        attendee=schemas.AttendeeBase(
+            email=slot.attendee.email,
+            name=slot.attendee.name,
+            timezone=slot.attendee.timezone
+        )
     )

@@ -17,7 +17,7 @@ class TestMailer:
         deny_url = 'https://example.org/no'
         fake_email = 'to@example.org'
         now = datetime.datetime.now()
-        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name())
+        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
         mailer = ConfirmationMail(confirm_url, deny_url, attendee, now, to=fake_email)
         assert mailer.html()
