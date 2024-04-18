@@ -338,7 +338,7 @@ class TestAppointment:
 
         response = with_client.put(
             f"/apmt/public/{generated_appointment.slug}",
-            json={"slot_id": generated_appointment.slots[-1].id, "attendee": {"email": "a", "name": "b"}},
+            json={"slot_id": generated_appointment.slots[-1].id, "attendee": {"email": "a", "name": "b", "timezone": "c"}},
         )
         assert response.status_code == 403, response.text
 
@@ -347,7 +347,7 @@ class TestAppointment:
 
         response = with_client.put(
             f"/apmt/public/{generated_appointment}",
-            json={"slot_id": generated_appointment.slots[0].id, "attendee": {"email": "a", "name": "b"}},
+            json={"slot_id": generated_appointment.slots[0].id, "attendee": {"email": "a", "name": "b", "timezone": "c"}},
         )
         assert response.status_code == 404, response.text
 
@@ -356,7 +356,7 @@ class TestAppointment:
 
         response = with_client.put(
             f"/apmt/public/{generated_appointment.id}",
-            json={"slot_id": generated_appointment.slots[0].id + 1, "attendee": {"email": "a", "name": "b"}},
+            json={"slot_id": generated_appointment.slots[0].id + 1, "attendee": {"email": "a", "name": "b", "timezone": "c"}},
         )
         assert response.status_code == 404, response.text
 

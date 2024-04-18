@@ -220,7 +220,12 @@ def request_schedule_availability_slot(
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
     date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
-    date = f"{date}, {slot.duration} minutes"
+    date = f"{date}, {slot.duration} minutes ({subscriber.timezone})"
+
+    # human readable date in attendee timezone
+    # TODO: handle locale date representation
+    attendee_date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(slot.attendee.timezone)).strftime("%c")
+    attendee_date = f"{attendee_date}, {slot.duration} minutes ({slot.attendee.timezone})"
 
     # Create a pending appointment
     attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
@@ -246,7 +251,7 @@ def request_schedule_availability_slot(
     background_tasks.add_task(send_confirmation_email, url=url, attendee=attendee, date=date, to=subscriber.email)
 
     # Sending pending email to attendee
-    background_tasks.add_task(send_pending_email, owner=subscriber, date=date, to=slot.attendee.email)
+    background_tasks.add_task(send_pending_email, owner=subscriber, date=attendee_date, to=slot.attendee.email)
 
     # Mini version of slot, so we can grab the newly created slot id for tests
     return schemas.SlotOut(
@@ -416,5 +421,9 @@ def decide_on_schedule_availability_slot(
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
-        attendee=schemas.AttendeeBase(email=slot.attendee.email, name=slot.attendee.name)
+        attendee=schemas.AttendeeBase(
+            email=slot.attendee.email,
+            name=slot.attendee.name,
+            timezone=slot.attendee.timezone
+        )
     )

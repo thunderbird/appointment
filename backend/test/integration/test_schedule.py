@@ -462,7 +462,8 @@ class TestSchedule:
             ),
             attendee=schemas.AttendeeBase(
                 email='hello@example.org',
-                name='Greg'
+                name='Greg',
+                timezone='Europe/Berlin'
             )
         ).model_dump(mode='json')
 

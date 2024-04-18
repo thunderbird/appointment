@@ -25,7 +25,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ToolTip from '@/elements/Tooltip';
+import ToolTip from '@/elements/ToolTip';
 
 // icons
 import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';
