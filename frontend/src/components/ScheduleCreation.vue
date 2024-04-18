@@ -20,25 +20,177 @@
           :placeholder="t('placeholder.mySchedule')"
           :disabled="!scheduleInput.active"
           class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0"
+          required
         />
       </label>
     </div>
     <!-- step 1 -->
     <div
-      @click="state = scheduleCreationState.details"
       class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
-      :class="{'bg-neutral-50':state === scheduleCreationState.details}"
+      :class="{'bg-neutral-50': activeStep1}"
+      id="schedule-availability"
     >
-      <div class="flex cursor-pointer items-center justify-between">
+      <div
+        @click="state = scheduleCreationState.availability"
+        class="flex cursor-pointer items-center justify-between"
+      >
         <span class="font-semibold">
-          {{ t("label.generalDetails") }}
+          {{ t("label.chooseYourAvailability") }}
         </span>
         <icon-chevron-down
           class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep1 }"
         />
       </div>
-      <div v-show="activeStep1" class="flex flex-col gap-2">
+      <div v-show="activeStep1" class="flex flex-col gap-3">
+        <hr/>
+        <div class="grid grid-cols-2 gap-4">
+          <label>
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.startTime") }}
+            </div>
+            <input
+              type="time"
+              v-model="scheduleInput.start_time"
+              :disabled="!scheduleInput.active"
+              class="w-full rounded-md"
+            />
+          </label>
+          <label>
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.endTime") }}
+            </div>
+            <input
+              type="time"
+              v-model="scheduleInput.end_time"
+              :disabled="!scheduleInput.active"
+              class="w-full rounded-md"
+            />
+          </label>
+        </div>
+        <div>
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+            {{ t("label.availableDays") }}
+          </div>
+          <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg p-4">
+            <label
+              v-for="w in isoWeekdays"
+              :key="w.iso"
+              class="flex cursor-pointer select-none items-center gap-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                v-model="scheduleInput.weekdays"
+                :value="w.iso"
+                :disabled="!scheduleInput.active"
+                class="size-5 text-teal-500"
+              />
+              <span>{{ w.long }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- step 2 -->
+    <div
+      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      :class="{'bg-neutral-50':activeStep2}"
+      id="schedule-settings"
+    >
+      <div
+        @click="state = scheduleCreationState.settings"
+        class="flex cursor-pointer items-center justify-between"
+      >
+        <span class="font-semibold">
+          {{ t("label.scheduleDetails") }}
+        </span>
+        <icon-chevron-down
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+          :class="{ '!rotate-0': activeStep2 }"
+        />
+      </div>
+      <div v-show="activeStep2" class="flex flex-col gap-3">
+        <hr/>
+        <div class="grid grid-cols-2 gap-4">
+          <label>
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.earliestBooking") }}
+            </div>
+            <select
+              v-model="scheduleInput.earliest_booking"
+              class="w-full rounded-md capitalize"
+              :disabled="!scheduleInput.active"
+            >
+              <option
+                v-for="(label, value) in earliestOptions"
+                :key="value"
+                :value="value"
+              >
+                {{ label }}
+              </option>
+            </select>
+          </label>
+          <label>
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.farthestBooking") }}
+            </div>
+            <select
+              v-model="scheduleInput.farthest_booking"
+              class="w-full rounded-md"
+              :disabled="!scheduleInput.active"
+            >
+              <option
+                v-for="(label, value) in farthestOptions"
+                :key="value"
+                :value="value"
+              >
+                {{ label }}
+              </option>
+            </select>
+          </label>
+          <label class="col-span-2">
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.slotLength") }}
+            </div>
+            <input
+              type="number"
+              min="10"
+              step="10"
+              v-model="scheduleInput.slot_duration"
+              :disabled="!scheduleInput.active"
+              class="w-full rounded-md"
+              list="suggestedTimes"
+            />
+            <datalist id="suggestedTimes">
+              <option value="15">{{ localized15Mins }}</option>
+              <option value="30">{{ localized30Mins }}</option>
+              <option value="45">{{ localized45Mins }}</option>
+              <option value="60">{{ localized60Mins }}</option>
+            </datalist>
+          </label>
+        </div>
+        <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
+          <div>{{ t('text.recipientsCanScheduleBetween', {duration: duration, earliest: earliest, farthest: farthest}) }}</div>
+        </div>
+      </div>
+    </div>
+    <!-- step 3 -->
+    <div
+      @click="state = scheduleCreationState.details"
+      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+      :class="{'bg-neutral-50': activeStep3}"
+      id="schedule-details"
+    >
+      <div class="flex cursor-pointer items-center justify-between">
+        <span class="font-semibold">
+          {{ t("label.meetingDetails") }}
+        </span>
+        <icon-chevron-down
+          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+          :class="{ '!rotate-0': activeStep3 }"
+        />
+      </div>
+      <div v-show="activeStep3" class="flex flex-col gap-2">
         <hr/>
         <label>
           <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
@@ -98,169 +250,6 @@
             {{ charCount }}/{{ charLimit }}
           </div>
         </label>
-      </div>
-    </div>
-    <!-- step 2 -->
-    <div
-      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
-      :class="{'bg-neutral-50':state === scheduleCreationState.availability}"
-    >
-      <div
-        @click="state = scheduleCreationState.availability"
-        class="flex cursor-pointer items-center justify-between"
-      >
-        <span class="font-semibold">
-          {{ t("label.chooseYourAvailability") }}
-        </span>
-        <icon-chevron-down
-          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
-          :class="{ '!rotate-0': activeStep2 }"
-        />
-      </div>
-      <div v-show="activeStep2" class="flex flex-col gap-3">
-        <hr/>
-        <div class="grid grid-cols-2 gap-4">
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.startDate") }}
-            </div>
-            <input
-              type="date"
-              v-model="scheduleInput.start_date"
-              :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
-            />
-          </label>
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.endDate") }}
-            </div>
-            <input
-              type="date"
-              v-model="scheduleInput.end_date"
-              :placeholder="t('placeholder.never')"
-              :disabled="!scheduleInput.active"
-              class="place-holder w-full rounded-md"
-            />
-          </label>
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.startTime") }}
-            </div>
-            <input
-              type="time"
-              v-model="scheduleInput.start_time"
-              :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
-            />
-          </label>
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.endTime") }}
-            </div>
-            <input
-              type="time"
-              v-model="scheduleInput.end_time"
-              :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
-            />
-          </label>
-        </div>
-        <div>
-          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-            {{ t("label.availableDays") }}
-          </div>
-          <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg bg-white p-4 dark:bg-gray-800">
-            <label
-              v-for="w in isoWeekdays"
-              :key="w.iso"
-              class="flex cursor-pointer select-none items-center gap-2 text-sm"
-            >
-              <input
-                type="checkbox"
-                v-model="scheduleInput.weekdays"
-                :value="w.iso"
-                :disabled="!scheduleInput.active"
-                class="size-5 text-teal-500"
-              />
-              <span>{{ w.long }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- step 3 -->
-    <div
-      class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
-      :class="{'bg-neutral-50':state === scheduleCreationState.settings}"
-    >
-      <div
-        @click="state = scheduleCreationState.settings"
-        class="flex cursor-pointer items-center justify-between"
-      >
-        <span class="font-semibold">
-          {{ t("label.bookingSettings") }}
-        </span>
-        <icon-chevron-down
-          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
-          :class="{ '!rotate-0': activeStep3 }"
-        />
-      </div>
-      <div v-show="activeStep3" class="flex flex-col gap-3">
-        <hr/>
-        <div class="grid grid-cols-2 gap-4">
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.earliestBooking") }}
-            </div>
-            <select
-              v-model="scheduleInput.earliest_booking"
-              class="w-full rounded-md"
-              :disabled="!scheduleInput.active"
-            >
-              <option
-                v-for="(label, value) in earliestOptions"
-                :key="value"
-                :value="value"
-              >
-                {{ label }}
-              </option>
-            </select>
-          </label>
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.farthestBooking") }}
-            </div>
-            <select
-              v-model="scheduleInput.farthest_booking"
-              class="w-full rounded-md"
-              :disabled="!scheduleInput.active"
-            >
-              <option
-                v-for="(label, value) in farthestOptions"
-                :key="value"
-                :value="value"
-              >
-                {{ label }}
-              </option>
-            </select>
-          </label>
-          <label class="col-span-2">
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.slotLength") }}
-            </div>
-            <input
-              type="number"
-              min="10"
-              v-model="scheduleInput.slot_duration"
-              :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
-            />
-          </label>
-        </div>
-        <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
-          <div>{{ t('text.recipientsCanScheduleBetween', {earliest: earliest, farthest: farthest}) }}</div>
-        </div>
       </div>
     </div>
     <!-- action buttons -->
@@ -331,6 +320,8 @@ const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
 const dateFormat = dateFormatStrings.qalendarFullDay;
 
+const firstStep = scheduleCreationState.availability;
+
 // component emits
 const emit = defineEmits(['created', 'updated']);
 
@@ -345,15 +336,15 @@ const props = defineProps({
 const existing = computed(() => Boolean(props.schedule));
 
 // schedule creation state indicating the current step
-const state = ref(scheduleCreationState.details);
-
+const state = ref(firstStep);
+console.log('State', state.value);
 // calculate the current visible step by given status
 // first step are the general details
 // second step is the availability configuration
 // third step are the booking settings
-const activeStep1 = computed(() => state.value === scheduleCreationState.details);
-const activeStep2 = computed(() => state.value === scheduleCreationState.availability);
-const activeStep3 = computed(() => state.value === scheduleCreationState.settings);
+const activeStep1 = computed(() => state.value === firstStep);
+const activeStep2 = computed(() => state.value === scheduleCreationState.settings);
+const activeStep3 = computed(() => state.value === scheduleCreationState.details);
 const visitedStep1 = ref(false);
 const nextStep = () => {
   state.value += 1;
@@ -467,6 +458,12 @@ const farthestOptions = {};
 const earliest = computed(() => (parseInt(scheduleInput.value.earliest_booking, 10) === 0
   ? t('label.immediately') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
+const duration = computed(() => dj.duration(scheduleInput.value.slot_duration, 'minutes').humanize());
+
+const localized15Mins = computed(() => dj.duration(15, 'minutes').humanize());
+const localized30Mins = computed(() => dj.duration(30, 'minutes').humanize());
+const localized45Mins = computed(() => dj.duration(45, 'minutes').humanize());
+const localized60Mins = computed(() => dj.duration(60, 'minutes').humanize());
 
 // show confirmation dialog
 const savedConfirmation = reactive({
@@ -480,7 +477,7 @@ const closeCreatedModal = () => {
 // reset the Schedule creation form
 const resetSchedule = () => {
   scheduleCreationError.value = null;
-  state.value = scheduleCreationState.details;
+  state.value = firstStep;
 };
 
 const handleErrorResponse = (responseData) => {
@@ -556,7 +553,7 @@ const saveSchedule = async (withConfirmation = true) => {
     // error message is in data
     handleErrorResponse(data);
     // go back to the start
-    state.value = scheduleCreationState.details;
+    state.value = firstStep;
     savingInProgress.value = false;
     return;
   }

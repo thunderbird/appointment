@@ -58,9 +58,9 @@ export const appointmentCreationState = {
  * @readonly
  */
 export const scheduleCreationState = {
-  details: 1,
-  availability: 2,
-  settings: 3,
+  availability: 1,
+  settings: 2,
+  details: 3,
 };
 
 /**
