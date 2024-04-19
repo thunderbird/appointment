@@ -5,20 +5,11 @@
   </div>
   <!-- page content -->
   <div
-    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
+    class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
-    <!-- main section: big calendar showing active month, week or day -->
-    <calendar-qalendar
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="pendingAppointments"
-      :events="calendarEvents"
-      :schedules="schedulesPreviews"
-      @date-change="onDateChange"
-    />
     <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 md:w-1/4">
+    <div class="mx-auto mb-10 w-3/4 min-w-[20rem] rounded-2xl bg-zinc-100 sm:w-1/4 md:mb-0 xl:w-1/6">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -28,7 +19,15 @@
         @updated="schedulePreview"
       />
     </div>
-
+    <!-- main section: big calendar showing active month, week or day -->
+    <calendar-qalendar
+      class="w-full md:w-9/12 xl:w-10/12"
+      :selected="activeDate"
+      :appointments="pendingAppointments"
+      :events="calendarEvents"
+      :schedules="schedulesPreviews"
+      @date-change="onDateChange"
+    />
   </div>
 </template>
 
@@ -111,7 +110,7 @@ const onDateChange = (dateObj) => {
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
   if (
     dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
-      || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
+    || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
   ) {
     getRemoteEvents(
       dj(start).format('YYYY-MM-DD'),
