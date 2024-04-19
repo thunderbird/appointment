@@ -40,7 +40,7 @@
               {{ t("label.chooseYourAvailability") }}
             </h2>
             <h3 class="text-xs">
-              {{ t('label.scheduleSettings.availabilitySubHeading')}}
+              {{ t('label.scheduleSettings.availabilitySubHeading') }}
             </h3>
           </div>
           <icon-chevron-down
@@ -288,14 +288,14 @@
       <!-- Not active -->
       <div v-if="!scheduleInput.active" class="m-auto flex h-full w-8/12 flex-row items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
         <div class="flex flex-row items-center justify-center gap-2">
-        <icon-info-circle class="min-w-4" aria-hidden="true"/>
-        <p>{{ t('text.scheduleSettings.notActive') }}</p>
+          <icon-info-circle class="min-w-4" aria-hidden="true"/>
+          <p>{{ t('text.scheduleSettings.notActive') }}</p>
         </div>
       </div>
       <!-- Form is dirty, please clean it. -->
       <div v-else-if="isFormDirty" class="m-auto flex h-full w-8/12 flex-col items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
         <div class="flex flex-row items-center justify-center gap-2">
-        <icon-info-circle class="w-4" aria-hidden="true"/>
+          <icon-info-circle class="w-4" aria-hidden="true"/>
           <p>{{ t('text.scheduleSettings.formDirty') }}</p>
         </div>
         <div class="flex gap-4">
@@ -680,9 +680,15 @@ watch(
 );
 </script>
 <style scoped>
+input[type="time"]::-webkit-calendar-picker-indicator {
+  @apply -mr-2;
+  background: none;
+}
+
 label {
   font-size: theme('fontSize.sm');
 }
+
 /* Lol come-on! */
 textarea:disabled,
 select:disabled,
