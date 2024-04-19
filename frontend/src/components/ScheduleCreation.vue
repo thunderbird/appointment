@@ -250,6 +250,7 @@
           <input
             type="checkbox"
             :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
+            :disabled="!scheduleInput.active"
             @change="toggleZoomLinkCreation"
             class="size-5 rounded-md"
           />
