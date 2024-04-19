@@ -284,20 +284,20 @@
       </div>
     </div>
     <!-- Snack-like Bar-ish -->
-    <div v-if="!scheduleInput.active || isFormDirty" class="h-28 w-full rounded-xl bg-neutral-600">
+    <div v-if="!scheduleInput.active || isFormDirty" class="h-28 w-full rounded-xl bg-neutral-600 text-white dark:bg-gray-800 dark:text-gray-100">
       <!-- Not active -->
-      <div v-if="!scheduleInput.active" class="m-auto flex h-full w-8/12 flex-row items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider text-white">
+      <div v-if="!scheduleInput.active" class="m-auto flex h-full w-8/12 flex-row items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
         <icon-info-circle class="w-4" aria-hidden="true"/>
         <p>{{ t('text.scheduleSettings.notActive') }}</p>
       </div>
-      <div v-else-if="isFormDirty" class="m-auto flex h-full w-8/12 flex-col items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider text-white">
+      <div v-else-if="isFormDirty" class="m-auto flex h-full w-8/12 flex-col items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
         <div class="flex flex-row items-center justify-center gap-2">
           <icon-info-circle class="w-4" aria-hidden="true"/>
           <p>{{ t('text.scheduleSettings.formDirty') }}</p>
         </div>
         <div class="flex gap-4">
           <secondary-button
-            :label="t('label.cancel')"
+            :label="t('label.revert')"
             @click="resetSchedule()"
             :disabled="!scheduleInput.active"
             class="w-1/2"
