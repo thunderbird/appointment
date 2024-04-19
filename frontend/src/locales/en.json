@@ -190,6 +190,11 @@
     "schedule": "Schedule",
     "scheduleCreationError": "There was an error creating your schedule. Let's try that again.",
     "scheduleDetails": "Scheduling Details",
+    "scheduleSettings": {
+      "availabilitySubHeading": "Set your availability days and times",
+      "schedulingDetailsSubHeading": "Set booking intervals and duration",
+      "meetingDetailsSubHeading": "Add video and/or notes to events"
+    },
     "search": "Search",
     "searchAppointments": "Search bookings",
     "secondaryTimeZone": "Secondary time zone",
@@ -276,6 +281,10 @@
       "continueToFxa": "Enter your email above to continue to Mozilla Accounts"
     },
     "nameIsInvitingYou": "{name} is inviting you",
+    "scheduleSettings": {
+      "notActive": "Schedule is not active, turn on the toggle to edit or share.",
+      "formDirty": "You have unsaved changes."
+    },
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
     "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",

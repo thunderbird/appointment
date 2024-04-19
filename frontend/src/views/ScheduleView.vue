@@ -9,7 +9,7 @@
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-full min-w-[20rem] rounded-2xl bg-zinc-100 px-1 py-4 sm:w-1/2 md:mb-0 md:w-2/6">
+    <div class="mx-auto mb-10 w-full min-w-[20rem] rounded-2xl bg-zinc-100 sm:w-3/4 md:mb-0">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -110,7 +110,7 @@ const onDateChange = (dateObj) => {
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
   if (
     dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
-      || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
+    || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
   ) {
     getRemoteEvents(
       dj(start).format('YYYY-MM-DD'),
