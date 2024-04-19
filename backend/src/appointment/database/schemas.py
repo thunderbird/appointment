@@ -153,7 +153,7 @@ class Availability(AvailabilityBase):
 
 class ScheduleBase(BaseModel):
     active: bool | None = True
-    name: str
+    name: str = Field(min_length=1)
     calendar_id: int
     location_type: LocationType | None = LocationType.inperson
     location_url: str | None = None
