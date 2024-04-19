@@ -9,7 +9,7 @@
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
     <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-full min-w-[20rem] rounded-2xl bg-zinc-100 sm:w-3/4 md:mb-0">
+    <div class="mx-auto mb-10 w-3/4 min-w-[20rem] rounded-2xl bg-zinc-100 sm:w-1/4 md:mb-0 xl:w-1/6">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -21,7 +21,7 @@
     </div>
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
-      class="w-full md:w-9/12"
+      class="w-full md:w-9/12 xl:w-10/12"
       :selected="activeDate"
       :appointments="pendingAppointments"
       :events="calendarEvents"

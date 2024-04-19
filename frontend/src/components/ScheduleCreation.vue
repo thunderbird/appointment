@@ -602,8 +602,8 @@ const saveSchedule = async (withConfirmation = true) => {
     // error message is in data
     handleErrorResponse(data);
     // go back to the start
-    state.value = firstStep;
     savingInProgress.value = false;
+    window.scrollTo(0, 0);
     return;
   }
 
