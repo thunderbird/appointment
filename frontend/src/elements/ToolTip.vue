@@ -1,8 +1,8 @@
 <template>
   <div
     class="
-      absolute bottom-full z-50 -translate-y-2 whitespace-nowrap rounded-lg bg-black/75 px-3 py-1.5
-      font-sans text-sm font-normal text-white focus:outline-none
+      absolute bottom-full z-50 -translate-y-2 whitespace-nowrap text-wrap rounded-lg bg-black/75 px-3
+      py-1.5 font-sans text-sm font-normal text-white focus:outline-none
     "
   >
     {{ content }}

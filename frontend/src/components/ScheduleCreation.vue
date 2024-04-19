@@ -2,7 +2,7 @@
   <div class="sticky top-24 flex flex-col gap-4">
     <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
       <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
-      <switch-toggle v-if="existing" class="mt-0.5" :active="schedule.active" no-legend @changed="toggleActive"/>
+      <switch-toggle v-if="existing" class="mt-0.5 pr-3" :active="schedule.active" no-legend @changed="toggleActive"/>
     </div>
     <alert-box
       @close="scheduleCreationError = ''"
@@ -34,18 +34,23 @@
         @click="state = scheduleCreationState.availability"
         class="flex cursor-pointer items-center justify-between"
       >
-        <span class="font-semibold">
-          {{ t("label.chooseYourAvailability") }}
-        </span>
+        <div class="flex flex-col gap-1">
+          <h2>
+            {{ t("label.chooseYourAvailability") }}
+          </h2>
+          <h3 class="text-xs">
+            Set your availability days and times
+          </h3>
+        </div>
         <icon-chevron-down
-          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+          class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep1 }"
         />
       </div>
       <div v-show="activeStep1" class="flex flex-col gap-3">
         <hr/>
-        <div class="grid grid-cols-2 gap-4">
-          <label>
+        <div class="flex w-full flex-col justify-between gap-2 md:flex-row lg:gap-4">
+          <label class="w-full">
             <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.startTime") }}
             </div>
@@ -53,10 +58,10 @@
               type="time"
               v-model="scheduleInput.start_time"
               :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
+              class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
             />
           </label>
-          <label>
+          <label class="w-full">
             <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.endTime") }}
             </div>
@@ -64,7 +69,7 @@
               type="time"
               v-model="scheduleInput.end_time"
               :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
+              class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
             />
           </label>
         </div>
@@ -101,16 +106,35 @@
         @click="state = scheduleCreationState.settings"
         class="flex cursor-pointer items-center justify-between"
       >
-        <span class="font-semibold">
-          {{ t("label.scheduleDetails") }}
-        </span>
+        <div class="flex flex-col gap-1">
+          <h2>
+            {{ t("label.scheduleDetails") }}
+          </h2>
+          <h3 class="text-xs">
+            Set booking intervals and duration
+          </h3>
+        </div>
         <icon-chevron-down
-          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+          class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep2 }"
         />
       </div>
       <div v-show="activeStep2" class="flex flex-col gap-3">
         <hr/>
+        <label>
+          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+            {{ t("label.selectCalendar") }}
+          </div>
+          <select v-model="scheduleInput.calendar_id" class="w-full rounded-md" :disabled="!scheduleInput.active">
+            <option
+              v-for="calendar in calendars"
+              :key="calendar.id"
+              :value="calendar.id"
+            >
+              {{ calendar.title }}
+            </option>
+          </select>
+        </label>
         <div class="grid grid-cols-2 gap-4">
           <label>
             <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
@@ -155,22 +179,28 @@
             <input
               type="number"
               min="10"
+              max="120"
               step="10"
+              @focusout="() => {
+                scheduleInput.slot_duration = Math.max(scheduleInput.slot_duration, 10);
+                scheduleInput.slot_duration = Math.min(scheduleInput.slot_duration, 120);
+              }"
               v-model="scheduleInput.slot_duration"
               :disabled="!scheduleInput.active"
               class="w-full rounded-md"
               list="suggestedTimes"
             />
-            <datalist id="suggestedTimes">
-              <option value="15">{{ localized15Mins }}</option>
-              <option value="30">{{ localized30Mins }}</option>
-              <option value="45">{{ localized45Mins }}</option>
-              <option value="60">{{ localized60Mins }}</option>
-            </datalist>
           </label>
         </div>
         <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
-          <div>{{ t('text.recipientsCanScheduleBetween', {duration: duration, earliest: earliest, farthest: farthest}) }}</div>
+          <div>{{
+              t('text.recipientsCanScheduleBetween', {
+                duration: duration,
+                earliest: earliest,
+                farthest: farthest
+              })
+            }}
+          </div>
         </div>
       </div>
     </div>
@@ -182,33 +212,32 @@
       id="schedule-details"
     >
       <div class="flex cursor-pointer items-center justify-between">
-        <span class="font-semibold">
-          {{ t("label.meetingDetails") }}
-        </span>
+        <div class="flex flex-col gap-1">
+          <h2>
+            {{ t("label.meetingDetails") }}
+          </h2>
+          <h3 class="text-xs">
+            Add video and/or notes to events
+          </h3>
+        </div>
         <icon-chevron-down
-          class="size-6 rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+          class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
           :class="{ '!rotate-0': activeStep3 }"
         />
       </div>
       <div v-show="activeStep3" class="flex flex-col gap-2">
         <hr/>
-        <label>
-          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-            {{ t("label.selectCalendar") }}
-          </div>
-          <select v-model="scheduleInput.calendar_id" class="w-full rounded-md" :disabled="!scheduleInput.active">
-            <option
-              v-for="calendar in calendars"
-              :key="calendar.id"
-              :value="calendar.id"
-            >
-              {{ calendar.title }}
-            </option>
-          </select>
-        </label>
-        <label>
-          <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+        <label class="tooltip-label">
+          <div class="relative mb-1 flex flex-row items-center gap-2 font-medium text-gray-500 dark:text-gray-300">
             {{ t("label.videoLink") }}
+            <span class="relative cursor-help" role="tooltip" aria-labelledby="video-link-tooltip">
+              <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
+                <span class="tooltip hidden">
+                  <transition>
+                      <tool-tip id="video-link-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.videoLinkNotice')"/>
+                  </transition>
+                </span>
+            </span>
           </div>
           <input
             type="text"
@@ -308,9 +337,10 @@ import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 
 // icons
-import { IconChevronDown } from '@tabler/icons-vue';
+import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
+import ToolTip from '@/elements/ToolTip.vue';
 
 // component constants
 const user = useUserStore();
@@ -337,7 +367,7 @@ const existing = computed(() => Boolean(props.schedule));
 
 // schedule creation state indicating the current step
 const state = ref(firstStep);
-console.log('State', state.value);
+
 // calculate the current visible step by given status
 // first step are the general details
 // second step is the availability configuration
@@ -459,11 +489,6 @@ const earliest = computed(() => (parseInt(scheduleInput.value.earliest_booking, 
   ? t('label.immediately') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
 const duration = computed(() => dj.duration(scheduleInput.value.slot_duration, 'minutes').humanize());
-
-const localized15Mins = computed(() => dj.duration(15, 'minutes').humanize());
-const localized30Mins = computed(() => dj.duration(30, 'minutes').humanize());
-const localized45Mins = computed(() => dj.duration(45, 'minutes').humanize());
-const localized60Mins = computed(() => dj.duration(60, 'minutes').humanize());
 
 // show confirmation dialog
 const savedConfirmation = reactive({
@@ -625,3 +650,15 @@ watch(
   },
 );
 </script>
+<style scoped>
+/* If the device does not support hover (i.e. mobile) then make it activate on focus within */
+@media (hover: none) {
+  .tooltip-label:focus-within .tooltip {
+    display: block;
+  }
+}
+
+.tooltip-icon:hover ~ .tooltip {
+  display: block;
+}
+</style>

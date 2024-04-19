@@ -109,7 +109,7 @@
     "calendarUrl": "Calendar URL",
     "cancel": "Cancel",
     "checkAvailableSlots": "Check available slots",
-    "chooseYourAvailability": "Set availability",
+    "chooseYourAvailability": "Availability",
     "close": "Close",
     "closed": "Closed",
     "color": "Color",
@@ -188,7 +188,7 @@
     "saveChanges": "Save changes",
     "schedule": "Schedule",
     "scheduleCreationError": "There was an error creating your schedule. Let's try that again.",
-    "scheduleDetails": "Schedule Details",
+    "scheduleDetails": "Scheduling Details",
     "search": "Search",
     "searchAppointments": "Search bookings",
     "secondaryTimeZone": "Secondary time zone",
@@ -280,7 +280,8 @@
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
     "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
-    "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work."
+    "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work.",
+    "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created."
   },
   "units": {
     "minutes": "{value} minutes",

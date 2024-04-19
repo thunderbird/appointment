@@ -5,20 +5,11 @@
   </div>
   <!-- page content -->
   <div
-    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
+    class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4"
     :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
   >
-    <!-- main section: big calendar showing active month, week or day -->
-    <calendar-qalendar
-      class="w-full md:w-4/5"
-      :selected="activeDate"
-      :appointments="pendingAppointments"
-      :events="calendarEvents"
-      :schedules="schedulesPreviews"
-      @date-change="onDateChange"
-    />
     <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-full min-w-[310px] rounded-2xl bg-zinc-100 px-1 py-4 sm:w-1/2 md:mb-0 md:w-1/4">
+    <div class="mx-auto mb-10 w-full min-w-[20rem] rounded-2xl bg-zinc-100 px-1 py-4 sm:w-1/2 md:mb-0 md:w-2/6">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
@@ -28,7 +19,15 @@
         @updated="schedulePreview"
       />
     </div>
-
+    <!-- main section: big calendar showing active month, week or day -->
+    <calendar-qalendar
+      class="w-full md:w-9/12"
+      :selected="activeDate"
+      :appointments="pendingAppointments"
+      :events="calendarEvents"
+      :schedules="schedulesPreviews"
+      @date-change="onDateChange"
+    />
   </div>
 </template>
 
