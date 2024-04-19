@@ -1,5 +1,5 @@
 <template>
-  <div class="sticky top-24 flex flex-col gap-4">
+  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600">
     <div class="flex flex-col gap-4 px-1 py-4">
       <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
         <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
@@ -287,12 +287,15 @@
     <div v-if="!scheduleInput.active || isFormDirty" class="h-28 w-full rounded-xl bg-neutral-600 text-white dark:bg-gray-800 dark:text-gray-100">
       <!-- Not active -->
       <div v-if="!scheduleInput.active" class="m-auto flex h-full w-8/12 flex-row items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
-        <icon-info-circle class="w-4" aria-hidden="true"/>
+        <div class="flex flex-row items-center justify-center gap-2">
+        <icon-info-circle class="min-w-4" aria-hidden="true"/>
         <p>{{ t('text.scheduleSettings.notActive') }}</p>
+        </div>
       </div>
+      <!-- Form is dirty, please clean it. -->
       <div v-else-if="isFormDirty" class="m-auto flex h-full w-8/12 flex-col items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
         <div class="flex flex-row items-center justify-center gap-2">
-          <icon-info-circle class="w-4" aria-hidden="true"/>
+        <icon-info-circle class="w-4" aria-hidden="true"/>
           <p>{{ t('text.scheduleSettings.formDirty') }}</p>
         </div>
         <div class="flex gap-4">

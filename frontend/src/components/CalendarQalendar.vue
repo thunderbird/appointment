@@ -356,6 +356,7 @@ watch(currentDate, () => onCurrentDateChange(currentDate.value));
 
       <template #monthEvent="monthEventProps">
         <calendar-event
+          class="max-w-[12.5rem]"
           :isActive="true"
           :isSelected="selectedDate === monthEventProps.eventData.id"
           :isToday="false"
