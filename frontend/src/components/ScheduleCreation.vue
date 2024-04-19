@@ -176,20 +176,19 @@
             <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.slotLength") }}
             </div>
-            <input
-              type="number"
-              min="10"
-              max="120"
-              step="10"
-              @focusout="() => {
-                scheduleInput.slot_duration = Math.max(scheduleInput.slot_duration, 10);
-                scheduleInput.slot_duration = Math.min(scheduleInput.slot_duration, 120);
-              }"
+            <select
               v-model="scheduleInput.slot_duration"
               :disabled="!scheduleInput.active"
-              class="w-full rounded-md"
-              list="suggestedTimes"
-            />
+              class="w-7/12 rounded-md"
+            >
+              <option
+                v-for="(label, value) in durationOptions"
+                :key="value"
+                :value="value"
+              >
+                {{ label }}
+              </option>
+            </select>
           </label>
         </div>
         <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
@@ -484,11 +483,16 @@ const farthestOptions = {};
   farthestOptions[d * 60 * 24 * 7] = dj.duration(d, 'weeks').humanize();
 });
 
+const durationOptions = {};
+[15, 30, 45, 60, 75, 90].forEach((duration) => {
+  durationOptions[duration] = t('units.minutes', { value: duration });
+});
+
 // humanize selected durations
 const earliest = computed(() => (parseInt(scheduleInput.value.earliest_booking, 10) === 0
-  ? t('label.immediately') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
+  ? t('label.now') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
-const duration = computed(() => dj.duration(scheduleInput.value.slot_duration, 'minutes').humanize());
+const duration = computed(() => t('units.minutes', { value: scheduleInput.value.slot_duration }));
 
 // show confirmation dialog
 const savedConfirmation = reactive({
@@ -651,6 +655,18 @@ watch(
 );
 </script>
 <style scoped>
+/* Lol come-on! */
+textarea:disabled,
+select:disabled,
+input:disabled {
+  color: theme('colors.neutral.400') !important;
+  cursor: not-allowed;
+}
+
+input[type=checkbox]:disabled {
+  filter: grayscale(100%);
+}
+
 /* If the device does not support hover (i.e. mobile) then make it activate on focus within */
 @media (hover: none) {
   .tooltip-label:focus-within .tooltip {
