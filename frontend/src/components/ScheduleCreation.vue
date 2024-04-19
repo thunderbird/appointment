@@ -20,14 +20,14 @@
             v-model="scheduleInput.name"
             :placeholder="t('placeholder.mySchedule')"
             :disabled="!scheduleInput.active"
-            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0"
+            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0 dark:bg-transparent"
             required
           />
         </label>
       </div>
       <!-- step 1 -->
       <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
         :class="{'bg-neutral-50': activeStep1}"
         id="schedule-availability"
       >
@@ -99,7 +99,7 @@
       </div>
       <!-- step 2 -->
       <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
         :class="{'bg-neutral-50':activeStep2}"
         id="schedule-settings"
       >
@@ -207,7 +207,7 @@
       <!-- step 3 -->
       <div
         @click="state = scheduleCreationState.details"
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:bg-gray-600 dark:text-gray-100"
+        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
         :class="{'bg-neutral-50': activeStep3}"
         id="schedule-details"
       >
