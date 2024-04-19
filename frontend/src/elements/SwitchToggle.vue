@@ -9,7 +9,7 @@
     <div v-if="label">{{ label }}</div>
     <div class="flex items-center gap-1.5">
       <div v-if="!noLegend" class="text-xs text-gray-500">{{ t('label.off') }}</div>
-      <div class="h-4 w-8 shrink-0 rounded-full bg-gray-300 ease-in-out dark:bg-gray-600">
+      <div class="h-4 w-8 shrink-0 rounded-full bg-gray-300 ease-in-out dark:bg-gray-700">
         <input type="checkbox" class="peer hidden" :checked="state" />
         <icon-circle-dot-filled
           class="size-4 rounded-full text-gray-400 duration-300 peer-checked:translate-x-4 peer-checked:text-teal-500 dark:text-gray-300"
