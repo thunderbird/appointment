@@ -129,7 +129,7 @@ resource "aws_cloudfront_distribution" "appointment" {
 
     function_association {
       event_type = "viewer-request"
-      function_arn = aws_cloudfront_function.add_index.arn
+      function_arn = aws_cloudfront_function.rewrite_api.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"
@@ -161,6 +161,11 @@ resource "aws_cloudfront_distribution" "appointment" {
 
     cache_policy_id = data.aws_cloudfront_cache_policy.CachingDisabled.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.AllViewer.id
+
+    function_association {
+      event_type = "viewer-request"
+      function_arn = aws_cloudfront_function.rewrite_api.arn
+    }
 
     viewer_protocol_policy = "redirect-to-https"
 
@@ -194,38 +199,23 @@ resource "aws_cloudfront_function" "rewrite_api" {
   async function handler(event) {
     const request = event.request;
     const apiPath = "/api/v1";
+    const ignorePaths = ['/fxa', '/assets', '/appointment_logo.svg'];
+    const pathCheckFn = (path) => request.uri.startsWith(path);
 
     // If our api path is the first thing that's found in the uri then remove it from the uri.
     if (request.uri.indexOf(apiPath) === 0) {
-        request.uri = request.uri.replace(apiPath, "");
+      request.uri = request.uri.replace(apiPath, "");
+    } else if (!ignorePaths.some(pathCheckFn)) {
+      // If we're not in one of the ignorePaths then force them to /index.html
+      request.uri = '/index.html';
     }
+
     // else carry on like normal.
     return request;
   }
   EOT
 }
 
-resource "aws_cloudfront_function" "add_index" {
-  name = "${var.name_prefix}-add-index"
-  runtime = "cloudfront-js-2.0"
-  code = <<EOT
-  async function handler(event) {
-    const request = event.request;
-    const uri = request.uri;
-    
-    // Check whether the URI is missing a file name.
-    if (uri.endsWith('/')) {
-        request.uri += 'index.html';
-    } 
-    // Check whether the URI is missing a file extension.
-    else if (!uri.includes('.')) {
-        request.uri = '/index.html';
-    }
-
-    return request;
-}
-  EOT
-}
 resource "aws_s3_bucket" "request_logs" {
   bucket = local.log_bucket
   force_destroy = true
