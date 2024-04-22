@@ -1,6 +1,6 @@
 <template>
 <div
-  class="flex items-center p-2 leading-none text-white shadow-md shadow-black/30 dark:shadow-lg lg:inline-flex lg:rounded-full"
+  class="flex items-center p-2 leading-none text-white shadow-md shadow-black/30 dark:shadow-lg lg:inline-flex lg:rounded-xl"
   role="alert"
   :class="{
     'bg-rose-600 dark:bg-rose-900': scheme === alertSchemes.error,

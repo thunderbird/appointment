@@ -13,7 +13,7 @@
       </alert-box>
 
       <div class="px-4">
-        <label for="scheduleName">
+        <label for="scheduleName" class="flex-column flex">
           <input
             id="scheduleName"
             type="text"
@@ -23,6 +23,7 @@
             class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0 dark:bg-transparent"
             required
           />
+          <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
         </label>
       </div>
       <!-- step 1 -->
