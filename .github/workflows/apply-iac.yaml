@@ -48,7 +48,7 @@ jobs:
       - name: vpc
         working-directory: ./tofu/environments/${{inputs.environment}}/network/vpc
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
           terragrunt apply tfplan
@@ -56,7 +56,7 @@ jobs:
       - name: backend-infra
         working-directory: ./tofu/environments/${{inputs.environment}}/services/backend-infra
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
           terragrunt apply tfplan
@@ -64,7 +64,7 @@ jobs:
       - name: cache
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/cache
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
           terragrunt apply tfplan
@@ -72,7 +72,7 @@ jobs:
       - name: database
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/database
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
           terragrunt apply tfplan
@@ -80,7 +80,7 @@ jobs:
       - name: frontend
         working-directory: ./tofu/environments/${{inputs.environment}}/services/frontend
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
           terragrunt apply tfplan
