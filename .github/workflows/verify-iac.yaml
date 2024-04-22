@@ -49,7 +49,7 @@ jobs:
         working-directory: ./tofu/environments/${{inputs.environment}}/network/vpc
         continue-on-error: true
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan
 
@@ -57,7 +57,7 @@ jobs:
         working-directory: ./tofu/environments/${{inputs.environment}}/services/backend-infra
         continue-on-error: true
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan
 
@@ -65,7 +65,7 @@ jobs:
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/cache
         continue-on-error: true
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan
 
@@ -73,13 +73,13 @@ jobs:
         working-directory: ./tofu/environments/${{inputs.environment}}/data-store/database
         continue-on-error: true
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan
           
       - name: frontend
         working-directory: ./tofu/environments/${{inputs.environment}}/services/frontend
         run: |
-          terragrunt init
+          terragrunt init -upgrade
           terragrunt validate
           terragrunt plan

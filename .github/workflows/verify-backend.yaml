@@ -68,7 +68,7 @@ jobs:
     - name: backend-service
       working-directory: ./tofu/environments/${{inputs.environment}}/services/backend-service
       run: |
-        terragrunt init
+        terragrunt init -upgrade
         terragrunt validate
         terragrunt plan -var 'image=${{env.IMAGE}}'
 
