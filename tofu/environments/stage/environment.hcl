@@ -17,11 +17,11 @@ generate "versions" {
       required_providers {
         aws = {
           source = "hashicorp/aws"
-          version = "~>= 5.41.0"
+          version = "~> 5.41"
         }
         random = {
           source = "hashicorp/random"
-          version = "~>= 3.6.1"
+          version = "~> 3.6"
         }
       }
     }
