@@ -19,6 +19,7 @@ dependency "backend" {
   mock_outputs = {
     alb_id   = "mock_alb_id"
     dns_name = "mock_dns_name"
+    x_allow_secret = "mock_secret"
   }
 }
 

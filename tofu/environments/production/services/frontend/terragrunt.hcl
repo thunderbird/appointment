@@ -19,6 +19,7 @@ dependency "backend" {
   mock_outputs = {
     alb_id   = "mock_alb_id"
     dns_name = "mock_dns_name"
+    x_allow_secret = "mock_secret"
   }
 }
 
@@ -43,4 +44,5 @@ inputs = {
   ssl_cert         = local.ssl_cert
   backend_id       = dependency.backend.outputs.alb_id
   backend_dns_name = dependency.backend.outputs.dns_name
+  x_allow_secret = dependency.backend.outputs.x_allow_secret
 }
