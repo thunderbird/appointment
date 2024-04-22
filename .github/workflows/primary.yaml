@@ -11,11 +11,6 @@ permissions:
   id-token: write
   contents: read
 
-env:
-  TF_VERSION: '1.6.2'
-  TG_VERSION: '0.55.15'
-  AWS_REGION: us-east-1
-
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
@@ -48,9 +43,9 @@ jobs:
         environment: [stage, production]
     uses: ./.github/workflows/verify-iac.yaml
     with:
-      tf_version: $TF_VERSION
-      tg_version: $TG_VERSION
-      aws_region: $AWS_REGION
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
       environment: ${{ matrix.environment }}
     secrets: inherit
 
@@ -63,9 +58,9 @@ jobs:
         environment: [stage]
     uses: ./.github/workflows/apply-iac.yaml
     with:
-      tf_version: $TF_VERSION
-      tg_version: $TG_VERSION
-      aws_region: $AWS_REGION
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
       environment: ${{ matrix.environment }}
     secrets: inherit
 
@@ -83,9 +78,9 @@ jobs:
         environment: [stage, production]
     uses: ./.github/workflows/verify-backend.yaml
     with:
-      tf_version: $TF_VERSION
-      tg_version: $TG_VERSION
-      aws_region: $AWS_REGION
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
       environment: ${{ matrix.environment }}
     secrets: inherit
 
@@ -98,9 +93,9 @@ jobs:
         environment: [stage]
     uses: ./.github/workflows/deploy-backend.yaml
     with:
-      tf_version: $TF_VERSION
-      tg_version: $TG_VERSION
-      aws_region: $AWS_REGION
+      tf_version: 1.6.2
+      tg_version: 0.55.15
+      aws_region: us-east-1
       environment: ${{ matrix.environment }}
     secrets: inherit
 
@@ -109,7 +104,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && needs.detect-changes.outputs.run-frontend == 'true'
     uses: ./.github/workflows/deploy-frontend.yaml
     with:
-      aws_region: $AWS_REGION
+      aws_region: us-east-1
       bucket: tb-apmt-stage-frontend
       build_environment: staging
     secrets: inherit
