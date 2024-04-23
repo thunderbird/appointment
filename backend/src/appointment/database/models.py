@@ -87,6 +87,10 @@ class Base:
     def __tablename__(cls):
         return cls.__name__.lower()
 
+    def touch(self):
+        """Updates the time_updated field with the current datetime. This function does not save the model!"""
+        self.time_updated = datetime.datetime.now()
+
     time_created = Column(DateTime, server_default=func.now(), index=True)
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now(), index=True)
 
