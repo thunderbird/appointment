@@ -23,7 +23,7 @@
   <span class="ml-1 block sm:inline">
     <slot></slot>
   </span>
-  <span class="ml-auto" @click="emit('close')">
+  <span v-if="canClose" class="ml-auto" @click="emit('close')">
     <icon-x class="size-6 cursor-pointer fill-transparent stroke-white stroke-1" />
   </span>
 </div>
@@ -35,6 +35,10 @@ import { alertSchemes } from '@/definitions';
 
 defineProps({
   title: String,
+  canClose: {
+    type: Boolean,
+    default: true,
+  },
   scheme: {
     type: Number,
     default: alertSchemes.error,

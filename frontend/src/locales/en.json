@@ -283,6 +283,9 @@
     },
     "nameIsInvitingYou": "{name} is inviting you",
     "scheduleSettings": {
+      "create": "Select a calendar under Scheduling Details and click save to get started!",
+      "noCalendars": "Scheduling requires at least one connected calendar.",
+      "clickHereToConnect": "Click here to connect a calendar!",
       "notActive": "Schedule is not active, turn on the toggle to edit or share.",
       "formDirty": "You have unsaved changes."
     },

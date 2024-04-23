@@ -11,6 +11,8 @@ export const useCalendarStore = defineStore('calendars', () => {
   const unconnectedCalendars = computed(() => calendars.value.filter((cal) => !cal.connected));
   const connectedCalendars = computed(() => calendars.value.filter((cal) => cal.connected));
 
+  const hasConnectedCalendars = computed(() => connectedCalendars.value.length > 0);
+
   /**
    * Get all calendars for current user
    * @param {function} call preconfigured API fetch function
@@ -37,6 +39,6 @@ export const useCalendarStore = defineStore('calendars', () => {
   };
 
   return {
-    isLoaded, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset,
+    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset,
   };
 });

@@ -284,22 +284,36 @@
         </div>
       </div>
     </div>
-    <!-- Snack-like Bar-ish -->
-    <div v-if="!scheduleInput.active || isFormDirty" class="h-28 w-full rounded-xl bg-neutral-600 text-white dark:bg-gray-800 dark:text-gray-100">
-      <!-- Not active -->
-      <div v-if="!scheduleInput.active" class="m-auto flex h-full w-8/12 flex-row items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
-        <div class="flex flex-row items-center justify-center gap-2">
-          <icon-info-circle class="min-w-4" aria-hidden="true"/>
-          <p>{{ t('text.scheduleSettings.notActive') }}</p>
-        </div>
+    <!-- Snack-ish Bar - The dark info bubble at the bottom of this form -->
+    <!-- First time no calendars -->
+    <snackish-bar :show-icon=true v-if="!calendarStore.hasConnectedCalendars">
+      <div class="flex flex-col gap-2">
+        <p>{{ t('text.scheduleSettings.noCalendars') }}</p>
+        <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
       </div>
-      <!-- Form is dirty, please clean it. -->
-      <div v-else-if="isFormDirty" class="m-auto flex h-full w-8/12 flex-col items-center justify-center gap-2 text-wrap text-center text-xs leading-4 tracking-wider">
-        <div class="flex flex-row items-center justify-center gap-2">
-          <icon-info-circle class="w-4" aria-hidden="true"/>
-          <p>{{ t('text.scheduleSettings.formDirty') }}</p>
-        </div>
-        <div class="flex gap-4">
+    </snackish-bar>
+    <!-- No schedule? Create one please! -->
+    <snackish-bar v-else-if="!existing">
+      <div class="flex flex-col items-center justify-center gap-2">
+        <p>{{ t('text.scheduleSettings.create') }}</p>
+        <primary-button
+          :label="t('label.save')"
+          @click="saveSchedule(!existing)"
+          :waiting="savingInProgress"
+          :disabled="!scheduleInput.active"
+          class="w-1/2"
+        />
+      </div>
+    </snackish-bar>
+    <!-- Schedule is not active -->
+    <snackish-bar :show-icon=true v-else-if="!scheduleInput.active">
+      <p>{{ t('text.scheduleSettings.notActive') }}</p>
+    </snackish-bar>
+    <!-- Form is dirty, please clean it -->
+    <snackish-bar v-else-if="isFormDirty">
+      <div class="flex flex-col gap-2">
+      <p>{{ t('text.scheduleSettings.formDirty') }}</p>
+      <div class="flex gap-4">
           <secondary-button
             :label="t('label.revert')"
             @click="resetSchedule()"
@@ -314,8 +328,8 @@
             class="w-1/2"
           />
         </div>
-      </div>
-    </div>
+        </div>
+    </snackish-bar>
     <div v-else>
       <div class="my-8 flex justify-center gap-4">
         <primary-button
@@ -354,9 +368,12 @@ import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
 import ToolTip from '@/elements/ToolTip.vue';
+import { useCalendarStore } from '@/stores/calendar-store';
+import SnackishBar from '@/elements/SnackishBar.vue';
 
 // component constants
 const user = useUserStore();
+const calendarStore = useCalendarStore();
 const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
@@ -389,9 +406,6 @@ const activeStep1 = computed(() => state.value === firstStep);
 const activeStep2 = computed(() => state.value === scheduleCreationState.settings);
 const activeStep3 = computed(() => state.value === scheduleCreationState.details);
 const visitedStep1 = ref(false);
-const nextStep = () => {
-  state.value += 1;
-};
 
 // calculate calendar titles
 const calendarTitles = computed(() => {
@@ -404,8 +418,8 @@ const calendarTitles = computed(() => {
 
 // default schedule object (for start and reset) and schedule form data
 const defaultSchedule = {
-  active: true,
-  name: '',
+  active: calendarStore.hasConnectedCalendars,
+  name: `${user.data.name}'s Availability`,
   calendar_id: props.calendars[0]?.id,
   location_type: locationTypes.inPerson,
   location_url: '',
