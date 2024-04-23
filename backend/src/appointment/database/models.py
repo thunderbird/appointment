@@ -91,8 +91,8 @@ class Base:
         """Updates the time_updated field with the current datetime. This function does not save the model!"""
         self.time_updated = datetime.datetime.now()
 
-    time_created = Column(DateTime, server_default=func.now(), index=True)
-    time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now(), index=True)
+    time_created = Column(DateTime, server_default=func.now(), default=func.now(), index=True)
+    time_updated = Column(DateTime, server_default=func.now(), default=func.now(), onupdate=func.now(), index=True)
 
 
 class Subscriber(Base):
