@@ -102,7 +102,7 @@ def read_schedule_availabilities(
     try:
         schedule = schedules[0]  # for now we only process the first existing schedule
     except IndexError:
-        raise validation.ScheduleNotFoundException()
+        raise validation.ScheduleNotActive()
 
     # check if schedule is enabled
     if not schedule.active:
