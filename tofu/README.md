@@ -4,7 +4,8 @@ Code was written and tested with the following (these versions are enforced in c
 
 - OpenTofu v1.6.2
 - Terragrunt 0.55.15
-- hashicorp/aws v5.41.0
+- hashicorp/aws v5.46.0
+- hashicorp/random v3.6.1
 
 **Note:** All code should be run through Terragrunt, which will then execute the required Tofu commands
 
