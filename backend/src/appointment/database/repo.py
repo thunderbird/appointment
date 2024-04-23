@@ -507,13 +507,6 @@ def create_calendar_schedule(db: Session, schedule: schemas.ScheduleBase):
     db.add(db_schedule)
     db.commit()
     db.refresh(db_schedule)
-
-    # There's a bug on stage where onupdate isn't triggered on creates.
-    # So update the timestamp and commit it!
-    db_schedule.touch()
-    db.commit()
-    db.refresh(db_schedule)
-
     return db_schedule
 
 
