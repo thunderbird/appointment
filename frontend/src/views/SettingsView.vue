@@ -7,7 +7,7 @@
     <!-- sidebar navigation -->
     <div class="flex w-1/5 flex-col gap-6">
       <!-- search -->
-      <label class="relative flex items-center">
+      <label v-if="false" class="relative flex items-center">
         <icon-search
           class="
             absolute left-4 top-1/2 size-4 -translate-y-1/2 cursor-text fill-transparent stroke-gray-300
