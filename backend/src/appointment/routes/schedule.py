@@ -78,6 +78,8 @@ def update_schedule(
     """endpoint to update an existing calendar connection for authenticated subscriber"""
     if not repo.schedule.exists(db, schedule_id=id):
         raise validation.ScheduleNotFoundException()
+    if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
+        raise validation.CalendarNotConnectedException()
     if not repo.schedule.is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
         raise validation.ScheduleNotAuthorizedException()
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
@@ -106,6 +108,10 @@ def read_schedule_availabilities(
 
     # check if schedule is enabled
     if not schedule.active:
+        raise validation.ScheduleNotActive()
+
+    # check if calendar is connected, if its not then its a schedule not active error
+    if not schedule.calendar or not schedule.calendar.connected:
         raise validation.ScheduleNotActive()
 
     calendars = repo.calendar.get_by_subscriber(db, subscriber.id, False)

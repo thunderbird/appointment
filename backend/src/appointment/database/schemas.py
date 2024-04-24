@@ -179,6 +179,7 @@ class Schedule(ScheduleBase):
     time_created: datetime | None = None
     time_updated: datetime | None = None
     availabilities: list[Availability] = []
+    calendar: 'CalendarBase'
 
     class Config:
         from_attributes = True

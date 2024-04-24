@@ -393,7 +393,7 @@ const props = defineProps({
 });
 
 // check if existing schedule is given
-const existing = computed(() => Boolean(props.schedule));
+const existing = computed(() => Boolean(props.schedule) && Boolean(props.schedule.calendar.connected));
 
 // schedule creation state indicating the current step
 const state = ref(firstStep);
@@ -450,6 +450,12 @@ onMounted(() => {
       .utc(true)
       .tz(user.data.timezone ?? dj.tz.guess())
       .format('HH:mm');
+
+    // Adjust the default calendar if the one attached is not connected.
+    const { calendar_id: calendarId } = scheduleInput.value;
+    if (!props.calendars[calendarId] || !props.calendars[calendarId].connected) {
+      scheduleInput.value.calendar_id = props.calendars[0]?.id;
+    }
   } else {
     scheduleInput.value = { ...defaultSchedule };
   }
