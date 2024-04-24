@@ -61,7 +61,7 @@ class ZoomClient:
             return
 
         # get_db is a generator function, retrieve the only yield
-        repo.update_subscriber_external_connection_token(next(get_db()), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.zoom)
+        repo.external_connection.update_token(next(get_db()), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.zoom)
 
     def get_me(self):
         return self.client.get(f'{self.OAUTH_REQUEST_URL}/users/me').json()

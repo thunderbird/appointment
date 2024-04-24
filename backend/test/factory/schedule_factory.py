@@ -24,7 +24,7 @@ def make_schedule(with_db, make_caldav_calendar):
                        slot_duration=FAKER_RANDOM_VALUE,
                        ):
         with with_db() as db:
-            return repo.create_calendar_schedule(db, schemas.ScheduleBase(
+            return repo.schedule.create(db, schemas.ScheduleBase(
                 active=active,
                 name=name if factory_has_value(name) else fake.name(),
                 location_url=location_url if factory_has_value(location_url) else fake.url(),

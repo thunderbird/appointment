@@ -50,7 +50,7 @@ class TestAuthDependency:
         with freeze_time("Jan 10th 2024"):
             with with_db() as db:
                 # We need to pull down the subscriber in this db session, otherwise we can't save it.
-                subscriber = repo.get_subscriber(db, subscriber.id)
+                subscriber = repo.subscriber.get(db, subscriber.id)
                 subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
                 db.add(subscriber)
                 db.commit()

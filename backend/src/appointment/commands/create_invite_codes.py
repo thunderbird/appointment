@@ -10,7 +10,7 @@ def run(n: int):
     _, session = get_engine_and_session()
     db = session()
 
-    codes = repo.generate_invite_codes(db, n)
+    codes = repo.invite.generate_codes(db, n)
 
     db.close()
 

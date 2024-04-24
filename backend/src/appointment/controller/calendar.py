@@ -567,7 +567,7 @@ class Tools:
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
-                external_connection = utils.list_first(repo.get_external_connections_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+                external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
                 if external_connection is None or external_connection.token is None:
                     raise RemoteCalendarConnectionError()

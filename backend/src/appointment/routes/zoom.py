@@ -47,7 +47,7 @@ def zoom_callback(
         raise HTTPException(400, l10n('oauth-error'))
 
     # Retrieve the user id set at the start of the zoom oauth process
-    subscriber = repo.get_subscriber(db, request.session['zoom_user_id'])
+    subscriber = repo.subscriber.get(db, request.session['zoom_user_id'])
 
     # Clear zoom session keys
     request.session.pop('zoom_state')
@@ -69,8 +69,8 @@ def zoom_callback(
         token=json.dumps(creds)
     )
 
-    if len(repo.get_external_connections_by_type(db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id)) == 0:
-        repo.create_subscriber_external_connection(db, external_connection_schema)
+    if len(repo.external_connection.get_by_type(db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id)) == 0:
+        repo.external_connection.create(db, external_connection_schema)
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/account")
 
@@ -84,7 +84,7 @@ def disconnect_account(
     zoom_connection = subscriber.get_external_connection(ExternalConnectionType.zoom)
 
     if zoom_connection:
-        repo.delete_external_connections_by_type_id(db, subscriber.id, zoom_connection.type, zoom_connection.type_id)
+        repo.external_connection.delete_by_type(db, subscriber.id, zoom_connection.type, zoom_connection.type_id)
     else:
         return False
 

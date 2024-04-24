@@ -18,7 +18,7 @@ def make_appointment_slot(with_db):
                                meeting_link_id=None,
                                meeting_link_url=None):
         with with_db() as db:
-            return repo.add_appointment_slots(db, [schemas.SlotBase(
+            return repo.slot.add_for_appointment(db, [schemas.SlotBase(
                 start=start if factory_has_value(start) else fake.date_time(),
                 duration=duration if factory_has_value(duration) else fake.pyint(15, 60),
                 attendee_id=attendee_id,

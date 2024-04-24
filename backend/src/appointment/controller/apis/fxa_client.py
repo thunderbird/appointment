@@ -135,7 +135,7 @@ class FxaClient:
         if self.subscriber_id is None:
             return
 
-        repo.update_subscriber_external_connection_token(next(get_db()), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.fxa)
+        repo.external_connection.update_token(next(get_db()), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.fxa)
 
     def get_profile(self):
         """Retrieve the user's profile information"""

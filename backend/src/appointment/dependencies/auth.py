@@ -26,7 +26,7 @@ def get_user_from_token(db, token: str):
         raise InvalidTokenException()
 
     id = sub.replace('uid-', '')
-    subscriber = repo.get_subscriber(db, int(id))
+    subscriber = repo.subscriber.get(db, int(id))
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
     if subscriber is None:
@@ -60,7 +60,7 @@ def get_subscriber_from_signed_url(
     db: Session = Depends(get_db),
 ):
     """Retrieve a subscriber based off a signed url from the body. Requires `url` param to be used in the request."""
-    subscriber = repo.verify_subscriber_link(db, url)
+    subscriber = repo.subscriber.verify_link(db, url)
     if not subscriber:
         raise validation.InvalidLinkException
 

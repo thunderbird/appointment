@@ -11,7 +11,7 @@ def make_caldav_calendar(with_db):
     def _make_caldav_calendar(subscriber_id=TEST_USER_ID, url=FAKER_RANDOM_VALUE, title=FAKER_RANDOM_VALUE, color=FAKER_RANDOM_VALUE, connected=False, user=FAKER_RANDOM_VALUE, password=FAKER_RANDOM_VALUE):
         with with_db() as db:
             title = title if factory_has_value(title) else fake.name()
-            return repo.create_subscriber_calendar(db, schemas.CalendarConnection(
+            return repo.calendar.create(db, schemas.CalendarConnection(
                 title=title,
                 color=color if factory_has_value(color) else fake.color(),
                 connected=connected,
@@ -32,7 +32,7 @@ def make_google_calendar(with_db):
         with with_db() as db:
             title = title if factory_has_value(title) else fake.name()
             id = id if factory_has_value(id) else fake.uuid4()
-            return repo.create_subscriber_calendar(db, schemas.CalendarConnection(
+            return repo.calendar.create(db, schemas.CalendarConnection(
                 title=title,
                 color=color if factory_has_value(color) else fake.color(),
                 connected=connected,

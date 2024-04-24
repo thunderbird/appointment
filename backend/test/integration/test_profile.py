@@ -31,7 +31,7 @@ class TestProfile:
 
         # Confirm the data was saved
         with with_db() as db:
-            subscriber = repo.get_subscriber_by_email(db, os.getenv('TEST_USER_EMAIL'))
+            subscriber = repo.subscriber.get_by_email(db, os.getenv('TEST_USER_EMAIL'))
             assert subscriber.username == "test"
             assert subscriber.name == "Test Account"
             assert subscriber.timezone == "Europe/Berlin"

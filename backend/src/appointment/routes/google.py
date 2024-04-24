@@ -59,7 +59,7 @@ def google_callback(
         return google_callback_error(l10n('google-auth-fail'))
 
     subscriber_id = request.session.get('google_oauth_subscriber_id')
-    subscriber = repo.get_subscriber(db, subscriber_id)
+    subscriber = repo.subscriber.get(db, subscriber_id)
 
     # Clear session keys
     request.session.pop('google_oauth_state')
@@ -76,10 +76,10 @@ def google_callback(
     if google_id is None:
         return google_callback_error(l10n('google-auth-fail'))
 
-    external_connection = repo.get_external_connections_by_type(db, subscriber.id, ExternalConnectionType.google, google_id)
+    external_connection = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google, google_id)
 
     # Create an artificial limit of one google account per account, mainly because we didn't plan for multiple accounts!
-    remainder = list(filter(lambda ec: ec.type_id != google_id, repo.get_external_connections_by_type(db, subscriber.id, ExternalConnectionType.google)))
+    remainder = list(filter(lambda ec: ec.type_id != google_id, repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google)))
 
     if len(remainder) > 0:
         return google_callback_error(l10n('google-only-one'))
@@ -94,9 +94,9 @@ def google_callback(
             token=creds.to_json()
         )
 
-        repo.create_subscriber_external_connection(db, external_connection_schema)
+        repo.external_connection.create(db, external_connection_schema)
     else:
-        repo.update_subscriber_external_connection_token(db, creds.to_json(), subscriber.id,
+        repo.external_connection.update_token(db, creds.to_json(), subscriber.id,
                                                          ExternalConnectionType.google, google_id)
 
     error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds)

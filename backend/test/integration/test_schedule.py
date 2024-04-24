@@ -508,5 +508,5 @@ class TestSchedule:
 
         # Look up the slot
         with with_db() as db:
-            slot = repo.get_slot(db, slot_id)
+            slot = repo.slot.get(db, slot_id)
             assert slot.appointment_id

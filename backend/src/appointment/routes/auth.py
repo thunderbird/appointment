@@ -111,14 +111,14 @@ def fxa_callback(
         raise HTTPException(400, l10n('email-mismatch'))
 
     # Check if we have an existing fxa connection by profile's uid
-    fxa_subscriber = repo.get_subscriber_by_fxa_uid(db, profile['uid'])
+    fxa_subscriber = repo.external_connection.get_subscriber_by_fxa_uid(db, profile['uid'])
     # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
-    subscriber = repo.get_subscriber_by_email(db, email)
+    subscriber = repo.subscriber.get_by_email(db, email)
 
     new_subscriber_flow = not fxa_subscriber and not subscriber
 
     if new_subscriber_flow:
-        subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
+        subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
             email=email,
             username=email,
             timezone=timezone,
@@ -135,9 +135,9 @@ def fxa_callback(
     )
 
     if not fxa_subscriber:
-        repo.create_subscriber_external_connection(db, external_connection_schema)
+        repo.external_connection.create(db, external_connection_schema)
     else:
-        repo.update_subscriber_external_connection_token(db, json.dumps(creds), subscriber.id,
+        repo.external_connection.update_token(db, json.dumps(creds), subscriber.id,
                                                          external_connection_schema.type,
                                                          external_connection_schema.type_id)
 
@@ -155,7 +155,7 @@ def fxa_callback(
         data.name = profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0]
         data.username = profile['email']
 
-    repo.update_subscriber(db, data, subscriber.id)
+    repo.subscriber.update(db, data, subscriber.id)
 
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
@@ -175,7 +175,7 @@ def token(
         raise HTTPException(status_code=405)
 
     """Retrieve an access token from a given username and password."""
-    subscriber = repo.get_subscriber_by_username(db, form_data.username)
+    subscriber = repo.subscriber.get_by_username(db, form_data.username)
     if not subscriber or subscriber.password is None:
         raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
@@ -232,7 +232,7 @@ def me(
 #     if os.getenv('AUTH_SCHEME') != 'password':
 #         raise HTTPException(status_code=405)
 #
-#     subscriber = repo.create_subscriber(db, schemas.SubscriberBase(
+#     subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
 #         email=email,
 #         username=email,
 #         name=email.split('@')[0],
