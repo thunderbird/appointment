@@ -66,16 +66,32 @@ def _common_setup():
         if release_version:
             release_string = f"appointment-backend@{release_version}"
 
+        sample_rate = 0
+        profile_traces_max = 0
+        environment = os.getenv("APP_ENV", "stage")
+
+        if environment == 'stage':
+            profile_traces_max = 0.25
+            sample_rate = 1.0
+        elif environment == 'production':
+            profile_traces_max = 0.25
+            sample_rate = 0.5
+
+        def traces_sampler(sampling_context):
+            """Tell Sentry to ignore or reduce traces for particular routes"""
+            asgi_scope = sampling_context.get('asgi_scope', {})
+            path = asgi_scope.get('path')
+
+            # Ignore health check and favicon.ico
+            if path == '/' or '/favicon.ico':
+                return 0
+
+            return profile_traces_max
+
         sentry_sdk.init(
             dsn=os.getenv("SENTRY_DSN"),
-            # Set traces_sample_rate to 1.0 to capture 100%
-            # of transactions for performance monitoring.
-            # We recommend adjusting this value in production,
-            traces_sample_rate=1.0,
-            # Only profile staging for now
-            profiles_sample_rate=1.0 if os.getenv("APP_ENV", "stage") else 0.0,
-            send_default_pii=True if os.getenv("APP_ENV", "stage") else False,
-            environment=os.getenv("APP_ENV", "dev"),
+            sample_rate=sample_rate,
+            environment=environment,
             release=release_string,
             integrations=[
                 StarletteIntegration(
@@ -85,6 +101,8 @@ def _common_setup():
                     transaction_style="endpoint"
                 ),
             ],
+            profiles_sampler=traces_sampler,
+            traces_sampler=traces_sampler
         )
 
 
