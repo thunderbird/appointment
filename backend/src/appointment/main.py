@@ -75,7 +75,7 @@ def _common_setup():
             sample_rate = 1.0
         elif environment == 'production':
             profile_traces_max = 0.25
-            sample_rate = 0.5
+            sample_rate = 1.0
 
         def traces_sampler(sampling_context):
             """Tell Sentry to ignore or reduce traces for particular routes"""
