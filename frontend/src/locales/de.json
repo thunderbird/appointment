@@ -105,7 +105,7 @@
     "busy": "Beschäftigt",
     "caldav": "CalDAV",
     "calendar": "Kalender",
-    "calendarDeletion": "Kalendarverbindung trennen",
+    "calendarDeletion": "Kalendarverbindung entfernen",
     "calendarUrl": "Kalender URL",
     "cancel": "Abbrechen",
     "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
@@ -160,6 +160,7 @@
     "logIn": "Anmelden",
     "logOut": "Abmelden",
     "loginToContinue": "Anmelden um fortzufahren",
+    "meetingDetails": "Meeting Details",
     "message": "Nachricht",
     "month": "Monat",
     "myLink": "Mein Link",
@@ -168,6 +169,7 @@
     "notConnected": "Nicht verbunden",
     "notProvided": "Keine Angabe",
     "notes": "Details",
+    "now": "Sofort",
     "off": "Aus",
     "on": "An",
     "online": "Online",
@@ -183,10 +185,17 @@
     "replies": "Antworten",
     "requested": "Angefragt",
     "restoreColumnOrder": "Spaltenreihenfolge wiederherstellen",
+    "revert": "Zurücksetzen",
     "save": "Speichern",
     "saveChanges": "Änderungen speichern",
     "schedule": "Zeitplan",
     "scheduleCreationError": "Fehler beim Speichern des Zeitplans",
+    "scheduleDetails": "Zeitplan Details",
+    "scheduleSettings": {
+      "availabilitySubHeading": "Lege deine Verfügbarkeit fest",
+      "meetingDetailsSubHeading": "Videos oder Notizen den Events hinzufügen",
+      "schedulingDetailsSubHeading": "Buchungsintervalle und Dauer festlegen"
+    },
     "search": "Suche",
     "searchAppointments": "Termine durchsuchen",
     "secondaryTimeZone": "Sekundäre Zeitzone",
@@ -230,6 +239,7 @@
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen…",
     "emailAddress": "max.muster{'@'}beispiel.de",
     "firstAndLastName": "Vor- und Nachname",
+    "mySchedule": "Mein Zeitplan",
     "never": "Nie",
     "writeHere": "Hier notieren…",
     "zoomCom": "zoom.com…"
@@ -275,9 +285,17 @@
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
+    "scheduleSettings": {
+      "clickHereToConnect": "Hier einen Kalender verbinden",
+      "create": "Wähle einen Kalender unter Zeitplan Details und klicke Speichern!",
+      "formDirty": "Es gibt ungespeicherte Änderungen.",
+      "noCalendars": "Dein Zeitplan benötigt mindestens einen verbundenen Kalender.",
+      "notActive": "Der Zeitplan ist inaktiv, aktiviere ihn zum Bearbeiten oder Teilen."
+    },
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren."
+    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren.",
+    "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt."
   },
   "units": {
     "minutes": "{value} Minuten",
