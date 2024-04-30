@@ -1,6 +1,5 @@
 <template>
-  <div v-html="pageContents">
-  </div>
+  <div class="px-4 md:px-20" v-html="pageContents"></div>
 </template>
 
 <script setup>
