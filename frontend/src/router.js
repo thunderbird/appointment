@@ -1,3 +1,4 @@
+import { defineAsyncComponent } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
@@ -6,6 +7,13 @@ import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
+
+// lazy loaded components
+const ContactView = defineAsyncComponent(() => import('@/views/ContactView'));
+const AppointmentsView = defineAsyncComponent(() => import('@/views/AppointmentsView'));
+const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView'));
+const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView'));
+const LegalView = defineAsyncComponent(() => import('@/views/LegalView'));
 
 /**
  * Defined routes for Thunderbird Appointment
@@ -52,36 +60,35 @@ const routes = [
     name: 'calendar',
     component: CalendarView,
   },
-  // lazy-loaded routes
   {
     path: '/appointments/:view?/:slug?',
     name: 'appointments',
-    component: () => import('@/views/AppointmentsView'),
+    component: AppointmentsView,
   },
   {
     path: '/settings/:view?',
     name: 'settings',
-    component: () => import('@/views/SettingsView'),
+    component: SettingsView,
   },
   {
     path: '/profile',
     name: 'profile',
-    component: () => import('@/views/ProfileView'),
+    component: ProfileView,
   },
   {
     path: '/contact',
     name: 'contact',
-    component: () => import('@/views/ContactView'),
+    component: ContactView,
   },
   {
     path: '/privacy',
     name: 'privacy',
-    component: () => import('@/views/LegalView'),
+    component: LegalView,
   },
   {
     path: '/terms',
     name: 'terms',
-    component: () => import('@/views/LegalView'),
+    component: LegalView,
   },
 ];
 
