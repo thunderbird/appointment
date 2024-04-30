@@ -4,6 +4,11 @@
 
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
+
+## Feedback and Support
+
+If you'd like to give feedback or need support, please see our [Topicbox](https://thunderbird.topicbox.com/groups/services).
+
 ## Get started
 
 You can either build preconfigured docker containers (database, backend and frontend) or manually set up the application. A more detailed documentation can be found in the [docs folder](./docs/README.md).
