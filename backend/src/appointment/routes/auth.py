@@ -7,6 +7,7 @@ from typing import Annotated
 import argon2.exceptions
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
+from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -125,6 +126,18 @@ def fxa_callback(
         ))
     elif not subscriber:
         subscriber = fxa_subscriber
+
+    fxa_connections = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.fxa)
+
+    # If we have fxa_connections, ensure the incoming one matches our known one.
+    # This shouldn't occur, but it's a safety check in-case we missed a webhook push.
+    if any([profile['uid'] != ec.type_id for ec in fxa_connections]):
+        # Ensure sentry captures the error too!
+        if os.getenv('SENTRY_DSN') != '':
+            e = Exception("Invalid Credentials, incoming profile uid does not match existing profile uid")
+            capture_exception(e)
+
+        raise HTTPException(403, l10n('invalid-credentials'))
 
     external_connection_schema = schemas.ExternalConnection(
         name=profile['email'],

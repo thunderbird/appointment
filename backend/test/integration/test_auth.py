@@ -1,6 +1,7 @@
 import os
 
-from defines import FXA_CLIENT_PATCH
+from appointment.l10n import l10n
+from defines import FXA_CLIENT_PATCH, TEST_USER_ID
 from appointment.database import repo, models
 
 
@@ -89,3 +90,34 @@ class TestAuth:
             fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
             assert fxa
             assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
+
+    def test_fxa_callback_with_mismatch_uid(self, with_db, with_client, monkeypatch, make_external_connections, make_basic_subscriber, with_l10n):
+        """Test that our fxa callback will throw an invalid-credentials error if the incoming fxa uid doesn't match any existing ones."""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+
+        state = 'a1234'
+
+        subscriber = make_basic_subscriber(email=FXA_CLIENT_PATCH.get('subscriber_email'))
+
+        mismatch_uid = f"{FXA_CLIENT_PATCH.get('external_connection_type_id')}-not-actually"
+        make_external_connections(subscriber.id, type=models.ExternalConnectionType.fxa, type_id=mismatch_uid)
+
+        monkeypatch.setattr('starlette.requests.HTTPConnection.session', {
+            'fxa_state': state,
+            'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
+            'fxa_user_timezone': 'America/Vancouver'
+        })
+
+        response = with_client.get(
+            "/fxa",
+            params={
+                'code': FXA_CLIENT_PATCH.get('credentials_code'),
+                'state': state
+            },
+            follow_redirects=False
+        )
+
+        # This should error out as a 403
+        assert response.status_code == 403, response.text
+        # This will just key match due to the lack of context.
+        assert response.json().get('detail') == l10n('invalid-credentials')
