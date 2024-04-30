@@ -47,7 +47,7 @@
         {{ t('label.editCalendar') }}
       </button>
       <button
-        v-if="cal.connected"
+        v-if="!cal.connected"
         class="bg-transparent p-0.5 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
         :disabled="loading"
         @click="emit('remove', cal.id)"

@@ -1,6 +1,7 @@
 import logging
 import os
 import secrets
+from typing import Annotated
 
 import requests.exceptions
 import validators
@@ -18,7 +19,7 @@ from ..database import repo, schemas
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Query, Request
 from datetime import timedelta, timezone
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
@@ -194,19 +195,25 @@ def update_my_calendar(
 
 
 @router.post("/cal/{id}/connect", response_model=schemas.CalendarOut)
-def connect_my_calendar(
+@router.post("/cal/{id}/disconnect", response_model=schemas.CalendarOut)
+def change_my_calendar_connection(
+    request: Request,
     id: int,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
-    """endpoint to update an existing calendar connection for authenticated subscriber"""
+    """endpoint to update an existing calendar connection for authenticated subscriber
+    note this function handles both disconnect and connect (the double route is not a typo.)"""
     if not repo.calendar.exists(db, calendar_id=id):
         raise validation.CalendarNotFoundException()
     if not repo.calendar.is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise validation.CalendarNotAuthorizedException()
 
+    # If our path ends with /connect then connect the calendar, otherwise disconnect the calendar
+    connect = request.scope.get('path', '').endswith('/connect')
+
     try:
-        cal = repo.calendar.update_connection(db=db, calendar_id=id, is_connected=True)
+        cal = repo.calendar.update_connection(db=db, calendar_id=id, is_connected=connect)
     except HTTPException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)

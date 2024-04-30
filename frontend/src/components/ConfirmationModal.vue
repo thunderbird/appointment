@@ -10,7 +10,7 @@
     <div class="text-2xl font-semibold text-teal-500">
       {{ title }}
     </div>
-    <div class="max-w-xs text-center">
+    <div class="max-w-sm text-center">
       {{ message }}
     </div>
     <div class="flex gap-4">

@@ -15,6 +15,7 @@
       :calendars="calendarStore.unconnectedCalendars"
       :loading="loading"
       @sync="syncCalendars"
+      @remove="deleteCalendar"
       @modify="connectCalendar"
     />
 
@@ -24,7 +25,6 @@
       :type="calendarManagementType.edit"
       :calendars="calendarStore.connectedCalendars"
       :loading="loading"
-      @remove="deleteCalendar"
       @modify="editCalendar"
     />
 
@@ -162,7 +162,16 @@
           class="w-full max-w-sm rounded-md"
         />
       </label>
-      <div class="flex gap-4 self-end">
+      <div class="flex justify-between gap-4">
+        <div class="flex">
+        <caution-button
+          v-if="editMode"
+          :label="t('label.disconnect')"
+          class="text-sm"
+          @click="() => disconnectCalendar(calendarInput.id)"
+        />
+        </div>
+        <div class="flex gap-4 self-end">
         <secondary-button
           :label="t('label.cancel')"
           class="text-sm !text-teal-500"
@@ -182,6 +191,7 @@
           :label="t('label.connectGoogleCalendar')"
           @click="saveCalendar"
         />
+        </div>
       </div>
     </div>
 
@@ -192,8 +202,9 @@
   :open="deleteCalendarModalOpen"
   :title="t('label.calendarDeletion')"
   :message="t('text.calendarDeletionWarning')"
-  :confirm-label="t('label.disconnect')"
+  :confirm-label="t('label.calendarDeletion')"
   :cancel-label="t('label.cancel')"
+  :useCautionButton="true"
   @confirm="deleteCalendarConfirm"
   @close="closeModals"
 ></ConfirmationModal>
@@ -214,6 +225,7 @@ import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
+import CautionButton from '@/elements/CautionButton.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -289,6 +301,14 @@ const connectCalendar = async (id) => {
 
   await call(`cal/${id}/connect`).post();
   await refreshData();
+  await resetInput();
+};
+const disconnectCalendar = async (id) => {
+  loading.value = true;
+
+  await call(`cal/${id}/disconnect`).post();
+  await refreshData();
+  await resetInput();
 };
 const syncCalendars = async () => {
   loading.value = true;

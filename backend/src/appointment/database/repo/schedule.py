@@ -44,6 +44,12 @@ def exists(db: Session, schedule_id: int):
     return True if get(db, schedule_id) is not None else False
 
 
+def is_calendar_connected(db: Session, schedule_id: int) -> bool:
+    """true if the schedule's calendar is connected"""
+    schedule: models.Schedule = get(db, schedule_id)
+    return schedule.calendar and schedule.calendar.connected
+
+
 def update(db: Session, schedule: schemas.ScheduleBase, schedule_id: int):
     """update existing schedule by id"""
     db_schedule = get(db, schedule_id)
