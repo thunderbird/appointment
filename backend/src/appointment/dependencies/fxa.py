@@ -1,5 +1,6 @@
 import logging
 import os
+import datetime
 
 from fastapi import Request, Depends
 #from jose import jwt, jwk
@@ -41,15 +42,17 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
     jwk_pem = None
     for current_jwk in public_jwks:
         if current_jwk.get('kid') == headers.get('kid'):
-            jwk_obj = jwt.PyJWK(current_jwk)
-            jwk_pem = jwk_obj.Algorithm.prepare_key(jwk_obj.key)
+            jwk_pem = jwt.PyJWK(current_jwk).key
             break
 
     if jwk_pem is None:
         logging.error(f"Error decoding token. Key ID ({headers.get('kid')}) is missing from public list.")
         return None
 
-    decoded_jwt = jwt.decode(header_token, jwk_pem, audience=fxa_client.client_id, algorithms='RS256')
+    # Amount of time over what the iat is issued for to allow
+    # We were having millisecond timing issues, so this is set to a few seconds to cover for that.
+    leeway = datetime.timedelta(seconds=5)
+    decoded_jwt = jwt.decode(header_token, key=jwk_pem, audience=fxa_client.client_id, algorithms='RS256', leeway=leeway)
 
     # Final verification
     if decoded_jwt.get('iss') != fxa_client.config.issuer:
