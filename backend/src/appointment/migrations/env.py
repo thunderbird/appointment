@@ -6,6 +6,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from appointment.defines import APP_ENV_DEV
 # This is ran from src/ so ignore the errors
 from appointment.secrets import normalize_secrets
 
@@ -42,7 +43,7 @@ if os.getenv("SENTRY_DSN") != "" or os.getenv("SENTRY_DSN") is not None:
         # of transactions for performance monitoring.
         # We recommend adjusting this value in production,
         traces_sample_rate=1.0,
-        environment=os.getenv("APP_ENV", "dev"),
+        environment=os.getenv("APP_ENV", APP_ENV_DEV),
     )
 
 

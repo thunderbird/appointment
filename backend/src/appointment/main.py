@@ -8,7 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
 
-from .defines import APP_ENV_DEV, APP_ENV_TEST
+from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 # Ignore "Module level import not at top of file"
@@ -68,12 +68,12 @@ def _common_setup():
 
         sample_rate = 0
         profile_traces_max = 0
-        environment = os.getenv("APP_ENV", "stage")
+        environment = os.getenv("APP_ENV", APP_ENV_STAGE)
 
-        if environment == 'stage':
+        if environment == APP_ENV_STAGE:
             profile_traces_max = 0.25
             sample_rate = 1.0
-        elif environment == 'production':
+        elif environment == APP_ENV_PROD:
             profile_traces_max = 0.25
             sample_rate = 1.0
 
@@ -125,7 +125,7 @@ def server():
     from .routes import webhooks
 
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
-    openapi_url = '/openapi.json' if os.getenv('APP_ENV') == 'dev' else None
+    openapi_url = '/openapi.json' if os.getenv('APP_ENV') == APP_ENV_DEV else None
 
     # init app
     app = FastAPI(openapi_url=openapi_url)
