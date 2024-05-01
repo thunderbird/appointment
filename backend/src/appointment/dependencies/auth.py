@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request, HTTPException, Body
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+import jwt
 
 from sqlalchemy.orm import Session
 
@@ -22,18 +22,18 @@ def get_user_from_token(db, token: str):
         iat = payload.get("iat")
         if sub is None:
             raise InvalidTokenException()
-    except JWTError:
+    except jwt.exceptions.InvalidTokenError:
         raise InvalidTokenException()
 
     id = sub.replace('uid-', '')
     subscriber = repo.subscriber.get(db, int(id))
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
-    if subscriber is None:
-        raise InvalidTokenException()
-    elif subscriber.minimum_valid_iat_time and not iat:
-        raise InvalidTokenException()
-    elif subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat):
+    if any([
+        subscriber is None,
+        subscriber and subscriber.minimum_valid_iat_time and not iat,
+        subscriber and subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat)
+    ]):
         raise InvalidTokenException()
 
     return subscriber

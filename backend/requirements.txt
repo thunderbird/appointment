@@ -18,8 +18,8 @@ markdown==3.6
 MarkupSafe==2.1.2
 nh3==0.2.17
 python-dotenv==1.0.0
-python-jose==3.3.0
 python-multipart==0.0.7
+PyJWT==2.6.0
 pydantic==2.5.2
 sentry-sdk==1.26.0
 starlette-context==0.3.6

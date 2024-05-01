@@ -5,8 +5,8 @@ from secrets import token_urlsafe
 from typing import Annotated
 
 import argon2.exceptions
+import jwt
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 

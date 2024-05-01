@@ -2,7 +2,8 @@ import logging
 import os
 
 from fastapi import Request, Depends
-from jose import jwt, jwk
+#from jose import jwt, jwk
+import jwt
 
 from ..controller.apis.fxa_client import FxaClient
 
@@ -31,7 +32,7 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
         logging.error("No public jwks available.")
         return None
 
-    headers = jwt.get_unverified_headers(header_token)
+    headers = jwt.get_unverified_header(header_token)
 
     if 'kid' not in headers:
         logging.error("Error decoding token. Key ID is missing from headers.")
@@ -40,7 +41,7 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
     jwk_pem = None
     for current_jwk in public_jwks:
         if current_jwk.get('kid') == headers.get('kid'):
-            jwk_pem = jwk.construct(current_jwk)
+            jwk_pem = jwt.PyJWK(current_jwk)
             break
 
     if jwk_pem is None:
