@@ -41,7 +41,8 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
     jwk_pem = None
     for current_jwk in public_jwks:
         if current_jwk.get('kid') == headers.get('kid'):
-            jwk_pem = jwt.PyJWK(current_jwk)
+            jwk_obj = jwt.PyJWK(current_jwk)
+            jwk_pem = jwk_obj.Algorithm.prepare_key(jwk_obj.key)
             break
 
     if jwk_pem is None:
