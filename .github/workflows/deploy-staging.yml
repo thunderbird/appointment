@@ -9,11 +9,10 @@ on:
     branches:
     - main
 
-environment: staging
-
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       deploy-iac: ${{ steps.check.outputs.deploy-iac }}
       deploy-backend: ${{ steps.check.outputs.deploy-backend }}
@@ -38,6 +37,7 @@ jobs:
   deploy-iac:
     needs: detect-changes
     runs-on: ubuntu-latest
+    environment: staging
     if: needs.detect-changes.outputs.deploy-iac == 'true'
     steps:
     - uses: actions/checkout@v4
@@ -104,6 +104,7 @@ jobs:
   deploy-frontend:
     needs: detect-changes
     runs-on: ubuntu-latest
+    environment: staging
     if: needs.detect-changes.outputs.deploy-frontend == 'true'
     steps:
     - uses: actions/checkout@v4
@@ -131,6 +132,7 @@ jobs:
   deploy-backend:
     needs: detect-changes
     runs-on: ubuntu-latest
+    environment: staging
     if: needs.detect-changes.outputs.deploy-backend == 'true'
     steps:
     - uses: actions/checkout@v4
