@@ -175,7 +175,7 @@ jobs:
         echo 'image_backend=$ECR_TAG >> $GITHUB_OUTPUT
 
     - name: backend-service
-      working-directory: ./tofu/environments/${{ inputs.environment }}/services/backend-service
+      working-directory: ./tofu/environments/stage/services/backend-service
       run: |
         terragrunt init -upgrade
         terragrunt validate
