@@ -1,18 +1,16 @@
-import json
 import os
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 
 from ..controller.apis.google_client import GoogleClient
-from ..database import repo, schemas
+from ..database import repo, schemas, models
 from sqlalchemy.orm import Session
 
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 
-from ..database.models import Subscriber, ExternalConnectionType, ExternalConnections
+from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
@@ -76,10 +74,12 @@ def google_callback(
     if google_id is None:
         return google_callback_error(l10n('google-auth-fail'))
 
-    external_connection = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google, google_id)
+    external_connection = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google,
+                                                               google_id)
 
     # Create an artificial limit of one google account per account, mainly because we didn't plan for multiple accounts!
-    remainder = list(filter(lambda ec: ec.type_id != google_id, repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google)))
+    remainder = list(filter(lambda ec: ec.type_id != google_id,
+                            repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google)))
 
     if len(remainder) > 0:
         return google_callback_error(l10n('google-only-one'))
@@ -97,7 +97,7 @@ def google_callback(
         repo.external_connection.create(db, external_connection_schema)
     else:
         repo.external_connection.update_token(db, creds.to_json(), subscriber.id,
-                                                         ExternalConnectionType.google, google_id)
+                                              ExternalConnectionType.google, google_id)
 
     error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds)
 
@@ -111,3 +111,21 @@ def google_callback(
 def google_callback_error(error: str):
     """Call if you encounter an unrecoverable error with the Google callback function"""
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar?error={error}")
+
+
+@router.post("/disconnect")
+def disconnect_account(
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
+    """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
+    google_connection = subscriber.get_external_connection(ExternalConnectionType.google)
+
+    # Remove all of their google calendars (We only support one connection so this should be good for now)
+    repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google)
+
+    # Remove their account details
+    repo.external_connection.delete_by_type(db, subscriber.id, google_connection.type, google_connection.type_id)
+
+
+    return True

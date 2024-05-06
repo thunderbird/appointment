@@ -12,7 +12,7 @@ _google_client = GoogleClient(
 )
 
 
-def get_google_client():
+def get_google_client() -> 'GoogleClient':
     """Returns the google client instance"""
     try:
         _google_client.setup()

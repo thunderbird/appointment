@@ -1,6 +1,6 @@
 <template>
 <div class="flex flex-col gap-8">
-  <div class="text-3xl font-semibold text-gray-500">{{ t('heading.calendarSettings') }}</div>
+  <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.calendarSettings') }}</div>
   <div class="flex flex-col gap-6 pl-6">
     <alert-box
       @close="calendarConnectError = ''"

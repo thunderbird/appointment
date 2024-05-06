@@ -9,9 +9,12 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   // Data
   const zoom = ref([]);
   const fxa = ref([]);
+  const google = ref([]);
   const connections = computed(() => ({
-    zoom: zoom.value,
+    // FXA should be at the top imo
     fxa: fxa.value,
+    google: google.value,
+    zoom: zoom.value,
   }));
 
   /**
@@ -26,6 +29,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     const { data } = await call('account/external-connections').get().json();
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
+    google.value = data.value?.google ?? [];
     isLoaded.value = true;
   };
 
@@ -35,10 +39,11 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const $reset = () => {
     zoom.value = [];
     fxa.value = [];
+    google.value = [];
     isLoaded.value = false;
   };
 
   return {
-    connections, isLoaded, fxa, zoom, fetch, $reset,
+    connections, isLoaded, fxa, zoom, google, fetch, $reset,
   };
 });

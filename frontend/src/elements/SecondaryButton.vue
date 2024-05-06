@@ -4,7 +4,7 @@
       relative flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full border
       border-teal-500 bg-white px-6 text-base font-semibold text-gray-600 transition-all ease-in-out
       hover:scale-102 hover:shadow-md active:scale-98 disabled:scale-100 disabled:opacity-50 disabled:shadow-none
-      dark:bg-gray-700 dark:text-gray-400
+      dark:bg-gray-700 dark:text-gray-100
     "
     :class="{ '!text-transparent': waiting }"
     @click="copy ? copyToClipboard() : null"

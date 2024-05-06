@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-8">
-    <div class="text-3xl font-semibold text-gray-500">{{ t('heading.accountSettings') }}</div>
+    <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
     <div class="flex max-w-3xl flex-col pl-6">
       <div class="text-xl">{{ t('heading.profile') }}</div>
       <label class="mt-4 flex items-center pl-4">
@@ -57,30 +57,6 @@
             class="!text-teal-500"
             @click="updateUserCheckForConfirmation"
         />
-      </div>
-    </div>
-    <div class="max-w-3xl pl-6">
-      <div class="mb-4 text-xl">{{ t('heading.zoom') }}</div>
-      <div>
-        <p>{{ t('text.connectZoom') }}</p>
-      </div>
-      <div class="mt-4 flex items-center pl-4">
-        <div class="w-full max-w-2xs">
-          <p v-if="hasZoomAccountConnected">{{ t('label.connectedAs', { name: zoomAccountName }) }}</p>
-          <p v-if="!hasZoomAccountConnected">{{ t('label.notConnected') }}</p>
-        </div>
-        <div class="mx-auto mr-0">
-          <primary-button
-          v-if="!hasZoomAccountConnected"
-          :label="t('label.connect')"
-          @click="connectZoom"
-        />
-        <caution-button
-          v-if="hasZoomAccountConnected"
-          :label="t('label.disconnect')"
-          @click="disconnectZoom"
-        />
-        </div>
       </div>
     </div>
     <div class="pl-6">
@@ -147,12 +123,11 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, computed,
+  ref, inject, onMounted,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { storeToRefs } from 'pinia';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -171,11 +146,6 @@ const call = inject('call');
 const router = useRouter();
 const user = useUserStore();
 const externalConnectionsStore = useExternalConnectionsStore();
-const { zoom: zoomConnections, $reset: resetConnections } = storeToRefs(externalConnectionsStore);
-
-// Currently we only support one zoom account being connected at once.
-const hasZoomAccountConnected = computed(() => (zoomConnections.value.length) > 0);
-const zoomAccountName = computed(() => (zoomConnections.value[0]?.name ?? null));
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -236,17 +206,6 @@ const updateUserCheckForConfirmation = async () => {
 onMounted(async () => {
   await refreshData();
 });
-
-const connectZoom = async () => {
-  const { data } = await call('zoom/auth').get().json();
-  // Ship them to the auth link
-  window.location.href = data.value.url;
-};
-const disconnectZoom = async () => {
-  await call('zoom/disconnect').post();
-  await resetConnections();
-  await refreshData();
-};
 
 const downloadData = async () => {
   downloadAccountModalOpen.value = true;

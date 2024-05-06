@@ -164,10 +164,8 @@ export const viewTypes = {
 export const settingsSections = {
   general: 1,
   calendar: 2,
-  // appointmentsAndBooking: 3,
-  account: 4,
-  // privacy:                5,
-  // faq:                    6,
+  account: 3,
+  connectedAccounts: 4,
 };
 
 /**

@@ -133,3 +133,13 @@ def delete_by_subscriber(db: Session, subscriber_id: int):
     for calendar in calendars:
         delete(db, calendar_id=calendar.id)
     return True
+
+
+def delete_by_subscriber_and_provider(db: Session, subscriber_id: int, provider: models.CalendarProvider):
+    """Delete all subscriber's calendar by a provider"""
+    calendars = get_by_subscriber(db, subscriber_id=subscriber_id)
+    for calendar in calendars:
+        if calendar.provider == provider:
+            delete(db, calendar_id=calendar.id)
+
+    return True
