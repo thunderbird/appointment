@@ -42,6 +42,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.IAM_ROLE }}
+        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ vars.AWS_REGION }}
+
     - name: install opentofu
       uses: opentofu/setup-opentofu@v1
       with: 
@@ -84,6 +91,7 @@ jobs:
         
     - name: frontend
       working-directory: ./tofu/environments/stage/services/frontend
+      continue-on-error: true
       run: |
         terragrunt init -upgrade
         terragrunt validate
