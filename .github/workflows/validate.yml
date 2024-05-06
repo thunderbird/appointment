@@ -46,7 +46,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: ${{ secrets.IAM_ROLE }}
-        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
         aws-region: ${{ vars.AWS_REGION }}
 
     - name: install opentofu
