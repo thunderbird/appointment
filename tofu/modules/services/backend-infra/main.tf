@@ -13,19 +13,19 @@ locals {
 }
 
 resource "random_string" "x_allow_value" {
-  length = 128
-  lower = true
+  length  = 128
+  lower   = true
   numeric = true
   special = true
-  upper = true
+  upper   = true
 }
 
 resource "random_string" "x_allow_suffix" {
-  length = 8
-  lower = true
+  length  = 8
+  lower   = true
   numeric = false
   special = false
-  upper = true
+  upper   = true
 }
 
 resource "aws_secretsmanager_secret" "x_allow_secret" {
@@ -33,7 +33,7 @@ resource "aws_secretsmanager_secret" "x_allow_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "x_allow_secret_version" {
-  secret_id = aws_secretsmanager_secret.x_allow_secret.name
+  secret_id     = aws_secretsmanager_secret.x_allow_secret.name
   secret_string = random_string.x_allow_value.result
 }
 
@@ -69,16 +69,16 @@ module "backend_alb" {
 
   security_group_ingress_rules = {
     inbound_5000 = {
-      from_port                    = 5000
-      to_port                      = 5000
-      ip_protocol                  = "tcp"
+      from_port      = 5000
+      to_port        = 5000
+      ip_protocol    = "tcp"
       prefix_list_id = data.aws_ec2_managed_prefix_list.cloudfront.id
     },
     inbound_80 = {
-      from_port                    = 80
-      to_port                      = 80
-      ip_protocol                  = "tcp"
-      cidr_ipv4 = "0.0.0.0/0"
+      from_port   = 80
+      to_port     = 80
+      ip_protocol = "tcp"
+      cidr_ipv4   = "0.0.0.0/0"
     }
   }
 
@@ -94,20 +94,20 @@ module "backend_alb" {
   listeners = {
 
     https = {
-      port     = 5000
-      protocol = "HTTPS"
+      port            = 5000
+      protocol        = "HTTPS"
       certificate_arn = var.ssl_cert
       fixed_response = {
         content_type = "text/plain"
         message_body = ""
-        status_code = 503
+        status_code  = 503
       }
 
       rules = {
         custom-header = {
           actions = [{
             type             = "forward"
-            target_group_key = local.target_group_key 
+            target_group_key = local.target_group_key
           }]
           conditions = [{
             http_header = {
@@ -119,15 +119,15 @@ module "backend_alb" {
       }
     },
     shortlink = {
-      port = 80
+      port     = 80
       protocol = "HTTP"
 
       redirect = {
         status_code = "HTTP_302"
-        host = "${var.environment}.appointment.day"
-        path = "/user/#{path}"
-        port = 443
-        protocol = "HTTPS"
+        host        = "${var.environment}.appointment.day"
+        path        = "/user/#{path}"
+        port        = 443
+        protocol    = "HTTPS"
       }
     }
   }
@@ -185,13 +185,13 @@ resource "aws_vpc_security_group_ingress_rule" "allow_5000_from_backend_alb" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_mysql_to_DB_subnets" {
-  for_each = toset(var.database_subnet_cidrs)
-  security_group_id            = aws_security_group.backend.id
-  description                  = "mysql to DB"
-  from_port                    = 3306
-  to_port                      = 3306
-  ip_protocol                  = "tcp"
-  cidr_ipv4 = each.value
+  for_each          = toset(var.database_subnet_cidrs)
+  security_group_id = aws_security_group.backend.id
+  description       = "mysql to DB"
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_tls_to_ecr_endpoints" {
@@ -236,7 +236,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_tls_to_all" {
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
-  cidr_ipv4 = "0.0.0.0/0"
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_smtp_to_all" {
@@ -245,5 +245,5 @@ resource "aws_vpc_security_group_egress_rule" "allow_smtp_to_all" {
   from_port         = 587
   to_port           = 587
   ip_protocol       = "tcp"
-  cidr_ipv4 = "0.0.0.0/0"
+  cidr_ipv4         = "0.0.0.0/0"
 }

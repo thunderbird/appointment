@@ -1,0 +1,181 @@
+name: deploy-staging
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+    - main
+
+environment: staging
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-iac: ${{ steps.check.outputs.deploy-iac }}
+      deploy-backend: ${{ steps.check.outputs.deploy-backend }}
+      deploy-frontend: ${{ steps.check.outputs.deploy-frontend }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dorny/paths-filter@v3
+      id: check
+      with:
+        filters: |
+          deploy-iac:
+            - 'tofu/**'
+            - '.github/workflows/**'
+          deploy-backend:
+            - 'backend/**'
+            - 'tofu/modules/services/backend-service/**'
+            - 'tofu/environments/stage/services/backend-service/**'
+          deploy-frontend:
+            - 'frontend/**'
+
+  deploy-iac:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.deploy-iac == 'true'
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.IAM_ROLE }}
+        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ vars.AWS_REGION }}
+
+    - name: install opentofu
+      uses: opentofu/setup-opentofu@v1
+      with: 
+        tofu_version: ${{ vars.TF_VERSION }}
+        tofu_wrapper: false
+
+    - name: install terragrunt
+      run: |
+        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+        sudo chmod +x /bin/terragrunt
+        terragrunt -v
+
+    - name: vpc
+      working-directory: ./tofu/environments/stage/network/vpc
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        terragrunt plan -out tfplan
+        terragrunt apply tfplan
+
+    - name: backend-infra
+      working-directory: ./tofu/environments/stage/services/backend-infra
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        terragrunt plan -out tfplan
+        terragrunt apply tfplan
+
+    - name: cache
+      working-directory: ./tofu/environments/stage/data-store/cache
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        terragrunt plan -out tfplan
+        terragrunt apply tfplan
+
+    - name: database
+      working-directory: ./tofu/environments/stage/data-store/database
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        terragrunt plan -out tfplan
+        terragrunt apply tfplan
+        
+    - name: frontend
+      working-directory: ./tofu/environments/stage/services/frontend
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        terragrunt plan -out tfplan
+        terragrunt apply tfplan
+
+  deploy-frontend:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.deploy-frontend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup NPM
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+
+    - name: Install dependencies
+      run: cd frontend && yarn install
+
+    - name: Build project
+      run: |
+        cp frontend/.env.${{ vars.APP_ENV }}.example frontend/.env.${{ vars.APP_ENV }}
+        cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.IAM_ROLE }}
+        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ vars.AWS_REGION }}
+
+  deploy-backend:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.deploy-backend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.IAM_ROLE }}
+        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+        aws-region: ${{ vars.AWS_REGION }}
+
+    - name: install opentofu
+      uses: opentofu/setup-opentofu@v1
+      with: 
+        tofu_version: ${{ vars.TF_VERSION }}
+        tofu_wrapper: false
+
+    - name: install terragrunt
+      run: |
+        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+        sudo chmod +x /bin/terragrunt
+        terragrunt -v
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        mask-password: 'true'
+
+    - name: Build, tag, and push backend image to Amazon ECR
+      id: build-backend
+      env:
+        ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/$${{ vars.PROJECT }}:backend-${{ github.sha }}'
+      run: |
+        # Build a docker container and
+        # push it to ECR so that it can
+        # be deployed to ECS.
+        docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
+        docker push $ECR_TAG
+        echo 'image_backend=$ECR_TAG >> $GITHUB_OUTPUT
+
+    - name: backend-service
+      working-directory: ./tofu/environments/${{ inputs.environment }}/services/backend-service
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
+        terragrunt apply tfplan

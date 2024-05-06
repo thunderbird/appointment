@@ -1,0 +1,142 @@
+name: validate
+
+concurrency:
+  group: validate
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+    - main
+
+environment: staging
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      validate-iac: ${{ steps.check.outputs.validate-iac }}
+      validate-backend: ${{ steps.check.outputs.validate-backend }}
+      validate-frontend: ${{ steps.check.outputs.validate-frontend }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dorny/paths-filter@v3
+      id: check
+      with:
+        filters: |
+          validate-iac:
+            - 'tofu/**'
+            - '.github/workflows/**'
+          validate-backend:
+            - 'backend/**'
+            - 'tofu/modules/services/backend-service/**'
+            - 'tofu/environments/stage/services/backend-service/**'
+          validate-frontend:
+            - 'frontend/**'
+
+  validate-iac:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-iac == 'true'
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install opentofu
+      uses: opentofu/setup-opentofu@v1
+      with: 
+        tofu_version: ${{ vars.TF_VERSION }}
+        tofu_wrapper: false
+
+    - name: install terragrunt
+      run: |
+        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+        sudo chmod +x /bin/terragrunt
+        terragrunt -v
+
+    - name: vpc
+      working-directory: ./tofu/environments/stage/network/vpc
+      continue-on-error: true
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+
+    - name: backend-infra
+      working-directory: ./tofu/environments/stage/services/backend-infra
+      continue-on-error: true
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+
+    - name: cache
+      working-directory: ./tofu/environments/stage/data-store/cache
+      continue-on-error: true
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+
+    - name: database
+      working-directory: ./tofu/environments/stage/data-store/database
+      continue-on-error: true
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+        
+    - name: frontend
+      working-directory: ./tofu/environments/stage/services/frontend
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+
+    - name: backend-service
+      working-directory: ./tofu/environments/stage/services/backend-service
+      continue-on-error: true
+      run: |
+        terragrunt init -upgrade
+        terragrunt validate
+
+  validate-backend:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-backend == 'true'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        cd ./backend
+        python -m pip install --upgrade pip
+        python -m pip install .'[test]'
+
+    - name: Test with pytest
+      run: |
+        cd ./backend && python -m pytest
+  
+  validate-frontend:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-frontend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'yarn'
+        cache-dependency-path: 'frontend/yarn.lock'
+
+    - name: Install dependencies
+      run: |
+        cd ./frontend
+        yarn install
+        
+    - name: Test with vitest
+      run: |
+        cd ./frontend && yarn test --run

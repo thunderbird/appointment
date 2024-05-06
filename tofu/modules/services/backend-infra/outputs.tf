@@ -28,4 +28,5 @@ output "cluster_id" {
 
 output "x_allow_secret" {
   value = aws_secretsmanager_secret.x_allow_secret.name
+  sensitive = true
 }

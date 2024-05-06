@@ -3,6 +3,11 @@ variable "name_prefix" {
   type        = string
 }
 
+variable "short_name" {
+  description = "Application short name"
+  type        = string
+}
+
 variable "subnets" {
   description = "Backend subnets"
   type        = list(any)
@@ -30,20 +35,81 @@ variable "target_group_arn" {
 
 variable "ecs_cluster" {
   description = "Backend ECS cluster id"
-  type = string
+  type        = string
 }
 
 variable "security_group" {
   description = "Backend security group"
-  type = string
+  type        = string
 }
 
 variable "image" {
   description = "Backend Docker image"
-  type = string
+  type        = string
 }
 
 variable "task_execution_role" {
   description = "ECS task execution role"
-  type = string
+  type        = string
+}
+
+variable "frontend_url" {
+  description = "Frontend URL"
+  type        = string
+}
+
+variable "short_base_url" {
+  description = "Short base URL"
+  type        = string
+}
+
+variable "app_env" {
+  description = "Application environment (dev, stage, etc...)"
+  type        = string
+}
+
+variable "sentry_dsn" {
+  description = "Sentry DSN"
+  type        = string
+}
+
+variable "zoom_auth_callback" {
+  description = "Zoom authorization callback"
+  type        = string
+}
+
+variable "database_secret" {
+  description = "Database secret ARN"
+  type        = string
+  sensitive = true
+}
+
+variable "db_enc_secret" {
+  description = "DB encryped secret ARN"
+  type        = string
+  sensitive = true
+}
+
+variable "smtp_secret" {
+  description = "smtp connection info"
+  type        = string
+  sensitive = true
+}
+
+variable "google_oauth_secret" {
+  description = "Google OAUTH secret ARN"
+  type        = string
+  sensitive = true
+}
+
+variable "zoom_secret" {
+  description = "Zoom secret ARN"
+  type        = string
+  sensitive = true
+}
+
+variable "fxa_secret" {
+  description = "FXA secret ARN"
+  type        = string
+  sensitive = true
 }

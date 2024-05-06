@@ -1,8 +1,8 @@
-data "aws_secretsmanager_secret" "db_secrets" {
-  arn = "arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"
-}
-data "aws_secretsmanager_secret_version" "current" {
-  secret_id = data.aws_secretsmanager_secret.db_secrets.id
+locals {
+  username = replace("${var.name_prefix}_user", "-", "_")
+  secret = {
+    
+  }
 }
 
 module "db" {
@@ -16,8 +16,8 @@ module "db" {
   allocated_storage = 20
 
   db_name                     = "appointment"
-  username                    = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)["username"]
-  password                    = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)["password"]
+  username                    = local.username //jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)["username"]
+  password                    = random_password.db_password.result //jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)["password"]
   manage_master_user_password = false
   port                        = "3306"
 
@@ -77,4 +77,33 @@ resource "aws_vpc_security_group_ingress_rule" "allow_mysql_from_backend" {
   to_port                      = 3306
   ip_protocol                  = "tcp"
   referenced_security_group_id = var.backend_security_group
+}
+
+resource "aws_secretsmanager_secret" "db_secret" {
+  name = "${var.name_prefix}-db"
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-db"
+  })
+}
+
+resource "aws_secretsmanager_secret_version" "db_secret_values" {
+  secret_id = aws_secretsmanager_secret.db_secret.id
+  secret_string = <<EOF
+{
+  "engine": "mysql",
+  "username": "${local.username}",
+  "password": "${random_password.db_password.result}",
+  "host": "${module.db.db_instance_endpoint}",
+  "dbname": "appointment",
+  "port": "3306"
+}
+EOF
+}
+
+resource "random_password" "db_password" {
+  length  = 32
+  lower   = true
+  numeric = true
+  special = true
+  upper   = true
 }

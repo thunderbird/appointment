@@ -59,5 +59,6 @@ inputs = {
   subnet_group               = dependency.vpc.outputs.database_subnet_group
   elasticache_security_group = dependency.cache.outputs.security_group_id
   backend_security_group     = dependency.backend.outputs.security_group_id
+  database_secret            = "arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"
   tags                       = local.tags
 }

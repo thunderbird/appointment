@@ -1,6 +1,6 @@
 # S3 Bucket
 locals {
-  bucket = "${var.name_prefix}-frontend"
+  bucket     = "${var.name_prefix}-frontend"
   log_bucket = "${var.name_prefix}-frontend-logs"
 }
 
@@ -78,21 +78,21 @@ data "aws_cloudfront_cache_policy" "CachingOptimized" {
 
 data "aws_cloudfront_origin_request_policy" "AllViewer" {
   name = "Managed-AllViewer"
-} 
+}
 
 data "aws_secretsmanager_secret_version" "x_allow_value" {
   secret_id = var.x_allow_secret
 }
 
 resource "aws_cloudfront_distribution" "appointment" {
-  comment             = "appointment ${var.environment} frontend"
-  enabled             = true
+  comment = "appointment ${var.environment} frontend"
+  enabled = true
   //default_root_object = "index.html"
 
   aliases = ["${var.environment}.appointment.day"]
 
   logging_config {
-    bucket = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"
+    bucket          = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"
     include_cookies = true
   }
 
@@ -128,7 +128,7 @@ resource "aws_cloudfront_distribution" "appointment" {
     cache_policy_id = data.aws_cloudfront_cache_policy.CachingOptimized.id
 
     function_association {
-      event_type = "viewer-request"
+      event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.rewrite_api.arn
     }
 
@@ -141,11 +141,11 @@ resource "aws_cloudfront_distribution" "appointment" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = var.backend_id
 
-    cache_policy_id = data.aws_cloudfront_cache_policy.CachingDisabled.id
+    cache_policy_id          = data.aws_cloudfront_cache_policy.CachingDisabled.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.AllViewer.id
 
     function_association {
-      event_type = "viewer-request"
+      event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.rewrite_api.arn
     }
 
@@ -159,11 +159,11 @@ resource "aws_cloudfront_distribution" "appointment" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = var.backend_id
 
-    cache_policy_id = data.aws_cloudfront_cache_policy.CachingDisabled.id
+    cache_policy_id          = data.aws_cloudfront_cache_policy.CachingDisabled.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.AllViewer.id
 
     function_association {
-      event_type = "viewer-request"
+      event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.rewrite_api.arn
     }
 
@@ -178,10 +178,10 @@ resource "aws_cloudfront_distribution" "appointment" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = var.ssl_cert
+    acm_certificate_arn            = var.ssl_cert
     cloudfront_default_certificate = false
-    ssl_support_method  = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
+    ssl_support_method             = "sni-only"
+    minimum_protocol_version       = "TLSv1.2_2021"
   }
 }
 
@@ -193,9 +193,9 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 resource "aws_cloudfront_function" "rewrite_api" {
-  name = "${var.name_prefix}-rewrite-api"
+  name    = "${var.name_prefix}-rewrite-api"
   runtime = "cloudfront-js-2.0"
-  code = <<EOT
+  code    = <<EOT
   async function handler(event) {
     const request = event.request;
     const apiPath = "/api/v1";
@@ -217,7 +217,7 @@ resource "aws_cloudfront_function" "rewrite_api" {
 }
 
 resource "aws_s3_bucket" "request_logs" {
-  bucket = local.log_bucket
+  bucket        = local.log_bucket
   force_destroy = true
 
   tags = merge(var.tags, {
@@ -259,6 +259,6 @@ resource "aws_s3_bucket_ownership_controls" "request_logs" {
 
 resource "aws_s3_bucket_acl" "request_logs" {
   depends_on = [aws_s3_bucket_ownership_controls.request_logs]
-  bucket = aws_s3_bucket.request_logs.id
-  acl = "private"
+  bucket     = aws_s3_bucket.request_logs.id
+  acl        = "private"
 }

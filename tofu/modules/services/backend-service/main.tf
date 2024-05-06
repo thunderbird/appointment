@@ -16,9 +16,9 @@ resource "aws_ecs_service" "backend_service" {
   }
 
   health_check_grace_period_seconds = 180
-  task_definition = aws_ecs_task_definition.backend.arn
-  desired_count   = 1
-  tags            = var.tags
+  task_definition                   = aws_ecs_task_definition.backend.arn
+  desired_count                     = 1
+  tags                              = var.tags
 }
 
 resource "aws_ecs_task_definition" "backend" {
@@ -48,11 +48,11 @@ resource "aws_ecs_task_definition" "backend" {
       environment = [
         {
           "name" : "FRONTEND_URL",
-          "value" : "https://stage.appointment.day"
+          "value" : var.frontend_url
         },
         {
           "name" : "SHORT_BASE_URL",
-          "value" : "https://stage.apmt.day"
+          "value" : var.short_base_url
         },
         {
           "name" : "TIER_BASIC_CALENDAR_LIMIT",
@@ -76,11 +76,11 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           "name" : "APP_ENV",
-          "value" : "stage"
+          "value" : var.app_env
         },
         {
           "name" : "SENTRY_DSN",
-          "value" : "https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648"
+          "value" : var.sentry_dsn
         },
         {
           "name" : "ZOOM_API_ENABLED",
@@ -88,7 +88,7 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           "name" : "ZOOM_AUTH_CALLBACK",
-          "value" : "https://stage.appointment.day/api/v1/zoom/callback"
+          "value" : var.zoom_auth_callback
         },
         {
           "name" : "SERVICE_EMAIL",
@@ -110,27 +110,27 @@ resource "aws_ecs_task_definition" "backend" {
       secrets = [
         {
           "name" : "DATABASE_SECRETS",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"
+          "valueFrom" : var.database_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"
         },
         {
           "name" : "DB_ENC_SECRET",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/db-secret-CYKglI"
+          "valueFrom" : var.db_enc_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/db-secret-CYKglI"
         },
         {
           "name" : "SMTP_SECRETS",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/socketlabs-UYmjaC"
+          "valueFrom" : var.smtp_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/socketlabs-UYmjaC"
         },
         {
           "name" : "GOOGLE_OAUTH_SECRETS",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/google-cal-oauth-VevaSo"
+          "valueFrom" : var.google_oauth_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/google-cal-oauth-VevaSo"
         },
         {
           "name" : "ZOOM_SECRETS",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/zoom-S862zi"
+          "valueFrom" : var.zoom_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/zoom-S862zi"
         },
         {
           "name" : "FXA_SECRETS",
-          "valueFrom" : "arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/fxa-7koQF0"
+          "valueFrom" : var.fxa_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/fxa-7koQF0"
         }
       ],
       logConfiguration = {
@@ -138,7 +138,7 @@ resource "aws_ecs_task_definition" "backend" {
         options = {
           awslogs-group         = var.log_group
           awslogs-region        = var.region
-          awslogs-stream-prefix = "apmt"
+          awslogs-stream-prefix = "${var.short_name}/${var.app_env}"
         }
       }
     }
