@@ -254,15 +254,15 @@ const calendarEvents = computed(() => {
  * @type {ComputedRef<{start, end}>}
  */
 const dayBoundary = computed(() => {
-  let startHour = 99;
-  let endHour = 0;
-
   if (calendarEvents?.value.length === 0) {
     return {
       start: 0,
       end: 24,
     };
   }
+
+  let startHour = 99;
+  let endHour = 0;
 
   calendarEvents.value.forEach((event) => {
     // Calculate start/end hours
@@ -322,7 +322,23 @@ if (locale) {
  * Qalendar's selectedDate is only set on init and never updated. So we have to poke at their internals...
  */
 watch(currentDate, () => onCurrentDateChange(currentDate.value));
+/**
+ * We need to update the Time object manually when we get new dayBoundaries. (But only if they're not the default val)
+ */
+watch(dayBoundary, () => {
+  // Don't try to update qalendar if we don't have a valid reference!
+  if (!qalendarRef?.value) {
+    return;
+  }
 
+  // Don't refresh with the default values
+  if (dayBoundary.value.start === 0 && dayBoundary.value.end === 24) {
+    return;
+  }
+
+  qalendarRef.value.time.DAY_START = dayBoundary.value.start * 100;
+  qalendarRef.value.time.DAY_END = dayBoundary.value.end * 100;
+});
 </script>
 <template>
   <div
