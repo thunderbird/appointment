@@ -74,7 +74,7 @@ def _common_setup():
             profile_traces_max = 0.25
             sample_rate = 1.0
         elif environment == APP_ENV_PROD:
-            profile_traces_max = 0.25
+            profile_traces_max = 0.50
             sample_rate = 1.0
 
         def traces_sampler(sampling_context):
@@ -83,7 +83,7 @@ def _common_setup():
             path = asgi_scope.get('path')
 
             # Ignore health check and favicon.ico
-            if path == '/' or '/favicon.ico':
+            if path == '/' or path == '/favicon.ico':
                 return 0
 
             return profile_traces_max
