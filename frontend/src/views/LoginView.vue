@@ -79,7 +79,7 @@ const login = async () => {
     const { url } = data.value;
 
     if (error.value) {
-      loginError.value = error.value;
+      loginError.value = data.value?.detail;
       return;
     }
 
