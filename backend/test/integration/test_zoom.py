@@ -54,7 +54,7 @@ class TestZoom:
         assert response.json() is True
 
         # Refresh the schedule now that the zoom account is gone,
-        # and our meeting link provider should be none
+        # and our meeting link provider should still be google meet
         with with_db() as db:
             db.add(schedule)
             db.refresh(schedule)

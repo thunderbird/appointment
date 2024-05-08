@@ -243,6 +243,7 @@
             <input
               type="text"
               v-model="scheduleInput.location_url"
+              v-if="scheduleInput.meeting_link_provider === meetingLinkProviderType.none"
               :placeholder="t('placeholder.zoomCom')"
               :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== meetingLinkProviderType.none"
               class="place-holder w-full rounded-md disabled:cursor-not-allowed"
