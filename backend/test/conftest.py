@@ -87,7 +87,7 @@ def _patch_fxa_client(monkeypatch):
             pass
 
         @staticmethod
-        def get_redirect_url(self, state, email):
+        def get_redirect_url(self, db, state, email):
             return FXA_CLIENT_PATCH.get('authorization_url'), state
 
         @staticmethod
