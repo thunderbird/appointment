@@ -20,6 +20,15 @@ class APIException(HTTPException):
         return l10n('unknown-error')
 
 
+class InvalidPermissionLevelException(APIException):
+    """Raise when the subscribers permission level is too low for the action"""
+    id_code = 'INVALID_PERMISSION_LEVEL'
+    status_code = 401
+
+    def get_msg(self):
+        return l10n('protected-route-fail')
+
+
 class InvalidTokenException(APIException):
     """Raise when the subscriber could not be parsed from the auth token"""
     id_code = 'INVALID_TOKEN'
