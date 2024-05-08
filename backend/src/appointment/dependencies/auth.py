@@ -1,6 +1,7 @@
 import os
 from typing import Annotated
 
+import sentry_sdk
 from fastapi import Depends, Request, HTTPException, Body
 from fastapi.security import OAuth2PasswordBearer
 import jwt
@@ -43,14 +44,20 @@ def get_subscriber(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Session = Depends(get_db),
 ):
+    """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
 
-    """Automatically retrieve and return the subscriber"""
     user = get_user_from_token(db, token)
 
     if user is None:
         raise InvalidTokenException()
+
+    # Associate user id with users
+    if os.getenv('SENTRY_DSN'):
+        sentry_sdk.set_user({
+            'id': user.id,
+        })
 
     return user
 
