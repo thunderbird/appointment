@@ -22,6 +22,7 @@ def make_schedule(with_db, make_caldav_calendar):
                        farthest_booking=FAKER_RANDOM_VALUE,
                        weekdays=[1,2,3,4,5],
                        slot_duration=FAKER_RANDOM_VALUE,
+                       meeting_link_provider=models.MeetingLinkProviderType.none,
                        ):
         with with_db() as db:
             return repo.schedule.create(db, schemas.ScheduleBase(
@@ -39,7 +40,7 @@ def make_schedule(with_db, make_caldav_calendar):
                 farthest_booking=farthest_booking if factory_has_value(farthest_booking) else fake.pyint(15, 60),
                 weekdays=weekdays,
                 slot_duration=slot_duration if factory_has_value(slot_duration) else fake.pyint(15, 60),
-                meeting_link_provider=models.MeetingLinkProviderType.none,
+                meeting_link_provider=meeting_link_provider,
                 calendar_id=calendar_id if factory_has_value(calendar_id) else make_caldav_calendar(connected=True).id
             ))
 
