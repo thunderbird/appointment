@@ -7,7 +7,7 @@ import jwt
 
 from sqlalchemy.orm import Session
 
-from ..database import repo, schemas
+from ..database import repo, schemas, models
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
@@ -56,21 +56,15 @@ def get_subscriber(
 
 
 def get_admin_subscriber(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: models.Subscriber = Depends(get_subscriber),
     db: Session = Depends(get_db),
 ):
-    if token is None:
-        raise InvalidTokenException()
-
-    """Automatically retrieve and return the subscriber"""
-    user = get_user_from_token(db, token)
-
     if user is None:
         raise InvalidTokenException()
     
     # check admin allow list
-    ALLOW_LIST = os.getenv("APP_ADMIN_ALLOW_LIST", '').split(',')
-    if not user.email in ALLOW_LIST:
+    admin_emails = os.getenv("APP_ADMIN_ALLOW_LIST", '').split(',')
+    if not any([user.email.endswith(allowed_email) for allowed_email in admin_emails]):
         raise InvalidPermissionLevelException()
 
     return user
