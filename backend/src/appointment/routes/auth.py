@@ -44,7 +44,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 @router.get("/fxa_login")
-def fxa_login(request: Request, email: str, timezone: str | None = None,
+def fxa_login(request: Request,
+              email: str,
+              timezone: str | None = None,
+              db: Session = Depends(get_db),
               fxa_client: FxaClient = Depends(get_fxa_client)):
     """Request an authorization url from fxa"""
     if os.getenv('AUTH_SCHEME') != 'fxa':
@@ -53,7 +56,7 @@ def fxa_login(request: Request, email: str, timezone: str | None = None,
     fxa_client.setup()
 
     try:
-        url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
+        url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
     except NotInAllowListException:
         raise HTTPException(status_code=403, detail='Your email is not in the allow list')
 

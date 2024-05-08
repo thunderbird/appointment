@@ -73,8 +73,14 @@ class FxaClient:
                                     token=token,
                                     token_updater=self.token_saver)
 
-    def is_in_allow_list(self, email: str):
+    def is_in_allow_list(self, db, email: str):
         """Check this email against our allow list"""
+
+        # Allow existing subscribers to login even if they're not on an allow-list
+        subscriber = repo.subscriber.get_by_email(db, email)
+        if subscriber:
+            return True
+
         allow_list = os.getenv('FXA_ALLOW_LIST')
         # If we have no allow list, then we allow everyone
         if not allow_list or allow_list == '':
@@ -82,8 +88,8 @@ class FxaClient:
 
         return email.endswith(tuple(allow_list.split(',')))
 
-    def get_redirect_url(self, state, email):
-        if not self.is_in_allow_list(email):
+    def get_redirect_url(self, db, state, email):
+        if not self.is_in_allow_list(db, email):
             raise NotInAllowListException()
 
         utm_campaign = f"{self.ENTRYPOINT}_{os.getenv('APP_ENV')}"
