@@ -16,7 +16,7 @@
         '!pt-24': routeIsHome || isAuthenticated,
         'min-h-full pb-32 pt-8': routeIsPublic,
       }"
-      >
+    >
       <router-view/>
     </main>
     <footer-bar/>
@@ -59,10 +59,13 @@ const {
   title: notificationTitle,
   actionUrl: notificationActionUrl,
   message: notificationMessage,
-  isSame: isSameNotification,
-  lock: lockNotification,
-  show: showNotification,
 } = storeToRefs(siteNotificationStore);
+
+const {
+  isSame: isSameNotification,
+  show: showNotification,
+  lock: lockNotification,
+} = siteNotificationStore;
 
 // handle auth and fetch
 const isAuthenticated = computed(() => currentUser?.exists());
