@@ -33,6 +33,7 @@
     "calendarSettings": "Kalender-Einstellungen",
     "calendarsConnected": "Verbundene Kalender",
     "calendarsUnconnected": "Available Calendars",
+    "connectedAccounts": "Verbundene Konten",
     "contactRequest": "Kontaktanfrage",
     "createNewAppointment": "Neuen Termin erstellen",
     "dateAndTimeFormatting": "Datums- und Zeitformat",
@@ -47,6 +48,13 @@
     "privacySettings": "Privatsphäre-Einstellungen",
     "profile": "Profile",
     "scheduleCreated": "Zeitplan erstellt!",
+    "settings": {
+      "connectedAccounts": {
+        "fxa": "Mozilla Konten",
+        "google": "Google Kalender",
+        "zoom": "Zoom"
+      }
+    },
     "zoom": "Zoom"
   },
   "info": {
@@ -117,6 +125,7 @@
     "connect": "Verbinden",
     "connectCalendar": "Kalender verbinden",
     "connectGoogleCalendar": "Google Kalender verbinden",
+    "connectedAccounts": "Verbundene Konten",
     "connectedAs": "Verbunden als {name}",
     "contact": "Kontakt",
     "continue": "Weiter",
@@ -291,6 +300,33 @@
       "formDirty": "Es gibt ungespeicherte Änderungen.",
       "noCalendars": "Dein Zeitplan benötigt mindestens einen verbundenen Kalender.",
       "notActive": "Der Zeitplan ist inaktiv, aktiviere ihn zum Bearbeiten oder Teilen."
+    },
+    "settings": {
+      "connectedAccounts": {
+        "connect": {
+          "fxa": "Dies ist das Konto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
+          "google": "Ein Google-Konto kann verbunden werden, um auf die Kalender zuzugreifen. Wenn die Verbindung zum Google-Konto getrennt wird, werden die entsprechenden Kalender und die damit verbundenen Daten bei Thunderbird Appointment entfernt.",
+          "googleLegal": {
+            "text": "Die Nutzung von Thunderbird Appointment und die Weitergabe von Informationen, die per Google APIs übertragen wurden, an eine andere App erfolgt unter Einhaltung der {0}, einschließlich der Anforderungen für die begrenzte Nutzung.",
+            "link": "Google API Services User Data Policy"
+          },
+          "zoom": "Ein Zoom-Konto kann verbunden werden, um Einladungen zu Zoom-Besprechungen an Terminen zu ermöglichen."
+        },
+        "disconnect": {
+          "google": {
+            "title": "Google Calendar trennen",
+            "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis der Terminplan auf einen neuen Kalender eingestellt wurde.",
+            "confirm": "Trennen",
+            "cancel": "Abbrechen"
+          },
+          "zoom": {
+            "title": "Zoom trennen",
+            "message": "Beim Trennen der Verbindung zum Zoom-Konto wird die Möglichkeit, Zoom-Meeting-Links für Buchungen zu erstellen, deaktiviert. Bestehende Meeting-Links bleiben davon unberührt.",
+            "confirm": "Trennen",
+            "cancel": "Abbrechen"
+          }
+        }
+      }
     },
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",

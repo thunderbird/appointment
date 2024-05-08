@@ -33,6 +33,7 @@
     "calendarSettings": "Calendar settings",
     "calendarsConnected": "Connected Calendars",
     "calendarsUnconnected": "Available Calendars",
+    "connectedAccounts": "Connected Accounts",
     "contactRequest": "Contact Request",
     "createNewAppointment": "Create new appointment",
     "dateAndTimeFormatting": "Date and time format",
@@ -47,6 +48,13 @@
     "privacySettings": "Privacy settings",
     "profile": "Profile",
     "scheduleCreated": "Schedule created!",
+    "settings": {
+      "connectedAccounts": {
+        "fxa": "Mozilla Accounts",
+        "google": "Google Calendar",
+        "zoom": "Zoom"
+      }
+    },
     "zoom": "Zoom"
   },
   "info": {
@@ -117,6 +125,7 @@
     "connect": "Connect",
     "connectCalendar": "Connect calendar",
     "connectGoogleCalendar": "Connect Google Calendar",
+    "connectedAccounts": "Connected Accounts",
     "connectedAs": "Connected as {name}",
     "contact": "Contact",
     "continue": "Continue",
@@ -291,6 +300,33 @@
       "formDirty": "You have unsaved changes.",
       "noCalendars": "Scheduling requires at least one connected calendar.",
       "notActive": "Schedule is not active, turn on the toggle to edit or share."
+    },
+    "settings": {
+      "connectedAccounts": {
+        "connect": {
+          "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
+          "google": "You can connect your Google account to access your calendars. Disconnecting your account will remove your calendars, and associated data.",
+          "googleLegal": {
+            "text": "Thunderbird Appointment use and transfer of information received from Google APIs to any other app will adhere to {0}, including the Limited Use requirements.",
+            "link": "Google API Services User Data Policy"
+          },
+          "zoom": "You can connect your Zoom account to enable instant meeting invites with your appointments."
+        },
+        "disconnect": {
+          "google": {
+            "title": "Disconnect Google Calendar",
+            "message": "Disconnecting your Google Calendars will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
+            "confirm": "Disconnect",
+            "cancel": "Back"
+          },
+          "zoom": {
+            "title": "Disconnect Zoom",
+            "message": "Disconnecting your Zoom account will disable the ability to generate Zoom meeting links on bookings. Any existing meeting link will be unaffected.",
+            "confirm": "Disconnect",
+            "cancel": "Back"
+          }
+        }
+      }
     },
     "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
     "titleIsReadyForBookings": "{title} is ready for bookings",

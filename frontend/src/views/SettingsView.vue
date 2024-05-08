@@ -3,9 +3,9 @@
   <div class="flex select-none items-start justify-between">
     <div class="text-4xl font-light">{{ t('label.settings') }}</div>
   </div>
-  <div class="mt-8 flex items-stretch justify-between gap-24 pb-16">
+  <div class="mt-8 flex flex-col items-stretch justify-between gap-4 pb-2 lg:flex-row lg:gap-24 lg:pb-16">
     <!-- sidebar navigation -->
-    <div class="flex w-1/5 flex-col gap-6">
+    <div class="mx-auto flex w-full flex-col gap-6 md:w-1/2 lg:w-full lg:max-w-60">
       <!-- search -->
       <label v-if="false" class="relative flex items-center">
         <icon-search
@@ -43,38 +43,17 @@
       </div>
     </div>
     <!-- content -->
-    <div class="w-4/5 pt-14">
-
-      <!-- general settings -->
+    <div class="w-full pt-2 lg:w-4/5 lg:pt-14">
       <settings-general v-if="activeView === settingsSections.general" />
-
-      <!-- calendar settings -->
       <settings-calendar v-if="activeView === settingsSections.calendar" />
-
-      <!-- appointments and booking settings -->
-      <div v-if="activeView === settingsSections.appointmentsAndBooking">
-        <div class="text-3xl font-semibold text-gray-500">{{ t('heading.appointmentsAndBookingSettings') }}</div>
-      </div>
-
-      <!-- account settings -->
       <settings-account v-if="activeView === settingsSections.account" />
-
-      <!-- privacy settings -->
-      <div v-if="activeView === settingsSections.privacy">
-        <div class="text-3xl font-semibold text-gray-500">{{ t('heading.privacySettings') }}</div>
-      </div>
-
-      <!-- faq settings -->
-      <div v-if="activeView === settingsSections.faq">
-        <div class="text-3xl font-semibold text-gray-500">{{ t('heading.frequentlyAskedQuestions') }}</div>
-      </div>
-
+      <settings-connections v-if="activeView === settingsSections.connectedAccounts" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { settingsSections } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -87,16 +66,17 @@ import {
   IconSearch,
 } from '@tabler/icons-vue';
 import SettingsAccount from '@/components/SettingsAccount.vue';
+import SettingsConnections from '@/components/SettingsConnections.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 
+const activeView = computed(() => (route.params.view && settingsSections[route.params.view] ? settingsSections[route.params.view] : settingsSections.general));
+
 // menu navigation of different views
-const activeView = ref(route.params.view ? settingsSections[route.params.view] : settingsSections.general);
 const show = (key) => {
-  router.replace({ name: route.name, params: { view: key } });
-  activeView.value = settingsSections[key];
+  router.push({ name: route.name, params: { view: key } });
 };
 </script>

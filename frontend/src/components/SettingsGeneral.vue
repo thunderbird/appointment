@@ -1,6 +1,6 @@
 <template>
 <div class="flex flex-col gap-8">
-  <div class="text-3xl font-semibold text-gray-500">{{ t('heading.generalSettings') }}</div>
+  <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.generalSettings') }}</div>
   <div class="pl-6">
     <div class="text-xl">{{ t('heading.languageAndAppearance') }}</div>
     <div class="mt-6 pl-6">
