@@ -1,19 +1,24 @@
 <template>
   <!-- page title area -->
   <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-4">
-    <div class="flex w-full flex-row justify-between">
-      <div class="flex w-full items-center text-left">
-        <a href="#generate">Go to Generate Invites</a>
+    <div class="flex flex-row justify-between items-center w-full">
+      <div>
+        <span class="font-bold">{{ filteredInvites.length }}</span> invite codes
       </div>
-      <div class="flex w-full items-center justify-end gap-2 text-right">
-        <label for="used-filter">Used Filter</label>
+      <list-pagination
+        :list-length="filteredInvites.length"
+        :page-size="pageSize"
+        @update="updatePage"
+      />
+      <div class="flex items-center justify-end gap-2 text-right">
+        <label for="used-filter" class="whitespace-nowrap">Used Filter</label>
         <select id="used-filter" class="rounded-md" v-model="usedFilter">
           <option value="all">Show All</option>
           <option value="unused">Show Unused</option>
           <option value="used">Show Used</option>
         </select>
 
-        <label for="status-filter">Status Filter</label>
+        <label for="status-filter" class="whitespace-nowrap">Status Filter</label>
         <select id="status-filter" class="rounded-md" v-model="inviteFilter">
           <option value="all">Show All</option>
           <option value="available">Show Available</option>
@@ -21,38 +26,59 @@
         </select>
       </div>
     </div>
-    <div class="round-support-div mb-4 ml-auto mr-0">
+    <div class="
+      rounded-xl w-full border py-2 border-gray-100 bg-white text-sm shadow-sm
+      dark:border-gray-500 dark:bg-gray-700 mb-4 ml-auto mr-0
+    ">
       <table>
         <thead>
-        <tr>
-          <th>Code</th>
-          <th>Used</th>
-          <th>Status</th>
-          <th>Time Created</th>
-        </tr>
+          <tr>
+            <th>Code</th>
+            <th>Used</th>
+            <th>Status</th>
+            <th>Time Created</th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-        <tr v-for="invite in filteredInvites" :key="invite.code">
-          <td>{{ invite.code }}</td>
-          <td>{{ invite.subscriber_id !== null ? 'Yes' : 'No' }}</td>
-          <td>{{ invite.status === 1 ? 'Available' : 'Revoked' }}</td>
-          <td>{{ invite.time_created }}</td>
-        </tr>
-        <tr v-if="filteredInvites.length === 0">
-          <td colspan="4">No invites of this type could be found.</td>
-        </tr>
+          <tr v-for="invite in paginatedInvites" :key="invite.code">
+            <td><code>{{ invite.code }}</code></td>
+            <td>{{ invite.subscriber_id !== null ? 'Yes' : 'No' }}</td>
+            <td>{{ invite.status === 1 ? 'Available' : 'Revoked' }}</td>
+            <td class="whitespace-nowrap">{{ dj(invite.time_created).format('ll LTS') }}</td>
+            <td class="w-28 py-2">
+              <caution-button
+                v-if="invite.status !== 2"
+                :label="'Revoke'"
+                class="text-sm px-4 h-8"
+                @click="revokeInvite(invite.code)"
+              />
+            </td>
+          </tr>
+          <tr v-if="filteredInvites.length === 0">
+            <td colspan="5">No invites of this type could be found.</td>
+          </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="5">
+              <div class="flex w-full gap-4">
+                <label>
+                  Generate
+                  <input
+                    class="w-20 rounded-md text-sm"
+                    type="number"
+                    placeholder="Amount"
+                    v-model="amountOfInvitesToGenerate"
+                  />
+                  invite codes. They will be added to this list.
+                </label>
+                <primary-button :label="'Generate'" @click="generateInvites" />
+              </div>
+            </th>
+          </tr>
+        </tfoot>
       </table>
-    </div>
-    <div id="generate" class="w-full">
-      <div class="flex w-full max-w-xs flex-col gap-4">
-        <label for="invite-amount">Generate Invites</label>
-        <input id="invite-amount" class="w-full rounded-md text-sm" type="number" placeholder="Amount" v-model="amountOfInvitesToGenerate"/>
-        <p>Generate {{ amountOfInvitesToGenerate }} invites. They will be added to the list below.</p>
-        <div class="max-w-xs">
-          <primary-button @click="generateInvites">Generate!</primary-button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -61,20 +87,22 @@
 /*
  * Not dealing with tailwinding every single td
  */
-.round-support-div {
-  @apply rounded-t-xl w-full border pt-2 border-gray-100 bg-white text-sm shadow-sm dark:border-gray-500 dark:bg-gray-700;
-}
-
 table {
   @apply w-full table-auto border-collapse bg-white text-sm shadow-sm dark:bg-gray-600;
 }
 
-thead {
+thead, tfoot {
   @apply border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-700 text-gray-600 dark:text-gray-300;
 }
 
 th {
-  @apply w-1/2 p-4 text-left font-semibold border-gray-200 dark:border-gray-500;
+  @apply px-4 text-left font-semibold border-gray-200 dark:border-gray-500;
+}
+thead th {
+  @apply pb-4 pt-2;
+}
+tfoot th {
+  @apply pb-2 pt-4;
 }
 
 td {
@@ -91,16 +119,14 @@ td:last-child {
 </style>
 
 <script setup>
-import {
-  computed, inject, onMounted, ref,
-} from 'vue';
-import { keyByValue } from '@/utils';
+import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { subscriberLevels } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
+import CautionButton from '@/elements/CautionButton.vue';
+import ListPagination from '@/elements/ListPagination.vue';
 
 // icons
 import { IconPencil } from '@tabler/icons-vue';
@@ -109,14 +135,28 @@ import { useRouter } from 'vue-router';
 // component constants
 const user = useUserStore();
 const call = inject('call');
+const dj = inject('dayjs');
 
 // component constants
 const { t } = useI18n();
 
+// pagination
+const pageSize = 10;
+const currentPage = ref(0);
+const updatePage = (index) => {
+  currentPage.value = index;
+}
+
+// invite specific props
 const usedFilter = ref('all');
 const inviteFilter = ref('all');
 const invites = ref([]);
 const amountOfInvitesToGenerate = ref(0);
+
+// reset page when filter changes
+watch([usedFilter, inviteFilter], () => {
+  currentPage.value = 0;
+});
 
 const filteredInvites = computed(() => {
   if (inviteFilter.value === 'all' && usedFilter.value === 'all') {
@@ -135,6 +175,12 @@ const filteredInvites = computed(() => {
   return filtered;
 });
 
+const paginatedInvites = computed(() => {
+  return filteredInvites.value.length
+    ? filteredInvites.value.slice(currentPage.value*pageSize, (currentPage.value+1)*pageSize)
+    : [];
+});
+
 const getInvites = async () => {
   const response = await call('invite/').get().json();
   const { data } = response;
@@ -143,7 +189,7 @@ const getInvites = async () => {
 };
 
 const generateInvites = async () => {
-  // Parse it as a string to remove any bad bits..this probably works fine right?
+  // Parse it as an integer to remove any bad bits
   const amount = parseInt(`${amountOfInvitesToGenerate.value}`, 10);
   if (!amount) {
     return;
@@ -157,9 +203,22 @@ const generateInvites = async () => {
   invites.value = [...invites.value, ...data.value];
 };
 
+const revokeInvite = async (code) => {
+  // Parse it as a string to remove any bad bits..this probably works fine right?
+  if (!code) {
+    return;
+  }
+
+  const response = await call(`invite/revoke/${code}`).put().json();
+  const { data } = response;
+
+  if (data.value) {
+    await getInvites();
+  }
+};
+
 onMounted(async () => {
   await getInvites();
-  console.log(amountOfInvitesToGenerate.value);
 });
 
 </script>

@@ -19,7 +19,6 @@ def get_all_invites(db: Session = Depends(get_db)):
 
 @router.post("/generate/{n}", response_model=list[schemas.Invite])
 def generate_invite_codes(n: int, db: Session = Depends(get_db)):
-    raise NotImplementedError
     """endpoint to generate n invite codes"""
     return repo.invite.generate_codes(db, n)
 
@@ -41,7 +40,6 @@ def use_invite_code(code: str, db: Session = Depends(get_db)):
 
 @router.put("/revoke/{code}")
 def revoke_invite_code(code: str, db: Session = Depends(get_db)):
-    raise NotImplementedError
     """endpoint to revoke a given invite code and mark in unavailable"""
     if not repo.invite.code_exists(db, code):
         raise validation.InviteCodeNotFoundException()
