@@ -1,5 +1,4 @@
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 
 from sqlalchemy.orm import Session
 
@@ -9,6 +8,7 @@ from ..dependencies.auth import get_admin_subscriber
 from ..dependencies.database import get_db
 
 from ..exceptions import validation
+from ..tasks.emails import send_invite_account_email
 
 router = APIRouter()
 
@@ -48,3 +48,30 @@ def revoke_invite_code(code: str, db: Session = Depends(get_db), admin: Subscrib
     if not repo.invite.code_is_available(db, code):
         raise validation.InviteCodeNotAvailableException()
     return repo.invite.revoke_code(db, code)
+
+
+@router.post("/send", response_model=schemas.Invite)
+def send_invite_email(
+    background_tasks: BackgroundTasks,
+    email: str,
+    db: Session = Depends(get_db),
+    # Note admin must be here to for permission reasons
+    _admin: Subscriber = Depends(get_admin_subscriber)
+):
+    """With a given email address, generate a subscriber and email them, welcoming them to Thunderbird Appointment."""
+    invite_code = repo.invite.generate_codes(db, 1)[0]
+    subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
+        email=email,
+        username=email,
+    ))
+
+    if not subscriber:
+        raise RuntimeError
+
+    invite_code.subscriber_id = subscriber.id
+    db.add(invite_code)
+    db.commit()
+
+    background_tasks.add_task(send_invite_account_email, to=email)
+
+    return invite_code

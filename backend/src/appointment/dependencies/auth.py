@@ -57,11 +57,8 @@ def get_subscriber(
 
 def get_admin_subscriber(
     user: models.Subscriber = Depends(get_subscriber),
-    db: Session = Depends(get_db),
 ):
-    if user is None:
-        raise InvalidTokenException()
-    
+    """Retrieve the subscriber and check if they're an admin"""
     # check admin allow list
     admin_emails = os.getenv("APP_ADMIN_ALLOW_LIST", '').split(',')
     if not any([user.email.endswith(allowed_email) for allowed_email in admin_emails]):
