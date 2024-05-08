@@ -252,7 +252,7 @@
             <input
               type="checkbox"
               :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
-              :disabled="!scheduleInput.active"
+              :disabled="!scheduleInput.active || !hasZoomAccount"
               @change="toggleZoomLinkCreation"
               class="size-5 rounded-md"
             />
@@ -369,11 +369,13 @@ import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
 import ToolTip from '@/elements/ToolTip.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import SnackishBar from '@/elements/SnackishBar.vue';
 
 // component constants
 const user = useUserStore();
 const calendarStore = useCalendarStore();
+const externalConnectionStore = useExternalConnectionsStore();
 const { t } = useI18n();
 const dj = inject('dayjs');
 const call = inject('call');
@@ -384,6 +386,8 @@ const firstStep = scheduleCreationState.availability;
 
 // component emits
 const emit = defineEmits(['created', 'updated']);
+
+const hasZoomAccount = computed(() => externalConnectionStore.zoom[0]);
 
 // component properties
 const props = defineProps({
