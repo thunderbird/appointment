@@ -111,3 +111,29 @@
 .v-leave-to {
   @apply opacity-0;
 }
+
+/* custom data table with wrapper */
+.data-table {
+  @apply rounded-xl w-full border py-2 border-gray-100 bg-white text-sm shadow-sm dark:border-gray-500 dark:bg-gray-700 mb-4 ml-auto mr-0;
+
+  table {
+    @apply w-full table-auto border-collapse bg-white text-sm shadow-sm dark:bg-gray-600;
+  }
+  
+  thead, tfoot {
+    @apply border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-700 text-gray-600 dark:text-gray-300;
+  }
+  
+  th {
+    @apply px-4 text-left font-semibold border-gray-200 dark:border-gray-500;
+  }
+  thead th {
+    @apply pb-4 pt-2;
+  }
+  tfoot th {
+    @apply pb-2 pt-4;
+  }
+  td {
+    @apply border-y border-gray-200 p-4 dark:border-gray-500;
+  }
+}

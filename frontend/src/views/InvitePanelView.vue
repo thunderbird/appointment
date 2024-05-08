@@ -10,7 +10,7 @@
         :page-size="pageSize"
         @update="updatePage"
       />
-      <div class="flex items-center justify-end gap-2 text-right">
+      <div class="flex items-center justify-end gap-4 text-right">
         <label for="used-filter" class="whitespace-nowrap">Used Filter</label>
         <select id="used-filter" class="rounded-md" v-model="usedFilter">
           <option value="all">Show All</option>
@@ -26,10 +26,7 @@
         </select>
       </div>
     </div>
-    <div class="
-      rounded-xl w-full border py-2 border-gray-100 bg-white text-sm shadow-sm
-      dark:border-gray-500 dark:bg-gray-700 mb-4 ml-auto mr-0
-    ">
+    <div class="data-table">
       <table>
         <thead>
           <tr>
@@ -42,7 +39,12 @@
         </thead>
         <tbody>
           <tr v-for="invite in paginatedInvites" :key="invite.code">
-            <td><code>{{ invite.code }}</code></td>
+            <td>
+              <div class="flex gap-4 items-center">
+                <code>{{ invite.code }}</code>
+                <text-button :copy="invite.code" />
+              </div>
+            </td>
             <td>{{ invite.subscriber_id !== null ? 'Yes' : 'No' }}</td>
             <td>{{ invite.status === 1 ? 'Available' : 'Revoked' }}</td>
             <td class="whitespace-nowrap">{{ dj(invite.time_created).format('ll LTS') }}</td>
@@ -83,41 +85,6 @@
   </div>
 </template>
 
-<style scoped>
-/*
- * Not dealing with tailwinding every single td
- */
-table {
-  @apply w-full table-auto border-collapse bg-white text-sm shadow-sm dark:bg-gray-600;
-}
-
-thead, tfoot {
-  @apply border-gray-200 bg-gray-100 dark:border-gray-500 dark:bg-gray-700 text-gray-600 dark:text-gray-300;
-}
-
-th {
-  @apply px-4 text-left font-semibold border-gray-200 dark:border-gray-500;
-}
-thead th {
-  @apply pb-4 pt-2;
-}
-tfoot th {
-  @apply pb-2 pt-4;
-}
-
-td {
-  @apply border border-gray-200 p-4 dark:border-gray-500;
-}
-
-td:first-child {
-  @apply border-l-0;
-}
-
-td:last-child {
-  @apply border-r-0;
-}
-</style>
-
 <script setup>
 import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -126,6 +93,7 @@ import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/elements/PrimaryButton';
 import CautionButton from '@/elements/CautionButton.vue';
+import TextButton from '@/elements/TextButton.vue';
 import ListPagination from '@/elements/ListPagination.vue';
 
 // icons
