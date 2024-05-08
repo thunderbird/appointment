@@ -14,6 +14,8 @@ const AppointmentsView = defineAsyncComponent(() => import('@/views/Appointments
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView'));
+const InvitePanelView = defineAsyncComponent(() => import('@/views/InvitePanelView'));
+const SubscriberPanelView = defineAsyncComponent(() => import('@/views/SubscriberPanelView'));
 
 /**
  * Defined routes for Thunderbird Appointment
@@ -93,7 +95,12 @@ const routes = [
   {
     path: '/admin/invites',
     name: 'admin-invite-panel',
-    component: () => import('@/views/InvitePanelView.vue'),
+    component: InvitePanelView,
+  },
+  {
+    path: '/admin/subscribers',
+    name: 'admin-subscriber-panel',
+    component: SubscriberPanelView,
   },
 ];
 
