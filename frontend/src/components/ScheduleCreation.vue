@@ -443,6 +443,9 @@ const scheduleInput = ref({ ...defaultSchedule });
 const referenceSchedule = ref({ ...defaultSchedule });
 
 onMounted(() => {
+  // Retrieve the current external connections
+  externalConnectionStore.fetch(call);
+
   if (props.schedule) {
     scheduleInput.value = { ...props.schedule };
     // calculate utc back to user timezone
