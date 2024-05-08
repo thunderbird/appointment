@@ -6,8 +6,18 @@
       <p>{{ t(`text.settings.connectedAccounts.connect.${category}`) }}</p>
       <div v-if="category === 'google'" class="pt-2">
         <p>
-          <i18n-t :keypath="`text.settings.connectedAccounts.connect.${category}Legal.text`" tag="label" :for="`text.settings.connectedAccounts.connect.${category}Legal.link`">
-          <a class="underline" href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">{{ t(`text.settings.connectedAccounts.connect.${category}Legal.link`) }}</a>
+          <i18n-t
+            :keypath="`text.settings.connectedAccounts.connect.${category}Legal.text`"
+            tag="label"
+            :for="`text.settings.connectedAccounts.connect.${category}Legal.link`"
+          >
+          <a
+            class="underline"
+            href="https://developers.google.com/terms/api-services-user-data-policy"
+            target="_blank"
+          >
+            {{ t(`text.settings.connectedAccounts.connect.${category}Legal.link`) }}
+          </a>
           </i18n-t>
         </p>
       </div>
@@ -38,7 +48,7 @@
     </div>
   </div>
   <!-- Disconnect Google Modal -->
-  <ConfirmationModal
+  <confirmation-modal
       :open="disconnectGoogleModalOpen"
       :title="t('text.settings.connectedAccounts.disconnect.google.title')"
       :message="t('text.settings.connectedAccounts.disconnect.google.message')"
@@ -47,9 +57,9 @@
       :use-caution-button="true"
       @confirm="() => disconnectAccount('google')"
       @close="closeModals"
-  ></ConfirmationModal>
+  ></confirmation-modal>
   <!-- Disconnect Zoom Modal -->
-  <ConfirmationModal
+  <confirmation-modal
       :open="disconnectZoomModalOpen"
       :title="t('text.settings.connectedAccounts.disconnect.zoom.title')"
       :message="t('text.settings.connectedAccounts.disconnect.zoom.message')"
@@ -58,7 +68,7 @@
       :use-caution-button="true"
       @confirm="() => disconnectAccount('zoom')"
       @close="closeModals"
-  ></ConfirmationModal>
+  ></confirmation-modal>
 </template>
 
 <script setup>

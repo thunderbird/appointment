@@ -11,7 +11,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const fxa = ref([]);
   const google = ref([]);
   const connections = computed(() => ({
-    // FXA should be at the top imo
+    // FXA should be at the top since it represents the Appointment subscriber.
     fxa: fxa.value,
     google: google.value,
     zoom: zoom.value,

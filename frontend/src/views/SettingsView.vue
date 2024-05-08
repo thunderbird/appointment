@@ -44,19 +44,10 @@
     </div>
     <!-- content -->
     <div class="w-full pt-2 lg:w-4/5 lg:pt-14">
-
-      <!-- general settings -->
       <settings-general v-if="activeView === settingsSections.general" />
-
-      <!-- calendar settings -->
       <settings-calendar v-if="activeView === settingsSections.calendar" />
-
-      <!-- account settings -->
       <settings-account v-if="activeView === settingsSections.account" />
-
-      <!-- connected accounts -->
       <settings-connections v-if="activeView === settingsSections.connectedAccounts" />
-
     </div>
   </div>
 </template>
@@ -82,7 +73,7 @@ const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 
-const activeView = computed(() => (route.params.view ? settingsSections[route.params.view] : settingsSections.general));
+const activeView = computed(() => (route.params.view && settingsSections[route.params.view] ? settingsSections[route.params.view] : settingsSections.general));
 
 // menu navigation of different views
 const show = (key) => {
