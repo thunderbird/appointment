@@ -20,7 +20,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       return;
     }
 
-    const { data, error } = await call('schedule').get().json();
+    const { data, error } = await call('schedule/').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
       schedules.value = data.value;
