@@ -40,9 +40,9 @@ jobs:
 
   deploy-iac:
     needs: detect-changes
-    runs-on: ubuntu-latest
-    environment: staging
     if: needs.detect-changes.outputs.deploy-iac == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
     env:
       TF_VAR_region: ${{ vars.AWS_REGION }}
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
@@ -121,10 +121,12 @@ jobs:
         terragrunt apply tfplan
 
   deploy-frontend:
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    environment: staging
+    needs:
+      - detect-changes
+      - deploy-iac
     if: needs.detect-changes.outputs.deploy-frontend == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -138,7 +140,7 @@ jobs:
 
     - name: Build project
       run: |
-        cp frontend/.env.${{ vars.APP_ENV }}.example frontend/.env.${{ vars.APP_ENV }}
+        cp frontend/.env.staging.example frontend/.env.staging
         cd frontend && yarn build --mode ${{ vars.APP_ENV }}
 
     - name: Configure AWS credentials
@@ -148,11 +150,13 @@ jobs:
         role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
         aws-region: ${{ vars.AWS_REGION }}
 
-  deploy-backend:
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    environment: staging
+  deploy-backend-service:
+    needs: 
+      - detect-changes
+      - deploy-iac
     if: needs.detect-changes.outputs.deploy-backend == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
     env:
       TF_VAR_region: ${{ vars.AWS_REGION }}
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
@@ -198,7 +202,7 @@ jobs:
     - name: Build, tag, and push backend image to Amazon ECR
       id: build-backend
       env:
-        ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/$${{ vars.PROJECT }}:backend-${{ github.sha }}'
+        ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
       run: |
         # Build a docker container and
         # push it to ECR so that it can
