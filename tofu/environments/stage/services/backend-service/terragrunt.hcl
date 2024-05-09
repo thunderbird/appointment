@@ -53,9 +53,9 @@ dependency "cache" {
 }
 
 locals {
-  environment = get_env("environment")
-  name_prefix = get_env("name_prefix")
-  region      = get_env("region")
+  environment = get_env("TF_VAR_environment")
+  name_prefix = get_env("TF_VAR_name_prefix")
+  region      = get_env("TF_VAR_region")
   project     = include.root.locals.project
   //environment      = include.env.locals.environment
   short_name = include.root.locals.short_name

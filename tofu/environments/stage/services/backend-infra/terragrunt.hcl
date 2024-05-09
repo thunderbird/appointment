@@ -28,9 +28,9 @@ dependency "vpc" {
 }
 
 locals {
-  environment = get_env("environment")
-  name_prefix = get_env("name_prefix")
-  region      = get_env("region")
+  environment = get_env("TF_VAR_environment")
+  name_prefix = get_env("TF_VAR_name_prefix")
+  region      = get_env("TF_VAR_region")
 
   project_tags     = include.root.locals.tags
   environment_tags = include.environment.locals.tags
