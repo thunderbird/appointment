@@ -2,10 +2,8 @@ resource "aws_elasticache_serverless_cache" "redis" {
   engine = "redis"
   name   = "${var.name_prefix}-redis"
 
-  daily_snapshot_time      = "09:00"
   description              = "Appointment Caches"
   major_engine_version     = "7"
-  snapshot_retention_limit = 1
   security_group_ids       = [aws_security_group.redis.id]
   subnet_ids               = var.subnets
 

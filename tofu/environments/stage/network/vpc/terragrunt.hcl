@@ -13,9 +13,9 @@ terraform {
 }
 
 locals {
-  environment = include.environment.locals.environment
-  name_prefix = "tb-${include.root.locals.short_name}-${include.environment.locals.environment}"
-  region      = include.environment.locals.region
+  environment = get_env("environment")
+  name_prefix = get_env("name_prefix")
+  region      = get_env("region")
 
   project_tags     = include.root.locals.tags
   environment_tags = include.environment.locals.tags

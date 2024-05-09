@@ -81,35 +81,39 @@ variable "zoom_auth_callback" {
 variable "database_secret" {
   description = "Database secret ARN"
   type        = string
-  sensitive = true
 }
 
 variable "db_enc_secret" {
   description = "DB encryped secret ARN"
   type        = string
-  sensitive = true
 }
 
 variable "smtp_secret" {
   description = "smtp connection info"
   type        = string
-  sensitive = true
 }
 
 variable "google_oauth_secret" {
   description = "Google OAUTH secret ARN"
   type        = string
-  sensitive = true
 }
 
 variable "zoom_secret" {
   description = "Zoom secret ARN"
   type        = string
-  sensitive = true
 }
 
 variable "fxa_secret" {
   description = "FXA secret ARN"
   type        = string
-  sensitive = true
+}
+
+variable "redis_endpoint" {
+  description = "Redis cache endpoint"
+  type = string
+}
+
+variable "log_level" {
+  description = "application logging level"
+  type = string
 }

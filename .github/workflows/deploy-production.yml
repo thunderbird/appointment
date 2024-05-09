@@ -41,6 +41,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     if: needs.detect-changes.outputs.deploy-iac == 'true'
+    env:
+      TF_VAR_region: ${{ vars.AWS_REGION }}
+      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_app_env: ${{ vars.APP_ENV }}
+      TF_VAR_db_encrypted_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
+      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
+      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
+      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
+      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
+      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
+      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
     steps:
     - uses: actions/checkout@v4
 
@@ -136,6 +150,20 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     if: needs.detect-changes.outputs.deploy-backend == 'true'
+    env:
+      TF_VAR_region: ${{ vars.AWS_REGION }}
+      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_app_env: ${{ vars.APP_ENV }}
+      TF_VAR_db_encrypted_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
+      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
+      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
+      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
+      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
+      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
+      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
     steps:
     - uses: actions/checkout@v4
 

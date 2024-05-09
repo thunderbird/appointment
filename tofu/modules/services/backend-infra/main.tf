@@ -152,7 +152,7 @@ module "backend_alb" {
       health_check = {
         enabled             = true
         healthy_threshold   = 2
-        interval            = 10
+        interval            = 60
         matcher             = "200"
         path                = "/"
         port                = "traffic-port"

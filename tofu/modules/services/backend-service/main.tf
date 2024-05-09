@@ -72,7 +72,7 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           "name" : "LOG_LEVEL",
-          "value" : "INFO"
+          "value" : "var.log_level"
         },
         {
           "name" : "APP_ENV",
@@ -105,32 +105,44 @@ resource "aws_ecs_task_definition" "backend" {
         {
           "name" : "JWT_EXPIRE_IN_MINS",
           "value" : "10000"
+        },
+        {
+          "name": "REDIS_URL",
+          "value": var.redis_endpoint
+        },
+        {
+          "name": "REDIS_PORT",
+          "value": "6379"
+        },
+        {
+          "name": "REDIS_DB",
+          "value": "0"
         }
       ],
       secrets = [
         {
           "name" : "DATABASE_SECRETS",
-          "valueFrom" : var.database_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"
+          "valueFrom" : var.database_secret
         },
         {
           "name" : "DB_ENC_SECRET",
-          "valueFrom" : var.db_enc_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/db-secret-CYKglI"
+          "valueFrom" : var.db_enc_secret
         },
         {
           "name" : "SMTP_SECRETS",
-          "valueFrom" : var.smtp_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/socketlabs-UYmjaC"
+          "valueFrom" : var.smtp_secret
         },
         {
           "name" : "GOOGLE_OAUTH_SECRETS",
-          "valueFrom" : var.google_oauth_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/google-cal-oauth-VevaSo"
+          "valueFrom" : var.google_oauth_secret
         },
         {
           "name" : "ZOOM_SECRETS",
-          "valueFrom" : var.zoom_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/zoom-S862zi"
+          "valueFrom" : var.zoom_secret
         },
         {
           "name" : "FXA_SECRETS",
-          "valueFrom" : var.fxa_secret //"arn:aws:secretsmanager:us-east-1:768512802988:secret:staging/appointment/fxa-7koQF0"
+          "valueFrom" : var.fxa_secret
         }
       ],
       logConfiguration = {
