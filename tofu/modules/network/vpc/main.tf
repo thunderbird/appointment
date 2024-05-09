@@ -227,6 +227,10 @@ resource "aws_security_group" "ecr_endpoint" {
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-ecr-endpoint"
   })
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 resource "aws_security_group_rule" "ecr_endpoint_ingress" {
@@ -246,6 +250,10 @@ resource "aws_security_group" "secrets_endpoint" {
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-secrets-endpoint"
   })
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 resource "aws_security_group_rule" "secrets_endpoint_ingress" {
@@ -265,6 +273,10 @@ resource "aws_security_group" "logs_endpoint" {
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-logs-endpoint"
   })
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 resource "aws_security_group_rule" "logs_endpoint_ingress" {
