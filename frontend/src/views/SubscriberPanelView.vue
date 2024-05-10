@@ -15,7 +15,6 @@
     </alert-box>
   </div>
   <div v-if="displayPage">
-
     <data-table
     data-name="Subscribers"
     :allow-multi-select="false"
@@ -35,6 +34,8 @@
               placeholder="e.g. test@example.org"
               v-model="inviteEmail"
               :disabled="loading"
+              enterkeyhint="send"
+              @keyup.enter="sendInvite"
             />
           </label>
           <primary-button :disabled="loading" @click="sendInvite">

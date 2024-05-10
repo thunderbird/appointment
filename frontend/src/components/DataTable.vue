@@ -13,7 +13,7 @@
         </label>
       </div>
       <list-pagination
-        :list-length="dataList.length"
+        :list-length="mutableDataList.length > 0 ? mutableDataList.length : dataList.length"
         :page-size="pageSize"
         @update="updatePage"
       />
@@ -33,7 +33,7 @@
             <td v-if="allowMultiSelect">
               <input type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
             </td>
-            <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey">
+            <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey" :class="`column-${fieldKey}`">
               <span v-if="fieldData.type === tableDataType.text">
                 {{ fieldData.value }}
               </span>
