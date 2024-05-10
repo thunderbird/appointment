@@ -187,7 +187,7 @@ const calendarEvents = computed(() => {
           ? start.format(dateFormatStrings.qalendarFullDay)
           : start.format(dateFormatStrings.qalendar),
         end: event.all_day
-          ? end.format(dateFormatStrings.qalendarFullDay)
+          ? end.subtract(1, 'minute').format(dateFormatStrings.qalendarFullDay)
           : end.format(dateFormatStrings.qalendar),
       },
       description: event.description,
