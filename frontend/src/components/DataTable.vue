@@ -1,6 +1,6 @@
 <template>
 <div class="flex flex-col items-center justify-center gap-4">
-    <div class="flex w-full flex-row items-center justify-between">
+    <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
       <div>
         <span class="font-bold">{{ paginatedDataList.length }}</span> {{ dataName }}
       </div>
@@ -18,7 +18,7 @@
         @update="updatePage"
       />
     </div>
-    <div class="data-table">
+    <div class="data-table overflow-x-scroll">
       <table>
         <thead>
           <tr>

@@ -25,8 +25,8 @@
     @field-click="(_key, field) => disableSubscriber(field.email.value)"
     >
       <template v-slot:footer>
-        <div class="flex w-full gap-4">
-          <label>
+        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
+          <label class="flex flex-col gap-4 md:flex-row md:gap-0">
             {{ t('label.enterEmailToInvite') }}
             <input
               class="mx-4 w-60 rounded-md text-sm"
@@ -95,6 +95,10 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
     type: tableDataType.text,
     value: dj(subscriber.time_created).format('ll LTS'),
   },
+  timezone: {
+    type: tableDataType.text,
+    value: subscriber.timezone ?? 'Unset',
+  },
   wasInvited: {
     type: tableDataType.text,
     value: subscriber.invite ? 'Yes' : 'No',
@@ -123,6 +127,10 @@ const columns = [
   {
     key: 'createdAt',
     name: 'Time Created',
+  },
+  {
+    key: 'timezone',
+    name: 'Timezone',
   },
   {
     key: 'wasInvited',
