@@ -14,7 +14,6 @@ const AppointmentsView = defineAsyncComponent(() => import('@/views/Appointments
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView'));
-const InvitePanelView = defineAsyncComponent(() => import('@/views/InvitePanelView'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/SubscriberPanelView'));
 
 /**
@@ -91,11 +90,6 @@ const routes = [
     path: '/terms',
     name: 'terms',
     component: LegalView,
-  },
-  {
-    path: '/admin/invites',
-    name: 'admin-invite-panel',
-    component: InvitePanelView,
   },
   {
     path: '/admin/subscribers',
