@@ -64,3 +64,4 @@ def normalize_secrets():
         os.environ['FXA_SECRET'] = secrets.get('secret')
         os.environ['FXA_CALLBACK'] = secrets.get('callback_url')
         os.environ['FXA_ALLOW_LIST'] = secrets.get('allow_list')
+        os.environ['APP_ADMIN_ALLOW_LIST'] = secrets.get('admin_list')
