@@ -1,7 +1,7 @@
 import os
 
 from appointment.l10n import l10n
-from defines import FXA_CLIENT_PATCH, TEST_USER_ID
+from defines import FXA_CLIENT_PATCH, auth_headers
 from appointment.database import repo, models
 
 
@@ -91,7 +91,8 @@ class TestAuth:
             assert fxa
             assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
 
-    def test_fxa_callback_with_mismatch_uid(self, with_db, with_client, monkeypatch, make_external_connections, make_basic_subscriber, with_l10n):
+    def test_fxa_callback_with_mismatch_uid(self, with_db, with_client, monkeypatch, make_external_connections,
+                                            make_basic_subscriber, with_l10n):
         """Test that our fxa callback will throw an invalid-credentials error if the incoming fxa uid doesn't match any existing ones."""
         os.environ['AUTH_SCHEME'] = 'fxa'
 
@@ -121,3 +122,31 @@ class TestAuth:
         assert response.status_code == 403, response.text
         # This will just key match due to the lack of context.
         assert response.json().get('detail') == l10n('invalid-credentials')
+
+    def test_permission_check_with_no_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = ''
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 401, response.text
+
+    def test_permission_check_with_wrong_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 401, response.text
+
+    def test_permission_check_with_correct_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = f"@{os.getenv('TEST_USER_EMAIL').split('@')[1]}"
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 200, response.text
+
+    def test_permission_check_with_correct_full_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 200, response.text
