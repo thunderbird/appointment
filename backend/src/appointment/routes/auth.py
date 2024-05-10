@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from datetime import timedelta, datetime, UTC
 from secrets import token_urlsafe
 from typing import Annotated
@@ -18,7 +19,7 @@ from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 
 from ..dependencies.database import get_db
-from ..dependencies.auth import get_subscriber
+from ..dependencies.auth import get_subscriber, get_admin_subscriber
 
 from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
@@ -239,6 +240,13 @@ def me(
         username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
         timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
     )
+
+
+@router.post("/permission-check")
+def permission_check(_: Subscriber = Depends(get_admin_subscriber)):
+    """Checks if they have admin permissions"""
+    return True
+
 
 # @router.get('/test-create-account')
 # def test_create_account(email: str, password: str, timezone: str, db: Session = Depends(get_db)):

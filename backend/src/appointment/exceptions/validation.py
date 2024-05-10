@@ -48,13 +48,12 @@ class InvalidLinkException(APIException):
 
 
 class SubscriberNotFoundException(APIException):
-    """Raise when the calendar is not found during route validation"""
+    """Raise when the subscriber is not found during route validation"""
     id_code = 'SUBSCRIBER_NOT_FOUND'
     status_code = 404
 
     def get_msg(self):
         return l10n('subscriber-not-found')
-
 
 class CalendarNotFoundException(APIException):
     """Raise when the calendar is not found during route validation"""
@@ -196,3 +195,21 @@ class InviteCodeNotAvailableException(APIException):
 
     def get_msg(self):
         return l10n('invite-code-not-valid')
+
+
+class CreateSubscriberFailedException(APIException):
+    """Raise when a subscriber failed to be created"""
+    id_code = 'CREATE_SUBSCRIBER_FAILED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('failed-to-create-subscriber')
+
+
+class CreateSubscriberAlreadyExistsException(APIException):
+    """Raise when a subscriber failed to be created"""
+    id_code = 'CREATE_SUBSCRIBER_ALREADY_EXISTS'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('subscriber-already-exists')

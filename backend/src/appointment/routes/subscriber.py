@@ -1,3 +1,4 @@
+import time
 
 from fastapi import APIRouter, Depends
 
@@ -13,10 +14,11 @@ from ..exceptions import validation
 router = APIRouter()
 
 
-@router.get('/', response_model=list[schemas.Subscriber])
+@router.get('/', response_model=list[schemas.SubscriberAdminOut])
 def get_all_subscriber(db: Session = Depends(get_db), admin: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
-    return db.query(models.Subscriber).all()
+    response = db.query(models.Subscriber).all()
+    return response
 
 
 @router.put("/disable/{email}")

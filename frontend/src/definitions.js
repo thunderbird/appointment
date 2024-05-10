@@ -243,6 +243,23 @@ export const qalendarSlotDurations = {
  */
 export const loginRedirectKey = 'loginRedirect';
 
+/**
+ * Data types for table row items
+ * @enum
+ * @readonly
+ */
+export const tableDataType = {
+  text: 1,
+  link: 2,
+  button: 3,
+};
+
+export const tableDataButtonType = {
+  primary: 1,
+  secondary: 2,
+  caution: 3,
+};
+
 export default {
   subscriberLevels,
   appointmentState,
@@ -259,4 +276,6 @@ export default {
   meetingLinkProviderType,
   dateFormatStrings,
   qalendarSlotDurations,
+  tableDataType,
+  tableDataButtonType,
 };
