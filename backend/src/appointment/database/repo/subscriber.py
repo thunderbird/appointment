@@ -15,7 +15,7 @@ def get(db: Session, subscriber_id: int) -> models.Subscriber | None:
     return db.get(models.Subscriber, subscriber_id)
 
 
-def get_by_email(db: Session, email: str):
+def get_by_email(db: Session, email: str) -> models.Subscriber | None:
     """retrieve subscriber by email"""
     return db.query(models.Subscriber).filter(models.Subscriber.email == email).first()
 

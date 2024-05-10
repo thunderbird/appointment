@@ -41,9 +41,9 @@
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
               </span>
               <span v-else-if="fieldData.type === tableDataType.button">
-                <primary-button v-if="fieldData.buttonType === tableDataButtonType.primary" @click="emit('fieldClick', datum)">{{ fieldData.value }}</primary-button>
-                <secondary-button v-else-if="fieldData.buttonType === tableDataButtonType.secondary" @click="emit('fieldClick', datum)">{{ fieldData.value }}</secondary-button>
-                <caution-button v-else-if="fieldData.buttonType === tableDataButtonType.caution" @click="emit('fieldClick', datum)">{{ fieldData.value }}</caution-button>
+                <primary-button v-if="fieldData.buttonType === tableDataButtonType.primary" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</primary-button>
+                <secondary-button v-else-if="fieldData.buttonType === tableDataButtonType.secondary" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</secondary-button>
+                <caution-button v-else-if="fieldData.buttonType === tableDataButtonType.caution" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</caution-button>
               </span>
             </td>
           </tr>
@@ -82,7 +82,7 @@
  * @param dataName {string} - The name for the object being represented on the table
  * @param columns {Array<DataColumn>} - List of columns to be displayed (these don't filter data, filter that yourself!)
  * @param dataList {Array<DataField>} - List of data to be displayed
- * @param filters
+ * @param filters {Array<Filter>} - List of filters to be displayed
  * @param loading {boolean} - Displays a loading spinner
  */
 import ListPagination from '@/elements/ListPagination.vue';

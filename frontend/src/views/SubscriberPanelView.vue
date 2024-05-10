@@ -23,7 +23,7 @@
     :columns="columns"
     :filters="filters"
     :loading="loading"
-    @field-click="onFieldClick"
+    @field-click="(_key, field) => disableSubscriber(field.email.value)"
     >
       <template v-slot:footer>
         <div class="flex w-full gap-4">
@@ -98,11 +98,13 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
     type: tableDataType.text,
     value: subscriber.invite ? 'Yes' : 'No',
   },
+  /*
   disable: {
     type: tableDataType.button,
     buttonType: tableDataButtonType.caution,
     value: 'Disable',
   },
+   */
 })));
 const columns = [
   {
@@ -125,10 +127,12 @@ const columns = [
     key: 'wasInvited',
     name: 'Was Invited?',
   },
+  /*
   {
     key: 'disable',
     name: '',
   },
+   */
 ];
 const filters = [
   {
@@ -168,10 +172,17 @@ const getSubscribers = async () => {
   subscribers.value = data.value;
 };
 
-const onFieldClick = (a, b, c) => {
-  console.log('click', a, b, c);
+const refresh = async () => {
+  loading.value = true;
+  await getSubscribers();
+  loading.value = false;
 };
 
+/**
+ * Disables a subscriber
+ * @param email
+ * @returns {Promise<void>}
+ */
 const disableSubscriber = async (email) => {
   if (!email) {
     return;
@@ -181,14 +192,8 @@ const disableSubscriber = async (email) => {
   const { data } = response;
 
   if (data.value) {
-    await getSubscribers();
+    await refresh();
   }
-};
-
-const refresh = async () => {
-  loading.value = true;
-  await getSubscribers();
-  loading.value = false;
 };
 
 const sendInvite = async () => {
