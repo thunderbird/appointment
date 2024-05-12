@@ -7,7 +7,7 @@ concurrency:
 on:
   push:
     branches:
-    - add-tf-iac
+    - main
 
 permissions:
   id-token: write   # This is required for requesting the JWT
