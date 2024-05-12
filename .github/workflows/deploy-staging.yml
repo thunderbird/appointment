@@ -142,6 +142,12 @@ jobs:
         cp frontend/.env.staging.example frontend/.env.staging
         cd frontend && yarn build --mode ${{ vars.APP_ENV }}
 
+    - name: Install AWS CLI
+      uses: unfor19/install-aws-cli-action@v1
+      with:
+        version: 2
+        arch: amd64
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
