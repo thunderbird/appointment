@@ -152,6 +152,9 @@ jobs:
         role-to-assume: ${{ secrets.IAM_ROLE }}
         role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
         aws-region: ${{ vars.AWS_REGION }}
+    
+    - name: Deploy frontend to S3
+      run: aws s3 sync frontend/dist s3://tb-apmt-prod-frontend
 
   deploy-backend:
     needs:

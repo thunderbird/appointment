@@ -121,13 +121,6 @@ jobs:
         terragrunt plan -out tfplan
         terragrunt apply tfplan
 
-    - name: output-bucket-name
-      id: output-bucket-name
-      working-directory: ./tofu/environments/stage/services/frontend-infra
-      run: |
-        output=$(terragrunt output bucket)
-        echo bucket=$output >> $GITHUB_OUTPUT
-
   deploy-frontend:
     needs:
       - detect-changes
@@ -165,7 +158,7 @@ jobs:
         aws-region: ${{ vars.AWS_REGION }}
     
     - name: Deploy frontend to S3
-      run: aws s3 sync frontend s3://tb-apmt-stg-frontend
+      run: aws s3 sync frontend/dist s3://tb-apmt-stg-frontend
         
 
 
