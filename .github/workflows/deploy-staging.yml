@@ -82,7 +82,6 @@ jobs:
     - name: vpc
       working-directory: ./tofu/environments/stage/network/vpc
       run: |
-        printenv
         terragrunt init -upgrade
         terragrunt validate
         terragrunt plan -out tfplan
