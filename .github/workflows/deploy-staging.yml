@@ -112,8 +112,8 @@ jobs:
         terragrunt plan -out tfplan
         terragrunt apply tfplan
         
-    - name: frontend
-      working-directory: ./tofu/environments/stage/services/frontend
+    - name: frontend-infra
+      working-directory: ./tofu/environments/stage/services/frontend-infra
       run: |
         terragrunt init -upgrade
         terragrunt validate
@@ -150,7 +150,7 @@ jobs:
         role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
         aws-region: ${{ vars.AWS_REGION }}
 
-  deploy-backend-service:
+  deploy-backend:
     needs: 
       - detect-changes
       - deploy-iac
@@ -209,9 +209,9 @@ jobs:
         # be deployed to ECS.
         docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
         docker push $ECR_TAG
-        echo 'image_backend=$ECR_TAG >> $GITHUB_OUTPUT
+        echo 'image_backend=$ECR_TAG' >> $GITHUB_OUTPUT
 
-    - name: backend-service
+    - name: deploy backend-service
       working-directory: ./tofu/environments/stage/services/backend-service
       run: |
         terragrunt init -upgrade

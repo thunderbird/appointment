@@ -107,8 +107,8 @@ jobs:
         terragrunt init -upgrade
         terragrunt validate
         
-    - name: frontend
-      working-directory: ./tofu/environments/stage/services/frontend
+    - name: frontend-infra
+      working-directory: ./tofu/environments/stage/services/frontend-infra
       continue-on-error: true
       run: |
         terragrunt init -upgrade

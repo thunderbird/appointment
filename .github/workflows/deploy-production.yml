@@ -109,8 +109,8 @@ jobs:
         terragrunt plan -out tfplan
         terragrunt apply tfplan
         
-    - name: frontend
-      working-directory: ./tofu/environments/stage/services/frontend
+    - name: frontend-infra
+      working-directory: ./tofu/environments/stage/services/frontend-infra
       run: |
         terragrunt init -upgrade
         terragrunt validate
@@ -147,7 +147,7 @@ jobs:
         role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
         aws-region: ${{ vars.AWS_REGION }}
 
-  deploy-backend-service:
+  deploy-backend:
     needs:
       - detect-changes
       - deploy-iac
