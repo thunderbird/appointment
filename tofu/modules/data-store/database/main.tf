@@ -5,6 +5,14 @@ locals {
   }
 }
 
+resource "random_string" "secret_suffix" {
+  length  = 8
+  lower   = true
+  numeric = false
+  special = false
+  upper   = true
+}
+
 module "db" {
   source = "github.com/terraform-aws-modules/terraform-aws-rds"
 
@@ -83,9 +91,9 @@ resource "aws_vpc_security_group_ingress_rule" "allow_mysql_from_backend" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "${var.name_prefix}-db"
+  name = "${var.name_prefix}-db-${random_string.secret_suffix.result}"
   tags = merge(var.tags, {
-    Name = "${var.name_prefix}-db"
+    Name = "${var.name_prefix}-db-${random_string.secret_suffix.result}"
   })
 }
 
