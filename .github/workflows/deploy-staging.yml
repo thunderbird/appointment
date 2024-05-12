@@ -126,7 +126,7 @@ jobs:
       working-directory: ./tofu/environments/stage/services/frontend-infra
       run: |
         output=$(terragrunt output bucket)
-        echo "bucket=$output" >> $GITHUB_OUTPUT
+        echo bucket=$output >> $GITHUB_OUTPUT
 
   deploy-frontend:
     needs:
