@@ -165,7 +165,7 @@ jobs:
         aws-region: ${{ vars.AWS_REGION }}
     
     - name: Deploy frontend to S3
-      run: aws s3 synv frontend ${{ needs.deploy-iac.outputs.bucket }}
+      run: aws s3 sync frontend ${{ needs.deploy-iac.outputs.bucket }}
         
 
 
