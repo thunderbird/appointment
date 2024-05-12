@@ -28,6 +28,11 @@ variable "subnet_group" {
   type        = string
 }
 
+variable "database_subnets" {
+  description = "DB subnets ids"
+  type = list
+}
+
 variable "elasticache_security_group" {
   description = "Elasticache security group"
   type        = string

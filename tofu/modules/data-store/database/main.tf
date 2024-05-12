@@ -32,6 +32,9 @@ module "db" {
 
   enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
 
+  create_db_subnet_group = true
+  subnet_ids = var.database_subnets
+
   # DB parameter group
   family = "mysql8.0"
 

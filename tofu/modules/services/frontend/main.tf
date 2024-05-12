@@ -136,7 +136,7 @@ resource "aws_cloudfront_distribution" "appointment" {
 
     function_association {
       event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.rewrite_api.arn
+      function_arn = aws_cloudfront_function.rewrite.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"
@@ -153,7 +153,7 @@ resource "aws_cloudfront_distribution" "appointment" {
 
     function_association {
       event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.rewrite_api.arn
+      function_arn = aws_cloudfront_function.rewrite.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"
@@ -171,7 +171,7 @@ resource "aws_cloudfront_distribution" "appointment" {
 
     function_association {
       event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.rewrite_api.arn
+      function_arn = aws_cloudfront_function.rewrite.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"
@@ -199,8 +199,8 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   signing_protocol                  = "sigv4"
 }
 
-resource "aws_cloudfront_function" "rewrite_api" {
-  name    = "${var.name_prefix}-rewrite-api"
+resource "aws_cloudfront_function" "rewrite" {
+  name    = "${var.name_prefix}-rewrite"
   runtime = "cloudfront-js-2.0"
   code    = <<EOT
   async function handler(event) {
