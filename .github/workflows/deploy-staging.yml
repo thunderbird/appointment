@@ -121,8 +121,9 @@ jobs:
         terragrunt plan -out tfplan
         terragrunt apply tfplan
 
-    - name: output-bucke-name
+    - name: output-bucket-name
       id: output-bucket-name
+      working-directory: ./tofu/environments/stage/services/frontend-infra
       run: |
         output=$(terragrunt output bucket)
         echo "bucket=$output" >> $GITHUB_OUTPUT
