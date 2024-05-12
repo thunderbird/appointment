@@ -8,6 +8,8 @@ locals {
 
   project    = local.project_vars.project
   short_name = local.project_vars.short_name
+  name_prefix = get_env("TF_VAR_name_prefix")
+  region      = get_env("TF_VAR_region")
 
   tags = {
     project = local.project
@@ -24,11 +26,11 @@ generate "backend" {
   contents  = <<EOF
 terraform {
   backend "s3" {
-    bucket         = "tb-${local.short_name}-${local.env}-state"
+    bucket         = "${local.name_prefix}-state"
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    dynamodb_table = "tb-${local.short_name}-${local.env}-locks"
+    dynamodb_table = "${local.name_prefix}-locks"
   }
 }
 EOF

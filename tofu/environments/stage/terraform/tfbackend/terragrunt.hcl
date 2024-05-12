@@ -13,8 +13,10 @@ terraform {
 }
 
 locals {
-  bucket_name = "tb-${include.root.locals.short_name}-${include.environment.locals.environment}-state"
-  table_name  = "tb-${include.root.locals.short_name}-${include.environment.locals.environment}-locks"
+  name_prefix = get_env("TF_VAR_name_prefix")
+
+  bucket_name = "${local.name_prefix}-state"
+  table_name  = "${local.name_prefix}-locks"
 
   project_tags     = include.root.locals.tags
   environment_tags = include.environment.locals.tags
