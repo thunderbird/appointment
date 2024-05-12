@@ -211,7 +211,7 @@ jobs:
         # be deployed to ECS.
         docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
         docker push $ECR_TAG
-        echo 'image_backend=$ECR_TAG' >> $GITHUB_OUTPUT
+        echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
 
     - name: deploy backend-service
       working-directory: ./tofu/environments/stage/services/backend-service
