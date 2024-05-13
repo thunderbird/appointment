@@ -18,7 +18,7 @@
         @update="updatePage"
       />
     </div>
-    <div class="data-table overflow-x-scroll">
+    <div class="data-table overflow-x-auto">
       <table>
         <thead>
           <tr>

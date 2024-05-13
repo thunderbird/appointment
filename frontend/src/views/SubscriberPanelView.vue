@@ -16,18 +16,18 @@
   </div>
   <div v-if="displayPage">
     <data-table
-    data-name="Subscribers"
-    :allow-multi-select="false"
-    :data-list="filteredSubscribers"
-    :columns="columns"
-    :filters="filters"
-    :loading="loading"
-    @field-click="(_key, field) => disableSubscriber(field.email.value)"
+      data-name="Subscribers"
+      :allow-multi-select="false"
+      :data-list="filteredSubscribers"
+      :columns="columns"
+      :filters="filters"
+      :loading="loading"
+      @field-click="(_key, field) => disableSubscriber(field.email.value)"
     >
       <template v-slot:footer>
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
-          <label class="flex flex-col gap-4 md:flex-row md:gap-0">
-            {{ t('label.enterEmailToInvite') }}
+          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+            <span>{{ t('label.enterEmailToInvite') }}</span>
             <input
               class="mx-4 w-60 rounded-md text-sm"
               type="email"
@@ -53,9 +53,7 @@
 </template>
 
 <script setup>
-import {
-  computed, inject, onMounted, ref,
-} from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { alertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
 import DataTable from '@/components/DataTable.vue';
