@@ -30,13 +30,13 @@ jobs:
         filters: |
           validate-iac:
             - 'tofu/**'
-            - '.github/workflows/**'
+            - '.github/workflows/validate.yml'
           validate-backend:
             - 'backend/**'
-            - 'tofu/modules/services/backend-service/**'
-            - 'tofu/environments/stage/services/backend-service/**'
+            - '.github/workflows/validate.yml'
           validate-frontend:
             - 'frontend/**'
+            - '.github/workflows/validate.yml'
 
   validate-iac:
     needs: detect-changes

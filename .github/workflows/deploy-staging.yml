@@ -36,10 +36,12 @@ jobs:
             - 'backend/**'
             - 'tofu/modules/services/backend-service/**'
             - 'tofu/environments/stage/services/backend-service/**'
+            - '.github/workflows/deploy-staging.yml'
           deploy-frontend:
             - 'frontend/**'
             - 'tofu/modules/services/frontend-infra/**'
             - 'tofu/environments/stage/services/frontend-infra/**'
+            - '.github/workflows/deploy-staging.yml'
 
   deploy-iac:
     needs: detect-changes

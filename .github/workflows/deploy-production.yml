@@ -27,14 +27,19 @@ jobs:
       with:
         filters: |
           deploy-iac:
-            - 'tofu/**'
-            - '.github/workflows/**'
+            - 'tofu/modules/**'
+            - 'tofu/environments/stage/**'
+            - '.github/workflows/deploy-production.yml'
           deploy-backend:
             - 'backend/**'
             - 'tofu/modules/services/backend-service/**'
             - 'tofu/environments/stage/services/backend-service/**'
+            - '.github/workflows/deploy-production.yml'
           deploy-frontend:
             - 'frontend/**'
+            - 'tofu/modules/services/frontend-infra/**'
+            - 'tofu/environments/stage/services/frontend-infra/**'
+            - '.github/workflows/deploy-production.yml'
 
   deploy-iac:
     needs: detect-changes
