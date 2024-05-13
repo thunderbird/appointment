@@ -20,26 +20,26 @@ jobs:
       deploy-backend: ${{ steps.check.outputs.deploy-backend }}
       deploy-frontend: ${{ steps.check.outputs.deploy-frontend }}
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: dorny/paths-filter@v3
-      id: check
-      with:
-        filters: |
-          deploy-iac:
-            - 'tofu/modules/**'
-            - 'tofu/environments/stage/**'
-            - '.github/workflows/deploy-production.yml'
-          deploy-backend:
-            - 'backend/**'
-            - 'tofu/modules/services/backend-service/**'
-            - 'tofu/environments/stage/services/backend-service/**'
-            - '.github/workflows/deploy-production.yml'
-          deploy-frontend:
-            - 'frontend/**'
-            - 'tofu/modules/services/frontend-infra/**'
-            - 'tofu/environments/stage/services/frontend-infra/**'
-            - '.github/workflows/deploy-production.yml'
+      - uses: dorny/paths-filter@v3
+        id: check
+        with:
+          filters: |
+            deploy-iac:
+              - 'tofu/modules/**'
+              - 'tofu/environments/stage/**'
+              - '.github/workflows/deploy-production.yml'
+            deploy-backend:
+              - 'backend/**'
+              - 'tofu/modules/services/backend-service/**'
+              - 'tofu/environments/stage/services/backend-service/**'
+              - '.github/workflows/deploy-production.yml'
+            deploy-frontend:
+              - 'frontend/**'
+              - 'tofu/modules/services/frontend-infra/**'
+              - 'tofu/environments/stage/services/frontend-infra/**'
+              - '.github/workflows/deploy-production.yml'
 
   deploy-iac:
     needs: detect-changes
@@ -63,73 +63,73 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.IAM_ROLE }}
-        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-        aws-region: ${{ vars.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
 
-    - name: install opentofu
-      uses: opentofu/setup-opentofu@v1
-      with: 
-        tofu_version: ${{ vars.TF_VERSION }}
-        tofu_wrapper: false
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
 
-    - name: install terragrunt
-      run: |
-        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
-        sudo chmod +x /bin/terragrunt
-        terragrunt -v
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 
-    - name: vpc
-      working-directory: ./tofu/environments/stage/network/vpc
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        terragrunt plan -out tfplan
-        terragrunt apply tfplan
+      - name: vpc
+        working-directory: ./tofu/environments/stage/network/vpc
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
 
-    - name: backend-infra
-      working-directory: ./tofu/environments/stage/services/backend-infra
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        terragrunt plan -out tfplan
-        terragrunt apply tfplan
+      - name: backend-infra
+        working-directory: ./tofu/environments/stage/services/backend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
 
-    - name: cache
-      working-directory: ./tofu/environments/stage/data-store/cache
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        terragrunt plan -out tfplan
-        terragrunt apply tfplan
+      - name: cache
+        working-directory: ./tofu/environments/stage/data-store/cache
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
 
-    - name: database
-      working-directory: ./tofu/environments/stage/data-store/database
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        terragrunt plan -out tfplan
-        terragrunt apply tfplan
-        
-    - name: frontend-infra
-      working-directory: ./tofu/environments/stage/services/frontend-infra
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        terragrunt plan -out tfplan
-        terragrunt apply tfplan
+      - name: database
+        working-directory: ./tofu/environments/stage/data-store/database
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
+          
+      - name: frontend-infra
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
 
-    - name: output-bucket-name
-      id: output-bucket-name
-      working-directory: ./tofu/environments/stage/services/frontend-infra
-      run: |
-        output=$(terragrunt output bucket_name | tr -d '"')
-        echo bucket=$output >> $GITHUB_OUTPUT
+      - name: output-bucket-name
+        id: output-bucket-name
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          output=$(terragrunt output bucket_name | tr -d '"')
+          echo bucket=$output >> $GITHUB_OUTPUT
 
   deploy-frontend:
     needs:
@@ -139,36 +139,36 @@ jobs:
     environment: production
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup NPM
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18.x'
+      - name: Setup NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
 
-    - name: Install dependencies
-      run: cd frontend && yarn install
+      - name: Install dependencies
+        run: cd frontend && yarn install
 
-    - name: Build project
-      run: |
-        cp frontend/.env.prod.example frontend/.env.prod
-        cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+      - name: Build project
+        run: |
+          cp frontend/.env.prod.example frontend/.env.prod
+          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
 
-    - name: Install AWS CLI
-      uses: unfor19/install-aws-cli-action@v1
-      with:
-        version: 2
-        arch: amd64
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
+          arch: amd64
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.IAM_ROLE }}
-        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-        aws-region: ${{ vars.AWS_REGION }}
-    
-    - name: Deploy frontend to S3
-      run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Deploy frontend to S3
+        run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
 
   deploy-backend:
     needs:
@@ -193,49 +193,49 @@ jobs:
       TF_VAR_zoom_secret: ${{ vars.ZOOM_SECRET }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.IAM_ROLE }}
-        role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-        aws-region: ${{ vars.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
 
-    - name: install opentofu
-      uses: opentofu/setup-opentofu@v1
-      with: 
-        tofu_version: ${{ vars.TF_VERSION }}
-        tofu_wrapper: false
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
 
-    - name: install terragrunt
-      run: |
-        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
-        sudo chmod +x /bin/terragrunt
-        terragrunt -v
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-      with:
-        mask-password: 'true'
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
 
-    - name: Build, tag, and push backend image to Amazon ECR
-      id: build-backend
-      env:
-        ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
-      run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
-        docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
-        docker push $ECR_TAG
-        echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
+      - name: Build, tag, and push backend image to Amazon ECR
+        id: build-backend
+        env:
+          ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
+          docker push $ECR_TAG
+          echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
 
-    - name: backend-service
-      working-directory: ./tofu/environments/prod/services/backend-service
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
-        terragrunt apply tfplan
+      - name: backend-service
+        working-directory: ./tofu/environments/prod/services/backend-service
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
+          terragrunt apply tfplan

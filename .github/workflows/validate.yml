@@ -7,7 +7,8 @@ concurrency:
 on:
   push:
     branches:
-    - main
+      - '**'
+      - '!main'
 
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -58,68 +59,68 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.IAM_ROLE }}
-        role-session-name: GitHub_to_AWS_via_FederatedOIDC
-        aws-region: ${{ vars.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
 
-    - name: install opentofu
-      uses: opentofu/setup-opentofu@v1
-      with: 
-        tofu_version: ${{ vars.TF_VERSION }}
-        tofu_wrapper: false
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
 
-    - name: install terragrunt
-      run: |
-        sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
-        sudo chmod +x /bin/terragrunt
-        terragrunt -v
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 
-    - name: vpc
-      working-directory: ./tofu/environments/stage/network/vpc
-      continue-on-error: true
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
+      - name: vpc
+        working-directory: ./tofu/environments/stage/network/vpc
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
 
-    - name: backend-infra
-      working-directory: ./tofu/environments/stage/services/backend-infra
-      continue-on-error: true
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
+      - name: backend-infra
+        working-directory: ./tofu/environments/stage/services/backend-infra
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
 
-    - name: cache
-      working-directory: ./tofu/environments/stage/data-store/cache
-      continue-on-error: true
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
+      - name: cache
+        working-directory: ./tofu/environments/stage/data-store/cache
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
 
-    - name: database
-      working-directory: ./tofu/environments/stage/data-store/database
-      continue-on-error: true
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
-        
-    - name: frontend-infra
-      working-directory: ./tofu/environments/stage/services/frontend-infra
-      continue-on-error: true
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
+      - name: database
+        working-directory: ./tofu/environments/stage/data-store/database
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          
+      - name: frontend-infra
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
 
-    - name: backend-service
-      working-directory: ./tofu/environments/stage/services/backend-service
-      continue-on-error: true
-      run: |
-        terragrunt init -upgrade
-        terragrunt validate
+      - name: backend-service
+        working-directory: ./tofu/environments/stage/services/backend-service
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
 
   validate-backend:
     needs: detect-changes
@@ -128,23 +129,23 @@ jobs:
     if: needs.detect-changes.outputs.validate-backend == 'true'
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-    - name: Install dependencies
-      run: |
-        cd ./backend
-        python -m pip install --upgrade pip
-        python -m pip install .'[test]'
+      - name: Install dependencies
+        run: |
+          cd ./backend
+          python -m pip install --upgrade pip
+          python -m pip install .'[test]'
 
-    - name: Test with pytest
-      run: |
-        cd ./backend && python -m pytest
+      - name: Test with pytest
+        run: |
+          cd ./backend && python -m pytest
   
   validate-frontend:
     needs: detect-changes
@@ -152,19 +153,19 @@ jobs:
     environment: staging
     if: needs.detect-changes.outputs.validate-frontend == 'true'
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        cache: 'yarn'
-        cache-dependency-path: 'frontend/yarn.lock'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: 'frontend/yarn.lock'
 
-    - name: Install dependencies
-      run: |
-        cd ./frontend
-        yarn install
-        
-    - name: Test with vitest
-      run: |
-        cd ./frontend && yarn test --run
+      - name: Install dependencies
+        run: |
+          cd ./frontend
+          yarn install
+          
+      - name: Test with vitest
+        run: |
+          cd ./frontend && yarn test --run
