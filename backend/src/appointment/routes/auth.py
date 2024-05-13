@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from datetime import timedelta, datetime, UTC
 from secrets import token_urlsafe
 from typing import Annotated
@@ -18,7 +19,7 @@ from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 
 from ..dependencies.database import get_db
-from ..dependencies.auth import get_subscriber
+from ..dependencies.auth import get_subscriber, get_admin_subscriber
 
 from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
@@ -44,7 +45,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 @router.get("/fxa_login")
-def fxa_login(request: Request, email: str, timezone: str | None = None,
+def fxa_login(request: Request,
+              email: str,
+              timezone: str | None = None,
+              db: Session = Depends(get_db),
               fxa_client: FxaClient = Depends(get_fxa_client)):
     """Request an authorization url from fxa"""
     if os.getenv('AUTH_SCHEME') != 'fxa':
@@ -53,7 +57,7 @@ def fxa_login(request: Request, email: str, timezone: str | None = None,
     fxa_client.setup()
 
     try:
-        url, state = fxa_client.get_redirect_url(token_urlsafe(32), email)
+        url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
     except NotInAllowListException:
         raise HTTPException(status_code=403, detail='Your email is not in the allow list')
 
@@ -236,6 +240,13 @@ def me(
         username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
         timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
     )
+
+
+@router.post("/permission-check")
+def permission_check(_: Subscriber = Depends(get_admin_subscriber)):
+    """Checks if they have admin permissions"""
+    return True
+
 
 # @router.get('/test-create-account')
 # def test_create_account(email: str, password: str, timezone: str, db: Session = Depends(get_db)):

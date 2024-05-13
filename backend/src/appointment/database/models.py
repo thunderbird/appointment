@@ -11,7 +11,7 @@ import zoneinfo
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType, ChoiceType, UUIDType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
-from sqlalchemy.orm import relationship, as_declarative, declared_attr
+from sqlalchemy.orm import relationship, as_declarative, declared_attr, Mapped
 from sqlalchemy.sql import func
 
 
@@ -116,7 +116,7 @@ class Subscriber(Base):
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
     external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
-    invite: "Invite" = relationship("Invite", back_populates="subscriber")
+    invite: Mapped["Invite"] = relationship("Invite", back_populates="subscriber", uselist=False)
 
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
@@ -288,7 +288,7 @@ class Invite(Base):
     code = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
     status = Column(Enum(InviteStatus), index=True)
 
-    subscriber = relationship("Subscriber", back_populates="invite")
+    subscriber: Mapped["Subscriber"] = relationship("Subscriber", back_populates="invite", single_parent=True)
 
     @property
     def is_used(self) -> bool:

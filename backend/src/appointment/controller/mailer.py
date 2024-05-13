@@ -259,3 +259,19 @@ class SupportRequestMail(Mailer):
 
     def html(self):
         return get_template("support.jinja2").render(requestee=self.requestee, topic=self.topic, details=self.details)
+
+
+class InviteAccountMail(Mailer):
+    def __init__(self, *args, **kwargs):
+        default_kwargs = {
+            "subject": l10n('new-account-mail-subject')
+        }
+        super(InviteAccountMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n('new-account-mail-plain', {
+            'homepage_url': os.getenv('FRONTEND_URL'),
+        })
+
+    def html(self):
+        return get_template("new_account.jinja2").render(homepage_url=os.getenv('FRONTEND_URL'))

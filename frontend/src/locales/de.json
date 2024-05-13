@@ -7,6 +7,7 @@
     "actionNeeded": "Aktion erforderlich!",
     "authenticationRequired": "Sorry, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
+    "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "generalBookingError": "Beim Abrufen des Zeitplans ist ein Problem aufgetreten. Bitte später nochmal versuchen.",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
     "loginMethodNotSupported": "Login-Methode wird nicht unterstützt. Bitte nochmal versuchen.",
@@ -67,7 +68,8 @@
     "bookingSuccessfullyRequested": "Buchung erfolgreich angefragt!",
     "copiedToClipboard": "In Zwischenablage kopiert",
     "eventWasCreated": "Das Event wurde in deinem Kalender erstellt.",
-    "invitationWasSent": "Eine Einladung wurde an deine E-Mail-Adresse gesandt.",
+    "invitationWasSent": "Eine Einladung wurde an deine E-Mail-Adresse gesendet.",
+    "invitationWasSentContext": "Eine Einladung wurde an {email} gesendet.",
     "messageWasNotSent": "Die Nachricht konnte nicht gesendet werden. Bitte nochmal versuchen.",
     "messageWasSent": "Die Nachricht wurde an unser Support-Team gesendet.",
     "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine.",
@@ -151,9 +153,11 @@
     "end": "Ende",
     "endDate": "Enddatum",
     "endTime": "Endzeit",
+    "enterEmailToInvite": "Per E-Mail-Adresse zu Thunderbird Appointment einladen:",
     "error": "Fehler",
     "faq": "FAQ",
     "farthestBooking": "Späteste Buchung",
+    "filter": "Filter",
     "general": "Allgemein",
     "generalDetails": "Allgemeine Infos",
     "generateZoomLink": "Zoom Meeting generieren",
@@ -307,23 +311,23 @@
           "fxa": "Dies ist das Konto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "google": "Ein Google-Konto kann verbunden werden, um auf die Kalender zuzugreifen. Wenn die Verbindung zum Google-Konto getrennt wird, werden die entsprechenden Kalender und die damit verbundenen Daten bei Thunderbird Appointment entfernt.",
           "googleLegal": {
-            "text": "Die Nutzung von Thunderbird Appointment und die Weitergabe von Informationen, die per Google APIs übertragen wurden, an eine andere App erfolgt unter Einhaltung der {0}, einschließlich der Anforderungen für die begrenzte Nutzung.",
-            "link": "Google API Services User Data Policy"
+            "link": "Google API Services User Data Policy",
+            "text": "Die Nutzung von Thunderbird Appointment und die Weitergabe von Informationen, die per Google APIs übertragen wurden, an eine andere App erfolgt unter Einhaltung der {0}, einschließlich der Anforderungen für die begrenzte Nutzung."
           },
           "zoom": "Ein Zoom-Konto kann verbunden werden, um Einladungen zu Zoom-Besprechungen an Terminen zu ermöglichen."
         },
         "disconnect": {
           "google": {
-            "title": "Google Calendar trennen",
-            "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis der Terminplan auf einen neuen Kalender eingestellt wurde.",
+            "cancel": "Abbrechen",
             "confirm": "Trennen",
-            "cancel": "Abbrechen"
+            "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis der Terminplan auf einen neuen Kalender eingestellt wurde.",
+            "title": "Google Calendar trennen"
           },
           "zoom": {
-            "title": "Zoom trennen",
-            "message": "Beim Trennen der Verbindung zum Zoom-Konto wird die Möglichkeit, Zoom-Meeting-Links für Buchungen zu erstellen, deaktiviert. Bestehende Meeting-Links bleiben davon unberührt.",
+            "cancel": "Abbrechen",
             "confirm": "Trennen",
-            "cancel": "Abbrechen"
+            "message": "Beim Trennen der Verbindung zum Zoom-Konto wird die Möglichkeit, Zoom-Meeting-Links für Buchungen zu erstellen, deaktiviert. Bestehende Meeting-Links bleiben davon unberührt.",
+            "title": "Zoom trennen"
           }
         }
       }

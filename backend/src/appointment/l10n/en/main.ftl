@@ -40,6 +40,9 @@ remote-calendar-connection-error = The remote calendar could not be reached. Ple
 
 event-could-not-be-accepted = There was an error accepting the booking details. Please try again later.
 
+failed-to-create-subscriber = There was an error creating the subscriber. Please try again later.
+subscriber-already-exists = A subscriber with this email address already exists.
+
 ## Authentication Exceptions
 
 email-mismatch = Email mismatch.

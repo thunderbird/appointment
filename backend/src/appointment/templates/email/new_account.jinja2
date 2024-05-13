@@ -1,0 +1,21 @@
+<html lang="{{ l10n('locale') }}">
+  <body>
+    <p>
+      {{ l10n('new-account-mail-html-heading') }}
+    </p>
+    <div>
+      <a
+        href="{{ homepage_url }}"
+        style="
+          display:inline-block;
+          padding:.5rem 1rem;
+          color:white;
+          background:#0e757f;
+          border-radius:6px;
+          text-decoration:none;
+        "
+      >{{ l10n('new-account-mail-action') }}</a>
+    </div>
+    {% include 'includes/footer.jinja2' %}
+  </body>
+</html>

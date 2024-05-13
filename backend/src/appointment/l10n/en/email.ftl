@@ -103,3 +103,14 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) sent the followi
                     Topic: { $topic }
                     Details: { $details }
                     {-brand-footer}
+
+## New/Invited Account Email
+new-account-mail-subject = You've been invited to Thunderbird Appointment
+new-account-mail-action = Continue to Thunderbird Appointment
+new-account-mail-html-heading = You've been invited to Thunderbird Appointment. Login with this email address to continue.
+# Variables:
+# $homepage_url (String) - URL to Thunderbird Appointment
+new-account-mail-plain = You've been invited to Thunderbird Appointment.
+                    Login with this email address to continue.
+                    { $homepage_url }
+                    {-brand-footer}

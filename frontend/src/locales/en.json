@@ -7,6 +7,7 @@
     "actionNeeded": "Action needed",
     "authenticationRequired": "Sorry, this page requires you to be logged in.",
     "credentialsIncomplete": "Please provide login credentials.",
+    "dataSourceIsEmpty": "No {name} could be found.",
     "generalBookingError": "Sorry, there was a problem retrieving the schedule details. Please try again later.",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "loginMethodNotSupported": "Login method not supported. Please try again.",
@@ -68,6 +69,7 @@
     "copiedToClipboard": "Copied to clipboard",
     "eventWasCreated": "Event created in your calendar.",
     "invitationWasSent": "An invitation was sent to your email.",
+    "invitationWasSentContext": "An invitation was sent to {email}.",
     "messageWasNotSent": "Your message couldn't be sent. Please try again.",
     "messageWasSent": "Your message has been sent to our support team.",
     "noPendingAppointmentsInList": "You have no pending events.",
@@ -151,9 +153,11 @@
     "end": "End",
     "endDate": "End Date",
     "endTime": "End Time",
+    "enterEmailToInvite": "Enter an email to invite them to Thunderbird Appointment:",
     "error": "Error",
     "faq": "FAQ",
     "farthestBooking": "Farthest Booking",
+    "filter": "Filter",
     "general": "General",
     "generalDetails": "Details",
     "generateZoomLink": "Generate Zoom Meeting",
@@ -307,23 +311,23 @@
           "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
           "google": "You can connect your Google account to access your calendars. Disconnecting your account will remove your calendars, and associated data.",
           "googleLegal": {
-            "text": "Thunderbird Appointment use and transfer of information received from Google APIs to any other app will adhere to {0}, including the Limited Use requirements.",
-            "link": "Google API Services User Data Policy"
+            "link": "Google API Services User Data Policy",
+            "text": "Thunderbird Appointment use and transfer of information received from Google APIs to any other app will adhere to {0}, including the Limited Use requirements."
           },
           "zoom": "You can connect your Zoom account to enable instant meeting invites with your appointments."
         },
         "disconnect": {
           "google": {
-            "title": "Disconnect Google Calendar",
-            "message": "Disconnecting your Google Calendars will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
+            "cancel": "Back",
             "confirm": "Disconnect",
-            "cancel": "Back"
+            "message": "Disconnecting your Google Calendars will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
+            "title": "Disconnect Google Calendar"
           },
           "zoom": {
-            "title": "Disconnect Zoom",
-            "message": "Disconnecting your Zoom account will disable the ability to generate Zoom meeting links on bookings. Any existing meeting link will be unaffected.",
+            "cancel": "Back",
             "confirm": "Disconnect",
-            "cancel": "Back"
+            "message": "Disconnecting your Zoom account will disable the ability to generate Zoom meeting links on bookings. Any existing meeting link will be unaffected.",
+            "title": "Disconnect Zoom"
           }
         }
       }

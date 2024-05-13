@@ -224,6 +224,19 @@ class CalendarOut(CalendarBase):
     id: int
 
 
+""" INVITE model schemas
+"""
+
+
+class Invite(BaseModel):
+    subscriber_id: int | None = None
+    code: str
+    status: InviteStatus = InviteStatus.active
+    time_created: datetime | None = None
+    time_updated: datetime | None = None
+
+
+
 """ SUBSCRIBER model schemas
 """
 
@@ -253,16 +266,12 @@ class Subscriber(SubscriberAuth):
         from_attributes = True
 
 
-""" INVITE model schemas
-"""
+class SubscriberAdminOut(Subscriber):
+    invite: Invite | None = None
+    time_created: datetime
 
-
-class Invite(BaseModel):
-    subscriber_id: int | None = None
-    code: str
-    status: InviteStatus = InviteStatus.active
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
+    class Config:
+        from_attributes = True
 
 
 """ other schemas used for requests or data migration
@@ -357,3 +366,10 @@ class Login(BaseModel):
 
 class TokenData(BaseModel):
     username: str
+
+
+"""Invite"""
+
+
+class SendInviteEmailIn(BaseModel):
+    email: str = Field(title="Email", min_length=1)
