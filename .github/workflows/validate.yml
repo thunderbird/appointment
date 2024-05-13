@@ -118,7 +118,6 @@ jobs:
 
       - name: backend-service
         working-directory: ./tofu/environments/stage/services/backend-service
-        continue-on-error: true
         run: |
           terragrunt init -upgrade
           terragrunt validate
