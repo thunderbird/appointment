@@ -123,7 +123,7 @@ jobs:
       id: output-bucket-name
       working-directory: ./tofu/environments/stage/services/frontend-infra
       run: |
-        output=$(terragrunt output bucket | tr -d '"')
+        output=$(terragrunt output bucket_name | tr -d '"')
         echo bucket=$output >> $GITHUB_OUTPUT
 
   deploy-frontend:
