@@ -49,7 +49,7 @@ jobs:
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
       TF_VAR_app_env: ${{ vars.APP_ENV }}
-      TF_VAR_db_encrypted_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+      TF_VAR_db_enc_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
       TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
       TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
       TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
@@ -58,6 +58,7 @@ jobs:
       TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
+      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
 
