@@ -165,7 +165,7 @@ jobs:
         aws-region: ${{ vars.AWS_REGION }}
     
     - name: Deploy frontend to S3
-      run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}" //s3://tb-apmt-stg-frontend
+      run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
         
 
 
