@@ -40,6 +40,9 @@ remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreich
 
 event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
 
+failed-to-create-subscriber = Es gab einen Fehler beim Anlegen der Person. Bitte später erneut versuchen.
+subscriber-already-exists = Eine Person mit dieser E-Mail-Adresse existiert bereits.
+
 ## Authentication Exceptions
 
 email-mismatch = E-Mail-Adresse stimmen nicht überein.

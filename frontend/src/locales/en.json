@@ -311,23 +311,23 @@
           "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
           "google": "You can connect your Google account to access your calendars. Disconnecting your account will remove your calendars, and associated data.",
           "googleLegal": {
-            "text": "Thunderbird Appointment use and transfer of information received from Google APIs to any other app will adhere to {0}, including the Limited Use requirements.",
-            "link": "Google API Services User Data Policy"
+            "link": "Google API Services User Data Policy",
+            "text": "Thunderbird Appointment use and transfer of information received from Google APIs to any other app will adhere to {0}, including the Limited Use requirements."
           },
           "zoom": "You can connect your Zoom account to enable instant meeting invites with your appointments."
         },
         "disconnect": {
           "google": {
-            "title": "Disconnect Google Calendar",
-            "message": "Disconnecting your Google Calendars will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
+            "cancel": "Back",
             "confirm": "Disconnect",
-            "cancel": "Back"
+            "message": "Disconnecting your Google Calendars will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
+            "title": "Disconnect Google Calendar"
           },
           "zoom": {
-            "title": "Disconnect Zoom",
-            "message": "Disconnecting your Zoom account will disable the ability to generate Zoom meeting links on bookings. Any existing meeting link will be unaffected.",
+            "cancel": "Back",
             "confirm": "Disconnect",
-            "cancel": "Back"
+            "message": "Disconnecting your Zoom account will disable the ability to generate Zoom meeting links on bookings. Any existing meeting link will be unaffected.",
+            "title": "Disconnect Zoom"
           }
         }
       }
