@@ -20,8 +20,7 @@ jobs:
     environment: staging
     outputs:
       deploy-iac: ${{ steps.check.outputs.deploy-iac }}
-      deploy-backend: ${{ steps.check.outputs.deploy-backend }}
-      deploy-frontend: ${{ steps.check.outputs.deploy-frontend }}
+      deploy-app: ${{ steps.check.outputs.deploy-app }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,8 +36,6 @@ jobs:
               - 'backend/**'
               - 'tofu/modules/services/backend-service/**'
               - 'tofu/environments/stage/services/backend-service/**'
-              - '.github/workflows/deploy-staging.yml'
-            deploy-frontend:
               - 'frontend/**'
               - 'tofu/modules/services/frontend-infra/**'
               - 'tofu/environments/stage/services/frontend-infra/**'
@@ -139,7 +136,7 @@ jobs:
     needs:
       - detect-changes
       - deploy-iac
-    if: needs.detect-changes.outputs.deploy-frontend == 'true'
+    if: needs.detect-changes.outputs.deploy-app == 'true'
     environment: staging
     runs-on: ubuntu-latest
     steps:
@@ -170,7 +167,18 @@ jobs:
           role-to-assume: ${{ secrets.IAM_ROLE }}
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Build frontend archive
+        run: |
+          zip -r frontend-${{ github.sha }}.zip frontend/dist
       
+      - name: Archive Frontend
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ github.sha }}
+          path: |
+            frontend-${{ github.sha }}.zip
+
       - name: Deploy frontend to S3
         run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
         
@@ -180,7 +188,7 @@ jobs:
     needs: 
       - detect-changes
       - deploy-iac
-    if: needs.detect-changes.outputs.deploy-backend == 'true'
+    if: needs.detect-changes.outputs.deploy-app == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -245,3 +253,40 @@ jobs:
           terragrunt validate
           terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
           terragrunt apply tfplan
+
+  create-release:
+    needs:
+      - detect-changes
+      - deploy-backend
+      - deploy-frontend
+    if: needs.detect-changes.outputs.deploy-app == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: 
+            frontend-${{ github.sha }}
+          path:
+            frontend-${{ github.sha }}.zip
+
+      - name: create release tag
+        id: create-release-tag
+        run: echo "tag_name=r-$(printf %04d $GITHUB_RUN_NUMBER)" >> $GITHUB_OUTPUT
+
+      - name: create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create-release-tag.outputs.tag_name }}
+          name: Release ${{ steps.create-release-tag.outputs.tag_name }}
+          body: |
+            ## Info
+            Commit ${{ github.sha }} was deployed to `staging`. [See code diff](${{ github.event.compare }}).
+
+            It was initialized by [${{ github.event.sender.login }}](${{ github.event.sender.html_url }}).
+
+            ## How to Promote?
+            In order to promote this to prod, edit the draft and press **"Publish release"**.
+          draft: true
+          files: frontend-${{ github.sha }}.zip
