@@ -176,8 +176,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-${{ github.sha }}
-          path: |
-            frontend-${{ github.sha }}.zip
+          path: frontend-${{ github.sha }}.zip
 
       - name: Deploy frontend to S3
         run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
@@ -264,12 +263,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: 
             frontend-${{ github.sha }}
-          path:
-            frontend-${{ github.sha }}.zip
 
       - name: create release tag
         id: create-release-tag
