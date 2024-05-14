@@ -32,7 +32,7 @@ jobs:
               - 'tofu/modules/**'
               - 'tofu/environments/stage/**'
               - '.github/workflows/deploy-staging.yml'
-            deploy-backend:
+            deploy-app:
               - 'backend/**'
               - 'tofu/modules/services/backend-service/**'
               - 'tofu/environments/stage/services/backend-service/**'
