@@ -23,4 +23,9 @@ variable "source_security_groups" {
   type        = list(any)
 }
 
+variable "database_subnet_cidrs" {
+  description = "Database subnet CIDRs"
+  type        = list(any)
+}
+
 

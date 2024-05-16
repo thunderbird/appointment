@@ -19,7 +19,7 @@ dependency "vpc" {
   mock_outputs = {
     vpc_id                = "mock_vpc_id"
     database_subnet_group = "mock_subnet_group"
-    database_subnets = []
+    database_subnets      = []
 
   }
 }
@@ -58,7 +58,7 @@ inputs = {
   region                     = local.region
   vpc                        = dependency.vpc.outputs.vpc_id
   subnet_group               = local.name_prefix //dependency.vpc.outputs.database_subnet_group
-  database_subnets = dependency.vpc.outputs.database_subnets
+  database_subnets           = dependency.vpc.outputs.database_subnets
   elasticache_security_group = dependency.cache.outputs.security_group_id
   backend_security_group     = dependency.backend.outputs.security_group_id
   database_secret            = "arn:aws:secretsmanager:us-east-1:768512802988:secret:tb-apmt-stage-db-secret-V0syHj"

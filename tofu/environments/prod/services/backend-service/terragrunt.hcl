@@ -53,10 +53,10 @@ dependency "cache" {
 }
 
 locals {
-  environment = get_env("TF_VAR_environment")
-  name_prefix = get_env("TF_VAR_name_prefix")
-  region      = get_env("TF_VAR_region")
-  short_name = include.root.locals.short_name
+  environment      = get_env("TF_VAR_environment")
+  name_prefix      = get_env("TF_VAR_name_prefix")
+  region           = get_env("TF_VAR_region")
+  short_name       = include.root.locals.short_name
   project_tags     = include.root.locals.tags
   environment_tags = include.env.locals.tags
   tags             = "${merge(local.project_tags, local.environment_tags)}"
@@ -71,18 +71,18 @@ inputs = {
   security_group      = dependency.backend-infra.outputs.security_group_id
   ecs_cluster         = dependency.backend-infra.outputs.cluster_id
   task_execution_role = dependency.vpc.outputs.ecs_execution_role
-  frontend_url        = get_env("TF_VAR_frontend_url")   
-  short_base_url      = get_env("TF_VAR_short_base_url") 
-  app_env             = get_env("TF_VAR_app_env")        
-  sentry_dsn          = get_env("TF_VAR_sentry_dsn")     
-  zoom_auth_callback  = get_env("TF_VAR_zoom_callback")  
+  frontend_url        = get_env("TF_VAR_frontend_url")
+  short_base_url      = get_env("TF_VAR_short_base_url")
+  app_env             = get_env("TF_VAR_app_env")
+  sentry_dsn          = get_env("TF_VAR_sentry_dsn")
+  zoom_auth_callback  = get_env("TF_VAR_zoom_callback")
   short_name          = local.short_name
   database_secret     = dependency.database.outputs.db_secret
-  db_enc_secret       = get_env("TF_VAR_db_enc_secret")  
-  smtp_secret         = get_env("TF_VAR_smtp_secret")    
+  db_enc_secret       = get_env("TF_VAR_db_enc_secret")
+  smtp_secret         = get_env("TF_VAR_smtp_secret")
   google_oauth_secret = get_env("TF_VAR_google_oauth_secret")
-  zoom_secret         = get_env("TF_VAR_zoom_secret")        
-  fxa_secret          = get_env("TF_VAR_fxa_secret")         
+  zoom_secret         = get_env("TF_VAR_zoom_secret")
+  fxa_secret          = get_env("TF_VAR_fxa_secret")
   redis_endpoint      = dependency.cache.outputs.endpoint
   log_level           = get_env("TF_VAR_log_level")
   tags                = local.tags

@@ -36,3 +36,18 @@ resource "aws_vpc_security_group_ingress_rule" "ingress" {
     Name = "${var.name_prefix}-redis"
   })
 }
+
+resource "aws_vpc_security_group_egress_rule" "egress" {
+  for_each = toset(var.database_subnet_cidrs)
+
+  security_group_id = aws_security_group.redis.id
+  description                  = "mysql(3306) to DB"
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
+  cidr_ipv4                    = each.key
+
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-redis"
+  })
+}

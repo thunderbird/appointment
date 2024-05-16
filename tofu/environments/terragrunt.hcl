@@ -6,8 +6,8 @@ terragrunt_version_constraint = ">= 0.55.15"
 locals {
   project_vars = yamldecode(file("project_vars.yaml"))
 
-  project    = local.project_vars.project
-  short_name = local.project_vars.short_name
+  project     = local.project_vars.project
+  short_name  = local.project_vars.short_name
   name_prefix = get_env("TF_VAR_name_prefix")
   region      = get_env("TF_VAR_region")
 

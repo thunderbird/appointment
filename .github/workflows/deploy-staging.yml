@@ -175,8 +175,8 @@ jobs:
       - name: Archive Frontend
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-${{ github.sha }}
-          path: frontend-${{ github.sha }}.zip
+          name: frontend
+          path: frontend.zip
 
       - name: Deploy frontend to S3
         run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
@@ -244,6 +244,13 @@ jobs:
           docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
+          echo $ECR_TAG | cat ecr_tag.txt
+
+      - name: Archive ECR tag
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecr_tag
+          path: ecr_tag.txt
 
       - name: deploy backend-service
         working-directory: ./tofu/environments/stage/services/backend-service
@@ -266,7 +273,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: 
-            frontend-${{ github.sha }}
+            frontend
+
+      - name: download ecr tag
+        uses: actions/download-artifact@v4
+        with:
+            name: 
+              ecr_tag.txt
 
       - name: create release tag
         id: create-release-tag
@@ -286,4 +299,6 @@ jobs:
             ## How to Promote?
             In order to promote this to prod, edit the draft and press **"Publish release"**.
           draft: true
-          files: frontend-${{ github.sha }}.zip
+          files: |
+            frontend.zip
+            ecr_tag.txt
