@@ -152,7 +152,7 @@ jobs:
 
       - name: Build project
         run: |
-          cp frontend/.env.stage.example frontend/.env.staging
+          cp frontend/.env.stage.example frontend/.env.stage
           cd frontend && yarn build --mode ${{ vars.APP_ENV }}
 
       - name: Install AWS CLI
