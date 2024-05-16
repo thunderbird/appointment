@@ -170,7 +170,7 @@ jobs:
 
       - name: Build frontend archive
         run: |
-          zip -r frontend-${{ github.sha }}.zip frontend/dist
+          zip -r frontend.zip frontend/dist
       
       - name: Archive Frontend
         uses: actions/upload-artifact@v4
