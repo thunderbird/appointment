@@ -132,8 +132,7 @@ resource "aws_iam_policy" "appointment_secrets_policy" {
                 "secretsmanager:GetSecretValue"
             ],
             "Resource": [
-              "arn:aws:secretsmanager:${var.region}:768512802988:secret:staging/appointment/*",
-              "arn:aws:secretsmanager:${var.region}:768512802988:secret:${var.name_prefix}-db-secret-*"
+              "arn:aws:secretsmanager:${var.region}:768512802988:secret:${var.name_prefix}-*"
             ]
         }
     ]
