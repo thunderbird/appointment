@@ -72,7 +72,7 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           "name" : "LOG_LEVEL",
-          "value" : "var.log_level"
+          "value" : var.log_level
         },
         {
           "name" : "APP_ENV",
