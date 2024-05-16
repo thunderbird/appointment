@@ -108,7 +108,7 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           "name": "REDIS_URL",
-          "value": ${var.redis_endpoint}
+          "value": var.redis_endpoint
         },
         {
           "name": "REDIS_PORT",
