@@ -47,5 +47,6 @@ inputs = {
   vpc                    = dependency.vpc.outputs.vpc_id
   subnets                = dependency.vpc.outputs.database_subnets
   source_security_groups = [dependency.backend.outputs.security_group_id]
+  database_subnet_cidrs  = dependency.vpc.outputs.database_subnet_cidrs
   tags                   = local.tags
 }
