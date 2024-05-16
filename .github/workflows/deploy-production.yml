@@ -129,6 +129,10 @@ jobs:
           version: ${{ github.event.release.id }}
           file: ecr_tag.txt
           target: ./tofu/environments/stage/services/backend-service
+      
+      - name: Unzip ECR tag
+        working-directory: ./tofu/environments/stage/services/backend-service
+        run: unzip ecr_tag.zip
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

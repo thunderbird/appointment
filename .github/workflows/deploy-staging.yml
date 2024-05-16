@@ -168,15 +168,15 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Build frontend archive
-        run: |
-          zip -r frontend.zip frontend/dist
-      
+#      - name: Build frontend archive
+#        run: |
+#          zip -r frontend.zip frontend/dist
+#      
       - name: Archive Frontend
         uses: actions/upload-artifact@v4
         with:
           name: frontend
-          path: frontend.zip
+          path: frontend/dist
 
       - name: Deploy frontend to S3
         run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
@@ -279,7 +279,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
             name: 
-              ecr_tag.txt
+              ecr_tag
 
       - name: create release tag
         id: create-release-tag
@@ -301,4 +301,4 @@ jobs:
           draft: true
           files: |
             frontend.zip
-            ecr_tag.txt
+            ecr_tag.zip
