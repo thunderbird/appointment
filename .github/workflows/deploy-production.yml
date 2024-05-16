@@ -34,26 +34,26 @@ jobs:
 #      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
 #      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
     steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Configure AWS credentials
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          role-to-assume: ${{ secrets.IAM_ROLE }}
-#          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-#          aws-region: ${{ vars.AWS_REGION }}
-#
-#      - name: install opentofu
-#        uses: opentofu/setup-opentofu@v1
-#        with: 
-#          tofu_version: ${{ vars.TF_VERSION }}
-#          tofu_wrapper: false
-#
-#      - name: install terragrunt
-#        run: |
-#          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
-#          sudo chmod +x /bin/terragrunt
-#          terragrunt -v
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 #
 #      - name: vpc
 #        working-directory: ./tofu/environments/stage/network/vpc
