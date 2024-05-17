@@ -40,5 +40,6 @@ def get_redis() -> Redis | None:
         port=os.getenv('REDIS_PORT'),
         db=os.getenv('REDIS_DB'),
         password=os.getenv('REDIS_PASSWORD'),
+        ssl=os.getenv('REDIS_USE_SSL'),
         decode_responses=True,
     )
