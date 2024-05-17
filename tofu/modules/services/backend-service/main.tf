@@ -117,6 +117,10 @@ resource "aws_ecs_task_definition" "backend" {
         {
           "name": "REDIS_DB",
           "value": "0"
+        },
+        {
+          "name": "REDIS_USE_SSL",
+          "value": "True"
         }
       ],
       secrets = [
