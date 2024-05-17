@@ -105,23 +105,23 @@ resource "aws_ecs_task_definition" "backend" {
         {
           "name" : "JWT_EXPIRE_IN_MINS",
           "value" : "10000"
-        },
-        {
-          "name": "REDIS_URL",
-          "value": "" #var.redis_endpoint
-        },
-        {
-          "name": "REDIS_PORT",
-          "value": "" #"6379"
-        },
-        {
-          "name": "REDIS_DB",
-          "value": "" #"0"
-        },
-        {
-          "name": "REDIS_USE_SSL",
-          "value": "" #"True"
-        }
+        }#,
+        #{
+        #  "name": "REDIS_URL",
+        #  "value": "" #var.redis_endpoint
+        #},
+        #{
+        #  "name": "REDIS_PORT",
+        #  "value": "" #"6379"
+        #},
+        #{
+        #  "name": "REDIS_DB",
+        #  "value": "" #"0"
+        #},
+        #{
+        #  "name": "REDIS_USE_SSL",
+        #  "value": "" #"True"
+        #}
       ],
       secrets = [
         {
