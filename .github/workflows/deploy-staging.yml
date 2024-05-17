@@ -292,7 +292,7 @@ jobs:
           name: Release ${{ steps.create-release-tag.outputs.tag_name }}
           body: |
             ## Info
-            Commit ${{ github.sha }} was deployed to `staging`. [See code diff](${{ github.event.compare }}).
+            Commit ${{ github.sha }} was deployed to `stage`. [See code diff](${{ github.event.compare }}).
 
             It was initialized by [${{ github.event.sender.login }}](${{ github.event.sender.html_url }}).
 
