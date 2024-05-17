@@ -87,19 +87,11 @@ data "aws_secretsmanager_secret_version" "x_allow_value" {
 resource "aws_cloudfront_distribution" "appointment" {
   comment = "appointment ${var.environment} frontend"
   enabled = true
-  //default_root_object = "index.html"
 
   aliases = ["${var.environment}.appointment.day"]
 
   logging_config {
     bucket          = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"
-    include_cookies = true
-  }
-
-  aliases = ["${var.environment}.appointment.day"]
-
-  logging_config {
-    bucket = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"
     include_cookies = true
   }
 
@@ -222,27 +214,6 @@ resource "aws_cloudfront_function" "rewrite" {
   EOT
 }
 
-resource "aws_cloudfront_function" "add_index" {
-  name = "${var.name_prefix}-add-index"
-  runtime = "cloudfront-js-2.0"
-  code = <<EOT
-  async function handler(event) {
-    const request = event.request;
-    const uri = request.uri;
-    
-    // Check whether the URI is missing a file name.
-    if (uri.endsWith('/')) {
-        request.uri += 'index.html';
-    } 
-    // Check whether the URI is missing a file extension.
-    else if (!uri.includes('.')) {
-        request.uri += '/index.html';
-    }
-
-    return request;
-}
-  EOT
-}
 resource "aws_s3_bucket" "request_logs" {
   bucket        = local.log_bucket
   force_destroy = true
