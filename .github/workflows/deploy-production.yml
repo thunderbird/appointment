@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       bucket: ${{ steps.output-bucket-name.outputs.bucket }}
+      cloudfront_id: ${{ steps.output-cloudfront-distro.outputs.cloudfront_id }}
 #    env:
 #      TF_VAR_region: ${{ vars.AWS_REGION }}
 #      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
@@ -102,6 +103,13 @@ jobs:
           output=$(terragrunt output bucket_name | tr -d '"')
           echo bucket=$output >> $GITHUB_OUTPUT
 
+      - name: output-cloudfront-distro
+        id: output-cloudfront-distro
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          output=$(terragrunt output cloudfront_id)
+          echo cloudfront_id=$output >> $GITHUB_OUTPUT
+
   release-production:
     name: Release to Production
     needs: deploy-iac
@@ -152,3 +160,6 @@ jobs:
 
 #      - name: Deploy frontend to S3
 #        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
