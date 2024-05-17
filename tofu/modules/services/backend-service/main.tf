@@ -108,19 +108,19 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           "name": "REDIS_URL",
-          "value": var.redis_endpoint
+          "value": "" #var.redis_endpoint
         },
         {
           "name": "REDIS_PORT",
-          "value": "6379"
+          "value": "" #"6379"
         },
         {
           "name": "REDIS_DB",
-          "value": "0"
+          "value": "" #"0"
         },
         {
           "name": "REDIS_USE_SSL",
-          "value": "True"
+          "value": "" #"True"
         }
       ],
       secrets = [
