@@ -587,7 +587,8 @@ def send_feedback(
 
     background_tasks.add_task(
         send_support_email,
-        requestee=subscriber,
+        requestee_name=subscriber.name,
+        requestee_email=subscriber.email,
         topic=form_data.topic,
         details=form_data.details,
     )

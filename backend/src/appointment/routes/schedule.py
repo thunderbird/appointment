@@ -254,10 +254,10 @@ def request_schedule_availability_slot(
     db.commit()
 
     # Sending confirmation email to owner
-    background_tasks.add_task(send_confirmation_email, url=url, attendee=attendee, date=date, to=subscriber.email)
+    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee, date=date, to=subscriber.email)
 
     # Sending pending email to attendee
-    background_tasks.add_task(send_pending_email, owner=subscriber, date=attendee_date, to=slot.attendee.email)
+    background_tasks.add_task(send_pending_email, owner_name=subscriber.name, date=attendee_date, to=slot.attendee.email)
 
     # Mini version of slot, so we can grab the newly created slot id for tests
     return schemas.SlotOut(
@@ -321,7 +321,7 @@ def decide_on_schedule_availability_slot(
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
         date = f"{date}, {slot.duration} minutes"
         # send rejection information to bookee
-        background_tasks.add_task(send_rejection_email, owner=subscriber, date=date, to=slot.attendee.email)
+        background_tasks.add_task(send_rejection_email, owner_name=subscriber.name, date=date, to=slot.attendee.email)
 
         if slot.appointment_id:
             # delete the appointment, this will also delete the slot.
