@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - main
-      - add-tf-iac
 
 permissions:
   id-token: write   # This is required for requesting the JWT

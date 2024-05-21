@@ -105,7 +105,8 @@ resource "aws_ecs_task_definition" "backend" {
         {
           "name" : "JWT_EXPIRE_IN_MINS",
           "value" : "10000"
-        }#,
+        # Redis integration disabled pending application code updates
+        #},
         #{
         #  "name": "REDIS_URL",
         #  "value": "" #var.redis_endpoint
@@ -121,7 +122,7 @@ resource "aws_ecs_task_definition" "backend" {
         #{
         #  "name": "REDIS_USE_SSL",
         #  "value": "" #"True"
-        #}
+        }
       ],
       secrets = [
         {

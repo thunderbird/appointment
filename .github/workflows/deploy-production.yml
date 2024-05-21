@@ -55,45 +55,45 @@ jobs:
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
-#
-#      - name: vpc
-#        working-directory: ./tofu/environments/stage/network/vpc
-#        run: |
-#          terragrunt init -upgrade
-#          terragrunt validate
-#          terragrunt plan -out tfplan
+
+      - name: vpc
+        working-directory: ./tofu/environments/stage/network/vpc
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
 #          terragrunt apply tfplan
-#
-#      - name: backend-infra
-#        working-directory: ./tofu/environments/stage/services/backend-infra
-#        run: |
-#          terragrunt init -upgrade
-#          terragrunt validate
-#          terragrunt plan -out tfplan
+
+      - name: backend-infra
+        working-directory: ./tofu/environments/stage/services/backend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
 #          terragrunt apply tfplan
-#
-#      - name: cache
-#        working-directory: ./tofu/environments/stage/data-store/cache
-#        run: |
-#          terragrunt init -upgrade
-#          terragrunt validate
-#          terragrunt plan -out tfplan
+
+      - name: cache
+        working-directory: ./tofu/environments/stage/data-store/cache
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
 #          terragrunt apply tfplan
-#
-#      - name: database
-#        working-directory: ./tofu/environments/stage/data-store/database
-#        run: |
-#          terragrunt init -upgrade
-#          terragrunt validate
-#          terragrunt plan -out tfplan
+
+      - name: database
+        working-directory: ./tofu/environments/stage/data-store/database
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
 #          terragrunt apply tfplan
-#          
-#      - name: frontend-infra
-#        working-directory: ./tofu/environments/stage/services/frontend-infra
-#        run: |
-#          terragrunt init -upgrade
-#          terragrunt validate
-#          terragrunt plan -out tfplan
+          
+      - name: frontend-infra
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
 #          terragrunt apply tfplan
 
       - name: output-bucket-name
