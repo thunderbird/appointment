@@ -3,8 +3,8 @@ FROM nginx:stable
 # Copy over files
 COPY . /build/frontend
 
-# Copy over the staging config
-RUN mv /build/frontend/.env.staging.example /build/frontend/.env.staging
+# Copy over the stage config
+RUN mv /build/frontend/.env.stage.example /build/frontend/.env.stage
 
 # Add Node 18 support
 RUN apt-get update
@@ -19,7 +19,7 @@ RUN npm install --global yarn
 
 # Build site
 RUN cd /build/frontend && yarn install
-RUN cd /build/frontend && yarn build --mode staging
+RUN cd /build/frontend && yarn build --mode stage
 
 # Use our custom nginx config
 RUN rm /etc/nginx/conf.d/default.conf

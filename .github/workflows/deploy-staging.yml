@@ -1,0 +1,310 @@
+name: deploy-staging
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: write   # This is required to create a release
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    environment: staging
+    outputs:
+      deploy-iac: ${{ steps.check.outputs.deploy-iac }}
+      deploy-app: ${{ steps.check.outputs.deploy-app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: check
+        with:
+          filters: |
+            deploy-iac:
+              - 'tofu/modules/**'
+              - 'tofu/environments/stage/**'
+              - '.github/workflows/deploy-staging.yml'
+            deploy-app:
+              - 'backend/**'
+              - 'tofu/modules/services/backend-service/**'
+              - 'tofu/environments/stage/services/backend-service/**'
+              - 'frontend/**'
+              - 'tofu/modules/services/frontend-infra/**'
+              - 'tofu/environments/stage/services/frontend-infra/**'
+              - '.github/workflows/deploy-staging.yml'
+
+  deploy-iac:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.deploy-iac == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    outputs:
+      bucket: ${{ steps.output-bucket-name.outputs.bucket }}
+      cloudfront_id: ${{ steps.output-cloudfront-distro.outputs.cloudfront_id }}
+    env:
+      TF_VAR_region: ${{ vars.AWS_REGION }}
+      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_app_env: ${{ vars.APP_ENV }}
+      TF_VAR_db_enc_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
+      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
+      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
+      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
+      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
+      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
+      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
+      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
+      - name: vpc
+        working-directory: ./tofu/environments/stage/network/vpc
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
+
+      - name: backend-infra
+        working-directory: ./tofu/environments/stage/services/backend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
+
+      - name: cache
+        working-directory: ./tofu/environments/stage/data-store/cache
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
+
+      - name: database
+        working-directory: ./tofu/environments/stage/data-store/database
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
+          
+      - name: frontend-infra
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+          terragrunt apply tfplan
+
+      - name: output-bucket-name
+        id: output-bucket-name
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          output=$(terragrunt output bucket_name | tr -d '"')
+          echo bucket=$output >> $GITHUB_OUTPUT
+
+      - name: output-cloudfront-distro
+        id: output-cloudfront-distro
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          output=$(terragrunt output cloudfront_id)
+          echo cloudfront_id=$output >> $GITHUB_OUTPUT
+
+  deploy-frontend:
+    needs:
+      - detect-changes
+      - deploy-iac
+    if: needs.detect-changes.outputs.deploy-app == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Install dependencies
+        run: cd frontend && yarn install
+
+      - name: Build project
+        run: |
+          cp frontend/.env.stage.example frontend/.env.stage
+          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2
+          arch: amd64
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
+
+      - name: Archive Frontend
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend
+          path: frontend/dist
+
+      - name: Deploy frontend to S3
+        run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+        
+
+
+  deploy-backend:
+    needs: 
+      - detect-changes
+      - deploy-iac
+    if: needs.detect-changes.outputs.deploy-app == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_region: ${{ vars.AWS_REGION }}
+      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_app_env: ${{ vars.APP_ENV }}
+      TF_VAR_db_enc_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
+      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
+      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
+      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
+      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
+      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
+      TF_VAR_zoom_secret: ${{ vars.ZOOM_SECRET }}
+      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push backend image to Amazon ECR
+        id: build-backend
+        env:
+          ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
+          docker push $ECR_TAG
+          echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
+          echo $ECR_TAG > ecr_tag.txt
+
+      - name: Archive ECR tag
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecr_tag
+          path: ecr_tag.txt
+
+      - name: deploy backend-service
+        working-directory: ./tofu/environments/stage/services/backend-service
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
+          terragrunt apply tfplan
+
+  create-release:
+    needs:
+      - detect-changes
+      - deploy-backend
+      - deploy-frontend
+    if: needs.detect-changes.outputs.deploy-app == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 
+            frontend
+
+      - name: download ecr tag
+        uses: actions/download-artifact@v4
+        with:
+            name: 
+              ecr_tag
+
+      - name: create release tag
+        id: create-release-tag
+        run: echo "tag_name=r-$(printf %04d $GITHUB_RUN_NUMBER)" >> $GITHUB_OUTPUT
+
+      - name: create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create-release-tag.outputs.tag_name }}
+          name: Release ${{ steps.create-release-tag.outputs.tag_name }}
+          body: |
+            ## Info
+            Commit ${{ github.sha }} was deployed to `stage`. [See code diff](${{ github.event.compare }}).
+
+            It was initialized by [${{ github.event.sender.login }}](${{ github.event.sender.html_url }}).
+
+            ## How to Promote?
+            In order to promote this to prod, edit the draft and press **"Publish release"**.
+          draft: true
+          files: |
+            frontend.zip
+            ecr_tag.zip

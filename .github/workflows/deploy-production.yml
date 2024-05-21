@@ -1,0 +1,166 @@
+name: deploy-production
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  deploy-iac:
+    environment: production
+    runs-on: ubuntu-latest
+    outputs:
+      bucket: ${{ steps.output-bucket-name.outputs.bucket }}
+      cloudfront_id: ${{ steps.output-cloudfront-distro.outputs.cloudfront_id }}
+#    env:
+#      TF_VAR_region: ${{ vars.AWS_REGION }}
+#      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+#      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+#      TF_VAR_app_env: ${{ vars.APP_ENV }}
+#      TF_VAR_db_enc_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+#      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+#      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
+#      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
+#      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
+#      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
+#      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
+#      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
+#      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
+#      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
+      - name: vpc
+        working-directory: ./tofu/environments/stage/network/vpc
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+#          terragrunt apply tfplan  # will be re-enabled once release workflow is tested
+
+      - name: backend-infra
+        working-directory: ./tofu/environments/stage/services/backend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+
+      - name: cache
+        working-directory: ./tofu/environments/stage/data-store/cache
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+
+      - name: database
+        working-directory: ./tofu/environments/stage/data-store/database
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+          
+      - name: frontend-infra
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -out tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+
+      - name: output-bucket-name
+        id: output-bucket-name
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          output=$(terragrunt output bucket_name | tr -d '"')
+          echo bucket=$output >> $GITHUB_OUTPUT
+
+      - name: output-cloudfront-distro
+        id: output-cloudfront-distro
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          output=$(terragrunt output cloudfront_id)
+          echo cloudfront_id=$output >> $GITHUB_OUTPUT
+
+  release-production:
+    name: Release to Production
+    needs: deploy-iac
+    if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
+    environment: production
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Get Artifact from Release
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: ${{ github.event.release.id }}
+          file: frontend.zip
+
+      - name: Unzip Artifact
+        run: unzip frontend.zip
+
+      - name: Get ECR tag from Release
+        id: get_ecr_tag
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: ${{ github.event.release.id }}
+          file: ecr_tag.txt
+          target: ./tofu/environments/stage/services/backend-service
+      
+      - name: Unzip ECR tag
+        working-directory: ./tofu/environments/stage/services/backend-service
+        run: unzip ecr_tag.zip
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Deploy Backend
+        working-directory: ./tofu/environments/stage/services/backend-service
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          terragrunt plan -var "image=$(cat steps.get_ecr_tag.outputs.*)" -out tfplan
+          cat tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+
+# will be re-enabled once release workflow is tested
+#      - name: Deploy frontend to S3
+#        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"

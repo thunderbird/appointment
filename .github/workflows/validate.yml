@@ -1,0 +1,171 @@
+name: validate
+
+concurrency:
+  group: validate
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!main'
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    environment: staging
+    outputs:
+      validate-iac: ${{ steps.check.outputs.validate-iac }}
+      validate-backend: ${{ steps.check.outputs.validate-backend }}
+      validate-frontend: ${{ steps.check.outputs.validate-frontend }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dorny/paths-filter@v3
+      id: check
+      with:
+        filters: |
+          validate-iac:
+            - 'tofu/**'
+            - '.github/workflows/validate.yml'
+          validate-backend:
+            - 'backend/**'
+            - '.github/workflows/validate.yml'
+          validate-frontend:
+            - 'frontend/**'
+            - '.github/workflows/validate.yml'
+
+  validate-iac:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    environment: staging
+    if: needs.detect-changes.outputs.validate-iac == 'true'
+    env:
+      TF_VAR_region: ${{ vars.AWS_REGION }}
+      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_app_env: ${{ vars.APP_ENV }}
+      TF_VAR_db_enc_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
+      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
+      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
+      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
+      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
+      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
+      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
+      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
+      - name: vpc
+        working-directory: ./tofu/environments/stage/network/vpc
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+
+      - name: backend-infra
+        working-directory: ./tofu/environments/stage/services/backend-infra
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+
+      - name: cache
+        working-directory: ./tofu/environments/stage/data-store/cache
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+
+      - name: database
+        working-directory: ./tofu/environments/stage/data-store/database
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+          
+      - name: frontend-infra
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        continue-on-error: true
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+
+      - name: backend-service
+        working-directory: ./tofu/environments/stage/services/backend-service
+        run: |
+          terragrunt init -upgrade
+          terragrunt validate
+
+  validate-backend:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    environment: staging
+    if: needs.detect-changes.outputs.validate-backend == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd ./backend
+          python -m pip install --upgrade pip
+          python -m pip install .'[test]'
+
+      - name: Test with pytest
+        run: |
+          cd ./backend && python -m pytest
+  
+  validate-frontend:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    environment: staging
+    if: needs.detect-changes.outputs.validate-frontend == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: 'frontend/yarn.lock'
+
+      - name: Install dependencies
+        run: |
+          cd ./frontend
+          yarn install
+          
+      - name: Test with vitest
+        run: |
+          cd ./frontend && yarn test --run
