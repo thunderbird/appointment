@@ -4,13 +4,12 @@ Handle connection to a CalDAV server.
 """
 import json
 import logging
-import uuid
 import zoneinfo
 import os
 
 import caldav.lib.error
 import requests
-from redis import Redis
+from redis import Redis, RedisCluster
 from caldav import DAVClient
 from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
@@ -29,11 +28,11 @@ from ..tasks.emails import send_invite_email
 
 
 class BaseConnector:
-    redis_instance: Redis | None
+    redis_instance: Redis | RedisCluster | None
     subscriber_id: int
     calendar_id: int
 
-    def __init__(self, subscriber_id: int, calendar_id: int | None, redis_instance: Redis | None = None):
+    def __init__(self, subscriber_id: int, calendar_id: int | None, redis_instance: Redis | RedisCluster | None = None):
         self.redis_instance = redis_instance
         self.subscriber_id = subscriber_id
         self.calendar_id = calendar_id
