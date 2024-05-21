@@ -27,15 +27,6 @@ resource "random_string" "x_allow_suffix" {
   special = false
   upper   = true
 }
-
-resource "random_string" "x_allow_suffix" {
-  length = 8
-  lower = true
-  numeric = false
-  special = false
-  upper = true
-}
-
 resource "aws_secretsmanager_secret" "x_allow_secret" {
   name = "${var.name_prefix}-x-allow-secret-${random_string.x_allow_suffix.result}"
 }

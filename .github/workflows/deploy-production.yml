@@ -62,7 +62,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan
+#          terragrunt apply tfplan  # will be re-enabled once release workflow is tested
 
       - name: backend-infra
         working-directory: ./tofu/environments/stage/services/backend-infra
@@ -70,7 +70,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
 
       - name: cache
         working-directory: ./tofu/environments/stage/data-store/cache
@@ -78,7 +78,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
 
       - name: database
         working-directory: ./tofu/environments/stage/data-store/database
@@ -86,7 +86,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
           
       - name: frontend-infra
         working-directory: ./tofu/environments/stage/services/frontend-infra
@@ -94,7 +94,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
 
       - name: output-bucket-name
         id: output-bucket-name
@@ -156,8 +156,9 @@ jobs:
           terragrunt validate
           terragrunt plan -var "image=$(cat steps.get_ecr_tag.outputs.*)" -out tfplan
           cat tfplan
-#          terragrunt apply tfplan
+#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
 
+# will be re-enabled once release workflow is tested
 #      - name: Deploy frontend to S3
 #        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
 
