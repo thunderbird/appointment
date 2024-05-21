@@ -48,18 +48,19 @@
             color: !eventData.tentative ? getAccessibleColor(eventData.calendar_color) : null,
           }"
         ></div>
-        <!-- Table, Table-Fixed, and w-full prevent whitespace: nowrap from expanding width of container -->
-        <div
-          class="table w-full table-fixed truncate rounded"
-          :class="{
-            'h-full border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
-            '!border-none': isBooked,
-            'border-white': isSelected,
-          }"
-        >
-          <span v-if="eventData.preview">{{ formattedTimeRange(event) }}</span>
-          <span v-else-if="isBooked">{{ t('label.busy') }}</span>
-          <span v-else>{{ event.title }}</span>
+        <div class="grid">
+          <div
+            class="truncate rounded"
+            :class="{
+              'h-full border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
+              '!border-none': isBooked,
+              'border-white': isSelected,
+            }"
+          >
+            <template v-if="eventData.preview">{{ formattedTimeRange(event) }}</template>
+            <template v-else-if="isBooked">{{ t('label.busy') }}</template>
+            <template v-else>{{ event.title }}</template>
+          </div>
         </div>
       </div>
     </div>
