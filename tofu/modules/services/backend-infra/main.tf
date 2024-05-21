@@ -73,7 +73,7 @@ module "backend_alb" {
   vpc_id  = var.vpc
   subnets = var.subnets
 
-  enable_deletion_protection = false #var.environment != "sandbox" ? true : false
+  enable_deletion_protection = var.environment == "production" ? true : false
 
   security_group_ingress_rules = {
     inbound_5000 = {
