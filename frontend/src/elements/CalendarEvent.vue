@@ -48,8 +48,9 @@
             color: !eventData.tentative ? getAccessibleColor(eventData.calendar_color) : null,
           }"
         ></div>
+        <!-- Table, Table-Fixed, and w-full prevent whitespace: nowrap from expanding width of container -->
         <div
-          class="truncate rounded "
+          class="table w-full table-fixed truncate rounded"
           :class="{
             'h-full border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
             '!border-none': isBooked,
