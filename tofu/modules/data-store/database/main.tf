@@ -50,8 +50,8 @@ module "db" {
   major_engine_version = "8.0"
 
   # Database Deletion Protection
-  skip_final_snapshot = true  #var.environment != "sandbox" ? false : true
-  deletion_protection = false #var.environment != "sandbox" ? true : false
+  skip_final_snapshot = var.environment == "production" ? false : true
+  deletion_protection = var.environment == "production" ? true : false
 
   parameters = [
     {
