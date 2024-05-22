@@ -31,21 +31,38 @@ Contains the VPC and all core network resources and supporting security groups e
 
 Contains the ECS cluster & Application Load Balancer for the backend & supporting resources
 
+- ECS cluster
+- application load balancer
+- security group
+
 ### cache
 
 Contains the Elasticache redis cluster and supporting resources
+
+- Elasticache serverless Redis cache
+- security group
 
 ### database
 
 Contains the RDS database instance and supporting resources
 
-### frontend
+- RDS mysql database
+- security group
+
+### frontend-infra
 
 Contains the Cloudfront CDN distribution, frontend S3 bucket and supporting resources.  WHile the bucket contents will change with frontend code changes the infrastructure defined here will remain static
+
+- S3 bucket
+- Cloudfront distribution
+- Cloudfront function
 
 ### backend-service
 
 Contains the backend ECS service and task definitions.  This will be redeployed whenever the backend code is updated
+
+- ECS service
+- ECS task definition
 
 ## Deployment Order
 
@@ -110,13 +127,13 @@ These should be deployed in the following order and generally will only be updat
    3. `terragrunt validate`
    4. `terragrunt plan -out tfplan`
    5. `terragrunt apply tfplan`
-5. tofu/environments/\<end>/services/frontend
+5. tofu/environments/\<end>/services/frontend-infra
    Required Environment Variables:
     - TF_VAR_name_prefix
     - TF_VAR_environment
     - TF_VAR_region
 
-   1. `cd tofu/environments/<env>/services/frontend`
+   1. `cd tofu/environments/<env>/services/frontend-infra`
    2. `terragrunt init`
    3. `terragrunt validate`
    4. `terragrunt plan -out tfplan`
