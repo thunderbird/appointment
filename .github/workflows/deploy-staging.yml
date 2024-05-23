@@ -152,6 +152,18 @@ jobs:
           cp frontend/.env.stage.example frontend/.env.stage
           cd frontend && yarn build --mode ${{ vars.APP_ENV }}
 
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
