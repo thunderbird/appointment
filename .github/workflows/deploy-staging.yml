@@ -143,7 +143,7 @@ jobs:
     needs:
       - detect-changes
       - deploy-iac
-    if: needs.detect-changes.outputs.deploy-app == 'true'
+    if: always() && needs.detect-changes.outputs.deploy-app == 'true'
     environment: staging
     runs-on: ubuntu-latest
     steps:
@@ -193,7 +193,7 @@ jobs:
     needs: 
       - detect-changes
       - deploy-iac
-    if: needs.detect-changes.outputs.deploy-app == 'true'
+    if: always() && needs.detect-changes.outputs.deploy-app == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -271,7 +271,7 @@ jobs:
       - detect-changes
       - deploy-backend
       - deploy-frontend
-    if: needs.detect-changes.outputs.deploy-app == 'true'
+    if: always() && needs.detect-changes.outputs.deploy-app == 'true'
     environment: staging
     runs-on: ubuntu-latest
     steps:
