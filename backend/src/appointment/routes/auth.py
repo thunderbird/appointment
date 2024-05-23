@@ -24,6 +24,7 @@ from ..dependencies.auth import get_subscriber, get_admin_subscriber
 from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
+from ..exceptions import validation
 from ..exceptions.fxa_api import NotInAllowListException
 from ..l10n import l10n
 
@@ -48,6 +49,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 def fxa_login(request: Request,
               email: str,
               timezone: str | None = None,
+              invite_code: str | None = None,
               db: Session = Depends(get_db),
               fxa_client: FxaClient = Depends(get_fxa_client)):
     """Request an authorization url from fxa"""
@@ -64,6 +66,7 @@ def fxa_login(request: Request,
     request.session['fxa_state'] = state
     request.session['fxa_user_email'] = email
     request.session['fxa_user_timezone'] = timezone
+    request.session['fxa_user_invite_code'] = invite_code
 
     return {
         'url': url
@@ -99,11 +102,14 @@ def fxa_callback(
     email = request.session['fxa_user_email']
     # We only use timezone during subscriber creation, or if their timezone is None
     timezone = request.session['fxa_user_timezone']
+    invite_code = request.session.get('fxa_user_invite_code')
 
     # Clear session keys
     request.session.pop('fxa_state')
     request.session.pop('fxa_user_email')
     request.session.pop('fxa_user_timezone')
+    if invite_code:
+        request.session.pop('fxa_user_invite_code')
 
     fxa_client.setup()
 
@@ -123,11 +129,21 @@ def fxa_callback(
     new_subscriber_flow = not fxa_subscriber and not subscriber
 
     if new_subscriber_flow:
+        # Ensure the invite code exists and is available
+        # Use some inline-errors for now. We don't have a good error flow!
+        if not repo.invite.code_exists(db, invite_code):
+            raise HTTPException(404, l10n('invite-code-not-valid'))
+        if not repo.invite.code_is_available(db, invite_code):
+            raise HTTPException(403, l10n('invite-code-not-valid'))
+
         subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
             email=email,
             username=email,
             timezone=timezone,
         ))
+
+        # Use the invite code after we've created the new subscriber
+        repo.invite.use_code(db, code, subscriber.id)
     elif not subscriber:
         subscriber = fxa_subscriber
 
