@@ -35,12 +35,14 @@ def get_by_subscriber(db: Session, subscriber_id: int):
 
 def add_for_appointment(db: Session, slots: list[schemas.SlotBase], appointment_id: int):
     """create new slots for appointment of given id"""
+    return_slots = []
     for slot in slots:
         db_slot = models.Slot(**slot.dict())
         db_slot.appointment_id = appointment_id
         db.add(db_slot)
+        return_slots.append(db_slot)
     db.commit()
-    return slots
+    return return_slots
 
 
 def add_for_schedule(db: Session, slot: schemas.SlotBase, schedule_id: int):

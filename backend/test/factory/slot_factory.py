@@ -26,7 +26,7 @@ def make_appointment_slot(with_db):
                 booking_expires_at=booking_expires_at,
                 booking_status=booking_status,
                 meeting_link_id=meeting_link_id,
-                meeting_link_url=meeting_link_url
+                meeting_link_url=meeting_link_url,
             )], appointment_id)
 
     return _make_appointment_slot
