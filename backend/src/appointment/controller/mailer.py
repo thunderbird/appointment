@@ -170,7 +170,7 @@ class ZoomMeetingFailedMail(Mailer):
 class ConfirmationMail(Mailer):
     def __init__(self, confirm_url, deny_url, attendee_name, attendee_email, date, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
-        self.attendee_name = attendee_name.title()
+        self.attendee_name = attendee_name
         self.attendee_email = attendee_email
         self.date = date
         self.confirmUrl = confirm_url

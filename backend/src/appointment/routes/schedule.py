@@ -254,7 +254,7 @@ def request_schedule_availability_slot(
     db.commit()
 
     # Sending confirmation email to owner
-    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee, date=date, to=subscriber.email)
+    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee.name, date=date, to=subscriber.email)
 
     # Sending pending email to attendee
     background_tasks.add_task(send_pending_email, owner_name=subscriber.name, date=attendee_date, to=slot.attendee.email)
