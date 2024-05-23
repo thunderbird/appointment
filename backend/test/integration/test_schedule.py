@@ -405,8 +405,7 @@ class TestSchedule:
                 assert iso in slots_dict
 
                 slot = slots_dict[iso]
-                assert slot[
-                           'booking_status'] == models.BookingStatus.none.value if expected_assert else models.BookingStatus.booked.value
+                assert slot['booking_status'] == models.BookingStatus.none.value if expected_assert else models.BookingStatus.booked.value
 
     def test_request_schedule_availability_slot(self, monkeypatch, with_db, with_client, make_pro_subscriber,
                                                 make_caldav_calendar, make_schedule):
