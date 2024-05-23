@@ -42,7 +42,7 @@ jobs:
 
   deploy-iac:
     needs: detect-changes
-    if: needs.detect-changes.outputs.deploy-iac == 'true'
+    if: always() && (needs.detect-changes.outputs.deploy-app == 'true' || needs.detect-changes.outputs.deploy-iac == 'true')
     environment: staging
     runs-on: ubuntu-latest
     outputs:
