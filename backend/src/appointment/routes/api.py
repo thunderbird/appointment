@@ -5,7 +5,7 @@ from typing import Annotated
 
 import requests.exceptions
 import validators
-from redis import Redis
+from redis import Redis, RedisCluster
 from requests import HTTPError
 from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
@@ -316,7 +316,7 @@ def read_remote_events(
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
-    redis_instance: Redis | None = Depends(get_redis),
+    redis_instance: Redis | RedisCluster | None = Depends(get_redis),
 ):
     """endpoint to get events in a given date range from a remote calendar"""
     db_calendar = repo.calendar.get(db, calendar_id=id)
@@ -587,7 +587,8 @@ def send_feedback(
 
     background_tasks.add_task(
         send_support_email,
-        requestee=subscriber,
+        requestee_name=subscriber.name,
+        requestee_email=subscriber.email,
         topic=form_data.topic,
         details=form_data.details,
     )

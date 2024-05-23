@@ -45,6 +45,7 @@ jobs:
 
   deploy-iac:
     needs: detect-changes
+    
     if: needs.detect-changes.outputs.deploy-iac == 'true'
     environment: staging
     runs-on: ubuntu-latest
@@ -118,6 +119,7 @@ jobs:
     needs:
       - detect-changes
       - deploy-iac
+
     if: |
       always() &&
       (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
@@ -197,6 +199,7 @@ jobs:
     needs: 
       - detect-changes
       - deploy-iac
+
     if: |
       always() &&
       (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
@@ -279,9 +282,11 @@ jobs:
       - detect-changes
       - deploy-backend
       - deploy-frontend
+
     if: |
       needs.detect-changes.outputs.deploy-backend == 'true' &&
       needs.detect-changes.outputs.deploy-frontend == 'true'
+
     environment: staging
     runs-on: ubuntu-latest
     steps:
