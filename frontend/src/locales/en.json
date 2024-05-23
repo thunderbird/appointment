@@ -76,6 +76,8 @@
     "slotIsAvailableAgain": "Time slot now available for bookings."
   },
   "label": {
+    "admin-invite-codes-panel": "Invites",
+    "admin-subscriber-panel": "Subscribers",
     "12hAmPm": "12h AM/PM",
     "24h": "24h",
     "DDMMYYYY": "DD/MM/YYYY",

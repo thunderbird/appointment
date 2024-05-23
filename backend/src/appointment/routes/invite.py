@@ -19,13 +19,13 @@ router = APIRouter()
 
 
 @router.get('/', response_model=list[schemas.Invite])
-def get_all_invites(db: Session = Depends(get_db), admin: Subscriber = Depends(get_admin_subscriber)):
+def get_all_invites(db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
     return db.query(models.Invite).all()
 
 
 @router.post("/generate/{n}", response_model=list[schemas.Invite])
-def generate_invite_codes(n: int, db: Session = Depends(get_db), admin: Subscriber = Depends(get_admin_subscriber)):
+def generate_invite_codes(n: int, db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to generate n invite codes, needs admin permissions"""
     return repo.invite.generate_codes(db, n)
 

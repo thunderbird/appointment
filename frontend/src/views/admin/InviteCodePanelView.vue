@@ -14,15 +14,18 @@
       {{ pageError }}
     </alert-box>
   </div>
+  <admin-nav>
+
+  </admin-nav>
   <div v-if="displayPage">
     <data-table
-      data-name="Subscribers"
+      data-name="Invite Codes"
       :allow-multi-select="false"
-      :data-list="filteredSubscribers"
+      :data-list="filteredInvites"
       :columns="columns"
       :filters="filters"
       :loading="loading"
-      @field-click="(_key, field) => disableSubscriber(field.email.value)"
+      @field-click="(_key, field) => revokeInvite(field.code.value)"
     >
       <template v-slot:footer>
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
@@ -53,7 +56,9 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, ref } from 'vue';
+import {
+  computed, inject, onMounted, ref,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { alertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
 import DataTable from '@/components/DataTable.vue';
@@ -62,6 +67,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import { IconSend } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import AdminNav from '@/elements/admin/AdminNav.vue';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -69,93 +75,86 @@ const { t } = useI18n();
 const call = inject('call');
 const dj = inject('dayjs');
 
-const subscribers = ref([]);
+const invites = ref([]);
 const displayPage = ref(false);
 const inviteEmail = ref('');
 const loading = ref(true);
 const pageError = ref('');
 const pageNotification = ref('');
 
-const filteredSubscribers = computed(() => subscribers.value.map((subscriber) => ({
-  id: {
+const filteredInvites = computed(() => invites.value.map((invite) => ({
+  code: {
     type: tableDataType.text,
-    value: subscriber.id,
+    value: invite.code,
   },
-  username: {
+  status: {
     type: tableDataType.text,
-    value: subscriber.username,
+    value: invite.status === 1 ? 'Available' : 'Revoked',
   },
-  email: {
+  subscriber_id: {
     type: tableDataType.text,
-    value: subscriber.email,
+    value: invite.subscriber_id ?? 'Unused',
   },
   timeCreated: {
     type: tableDataType.text,
-    value: dj(subscriber.time_created).format('ll LTS'),
+    value: dj(invite.time_created).format('ll LTS'),
   },
-  timezone: {
+  timeUpdated: {
     type: tableDataType.text,
-    value: subscriber.timezone ?? 'Unset',
+    value: dj(invite.time_updated).format('ll LTS'),
   },
-  wasInvited: {
-    type: tableDataType.text,
-    value: subscriber.invite ? 'Yes' : 'No',
-  },
-  /*
-  disable: {
+  revoke: {
     type: tableDataType.button,
-    buttonType: tableDataButtonType.caution,
-    value: 'Disable',
+    buttonType: tableDataButtonType.secondary,
+    value: 'Revoke',
+    disabled: invite.subscriber_id || invite.status === 2,
   },
-   */
 })));
 const columns = [
   {
-    key: 'id',
-    name: 'ID',
+    key: 'code',
+    name: 'Code',
   },
   {
-    key: 'username',
-    name: 'Username',
+    key: 'status',
+    name: 'Status',
   },
   {
-    key: 'email',
-    name: 'Email',
+    key: 'subscriber_id',
+    name: 'Invited Subscriber ID',
   },
   {
     key: 'createdAt',
     name: 'Time Created',
   },
   {
-    key: 'timezone',
-    name: 'Timezone',
+    key: 'updatedAt',
+    name: 'Time Updated',
   },
   {
-    key: 'wasInvited',
-    name: 'Was Invited?',
-  },
-  /*
-  {
-    key: 'disable',
+    key: 'revoke',
     name: '',
   },
-   */
 ];
 const filters = [
   {
-    name: 'Was Invited',
+    name: 'Invite Status',
     options: [
       {
         name: 'All',
         key: 'all',
       },
       {
-        name: 'Yes',
-        key: 'yes',
+        name: 'Used',
+        key: 'used',
       },
       {
-        name: 'No',
-        key: 'no',
+        name: 'Unused',
+        key: 'unused',
+      },
+      {
+        name: 'Revoked',
+        key: 'revoked',
       },
     ],
     /**
@@ -168,34 +167,43 @@ const filters = [
       if (selectedKey === 'all') {
         return mutableDataList;
       }
-      return mutableDataList.filter((data) => data.wasInvited.value.toLowerCase() === selectedKey);
+      if (selectedKey === 'revoked') {
+        return mutableDataList.filter((data) => (data.status.value === 'Revoked'));
+      }
+      return mutableDataList.filter((data) => {
+        if (data.status.value === 'Revoked') {
+          return false;
+        }
+
+        return selectedKey === 'used' && data.subscriber_id.value !== 'Unused';
+      });
     },
   },
 ];
-const getSubscribers = async () => {
-  const response = await call('subscriber/').get().json();
+const getInvites = async () => {
+  const response = await call('invite/').get().json();
   const { data } = response;
 
-  subscribers.value = data.value;
+  invites.value = data.value;
 };
 
 const refresh = async () => {
   loading.value = true;
-  await getSubscribers();
+  await getInvites();
   loading.value = false;
 };
 
 /**
- * Disables a subscriber
- * @param email
+ * Disables an unused invite
+ * @param code
  * @returns {Promise<void>}
  */
-const disableSubscriber = async (email) => {
-  if (!email) {
+const revokeInvite = async (code) => {
+  if (!code) {
     return;
   }
 
-  const response = await call(`subscriber/disable/${email}`).put().json();
+  const response = await call(`invite/revoke/${code}`).put().json();
   const { data } = response;
 
   if (data.value) {

@@ -13,7 +13,7 @@
         </label>
       </div>
       <list-pagination
-        :list-length="mutableDataList.length > 0 ? mutableDataList.length : dataList.length"
+        :list-length="totalDataLength"
         :page-size="pageSize"
         @update="updatePage"
       />
@@ -41,9 +41,9 @@
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
               </span>
               <span v-else-if="fieldData.type === tableDataType.button">
-                <primary-button v-if="fieldData.buttonType === tableDataButtonType.primary" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</primary-button>
-                <secondary-button v-else-if="fieldData.buttonType === tableDataButtonType.secondary" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</secondary-button>
-                <caution-button v-else-if="fieldData.buttonType === tableDataButtonType.caution" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</caution-button>
+                <primary-button v-if="fieldData.buttonType === tableDataButtonType.primary" :disabled="fieldData.disabled" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</primary-button>
+                <secondary-button v-else-if="fieldData.buttonType === tableDataButtonType.secondary" :disabled="fieldData.disabled" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</secondary-button>
+                <caution-button v-else-if="fieldData.buttonType === tableDataButtonType.caution" :disabled="fieldData.disabled" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</caution-button>
               </span>
             </td>
           </tr>
@@ -122,13 +122,13 @@ const updatePage = (index) => {
 const columnSpan = computed(() => (columns.value.length + (allowMultiSelect.value ? 1 : 0)));
 const selectedFields = ref([]);
 
-const mutableDataList = ref([]);
+const mutableDataList = ref(null);
 
 /**
  * Returns either a filtered data list, or the original all nice and paginated
  */
 const paginatedDataList = computed(() => {
-  if (mutableDataList?.value?.length) {
+  if (mutableDataList?.value !== null) {
     return mutableDataList.value.slice(currentPage.value * pageSize, (currentPage.value + 1) * pageSize);
   }
   if (dataList?.value?.length) {
@@ -136,6 +136,16 @@ const paginatedDataList = computed(() => {
   }
 
   return [];
+});
+
+const totalDataLength = computed(() => {
+  if (mutableDataList?.value !== null) {
+    return mutableDataList.value?.length ?? 0;
+  }
+  if (dataList?.value?.length) {
+    return dataList.value.length;
+  }
+  return 0;
 });
 
 const onFieldSelect = (evt, fieldData) => {
@@ -154,8 +164,9 @@ const onFieldSelect = (evt, fieldData) => {
 
 const onColumnFilter = (evt, filter) => {
   mutableDataList.value = filter.fn(evt.target.value, dataList.value);
+  console.log('Data list info: ', mutableDataList.value, ' vs ', dataList.value);
   if (mutableDataList.value === dataList.value) {
-    mutableDataList.value = [];
+    mutableDataList.value = null;
   }
 };
 
