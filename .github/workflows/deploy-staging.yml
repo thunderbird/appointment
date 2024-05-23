@@ -170,11 +170,14 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Create Frontend Archive
+        run: zip frontend.zip frontend/dist
+
       - name: Archive Frontend
         uses: actions/upload-artifact@v4
         with:
           name: frontend
-          path: frontend/dist
+          path: frontend.zip
       
       - name: Get frontend bucket & distribution
         id: get-frontend-resources
@@ -256,12 +259,13 @@ jobs:
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > ecr_tag.txt
+          zip ecr_tag.zip ecr_tag.txt
 
       - name: Archive ECR tag
         uses: actions/upload-artifact@v4
         with:
           name: ecr_tag
-          path: ecr_tag.txt
+          path: ecr_tag.zip
 
       - name: deploy backend-service
         working-directory: ./tofu/environments/stage/services/backend-service
