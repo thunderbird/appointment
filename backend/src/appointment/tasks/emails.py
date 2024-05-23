@@ -7,30 +7,31 @@ def send_invite_email(to, attachment):
     mail.send()
 
 
-def send_confirmation_email(url, attendee, date, to):
+def send_confirmation_email(url, attendee_name, attendee_email, date, to):
     # send confirmation mail to owner
     mail = ConfirmationMail(
         f"{url}/1",
         f"{url}/0",
-        attendee,
+        attendee_name,
+        attendee_email,
         date,
         to=to
     )
     mail.send()
 
 
-def send_pending_email(owner, date, to):
+def send_pending_email(owner_name, date, to):
     mail = PendingRequestMail(
-        owner=owner,
+        owner_name=owner_name,
         date=date,
         to=to
     )
     mail.send()
 
 
-def send_rejection_email(owner, date, to):
+def send_rejection_email(owner_name, date, to):
     mail = RejectionMail(
-        owner=owner,
+        owner_name=owner_name,
         date=date,
         to=to
     )
@@ -42,9 +43,10 @@ def send_zoom_meeting_failed_email(to, appointment_title):
     mail.send()
 
 
-def send_support_email(requestee, topic, details):
+def send_support_email(requestee_name, requestee_email, topic, details):
     mail = SupportRequestMail(
-        requestee=requestee,
+        requestee_name=requestee_name,
+        requestee_email=requestee_email,
         topic=topic,
         details=details,
     )

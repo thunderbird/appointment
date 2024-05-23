@@ -168,10 +168,10 @@ class ZoomMeetingFailedMail(Mailer):
 
 
 class ConfirmationMail(Mailer):
-    def __init__(self, confirm_url, deny_url, attendee, date, *args, **kwargs):
+    def __init__(self, confirm_url, deny_url, attendee_name, attendee_email, date, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
-        self.attendee = attendee
-        self.attendee.name = self.attendee.name.title()
+        self.attendee_name = attendee_name
+        self.attendee_email = attendee_email
         self.date = date
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
@@ -182,8 +182,8 @@ class ConfirmationMail(Mailer):
 
     def text(self):
         return l10n('confirm-mail-plain', {
-            'attendee_name': self.attendee.name,
-            'attendee_email': self.attendee.email,
+            'attendee_name': self.attendee_name,
+            'attendee_email': self.attendee_email,
             'date': self.date,
             'confirm_url': self.confirmUrl,
             'deny_url': self.denyUrl,
@@ -191,7 +191,8 @@ class ConfirmationMail(Mailer):
 
     def html(self):
         return get_template("confirm.jinja2").render(
-            attendee=self.attendee,
+            attendee_name=self.attendee_name,
+            attendee_email=self.attendee_email,
             date=self.date,
             confirm=self.confirmUrl,
             deny=self.denyUrl,
@@ -199,9 +200,9 @@ class ConfirmationMail(Mailer):
 
 
 class RejectionMail(Mailer):
-    def __init__(self, owner, date, *args, **kwargs):
+    def __init__(self, owner_name, date, *args, **kwargs):
         """init Mailer with rejection specific defaults"""
-        self.owner = owner
+        self.owner_name = owner_name
         self.date = date
         default_kwargs = {
             "subject": l10n('reject-mail-subject')
@@ -210,18 +211,18 @@ class RejectionMail(Mailer):
 
     def text(self):
         return l10n('reject-mail-plain', {
-            'owner_name': self.owner.name,
+            'owner_name': self.owner_name,
             'date': self.date
         })
 
     def html(self):
-        return get_template("rejected.jinja2").render(owner=self.owner, date=self.date)
+        return get_template("rejected.jinja2").render(owner_name=self.owner_name, date=self.date)
 
 
 class PendingRequestMail(Mailer):
-    def __init__(self, owner, date, *args, **kwargs):
+    def __init__(self, owner_name, date, *args, **kwargs):
         """init Mailer with pending specific defaults"""
-        self.owner = owner
+        self.owner_name = owner_name
         self.date = date
         default_kwargs = {
             "subject": l10n('pending-mail-subject')
@@ -230,18 +231,19 @@ class PendingRequestMail(Mailer):
 
     def text(self):
         return l10n('pending-mail-plain', {
-            'owner_name': self.owner.name,
+            'owner_name': self.owner_name,
             'date': self.date
         })
 
     def html(self):
-        return get_template("pending.jinja2").render(owner=self.owner, date=self.date)
+        return get_template("pending.jinja2").render(owner_name=self.owner_name, date=self.date)
 
 
 class SupportRequestMail(Mailer):
-    def __init__(self, requestee, topic, details, *args, **kwargs):
+    def __init__(self, requestee_name, requestee_email, topic, details, *args, **kwargs):
         """init Mailer with support specific defaults"""
-        self.requestee = requestee
+        self.requestee_name = requestee_name
+        self.requestee_email = requestee_email
         self.topic = topic
         self.details = details
         default_kwargs = {
@@ -251,14 +253,14 @@ class SupportRequestMail(Mailer):
 
     def text(self):
         return l10n('support-mail-plain', {
-            'requestee_name': self.requestee.name,
-            'requestee_email': self.requestee.email,
+            'requestee_name': self.requestee_name,
+            'requestee_email': self.requestee_email,
             'topic': self.topic,
             'details': self.details,
         })
 
     def html(self):
-        return get_template("support.jinja2").render(requestee=self.requestee, topic=self.topic, details=self.details)
+        return get_template("support.jinja2").render(requestee_name=self.requestee_name, requestee_email=self.requestee_email, topic=self.topic, details=self.details)
 
 
 class InviteAccountMail(Mailer):
