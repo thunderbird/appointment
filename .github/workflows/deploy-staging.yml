@@ -293,6 +293,7 @@ jobs:
         with:
             name: 
               ecr_tag
+      - run: ls
 
       - name: create release tag
         id: create-release-tag
