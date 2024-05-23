@@ -30,20 +30,19 @@
       <template v-slot:footer>
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
           <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
-            <span>{{ t('label.enterEmailToInvite') }}</span>
+            <span>{{ t('label.amountOfCodes') }}</span>
             <input
               class="mx-4 w-60 rounded-md text-sm"
-              type="email"
-              placeholder="e.g. test@example.org"
-              v-model="inviteEmail"
+              type="number"
+              v-model="generateCodeAmount"
               :disabled="loading"
-              enterkeyhint="send"
-              @keyup.enter="sendInvite"
+              enterkeyhint="done"
+              @keyup.enter="generateInvites"
             />
           </label>
-          <primary-button :disabled="loading" @click="sendInvite">
-            <icon-send />
-            {{ t('label.send') }}
+          <primary-button :disabled="loading" @click="generateInvites">
+            <icon-send/>
+            {{ t('label.generate') }}
           </primary-button>
         </div>
       </template>
@@ -77,7 +76,7 @@ const dj = inject('dayjs');
 
 const invites = ref([]);
 const displayPage = ref(false);
-const inviteEmail = ref('');
+const generateCodeAmount = ref(null);
 const loading = ref(true);
 const pageError = ref('');
 const pageNotification = ref('');
@@ -164,19 +163,31 @@ const filters = [
      * @returns {*}
      */
     fn: (selectedKey, mutableDataList) => {
-      if (selectedKey === 'all') {
-        return mutableDataList;
-      }
-      if (selectedKey === 'revoked') {
-        return mutableDataList.filter((data) => (data.status.value === 'Revoked'));
-      }
-      return mutableDataList.filter((data) => {
-        if (data.status.value === 'Revoked') {
-          return false;
-        }
+      switch (selectedKey) {
+        case 'all':
+          return null;
+        case 'revoked':
+          return mutableDataList.filter((data) => (data.status.value === 'Revoked'));
+        case 'used':
+          return mutableDataList.filter((data) => {
+            if (data.status.value === 'Revoked') {
+              return false;
+            }
 
-        return selectedKey === 'used' && data.subscriber_id.value !== 'Unused';
-      });
+            return data.subscriber_id.value !== 'Unused';
+          });
+        case 'unused':
+          return mutableDataList.filter((data) => {
+            if (data.status.value === 'Revoked') {
+              return false;
+            }
+
+            return data.subscriber_id.value === 'Unused';
+          });
+        default:
+          break;
+      }
+      return null;
     },
   },
 ];
@@ -211,14 +222,12 @@ const revokeInvite = async (code) => {
   }
 };
 
-const sendInvite = async () => {
+const generateInvites = async () => {
   loading.value = true;
   pageError.value = '';
   pageNotification.value = '';
 
-  const response = await call('invite/send').post({
-    email: inviteEmail.value,
-  }).json();
+  const response = await call(`invite/generate/${generateCodeAmount.value}`).post().json();
 
   const { data, error } = response;
 
@@ -233,8 +242,8 @@ const sendInvite = async () => {
       pageError.value = data.value?.detail?.message;
     }
   } else {
-    pageNotification.value = t('info.invitationWasSentContext', { email: inviteEmail.value });
-    inviteEmail.value = '';
+    pageNotification.value = t('info.invitationGenerated');
+    generateCodeAmount.value = null;
     await refresh();
   }
 

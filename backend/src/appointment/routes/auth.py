@@ -143,7 +143,12 @@ def fxa_callback(
         ))
 
         # Use the invite code after we've created the new subscriber
-        repo.invite.use_code(db, code, subscriber.id)
+        used = repo.invite.use_code(db, invite_code, subscriber.id)
+
+        # This shouldn't happen, but just in case!
+        if not used:
+            repo.subscriber.delete(db, subscriber)
+            raise HTTPException(500, l10n('unknown-error'))
     elif not subscriber:
         subscriber = fxa_subscriber
 

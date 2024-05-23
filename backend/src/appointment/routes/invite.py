@@ -30,21 +30,6 @@ def generate_invite_codes(n: int, db: Session = Depends(get_db), _admin: Subscri
     return repo.invite.generate_codes(db, n)
 
 
-@router.put("/redeem/{code}")
-def use_invite_code(code: str, db: Session = Depends(get_db)):
-    raise NotImplementedError
-
-    """endpoint to create a new subscriber and update the corresponding invite"""
-    if not repo.invite.code_exists(db, code):
-        raise validation.InviteCodeNotFoundException()
-    if not repo.invite.code_is_available(db, code):
-        raise validation.InviteCodeNotAvailableException()
-    # TODO: get email from admin panel
-    email = 'placeholder@mozilla.org'
-    subscriber = repo.subscriber.create(db, schemas.SubscriberBase(email=email, username=email))
-    return repo.invite.use_code(db, code, subscriber.id)
-
-
 @router.put("/revoke/{code}")
 def revoke_invite_code(code: str, db: Session = Depends(get_db), admin: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to revoke a given invite code and mark in unavailable, needs admin permissions"""
