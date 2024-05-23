@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - cleanup-workflow-triggers
 
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -19,7 +20,8 @@ jobs:
     environment: staging
     outputs:
       deploy-iac: ${{ steps.check.outputs.deploy-iac }}
-      deploy-app: ${{ steps.check.outputs.deploy-app }}
+      deploy-backend: ${{ steps.check.outputs.deploy-backend }}
+      deploy-frontend: ${{ steps.check.outputs.deploy-frontend }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,10 +33,12 @@ jobs:
               - 'tofu/modules/**'
               - 'tofu/environments/stage/**'
               - '.github/workflows/deploy-staging.yml'
-            deploy-app:
+            deploy-backend:
               - 'backend/**'
               - 'tofu/modules/services/backend-service/**'
               - 'tofu/environments/stage/services/backend-service/**'
+              - '.github/workflows/deploy-staging.yml'
+            deploy-frontend:
               - 'frontend/**'
               - 'tofu/modules/services/frontend-infra/**'
               - 'tofu/environments/stage/services/frontend-infra/**'
@@ -45,9 +49,6 @@ jobs:
     if: needs.detect-changes.outputs.deploy-iac == 'true'
     environment: staging
     runs-on: ubuntu-latest
-    outputs:
-      bucket: ${{ steps.output-bucket-name.outputs.bucket }}
-      cloudfront_id: ${{ steps.output-cloudfront-distro.outputs.cloudfront_id }}
     env:
       TF_VAR_region: ${{ vars.AWS_REGION }}
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
@@ -125,25 +126,14 @@ jobs:
           terragrunt plan -out tfplan
           terragrunt apply tfplan
 
-      - name: output-bucket-name
-        id: output-bucket-name
-        working-directory: ./tofu/environments/stage/services/frontend-infra
-        run: |
-          output=$(terragrunt output bucket_name | tr -d '"')
-          echo bucket=$output >> $GITHUB_OUTPUT
-
-      - name: output-cloudfront-distro
-        id: output-cloudfront-distro
-        working-directory: ./tofu/environments/stage/services/frontend-infra
-        run: |
-          output=$(terragrunt output cloudfront_id)
-          echo cloudfront_id=$output >> $GITHUB_OUTPUT
-
   deploy-frontend:
     needs:
       - detect-changes
       - deploy-iac
-    if: needs.detect-changes.outputs.deploy-app == 'true'
+    if: |
+      always() &&
+      (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-frontend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     steps:
@@ -175,17 +165,24 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Invalidate Cloudfront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
-
       - name: Archive Frontend
         uses: actions/upload-artifact@v4
         with:
           name: frontend
           path: frontend/dist
+      
+      - name: Get frontend bucket & distribution
+        id: get-frontend-resources
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          echo "bucket=$(terragrunt output bucket_name | tr -d '"')" >> $GITHUB_OUTPUT
+          echo "distribution=$(terragrunt output cloudfront_id)" >> $GITHUB_OUTPUT
 
       - name: Deploy frontend to S3
-        run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+        run: aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
         
 
 
@@ -193,7 +190,10 @@ jobs:
     needs: 
       - detect-changes
       - deploy-iac
-    if: needs.detect-changes.outputs.deploy-app == 'true'
+    if: |
+      always() &&
+      (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-backend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:

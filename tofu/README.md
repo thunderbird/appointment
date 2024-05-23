@@ -170,7 +170,7 @@ The application backend is deployed as an ECS service via terragrunt
 
 #### Frontend
 
-The application frontend is deployed to an S3 bucket fronted by Cloudfront.  As such it can be deployed by deploying files to S3 and creating a Cloudfront invalidation.
+The application frontend is deployed to an S3 bucket fronted by Cloudfront.  As such it can be deployed by uploadingx files to S3 and creating a Cloudfront invalidation.
 
 - aws s3 sync frontend/dist \<Appointment Environment Frontend S3 Bucket URI>
 - aws cloudfront create-invalidation --distribution-id \<Appointment Environment Cloudfront Distribution ID> --paths "/*"
