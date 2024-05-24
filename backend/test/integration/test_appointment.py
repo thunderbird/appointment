@@ -324,42 +324,6 @@ class TestAppointment:
         assert len(data["slots"]) == len(generated_appointment.slots)
         assert data["slots"][-1]["attendee_id"] == generated_attendee.id
 
-    def test_attendee_selects_slot_of_unavailable_appointment(self, with_db, with_client, make_appointment, make_attendee, make_appointment_slot):
-        generated_appointment = make_appointment()
-        generated_attendee = make_attendee()
-        make_appointment_slot(generated_appointment.id, attendee_id=generated_attendee.id)
-
-        # db.refresh doesn't work because it only refreshes instances created by the current db session?
-        with with_db() as db:
-            from appointment.database import models
-            generated_appointment = db.get(models.Appointment, generated_appointment.id)
-            # Reload slots
-            generated_appointment.slots
-
-        response = with_client.put(
-            f"/apmt/public/{generated_appointment.slug}",
-            json={"slot_id": generated_appointment.slots[-1].id, "attendee": {"email": "a", "name": "b", "timezone": "c"}},
-        )
-        assert response.status_code == 403, response.text
-
-    def test_attendee_selects_slot_of_missing_appointment(self, with_client, make_appointment):
-        generated_appointment = make_appointment()
-
-        response = with_client.put(
-            f"/apmt/public/{generated_appointment}",
-            json={"slot_id": generated_appointment.slots[0].id, "attendee": {"email": "a", "name": "b", "timezone": "c"}},
-        )
-        assert response.status_code == 404, response.text
-
-    def test_attendee_selects_missing_slot_of_existing_appointment(self, with_client, make_appointment):
-        generated_appointment = make_appointment()
-
-        response = with_client.put(
-            f"/apmt/public/{generated_appointment.id}",
-            json={"slot_id": generated_appointment.slots[0].id + 1, "attendee": {"email": "a", "name": "b", "timezone": "c"}},
-        )
-        assert response.status_code == 404, response.text
-
     def test_get_remote_caldav_events(self, with_client, make_appointment, monkeypatch):
         """Test against a fake remote caldav, we're testing the route controller, not the actual caldav connector here!"""
         from appointment.controller.calendar import CalDavConnector

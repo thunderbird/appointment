@@ -278,7 +278,6 @@ def decide_on_schedule_availability_slot(
 ):
     """endpoint to react to owners decision to a request of a time slot of his public link
        if confirmed: create an event in remote calendar and send invitation mail
-       TODO: if denied: send information mail to bookee
     """
     subscriber = repo.subscriber.verify_link(db, data.owner_url)
     if not subscriber:
@@ -322,6 +321,7 @@ def decide_on_schedule_availability_slot(
         date = f"{date}, {slot.duration} minutes"
         # send rejection information to bookee
         background_tasks.add_task(send_rejection_email, owner_name=subscriber.name, date=date, to=slot.attendee.email)
+        repo.slot.delete(db, slot.id)
 
         if slot.appointment_id:
             # delete the appointment, this will also delete the slot.
@@ -330,100 +330,111 @@ def decide_on_schedule_availability_slot(
             # delete the scheduled slot to make the time available again
             repo.slot.delete(db, slot.id)
 
-    # otherwise, confirm slot and create event
-    else:
-        location_url = schedule.location_url
-
-        # FIXME: This is just duplicated from the appointment code. We should find a nice way to merge the two.
-        if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
-            try:
-                zoom_client = get_zoom_client(subscriber)
-                response = zoom_client.create_meeting(schedule.name, slot.start.isoformat(), slot.duration,
-                                                      subscriber.timezone)
-                if 'id' in response:
-                    location_url = zoom_client.get_meeting(response['id'])['join_url']
-                    slot.meeting_link_id = response['id']
-                    slot.meeting_link_url = location_url
-
-                    db.add(slot)
-                    db.commit()
-            except HTTPError as err:  # Not fatal, just a bummer
-                logging.error("Zoom meeting creation error: ", err)
-
-                # Ensure sentry captures the error too!
-                if os.getenv('SENTRY_DSN') != '':
-                    capture_exception(err)
-
-                # Notify the organizer that the meeting link could not be created!
-                background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.email, appointment_title=schedule.name)
-            except SQLAlchemyError as err:  # Not fatal, but could make things tricky
-                logging.error("Failed to save the zoom meeting link to the appointment: ", err)
-                if os.getenv('SENTRY_DSN') != '':
-                    capture_exception(err)
-
-        if not slot.appointment:
-            attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
-            subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
-
-            title = f"Appointment - {subscriber_name} and {attendee_name}"
-        else:
-            title = slot.appointment.title
-            # Update the appointment to closed
-            repo.appointment.update_status(db, slot.appointment_id, models.AppointmentStatus.closed)
-
-        event = schemas.Event(
-            title=title,
-            start=slot.start.replace(tzinfo=timezone.utc),
-            end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
-            description=schedule.details,
-            location=schemas.EventLocation(
-                type=schedule.location_type,
-                url=location_url,
-                name=None,
-            ),
-            uuid=slot.appointment.uuid if slot.appointment else None
+        # Early return
+        return schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
+            attendee=schemas.AttendeeBase(
+                email=slot.attendee.email,
+                name=slot.attendee.name,
+                timezone=slot.attendee.timezone
+            )
         )
 
-        organizer_email = subscriber.email
+    # otherwise, confirm slot and create event
+    location_url = schedule.location_url
 
-        # create remote event
-        if calendar.provider == CalendarProvider.google:
-            external_connection: ExternalConnection|None = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+    attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+    subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
 
-            if external_connection is None or external_connection.token is None:
-                raise RemoteCalendarConnectionError()
+    attendees = f"{subscriber_name} and {attendee_name}"
 
-            # Email is stored in the name
-            organizer_email = external_connection.name
+    if not slot.appointment:
+        title = f"Appointment - {attendees}"
+    else:
+        title = slot.appointment.title
+        # Update the appointment to closed
+        repo.appointment.update_status(db, slot.appointment_id, models.AppointmentStatus.closed)
 
-            con = GoogleConnector(
-                db=db,
-                redis_instance=redis,
-                google_client=google_client,
-                remote_calendar_id=calendar.user,
-                subscriber_id=subscriber.id,
-                calendar_id=calendar.id,
-                google_tkn=external_connection.token,
-            )
-        else:
-            con = CalDavConnector(
-                redis_instance=redis,
-                subscriber_id=subscriber.id,
-                calendar_id=calendar.id,
-                url=calendar.url, 
-                user=calendar.user, 
-                password=calendar.password
-            )
-
+    # If needed: Create a zoom meeting link for this booking
+    if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
         try:
-            con.create_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
-        except EventNotCreatedException:
-            raise EventCouldNotBeAccepted
+            zoom_client = get_zoom_client(subscriber)
+            response = zoom_client.create_meeting(attendees, slot.start.isoformat(), slot.duration,
+                                                  subscriber.timezone)
+            if 'id' in response:
+                location_url = zoom_client.get_meeting(response['id'])['join_url']
+                slot.meeting_link_id = response['id']
+                slot.meeting_link_url = location_url
 
-        # Book the slot at the end
-        slot = repo.slot.book(db, slot.id)
+                db.add(slot)
+                db.commit()
+        except HTTPError as err:  # Not fatal, just a bummer
+            logging.error("Zoom meeting creation error: ", err)
 
-        Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+            # Ensure sentry captures the error too!
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
+            # Notify the organizer that the meeting link could not be created!
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.email, appointment_title=schedule.name)
+        except SQLAlchemyError as err:  # Not fatal, but could make things tricky
+            logging.error("Failed to save the zoom meeting link to the appointment: ", err)
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
+    event = schemas.Event(
+        title=title,
+        start=slot.start.replace(tzinfo=timezone.utc),
+        end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
+        description=schedule.details,
+        location=schemas.EventLocation(
+            type=schedule.location_type,
+            url=location_url,
+            name=None,
+        ),
+        uuid=slot.appointment.uuid if slot.appointment else None
+    )
+
+    organizer_email = subscriber.email
+
+    # create remote event
+    if calendar.provider == CalendarProvider.google:
+        external_connection: ExternalConnection|None = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        # Email is stored in the name
+        organizer_email = external_connection.name
+
+        con = GoogleConnector(
+            db=db,
+            redis_instance=redis,
+            google_client=google_client,
+            remote_calendar_id=calendar.user,
+            subscriber_id=subscriber.id,
+            calendar_id=calendar.id,
+            google_tkn=external_connection.token,
+        )
+    else:
+        con = CalDavConnector(
+            redis_instance=redis,
+            subscriber_id=subscriber.id,
+            calendar_id=calendar.id,
+            url=calendar.url,
+            user=calendar.user,
+            password=calendar.password
+        )
+
+    try:
+        con.create_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
+    except EventNotCreatedException:
+        raise EventCouldNotBeAccepted
+
+    # Book the slot at the end
+    slot = repo.slot.book(db, slot.id)
+
+    Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
