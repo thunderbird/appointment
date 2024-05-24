@@ -19,7 +19,8 @@ jobs:
     environment: staging
     outputs:
       deploy-iac: ${{ steps.check.outputs.deploy-iac }}
-      deploy-app: ${{ steps.check.outputs.deploy-app }}
+      deploy-backend: ${{ steps.check.outputs.deploy-backend }}
+      deploy-frontend: ${{ steps.check.outputs.deploy-frontend }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,10 +32,12 @@ jobs:
               - 'tofu/modules/**'
               - 'tofu/environments/stage/**'
               - '.github/workflows/deploy-staging.yml'
-            deploy-app:
+            deploy-backend:
               - 'backend/**'
               - 'tofu/modules/services/backend-service/**'
               - 'tofu/environments/stage/services/backend-service/**'
+              - '.github/workflows/deploy-staging.yml'
+            deploy-frontend:
               - 'frontend/**'
               - 'tofu/modules/services/frontend-infra/**'
               - 'tofu/environments/stage/services/frontend-infra/**'
@@ -42,27 +45,14 @@ jobs:
 
   deploy-iac:
     needs: detect-changes
+    
     if: needs.detect-changes.outputs.deploy-iac == 'true'
     environment: staging
     runs-on: ubuntu-latest
-    outputs:
-      bucket: ${{ steps.output-bucket-name.outputs.bucket }}
-      cloudfront_id: ${{ steps.output-cloudfront-distro.outputs.cloudfront_id }}
     env:
       TF_VAR_region: ${{ vars.AWS_REGION }}
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
-      TF_VAR_app_env: ${{ vars.APP_ENV }}
-      TF_VAR_db_enc_secret: ${{ vars.DB_ENCRYPTED_SECRET }}
-      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
-      TF_VAR_fxa_secret: ${{ vars.FXA_SECRET }}
-      TF_VAR_google_oauth_secret: ${{ vars.GOOGLE_OAUTH_SECRET }}
-      TF_VAR_log_level: ${{ vars.LOG_LEVEL }}
-      TF_VAR_short_base_url: ${{ vars.SHORT_BASE_URL }}
-      TF_VAR_smtp_secret: ${{ vars.SMTP_SECRET }}
-      TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
-      TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
-      TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -125,27 +115,21 @@ jobs:
           terragrunt plan -out tfplan
           terragrunt apply tfplan
 
-      - name: output-bucket-name
-        id: output-bucket-name
-        working-directory: ./tofu/environments/stage/services/frontend-infra
-        run: |
-          output=$(terragrunt output bucket_name | tr -d '"')
-          echo bucket=$output >> $GITHUB_OUTPUT
-
-      - name: output-cloudfront-distro
-        id: output-cloudfront-distro
-        working-directory: ./tofu/environments/stage/services/frontend-infra
-        run: |
-          output=$(terragrunt output cloudfront_id)
-          echo cloudfront_id=$output >> $GITHUB_OUTPUT
-
   deploy-frontend:
     needs:
       - detect-changes
       - deploy-iac
-    if: always() && needs.detect-changes.outputs.deploy-app == 'true'
+
+    if: |
+      always() &&
+      (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-frontend == 'true'
     environment: staging
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_region: ${{ vars.AWS_REGION }}
+      TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
+      TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
     steps:
       - uses: actions/checkout@v4
 
@@ -162,6 +146,18 @@ jobs:
           cp frontend/.env.stage.example frontend/.env.stage
           cd frontend && yarn build --mode ${{ vars.APP_ENV }}
 
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
         with:
@@ -175,17 +171,27 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Invalidate Cloudfront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
+      - name: Create Frontend Archive
+        run: zip frontend.zip frontend/dist
 
       - name: Archive Frontend
         uses: actions/upload-artifact@v4
         with:
           name: frontend
-          path: frontend/dist
+          path: frontend.zip
+      
+      - name: Get frontend bucket & distribution
+        id: get-frontend-resources
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          echo "bucket=$(terragrunt output bucket_name | tr -d '"')" >> $GITHUB_OUTPUT
+          echo "distribution=$(terragrunt output cloudfront_id)" >> $GITHUB_OUTPUT
 
       - name: Deploy frontend to S3
-        run: aws s3 sync frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+        run: aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
         
 
 
@@ -193,7 +199,11 @@ jobs:
     needs: 
       - detect-changes
       - deploy-iac
-    if: always() && needs.detect-changes.outputs.deploy-app == 'true'
+
+    if: |
+      always() &&
+      (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-backend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -251,12 +261,13 @@ jobs:
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > ecr_tag.txt
+          zip ecr_tag.zip ecr_tag.txt
 
       - name: Archive ECR tag
         uses: actions/upload-artifact@v4
         with:
           name: ecr_tag
-          path: ecr_tag.txt
+          path: ecr_tag.zip
 
       - name: deploy backend-service
         working-directory: ./tofu/environments/stage/services/backend-service
@@ -271,7 +282,11 @@ jobs:
       - detect-changes
       - deploy-backend
       - deploy-frontend
-    if: always() && needs.detect-changes.outputs.deploy-app == 'true'
+
+    if: |
+      needs.detect-changes.outputs.deploy-backend == 'true' &&
+      needs.detect-changes.outputs.deploy-frontend == 'true'
+
     environment: staging
     runs-on: ubuntu-latest
     steps:
@@ -286,6 +301,7 @@ jobs:
         with:
             name: 
               ecr_tag
+      - run: ls
 
       - name: create release tag
         id: create-release-tag

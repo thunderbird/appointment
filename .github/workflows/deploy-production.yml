@@ -135,7 +135,7 @@ jobs:
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           version: ${{ github.event.release.id }}
-          file: ecr_tag.txt
+          file: ecr_tag.zip
           target: ./tofu/environments/prod/services/backend-service
       
       - name: Unzip ECR tag
