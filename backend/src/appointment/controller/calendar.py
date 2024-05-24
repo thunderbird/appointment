@@ -318,12 +318,19 @@ class CalDavConnector(BaseConnector):
             # Mark tentative events
             tentative = status == "tentative"
 
+            title = e.vobject_instance.vevent.summary.value
+            start = e.vobject_instance.vevent.dtstart.value
+            # get_duration grabs either end or duration into a timedelta
+            end = start + e.get_duration()
+            # if start doesn't hold time information (no datetime), it's a whole day
+            all_day = not isinstance(start, datetime)
+
             events.append(
                 schemas.Event(
-                    title=e.vobject_instance.vevent.summary.value,
-                    start=e.vobject_instance.vevent.dtstart.value,
-                    end=e.vobject_instance.vevent.dtend.value,
-                    all_day=not isinstance(e.vobject_instance.vevent.dtstart.value, datetime),
+                    title=title,
+                    start=start,
+                    end=end,
+                    all_day=all_day,
                     tentative=tentative,
                     description=e.icalendar_component["description"] if "description" in e.icalendar_component else "",
                 )
