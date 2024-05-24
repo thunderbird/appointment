@@ -14,9 +14,7 @@
       {{ pageError }}
     </alert-box>
   </div>
-  <admin-nav>
-
-  </admin-nav>
+  <admin-nav/>
   <div v-if="displayPage">
     <data-table
       data-name="Invite Codes"
