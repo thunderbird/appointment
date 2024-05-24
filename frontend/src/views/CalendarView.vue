@@ -104,7 +104,7 @@ const activeDateRange = computed(() => ({
 }));
 
 // active menu item for tab navigation of calendar views
-const tabActive = ref(calendarViews[route.params.view]);
+const tabActive = calendarViews.month;
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);
@@ -147,7 +147,7 @@ const selectDate = async (d) => {
   const date = dj(d);
   await router.replace({
     name: route.name,
-    params: { view: route.params.view, date: date.format('YYYY-MM-DD') },
+    params: { date: date.format('YYYY-MM-DD') },
   });
   // Check if we need to pull remote events
   await onDateChange({ start: date.startOf('month'), end: date.endOf('month') });

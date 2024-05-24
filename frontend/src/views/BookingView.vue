@@ -136,7 +136,7 @@ const getViewBySlotDistribution = (slots) => {
  * @returns {Promise<Object|null>}
  */
 const getAppointment = async () => {
-  const request = call('schedule/public/availability').post({ url: window.location.href });
+  const request = call('schedule/public/availability').post({ url: window.location.href.split('#')[0] });
 
   const { data, error } = await request.json();
 

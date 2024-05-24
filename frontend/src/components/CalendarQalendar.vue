@@ -14,9 +14,12 @@ import {
   qalendarSlotDurations,
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
+import { useRoute, useRouter } from 'vue-router';
 
 // component constants
 const dj = inject('dayjs');
+const router = useRouter();
+const route = useRoute();
 
 // component properties
 const props = defineProps({
@@ -37,10 +40,12 @@ const {
 
 const qalendarRef = ref();
 
+const isValidMode = (mode) => ['#day', '#week', '#month'].indexOf(mode) !== -1;
+
 const displayFormat = timeFormat();
 const calendarColors = ref({});
 const selectedDate = ref(null);
-const calendarMode = ref('month');
+const calendarMode = ref(isValidMode(route.hash) ? route.hash.slice(1) : 'month');
 const preferredTheme = getPreferredTheme();
 
 // component emits
@@ -109,7 +114,9 @@ const dateChange = (evt) => {
  * On mode change. e.g. month, week, day.
  */
 const modeChange = (evt) => {
-  calendarMode.value = evt?.mode ?? 'month';
+  const hash = evt?.mode ?? 'month';
+  calendarMode.value = hash;
+  router.push({ hash: `#${hash}` });
 };
 
 /* Functions */
@@ -339,6 +346,18 @@ watch(dayBoundary, () => {
   qalendarRef.value.time.DAY_START = dayBoundary.value.start * 100;
   qalendarRef.value.time.DAY_END = dayBoundary.value.end * 100;
 });
+
+watch(route, () => {
+  if (!qalendarRef?.value) {
+    return;
+  }
+
+  // Route.hash never returns null, so need to do falsey default here.
+  const hash = route.hash || '#month';
+  if (isValidMode(hash)) {
+    qalendarRef.value.mode = hash.replace('#', '');
+  }
+});
 </script>
 <template>
   <div
@@ -432,7 +451,7 @@ watch(dayBoundary, () => {
   --qalendar-theme-color: var(--qalendar-blue) !important;
   --qalendar-light-gray: theme('colors.gray.600') !important;
   --qalendar-dark-mode-line-color: var(--qalendar-appointment-border-color);
-  --qalendar-option-hover: theme('colors.gray.500')66 !important; /* note: the appended hex 66 makes 40% opacity */
+  --qalendar-option-hover: theme('colors.gray.500') 66 !important; /* note: the appended hex 66 makes 40% opacity */
 }
 
 /* Ensure smol mode is clickable, and noticeable! */
