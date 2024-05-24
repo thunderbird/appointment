@@ -252,6 +252,7 @@ export const tableDataType = {
   text: 1,
   link: 2,
   button: 3,
+  code: 4,
 };
 
 export const tableDataButtonType = {

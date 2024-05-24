@@ -83,7 +83,7 @@ const pageNotification = ref('');
 
 const filteredInvites = computed(() => invites.value.map((invite) => ({
   code: {
-    type: tableDataType.text,
+    type: tableDataType.code,
     value: invite.code,
   },
   status: {

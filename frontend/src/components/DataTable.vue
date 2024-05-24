@@ -37,6 +37,10 @@
               <span v-if="fieldData.type === tableDataType.text">
                 {{ fieldData.value }}
               </span>
+              <span v-else-if="fieldData.type === tableDataType.code" class="flex gap-4 items-center">
+                <code>{{ fieldData.value }}</code>
+                <text-button :copy="fieldData.value" />
+              </span>
               <span v-else-if="fieldData.type === tableDataType.link">
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
               </span>
@@ -94,6 +98,7 @@ import { tableDataButtonType, tableDataType } from '@/definitions';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
+import TextButton from '@/elements/TextButton.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 const props = defineProps({
