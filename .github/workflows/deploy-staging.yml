@@ -285,8 +285,9 @@ jobs:
       - deploy-frontend
 
     if: |
-      needs.detect-changes.outputs.deploy-backend == 'true' &&
-      needs.detect-changes.outputs.deploy-frontend == 'true'
+      always() &&
+      needs.deploy-backend.result == 'success' &&
+      needs.deploy-frontend.result == 'success'
 
     environment: staging
     runs-on: ubuntu-latest
