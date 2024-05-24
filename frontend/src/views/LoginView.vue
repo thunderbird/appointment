@@ -8,11 +8,10 @@
         {{ loginError }}
       </alert-box>
       <div
-        class="my-8 grid w-full"
-        :class="{'gap-8': isPasswordAuth, 'grid-rows-2': isPasswordAuth, 'gap-4': isFxaAuth}"
+        class="my-8 grid w-full gap-8"
       >
-        <label class="mt-4 flex items-center pl-4">
-          <span class="w-full" :class="{'max-w-[4em]': isFxaAuth, 'max-w-[6rem]': isPasswordAuth}">
+        <label class="flex flex-col items-center pl-4">
+          <span class="w-full">
             {{ isPasswordAuth ? t('label.username') : t('label.email') }}
           </span>
           <input
@@ -23,9 +22,21 @@
             @keydown.enter="isFxaAuth ? login() : null"
           />
         </label>
+        <label class="flex flex-col items-center pl-4">
+          <span class="w-full" >
+          {{ t('label.inviteCode') }}
+          </span>
+          <input
+            v-model="inviteCode"
+            type="text"
+            class="mr-6 w-full rounded-md"
+            :class="{'mr-4': isFxaAuth}"
+            @keydown.enter="isFxaAuth ? login() : null"
+          />
+        </label>
         <div v-if="isFxaAuth" class="text-center text-sm">{{ t('text.login.continueToFxa') }}</div>
-        <label v-if="isPasswordAuth" class="mt-4 flex items-center pl-4">
-          <span class="w-full max-w-[6rem]">{{ t('label.password') }}</span>
+        <label v-if="isPasswordAuth" class="flex flex-col items-center pl-4">
+          <span class="w-full">{{ t('label.password') }}</span>
           <input
             v-model="password"
             type="password"
@@ -62,6 +73,7 @@ const isFxaAuth = inject('isFxaAuth');
 const username = ref('');
 const password = ref('');
 const loginError = ref(null);
+const inviteCode = ref('');
 
 // do log out
 const login = async () => {
@@ -75,6 +87,11 @@ const login = async () => {
       email: username.value,
       timezone: dj.tz.guess(),
     });
+
+    if (inviteCode.value) {
+      params.append('invite_code', inviteCode.value);
+    }
+
     const { error, data } = await call(`fxa_login?${params}`).get().json();
     const { url } = data.value;
 

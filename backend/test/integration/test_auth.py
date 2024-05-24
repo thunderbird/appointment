@@ -59,16 +59,19 @@ class TestAuth:
         assert 'url' in data
         assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
 
-    def test_fxa_callback(self, with_db, with_client, monkeypatch):
+    def test_fxa_callback(self, with_db, with_client, monkeypatch, make_invite):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""
         os.environ['AUTH_SCHEME'] = 'fxa'
 
         state = 'a1234'
 
+        invite = make_invite()
+
         monkeypatch.setattr('starlette.requests.HTTPConnection.session', {
             'fxa_state': state,
             'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
-            'fxa_user_timezone': 'America/Vancouver'
+            'fxa_user_timezone': 'America/Vancouver',
+            'fxa_user_invite_code': invite.code,
         })
 
         response = with_client.get(
