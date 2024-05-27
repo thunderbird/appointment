@@ -1,11 +1,11 @@
 {
   "app": {
-    "summary": "Lass Freunde und Kollegen Zeiten in deinem Kalender wählen. Terminabsprachen so simple wie möglich.",
+    "summary": "Lass Freunde und Kollegen Zeiten in deinem Kalender wählen. Terminabsprachen so simpel wie möglich.",
     "title": "Thunderbird Appointment"
   },
   "error": {
     "actionNeeded": "Aktion erforderlich!",
-    "authenticationRequired": "Sorry, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
+    "authenticationRequired": "Entschuldigung, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "generalBookingError": "Beim Abrufen des Zeitplans ist ein Problem aufgetreten. Bitte später nochmal versuchen.",
@@ -14,7 +14,7 @@
     "minimumValue": "{field} sollte wenigstens {value} sein.",
     "noConnectedCalendars": "Kalendereinrichtung zum Fortfahren erforderlich. {0}.",
     "noConnectedCalendarsLink": "Zu den Einstellungen wechseln.",
-    "routeNotFound": "Sorry, diese Seite wurde nicht gefunden.",
+    "routeNotFound": "Entschuldigung, diese Seite wurde nicht gefunden.",
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
@@ -33,8 +33,8 @@
     "bookSelection": "Auswahl buchen",
     "calendarSettings": "Kalender-Einstellungen",
     "calendarsConnected": "Verbundene Kalender",
-    "calendarsUnconnected": "Available Calendars",
-    "connectedAccounts": "Verbundene Konten",
+    "calendarsUnconnected": "Verfügbare Kalender",
+    "connectedAccounts": "Verbundene Benutzerkonten",
     "contactRequest": "Kontaktanfrage",
     "createNewAppointment": "Neuen Termin erstellen",
     "dateAndTimeFormatting": "Datums- und Zeitformat",
@@ -51,7 +51,7 @@
     "scheduleCreated": "Zeitplan erstellt!",
     "settings": {
       "connectedAccounts": {
-        "fxa": "Mozilla Konten",
+        "fxa": "Mozilla-Konten",
         "google": "Google Kalender",
         "zoom": "Zoom"
       }
@@ -59,7 +59,7 @@
     "zoom": "Zoom"
   },
   "info": {
-    "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht, bitte überprüfe deinen Posteingang um das Event in deinen Kalender einzutragen.",
+    "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht. Bitte überprüfe deinen Posteingang, um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
     "bookingLinkIsInvalid": "Der Link zur Buchungsbestätigung ist ungültig.",
     "bookingSuccessful": "Erfolgreich gebucht!",
@@ -119,11 +119,11 @@
     "busy": "Beschäftigt",
     "caldav": "CalDAV",
     "calendar": "Kalender",
-    "calendarDeletion": "Kalendarverbindung entfernen",
+    "calendarDeletion": "Kalenderverbindung entfernen",
     "calendarUrl": "Kalender URL",
     "cancel": "Abbrechen",
     "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
-    "chooseYourAvailability": "Wähle Deine Verfügbarkeit",
+    "chooseYourAvailability": "Wähle deine Verfügbarkeit",
     "close": "Schließen",
     "closed": "Geschlossen",
     "color": "Farbe",
@@ -131,7 +131,7 @@
     "connect": "Verbinden",
     "connectCalendar": "Kalender verbinden",
     "connectGoogleCalendar": "Google Kalender verbinden",
-    "connectedAccounts": "Verbundene Konten",
+    "connectedAccounts": "Verbundene Benutzerkonten",
     "connectedAs": "Verbunden als {name}",
     "contact": "Kontakt",
     "continue": "Weiter",
@@ -163,7 +163,7 @@
     "farthestBooking": "Späteste Buchung",
     "filter": "Filter",
     "general": "Allgemein",
-    "generalDetails": "Allgemeine Infos",
+    "generalDetails": "Allgemeine Informationen",
     "generate": "Generieren",
     "generateZoomLink": "Zoom Meeting generieren",
     "goBack": "Zurück",
@@ -178,7 +178,7 @@
     "location": "Ort",
     "logIn": "Anmelden",
     "logOut": "Abmelden",
-    "loginToContinue": "Anmelden um fortzufahren",
+    "loginToContinue": "Anmelden, um fortzufahren",
     "meetingDetails": "Meeting Details",
     "message": "Nachricht",
     "month": "Monat",
@@ -199,8 +199,8 @@
     "pending": "Ausstehend",
     "primaryTimeZone": "Primäre Zeitzone",
     "privacy": "Datenschutz",
-    "refresh": "Refresh",
-    "refreshLink": "Refresh your short link",
+    "refresh": "Erneuern",
+    "refreshLink": "Link erneuern",
     "replies": "Antworten",
     "requested": "Angefragt",
     "restoreColumnOrder": "Spaltenreihenfolge wiederherstellen",
@@ -212,7 +212,7 @@
     "scheduleDetails": "Zeitplan Details",
     "scheduleSettings": {
       "availabilitySubHeading": "Lege deine Verfügbarkeit fest",
-      "meetingDetailsSubHeading": "Videos oder Notizen den Events hinzufügen",
+      "meetingDetailsSubHeading": "Videos und/oder Notizen den Events hinzufügen",
       "schedulingDetailsSubHeading": "Buchungsintervalle und Dauer festlegen"
     },
     "search": "Suche",
@@ -232,7 +232,7 @@
     "startUsingTba": "Starte mit TBA",
     "status": "Status",
     "success": "Erfolg",
-    "syncCalendars": "Sync Calendars",
+    "syncCalendars": "Kalender synchronisieren",
     "system": "System",
     "theme": "Thema",
     "time": "Zeit",
@@ -242,7 +242,7 @@
     "to": "bis",
     "today": "Heute",
     "topic": "Thema",
-    "updateUsername": "Update username",
+    "updateUsername": "Benutzername aktualisieren",
     "userProfile": "Benutzerprofil",
     "username": "Benutzername",
     "videoLink": "Konferenz-Link",
@@ -255,22 +255,22 @@
     "en": "Englisch"
   },
   "placeholder": {
-    "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen…",
+    "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen …",
     "emailAddress": "max.muster{'@'}beispiel.de",
     "firstAndLastName": "Vor- und Nachname",
     "mySchedule": "Mein Zeitplan",
     "never": "Nie",
-    "writeHere": "Hier notieren…",
-    "zoomCom": "zoom.com…"
+    "writeHere": "Hier notieren …",
+    "zoomCom": "zoom.com …"
   },
   "text": {
-    "accountDataNotice": "Lade all Deine Daten von Thunderbird Appointment herunter.",
-    "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all Deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben selbstverständlich unverändert. Du kannst jederzeit ein neues Konto erstellen.",
-    "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalendern gespeichert sind.",
+    "accountDataNotice": "Lade all deine Daten von Thunderbird Appointment herunter.",
+    "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben selbstverständlich unverändert. Du kannst jederzeit ein neues Benutzerkonto erstellen.",
+    "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalender gespeichert sind.",
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erweitern.",
     "contactRequestForm": "Bitte verwende das nachstehende Kontaktformular, um Feedback, Fragen oder Anliegen an unser Support-Team zu senden. Wir werden ggf. versuchen, so schnell wie möglich zu antworten.",
-    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können…",
+    "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können …",
     "denialSentToAddress": "Die Informationen über die Ablehnung der Anfrage wurde per E-Mail an {address} geschickt.",
     "disclaimerGABooking": "Bitte beachten: Der Eigentümer muss die Buchung bestätigen.",
     "googlePermissionCalendarName": "Anzeigen und Herunterladen aller Kalender des Google-Kontos",
@@ -279,7 +279,7 @@
     "googlePermissionEventReason": "Thunderbird Appointment benötigt diese Berechtigung, um Termine zu verbundenen Google-Kalendern hinzuzufügen.",
     "googlePermissionEventsName": "Anzeigen und Bearbeiten von Terminen in allen Kalendern",
     "homepage": {
-      "calendarCopy": "Verbinden deine Kalender und finde alle deine Termine an einem Ort. Buche einmalige oder wiederkehrende Veranstaltungen und lade andere dazu ein.",
+      "calendarCopy": "Verbinde deine Kalender und finde alle deine Termine an einem Ort. Buche einmalige oder wiederkehrende Veranstaltungen und lade andere dazu ein.",
       "copywrite": "Thunderbird gehört nun zu {mzlaLink}, eine vollständige Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts sind ©1998-2023 von einzelnen Mitwirkenden. Der Inhalt ist unter einem {creativeCommonsLink} verfügbar.",
       "creativeCommonsLinkText": "Creative-Commons-Lizenz",
       "intro": "Thunderbird Appointment macht Termine finden zum Kinderspiel. Spar dir den Aufwand und gestalte deinen Tag effizienter.",
@@ -302,7 +302,7 @@
     },
     "nameIsInvitingYou": "{name} lädt dich ein",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
-    "refreshLinkNotice": "This will refresh your short link. Please note that any old short links will no longer work.",
+    "refreshLinkNotice": "Dadurch wird dein Link erneuert. Deine alten Links werden nicht länger funktionieren.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
     "scheduleSettings": {
       "clickHereToConnect": "Hier einen Kalender verbinden",
@@ -314,7 +314,7 @@
     "settings": {
       "connectedAccounts": {
         "connect": {
-          "fxa": "Dies ist das Konto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
+          "fxa": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "google": "Ein Google-Konto kann verbunden werden, um auf die Kalender zuzugreifen. Wenn die Verbindung zum Google-Konto getrennt wird, werden die entsprechenden Kalender und die damit verbundenen Daten bei Thunderbird Appointment entfernt.",
           "googleLegal": {
             "link": "Google API Services User Data Policy",
@@ -327,7 +327,7 @@
             "cancel": "Abbrechen",
             "confirm": "Trennen",
             "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis der Terminplan auf einen neuen Kalender eingestellt wurde.",
-            "title": "Google Calendar trennen"
+            "title": "Google Kalender trennen"
           },
           "zoom": {
             "cancel": "Abbrechen",
@@ -340,7 +340,7 @@
     },
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch den Kurzlink. Alle alten Kurzlinks werden dann nicht mehr funktionieren.",
+    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
     "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt."
   },
   "units": {
