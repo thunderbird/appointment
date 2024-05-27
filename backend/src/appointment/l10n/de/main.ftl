@@ -45,7 +45,7 @@ subscriber-already-exists = Eine Person mit dieser E-Mail-Adresse existiert bere
 
 ## Authentication Exceptions
 
-email-mismatch = E-Mail-Adresse stimmen nicht überein.
+email-mismatch = E-Mail-Adressen stimmen nicht überein.
 invalid-credentials = Die angegebenen Anmeldedaten sind nicht gültig.
 oauth-error = Es ist ein Fehler bei der Authentifizierung aufgetreten. Bitte erneut versuchen.
 

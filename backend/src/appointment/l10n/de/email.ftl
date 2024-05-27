@@ -22,7 +22,7 @@ confirm-mail-subject = Buchungsanfrage von {-brand-name} bestätigen
 # $date (String) - Date of the Appointment
 # $confirm_url (String) - URL that when clicked will confirm the appointment
 # $deny_url (String) - URL that when clicked will deny the appointment
-confirm-mail-plain = { $attendee_name } ({ $attendee_email }) hat soeben dieses Zeitfenster aus Deinem Kalender angefordert: { $date }
+confirm-mail-plain = { $attendee_name } ({ $attendee_email }) hat soeben dieses Zeitfenster aus deinem Kalender angefordert: { $date }
 
                     Dieser Link führt zur Bestätigung der Buchungsanfrage:
                     { $confirm_url }
@@ -35,7 +35,7 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) hat soeben dieses 
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-confirm-mail-html-heading = { $attendee_name } ({ $attendee_email })  hat soeben dieses Zeitfenster aus Deinem Kalender angefordert: { $date }.
+confirm-mail-html-heading = { $attendee_name } ({ $attendee_email })  hat soeben dieses Zeitfenster aus deinem Kalender angefordert: { $date }.
 confirm-mail-html-confirm-text = Dieser Link führt zur Bestätigung der Buchungsanfrage:
 confirm-mail-html-confirm-action = Buchung bestätigen
 confirm-mail-html-deny-text = Dieser Link führt zur Ablehnung der Buchungsanfrage:
@@ -47,24 +47,24 @@ reject-mail-subject = Buchungsanfrage abgelehnt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
-reject-mail-html-heading = { $owner_name } hat Deine Buchungsanfrage für dieses Zeitfenster abgelehnt: { $date }.
+reject-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgelehnt: { $date }.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
-reject-mail-plain = { $owner_name } hat Deine Buchungsanfrage für dieses Zeitfenster abgelehnt: { $date }.
+reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgelehnt: { $date }.
                     {-brand-footer}
 
 ## Pending Appointment
-pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
+pending-mail-subject = deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
-pending-mail-html-heading = { $owner_name } wurde über Deine Buchungsanfrage für dieses Zeitfenster informiert: { $date }. Du erhälst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+pending-mail-html-heading = { $owner_name } wurde über deine Buchungsanfrage für dieses Zeitfenster informiert: { $date }. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
-pending-mail-plain = { $owner_name } wurde über Deine Buchungsanfrage für dieses Zeitfenster informiert: { $date }.
-                    Du erhälst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+pending-mail-plain = { $owner_name } wurde über deine Buchungsanfrage für dieses Zeitfenster informiert: { $date }.
+                    Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
                     {-brand-footer}
 
 ## Zoom Invite Link Failed
@@ -72,10 +72,10 @@ pending-mail-plain = { $owner_name } wurde über Deine Buchungsanfrage für dies
 zoom-invite-failed-subject = Fehler Erstellung Zoom-Meeting
 # Variables:
 # $title - The appointment's title
-zoom-invite-failed-html-heading = Leider ist bei der Erstellung des Zoom-Meetings für Deinen nächsten Termin ein Fehler aufgetreten: { $title }.
+zoom-invite-failed-html-heading = Leider ist bei der Erstellung des Zoom-Meetings für deinen nächsten Termin ein Fehler aufgetreten: { $title }.
 # Variables:
 # $title - The appointment's title
-zoom-invite-failed-plain = Leider ist bei der Erstellung des Zoom-Meetings für Deinen nächsten Termin ein Fehler aufgetreten: { $title }.
+zoom-invite-failed-plain = Leider ist bei der Erstellung des Zoom-Meetings für deinen nächsten Termin ein Fehler aufgetreten: { $title }.
                            {-brand-footer}
 
 ## Support Request
@@ -98,7 +98,7 @@ support-mail-html-details = { $details }
 # $requestee_email (String) - Email address of the person who did the request
 # $topic (String) - Topic selected by the person who did the request
 # $details (String) - Detailed description given by the person who did the request
-support-mail-plain = { $requestee_name } ({ $requestee_email }) hat folgende Supportanfrage per Kontaktformular auf {-brand-name}.
+support-mail-plain = { $requestee_name } ({ $requestee_email }) hat folgende Supportanfrage per Kontaktformular auf {-brand-name} gestellt.
                     Thema: { $topic }
                     Inhalt: { $details }
                     {-brand-footer}
