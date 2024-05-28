@@ -58,7 +58,7 @@ const routes = [
     redirect: { name: 'calendar' },
   },
   {
-    path: '/calendar/:view?/:date?',
+    path: '/calendar/:date?',
     name: 'calendar',
     component: CalendarView,
   },
@@ -109,19 +109,6 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-});
-
-// set default route parameters
-router.beforeEach((to) => {
-  if (to.name === 'calendar' && !to.params.view) {
-    to.params.view = 'month';
-    return to;
-  }
-  if (to.name === 'appointments' && !to.params.view) {
-    to.params.view = 'all';
-    return to;
-  }
-  return null;
 });
 
 export default router;
