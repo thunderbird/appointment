@@ -249,10 +249,11 @@ class CalDavConnector(BaseConnector):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
         self.provider = CalendarProvider.caldav
-        self.url = url
+        self.url = url if url[-1] == '/' else url + '/'
         self.password = password
         self.user = user
-        # connect to CalDAV server
+
+        # connect to the CalDAV server
         self.client = DAVClient(url=url, username=user, password=password)
 
     def test_connection(self) -> bool:
