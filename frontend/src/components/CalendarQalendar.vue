@@ -451,7 +451,7 @@ watch(route, () => {
   --qalendar-theme-color: var(--qalendar-blue) !important;
   --qalendar-light-gray: theme('colors.gray.600') !important;
   --qalendar-dark-mode-line-color: var(--qalendar-appointment-border-color);
-  --qalendar-option-hover: theme('colors.gray.500') 66 !important; /* note: the appended hex 66 makes 40% opacity */
+  --qalendar-option-hover: theme('colors.gray.500')66 !important; /* note: the appended hex 66 makes 40% opacity */
 }
 
 /* Ensure smol mode is clickable, and noticeable! */
