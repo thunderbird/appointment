@@ -135,10 +135,6 @@ def create_my_calendar(
             google_tkn=external_connection.token,
         )
     else:
-        # make sure, the CalDAV url has a trailing slash
-        if calendar.url[-1] != '/':
-            calendar.url += '/'
-
         con = CalDavConnector(
             redis_instance=None,
             url=calendar.url,
@@ -193,10 +189,6 @@ def update_my_calendar(
         raise validation.CalendarNotFoundException()
     if not repo.calendar.is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
         raise validation.CalendarNotAuthorizedException()
-
-    # make sure, the CalDAV url has a trailing slash
-    if calendar.provider == CalendarProvider.caldav and calendar.url[-1] != '/':
-        calendar.url += '/'
 
     cal = repo.calendar.update(db=db, calendar=calendar, calendar_id=id)
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)

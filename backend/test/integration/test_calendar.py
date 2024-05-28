@@ -361,7 +361,7 @@ class TestCaldav:
         with with_db() as db:
             cal = db.scalars(query).one()
 
-        assert cal.url == os.getenv("CALDAV_TEST_CALENDAR_URL") + "x/"
+        assert cal.url == os.getenv("CALDAV_TEST_CALENDAR_URL") + "x"
         assert cal.user == os.getenv("CALDAV_TEST_USER") + "x"
         assert cal.password == os.getenv("CALDAV_TEST_PASS") + "x"
 
@@ -394,6 +394,6 @@ class TestCaldav:
         with with_db() as db:
             cal = db.scalars(query).one()
 
-        assert cal.url == os.getenv("CALDAV_TEST_CALENDAR_URL") + "/"
+        assert cal.url == os.getenv("CALDAV_TEST_CALENDAR_URL")
         assert cal.user == os.getenv("CALDAV_TEST_USER")
         assert cal.password == ''
