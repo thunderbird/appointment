@@ -137,9 +137,9 @@ class Calendar(Base):
     connected = Column(Boolean, index=True, default=False)
     connected_at = Column(DateTime)
 
-    owner: Subscriber = relationship("Subscriber", back_populates="calendars")
-    appointments: list["Appointment"] = relationship("Appointment", cascade="all,delete", back_populates="calendar")
-    schedules: list["Schedule"] = relationship("Schedule", cascade="all,delete", back_populates="calendar")
+    owner: Mapped[Subscriber] = relationship("Subscriber", back_populates="calendars")
+    appointments: Mapped[list["Appointment"]] = relationship("Appointment", cascade="all,delete", back_populates="calendar")
+    schedules: Mapped[list["Schedule"]] = relationship("Schedule", cascade="all,delete", back_populates="calendar")
 
 
 class Appointment(Base):
@@ -164,8 +164,8 @@ class Appointment(Base):
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
 
-    calendar = relationship("Calendar", back_populates="appointments")
-    slots = relationship("Slot", cascade="all,delete", back_populates="appointment")
+    calendar: Mapped[Calendar] = relationship("Calendar", back_populates="appointments")
+    slots: Mapped[list['Slot']] = relationship("Slot", cascade="all,delete", back_populates="appointment")
 
 
 class Attendee(Base):
@@ -176,7 +176,7 @@ class Attendee(Base):
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     timezone = Column(String(255), index=True)
 
-    slots = relationship("Slot", cascade="all,delete", back_populates="attendee")
+    slots: Mapped[list['Slot']] = relationship("Slot", cascade="all,delete", back_populates="attendee")
 
 
 class Slot(Base):
@@ -201,11 +201,11 @@ class Slot(Base):
     booking_expires_at = Column(DateTime)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
-    appointment: Appointment = relationship("Appointment", back_populates="slots")
-    schedule: 'Schedule' = relationship("Schedule", back_populates="slots")
+    appointment: Mapped[Appointment] = relationship("Appointment", back_populates="slots")
+    schedule: Mapped['Schedule'] = relationship("Schedule", back_populates="slots")
 
-    attendee: Attendee = relationship("Attendee", cascade="all,delete", back_populates="slots")
-    subscriber: Subscriber = relationship("Subscriber", back_populates="slots")
+    attendee: Mapped[Attendee] = relationship("Attendee", cascade="all,delete", back_populates="slots")
+    subscriber: Mapped[Subscriber] = relationship("Subscriber", back_populates="slots")
 
 
 class Schedule(Base):
@@ -230,9 +230,9 @@ class Schedule(Base):
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
 
-    calendar: Calendar = relationship("Calendar", back_populates="schedules")
-    availabilities: list["Availability"] = relationship("Availability", cascade="all,delete", back_populates="schedule")
-    slots: list[Slot] = relationship("Slot", cascade="all,delete", back_populates="schedule")
+    calendar: Mapped[Calendar] = relationship("Calendar", back_populates="schedules")
+    availabilities: Mapped[list["Availability"]] = relationship("Availability", cascade="all,delete", back_populates="schedule")
+    slots: Mapped[list[Slot]] = relationship("Slot", cascade="all,delete", back_populates="schedule")
 
     @property
     def start_time_local(self) -> datetime.time:
@@ -263,7 +263,7 @@ class Availability(Base):
     min_time_before_meeting = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
 
-    schedule = relationship("Schedule", back_populates="availabilities")
+    schedule: Mapped[Schedule] = relationship("Schedule", back_populates="availabilities")
 
 
 class ExternalConnections(Base):
@@ -276,7 +276,7 @@ class ExternalConnections(Base):
     type = Column(Enum(ExternalConnectionType), index=True)
     type_id = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     token = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=2048), index=False)
-    owner = relationship("Subscriber", back_populates="external_connections")
+    owner: Mapped[Subscriber] = relationship("Subscriber", back_populates="external_connections")
 
 
 class Invite(Base):
