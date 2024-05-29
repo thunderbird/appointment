@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
-import CalendarEvent from '@/elements/CalendarEvent.vue';
+import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
   appointmentState,
   bookingStatus,
@@ -377,9 +377,7 @@ watch(route, () => {
     >
       <template #weekDayEvent="eventProps">
         <calendar-event
-          :isActive="true"
           :isSelected="selectedDate === eventProps.eventData.id"
-          :isToday="false"
           :showDetails="!isBookingRoute"
           :disabled="false"
           :placeholder="isBookingRoute"
@@ -392,9 +390,7 @@ watch(route, () => {
       <template #monthEvent="monthEventProps">
         <calendar-event
           class="max-w-[12.5rem]"
-          :isActive="true"
           :isSelected="selectedDate === monthEventProps.eventData.id"
-          :isToday="false"
           :showDetails="!isBookingRoute"
           :disabled="false"
           :placeholder="isBookingRoute"

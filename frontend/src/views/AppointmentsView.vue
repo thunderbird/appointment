@@ -174,9 +174,8 @@
     <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 lg:w-1/5">
       <div>
         <!-- monthly mini calendar -->
-        <calendar-month
+        <calendar-mini-month
           :selected="activeDate"
-          :mini="true"
           :nav="true"
           @prev="dateNav('month', false)"
           @next="dateNav('month')"
@@ -210,7 +209,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
 import AppointmentGridItem from '@/elements/AppointmentGridItem';
 import AppointmentModal from '@/components/AppointmentModal';
-import CalendarMonth from '@/components/CalendarMonth';
+import CalendarMiniMonth from '@/components/CalendarMiniMonth';
 import TabBar from '@/components/TabBar';
 
 // icons
