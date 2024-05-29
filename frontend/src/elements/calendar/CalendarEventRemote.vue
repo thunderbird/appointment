@@ -10,9 +10,8 @@
     }"
     :style="{
       borderColor: !isMonthView ? eventColor(event, false).border : null,
-      backgroundColor: isMonthView || (!isMonthView && event.tentative) ? 'transparent' : event.calendar_color,
-      color: !isMonthView && !event.tentative ? getAccessibleColor(event.calendar_color) : null,
-      color: !isMonthView && event.tentative ? event.calendar_color : null,
+      backgroundColor: eventBackgroundColor,
+      color: eventTextColor,
     }"
   >
     <div
@@ -38,11 +37,34 @@
 
 <script setup>
 import { eventColor, getAccessibleColor } from '@/utils';
+import { computed } from 'vue';
 
 // component properties
 const props = defineProps({
   isMonthView: Boolean, // flag, are we in month view?
   event: Object, // the event to show
   label: String, // event title
+});
+
+const eventBackgroundColor = computed(() => {
+  if (props.event.all_day) {
+    return null;
+  }
+  if (props.isMonthView || (!props.isMonthView && props.event.tentative)) {
+    return 'transparent';
+  } else {
+    return props.event.calendar_color;
+  }
+});
+
+const eventTextColor = computed(() => {
+  if (props.isMonthView) {
+    return null;
+  }
+  if (props.event.tentative) {
+    return props.event.calendar_color;
+  } else {
+    return getAccessibleColor(event.calendar_color)
+  }
 });
 </script>
