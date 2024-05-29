@@ -42,10 +42,8 @@
 </template>
 
 <script setup>
-import {
-  ref, computed, inject, watch,
-} from 'vue';
-import CalendarMiniMonthDay from '@/elements/CalendarMiniMonthDay';
+import { ref, computed, inject, watch } from 'vue';
+import CalendarMiniMonthDay from '@/elements/calendar/CalendarMiniMonthDay';
 
 // icons
 import {

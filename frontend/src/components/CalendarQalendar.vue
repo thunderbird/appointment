@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
-import CalendarEvent from '@/elements/CalendarEvent.vue';
+import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
   appointmentState,
   bookingStatus,
