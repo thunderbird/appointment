@@ -1,42 +1,66 @@
 <template>
   <div
-    class="group/day"
-    :class="{
-      'text-gray-400': !isActive || disabled,
-      'cursor-not-allowed': disabled,
-      'h-full': !monthView,
+    :class="{ 'text-gray-400 cursor-not-allowed': disabled, 'h-full': !monthView,
     }"
-    @mouseleave="popup = {...initialEventPopupData}">
+    @mouseleave="popup = {...initialEventPopupData}"
+  >
     <div class="flex flex-col gap-1.5 overflow-y-auto"
-         :class="{
-            'h-full': !monthView,
-            'px-1' : isBooked,
-          }"
-         :style="`height: ${elementHeight}px`">
+      :class="{
+        'h-full': !monthView,
+        'px-1' : isBooked,
+      }"
+      :style="`height: ${elementHeight}px`"
+    >
+      <!-- placeholder event for availability bookings -->
       <div
-        class="is-preview m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
+        v-if="placeholder"
+        class="m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
         :class="{
-          'rounded border-2 border-dashed border-sky-400 bg-sky-400/10 px-2 py-0.5': !placeholder && !eventData.remote && !eventData.preview,
-          'group/event cursor-pointer rounded-md p-1 hover:bg-gradient-to-b hover:shadow-lg': placeholder && !isBooked,
-          'bg-teal-50 hover:from-teal-500 hover:to-sky-600 hover:!text-white dark:bg-teal-800': placeholder && !isBooked,
-          'flex items-center gap-1.5 px-2 py-0.5': eventData.remote,
-          'flex items-center rounded border-l-4 border-teal-400 px-2': eventData.preview,
-          '!border-solid text-black': eventData.attendee !== null,
-          'rounded bg-amber-400/80 dark:text-white': eventData.all_day,
+          'group/event cursor-pointer rounded-md p-1 hover:bg-gradient-to-b hover:shadow-lg': !isBooked,
+          'bg-teal-50 hover:from-teal-500 hover:to-sky-600 hover:!text-white dark:bg-teal-800': !isBooked,
           'bg-gradient-to-b from-teal-500 to-sky-600 shadow-lg': isSelected,
           'h-full rounded': !monthView,
           '!cursor-not-allowed rounded-md bg-gray-100 p-1 dark:bg-gray-600': isBooked,
         }"
-        :style="{
-          borderColor: eventColor(eventData, placeholder).border,
-          backgroundColor: monthView || placeholder ? eventColor(eventData, placeholder).background : eventData.calendar_color,
-          color: !monthView && !placeholder ? getAccessibleColor(eventData.calendar_color) : null,
-        }"
         @click="emit('eventSelected', day)"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       >
+        <div class="grid">
+          <div
+            class="
+              truncate rounded h-full p-1 font-semibold border-2 border-dashed 
+              border-teal-500 group-hover/event:border-white"
+            :class="{
+              '!border-none': isBooked,
+              'border-white': isSelected,
+            }"
+          >
+            <template v-if="isBooked">{{ t('label.busy') }}</template>
+            <template v-else>{{ formattedTimeRange(event) }}</template>
+          </div>
+        </div>
+      </div>
+
+      <!-- remote event (can be normal, all_day or tentative) -->
+      <div
+        v-else-if="eventData.remote"
+        class="
+          m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
+          flex items-center gap-1.5 px-2 py-0.5
+        "
+        :class="{
+          'rounded bg-amber-400/80 dark:text-white': eventData.all_day,
+          'h-full rounded': !monthView,
+        }"
+        :style="{
+          borderColor: eventColor(eventData, false).border,
+          backgroundColor: monthView ? eventColor(eventData, false).background : eventData.calendar_color,
+          color: !monthView ? getAccessibleColor(eventData.calendar_color) : null,
+        }"
+        @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
+      >
         <div
-          v-if="eventData.remote && !eventData.all_day"
+          v-if="!eventData.all_day"
           class="mt-0.5 size-2.5 shrink-0 rounded-full"
           :class="{
             'bg-sky-400': !eventData.tentative,
@@ -49,17 +73,52 @@
           }"
         ></div>
         <div class="grid">
-          <div
-            class="truncate rounded"
-            :class="{
-              'h-full border-2 border-dashed border-teal-500 p-1 font-semibold group-hover/event:border-white': placeholder,
-              '!border-none': isBooked,
-              'border-white': isSelected,
-            }"
-          >
-            <template v-if="eventData.preview">{{ formattedTimeRange(event) }}</template>
-            <template v-else-if="isBooked">{{ t('label.busy') }}</template>
-            <template v-else>{{ event.title }}</template>
+          <div class="truncate rounded">
+            {{ event.title }}
+          </div>
+        </div>
+      </div>
+
+      <!-- live preview event (e.g. for schedule calendar) -->
+      <div
+        v-else-if="eventData.preview"
+        class="
+          m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
+          flex items-center rounded border-l-4 border-teal-400 px-2
+        "
+        :class="{ 'h-full': !monthView }"
+        :style="{
+          borderColor: eventColor(eventData, false).border,
+          backgroundColor: monthView ? eventColor(eventData, false).background : eventData.calendar_color,
+          color: !monthView ? getAccessibleColor(eventData.calendar_color) : null,
+        }"
+        @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
+      >
+        <div class="grid">
+          <div class="truncate rounded">
+            {{ formattedTimeRange(event) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- scheduled event -->
+      <div
+        v-else
+        class="
+          m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
+          rounded border-2 border-dashed border-sky-400 bg-sky-400/10 px-2 py-0.5
+        "
+        :class="{ 'h-full': !monthView }"
+        :style="{
+          borderColor: eventColor(eventData, false).border,
+          backgroundColor: monthView ? eventColor(eventData, false).background : eventData.calendar_color,
+          color: !monthView ? getAccessibleColor(eventData.calendar_color) : null,
+        }"
+        @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
+      >
+        <div class="grid">
+          <div class="truncate rounded">
+            {{ event.title }}
           </div>
         </div>
       </div>
@@ -95,9 +154,7 @@ const dj = inject('dayjs');
 // component properties
 const props = defineProps({
   day: String, // number of day in its month
-  isActive: Boolean, // flag showing if the day belongs to active month
-  isSelected: Boolean, // flag showing if the day is currently selected by user
-  isToday: Boolean, // flag showing if the day is today
+  isSelected: Boolean, // flag showing if the event is currently selected by user
   placeholder: Boolean, // flag formating events as placeholder
   monthView: Boolean, // flag, are we in month view?
   event: Object, // the event to show
