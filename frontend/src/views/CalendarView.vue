@@ -27,9 +27,8 @@
     <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 md:w-1/5">
       <div class="flex flex-col gap-8">
         <!-- monthly mini calendar -->
-        <calendar-month
+        <calendar-mini-month
           :selected="activeDate"
-          :mini="true"
           :nav="true"
           :events="calendarEvents"
           @prev="dateNav('month', false)"
@@ -78,7 +77,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AppointmentListItem from '@/elements/AppointmentListItem';
-import CalendarMonth from '@/components/CalendarMonth';
+import CalendarMiniMonth from '@/components/CalendarMiniMonth';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';

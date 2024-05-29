@@ -19,18 +19,16 @@
         v-for="h in isoWeekdays"
         :key="h"
         class="bg-gray-100 py-2 text-center text-gray-500 dark:bg-gray-600 dark:text-gray-300"
-        :class="{ 'font-bold': !mini}"
       >
         {{ h.min }}
       </div>
-      <calendar-month-day
+      <calendar-mini-month-day
         v-for="d in days"
         :key="d.date"
         :day="d.date"
         :is-active="d.active"
         :is-selected="d.date === date"
         :is-today="d.date === today"
-        :mini="mini"
         :placeholder="placeholder"
         :events="eventsByDate(d.date)"
         :show-details="!placeholder"
@@ -47,7 +45,7 @@
 import {
   ref, computed, inject, watch,
 } from 'vue';
-import CalendarMonthDay from '@/elements/CalendarMonthDay';
+import CalendarMiniMonthDay from '@/elements/CalendarMiniMonthDay';
 
 // icons
 import {
@@ -64,7 +62,6 @@ const isoFirstDayOfWeek = inject('isoFirstDayOfWeek');
 // component properties
 const props = defineProps({
   selected: Object, // currently active date (dayjs object)
-  mini: Boolean, // show small version of monthly calendar
   nav: Boolean, // show month navigation
   placeholder: Boolean, // format appointments as placeholder
   minDate: Object, // minimum active date in view (dayjs object)
