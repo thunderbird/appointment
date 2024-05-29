@@ -3,11 +3,9 @@
     :class="{ 'text-gray-400 cursor-not-allowed': disabled, 'h-full': !monthView }"
     @mouseleave="popup = {...initialEventPopupData}"
   >
-    <div class="flex flex-col gap-1.5 overflow-y-auto"
-      :class="{
-        'h-full': !monthView,
-        'px-1' : isBusy,
-      }"
+    <div
+      class="flex flex-col gap-1.5 overflow-y-auto"
+      :class="{ 'h-full': !monthView, 'px-1' : isBusy }"
       :style="`height: ${elementHeight}px`"
     >
       <!-- placeholder event for availability bookings -->

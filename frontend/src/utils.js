@@ -10,19 +10,15 @@ export const eventColor = (event, placeholder) => {
     background: null,
   };
   // color appointment slots
-  if (!placeholder && !event.remote) {
+  if (!placeholder) {
     color.border = event.calendar_color;
     color.background = event.calendar_color;
     // keep solid background only for slots with attendee
-    if (!event.attendee) {
+    if (!event.attendee && !event.remote) {
       color.background += '22';
     }
   }
-  // color remote tentative events
-  if (event.remote && event.tentative) {
-    color.border = `${event.calendar_color}bb`;
-    color.background = 'transparent';
-  }
+
   return color;
 };
 

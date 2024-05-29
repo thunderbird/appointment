@@ -6,16 +6,17 @@
     "
     :class="{
       'rounded bg-amber-400/80 dark:text-white': event.all_day,
-      'h-full rounded': !isMonthView,
+      'h-full border-2 rounded': !isMonthView,
     }"
     :style="{
-      borderColor: eventColor(event, false).border,
-      backgroundColor: isMonthView ? eventColor(event, false).background : event.calendar_color,
-      color: !isMonthView ? getAccessibleColor(event.calendar_color) : null,
+      borderColor: !isMonthView ? eventColor(event, false).border : null,
+      backgroundColor: isMonthView || (!isMonthView && event.tentative) ? 'transparent' : event.calendar_color,
+      color: !isMonthView && !event.tentative ? getAccessibleColor(event.calendar_color) : null,
+      color: !isMonthView && event.tentative ? event.calendar_color : null,
     }"
   >
     <div
-      v-if="!event.all_day"
+      v-if="isMonthView && !event.all_day"
       class="mt-0.5 size-2.5 shrink-0 rounded-full"
       :class="{
         'bg-sky-400': !event.tentative,
