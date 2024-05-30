@@ -258,8 +258,13 @@ def me(
 ):
     """Return the currently authed user model"""
     return schemas.SubscriberBase(
-        username=subscriber.username, email=subscriber.email, name=subscriber.name, level=subscriber.level,
-        timezone=subscriber.timezone, avatar_url=subscriber.avatar_url
+        username=subscriber.username,
+        email=subscriber.email,
+        preferred_email=subscriber.preferred_email,
+        name=subscriber.name,
+        level=subscriber.level,
+        timezone=subscriber.timezone,
+        avatar_url=subscriber.avatar_url
     )
 
 

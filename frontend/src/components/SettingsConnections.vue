@@ -98,6 +98,7 @@ const call = inject('call');
 const router = useRouter();
 const externalConnectionsStore = useExternalConnectionsStore();
 const calendarStore = useCalendarStore();
+const userStore = useUserStore();
 const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 
@@ -117,6 +118,8 @@ const refreshData = async () => {
   await Promise.all([
     externalConnectionsStore.fetch(call),
     calendarStore.fetch(call),
+    // Need to update userStore in case they used an attached email
+    userStore.profile(call),
   ]);
 };
 

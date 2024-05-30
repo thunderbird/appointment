@@ -12,6 +12,7 @@ class TestProfile:
                 "username": "test",
                 "name": "Test Account",
                 "timezone": "Europe/Berlin",
+                "secondary_email": "useme@example.org"
             },
             headers=auth_headers,
         )
@@ -20,14 +21,8 @@ class TestProfile:
         assert data["username"] == "test"
         assert data["name"] == "Test Account"
         assert data["timezone"] == "Europe/Berlin"
-
-        # Can't test login right now
-
-        # response = client.get("/login", headers=headers)
-        # data = response.json()
-        # assert data["username"] == "test"
-        # assert data["name"] == "Test Account"
-        # assert data["timezone"] == "Europe/Berlin"
+        # Response returns preferred_email
+        assert data["preferred_email"] == "useme@example.org"
 
         # Confirm the data was saved
         with with_db() as db:
@@ -35,6 +30,8 @@ class TestProfile:
             assert subscriber.username == "test"
             assert subscriber.name == "Test Account"
             assert subscriber.timezone == "Europe/Berlin"
+            assert subscriber.secondary_email == "useme@example.org"
+            assert subscriber.preferred_email == "useme@example.org"
 
     def test_signed_short_link(self, with_client):
         """Retrieves our unique short link, and ensures it exists"""

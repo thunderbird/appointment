@@ -246,10 +246,12 @@ class SubscriberIn(BaseModel):
     username: str
     name: str | None = None
     avatar_url: str | None = None
+    secondary_email: str | None = None
 
 
 class SubscriberBase(SubscriberIn):
     email: str
+    preferred_email: str | None = None
     level: SubscriberLevel | None = SubscriberLevel.basic
 
 

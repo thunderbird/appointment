@@ -79,7 +79,9 @@
 </template>
 
 <script setup>
-import { inject, computed, reactive, ref, onMounted } from 'vue';
+import {
+  inject, computed, reactive, ref, onMounted,
+} from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -109,7 +111,9 @@ const props = defineProps({
 
 // Store
 const bookingModalStore = useBookingModalStore();
-const { open, state, stateData, isLoading, hasErrors, isFinished, isEditable } = storeToRefs(bookingModalStore);
+const {
+  open, state, stateData, isLoading, hasErrors, isFinished, isEditable,
+} = storeToRefs(bookingModalStore);
 
 // Refs
 
@@ -141,7 +145,7 @@ const bookIt = () => {
 onMounted(() => {
   if (user.exists()) {
     attendee.name = user.data.name;
-    attendee.email = user.data.email;
+    attendee.email = user.data.preferredEmail;
     attendee.timezone = user.data.timezone;
   }
 });

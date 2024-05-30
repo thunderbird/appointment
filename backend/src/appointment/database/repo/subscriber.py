@@ -47,7 +47,12 @@ def get_by_google_state(db: Session, state: str):
 
 def create(db: Session, subscriber: schemas.SubscriberBase):
     """create new subscriber"""
-    db_subscriber = models.Subscriber(**subscriber.dict())
+    data = subscriber.model_dump()
+
+    # Remove virtual fields
+    del data['preferred_email']
+
+    db_subscriber = models.Subscriber(**data)
     db.add(db_subscriber)
     db.commit()
     db.refresh(db_subscriber)

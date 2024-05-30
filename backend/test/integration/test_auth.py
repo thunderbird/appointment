@@ -6,6 +6,15 @@ from appointment.database import repo, models
 
 
 class TestAuth:
+    def test_me(self, with_db, with_client):
+        response = with_client.get('/me', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data.get('username') == os.getenv('TEST_USER_EMAIL')
+        assert data.get('email') == os.getenv('TEST_USER_EMAIL')
+        assert data.get('secondary_email') is None
+        assert data.get('preferred_email') == os.getenv('TEST_USER_EMAIL')
+
     def test_token(self, with_db, with_client, make_pro_subscriber):
         """Test that our username/password authentication works correctly."""
         password = 'test'

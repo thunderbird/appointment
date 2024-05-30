@@ -4,6 +4,7 @@ import { i18n } from '@/composables/i18n';
 
 const initialUserObject = {
   email: null,
+  preferredEmail: null,
   level: null,
   name: null,
   timezone: null,
@@ -19,6 +20,21 @@ export const useUserStore = defineStore('user', () => {
   const exists = () => data.value.accessToken !== null;
   const $reset = () => {
     data.value = structuredClone(initialUserObject);
+  };
+
+  const updateProfile = (userData) => {
+    data.value = {
+      // Include the previous values first
+      ...data.value,
+      // Then the new ones!
+      username: userData.username,
+      name: userData.name,
+      email: userData.email,
+      preferredEmail: userData?.preferred_email ?? userData.email,
+      level: userData.level,
+      timezone: userData.timezone,
+      avatarUrl: userData.avatar_url,
+    };
   };
 
   /**
@@ -52,17 +68,7 @@ export const useUserStore = defineStore('user', () => {
       return { error: userData.value?.detail ?? error.value };
     }
 
-    data.value = {
-      // Include the previous values first
-      ...data.value,
-      // Then the new ones!
-      username: userData.value.username,
-      name: userData.value.name,
-      email: userData.value.email,
-      level: userData.value.level,
-      timezone: userData.value.timezone,
-      avatarUrl: userData.value.avatar_url,
-    };
+    updateProfile(userData.value);
 
     return updateSignedUrl(fetch);
   };
@@ -130,6 +136,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    data, exists, $reset, updateSignedUrl, profile, changeSignedUrl, login, logout,
+    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout,
   };
 });
