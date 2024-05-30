@@ -91,6 +91,9 @@ class Base:
         """Updates the time_updated field with the current datetime. This function does not save the model!"""
         self.time_updated = datetime.datetime.now()
 
+    def get_columns(self) -> list:
+        return list(self.__table__.columns.keys())
+
     time_created = Column(DateTime, server_default=func.now(), default=func.now(), index=True)
     time_updated = Column(DateTime, server_default=func.now(), default=func.now(), onupdate=func.now(), index=True)
 

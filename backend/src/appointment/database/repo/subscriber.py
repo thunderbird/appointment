@@ -49,8 +49,9 @@ def create(db: Session, subscriber: schemas.SubscriberBase):
     """create new subscriber"""
     data = subscriber.model_dump()
 
-    # Remove virtual fields
-    del data['preferred_email']
+    # Filter incoming data to just the available model columns
+    columns = models.Subscriber().get_columns()
+    data = {k: v for k, v in data.items() if k in columns}
 
     db_subscriber = models.Subscriber(**data)
     db.add(db_subscriber)
