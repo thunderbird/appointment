@@ -47,6 +47,7 @@ subscriber-already-exists = A subscriber with this email address already exists.
 
 email-mismatch = Email mismatch.
 invalid-credentials = The provided credentials are not valid.
+disabled-account = Your account has been disabled.
 oauth-error = There was an error with the authentication flow. Please try again.
 
 ## Zoom Exceptions

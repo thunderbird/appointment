@@ -269,6 +269,7 @@ class Subscriber(SubscriberAuth):
 
 
 class SubscriberAdminOut(Subscriber):
+    active: bool | None = True
     invite: Invite | None = None
     time_created: datetime
 

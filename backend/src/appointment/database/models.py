@@ -106,6 +106,8 @@ class Subscriber(Base):
     # Encrypted (here) and hashed (by the associated hashing functions in routes/auth)
     password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
 
+    active: bool = Column(Boolean, index=True, default=True)
+
     # Use subscriber.preferred_email for any email, or other user-facing presence.
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     secondary_email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), nullable=True, index=True)

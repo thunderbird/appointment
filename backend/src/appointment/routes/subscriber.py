@@ -24,12 +24,20 @@ def get_all_subscriber(db: Session = Depends(get_db), _: Subscriber = Depends(ge
 @router.put("/disable/{email}")
 def disable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to disable a subscriber by email, needs admin permissions"""
-    # TODO: Add status to subscriber, and disable it instead.
-    raise NotImplementedError
-
     subscriber = repo.subscriber.get_by_email(db, email)
     if not subscriber:
         raise validation.SubscriberNotFoundException()
-    # TODO: CAUTION! This actually deletes the subscriber. We might want to only disable them.
-    # This needs an active flag on the subscribers model.
-    return repo.subscriber.delete(db, subscriber)
+    
+    # Set active flag to false on the subscribers model.
+    return repo.subscriber.disable(db, subscriber)
+
+
+@router.put("/enable/{email}")
+def disable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
+    """endpoint to disable a subscriber by email, needs admin permissions"""
+    subscriber = repo.subscriber.get_by_email(db, email)
+    if not subscriber:
+        raise validation.SubscriberNotFoundException()
+    
+    # Set active flag to true on the subscribers model.
+    return repo.subscriber.enable(db, subscriber)

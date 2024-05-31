@@ -71,8 +71,24 @@ def update(db: Session, data: schemas.SubscriberIn, subscriber_id: int):
     return db_subscriber
 
 
+def disable(db: Session, subscriber: models.Subscriber):
+    """Disable a given subscriber"""
+    subscriber.active = False
+    db.commit()
+    db.refresh(subscriber)
+    return subscriber
+
+
+def enable(db: Session, subscriber: models.Subscriber):
+    """Enable a given subscriber"""
+    subscriber.active = True
+    db.commit()
+    db.refresh(subscriber)
+    return subscriber
+
+
 def delete(db: Session, subscriber: models.Subscriber):
-    """Delete a subscriber by subscriber id"""
+    """Delete a given subscriber"""
     db.delete(subscriber)
     db.commit()
     return True

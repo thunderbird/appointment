@@ -41,6 +41,10 @@
                 <code>{{ fieldData.value }}</code>
                 <text-button :copy="fieldData.value" />
               </span>
+              <span v-else-if="fieldData.type === tableDataType.bool">
+                <span v-if="fieldData.value">Yes</span>
+                <span v-else>No</span>
+              </span>
               <span v-else-if="fieldData.type === tableDataType.link">
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
               </span>

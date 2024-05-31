@@ -23,7 +23,7 @@
       :columns="columns"
       :filters="filters"
       :loading="loading"
-      @field-click="(_key, field) => disableSubscriber(field.email.value)"
+      @field-click="(_key, field) => toggleSubscriberState(field.email.value, field.active.value)"
     >
       <template v-slot:footer>
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
@@ -93,6 +93,10 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
     type: tableDataType.text,
     value: subscriber.email,
   },
+  active: {
+    type: tableDataType.bool,
+    value: subscriber.active,
+  },
   timeCreated: {
     type: tableDataType.text,
     value: dj(subscriber.time_created).format('ll LTS'),
@@ -102,16 +106,14 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
     value: subscriber.timezone ?? 'Unset',
   },
   wasInvited: {
-    type: tableDataType.text,
-    value: subscriber.invite ? 'Yes' : 'No',
+    type: tableDataType.bool,
+    value: subscriber.invite,
   },
-  /*
   disable: {
     type: tableDataType.button,
-    buttonType: tableDataButtonType.caution,
-    value: 'Disable',
+    buttonType: subscriber.active ? tableDataButtonType.caution : tableDataButtonType.primary,
+    value: subscriber.active ? 'Disable' : 'Enable',
   },
-   */
 })));
 const columns = [
   {
@@ -127,6 +129,10 @@ const columns = [
     name: 'Email',
   },
   {
+    key: 'active',
+    name: 'Active',
+  },
+  {
     key: 'createdAt',
     name: 'Time Created',
   },
@@ -138,12 +144,10 @@ const columns = [
     key: 'wasInvited',
     name: 'Was Invited?',
   },
-  /*
   {
     key: 'disable',
     name: '',
   },
-   */
 ];
 const filters = [
   {
@@ -194,12 +198,13 @@ const refresh = async () => {
  * @param email
  * @returns {Promise<void>}
  */
-const disableSubscriber = async (email) => {
+const toggleSubscriberState = async (email, currentState) => {
   if (!email) {
     return;
   }
 
-  const response = await call(`subscriber/disable/${email}`).put().json();
+  const action = currentState ? 'disable' : 'enable';
+  const response = await call(`subscriber/${action}/${email}`).put().json();
   const { data } = response;
 
   if (data.value) {
