@@ -88,7 +88,7 @@ resource "aws_cloudfront_distribution" "appointment" {
   comment = "appointment ${var.environment} frontend"
   enabled = true
 
-  aliases = ["${var.environment}.appointment.day"]
+  aliases = [var.frontend_url]
 
   logging_config {
     bucket          = "${aws_s3_bucket.request_logs.id}.s3.amazonaws.com"

@@ -44,9 +44,3 @@ variable "backend_security_group" {
   type        = string
   default     = ""
 }
-
-variable "database_secret" {
-  description = "Database secret"
-  type        = string
-  default     = ""
-}

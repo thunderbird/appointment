@@ -48,5 +48,6 @@ inputs = {
   logs_endpoint_security_group    = dependency.vpc.outputs.logs_endpoint_security_group
   database_subnet_cidrs           = dependency.vpc.outputs.database_subnet_cidrs
   ssl_cert                        = "arn:aws:acm:us-east-1:768512802988:certificate/4a53e27b-0cd3-4855-a13f-5bac50015e43"
+  frontend_url                    = get_env("TF_VAR_frontend_url")
   tags                            = local.tags
 }

@@ -42,3 +42,8 @@ variable "x_allow_secret" {
   description = "X-Allow header secret"
   type        = string
 }
+
+variable "frontend_url" {
+  description = "Environment frontend url"
+  type = string
+}

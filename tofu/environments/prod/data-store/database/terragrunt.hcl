@@ -56,6 +56,7 @@ inputs = {
   region                     = local.region
   vpc                        = dependency.vpc.outputs.vpc_id
   subnet_group               = dependency.vpc.outputs.database_subnet_group
+  database_subnets           = dependency.vpc.outputs.database_subnets
   elasticache_security_group = dependency.cache.outputs.security_group_id
   backend_security_group     = dependency.backend.outputs.security_group_id
   tags                       = local.tags
