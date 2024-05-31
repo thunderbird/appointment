@@ -91,6 +91,9 @@ class Base:
         """Updates the time_updated field with the current datetime. This function does not save the model!"""
         self.time_updated = datetime.datetime.now()
 
+    def get_columns(self) -> list:
+        return list(self.__table__.columns.keys())
+
     time_created = Column(DateTime, server_default=func.now(), default=func.now(), index=True)
     time_updated = Column(DateTime, server_default=func.now(), default=func.now(), onupdate=func.now(), index=True)
 
@@ -102,7 +105,11 @@ class Subscriber(Base):
     username = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     # Encrypted (here) and hashed (by the associated hashing functions in routes/auth)
     password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
+
+    # Use subscriber.preferred_email for any email, or other user-facing presence.
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
+    secondary_email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), nullable=True, index=True)
+
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
     timezone = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
@@ -121,6 +128,11 @@ class Subscriber(Base):
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
         return next(filter(lambda ec: ec.type == type, self.external_connections), None)
+
+    @property
+    def preferred_email(self):
+        """Returns the preferred email address."""
+        return self.secondary_email if self.secondary_email is not None else self.email
 
 
 class Calendar(Base):

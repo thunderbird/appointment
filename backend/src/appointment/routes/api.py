@@ -52,7 +52,12 @@ def update_me(
 
     me = repo.subscriber.update(db=db, data=data, subscriber_id=subscriber.id)
     return schemas.SubscriberBase(
-        username=me.username, email=me.email, name=me.name, level=me.level, timezone=me.timezone
+        username=me.username,
+        email=me.email,
+        preferred_email=me.preferred_email,
+        name=me.name,
+        level=me.level,
+        timezone=me.timezone
     )
 
 
@@ -473,7 +478,7 @@ def send_feedback(
     background_tasks.add_task(
         send_support_email,
         requestee_name=subscriber.name,
-        requestee_email=subscriber.email,
+        requestee_email=subscriber.preferred_email,
         topic=form_data.topic,
         details=form_data.details,
     )

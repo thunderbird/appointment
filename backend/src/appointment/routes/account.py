@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 
-from ..database.models import Subscriber
+from ..database.models import Subscriber, ExternalConnectionType
+from ..database.repo.external_connection import get_by_type
 from ..database import schemas
 
 from fastapi.responses import StreamingResponse
@@ -30,9 +31,10 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
 
     for ec in subscriber.external_connections:
         external_connections[ec.type.name].append(schemas.ExternalConnectionOut(owner_id=ec.owner_id, type=ec.type.name,
-                                                                            type_id=ec.type_id, name=ec.name))
+                                                                                type_id=ec.type_id, name=ec.name))
 
     return external_connections
+
 
 @router.get("/download")
 def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
@@ -52,3 +54,16 @@ def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depen
         return data.delete_account(db, subscriber)
     except AccountDeletionException as e:
         raise HTTPException(status_code=500, detail=e.message)
+
+
+@router.get("/available-emails")
+def get_available_emails(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """Return the list of emails they can use within Thunderbird Appointment"""
+    google_connections = get_by_type(db, subscriber_id=subscriber.id, type=ExternalConnectionType.google)
+
+    emails = {subscriber.email, *[connection.name for connection in google_connections]} - {subscriber.preferred_email}
+
+    return [
+        subscriber.preferred_email,
+        *emails
+    ]

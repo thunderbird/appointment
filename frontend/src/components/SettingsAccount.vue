@@ -13,9 +13,24 @@
             :class="{ '!border-red-500': errorUsername }"
           />
           <div v-if="errorUsername" class="text-sm text-red-500">
-            {{ t('error.usernameIsNotAvailable')}}
+            {{ t('error.usernameIsNotAvailable') }}
           </div>
         </div>
+      </label>
+      <label class="tooltip-label mt-4 flex items-center pl-4">
+        <div class="flex w-full max-w-2xs gap-2">{{ t('label.preferredEmail') }}
+          <span class="relative cursor-help" role="tooltip" aria-labelledby="preferred-email-help-tooltip">
+          <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
+            <span class="tooltip hidden">
+              <transition>
+                  <tool-tip id="preferred-email-help-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.preferredEmailHelp')"/>
+              </transition>
+            </span>
+        </span>
+        </div>
+        <select v-model="activePreferredEmail" class="w-full rounded-md">
+          <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
+        </select>
       </label>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
@@ -40,22 +55,22 @@
               target="_blank"
               class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
             >
-              <icon-external-link class="size-5" />
+              <icon-external-link class="size-5"/>
             </a>
           </div>
-          <text-button :label="t('label.copyLink')" :copy="user.data.signedUrl" />
+          <text-button :label="t('label.copyLink')" :copy="user.data.signedUrl"/>
         </div>
       </label>
       <div class="mt-6 flex gap-4 self-end">
         <secondary-button
-            :label="t('label.refreshLink')"
-            class="!text-teal-500"
-            @click="refreshLink"
+          :label="t('label.refreshLink')"
+          class="!text-teal-500"
+          @click="refreshLink"
         />
         <secondary-button
-            :label="t('label.saveChanges')"
-            class="!text-teal-500"
-            @click="updateUserCheckForConfirmation"
+          :label="t('label.saveChanges')"
+          class="!text-teal-500"
+          @click="updateUserCheckForConfirmation"
         />
       </div>
     </div>
@@ -79,45 +94,45 @@
     </div>
   </div>
   <!-- Refresh link confirmation modal -->
-    <ConfirmationModal
-      :open="refreshLinkModalOpen"
-      :title="t('label.refreshLink')"
-      :message="t('text.refreshLinkNotice')"
-      :confirm-label="t('label.refresh')"
-      :cancel-label="t('label.cancel')"
-      @confirm="() => refreshLinkConfirm()"
-      @close="closeModals"
+  <ConfirmationModal
+    :open="refreshLinkModalOpen"
+    :title="t('label.refreshLink')"
+    :message="t('text.refreshLinkNotice')"
+    :confirm-label="t('label.refresh')"
+    :cancel-label="t('label.cancel')"
+    @confirm="() => refreshLinkConfirm()"
+    @close="closeModals"
   ></ConfirmationModal>
   <!-- Update username confirmation modal -->
-    <ConfirmationModal
-      :open="updateUsernameModalOpen"
-      :title="t('label.updateUsername')"
-      :message="t('text.updateUsernameNotice')"
-      :confirm-label="t('label.saveChanges')"
-      :cancel-label="t('label.cancel')"
-      @confirm="() => updateUser()"
-      @close="closeModals"
+  <ConfirmationModal
+    :open="updateUsernameModalOpen"
+    :title="t('label.updateUsername')"
+    :message="t('text.updateUsernameNotice')"
+    :confirm-label="t('label.saveChanges')"
+    :cancel-label="t('label.cancel')"
+    @confirm="() => updateUser()"
+    @close="closeModals"
   ></ConfirmationModal>
   <!-- Account download modal -->
-    <ConfirmationModal
-      :open="downloadAccountModalOpen"
-      :title="t('label.accountData')"
-      :message="t('text.accountDataNotice')"
-      :confirm-label="t('label.continue')"
-      :cancel-label="t('label.cancel')"
-      @confirm="actuallyDownloadData"
-      @close="closeModals"
+  <ConfirmationModal
+    :open="downloadAccountModalOpen"
+    :title="t('label.accountData')"
+    :message="t('text.accountDataNotice')"
+    :confirm-label="t('label.continue')"
+    :cancel-label="t('label.cancel')"
+    @confirm="actuallyDownloadData"
+    @close="closeModals"
   ></ConfirmationModal>
   <!-- Account deletion modals -->
   <ConfirmationModal
-      :open="deleteAccountFirstModalOpen"
-      :title="t('label.deleteYourAccount')"
-      :message="t('text.accountDeletionWarning')"
-      :confirm-label="t('label.deleteYourAccount')"
-      :cancel-label="t('label.cancel')"
-      :use-caution-button="true"
-      @confirm="actuallyDeleteAccount"
-      @close="closeModals"
+    :open="deleteAccountFirstModalOpen"
+    :title="t('label.deleteYourAccount')"
+    :message="t('text.accountDeletionWarning')"
+    :confirm-label="t('label.deleteYourAccount')"
+    :cancel-label="t('label.cancel')"
+    :use-caution-button="true"
+    @confirm="actuallyDeleteAccount"
+    @close="closeModals"
   ></ConfirmationModal>
 </template>
 
@@ -135,10 +150,11 @@ import SecondaryButton from '@/elements/SecondaryButton.vue';
 import TextButton from '@/elements/TextButton.vue';
 
 // icons
-import { IconExternalLink } from '@tabler/icons-vue';
+import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import ToolTip from '@/elements/ToolTip.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -154,6 +170,8 @@ const deleteAccountFirstModalOpen = ref(false);
 const deleteAccountSecondModalOpen = ref(false);
 const refreshLinkModalOpen = ref(false);
 const updateUsernameModalOpen = ref(false);
+const availableEmails = ref([user.data.preferredEmail]);
+const activePreferredEmail = ref(user.data.preferredEmail);
 
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
@@ -163,9 +181,19 @@ const closeModals = () => {
   updateUsernameModalOpen.value = false;
 };
 
+const getAvailableEmails = async () => {
+  const { data } = await call('account/available-emails').get().json();
+  if (!data || !data.value) {
+    availableEmails.value = [];
+  }
+
+  availableEmails.value = data.value;
+};
+
 const refreshData = async () => Promise.all([
   user.updateSignedUrl(call),
   externalConnectionsStore.fetch(call),
+  getAvailableEmails(),
 ]);
 
 // save user data
@@ -174,11 +202,12 @@ const updateUser = async () => {
   const inputData = {
     username: activeUsername.value,
     name: activeDisplayName.value,
+    secondary_email: activePreferredEmail.value,
   };
-  const { error } = await call('me').put(inputData).json();
+  const { data, error } = await call('me').put(inputData).json();
   if (!error.value) {
     // update user in store
-    user.$patch({ data: { ...user.data, ...inputData } });
+    user.updateProfile(data.value);
     await user.updateSignedUrl(call);
     errorUsername.value = false;
     // TODO show some confirmation
@@ -264,3 +293,17 @@ const actuallyDeleteAccount = async () => {
 };
 
 </script>
+<style scoped>
+
+/* If the device does not support hover (i.e. mobile) then make it activate on focus within */
+@media (hover: none) {
+  .tooltip-label:focus-within .tooltip {
+    display: block;
+  }
+}
+
+.tooltip-icon:hover ~ .tooltip {
+  display: block;
+}
+
+</style>

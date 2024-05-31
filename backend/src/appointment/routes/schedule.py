@@ -254,7 +254,7 @@ def request_schedule_availability_slot(
     db.commit()
 
     # Sending confirmation email to owner
-    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee.name, date=date, to=subscriber.email)
+    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee.name, date=date, to=subscriber.preferred_email)
 
     # Sending pending email to attendee
     background_tasks.add_task(send_pending_email, owner_name=subscriber.name, date=attendee_date, to=slot.attendee.email)
@@ -376,7 +376,7 @@ def decide_on_schedule_availability_slot(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.email, appointment_title=schedule.name)
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error("Failed to save the zoom meeting link to the appointment: ", err)
             if os.getenv('SENTRY_DSN') != '':

@@ -197,6 +197,7 @@
     "password": "Password",
     "past": "Past",
     "pending": "Pending",
+    "preferredEmail": "Preferred Email",
     "primaryTimeZone": "Primary time zone",
     "privacy": "Privacy",
     "refresh": "Refresh",
@@ -301,6 +302,7 @@
       "continueToFxa": "Enter your email above to continue to Mozilla Accounts"
     },
     "nameIsInvitingYou": "{name} is inviting you",
+    "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
     "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",

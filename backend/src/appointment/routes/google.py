@@ -124,8 +124,15 @@ def disconnect_account(
     # Remove all of their google calendars (We only support one connection so this should be good for now)
     repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google)
 
+    # Unassociated any secondary emails if they're attached to their google connection
+    if subscriber.secondary_email == google_connection.name:
+        subscriber.secondary_email = None
+        db.add(subscriber)
+        db.commit()
+
     # Remove their account details
     repo.external_connection.delete_by_type(db, subscriber.id, google_connection.type, google_connection.type_id)
+
 
 
     return True
