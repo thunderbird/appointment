@@ -99,6 +99,7 @@ These should be deployed in the following order and generally will only be updat
     - TF_VAR_name_prefix
     - TF_VAR_environment
     - TF_VAR_region
+    - TF_VAR_frontend_url
 
    1. `cd tofu/environments/<env>/services/backend-infra`
    2. `terragrunt init`

@@ -58,3 +58,8 @@ variable "ssl_cert" {
   description = "SSL certificate ARN in AWS Certificate Manager"
   type        = string
 }
+
+variable "frontend_url" {
+  description = "environment frontend url"
+  type = string
+}
