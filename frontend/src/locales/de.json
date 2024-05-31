@@ -197,6 +197,7 @@
     "password": "Passwort",
     "past": "Vergangen",
     "pending": "Ausstehend",
+    "preferredEmail": "Bevorzugte E-Mail-Adresse",
     "primaryTimeZone": "Primäre Zeitzone",
     "privacy": "Datenschutz",
     "refresh": "Erneuern",
@@ -301,6 +302,7 @@
       "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
     },
     "nameIsInvitingYou": "{name} lädt dich ein",
+    "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "Dadurch wird dein Link erneuert. Deine alten Links werden nicht länger funktionieren.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
