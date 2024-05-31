@@ -479,13 +479,15 @@ const scheduledRangeMinutes = computed(() => {
   return end.diff(start, 'minutes');
 });
 
-// generate time slots from current schedule configuration
-const getSlots = () => {
+// generate time slots from current schedule configuration for the displayed month
+const getSlotPreviews = () => {
   const slots = [];
+  // Add 1 week to the end of month here to display slots in displayed next month days too
   const end = scheduleInput.value.end_date
-    ? dj.min(dj(scheduleInput.value.end_date), dj(props.activeDate).endOf('month'))
-    : dj(props.activeDate).endOf('month');
-  let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month'));
+    ? dj.min(dj(scheduleInput.value.end_date), dj(props.activeDate).endOf('month').add(1, 'week'))
+    : dj(props.activeDate).endOf('month').add(1, 'week');
+  // Substract one week from the start to display slots in displayed previous month days too
+  let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month').subtract(1, 'week'));
   while (pointerDate <= end) {
     if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
@@ -508,7 +510,7 @@ const getScheduleAppointment = () => ({
   location_url: scheduleInput.value.location_url,
   details: scheduleInput.value.details,
   status: 2,
-  slots: getSlots(),
+  slots: getSlotPreviews(),
   type: 'schedule',
 });
 

@@ -87,7 +87,6 @@ const schedules = ref([]);
 const firstSchedule = computed(() => (schedules.value?.length > 0 ? schedules.value[0] : null));
 const schedulesReady = ref(false);
 const getFirstSchedule = async () => {
-  calendarEvents.value = [];
   // trailing slash to prevent fast api redirect which doesn't work great on our container setup
   const { data } = await call('schedule/').get().json();
   schedules.value = data.value;
@@ -106,6 +105,8 @@ const schedulePreview = (schedule) => {
 const onDateChange = (dateObj) => {
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
+
+  activeDate.value = start.add(end.diff(start, 'minutes')/2, 'minutes');
 
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
   if (
