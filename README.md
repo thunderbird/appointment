@@ -4,7 +4,6 @@
 
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
-
 ## Feedback and Support
 
 If you'd like to give feedback or need support, please see our [Topicbox](https://thunderbird.topicbox.com/groups/services).

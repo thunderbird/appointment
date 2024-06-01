@@ -42,6 +42,9 @@ event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdate
 
 failed-to-create-subscriber = Es gab einen Fehler beim Anlegen der Person. Bitte später erneut versuchen.
 subscriber-already-exists = Eine Person mit dieser E-Mail-Adresse existiert bereits.
+subscriber-already-deleted = Die Person ist bereits gelöscht.
+subscriber-already-enabled = Die Person ist bereits aktiv.
+subscriber-self-delete = Die Löschung des eigenen Benutzerkontos ist hier nicht möglich.
 
 ## Authentication Exceptions
 

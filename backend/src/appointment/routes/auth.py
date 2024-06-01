@@ -153,7 +153,7 @@ def fxa_callback(
         subscriber = fxa_subscriber
 
     # Only proceed if user account is enabled (which is the default case for new users)
-    if not subscriber.active:
+    if subscriber.is_deleted:
         raise HTTPException(status_code=403, detail=l10n('disabled-account'))
 
     fxa_connections = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.fxa)
@@ -222,7 +222,7 @@ def token(
         raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
     # Only proceed if user account is enabled
-    if not subscriber.active:
+    if subscriber.is_deleted:
         raise HTTPException(status_code=403, detail=l10n('disabled-account'))
 
     # Verify the incoming password, and re-hash our password if needed
@@ -279,7 +279,7 @@ def me(
 @router.post("/permission-check")
 def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     """Checks if they have admin permissions"""
-    return subscriber.active
+    return subscriber.is_deleted
 
 
 # @router.get('/test-create-account')

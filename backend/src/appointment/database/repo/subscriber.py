@@ -4,6 +4,7 @@ Repository providing CRUD functions for subscriber database models.
 """
 
 import re
+import datetime
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
@@ -73,7 +74,11 @@ def update(db: Session, data: schemas.SubscriberIn, subscriber_id: int):
 
 def disable(db: Session, subscriber: models.Subscriber):
     """Disable a given subscriber"""
-    subscriber.active = False
+    # mark subscriber deleted = disable them
+    subscriber.time_deleted = datetime.datetime.now(datetime.UTC)
+    # invalidate session
+    # subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+    db.add(subscriber)
     db.commit()
     db.refresh(subscriber)
     return subscriber
@@ -81,7 +86,11 @@ def disable(db: Session, subscriber: models.Subscriber):
 
 def enable(db: Session, subscriber: models.Subscriber):
     """Enable a given subscriber"""
-    subscriber.active = True
+    # mark subscriber deleted = disable them
+    subscriber.time_deleted = None
+    # refresh session
+    # subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+    db.add(subscriber)
     db.commit()
     db.refresh(subscriber)
     return subscriber

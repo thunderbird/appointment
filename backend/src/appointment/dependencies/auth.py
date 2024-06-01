@@ -32,6 +32,7 @@ def get_user_from_token(db, token: str):
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
     if any([
         subscriber is None,
+        subscriber.is_deleted,
         subscriber and subscriber.minimum_valid_iat_time and not iat,
         subscriber and subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat)
     ]):

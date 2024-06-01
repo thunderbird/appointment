@@ -23,7 +23,7 @@
       :columns="columns"
       :filters="filters"
       :loading="loading"
-      @field-click="(_key, field) => toggleSubscriberState(field.email.value, field.active.value)"
+      @field-click="(_key, field) => toggleSubscriberState(field.email.value, field.timeDeleted.value === '')"
     >
       <template v-slot:footer>
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
@@ -54,18 +54,19 @@
 </template>
 
 <script setup>
-import {
-  computed, inject, onMounted, ref,
-} from 'vue';
-import { useI18n } from 'vue-i18n';
 import { alertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
-import DataTable from '@/components/DataTable.vue';
+import { computed, inject, onMounted, ref } from 'vue';
+import { IconSend } from '@tabler/icons-vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+import AdminNav from '@/elements/admin/AdminNav.vue';
+import AlertBox from '@/elements/AlertBox.vue';
+import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
-import { IconSend } from '@tabler/icons-vue';
-import AlertBox from '@/elements/AlertBox.vue';
-import AdminNav from '@/elements/admin/AdminNav.vue';
+
+const user = useUserStore();
 
 const router = useRouter();
 const { t } = useI18n();
@@ -93,13 +94,13 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
     type: tableDataType.text,
     value: subscriber.email,
   },
-  active: {
-    type: tableDataType.bool,
-    value: subscriber.active,
-  },
   timeCreated: {
     type: tableDataType.text,
     value: dj(subscriber.time_created).format('ll LTS'),
+  },
+  timeDeleted: {
+    type: tableDataType.text,
+    value: subscriber.time_deleted ? dj(subscriber.time_deleted).format('ll LTS') : '',
   },
   timezone: {
     type: tableDataType.text,
@@ -111,8 +112,9 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
   },
   disable: {
     type: tableDataType.button,
-    buttonType: subscriber.active ? tableDataButtonType.caution : tableDataButtonType.primary,
-    value: subscriber.active ? 'Disable' : 'Enable',
+    buttonType: subscriber.time_deleted ? tableDataButtonType.primary : tableDataButtonType.caution,
+    value: subscriber.time_deleted ? 'Enable' : 'Disable',
+    disabled: !subscriber.time_deleted && subscriber.email === user.data.email,
   },
 })));
 const columns = [
@@ -129,12 +131,12 @@ const columns = [
     name: 'Email',
   },
   {
-    key: 'active',
-    name: 'Active',
-  },
-  {
     key: 'createdAt',
     name: 'Time Created',
+  },
+  {
+    key: 'deletedAt',
+    name: 'Time Deleted',
   },
   {
     key: 'timezone',

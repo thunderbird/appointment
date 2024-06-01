@@ -98,15 +98,23 @@ class Base:
     time_updated = Column(DateTime, server_default=func.now(), default=func.now(), onupdate=func.now(), index=True)
 
 
-class Subscriber(Base):
+class HasSoftDelete:
+    """Mixing in a column to support deletion without removing the record"""
+    time_deleted = Column(DateTime, nullable=True)
+
+    @property
+    def is_deleted(self):
+        """A record is marked deleted if a delete time is set."""
+        return self.time_deleted is not None
+
+
+class Subscriber(HasSoftDelete, Base):
     __tablename__ = "subscribers"
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
     # Encrypted (here) and hashed (by the associated hashing functions in routes/auth)
     password = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
-
-    active: bool = Column(Boolean, index=True, default=True)
 
     # Use subscriber.preferred_email for any email, or other user-facing presence.
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)

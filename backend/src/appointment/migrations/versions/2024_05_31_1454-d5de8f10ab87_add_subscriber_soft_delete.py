@@ -1,4 +1,4 @@
-"""add subscriber active flag
+"""add subscriber soft delete
 
 Revision ID: d5de8f10ab87
 Revises: 9fe08ba6f2ed
@@ -17,8 +17,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('active', sa.Boolean, index=True, default=True))
+    op.add_column('subscribers', sa.Column('time_deleted', sa.DateTime, nullable=True))
 
 
 def downgrade() -> None:
-    op.drop_column('subscribers', 'active')
+    op.drop_column('subscribers', 'time_deleted')
