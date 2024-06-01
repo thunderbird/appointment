@@ -8,7 +8,9 @@
         <label class="flex items-center gap-4 whitespace-nowrap">
         {{ filter.name }} {{ t('label.filter') }}:
         <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter)">
-          <option :value="option.key" v-for="option in filter.options" :key="option.key">{{ option.name }}</option>
+          <option :value="option.key" v-for="option in filter.options" :key="option.key">
+            {{ option.name }}
+          </option>
         </select>
         </label>
       </div>
@@ -173,7 +175,6 @@ const onFieldSelect = (evt, fieldData) => {
 
 const onColumnFilter = (evt, filter) => {
   mutableDataList.value = filter.fn(evt.target.value, dataList.value);
-  console.log('Data list info: ', mutableDataList.value, ' vs ', dataList.value);
   if (mutableDataList.value === dataList.value) {
     mutableDataList.value = null;
   }

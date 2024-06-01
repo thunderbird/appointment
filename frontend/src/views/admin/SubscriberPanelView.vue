@@ -108,7 +108,7 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
   },
   wasInvited: {
     type: tableDataType.bool,
-    value: subscriber.invite,
+    value: Boolean(subscriber.invite),
   },
   disable: {
     type: tableDataType.button,
@@ -161,11 +161,11 @@ const filters = [
       },
       {
         name: 'Yes',
-        key: 'yes',
+        key: 'true',
       },
       {
         name: 'No',
-        key: 'no',
+        key: 'false',
       },
     ],
     /**
@@ -178,7 +178,7 @@ const filters = [
       if (selectedKey === 'all') {
         return mutableDataList;
       }
-      return mutableDataList.filter((data) => data.wasInvited.value.toLowerCase() === selectedKey);
+      return mutableDataList.filter((data) => data.wasInvited.value?.toString().toLowerCase() === selectedKey);
     },
   },
 ];
