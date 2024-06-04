@@ -147,7 +147,7 @@ def fxa_callback(
 
         # This shouldn't happen, but just in case!
         if not used:
-            repo.subscriber.delete(db, subscriber)
+            repo.subscriber.hard_delete(db, subscriber)
             raise HTTPException(500, l10n('unknown-error'))
     elif not subscriber:
         subscriber = fxa_subscriber
