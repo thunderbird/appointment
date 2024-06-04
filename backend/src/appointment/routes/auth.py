@@ -147,10 +147,14 @@ def fxa_callback(
 
         # This shouldn't happen, but just in case!
         if not used:
-            repo.subscriber.delete(db, subscriber)
+            repo.subscriber.hard_delete(db, subscriber)
             raise HTTPException(500, l10n('unknown-error'))
     elif not subscriber:
         subscriber = fxa_subscriber
+
+    # Only proceed if user account is enabled (which is the default case for new users)
+    if subscriber.is_deleted:
+        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
 
     fxa_connections = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.fxa)
 
@@ -217,6 +221,10 @@ def token(
     if not subscriber or subscriber.password is None:
         raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
+    # Only proceed if user account is enabled
+    if subscriber.is_deleted:
+        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
+
     # Verify the incoming password, and re-hash our password if needed
     try:
         utils.verify_password(form_data.password, subscriber.password)
@@ -269,9 +277,9 @@ def me(
 
 
 @router.post("/permission-check")
-def permission_check(_: Subscriber = Depends(get_admin_subscriber)):
+def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     """Checks if they have admin permissions"""
-    return True
+    return subscriber.is_deleted
 
 
 # @router.get('/test-create-account')

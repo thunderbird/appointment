@@ -253,6 +253,7 @@ export const tableDataType = {
   link: 2,
   button: 3,
   code: 4,
+  bool: 5,
 };
 
 export const tableDataButtonType = {

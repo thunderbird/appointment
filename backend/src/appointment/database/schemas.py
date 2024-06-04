@@ -271,6 +271,7 @@ class Subscriber(SubscriberAuth):
 class SubscriberAdminOut(Subscriber):
     invite: Invite | None = None
     time_created: datetime
+    time_deleted: datetime | None
 
     class Config:
         from_attributes = True
