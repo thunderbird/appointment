@@ -1,3 +1,4 @@
+import uuid
 
 from fastapi import APIRouter, Depends, Body, BackgroundTasks
 import logging
@@ -44,6 +45,21 @@ def create_calendar_schedule(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
+
+    # If slug isn't provided, give them the last 8 characters from a uuid4
+    if schedule.slug is None:
+        # Try up-to-3 times to create a unique slug
+        for _ in range(3):
+            slug = uuid.uuid4().hex[-8:]
+            exists = repo.schedule.get_by_slug(db, slug)
+            if not exists:
+                schedule.slug = slug
+                break
+
+        # Could not create slug due to randomness overlap
+        if schedule.slug is None:
+            raise validation.ScheduleCreationException()
+
     return repo.schedule.create(db=db, schedule=schedule)
 
 

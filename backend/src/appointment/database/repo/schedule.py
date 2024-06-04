@@ -26,6 +26,10 @@ def get_by_subscriber(db: Session, subscriber_id: int):
     )
 
 
+def get_by_slug(db: Session, slug: str):
+    """Get schedule by slug"""
+    return db.query(models.Schedule).filter(models.Schedule.slug == slug).first()
+
 def get(db: Session, schedule_id: int):
     """retrieve schedule by id"""
     if schedule_id:
