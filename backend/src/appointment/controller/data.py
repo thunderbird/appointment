@@ -79,7 +79,7 @@ def download(db, subscriber: Subscriber):
 
 def delete_account(db, subscriber: Subscriber):
     # Ok nuke everything (thanks cascade=all,delete)
-    repo.subscriber.delete(db, subscriber)
+    repo.subscriber.hard_delete(db, subscriber)
 
     # Make sure we actually nuked the subscriber
     if repo.subscriber.get(db, subscriber.id) is not None:

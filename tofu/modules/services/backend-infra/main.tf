@@ -123,7 +123,7 @@ module "backend_alb" {
 
       redirect = {
         status_code = "HTTP_302"
-        host        = var.frontend_url
+        host        = trimprefix(var.frontend_url, "https://")
         path        = "/user/#{path}"
         port        = 443
         protocol    = "HTTPS"

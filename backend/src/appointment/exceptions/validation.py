@@ -213,3 +213,30 @@ class CreateSubscriberAlreadyExistsException(APIException):
 
     def get_msg(self):
         return l10n('subscriber-already-exists')
+
+
+class SubscriberAlreadyDeletedException(APIException):
+    """Raise when a subscriber failed to be marked deleted because they already are"""
+    id_code = 'SUBSCRIBER_ALREADY_DELETED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('subscriber-already-deleted')
+
+
+class SubscriberAlreadyEnabledException(APIException):
+    """Raise when a subscriber failed to be marked undeleted because they already are"""
+    id_code = 'SUBSCRIBER_ALREADY_ENABLED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('subscriber-already-enabled')
+
+
+class SubscriberSelfDeleteException(APIException):
+    """Raise when a subscriber tries to delete themselves where not allowed"""
+    id_code = 'SUBSCRIBER_SELF_DELETE'
+    status_code = 403
+
+    def get_msg(self):
+        return l10n('subscriber-self-delete')
