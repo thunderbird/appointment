@@ -53,6 +53,7 @@ jobs:
       TF_VAR_region: ${{ vars.AWS_REGION }}
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -130,6 +131,7 @@ jobs:
       TF_VAR_region: ${{ vars.AWS_REGION }}
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
+      TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
     steps:
       - uses: actions/checkout@v4
 
