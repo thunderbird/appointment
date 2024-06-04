@@ -131,10 +131,13 @@ def fxa_callback(
     if new_subscriber_flow:
         # Ensure the invite code exists and is available
         # Use some inline-errors for now. We don't have a good error flow!
-        if not repo.invite.code_exists(db, invite_code):
-            raise HTTPException(404, l10n('invite-code-not-valid'))
-        if not repo.invite.code_is_available(db, invite_code):
-            raise HTTPException(403, l10n('invite-code-not-valid'))
+        is_in_allow_list = fxa_client.is_in_allow_list(db, email)
+
+        if not is_in_allow_list:
+            if not repo.invite.code_exists(db, invite_code):
+                raise HTTPException(404, l10n('invite-code-not-valid'))
+            if not repo.invite.code_is_available(db, invite_code):
+                raise HTTPException(403, l10n('invite-code-not-valid'))
 
         subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
             email=email,
@@ -142,13 +145,15 @@ def fxa_callback(
             timezone=timezone,
         ))
 
-        # Use the invite code after we've created the new subscriber
-        used = repo.invite.use_code(db, invite_code, subscriber.id)
+        if not is_in_allow_list:
+            # Use the invite code after we've created the new subscriber
+            used = repo.invite.use_code(db, invite_code, subscriber.id)
 
-        # This shouldn't happen, but just in case!
-        if not used:
-            repo.subscriber.hard_delete(db, subscriber)
-            raise HTTPException(500, l10n('unknown-error'))
+            # This shouldn't happen, but just in case!
+            if not used:
+                repo.subscriber.hard_delete(db, subscriber)
+                raise HTTPException(500, l10n('unknown-error'))
+
     elif not subscriber:
         subscriber = fxa_subscriber
 

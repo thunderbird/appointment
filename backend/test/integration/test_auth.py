@@ -15,6 +15,36 @@ class TestAuth:
         assert data.get('secondary_email') is None
         assert data.get('preferred_email') == os.getenv('TEST_USER_EMAIL')
 
+    def test_permission_check_with_no_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = ''
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 401, response.text
+
+    def test_permission_check_with_wrong_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 401, response.text
+
+    def test_permission_check_with_correct_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = f"@{os.getenv('TEST_USER_EMAIL').split('@')[1]}"
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 200, response.text
+
+    def test_permission_check_with_correct_full_admin_email(self, with_client):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 200, response.text
+
+
+class TestPassword:
     def test_token(self, with_db, with_client, make_pro_subscriber):
         """Test that our username/password authentication works correctly."""
         password = 'test'
@@ -55,6 +85,8 @@ class TestAuth:
         )
         assert response.status_code == 403, response.text
 
+
+class TestFXA:
     def test_fxa_login(self, with_client):
         os.environ['AUTH_SCHEME'] = 'fxa'
         response = with_client.get(
@@ -68,7 +100,7 @@ class TestAuth:
         assert 'url' in data
         assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
 
-    def test_fxa_callback(self, with_db, with_client, monkeypatch, make_invite):
+    def test_fxa_callback_with_invite(self, with_db, with_client, monkeypatch, make_invite):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""
         os.environ['AUTH_SCHEME'] = 'fxa'
 
@@ -76,11 +108,114 @@ class TestAuth:
 
         invite = make_invite()
 
+        with with_db() as db:
+            assert not repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+
         monkeypatch.setattr('starlette.requests.HTTPConnection.session', {
             'fxa_state': state,
             'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
             'fxa_user_timezone': 'America/Vancouver',
             'fxa_user_invite_code': invite.code,
+        })
+
+        response = with_client.get(
+            "/fxa",
+            params={
+                'code': FXA_CLIENT_PATCH.get('credentials_code'),
+                'state': state
+            },
+            follow_redirects=False
+        )
+        # This is a redirect request
+        assert response.status_code == 307, response.text
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+            assert subscriber
+            assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
+            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
+            fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
+            assert fxa
+            assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
+
+    def test_fxa_callback_with_allowlist(self, with_db, with_client, monkeypatch):
+        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@example.org'
+
+        with with_db() as db:
+            assert not repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+
+        state = 'a1234'
+
+        monkeypatch.setattr('starlette.requests.HTTPConnection.session', {
+            'fxa_state': state,
+            'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
+            'fxa_user_timezone': 'America/Vancouver',
+        })
+
+        response = with_client.get(
+            "/fxa",
+            params={
+                'code': FXA_CLIENT_PATCH.get('credentials_code'),
+                'state': state
+            },
+            follow_redirects=False
+        )
+        # This is a redirect request
+        assert response.status_code == 307, response.text
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+            assert subscriber
+            assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
+            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
+            fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
+            assert fxa
+            assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
+
+    def test_fxa_callback_no_invite_or_allowlist(self, with_db, with_client, monkeypatch):
+        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@notexample.org'
+
+        with with_db() as db:
+            assert not repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+
+        state = 'a1234'
+
+        monkeypatch.setattr('starlette.requests.HTTPConnection.session', {
+            'fxa_state': state,
+            'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
+            'fxa_user_timezone': 'America/Vancouver',
+        })
+
+        response = with_client.get(
+            "/fxa",
+            params={
+                'code': FXA_CLIENT_PATCH.get('credentials_code'),
+                'state': state
+            },
+            follow_redirects=False
+        )
+        # 404, invite code not found
+        assert response.status_code == 404, response.text
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
+            assert not subscriber
+
+    def test_fxa_callback_with_allowlist(self, with_db, with_client, monkeypatch):
+        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@example.org'
+
+        state = 'a1234'
+
+        monkeypatch.setattr('starlette.requests.HTTPConnection.session', {
+            'fxa_state': state,
+            'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
+            'fxa_user_timezone': 'America/Vancouver',
         })
 
         response = with_client.get(
@@ -134,31 +269,3 @@ class TestAuth:
         assert response.status_code == 403, response.text
         # This will just key match due to the lack of context.
         assert response.json().get('detail') == l10n('invalid-credentials')
-
-    def test_permission_check_with_no_admin_email(self, with_client):
-        os.environ['APP_ADMIN_ALLOW_LIST'] = ''
-
-        response = with_client.post('/permission-check',
-                                    headers=auth_headers)
-        assert response.status_code == 401, response.text
-
-    def test_permission_check_with_wrong_admin_email(self, with_client):
-        os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
-
-        response = with_client.post('/permission-check',
-                                    headers=auth_headers)
-        assert response.status_code == 401, response.text
-
-    def test_permission_check_with_correct_admin_email(self, with_client):
-        os.environ['APP_ADMIN_ALLOW_LIST'] = f"@{os.getenv('TEST_USER_EMAIL').split('@')[1]}"
-
-        response = with_client.post('/permission-check',
-                                    headers=auth_headers)
-        assert response.status_code == 200, response.text
-
-    def test_permission_check_with_correct_full_admin_email(self, with_client):
-        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
-
-        response = with_client.post('/permission-check',
-                                    headers=auth_headers)
-        assert response.status_code == 200, response.text
