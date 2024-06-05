@@ -71,7 +71,7 @@ def get_admin_subscriber(
     admin_emails = os.getenv("APP_ADMIN_ALLOW_LIST")
 
     # Raise an error if we don't have any admin emails specified
-    if not admin_emails:
+    if not admin_emails or not user:
         raise InvalidPermissionLevelException()
 
     admin_emails = admin_emails.split(',')
