@@ -191,7 +191,7 @@ class ScheduleValidationIn(ScheduleBase):
     slot_duration: Annotated[int, Field(ge=10, default=30)]
 
 
-class ScheduleSlug:
+class ScheduleSlug(BaseModel):
     slug: str
 
 

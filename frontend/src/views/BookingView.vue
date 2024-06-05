@@ -60,6 +60,7 @@ import BookingModal from '@/components/BookingModal';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
+import { useRoute } from 'vue-router';
 
 // component constants
 const { t } = useI18n();
@@ -67,6 +68,7 @@ const dj = inject('dayjs');
 const call = inject('call');
 const bookingViewStore = useBookingViewStore();
 const bookingModalStore = useBookingModalStore();
+const route = useRoute();
 
 const errorHeading = ref(null);
 const errorBody = ref(null);
@@ -130,24 +132,43 @@ const getViewBySlotDistribution = (slots) => {
   return views.invalid;
 };
 
+const handleError = (data) => {
+  errorHeading.value = null;
+  errorBody.value = null;
+
+  if (data?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
+    errorHeading.value = '';
+    errorBody.value = data.value.detail.message;
+  }
+};
+
 /**
  * Retrieve the appointment from either availability or booking routes.
  * Returns null if there was an error, or the Appointment object if it was successful.
  * @returns {Promise<Object|null>}
  */
 const getAppointment = async () => {
-  const request = call('schedule/public/availability').post({ url: window.location.href.split('#')[0] });
+  let url = null;
+  // Okay we have a slug, lets lookup the actual signature
+  if (route.params.usernameOrSlug && !route.params.signature) {
+    const request = call('schedule/public/url').post({ slug: route.params.usernameOrSlug });
+    const { data, error } = await request.json();
+
+    if (error.value) {
+      handleError(data?.value);
+      return null;
+    }
+
+    url = data?.value?.url;
+  }
+
+  const signedUrl = url ?? window.location.href.split('#')[0];
+  const request = call('schedule/public/availability').post({ url: signedUrl });
 
   const { data, error } = await request.json();
 
   if (error.value) {
-    errorHeading.value = null;
-    errorBody.value = null;
-
-    if (data?.value?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
-      errorHeading.value = '';
-      errorBody.value = data.value.detail.message;
-    }
+    handleError(data?.value);
 
     return null;
   }

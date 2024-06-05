@@ -100,3 +100,11 @@ def generate_slug(db: Session, schedule_id: int) -> str|None:
     db.commit()
 
     return schedule.slug
+
+
+def delete(db: Session, schedule_id: int):
+    schedule = repo.schedule.get(db, schedule_id)
+    db.delete(schedule)
+    db.commit()
+
+    return True

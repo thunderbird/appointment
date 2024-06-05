@@ -45,12 +45,16 @@ def create_calendar_schedule(
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
 
+    db_schedule = repo.schedule.create(db=db, schedule=schedule)
+
     # If slug isn't provided, give them the last 8 characters from a uuid4
-    slug = repo.schedule.generate_slug(db, schedule.id)
+    slug = repo.schedule.generate_slug(db, db_schedule.id)
     if not slug:
+        # A little extra, but things are a little out of place right now..
+        repo.schedule.delete(db, db_schedule.id)
         raise validation.ScheduleCreationException()
 
-    return repo.schedule.create(db=db, schedule=schedule)
+    return db_schedule
 
 
 @router.get("/", response_model=list[schemas.Schedule])
