@@ -7,6 +7,7 @@ import enum
 import os
 import uuid
 import zoneinfo
+from functools import cached_property
 
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time
 from sqlalchemy_utils import StringEncryptedType, ChoiceType, UUIDType
@@ -280,6 +281,12 @@ class Schedule(Base):
         time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0,
                                                  tzinfo=datetime.timezone.utc)
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
+
+    @cached_property
+    def owner(self):
+        if not self.calendar:
+            return None
+        return self.calendar.owner
 
 
 class Availability(Base):

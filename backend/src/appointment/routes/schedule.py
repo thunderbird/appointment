@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import APIRouter, Depends, Body, BackgroundTasks
 import logging
 import os
@@ -14,7 +12,8 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas, models
-from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, ExternalConnectionType
+from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, \
+    ExternalConnectionType
 from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
 from ..dependencies.database import get_db, get_redis
@@ -47,18 +46,9 @@ def create_calendar_schedule(
         raise validation.CalendarNotConnectedException()
 
     # If slug isn't provided, give them the last 8 characters from a uuid4
-    if schedule.slug is None:
-        # Try up-to-3 times to create a unique slug
-        for _ in range(3):
-            slug = uuid.uuid4().hex[-8:]
-            exists = repo.schedule.get_by_slug(db, slug)
-            if not exists:
-                schedule.slug = slug
-                break
-
-        # Could not create slug due to randomness overlap
-        if schedule.slug is None:
-            raise validation.ScheduleCreationException()
+    slug = repo.schedule.generate_slug(db, schedule.id)
+    if not slug:
+        raise validation.ScheduleCreationException()
 
     return repo.schedule.create(db=db, schedule=schedule)
 
@@ -98,16 +88,35 @@ def update_schedule(
         raise validation.CalendarNotConnectedException()
     if not repo.schedule.is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
         raise validation.ScheduleNotAuthorizedException()
-    if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
+    if schedule.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(
+        ExternalConnectionType.zoom) is None:
         raise validation.ZoomNotConnectedException()
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
+
+
+@router.post("/public/url")
+def get_signed_url_from_slug(
+    schedule_slug: schemas.ScheduleSlug,
+    db: Session = Depends(get_db),
+) -> dict:
+    schedule = repo.schedule.get_by_slug(db, schedule_slug.slug)
+    if not schedule:
+        raise validation.ScheduleNotFoundException()
+
+    owner = schedule.owner
+    if not owner:
+        raise validation.ScheduleNotFoundException()
+
+    return {
+        'url': signed_url_by_subscriber(owner)
+    }
 
 
 @router.post("/public/availability", response_model=schemas.AppointmentOut)
 def read_schedule_availabilities(
     subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
-    redis = Depends(get_redis),
+    redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """Returns the calculated availability for the first schedule from a subscribers public profile link"""
@@ -160,8 +169,8 @@ def request_schedule_availability_slot(
     background_tasks: BackgroundTasks,
     subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
-    redis = Depends(get_redis),
-    google_client = Depends(get_google_client),
+    redis=Depends(get_redis),
+    google_client=Depends(get_google_client),
 ):
     """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner"""
 
@@ -189,10 +198,11 @@ def request_schedule_availability_slot(
     slot = schemas.SlotBase(**s_a.slot.dict())
     if repo.slot.exists_on_schedule(db, slot, schedule.id):
         raise validation.SlotAlreadyTakenException()
-    
+
     # We need to verify that the time is actually available on the remote calendar
     if db_calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -211,17 +221,18 @@ def request_schedule_availability_slot(
             redis_instance=redis,
             subscriber_id=subscriber.id,
             calendar_id=db_calendar.id,
-            url=db_calendar.url, 
-            user=db_calendar.user, 
+            url=db_calendar.url,
+            user=db_calendar.user,
             password=db_calendar.password
         )
 
     # Ok we need to clear the cache for all calendars, because we need to recheck them.
     con.bust_cached_events(True)
     calendars = repo.calendar.get_by_subscriber(db, subscriber.id, False)
-    existing_remote_events = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
+    existing_remote_events = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db,
+                                                                redis)
     has_collision = Tools.events_roll_up_difference([slot], existing_remote_events)
-    
+
     # If we only have booked entries in this list then it means our slot is not available.
     if all(evt.booking_status == BookingStatus.booked for evt in has_collision):
         raise validation.SlotAlreadyTakenException()
@@ -270,10 +281,12 @@ def request_schedule_availability_slot(
     db.commit()
 
     # Sending confirmation email to owner
-    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee.name, date=date, to=subscriber.preferred_email)
+    background_tasks.add_task(send_confirmation_email, url=url, attendee_name=attendee.name, date=date,
+                              to=subscriber.preferred_email)
 
     # Sending pending email to attendee
-    background_tasks.add_task(send_pending_email, owner_name=subscriber.name, date=attendee_date, to=slot.attendee.email)
+    background_tasks.add_task(send_pending_email, owner_name=subscriber.name, date=attendee_date,
+                              to=slot.attendee.email)
 
     # Mini version of slot, so we can grab the newly created slot id for tests
     return schemas.SlotOut(
@@ -289,7 +302,7 @@ def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    redis = Depends(get_redis),
+    redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to react to owners decision to a request of a time slot of his public link
@@ -392,7 +405,8 @@ def decide_on_schedule_availability_slot(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email,
+                                      appointment_title=schedule.name)
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error("Failed to save the zoom meeting link to the appointment: ", err)
             if os.getenv('SENTRY_DSN') != '':
@@ -415,7 +429,8 @@ def decide_on_schedule_availability_slot(
 
     # create remote event
     if calendar.provider == CalendarProvider.google:
-        external_connection: ExternalConnection|None = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection: ExternalConnection | None = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()

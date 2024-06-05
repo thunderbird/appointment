@@ -2,6 +2,7 @@
 
 Repository providing CRUD functions for schedule database models. 
 """
+import uuid
 
 from sqlalchemy.orm import Session
 from .. import models, schemas, repo
@@ -26,9 +27,10 @@ def get_by_subscriber(db: Session, subscriber_id: int):
     )
 
 
-def get_by_slug(db: Session, slug: str):
+def get_by_slug(db: Session, slug: str) -> models.Schedule | None:
     """Get schedule by slug"""
     return db.query(models.Schedule).filter(models.Schedule.slug == slug).first()
+
 
 def get(db: Session, schedule_id: int):
     """retrieve schedule by id"""
@@ -73,3 +75,28 @@ def has_slot(db: Session, schedule_id: int, slot_id: int):
     """check if slot belongs to schedule"""
     db_slot = repo.slot.get(db, slot_id)
     return db_slot and db_slot.schedule_id == schedule_id
+
+
+def generate_slug(db: Session, schedule_id: int) -> str|None:
+    schedule = repo.schedule.get(db, schedule_id)
+
+    if schedule.slug:
+        return schedule.slug
+
+    # If slug isn't provided, give them the last 8 characters from a uuid4
+    # Try up-to-3 times to create a unique slug
+    for _ in range(3):
+        slug = uuid.uuid4().hex[-8:]
+        exists = repo.schedule.get_by_slug(db, slug)
+        if not exists:
+            schedule.slug = slug
+            break
+
+        # Could not create slug due to randomness overlap
+        if schedule.slug is None:
+            return None
+
+    db.add(schedule)
+    db.commit()
+
+    return schedule.slug

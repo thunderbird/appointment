@@ -191,6 +191,10 @@ class ScheduleValidationIn(ScheduleBase):
     slot_duration: Annotated[int, Field(ge=10, default=30)]
 
 
+class ScheduleSlug:
+    slug: str
+
+
 """ CALENDAR model schemas
 """
 
