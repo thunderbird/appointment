@@ -9,9 +9,17 @@ def normalize_secrets():
     if database_secrets:
         secrets = json.loads(database_secrets)
 
+        host = secrets['host']
+        port = secrets['port']
+
+        # If port is not already in the host var, then append it to hostname
+        hostname = host
+        if f':{port}' not in host:
+            hostname = f'{hostname}:{port}'
+
         os.environ[
             "DATABASE_URL"
-        ] = f"mysql+mysqldb://{secrets['username']}:{secrets['password']}@{secrets['host']}:{secrets['port']}/appointment"
+        ] = f"mysql+mysqldb://{secrets['username']}:{secrets['password']}@{hostname}/appointment"
 
     database_enc_secret = os.getenv("DB_ENC_SECRET")
 
