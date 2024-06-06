@@ -177,10 +177,10 @@ jobs:
       - name: Deploy frontend to S3
         run: |
           cd tofu/environments/stage/services/frontend-infra
-          bucket=terragrunt output bucket_name | tr -d '"'
-          cloudfront=terragrunt output cloudfront_id
-          aws s3 sync ../../../../../frontend/dist "s3://$bucket"
-          aws cloudfront create-invalidation --distribution-id $cloudfront --paths "/*"
+          bucket=$(terragrunt output bucket_name | tr -d '"')
+          cloudfront=$(terragrunt output cloudfront_id)
+          aws s3 sync ../../../../../frontend/dist "s3://$(bucket)"
+          aws cloudfront create-invalidation --distribution-id $(cloudfront) --paths "/*"
 
 
   deploy-backend:
