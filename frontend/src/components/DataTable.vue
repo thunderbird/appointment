@@ -39,7 +39,7 @@
               <span v-if="fieldData.type === tableDataType.text">
                 {{ fieldData.value }}
               </span>
-              <span v-else-if="fieldData.type === tableDataType.code" class="flex gap-4 items-center">
+              <span v-else-if="fieldData.type === tableDataType.code" class="flex items-center gap-4">
                 <code>{{ fieldData.value }}</code>
                 <text-button :copy="fieldData.value" />
               </span>
