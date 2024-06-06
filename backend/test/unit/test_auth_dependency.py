@@ -14,7 +14,7 @@ class TestAuthDependency:
 
     def test_get_user_from_token(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
-        access_token_expires = datetime.timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
+        access_token_expires = datetime.timedelta(minutes=float(os.getenv("JWT_EXPIRE_IN_MINS")))
 
         # Ensure we don't have a minimum_valid_iat_time, that test comes later.
         assert subscriber.minimum_valid_iat_time is None

@@ -1,14 +1,8 @@
-import logging
 import os
 import secrets
-from typing import Annotated
 
 import requests.exceptions
-import validators
 from redis import Redis, RedisCluster
-from requests import HTTPError
-from sentry_sdk import capture_exception
-from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
@@ -19,19 +13,17 @@ from ..database import repo, schemas
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Query, Request
-from datetime import timedelta, timezone
+from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
-from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
-from ..tasks.emails import send_zoom_meeting_failed_email, send_support_email
+from ..tasks.emails import send_support_email
 
 router = APIRouter()
 

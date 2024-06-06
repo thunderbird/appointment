@@ -2,6 +2,7 @@
 
 Definitions of valid data shapes for database and query models.
 """
+
 import json
 from uuid import UUID
 from datetime import datetime, date, time

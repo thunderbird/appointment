@@ -2,7 +2,7 @@
 
 Handle authentification with Auth0 and get subscription data.
 """
-import logging
+
 import os
 import hashlib
 import hmac
@@ -11,7 +11,7 @@ import datetime
 from sqlalchemy.orm import Session
 
 from .apis.fxa_client import FxaClient
-from ..database import repo, schemas, models
+from ..database import schemas, models
 
 
 def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | None, deny_previous_tokens=True):

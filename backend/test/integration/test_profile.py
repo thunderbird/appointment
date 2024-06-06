@@ -12,7 +12,7 @@ class TestProfile:
                 "username": "test",
                 "name": "Test Account",
                 "timezone": "Europe/Berlin",
-                "secondary_email": "useme@example.org"
+                "secondary_email": "useme@example.org",
             },
             headers=auth_headers,
         )
@@ -26,7 +26,7 @@ class TestProfile:
 
         # Confirm the data was saved
         with with_db() as db:
-            subscriber = repo.subscriber.get_by_email(db, os.getenv('TEST_USER_EMAIL'))
+            subscriber = repo.subscriber.get_by_email(db, os.getenv("TEST_USER_EMAIL"))
             assert subscriber.username == "test"
             assert subscriber.name == "Test Account"
             assert subscriber.timezone == "Europe/Berlin"

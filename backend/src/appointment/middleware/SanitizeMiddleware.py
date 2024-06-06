@@ -1,5 +1,4 @@
 import json
-import logging
 import nh3
 from starlette.types import ASGIApp, Scope, Receive, Send
 from ..utils import is_json

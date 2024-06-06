@@ -1,8 +1,7 @@
-import json
 import logging
 
 import requests
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ..controller import auth, data

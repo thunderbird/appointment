@@ -3,9 +3,8 @@
 Repository providing CRUD functions for external_connection database models. 
 """
 
-
 from sqlalchemy.orm import Session
-from .. import models, repo
+from .. import models
 from ..schemas import ExternalConnection
 
 

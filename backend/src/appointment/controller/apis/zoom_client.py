@@ -25,7 +25,7 @@ class ZoomClient:
 
     def setup(self, subscriber_id=None, token=None):
         """Setup our oAuth session"""
-        if type(token) is str:
+        if isinstance(token, str):
             token = json.loads(token)
 
         self.subscriber_id = subscriber_id

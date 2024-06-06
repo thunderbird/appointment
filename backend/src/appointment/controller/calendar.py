@@ -2,6 +2,7 @@
 
 Handle connection to a CalDAV server.
 """
+
 import json
 import logging
 import zoneinfo
@@ -480,11 +481,12 @@ class Tools:
             end_time += timedelta(days=1)
 
         # All user defined weekdays, falls back to working week if invalid
-        weekdays = schedule.weekdays if type(schedule.weekdays) is list else json.loads(schedule.weekdays)
+        weekdays = schedule.weekdays if isinstance(schedule.weekdays, list) else json.loads(schedule.weekdays)
         if not weekdays or len(weekdays) == 0:
             weekdays = [1, 2, 3, 4, 5]
 
-        # Difference of the start and end time. Since our times are localized we start at 0, and go until we hit the diff.
+        # Difference of the start and end time.
+        # Since our times are localized we start at 0, and go until we hit the diff.
         total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
 
         slot_duration_seconds = schedule.slot_duration * 60

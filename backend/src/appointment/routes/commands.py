@@ -1,4 +1,5 @@
 """This file handles routing for console commands"""
+
 from contextlib import contextmanager
 import os
 

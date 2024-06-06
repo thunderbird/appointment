@@ -53,7 +53,8 @@ def zoom_callback(
     request.session.pop("zoom_state")
     request.session.pop("zoom_user_id")
 
-    # Generate the zoom client instance based on our subscriber (this can't be set as a dep injection since subscriber is based on session.
+    # Generate the zoom client instance based on our subscriber
+    # This can't be set as a dep injection since subscriber is based on session.
     zoom_client: ZoomClient = get_zoom_client(subscriber)
 
     creds = zoom_client.get_credentials(code)

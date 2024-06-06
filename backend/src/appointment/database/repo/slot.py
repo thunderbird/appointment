@@ -4,7 +4,7 @@ Repository providing CRUD functions for slot database models.
 """
 
 from sqlalchemy.orm import Session
-from .. import models, schemas, repo
+from .. import models, schemas
 
 
 """ SLOT repository functions

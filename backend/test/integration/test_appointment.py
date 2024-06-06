@@ -104,7 +104,7 @@ class TestAppointment:
         response = with_client.get("/me/appointments", headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 1
         data = data[0]
         assert data["time_created"] is not None
@@ -267,7 +267,7 @@ class TestAppointment:
         response = with_client.get("/me/appointments", headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 0
 
     def test_delete_missing_appointment(self, with_client, make_appointment):
@@ -306,7 +306,9 @@ class TestAppointment:
         response = with_client.get(f"/apmt/public/{generated_appointment.slug}-that-isnt-real")
         assert response.status_code == 404, response.text
 
-    def test_read_public_appointment_after_attendee_selection(self, with_db, with_client, make_appointment, make_attendee, make_appointment_slot):
+    def test_read_public_appointment_after_attendee_selection(
+        self, with_db, with_client, make_appointment, make_attendee, make_appointment_slot
+    ):
         generated_appointment = make_appointment()
         generated_attendee = make_attendee()
         make_appointment_slot(generated_appointment.id, attendee_id=generated_attendee.id)
@@ -314,6 +316,7 @@ class TestAppointment:
         # db.refresh doesn't work because it only refreshes instances created by the current db session?
         with with_db() as db:
             from appointment.database import models
+
             generated_appointment = db.get(models.Appointment, generated_appointment.id)
             # Reload slots
             generated_appointment.slots
@@ -325,23 +328,29 @@ class TestAppointment:
         assert data["slots"][-1]["attendee_id"] == generated_attendee.id
 
     def test_get_remote_caldav_events(self, with_client, make_appointment, monkeypatch):
-        """Test against a fake remote caldav, we're testing the route controller, not the actual caldav connector here!"""
+        """Test against a fake remote caldav, we're testing the route controller
+        not the actual caldav connector here!
+        """
         from appointment.controller.calendar import CalDavConnector
+
         generated_appointment = make_appointment()
 
         def list_events(self, start, end):
             end = dateutil.parser.parse(end)
             from appointment.database import schemas
+
             print("list events!")
-            return [schemas.Event(
-                title=generated_appointment.title,
-                start=generated_appointment.slots[0].start,
-                end=end,
-                all_day=False,
-                description=generated_appointment.details,
-                calendar_title=generated_appointment.calendar.title,
-                calendar_color=generated_appointment.calendar.color
-            )]
+            return [
+                schemas.Event(
+                    title=generated_appointment.title,
+                    start=generated_appointment.slots[0].start,
+                    end=end,
+                    all_day=False,
+                    description=generated_appointment.details,
+                    calendar_title=generated_appointment.calendar.title,
+                    calendar_color=generated_appointment.calendar.color,
+                )
+            ]
 
         monkeypatch.setattr(CalDavConnector, "list_events", list_events)
 
@@ -368,11 +377,15 @@ class TestAppointment:
     def test_get_invitation_ics_file_for_missing_appointment(self, with_client, make_appointment):
         generated_appointment = make_appointment()
 
-        response = with_client.get(f"/apmt/serve/ics/{generated_appointment.slug}-doesnt-exist/{generated_appointment.slots[0].id}")
+        response = with_client.get(
+            f"/apmt/serve/ics/{generated_appointment.slug}-doesnt-exist/{generated_appointment.slots[0].id}"
+        )
         assert response.status_code == 404, response.text
 
     def test_get_invitation_ics_file_for_missing_slot(self, with_client, make_appointment):
         generated_appointment = make_appointment()
 
-        response = with_client.get(f"/apmt/serve/ics/{generated_appointment.slug}/{generated_appointment.slots[0].id + 1}")
+        response = with_client.get(
+            f"/apmt/serve/ics/{generated_appointment.slug}/{generated_appointment.slots[0].id + 1}"
+        )
         assert response.status_code == 404, response.text

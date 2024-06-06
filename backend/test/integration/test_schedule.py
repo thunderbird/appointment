@@ -75,8 +75,9 @@ class TestSchedule:
         )
         assert response.status_code == 404, response.text
 
-    def test_create_schedule_on_foreign_calendar(self, with_client, make_pro_subscriber, make_caldav_calendar,
-                                                 make_schedule):
+    def test_create_schedule_on_foreign_calendar(
+        self, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
         the_other_guy = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(the_other_guy.id)
         generated_schedule = make_schedule(calendar_id=generated_calendar.id)
@@ -94,7 +95,7 @@ class TestSchedule:
         response = with_client.get("/schedule", headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 1
         data = data[0]
         assert data["time_created"] is not None
@@ -106,8 +107,8 @@ class TestSchedule:
         assert data["details"] == generated_schedule.details
         assert data["start_date"] == generated_schedule.start_date.isoformat()
         assert data["end_date"] == generated_schedule.end_date.isoformat()
-        assert data["start_time"] == generated_schedule.start_time.isoformat('minutes')
-        assert data["end_time"] == generated_schedule.end_time.isoformat('minutes')
+        assert data["start_time"] == generated_schedule.start_time.isoformat("minutes")
+        assert data["end_time"] == generated_schedule.end_time.isoformat("minutes")
         assert data["earliest_booking"] == generated_schedule.earliest_booking
         assert data["farthest_booking"] == generated_schedule.farthest_booking
         assert data["weekdays"] is not None
@@ -131,8 +132,8 @@ class TestSchedule:
         assert data["details"] == generated_schedule.details
         assert data["start_date"] == generated_schedule.start_date.isoformat()
         assert data["end_date"] == generated_schedule.end_date.isoformat()
-        assert data["start_time"] == generated_schedule.start_time.isoformat('minutes')
-        assert data["end_time"] == generated_schedule.end_time.isoformat('minutes')
+        assert data["start_time"] == generated_schedule.start_time.isoformat("minutes")
+        assert data["end_time"] == generated_schedule.end_time.isoformat("minutes")
         assert data["earliest_booking"] == generated_schedule.earliest_booking
         assert data["farthest_booking"] == generated_schedule.farthest_booking
         assert data["weekdays"] is not None
@@ -237,8 +238,9 @@ class TestSchedule:
         )
         assert response.status_code == 403, response.text
 
-    def test_public_availability(self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar,
-                                 make_schedule):
+    def test_public_availability(
+        self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
         class MockCaldavConnector:
             @staticmethod
             def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
@@ -268,7 +270,8 @@ class TestSchedule:
             end_date=None,
             earliest_booking=1440,
             farthest_booking=20160,
-            slot_duration=30)
+            slot_duration=30,
+        )
 
         signed_url = signed_url_by_subscriber(subscriber)
 
@@ -281,14 +284,14 @@ class TestSchedule:
             )
             assert response.status_code == 200, response.text
             data = response.json()
-            slots = data['slots']
+            slots = data["slots"]
 
             # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
             # Note: this should be in PST (Pacific Standard Time)
-            assert slots[0]['start'] == '2024-03-04T09:00:00-08:00'
+            assert slots[0]["start"] == "2024-03-04T09:00:00-08:00"
             # Based off the farthest_booking our latest slot is 4:30pm
             # Note: This should be in PDT (Pacific Daylight Time)
-            assert slots[-1]['start'] == '2024-03-15T16:30:00-07:00'
+            assert slots[-1]["start"] == "2024-03-15T16:30:00-07:00"
 
         # Check availability over a year from now
         with freeze_time(date(2025, 6, 1)):
@@ -299,10 +302,10 @@ class TestSchedule:
             )
             assert response.status_code == 200, response.text
             data = response.json()
-            slots = data['slots']
+            slots = data["slots"]
 
-            assert slots[0]['start'] == '2025-06-02T09:00:00-07:00'
-            assert slots[-1]['start'] == '2025-06-13T16:30:00-07:00'
+            assert slots[0]["start"] == "2025-06-02T09:00:00-07:00"
+            assert slots[-1]["start"] == "2025-06-13T16:30:00-07:00"
 
         # Check availability with a start date day greater than the farthest_booking day
         with freeze_time(date(2025, 6, 27)):
@@ -313,18 +316,21 @@ class TestSchedule:
             )
             assert response.status_code == 200, response.text
             data = response.json()
-            slots = data['slots']
+            slots = data["slots"]
 
-            assert slots[0]['start'] == '2025-06-30T09:00:00-07:00'
-            assert slots[-1]['start'] == '2025-07-11T16:30:00-07:00'
+            assert slots[0]["start"] == "2025-06-30T09:00:00-07:00"
+            assert slots[-1]["start"] == "2025-07-11T16:30:00-07:00"
 
-    def test_public_availability_with_blockers(self, monkeypatch, with_client, make_pro_subscriber,
-                                               make_caldav_calendar, make_schedule):
-        """Test public availability route with blocked off times. Ensuring the blocked off time displays as such and is otherwise normal."""
+    def test_public_availability_with_blockers(
+        self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
+        """Test public availability route with blocked off times.
+        Ensuring the blocked off time displays as such and is otherwise normal.
+        """
         start_date = date(2024, 3, 3)
         end_date = date(2024, 3, 6)
 
-        tz = zoneinfo.ZoneInfo('America/Vancouver')
+        tz = zoneinfo.ZoneInfo("America/Vancouver")
 
         # In UTC... 9 - 4 Vancouver time
         schedule_start_time = time(16)
@@ -363,7 +369,8 @@ class TestSchedule:
                         title="A blocker!",
                         start=start_end_datetimes[0],
                         end=start_end_datetimes[1],
-                    ) for start_end_datetimes in blocker_times
+                    )
+                    for start_end_datetimes in blocker_times
                 ]
 
         monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
@@ -380,7 +387,8 @@ class TestSchedule:
             end_date=end_date,
             earliest_booking=1440,
             farthest_booking=20160,
-            slot_duration=30)
+            slot_duration=30,
+        )
 
         signed_url = signed_url_by_subscriber(subscriber)
 
@@ -393,10 +401,10 @@ class TestSchedule:
             )
             assert response.status_code == 200, response.text
             data = response.json()
-            slots = data['slots']
+            slots = data["slots"]
 
             # Remap slots into dict with start time as key
-            start_dates = map(lambda s: s['start'], slots)
+            start_dates = map(lambda s: s["start"], slots)
             slots_dict = dict(zip(start_dates, slots))
 
             for test_time, expected_assert in testing_times.items():
@@ -405,10 +413,15 @@ class TestSchedule:
                 assert iso in slots_dict
 
                 slot = slots_dict[iso]
-                assert slot['booking_status'] == models.BookingStatus.none.value if expected_assert else models.BookingStatus.booked.value
+                assert (
+                    slot["booking_status"] == models.BookingStatus.none.value
+                    if expected_assert
+                    else models.BookingStatus.booked.value
+                )
 
-    def test_request_schedule_availability_slot(self, monkeypatch, with_db, with_client, make_pro_subscriber,
-                                                make_caldav_calendar, make_schedule):
+    def test_request_schedule_availability_slot(
+        self, monkeypatch, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
         """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
         start_time = time(9)
@@ -424,15 +437,11 @@ class TestSchedule:
             @staticmethod
             def list_events(self, start, end):
                 return [
-                    schemas.Event(
-                        title="A blocker!",
-                        start=start_datetime,
-                        end=datetime.combine(start_date, end_time)
-                    ),
+                    schemas.Event(title="A blocker!", start=start_datetime, end=datetime.combine(start_date, end_time)),
                     schemas.Event(
                         title="A second blocker!",
                         start=start_datetime + timedelta(minutes=10),
-                        end=datetime.combine(start_date, end_time) + timedelta(minutes=20)
+                        end=datetime.combine(start_date, end_time) + timedelta(minutes=20),
                     ),
                 ]
 
@@ -455,21 +464,15 @@ class TestSchedule:
             end_date=None,
             earliest_booking=1440,
             farthest_booking=20160,
-            slot_duration=30)
+            slot_duration=30,
+        )
 
         signed_url = signed_url_by_subscriber(subscriber)
 
         slot_availability = schemas.AvailabilitySlotAttendee(
-            slot=schemas.SlotBase(
-                start=start_datetime,
-                duration=30
-            ),
-            attendee=schemas.AttendeeBase(
-                email='hello@example.org',
-                name='Greg',
-                timezone='Europe/Berlin'
-            )
-        ).model_dump(mode='json')
+            slot=schemas.SlotBase(start=start_datetime, duration=30),
+            attendee=schemas.AttendeeBase(email="hello@example.org", name="Greg", timezone="Europe/Berlin"),
+        ).model_dump(mode="json")
 
         # Check availability at the start of the schedule
         # This should throw "Slot taken" error
@@ -485,14 +488,14 @@ class TestSchedule:
         assert response.status_code == 403, response.text
         data = response.json()
 
-        assert data.get('detail')
+        assert data.get("detail")
         # I miss dot notation
-        assert data.get('detail').get('id') == validation.SlotAlreadyTakenException.id_code
+        assert data.get("detail").get("id") == validation.SlotAlreadyTakenException.id_code
 
         # Okay change up the time
         start_time = time(11)
 
-        slot_availability['slot']['start'] = datetime.combine(start_date, start_time).isoformat()
+        slot_availability["slot"]["start"] = datetime.combine(start_date, start_time).isoformat()
 
         # Check availability at the start of the schedule
         # This should work
@@ -506,9 +509,9 @@ class TestSchedule:
         )
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data.get('id')
+        assert data.get("id")
 
-        slot_id = data.get('id')
+        slot_id = data.get("id")
 
         # Look up the slot
         with with_db() as db:
@@ -523,8 +526,17 @@ class TestDecideScheduleAvailabilitySlot:
     start_datetime = datetime.combine(start_date, start_time)
     end_time = time(10)
 
-    def test_confirm(self, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule,
-                     make_appointment, make_appointment_slot, make_attendee):
+    def test_confirm(
+        self,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        make_appointment,
+        make_appointment_slot,
+        make_attendee,
+    ):
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         schedule = make_schedule(
@@ -536,18 +548,20 @@ class TestDecideScheduleAvailabilitySlot:
             end_date=None,
             earliest_booking=1440,
             farthest_booking=20160,
-            slot_duration=30)
+            slot_duration=30,
+        )
 
         signed_url = signed_url_by_subscriber(subscriber)
 
         # Requested booking
         attendee = make_attendee()
         appointment = make_appointment(generated_calendar.id, status=models.AppointmentStatus.draft, slots=[])
-        slot: models.Slot = make_appointment_slot(appointment_id=appointment.id,
-                                                  attendee_id=attendee.id,
-                                                  booking_status=models.BookingStatus.requested,
-                                                  booking_tkn='abcd',
-                                                  )[0]
+        slot: models.Slot = make_appointment_slot(
+            appointment_id=appointment.id,
+            attendee_id=attendee.id,
+            booking_status=models.BookingStatus.requested,
+            booking_tkn="abcd",
+        )[0]
 
         with with_db() as db:
             # Bring the db slot to our db session
@@ -561,10 +575,7 @@ class TestDecideScheduleAvailabilitySlot:
             db.commit()
 
             availability = schemas.AvailabilitySlotConfirmation(
-                slot_id=slot_id,
-                slot_token=slot.booking_tkn,
-                owner_url=signed_url,
-                confirmed=True
+                slot_id=slot_id, slot_token=slot.booking_tkn, owner_url=signed_url, confirmed=True
             ).model_dump()
 
         response = with_client.put(
@@ -582,8 +593,17 @@ class TestDecideScheduleAvailabilitySlot:
             assert slot.booking_status == models.BookingStatus.booked
             assert appointment.status == models.AppointmentStatus.closed
 
-    def test_deny(self, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule,
-                     make_appointment, make_appointment_slot, make_attendee):
+    def test_deny(
+        self,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        make_appointment,
+        make_appointment_slot,
+        make_attendee,
+    ):
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         schedule = make_schedule(
@@ -595,18 +615,20 @@ class TestDecideScheduleAvailabilitySlot:
             end_date=None,
             earliest_booking=1440,
             farthest_booking=20160,
-            slot_duration=30)
+            slot_duration=30,
+        )
 
         signed_url = signed_url_by_subscriber(subscriber)
 
         # Requested booking
         attendee = make_attendee()
         appointment = make_appointment(generated_calendar.id, status=models.AppointmentStatus.draft, slots=[])
-        slot: models.Slot = make_appointment_slot(appointment_id=appointment.id,
-                                                  attendee_id=attendee.id,
-                                                  booking_status=models.BookingStatus.requested,
-                                                  booking_tkn='abcd',
-                                                  )[0]
+        slot: models.Slot = make_appointment_slot(
+            appointment_id=appointment.id,
+            attendee_id=attendee.id,
+            booking_status=models.BookingStatus.requested,
+            booking_tkn="abcd",
+        )[0]
 
         with with_db() as db:
             # Bring the db slot to our db session
@@ -620,10 +642,7 @@ class TestDecideScheduleAvailabilitySlot:
             db.commit()
 
             availability = schemas.AvailabilitySlotConfirmation(
-                slot_id=slot_id,
-                slot_token=slot.booking_tkn,
-                owner_url=signed_url,
-                confirmed=False
+                slot_id=slot_id, slot_token=slot.booking_tkn, owner_url=signed_url, confirmed=False
             ).model_dump()
 
         response = with_client.put(

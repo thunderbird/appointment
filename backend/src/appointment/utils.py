@@ -27,7 +27,7 @@ def is_json(jsonstring: str):
     """Return true if given string is valid JSON."""
     try:
         json.loads(jsonstring)
-    except ValueError as e:
+    except ValueError:
         return False
     return True
 

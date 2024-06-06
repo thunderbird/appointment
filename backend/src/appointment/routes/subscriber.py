@@ -1,5 +1,3 @@
-import time
-
 from fastapi import APIRouter, Depends
 
 from sqlalchemy.orm import Session
@@ -39,7 +37,7 @@ def disable_subscriber(
 
 
 @router.put("/enable/{email}")
-def disable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
+def enable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to enable a subscriber by email, needs admin permissions"""
     subscriber_to_enable = repo.subscriber.get_by_email(db, email)
     if not subscriber_to_enable:

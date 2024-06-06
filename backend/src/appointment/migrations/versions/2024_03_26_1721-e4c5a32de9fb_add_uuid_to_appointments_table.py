@@ -5,11 +5,11 @@ Revises: bbdfad87a7fb
 Create Date: 2024-03-26 17:21:55.528828
 
 """
+
 import uuid
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import func
 from sqlalchemy_utils import UUIDType
 
 # revision identifiers, used by Alembic.

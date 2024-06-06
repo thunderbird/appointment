@@ -7,8 +7,8 @@ from appointment.routes.commands import cron_lock
 
 def test_cron_lock():
     """Test our cron lock function, this does use disk io but should clean itself up after."""
-    test_lock_name = 'test_cron_lock_run'
-    test_lock_file_name = f'/tmp/{test_lock_name}.lock'
+    test_lock_name = "test_cron_lock_run"
+    test_lock_file_name = f"/tmp/{test_lock_name}.lock"
 
     # Clean up in case the lock file previously exists
     if os.path.isfile(test_lock_file_name):
@@ -22,7 +22,7 @@ def test_cron_lock():
     assert not os.path.isfile(test_lock_file_name)
 
     # Test a lock already exists case with way too many withs.
-    with open(test_lock_file_name, 'w'):
+    with open(test_lock_file_name, "w"):
         with pytest.raises(FileExistsError):
             with cron_lock(test_lock_name):
                 pass

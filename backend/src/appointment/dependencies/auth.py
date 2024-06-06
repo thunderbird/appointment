@@ -2,13 +2,13 @@ import os
 from typing import Annotated
 
 import sentry_sdk
-from fastapi import Depends, Request, HTTPException, Body
+from fastapi import Depends, Body
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 from sqlalchemy.orm import Session
 
-from ..database import repo, schemas, models
+from ..database import repo, models
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException

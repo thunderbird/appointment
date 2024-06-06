@@ -20,7 +20,6 @@ from factory.external_connection_factory import make_external_connections  # noq
 from factory.schedule_factory import make_schedule  # noqa: F401
 from factory.slot_factory import make_appointment_slot  # noqa: F401
 from factory.subscriber_factory import make_subscriber, make_basic_subscriber, make_pro_subscriber  # noqa: F401
-from factory.invite_factory import make_invite
 
 # Load our env
 load_dotenv(find_dotenv(".env.test"))
@@ -33,6 +32,7 @@ from appointment.middleware.l10n import L10n  # noqa: E402
 
 def _patch_caldav_connector(monkeypatch):
     """Standard function to patch caldav connector"""
+
     # Create a mock caldav connector
     class MockCaldavConnector:
         @staticmethod
@@ -42,12 +42,7 @@ def _patch_caldav_connector(monkeypatch):
 
         @staticmethod
         def list_calendars(self):
-            return [
-                schemas.CalendarConnectionOut(
-                    url=TEST_CALDAV_URL,
-                    user=TEST_CALDAV_USER
-                )
-            ]
+            return [schemas.CalendarConnectionOut(url=TEST_CALDAV_URL, user=TEST_CALDAV_USER)]
 
         @staticmethod
         def create_event(self, event, attendee, organizer, organizer_email):
@@ -63,6 +58,7 @@ def _patch_caldav_connector(monkeypatch):
 
     # Patch up the caldav constructor, and list_calendars
     from appointment.controller.calendar import CalDavConnector
+
     monkeypatch.setattr(CalDavConnector, "__init__", MockCaldavConnector.__init__)
     monkeypatch.setattr(CalDavConnector, "list_calendars", MockCaldavConnector.list_calendars)
     monkeypatch.setattr(CalDavConnector, "create_event", MockCaldavConnector.create_event)
@@ -72,12 +68,14 @@ def _patch_caldav_connector(monkeypatch):
 
 def _patch_mailer(monkeypatch):
     """Mocks the base mailer class to not send mail"""
+
     class MockMailer:
         @staticmethod
         def send(self):
             return
 
     from appointment.controller.mailer import Mailer
+
     monkeypatch.setattr(Mailer, "send", MockMailer.send)
 
 
@@ -89,19 +87,19 @@ def _patch_fxa_client(monkeypatch):
 
         @staticmethod
         def get_redirect_url(self, db, state, email):
-            return FXA_CLIENT_PATCH.get('authorization_url'), state
+            return FXA_CLIENT_PATCH.get("authorization_url"), state
 
         @staticmethod
         def get_credentials(self, code: str):
-            return FXA_CLIENT_PATCH.get('credentials_code')
+            return FXA_CLIENT_PATCH.get("credentials_code")
 
         @staticmethod
         def get_profile(self):
             return {
-                'email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'uid': FXA_CLIENT_PATCH.get('external_connection_type_id'),
-                'avatar': FXA_CLIENT_PATCH.get('subscriber_avatar_url'),
-                'displayName': FXA_CLIENT_PATCH.get('subscriber_display_name')
+                "email": FXA_CLIENT_PATCH.get("subscriber_email"),
+                "uid": FXA_CLIENT_PATCH.get("external_connection_type_id"),
+                "avatar": FXA_CLIENT_PATCH.get("subscriber_avatar_url"),
+                "displayName": FXA_CLIENT_PATCH.get("subscriber_display_name"),
             }
 
         @staticmethod
@@ -113,6 +111,7 @@ def _patch_fxa_client(monkeypatch):
             return {}
 
     from appointment.controller.apis.fxa_client import FxaClient
+
     monkeypatch.setattr(FxaClient, "setup", MockFxaClient.setup)
     monkeypatch.setattr(FxaClient, "get_redirect_url", MockFxaClient.get_redirect_url)
     monkeypatch.setattr(FxaClient, "get_credentials", MockFxaClient.get_credentials)
@@ -132,10 +131,10 @@ def with_db():
     # Ensure we have a default subscriber
     with testing_local_session() as db:
         subscriber = models.Subscriber(
-            username=os.getenv('TEST_USER_EMAIL'),
-            email=os.getenv('TEST_USER_EMAIL'),
+            username=os.getenv("TEST_USER_EMAIL"),
+            email=os.getenv("TEST_USER_EMAIL"),
             name="Test Account",
-            level=models.SubscriberLevel.pro
+            level=models.SubscriberLevel.pro,
         )
         db.add(subscriber)
         db.commit()
@@ -157,11 +156,11 @@ def with_client(with_db, monkeypatch):
         finally:
             db.close()
 
-    def override_get_subscriber(request : Request):
-        if 'authorization' not in request.headers:
+    def override_get_subscriber(request: Request):
+        if "authorization" not in request.headers:
             raise InvalidTokenException
 
-        return repo.subscriber.get_by_email(with_db(), os.getenv('TEST_USER_EMAIL'))
+        return repo.subscriber.get_by_email(with_db(), os.getenv("TEST_USER_EMAIL"))
 
     def override_get_google_client():
         return None
@@ -186,9 +185,11 @@ def with_client(with_db, monkeypatch):
 
 @pytest.fixture()
 def with_l10n():
-    """Creates a fake starlette_context context with just the l10n function, only needed for unit tests. Only supports english for now!"""
+    """Creates a fake starlette_context context with just the l10n function, only needed for unit tests.
+    Only supports English for now!
+    """
     l10n_plugin = L10n()
-    l10n_fn = l10n_plugin.get_fluent('en')
+    l10n_fn = l10n_plugin.get_fluent("en")
 
-    with request_cycle_context({'l10n': l10n_fn}):
+    with request_cycle_context({"l10n": l10n_fn}):
         yield

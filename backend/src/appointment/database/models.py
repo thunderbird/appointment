@@ -2,6 +2,7 @@
 
 Definitions of database tables and their relationships.
 """
+
 import datetime
 import enum
 import os

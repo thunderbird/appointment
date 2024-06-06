@@ -20,14 +20,14 @@ class TestGeneral:
 
     def test_health_for_locale(self, with_client):
         # Try english first
-        response = with_client.get("/", headers={'accept-language': 'en'})
+        response = with_client.get("/", headers={"accept-language": "en"})
         assert response.status_code == 200
-        assert response.json() == 'Health OK'
+        assert response.json() == "Health OK"
 
         # Try german next
-        response = with_client.get("/", headers={'accept-language': 'de'})
+        response = with_client.get("/", headers={"accept-language": "de"})
         assert response.status_code == 200
-        assert response.json() == 'Betriebsbereit'
+        assert response.json() == "Betriebsbereit"
 
     def test_access_without_authentication_token(self, with_client):
         # response = client.get("/login")
@@ -75,11 +75,6 @@ class TestGeneral:
 
     def test_send_feedback(self, with_client):
         response = with_client.post(
-            "/support",
-            json={
-                'topic': 'Hello World',
-                'details': 'Hello World but longer'
-            },
-            headers=auth_headers)
+            "/support", json={"topic": "Hello World", "details": "Hello World but longer"}, headers=auth_headers
+        )
         assert response.status_code == 200
-

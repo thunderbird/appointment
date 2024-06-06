@@ -2,6 +2,7 @@
 
 Boot application, init database, authenticate user and provide all API endpoints.
 """
+
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 from starlette.middleware.sessions import SessionMiddleware

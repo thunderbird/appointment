@@ -2,6 +2,7 @@
 
 Handle outgoing emails.
 """
+
 import logging
 import os
 import smtplib

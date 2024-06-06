@@ -5,6 +5,7 @@ Revises: 9614c3875c5e
 Create Date: 2023-04-25 13:03:01.556282
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 from database.models import CalendarProvider

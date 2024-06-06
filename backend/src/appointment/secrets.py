@@ -17,9 +17,9 @@ def normalize_secrets():
         if f":{port}" not in host:
             hostname = f"{hostname}:{port}"
 
-        os.environ[
-            "DATABASE_URL"
-        ] = f"mysql+mysqldb://{secrets['username']}:{secrets['password']}@{hostname}/appointment"
+        os.environ["DATABASE_URL"] = (
+            f"mysql+mysqldb://{secrets['username']}:{secrets['password']}@{hostname}/appointment"
+        )
 
     database_enc_secret = os.getenv("DB_ENC_SECRET")
 

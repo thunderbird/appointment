@@ -87,7 +87,7 @@ def delete_account(db, subscriber: Subscriber):
     if repo.subscriber.get(db, subscriber.id) is not None:
         raise AccountDeletionSubscriberFail(
             subscriber.id,
-            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+            l10n("account-delete-fail"),
         )
 
     empty_check = [
@@ -102,7 +102,7 @@ def delete_account(db, subscriber: Subscriber):
     if any(empty_check) > 0:
         raise AccountDeletionPartialFail(
             subscriber.id,
-            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+            l10n("account-delete-fail"),
         )
 
     return True

@@ -1,5 +1,3 @@
-import os
-
 from starlette_context.plugins import Plugin
 from fastapi import Request
 from fluent.runtime import FluentLocalization, FluentResourceLoader

@@ -16,8 +16,8 @@ def get_calendar_factory():
     We pass fixture string names, and we'll need to create them by using request.getfixturevalue(string_name).
     It's ugly, but `parametrize` doesn't support fixtures..."""
     providers = {
-        schemas.CalendarProvider.caldav: 'make_caldav_calendar',
-        schemas.CalendarProvider.google: 'make_google_calendar'
+        schemas.CalendarProvider.caldav: "make_caldav_calendar",
+        schemas.CalendarProvider.google: "make_google_calendar",
     }
     for provider, factory_name in providers.items():
         yield provider, factory_name
@@ -37,31 +37,32 @@ def get_mock_connector_class():
         @staticmethod
         def list_calendars(self):
             return [
-                schemas.CalendarConnectionOut(
-                    provider=schemas.CalendarProvider.caldav,
-                    url=test_url,
-                    user=test_user
-                )
+                schemas.CalendarConnectionOut(provider=schemas.CalendarProvider.caldav, url=test_url, user=test_user)
             ]
 
     class MockGoogleConnector:
         @staticmethod
-        def __init__(self, subscriber_id, calendar_id, redis_instance, db, remote_calendar_id, google_client, google_tkn: str = None):
+        def __init__(
+            self,
+            subscriber_id,
+            calendar_id,
+            redis_instance,
+            db,
+            remote_calendar_id,
+            google_client,
+            google_tkn: str = None,
+        ):
             pass
 
         @staticmethod
         def list_calendars(self):
             return [
-                schemas.CalendarConnectionOut(
-                    provider=schemas.CalendarProvider.google,
-                    url=test_url,
-                    user=test_user
-                )
+                schemas.CalendarConnectionOut(provider=schemas.CalendarProvider.google, url=test_url, user=test_user)
             ]
 
     connectors = [
         (MockCaldavConnector, CalDavConnector, schemas.CalendarProvider.caldav.value, test_url, test_user),
-        (MockGoogleConnector, GoogleConnector, schemas.CalendarProvider.google.value, test_url, test_user)
+        (MockGoogleConnector, GoogleConnector, schemas.CalendarProvider.google.value, test_url, test_user),
     ]
 
     for connector in connectors:
@@ -71,7 +72,17 @@ def get_mock_connector_class():
 
 class TestCalendar:
     @pytest.mark.parametrize("mock_connector,connector,provider,test_url,test_user", get_mock_connector_class())
-    def test_read_remote_calendars(self, monkeypatch, with_client, mock_connector, connector, provider, test_url, test_user, make_external_connections):
+    def test_read_remote_calendars(
+        self,
+        monkeypatch,
+        with_client,
+        mock_connector,
+        connector,
+        provider,
+        test_url,
+        test_user,
+        make_external_connections,
+    ):
 
         # Ensure we have an external connection for google
         if provider == schemas.CalendarProvider.google.value:
@@ -93,7 +104,7 @@ class TestCalendar:
         )
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) > 0
         assert any(c["url"] == test_url for c in data)
         assert any(c["provider"] == provider for c in data)
@@ -102,14 +113,14 @@ class TestCalendar:
         response = with_client.get("/me/calendars", headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 0
 
     def test_read_unconnected_calendars_before_creation(self, with_client):
         response = with_client.get("/me/calendars", params={"only_connected": False}, headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 0
 
     @pytest.mark.parametrize("provider,factory_name", get_calendar_factory())
@@ -122,7 +133,7 @@ class TestCalendar:
         response = with_client.get("/me/calendars", headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 0
 
     @pytest.mark.parametrize("provider,factory_name", get_calendar_factory())
@@ -133,7 +144,7 @@ class TestCalendar:
         response = with_client.get("/me/calendars", params={"only_connected": False}, headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 1
         calendar = data[0]
         assert calendar["title"] == generated_calendar.title
@@ -180,7 +191,11 @@ class TestCalendar:
         the_other_guy = make_pro_subscriber()
         generated_calendar = request.getfixturevalue(factory_name)(the_other_guy.id)
 
-        response = with_client.put(f"/cal/{generated_calendar.id}", json={"title": "b", "url": "b", "user": "b", "password": "b"}, headers=auth_headers)
+        response = with_client.put(
+            f"/cal/{generated_calendar.id}",
+            json={"title": "b", "url": "b", "user": "b", "password": "b"},
+            headers=auth_headers,
+        )
         assert response.status_code == 403, response.text
 
     @pytest.mark.parametrize("provider,factory_name", get_calendar_factory())
@@ -235,7 +250,7 @@ class TestCalendar:
         assert response.status_code == 200, response.text
 
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 1
 
         calendar = data[0]
@@ -254,7 +269,7 @@ class TestCalendar:
         response = with_client.get("/me/calendars", params={"only_connected": False}, headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert type(data) is list
+        assert isinstance(data, list)
         assert len(data) == 2
 
     @pytest.mark.parametrize("provider,factory_name", get_calendar_factory())
@@ -295,7 +310,9 @@ class TestCalendar:
         assert response.status_code == 403, response.text
 
     @pytest.mark.parametrize("provider,factory_name", get_calendar_factory())
-    def test_connect_more_calendars_than_tier_allows(self, with_client, with_db, make_basic_subscriber, provider, factory_name, request):
+    def test_connect_more_calendars_than_tier_allows(
+        self, with_client, with_db, make_basic_subscriber, provider, factory_name, request
+    ):
         basic_user = make_basic_subscriber()
 
         cal = {}
@@ -308,6 +325,7 @@ class TestCalendar:
 
 class TestCaldav:
     """Tests for caldav specific functionality"""
+
     def test_create_first_caldav_calendar(self, with_client):
         response = with_client.post(
             "/cal",
@@ -367,7 +385,7 @@ class TestCaldav:
 
     def test_update_existing_caldav_calendar_without_password(self, with_client, with_db, make_caldav_calendar):
         """Ensure if we put a blank password into the request that the calendar will update with an empty password."""
-        generated_calendar = make_caldav_calendar(password='')
+        generated_calendar = make_caldav_calendar(password="")
 
         response = with_client.put(
             f"/cal/{generated_calendar.id}",
@@ -396,4 +414,4 @@ class TestCaldav:
 
         assert cal.url == os.getenv("CALDAV_TEST_CALENDAR_URL")
         assert cal.user == os.getenv("CALDAV_TEST_USER")
-        assert cal.password == ''
+        assert cal.password == ""

@@ -29,7 +29,7 @@ class TestTools:
                 start=start + timedelta(minutes=duration * 3),
                 duration=duration,
                 booking_status=models.BookingStatus.requested,
-            )
+            ),
         ]
 
         # 3x 30 minute booked slots, two of the slots should combine to one hour busy slot
@@ -42,12 +42,12 @@ class TestTools:
             schemas.Event(
                 title="After meeting nap",
                 start=start + timedelta(minutes=duration),
-                end=start + timedelta(minutes=duration*2),
+                end=start + timedelta(minutes=duration * 2),
             ),
             schemas.Event(
                 title="Some other appointment",
-                start=start + timedelta(minutes=duration*3),
-                end=start + timedelta(minutes=duration*4),
+                start=start + timedelta(minutes=duration * 3),
+                end=start + timedelta(minutes=duration * 4),
             ),
         ]
 

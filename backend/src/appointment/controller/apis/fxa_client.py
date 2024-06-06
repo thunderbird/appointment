@@ -61,7 +61,7 @@ class FxaClient:
 
     def setup(self, subscriber_id=None, token=None):
         """Retrieve the openid connect urls, and setup our client connection"""
-        if type(token) is str:
+        if isinstance(token, str):
             token = json.loads(token)
 
         self.config = FxaConfig.from_url(os.getenv("FXA_OPEN_ID_CONFIG"))

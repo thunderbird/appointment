@@ -16,14 +16,22 @@ class TestData:
 
         assert csv_data
         # Check if our scrubber is working as intended
-        assert 'subscriber.password' not in csv_data
+        assert "subscriber.password" not in csv_data
         assert password not in csv_data
         assert ph.hash(password) not in csv_data
         # Ensure that some of our subscriber data is there
         assert subscriber.email in csv_data
         assert subscriber.username in csv_data
 
-    def test_delete_account(self, with_db, make_pro_subscriber, make_appointment, make_schedule, make_caldav_calendar, make_external_connections):
+    def test_delete_account(
+        self,
+        with_db,
+        make_pro_subscriber,
+        make_appointment,
+        make_schedule,
+        make_caldav_calendar,
+        make_external_connections,
+    ):
         """Test that our delete account functionality actually deletes everything"""
         subscriber = make_pro_subscriber()
         calendar = make_caldav_calendar(subscriber_id=subscriber.id)
