@@ -174,13 +174,17 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Get frontend bucket & distribution
+        id: get-frontend-resources
+        working-directory: ./tofu/environments/stage/services/frontend-infra
+        run: |
+          echo "bucket=$(terragrunt output bucket_name | tr -d '"')" >> $GITHUB_OUTPUT
+          echo "distribution=$(terragrunt output cloudfront_id)" >> $GITHUB_OUTPUT
+
       - name: Deploy frontend to S3
         run: |
-          cd tofu/environments/stage/services/frontend-infra
-          bucket=$(terragrunt output bucket_name | tr -d '"')
-          cloudfront=$(terragrunt output cloudfront_id)
-          aws s3 sync ../../../../../frontend/dist "s3://$(bucket)"
-          aws cloudfront create-invalidation --distribution-id $(cloudfront) --paths "/*"
+          aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
+          aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
 
 
   deploy-backend:
