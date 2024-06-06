@@ -284,7 +284,10 @@ def me(
 @router.post("/permission-check")
 def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     """Checks if they have admin permissions"""
-    return subscriber.is_deleted
+    # This should already be covered, but just in case!
+    if subscriber.is_deleted:
+        raise validation.InvalidPermissionLevelException()
+    return True  # Covered by get_admin_subscriber
 
 
 # @router.get('/test-create-account')

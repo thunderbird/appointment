@@ -15,6 +15,18 @@ class TestAuth:
         assert data.get('secondary_email') is None
         assert data.get('preferred_email') == os.getenv('TEST_USER_EMAIL')
 
+    def test_permission_check_with_deleted_subscriber(self, with_client, with_db):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, os.getenv('TEST_USER_EMAIL'))
+            db.delete(subscriber)
+            db.commit()
+
+        response = with_client.post('/permission-check',
+                                    headers=auth_headers)
+        assert response.status_code == 401, response.text
+
     def test_permission_check_with_no_admin_email(self, with_client):
         os.environ['APP_ADMIN_ALLOW_LIST'] = ''
 
