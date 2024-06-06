@@ -297,7 +297,7 @@ jobs:
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
           cd frontend && yarn build --mode ${{ vars.APP_ENV }}
-          zip -r frontend.zip frontend/dist
+          zip frontend.zip frontend/dist
 
       - name: download ecr tag
         uses: actions/download-artifact@v4
