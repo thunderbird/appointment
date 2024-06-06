@@ -20,11 +20,11 @@ new_external_connections = ",".join(['"zoom"', '"google"', '"fxa"'])
 
 def upgrade() -> None:
     op.execute(
-        f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({new_external_connections}) NOT NULL AFTER `name`;"
+        f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({new_external_connections}) NOT NULL AFTER `name`;"  # noqa: E501
     )
 
 
 def downgrade() -> None:
     op.execute(
-        f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({old_external_connections}) NOT NULL AFTER `name`;"
+        f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({old_external_connections}) NOT NULL AFTER `name`;"  # noqa: E501
     )
