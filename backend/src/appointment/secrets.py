@@ -9,13 +9,13 @@ def normalize_secrets():
     if database_secrets:
         secrets = json.loads(database_secrets)
 
-        host = secrets['host']
-        port = secrets['port']
+        host = secrets["host"]
+        port = secrets["port"]
 
         # If port is not already in the host var, then append it to hostname
         hostname = host
-        if f':{port}' not in host:
-            hostname = f'{hostname}:{port}'
+        if f":{port}" not in host:
+            hostname = f"{hostname}:{port}"
 
         os.environ[
             "DATABASE_URL"
@@ -62,14 +62,14 @@ def normalize_secrets():
         os.environ["ZOOM_AUTH_CLIENT_ID"] = secrets.get("client_id")
         os.environ["ZOOM_AUTH_SECRET"] = secrets.get("secret")
 
-    fxa_secrets = os.getenv('FXA_SECRETS')
+    fxa_secrets = os.getenv("FXA_SECRETS")
 
     if fxa_secrets:
         secrets = json.loads(fxa_secrets)
 
-        os.environ['FXA_OPEN_ID_CONFIG'] = secrets.get('open_id_config')
-        os.environ['FXA_CLIENT_ID'] = secrets.get('client_id')
-        os.environ['FXA_SECRET'] = secrets.get('secret')
-        os.environ['FXA_CALLBACK'] = secrets.get('callback_url')
-        os.environ['FXA_ALLOW_LIST'] = secrets.get('allow_list')
-        os.environ['APP_ADMIN_ALLOW_LIST'] = secrets.get('admin_list')
+        os.environ["FXA_OPEN_ID_CONFIG"] = secrets.get("open_id_config")
+        os.environ["FXA_CLIENT_ID"] = secrets.get("client_id")
+        os.environ["FXA_SECRET"] = secrets.get("secret")
+        os.environ["FXA_CALLBACK"] = secrets.get("callback_url")
+        os.environ["FXA_ALLOW_LIST"] = secrets.get("allow_list")
+        os.environ["APP_ADMIN_ALLOW_LIST"] = secrets.get("admin_list")

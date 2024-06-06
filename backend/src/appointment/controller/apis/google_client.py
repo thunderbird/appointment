@@ -72,7 +72,7 @@ class GoogleClient:
         if self.client is None:
             return None
 
-        user_info_service = build('oauth2', 'v2', credentials=token)
+        user_info_service = build("oauth2", "v2", credentials=token)
         user_info = user_info_service.userinfo().get().execute()
 
         return user_info
@@ -83,12 +83,12 @@ class GoogleClient:
         response = {}
         items = []
         with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
-            request = service.calendarList().list(minAccessRole='writer')
+            request = service.calendarList().list(minAccessRole="writer")
             while request is not None:
                 try:
                     response = request.execute()
 
-                    items += response.get('items', [])
+                    items += response.get("items", [])
                 except HttpError as e:
                     logging.warning(f"[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}")
 
@@ -101,37 +101,38 @@ class GoogleClient:
         items = []
 
         # Limit the fields we request
-        fields = ','.join(
+        fields = ",".join(
             (
-                'items/status',
-                'items/summary',
-                'items/description',
-                'items/attendees',
-                'items/start',
-                'items/end',
+                "items/status",
+                "items/summary",
+                "items/description",
+                "items/attendees",
+                "items/start",
+                "items/end",
                 # Top level stuff
-                'nextPageToken',
+                "nextPageToken",
             )
         )
 
         # Explicitly ignore workingLocation events
         # See: https://developers.google.com/calendar/api/v3/reference/events#eventType
-        event_types = [
-            'default',
-            'focusTime',
-            'outOfOffice'
-        ]
+        event_types = ["default", "focusTime", "outOfOffice"]
 
         with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
             request = service.events().list(
-                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime",
-                eventTypes=event_types, fields=fields
+                calendarId=calendar_id,
+                timeMin=time_min,
+                timeMax=time_max,
+                singleEvents=True,
+                orderBy="startTime",
+                eventTypes=event_types,
+                fields=fields,
             )
             while request is not None:
                 try:
                     response = request.execute()
 
-                    items += response.get('items', [])
+                    items += response.get("items", [])
                 except HttpError as e:
                     logging.warning(f"[google_client.list_events] Request Error: {e.status_code}/{e.error_details}")
 
@@ -170,10 +171,7 @@ class GoogleClient:
             # add calendar
             try:
                 repo.calendar.update_or_create(
-                    db=db,
-                    calendar=cal,
-                    calendar_url=calendar.get("id"),
-                    subscriber_id=subscriber_id
+                    db=db, calendar=cal, calendar_url=calendar.get("id"), subscriber_id=subscriber_id
                 )
             except Exception as err:
                 logging.warning(

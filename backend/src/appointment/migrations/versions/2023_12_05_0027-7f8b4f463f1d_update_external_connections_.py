@@ -9,18 +9,22 @@ from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = '7f8b4f463f1d'
-down_revision = 'c4a5f0df612c'
+revision = "7f8b4f463f1d"
+down_revision = "c4a5f0df612c"
 branch_labels = None
 depends_on = None
 
-old_external_connections = ','.join(['"zoom"', '"google"'])
-new_external_connections = ','.join(['"zoom"', '"google"', '"fxa"'])
+old_external_connections = ",".join(['"zoom"', '"google"'])
+new_external_connections = ",".join(['"zoom"', '"google"', '"fxa"'])
 
 
 def upgrade() -> None:
-    op.execute(f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({new_external_connections}) NOT NULL AFTER `name`;")
+    op.execute(
+        f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({new_external_connections}) NOT NULL AFTER `name`;"
+    )
 
 
 def downgrade() -> None:
-    op.execute(f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({old_external_connections}) NOT NULL AFTER `name`;")
+    op.execute(
+        f"ALTER TABLE `external_connections` MODIFY COLUMN `type` enum({old_external_connections}) NOT NULL AFTER `name`;"
+    )

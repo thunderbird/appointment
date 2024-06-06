@@ -9,24 +9,25 @@ from ..defines import SUPPORTED_LOCALES, FALLBACK_LOCALE
 
 class L10n(Plugin):
     """Provides fluent's format_value function via context['l10n']"""
-    key = 'l10n'
+
+    key = "l10n"
 
     def parse_accept_language(self, accept_language_header):
-        languages = accept_language_header.split(',')
+        languages = accept_language_header.split(",")
         parsed_locales = []
 
         for language in languages:
-            split_language = language.split(';')
+            split_language = language.split(";")
             if len(split_language) == 1:
                 language = language.strip()
             else:
                 language, _ = split_language
                 language = language.strip()
 
-            if language in SUPPORTED_LOCALES or language == '*':
+            if language in SUPPORTED_LOCALES or language == "*":
                 parsed_locales.append(language)
 
-        if len(parsed_locales) == 0 or parsed_locales[0] == '*':
+        if len(parsed_locales) == 0 or parsed_locales[0] == "*":
             parsed_locales = [FALLBACK_LOCALE]
 
         return parsed_locales
@@ -45,7 +46,5 @@ class L10n(Plugin):
 
         return fluent.format_value
 
-    async def process_request(
-        self, request: Request
-    ):
-        return self.get_fluent(request.headers.get('accept-language', FALLBACK_LOCALE))
+    async def process_request(self, request: Request):
+        return self.get_fluent(request.headers.get("accept-language", FALLBACK_LOCALE))

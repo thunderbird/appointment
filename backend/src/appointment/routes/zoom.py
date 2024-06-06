@@ -28,10 +28,10 @@ def zoom_auth(
     url, state = zoom_client.get_redirect_url(state=sign_url(str(subscriber.id)))
 
     # We'll need to store this in session
-    request.session['zoom_state'] = state
-    request.session['zoom_user_id'] = subscriber.id
+    request.session["zoom_state"] = state
+    request.session["zoom_user_id"] = subscriber.id
 
-    return {'url': url}
+    return {"url": url}
 
 
 @router.get("/callback")
@@ -41,17 +41,17 @@ def zoom_callback(
     state: str,
     db=Depends(get_db),
 ):
-    if 'zoom_state' not in request.session or request.session['zoom_state'] != state:
-        raise HTTPException(400, l10n('oauth-error'))
-    if 'zoom_user_id' not in request.session or 'zoom_user_id' == '':
-        raise HTTPException(400, l10n('oauth-error'))
+    if "zoom_state" not in request.session or request.session["zoom_state"] != state:
+        raise HTTPException(400, l10n("oauth-error"))
+    if "zoom_user_id" not in request.session or "zoom_user_id" == "":
+        raise HTTPException(400, l10n("oauth-error"))
 
     # Retrieve the user id set at the start of the zoom oauth process
-    subscriber = repo.subscriber.get(db, request.session['zoom_user_id'])
+    subscriber = repo.subscriber.get(db, request.session["zoom_user_id"])
 
     # Clear zoom session keys
-    request.session.pop('zoom_state')
-    request.session.pop('zoom_user_id')
+    request.session.pop("zoom_state")
+    request.session.pop("zoom_user_id")
 
     # Generate the zoom client instance based on our subscriber (this can't be set as a dep injection since subscriber is based on session.
     zoom_client: ZoomClient = get_zoom_client(subscriber)
@@ -62,14 +62,21 @@ def zoom_callback(
     zoom_user_info = zoom_client.get_me()
 
     external_connection_schema = schemas.ExternalConnection(
-        name=zoom_user_info['email'],
+        name=zoom_user_info["email"],
         type=ExternalConnectionType.zoom,
-        type_id=zoom_user_info['id'],
+        type_id=zoom_user_info["id"],
         owner_id=subscriber.id,
-        token=json.dumps(creds)
+        token=json.dumps(creds),
     )
 
-    if len(repo.external_connection.get_by_type(db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id)) == 0:
+    if (
+        len(
+            repo.external_connection.get_by_type(
+                db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id
+            )
+        )
+        == 0
+    ):
         repo.external_connection.create(db, external_connection_schema)
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/account")

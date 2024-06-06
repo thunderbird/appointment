@@ -13,15 +13,17 @@ from sqlalchemy.orm import Session
 from appointment.database import models
 
 # revision identifiers, used by Alembic.
-revision = 'c5b9fc31b555'
-down_revision = 'e4c5a32de9fb'
+revision = "c5b9fc31b555"
+down_revision = "e4c5a32de9fb"
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
     session = Session(op.get_bind())
-    appointments: list[models.Appointment] = session.query(models.Appointment).where(models.Appointment.uuid.is_(None)).all()
+    appointments: list[models.Appointment] = (
+        session.query(models.Appointment).where(models.Appointment.uuid.is_(None)).all()
+    )
     for appointment in appointments:
         appointment.uuid = uuid.uuid4()
         session.add(appointment)

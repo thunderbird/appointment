@@ -18,7 +18,7 @@ from ..tasks.emails import send_invite_account_email
 router = APIRouter()
 
 
-@router.get('/', response_model=list[schemas.Invite])
+@router.get("/", response_model=list[schemas.Invite])
 def get_all_invites(db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
     return db.query(models.Invite).all()
@@ -46,7 +46,7 @@ def send_invite_email(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     # Note admin must be here to for permission reasons
-    _admin: Subscriber = Depends(get_admin_subscriber)
+    _admin: Subscriber = Depends(get_admin_subscriber),
 ):
     """With a given email address, generate a subscriber and email them, welcoming them to Thunderbird Appointment."""
     email = data.email
@@ -57,10 +57,13 @@ def send_invite_email(
         raise CreateSubscriberAlreadyExistsException()
 
     invite_code = repo.invite.generate_codes(db, 1)[0]
-    subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
-        email=email,
-        username=email,
-    ))
+    subscriber = repo.subscriber.create(
+        db,
+        schemas.SubscriberBase(
+            email=email,
+            username=email,
+        ),
+    )
 
     if not subscriber:
         raise CreateSubscriberFailedException()

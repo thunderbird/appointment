@@ -15,7 +15,7 @@ def model_to_csv_buffer(models):
         return StringIO()
 
     # Don't write out these columns
-    scrub_columns = ['password', 'google_tkn', 'google_state', 'google_state_expires_at', 'token']
+    scrub_columns = ["password", "google_tkn", "google_state", "google_state_expires_at", "token"]
 
     string_buffer = StringIO()
 
@@ -56,7 +56,7 @@ def download(db, subscriber: Subscriber):
     schedules_buffer = model_to_csv_buffer(schedules)
 
     # Unique behaviour because we can have lists of lists..too annoying to not do it this way.
-    availability_buffer = ''
+    availability_buffer = ""
     for avail in availability:
         availability_buffer += model_to_csv_buffer(avail).getvalue()
 
@@ -71,7 +71,9 @@ def download(db, subscriber: Subscriber):
         data_zip.writestr("external_connection.csv", external_connections_buffer.getvalue())
         data_zip.writestr("schedules.csv", schedules_buffer.getvalue())
         data_zip.writestr("availability.csv", availability_buffer)
-        data_zip.writestr("readme.txt", l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)}))
+        data_zip.writestr(
+            "readme.txt", l10n("account-data-readme", {"download_time": datetime.datetime.now(datetime.UTC)})
+        )
 
     # Return our zip buffer
     return zip_buffer
@@ -93,7 +95,7 @@ def delete_account(db, subscriber: Subscriber):
         len(repo.slot.get_by_subscriber(db, subscriber.id)),
         len(repo.appointment.get_by_subscriber(db, subscriber.id)),
         len(repo.calendar.get_by_subscriber(db, subscriber.id)),
-        len(repo.schedule.get_by_subscriber(db, subscriber.id))
+        len(repo.schedule.get_by_subscriber(db, subscriber.id)),
     ]
 
     # Check if we have any left-over subscriber data

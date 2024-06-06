@@ -118,6 +118,7 @@ class Appointment(AppointmentFull):
 
 class AppointmentWithCalendarOut(Appointment):
     """For /me/appointments"""
+
     calendar_title: str
     calendar_color: str
 
@@ -125,7 +126,7 @@ class AppointmentWithCalendarOut(Appointment):
 class AppointmentOut(AppointmentBase):
     id: int | None = None
     owner_name: str | None = None
-    slots: list[SlotBase|SlotOut] = []
+    slots: list[SlotBase | SlotOut] = []
     slot_duration: int
 
 
@@ -179,7 +180,7 @@ class Schedule(ScheduleBase):
     time_created: datetime | None = None
     time_updated: datetime | None = None
     availabilities: list[Availability] = []
-    calendar: 'CalendarBase'
+    calendar: "CalendarBase"
 
     class Config:
         from_attributes = True
@@ -187,6 +188,7 @@ class Schedule(ScheduleBase):
 
 class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
+
     slot_duration: Annotated[int, Field(ge=10, default=30)]
 
 
@@ -234,7 +236,6 @@ class Invite(BaseModel):
     status: InviteStatus = InviteStatus.active
     time_created: datetime | None = None
     time_updated: datetime | None = None
-
 
 
 """ SUBSCRIBER model schemas
@@ -316,6 +317,7 @@ class Event(BaseModel):
 
     """Ideally this would just be a mixin, but I'm having issues figuring out a good
     static constructor that will work for anything."""
+
     def model_dump_redis(self):
         """Dumps our event into an encrypted json blob for redis"""
         values_json = self.model_dump_json()
@@ -330,7 +332,7 @@ class Event(BaseModel):
         values = json.loads(values_json)
 
         return Event(**values)
-    
+
 
 class FileDownload(BaseModel):
     name: str

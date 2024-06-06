@@ -32,16 +32,16 @@ def get_db():
 def get_redis() -> Redis | RedisCluster | None:
     """Retrieves a redis instance or None if redis isn't available."""
     # TODO: Create pool and simply grab instance?
-    if os.getenv('REDIS_URL') is None:
+    if os.getenv("REDIS_URL") is None:
         return None
 
-    host = os.getenv('REDIS_URL')
-    port = int(os.getenv('REDIS_PORT'))
-    db = os.getenv('REDIS_DB')
-    password = os.getenv('REDIS_PASSWORD')
-    ssl = os.getenv('REDIS_USE_SSL')
+    host = os.getenv("REDIS_URL")
+    port = int(os.getenv("REDIS_PORT"))
+    db = os.getenv("REDIS_DB")
+    password = os.getenv("REDIS_PASSWORD")
+    ssl = os.getenv("REDIS_USE_SSL")
 
-    if os.getenv('REDIS_USE_CLUSTER'):
+    if os.getenv("REDIS_USE_CLUSTER"):
         return RedisCluster(
             host=host,
             port=port,

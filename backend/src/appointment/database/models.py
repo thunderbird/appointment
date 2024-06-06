@@ -70,9 +70,9 @@ class ExternalConnectionType(enum.Enum):
 
 
 class MeetingLinkProviderType(enum.StrEnum):
-    none = 'none'
-    zoom = 'zoom'
-    google_meet = 'google_meet'
+    none = "none"
+    zoom = "zoom"
+    google_meet = "google_meet"
 
 
 class InviteStatus(enum.Enum):
@@ -83,6 +83,7 @@ class InviteStatus(enum.Enum):
 @as_declarative()
 class Base:
     """Base model, contains anything we want to be on every model."""
+
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
@@ -100,6 +101,7 @@ class Base:
 
 class HasSoftDelete:
     """Mixing in a column to support deletion without removing the record"""
+
     time_deleted = Column(DateTime, nullable=True)
 
     @property
@@ -118,7 +120,9 @@ class Subscriber(HasSoftDelete, Base):
 
     # Use subscriber.preferred_email for any email, or other user-facing presence.
     email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), unique=True, index=True)
-    secondary_email = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), nullable=True, index=True)
+    secondary_email = Column(
+        StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), nullable=True, index=True
+    )
 
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
@@ -128,14 +132,16 @@ class Subscriber(HasSoftDelete, Base):
     short_link_hash = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=False)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
-    minimum_valid_iat_time = Column('minimum_valid_iat_time', StringEncryptedType(DateTime, secret, AesEngine, "pkcs5", length=255))
+    minimum_valid_iat_time = Column(
+        "minimum_valid_iat_time", StringEncryptedType(DateTime, secret, AesEngine, "pkcs5", length=255)
+    )
 
     calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
     slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
     external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
     invite: Mapped["Invite"] = relationship("Invite", back_populates="subscriber", uselist=False)
 
-    def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
+    def get_external_connection(self, type: ExternalConnectionType) -> "ExternalConnections":
         """Retrieves the first found external connection by type or returns None if not found"""
         return next(filter(lambda ec: ec.type == type, self.external_connections), None)
 
@@ -160,7 +166,9 @@ class Calendar(Base):
     connected_at = Column(DateTime)
 
     owner: Mapped[Subscriber] = relationship("Subscriber", back_populates="calendars")
-    appointments: Mapped[list["Appointment"]] = relationship("Appointment", cascade="all,delete", back_populates="calendar")
+    appointments: Mapped[list["Appointment"]] = relationship(
+        "Appointment", cascade="all,delete", back_populates="calendar"
+    )
     schedules: Mapped[list["Schedule"]] = relationship("Schedule", cascade="all,delete", back_populates="calendar")
 
 
@@ -184,10 +192,14 @@ class Appointment(Base):
     status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider = Column(
+        StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255),
+        default=MeetingLinkProviderType.none,
+        index=False,
+    )
 
     calendar: Mapped[Calendar] = relationship("Calendar", back_populates="appointments")
-    slots: Mapped[list['Slot']] = relationship("Slot", cascade="all,delete", back_populates="appointment")
+    slots: Mapped[list["Slot"]] = relationship("Slot", cascade="all,delete", back_populates="appointment")
 
 
 class Attendee(Base):
@@ -198,7 +210,7 @@ class Attendee(Base):
     name = Column(StringEncryptedType(String, secret, AesEngine, "pkcs5", length=255), index=True)
     timezone = Column(String(255), index=True)
 
-    slots: Mapped[list['Slot']] = relationship("Slot", cascade="all,delete", back_populates="attendee")
+    slots: Mapped[list["Slot"]] = relationship("Slot", cascade="all,delete", back_populates="attendee")
 
 
 class Slot(Base):
@@ -224,7 +236,7 @@ class Slot(Base):
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
     appointment: Mapped[Appointment] = relationship("Appointment", back_populates="slots")
-    schedule: Mapped['Schedule'] = relationship("Schedule", back_populates="slots")
+    schedule: Mapped["Schedule"] = relationship("Schedule", back_populates="slots")
 
     attendee: Mapped[Attendee] = relationship("Attendee", cascade="all,delete", back_populates="slots")
     subscriber: Mapped[Subscriber] = relationship("Subscriber", back_populates="slots")
@@ -250,28 +262,38 @@ class Schedule(Base):
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider: MeetingLinkProviderType = Column(StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255), default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider: MeetingLinkProviderType = Column(
+        StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255),
+        default=MeetingLinkProviderType.none,
+        index=False,
+    )
 
     calendar: Mapped[Calendar] = relationship("Calendar", back_populates="schedules")
-    availabilities: Mapped[list["Availability"]] = relationship("Availability", cascade="all,delete", back_populates="schedule")
+    availabilities: Mapped[list["Availability"]] = relationship(
+        "Availability", cascade="all,delete", back_populates="schedule"
+    )
     slots: Mapped[list[Slot]] = relationship("Slot", cascade="all,delete", back_populates="schedule")
 
     @property
     def start_time_local(self) -> datetime.time:
         """Start Time in the Schedule's Calendar's Owner's timezone"""
-        time_of_save = self.time_updated.replace(hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc)
+        time_of_save = self.time_updated.replace(
+            hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
     @property
     def end_time_local(self) -> datetime.time:
         """End Time in the Schedule's Calendar's Owner's timezone"""
-        time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc)
+        time_of_save = self.time_updated.replace(
+            hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
 
 class Availability(Base):
     """This table will be used as soon as the application provides custom availability
-       in addition to the general availability
+    in addition to the general availability
     """
 
     __tablename__ = "availabilities"
@@ -290,6 +312,7 @@ class Availability(Base):
 
 class ExternalConnections(Base):
     """This table holds all external service connections to a subscriber."""
+
     __tablename__ = "external_connections"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -303,6 +326,7 @@ class ExternalConnections(Base):
 
 class Invite(Base):
     """This table holds all invite codes for code based sign-ups."""
+
     __tablename__ = "invites"
 
     id = Column(Integer, primary_key=True, index=True)

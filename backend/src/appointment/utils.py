@@ -36,7 +36,7 @@ def is_json(jsonstring: str):
 def setup_encryption_engine():
     engine = AesEngine()
     # Yes we need to use protected methods to set this up.
-    # We could replace it with our own encryption, 
+    # We could replace it with our own encryption,
     # but I wanted it to be similar to the db.
     engine._update_key(secret())
     engine._set_padding_mechanism("pkcs5")

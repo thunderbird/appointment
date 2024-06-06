@@ -1,5 +1,3 @@
-import os
-
 from ..database import repo
 from ..dependencies.database import get_engine_and_session
 

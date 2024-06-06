@@ -13,15 +13,15 @@ from sqlalchemy import func
 from sqlalchemy_utils import UUIDType
 
 # revision identifiers, used by Alembic.
-revision = 'e4c5a32de9fb'
-down_revision = 'bbdfad87a7fb'
+revision = "e4c5a32de9fb"
+down_revision = "bbdfad87a7fb"
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('appointments', sa.Column('uuid', UUIDType(native=False), default=uuid.uuid4(), index=True))
+    op.add_column("appointments", sa.Column("uuid", UUIDType(native=False), default=uuid.uuid4(), index=True))
 
 
 def downgrade() -> None:
-    op.drop_column('appointments', 'uuid')
+    op.drop_column("appointments", "uuid")

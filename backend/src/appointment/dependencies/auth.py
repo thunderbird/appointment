@@ -18,7 +18,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 def get_user_from_token(db, token: str):
     try:
-        payload = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=[os.getenv('JWT_ALGO')])
+        payload = jwt.decode(token, os.getenv("JWT_SECRET"), algorithms=[os.getenv("JWT_ALGO")])
         sub = payload.get("sub")
         iat = payload.get("iat")
         if sub is None:
@@ -26,16 +26,20 @@ def get_user_from_token(db, token: str):
     except jwt.exceptions.InvalidTokenError:
         raise InvalidTokenException()
 
-    id = sub.replace('uid-', '')
+    id = sub.replace("uid-", "")
     subscriber = repo.subscriber.get(db, int(id))
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
-    if any([
-        subscriber is None,
-        subscriber.is_deleted,
-        subscriber and subscriber.minimum_valid_iat_time and not iat,
-        subscriber and subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat)
-    ]):
+    if any(
+        [
+            subscriber is None,
+            subscriber.is_deleted,
+            subscriber and subscriber.minimum_valid_iat_time and not iat,
+            subscriber
+            and subscriber.minimum_valid_iat_time
+            and subscriber.minimum_valid_iat_time.timestamp() > int(iat),
+        ]
+    ):
         raise InvalidTokenException()
 
     return subscriber
@@ -55,10 +59,12 @@ def get_subscriber(
         raise InvalidTokenException()
 
     # Associate user id with users
-    if os.getenv('SENTRY_DSN'):
-        sentry_sdk.set_user({
-            'id': user.id,
-        })
+    if os.getenv("SENTRY_DSN"):
+        sentry_sdk.set_user(
+            {
+                "id": user.id,
+            }
+        )
 
     return user
 
@@ -74,7 +80,7 @@ def get_admin_subscriber(
     if not admin_emails or not user:
         raise InvalidPermissionLevelException()
 
-    admin_emails = admin_emails.split(',')
+    admin_emails = admin_emails.split(",")
     if not any([user.email.endswith(allowed_email) for allowed_email in admin_emails]):
         raise InvalidPermissionLevelException()
 

@@ -11,6 +11,7 @@ from fastapi import Request
 from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
+
 # Ignore "Module level import not at top of file"
 # ruff: noqa: E402
 from .secrets import normalize_secrets
@@ -60,9 +61,8 @@ def _common_setup():
     logging.debug("Logger started!")
 
     if os.getenv("SENTRY_DSN") != "" and os.getenv("SENTRY_DSN") is not None:
-
         release_string = None
-        release_version = os.getenv('RELEASE_VERSION')
+        release_version = os.getenv("RELEASE_VERSION")
         if release_version:
             release_string = f"appointment-backend@{release_version}"
 
@@ -79,11 +79,11 @@ def _common_setup():
 
         def traces_sampler(sampling_context):
             """Tell Sentry to ignore or reduce traces for particular routes"""
-            asgi_scope = sampling_context.get('asgi_scope', {})
-            path = asgi_scope.get('path')
+            asgi_scope = sampling_context.get("asgi_scope", {})
+            path = asgi_scope.get("path")
 
             # Ignore health check and favicon.ico
-            if path == '/' or path == '/favicon.ico':
+            if path == "/" or path == "/favicon.ico":
                 return 0
 
             return profile_traces_max
@@ -94,15 +94,11 @@ def _common_setup():
             environment=environment,
             release=release_string,
             integrations=[
-                StarletteIntegration(
-                    transaction_style="endpoint"
-                ),
-                FastApiIntegration(
-                    transaction_style="endpoint"
-                ),
+                StarletteIntegration(transaction_style="endpoint"),
+                FastApiIntegration(transaction_style="endpoint"),
             ],
             profiles_sampler=traces_sampler,
-            traces_sampler=traces_sampler
+            traces_sampler=traces_sampler,
         )
 
 
@@ -126,25 +122,17 @@ def server():
     from .routes import webhooks
 
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
-    openapi_url = '/openapi.json' if os.getenv('APP_ENV') == APP_ENV_DEV else None
+    openapi_url = "/openapi.json" if os.getenv("APP_ENV") == APP_ENV_DEV else None
 
     # init app
     app = FastAPI(openapi_url=openapi_url)
 
-    app.add_middleware(
-        RawContextMiddleware,
-        plugins=(
-            L10n(),
-        )
-    )
+    app.add_middleware(RawContextMiddleware, plugins=(L10n(),))
 
     # strip html tags from input requests
     app.add_middleware(SanitizeMiddleware)
 
-    app.add_middleware(
-        SessionMiddleware,
-        secret_key=os.getenv("SESSION_SECRET")
-    )
+    app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET"))
 
     # allow requests from own frontend running on a different port
     app.add_middleware(
@@ -165,13 +153,13 @@ def server():
     async def warn_about_deprecated_routes(request: Request, call_next):
         """Warn about clients using deprecated routes"""
         response = await call_next(request)
-        if request.scope.get('route') and request.scope['route'].deprecated:
-            app_env = os.getenv('APP_ENV')
+        if request.scope.get("route") and request.scope["route"].deprecated:
+            app_env = os.getenv("APP_ENV")
             if app_env == APP_ENV_DEV:
                 logging.warning(f"Use of deprecated route: `{request.scope['route'].path}`!")
             elif app_env == APP_ENV_TEST:
                 # Stale test runtime error
-                #raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
+                # raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
                 # Just log for this PR, we'll fix it another PR.
                 logging.error(f"Test uses deprecated route: `{request.scope['route'].path}`!")
         return response
@@ -181,7 +169,6 @@ def server():
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
         return await http_exception_handler(request, APIGoogleRefreshError())
-
 
     # Mix in our extra routes
     app.include_router(api.router)

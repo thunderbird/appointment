@@ -17,15 +17,18 @@ def secret():
 
 
 # revision identifiers, used by Alembic.
-revision = 'ad7cc2de5ff8'
-down_revision = '0dc429ca07f5'
+revision = "ad7cc2de5ff8"
+down_revision = "0dc429ca07f5"
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('minimum_valid_iat_time', StringEncryptedType(sa.DateTime, secret, AesEngine, "pkcs5", length=255)))
+    op.add_column(
+        "subscribers",
+        sa.Column("minimum_valid_iat_time", StringEncryptedType(sa.DateTime, secret, AesEngine, "pkcs5", length=255)),
+    )
 
 
 def downgrade() -> None:
-    op.drop_column('subscribers', 'minimum_valid_iat_time')
+    op.drop_column("subscribers", "minimum_valid_iat_time")

@@ -26,12 +26,13 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
     # Create a list of supported external connections
     external_connections = defaultdict(list)
 
-    if os.getenv('ZOOM_API_ENABLED'):
-        external_connections['Zoom'] = []
+    if os.getenv("ZOOM_API_ENABLED"):
+        external_connections["Zoom"] = []
 
     for ec in subscriber.external_connections:
-        external_connections[ec.type.name].append(schemas.ExternalConnectionOut(owner_id=ec.owner_id, type=ec.type.name,
-                                                                                type_id=ec.type_id, name=ec.name))
+        external_connections[ec.type.name].append(
+            schemas.ExternalConnectionOut(owner_id=ec.owner_id, type=ec.type.name, type_id=ec.type_id, name=ec.name)
+        )
 
     return external_connections
 
@@ -63,7 +64,4 @@ def get_available_emails(db: Session = Depends(get_db), subscriber: Subscriber =
 
     emails = {subscriber.email, *[connection.name for connection in google_connections]} - {subscriber.preferred_email}
 
-    return [
-        subscriber.preferred_email,
-        *emails
-    ]
+    return [subscriber.preferred_email, *emails]

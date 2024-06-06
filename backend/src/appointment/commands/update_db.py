@@ -36,5 +36,4 @@ def run():
             command.stamp(alembic_cfg, "head")
         else:
             print("Database already initialized, running migrations")
-            command.upgrade(alembic_cfg, 'head')
-
+            command.upgrade(alembic_cfg, "head")

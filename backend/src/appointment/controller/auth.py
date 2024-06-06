@@ -21,7 +21,7 @@ def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | N
         db.add(subscriber)
         db.commit()
 
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if os.getenv("AUTH_SCHEME") == "fxa":
         fxa_client.logout()
 
 

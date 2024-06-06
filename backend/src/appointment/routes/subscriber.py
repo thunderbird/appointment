@@ -14,7 +14,7 @@ from ..exceptions import validation
 router = APIRouter()
 
 
-@router.get('/', response_model=list[schemas.SubscriberAdminOut])
+@router.get("/", response_model=list[schemas.SubscriberAdminOut])
 def get_all_subscriber(db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
     response = db.query(models.Subscriber).all()
@@ -22,7 +22,9 @@ def get_all_subscriber(db: Session = Depends(get_db), _: Subscriber = Depends(ge
 
 
 @router.put("/disable/{email}")
-def disable_subscriber(email: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)):
+def disable_subscriber(
+    email: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)
+):
     """endpoint to mark a subscriber deleted by email, needs admin permissions"""
     subscriber_to_delete = repo.subscriber.get_by_email(db, email)
     if not subscriber_to_delete:

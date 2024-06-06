@@ -14,8 +14,8 @@ from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 # revision identifiers, used by Alembic.
-revision = 'f92bae6c27da'
-down_revision = 'ea551afc14fc'
+revision = "f92bae6c27da"
+down_revision = "ea551afc14fc"
 branch_labels = None
 depends_on = None
 
@@ -25,9 +25,9 @@ def secret():
 
 
 def upgrade() -> None:
-    op.drop_column('subscribers', 'google_tkn')
-    op.drop_column('subscribers', 'google_state')
-    op.drop_column('subscribers', 'google_state_expires_at')
+    op.drop_column("subscribers", "google_tkn")
+    op.drop_column("subscribers", "google_state")
+    op.drop_column("subscribers", "google_state_expires_at")
 
 
 def downgrade() -> None:
