@@ -9,12 +9,12 @@ on:
     types: [published]
 
 permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: read    # This is required for actions/checkout
+  contents: read
 
 jobs:
   deploy-iac:
     environment: production
+    if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     runs-on: ubuntu-latest
     outputs:
       bucket: ${{ steps.output-bucket-name.outputs.bucket }}
@@ -34,15 +34,16 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+    steps:
+      - name: Get Artifact from Release
+        uses: dsaltares/fetch-gh-release-asset@master
         with:
-          role-to-assume: ${{ secrets.IAM_ROLE }}
-          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ vars.AWS_REGION }}
+          version: ${{ github.event.release.id }}
+          file: iac.zip
+
+      - name: Unzip Artifact
+        run: unzip iac.zip
 
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
@@ -55,6 +56,13 @@ jobs:
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: vpc
         working-directory: ./tofu/environments/prod/network/vpc
@@ -110,15 +118,12 @@ jobs:
           output=$(terragrunt output cloudfront_id)
           echo cloudfront_id=$output >> $GITHUB_OUTPUT
 
-  release-production:
+  deploy-frontend:
     name: Release to Production
     needs: deploy-iac
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Get Artifact from Release
@@ -130,6 +135,39 @@ jobs:
       - name: Unzip Artifact
         run: unzip frontend.zip
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+# will be re-enabled once release workflow is tested
+#      - name: Deploy frontend to S3
+#        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+
+      - name: Invalidate Cloudfront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
+
+  deploy-backend:
+    needs: deploy-iac
+    if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
+    environment: production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: install opentofu
+        uses: opentofu/setup-opentofu@v1
+        with: 
+          tofu_version: ${{ vars.TF_VERSION }}
+          tofu_wrapper: false
+
+      - name: install terragrunt
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
+
       - name: Get ECR tag from Release
         id: get_ecr_tag
         uses: dsaltares/fetch-gh-release-asset@master
@@ -137,7 +175,7 @@ jobs:
           version: ${{ github.event.release.id }}
           file: ecr_tag.zip
           target: ./tofu/environments/prod/services/backend-service
-      
+
       - name: Unzip ECR tag
         working-directory: ./tofu/environments/prod/services/backend-service
         run: unzip ecr_tag.zip
@@ -156,11 +194,5 @@ jobs:
           terragrunt validate
           terragrunt plan -var "image=$(cat steps.get_ecr_tag.outputs.*)" -out tfplan
           cat tfplan
-#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+  #        terragrunt apply tfplan # will be re-enabled once release workflow is tested
 
-# will be re-enabled once release workflow is tested
-#      - name: Deploy frontend to S3
-#        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
-
-      - name: Invalidate Cloudfront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
