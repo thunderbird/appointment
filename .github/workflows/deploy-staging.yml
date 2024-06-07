@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - release-pipeline-troubleshooting
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS
@@ -271,13 +272,13 @@ jobs:
 
   create-release:
     needs:
-      - detect-changes
       - deploy-backend
       - deploy-frontend
+      - deploy-iac
     if: |
       always() &&
-      needs.deploy-backend.result == 'success' &&
-      needs.deploy-frontend.result == 'success'
+      contains(join(needs.*.result, ','), 'success') &&
+      ! contains(join(needs.*.result, ','), 'failure')
     environment: production
     runs-on: ubuntu-latest
 
