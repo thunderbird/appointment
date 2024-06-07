@@ -62,8 +62,8 @@ exclude = [
     "venv",
 ]
 
-# TODO: Assume Python 3.10.
-target-version = "py310"
+# Always generate Python 3.11-compatible code.
+target-version = "py311"
 
 [tool.ruff.lint]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
