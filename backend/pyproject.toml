@@ -63,6 +63,10 @@ exclude = [
 # Always generate Python 3.11-compatible code.
 target-version = "py311"
 
+[tool.ruff.format]
+# Prefer single quotes over double quotes.
+quote-style = "single"
+
 [tool.ruff.lint]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
 select = ["E", "F"]
