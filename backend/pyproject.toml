@@ -15,7 +15,6 @@ repository = "https://github.com/thunderbird/appointment.git"
 [project.optional-dependencies]
 cli = [
     "ruff",
-    "black"
 ]
 db = [
     "mysqlclient==2.1.1",
@@ -35,7 +34,6 @@ dependencies = { file = ["requirements.txt"] }
 
 # Ruff
 [tool.ruff]
-# Same as Black.
 line-length = 120
 
 # Exclude a variety of commonly ignored directories.
@@ -80,9 +78,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
-
-[tool.black]
-line-length = 120
 
 [tool.pytest.ini_options]
 pythonpath = "test"
