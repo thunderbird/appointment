@@ -9,6 +9,7 @@ on:
     types: [published]
 
 permissions:
+  id-token: write # required for OIDC connectiong to AWS
   contents: read
 
 jobs:
@@ -119,7 +120,6 @@ jobs:
           echo cloudfront_id=$output >> $GITHUB_OUTPUT
 
   deploy-frontend:
-    name: Release to Production
     needs: deploy-iac
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production

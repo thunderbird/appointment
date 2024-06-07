@@ -10,8 +10,8 @@ on:
       - main
 
 permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: write   # This is required to create a release
+  id-token: write # required for OIDC connectiong to AWS
+  contents: write # This is required to create a release
 
 jobs:
   detect-changes:
@@ -54,6 +54,7 @@ jobs:
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
       TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -120,7 +121,6 @@ jobs:
     needs:
       - detect-changes
       - deploy-iac
-
     if: |
       always() &&
       (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
@@ -132,6 +132,7 @@ jobs:
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
       TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -190,7 +191,6 @@ jobs:
     needs: 
       - detect-changes
       - deploy-iac
-
     if: |
       always() &&
       (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
@@ -212,6 +212,7 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.ZOOM_SECRET }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -273,14 +274,13 @@ jobs:
       - detect-changes
       - deploy-backend
       - deploy-frontend
-
     if: |
       always() &&
       needs.deploy-backend.result == 'success' &&
       needs.deploy-frontend.result == 'success'
-
     environment: production
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
