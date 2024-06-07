@@ -57,13 +57,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.IAM_ROLE }}
-          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ vars.AWS_REGION }}
-
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
         with: 
@@ -75,6 +68,13 @@ jobs:
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: vpc
         working-directory: ./tofu/environments/stage/network/vpc
@@ -143,7 +143,7 @@ jobs:
       - name: Install dependencies
         run: cd frontend && yarn install
 
-      - name: Build project
+      - name: Build stage frontend
         run: |
           cp frontend/.env.stage.example frontend/.env.stage
           cd frontend && yarn build --mode ${{ vars.APP_ENV }}
@@ -173,15 +173,6 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Create Frontend Archive
-        run: zip frontend.zip frontend/dist
-
-      - name: Archive Frontend
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend
-          path: frontend.zip
-      
       - name: Get frontend bucket & distribution
         id: get-frontend-resources
         working-directory: ./tofu/environments/stage/services/frontend-infra
@@ -190,11 +181,9 @@ jobs:
           echo "distribution=$(terragrunt output cloudfront_id)" >> $GITHUB_OUTPUT
 
       - name: Deploy frontend to S3
-        run: aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
-
-      - name: Invalidate Cloudfront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
-        
+        run: |
+          aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
+          aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
 
 
   deploy-backend:
@@ -226,13 +215,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.IAM_ROLE }}
-          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ vars.AWS_REGION }}
-
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
         with: 
@@ -244,6 +226,13 @@ jobs:
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ vars.TG_VERSION }}/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
           terragrunt -v
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -290,20 +279,33 @@ jobs:
       needs.deploy-backend.result == 'success' &&
       needs.deploy-frontend.result == 'success'
 
-    environment: staging
+    environment: production
     runs-on: ubuntu-latest
     steps:
-      - name: download artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+
+      - name: Setup NPM
+        uses: actions/setup-node@v4
         with:
-          name: 
-            frontend
+          node-version: '18.x'
+
+      - name: Install dependencies
+        run: cd frontend && yarn install
+
+      - name: Build prod frontend
+        run: |
+          cp frontend/.env.prod.example frontend/.env.prod
+          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+          zip ../frontend.zip dist
 
       - name: download ecr tag
         uses: actions/download-artifact@v4
         with:
             name: 
               ecr_tag
+      
+      - name: Zip IaC
+        run: zip -r iac.zip tofu -x "tofu/environments/stage/*" "tofu/environments/prod/*/*/.terragrunt-cache/*"
 
       - name: create release tag
         id: create-release-tag
@@ -324,5 +326,6 @@ jobs:
             In order to promote this to prod, edit the draft and press **"Publish release"**.
           draft: true
           files: |
-            frontend.zip
             ecr_tag.zip
+            frontend.zip
+            iac.zip
