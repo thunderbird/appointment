@@ -182,7 +182,6 @@ jobs:
         with:
           version: ${{ github.event.release.id }}
           file: ecr_tag.zip
-          target: ./tofu/environments/prod/services/backend-service
 
       - name: Unzip ECR tag
         id: get_ecr_tag
