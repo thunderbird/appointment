@@ -334,9 +334,9 @@
     <div v-else>
       <div class="my-8 flex justify-center gap-4">
         <primary-button
-          v-if="user.data.signedUrl && existing"
+          v-if="user.myLink && existing"
           :label="t('label.shareMyLink')"
-          :copy="user.data.signedUrl"
+          :copy="user.myLink"
         />
       </div>
     </div>
