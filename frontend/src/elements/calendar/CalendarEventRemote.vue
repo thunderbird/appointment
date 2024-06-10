@@ -1,12 +1,12 @@
 <template>
   <div
     class="
-      m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
-      flex items-center gap-1.5 px-2 py-0.5
+      m-auto flex size-[95%] shrink-0 items-center gap-1.5 px-2
+      py-0.5 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
     "
     :class="{
       'rounded bg-amber-400/80 dark:text-white': event.all_day,
-      'h-full border-2 rounded': !isMonthView,
+      'h-full rounded border-2': !isMonthView,
     }"
     :style="{
       borderColor: !isMonthView ? eventColor(event, false).border : null,
@@ -52,9 +52,8 @@ const eventBackgroundColor = computed(() => {
   }
   if (props.isMonthView || (!props.isMonthView && props.event.tentative)) {
     return 'transparent';
-  } else {
-    return props.event.calendar_color;
   }
+  return props.event.calendar_color;
 });
 
 const eventTextColor = computed(() => {
@@ -63,8 +62,7 @@ const eventTextColor = computed(() => {
   }
   if (props.event.tentative) {
     return props.event.calendar_color;
-  } else {
-    return getAccessibleColor(event.calendar_color)
   }
+  return getAccessibleColor(props.event.calendar_color);
 });
 </script>

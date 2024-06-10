@@ -10,7 +10,7 @@
       <div v-show="showFirstEllipsis(p)">&hellip;</div>
       <button
         class="cursor-pointer px-2 py-1"
-        :class="{ 'text-gray-500': (p-1) == currentPage }"
+        :class="{ 'text-gray-500': (p-1) === currentPage }"
         v-show="showPageItemLink(p)"
         @click="goto(p-1)"
       >
@@ -26,13 +26,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 // icons
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
-
-// component constants
-const { t } = useI18n();
 
 // component properties and emits
 const props = defineProps({
@@ -49,13 +45,13 @@ const isLastPage = computed(() => currentPage.value >= pageCount.value - 1);
 
 const prev = () => {
   if (!isFirstPage.value) {
-    currentPage.value--;
+    currentPage.value -= 1;
     emit('update', currentPage.value);
   }
 };
 const next = () => {
   if (!isLastPage.value) {
-    currentPage.value++;
+    currentPage.value += 1;
     emit('update', currentPage.value);
   }
 };
@@ -64,15 +60,15 @@ const goto = (index) => {
   emit('update', currentPage.value);
 };
 
-const showPageItem = (p) => pageCount.value < 6 || p == 1 || p == 2 || isVisibleInnerPage(p) || p == pageCount.value - 1;
-const showFirstEllipsis = (p) => pageCount.value >= 6 && currentPage.value > 2 && p == 2;
-const showPageItemLink = (p) => pageCount.value < 6 || p == 1 || isVisibleInnerPage(p);
-const showLastEllipsis = (p) => pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p == pageCount.value - 1;
+const isVisibleInnerPage = (p) => (currentPage.value === 0 && p === 3)
+    || ((currentPage.value === 0 || currentPage.value === 1) && p === 4)
+    || (p > currentPage.value - 1 && p < currentPage.value + 3)
+    || ((currentPage.value === pageCount.value - 1 || currentPage.value === pageCount.value - 2) && p === pageCount.value - 3)
+    || (currentPage.value === pageCount.value - 1 && p === pageCount.value - 2)
+    || p === pageCount.value;
 
-const isVisibleInnerPage = (p) => (currentPage.value == 0 && p == 3)
-		|| ((currentPage.value == 0 || currentPage.value == 1) && p == 4)
-		|| (p > currentPage.value - 1 && p < currentPage.value + 3)
-		|| ((currentPage.value == pageCount.value - 1 || currentPage.value == pageCount.value - 2) && p == pageCount.value - 3)
-		|| (currentPage.value == pageCount.value - 1 && p == pageCount.value - 2)
-    || p == pageCount.value;
+const showPageItem = (p) => pageCount.value < 6 || p === 1 || p === 2 || isVisibleInnerPage(p) || p === pageCount.value - 1;
+const showFirstEllipsis = (p) => pageCount.value >= 6 && currentPage.value > 2 && p === 2;
+const showPageItemLink = (p) => pageCount.value < 6 || p === 1 || isVisibleInnerPage(p);
+const showLastEllipsis = (p) => pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p === pageCount.value - 1;
 </script>

@@ -73,7 +73,7 @@
 
 <script setup>
 import {
-  ref, inject, onMounted, computed,
+  ref, inject, onMounted,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -83,10 +83,6 @@ import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
-import TextButton from '@/elements/TextButton.vue';
-
-// icons
-import { IconExternalLink } from '@tabler/icons-vue';
 
 // stores
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';

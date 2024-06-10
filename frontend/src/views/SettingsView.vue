@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { settingsSections } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
