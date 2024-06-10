@@ -23,6 +23,9 @@ RUN crontab /etc/cron.d/appointment-cron
 # Needed for deploy, we don't have a volume attached
 COPY src .
 
+# Remove setup.py as we don't need it on stage/prod
+RUN rm /app/appointment/commands/setup.py
+
 RUN pip install --upgrade pip
 RUN pip install .'[deploy]'
 
