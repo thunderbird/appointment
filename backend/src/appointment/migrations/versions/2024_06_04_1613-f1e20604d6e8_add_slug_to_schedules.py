@@ -24,7 +24,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('schedules', sa.Column('slug', StringEncryptedType(sa.DateTime, secret, AesEngine, "pkcs5", length=255)))
+    op.add_column('schedules', sa.Column('slug', StringEncryptedType(sa.DateTime, secret, AesEngine, "pkcs5", length=255),  unique=True, index=True))
 
 
 def downgrade() -> None:

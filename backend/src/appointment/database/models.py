@@ -246,7 +246,7 @@ class Schedule(Base):
     calendar_id: int = Column(Integer, ForeignKey("calendars.id"))
     active: bool = Column(Boolean, index=True, default=True)
     name: str = Column(encrypted_type(String), index=True)
-    slug: str = Column(encrypted_type(String), index=True)
+    slug: str = Column(encrypted_type(String), index=True, unique=True)
     location_type: LocationType = Column(Enum(LocationType), default=LocationType.inperson)
     location_url: str = Column(encrypted_type(String, length=2048))
     details: str = Column(encrypted_type(String))
