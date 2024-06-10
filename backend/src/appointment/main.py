@@ -44,32 +44,32 @@ def _common_setup():
     normalize_secrets()
 
     # init logging
-    level = os.getenv("LOG_LEVEL", "ERROR")
-    use_log_stream = os.getenv("LOG_USE_STREAM", False)
+    level = os.getenv('LOG_LEVEL', 'ERROR')
+    use_log_stream = os.getenv('LOG_USE_STREAM', False)
 
     log_config = {
-        "format": "%(asctime)s %(levelname)-8s %(message)s",
-        "level": getattr(logging, level),
-        "datefmt": "%Y-%m-%d %H:%M:%S",
+        'format': '%(asctime)s %(levelname)-8s %(message)s',
+        'level': getattr(logging, level),
+        'datefmt': '%Y-%m-%d %H:%M:%S',
     }
     if use_log_stream:
-        log_config["stream"] = sys.stdout
+        log_config['stream'] = sys.stdout
     else:
-        log_config["filename"] = "appointment.log"
+        log_config['filename'] = 'appointment.log'
 
     logging.basicConfig(**log_config)
 
-    logging.debug("Logger started!")
+    logging.debug('Logger started!')
 
-    if os.getenv("SENTRY_DSN") != "" and os.getenv("SENTRY_DSN") is not None:
+    if os.getenv('SENTRY_DSN') != '' and os.getenv('SENTRY_DSN') is not None:
         release_string = None
-        release_version = os.getenv("RELEASE_VERSION")
+        release_version = os.getenv('RELEASE_VERSION')
         if release_version:
-            release_string = f"appointment-backend@{release_version}"
+            release_string = f'appointment-backend@{release_version}'
 
         sample_rate = 0
         profile_traces_max = 0
-        environment = os.getenv("APP_ENV", APP_ENV_STAGE)
+        environment = os.getenv('APP_ENV', APP_ENV_STAGE)
 
         if environment == APP_ENV_STAGE:
             profile_traces_max = 0.25
@@ -80,23 +80,23 @@ def _common_setup():
 
         def traces_sampler(sampling_context):
             """Tell Sentry to ignore or reduce traces for particular routes"""
-            asgi_scope = sampling_context.get("asgi_scope", {})
-            path = asgi_scope.get("path")
+            asgi_scope = sampling_context.get('asgi_scope', {})
+            path = asgi_scope.get('path')
 
             # Ignore health check and favicon.ico
-            if path == "/" or path == "/favicon.ico":
+            if path == '/' or path == '/favicon.ico':
                 return 0
 
             return profile_traces_max
 
         sentry_sdk.init(
-            dsn=os.getenv("SENTRY_DSN"),
+            dsn=os.getenv('SENTRY_DSN'),
             sample_rate=sample_rate,
             environment=environment,
             release=release_string,
             integrations=[
-                StarletteIntegration(transaction_style="endpoint"),
-                FastApiIntegration(transaction_style="endpoint"),
+                StarletteIntegration(transaction_style='endpoint'),
+                FastApiIntegration(transaction_style='endpoint'),
             ],
             profiles_sampler=traces_sampler,
             traces_sampler=traces_sampler,
@@ -123,7 +123,7 @@ def server():
     from .routes import webhooks
 
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
-    openapi_url = "/openapi.json" if os.getenv("APP_ENV") == APP_ENV_DEV else None
+    openapi_url = '/openapi.json' if os.getenv('APP_ENV') == APP_ENV_DEV else None
 
     # init app
     app = FastAPI(openapi_url=openapi_url)
@@ -133,29 +133,29 @@ def server():
     # strip html tags from input requests
     app.add_middleware(SanitizeMiddleware)
 
-    app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET"))
+    app.add_middleware(SessionMiddleware, secret_key=os.getenv('SESSION_SECRET'))
 
     # allow requests from own frontend running on a different port
     app.add_middleware(
         CORSMiddleware,
         # Work around for now :)
         allow_origins=[
-            os.getenv("FRONTEND_URL", "http://localhost:8080"),
-            "https://stage.appointment.day",  # Temp for now!
-            "https://accounts.google.com",
-            "https://www.googleapis.com/auth/calendar",
+            os.getenv('FRONTEND_URL', 'http://localhost:8080'),
+            'https://stage.appointment.day',  # Temp for now!
+            'https://accounts.google.com',
+            'https://www.googleapis.com/auth/calendar',
         ],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=['*'],
+        allow_headers=['*'],
     )
 
-    @app.middleware("http")
+    @app.middleware('http')
     async def warn_about_deprecated_routes(request: Request, call_next):
         """Warn about clients using deprecated routes"""
         response = await call_next(request)
-        if request.scope.get("route") and request.scope["route"].deprecated:
-            app_env = os.getenv("APP_ENV")
+        if request.scope.get('route') and request.scope['route'].deprecated:
+            app_env = os.getenv('APP_ENV')
             if app_env == APP_ENV_DEV:
                 logging.warning(f"Use of deprecated route: `{request.scope['route'].path}`!")
             elif app_env == APP_ENV_TEST:
@@ -174,14 +174,14 @@ def server():
     # Mix in our extra routes
     app.include_router(api.router)
     app.include_router(auth.router)  # Special case!
-    app.include_router(account.router, prefix="/account")
-    app.include_router(google.router, prefix="/google")
-    app.include_router(schedule.router, prefix="/schedule")
-    app.include_router(invite.router, prefix="/invite")
-    app.include_router(subscriber.router, prefix="/subscriber")
-    app.include_router(webhooks.router, prefix="/webhooks")
-    if os.getenv("ZOOM_API_ENABLED"):
-        app.include_router(zoom.router, prefix="/zoom")
+    app.include_router(account.router, prefix='/account')
+    app.include_router(google.router, prefix='/google')
+    app.include_router(schedule.router, prefix='/schedule')
+    app.include_router(invite.router, prefix='/invite')
+    app.include_router(subscriber.router, prefix='/subscriber')
+    app.include_router(webhooks.router, prefix='/webhooks')
+    if os.getenv('ZOOM_API_ENABLED'):
+        app.include_router(zoom.router, prefix='/zoom')
 
     return app
 
@@ -198,5 +198,5 @@ def cli():
 
     app = typer.Typer(pretty_exceptions_enable=False)
     # We don't have too many commands, so just dump them under main for now.
-    app.add_typer(commands.router, name="main")
+    app.add_typer(commands.router, name='main')
     app()

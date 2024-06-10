@@ -14,22 +14,22 @@ from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 # revision identifiers, used by Alembic.
-revision = "9fe08ba6f2ed"
-down_revision = "89e1197d980d"
+revision = '9fe08ba6f2ed'
+down_revision = '89e1197d980d'
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
     op.add_column(
-        "subscribers",
+        'subscribers',
         sa.Column(
-            "secondary_email",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            'secondary_email',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
             nullable=True,
             index=True,
         ),
@@ -37,4 +37,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column("subscribers", "secondary_email")
+    op.drop_column('subscribers', 'secondary_email')

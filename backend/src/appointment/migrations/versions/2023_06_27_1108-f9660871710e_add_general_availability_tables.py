@@ -17,58 +17,58 @@ from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 # revision identifiers, used by Alembic.
-revision = "f9660871710e"
-down_revision = "845089644770"
+revision = 'f9660871710e'
+down_revision = '845089644770'
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
     op.create_table(
-        "schedules",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("appointment_id", sa.Integer),
+        'schedules',
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('appointment_id', sa.Integer),
         sa.Column(
-            "name",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            'name',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
             index=False,
         ),
-        sa.Column("time_created", DateTime()),
-        sa.Column("time_updated", DateTime()),
+        sa.Column('time_created', DateTime()),
+        sa.Column('time_updated', DateTime()),
     )
     op.create_table(
-        "availabilities",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("schedule_id", sa.Integer),
+        'availabilities',
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('schedule_id', sa.Integer),
         sa.Column(
-            "day_of_week",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            'day_of_week',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
             index=False,
         ),
         sa.Column(
-            "start_time",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            'start_time',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
         ),
         sa.Column(
-            "end_time",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            'end_time',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
             index=False,
         ),
         sa.Column(
-            "min_time_before_meeting",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255),
+            'min_time_before_meeting',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
             index=False,
         ),
-        sa.Column("slot_duration", sa.Integer),
-        sa.Column("time_created", DateTime()),
-        sa.Column("time_updated", DateTime()),
+        sa.Column('slot_duration', sa.Integer),
+        sa.Column('time_created', DateTime()),
+        sa.Column('time_updated', DateTime()),
     )
 
 
 def downgrade() -> None:
-    op.drop_table("schedules")
-    op.drop_table("availabilities")
+    op.drop_table('schedules')
+    op.drop_table('availabilities')

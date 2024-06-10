@@ -1,6 +1,6 @@
 """Module: repo.external_connection
 
-Repository providing CRUD functions for external_connection database models. 
+Repository providing CRUD functions for external_connection database models.
 """
 
 from sqlalchemy.orm import Session

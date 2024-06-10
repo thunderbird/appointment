@@ -172,7 +172,7 @@ class ScheduleBase(BaseModel):
 
     class Config:
         json_encoders = {
-            time: lambda t: t.strftime("%H:%M"),
+            time: lambda t: t.strftime('%H:%M'),
         }
 
 
@@ -181,7 +181,7 @@ class Schedule(ScheduleBase):
     time_created: datetime | None = None
     time_updated: datetime | None = None
     availabilities: list[Availability] = []
-    calendar: "CalendarBase"
+    calendar: 'CalendarBase'
 
     class Config:
         from_attributes = True
@@ -378,4 +378,4 @@ class TokenData(BaseModel):
 
 
 class SendInviteEmailIn(BaseModel):
-    email: str = Field(title="Email", min_length=1)
+    email: str = Field(title='Email', min_length=1)

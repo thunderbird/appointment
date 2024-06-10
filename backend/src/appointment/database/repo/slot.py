@@ -1,6 +1,6 @@
 """Module: repo.slot
 
-Repository providing CRUD functions for slot database models. 
+Repository providing CRUD functions for slot database models.
 """
 
 from sqlalchemy.orm import Session
@@ -103,7 +103,7 @@ def update(db: Session, slot_id: int, attendee: schemas.Attendee):
     # update slot
     db_slot = get(db, slot_id)
     # TODO: additionally handle subscriber_id here for already logged in users
-    setattr(db_slot, "attendee_id", db_attendee.id)
+    setattr(db_slot, 'attendee_id', db_attendee.id)
     db.commit()
     return db_attendee
 

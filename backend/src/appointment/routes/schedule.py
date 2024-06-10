@@ -41,7 +41,7 @@ from ..tasks.emails import (
 router = APIRouter()
 
 
-@router.post("/", response_model=schemas.Schedule)
+@router.post('/', response_model=schemas.Schedule)
 def create_calendar_schedule(
     schedule: schemas.ScheduleBase,
     db: Session = Depends(get_db),
@@ -57,13 +57,13 @@ def create_calendar_schedule(
     return repo.schedule.create(db=db, schedule=schedule)
 
 
-@router.get("/", response_model=list[schemas.Schedule])
+@router.get('/', response_model=list[schemas.Schedule])
 def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Gets all of the available schedules for the logged in subscriber"""
     return repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
 
 
-@router.get("/{id}", response_model=schemas.Schedule, deprecated=True)
+@router.get('/{id}', response_model=schemas.Schedule, deprecated=True)
 def read_schedule(
     id: int,
     db: Session = Depends(get_db),
@@ -78,7 +78,7 @@ def read_schedule(
     return schedule
 
 
-@router.put("/{id}", response_model=schemas.Schedule)
+@router.put('/{id}', response_model=schemas.Schedule)
 def update_schedule(
     id: int,
     schedule: schemas.ScheduleValidationIn,
@@ -100,7 +100,7 @@ def update_schedule(
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
 
-@router.post("/public/availability", response_model=schemas.AppointmentOut)
+@router.post('/public/availability', response_model=schemas.AppointmentOut)
 def read_schedule_availabilities(
     subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
     db: Session = Depends(get_db),
@@ -151,7 +151,7 @@ def read_schedule_availabilities(
     )
 
 
-@router.put("/public/availability/request")
+@router.put('/public/availability/request')
 def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
     background_tasks: BackgroundTasks,
@@ -238,22 +238,22 @@ def request_schedule_availability_slot(
     attendee = repo.slot.update(db, slot.id, s_a.attendee)
 
     # generate confirm and deny links with encoded booking token and signed owner url
-    url = f"{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}"
+    url = f'{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}'
 
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
-    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
-    date = f"{date}, {slot.duration} minutes ({subscriber.timezone})"
+    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
+    date = f'{date}, {slot.duration} minutes ({subscriber.timezone})'
 
     # human readable date in attendee timezone
     # TODO: handle locale date representation
-    attendee_date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(slot.attendee.timezone)).strftime("%c")
-    attendee_date = f"{attendee_date}, {slot.duration} minutes ({slot.attendee.timezone})"
+    attendee_date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(slot.attendee.timezone)).strftime('%c')
+    attendee_date = f'{attendee_date}, {slot.duration} minutes ({slot.attendee.timezone})'
 
     # Create a pending appointment
     attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
     subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
-    title = f"Appointment - {subscriber_name} and {attendee_name}"
+    title = f'Appointment - {subscriber_name} and {attendee_name}'
 
     appointment = repo.appointment.create(
         db,
@@ -292,7 +292,7 @@ def request_schedule_availability_slot(
     )
 
 
-@router.put("/public/availability/booking", response_model=schemas.AvailabilitySlotAttendee)
+@router.put('/public/availability/booking', response_model=schemas.AvailabilitySlotAttendee)
 def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     background_tasks: BackgroundTasks,
@@ -341,8 +341,8 @@ def decide_on_schedule_availability_slot(
     if data.confirmed is False:
         # human readable date in subscribers timezone
         # TODO: handle locale date representation
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime("%c")
-        date = f"{date}, {slot.duration} minutes"
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
+        date = f'{date}, {slot.duration} minutes'
         # send rejection information to bookee
         background_tasks.add_task(send_rejection_email, owner_name=subscriber.name, date=date, to=slot.attendee.email)
         repo.slot.delete(db, slot.id)
@@ -368,10 +368,10 @@ def decide_on_schedule_availability_slot(
     attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
     subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
 
-    attendees = f"{subscriber_name} and {attendee_name}"
+    attendees = f'{subscriber_name} and {attendee_name}'
 
     if not slot.appointment:
-        title = f"Appointment - {attendees}"
+        title = f'Appointment - {attendees}'
     else:
         title = slot.appointment.title
         # Update the appointment to closed
@@ -382,18 +382,18 @@ def decide_on_schedule_availability_slot(
         try:
             zoom_client = get_zoom_client(subscriber)
             response = zoom_client.create_meeting(attendees, slot.start.isoformat(), slot.duration, subscriber.timezone)
-            if "id" in response:
-                location_url = zoom_client.get_meeting(response["id"])["join_url"]
-                slot.meeting_link_id = response["id"]
+            if 'id' in response:
+                location_url = zoom_client.get_meeting(response['id'])['join_url']
+                slot.meeting_link_id = response['id']
                 slot.meeting_link_url = location_url
 
                 db.add(slot)
                 db.commit()
         except HTTPError as err:  # Not fatal, just a bummer
-            logging.error("Zoom meeting creation error: ", err)
+            logging.error('Zoom meeting creation error: ', err)
 
             # Ensure sentry captures the error too!
-            if os.getenv("SENTRY_DSN") != "":
+            if os.getenv('SENTRY_DSN') != '':
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
@@ -401,8 +401,8 @@ def decide_on_schedule_availability_slot(
                 send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name
             )
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
-            logging.error("Failed to save the zoom meeting link to the appointment: ", err)
-            if os.getenv("SENTRY_DSN") != "":
+            logging.error('Failed to save the zoom meeting link to the appointment: ', err)
+            if os.getenv('SENTRY_DSN') != '':
                 capture_exception(err)
 
     event = schemas.Event(

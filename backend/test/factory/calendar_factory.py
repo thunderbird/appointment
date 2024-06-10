@@ -59,7 +59,7 @@ def make_google_calendar(with_db):
                     provider=models.CalendarProvider.google,
                     url=id,
                     user=id,
-                    password="",
+                    password='',
                 ),
                 subscriber_id,
             )

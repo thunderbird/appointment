@@ -4,14 +4,14 @@ from defines import auth_headers, TEST_USER_ID
 
 class TestZoom:
     def test_zoom_disconnect_without_connection(self, with_client):
-        response = with_client.post("/zoom/disconnect", headers=auth_headers)
+        response = with_client.post('/zoom/disconnect', headers=auth_headers)
         assert response.status_code == 200
         assert response.json() is False
 
     def test_zoom_disconnect_with_connection(self, with_client, make_external_connections):
         make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.zoom)
 
-        response = with_client.post("/zoom/disconnect", headers=auth_headers)
+        response = with_client.post('/zoom/disconnect', headers=auth_headers)
         assert response.status_code == 200
         assert response.json() is True
 
@@ -21,7 +21,7 @@ class TestZoom:
 
         assert schedule.meeting_link_provider == models.MeetingLinkProviderType.zoom
 
-        response = with_client.post("/zoom/disconnect", headers=auth_headers)
+        response = with_client.post('/zoom/disconnect', headers=auth_headers)
         assert response.status_code == 200
         assert response.json() is True
 
@@ -41,7 +41,7 @@ class TestZoom:
 
         assert schedule.meeting_link_provider == models.MeetingLinkProviderType.google_meet
 
-        response = with_client.post("/zoom/disconnect", headers=auth_headers)
+        response = with_client.post('/zoom/disconnect', headers=auth_headers)
         assert response.status_code == 200
         assert response.json() is True
 

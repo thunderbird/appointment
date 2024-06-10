@@ -17,10 +17,10 @@ def make_subscriber(with_db):
                 db,
                 schemas.SubscriberBase(
                     name=name if factory_has_value(name) else fake.name(),
-                    username=username if factory_has_value(username) else fake.name().replace(" ", "_"),
+                    username=username if factory_has_value(username) else fake.name().replace(' ', '_'),
                     email=email if factory_has_value(email) else fake.email(),
                     level=level,
-                    timezone="America/Vancouver",
+                    timezone='America/Vancouver',
                 ),
             )
             # If we've passed in a password then hash it and save it to the subscriber

@@ -1,6 +1,6 @@
 """Module: repo.appointment
 
-Repository providing CRUD functions for appointment database models. 
+Repository providing CRUD functions for appointment database models.
 """
 
 from sqlalchemy.orm import Session

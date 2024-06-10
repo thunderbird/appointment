@@ -15,37 +15,37 @@ from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 # revision identifiers, used by Alembic.
-revision = "f92bae6c27da"
-down_revision = "ea551afc14fc"
+revision = 'f92bae6c27da'
+down_revision = 'ea551afc14fc'
 branch_labels = None
 depends_on = None
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 def upgrade() -> None:
-    op.drop_column("subscribers", "google_tkn")
-    op.drop_column("subscribers", "google_state")
-    op.drop_column("subscribers", "google_state_expires_at")
+    op.drop_column('subscribers', 'google_tkn')
+    op.drop_column('subscribers', 'google_state')
+    op.drop_column('subscribers', 'google_state_expires_at')
 
 
 def downgrade() -> None:
     op.add_column(
-        "subscribers",
+        'subscribers',
         sa.Column(
-            "google_tkn",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=2048),
+            'google_tkn',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=2048),
             index=False,
         ),
     )
     op.add_column(
-        "subscribers",
+        'subscribers',
         sa.Column(
-            "google_state",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=2048),
+            'google_state',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=2048),
             index=False,
         ),
     )
-    op.add_column("subscribers", sa.Column("google_state_expires_at", DateTime()))
+    op.add_column('subscribers', sa.Column('google_state_expires_at', DateTime()))

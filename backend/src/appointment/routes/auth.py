@@ -36,12 +36,12 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=15)
-    to_encode.update({"exp": expire, "iat": int(datetime.now(UTC).timestamp())})
-    encoded_jwt = jwt.encode(to_encode, os.getenv("JWT_SECRET"), algorithm=os.getenv("JWT_ALGO"))
+    to_encode.update({'exp': expire, 'iat': int(datetime.now(UTC).timestamp())})
+    encoded_jwt = jwt.encode(to_encode, os.getenv('JWT_SECRET'), algorithm=os.getenv('JWT_ALGO'))
     return encoded_jwt
 
 
-@router.get("/fxa_login")
+@router.get('/fxa_login')
 def fxa_login(
     request: Request,
     email: str,
@@ -51,7 +51,7 @@ def fxa_login(
     fxa_client: FxaClient = Depends(get_fxa_client),
 ):
     """Request an authorization url from fxa"""
-    if os.getenv("AUTH_SCHEME") != "fxa":
+    if os.getenv('AUTH_SCHEME') != 'fxa':
         raise HTTPException(status_code=405)
 
     fxa_client.setup()
@@ -59,17 +59,17 @@ def fxa_login(
     try:
         url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
     except NotInAllowListException:
-        raise HTTPException(status_code=403, detail="Your email is not in the allow list")
+        raise HTTPException(status_code=403, detail='Your email is not in the allow list')
 
-    request.session["fxa_state"] = state
-    request.session["fxa_user_email"] = email
-    request.session["fxa_user_timezone"] = timezone
-    request.session["fxa_user_invite_code"] = invite_code
+    request.session['fxa_state'] = state
+    request.session['fxa_user_email'] = email
+    request.session['fxa_user_timezone'] = timezone
+    request.session['fxa_user_invite_code'] = invite_code
 
-    return {"url": url}
+    return {'url': url}
 
 
-@router.get("/fxa")
+@router.get('/fxa')
 def fxa_callback(
     request: Request,
     code: str,
@@ -87,25 +87,25 @@ def fxa_callback(
     - We also update (an initial set if the subscriber is new) the profile data for the subscriber.
     - And finally generate a jwt token for the frontend, and redirect them to a special frontend route with that token.
     """
-    if os.getenv("AUTH_SCHEME") != "fxa":
+    if os.getenv('AUTH_SCHEME') != 'fxa':
         raise HTTPException(status_code=405)
 
-    if "fxa_state" not in request.session or request.session["fxa_state"] != state:
-        raise HTTPException(400, "Invalid state.")
-    if "fxa_user_email" not in request.session or request.session["fxa_user_email"] == "":
-        raise HTTPException(400, "Email could not be retrieved.")
+    if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
+        raise HTTPException(400, 'Invalid state.')
+    if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
+        raise HTTPException(400, 'Email could not be retrieved.')
 
-    email = request.session["fxa_user_email"]
+    email = request.session['fxa_user_email']
     # We only use timezone during subscriber creation, or if their timezone is None
-    timezone = request.session["fxa_user_timezone"]
-    invite_code = request.session.get("fxa_user_invite_code")
+    timezone = request.session['fxa_user_timezone']
+    invite_code = request.session.get('fxa_user_invite_code')
 
     # Clear session keys
-    request.session.pop("fxa_state")
-    request.session.pop("fxa_user_email")
-    request.session.pop("fxa_user_timezone")
+    request.session.pop('fxa_state')
+    request.session.pop('fxa_user_email')
+    request.session.pop('fxa_user_timezone')
     if invite_code:
-        request.session.pop("fxa_user_invite_code")
+        request.session.pop('fxa_user_invite_code')
 
     fxa_client.setup()
 
@@ -113,12 +113,12 @@ def fxa_callback(
     creds = fxa_client.get_credentials(code)
     profile = fxa_client.get_profile()
 
-    if profile["email"] != email:
+    if profile['email'] != email:
         fxa_client.logout()
-        raise HTTPException(400, l10n("email-mismatch"))
+        raise HTTPException(400, l10n('email-mismatch'))
 
     # Check if we have an existing fxa connection by profile's uid
-    fxa_subscriber = repo.external_connection.get_subscriber_by_fxa_uid(db, profile["uid"])
+    fxa_subscriber = repo.external_connection.get_subscriber_by_fxa_uid(db, profile['uid'])
     # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
     subscriber = repo.subscriber.get_by_email(db, email)
 
@@ -131,9 +131,9 @@ def fxa_callback(
 
         if not is_in_allow_list:
             if not repo.invite.code_exists(db, invite_code):
-                raise HTTPException(404, l10n("invite-code-not-valid"))
+                raise HTTPException(404, l10n('invite-code-not-valid'))
             if not repo.invite.code_is_available(db, invite_code):
-                raise HTTPException(403, l10n("invite-code-not-valid"))
+                raise HTTPException(403, l10n('invite-code-not-valid'))
 
         subscriber = repo.subscriber.create(
             db,
@@ -151,31 +151,31 @@ def fxa_callback(
             # This shouldn't happen, but just in case!
             if not used:
                 repo.subscriber.hard_delete(db, subscriber)
-                raise HTTPException(500, l10n("unknown-error"))
+                raise HTTPException(500, l10n('unknown-error'))
 
     elif not subscriber:
         subscriber = fxa_subscriber
 
     # Only proceed if user account is enabled (which is the default case for new users)
     if subscriber.is_deleted:
-        raise HTTPException(status_code=403, detail=l10n("disabled-account"))
+        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
 
     fxa_connections = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.fxa)
 
     # If we have fxa_connections, ensure the incoming one matches our known one.
     # This shouldn't occur, but it's a safety check in-case we missed a webhook push.
-    if any([profile["uid"] != ec.type_id for ec in fxa_connections]):
+    if any([profile['uid'] != ec.type_id for ec in fxa_connections]):
         # Ensure sentry captures the error too!
-        if os.getenv("SENTRY_DSN") != "":
-            e = Exception("Invalid Credentials, incoming profile uid does not match existing profile uid")
+        if os.getenv('SENTRY_DSN') != '':
+            e = Exception('Invalid Credentials, incoming profile uid does not match existing profile uid')
             capture_exception(e)
 
-        raise HTTPException(403, l10n("invalid-credentials"))
+        raise HTTPException(403, l10n('invalid-credentials'))
 
     external_connection_schema = schemas.ExternalConnection(
-        name=profile["email"],
+        name=profile['email'],
         type=ExternalConnectionType.fxa,
-        type_id=profile["uid"],
+        type_id=profile['uid'],
         owner_id=subscriber.id,
         token=json.dumps(creds),
     )
@@ -189,49 +189,49 @@ def fxa_callback(
 
     # Update profile with fxa info
     data = schemas.SubscriberIn(
-        avatar_url=profile["avatar"],
+        avatar_url=profile['avatar'],
         name=subscriber.name,
         username=subscriber.username,
-        email=profile["email"],
+        email=profile['email'],
         timezone=timezone if subscriber.timezone is None else None,
     )
 
     # If they're a new subscriber we should fill in some defaults!
     if new_subscriber_flow:
-        data.name = profile["displayName"] if "displayName" in profile else profile["email"].split("@")[0]
-        data.username = profile["email"]
+        data.name = profile['displayName'] if 'displayName' in profile else profile['email'].split('@')[0]
+        data.username = profile['email']
 
     repo.subscriber.update(db, data, subscriber.id)
 
     # Generate our jwt token, we only store the username on the token
-    access_token_expires = timedelta(minutes=float(os.getenv("JWT_EXPIRE_IN_MINS")))
-    access_token = create_access_token(data={"sub": f"uid-{subscriber.id}"}, expires_delta=access_token_expires)
+    access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
+    access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'}, expires_delta=access_token_expires)
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{access_token}")
 
 
-@router.post("/token")
+@router.post('/token')
 def token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
-    if os.getenv("AUTH_SCHEME") == "fxa":
+    if os.getenv('AUTH_SCHEME') == 'fxa':
         raise HTTPException(status_code=405)
 
     """Retrieve an access token from a given username and password."""
     subscriber = repo.subscriber.get_by_username(db, form_data.username)
     if not subscriber or subscriber.password is None:
-        raise HTTPException(status_code=403, detail=l10n("invalid-credentials"))
+        raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
     # Only proceed if user account is enabled
     if subscriber.is_deleted:
-        raise HTTPException(status_code=403, detail=l10n("disabled-account"))
+        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
 
     # Verify the incoming password, and re-hash our password if needed
     try:
         utils.verify_password(form_data.password, subscriber.password)
     except argon2.exceptions.VerifyMismatchError:
-        raise HTTPException(status_code=403, detail=l10n("invalid-credentials"))
+        raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
     if utils.ph.check_needs_rehash(subscriber.password):
         subscriber.password = utils.get_password_hash(form_data.password)
@@ -239,14 +239,14 @@ def token(
         db.commit()
 
     # Generate our jwt token, we only store the username on the token
-    access_token_expires = timedelta(minutes=float(os.getenv("JWT_EXPIRE_IN_MINS")))
-    access_token = create_access_token(data={"sub": f"uid-{subscriber.id}"}, expires_delta=access_token_expires)
+    access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
+    access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'}, expires_delta=access_token_expires)
 
     """Log a user in with the passed username and password information"""
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@router.get("/logout")
+@router.get('/logout')
 def logout(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
@@ -254,7 +254,7 @@ def logout(
 ):
     """Logout a given subscriber session"""
 
-    if os.getenv("AUTH_SCHEME") == "fxa":
+    if os.getenv('AUTH_SCHEME') == 'fxa':
         fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
 
     # Don't set a minimum_valid_iat_time here.
@@ -263,7 +263,7 @@ def logout(
     return True
 
 
-@router.get("/me", response_model=schemas.SubscriberBase)
+@router.get('/me', response_model=schemas.SubscriberBase)
 def me(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
@@ -279,7 +279,7 @@ def me(
     )
 
 
-@router.post("/permission-check")
+@router.post('/permission-check')
 def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     """Checks if they have admin permissions"""
     # This should already be covered, but just in case!

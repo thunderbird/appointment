@@ -12,7 +12,7 @@ def get_zoom_client(subscriber: Subscriber = Depends(get_subscriber)):
     """Returns a zoom client instance. This is a stateful dependency, and requires a new instance per request"""
     try:
         _zoom_client = ZoomClient(
-            os.getenv("ZOOM_AUTH_CLIENT_ID"), os.getenv("ZOOM_AUTH_SECRET"), os.getenv("ZOOM_AUTH_CALLBACK")
+            os.getenv('ZOOM_AUTH_CLIENT_ID'), os.getenv('ZOOM_AUTH_SECRET'), os.getenv('ZOOM_AUTH_CALLBACK')
         )
 
         # Grab our zoom connection if it's available, we only support one zoom connection...hopefully
@@ -21,7 +21,7 @@ def get_zoom_client(subscriber: Subscriber = Depends(get_subscriber)):
 
         _zoom_client.setup(subscriber.id, token)
     except Exception as e:
-        logging.error(f"[routes.zoom] Zoom Client could not be setup, bad credentials?\nError: {str(e)}")
+        logging.error(f'[routes.zoom] Zoom Client could not be setup, bad credentials?\nError: {str(e)}')
         raise e
 
     return _zoom_client

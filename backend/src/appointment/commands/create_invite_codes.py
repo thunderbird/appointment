@@ -3,7 +3,7 @@ from ..dependencies.database import get_engine_and_session
 
 
 def run(n: int):
-    print(f"Generating {n} new invite codes...")
+    print(f'Generating {n} new invite codes...')
 
     _, session = get_engine_and_session()
     db = session()
@@ -12,4 +12,4 @@ def run(n: int):
 
     db.close()
 
-    print(f"Successfull added {len(codes)} shiny new invite codes to the database.")
+    print(f'Successfull added {len(codes)} shiny new invite codes to the database.')

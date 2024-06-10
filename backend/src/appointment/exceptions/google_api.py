@@ -17,8 +17,8 @@ class GoogleInvalidCredentials(Exception):
 class APIGoogleRefreshError(APIException):
     """Raise when you need to signal to the end-user that they need to re-connect to Google."""
 
-    id_code = "GOOGLE_REFRESH_ERROR"
+    id_code = 'GOOGLE_REFRESH_ERROR'
     status_code = 401
 
     def get_msg(self):
-        return l10n("google-connection-error")
+        return l10n('google-connection-error')

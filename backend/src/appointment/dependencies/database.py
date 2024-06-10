@@ -6,11 +6,11 @@ from sqlalchemy.orm import sessionmaker
 
 
 def get_engine_and_session():
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv('DATABASE_URL')
     connect_args = {}
 
-    if "sqlite://" in database_url:
-        connect_args = {"check_same_thread": False}
+    if 'sqlite://' in database_url:
+        connect_args = {'check_same_thread': False}
 
     engine = create_engine(database_url, connect_args=connect_args)
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -32,16 +32,16 @@ def get_db():
 def get_redis() -> Redis | RedisCluster | None:
     """Retrieves a redis instance or None if redis isn't available."""
     # TODO: Create pool and simply grab instance?
-    if os.getenv("REDIS_URL") is None:
+    if os.getenv('REDIS_URL') is None:
         return None
 
-    host = os.getenv("REDIS_URL")
-    port = int(os.getenv("REDIS_PORT"))
-    db = os.getenv("REDIS_DB")
-    password = os.getenv("REDIS_PASSWORD")
-    ssl = os.getenv("REDIS_USE_SSL")
+    host = os.getenv('REDIS_URL')
+    port = int(os.getenv('REDIS_PORT'))
+    db = os.getenv('REDIS_DB')
+    password = os.getenv('REDIS_PASSWORD')
+    ssl = os.getenv('REDIS_USE_SSL')
 
-    if os.getenv("REDIS_USE_CLUSTER"):
+    if os.getenv('REDIS_USE_CLUSTER'):
         return RedisCluster(
             host=host,
             port=port,

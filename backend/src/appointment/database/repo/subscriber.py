@@ -1,6 +1,6 @@
 """Module: repo.subscriber
 
-Repository providing CRUD functions for subscriber database models. 
+Repository providing CRUD functions for subscriber database models.
 """
 
 import re
@@ -123,7 +123,7 @@ def verify_link(db: Session, url: str):
     Return subscriber if valid.
     """
     # Look for a <username> followed by an optional signature that ends the string
-    pattern = r"[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$"
+    pattern = r'[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$'
     match = re.findall(pattern, url)
 
     if match is None or len(match) == 0:
@@ -137,13 +137,13 @@ def verify_link(db: Session, url: str):
     signature = None
     if len(match) > 1:
         signature = match[1]
-        clean_url = clean_url.replace(signature, "")
+        clean_url = clean_url.replace(signature, '')
 
     subscriber = get_by_username(db, username)
     if not subscriber:
         return False
 
-    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
+    clean_url_with_short_link = clean_url + f'{subscriber.short_link_hash}'
     signed_signature = sign_url(clean_url_with_short_link)
 
     # Verify the signature matches the incoming one

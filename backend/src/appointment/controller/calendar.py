@@ -47,7 +47,7 @@ class BaseConnector:
         if not only_subscriber:
             parts.append(self.obscure_key(self.calendar_id))
 
-        return ":".join(parts)
+        return ':'.join(parts)
 
     def get_cached_events(self, key_scope):
         """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
@@ -56,13 +56,13 @@ class BaseConnector:
 
         key_scope = self.obscure_key(key_scope)
 
-        encrypted_events = self.redis_instance.get(f"{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}")
+        encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
         if encrypted_events is None:
             return None
 
         return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
 
-    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv("REDIS_EVENT_EXPIRE_SECONDS")):
+    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS')):
         """Sets the passed cached events with an option to set a custom expiry time."""
         if self.redis_instance is None:
             return False
@@ -71,7 +71,7 @@ class BaseConnector:
 
         encrypted_events = json.dumps([event.model_dump_redis() for event in events])
         self.redis_instance.set(
-            f"{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}", value=encrypted_events, ex=expiry
+            f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}', value=encrypted_events, ex=expiry
         )
 
         return True
@@ -84,7 +84,7 @@ class BaseConnector:
 
         # Scan returns a tuple like: (Cursor start, [...keys found])
         ret = self.redis_instance.scan(
-            0, f"{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*"
+            0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
         )
 
         if len(ret[1]) == 0:
@@ -151,45 +151,45 @@ class GoogleConnector(BaseConnector):
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
-        cache_scope = f"{start}_{end}"
+        cache_scope = f'{start}_{end}'
         cached_events = self.get_cached_events(cache_scope)
         if cached_events:
             return cached_events
 
-        time_min = datetime.strptime(start, DATEFMT).isoformat() + "Z"
-        time_max = datetime.strptime(end, DATEFMT).isoformat() + "Z"
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
 
         # We're storing google cal id in user...for now.
         remote_events = self.google_client.list_events(self.remote_calendar_id, time_min, time_max, self.google_token)
 
         events = []
         for event in remote_events:
-            status = event.get("status").lower()
+            status = event.get('status').lower()
 
             # Ignore cancelled events
-            if status == "cancelled":
+            if status == 'cancelled':
                 continue
 
             # Mark tentative events
-            attendees = event.get("attendees") or []
+            attendees = event.get('attendees') or []
             tentative = any(
-                (attendee.get("self") and attendee.get("responseStatus") == "tentative") for attendee in attendees
+                (attendee.get('self') and attendee.get('responseStatus') == 'tentative') for attendee in attendees
             )
 
-            summary = event.get("summary", "Title not found!")
-            description = event.get("description", "")
+            summary = event.get('summary', 'Title not found!')
+            description = event.get('description', '')
 
-            all_day = "date" in event.get("start")
+            all_day = 'date' in event.get('start')
 
             start = (
-                datetime.strptime(event.get("start")["date"], DATEFMT)
+                datetime.strptime(event.get('start')['date'], DATEFMT)
                 if all_day
-                else datetime.fromisoformat(event.get("start")["dateTime"])
+                else datetime.fromisoformat(event.get('start')['dateTime'])
             )
             end = (
-                datetime.strptime(event.get("end")["date"], DATEFMT)
+                datetime.strptime(event.get('end')['date'], DATEFMT)
                 if all_day
-                else datetime.fromisoformat(event.get("end")["dateTime"])
+                else datetime.fromisoformat(event.get('end')['dateTime'])
             )
 
             events.append(
@@ -220,25 +220,25 @@ class GoogleConnector(BaseConnector):
 
         # Place url and phone in desc if available:
         if event.location.url:
-            description.append(l10n("join-online", {"url": event.location.url}))
+            description.append(l10n('join-online', {'url': event.location.url}))
 
         if event.location.phone:
-            description.append(l10n("join-phone", {"phone": event.location.phone}))
+            description.append(l10n('join-phone', {'phone': event.location.phone}))
 
         body = {
-            "iCalUID": event.uuid.hex,
-            "summary": event.title,
-            "location": event.location.name,
-            "description": "\n".join(description),
-            "start": {"dateTime": event.start.isoformat()},
-            "end": {"dateTime": event.end.isoformat()},
-            "attendees": [
-                {"displayName": organizer.name, "email": organizer_email},
-                {"displayName": attendee.name, "email": attendee.email},
+            'iCalUID': event.uuid.hex,
+            'summary': event.title,
+            'location': event.location.name,
+            'description': '\n'.join(description),
+            'start': {'dateTime': event.start.isoformat()},
+            'end': {'dateTime': event.end.isoformat()},
+            'attendees': [
+                {'displayName': organizer.name, 'email': organizer_email},
+                {'displayName': attendee.name, 'email': attendee.email},
             ],
-            "organizer": {
-                "displayName": organizer.name,
-                "email": self.remote_calendar_id,
+            'organizer': {
+                'displayName': organizer.name,
+                'email': self.remote_calendar_id,
             },
         }
         self.google_client.create_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
@@ -259,7 +259,7 @@ class CalDavConnector(BaseConnector):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
         self.provider = CalendarProvider.caldav
-        self.url = url if url[-1] == "/" else url + "/"
+        self.url = url if url[-1] == '/' else url + '/'
         self.password = password
         self.user = user
 
@@ -273,10 +273,10 @@ class CalDavConnector(BaseConnector):
             cal = self.client.calendar(url=self.url)
             supported_comps = cal.get_supported_components()
         except IndexError as ex:  # Library has an issue with top level urls, probably due to caldav spec?
-            logging.error(f"Error testing connection {ex}")
+            logging.error(f'Error testing connection {ex}')
             return False
         except KeyError as ex:
-            logging.error(f"Error testing connection {ex}")
+            logging.error(f'Error testing connection {ex}')
             return False
         except requests.exceptions.RequestException:  # Max retries exceeded, bad connection, missing schema, etc...
             return False
@@ -284,7 +284,7 @@ class CalDavConnector(BaseConnector):
             return False
 
         # They need at least VEVENT support for appointment to work.
-        return "VEVENT" in supported_comps
+        return 'VEVENT' in supported_comps
 
     def sync_calendars(self):
         # We don't sync anything for caldav, but might as well bust event cache.
@@ -306,7 +306,7 @@ class CalDavConnector(BaseConnector):
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
-        cache_scope = f"{start}_{end}"
+        cache_scope = f'{start}_{end}'
         cached_events = self.get_cached_events(cache_scope)
         if cached_events:
             return cached_events
@@ -320,14 +320,14 @@ class CalDavConnector(BaseConnector):
             expand=True,
         )
         for e in result:
-            status = e.icalendar_component["status"].lower() if "status" in e.icalendar_component else ""
+            status = e.icalendar_component['status'].lower() if 'status' in e.icalendar_component else ''
 
             # Ignore cancelled events
-            if status == "cancelled":
+            if status == 'cancelled':
                 continue
 
             # Mark tentative events
-            tentative = status == "tentative"
+            tentative = status == 'tentative'
 
             title = e.vobject_instance.vevent.summary.value
             start = e.vobject_instance.vevent.dtstart.value
@@ -343,7 +343,7 @@ class CalDavConnector(BaseConnector):
                     end=end,
                     all_day=all_day,
                     tentative=tentative,
-                    description=e.icalendar_component["description"] if "description" in e.icalendar_component else "",
+                    description=e.icalendar_component['description'] if 'description' in e.icalendar_component else '',
                 )
             )
 
@@ -400,28 +400,28 @@ class Tools:
     ):
         """create an event in ical format for .ics file creation"""
         cal = Calendar()
-        cal.add("prodid", "-//Thunderbird Appointment//tba.dk//")
-        cal.add("version", "2.0")
-        org = vCalAddress("MAILTO:" + organizer.preferred_email)
-        org.params["cn"] = vText(organizer.preferred_email)
-        org.params["role"] = vText("CHAIR")
+        cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
+        cal.add('version', '2.0')
+        org = vCalAddress('MAILTO:' + organizer.preferred_email)
+        org.params['cn'] = vText(organizer.preferred_email)
+        org.params['role'] = vText('CHAIR')
         event = Event()
-        event.add("uid", appointment.uuid.hex)
-        event.add("summary", appointment.title)
-        event.add("dtstart", slot.start.replace(tzinfo=timezone.utc))
+        event.add('uid', appointment.uuid.hex)
+        event.add('summary', appointment.title)
+        event.add('dtstart', slot.start.replace(tzinfo=timezone.utc))
         event.add(
-            "dtend",
+            'dtend',
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
-        event.add("dtstamp", datetime.now(UTC))
-        event["description"] = appointment.details
-        event["organizer"] = org
+        event.add('dtstamp', datetime.now(UTC))
+        event['description'] = appointment.details
+        event['organizer'] = org
 
         # Prefer the slot meeting link url over the appointment location url
         location_url = slot.meeting_link_url if slot.meeting_link_url is not None else appointment.location_url
 
-        if location_url != "" or location_url is not None:
-            event.add("location", location_url)
+        if location_url != '' or location_url is not None:
+            event.add('location', location_url)
 
         cal.add_component(event)
         return cal.to_ical()
@@ -436,8 +436,8 @@ class Tools:
     ):
         """send a booking confirmation email to attendee with .ics file attached"""
         invite = Attachment(
-            mime=("text", "calendar"),
-            filename="AppointmentInvite.ics",
+            mime=('text', 'calendar'),
+            filename='AppointmentInvite.ics',
             data=self.create_vevent(appointment, slot, organizer),
         )
         background_tasks.add_task(send_invite_email, to=attendee.email, attachment=invite)

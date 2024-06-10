@@ -15,19 +15,19 @@ from ..tasks.emails import send_invite_account_email
 router = APIRouter()
 
 
-@router.get("/", response_model=list[schemas.Invite])
+@router.get('/', response_model=list[schemas.Invite])
 def get_all_invites(db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
     return db.query(models.Invite).all()
 
 
-@router.post("/generate/{n}", response_model=list[schemas.Invite])
+@router.post('/generate/{n}', response_model=list[schemas.Invite])
 def generate_invite_codes(n: int, db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to generate n invite codes, needs admin permissions"""
     return repo.invite.generate_codes(db, n)
 
 
-@router.put("/revoke/{code}")
+@router.put('/revoke/{code}')
 def revoke_invite_code(code: str, db: Session = Depends(get_db), admin: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to revoke a given invite code and mark in unavailable, needs admin permissions"""
     if not repo.invite.code_exists(db, code):
@@ -37,7 +37,7 @@ def revoke_invite_code(code: str, db: Session = Depends(get_db), admin: Subscrib
     return repo.invite.revoke_code(db, code)
 
 
-@router.post("/send", response_model=schemas.Invite)
+@router.post('/send', response_model=schemas.Invite)
 def send_invite_email(
     data: SendInviteEmailIn,
     background_tasks: BackgroundTasks,

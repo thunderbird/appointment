@@ -39,5 +39,5 @@ def setup_encryption_engine():
     # We could replace it with our own encryption,
     # but I wanted it to be similar to the db.
     engine._update_key(secret())
-    engine._set_padding_mechanism("pkcs5")
+    engine._set_padding_mechanism('pkcs5')
     return engine

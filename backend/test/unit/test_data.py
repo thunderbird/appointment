@@ -8,7 +8,7 @@ class TestData:
         """Make sure our model to csv buffer is working, scrubbers and all!"""
         ph = PasswordHasher()
 
-        password = "cool beans"
+        password = 'cool beans'
         subscriber = make_pro_subscriber(password=password)
 
         buffer = model_to_csv_buffer([subscriber])
@@ -16,7 +16,7 @@ class TestData:
 
         assert csv_data
         # Check if our scrubber is working as intended
-        assert "subscriber.password" not in csv_data
+        assert 'subscriber.password' not in csv_data
         assert password not in csv_data
         assert ph.hash(password) not in csv_data
         # Ensure that some of our subscriber data is there
@@ -51,4 +51,4 @@ class TestData:
 
         for model in models_to_check:
             check = db.get(model.__class__, model.id)
-            assert check is None, f"Ensuring {model.__class__} is None"
+            assert check is None, f'Ensuring {model.__class__} is None'

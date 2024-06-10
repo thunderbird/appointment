@@ -12,13 +12,13 @@ router = typer.Typer()
 @contextmanager
 def cron_lock(lock_name):
     """Context manager helper to create a cron lockfile or error out with FileExistsError."""
-    lock_file_name = f"/tmp/{lock_name}.lock"
+    lock_file_name = f'/tmp/{lock_name}.lock'
 
     # Lock file exists? Don't run
     if os.path.isfile(lock_file_name):
         raise FileExistsError
 
-    fh = open(lock_file_name, "w+")
+    fh = open(lock_file_name, 'w+')
     try:
         yield
     finally:
@@ -26,16 +26,16 @@ def cron_lock(lock_name):
         os.remove(lock_file_name)
 
 
-@router.command("update-db")
+@router.command('update-db')
 def update_database():
     update_db.run()
 
 
-@router.command("download-legal")
+@router.command('download-legal')
 def download_legal_docs():
     download_legal.run()
 
 
-@router.command("create-invite-codes")
+@router.command('create-invite-codes')
 def create_app_invite_codes(n: int):
     create_invite_codes.run(n)

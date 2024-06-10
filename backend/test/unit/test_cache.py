@@ -7,8 +7,8 @@ class TestEncrypt:
     def test_cached_events(self):
         """Test our model_(dump/load)_redis functions to ensure they don't leak data and work correctly."""
         now = datetime.datetime.now()
-        title = "Private event!"
-        description = "This is a super secret event!"
+        title = 'Private event!'
+        description = 'This is a super secret event!'
 
         cached_event = Event(title=title, start=now, end=now + datetime.timedelta(hours=2), description=description)
 

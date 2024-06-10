@@ -15,7 +15,7 @@ def model_to_csv_buffer(models):
         return StringIO()
 
     # Don't write out these columns
-    scrub_columns = ["password", "google_tkn", "google_state", "google_state_expires_at", "token"]
+    scrub_columns = ['password', 'google_tkn', 'google_state', 'google_state_expires_at', 'token']
 
     string_buffer = StringIO()
 
@@ -56,23 +56,23 @@ def download(db, subscriber: Subscriber):
     schedules_buffer = model_to_csv_buffer(schedules)
 
     # Unique behaviour because we can have lists of lists..too annoying to not do it this way.
-    availability_buffer = ""
+    availability_buffer = ''
     for avail in availability:
         availability_buffer += model_to_csv_buffer(avail).getvalue()
 
     # Create an in-memory zip and append our csvs
     zip_buffer = BytesIO()
-    with ZipFile(zip_buffer, "w") as data_zip:
-        data_zip.writestr("attendees.csv", attendee_buffer.getvalue())
-        data_zip.writestr("appointments.csv", appointment_buffer.getvalue())
-        data_zip.writestr("calendar.csv", calendar_buffer.getvalue())
-        data_zip.writestr("subscriber.csv", subscriber_buffer.getvalue())
-        data_zip.writestr("slot.csv", slot_buffer.getvalue())
-        data_zip.writestr("external_connection.csv", external_connections_buffer.getvalue())
-        data_zip.writestr("schedules.csv", schedules_buffer.getvalue())
-        data_zip.writestr("availability.csv", availability_buffer)
+    with ZipFile(zip_buffer, 'w') as data_zip:
+        data_zip.writestr('attendees.csv', attendee_buffer.getvalue())
+        data_zip.writestr('appointments.csv', appointment_buffer.getvalue())
+        data_zip.writestr('calendar.csv', calendar_buffer.getvalue())
+        data_zip.writestr('subscriber.csv', subscriber_buffer.getvalue())
+        data_zip.writestr('slot.csv', slot_buffer.getvalue())
+        data_zip.writestr('external_connection.csv', external_connections_buffer.getvalue())
+        data_zip.writestr('schedules.csv', schedules_buffer.getvalue())
+        data_zip.writestr('availability.csv', availability_buffer)
         data_zip.writestr(
-            "readme.txt", l10n("account-data-readme", {"download_time": datetime.datetime.now(datetime.UTC)})
+            'readme.txt', l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)})
         )
 
     # Return our zip buffer
@@ -87,7 +87,7 @@ def delete_account(db, subscriber: Subscriber):
     if repo.subscriber.get(db, subscriber.id) is not None:
         raise AccountDeletionSubscriberFail(
             subscriber.id,
-            l10n("account-delete-fail"),
+            l10n('account-delete-fail'),
         )
 
     empty_check = [
@@ -102,7 +102,7 @@ def delete_account(db, subscriber: Subscriber):
     if any(empty_check) > 0:
         raise AccountDeletionPartialFail(
             subscriber.id,
-            l10n("account-delete-fail"),
+            l10n('account-delete-fail'),
         )
 
     return True

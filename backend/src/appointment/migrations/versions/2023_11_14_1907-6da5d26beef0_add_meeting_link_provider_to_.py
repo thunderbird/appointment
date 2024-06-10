@@ -18,26 +18,26 @@ from database.models import MeetingLinkProviderType
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 # revision identifiers, used by Alembic.
-revision = "6da5d26beef0"
-down_revision = "d0c36eef5da9"
+revision = '6da5d26beef0'
+down_revision = 'd0c36eef5da9'
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
     op.add_column(
-        "schedules",
+        'schedules',
         sa.Column(
-            "meeting_link_provider",
-            StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, "pkcs5", length=255),
+            'meeting_link_provider',
+            StringEncryptedType(ChoiceType(MeetingLinkProviderType), secret, AesEngine, 'pkcs5', length=255),
             index=False,
         ),
     )
 
 
 def downgrade() -> None:
-    op.drop_column("schedules", "meeting_link_provider")
+    op.drop_column('schedules', 'meeting_link_provider')
