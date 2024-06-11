@@ -118,7 +118,7 @@ jobs:
           terragrunt plan -out tfplan
           terragrunt apply tfplan
 
-  deploy-frontend:
+  build-and-deploy-frontend:
     needs:
       - detect-changes
       - deploy-iac
@@ -187,8 +187,50 @@ jobs:
           aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
           aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
 
+  build-backend-image:
+    needs:
+      - detect-changes
+    environment: staging
+    runs-on: ubuntu-latest
 
-  deploy-backend:
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE }}
+          role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push backend image to Amazon ECR
+        id: build-backend
+        env:
+          ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
+          docker push $ECR_TAG
+          echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
+          echo $ECR_TAG > ecr_tag.txt
+          zip ecr_tag.zip ecr_tag.txt
+
+      - name: Archive ECR tag
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecr_tag
+          path: ecr_tag.zip
+
+
+  deploy-stage-backend:
     needs: 
       - detect-changes
       - deploy-iac
@@ -229,6 +271,19 @@ jobs:
           sudo chmod +x /bin/terragrunt
           terragrunt -v
 
+      - name: download ecr tag
+        uses: actions/download-artifact@v4
+        with:
+            name: 
+              ecr_tag
+
+      - name: Unzip ECR tag
+        id: get_ecr_tag
+        run: |
+          unzip ecr_tag.zip
+          output=$(cat ecr_tag.txt)
+          echo ecr_tag=$output >> $GITHUB_OUTPUT
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -236,45 +291,20 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Build, tag, and push backend image to Amazon ECR
-        id: build-backend
-        env:
-          ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
-        run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
-          docker push $ECR_TAG
-          echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
-          echo $ECR_TAG > ecr_tag.txt
-          zip ecr_tag.zip ecr_tag.txt
-
-      - name: Archive ECR tag
-        uses: actions/upload-artifact@v4
-        with:
-          name: ecr_tag
-          path: ecr_tag.zip
-
       - name: deploy backend-service
         working-directory: ./tofu/environments/stage/services/backend-service
         run: |
           terragrunt init -upgrade
           terragrunt validate
-          terragrunt plan -var 'image=${{ steps.build-backend.outputs.image_backend }}' -out tfplan
+          terragrunt plan -var 'image=${{ steps.get_ecr_tag.outputs.ecr_tag }}' -out tfplan
           terragrunt apply tfplan
 
   create-release:
     needs:
-      - deploy-backend
-      - deploy-frontend
+      - build-backend-image
+      - build-and-deploy-frontend
       - deploy-iac
+      - deploy-stage-backend
     if: |
       always() &&
       contains(join(needs.*.result, ','), 'success') &&
