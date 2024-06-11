@@ -1,4 +1,4 @@
-name: deploy-staging
+name: deploy-staging-and-create-release
 
 concurrency:
   group: deploy-staging
@@ -44,7 +44,7 @@ jobs:
               - 'tofu/environments/stage/services/frontend-infra/**'
               - '.github/workflows/deploy-staging.yml'
 
-  deploy-iac:
+  deploy-stage-iac:
     needs: detect-changes
     
     if: needs.detect-changes.outputs.deploy-iac == 'true'
@@ -118,10 +118,10 @@ jobs:
           terragrunt plan -out tfplan
           terragrunt apply tfplan
 
-  build-and-deploy-frontend:
+  build-and-deploy-stage-frontend:
     needs:
       - detect-changes
-      - deploy-iac
+      - deploy-stage-iac
     if: |
       always() &&
       (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
@@ -229,11 +229,10 @@ jobs:
           name: ecr_tag
           path: ecr_tag.zip
 
-
   deploy-stage-backend:
     needs: 
       - detect-changes
-      - deploy-iac
+      - deploy-stage-iac
     if: |
       always() &&
       (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
@@ -302,8 +301,8 @@ jobs:
   create-release:
     needs:
       - build-backend-image
-      - build-and-deploy-frontend
-      - deploy-iac
+      - build-and-deploy-stage-frontend
+      - deploy-stage-iac
       - deploy-stage-backend
     if: |
       always() &&
