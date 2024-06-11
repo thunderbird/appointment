@@ -1,33 +1,41 @@
-# frontend
+# Thunderbird Appointment Frontend
+
+This is the frontend component of Thunderbird Appointment. It's written in VueJS with Vite.
 
 ## Project setup
 
+Copy the [.env.example](.env.example) as `.env`. 
+
+Then simply run:
 ```bash
-npm install
+yarn install
 ```
 
 ### Compiles and hot-reloads for development
 
 ```bash
-npm run serve
+yarn run serve
 ```
 
 ### Compiles and minifies for production
 
 ```bash
-npm run build
+yarn run build
 ```
 
 ### Lints and fixes files
 
+Frontend is formatted using ESlint with airbnb rules.
+
 ```bash
-npm run lint
+yarn run lint
+yarn run lint --fix
 ```
 
 ### Run tests
 
 ```bash
-npm test
+yarn run test
 ```
 
 ### Customize configuration
