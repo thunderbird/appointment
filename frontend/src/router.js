@@ -39,7 +39,7 @@ const routes = [
     component: PostLoginView,
   },
   {
-    path: '/user/:usernameOrSlug/:signature?',
+    path: '/user/:username/:signatureOrSlug',
     name: 'availability',
     component: BookingView,
   },

@@ -22,7 +22,7 @@ export const useUserStore = defineStore('user', () => {
   const myLink = computed(() => {
     const scheduleSlug = data.value?.scheduleSlugs?.length > 0 ? data.value?.scheduleSlugs[0] : null;
     if (scheduleSlug) {
-      return `${import.meta.env.VITE_SHORT_BASE_URL}/${scheduleSlug}/`;
+      return `${import.meta.env.VITE_SHORT_BASE_URL}/${data.value.username}/${scheduleSlug}/`;
     }
     return data.value.signedUrl;
   });

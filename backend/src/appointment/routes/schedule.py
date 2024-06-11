@@ -15,7 +15,8 @@ from ..database import repo, schemas, models
 from ..database.models import Subscriber, CalendarProvider, random_slug, BookingStatus, MeetingLinkProviderType, \
     ExternalConnectionType
 from ..database.schemas import ExternalConnection
-from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
+from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url, \
+    get_subscriber_from_schedule_or_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
@@ -51,7 +52,7 @@ def create_calendar_schedule(
     slug = repo.schedule.generate_slug(db, db_schedule.id)
     if not slug:
         # A little extra, but things are a little out of place right now..
-        repo.schedule.delete(db, db_schedule.id)
+        repo.schedule.hard_delete(db, db_schedule.id)
         raise validation.ScheduleCreationException()
 
     return db_schedule
@@ -118,7 +119,7 @@ def get_signed_url_from_slug(
 
 @router.post("/public/availability", response_model=schemas.AppointmentOut)
 def read_schedule_availabilities(
-    subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
+    subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),

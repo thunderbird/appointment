@@ -91,3 +91,19 @@ def get_subscriber_from_signed_url(
         raise validation.InvalidLinkException
 
     return subscriber
+
+
+def get_subscriber_from_schedule_or_signed_url(
+    url: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+):
+    subscriber = repo.subscriber.verify_link(db, url)
+    print("Signed? ", subscriber)
+    if not subscriber:
+        subscriber = repo.schedule.verify_link(db, url)
+        print("Slug? ", subscriber)
+
+    if not subscriber:
+        raise validation.InvalidLinkException
+
+    return subscriber

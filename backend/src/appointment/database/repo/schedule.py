@@ -6,6 +6,7 @@ import uuid
 
 from sqlalchemy.orm import Session
 from .. import models, schemas, repo
+from ... import utils
 
 
 def create(db: Session, schedule: schemas.ScheduleBase):
@@ -27,9 +28,13 @@ def get_by_subscriber(db: Session, subscriber_id: int):
     )
 
 
-def get_by_slug(db: Session, slug: str) -> models.Schedule | None:
+def get_by_slug(db: Session, slug: str, subscriber_id: int) -> models.Schedule | None:
     """Get schedule by slug"""
-    return db.query(models.Schedule).filter(models.Schedule.slug == slug).first()
+    return (db.query(models.Schedule)
+            .filter(models.Schedule.slug == slug)
+            .join(models.Schedule.calendar)
+            .filter(models.Calendar.owner_id == subscriber_id)
+            .first())
 
 
 def get(db: Session, schedule_id: int):
@@ -83,18 +88,20 @@ def generate_slug(db: Session, schedule_id: int) -> str|None:
     if schedule.slug:
         return schedule.slug
 
+    owner_id = schedule.owner.id
+
     # If slug isn't provided, give them the last 8 characters from a uuid4
     # Try up-to-3 times to create a unique slug
     for _ in range(3):
         slug = uuid.uuid4().hex[-8:]
-        exists = repo.schedule.get_by_slug(db, slug)
+        exists = repo.schedule.get_by_slug(db, slug, owner_id)
         if not exists:
             schedule.slug = slug
             break
 
-        # Could not create slug due to randomness overlap
-        if schedule.slug is None:
-            return None
+    # Could not create slug due to randomness overlap
+    if schedule.slug is None:
+        return None
 
     db.add(schedule)
     db.commit()
@@ -102,9 +109,26 @@ def generate_slug(db: Session, schedule_id: int) -> str|None:
     return schedule.slug
 
 
-def delete(db: Session, schedule_id: int):
+def hard_delete(db: Session, schedule_id: int):
     schedule = repo.schedule.get(db, schedule_id)
     db.delete(schedule)
     db.commit()
 
     return True
+
+
+def verify_link(db: Session, url: str) -> models.Subscriber | None:
+    """Verifies that an url belongs to a subscriber's schedule, and if so return the subscriber.
+    Otherwise, return none."""
+    username, slug, clean_url = utils.retrieve_user_url_data(url)
+
+    subscriber = repo.subscriber.get_by_username(db, username)
+    if not subscriber:
+        return None
+
+    schedule = get_by_slug(db, slug, subscriber.id)
+
+    if not schedule:
+        return None
+
+    return subscriber

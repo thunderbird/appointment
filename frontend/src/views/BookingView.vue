@@ -148,22 +148,8 @@ const handleError = (data) => {
  * @returns {Promise<Object|null>}
  */
 const getAppointment = async () => {
-  let url = null;
-  // Okay we have a slug, lets lookup the actual signature
-  if (route.params.usernameOrSlug && !route.params.signature) {
-    const request = call('schedule/public/url').post({ slug: route.params.usernameOrSlug });
-    const { data, error } = await request.json();
-
-    if (error.value) {
-      handleError(data?.value);
-      return null;
-    }
-
-    url = data?.value?.url;
-  }
-
-  const signedUrl = url ?? window.location.href.split('#')[0];
-  const request = call('schedule/public/availability').post({ url: signedUrl });
+  const url = window.location.href.split('#')[0];
+  const request = call('schedule/public/availability').post({ url });
 
   const { data, error } = await request.json();
 
