@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group/day px-1 cursor-pointer py-2"
+    class="group/day cursor-pointer px-1 py-2"
     :class="{
       'bg-white dark:bg-gray-700': isActive,
       'bg-gray-50 text-gray-400 dark:bg-gray-600': !isActive || disabled,
@@ -8,7 +8,7 @@
     }"
   >
     <div
-      class="relative w-6 rounded-full text-center mx-auto"
+      class="relative mx-auto w-6 rounded-full text-center"
       :class="{
         'bg-teal-500 font-semibold text-white': isToday,
         'text-teal-500': isSelected && !isToday,
@@ -28,7 +28,7 @@ import { inject } from 'vue';
 const dj = inject('dayjs');
 
 // component properties
-const props = defineProps({
+defineProps({
   day: String, // number of day in its month
   isActive: Boolean, // flag showing if the day belongs to active month
   isSelected: Boolean, // flag showing if the day is currently selected by user
@@ -39,7 +39,4 @@ const props = defineProps({
   popupPosition: String, // currently supported: right, left, top
   disabled: Boolean, // flag making this day non-selectable and inactive
 });
-
-// component emits
-const emit = defineEmits(['eventSelected']);
 </script>

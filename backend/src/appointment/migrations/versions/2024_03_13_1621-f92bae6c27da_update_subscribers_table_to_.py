@@ -5,6 +5,7 @@ Revises: ea551afc14fc
 Create Date: 2024-03-13 16:21:54.415458
 
 """
+
 import os
 
 from alembic import op
@@ -21,7 +22,7 @@ depends_on = None
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 def upgrade() -> None:
@@ -32,19 +33,19 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.add_column(
-        "subscribers",
+        'subscribers',
         sa.Column(
-            "google_tkn",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=2048),
+            'google_tkn',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=2048),
             index=False,
         ),
     )
     op.add_column(
-        "subscribers",
+        'subscribers',
         sa.Column(
-            "google_state",
-            StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=2048),
+            'google_state',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=2048),
             index=False,
         ),
     )
-    op.add_column("subscribers", sa.Column("google_state_expires_at", DateTime()))
+    op.add_column('subscribers', sa.Column('google_state_expires_at', DateTime()))

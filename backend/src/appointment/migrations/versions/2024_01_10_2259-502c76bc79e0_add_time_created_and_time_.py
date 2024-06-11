@@ -5,6 +5,7 @@ Revises: 0dc429ca07f5
 Create Date: 2024-01-10 22:59:02.194281
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import func
@@ -16,7 +17,14 @@ branch_labels = None
 depends_on = None
 
 affected_tables = ['attendees', 'calendars', 'slots', 'subscribers']
-index_tables = ['appointments', 'availabilities', 'external_connections', 'schedules', 'slots', ]
+index_tables = [
+    'appointments',
+    'availabilities',
+    'external_connections',
+    'schedules',
+    'slots',
+]
+
 
 def upgrade() -> None:
     for table in affected_tables:

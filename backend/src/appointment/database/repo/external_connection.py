@@ -1,11 +1,10 @@
 """Module: repo.external_connection
 
-Repository providing CRUD functions for external_connection database models. 
+Repository providing CRUD functions for external_connection database models.
 """
 
-
 from sqlalchemy.orm import Session
-from .. import models, repo
+from .. import models
 from ..schemas import ExternalConnection
 
 
@@ -14,16 +13,16 @@ from ..schemas import ExternalConnection
 
 
 def create(db: Session, external_connection: ExternalConnection):
-    db_external_connection = models.ExternalConnections(
-        **external_connection.dict()
-    )
+    db_external_connection = models.ExternalConnections(**external_connection.dict())
     db.add(db_external_connection)
     db.commit()
     db.refresh(db_external_connection)
     return db_external_connection
 
 
-def update_token(db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None):
+def update_token(
+    db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
+):
     db_results = get_by_type(db, subscriber_id, type, type_id)
     if db_results is None or len(db_results) == 0:
         return None
@@ -46,7 +45,9 @@ def delete_by_type(db: Session, subscriber_id: int, type: models.ExternalConnect
     return True
 
 
-def get_by_type(db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None) -> list[models.ExternalConnections] | None:
+def get_by_type(
+    db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
+) -> list[models.ExternalConnections] | None:
     """Return a subscribers external connections by type, and optionally type id"""
     query = (
         db.query(models.ExternalConnections)

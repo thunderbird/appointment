@@ -1,8 +1,8 @@
 <template>
   <div
     class="
-      m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
-      flex items-center rounded border-l-4 border-teal-400 px-2
+      m-auto flex size-[95%] shrink-0 items-center rounded border-l-4
+      border-teal-400 px-2 text-sm text-gray-700 hover:shadow-md dark:text-gray-200
     "
     :class="{ 'h-full': !isMonthView }"
     :style="{
@@ -22,7 +22,7 @@
 import { eventColor, getAccessibleColor } from '@/utils';
 
 // component properties
-const props = defineProps({
+defineProps({
   isMonthView: Boolean, // flag, are we in month view?
   event: Object, // the event to show
   label: String, // event title

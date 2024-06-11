@@ -20,7 +20,7 @@ from ..exceptions.account_api import AccountDeletionException
 router = APIRouter()
 
 
-@router.get("/external-connections")
+@router.get('/external-connections')
 def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
     # This could be moved to a helper function in the future
     # Create a list of supported external connections
@@ -30,24 +30,25 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
         external_connections['Zoom'] = []
 
     for ec in subscriber.external_connections:
-        external_connections[ec.type.name].append(schemas.ExternalConnectionOut(owner_id=ec.owner_id, type=ec.type.name,
-                                                                                type_id=ec.type_id, name=ec.name))
+        external_connections[ec.type.name].append(
+            schemas.ExternalConnectionOut(owner_id=ec.owner_id, type=ec.type.name, type_id=ec.type_id, name=ec.name)
+        )
 
     return external_connections
 
 
-@router.get("/download")
+@router.get('/download')
 def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Download your account data in zip format! Returns a streaming response with the zip buffer."""
     zip_buffer = data.download(db, subscriber)
     return StreamingResponse(
         iter([zip_buffer.getvalue()]),
-        media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": "attachment; filename=data.zip"},
+        media_type='application/x-zip-compressed',
+        headers={'Content-Disposition': 'attachment; filename=data.zip'},
     )
 
 
-@router.delete("/delete")
+@router.delete('/delete')
 def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Delete your account and all the data associated with it forever!"""
     try:
@@ -56,14 +57,11 @@ def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depen
         raise HTTPException(status_code=500, detail=e.message)
 
 
-@router.get("/available-emails")
+@router.get('/available-emails')
 def get_available_emails(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Return the list of emails they can use within Thunderbird Appointment"""
     google_connections = get_by_type(db, subscriber_id=subscriber.id, type=ExternalConnectionType.google)
 
     emails = {subscriber.email, *[connection.name for connection in google_connections]} - {subscriber.preferred_email}
 
-    return [
-        subscriber.preferred_email,
-        *emails
-    ]
+    return [subscriber.preferred_email, *emails]

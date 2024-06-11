@@ -19,7 +19,7 @@ from ..l10n import l10n
 router = APIRouter()
 
 
-@router.get("/auth")
+@router.get('/auth')
 def google_auth(
     request: Request,
     email: str | None = None,
@@ -36,7 +36,7 @@ def google_auth(
     return url
 
 
-@router.get("/callback")
+@router.get('/callback')
 def google_callback(
     request: Request,
     code: str,
@@ -74,12 +74,17 @@ def google_callback(
     if google_id is None:
         return google_callback_error(l10n('google-auth-fail'))
 
-    external_connection = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google,
-                                                               google_id)
+    external_connection = repo.external_connection.get_by_type(
+        db, subscriber.id, ExternalConnectionType.google, google_id
+    )
 
     # Create an artificial limit of one google account per account, mainly because we didn't plan for multiple accounts!
-    remainder = list(filter(lambda ec: ec.type_id != google_id,
-                            repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google)))
+    remainder = list(
+        filter(
+            lambda ec: ec.type_id != google_id,
+            repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google),
+        )
+    )
 
     if len(remainder) > 0:
         return google_callback_error(l10n('google-only-one'))
@@ -91,13 +96,14 @@ def google_callback(
             type=ExternalConnectionType.google,
             type_id=google_id,
             owner_id=subscriber.id,
-            token=creds.to_json()
+            token=creds.to_json(),
         )
 
         repo.external_connection.create(db, external_connection_schema)
     else:
-        repo.external_connection.update_token(db, creds.to_json(), subscriber.id,
-                                              ExternalConnectionType.google, google_id)
+        repo.external_connection.update_token(
+            db, creds.to_json(), subscriber.id, ExternalConnectionType.google, google_id
+        )
 
     error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds)
 
@@ -113,7 +119,7 @@ def google_callback_error(error: str):
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar?error={error}")
 
 
-@router.post("/disconnect")
+@router.post('/disconnect')
 def disconnect_account(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
@@ -132,7 +138,5 @@ def disconnect_account(
 
     # Remove their account details
     repo.external_connection.delete_by_type(db, subscriber.id, google_connection.type, google_connection.type_id)
-
-
 
     return True

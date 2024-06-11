@@ -2,25 +2,25 @@ import os
 from typing import Annotated
 
 import sentry_sdk
-from fastapi import Depends, Request, HTTPException, Body
+from fastapi import Depends, Body
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 from sqlalchemy.orm import Session
 
-from ..database import repo, schemas, models
+from ..database import repo, models
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
 def get_user_from_token(db, token: str):
     try:
         payload = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=[os.getenv('JWT_ALGO')])
-        sub = payload.get("sub")
-        iat = payload.get("iat")
+        sub = payload.get('sub')
+        iat = payload.get('iat')
         if sub is None:
             raise InvalidTokenException()
     except jwt.exceptions.InvalidTokenError:
@@ -30,12 +30,16 @@ def get_user_from_token(db, token: str):
     subscriber = repo.subscriber.get(db, int(id))
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
-    if any([
-        subscriber is None,
-        subscriber.is_deleted,
-        subscriber and subscriber.minimum_valid_iat_time and not iat,
-        subscriber and subscriber.minimum_valid_iat_time and subscriber.minimum_valid_iat_time.timestamp() > int(iat)
-    ]):
+    if any(
+        [
+            subscriber is None,
+            subscriber.is_deleted,
+            subscriber and subscriber.minimum_valid_iat_time and not iat,
+            subscriber
+            and subscriber.minimum_valid_iat_time
+            and subscriber.minimum_valid_iat_time.timestamp() > int(iat),
+        ]
+    ):
         raise InvalidTokenException()
 
     return subscriber
@@ -56,9 +60,11 @@ def get_subscriber(
 
     # Associate user id with users
     if os.getenv('SENTRY_DSN'):
-        sentry_sdk.set_user({
-            'id': user.id,
-        })
+        sentry_sdk.set_user(
+            {
+                'id': user.id,
+            }
+        )
 
     return user
 
@@ -68,10 +74,10 @@ def get_admin_subscriber(
 ):
     """Retrieve the subscriber and check if they're an admin"""
     # check admin allow list
-    admin_emails = os.getenv("APP_ADMIN_ALLOW_LIST")
+    admin_emails = os.getenv('APP_ADMIN_ALLOW_LIST')
 
     # Raise an error if we don't have any admin emails specified
-    if not admin_emails:
+    if not admin_emails or not user:
         raise InvalidPermissionLevelException()
 
     admin_emails = admin_emails.split(',')

@@ -2,6 +2,7 @@
 
 Definitions of database tables and their relationships.
 """
+
 import datetime
 import enum
 import os
@@ -17,11 +18,11 @@ from sqlalchemy.sql import func
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 def random_slug():
-    return "".join(str(uuid.uuid4()).split("-"))
+    return ''.join(str(uuid.uuid4()).split('-'))
 
 
 class SubscriberLevel(enum.Enum):
@@ -83,7 +84,7 @@ class InviteStatus(enum.Enum):
 
 def encrypted_type(column_type, length: int = 255, **kwargs) -> StringEncryptedType:
     """Helper to reduce visual noise when creating model columns"""
-    return StringEncryptedType(column_type, secret, AesEngine, "pkcs5", length=length, **kwargs)
+    return StringEncryptedType(column_type, secret, AesEngine, 'pkcs5', length=length, **kwargs)
 
 
 @as_declarative()
@@ -107,6 +108,7 @@ class Base:
 
 class HasSoftDelete:
     """Mixing in a column to support deletion without removing the record"""
+
     time_deleted = Column(DateTime, nullable=True)
 
     @property
@@ -116,7 +118,7 @@ class HasSoftDelete:
 
 
 class Subscriber(HasSoftDelete, Base):
-    __tablename__ = "subscribers"
+    __tablename__ = 'subscribers'
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(encrypted_type(String), unique=True, index=True)
@@ -137,10 +139,10 @@ class Subscriber(HasSoftDelete, Base):
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
     minimum_valid_iat_time = Column('minimum_valid_iat_time', encrypted_type(DateTime))
 
-    calendars = relationship("Calendar", cascade="all,delete", back_populates="owner")
-    slots = relationship("Slot", cascade="all,delete", back_populates="subscriber")
-    external_connections = relationship("ExternalConnections", cascade="all,delete", back_populates="owner")
-    invite: Mapped["Invite"] = relationship("Invite", back_populates="subscriber", uselist=False)
+    calendars = relationship('Calendar', cascade='all,delete', back_populates='owner')
+    slots = relationship('Slot', cascade='all,delete', back_populates='subscriber')
+    external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
+    invite: Mapped['Invite'] = relationship('Invite', back_populates='subscriber', uselist=False)
 
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
@@ -153,10 +155,10 @@ class Subscriber(HasSoftDelete, Base):
 
 
 class Calendar(Base):
-    __tablename__ = "calendars"
+    __tablename__ = 'calendars'
 
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("subscribers.id"))
+    owner_id = Column(Integer, ForeignKey('subscribers.id'))
     provider = Column(Enum(CalendarProvider), default=CalendarProvider.caldav)
     title = Column(encrypted_type(String), index=True)
     color = Column(encrypted_type(String, length=32), index=True)
@@ -166,18 +168,19 @@ class Calendar(Base):
     connected = Column(Boolean, index=True, default=False)
     connected_at = Column(DateTime)
 
-    owner: Mapped[Subscriber] = relationship("Subscriber", back_populates="calendars")
-    appointments: Mapped[list["Appointment"]] = relationship("Appointment", cascade="all,delete",
-                                                             back_populates="calendar")
-    schedules: Mapped[list["Schedule"]] = relationship("Schedule", cascade="all,delete", back_populates="calendar")
+    owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='calendars')
+    appointments: Mapped[list['Appointment']] = relationship(
+        'Appointment', cascade='all,delete', back_populates='calendar'
+    )
+    schedules: Mapped[list['Schedule']] = relationship('Schedule', cascade='all,delete', back_populates='calendar')
 
 
 class Appointment(Base):
-    __tablename__ = "appointments"
+    __tablename__ = 'appointments'
 
     id = Column(Integer, primary_key=True, index=True)
     uuid = Column(UUIDType(native=False), default=uuid.uuid4(), index=True)
-    calendar_id = Column(Integer, ForeignKey("calendars.id"))
+    calendar_id = Column(Integer, ForeignKey('calendars.id'))
     duration = Column(Integer)
     title = Column(encrypted_type(String))
     location_type = Column(Enum(LocationType), default=LocationType.inperson)
@@ -192,32 +195,33 @@ class Appointment(Base):
     status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider = Column(encrypted_type(ChoiceType(MeetingLinkProviderType)),
-                                   default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider = Column(
+        encrypted_type(ChoiceType(MeetingLinkProviderType)), default=MeetingLinkProviderType.none, index=False
+    )
 
-    calendar: Mapped[Calendar] = relationship("Calendar", back_populates="appointments")
-    slots: Mapped[list['Slot']] = relationship("Slot", cascade="all,delete", back_populates="appointment")
+    calendar: Mapped[Calendar] = relationship('Calendar', back_populates='appointments')
+    slots: Mapped[list['Slot']] = relationship('Slot', cascade='all,delete', back_populates='appointment')
 
 
 class Attendee(Base):
-    __tablename__ = "attendees"
+    __tablename__ = 'attendees'
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(encrypted_type(String), index=True)
     name = Column(encrypted_type(String), index=True)
     timezone = Column(String(255), index=True)
 
-    slots: Mapped[list['Slot']] = relationship("Slot", cascade="all,delete", back_populates="attendee")
+    slots: Mapped[list['Slot']] = relationship('Slot', cascade='all,delete', back_populates='attendee')
 
 
 class Slot(Base):
-    __tablename__ = "slots"
+    __tablename__ = 'slots'
 
     id = Column(Integer, primary_key=True, index=True)
-    appointment_id = Column(Integer, ForeignKey("appointments.id"))
-    schedule_id = Column(Integer, ForeignKey("schedules.id"))
-    attendee_id = Column(Integer, ForeignKey("attendees.id"))
-    subscriber_id = Column(Integer, ForeignKey("subscribers.id"))
+    appointment_id = Column(Integer, ForeignKey('appointments.id'))
+    schedule_id = Column(Integer, ForeignKey('schedules.id'))
+    attendee_id = Column(Integer, ForeignKey('attendees.id'))
+    subscriber_id = Column(Integer, ForeignKey('subscribers.id'))
     time_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
     start = Column(DateTime)
     duration = Column(Integer)
@@ -232,18 +236,18 @@ class Slot(Base):
     booking_expires_at = Column(DateTime)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
-    appointment: Mapped[Appointment] = relationship("Appointment", back_populates="slots")
-    schedule: Mapped['Schedule'] = relationship("Schedule", back_populates="slots")
+    appointment: Mapped[Appointment] = relationship('Appointment', back_populates='slots')
+    schedule: Mapped['Schedule'] = relationship('Schedule', back_populates='slots')
 
-    attendee: Mapped[Attendee] = relationship("Attendee", cascade="all,delete", back_populates="slots")
-    subscriber: Mapped[Subscriber] = relationship("Subscriber", back_populates="slots")
+    attendee: Mapped[Attendee] = relationship('Attendee', cascade='all,delete', back_populates='slots')
+    subscriber: Mapped[Subscriber] = relationship('Subscriber', back_populates='slots')
 
 
 class Schedule(Base):
-    __tablename__ = "schedules"
+    __tablename__ = 'schedules'
 
     id: int = Column(Integer, primary_key=True, index=True)
-    calendar_id: int = Column(Integer, ForeignKey("calendars.id"))
+    calendar_id: int = Column(Integer, ForeignKey('calendars.id'))
     active: bool = Column(Boolean, index=True, default=True)
     name: str = Column(encrypted_type(String), index=True)
     slug: str = Column(encrypted_type(String), index=True, unique=True)
@@ -256,30 +260,34 @@ class Schedule(Base):
     end_time: datetime.time = Column(encrypted_type(Time), index=True)
     earliest_booking: int = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
     farthest_booking: int = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
-    weekdays: str | dict = Column(JSON, default="[1,2,3,4,5]")  # list of ISO weekdays, Mo-Su => 1-7
+    weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
 
     # What (if any) meeting link will we generate once the meeting is booked
-    meeting_link_provider: MeetingLinkProviderType = Column(encrypted_type(ChoiceType(MeetingLinkProviderType)),
-                                                            default=MeetingLinkProviderType.none, index=False)
+    meeting_link_provider: MeetingLinkProviderType = Column(
+        encrypted_type(ChoiceType(MeetingLinkProviderType)), default=MeetingLinkProviderType.none, index=False
+    )
 
-    calendar: Mapped[Calendar] = relationship("Calendar", back_populates="schedules")
-    availabilities: Mapped[list["Availability"]] = relationship("Availability", cascade="all,delete",
-                                                                back_populates="schedule")
-    slots: Mapped[list[Slot]] = relationship("Slot", cascade="all,delete", back_populates="schedule")
+    calendar: Mapped[Calendar] = relationship('Calendar', back_populates='schedules')
+    availabilities: Mapped[list['Availability']] = relationship(
+        'Availability', cascade='all,delete', back_populates='schedule'
+    )
+    slots: Mapped[list[Slot]] = relationship('Slot', cascade='all,delete', back_populates='schedule')
 
     @property
     def start_time_local(self) -> datetime.time:
         """Start Time in the Schedule's Calendar's Owner's timezone"""
-        time_of_save = self.time_updated.replace(hour=self.start_time.hour, minute=self.start_time.minute, second=0,
-                                                 tzinfo=datetime.timezone.utc)
+        time_of_save = self.time_updated.replace(
+            hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
     @property
     def end_time_local(self) -> datetime.time:
         """End Time in the Schedule's Calendar's Owner's timezone"""
-        time_of_save = self.time_updated.replace(hour=self.end_time.hour, minute=self.end_time.minute, second=0,
-                                                 tzinfo=datetime.timezone.utc)
+        time_of_save = self.time_updated.replace(
+            hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
         return time_of_save.astimezone(zoneinfo.ZoneInfo(self.calendar.owner.timezone)).time()
 
     @cached_property
@@ -291,13 +299,13 @@ class Schedule(Base):
 
 class Availability(Base):
     """This table will be used as soon as the application provides custom availability
-       in addition to the general availability
+    in addition to the general availability
     """
 
-    __tablename__ = "availabilities"
+    __tablename__ = 'availabilities'
 
     id = Column(Integer, primary_key=True, index=True)
-    schedule_id = Column(Integer, ForeignKey("schedules.id"))
+    schedule_id = Column(Integer, ForeignKey('schedules.id'))
     day_of_week = Column(encrypted_type(String), index=True)
     start_time = Column(encrypted_type(String), index=True)
     end_time = Column(encrypted_type(String), index=True)
@@ -305,32 +313,34 @@ class Availability(Base):
     min_time_before_meeting = Column(encrypted_type(String), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
 
-    schedule: Mapped[Schedule] = relationship("Schedule", back_populates="availabilities")
+    schedule: Mapped[Schedule] = relationship('Schedule', back_populates='availabilities')
 
 
 class ExternalConnections(Base):
     """This table holds all external service connections to a subscriber."""
-    __tablename__ = "external_connections"
+
+    __tablename__ = 'external_connections'
 
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("subscribers.id"))
+    owner_id = Column(Integer, ForeignKey('subscribers.id'))
     name = Column(encrypted_type(String), index=False)
     type = Column(Enum(ExternalConnectionType), index=True)
     type_id = Column(encrypted_type(String), index=True)
     token = Column(encrypted_type(String, length=2048), index=False)
-    owner: Mapped[Subscriber] = relationship("Subscriber", back_populates="external_connections")
+    owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='external_connections')
 
 
 class Invite(Base):
     """This table holds all invite codes for code based sign-ups."""
-    __tablename__ = "invites"
+
+    __tablename__ = 'invites'
 
     id = Column(Integer, primary_key=True, index=True)
-    subscriber_id = Column(Integer, ForeignKey("subscribers.id"))
+    subscriber_id = Column(Integer, ForeignKey('subscribers.id'))
     code = Column(encrypted_type(String), index=False)
     status = Column(Enum(InviteStatus), index=True)
 
-    subscriber: Mapped["Subscriber"] = relationship("Subscriber", back_populates="invite", single_parent=True)
+    subscriber: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True)
 
     @property
     def is_used(self) -> bool:

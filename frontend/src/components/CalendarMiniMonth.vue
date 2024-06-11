@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="
-      grid w-full grid-cols-7 gap-[1px] overflow-hidden rounded-lg border
+      grid w-full grid-cols-7 gap-px overflow-hidden rounded-lg border
     border-gray-200 bg-gray-200 dark:border-gray-500 dark:bg-gray-500
     ">
       <div
@@ -42,7 +42,9 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, watch } from 'vue';
+import {
+  ref, computed, inject, watch,
+} from 'vue';
 import CalendarMiniMonthDay from '@/elements/calendar/CalendarMiniMonthDay';
 
 // icons

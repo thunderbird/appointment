@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="{ 'text-gray-400 cursor-not-allowed': disabled, 'h-full': !monthView }"
+    :class="{ 'cursor-not-allowed text-gray-400': disabled, 'h-full': !monthView }"
     @mouseleave="popup = {...initialEventPopupData}"
   >
     <div
@@ -62,7 +62,9 @@
 
 <script setup>
 import { bookingStatus } from '@/definitions';
-import { computed, inject, ref, toRefs } from 'vue';
+import {
+  computed, inject, ref, toRefs,
+} from 'vue';
 import { timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
 import CalendarEventPlaceholder from '@/elements/calendar/CalendarEventPlaceholder';
 import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview';

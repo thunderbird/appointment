@@ -29,7 +29,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'tailwindcss/no-custom-classname': 'off',
     'import/prefer-default-export': 'off',
-    'radix': 'off',
+    radix: 'off',
   },
   settings: {
     'import/resolver': {

@@ -5,6 +5,7 @@ Revises: e4c5a32de9fb
 Create Date: 2024-03-26 17:22:03.157695
 
 """
+
 import uuid
 
 from alembic import op
@@ -21,7 +22,9 @@ depends_on = None
 
 def upgrade() -> None:
     session = Session(op.get_bind())
-    appointments: list[models.Appointment] = session.query(models.Appointment).where(models.Appointment.uuid.is_(None)).all()
+    appointments: list[models.Appointment] = (
+        session.query(models.Appointment).where(models.Appointment.uuid.is_(None)).all()
+    )
     for appointment in appointments:
         appointment.uuid = uuid.uuid4()
         session.add(appointment)

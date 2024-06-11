@@ -53,6 +53,3 @@ class TestFxaClient:
 
             # They're not in the allow list, but they are a user!
             assert fxa_client.is_in_allow_list(db, test_email)
-
-
-

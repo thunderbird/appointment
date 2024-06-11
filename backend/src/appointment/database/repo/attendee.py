@@ -1,6 +1,6 @@
 """Module: repo.attendee
 
-Repository providing CRUD functions for attendee database models. 
+Repository providing CRUD functions for attendee database models.
 """
 
 from sqlalchemy.orm import Session

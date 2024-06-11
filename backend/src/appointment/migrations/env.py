@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from appointment.defines import APP_ENV_DEV
+
 # This is ran from src/ so ignore the errors
 from appointment.secrets import normalize_secrets
 
@@ -36,14 +37,14 @@ target_metadata = None
 # ... etc.
 
 # Catch any errors that may run during migrations
-if os.getenv("SENTRY_DSN") != "" or os.getenv("SENTRY_DSN") is not None:
+if os.getenv('SENTRY_DSN') != '' or os.getenv('SENTRY_DSN') is not None:
     sentry_sdk.init(
-        dsn=os.getenv("SENTRY_DSN"),
+        dsn=os.getenv('SENTRY_DSN'),
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
         # We recommend adjusting this value in production,
         traces_sample_rate=1.0,
-        environment=os.getenv("APP_ENV", APP_ENV_DEV),
+        environment=os.getenv('APP_ENV', APP_ENV_DEV),
     )
 
 
@@ -59,12 +60,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    url = os.getenv('DATABASE_URL') or config.get_main_option('sqlalchemy.url')
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={'paramstyle': 'named'},
     )
 
     with context.begin_transaction():
@@ -79,12 +80,12 @@ def run_migrations_online() -> None:
 
     """
     # If we have our database url env variable set, use that instead!
-    if os.getenv("DATABASE_URL"):
-        config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+    if os.getenv('DATABASE_URL'):
+        config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
+        prefix='sqlalchemy.',
         poolclass=pool.NullPool,
     )
 

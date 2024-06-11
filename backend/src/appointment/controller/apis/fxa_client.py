@@ -25,7 +25,7 @@ class FxaConfig:
         # Check our supported scopes
         scopes = response.get('scopes_supported')
         if 'profile' not in scopes:
-            logging.warning("Profile scope not found in supported scopes for fxa!")
+            logging.warning('Profile scope not found in supported scopes for fxa!')
 
         config = FxaConfig()
         config.issuer = response.get('issuer')
@@ -44,7 +44,7 @@ class FxaClient:
     ENTRYPOINT = 'tbappointment'
 
     SCOPES = [
-        "profile",
+        'profile',
     ]
 
     config = FxaConfig()
@@ -61,17 +61,25 @@ class FxaClient:
 
     def setup(self, subscriber_id=None, token=None):
         """Retrieve the openid connect urls, and setup our client connection"""
-        if type(token) is str:
+        if isinstance(token, str):
             token = json.loads(token)
 
         self.config = FxaConfig.from_url(os.getenv('FXA_OPEN_ID_CONFIG'))
 
         self.subscriber_id = subscriber_id
-        self.client = OAuth2Session(self.client_id, redirect_uri=self.callback_url, scope=self.SCOPES,
-                                    auto_refresh_url=self.config.token_url,
-                                    auto_refresh_kwargs={"client_id": self.client_id, "client_secret": self.client_secret, 'include_client_id': True},
-                                    token=token,
-                                    token_updater=self.token_saver)
+        self.client = OAuth2Session(
+            self.client_id,
+            redirect_uri=self.callback_url,
+            scope=self.SCOPES,
+            auto_refresh_url=self.config.token_url,
+            auto_refresh_kwargs={
+                'client_id': self.client_id,
+                'client_secret': self.client_secret,
+                'include_client_id': True,
+            },
+            token=token,
+            token_updater=self.token_saver,
+        )
 
     def is_in_allow_list(self, db, email: str):
         """Check this email against our allow list"""
@@ -93,22 +101,27 @@ class FxaClient:
             raise NotInAllowListException()
 
         utm_campaign = f"{self.ENTRYPOINT}_{os.getenv('APP_ENV')}"
-        utm_source = "login"
+        utm_source = 'login'
 
         try:
-            response = self.client.get(url=self.config.metrics_flow_url, params={
-                'entrypoint': self.ENTRYPOINT,
-                'form_type': 'email',
-                'utm_campaign': utm_campaign,
-                'utm_source': utm_source
-            })
+            response = self.client.get(
+                url=self.config.metrics_flow_url,
+                params={
+                    'entrypoint': self.ENTRYPOINT,
+                    'form_type': 'email',
+                    'utm_campaign': utm_campaign,
+                    'utm_source': utm_source,
+                },
+            )
 
             response.raise_for_status()
 
             flow_values = response.json()
         except requests.HTTPError as e:
             # Not great, but we can still continue along..
-            logging.error(f"Could not initialize metrics flow, error occurred: {e.response.status_code} - {e.response.text}")
+            logging.error(
+                f'Could not initialize metrics flow, error occurred: {e.response.status_code} - {e.response.text}'
+            )
             flow_values = {}
 
         url, state = self.client.authorization_url(
@@ -122,13 +135,15 @@ class FxaClient:
             flow_begin_time=flow_values.get('flowBeginTime'),
             flow_id=flow_values.get('flowId'),
             utm_source=utm_source,
-            utm_campaign=utm_campaign
+            utm_campaign=utm_campaign,
         )
 
         return url, state
 
     def get_credentials(self, code: str):
-        return self.client.fetch_token(self.config.token_url, code, client_secret=self.client_secret, include_client_id=True)
+        return self.client.fetch_token(
+            self.config.token_url, code, client_secret=self.client_secret, include_client_id=True
+        )
 
     def token_saver(self, token):
         """requests-oauth automagically calls this function when it has a new refresh token for us.
@@ -141,7 +156,9 @@ class FxaClient:
         if self.subscriber_id is None:
             return
 
-        repo.external_connection.update_token(next(get_db()), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.fxa)
+        repo.external_connection.update_token(
+            next(get_db()), json.dumps(token), self.subscriber_id, models.ExternalConnectionType.fxa
+        )
 
     def get_profile(self):
         """Retrieve the user's profile information"""
@@ -156,11 +173,10 @@ class FxaClient:
             raise MissingRefreshTokenException()
 
         # This route doesn't want auth! (Because we're destroying it)
-        resp = requests.post(self.config.destroy_url, json={
-            'refresh_token': refresh_token,
-            'client_id': self.client_id,
-            'client_secret': self.client_secret
-        })
+        resp = requests.post(
+            self.config.destroy_url,
+            json={'refresh_token': refresh_token, 'client_id': self.client_id, 'client_secret': self.client_secret},
+        )
 
         resp.raise_for_status()
         return resp

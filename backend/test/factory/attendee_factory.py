@@ -12,7 +12,7 @@ def make_attendee(with_db):
         with with_db() as db:
             db_attendee = models.Attendee(
                 email=email if factory_has_value(email) else fake.email(),
-                name=name if factory_has_value(name) else fake.name()
+                name=name if factory_has_value(name) else fake.name(),
             )
             db.add(db_attendee)
             db.commit()

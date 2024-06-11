@@ -12,8 +12,8 @@
     <div class="grid">
       <div
         class="
-          truncate rounded h-full p-1 font-semibold border-2 border-dashed 
-          border-teal-500 group-hover/event:border-white"
+          h-full truncate rounded border-2 border-dashed border-teal-500 p-1
+          font-semibold group-hover/event:border-white"
         :class="{
           '!border-none': isBusy,
           'border-white': isSelected,
@@ -32,7 +32,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 // component properties
-const props = defineProps({
+defineProps({
   isBusy: Boolean, // flag showing this event as busy and non-selectable
   isSelected: Boolean, // flag showing if the event is currently selected by user
   isMonthView: Boolean, // flag, are we in month view?

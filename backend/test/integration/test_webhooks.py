@@ -14,16 +14,12 @@ class TestFXAWebhooks:
 
         def override_get_webhook_auth():
             return {
-                "iss": "https://accounts.firefox.com/",
-                "sub": FXA_USER_ID,
-                "aud": "REMOTE_SYSTEM",
-                "iat": 1565720808,
-                "jti": "e19ed6c5-4816-4171-aa43-56ffe80dbda1",
-                "events": {
-                    "https://schemas.accounts.firefox.com/event/password-change": {
-                        "changeTime": 1565721242227
-                    }
-                }
+                'iss': 'https://accounts.firefox.com/',
+                'sub': FXA_USER_ID,
+                'aud': 'REMOTE_SYSTEM',
+                'iat': 1565720808,
+                'jti': 'e19ed6c5-4816-4171-aa43-56ffe80dbda1',
+                'events': {'https://schemas.accounts.firefox.com/event/password-change': {'changeTime': 1565721242227}},
             }
 
         # Override get_webhook_auth so we don't have to mock up a valid jwt token
@@ -40,13 +36,15 @@ class TestFXAWebhooks:
         with freeze_time('Aug 13th 2019'):
             # Update the external connection time to match our freeze_time
             with with_db() as db:
-                fxa_connection = repo.external_connection.get_by_type(db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID)[0]
+                fxa_connection = repo.external_connection.get_by_type(
+                    db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID
+                )[0]
                 fxa_connection.time_updated = datetime.datetime.now()
                 db.add(fxa_connection)
                 db.commit()
 
             response = with_client.post(
-                "/webhooks/fxa-process",
+                '/webhooks/fxa-process',
             )
             assert response.status_code == 200, response.text
 
@@ -57,7 +55,9 @@ class TestFXAWebhooks:
         # Update the external connection time to match our current time
         # This will make the change password event out of date
         with with_db() as db:
-            fxa_connection = repo.external_connection.get_by_type(db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID)[0]
+            fxa_connection = repo.external_connection.get_by_type(
+                db, subscriber_id, models.ExternalConnectionType.fxa, FXA_USER_ID
+            )[0]
             fxa_connection.time_updated = datetime.datetime.now()
             db.add(fxa_connection)
             db.commit()
@@ -70,14 +70,16 @@ class TestFXAWebhooks:
 
         # Finally test that minimum_valid_iat_time stays the same due to an outdated password change event
         response = with_client.post(
-            "/webhooks/fxa-process",
+            '/webhooks/fxa-process',
         )
         assert response.status_code == 200, response.text
         with with_db() as db:
             subscriber = repo.subscriber.get(db, subscriber_id)
             assert subscriber.minimum_valid_iat_time is None
 
-    def test_fxa_process_change_primary_email(self, with_db, with_client, make_pro_subscriber, make_external_connections):
+    def test_fxa_process_change_primary_email(
+        self, with_db, with_client, make_pro_subscriber, make_external_connections
+    ):
         """Ensure the change primary email event is handled correctly"""
 
         FXA_USER_ID = 'abc-456'
@@ -86,16 +88,12 @@ class TestFXAWebhooks:
 
         def override_get_webhook_auth():
             return {
-                "iss": "https://accounts.firefox.com/",
-                "sub": FXA_USER_ID,
-                "aud": "REMOTE_SYSTEM",
-                "iat": 1565720808,
-                "jti": "e19ed6c5-4816-4171-aa43-56ffe80dbda1",
-                "events": {
-                    "https://schemas.accounts.firefox.com/event/profile-change": {
-                        "email": NEW_EMAIL
-                    }
-                }
+                'iss': 'https://accounts.firefox.com/',
+                'sub': FXA_USER_ID,
+                'aud': 'REMOTE_SYSTEM',
+                'iat': 1565720808,
+                'jti': 'e19ed6c5-4816-4171-aa43-56ffe80dbda1',
+                'events': {'https://schemas.accounts.firefox.com/event/profile-change': {'email': NEW_EMAIL}},
             }
 
         # Override get_webhook_auth so we don't have to mock up a valid jwt token
@@ -113,7 +111,7 @@ class TestFXAWebhooks:
         assert subscriber.name != FXA_CLIENT_PATCH.get('subscriber_display_name')
 
         response = with_client.post(
-            "/webhooks/fxa-process",
+            '/webhooks/fxa-process',
         )
         assert response.status_code == 200, response.text
 
@@ -129,20 +127,26 @@ class TestFXAWebhooks:
             assert subscriber.name != FXA_CLIENT_PATCH.get('subscriber_display_name')
             assert subscriber.name == subscriber_name
 
-    def test_fxa_process_delete_user(self, with_db, with_client, make_pro_subscriber, make_external_connections, make_appointment, make_caldav_calendar):
+    def test_fxa_process_delete_user(
+        self,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_external_connections,
+        make_appointment,
+        make_caldav_calendar,
+    ):
         """Ensure the delete user event is handled correctly"""
         FXA_USER_ID = 'abc-789'
 
         def override_get_webhook_auth():
             return {
-                "iss": "https://accounts.firefox.com/",
-                "sub": FXA_USER_ID,
-                "aud": "REMOTE_SYSTEM",
-                "iat": 1565720810,
-                "jti": "1b3d623a-300a-4ab8-9241-855c35586809",
-                "events": {
-                    "https://schemas.accounts.firefox.com/event/delete-user": {}
-                }
+                'iss': 'https://accounts.firefox.com/',
+                'sub': FXA_USER_ID,
+                'aud': 'REMOTE_SYSTEM',
+                'iat': 1565720810,
+                'jti': '1b3d623a-300a-4ab8-9241-855c35586809',
+                'events': {'https://schemas.accounts.firefox.com/event/delete-user': {}},
             }
 
         # Override get_webhook_auth so we don't have to mock up a valid jwt token
@@ -154,7 +158,7 @@ class TestFXAWebhooks:
         appointment = make_appointment(calendar_id=calendar.id)
 
         response = with_client.post(
-            "/webhooks/fxa-process",
+            '/webhooks/fxa-process',
         )
         assert response.status_code == 200, response.text
 

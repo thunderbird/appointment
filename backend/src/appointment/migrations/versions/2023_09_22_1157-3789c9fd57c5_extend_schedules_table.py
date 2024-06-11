@@ -5,6 +5,7 @@ Revises: f9c5471478d0
 Create Date: 2023-09-22 11:57:49.222824
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -17,8 +18,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column("schedules", sa.Column("active", sa.Boolean, index=True, default=True))
+    op.add_column('schedules', sa.Column('active', sa.Boolean, index=True, default=True))
 
 
 def downgrade() -> None:
-    op.drop_column("schedules", "active")
+    op.drop_column('schedules', 'active')

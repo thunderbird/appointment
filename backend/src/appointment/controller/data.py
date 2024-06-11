@@ -62,16 +62,18 @@ def download(db, subscriber: Subscriber):
 
     # Create an in-memory zip and append our csvs
     zip_buffer = BytesIO()
-    with ZipFile(zip_buffer, "w") as data_zip:
-        data_zip.writestr("attendees.csv", attendee_buffer.getvalue())
-        data_zip.writestr("appointments.csv", appointment_buffer.getvalue())
-        data_zip.writestr("calendar.csv", calendar_buffer.getvalue())
-        data_zip.writestr("subscriber.csv", subscriber_buffer.getvalue())
-        data_zip.writestr("slot.csv", slot_buffer.getvalue())
-        data_zip.writestr("external_connection.csv", external_connections_buffer.getvalue())
-        data_zip.writestr("schedules.csv", schedules_buffer.getvalue())
-        data_zip.writestr("availability.csv", availability_buffer)
-        data_zip.writestr("readme.txt", l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)}))
+    with ZipFile(zip_buffer, 'w') as data_zip:
+        data_zip.writestr('attendees.csv', attendee_buffer.getvalue())
+        data_zip.writestr('appointments.csv', appointment_buffer.getvalue())
+        data_zip.writestr('calendar.csv', calendar_buffer.getvalue())
+        data_zip.writestr('subscriber.csv', subscriber_buffer.getvalue())
+        data_zip.writestr('slot.csv', slot_buffer.getvalue())
+        data_zip.writestr('external_connection.csv', external_connections_buffer.getvalue())
+        data_zip.writestr('schedules.csv', schedules_buffer.getvalue())
+        data_zip.writestr('availability.csv', availability_buffer)
+        data_zip.writestr(
+            'readme.txt', l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)})
+        )
 
     # Return our zip buffer
     return zip_buffer
@@ -85,7 +87,7 @@ def delete_account(db, subscriber: Subscriber):
     if repo.subscriber.get(db, subscriber.id) is not None:
         raise AccountDeletionSubscriberFail(
             subscriber.id,
-            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+            l10n('account-delete-fail'),
         )
 
     empty_check = [
@@ -93,14 +95,14 @@ def delete_account(db, subscriber: Subscriber):
         len(repo.slot.get_by_subscriber(db, subscriber.id)),
         len(repo.appointment.get_by_subscriber(db, subscriber.id)),
         len(repo.calendar.get_by_subscriber(db, subscriber.id)),
-        len(repo.schedule.get_by_subscriber(db, subscriber.id))
+        len(repo.schedule.get_by_subscriber(db, subscriber.id)),
     ]
 
     # Check if we have any left-over subscriber data
     if any(empty_check) > 0:
         raise AccountDeletionPartialFail(
             subscriber.id,
-            "There was a problem deleting your data. This incident has been logged and your data will manually be removed.",
+            l10n('account-delete-fail'),
         )
 
     return True

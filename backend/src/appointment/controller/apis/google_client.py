@@ -14,21 +14,21 @@ class GoogleClient:
     """Authenticates with Google OAuth and allows the retrieval of Google Calendar information"""
 
     SCOPES = [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/calendar.events",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "openid",
+        'https://www.googleapis.com/auth/calendar.readonly',
+        'https://www.googleapis.com/auth/calendar.events',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'openid',
     ]
     client: Flow | None = None
 
     def __init__(self, client_id, client_secret, project_id, callback_url):
         self.config = {
-            "web": {
-                "client_id": client_id,
-                "client_secret": client_secret,
-                "project_id": project_id,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
+            'web': {
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'project_id': project_id,
+                'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+                'token_uri': 'https://oauth2.googleapis.com/token',
             }
         }
 
@@ -49,7 +49,7 @@ class GoogleClient:
 
         # (Url, State ID)
         return self.client.authorization_url(
-            access_type="offline", prompt="consent", login_hint=email if email else None
+            access_type='offline', prompt='consent', login_hint=email if email else None
         )
 
     def get_credentials(self, code: str):
@@ -60,11 +60,11 @@ class GoogleClient:
             self.client.fetch_token(code=code)
             return self.client.credentials
         except Warning as e:
-            logging.error(f"[google_client.get_credentials] Google Warning: {str(e)}")
+            logging.error(f'[google_client.get_credentials] Google Warning: {str(e)}')
             # This usually is the "Scope has changed" error.
             raise GoogleScopeChanged()
         except ValueError as e:
-            logging.error(f"[google_client.get_credentials] Value error while fetching credentials {str(e)}")
+            logging.error(f'[google_client.get_credentials] Value error while fetching credentials {str(e)}')
             raise GoogleInvalidCredentials()
 
     def get_profile(self, token):
@@ -82,7 +82,7 @@ class GoogleClient:
         Ref: https://developers.google.com/calendar/api/v3/reference/calendarList/list"""
         response = {}
         items = []
-        with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             request = service.calendarList().list(minAccessRole='writer')
             while request is not None:
                 try:
@@ -90,7 +90,7 @@ class GoogleClient:
 
                     items += response.get('items', [])
                 except HttpError as e:
-                    logging.warning(f"[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}")
+                    logging.warning(f'[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}')
 
                 request = service.calendarList().list_next(request, response)
 
@@ -116,16 +116,17 @@ class GoogleClient:
 
         # Explicitly ignore workingLocation events
         # See: https://developers.google.com/calendar/api/v3/reference/events#eventType
-        event_types = [
-            'default',
-            'focusTime',
-            'outOfOffice'
-        ]
+        event_types = ['default', 'focusTime', 'outOfOffice']
 
-        with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             request = service.events().list(
-                calendarId=calendar_id, timeMin=time_min, timeMax=time_max, singleEvents=True, orderBy="startTime",
-                eventTypes=event_types, fields=fields
+                calendarId=calendar_id,
+                timeMin=time_min,
+                timeMax=time_max,
+                singleEvents=True,
+                orderBy='startTime',
+                eventTypes=event_types,
+                fields=fields,
             )
             while request is not None:
                 try:
@@ -133,7 +134,7 @@ class GoogleClient:
 
                     items += response.get('items', [])
                 except HttpError as e:
-                    logging.warning(f"[google_client.list_events] Request Error: {e.status_code}/{e.error_details}")
+                    logging.warning(f'[google_client.list_events] Request Error: {e.status_code}/{e.error_details}')
 
                 request = service.events().list_next(request, response)
 
@@ -141,11 +142,11 @@ class GoogleClient:
 
     def create_event(self, calendar_id, body, token):
         response = None
-        with build("calendar", "v3", credentials=token, cache_discovery=False) as service:
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
                 response = service.events().import_(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
-                logging.warning(f"[google_client.create_event] Request Error: {e.status_code}/{e.error_details}")
+                logging.warning(f'[google_client.create_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotCreatedException()
 
         return response
@@ -159,25 +160,22 @@ class GoogleClient:
         error_occurred = False
         for calendar in calendars:
             cal = CalendarConnection(
-                title=calendar.get("summary"),
-                color=calendar.get("backgroundColor"),
-                user=calendar.get("id"),
-                password="",
-                url=calendar.get("id"),
+                title=calendar.get('summary'),
+                color=calendar.get('backgroundColor'),
+                user=calendar.get('id'),
+                password='',
+                url=calendar.get('id'),
                 provider=CalendarProvider.google,
             )
 
             # add calendar
             try:
                 repo.calendar.update_or_create(
-                    db=db,
-                    calendar=cal,
-                    calendar_url=calendar.get("id"),
-                    subscriber_id=subscriber_id
+                    db=db, calendar=cal, calendar_url=calendar.get('id'), subscriber_id=subscriber_id
                 )
             except Exception as err:
                 logging.warning(
-                    f"[google_client.sync_calendars] Error occurred while creating calendar. Error: {str(err)}"
+                    f'[google_client.sync_calendars] Error occurred while creating calendar. Error: {str(err)}'
                 )
                 error_occurred = True
         return error_occurred

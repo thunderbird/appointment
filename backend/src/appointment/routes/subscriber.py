@@ -1,5 +1,3 @@
-import time
-
 from fastapi import APIRouter, Depends
 
 from sqlalchemy.orm import Session
@@ -21,8 +19,10 @@ def get_all_subscriber(db: Session = Depends(get_db), _: Subscriber = Depends(ge
     return response
 
 
-@router.put("/disable/{email}")
-def disable_subscriber(email: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)):
+@router.put('/disable/{email}')
+def disable_subscriber(
+    email: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)
+):
     """endpoint to mark a subscriber deleted by email, needs admin permissions"""
     subscriber_to_delete = repo.subscriber.get_by_email(db, email)
     if not subscriber_to_delete:
@@ -36,8 +36,8 @@ def disable_subscriber(email: str, db: Session = Depends(get_db), subscriber: Su
     return repo.subscriber.disable(db, subscriber_to_delete)
 
 
-@router.put("/enable/{email}")
-def disable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
+@router.put('/enable/{email}')
+def enable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to enable a subscriber by email, needs admin permissions"""
     subscriber_to_enable = repo.subscriber.get_by_email(db, email)
     if not subscriber_to_enable:

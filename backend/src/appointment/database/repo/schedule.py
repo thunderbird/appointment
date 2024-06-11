@@ -1,6 +1,6 @@
 """Module: repo.schedule
 
-Repository providing CRUD functions for schedule database models. 
+Repository providing CRUD functions for schedule database models.
 """
 import uuid
 

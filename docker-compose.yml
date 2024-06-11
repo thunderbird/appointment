@@ -7,6 +7,7 @@ services:
     ports:
       - 5173:5173
     volumes:
+      - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
