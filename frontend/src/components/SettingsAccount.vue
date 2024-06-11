@@ -58,7 +58,7 @@
               <icon-external-link class="size-5"/>
             </a>
           </div>
-          <text-button :label="t('label.copyLink')" :copy="user.myLink"/>
+          <text-button :tooltip="t('label.copyLink')" :copy="user.myLink"/>
         </div>
       </label>
       <div class="mt-6 flex gap-4 self-end">

@@ -6,6 +6,10 @@
       hover:shadow-md dark:text-gray-400 dark:hover:bg-gray-800
     "
     @click.stop="copy ? copyToClipboard() : null"
+    @mouseover="hover = true"
+    @mouseout="hover = false"
+    @focusin="hover = true"
+    @focusout="hover = false"
   >
     <icon-copy
       v-if="copy && !copied"
@@ -18,6 +22,9 @@
     {{ label }}
     <transition>
       <tool-tip v-show="copied" :content="t('info.copiedToClipboard')" />
+    </transition>
+    <transition>
+      <tool-tip class="w-24" v-show="hover && tooltip && !copied" :content="tooltip" />
     </transition>
   </button>
 </template>
@@ -36,11 +43,13 @@ const { t } = useI18n();
 // component properties
 const props = defineProps({
   label: String, // button text
+  tooltip: String, // optional tooltip
   copy: String, // text to copy to clipboard
 });
 
 // state for copy click
 const copied = ref(false);
+const hover = ref(false);
 
 // copy text to clipboard
 const copyToClipboard = async () => {
