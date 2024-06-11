@@ -1,5 +1,6 @@
 #!/bin/sh
 
+run-command main setup
 run-command main update-db
 
 # Start up fake mail server

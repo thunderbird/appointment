@@ -4,7 +4,7 @@ from contextlib import contextmanager
 import os
 
 import typer
-from ..commands import update_db, download_legal, create_invite_codes
+from ..commands import update_db, download_legal, create_invite_codes, setup
 
 router = typer.Typer()
 
@@ -39,3 +39,8 @@ def download_legal_docs():
 @router.command('create-invite-codes')
 def create_app_invite_codes(n: int):
     create_invite_codes.run(n)
+
+
+@router.command('setup')
+def setup_app():
+    setup.run()
