@@ -39,7 +39,7 @@
               @keyup.enter="sendInvite"
             />
           </label>
-          <primary-button :disabled="loading" @click="sendInvite">
+          <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
             <icon-send />
             {{ t('label.send') }}
           </primary-button>

@@ -1,5 +1,5 @@
 <template>
-<div class="flex flex-col items-center justify-center gap-4">
+  <div class="flex flex-col items-center justify-center gap-4">
     <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
       <div>
         <span class="font-bold">{{ paginatedDataList.length }}</span> {{ dataName }}
@@ -41,7 +41,7 @@
               </span>
               <span v-else-if="fieldData.type === tableDataType.code" class="flex items-center gap-4">
                 <code>{{ fieldData.value }}</code>
-                <text-button :copy="fieldData.value" />
+                <text-button class="btn-copy" :copy="fieldData.value" :title="t('label.copy')" />
               </span>
               <span v-else-if="fieldData.type === tableDataType.bool">
                 <span v-if="fieldData.value">Yes</span>
@@ -51,9 +51,27 @@
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
               </span>
               <span v-else-if="fieldData.type === tableDataType.button">
-                <primary-button v-if="fieldData.buttonType === tableDataButtonType.primary" :disabled="fieldData.disabled" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</primary-button>
-                <secondary-button v-else-if="fieldData.buttonType === tableDataButtonType.secondary" :disabled="fieldData.disabled" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</secondary-button>
-                <caution-button v-else-if="fieldData.buttonType === tableDataButtonType.caution" :disabled="fieldData.disabled" @click="emit('fieldClick', fieldKey, datum)">{{ fieldData.value }}</caution-button>
+                <primary-button
+                  v-if="fieldData.buttonType === tableDataButtonType.primary"
+                  :disabled="fieldData.disabled"
+                  @click="emit('fieldClick', fieldKey, datum)"
+                >
+                  {{ fieldData.value }}
+                </primary-button>
+                <secondary-button
+                  v-else-if="fieldData.buttonType === tableDataButtonType.secondary"
+                  :disabled="fieldData.disabled"
+                  @click="emit('fieldClick', fieldKey, datum)"
+                >
+                  {{ fieldData.value }}
+                </secondary-button>
+                <caution-button
+                  v-else-if="fieldData.buttonType === tableDataButtonType.caution"
+                  :disabled="fieldData.disabled"
+                  @click="emit('fieldClick', fieldKey, datum)"
+                >
+                  {{ fieldData.value }}
+                </caution-button>
               </span>
             </td>
           </tr>

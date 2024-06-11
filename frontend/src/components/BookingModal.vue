@@ -1,10 +1,13 @@
 <template>
   <div v-if="open">
-    <div class="fixed left-0 top-0 z-40 h-screen w-screen bg-gray-800/50" @click="emit('close')"></div>
+    <div
+      class="mdl-overlay-close fixed left-0 top-0 z-40 h-screen w-screen bg-gray-800/50"
+      @click="emit('close')"
+    ></div>
     <div
       class="position-center fixed z-50 w-full max-w-lg rounded-xl bg-white p-12 dark:bg-gray-700"
     >
-      <div class="absolute right-8 top-8 cursor-pointer" @click="emit('close')">
+      <div class="mdl-btn-close absolute right-8 top-8 cursor-pointer" @click="emit('close')" :title="t('label.close')">
         <icon-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400"/>
       </div>
       <div class="mb-4 text-center text-2xl font-semibold text-teal-500">
@@ -63,15 +66,19 @@
       </div>
       <div class="mx-auto flex w-4/5 items-stretch justify-center gap-8">
         <secondary-button
+          class="mdl-btn-close"
           :label="t('label.close')"
           @click="emit('close')"
+          :title="t('label.close')"
         />
         <primary-button
           v-if="!isFinished"
+          class="btn-book"
           :label="t('label.bookEvent')"
           :waiting="isLoading"
           :disabled="!validAttendee || isLoading"
           @click="bookIt"
+          :title="t('label.bookEvent')"
         />
       </div>
     </div>

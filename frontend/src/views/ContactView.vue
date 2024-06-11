@@ -37,7 +37,7 @@
         />
       </label>
     </form>
-    <primary-button @click="send">
+    <primary-button class="btn-send" @click="send" :title="t('label.send')">
       <icon-send />
       {{ t('label.send') }}
     </primary-button>

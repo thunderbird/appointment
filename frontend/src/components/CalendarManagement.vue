@@ -3,9 +3,10 @@
     <div class="text-xl">{{ title }}</div>
     <div class="mx-auto mr-0 inline-flex" v-if="type === calendarManagementType.connect">
       <secondary-button
-        class="text-sm !text-teal-500 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
+        class="btn-sync text-sm !text-teal-500 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
         :disabled="loading"
         @click="emit('sync')"
+        :title="t('label.sync')"
       >
         <span class="mr-2 inline-block">
           {{ t('label.syncCalendars') }}
@@ -23,34 +24,37 @@
       {{ cal.title }}
       </span>
       <button
-          v-if="type === calendarManagementType.connect"
-          @click="emit('modify', cal.id)"
-          :disabled="loading"
-          class="
-            ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1
-            text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
-          "
+        v-if="type === calendarManagementType.connect"
+        @click="emit('modify', cal.id)"
+        :disabled="loading"
+        class="
+          btn-conntect ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1
+          text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
+        "
+        :title="t('label.connect')"
       >
         <icon-arrow-right class="size-3 stroke-3"/>
         {{ t('label.connectCalendar') }}
       </button>
       <button
-          v-if="type === calendarManagementType.edit"
-          @click="emit('modify', cal.id)"
-          :disabled="loading"
-          class="
-            ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1
-            text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
-          "
+        v-if="type === calendarManagementType.edit"
+        @click="emit('modify', cal.id)"
+        :disabled="loading"
+        class="
+          btn-edit ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1
+          text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
+        "
+        :title="t('label.edit')"
       >
         <icon-pencil class="size-3 stroke-3"/>
         {{ t('label.editCalendar') }}
       </button>
       <button
         v-if="!cal.connected"
-        class="bg-transparent p-0.5 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
+        class="btn-remove bg-transparent p-0.5 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
         :disabled="loading"
         @click="emit('remove', cal.id)"
+        :title="t('label.remove')"
       >
         <icon-x class="size-5 stroke-red-500 stroke-2"/>
       </button>

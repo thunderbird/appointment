@@ -38,7 +38,12 @@
               @keyup.enter="generateInvites"
             />
           </label>
-          <primary-button :disabled="loading" @click="generateInvites">
+          <primary-button
+            class="btn-generate"
+            :disabled="loading"
+            @click="generateInvites"
+            :title="t('label.generate')"
+          >
             <icon-send/>
             {{ t('label.generate') }}
           </primary-button>

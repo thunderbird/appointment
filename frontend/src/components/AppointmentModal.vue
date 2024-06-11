@@ -1,15 +1,20 @@
 <template>
   <transition>
-    <div v-show="open" class="fixed left-0 top-0 z-40 h-screen w-screen bg-gray-800/50" @click="emit('close')"></div>
+    <div
+      v-show="open"
+      class="mdl-overlay-close fixed left-0 top-0 z-40 h-screen w-screen bg-gray-800/50"
+      @click="emit('close')"
+    ></div>
   </transition>
   <transition>
     <div
       v-if="open"
-      class=" position-center fixed z-50 w-full max-w-4xl rounded-xl bg-white
+      class="
+        position-center fixed z-50 w-full max-w-4xl rounded-xl bg-white
         p-12 text-gray-500 dark:bg-gray-700 dark:text-gray-300
       "
     >
-      <div class="absolute right-8 top-8 cursor-pointer" @click="emit('close')">
+      <div class="mdl-btn-close absolute right-8 top-8 cursor-pointer" @click="emit('close')" :title="t('label.close')">
         <icon-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400"/>
       </div>
       <div class="mb-8 truncate text-xl">{{ appointment.title }}</div>
@@ -57,7 +62,12 @@
             {{ t('label.videoLink') }}
           </div>
           <div class="pl-6">
-            <a v-if="appointment.location_url" :href="appointment.location_url" class="text-teal-500 underline underline-offset-2" target="_blank">
+            <a
+              v-if="appointment.location_url"
+              :href="appointment.location_url"
+              class="text-teal-500 underline underline-offset-2"
+              target="_blank"
+            >
               {{ appointment.location_url }}
             </a>
             <p v-else>
@@ -103,8 +113,12 @@
       <div class="p-6" v-if="appointment?.slots[0].booking_status === bookingStatus.requested">
         <p>{{ attendeesSlots.map((s) => s.attendee.email).join(', ') }} have requested a booking at this time.</p>
         <div class="mt-4 flex justify-center gap-4">
-          <primary-button @click="answer(true)">Confirm Booking</primary-button>
-          <caution-button @click="answer(false)">Deny Booking</caution-button>
+          <primary-button class="btn-confirm" @click="answer(true)" :title="t('label.confirm')">
+            {{ t('label.confirmBooking') }}
+          </primary-button>
+          <caution-button class="btn-deny" @click="answer(false)" :title="t('label.deny')">
+            {{ t('label.denyBooking') }}
+          </caution-button>
         </div>
       </div>
       <div class="p-6" v-if="appointment?.slots[0].booking_status === bookingStatus.booked">

@@ -34,7 +34,7 @@
       >
         <div
           @click="state = scheduleCreationState.availability"
-          class="flex cursor-pointer items-center justify-between"
+          class="btn-step-1 flex cursor-pointer items-center justify-between"
         >
           <div class="flex flex-col gap-1">
             <h2>
@@ -106,7 +106,7 @@
       >
         <div
           @click="state = scheduleCreationState.settings"
-          class="flex cursor-pointer items-center justify-between"
+          class="btn-step-2 flex cursor-pointer items-center justify-between"
         >
           <div class="flex flex-col gap-1">
             <h2>
@@ -208,7 +208,7 @@
       <!-- step 3 -->
       <div
         @click="state = scheduleCreationState.details"
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
         :class="{'bg-neutral-50': activeStep3}"
         id="schedule-details"
       >
@@ -299,10 +299,11 @@
         <p>{{ t('text.scheduleSettings.create') }}</p>
         <primary-button
           :label="t('label.save')"
+          class="btn-save w-1/2"
           @click="saveSchedule(!existing)"
           :waiting="savingInProgress"
           :disabled="!scheduleInput.active"
-          class="w-1/2"
+          :title="t('label.save')"
         />
       </div>
     </snackish-bar>
@@ -317,16 +318,18 @@
       <div class="flex gap-4">
           <secondary-button
             :label="t('label.revert')"
+            class="btn-revert w-1/2"
             @click="resetSchedule()"
             :disabled="!scheduleInput.active"
-            class="w-1/2"
+            :title="t('label.revert')"
           />
           <primary-button
             :label="t('label.save')"
+            class="btn-save w-1/2"
             @click="saveSchedule(!existing)"
             :waiting="savingInProgress"
             :disabled="!scheduleInput.active"
-            class="w-1/2"
+            :title="t('label.save')"
           />
         </div>
         </div>
@@ -336,7 +339,9 @@
         <primary-button
           v-if="user.data.signedUrl && existing"
           :label="t('label.shareMyLink')"
+          class="btn-copy"
           :copy="user.data.signedUrl"
+          :title="t('label.copy')"
         />
       </div>
     </div>
