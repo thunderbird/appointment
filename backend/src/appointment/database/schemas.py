@@ -2,6 +2,7 @@
 
 Definitions of valid data shapes for database and query models.
 """
+
 import json
 from uuid import UUID
 from datetime import datetime, date, time
@@ -118,6 +119,7 @@ class Appointment(AppointmentFull):
 
 class AppointmentWithCalendarOut(Appointment):
     """For /me/appointments"""
+
     calendar_title: str
     calendar_color: str
 
@@ -125,7 +127,7 @@ class AppointmentWithCalendarOut(Appointment):
 class AppointmentOut(AppointmentBase):
     id: int | None = None
     owner_name: str | None = None
-    slots: list[SlotBase|SlotOut] = []
+    slots: list[SlotBase | SlotOut] = []
     slot_duration: int
 
 
@@ -170,7 +172,7 @@ class ScheduleBase(BaseModel):
 
     class Config:
         json_encoders = {
-            time: lambda t: t.strftime("%H:%M"),
+            time: lambda t: t.strftime('%H:%M'),
         }
 
 
@@ -187,6 +189,7 @@ class Schedule(ScheduleBase):
 
 class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
+
     slot_duration: Annotated[int, Field(ge=10, default=30)]
 
 
@@ -234,7 +237,6 @@ class Invite(BaseModel):
     status: InviteStatus = InviteStatus.active
     time_created: datetime | None = None
     time_updated: datetime | None = None
-
 
 
 """ SUBSCRIBER model schemas
@@ -316,6 +318,7 @@ class Event(BaseModel):
 
     """Ideally this would just be a mixin, but I'm having issues figuring out a good
     static constructor that will work for anything."""
+
     def model_dump_redis(self):
         """Dumps our event into an encrypted json blob for redis"""
         values_json = self.model_dump_json()
@@ -330,7 +333,7 @@ class Event(BaseModel):
         values = json.loads(values_json)
 
         return Event(**values)
-    
+
 
 class FileDownload(BaseModel):
     name: str
@@ -375,4 +378,4 @@ class TokenData(BaseModel):
 
 
 class SendInviteEmailIn(BaseModel):
-    email: str = Field(title="Email", min_length=1)
+    email: str = Field(title='Email', min_length=1)

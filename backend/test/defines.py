@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-DATEFMT = "%Y-%m-%d"
+DATEFMT = '%Y-%m-%d'
 
 now = datetime.today()
 DAY1 = now.strftime(DATEFMT)
@@ -10,7 +10,7 @@ DAY5 = (now + timedelta(days=4)).strftime(DATEFMT)
 DAY14 = (now + timedelta(days=13)).strftime(DATEFMT)
 
 # Standard headers to used for authentication requests
-auth_headers = {"authorization": "Bearer testtokenplsignore"}
+auth_headers = {'authorization': 'Bearer testtokenplsignore'}
 
 TEST_USER_ID = 1
 TEST_CALDAV_URL = 'https://caldav.example.org/'
@@ -27,6 +27,7 @@ FXA_CLIENT_PATCH = {
     'subscriber_avatar_url': 'https://www.example.org/cool_pic.jpg',
     'subscriber_display_name': 'test2',
 }
+
 
 def factory_has_value(val) -> bool:
     """For factories"""

@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from datetime import timedelta, datetime, UTC
 from secrets import token_urlsafe
 from typing import Annotated
@@ -37,21 +36,20 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=15)
-    to_encode.update({
-        "exp": expire,
-        "iat": int(datetime.now(UTC).timestamp())
-    })
+    to_encode.update({'exp': expire, 'iat': int(datetime.now(UTC).timestamp())})
     encoded_jwt = jwt.encode(to_encode, os.getenv('JWT_SECRET'), algorithm=os.getenv('JWT_ALGO'))
     return encoded_jwt
 
 
-@router.get("/fxa_login")
-def fxa_login(request: Request,
-              email: str,
-              timezone: str | None = None,
-              invite_code: str | None = None,
-              db: Session = Depends(get_db),
-              fxa_client: FxaClient = Depends(get_fxa_client)):
+@router.get('/fxa_login')
+def fxa_login(
+    request: Request,
+    email: str,
+    timezone: str | None = None,
+    invite_code: str | None = None,
+    db: Session = Depends(get_db),
+    fxa_client: FxaClient = Depends(get_fxa_client),
+):
     """Request an authorization url from fxa"""
     if os.getenv('AUTH_SCHEME') != 'fxa':
         raise HTTPException(status_code=405)
@@ -68,18 +66,16 @@ def fxa_login(request: Request,
     request.session['fxa_user_timezone'] = timezone
     request.session['fxa_user_invite_code'] = invite_code
 
-    return {
-        'url': url
-    }
+    return {'url': url}
 
 
-@router.get("/fxa")
+@router.get('/fxa')
 def fxa_callback(
     request: Request,
     code: str,
     state: str,
     db: Session = Depends(get_db),
-    fxa_client: FxaClient = Depends(get_fxa_client)
+    fxa_client: FxaClient = Depends(get_fxa_client),
 ):
     """Auth callback from fxa. It's a bit of a journey:
     - We first ensure the state has not changed during the authentication process.
@@ -95,9 +91,9 @@ def fxa_callback(
         raise HTTPException(status_code=405)
 
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
-        raise HTTPException(400, "Invalid state.")
+        raise HTTPException(400, 'Invalid state.')
     if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
-        raise HTTPException(400, "Email could not be retrieved.")
+        raise HTTPException(400, 'Email could not be retrieved.')
 
     email = request.session['fxa_user_email']
     # We only use timezone during subscriber creation, or if their timezone is None
@@ -139,11 +135,14 @@ def fxa_callback(
             if not repo.invite.code_is_available(db, invite_code):
                 raise HTTPException(403, l10n('invite-code-not-valid'))
 
-        subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
-            email=email,
-            username=email,
-            timezone=timezone,
-        ))
+        subscriber = repo.subscriber.create(
+            db,
+            schemas.SubscriberBase(
+                email=email,
+                username=email,
+                timezone=timezone,
+            ),
+        )
 
         if not is_in_allow_list:
             # Use the invite code after we've created the new subscriber
@@ -168,7 +167,7 @@ def fxa_callback(
     if any([profile['uid'] != ec.type_id for ec in fxa_connections]):
         # Ensure sentry captures the error too!
         if os.getenv('SENTRY_DSN') != '':
-            e = Exception("Invalid Credentials, incoming profile uid does not match existing profile uid")
+            e = Exception('Invalid Credentials, incoming profile uid does not match existing profile uid')
             capture_exception(e)
 
         raise HTTPException(403, l10n('invalid-credentials'))
@@ -178,15 +177,15 @@ def fxa_callback(
         type=ExternalConnectionType.fxa,
         type_id=profile['uid'],
         owner_id=subscriber.id,
-        token=json.dumps(creds)
+        token=json.dumps(creds),
     )
 
     if not fxa_subscriber:
         repo.external_connection.create(db, external_connection_schema)
     else:
-        repo.external_connection.update_token(db, json.dumps(creds), subscriber.id,
-                                                         external_connection_schema.type,
-                                                         external_connection_schema.type_id)
+        repo.external_connection.update_token(
+            db, json.dumps(creds), subscriber.id, external_connection_schema.type, external_connection_schema.type_id
+        )
 
     # Update profile with fxa info
     data = schemas.SubscriberIn(
@@ -194,7 +193,7 @@ def fxa_callback(
         name=subscriber.name,
         username=subscriber.username,
         email=profile['email'],
-        timezone=timezone if subscriber.timezone is None else None
+        timezone=timezone if subscriber.timezone is None else None,
     )
 
     # If they're a new subscriber we should fill in some defaults!
@@ -206,14 +205,12 @@ def fxa_callback(
 
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
-    access_token = create_access_token(
-        data={"sub": f"uid-{subscriber.id}"}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'}, expires_delta=access_token_expires)
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{access_token}")
 
 
-@router.post("/token")
+@router.post('/token')
 def token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
@@ -243,17 +240,18 @@ def token(
 
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
-    access_token = create_access_token(
-        data={"sub": f"uid-{subscriber.id}"}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'}, expires_delta=access_token_expires)
 
     """Log a user in with the passed username and password information"""
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {'access_token': access_token, 'token_type': 'bearer'}
 
 
 @router.get('/logout')
-def logout(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber),
-           fxa_client: FxaClient = Depends(get_fxa_client)):
+def logout(
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+    fxa_client: FxaClient = Depends(get_fxa_client),
+):
     """Logout a given subscriber session"""
 
     if os.getenv('AUTH_SCHEME') == 'fxa':
@@ -265,7 +263,7 @@ def logout(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_s
     return True
 
 
-@router.get("/me", response_model=schemas.SubscriberBase)
+@router.get('/me', response_model=schemas.SubscriberBase)
 def me(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
@@ -277,11 +275,11 @@ def me(
         name=subscriber.name,
         level=subscriber.level,
         timezone=subscriber.timezone,
-        avatar_url=subscriber.avatar_url
+        avatar_url=subscriber.avatar_url,
     )
 
 
-@router.post("/permission-check")
+@router.post('/permission-check')
 def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     """Checks if they have admin permissions"""
     # This should already be covered, but just in case!

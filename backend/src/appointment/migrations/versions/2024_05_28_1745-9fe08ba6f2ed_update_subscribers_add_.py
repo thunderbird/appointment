@@ -5,6 +5,7 @@ Revises: 89e1197d980d
 Create Date: 2024-05-28 17:45:48.192560
 
 """
+
 import os
 from alembic import op
 import sqlalchemy as sa
@@ -13,7 +14,7 @@ from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 
 def secret():
-    return os.getenv("DB_SECRET")
+    return os.getenv('DB_SECRET')
 
 
 # revision identifiers, used by Alembic.
@@ -24,7 +25,15 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('secondary_email', StringEncryptedType(sa.String, secret, AesEngine, "pkcs5", length=255), nullable=True, index=True))
+    op.add_column(
+        'subscribers',
+        sa.Column(
+            'secondary_email',
+            StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=255),
+            nullable=True,
+            index=True,
+        ),
+    )
 
 
 def downgrade() -> None:

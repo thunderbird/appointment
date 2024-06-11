@@ -1,7 +1,4 @@
-import time
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, BackgroundTasks, Request, Body
+from fastapi import APIRouter, Depends, BackgroundTasks
 
 from sqlalchemy.orm import Session
 
@@ -24,13 +21,13 @@ def get_all_invites(db: Session = Depends(get_db), _admin: Subscriber = Depends(
     return db.query(models.Invite).all()
 
 
-@router.post("/generate/{n}", response_model=list[schemas.Invite])
+@router.post('/generate/{n}', response_model=list[schemas.Invite])
 def generate_invite_codes(n: int, db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to generate n invite codes, needs admin permissions"""
     return repo.invite.generate_codes(db, n)
 
 
-@router.put("/revoke/{code}")
+@router.put('/revoke/{code}')
 def revoke_invite_code(code: str, db: Session = Depends(get_db), admin: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to revoke a given invite code and mark in unavailable, needs admin permissions"""
     if not repo.invite.code_exists(db, code):
@@ -40,13 +37,13 @@ def revoke_invite_code(code: str, db: Session = Depends(get_db), admin: Subscrib
     return repo.invite.revoke_code(db, code)
 
 
-@router.post("/send", response_model=schemas.Invite)
+@router.post('/send', response_model=schemas.Invite)
 def send_invite_email(
     data: SendInviteEmailIn,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     # Note admin must be here to for permission reasons
-    _admin: Subscriber = Depends(get_admin_subscriber)
+    _admin: Subscriber = Depends(get_admin_subscriber),
 ):
     """With a given email address, generate a subscriber and email them, welcoming them to Thunderbird Appointment."""
     email = data.email
@@ -57,10 +54,13 @@ def send_invite_email(
         raise CreateSubscriberAlreadyExistsException()
 
     invite_code = repo.invite.generate_codes(db, 1)[0]
-    subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
-        email=email,
-        username=email,
-    ))
+    subscriber = repo.subscriber.create(
+        db,
+        schemas.SubscriberBase(
+            email=email,
+            username=email,
+        ),
+    )
 
     if not subscriber:
         raise CreateSubscriberFailedException()

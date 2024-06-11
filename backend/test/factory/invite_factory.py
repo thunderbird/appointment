@@ -10,7 +10,9 @@ def make_invite(with_db):
 
     def _make_invite(subscriber_id=None, code=FAKER_RANDOM_VALUE, status=models.InviteStatus.active) -> models.Invite:
         with with_db() as db:
-            invite = models.Invite(subscriber_id=subscriber_id, status=status, code=code if factory_has_value(code) else fake.uuid4())
+            invite = models.Invite(
+                subscriber_id=subscriber_id, status=status, code=code if factory_has_value(code) else fake.uuid4()
+            )
             db.add(invite)
             db.commit()
             db.refresh(invite)

@@ -17,7 +17,7 @@ from ..l10n import l10n
 router = APIRouter()
 
 
-@router.get("/auth")
+@router.get('/auth')
 def zoom_auth(
     request: Request,
     subscriber: Subscriber = Depends(get_subscriber),
@@ -34,7 +34,7 @@ def zoom_auth(
     return {'url': url}
 
 
-@router.get("/callback")
+@router.get('/callback')
 def zoom_callback(
     request: Request,
     code: str,
@@ -53,7 +53,8 @@ def zoom_callback(
     request.session.pop('zoom_state')
     request.session.pop('zoom_user_id')
 
-    # Generate the zoom client instance based on our subscriber (this can't be set as a dep injection since subscriber is based on session.
+    # Generate the zoom client instance based on our subscriber
+    # This can't be set as a dep injection since subscriber is based on session.
     zoom_client: ZoomClient = get_zoom_client(subscriber)
 
     creds = zoom_client.get_credentials(code)
@@ -66,16 +67,23 @@ def zoom_callback(
         type=ExternalConnectionType.zoom,
         type_id=zoom_user_info['id'],
         owner_id=subscriber.id,
-        token=json.dumps(creds)
+        token=json.dumps(creds),
     )
 
-    if len(repo.external_connection.get_by_type(db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id)) == 0:
+    if (
+        len(
+            repo.external_connection.get_by_type(
+                db, subscriber.id, external_connection_schema.type, external_connection_schema.type_id
+            )
+        )
+        == 0
+    ):
         repo.external_connection.create(db, external_connection_schema)
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/account")
 
 
-@router.post("/disconnect")
+@router.post('/disconnect')
 def disconnect_account(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),

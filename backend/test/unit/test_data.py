@@ -8,7 +8,7 @@ class TestData:
         """Make sure our model to csv buffer is working, scrubbers and all!"""
         ph = PasswordHasher()
 
-        password = "cool beans"
+        password = 'cool beans'
         subscriber = make_pro_subscriber(password=password)
 
         buffer = model_to_csv_buffer([subscriber])
@@ -23,7 +23,15 @@ class TestData:
         assert subscriber.email in csv_data
         assert subscriber.username in csv_data
 
-    def test_delete_account(self, with_db, make_pro_subscriber, make_appointment, make_schedule, make_caldav_calendar, make_external_connections):
+    def test_delete_account(
+        self,
+        with_db,
+        make_pro_subscriber,
+        make_appointment,
+        make_schedule,
+        make_caldav_calendar,
+        make_external_connections,
+    ):
         """Test that our delete account functionality actually deletes everything"""
         subscriber = make_pro_subscriber()
         calendar = make_caldav_calendar(subscriber_id=subscriber.id)
@@ -43,4 +51,4 @@ class TestData:
 
         for model in models_to_check:
             check = db.get(model.__class__, model.id)
-            assert check is None, f"Ensuring {model.__class__} is None"
+            assert check is None, f'Ensuring {model.__class__} is None'

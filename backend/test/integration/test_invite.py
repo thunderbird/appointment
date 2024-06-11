@@ -10,10 +10,8 @@ class TestInvite:
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
 
         response = with_client.post(
-            "/invite/send",
-            json={
-                "email": "beatrice@ismycat.meow"
-            },
+            '/invite/send',
+            json={'email': 'beatrice@ismycat.meow'},
             headers=auth_headers,
         )
         assert response.status_code == 401, response.text
@@ -24,10 +22,8 @@ class TestInvite:
         os.environ['APP_ADMIN_ALLOW_LIST'] = ''
 
         response = with_client.post(
-            "/invite/send",
-            json={
-                "email": "beatrice@ismycat.meow"
-            },
+            '/invite/send',
+            json={'email': 'beatrice@ismycat.meow'},
             headers=auth_headers,
         )
         assert response.status_code == 401, response.text
@@ -44,10 +40,8 @@ class TestInvite:
             assert subscriber is None
 
         response = with_client.post(
-            "/invite/send",
-            json={
-                'email': invite_email
-            },
+            '/invite/send',
+            json={'email': invite_email},
             headers=auth_headers,
         )
         assert response.status_code == 200, response.text

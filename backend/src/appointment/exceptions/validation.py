@@ -6,15 +6,20 @@ from ..l10n import l10n
 class APIException(HTTPException):
     """Base exception for all custom API exceptions
     Custom messages are defined in a function, because l10n needs context set before use."""
+
     id_code = 'UNKNOWN'
     status_code = 500
 
     def __init__(self, **kwargs):
-        super().__init__(status_code=self.status_code, detail={
-            'id': self.id_code,
-            'message': self.get_msg(),
-            'status': self.status_code,
-        }, **kwargs)
+        super().__init__(
+            status_code=self.status_code,
+            detail={
+                'id': self.id_code,
+                'message': self.get_msg(),
+                'status': self.status_code,
+            },
+            **kwargs,
+        )
 
     def get_msg(self):
         return l10n('unknown-error')
@@ -22,6 +27,7 @@ class APIException(HTTPException):
 
 class InvalidPermissionLevelException(APIException):
     """Raise when the subscribers permission level is too low for the action"""
+
     id_code = 'INVALID_PERMISSION_LEVEL'
     status_code = 401
 
@@ -31,6 +37,7 @@ class InvalidPermissionLevelException(APIException):
 
 class InvalidTokenException(APIException):
     """Raise when the subscriber could not be parsed from the auth token"""
+
     id_code = 'INVALID_TOKEN'
     status_code = 401
 
@@ -40,6 +47,7 @@ class InvalidTokenException(APIException):
 
 class InvalidLinkException(APIException):
     """Raise when subscriber.verify_link fails"""
+
     id_code = 'INVALID_LINK'
     status_code = 400
 
@@ -49,14 +57,17 @@ class InvalidLinkException(APIException):
 
 class SubscriberNotFoundException(APIException):
     """Raise when the subscriber is not found during route validation"""
+
     id_code = 'SUBSCRIBER_NOT_FOUND'
     status_code = 404
 
     def get_msg(self):
         return l10n('subscriber-not-found')
 
+
 class CalendarNotFoundException(APIException):
     """Raise when the calendar is not found during route validation"""
+
     id_code = 'CALENDAR_NOT_FOUND'
     status_code = 404
 
@@ -66,6 +77,7 @@ class CalendarNotFoundException(APIException):
 
 class CalendarNotAuthorizedException(APIException):
     """Raise when the calendar is owned by someone else during route validation"""
+
     id_code = 'CALENDAR_NOT_AUTH'
     status_code = 403
 
@@ -75,6 +87,7 @@ class CalendarNotAuthorizedException(APIException):
 
 class CalendarNotConnectedException(APIException):
     """Raise when the calendar is owned by someone else during route validation"""
+
     id_code = 'CALENDAR_NOT_CONNECTED'
     status_code = 403
 
@@ -84,6 +97,7 @@ class CalendarNotConnectedException(APIException):
 
 class AppointmentNotFoundException(APIException):
     """Raise when the appointment is not found during route validation"""
+
     id_code = 'APPOINTMENT_NOT_FOUND'
     status_code = 404
 
@@ -93,6 +107,7 @@ class AppointmentNotFoundException(APIException):
 
 class AppointmentNotAuthorizedException(APIException):
     """Raise when the appointment is owned by someone else during route validation"""
+
     id_code = 'APPOINTMENT_NOT_AUTH'
     status_code = 403
 
@@ -102,6 +117,7 @@ class AppointmentNotAuthorizedException(APIException):
 
 class ScheduleNotFoundException(APIException):
     """Raise when the schedule is not found during route validation"""
+
     id_code = 'SCHEDULE_NOT_FOUND'
     status_code = 404
 
@@ -111,15 +127,17 @@ class ScheduleNotFoundException(APIException):
 
 class ScheduleNotActive(APIException):
     """Raise when the schedule is not active"""
+
     id_code = 'SCHEDULE_NOT_ACTIVE'
     status_code = 404
 
     def get_msg(self):
         return l10n('schedule-not-active')
-    
+
 
 class ScheduleNotAuthorizedException(APIException):
     """Raise when the schedule is owned by someone else during route validation"""
+
     id_code = 'SCHEDULE_NOT_AUTH'
     status_code = 403
 
@@ -129,6 +147,7 @@ class ScheduleNotAuthorizedException(APIException):
 
 class SlotNotFoundException(APIException):
     """Raise when a timeslot is not found during route validation"""
+
     id_code = 'SLOT_NOT_FOUND'
     status_code = 404
 
@@ -138,6 +157,7 @@ class SlotNotFoundException(APIException):
 
 class SlotAlreadyTakenException(APIException):
     """Raise when a timeslot is already taken during route validation"""
+
     id_code = 'SLOT_ALREADY_TAKEN'
     status_code = 403
 
@@ -147,6 +167,7 @@ class SlotAlreadyTakenException(APIException):
 
 class SlotNotAuthorizedException(APIException):
     """Raise when a slot is owned by someone else during route validation"""
+
     id_code = 'SLOT_NOT_AUTH'
     status_code = 403
 
@@ -156,6 +177,7 @@ class SlotNotAuthorizedException(APIException):
 
 class ZoomNotConnectedException(APIException):
     """Raise if the user requires a zoom connection during route validation"""
+
     id_code = 'ZOOM_NOT_CONNECTED'
     status_code = 400
 
@@ -181,6 +203,7 @@ class EventCouldNotBeAccepted(APIException):
 
 class InviteCodeNotFoundException(APIException):
     """Raise when the invite code is not found during route validation"""
+
     id_code = 'INVITE_CODE_NOT_FOUND'
     status_code = 404
 
@@ -190,6 +213,7 @@ class InviteCodeNotFoundException(APIException):
 
 class InviteCodeNotAvailableException(APIException):
     """Raise when the invite code is not available anymore during route validation"""
+
     id_code = 'INVITE_CODE_NOT_AVAILABLE'
     status_code = 403
 
@@ -199,6 +223,7 @@ class InviteCodeNotAvailableException(APIException):
 
 class CreateSubscriberFailedException(APIException):
     """Raise when a subscriber failed to be created"""
+
     id_code = 'CREATE_SUBSCRIBER_FAILED'
     status_code = 400
 
@@ -208,6 +233,7 @@ class CreateSubscriberFailedException(APIException):
 
 class CreateSubscriberAlreadyExistsException(APIException):
     """Raise when a subscriber failed to be created"""
+
     id_code = 'CREATE_SUBSCRIBER_ALREADY_EXISTS'
     status_code = 400
 
@@ -217,6 +243,7 @@ class CreateSubscriberAlreadyExistsException(APIException):
 
 class SubscriberAlreadyDeletedException(APIException):
     """Raise when a subscriber failed to be marked deleted because they already are"""
+
     id_code = 'SUBSCRIBER_ALREADY_DELETED'
     status_code = 400
 
@@ -226,6 +253,7 @@ class SubscriberAlreadyDeletedException(APIException):
 
 class SubscriberAlreadyEnabledException(APIException):
     """Raise when a subscriber failed to be marked undeleted because they already are"""
+
     id_code = 'SUBSCRIBER_ALREADY_ENABLED'
     status_code = 400
 
@@ -235,6 +263,7 @@ class SubscriberAlreadyEnabledException(APIException):
 
 class SubscriberSelfDeleteException(APIException):
     """Raise when a subscriber tries to delete themselves where not allowed"""
+
     id_code = 'SUBSCRIBER_SELF_DELETE'
     status_code = 403
 

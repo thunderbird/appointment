@@ -15,7 +15,6 @@ repository = "https://github.com/thunderbird/appointment.git"
 [project.optional-dependencies]
 cli = [
     "ruff",
-    "black"
 ]
 db = [
     "mysqlclient==2.1.1",
@@ -35,13 +34,7 @@ dependencies = { file = ["requirements.txt"] }
 
 # Ruff
 [tool.ruff]
-# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
-select = ["E", "F"]
-ignore = []
-
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
-unfixable = []
+line-length = 120
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -67,21 +60,31 @@ exclude = [
     "venv",
 ]
 
-# Same as Black.
-line-length = 120
+# Always generate Python 3.11-compatible code.
+target-version = "py311"
+
+[tool.ruff.format]
+# Prefer single quotes over double quotes.
+quote-style = "single"
+
+[tool.ruff.lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+ignore = []
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-# Assume Python 3.10.
-target-version = "py310"
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
-
-[tool.black]
-line-length = 120
 
 [tool.pytest.ini_options]
 pythonpath = "test"

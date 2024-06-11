@@ -110,18 +110,17 @@ Contributions are very welcome. Please lint/format code before creating PRs.
 
 ### Backend
 
-Backend is formatted using Ruff and Black.
+Backend is formatted using Ruff.
 
 ```bash
 pip install ruff
-pip install black
 ```
 
 Commands (from git root)
 
 ```bash
-ruff backend
-black backend
+ruff check backend
+ruff check backend --fix
 ```
 
 ### Frontend

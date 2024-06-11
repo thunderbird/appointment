@@ -16,6 +16,7 @@ class GoogleInvalidCredentials(Exception):
 
 class APIGoogleRefreshError(APIException):
     """Raise when you need to signal to the end-user that they need to re-connect to Google."""
+
     id_code = 'GOOGLE_REFRESH_ERROR'
     status_code = 401
 

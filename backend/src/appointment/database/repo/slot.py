@@ -1,10 +1,10 @@
 """Module: repo.slot
 
-Repository providing CRUD functions for slot database models. 
+Repository providing CRUD functions for slot database models.
 """
 
 from sqlalchemy.orm import Session
-from .. import models, schemas, repo
+from .. import models, schemas
 
 
 """ SLOT repository functions
@@ -59,11 +59,11 @@ def exists_on_schedule(db: Session, slot: schemas.SlotBase, schedule_id: int):
     """check if given slot already exists for schedule of given id"""
     db_slot = (
         db.query(models.Slot)
-            .filter(models.Slot.schedule_id == schedule_id)
-            .filter(models.Slot.start == slot.start)
-            .filter(models.Slot.duration == slot.duration)
-            .filter(models.Slot.booking_status != models.BookingStatus.none)
-            .first()
+        .filter(models.Slot.schedule_id == schedule_id)
+        .filter(models.Slot.start == slot.start)
+        .filter(models.Slot.duration == slot.duration)
+        .filter(models.Slot.booking_status != models.BookingStatus.none)
+        .first()
     )
     return db_slot is not None
 
@@ -103,7 +103,7 @@ def update(db: Session, slot_id: int, attendee: schemas.Attendee):
     # update slot
     db_slot = get(db, slot_id)
     # TODO: additionally handle subscriber_id here for already logged in users
-    setattr(db_slot, "attendee_id", db_attendee.id)
+    setattr(db_slot, 'attendee_id', db_attendee.id)
     db.commit()
     return db_attendee
 

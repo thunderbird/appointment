@@ -1,6 +1,6 @@
 """Module: repo.invite
 
-Repository providing CRUD functions for invite database models. 
+Repository providing CRUD functions for invite database models.
 """
 
 import uuid

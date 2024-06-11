@@ -6,8 +6,10 @@ import markdown
 
 
 def run():
-    """Helper function to update privacy and terms. Please check to ensure you're not getting a 404 before committing lol."""
-    print("Downloading the latest legal documents...")
+    """Helper function to update privacy and terms.
+    Please check to ensure you're not getting a 404 before committing lol.
+    """
+    print('Downloading the latest legal documents...')
 
     extensions = ['markdown.extensions.attr_list']
     # Only english for now. There's no german TB privacy policy?
@@ -20,7 +22,7 @@ def run():
         os.makedirs(f'{os.path.dirname(__file__)}/../tmp/legal/{locale}', exist_ok=True)
 
         if privacy_policy:
-            print("Privacy policy url found.")
+            print('Privacy policy url found.')
             contents = requests.get(privacy_policy).text
             html = markupsafe.Markup(markdown.markdown(contents, extensions=extensions))
 
@@ -28,11 +30,11 @@ def run():
                 fh.write(html)
 
         if terms_of_use:
-            print("Terms of use url found.")
+            print('Terms of use url found.')
             contents = requests.get(terms_of_use).text
             html = markupsafe.Markup(markdown.markdown(contents, extensions=extensions))
 
             with open(f'{os.path.dirname(__file__)}/../tmp/legal/{locale}/terms.html', 'w') as fh:
                 fh.write(html)
 
-    print("Done! Copy them over to the frontend/src/assets/legal!")
+    print('Done! Copy them over to the frontend/src/assets/legal!')

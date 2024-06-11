@@ -1,6 +1,6 @@
 """Module: repo.appointment
 
-Repository providing CRUD functions for appointment database models. 
+Repository providing CRUD functions for appointment database models.
 """
 
 from sqlalchemy.orm import Session
@@ -18,7 +18,7 @@ def create(db: Session, appointment: schemas.AppointmentFull, slots: list[schema
     return db_appointment
 
 
-def get(db: Session, appointment_id: int) -> models.Appointment|None:
+def get(db: Session, appointment_id: int) -> models.Appointment | None:
     """retrieve appointment by id (private)"""
     if appointment_id:
         return db.get(models.Appointment, appointment_id)

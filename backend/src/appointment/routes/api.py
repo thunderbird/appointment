@@ -1,14 +1,8 @@
-import logging
 import os
 import secrets
-from typing import Annotated
 
 import requests.exceptions
-import validators
 from redis import Redis, RedisCluster
-from requests import HTTPError
-from sentry_sdk import capture_exception
-from sqlalchemy.exc import SQLAlchemyError
 
 # database
 from sqlalchemy.orm import Session
@@ -19,30 +13,28 @@ from ..database import repo, schemas
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Query, Request
-from datetime import timedelta, timezone
+from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
-from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
-from ..tasks.emails import send_zoom_meeting_failed_email, send_support_email
+from ..tasks.emails import send_support_email
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get('/')
 def health():
     """Small route with no processing that will be used for health checks"""
     return l10n('health-ok')
 
 
-@router.put("/me", response_model=schemas.SubscriberBase)
+@router.put('/me', response_model=schemas.SubscriberBase)
 def update_me(
     data: schemas.SubscriberIn, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
 ):
@@ -57,40 +49,41 @@ def update_me(
         preferred_email=me.preferred_email,
         name=me.name,
         level=me.level,
-        timezone=me.timezone
+        timezone=me.timezone,
     )
 
 
-@router.get("/me/calendars", response_model=list[schemas.CalendarOut])
+@router.get('/me/calendars', response_model=list[schemas.CalendarOut])
 def read_my_calendars(
     db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), only_connected: bool = True
 ):
     """get all calendar connections of authenticated subscriber"""
-    calendars = repo.calendar.get_by_subscriber(
-        db, subscriber_id=subscriber.id, include_unconnected=not only_connected
-    )
+    calendars = repo.calendar.get_by_subscriber(db, subscriber_id=subscriber.id, include_unconnected=not only_connected)
     return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
 
 
-@router.get("/me/appointments", response_model=list[schemas.AppointmentWithCalendarOut])
+@router.get('/me/appointments', response_model=list[schemas.AppointmentWithCalendarOut])
 def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """get all appointments of authenticated subscriber"""
     appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id)
     # Mix in calendar title and color.
     # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
     appointments = map(
-        lambda x: schemas.AppointmentWithCalendarOut(**x.__dict__, slots=x.slots, calendar_title=x.calendar.title,
-                                                     calendar_color=x.calendar.color), appointments)
+        lambda x: schemas.AppointmentWithCalendarOut(
+            **x.__dict__, slots=x.slots, calendar_title=x.calendar.title, calendar_color=x.calendar.color
+        ),
+        appointments,
+    )
     return appointments
 
 
-@router.get("/me/signature")
+@router.get('/me/signature')
 def get_my_signature(subscriber: Subscriber = Depends(get_subscriber)):
     """Retrieve a subscriber's signed short link"""
-    return {"url": signed_url_by_subscriber(subscriber)}
+    return {'url': signed_url_by_subscriber(subscriber)}
 
 
-@router.post("/me/signature")
+@router.post('/me/signature')
 def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Refresh a subscriber's signed short link"""
     repo.subscriber.update(
@@ -104,7 +97,7 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
     return True
 
 
-@router.post("/verify/signature", deprecated=True)
+@router.post('/verify/signature', deprecated=True)
 def verify_signature(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
     """Verify a signed short link"""
     if repo.subscriber.verify_link(db, url):
@@ -113,7 +106,7 @@ def verify_signature(url: str = Body(..., embed=True), db: Session = Depends(get
     raise validation.InvalidLinkException()
 
 
-@router.post("/cal", response_model=schemas.CalendarOut)
+@router.post('/cal', response_model=schemas.CalendarOut)
 def create_my_calendar(
     calendar: schemas.CalendarConnection,
     db: Session = Depends(get_db),
@@ -124,7 +117,9 @@ def create_my_calendar(
 
     # Test the connection first
     if calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -161,7 +156,7 @@ def create_my_calendar(
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.get("/cal/{id}", response_model=schemas.CalendarConnectionOut)
+@router.get('/cal/{id}', response_model=schemas.CalendarConnectionOut)
 def read_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to get a calendar from db"""
     cal = repo.calendar.get(db, calendar_id=id)
@@ -182,7 +177,7 @@ def read_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscri
     )
 
 
-@router.put("/cal/{id}", response_model=schemas.CalendarOut)
+@router.put('/cal/{id}', response_model=schemas.CalendarOut)
 def update_my_calendar(
     id: int,
     calendar: schemas.CalendarConnection,
@@ -199,8 +194,8 @@ def update_my_calendar(
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.post("/cal/{id}/connect", response_model=schemas.CalendarOut)
-@router.post("/cal/{id}/disconnect", response_model=schemas.CalendarOut)
+@router.post('/cal/{id}/connect', response_model=schemas.CalendarOut)
+@router.post('/cal/{id}/disconnect', response_model=schemas.CalendarOut)
 def change_my_calendar_connection(
     request: Request,
     id: int,
@@ -224,7 +219,7 @@ def change_my_calendar_connection(
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.delete("/cal/{id}", response_model=schemas.CalendarOut)
+@router.delete('/cal/{id}', response_model=schemas.CalendarOut)
 def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to remove a calendar from db"""
     if not repo.calendar.exists(db, calendar_id=id):
@@ -236,7 +231,7 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subsc
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.post("/rmt/calendars", response_model=list[schemas.CalendarConnectionOut])
+@router.post('/rmt/calendars', response_model=list[schemas.CalendarConnectionOut])
 def read_remote_calendars(
     connection: schemas.CalendarConnection,
     google_client: GoogleClient = Depends(get_google_client),
@@ -245,7 +240,9 @@ def read_remote_calendars(
 ):
     """endpoint to get calendars from a remote CalDAV server"""
     if connection.provider == CalendarProvider.google:
-        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -277,7 +274,7 @@ def read_remote_calendars(
     return calendars
 
 
-@router.post("/rmt/sync")
+@router.post('/rmt/sync')
 def sync_remote_calendars(
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
@@ -289,7 +286,8 @@ def sync_remote_calendars(
     # TODO: Also handle CalDAV connections
 
     external_connection = utils.list_first(
-        repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+    )
 
     if external_connection is None or external_connection.token is None:
         raise RemoteCalendarConnectionError()
@@ -313,7 +311,7 @@ def sync_remote_calendars(
     return True
 
 
-@router.get("/rmt/cal/{id}/{start}/{end}", response_model=list[schemas.Event])
+@router.get('/rmt/cal/{id}/{start}/{end}', response_model=list[schemas.Event])
 def read_remote_events(
     id: int,
     start: str,
@@ -330,7 +328,9 @@ def read_remote_events(
         raise validation.CalendarNotFoundException()
 
     if db_calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -365,7 +365,7 @@ def read_remote_events(
     return events
 
 
-@router.post("/apmt", response_model=schemas.Appointment, deprecated=True)
+@router.post('/apmt', response_model=schemas.Appointment, deprecated=True)
 def create_my_calendar_appointment(
     a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
 ):
@@ -376,12 +376,15 @@ def create_my_calendar_appointment(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar.is_connected(db, calendar_id=a_s.appointment.calendar_id):
         raise validation.CalendarNotConnectedException()
-    if a_s.appointment.meeting_link_provider == MeetingLinkProviderType.zoom and subscriber.get_external_connection(ExternalConnectionType.zoom) is None:
+    if (
+        a_s.appointment.meeting_link_provider == MeetingLinkProviderType.zoom
+        and subscriber.get_external_connection(ExternalConnectionType.zoom) is None
+    ):
         raise validation.ZoomNotConnectedException()
     return repo.appointment.create(db=db, appointment=a_s.appointment, slots=a_s.slots)
 
 
-@router.get("/apmt/{id}", response_model=schemas.Appointment, deprecated=True)
+@router.get('/apmt/{id}', response_model=schemas.Appointment, deprecated=True)
 def read_my_appointment(id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to get an appointment from db by id"""
     db_appointment = repo.appointment.get(db, appointment_id=id)
@@ -394,7 +397,7 @@ def read_my_appointment(id: str, db: Session = Depends(get_db), subscriber: Subs
     return db_appointment
 
 
-@router.put("/apmt/{id}", response_model=schemas.Appointment, deprecated=True)
+@router.put('/apmt/{id}', response_model=schemas.Appointment, deprecated=True)
 def update_my_appointment(
     id: int,
     a_s: schemas.AppointmentSlots,
@@ -412,7 +415,7 @@ def update_my_appointment(
     return repo.appointment.update(db=db, appointment=a_s.appointment, slots=a_s.slots, appointment_id=id)
 
 
-@router.delete("/apmt/{id}", response_model=schemas.Appointment, deprecated=True)
+@router.delete('/apmt/{id}', response_model=schemas.Appointment, deprecated=True)
 def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to remove an appointment from db"""
     db_appointment = repo.appointment.get(db, appointment_id=id)
@@ -425,7 +428,7 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
     return repo.appointment.delete(db=db, appointment_id=id)
 
 
-@router.get("/apmt/public/{slug}", response_model=schemas.AppointmentOut, deprecated=True)
+@router.get('/apmt/public/{slug}', response_model=schemas.AppointmentOut, deprecated=True)
 def read_public_appointment(slug: str, db: Session = Depends(get_db)):
     """endpoint to retrieve an appointment from db via public link and only expose necessary data"""
     a = repo.appointment.get_public(db, slug=slug)
@@ -438,11 +441,17 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
         schemas.SlotOut(id=sl.id, start=sl.start, duration=sl.duration, attendee_id=sl.attendee_id) for sl in a.slots
     ]
     return schemas.AppointmentOut(
-        id=a.id, title=a.title, details=a.details, slug=a.slug, owner_name=s.name, slots=slots, slot_duration=slots[0].duration if len(slots) > 0 else 0
+        id=a.id,
+        title=a.title,
+        details=a.details,
+        slug=a.slug,
+        owner_name=s.name,
+        slots=slots,
+        slot_duration=slots[0].duration if len(slots) > 0 else 0,
     )
 
 
-@router.get("/apmt/serve/ics/{slug}/{slot_id}", response_model=schemas.FileDownload)
+@router.get('/apmt/serve/ics/{slug}/{slot_id}', response_model=schemas.FileDownload)
 def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     """endpoint to serve ICS file for time slot to download"""
     db_appointment = repo.appointment.get_public(db, slug=slug)
@@ -459,20 +468,20 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
     organizer = repo.subscriber.get_by_appointment(db=db, appointment_id=db_appointment.id)
 
     return schemas.FileDownload(
-        name="invite",
-        content_type="text/calendar",
-        data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode("utf-8"),
+        name='invite',
+        content_type='text/calendar',
+        data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode('utf-8'),
     )
 
 
-@router.post("/support")
+@router.post('/support')
 def send_feedback(
     form_data: schemas.SupportRequest,
     background_tasks: BackgroundTasks,
-    subscriber: Subscriber = Depends(get_subscriber)
+    subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Send a subscriber's support request to the configured support email address"""
-    if not os.getenv("SUPPORT_EMAIL"):
+    if not os.getenv('SUPPORT_EMAIL'):
         raise APIException()
 
     background_tasks.add_task(

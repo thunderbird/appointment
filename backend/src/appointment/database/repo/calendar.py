@@ -1,6 +1,6 @@
 """Module: repo.calendar
 
-Repository providing CRUD functions for calendar database models. 
+Repository providing CRUD functions for calendar database models.
 """
 
 from datetime import datetime
@@ -57,7 +57,7 @@ def create(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int
     subscriber_calendar_urls = [c.url for c in subscriber_calendars]
     # check if subscriber already holds this calendar by url
     if db_calendar.url in subscriber_calendar_urls:
-        raise HTTPException(status_code=403, detail="Calendar already exists")
+        raise HTTPException(status_code=403, detail='Calendar already exists')
     # add new calendar
     db.add(db_calendar)
     db.commit()
@@ -71,9 +71,9 @@ def update(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):
 
     # list of all attributes that must never be updated
     # # because they have dedicated update functions for security reasons
-    ignore = ["connected", "connected_at"]
+    ignore = ['connected', 'connected_at']
     # list of all attributes that will keep their current value if None is passed
-    keep_if_none = ["password"]
+    keep_if_none = ['password']
 
     for key, value in calendar:
         # skip update, if attribute is ignored or current value should be kept if given value is falsey/empty
@@ -97,7 +97,7 @@ def update_connection(db: Session, is_connected: bool, calendar_id: int):
         limit = repo.subscriber.get_connections_limit(db=db, subscriber_id=db_calendar.owner_id)
         if limit > 0 and len(connected_calendars) >= limit:
             raise HTTPException(
-                status_code=403, detail="Allowed number of connected calendars has been reached for this subscription"
+                status_code=403, detail='Allowed number of connected calendars has been reached for this subscription'
             )
     if not db_calendar.connected:
         db_calendar.connected_at = datetime.now()
