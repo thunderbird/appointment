@@ -120,7 +120,7 @@ jobs:
           echo cloudfront_id=$output >> $GITHUB_OUTPUT
 
   deploy-prod-frontend:
-    needs: deploy-iac
+    needs: deploy-prod-iac
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
@@ -144,13 +144,13 @@ jobs:
 
 # will be re-enabled once release workflow is tested
 #      - name: Deploy frontend to S3
-#        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-iac.outputs.bucket }}"
+#        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-prod-iac.outputs.bucket }}"
 
       - name: Invalidate Cloudfront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-iac.outputs.cloudfront_id }} --paths "/*"
+        run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-prod-iac.outputs.cloudfront_id }} --paths "/*"
 
   deploy-prod-backend:
-    needs: deploy-iac
+    needs: deploy-prod-iac
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
