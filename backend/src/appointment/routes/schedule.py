@@ -172,7 +172,7 @@ def read_schedule_availabilities(
 def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
     background_tasks: BackgroundTasks,
-    subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
+    subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client=Depends(get_google_client),
