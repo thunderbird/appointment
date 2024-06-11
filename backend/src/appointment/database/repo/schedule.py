@@ -121,7 +121,6 @@ def verify_link(db: Session, url: str) -> models.Subscriber | None:
     """Verifies that an url belongs to a subscriber's schedule, and if so return the subscriber.
     Otherwise, return none."""
     username, slug, clean_url = utils.retrieve_user_url_data(url)
-
     subscriber = repo.subscriber.get_by_username(db, username)
     if not subscriber:
         return None
