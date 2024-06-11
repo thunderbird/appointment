@@ -48,10 +48,10 @@ import PrimaryButton from '@/elements/PrimaryButton';
 import SecondaryButton from '@/elements/SecondaryButton';
 import CautionButton from '@/elements/CautionButton';
 
-const { t } = useI18n();
-
 // icons
 import { IconX } from '@tabler/icons-vue';
+
+const { t } = useI18n();
 
 // component properties
 defineProps({
