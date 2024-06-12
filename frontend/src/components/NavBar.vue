@@ -48,13 +48,14 @@
               v-show="user.data.signedUrl"
               :label="t('label.shareMyLink')"
               :copy="user.data.signedUrl"
-              class="flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
+              class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
+              :title="t('label.copy')"
             />
             <router-link :to="{ name: 'contact' }" class="p-2">
               {{ t('label.contact') }}
             </router-link>
             <hr class="border-teal-500" />
-            <div @click="logout" class="cursor-pointer p-2">
+            <div @click="logout" class="btn-logout cursor-pointer p-2" :title="t('label.logOut')">
               {{ t('label.logOut') }}
             </div>
           </div>

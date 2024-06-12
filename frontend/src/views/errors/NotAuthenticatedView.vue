@@ -5,7 +5,7 @@
       <div class="text-xl font-semibold text-sky-600">
         {{ t('error.authenticationRequired') }}
       </div>
-      <primary-button @click="goToLogin">
+      <primary-button class="btn-login" @click="goToLogin" :title="t('label.logIn')">
         {{ t('label.logIn') }}
       </primary-button>
     </div>

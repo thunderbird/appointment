@@ -31,15 +31,17 @@
     <div class="flex gap-4">
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.google') })"
-        class="text-sm !text-teal-500"
+        class="btn-add text-sm !text-teal-500"
         @click="addCalendar(calendarProviders.google)"
         :disabled="inputMode"
+        :title="t('label.addCalendar', { provider: t('label.google') })"
       />
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.caldav') })"
-        class="text-sm !text-teal-500"
+        class="btn-add text-sm !text-teal-500"
         @click="addCalendar(calendarProviders.caldav)"
         :disabled="inputMode"
+        :title="t('label.addCalendar', { provider: t('label.caldav') })"
       />
     </div>
 
@@ -75,9 +77,10 @@
       <div>
         <secondary-button
           :label="'Search for calendars'"
-          class="text-sm !text-teal-500"
+          class="btn-search text-sm !text-teal-500"
           :waiting="processPrincipal"
           @click="getRemoteCalendars"
+          :title="t('label.search')"
         />
       </div>
       <div v-if="searchResultCalendars.length" class="flex max-w-2xl flex-col gap-2 pl-6">
@@ -86,7 +89,8 @@
           <div>{{ cal.url }}</div>
           <button
             @click="assignCalendar(cal.title, cal.url)"
-            class="ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1 text-xs text-white"
+            class="btn-assign ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1 text-xs text-white"
+            :title="t('label.assign')"
           >
             <icon-arrow-right class="size-3.5 fill-transparent stroke-white stroke-2" />
             {{ 'Select calendar' }}
@@ -167,26 +171,29 @@
         <caution-button
           v-if="editMode"
           :label="t('label.disconnect')"
-          class="text-sm"
+          class="btn-disconnect text-sm"
           @click="() => disconnectCalendar(calendarInput.id)"
+          :title="t('label.disconnect')"
         />
         </div>
         <div class="flex gap-4 self-end">
         <secondary-button
           :label="t('label.cancel')"
-          class="text-sm !text-teal-500"
+          class="btn-cancel text-sm !text-teal-500"
           @click="resetInput"
+          :title="t('label.cancel')"
         />
         <primary-button
           v-if="isCalDav || editMode"
           :label="addMode ? t('label.connectCalendar') : t('label.saveChanges')"
-          class="text-sm"
+          class="btn-save text-sm"
           @click="saveCalendar"
+          :title="t('label.save')"
         />
         <!-- Google Button -->
         <google-calendar-button
           v-if="isGoogle && addMode"
-          class="cursor-pointer"
+          class="btn-connect cursor-pointer"
           :title="t('label.signInWithGoogle')"
           :label="t('label.connectGoogleCalendar')"
           @click="saveCalendar"

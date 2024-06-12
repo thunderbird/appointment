@@ -23,7 +23,7 @@
   <span class="ml-1 block sm:inline">
     <slot></slot>
   </span>
-  <span v-if="canClose" class="ml-auto" @click="emit('close')">
+  <span v-if="canClose" class="alert-close ml-auto" @click="emit('close')" :title="t('label.close')">
     <icon-x class="size-6 cursor-pointer fill-transparent stroke-white stroke-1" />
   </span>
 </div>

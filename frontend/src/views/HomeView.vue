@@ -11,8 +11,20 @@
             {{ $t('text.homepage.intro') }}
           </h4>
           <div class="mt-16">
-            <primary-button v-if="!isAuthenticated" :label="$t('label.logIn')" @click="login" />
-            <primary-button v-else-if="isAuthenticated" :label="$t('label.continue')" @click="enter" />
+            <primary-button
+              v-if="!isAuthenticated"
+              :label="$t('label.logIn')"
+              class="btn-login"
+              @click="login"
+              :title="$t('label.logIn')"
+            />
+            <primary-button
+              v-else-if="isAuthenticated"
+              :label="$t('label.continue')"
+              class="btn-continue"
+              @click="enter"
+              :title="$t('label.continue')"
+            />
           </div>
         </div>
         <div class="w-full">

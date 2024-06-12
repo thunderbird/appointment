@@ -31,10 +31,11 @@
   >
     <div class="mx-auto flex h-full max-w-screen-2xl items-center justify-end">
       <primary-button
-        class="p-7"
+        class="btn-confirm p-7"
         :label="t('label.confirmSelection')"
         :disabled="!selectedEvent"
         @click="emit('openModal')"
+        :title="t('label.confirm')"
       />
     </div>
   </footer>

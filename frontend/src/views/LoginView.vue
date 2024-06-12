@@ -45,7 +45,20 @@
           />
         </label>
       </div>
-      <primary-button class="bottom-0" :label="isFxaAuth ? t('label.continue') : t('label.logIn')" @click="login"/>
+      <primary-button
+        v-if="!isFxaAuth"
+        :label="$t('label.logIn')"
+        class="btn-login"
+        @click="login"
+        :title="$t('label.logIn')"
+      />
+      <primary-button
+        v-else
+        :label="$t('label.continue')"
+        class="btn-continue"
+        @click="login"
+        :title="$t('label.continue')"
+      />
     </div>
   </div>
 </template>
