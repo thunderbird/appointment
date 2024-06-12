@@ -229,7 +229,8 @@ jobs:
           path: ecr_tag.zip
 
   deploy-stage-backend:
-    needs: 
+    needs:
+      - build-backend-image
       - detect-changes
       - deploy-stage-iac
     if: |
