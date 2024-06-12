@@ -17,6 +17,7 @@
         'min-h-full pb-32 pt-8': routeIsPublic,
       }"
     >
+      <first-time-user-experience v-if="!currentUser.data.setup"></first-time-user-experience>
       <router-view/>
     </main>
     <footer-bar/>
@@ -47,6 +48,7 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
+import FirstTimeUserExperience from '@/components/FirstTimeUserExperience.vue';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
