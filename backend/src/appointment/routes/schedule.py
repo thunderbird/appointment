@@ -302,7 +302,8 @@ def request_schedule_availability_slot(
 
     # Sending confirmation email to owner
     background_tasks.add_task(
-        send_confirmation_email, url=url, attendee_name=attendee.name, date=date, to=subscriber.preferred_email
+        send_confirmation_email, url=url, attendee_name=attendee.name, attendee_email=attendee.email, date=date,
+        to=subscriber.preferred_email
     )
 
     # Sending pending email to attendee
