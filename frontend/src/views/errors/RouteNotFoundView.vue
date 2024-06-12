@@ -5,7 +5,7 @@
       <div class="text-xl font-semibold text-sky-600">
         {{ t('error.routeNotFound') }}
       </div>
-      <primary-button @click="$router.go(-1)">
+      <primary-button class="btn-back" @click="$router.go(-1)" :title="t('label.goBack')">
         {{ t('label.goBack') }}
       </primary-button>
     </div>

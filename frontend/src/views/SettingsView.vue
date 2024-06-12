@@ -26,7 +26,7 @@
         v-for="(view, key) in settingsSections"
         :key="key"
         class="
-          flex cursor-pointer justify-between rounded-lg bg-gray-100 p-4
+          btn-jump flex cursor-pointer justify-between rounded-lg bg-gray-100 p-4
           font-semibold text-gray-500 dark:bg-gray-600 dark:text-gray-300
         "
         :class="{ '!bg-teal-500 !text-white': view === activeView }"

@@ -58,19 +58,26 @@
               <icon-external-link class="size-5"/>
             </a>
           </div>
-          <text-button :tooltip="t('label.copyLink')" :copy="user.myLink"/>
+          <text-button
+            class="btn-copy"
+            :tooltip="t('label.copyLink')"
+            :copy="user.myLink"
+            :title="t('label.copy')"
+          />
         </div>
       </label>
       <div class="mt-6 flex gap-4 self-end">
         <secondary-button
           :label="t('label.refreshLink')"
-          class="!text-teal-500"
+          class="btn-refresh !text-teal-500"
           @click="refreshLink"
+          :title="t('label.refresh')"
         />
         <secondary-button
           :label="t('label.saveChanges')"
-          class="!text-teal-500"
+          class="btn-save !text-teal-500"
           @click="updateUserCheckForConfirmation"
+          :title="t('label.save')"
         />
       </div>
     </div>
@@ -79,7 +86,9 @@
       <div class="mt-4 pl-4">
         <primary-button
           :label="t('label.downloadYourData')"
+          class="btn-download"
           @click="downloadData"
+          :title="t('label.download')"
         />
       </div>
     </div>
@@ -88,7 +97,9 @@
       <div class="mt-4 pl-4">
         <caution-button
           :label="t('label.deleteYourAccount')"
+          class="btn-delete"
           @click="deleteAccount"
+          :title="t('label.delete')"
         />
       </div>
     </div>

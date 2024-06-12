@@ -36,7 +36,7 @@
         <div class="flex rounded border border-gray-300 dark:border-gray-500">
           <div
             class="
-              flex cursor-pointer items-center overflow-hidden border-r border-gray-300 px-1.5
+              btn-toggle flex cursor-pointer items-center overflow-hidden border-r border-gray-300 px-1.5
               py-1 dark:border-gray-500
             "
             :class="{
@@ -48,7 +48,7 @@
             <icon-list class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
           </div>
           <div
-            class="flex cursor-pointer items-center overflow-hidden px-1.5 py-1"
+            class="btn-toggle flex cursor-pointer items-center overflow-hidden px-1.5 py-1"
             :class="{
               'bg-gray-300 dark:bg-gray-600': view === viewTypes.grid,
               'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.grid,
@@ -59,7 +59,7 @@
           </div>
         </div>
         <div
-          class="flex items-center rounded border border-gray-300 px-1.5 py-1 dark:border-gray-500"
+          class="btn-toggle flex items-center rounded border border-gray-300 px-1.5 py-1 dark:border-gray-500"
           :class="{
             'bg-gray-300 dark:bg-gray-600': showAdjustments,
             'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === viewTypes.list,

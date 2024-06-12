@@ -30,18 +30,24 @@
           <primary-button
           v-if="!connection[0]"
           :label="t('label.connect')"
+          class="btn-connect"
           @click="() => connectAccount(category)"
+          :title="t('label.connect')"
         />
         <caution-button
           v-if="connection[0]"
           :label="t('label.disconnect')"
+          class="btn-disconnect"
           @click="() => displayModal(category)"
+          :title="t('label.disconnect')"
         />
         </div>
         <div class="mx-auto mr-0" v-else>
           <secondary-button
           :label="t('label.editProfile')"
+          class="btn-edit"
           @click="editProfile"
+          :title="t('label.edit')"
           />
         </div>
       </div>

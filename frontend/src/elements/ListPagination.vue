@@ -1,6 +1,6 @@
 <template>
   <nav class="flex flex-nowrap items-center gap-2">
-    <button @click="prev" :disabled="isFirstPage" :class="{ 'text-gray-500': isFirstPage }">
+    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'text-gray-500': isFirstPage }">
       <icon-chevron-left class="stroke-1.5 size-5" />
     </button>
     <div
@@ -9,7 +9,7 @@
     >
       <div v-show="showFirstEllipsis(p)">&hellip;</div>
       <button
-        class="cursor-pointer px-2 py-1"
+        class="btn-jump cursor-pointer px-2 py-1"
         :class="{ 'text-gray-500': (p-1) === currentPage }"
         v-show="showPageItemLink(p)"
         @click="goto(p-1)"
@@ -18,7 +18,7 @@
       </button>
       <div v-show="showLastEllipsis(p)">&hellip;</div>
     </div>
-    <button @click="next" :disabled="isLastPage" :class="{ 'text-gray-500': isLastPage }">
+    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'text-gray-500': isLastPage }">
       <icon-chevron-right class="stroke-1.5 size-5" />
     </button>
   </nav>

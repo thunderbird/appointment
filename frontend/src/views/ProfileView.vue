@@ -25,8 +25,19 @@
         <div class="text-center text-gray-500">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
-    <secondary-button class="mb-8" v-if="isFxaAuth" :label="t('label.editProfile')" @click="editProfile" />
-    <primary-button :label="t('label.logOut')" @click="logout" />
+    <secondary-button
+      v-if="isFxaAuth"
+      class="btn-edit mb-8"
+      :label="t('label.editProfile')"
+      @click="editProfile"
+      :title="t('label.edit')"
+    />
+    <primary-button
+      :label="t('label.logOut')"
+      class="btn-logout"
+      @click="logout"
+      :title="t('label.logOut')"
+    />
   </div>
 </template>
 

@@ -14,6 +14,8 @@ You can either build preconfigured docker containers (database, backend and fron
 
 ### With Docker
 
+This is the recommended and only supported method of developing Thunderbird Appointment.
+
 ```bash
 git clone https://github.com/thunderbird/appointment
 cp appointment/backend/.env.example appointment/backend/.env
@@ -28,75 +30,9 @@ docker-compose up -d --build
 
 A MySQL database will be accessible via `localhost:3306` with username and password set to: `tba`
 
-To init database or run migrations, the backend offers a simple CLI interface:
-
-```bash
-run-command main update-db
-```
-
-### Manual Setup
-
-Make sure to have the following prerequisites available:
-
-```plain
-Python >= 3.11
-Node.js >= 16.0
-```
-
-Run application for development with hot reloading backend and frontend:
-
-1. Get the application data
-
-    ```bash
-    git clone https://github.com/thunderbird/appointment
-    ```
-
-2. Install, configure and run python backend (it's recommended to do this in a virtual environment)
-
-    ```bash
-    cd appointment
-    pip install .
-    touch backend/src/appointment.db # when using sqlite
-    cp backend/.env.example backend/.env # add your own configuration here
-    uvicorn --factory appointment.main:server --host 0.0.0.0 --port 5000
-    ```
-
-    You can now access the backend at [localhost:5000](http://localhost:5000).
-
-3. Install and run vue frontend in a second bash
-
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
-
-    You can now access the frontend at [localhost:8080](http://localhost:8080).
-
-4. (optional) Run database migrations
-
-    ```bash
-    cd backend
-    cp alembic.ini.example alembic.ini # add your own configuration here
-    alembic init migrations # init migrations once
-    alembic current # check database state
-    alembic upgrade head # migrate to latest state
-    alembic revision -m "create ... table" # create a new migration
-    ```
+On first-run the database will initialize, and a first time setup command will be triggered. Going forward database migrations will automatically run on `docker-compose up`.
 
 ## Testing
-
-To run tests in the backend, simply install the package in editing mode:
-
-```bash
-cd backend && pip install -e .
-```
-
-After this you can run tests with:
-
-```bash
-cd backend && python -m pytest
-```
 
 To run tests in the frontend, do:
 
@@ -108,31 +44,9 @@ cd frontend && npm test
 
 Contributions are very welcome. Please lint/format code before creating PRs.
 
-### Backend
-
-Backend is formatted using Ruff.
-
-```bash
-pip install ruff
-```
-
-Commands (from git root)
-
-```bash
-ruff check backend
-ruff check backend --fix
-```
-
-### Frontend
-
-Frontend is formatted using ESlint with airbnb rules.
-
-Commands (from /frontend)
-
-```bash
-npm run lint
-npm run lint --fix
-```
+Check out the project's respective readmes:
+* [Backend Readme](backend/README.md)
+* [Frontend Readme](frontend/README.md)
 
 ### Localization
 
