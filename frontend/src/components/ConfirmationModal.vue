@@ -8,7 +8,7 @@
     v-if="open"
     class="position-center fixed z-50 flex w-full max-w-lg flex-col items-center gap-6 rounded-xl bg-white p-12 dark:bg-gray-700"
   >
-    <div class="mdl-btn-close absolute right-8 top-8 cursor-pointer" @click="emit('close')" :title="t('label.close')">
+    <div class="btn-close absolute right-8 top-8 cursor-pointer" @click="emit('close')" :title="t('label.close')">
       <icon-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400" />
     </div>
     <div class="text-2xl font-semibold text-teal-500">
@@ -19,7 +19,7 @@
     </div>
     <div class="flex gap-4">
       <secondary-button
-        class="mdl-btn-close"
+        class="btn-close"
         :label="cancelLabel"
         @click="emit('close')"
         :title="t('label.close')"
