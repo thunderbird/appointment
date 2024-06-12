@@ -4,23 +4,49 @@ This is the backend component of Thunderbird Appointment written in Python using
 
 ## Installation / Running
 
-### Development
-
-A docker file with instructions is provided for development use, please check [appointment/readme.md](../README.md) for more information.
-
 ### Self-hosting
 
 More information will be provided in the future. There is currently a docker file provided which we use to deploy to AWS' ECS which should help you get started.
 
-## Configuration
+### Configuration
 
-The backend project uses dotenv files to inject environment variables into the application. A starting template can be found as [.env.example](.env.example). Copy that as your .env to get started.
+The backend project uses dotenv files to inject environment variables into the application. A starting template can be found as [.env.example](.env.example). Copy that as your `.env` to get started.
 
-You will want to ensure any variable ending with `_SECRET` has a secret value assigned. Additionally there are values such as SMTP settings for mail, google authentication credentials for google oauth flow with the google calendar api, and zoom api credentials available.
+On first run (via [dev-entry.sh](scripts/dev-entry.sh)) a setup command will run filling in some secret environment variables, and the database will initialize.
+
+After that Appointment should be fully usable, however you may want to setup some third-party integrations like Google Calendar connections, or the creation of Zoom meetings. These are clearly labelled in the `.env` file, simply setup accounts for them with the vendor, and enter your values in the `.env` file.
+
+### Linting
+
+Backend is formatted using Ruff.
+
+```bash
+pip install ruff
+```
+
+Commands
+
+```bash
+ruff check 
+```
 
 ### Authentication
 
 This project is deployed with Mozilla Accounts (known as fxa in the code.) Since Mozilla Accounts is for internal use you will need to use password authentication. Note: password authentication does not currently have a registration flow.
+
+### Testing
+
+To run tests in the backend, simply install the package in editing mode:
+
+```bash
+cd backend && pip install -e .
+```
+
+After this you can run tests with:
+
+```bash
+cd backend && python -m pytest
+```
 
 ## Commands
 
@@ -40,9 +66,11 @@ run-command main --help
 │ download-legal                                                 │
 │ update-db                                                      │
 │ create-invite-codes                                            │
+│ setup                                                          │
 ╰────────────────────────────────────────────────────────────────╯
 ```
 
 * `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
 * `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
 * `create-invite-codes n` is an internal command to create invite codes which can be used for user registrations. The `n` argument is an integer that specifies the amount of codes to be generated.
+* `setup` a first run setup that fills in some missing environment variables.
