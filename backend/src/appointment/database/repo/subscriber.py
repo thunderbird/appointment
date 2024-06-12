@@ -1,6 +1,6 @@
 """Module: repo.subscriber
 
-Repository providing CRUD functions for subscriber database models.
+Repository providing CRUD functions for subscriber database models. 
 """
 
 import re
@@ -8,6 +8,7 @@ import datetime
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
+from ... import utils
 from ...controller.auth import sign_url
 
 
@@ -122,28 +123,13 @@ def verify_link(db: Session, url: str):
     """Check if a given url is a valid signed subscriber profile link
     Return subscriber if valid.
     """
-    # Look for a <username> followed by an optional signature that ends the string
-    pattern = r'[\/]([\w\d\-_\.\@]+)[\/]?([\w\d]*)[\/]?$'
-    match = re.findall(pattern, url)
-
-    if match is None or len(match) == 0:
-        return False
-
-    # Flatten
-    match = match[0]
-    clean_url = url
-
-    username = match[0]
-    signature = None
-    if len(match) > 1:
-        signature = match[1]
-        clean_url = clean_url.replace(signature, '')
+    username, signature, clean_url = utils.retrieve_user_url_data(url)
 
     subscriber = get_by_username(db, username)
     if not subscriber:
         return False
 
-    clean_url_with_short_link = clean_url + f'{subscriber.short_link_hash}'
+    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
     signed_signature = sign_url(clean_url_with_short_link)
 
     # Verify the signature matches the incoming one

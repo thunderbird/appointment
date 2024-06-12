@@ -6,7 +6,7 @@ Definitions of valid data shapes for database and query models.
 import json
 from uuid import UUID
 from datetime import datetime, date, time
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
 
@@ -156,6 +156,7 @@ class Availability(AvailabilityBase):
 class ScheduleBase(BaseModel):
     active: bool | None = True
     name: str = Field(min_length=1)
+    slug: Optional[str] = None
     calendar_id: int
     location_type: LocationType | None = LocationType.inperson
     location_url: str | None = None
@@ -191,6 +192,10 @@ class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
 
     slot_duration: Annotated[int, Field(ge=10, default=30)]
+
+
+class ScheduleSlug(BaseModel):
+    slug: str
 
 
 """ CALENDAR model schemas

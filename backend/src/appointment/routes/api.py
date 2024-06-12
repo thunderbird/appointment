@@ -94,6 +94,16 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
         subscriber.id,
     )
 
+    # Update schedule slugs as well!
+    # This is temp until we figure this flow out
+    schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
+    for schedule in schedules:
+        # Clear so we can generate a new one
+        schedule.slug = None
+        slug = repo.schedule.generate_slug(db, schedule.id)
+        if not slug:
+            logging.warning("Could not generate unique slug!")
+
     return True
 
 

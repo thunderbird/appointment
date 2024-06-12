@@ -45,13 +45,13 @@
         <div class="flex w-full items-center justify-between gap-4">
           <div class="relative w-full">
             <input
-              :value="user.data.signedUrl"
+              :value="user.myLink"
               type="text"
               class="mr-2 w-full rounded-md pr-7"
               readonly
             />
             <a
-              :href="user.data.signedUrl"
+              :href="user.myLink"
               target="_blank"
               class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
             >
@@ -60,8 +60,8 @@
           </div>
           <text-button
             class="btn-copy"
-            :label="t('label.copyLink')"
-            :copy="user.data.signedUrl"
+            :tooltip="t('label.copyLink')"
+            :copy="user.myLink"
             :title="t('label.copy')"
           />
         </div>
@@ -166,12 +166,14 @@ import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 // stores
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import ToolTip from '@/elements/ToolTip.vue';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
 const router = useRouter();
 const user = useUserStore();
+const schedule = useScheduleStore();
 const externalConnectionsStore = useExternalConnectionsStore();
 
 const activeUsername = ref(user.data.username);
@@ -203,6 +205,7 @@ const getAvailableEmails = async () => {
 
 const refreshData = async () => Promise.all([
   user.updateSignedUrl(call),
+  schedule.fetch(call, true),
   externalConnectionsStore.fetch(call),
   getAvailableEmails(),
 ]);

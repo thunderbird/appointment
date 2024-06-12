@@ -145,6 +145,15 @@ class ScheduleNotAuthorizedException(APIException):
         return l10n('schedule-not-auth')
 
 
+class ScheduleCreationException(APIException):
+    """Raise when we have an error with schedule creation but don't want to give exactly what."""
+    id_code = 'SCHEDULE_CREATION_EXCEPTION'
+    status_code = 500
+
+    def get_msg(self):
+        return l10n('unknown-error')
+
+
 class SlotNotFoundException(APIException):
     """Raise when a timeslot is not found during route validation"""
 

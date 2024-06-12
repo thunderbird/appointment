@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, Body, BackgroundTasks
 import logging
 import os
 
@@ -21,7 +21,8 @@ from ..database.models import (
     ExternalConnectionType,
 )
 from ..database.schemas import ExternalConnection
-from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url
+from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url, \
+    get_subscriber_from_schedule_or_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
@@ -54,7 +55,17 @@ def create_calendar_schedule(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
-    return repo.schedule.create(db=db, schedule=schedule)
+
+    db_schedule = repo.schedule.create(db=db, schedule=schedule)
+
+    # If slug isn't provided, give them the last 8 characters from a uuid4
+    slug = repo.schedule.generate_slug(db, db_schedule.id)
+    if not slug:
+        # A little extra, but things are a little out of place right now..
+        repo.schedule.hard_delete(db, db_schedule.id)
+        raise validation.ScheduleCreationException()
+
+    return db_schedule
 
 
 @router.get('/', response_model=list[schemas.Schedule])
@@ -100,9 +111,27 @@ def update_schedule(
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
 
+@router.post("/public/url")
+def get_signed_url_from_slug(
+    schedule_slug: schemas.ScheduleSlug,
+    db: Session = Depends(get_db),
+) -> dict:
+    schedule = repo.schedule.get_by_slug(db, schedule_slug.slug)
+    if not schedule:
+        raise validation.ScheduleNotFoundException()
+
+    owner = schedule.owner
+    if not owner:
+        raise validation.ScheduleNotFoundException()
+
+    return {
+        'url': signed_url_by_subscriber(owner)
+    }
+
+
 @router.post('/public/availability', response_model=schemas.AppointmentOut)
 def read_schedule_availabilities(
-    subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
+    subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
@@ -155,7 +184,7 @@ def read_schedule_availabilities(
 def request_schedule_availability_slot(
     s_a: schemas.AvailabilitySlotAttendee,
     background_tasks: BackgroundTasks,
-    subscriber: Subscriber = Depends(get_subscriber_from_signed_url),
+    subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client=Depends(get_google_client),
@@ -189,9 +218,7 @@ def request_schedule_availability_slot(
 
     # We need to verify that the time is actually available on the remote calendar
     if db_calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-        )
+        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -275,7 +302,8 @@ def request_schedule_availability_slot(
 
     # Sending confirmation email to owner
     background_tasks.add_task(
-        send_confirmation_email, url=url, attendee_name=attendee.name, date=date, to=subscriber.preferred_email
+        send_confirmation_email, url=url, attendee_name=attendee.name, attendee_email=attendee.email, date=date,
+        to=subscriber.preferred_email
     )
 
     # Sending pending email to attendee
@@ -397,9 +425,7 @@ def decide_on_schedule_availability_slot(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(
-                send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name
-            )
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error('Failed to save the zoom meeting link to the appointment: ', err)
             if os.getenv('SENTRY_DSN') != '':

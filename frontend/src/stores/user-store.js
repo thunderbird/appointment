@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
+import { computed } from 'vue';
 
 const initialUserObject = {
   email: null,
@@ -12,10 +13,19 @@ const initialUserObject = {
   signedUrl: null,
   avatarUrl: null,
   accessToken: null,
+  scheduleSlugs: [],
 };
 
 export const useUserStore = defineStore('user', () => {
   const data = useLocalStorage('tba/user', structuredClone(initialUserObject));
+
+  const myLink = computed(() => {
+    const scheduleSlug = data.value?.scheduleSlugs?.length > 0 ? data.value?.scheduleSlugs[0] : null;
+    if (scheduleSlug) {
+      return `${import.meta.env.VITE_SHORT_BASE_URL}/${data.value.username}/${scheduleSlug}/`;
+    }
+    return data.value.signedUrl;
+  });
 
   const exists = () => data.value.accessToken !== null;
   const $reset = () => {
@@ -34,6 +44,13 @@ export const useUserStore = defineStore('user', () => {
       level: userData.level,
       timezone: userData.timezone,
       avatarUrl: userData.avatar_url,
+    };
+  };
+
+  const updateScheduleUrls = (scheduleData) => {
+    data.value = {
+      ...data.value,
+      scheduleSlugs: scheduleData.map((schedule) => schedule?.slug),
     };
   };
 
@@ -136,6 +153,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout,
+    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateScheduleUrls,
   };
 });

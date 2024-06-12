@@ -45,11 +45,11 @@
               {{ t('label.userProfile') }}
             </router-link>
             <text-button
-              v-show="user.data.signedUrl"
+              v-show="user.myLink"
               :label="t('label.shareMyLink')"
-              :copy="user.data.signedUrl"
-              class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
+              :copy="user.myLink"
               :title="t('label.copy')"
+              class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
             />
             <router-link :to="{ name: 'contact' }" class="p-2">
               {{ t('label.contact') }}

@@ -97,3 +97,18 @@ def get_subscriber_from_signed_url(
         raise validation.InvalidLinkException
 
     return subscriber
+
+
+def get_subscriber_from_schedule_or_signed_url(
+    url: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
+):
+    """Retrieve a subscriber based off a signed url or schedule slug namespaced by their username."""
+    subscriber = repo.subscriber.verify_link(db, url)
+    if not subscriber:
+        subscriber = repo.schedule.verify_link(db, url)
+
+    if not subscriber:
+        raise validation.InvalidLinkException
+
+    return subscriber

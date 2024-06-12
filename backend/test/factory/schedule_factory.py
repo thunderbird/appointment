@@ -24,6 +24,7 @@ def make_schedule(with_db, make_caldav_calendar):
         weekdays=[1, 2, 3, 4, 5],
         slot_duration=FAKER_RANDOM_VALUE,
         meeting_link_provider=models.MeetingLinkProviderType.none,
+        slug=FAKER_RANDOM_VALUE,
     ):
         with with_db() as db:
             return repo.schedule.create(
@@ -32,11 +33,9 @@ def make_schedule(with_db, make_caldav_calendar):
                     active=active,
                     name=name if factory_has_value(name) else fake.name(),
                     location_url=location_url if factory_has_value(location_url) else fake.url(),
-                    location_type=(
-                        location_type
-                        if factory_has_value(location_type)
-                        else fake.random_element((models.LocationType.inperson, models.LocationType.online))
-                    ),
+                    location_type=location_type
+                    if factory_has_value(location_type)
+                    else fake.random_element((models.LocationType.inperson, models.LocationType.online)),
                     details=details if factory_has_value(details) else fake.sentence(),
                     start_date=start_date if factory_has_value(start_date) else fake.date_object(),
                     end_date=end_date if factory_has_value(end_date) else fake.date_object(),
@@ -47,9 +46,10 @@ def make_schedule(with_db, make_caldav_calendar):
                     weekdays=weekdays,
                     slot_duration=slot_duration if factory_has_value(slot_duration) else fake.pyint(15, 60),
                     meeting_link_provider=meeting_link_provider,
-                    calendar_id=(
-                        calendar_id if factory_has_value(calendar_id) else make_caldav_calendar(connected=True).id
-                    ),
+                    slug=slug if factory_has_value(slug) else fake.uuid4(),
+                    calendar_id=calendar_id
+                    if factory_has_value(calendar_id)
+                    else make_caldav_calendar(connected=True).id,
                 ),
             )
 
