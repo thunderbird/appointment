@@ -212,15 +212,6 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Prepare backend dependencies
-        run: |
-          cd tofu/environments/prod/network/vpc
-          terragrunt init -upgrade
-          cd ../../data-store/database
-          terragrunt init -upgrade
-          cd ../data-store/cache
-          terragrunt init -upgrade
-
       - name: Deploy Backend
         working-directory: ./tofu/environments/prod/services/backend-service
         run: |
