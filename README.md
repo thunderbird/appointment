@@ -32,14 +32,6 @@ A MySQL database will be accessible via `localhost:3306` with username and passw
 
 On first-run the database will initialize, and a first time setup command will be triggered. Going forward database migrations will automatically run on `docker-compose up`.
 
-## Testing
-
-To run tests in the frontend, do:
-
-```bash
-cd frontend && npm test
-```
-
 ## Contributing
 
 Contributions are very welcome. Please lint/format code before creating PRs.
