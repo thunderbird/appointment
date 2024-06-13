@@ -38,7 +38,8 @@ import sentry_sdk
 
 def _common_setup():
     # load any available .env into env
-    load_dotenv()
+    if os.getenv('APP_ENV') != APP_ENV_TEST:
+        load_dotenv()
 
     # This needs to be ran before any other imports
     normalize_secrets()
