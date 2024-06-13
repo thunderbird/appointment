@@ -48,6 +48,14 @@ After this you can run tests with:
 cd backend && python -m pytest
 ```
 
+## Database Migrations
+
+To generate a database migration, bash into a running backend container and run:
+
+```bash
+alembic revision -m "create ... table"
+```
+
 ## Commands
 
 Backend has a light selection of cli commands available to be run inside a container.
