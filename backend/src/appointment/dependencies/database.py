@@ -39,7 +39,7 @@ def get_redis() -> Redis | RedisCluster | None:
     port = int(os.getenv('REDIS_PORT'))
     db = os.getenv('REDIS_DB')
     password = os.getenv('REDIS_PASSWORD')
-    ssl = os.getenv('REDIS_USE_SSL')
+    ssl = True if os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1' else False
 
     if os.getenv('REDIS_USE_CLUSTER'):
         return RedisCluster(
