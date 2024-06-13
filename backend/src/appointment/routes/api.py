@@ -37,7 +37,6 @@ def health(db: Session = Depends(get_db)):
     try:
         db.query(Subscriber).first()
     except Exception as ex:
-        print("Ex -> ",ex)
         sentry_sdk.capture_exception(ex)
         return JSONResponse(content=l10n('health-bad'), status_code=503)
 
@@ -46,7 +45,6 @@ def health(db: Session = Depends(get_db)):
             redis_instance: Redis | RedisCluster | None = get_redis()
             redis_instance.ping()
         except Exception as ex:
-            print("Ex -> ", ex)
             sentry_sdk.capture_exception(ex)
             return JSONResponse(content=l10n('health-bad'), status_code=503)
 
