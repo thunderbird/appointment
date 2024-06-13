@@ -31,11 +31,8 @@
 <script setup>
 
 import PrimaryButton from '@/elements/PrimaryButton.vue';
-import { IconX } from '@tabler/icons-vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
-import ArtConfetti from '@/elements/arts/ArtConfetti.vue';
 import { useI18n } from 'vue-i18n';
-import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
 

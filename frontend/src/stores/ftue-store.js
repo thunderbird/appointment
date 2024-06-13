@@ -15,6 +15,15 @@ export const useFTUEStore = defineStore('FTUE', () => {
   // State
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));
 
+  /**
+   * State information for navigating the First Time User Experience
+   * @type {{
+   *   previous: null|ftueStep,
+   *   next: null|ftueStep,
+   *   title: string,
+   *   component: ComponentPublicInstance,
+   * }}
+   */
   const stepList = {
     [ftueStep.setupProfile]: {
       previous: null,
@@ -66,24 +75,17 @@ export const useFTUEStore = defineStore('FTUE', () => {
     },
   };
 
-  const ftueView = computed(() => {
-    if (!stepList[data.value.step]) {
-      // This should be an error component
-      return defineAsyncComponent({
-        loader: () => import('@/components/FTUE/SetupProfile.vue'),
-      });
-    }
-
-    return stepList[data.value.step].component;
-  });
+  /**
+   * Returns a deferred component instance.
+   * @type {ComputedRef}
+   */
+  const ftueView = computed(() => stepList[data.value.step]?.component ?? defineAsyncComponent({
+    loader: () => import('@/components/FTUE/SetupProfile.vue'),
+  }));
 
   const hasNextStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].next));
   const hasPreviousStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].previous));
-  const stepTitle = computed(() => {
-    if (stepList[data.value.step]) {
-      return stepList[data.value.step].title;
-    }
-  });
+  const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'Unknown Step!');
 
   const nextStep = () => {
     if (hasNextStep.value) {
