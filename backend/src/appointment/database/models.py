@@ -179,7 +179,7 @@ class Appointment(Base):
     __tablename__ = 'appointments'
 
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(UUIDType(native=False), default=uuid.uuid4(), index=True)
+    uuid = Column(UUIDType(native=False), default=uuid.uuid4, index=True, unique=True)
     calendar_id = Column(Integer, ForeignKey('calendars.id'))
     duration = Column(Integer)
     title = Column(encrypted_type(String))
