@@ -17,10 +17,10 @@
         'min-h-full pb-32 pt-8': routeIsPublic,
       }"
     >
-      <first-time-user-experience v-if="!currentUser.data.setup"></first-time-user-experience>
       <router-view/>
     </main>
     <footer-bar/>
+    <first-time-user-experience v-if="!currentUser.data.setup"></first-time-user-experience>
   </template>
   <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
     <not-authenticated-view/>

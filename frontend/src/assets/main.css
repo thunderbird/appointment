@@ -99,6 +99,16 @@
   .place-holder {
     @apply placeholder:text-gray-300 dark:placeholder:text-gray-500;
   }
+  /* Appointment Defaults */
+  .apmt-background-color {
+    @apply bg-white dark:bg-gray-700;
+  }
+  .apmt-text-color {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+  .apmt-error-color {
+    @apply text-red-600 dark:text-red-300;
+  }
 }
 
 /* vue specific classes */
