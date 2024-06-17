@@ -4,8 +4,29 @@
 
 
 @layer base {
-  input, select, textarea {
-    @apply transition-all dark:text-white bg-white dark:bg-gray-700 !border-gray-300 dark:!border-gray-500 focus:!ring-teal-500 focus:!border-teal-500 checked:!border-teal-500 checked:!bg-teal-500;
+
+  /* Yep this is needed to "properly" override tailwind form... */
+  [type='text'],
+  input:where(:not([type])),
+  [type='email'],
+  [type='url'],
+  [type='password'],
+  [type='number'],
+  [type='date'],
+  [type='datetime-local'],
+  [type='month'],
+  [type='search'],
+  [type='tel'],
+  [type='time'],
+  [type='week'],
+  [multiple],
+  textarea,
+  select,
+  input,
+  input:is(.dark *),
+  select:is(.dark *),
+  textarea:is(.dark *) {
+    @apply transition-all dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 focus:ring-teal-500 focus:border-teal-500 checked:border-teal-500 checked:bg-teal-500;
   }
 
   hr {
