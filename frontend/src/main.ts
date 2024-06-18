@@ -1,5 +1,5 @@
 // init app
-import App from '@/App';
+import App from '@/App.vue';
 import { createApp } from 'vue';
 
 // pinia state management
@@ -26,12 +26,12 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     app,
     dsn: import.meta.env.VITE_SENTRY_DSN,
     integrations: [
-      new Sentry.BrowserTracing({
+      Sentry.browserTracingIntegration({
         // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
         tracePropagationTargets: ['localhost', 'stage.appointment.day'],
-        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+        router,
       }),
-      new Sentry.Replay(),
+      Sentry.replayIntegration(),
     ],
     // Performance Monitoring
     // Capture 100% of the transactions, reduce in production!
@@ -58,7 +58,7 @@ const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
 
-const loc = localStorage?.getItem('locale') ?? (navigator.language || navigator.userLanguage);
+const loc = localStorage?.getItem('locale') ?? navigator.language;
 app.use(i18ninstance);
 useDayJS(app, loc);
 
