@@ -1,7 +1,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
-  content: ['./public/index.html', './src/**/*.{vue,js}'],
+  content: ['./public/index.html', './src/**/*.{vue,ts,js}'],
   theme: {
     fontFamily: {
       sans: ['"Open Sans"', ...defaultTheme.fontFamily.sans],
