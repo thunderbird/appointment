@@ -1,6 +1,8 @@
+import type { Config } from 'tailwindcss';
+
 const defaultTheme = require('tailwindcss/defaultTheme');
 
-module.exports = {
+export default {
   content: ['./public/index.html', './src/**/*.{vue,ts,js}'],
   theme: {
     fontFamily: {
@@ -28,4 +30,4 @@ module.exports = {
   },
   darkMode: 'class',
   plugins: [require('@tailwindcss/forms')],
-};
+} satisfies Config;

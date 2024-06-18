@@ -4,9 +4,10 @@ This is the frontend component of Thunderbird Appointment. It's written in VueJS
 
 ## Project setup
 
-Copy the [.env.example](.env.example) as `.env`. 
+Copy the [.env.example](.env.example) as `.env`.
 
 Then simply run:
+
 ```bash
 yarn install
 ```
