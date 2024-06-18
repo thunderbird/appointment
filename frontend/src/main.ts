@@ -26,12 +26,12 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     app,
     dsn: import.meta.env.VITE_SENTRY_DSN,
     integrations: [
-      new Sentry.BrowserTracing({
+      Sentry.browserTracingIntegration({
         // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
         tracePropagationTargets: ['localhost', 'stage.appointment.day'],
-        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+        router,
       }),
-      new Sentry.Replay(),
+      Sentry.replayIntegration(),
     ],
     // Performance Monitoring
     // Capture 100% of the transactions, reduce in production!
