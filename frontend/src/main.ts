@@ -1,5 +1,5 @@
 // init app
-import App from '@/App';
+import App from '@/App.vue';
 import { createApp } from 'vue';
 
 // pinia state management
@@ -58,7 +58,7 @@ const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide('apiUrl', apiUrl);
 app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
 
-const loc = localStorage?.getItem('locale') ?? (navigator.language || navigator.userLanguage);
+const loc = localStorage?.getItem('locale') ?? navigator.language;
 app.use(i18ninstance);
 useDayJS(app, loc);
 
