@@ -29,49 +29,31 @@ export const useFTUEStore = defineStore('FTUE', () => {
       previous: null,
       next: ftueStep.googlePermissions,
       title: 'Setup your profile',
-      component: defineAsyncComponent({
-        loader: () => import('@/components/FTUE/SetupProfile.vue'),
-      }),
     },
     [ftueStep.googlePermissions]: {
       previous: ftueStep.setupProfile,
       next: ftueStep.connectCalendars,
       title: 'Allow Google Calendar permissions',
-      component: defineAsyncComponent({
-        loader: () => import('@/components/FTUE/GooglePermissions.vue'),
-      }),
     },
     [ftueStep.connectCalendars]: {
       previous: ftueStep.googlePermissions,
       next: ftueStep.setupSchedule,
       title: 'Connect calendars',
-      component: defineAsyncComponent({
-        loader: () => import('@/components/FTUE/GooglePermissions.vue'),
-      }),
     },
     [ftueStep.setupSchedule]: {
       previous: ftueStep.connectCalendars,
       next: ftueStep.connectVideoConferencing,
       title: 'Create schedule',
-      component: defineAsyncComponent({
-        loader: () => import('@/components/FTUE/GooglePermissions.vue'),
-      }),
     },
     [ftueStep.connectVideoConferencing]: {
       previous: ftueStep.setupSchedule,
       next: ftueStep.finish,
       title: 'Connect video',
-      component: defineAsyncComponent({
-        loader: () => import('@/components/FTUE/GooglePermissions.vue'),
-      }),
     },
     [ftueStep.finish]: {
       previous: ftueStep.connectVideoConferencing,
       next: null,
       title: 'You are set to go!',
-      component: defineAsyncComponent({
-        loader: () => import('@/components/FTUE/GooglePermissions.vue'),
-      }),
     },
   };
 
@@ -87,7 +69,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const hasPreviousStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].previous));
   const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'Unknown Step!');
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (hasNextStep.value) {
       data.value.step = stepList[data.value.step].next;
     }
@@ -99,7 +81,9 @@ export const useFTUEStore = defineStore('FTUE', () => {
     }
   };
 
+  const currentStep = computed(() => data.value.step);
+
   return {
-    data, ftueView, nextStep, previousStep, hasNextStep, hasPreviousStep, stepTitle,
+    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle,
   };
 });

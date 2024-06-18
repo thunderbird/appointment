@@ -29,7 +29,18 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { defineEmits, onMounted } from 'vue';
 
 const { t } = useI18n();
+
+const emits = defineEmits(['ready']);
+
+const onSubmit = async () => {
+
+};
+
+onMounted(() => {
+  emits('ready', onSubmit);
+});
 
 </script>

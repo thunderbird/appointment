@@ -20,7 +20,6 @@
       <router-view/>
     </main>
     <footer-bar/>
-    <first-time-user-experience v-if="!currentUser.data.setup"></first-time-user-experience>
   </template>
   <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
     <not-authenticated-view/>
@@ -48,7 +47,6 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-import FirstTimeUserExperience from '@/components/FirstTimeUserExperience.vue';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
@@ -139,7 +137,7 @@ const scheduleStore = useScheduleStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
-  () => ['availability', 'home', 'login', 'post-login', 'confirmation', 'terms', 'privacy'].includes(route.name),
+  () => route.meta?.isPublic,
 );
 const routeIsHome = computed(
   () => ['home'].includes(route.name),

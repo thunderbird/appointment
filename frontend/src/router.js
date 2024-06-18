@@ -7,6 +7,7 @@ import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
+import { useUserStore } from '@/stores/user-store';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView'));
@@ -16,6 +17,7 @@ const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
+const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
 
 /**
  * Defined routes for Thunderbird Appointment
@@ -27,26 +29,41 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/post-login/:token',
     name: 'post-login',
     component: PostLoginView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/user/:username/:signatureOrSlug',
     name: 'availability',
     component: BookingView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/user/:username/:signature/confirm/:slot/:token/:confirmed',
     name: 'confirmation',
     component: BookingConfirmationView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/schedule',
@@ -86,11 +103,22 @@ const routes = [
     path: '/privacy',
     name: 'privacy',
     component: LegalView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/terms',
     name: 'terms',
     component: LegalView,
+    meta: {
+      isPublic: true,
+    },
+  },
+  {
+    path: '/setup',
+    name: 'setup',
+    component: FirstTimeUserExperienceView,
   },
   // Admin
   {
@@ -109,6 +137,15 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from) => {
+  if (!to.meta?.isPublic && to.name !== 'setup') {
+    const user = useUserStore();
+    if (user?.data?.email && !user.data.setup) {
+      return { name: 'setup' };
+    }
+  }
 });
 
 export default router;
