@@ -1,15 +1,20 @@
 <template>
-  <div class="fixed left-0 top-0 z-[55] h-screen w-screen overflow-hidden bg-gray-800" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
+  <div class="page-ftue overlay fixed left-0 top-0 z-[55] h-screen w-screen overflow-hidden" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div
-      class="position-center apmt-background-color fixed z-[60] flex size-full max-h-xl max-w-3xl  gap-6 rounded-xl bg-white p-12 drop-shadow-xl"
+      class="modal "
     >
       <div class="relative flex size-full w-full flex-col items-center gap-4">
-        <div id="ftue-title" class="text-2xl font-semibold text-teal-500">
+        <word-mark/>
+        <h2 id="ftue-title">
           {{ stepTitle }}
-        </div>
+        </h2>
         <div class="flex w-full flex-col items-center justify-center">
-          <SetupProfile v-if="currentStep === ftueStep.setupProfile"/>
-          <GooglePermissions v-else-if="currentStep === ftueStep.googlePermissions"/>
+          <setup-profile v-if="currentStep === ftueStep.setupProfile"/>
+          <google-permissions v-else-if="currentStep === ftueStep.googlePermissions"/>
+        </div>
+        <div class="divider"></div>
+        <div class="footer">
+          <router-link to="support">Support</router-link>
         </div>
       </div>
     </div>
@@ -23,7 +28,7 @@ import { storeToRefs } from 'pinia';
 import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import { ftueStep } from '@/definitions';
 import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
-import InfoBar from '@/elements/InfoBar.vue';
+import WordMark from '@/elements/WordMark.vue';
 
 const ftueStore = useFTUEStore();
 const {
@@ -31,3 +36,66 @@ const {
 } = storeToRefs(ftueStore);
 
 </script>
+
+<style scoped>
+.overlay {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: #26272A;
+  align-items: center;
+  justify-content: center;
+}
+/* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
+.modal {
+  position: relative;
+  width: 50rem; /* 800px */
+  height: 37.5rem; /* 600px */
+  background-image: url('@/assets/svg/ftue-background.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 2rem 2rem 0;
+}
+.modal:before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 12px;
+  filter: blur(64px);
+  margin: 50% 5% 0;
+  opacity: 0.8;
+  z-index: -1;
+  background: linear-gradient(118.89deg, #A3ECE3 -1.91%, #03AFD7 48.8%, #008080 100.54%);
+}
+
+#ftue-title {
+  color: var(--tbpro-text);
+  font-family: 'Inter', 'sans-serif';
+  font-weight: 400;
+  font-size: 1.375rem;
+  line-height: 1.664rem;
+}
+
+.divider {
+  width: 50rem;
+  height: 1px;
+  border-radius: unset;
+  background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
+  position: absolute;
+  bottom: 4rem;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  height: 4rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  a {
+    color: var(--tbpro-primary);
+    font-size: 0.75rem;
+    line-height: 1.5rem;
+  }
+}
+</style>

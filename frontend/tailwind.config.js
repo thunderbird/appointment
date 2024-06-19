@@ -1,4 +1,5 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
+const plugin = require('tailwindcss/plugin.js');
 
 module.exports = {
   content: ['./public/index.html', './src/**/*.{vue,js}'],
@@ -44,5 +45,8 @@ module.exports = {
     },
   },
   darkMode: 'class',
-  plugins: [require('@tailwindcss/forms')],
+
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 };

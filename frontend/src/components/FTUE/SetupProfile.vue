@@ -1,22 +1,21 @@
 <script setup>
 
-import TextInput from '@/components/inputs/TextInput.vue';
-import SelectInput from '@/components/inputs/SelectInput.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import {
   inject, ref,
 } from 'vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
-import InfoBar from '@/elements/InfoBar.vue';
 
-const ftueStore = useFTUEStore();
 const dj = inject('dayjs');
+const ftueStore = useFTUEStore();
 const {
   hasNextStep,
 } = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
+const { nextStep } = ftueStore;
 const user = useUserStore();
 
 const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone) => ({
@@ -45,22 +44,24 @@ const onSubmit = async () => {
 
 <template>
   <div class="flex w-full max-w-sm flex-col gap-4">
-    <InfoBar>
-      <p>This is a test error, wooooo!</p>
-    </InfoBar>
-    <form ref="formRef" class="flex flex-col gap-4" autocomplete="off" autofocus>
-      <TextInput name="full-name" v-model="fullName" required>Full Name</TextInput>
-      <TextInput name="username" v-model="username" required>Username</TextInput>
-      <SelectInput name="timezone" :options="timezoneOptions" v-model="timezone" required>Timezone</SelectInput>
+    <form ref="formRef" class="flex flex-col" autocomplete="off" autofocus>
+      <text-input name="full-name" v-model="fullName" required>Full Name</text-input>
+      <text-input name="username" v-model="username" required>Username</text-input>
+      <select-input name="timezone" :options="timezoneOptions" v-model="timezone" required>Timezone</select-input>
     </form>
   </div>
-  <div class="absolute bottom-0 flex gap-4">
+  <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
     <primary-button
       class="btn-continue"
-      label="Continue"
       title="Continue"
       v-if="hasNextStep"
       @click="onSubmit()"
-    />
+    >Continue</primary-button>
   </div>
 </template>
+
+<style scoped>
+form {
+  gap: 1.875rem;
+}
+</style>

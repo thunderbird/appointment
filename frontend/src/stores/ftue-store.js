@@ -28,7 +28,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
     [ftueStep.setupProfile]: {
       previous: null,
       next: ftueStep.googlePermissions,
-      title: 'Setup your profile',
+      title: 'Create your profile',
     },
     [ftueStep.googlePermissions]: {
       previous: ftueStep.setupProfile,

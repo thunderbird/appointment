@@ -13,6 +13,12 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   const hasConnectedCalendars = computed(() => connectedCalendars.value.length > 0);
 
+  const connectGoogleCalendar = async (call, email) => {
+    const urlFriendlyEmail = encodeURIComponent(email);
+    const googleUrl = await call(`google/auth?email=${urlFriendlyEmail}`).get();
+    window.location.href = googleUrl.data.value.slice(1, -1);
+  };
+
   /**
    * Get all calendars for current user
    * @param {function} call preconfigured API fetch function
@@ -39,6 +45,6 @@ export const useCalendarStore = defineStore('calendars', () => {
   };
 
   return {
-    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset,
+    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset, connectGoogleCalendar,
   };
 });
