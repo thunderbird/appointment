@@ -4,11 +4,15 @@ defineProps({
     type: String,
     default: 'secondary',
   },
+  size: {
+    type: String,
+    default: 'regular',
+  },
 });
 </script>
 
 <template>
-  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary'}">
+  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}">
     <span class="icon">
       <slot name="icon"/>
     </span>
@@ -106,7 +110,21 @@ button {
 }
 
 .text {
+  user-select: none;
   padding: 0.75rem 1.5rem 0.75rem 1.5rem;
 }
 
+.small {
+  .text {
+    text-transform: uppercase;
+    font-size: 0.5625rem;
+    padding: 0.5625rem;
+    font-weight: 700;
+  }
+
+  &button {
+    min-width: initial;
+    height: 1.25rem
+  }
+}
 </style>

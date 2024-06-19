@@ -75,6 +75,8 @@ select {
   border-color: var(--tbpro-input-border);
   border-radius: var(--border-radius);
 
+  font-weight: 400;
+
   &:hover {
     border-color: var(--tbpro-input-hover-border);
   }

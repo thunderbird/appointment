@@ -62,6 +62,6 @@ const onSubmit = async () => {
 
 <style scoped>
 form {
-  gap: 1.875rem;
+  gap: 1rem;
 }
 </style>

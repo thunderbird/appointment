@@ -140,10 +140,11 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from) => {
-  if (!to.meta?.isPublic && to.name !== 'setup') {
+  if (!to.meta?.isPublic && !['setup', 'contact', undefined].includes(to.name)) {
     const user = useUserStore();
-    if (user?.data?.email && !user.data.setup) {
-      return { name: 'setup' };
+    if (user && user.data?.email && !user.data.setup) {
+      console.log('To -> ', to);
+      return { ...to, name: 'setup' };
     }
   }
 });
