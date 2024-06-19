@@ -6,7 +6,7 @@
     <SyncCard class="sync-card" v-model="calendars" title="Calendars">
       <template v-slot:icon>
         <span class="icon-calendar">
-          <img src="@/assets/svg/icons/calendar.svg" alt="calendar"/>
+          <img src="@/assets/svg/icons/calendar.svg" alt="calendar icon" title="calendar icon"/>
         </span>
       </template>
     </SyncCard>
@@ -22,10 +22,10 @@
     </secondary-button>
     <primary-button
       class="btn-continue"
-      title="Continue"
+      :title="continueTitle"
       v-if="hasNextStep"
       @click="onSubmit()"
-      :disabled="isLoading"
+      :disabled="isLoading || !selected"
     >
       Continue
     </primary-button>
@@ -59,6 +59,8 @@ const { previousStep, nextStep } = ftueStore;
 
 const calendarStore = useCalendarStore();
 const calendars = ref([]);
+const selected = computed(() => calendars.value.filter((item) => item.checked).length);
+const continueTitle = computed(() => (selected.value ? 'Continue' : 'Please enable one calendar to continue'));
 
 onMounted(async () => {
   await calendarStore.fetch(call);
@@ -67,7 +69,6 @@ onMounted(async () => {
     label: calendar.title,
     checked: calendar.connected,
   }));
-  console.log(calendarStore.calendars);
 });
 
 const onSubmit = async () => {
@@ -87,11 +88,5 @@ const onSubmit = async () => {
 }
 .sync-card {
   width: 27.5rem;
-}
-.google-calendar-logo {
-  display: inline-block;
-  background-image: url('@/assets/svg/google-calendar-logo.svg');
-  width: 1.625rem;
-  height: 1.625rem;
 }
 </style>

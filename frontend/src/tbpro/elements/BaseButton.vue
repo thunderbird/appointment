@@ -1,3 +1,13 @@
+<template>
+  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}">
+    <span class="icon">
+      <slot name="icon"/>
+    </span>
+    <span class="text">
+      <slot/>
+    </span>
+  </button>
+</template>
 <script setup>
 defineProps({
   type: {
@@ -10,25 +20,13 @@ defineProps({
   },
 });
 </script>
-
-<template>
-  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}">
-    <span class="icon">
-      <slot name="icon"/>
-    </span>
-    <span class="text">
-      <slot/>
-    </span>
-  </button>
-</template>
-
 <style scoped>
 .primary {
   background-color: var(--tbpro-primary);
   border-color: var(--tbpro-primary-hover);
   color: var(--neutral);
 
-  &:hover {
+  &:hover:enabled {
     background-color: var(--tbpro-primary-hover);
     border-color: var(--success-pressed);
   }
@@ -45,7 +43,7 @@ defineProps({
   border-color: var(--tbpro-secondary-border);
   color: var(--tbpro-text);
 
-  &:hover {
+  &:hover:enabled {
     box-shadow: 0 0.25rem 0.125rem -0.1875rem #0000001A;
   }
 

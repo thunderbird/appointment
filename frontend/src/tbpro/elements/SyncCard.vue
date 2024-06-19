@@ -10,7 +10,7 @@
           {{ selected }} Selected
         </div>
       </div>
-      <primary-button class="select-all" size="small" @click="selectAll">Select All</primary-button>
+      <primary-button class="select-all" size="small" @click="selectAll" title="Select all calendars">Select All</primary-button>
     </div>
     <ul class="rows">
       <li class="row" v-for="(item, index) in model" :key="item.key">
