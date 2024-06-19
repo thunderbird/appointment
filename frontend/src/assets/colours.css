@@ -1,0 +1,29 @@
+html {
+  /* Generic colours */
+  --neutral: #FEFFFF;
+  --neutral-200: #E4E4E7;
+  --neutral-500: #737584;
+
+  --surface-subtle: #F7F7F7;
+  --surface-border: var(--neutral-200);
+  --surface-intense: #777580;
+  --success-pressed: #194E2C;
+
+  --tbpro-primary: #008080;
+  --tbpro-primary-hover: #066769;
+  --tbpro-primary-pressed: #0A5757;
+
+  --tbpro-secondary: var(--surface-subtle);
+  --tbpro-secondary-border: var(--surface-border);
+  --tbpro-secondary-pressed: var(--neutral-500);
+  --tbpro-secondary-pressed-border: var(--surface-intense);
+
+  --tbpro-disabled: var(--neutral-200);
+
+  --tbpro-text: #26272A;
+  --tbpro-text-muted: #737584;
+
+
+
+
+}
