@@ -1,20 +1,19 @@
 <template>
   <div class="page-ftue overlay fixed left-0 top-0 z-[55] h-screen w-screen overflow-hidden" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
-    <div
-      class="modal "
-    >
+    <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
-        <word-mark/>
+        <word-mark v-if="currentStep === ftueStep.setupProfile"/>
         <h2 id="ftue-title">
           {{ stepTitle }}
         </h2>
         <div class="flex w-full flex-col items-center justify-center">
           <setup-profile v-if="currentStep === ftueStep.setupProfile"/>
           <google-permissions v-else-if="currentStep === ftueStep.googlePermissions"/>
+          <connect-calendars v-else-if="currentStep === ftueStep.connectCalendars"/>
         </div>
         <div class="divider"></div>
         <div class="footer">
-          <router-link to="support">Support</router-link>
+          <router-link to="contact">Support</router-link>
         </div>
       </div>
     </div>
@@ -29,11 +28,18 @@ import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import { ftueStep } from '@/definitions';
 import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
 import WordMark from '@/elements/WordMark.vue';
+import { onMounted } from 'vue';
+import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 
 const ftueStore = useFTUEStore();
 const {
   stepTitle, currentStep,
 } = storeToRefs(ftueStore);
+
+onMounted(() => {
+  // Force light-mode
+  localStorage?.setItem('theme', 'light');
+});
 
 </script>
 
@@ -51,9 +57,11 @@ const {
   position: relative;
   width: 50rem; /* 800px */
   height: 37.5rem; /* 600px */
+  background-color: white;
   background-image: url('@/assets/svg/ftue-background.svg');
   background-size: cover;
   background-repeat: no-repeat;
+  border-radius: 0.75rem;
   padding: 2rem 2rem 0;
 }
 .modal:before {

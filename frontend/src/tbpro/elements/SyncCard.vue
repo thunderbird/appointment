@@ -47,6 +47,7 @@ defineProps({
   background: var(--neutral);
   font-family: 'Inter', 'sans-serif';
   font-size: var(--txt-input);
+  color: var(--tbpro-text);
 }
 
 .header {
@@ -92,10 +93,18 @@ label {
 }
 
 input {
-    width: 1.0rem;
-    height: 1.0rem;
-  &:checked {
+  width: 1.0rem;
+  height: 1.0rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-intense);
 
+  &:focus {
+    outline-color: var(--text-highlight);
+  }
+
+  &:checked {
+    border-color: var(--text-highlight);
+    color: var(--text-highlight);
   }
 }
 
