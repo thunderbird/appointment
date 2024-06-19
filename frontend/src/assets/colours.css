@@ -4,6 +4,10 @@ html {
   --neutral-200: #E4E4E7;
   --neutral-500: #737584;
 
+  --critical: #DC2626;
+  --critical-default: #991B1B;
+
+  --surface-base: #FEFFFF;
   --surface-subtle: #F7F7F7;
   --surface-border: var(--neutral-200);
   --surface-intense: #777580;
@@ -19,6 +23,13 @@ html {
   --tbpro-secondary-pressed-border: var(--surface-intense);
 
   --tbpro-disabled: var(--neutral-200);
+
+  --tbpro-input: var(--surface-base);
+  --tbpro-input-border: var(--surface-border);
+  --tbpro-input-hover-border: var(--surface-intense);
+  --tbpro-select-open: var(--surface-subtle);
+  --tbpro-select-open-border: var(--surface-intense);
+
 
   --tbpro-text: #26272A;
   --tbpro-text-muted: #737584;

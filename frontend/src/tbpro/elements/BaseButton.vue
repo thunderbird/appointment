@@ -59,10 +59,10 @@ button {
   align-items: center;
 
   border: solid 0.063rem;
-  border-radius: 0.188rem; /* 3px */
+  border-radius: var(--border-radius);
   box-shadow: 0 0.375rem 0.188rem -0.25rem #152F3C4D;
   font-family: 'Inter', 'sans-serif';
-  font-size: 0.813rem; /* 13px */
+  font-size: var(--txt-input); /* 13px */
   line-height: 0.983rem; /* 15.73px */
   font-weight: 700;
 

@@ -1,3 +1,7 @@
+@import './colours.css';
+@import './fonts.css';
+@import './variables.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
