@@ -16,6 +16,7 @@ import InfoBar from '@/elements/InfoBar.vue';
 import { defaultSlotDuration } from '@/definitions.js';
 import { useI18n } from 'vue-i18n';
 import { useCalendarStore } from '@/stores/calendar-store.js';
+import BubbleSelect from '@/elements/BubbleSelect.vue';
 
 const { t } = useI18n();
 const call = inject('call');
@@ -38,6 +39,10 @@ const calendarOptions = computed(() => connectedCalendars.value.map((calendar) =
 const durationOptions = [15, 30, 45, 60, 75, 90].map((min) => ({
   label: `${min} min`,
   value: min,
+}));
+const scheduleDayOptions = isoWeekdays.map((day) => ({
+  label: day.min[0],
+  value: day.iso,
 }));
 /**
  * @type {Ref<HTMLFormElement>}
@@ -81,9 +86,7 @@ onMounted(async () => {
         <text-input type="time" name="startTime" v-model="startTime" required>Start Time</text-input>
         <text-input type="time" name="endTime" v-model="endTime" required>End Time</text-input>
         </div>
-        <ul>
-          <li v-for="day in isoWeekdays" :key="day.iso">{{ day.min[0] }}</li>
-        </ul>
+        <bubble-select :options="scheduleDayOptions" />
       </div>
       <div class="column">
         <select-input name="calendar" v-model="calendar" :options="calendarOptions" required>Select Calendar</select-input>
@@ -138,11 +141,6 @@ form {
   justify-content: center;
   align-items: center;
   font-family: 'Inter', 'sans-serif';
-}
-
-ul {
-  display: flex;
-  gap: 1rem;
 }
 
 .scheduleInfo {
