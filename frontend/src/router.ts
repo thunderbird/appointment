@@ -1,5 +1,5 @@
 import { defineAsyncComponent } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import CalendarView from '@/views/CalendarView.vue';
@@ -9,19 +9,19 @@ import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 
 // lazy loaded components
-const ContactView = defineAsyncComponent(() => import('@/views/ContactView'));
-const AppointmentsView = defineAsyncComponent(() => import('@/views/AppointmentsView'));
-const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView'));
-const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView'));
-const LegalView = defineAsyncComponent(() => import('@/views/LegalView'));
-const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView'));
+const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
+const AppointmentsView = defineAsyncComponent(() => import('@/views/AppointmentsView.vue'));
+const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
+const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
+const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
+const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
 
 /**
  * Defined routes for Thunderbird Appointment
  * Note: All routes require authentication unless otherwise specified in App.vue::routeIsPublic
  */
-const routes = [
+const routes: RouteRecordRaw[] = [
   // instant loaded routes
   {
     path: '/',
