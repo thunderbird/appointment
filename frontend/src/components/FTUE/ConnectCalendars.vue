@@ -65,7 +65,7 @@ const continueTitle = computed(() => (selected.value ? 'Continue' : 'Please enab
 onMounted(async () => {
   await calendarStore.fetch(call);
   calendars.value = calendarStore.calendars.map((calendar) => ({
-    key: calendar.title,
+    key: calendar.id,
     label: calendar.title,
     checked: calendar.connected,
   }));
@@ -73,6 +73,13 @@ onMounted(async () => {
 
 const onSubmit = async () => {
   isLoading.value = true;
+
+  // FIXME: This is just lazy, we should be checking for checkbox dirty state but no one really should have a calendar connected here!
+  const calendarKeysConnect = calendars.value.filter((calendar) => calendar.checked).map((calendar) => calendar.key);
+  const calendarKeysDisconnect = calendars.value.filter((calendar) => !calendar.checked).map((calendar) => calendar.key);
+  await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(call, id)));
+  await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(call, id)));
+
   await nextStep();
 };
 

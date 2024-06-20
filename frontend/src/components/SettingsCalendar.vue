@@ -306,21 +306,21 @@ const addCalendar = (provider) => {
 const connectCalendar = async (id) => {
   loading.value = true;
 
-  await call(`cal/${id}/connect`).post();
+  await calendarStore.connectCalendar(call, id);
   await refreshData();
   await resetInput();
 };
 const disconnectCalendar = async (id) => {
   loading.value = true;
 
-  await call(`cal/${id}/disconnect`).post();
+  await calendarStore.disconnectCalendar(call, id);
   await refreshData();
   await resetInput();
 };
 const syncCalendars = async () => {
   loading.value = true;
 
-  await call('rmt/sync').post();
+  await calendarStore.syncCalendars(call);
   await refreshData();
 };
 const editCalendar = async (id) => {

@@ -58,7 +58,6 @@ export const useUserStore = defineStore('user', () => {
   /**
    * Retrieve the current signed url and update store
    * @param {function} fetch preconfigured API fetch function
-   * @return {boolean}
    */
   const updateSignedUrl = async (fetch) => {
     const { error, data: sigData } = await fetch('me/signature').get().json();
@@ -70,6 +69,20 @@ export const useUserStore = defineStore('user', () => {
     data.value.signedUrl = sigData.value.url;
 
     return { error: false };
+  };
+
+  const updateUser = async (fetch, inputData) => {
+    const { data: userData, error } = await fetch('me').put(inputData).json();
+    if (!error.value) {
+      // update user in store
+      await updateProfile(userData.value);
+      await updateSignedUrl(fetch);
+
+      return { error: false };
+    }
+
+    console.log('oops', data.value, error.value);
+    return { error: data.value ?? error.value };
   };
 
   /**
@@ -154,6 +167,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateScheduleUrls,
+    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateScheduleUrls, updateUser,
   };
 });

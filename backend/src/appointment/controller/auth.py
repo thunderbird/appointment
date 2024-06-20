@@ -7,6 +7,7 @@ import os
 import hashlib
 import hmac
 import datetime
+import urllib.parse
 
 from sqlalchemy.orm import Session
 
@@ -47,11 +48,13 @@ def signed_url_by_subscriber(subscriber: schemas.Subscriber):
     if not short_url:
         short_url = base_url
 
+    url_safe_username = urllib.parse.quote_plus(subscriber.username)
+
     # We sign with a different hash that the end-user doesn't have access to
     # We also need to use the default url, as short urls are currently setup as a redirect
-    url = f'{base_url}/{subscriber.username}/{subscriber.short_link_hash}'
+    url = f'{base_url}/{url_safe_username}/{subscriber.short_link_hash}'
 
     signature = sign_url(url)
 
     # We return with the signed url signature
-    return f'{short_url}/{subscriber.username}/{signature}'
+    return f'{short_url}/{url_safe_username}/{signature}'

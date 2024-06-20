@@ -3,7 +3,7 @@
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import {
-  inject, ref,
+  inject, onMounted, ref,
 } from 'vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { storeToRefs } from 'pinia';
@@ -11,6 +11,7 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 
 const dj = inject('dayjs');
+const call = inject('call');
 const ftueStore = useFTUEStore();
 const {
   hasNextStep,
@@ -30,10 +31,24 @@ const formRef = ref();
 const fullName = ref(user.data.name);
 const username = ref(user.data.username);
 const timezone = ref(user.data.timezone ?? dj.tz.guess());
+const isLoading = ref(false);
 
 const onSubmit = async () => {
+  isLoading.value = true;
+
   if (!formRef.value.checkValidity()) {
-    console.log('Nope!');
+    isLoading.value = false;
+    return;
+  }
+
+  const response = await user.updateUser(call, {
+    name: fullName.value,
+    username: username.value,
+    timezone: timezone.value,
+  });
+
+  if (response.error) {
+    isLoading.value = false;
     return;
   }
 
@@ -56,7 +71,8 @@ const onSubmit = async () => {
       title="Continue"
       v-if="hasNextStep"
       @click="onSubmit()"
-    >Continue</primary-button>
+    >Continue
+    </primary-button>
   </div>
 </template>
 

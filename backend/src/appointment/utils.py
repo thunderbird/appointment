@@ -46,7 +46,7 @@ def setup_encryption_engine():
 
 def retrieve_user_url_data(url):
     """Retrieves username, signature, and main url from /<username>/<signature>/"""
-    pattern = r"[\/]([\w\d\-_\.\@!]+)[\/]?([\w\d\-_\.\@!]*)[\/]?$"
+    pattern = r"[\/]([\w\d\-_\.\@!\+]+)[\/]?([\w\d\-_\.\@!\+]*)[\/]?$"
     match = re.findall(pattern, url)
 
     if match is None or len(match) == 0:

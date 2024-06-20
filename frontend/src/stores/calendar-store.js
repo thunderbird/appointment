@@ -44,7 +44,17 @@ export const useCalendarStore = defineStore('calendars', () => {
     isLoaded.value = false;
   };
 
+  const connectCalendar = async (call, id) => {
+    await call(`cal/${id}/connect`).post();
+  };
+  const disconnectCalendar = async (call, id) => {
+    await call(`cal/${id}/disconnect`).post();
+  };
+  const syncCalendars = async (call) => {
+    await call('rmt/sync').post();
+  };
+
   return {
-    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset, connectGoogleCalendar,
+    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset, connectGoogleCalendar, connectCalendar, disconnectCalendar, syncCalendars,
   };
 });
