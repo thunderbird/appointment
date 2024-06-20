@@ -75,22 +75,21 @@ const initFlowKey = 'tba/startedMeetingConnect';
 const errorMessage = ref('');
 
 onMounted(async () => {
-  // Error occurred during flow
-  if (route.query.error) {
-    localStorage?.removeItem(initFlowKey);
-    errorMessage.value = route.query.error;
-    await router.replace(route.path);
-  }
-
-  if (localStorage?.getItem(initFlowKey)) {
-    localStorage?.removeItem(initFlowKey);
-    await nextStep();
-    return;
-  }
-
   isLoading.value = true;
   await externalConnectionStore.fetch(call);
   isLoading.value = false;
+
+  const isBackFromConnectFlow = localStorage?.getItem(initFlowKey);
+  localStorage?.removeItem(initFlowKey);
+
+  // Error occurred during flow
+  if (isBackFromConnectFlow && zoom.value.length === 0) {
+    return;
+  }
+
+  if (isBackFromConnectFlow) {
+    await nextStep();
+  }
 });
 
 const onSubmit = async () => {
@@ -131,9 +130,11 @@ const connectZoom = async () => {
   padding: 1rem;
   border-radius: 0.5625rem;
   background-color: color-mix(in srgb, var(--neutral) 65%, transparent);
+  border: 0.0625rem solid color-mix(in srgb, var(--neutral) 65%, transparent);
+  transition: var(--transition);
 
   &.zoom:hover {
-    border: 0.0625rem solid var(--teal-700);
+    border-color: var(--teal-700);
     cursor: pointer;
   }
 }
