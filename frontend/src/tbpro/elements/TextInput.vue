@@ -3,6 +3,10 @@ import { ref } from 'vue';
 
 defineProps({
   name: String,
+  type: {
+    type: String,
+    default: 'text',
+  },
   placeholder: {
     type: String,
     default: '',
@@ -36,7 +40,7 @@ const onInvalid = (evt) => {
     </span>
     <input
       v-model="model"
-      type="text"
+      :type="type"
       :id="name"
       :name="name"
       :disabled="disabled"

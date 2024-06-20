@@ -10,6 +10,7 @@ html {
   --surface-base: #FEFFFF;
   --surface-subtle: #F7F7F7;
   --surface-lower: #F7F7F7;
+  --surface-raised: var(--neutral);
   --surface-border: var(--neutral-200);
   --surface-intense: #777580;
   --success-pressed: #194E2C;

@@ -43,7 +43,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
     [ftueStep.setupSchedule]: {
       previous: ftueStep.connectCalendars,
       next: ftueStep.connectVideoConferencing,
-      title: 'Create schedule',
+      title: 'Set up your appointment availability',
     },
     [ftueStep.connectVideoConferencing]: {
       previous: ftueStep.setupSchedule,

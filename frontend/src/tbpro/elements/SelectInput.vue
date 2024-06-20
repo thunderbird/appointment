@@ -43,7 +43,7 @@ const onInvalid = (evt) => {
         {{ option.label }}
       </option>
     </select>
-    <span v-if="isInvalid" class="flex w-full text-left text-rose-500">
+    <span :class="{'visible': isInvalid}" class="help-label">
       {{ validationMessage }}
     </span>
   </label>
@@ -64,6 +64,21 @@ const onInvalid = (evt) => {
 .label {
   width: 100%;
   font-weight: 600;
+}
+
+.help-label {
+  visibility: hidden;
+  display: flex;
+  color: var(--critical-default);
+
+  width: 100%;
+  min-height: 0.9375rem;
+  font-size: 0.625rem;
+  line-height: 0.9375rem;
+}
+
+.visible {
+  visibility: visible;
 }
 
 .required {

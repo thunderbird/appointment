@@ -10,6 +10,7 @@
           <setup-profile v-if="currentStep === ftueStep.setupProfile"/>
           <google-permissions v-else-if="currentStep === ftueStep.googlePermissions"/>
           <connect-calendars v-else-if="currentStep === ftueStep.connectCalendars"/>
+          <setup-schedule v-else-if="currentStep === ftueStep.setupSchedule"/>
         </div>
         <div class="divider"></div>
         <div class="footer">
@@ -30,6 +31,7 @@ import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
 import WordMark from '@/elements/WordMark.vue';
 import { onMounted } from 'vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
+import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
 
 const ftueStore = useFTUEStore();
 const {
@@ -44,6 +46,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .overlay {
   display: flex;
   width: 100%;
@@ -52,11 +56,12 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
 }
+
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
   position: relative;
-  width: 50rem; /* 800px */
-  height: 37.5rem; /* 600px */
+  width: 100%;
+  height: 100%;
   background-color: white;
   background-image: url('@/assets/svg/ftue-background.svg');
   background-size: cover;
@@ -64,6 +69,7 @@ onMounted(() => {
   border-radius: 0.75rem;
   padding: 2rem 2rem 0;
 }
+
 .modal:before {
   content: '';
   position: absolute;
@@ -92,6 +98,7 @@ onMounted(() => {
   position: absolute;
   bottom: 4rem;
 }
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -100,10 +107,18 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+
   a {
     color: var(--tbpro-primary);
     font-size: 0.75rem;
     line-height: 1.5rem;
+  }
+}
+
+@media (--md) {
+  .modal {
+    width: 50rem; /* 800px */
+    height: 37.5rem; /* 600px */
   }
 }
 </style>

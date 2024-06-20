@@ -41,9 +41,11 @@ defineProps({
 });
 </script>
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .wrapper {
-  border-radius: 9px;
-  border: 1px solid var(--surface-border);
+  border-radius: 0.5625rem;
+  border: 0.0625rem solid var(--surface-border);
   background: var(--neutral);
   font-family: 'Inter', 'sans-serif';
   font-size: var(--txt-input);
@@ -51,9 +53,11 @@ defineProps({
 }
 
 .header {
+  display: flex;
+  flex-direction: column;
+
   position: relative;
   min-height: 3.375rem;
-  display: flex;
   gap: 0.5rem;
   padding: 0.75rem 0.625rem;
   border-top-left-radius: 0.5rem;
@@ -109,9 +113,18 @@ input {
 }
 
 .select-all {
-  position: relative;
   margin-left: auto;
-  margin-right: 0.25rem;
-  top: 2.25rem;
+  margin-right: auto;
+}
+
+@media (--md) {
+  .header {
+    flex-direction: row;
+  }
+  .select-all {
+    position: relative;
+    margin-right: 0.25rem;
+    top: 2.25rem;
+  }
 }
 </style>

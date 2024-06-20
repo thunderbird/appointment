@@ -72,11 +72,14 @@ onMounted(async () => {
 });
 
 const onSubmit = async () => {
-  // await nextStep();
+  isLoading.value = true;
+  await nextStep();
 };
 
 </script>
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .content {
   display: flex;
   flex-direction: column;
@@ -87,6 +90,12 @@ const onSubmit = async () => {
 
 }
 .sync-card {
-  width: 27.5rem;
+  width: 100%;
+}
+
+@media (--md) {
+  .sync-card {
+    width: 27.5rem;
+  }
 }
 </style>
