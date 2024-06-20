@@ -31,7 +31,7 @@ defineProps({
     border-color: var(--success-pressed);
   }
 
-  &:active {
+  &:active:enabled {
     background-color: var(--tbpro-primary-pressed);
     border-color: var(--tbpro-primary-pressed);
     box-shadow: none;
@@ -47,7 +47,7 @@ defineProps({
     box-shadow: 0 0.25rem 0.125rem -0.1875rem #0000001A;
   }
 
-  &:active {
+  &:active:enabled {
     background-color: var(--tbpro-secondary-pressed);
     border-color: var(--tbpro-secondary-pressed-border);
     color: var(--neutral);

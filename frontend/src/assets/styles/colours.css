@@ -4,6 +4,8 @@ html {
   --neutral-200: #E4E4E7;
   --neutral-500: #737584;
 
+  --teal-700: #008080;
+
   --critical: #DC2626;
   --critical-default: #991B1B;
 
@@ -17,7 +19,7 @@ html {
 
   --text-highlight: #107781;
 
-  --tbpro-primary: #008080;
+  --tbpro-primary: var(--teal-700);
   --tbpro-primary-hover: #066769;
   --tbpro-primary-pressed: #0A5757;
 

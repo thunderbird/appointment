@@ -11,16 +11,14 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import SyncCard from '@/tbpro/elements/SyncCard.vue';
 import InfoBar from '@/elements/InfoBar.vue';
-import { defaultSlotDuration } from '@/definitions.js';
+import { defaultSlotDuration } from '@/definitions';
 import { useI18n } from 'vue-i18n';
-import { useCalendarStore } from '@/stores/calendar-store.js';
+import { useCalendarStore } from '@/stores/calendar-store';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
 
 const { t } = useI18n();
 const call = inject('call');
-const dj = inject('dayjs');
 const isoWeekdays = inject('isoWeekdays');
 
 const ftueStore = useFTUEStore();
@@ -60,11 +58,14 @@ const duration = computed(() => `${bookingDuration.value} minute`);
 const isLoading = ref(false);
 
 const onSubmit = async () => {
+  isLoading.value = true;
   if (!formRef.value.checkValidity()) {
     console.log('Nope!');
+    isLoading.value = false;
+    return;
   }
 
-  // await nextStep();
+  await nextStep();
 };
 
 onMounted(async () => {

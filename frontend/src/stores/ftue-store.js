@@ -48,12 +48,12 @@ export const useFTUEStore = defineStore('FTUE', () => {
     [ftueStep.connectVideoConferencing]: {
       previous: ftueStep.setupSchedule,
       next: ftueStep.finish,
-      title: 'Connect video',
+      title: 'Connect your video meeting link',
     },
     [ftueStep.finish]: {
       previous: ftueStep.connectVideoConferencing,
       next: null,
-      title: 'You are set to go!',
+      title: 'You are ready to start booking',
     },
   };
 
@@ -82,8 +82,11 @@ export const useFTUEStore = defineStore('FTUE', () => {
   };
 
   const currentStep = computed(() => data.value.step);
+  const $reset = () => {
+    data.value.step = ftueStep.setupProfile;
+  };
 
   return {
-    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle,
+    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset,
   };
 });

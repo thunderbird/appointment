@@ -11,6 +11,14 @@
           <google-permissions v-else-if="currentStep === ftueStep.googlePermissions"/>
           <connect-calendars v-else-if="currentStep === ftueStep.connectCalendars"/>
           <setup-schedule v-else-if="currentStep === ftueStep.setupSchedule"/>
+          <connect-video v-else-if="currentStep === ftueStep.connectVideoConferencing"/>
+          <finish v-else-if="currentStep === ftueStep.finish"/>
+          <div class="error-page" v-else>
+            <span>🤔</span>
+            <h2>Huh, how did this happen?</h2>
+            <p>Looks like there was an error. Click the button below to go back!</p>
+            <primary-button @click="ftueStore.$reset()">Go back</primary-button>
+          </div>
         </div>
         <div class="divider"></div>
         <div class="footer">
@@ -32,6 +40,9 @@ import WordMark from '@/elements/WordMark.vue';
 import { onMounted } from 'vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
+import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
+import Finish from '@/components/FTUE/Finish.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 const ftueStore = useFTUEStore();
 const {
@@ -112,6 +123,31 @@ onMounted(() => {
     color: var(--tbpro-primary);
     font-size: 0.75rem;
     line-height: 1.5rem;
+  }
+}
+
+.error-page {
+  width: 100%;
+  height: 28.125rem;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', 'sans-serif';
+
+  span {
+    font-size: 11.25rem;
+  }
+
+  h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  p {
+    font-size: 0.8125rem
   }
 }
 

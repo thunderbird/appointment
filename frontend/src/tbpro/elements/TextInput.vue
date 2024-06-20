@@ -97,21 +97,26 @@ input {
   border-color: var(--tbpro-input-border);
   border-radius: var(--border-radius);
 
-  &:hover {
+  &:hover:enabled {
     border-color: var(--tbpro-input-hover-border);
   }
 
-  &:active {
+  &:active:enabled {
     background-color: var(--tbpro-select-open);
     border-color: var(--tbpro-select-open-border);
   }
 
-  &:focus {
+  &:focus:enabled {
     border-radius: 0.125rem;
   }
 
   &:invalid {
     border-color: var(--critical);
+  }
+
+  &:disabled {
+    filter: grayscale(50%);
+    cursor: not-allowed;
   }
 
   &::placeholder {
