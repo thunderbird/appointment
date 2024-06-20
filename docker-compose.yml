@@ -19,7 +19,7 @@ services:
     build: ./frontend
     volumes:
       - './frontend:/app'
-      - '/app/node_modules'
+      - 'node_modules:/app/node_modules'
     ports:
       - 8080:8080
     environment:
@@ -54,3 +54,4 @@ services:
 volumes:
   db: {}
   cache: {}
+  node_modules: {}
