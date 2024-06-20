@@ -44,6 +44,7 @@
     "node-fetch": "^3.3.2",
     "postcss": "^8.4.17",
     "postcss-nesting": "^12.0.3",
+    "postcss-custom-media": "^10.0.6",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^1.1.0"
   },
@@ -51,7 +52,8 @@
     "plugins": {
       "tailwindcss": {},
       "autoprefixer": {},
-      "postcss-nesting": {}
+      "postcss-nesting": {},
+      "postcss-custom-media": {}
     }
   },
   "type": "module"
