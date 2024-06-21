@@ -1,3 +1,4 @@
+import { Dayjs, ConfigType } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
@@ -7,6 +8,7 @@ import { Appointment, Slot } from '@/models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
+  const dj = inject<(date?: ConfigType) => Dayjs>('dayjs');
   const tzGuess = inject<string>('tzGuess');
 
   // State
@@ -28,7 +30,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
       a.active = a.status !== bookingStatus.booked;
       // convert start dates from UTC back to users timezone
       a.slots.forEach((s: Slot) => {
-        s.start = s.start.utc(true).tz(userStore.data.timezone ?? tzGuess);
+        s.start = dj(s.start).utc(true).tz(userStore.data.timezone ?? tzGuess);
       });
     });
   };
