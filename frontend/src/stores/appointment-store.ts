@@ -1,19 +1,21 @@
+import { UseFetchReturn } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { bookingStatus } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
+import { Appointment, Slot } from '@/models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
-  const dj = inject('dayjs');
+  const tzGuess = inject<string>('tzGuess');
 
   // State
   const isLoaded = ref(false);
 
   // Data
-  const appointments = ref([]);
+  const appointments = ref<Appointment[]>([]);
   const pendingAppointments = computed(
-    () => appointments.value.filter((a) => a?.slots[0]?.booking_status === bookingStatus.requested),
+    (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === bookingStatus.requested),
   );
 
   /**
@@ -25,17 +27,17 @@ export const useAppointmentStore = defineStore('appointments', () => {
     appointments.value.forEach((a) => {
       a.active = a.status !== bookingStatus.booked;
       // convert start dates from UTC back to users timezone
-      a.slots.forEach((s) => {
-        s.start = dj.utc(s.start).tz(userStore.data.timezone ?? dj.tz.guess());
+      a.slots.forEach((s: Slot) => {
+        s.start = s.start.utc(true).tz(userStore.data.timezone ?? tzGuess);
       });
     });
   };
 
   /**
    * Get all appointments for current user
-   * @param {function} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    */
-  const fetch = async (call) => {
+  const fetch = async (call: (url: string) => UseFetchReturn<Appointment[]> & PromiseLike<UseFetchReturn<Appointment[]>>) => {
     const { data, error } = await call('me/appointments').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
