@@ -18,6 +18,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowJs": true,
     "paths": {
