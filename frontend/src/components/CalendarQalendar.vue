@@ -174,7 +174,7 @@ const processCalendarColorScheme = (calendarTitle, calendarColor) => {
  * @param d - DayJS date object
  * @returns {*}
  */
-const applyTimezone = (d) => dj(d).utc(true).tz(dj.tz.guess());
+const applyTimezone = (d) => dj(d).utc().tz(dj.tz.guess());
 
 /**
  * Generates a list of Qalendar friendly event objects from events and appointments props.
