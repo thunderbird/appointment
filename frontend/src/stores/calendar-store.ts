@@ -17,7 +17,7 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   /**
    * Get all calendars for current user
-   * @param {function} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    */
   const fetch = async (call: (url: string) => UseFetchReturn<Calendar[]> & PromiseLike<UseFetchReturn<Calendar[]>>) => {
     if (isLoaded.value) {

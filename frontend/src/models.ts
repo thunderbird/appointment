@@ -54,3 +54,16 @@ export type Calendar = {
   title: string;
   color: string;
 };
+
+export type ExternalConnection = {
+  owner_id: number;
+  name: string;
+  type: string;
+  type_id: string;
+};
+
+export type ExternalConnectionCollection = {
+  fxa?: ExternalConnection[];
+  google?: ExternalConnection[];
+  zoom?: ExternalConnection[];
+};
