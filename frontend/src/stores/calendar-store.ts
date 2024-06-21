@@ -1,3 +1,5 @@
+import { Calendar } from '@/models';
+import { UseFetchReturn } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -7,9 +9,9 @@ export const useCalendarStore = defineStore('calendars', () => {
   const isLoaded = ref(false);
 
   // Data
-  const calendars = ref([]);
-  const unconnectedCalendars = computed(() => calendars.value.filter((cal) => !cal.connected));
-  const connectedCalendars = computed(() => calendars.value.filter((cal) => cal.connected));
+  const calendars = ref<Calendar[]>([]);
+  const unconnectedCalendars = computed((): Calendar[] => calendars.value.filter((cal) => !cal.connected));
+  const connectedCalendars = computed((): Calendar[] => calendars.value.filter((cal) => cal.connected));
 
   const hasConnectedCalendars = computed(() => connectedCalendars.value.length > 0);
 
@@ -17,7 +19,7 @@ export const useCalendarStore = defineStore('calendars', () => {
    * Get all calendars for current user
    * @param {function} call preconfigured API fetch function
    */
-  const fetch = async (call) => {
+  const fetch = async (call: (url: string) => UseFetchReturn<Calendar[]> & PromiseLike<UseFetchReturn<Calendar[]>>) => {
     if (isLoaded.value) {
       return;
     }

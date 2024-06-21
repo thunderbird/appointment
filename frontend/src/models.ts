@@ -47,3 +47,10 @@ export type Appointment = {
   calendar_color: string;
   active: boolean;
 };
+
+export type Calendar = {
+  id: number;
+  connected: boolean;
+  title: string;
+  color: string;
+};
