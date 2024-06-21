@@ -49,7 +49,7 @@ export type Appointment = {
 };
 
 export type Calendar = {
-  id: number;
+  id?: number;
   connected: boolean;
   title: string;
   color: string;
@@ -66,4 +66,34 @@ export type ExternalConnectionCollection = {
   fxa?: ExternalConnection[];
   google?: ExternalConnection[];
   zoom?: ExternalConnection[];
+};
+
+// This will be used later if we provide custom availabilities
+// in addition to general availability too
+export type Availability = {
+  id?: number;
+};
+
+export type Schedule = {
+  active: boolean;
+  name: string;
+  slug: string;
+  calendar_id: number;
+  location_type: number;
+  location_url: string;
+  details: string;
+  start_date: string;
+  end_date: string;
+  start_time: string;
+  end_time: string;
+  earliest_booking: number;
+  farthest_booking: number;
+  weekdays: number[];
+  slot_duration: number;
+  meeting_link_provider: string;
+  id: number;
+  time_created: string;
+  time_updated: string;
+  availabilities?: Availability[];
+  calendar: Calendar;
 };
