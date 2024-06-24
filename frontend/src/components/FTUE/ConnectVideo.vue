@@ -1,16 +1,21 @@
 <template>
   <div class="content">
-    <div class="card zoom" @click="connectZoom">
-      <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" alt="Zoom"/>
-      <p class="zoom-description">
-        Connect your Zoom account to generate instant meeting invites for each booking
-      </p>
-      <primary-button class="connect-zoom" :disabled="isLoading">Connect</primary-button>
+    <div class="cards">
+      <div class="card zoom" @click="connectZoom">
+        <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" alt="Zoom"/>
+        <p class="zoom-description">
+          Connect your Zoom account to generate instant meeting invites for each booking
+        </p>
+        <primary-button class="connect-zoom" :disabled="isLoading">Connect</primary-button>
+      </div>
+      <div class="card">
+        <strong>Custom video meeting link</strong>
+        <p>Use a single meeting link for all bookings from your selected provider</p>
+        <text-input name="custom-meeting-link" v-model="customMeetingLink" placeholder="http://meet.google.com">Video meeting link</text-input>
+      </div>
     </div>
-    <div class="card">
-      <h2>Custom video meeting link</h2>
-      <p>Use a single meeting link for all bookings from your selected provider</p>
-      <text-input name="custom-meeting-link" v-model="customMeetingLink" placeholder="http://meet.google.com">Video meeting link</text-input>
+    <div class="skip-text">
+      <a href="#" @click="onSkip">Skip connect video</a>
     </div>
   </div>
   <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
@@ -27,7 +32,7 @@
       :title="continueTitle"
       v-if="hasNextStep"
       @click="onSubmit()"
-      :disabled="isLoading || !selected"
+      :disabled="isLoading || customMeetingLink.length === 0"
     >
       Continue
     </primary-button>
@@ -41,13 +46,10 @@ import {
 } from 'vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SyncCard from '@/tbpro/elements/SyncCard.vue';
-import TextButton from '@/elements/TextButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store.js';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useRoute, useRouter } from 'vue-router';
 
 const { t } = useI18n();
@@ -66,7 +68,6 @@ const { previousStep, nextStep } = ftueStore;
 const externalConnectionStore = useExternalConnectionsStore();
 const { zoom } = storeToRefs(externalConnectionStore);
 const customMeetingLink = ref('');
-const selected = computed(() => zoom.value.length > 0 || customMeetingLink.value.length > 0);
 
 const continueTitle = '';// computed(() => (selected.value ? 'Continue' : 'Please enable one calendar to continue'));
 const initFlowKey = 'tba/startedMeetingConnect';
@@ -96,6 +97,11 @@ const onSubmit = async () => {
   await nextStep();
 };
 
+const onSkip = async () => {
+  isLoading.value = true;
+  await nextStep();
+};
+
 const connectZoom = async () => {
   localStorage?.setItem(initFlowKey, true);
   isLoading.value = true;
@@ -111,14 +117,21 @@ const connectZoom = async () => {
 .content {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', 'sans-serif';
+  font-size: 0.8125rem;
+  height: 23rem;
+  margin: 6.25rem auto auto;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
   gap: 3.125rem;
   width: 100%;
   justify-content: center;
   align-items: center;
-  height: 23rem;
-  margin-top: 6.25rem;
-  font-family: 'Inter', 'sans-serif';
-  font-size: 0.8125rem;
 }
 
 .card {
@@ -150,8 +163,23 @@ const connectZoom = async () => {
   }
 
   .content {
+    margin-top: 0;
+  }
+
+  .cards {
     flex-direction: row;
     margin-top: 0;
+  }
+
+  .skip-text {
+    color: var(--tbpro-primary-pressed);
+    margin-right: 0;
+    margin-left: auto;
+    text-transform: uppercase;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-decoration: underline;
+    padding: 0.75rem 1.5rem;
   }
 
   .connect-zoom {

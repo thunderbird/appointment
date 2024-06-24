@@ -1,8 +1,10 @@
 <template>
   <div class="content">
     <img src="@/assets/svg/ftue-finish.svg" alt="A user icon in front of two calendars."/>
+    <div class="copy">
     <p>Before you close this screen, copy your shareable schedule link to start receiving appointments.</p>
-    <a href="">A link goes here :)</a>
+    <a class="link" :href="myLink">{{ myLink }}</a>
+    </div>
   </div>
   <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
     <primary-button
@@ -21,12 +23,12 @@ import { useI18n } from 'vue-i18n';
 import {
   onMounted, inject, ref, computed,
 } from 'vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SyncCard from '@/tbpro/elements/SyncCard.vue';
+import { useUserStore } from '@/stores/user-store';
 
 const { t } = useI18n();
 
@@ -34,24 +36,18 @@ const call = inject('call');
 
 const isLoading = ref(false);
 
-const ftueStore = useFTUEStore();
-const {
-  hasNextStep, hasPreviousStep,
-} = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
+const userStore = useUserStore();
 
-const calendarStore = useCalendarStore();
-const calendars = ref([]);
-const selected = computed(() => calendars.value.filter((item) => item.checked).length);
-const continueTitle = computed(() => (selected.value ? 'Continue' : 'Please enable one calendar to continue'));
+const ftueStore = useFTUEStore();
+
+const myLink = ref('');
+const { nextStep } = ftueStore;
+
+const scheduleStore = useScheduleStore();
 
 onMounted(async () => {
-  await calendarStore.fetch(call);
-  calendars.value = calendarStore.calendars.map((calendar) => ({
-    key: calendar.title,
-    label: calendar.title,
-    checked: calendar.connected,
-  }));
+  await scheduleStore.fetch(call);
+  myLink.value = userStore.myLink;
 });
 
 const onSubmit = async () => {
@@ -72,13 +68,18 @@ const onSubmit = async () => {
   align-items: center;
 
 }
-.sync-card {
-  width: 100%;
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 60%;
+  font-size: 0.8125rem;
+  text-align: center;
 }
 
-@media (--md) {
-  .sync-card {
-    width: 27.5rem;
-  }
+.link {
+  color: var(--tbpro-primary);
+  text-decoration: underline;
 }
 </style>

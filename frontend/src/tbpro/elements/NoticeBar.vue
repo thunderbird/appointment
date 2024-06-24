@@ -56,6 +56,7 @@ const isError = props.type === 'error';
   padding: 0.5625rem 1.75rem;
   gap: 0.625rem;
   border: 0.0625rem solid;
+  min-width: 31.25rem;
 }
 .info {
   background-color: var(--tbpro-soft);

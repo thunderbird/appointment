@@ -80,6 +80,7 @@ const onSubmit = async () => {
     .format('HH:mm');
 
   const scheduleData = {
+    ...schedules?.value[0] ?? {},
     active: true,
     name: scheduleName.value,
     calendar_id: calendar.value,
@@ -164,11 +165,6 @@ onMounted(async () => {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
-
-/* Notice bar from the notice-bar element */
-.notice-bar {
-  min-width: 31.25rem;
-}
 
 form {
   gap: 1rem;

@@ -81,7 +81,6 @@ export const useUserStore = defineStore('user', () => {
       return { error: false };
     }
 
-    console.log('oops', data.value, error.value);
     return { error: data.value ?? error.value };
   };
 

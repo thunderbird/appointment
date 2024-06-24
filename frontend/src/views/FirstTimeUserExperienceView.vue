@@ -2,7 +2,7 @@
   <div class="page-ftue overlay fixed left-0 top-0 z-[55] h-screen w-screen overflow-hidden" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
-        <word-mark v-if="currentStep === ftueStep.setupProfile"/>
+        <word-mark v-if="currentStep === ftueStep.setupProfile || currentStep === ftueStep.finish"/>
         <h2 id="ftue-title">
           {{ stepTitle }}
         </h2>
