@@ -1,5 +1,4 @@
-import { ExternalConnection, ExternalConnectionCollection } from '@/models';
-import { UseFetchReturn } from '@vueuse/core';
+import { ExternalConnection, ExternalConnectionCollection, FetchExternalConnectionCollection } from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -23,7 +22,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
    * Get all external connections for current user
    * @param call preconfigured API fetch function
    */
-  const fetch = async (call: (url: string) => UseFetchReturn<ExternalConnectionCollection[]> & PromiseLike<UseFetchReturn<ExternalConnectionCollection[]>>) => {
+  const fetch = async (call: FetchExternalConnectionCollection) => {
     if (isLoaded.value) {
       return;
     }

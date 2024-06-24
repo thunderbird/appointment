@@ -1,10 +1,9 @@
 import { Dayjs, ConfigType } from 'dayjs';
-import { UseFetchReturn } from '@vueuse/core';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { bookingStatus } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
-import { Appointment, Slot } from '@/models';
+import { Appointment, FetchAppointmentList, Slot } from '@/models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
@@ -39,7 +38,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
    * Get all appointments for current user
    * @param call preconfigured API fetch function
    */
-  const fetch = async (call: (url: string) => UseFetchReturn<Appointment[]> & PromiseLike<UseFetchReturn<Appointment[]>>) => {
+  const fetch = async (call: FetchAppointmentList) => {
     const { data, error } = await call('me/appointments').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
