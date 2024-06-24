@@ -155,7 +155,7 @@ class Availability(AvailabilityBase):
 
 class ScheduleBase(BaseModel):
     active: bool | None = True
-    name: str = Field(min_length=1)
+    name: str = Field(min_length=1, max_length=128)
     slug: Optional[str] = None
     calendar_id: int
     location_type: LocationType | None = LocationType.inperson
@@ -250,14 +250,14 @@ class Invite(BaseModel):
 
 class SubscriberIn(BaseModel):
     timezone: str | None = None
-    username: str
-    name: str | None = None
+    username: str = Field(min_length=1, max_length=128)
+    name: Optional[str] = Field(min_length=1, max_length=128, default=None)
     avatar_url: str | None = None
     secondary_email: str | None = None
 
 
 class SubscriberBase(SubscriberIn):
-    email: str
+    email: str = Field(min_length=1, max_length=200)
     preferred_email: str | None = None
     level: SubscriberLevel | None = SubscriberLevel.basic
 
