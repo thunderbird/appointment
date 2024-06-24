@@ -97,3 +97,30 @@ export type Schedule = {
   availabilities?: Availability[];
   calendar: Calendar;
 };
+
+export type User = {
+  email: string;
+  preferredEmail: string;
+  level: number;
+  name: string;
+  timezone: string;
+  username: string;
+  signedUrl: string;
+  avatarUrl: string;
+  accessToken: string;
+  scheduleSlugs: string[];
+}
+
+export type Subscriber = {
+  username: string;
+  name: string;
+  email: string;
+  preferred_email: string;
+  level: number;
+  timezone: string;
+  avatar_url: string;
+}
+
+export type Signature = {
+  url: string;
+}
