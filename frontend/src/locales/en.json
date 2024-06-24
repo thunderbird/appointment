@@ -358,5 +358,12 @@
   "units": {
     "minutes": "{value} minutes",
     "none": "{value}"
+  },
+  "icons": {
+    "calendar": "Calendar",
+    "info": "Information",
+    "success": "Success",
+    "warning": "Warning",
+    "critical": "Critical"
   }
 }

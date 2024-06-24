@@ -1,8 +1,8 @@
 <template>
   <div class="flex w-full flex-col gap-4">
-    <InfoBar v-if="errorMessage">
+    <notice-bar v-if="errorMessage">
       {{ errorMessage }}
-    </InfoBar>
+    </notice-bar>
     <p class="mb-2 text-lg">{{ t('text.googlePermissionDisclaimer') }}</p>
     <ul class="text-md mx-8 list-disc">
       <li>
@@ -60,10 +60,10 @@ import {
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
-import { useUserStore } from '@/stores/user-store.js';
+import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import InfoBar from '@/elements/InfoBar.vue';
+import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 
 const { t } = useI18n();
 const route = useRoute();

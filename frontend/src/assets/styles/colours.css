@@ -6,8 +6,15 @@ html {
 
   --teal-700: #008080;
 
+  --yellow-900: #713F12;
+
+  --warning: #FACC15;
+  --warning-background: #FEFAE8;
+
   --critical: #DC2626;
   --critical-default: #991B1B;
+  --critical-pressed: #7F1D1D;
+  --critical-soft: #FEF2F2;
 
   --surface-base: #FEFFFF;
   --surface-subtle: #F7F7F7;
@@ -15,6 +22,9 @@ html {
   --surface-raised: var(--neutral);
   --surface-border: var(--neutral-200);
   --surface-intense: #777580;
+
+  --success: #1D783B;
+  --success-soft: #F4F9F4;
   --success-pressed: #194E2C;
 
   --text-highlight: #107781;
@@ -36,6 +46,7 @@ html {
   --tbpro-select-open: var(--surface-subtle);
   --tbpro-select-open-border: var(--surface-intense);
 
+  --tbpro-soft: #F3F9FC;
 
   --tbpro-text: #26272A;
   --tbpro-text-muted: #737584;

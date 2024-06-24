@@ -1,15 +1,15 @@
 <template>
   <div class="content">
-    <InfoBar>
+    <notice-bar>
       Connect your calendars to manage your availability
-    </InfoBar>
-    <SyncCard class="sync-card" v-model="calendars" title="Calendars">
+    </notice-bar>
+    <sync-card class="sync-card" v-model="calendars" title="Calendars">
       <template v-slot:icon>
         <span class="icon-calendar">
           <img src="@/assets/svg/icons/calendar.svg" alt="calendar icon" title="calendar icon"/>
         </span>
       </template>
-    </SyncCard>
+    </sync-card>
   </div>
   <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
     <secondary-button
@@ -41,9 +41,9 @@ import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
-import InfoBar from '@/elements/InfoBar.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
+import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 
 const { t } = useI18n();
 

@@ -11,13 +11,15 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import InfoBar from '@/elements/InfoBar.vue';
+import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import { defaultSlotDuration } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useCalendarStore } from '@/stores/calendar-store';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 const { t } = useI18n();
+const dj = inject('dayjs');
 const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
 
@@ -28,7 +30,9 @@ const {
 const { nextStep, previousStep } = ftueStore;
 const user = useUserStore();
 const calendarStore = useCalendarStore();
+const scheduleStore = useScheduleStore();
 const { connectedCalendars } = storeToRefs(calendarStore);
+const { schedules } = storeToRefs(scheduleStore);
 
 const calendarOptions = computed(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
@@ -46,9 +50,10 @@ const scheduleDayOptions = isoWeekdays.map((day) => ({
  * @type {Ref<HTMLFormElement>}
  */
 const formRef = ref();
+const errorMessage = ref(null);
 
 const scheduleName = ref(`${user.data.name}'s Availability`);
-const calendar = ref({});
+const calendar = ref(0);
 const startTime = ref('09:00');
 const endTime = ref('17:00');
 const bookingDuration = ref(defaultSlotDuration);
@@ -59,8 +64,36 @@ const isLoading = ref(false);
 
 const onSubmit = async () => {
   isLoading.value = true;
+  errorMessage.value = null;
   if (!formRef.value.checkValidity()) {
-    console.log('Nope!');
+    isLoading.value = false;
+    return;
+  }
+
+  const startTimeFormatted = dj(`${dj().format('YYYY-MM-DD')}T${startTime.value}:00`)
+    .tz(user.data.timezone ?? dj.tz.guess(), true)
+    .utc()
+    .format('HH:mm');
+  const endTimeFormatted = dj(`${dj().format('YYYY-MM-DD')}T${endTime.value}:00`)
+    .tz(user.data.timezone ?? dj.tz.guess(), true)
+    .utc()
+    .format('HH:mm');
+
+  const scheduleData = {
+    active: true,
+    name: scheduleName.value,
+    calendar_id: calendar.value,
+    start_time: startTimeFormatted,
+    end_time: endTimeFormatted,
+    slot_duration: bookingDuration.value,
+    weekdays: scheduleDays.value,
+  };
+
+  const data = schedules.value.length > 0 ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData) : await scheduleStore.createSchedule(call, scheduleData);
+  console.log(data);
+
+  if (data?.error) {
+    errorMessage.value = data?.message;
     isLoading.value = false;
     return;
   }
@@ -69,7 +102,11 @@ const onSubmit = async () => {
 };
 
 onMounted(async () => {
-  await calendarStore.fetch(call);
+  await Promise.all([
+    calendarStore.fetch(call),
+    scheduleStore.fetch(call),
+  ]);
+
   calendar.value = connectedCalendars.value[0].id;
 });
 
@@ -77,9 +114,12 @@ onMounted(async () => {
 
 <template>
   <div class="content">
-    <InfoBar>
+    <notice-bar type="error" v-if="errorMessage">
+      {{ errorMessage }}
+    </notice-bar>
+    <notice-bar v-else>
       You can edit this schedule later
-    </InfoBar>
+    </notice-bar>
     <form ref="formRef" autocomplete="off" autofocus>
       <div class="column">
         <text-input name="scheduleName" v-model="scheduleName" required>Schedule's Name</text-input>
@@ -87,7 +127,7 @@ onMounted(async () => {
         <text-input type="time" name="startTime" v-model="startTime" required>Start Time</text-input>
         <text-input type="time" name="endTime" v-model="endTime" required>End Time</text-input>
         </div>
-        <bubble-select :options="scheduleDayOptions" />
+        <bubble-select :options="scheduleDayOptions" v-model="scheduleDays" />
       </div>
       <div class="column">
         <select-input name="calendar" v-model="calendar" :options="calendarOptions" required>Select Calendar</select-input>
@@ -124,6 +164,11 @@ onMounted(async () => {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+/* Notice bar from the notice-bar element */
+.notice-bar {
+  min-width: 31.25rem;
+}
 
 form {
   gap: 1rem;

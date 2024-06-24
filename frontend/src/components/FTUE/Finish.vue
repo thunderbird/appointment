@@ -25,7 +25,6 @@ import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
-import InfoBar from '@/elements/InfoBar.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
 
