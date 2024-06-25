@@ -27,35 +27,34 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { useUserStore } from '@/stores/user-store';
-import { IconClipboardCheck, IconCopy } from '@tabler/icons-vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import TextButton from '@/elements/TextButton.vue';
 
 const { t } = useI18n();
-
 const call = inject('call');
 
-const isLoading = ref(false);
-
+const scheduleStore = useScheduleStore();
 const userStore = useUserStore();
-
 const ftueStore = useFTUEStore();
-
-const myLink = ref('');
 const { nextStep } = ftueStore;
 
-const scheduleStore = useScheduleStore();
-
-const copied = ref(false);
+const isLoading = ref(false);
+const myLink = ref('');
 
 onMounted(async () => {
-  await scheduleStore.fetch(call);
+  await Promise.all([
+    scheduleStore.fetch(call),
+    userStore.profile(call),
+  ]);
   myLink.value = userStore.myLink;
 });
 
 const onSubmit = async () => {
   isLoading.value = true;
+
+  await userStore.finishFTUE(call);
   await nextStep();
+  // Yeet them to calendar!
+  window.location = '/calendar';
 };
 
 </script>

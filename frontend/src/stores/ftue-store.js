@@ -54,7 +54,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
     },
     [ftueStep.finish]: {
       previous: ftueStep.connectVideoConferencing,
-      next: 999,
+      next: ftueStep.finish,
       title: 'You are ready to start booking',
     },
   };

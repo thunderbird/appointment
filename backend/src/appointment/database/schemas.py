@@ -259,6 +259,7 @@ class SubscriberIn(BaseModel):
 class SubscriberBase(SubscriberIn):
     email: str = Field(min_length=1, max_length=200)
     preferred_email: str | None = None
+    is_setup: bool | None = None
     level: SubscriberLevel | None = SubscriberLevel.basic
 
 
@@ -270,6 +271,7 @@ class Subscriber(SubscriberAuth):
     id: int
     calendars: list[Calendar] = []
     slots: list[Slot] = []
+    ftue_level: Optional[int] = Field(gte=0)
 
     class Config:
         from_attributes = True

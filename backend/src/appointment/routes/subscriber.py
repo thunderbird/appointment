@@ -4,13 +4,16 @@ from sqlalchemy.orm import Session
 
 from ..database import repo, schemas, models
 from ..database.models import Subscriber
-from ..dependencies.auth import get_admin_subscriber
+from ..dependencies.auth import get_admin_subscriber, get_subscriber
 from ..dependencies.database import get_db
 
 from ..exceptions import validation
 
 router = APIRouter()
 
+""" ADMIN ROUTES 
+These require get_admin_subscriber!
+"""
 
 @router.get('/', response_model=list[schemas.SubscriberAdminOut])
 def get_all_subscriber(db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
@@ -47,3 +50,16 @@ def enable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber =
 
     # Set active flag to true on the subscribers model.
     return repo.subscriber.enable(db, subscriber_to_enable)
+
+
+""" NON-ADMIN ROUTES """
+
+
+@router.post('/setup')
+def subscriber_is_setup(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """Flips ftue_level to 1"""
+    subscriber.ftue_level = 1
+    db.add(subscriber)
+    db.commit()
+
+    return True
