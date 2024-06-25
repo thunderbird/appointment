@@ -14,6 +14,8 @@ const initialObject = {
 export const useFTUEStore = defineStore('FTUE', () => {
   // State
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));
+  const infoMessage = ref(null);
+  const errorMessage = ref(null);
 
   /**
    * State information for navigating the First Time User Experience
@@ -52,7 +54,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
     },
     [ftueStep.finish]: {
       previous: ftueStep.connectVideoConferencing,
-      next: null,
+      next: 999,
       title: 'You are ready to start booking',
     },
   };
@@ -69,14 +71,21 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const hasPreviousStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].previous));
   const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'Unknown Step!');
 
+  const clearMessages = () => {
+    infoMessage.value = null;
+    errorMessage.value = null;
+  };
+
   const nextStep = async () => {
     if (hasNextStep.value) {
+      clearMessages();
       data.value.step = stepList[data.value.step].next;
     }
   };
 
   const previousStep = () => {
     if (hasPreviousStep.value) {
+      clearMessages();
       data.value.step = stepList[data.value.step].previous;
     }
   };
@@ -84,9 +93,10 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const currentStep = computed(() => data.value.step);
   const $reset = () => {
     data.value.step = ftueStep.setupProfile;
+    clearMessages();
   };
 
   return {
-    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset,
+    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset, infoMessage, errorMessage,
   };
 });

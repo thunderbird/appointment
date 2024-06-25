@@ -1,8 +1,5 @@
 <template>
   <div class="content">
-    <notice-bar>
-      Connect your calendars to manage your availability
-    </notice-bar>
     <form autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
     <sync-card class="sync-card" v-model="calendars" title="Calendars">
       <template v-slot:icon>
@@ -55,8 +52,9 @@ const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
 const {
-  hasNextStep, hasPreviousStep,
+  hasNextStep, hasPreviousStep, infoMessage,
 } = storeToRefs(ftueStore);
+
 const { previousStep, nextStep } = ftueStore;
 
 const calendarStore = useCalendarStore();
@@ -66,6 +64,9 @@ const continueTitle = computed(() => (selected.value ? 'Continue' : 'Please enab
 
 onMounted(async () => {
   isLoading.value = true;
+
+  infoMessage.value = 'Connect your calendars to manage your availability';
+
   await calendarStore.fetch(call, true);
   calendars.value = calendarStore.calendars.map((calendar) => ({
     key: calendar.id,

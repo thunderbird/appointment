@@ -1,9 +1,6 @@
 <template>
   <div class="content">
   <div class="card">
-    <notice-bar v-if="errorMessage">
-      {{ errorMessage }}
-    </notice-bar>
     <p class="">{{ t('text.googlePermissionDisclaimer') }}</p>
     <ul class="">
       <li>
@@ -65,7 +62,6 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -73,11 +69,10 @@ const router = useRouter();
 const call = inject('call');
 
 const isLoading = ref(false);
-const errorMessage = ref(null);
 
 const ftueStore = useFTUEStore();
 const {
-  hasNextStep, hasPreviousStep,
+  hasNextStep, hasPreviousStep, errorMessage,
 } = storeToRefs(ftueStore);
 const { previousStep, nextStep } = ftueStore;
 

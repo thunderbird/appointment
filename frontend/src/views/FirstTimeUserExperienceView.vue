@@ -2,11 +2,19 @@
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
-        <word-mark v-if="currentStep === ftueStep.setupProfile || currentStep === ftueStep.finish"/>
-        <h2 id="ftue-title">
-          {{ stepTitle }}
-        </h2>
-        <div class="flex w-full flex-col items-center justify-center">
+        <div class="modal-header">
+          <word-mark v-if="currentStep === ftueStep.setupProfile || currentStep === ftueStep.finish"/>
+          <h2 id="ftue-title">
+            {{ stepTitle }}
+          </h2>
+          <notice-bar type="error" v-if="errorMessage">
+            {{ errorMessage }}
+          </notice-bar>
+          <notice-bar v-else-if="infoMessage">
+            {{ infoMessage }}
+          </notice-bar>
+        </div>
+        <div class="modal-body flex w-full flex-col items-center justify-center">
           <setup-profile v-if="currentStep === ftueStep.setupProfile"/>
           <google-permissions v-else-if="currentStep === ftueStep.googlePermissions"/>
           <connect-calendars v-else-if="currentStep === ftueStep.connectCalendars"/>
@@ -33,20 +41,21 @@
 
 import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
-import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import { ftueStep } from '@/definitions';
-import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
-import WordMark from '@/elements/WordMark.vue';
 import { onMounted } from 'vue';
+import WordMark from '@/elements/WordMark.vue';
+import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
+import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
 import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 
 const ftueStore = useFTUEStore();
 const {
-  stepTitle, currentStep,
+  stepTitle, currentStep, infoMessage, errorMessage,
 } = storeToRefs(ftueStore);
 
 onMounted(() => {
@@ -73,6 +82,28 @@ onMounted(() => {
   justify-content: center;
 }
 
+.modal-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 8.0rem;
+  width: 100%;
+  gap: 1rem;
+}
+
+#ftue-title {
+  color: var(--tbpro-text);
+  font-family: 'Inter', 'sans-serif';
+  font-weight: 400;
+  font-size: 1.375rem;
+  line-height: 1.664rem;
+}
+
+.modal-body {
+  height: 15.0rem;
+}
+
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
   position: relative;
@@ -96,14 +127,6 @@ onMounted(() => {
   opacity: 0.8;
   z-index: -1;
   background: linear-gradient(118.89deg, #A3ECE3 -1.91%, #03AFD7 48.8%, #008080 100.54%);
-}
-
-#ftue-title {
-  color: var(--tbpro-text);
-  font-family: 'Inter', 'sans-serif';
-  font-weight: 400;
-  font-size: 1.375rem;
-  line-height: 1.664rem;
 }
 
 .divider {

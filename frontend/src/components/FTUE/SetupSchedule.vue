@@ -28,6 +28,7 @@ const {
   hasNextStep, hasPreviousStep,
 } = storeToRefs(ftueStore);
 const { nextStep, previousStep } = ftueStore;
+const { errorMessage, infoMessage } = storeToRefs(ftueStore);
 const user = useUserStore();
 const calendarStore = useCalendarStore();
 const scheduleStore = useScheduleStore();
@@ -51,7 +52,6 @@ const scheduleDayOptions = isoWeekdays.map((day) => ({
  * @type {Ref<HTMLFormElement>}
  */
 const formRef = ref();
-const errorMessage = ref(null);
 
 const schedule = ref({
   name: `${user.data.name}'s Availability`,
@@ -67,7 +67,9 @@ const isLoading = ref(false);
 
 const onSubmit = async () => {
   isLoading.value = true;
+
   errorMessage.value = null;
+
   if (!formRef.value.checkValidity()) {
     isLoading.value = false;
     return;
@@ -100,6 +102,7 @@ const onSubmit = async () => {
 
 onMounted(async () => {
   isLoading.value = true;
+  infoMessage.value = 'You can edit this schedule later';
 
   await Promise.all([
     calendarStore.fetch(call),
@@ -130,12 +133,6 @@ onMounted(async () => {
 
 <template>
   <div class="content">
-    <notice-bar type="error" v-if="errorMessage">
-      {{ errorMessage }}
-    </notice-bar>
-    <notice-bar v-else>
-      You can edit this schedule later
-    </notice-bar>
     <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
       <div class="column">
         <text-input name="scheduleName" v-model="schedule.name" required>Schedule's Name</text-input>

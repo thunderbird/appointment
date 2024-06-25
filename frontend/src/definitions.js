@@ -282,6 +282,19 @@ export const ftueStep = {
   finish: 100,
 };
 
+/**
+ *
+ * @enum
+ * @readonly
+ */
+export const tooltipPosition = {
+  none: 'pos-none',
+  top: 'pos-top',
+  bottom: 'pos-bottom',
+  left: 'pos-left',
+  right: 'pos-right',
+};
+
 export default {
   subscriberLevels,
   appointmentState,
@@ -300,4 +313,5 @@ export default {
   qalendarSlotDurations,
   tableDataType,
   tableDataButtonType,
+  tooltipPosition,
 };
