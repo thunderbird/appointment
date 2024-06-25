@@ -27,11 +27,6 @@ defineProps({
 </script>
 
 <style scoped>
-/*
-
-      pointer-events-none absolute bottom-full z-50 -translate-y-2 whitespace-nowrap text-wrap rounded-lg bg-black/75 px-3
-      py-1.5 font-sans text-sm font-normal text-white focus:outline-none
- */
 .tooltip {
   position: absolute;
   text-wrap: wrap;
@@ -59,9 +54,6 @@ defineProps({
 
 }
 
-/*
-absolute left-1/2 top-full size-3 -translate-x-1/2 fill-black/75
- */
 .beak {
   position: absolute;
   color: var(--surface-subtle);

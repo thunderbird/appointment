@@ -12,7 +12,6 @@
 <script setup>
 import { tooltipPosition } from '@/definitions';
 import ToolTip from '@/tbpro/elements/ToolTip.vue';
-import { ref } from 'vue';
 
 defineProps({
   type: {

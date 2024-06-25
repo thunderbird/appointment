@@ -3,7 +3,7 @@
     <img src="@/assets/svg/ftue-finish.svg" alt="A user icon in front of two calendars."/>
     <div class="copy">
     <p>Before you close this screen, copy your shareable schedule link to start receiving appointments.</p>
-    <a class="link" :href="myLink">{{ myLink }}</a>
+    <text-button class="link" :copy="myLink" :label="myLink"/>
     </div>
   </div>
   <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
@@ -27,6 +27,9 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { useUserStore } from '@/stores/user-store';
+import { IconClipboardCheck, IconCopy } from '@tabler/icons-vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import TextButton from '@/elements/TextButton.vue';
 
 const { t } = useI18n();
 
@@ -42,6 +45,8 @@ const myLink = ref('');
 const { nextStep } = ftueStore;
 
 const scheduleStore = useScheduleStore();
+
+const copied = ref(false);
 
 onMounted(async () => {
   await scheduleStore.fetch(call);
@@ -79,5 +84,10 @@ const onSubmit = async () => {
 .link {
   color: var(--tbpro-primary);
   text-decoration: underline;
+  border: none;
+  &:hover {
+    background-color: initial !important;
+    box-shadow: none !important;
+  }
 }
 </style>
