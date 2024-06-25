@@ -3,6 +3,7 @@
     <notice-bar>
       Connect your calendars to manage your availability
     </notice-bar>
+    <form autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
     <sync-card class="sync-card" v-model="calendars" title="Calendars">
       <template v-slot:icon>
         <span class="icon-calendar">
@@ -10,6 +11,7 @@
         </span>
       </template>
     </sync-card>
+    </form>
   </div>
   <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
     <secondary-button
@@ -63,12 +65,14 @@ const selected = computed(() => calendars.value.filter((item) => item.checked).l
 const continueTitle = computed(() => (selected.value ? 'Continue' : 'Please enable one calendar to continue'));
 
 onMounted(async () => {
-  await calendarStore.fetch(call);
+  isLoading.value = true;
+  await calendarStore.fetch(call, true);
   calendars.value = calendarStore.calendars.map((calendar) => ({
     key: calendar.id,
     label: calendar.title,
     checked: calendar.connected,
   }));
+  isLoading.value = false;
 });
 
 const onSubmit = async () => {

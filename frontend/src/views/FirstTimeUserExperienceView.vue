@@ -1,5 +1,5 @@
 <template>
-  <div class="page-ftue overlay fixed left-0 top-0 z-[55] h-screen w-screen overflow-hidden" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
+  <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
         <word-mark v-if="currentStep === ftueStep.setupProfile || currentStep === ftueStep.finish"/>
@@ -60,9 +60,14 @@ onMounted(() => {
 @import '@/assets/styles/custom-media.pcss';
 
 .overlay {
+  position: fixed;
   display: flex;
-  width: 100%;
-  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: 55;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   background-color: #727375;
   align-items: center;
   justify-content: center;

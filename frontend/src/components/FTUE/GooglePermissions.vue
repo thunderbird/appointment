@@ -1,10 +1,11 @@
 <template>
-  <div class="flex w-full flex-col gap-4">
+  <div class="content">
+  <div class="card">
     <notice-bar v-if="errorMessage">
       {{ errorMessage }}
     </notice-bar>
-    <p class="mb-2 text-lg">{{ t('text.googlePermissionDisclaimer') }}</p>
-    <ul class="text-md mx-8 list-disc">
+    <p class="">{{ t('text.googlePermissionDisclaimer') }}</p>
+    <ul class="">
       <li>
         <strong>
           {{ t('text.googlePermissionEventsName') }}
@@ -29,6 +30,7 @@
         {{ t(`text.settings.connectedAccounts.connect.googleLegal.link`) }}
       </a>
     </i18n-t>
+  </div>
   </div>
   <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
     <secondary-button
@@ -55,7 +57,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import {
-  defineEmits, onMounted, inject, ref,
+  onMounted, inject, ref,
 } from 'vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
@@ -80,11 +82,15 @@ const {
 const { previousStep, nextStep } = ftueStore;
 
 const calendarStore = useCalendarStore();
+const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
 
 onMounted(async () => {
+  await calendarStore.fetch(call);
+  const hasFlowKey = localStorage?.getItem(initFlowKey);
+
   // Error occurred during flow
-  if (route.query.error) {
+  if (route.query.error || (hasFlowKey && calendars.value.length === 0)) {
     localStorage?.removeItem(initFlowKey);
     errorMessage.value = route.query.error;
     await router.replace(route.path);
@@ -108,6 +114,25 @@ const onSubmit = async () => {
 
 </script>
 <style scoped>
+
+.content {
+  display: flex;
+  height: 24rem;
+  margin: auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 70%;
+  padding: 1rem;
+  border-radius: 0.5625rem;
+  background-color: color-mix(in srgb, var(--neutral) 65%, transparent);
+  border: 0.0625rem solid color-mix(in srgb, var(--neutral) 65%, transparent);
+  font-size: 0.8125rem;
+  margin: auto;
+}
 
 .google-calendar-logo {
   display: inline-block;

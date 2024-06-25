@@ -3,7 +3,7 @@
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import {
-  inject, onMounted, ref,
+  inject, ref,
 } from 'vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { storeToRefs } from 'pinia';
@@ -59,7 +59,7 @@ const onSubmit = async () => {
 
 <template>
   <div class="flex w-full max-w-sm flex-col gap-4">
-    <form ref="formRef" class="flex flex-col" autocomplete="off" autofocus>
+    <form ref="formRef" class="flex flex-col" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
       <text-input name="full-name" v-model="fullName" required>Full Name</text-input>
       <text-input name="username" v-model="username" required>Username</text-input>
       <select-input name="timezone" :options="timezoneOptions" v-model="timezone" required>Timezone</select-input>
@@ -70,7 +70,7 @@ const onSubmit = async () => {
       class="btn-continue"
       title="Continue"
       v-if="hasNextStep"
-      @click="onSubmit()"
+      @click="onSubmit"
     >Continue
     </primary-button>
   </div>

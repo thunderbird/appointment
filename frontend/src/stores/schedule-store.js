@@ -1,10 +1,13 @@
 import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
+import { dateFormatStrings } from '@/definitions.js';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useScheduleStore = defineStore('schedules', () => {
+  const dj = inject('dayjs');
+
   // State
   const isLoaded = ref(false);
 
@@ -121,7 +124,35 @@ export const useScheduleStore = defineStore('schedules', () => {
     return data;
   };
 
+  /**
+   * Converts a time (startTime or endTime) to a timezone that the backend expects
+   * @param {string} time
+   */
+  const timeToBackendTime = (time) => {
+    const dateFormat = dateFormatStrings.qalendarFullDay;
+
+    const user = useUserStore();
+    return dj(`${dj().format(dateFormat)}T${time}:00`)
+      .tz(user.data.timezone ?? dj.tz.guess(), true)
+      .utc()
+      .format('HH:mm');
+  };
+
+  /**
+   * Converts a time (startTime or endTime) to the user's timezone from utc
+   * @param {string} time
+   */
+  const timeToFrontendTime = (time) => {
+    const dateFormat = dateFormatStrings.qalendarFullDay;
+    const user = useUserStore();
+
+    return dj(`${dj().format(dateFormat)}T${time}:00`)
+      .utc(true)
+      .tz(user.data.timezone ?? dj.tz.guess())
+      .format('HH:mm');
+  };
+
   return {
-    isLoaded, schedules, inactiveSchedules, activeSchedules, fetch, $reset, createSchedule, updateSchedule,
+    isLoaded, schedules, inactiveSchedules, activeSchedules, fetch, $reset, createSchedule, updateSchedule, timeToBackendTime, timeToFrontendTime,
   };
 });

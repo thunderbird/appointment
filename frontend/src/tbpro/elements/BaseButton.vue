@@ -1,5 +1,5 @@
 <template>
-  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}">
+  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}" type="button">
     <span class="icon">
       <slot name="icon"/>
     </span>

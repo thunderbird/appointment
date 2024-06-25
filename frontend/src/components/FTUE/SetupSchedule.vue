@@ -33,6 +33,7 @@ const calendarStore = useCalendarStore();
 const scheduleStore = useScheduleStore();
 const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
+const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
 const calendarOptions = computed(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
@@ -52,14 +53,16 @@ const scheduleDayOptions = isoWeekdays.map((day) => ({
 const formRef = ref();
 const errorMessage = ref(null);
 
-const scheduleName = ref(`${user.data.name}'s Availability`);
-const calendar = ref(0);
-const startTime = ref('09:00');
-const endTime = ref('17:00');
-const bookingDuration = ref(defaultSlotDuration);
-const scheduleDays = ref([1, 2, 3, 4, 5]);
+const schedule = ref({
+  name: `${user.data.name}'s Availability`,
+  calendar: 0,
+  startTime: '09:00',
+  endTime: '17:00',
+  duration: defaultSlotDuration,
+  days: [1, 2, 3, 4, 5],
+});
 
-const duration = computed(() => `${bookingDuration.value} minute`);
+const duration = computed(() => `${schedule.value.duration} minute`);
 const isLoading = ref(false);
 
 const onSubmit = async () => {
@@ -70,27 +73,20 @@ const onSubmit = async () => {
     return;
   }
 
-  const startTimeFormatted = dj(`${dj().format('YYYY-MM-DD')}T${startTime.value}:00`)
-    .tz(user.data.timezone ?? dj.tz.guess(), true)
-    .utc()
-    .format('HH:mm');
-  const endTimeFormatted = dj(`${dj().format('YYYY-MM-DD')}T${endTime.value}:00`)
-    .tz(user.data.timezone ?? dj.tz.guess(), true)
-    .utc()
-    .format('HH:mm');
-
   const scheduleData = {
     ...schedules?.value[0] ?? {},
     active: true,
-    name: scheduleName.value,
-    calendar_id: calendar.value,
-    start_time: startTimeFormatted,
-    end_time: endTimeFormatted,
-    slot_duration: bookingDuration.value,
-    weekdays: scheduleDays.value,
+    name: schedule.value.name,
+    calendar_id: schedule.value.calendar,
+    start_time: timeToBackendTime(schedule.value.startTime),
+    end_time: timeToBackendTime(schedule.value.endTime),
+    slot_duration: schedule.value.duration,
+    weekdays: schedule.value.days,
   };
 
-  const data = schedules.value.length > 0 ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData) : await scheduleStore.createSchedule(call, scheduleData);
+  const data = schedules.value.length > 0
+    ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData)
+    : await scheduleStore.createSchedule(call, scheduleData);
   console.log(data);
 
   if (data?.error) {
@@ -103,12 +99,31 @@ const onSubmit = async () => {
 };
 
 onMounted(async () => {
+  isLoading.value = true;
+
   await Promise.all([
     calendarStore.fetch(call),
     scheduleStore.fetch(call),
   ]);
 
-  calendar.value = connectedCalendars.value[0].id;
+  console.log(schedules.value);
+
+  schedule.value.calendar = connectedCalendars.value[0].id;
+
+  if (schedules?.value && schedules.value[0]) {
+    const dbSchedule = schedules.value[0];
+    schedule.value = {
+      ...schedule.value,
+      name: dbSchedule.name,
+      calendar: dbSchedule.calendar_id,
+      startTime: timeToFrontendTime(dbSchedule.start_time),
+      endTime: timeToFrontendTime(dbSchedule.end_time),
+      duration: dbSchedule.slot_duration,
+      days: dbSchedule.weekdays,
+    };
+  }
+
+  isLoading.value = false;
 });
 
 </script>
@@ -121,18 +136,18 @@ onMounted(async () => {
     <notice-bar v-else>
       You can edit this schedule later
     </notice-bar>
-    <form ref="formRef" autocomplete="off" autofocus>
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
       <div class="column">
-        <text-input name="scheduleName" v-model="scheduleName" required>Schedule's Name</text-input>
+        <text-input name="scheduleName" v-model="schedule.name" required>Schedule's Name</text-input>
         <div class="pair">
-        <text-input type="time" name="startTime" v-model="startTime" required>Start Time</text-input>
-        <text-input type="time" name="endTime" v-model="endTime" required>End Time</text-input>
+        <text-input type="time" name="startTime" v-model="schedule.startTime" required>Start Time</text-input>
+        <text-input type="time" name="endTime" v-model="schedule.endTime" required>End Time</text-input>
         </div>
-        <bubble-select :options="scheduleDayOptions" v-model="scheduleDays" />
+        <bubble-select :options="scheduleDayOptions" v-model="schedule.days" />
       </div>
       <div class="column">
-        <select-input name="calendar" v-model="calendar" :options="calendarOptions" required>Select Calendar</select-input>
-        <select-input name="duration" v-model="bookingDuration" :options="durationOptions" required>Booking Duration</select-input>
+        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>Select Calendar</select-input>
+        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>Booking Duration</select-input>
         <div class="scheduleInfo">{{
                 t('text.recipientsCanScheduleBetween', {
                   duration: duration,
@@ -151,8 +166,7 @@ onMounted(async () => {
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
-    >Back
-    </secondary-button>
+    >Back</secondary-button>
     <primary-button
       class="btn-continue"
       title="Continue"

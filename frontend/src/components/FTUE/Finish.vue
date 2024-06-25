@@ -21,12 +21,10 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import {
-  onMounted, inject, ref, computed,
+  onMounted, inject, ref,
 } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { useUserStore } from '@/stores/user-store';
 

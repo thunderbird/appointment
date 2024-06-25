@@ -22,9 +22,10 @@ export const useCalendarStore = defineStore('calendars', () => {
   /**
    * Get all calendars for current user
    * @param {function} call preconfigured API fetch function
+   * @param {boolean} force force a refetch
    */
-  const fetch = async (call) => {
-    if (isLoaded.value) {
+  const fetch = async (call, force = false) => {
+    if (isLoaded.value && !force) {
       return;
     }
 
