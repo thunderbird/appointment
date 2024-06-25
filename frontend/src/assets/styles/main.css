@@ -39,77 +39,77 @@
 
   @font-face {
     font-family: 'Raleway';
-    src: url('./fonts/Raleway-Regular.ttf');
+    src: url('@/assets/fonts/Raleway-Regular.ttf');
     font-weight: 400;
   }
   @font-face {
     font-family: 'Roboto';
-    src: url('./fonts/Roboto-Medium.ttf');
+    src: url('@/assets/fonts/Roboto-Medium.ttf');
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-LightItalic.ttf');
+    src: url('@/assets/fonts/OpenSans-LightItalic.ttf');
     font-weight: 300;
     font-style: italic;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-Light.ttf');
+    src: url('@/assets/fonts/OpenSans-Light.ttf');
     font-weight: 300;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-Italic.ttf');
+    src: url('@/assets/fonts/OpenSans-Italic.ttf');
     font-weight: 400;
     font-style: italic;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-Regular.ttf');
+    src: url('@/assets/fonts/OpenSans-Regular.ttf');
     font-weight: 400;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-MediumItalic.ttf');
+    src: url('@/assets/fonts/OpenSans-MediumItalic.ttf');
     font-weight: 500;
     font-style: italic;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-Medium.ttf');
+    src: url('@/assets/fonts/OpenSans-Medium.ttf');
     font-weight: 500;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-SemiBoldItalic.ttf');
+    src: url('@/assets/fonts/OpenSans-SemiBoldItalic.ttf');
     font-weight: 600;
     font-style: italic;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-SemiBold.ttf');
+    src: url('@/assets/fonts/OpenSans-SemiBold.ttf');
     font-weight: 600;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-BoldItalic.ttf');
+    src: url('@/assets/fonts/OpenSans-BoldItalic.ttf');
     font-weight: 700;
     font-style: italic;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-Bold.ttf');
+    src: url('@/assets/fonts/OpenSans-Bold.ttf');
     font-weight: 700;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-ExtraBoldItalic.ttf');
+    src: url('@/assets/fonts/OpenSans-ExtraBoldItalic.ttf');
     font-weight: 800;
     font-style: italic;
   }
   @font-face {
     font-family: 'Open Sans';
-    src: url('./fonts/OpenSans-ExtraBold.ttf');
+    src: url('@/assets/fonts/OpenSans-ExtraBold.ttf');
     font-weight: 800;
   }
 }
