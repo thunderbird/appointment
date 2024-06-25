@@ -1,22 +1,18 @@
 <template>
-  <button @mouseover="showTooltip = true" @mouseleave="showTooltip = false" :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}" type="button">
+  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}" type="button">
     <span class="icon">
       <slot name="icon"/>
     </span>
     <span class="text">
       <slot/>
     </span>
-    <transition>
-      <tool-tip v-if="tooltip" v-show="showTooltip" class="tooltip" @click.prevent :position="tooltipPosition.bottom">{{ tooltip }}</tool-tip>
-    </transition>
+    <tool-tip v-if="tooltip" class="tooltip" @click.prevent :position="tooltipPosition.bottom">{{ tooltip }}</tool-tip>
   </button>
 </template>
 <script setup>
 import { tooltipPosition } from '@/definitions';
 import ToolTip from '@/tbpro/elements/ToolTip.vue';
 import { ref } from 'vue';
-
-const showTooltip = ref(false);
 
 defineProps({
   type: {
@@ -35,8 +31,15 @@ defineProps({
 </script>
 <style scoped>
 .tooltip {
-  top: -100%;
+  transform: translate(0, -100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
+button:hover > .tooltip {
+  opacity: 1;
+}
+
 .primary {
   background-color: var(--tbpro-primary);
   border-color: var(--tbpro-primary-hover);

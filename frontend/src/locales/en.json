@@ -365,5 +365,8 @@
     "success": "Success",
     "warning": "Warning",
     "critical": "Critical"
+  },
+  "ftue": {
+    "oneCalendarRequired": "Please enable one calendar to continue"
   }
 }

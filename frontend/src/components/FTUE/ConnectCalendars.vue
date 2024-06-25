@@ -21,12 +21,14 @@
     </secondary-button>
     <primary-button
       class="btn-continue"
-      :title="continueTitle"
+      :aria-label="continueTitle"
       v-if="hasNextStep"
       @click="onSubmit()"
+      :tooltip="!selected ? t('ftue.oneCalendarRequired') : null"
       :disabled="isLoading || !selected"
     >
       Continue
+
     </primary-button>
   </div>
 </template>
@@ -60,7 +62,7 @@ const { previousStep, nextStep } = ftueStore;
 const calendarStore = useCalendarStore();
 const calendars = ref([]);
 const selected = computed(() => calendars.value.filter((item) => item.checked).length);
-const continueTitle = computed(() => (selected.value ? 'Continue' : 'Please enable one calendar to continue'));
+const continueTitle = computed(() => (selected.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
 
 onMounted(async () => {
   isLoading.value = true;
