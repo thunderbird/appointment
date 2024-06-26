@@ -183,9 +183,10 @@ const bookEvent = async (attendeeData) => {
     attendee: attendeeData,
   };
 
+  const url = window.location.href.split('#')[0];
   const request = call('schedule/public/availability/request').put({
     s_a: obj,
-    url: window.location.href,
+    url,
   });
 
   // Data should just be true here.
