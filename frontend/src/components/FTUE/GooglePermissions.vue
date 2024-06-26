@@ -1,38 +1,38 @@
 <template>
   <div class="content">
-  <div class="card">
-    <p class="">{{ t('text.googlePermissionDisclaimer') }}</p>
-    <ul class="">
-      <li>
-        <strong>
-          {{ t('text.googlePermissionEventsName') }}
-        </strong> - {{ t('text.googlePermissionEventReason') }}
-      </li>
-      <li>
-        <strong>
-          {{ t('text.googlePermissionCalendarName') }}
-        </strong> - {{ t('text.googlePermissionCalendarReason') }}
-      </li>
-    </ul>
-    <i18n-t
-      :keypath="`text.settings.connectedAccounts.connect.googleLegal.text`"
-      tag="label"
-      :for="`text.settings.connectedAccounts.connect.googleLegal.link`"
-    >
-      <a
-        class="underline"
-        href="https://developers.google.com/terms/api-services-user-data-policy"
-        target="_blank"
+    <div class="card">
+      <p class="">{{ t('text.googlePermissionDisclaimer') }}</p>
+      <ul class="">
+        <li>
+          <strong>
+            {{ t('text.googlePermissionEventsName') }}
+          </strong> - {{ t('text.googlePermissionEventReason') }}
+        </li>
+        <li>
+          <strong>
+            {{ t('text.googlePermissionCalendarName') }}
+          </strong> - {{ t('text.googlePermissionCalendarReason') }}
+        </li>
+      </ul>
+      <i18n-t
+        :keypath="`text.settings.connectedAccounts.connect.googleLegal.text`"
+        tag="label"
+        :for="`text.settings.connectedAccounts.connect.googleLegal.link`"
       >
-        {{ t(`text.settings.connectedAccounts.connect.googleLegal.link`) }}
-      </a>
-    </i18n-t>
+        <a
+          class="underline"
+          href="https://developers.google.com/terms/api-services-user-data-policy"
+          target="_blank"
+        >
+          {{ t(`text.settings.connectedAccounts.connect.googleLegal.link`) }}
+        </a>
+      </i18n-t>
+    </div>
   </div>
-  </div>
-  <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
+  <div class="buttons">
     <secondary-button
       class="btn-back"
-      title="Back"
+      :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
@@ -40,13 +40,13 @@
     </secondary-button>
     <secondary-button
       class="btn-continue"
-      title="Connect Google Calendar"
+      :title="t('label.connectGoogleCalendar')"
       v-if="hasNextStep"
       @click="onSubmit()"
       :disabled="isLoading"
     >
-      <template v-slot:icon><span title="Google Calendar Logo" class="google-calendar-logo"/></template>
-      Connect Google Calendar
+      <template v-slot:icon><span :title="t('ftue.googleCalendarLogo')" class="google-calendar-logo"/></template>
+      {{ t('label.connectGoogleCalendar') }}
     </secondary-button>
   </div>
 </template>
@@ -109,10 +109,10 @@ const onSubmit = async () => {
 
 </script>
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
 
 .content {
   display: flex;
-  height: 24rem;
   margin: auto;
 }
 
@@ -120,7 +120,7 @@ const onSubmit = async () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 70%;
+  width: 100%;
   padding: 1rem;
   border-radius: 0.5625rem;
   background-color: color-mix(in srgb, var(--neutral) 65%, transparent);
@@ -134,5 +134,26 @@ const onSubmit = async () => {
   background-image: url('@/assets/svg/google-calendar-logo.svg');
   width: 1.625rem;
   height: 1.625rem;
+}
+
+.buttons {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+@media (--md) {
+  .card {
+    width: 70%;
+  }
+
+  .buttons {
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 5.75rem;
+    margin: 0;
+  }
 }
 </style>

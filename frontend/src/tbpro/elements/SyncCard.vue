@@ -7,10 +7,10 @@
           {{ title }}
         </div>
         <div class="selected">
-          {{ selected }} Selected
+          {{ t('ftue.itemsSelected', {'count': selected}) }}
         </div>
       </div>
-      <primary-button class="select-all" size="small" @click="selectAll" title="Select all calendars">Select All</primary-button>
+      <primary-button class="select-all" size="small" @click="selectAll" :title="t('ftue.selectAllCalendars')">{{ t('ftue.selectAll') }}</primary-button>
     </div>
     <ul class="rows">
       <li class="row" v-for="(item, index) in model" :key="item.key">
@@ -23,9 +23,11 @@
   </div>
 </template>
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const model = defineModel();
 
 const selected = computed(() => model.value.filter((item) => item.checked).length);
@@ -55,6 +57,9 @@ defineProps({
 .header {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 
   position: relative;
   min-height: 3.375rem;
@@ -120,6 +125,9 @@ input {
 @media (--md) {
   .header {
     flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
   }
   .select-all {
     position: relative;

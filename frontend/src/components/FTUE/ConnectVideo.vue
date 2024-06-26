@@ -2,26 +2,26 @@
   <div class="content">
     <div class="cards">
       <div class="card zoom" @click="connectZoom">
-        <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" alt="Zoom"/>
+        <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" :alt="t('heading.zoom')"/>
         <p class="zoom-description">
-          Connect your Zoom account to generate instant meeting invites for each booking
+          {{ t('text.connectZoom') }}
         </p>
-        <primary-button class="connect-zoom" :disabled="isLoading">Connect</primary-button>
+        <primary-button class="connect-zoom" :disabled="isLoading">{{ t('label.connect') }}</primary-button>
       </div>
       <div class="card">
-        <strong>Custom video meeting link</strong>
-        <p>Use a single meeting link for all bookings from your selected provider</p>
-        <text-input name="custom-meeting-link" v-model="customMeetingLink" placeholder="http://meet.google.com">Video meeting link</text-input>
+        <strong>{{ t('ftue.customVideoMeetingLink') }}</strong>
+        <p>{{ t('ftue.customVideoMeetingText') }}</p>
+        <text-input name="custom-meeting-link" v-model="customMeetingLink" placeholder="http://meet.google.com">{{ t('ftue.videoMeetingLink') }}</text-input>
       </div>
     </div>
     <div class="skip-text">
-      <a href="#" @click="onSkip">Skip connect video</a>
+      <a href="#" @click="onSkip">{{ t('ftue.skipConnectVideo') }}</a>
     </div>
   </div>
-  <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
+  <div class="buttons">
     <secondary-button
       class="btn-back"
-      title="Back"
+      :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
@@ -29,7 +29,8 @@
     </secondary-button>
     <primary-button
       class="btn-continue"
-      :title="continueTitle"
+      :title="t('label.continue')"
+      :tooltip="customMeetingLink.length === 0 ? t('ftue.videoConnectionRequired') : null"
       v-if="hasNextStep"
       @click="onSubmit()"
       :disabled="isLoading || customMeetingLink.length === 0"
@@ -42,7 +43,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import {
-  onMounted, inject, ref, computed,
+  onMounted, inject, ref,
 } from 'vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
@@ -50,13 +51,10 @@ import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useRoute, useRouter } from 'vue-router';
 
 const { t } = useI18n();
 
 const call = inject('call');
-const route = useRoute();
-const router = useRouter();
 const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
@@ -69,10 +67,7 @@ const externalConnectionStore = useExternalConnectionsStore();
 const { zoom } = storeToRefs(externalConnectionStore);
 const customMeetingLink = ref('');
 
-const continueTitle = '';// computed(() => (selected.value ? 'Continue' : 'Please enable one calendar to continue'));
 const initFlowKey = 'tba/startedMeetingConnect';
-
-const errorMessage = ref('');
 
 onMounted(async () => {
   isLoading.value = true;
@@ -121,8 +116,6 @@ const connectZoom = async () => {
   align-items: center;
   font-family: 'Inter', 'sans-serif';
   font-size: 0.8125rem;
-  height: 23rem;
-  margin: 6.25rem auto auto;
 }
 
 .cards {
@@ -156,7 +149,33 @@ const connectZoom = async () => {
   width: 8.25rem;
 }
 
+.buttons {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+  .skip-text {
+    color: var(--tbpro-primary-pressed);
+    margin-right: 0;
+    margin-left: auto;
+    text-transform: uppercase;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-decoration: underline;
+    padding: 0.75rem 1.5rem;
+  }
+
 @media (--md) {
+  .buttons {
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 5.75rem;
+    margin: 0;
+  }
+
   .card {
     width: 18.75rem;
     height: 15.0rem;
@@ -169,17 +188,6 @@ const connectZoom = async () => {
   .cards {
     flex-direction: row;
     margin-top: 0;
-  }
-
-  .skip-text {
-    color: var(--tbpro-primary-pressed);
-    margin-right: 0;
-    margin-left: auto;
-    text-transform: uppercase;
-    font-size: 0.5625rem;
-    font-weight: 600;
-    text-decoration: underline;
-    padding: 0.75rem 1.5rem;
   }
 
   .connect-zoom {

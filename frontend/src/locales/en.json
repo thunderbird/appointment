@@ -120,6 +120,7 @@
     "busy": "Busy",
     "caldav": "CalDAV",
     "calendar": "Calendar",
+    "calendars": "Calendars",
     "calendarDeletion": "Remove Calendar",
     "calendarUrl": "Calendar URL",
     "cancel": "Cancel",
@@ -279,7 +280,7 @@
     "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
-    "connectZoom": "You can connect your Zoom account to enable instant meeting invites with your appointments.",
+    "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
     "contactRequestForm": "Please use the contact form below to send any feedback, questions, or concerns to our support team. If needed we will try and contact you for further information as soon as possible.",
     "defineDaysAndTimeSlots": "Choose the days and times this event can be booked.",
     "denialSentToAddress": "We've let the booker ({address}) know you can't make this event.",
@@ -367,6 +368,23 @@
     "critical": "Critical"
   },
   "ftue": {
-    "oneCalendarRequired": "Please enable one calendar to continue"
+    "oneCalendarRequired": "Please enable one calendar to continue",
+    "fullName": "Full Name",
+    "googleCalendarLogo": "Google Calendar Logo",
+    "itemsSelected": "{count} Selected",
+    "selectAll": "Select All",
+    "selectAllCalendars": "Select All Calendars",
+    "calendarIcon": "Calendar icon",
+    "connectCalendarInfo": "Connect your calendars to manage your availability",
+    "customVideoMeetingLink": "Custom Video meeting link",
+    "customVideoMeetingText": "Use a single meeting link for all bookings from your selected provider",
+    "videoMeetingLink": "Video meeting link",
+    "skipConnectVideo": "Skip connect video",
+    "scheduleName": "Schedule's Name",
+    "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
+    "finishScreenText": "Before you close this screen, copy your shareable schedule link to start receiving appointments.",
+    "finishAltText": "A user icon in front of two calendars.",
+    "finish": "Finish",
+    "setupScheduleInfo": "You can edit this schedule later"
   }
 }

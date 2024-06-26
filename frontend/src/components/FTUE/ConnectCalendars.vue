@@ -1,19 +1,19 @@
 <template>
   <div class="content">
-    <form autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-    <sync-card class="sync-card" v-model="calendars" title="Calendars">
-      <template v-slot:icon>
+    <form class="form" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
+      <sync-card class="sync-card" v-model="calendars" :title="t('label.calendars')">
+        <template v-slot:icon>
         <span class="icon-calendar">
-          <img src="@/assets/svg/icons/calendar.svg" alt="calendar icon" title="calendar icon"/>
+          <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>
         </span>
-      </template>
-    </sync-card>
+        </template>
+      </sync-card>
     </form>
   </div>
-  <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
+  <div class="buttons">
     <secondary-button
       class="btn-back"
-      title="Back"
+      :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
@@ -44,7 +44,6 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 
 const { t } = useI18n();
 
@@ -67,7 +66,7 @@ const continueTitle = computed(() => (selected.value ? t('label.continue') : t('
 onMounted(async () => {
   isLoading.value = true;
 
-  infoMessage.value = 'Connect your calendars to manage your availability';
+  infoMessage.value = t('ftue.connectCalendarInfo');
 
   await calendarStore.fetch(call, true);
   calendars.value = calendarStore.calendars.map((calendar) => ({
@@ -103,13 +102,36 @@ const onSubmit = async () => {
   align-items: center;
 
 }
+
 .sync-card {
   width: 100%;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.buttons {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
 @media (--md) {
   .sync-card {
     width: 27.5rem;
+  }
+
+  .buttons {
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 5.75rem;
+    margin: 0;
   }
 }
 </style>

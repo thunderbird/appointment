@@ -100,10 +100,6 @@ onMounted(() => {
   line-height: 1.664rem;
 }
 
-.modal-body {
-  height: 15.0rem;
-}
-
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
   position: relative;
@@ -114,7 +110,9 @@ onMounted(() => {
   background-size: cover;
   background-repeat: no-repeat;
   border-radius: 0.75rem;
-  padding: 2rem 2rem 0;
+  padding: 1rem 1rem 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .modal:before {
@@ -130,22 +128,21 @@ onMounted(() => {
 }
 
 .divider {
-  width: 50rem;
-  height: 1px;
+  width: 100%;
+  padding-bottom: 1px;
   border-radius: unset;
   background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
-  position: absolute;
-  bottom: 4rem;
+
 }
 
 .footer {
-  position: absolute;
   bottom: 0;
   height: 4rem;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding-bottom: 1rem;
 
   a {
     color: var(--tbpro-primary);
@@ -180,9 +177,31 @@ onMounted(() => {
 }
 
 @media (--md) {
+  .modal-header {
+    margin-bottom: 0;
+  }
+
   .modal {
     width: 50rem; /* 800px */
     height: 37.5rem; /* 600px */
+    padding: 2rem 2rem 0;
+    overflow: hidden;
+  }
+
+  .modal-body {
+    height: 15.0rem;
+  }
+
+  .divider {
+    position: absolute;
+    bottom: 4rem;
+    width: 50rem;
+    height: 0.0625rem;
+  }
+
+  .footer {
+    position: absolute;
+    padding-bottom: 0;
   }
 }
 </style>

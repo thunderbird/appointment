@@ -1,19 +1,19 @@
 <template>
   <div class="content">
-    <img src="@/assets/svg/ftue-finish.svg" alt="A user icon in front of two calendars."/>
+    <img src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
     <div class="copy">
-    <p>Before you close this screen, copy your shareable schedule link to start receiving appointments.</p>
-    <text-button class="link" :copy="myLink" :label="myLink"/>
+      <p>{{ t('ftue.finishScreenText') }}</p>
+      <text-button class="link" :copy="myLink" :label="myLink"/>
     </div>
   </div>
-  <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
+  <div class="buttons">
     <primary-button
       class="btn-finish"
-      title="Finish"
+      :title="t('ftue.finish')"
       @click="onSubmit()"
       :disabled="isLoading"
     >
-      Finish
+      {{ t('ftue.finish') }}
     </primary-button>
   </div>
 </template>
@@ -75,7 +75,6 @@ const onSubmit = async () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 60%;
   font-size: 0.8125rem;
   text-align: center;
 }
@@ -84,9 +83,31 @@ const onSubmit = async () => {
   color: var(--tbpro-primary);
   text-decoration: underline;
   border: none;
+
   &:hover {
     background-color: initial !important;
     box-shadow: none !important;
+  }
+}
+
+.buttons {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+@media (--md) {
+  .copy {
+    width: 60%;
+  }
+
+  .buttons {
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 5.75rem;
+    margin: 0;
   }
 }
 </style>

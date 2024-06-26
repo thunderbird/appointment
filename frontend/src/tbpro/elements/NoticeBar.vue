@@ -38,6 +38,8 @@ const isError = props.type === 'error';
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .icon {
   position: absolute;
   left: 0.5625rem;
@@ -53,10 +55,9 @@ const isError = props.type === 'error';
   justify-content: center;
   align-items: center;
   border-radius: 0.1875rem;
-  padding: 0.5625rem 1.75rem;
   gap: 0.625rem;
   border: 0.0625rem solid;
-  min-width: 31.25rem;
+  padding: 0.5625rem 0.5625rem 0.5625rem 1.75rem;
 }
 .info {
   background-color: var(--tbpro-soft);
@@ -77,5 +78,11 @@ const isError = props.type === 'error';
   background-color: var(--critical-soft);
   border-color: var(--critical-default);
   color: var(--critical-pressed);
+}
+
+@media (--md) {
+  .notice {
+    min-width: 31.25rem;
+  }
 }
 </style>

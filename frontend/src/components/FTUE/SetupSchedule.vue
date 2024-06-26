@@ -1,3 +1,45 @@
+<template>
+  <div class="content">
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
+      <div class="column">
+        <text-input name="scheduleName" v-model="schedule.name" required>{{ t('ftue.scheduleName') }}</text-input>
+        <div class="pair">
+        <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
+        <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
+        </div>
+        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
+      </div>
+      <div class="column">
+        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>{{ t('label.selectCalendar') }}</select-input>
+        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>{{ t('label.slotLength') }}</select-input>
+        <div class="scheduleInfo">{{
+                t('text.recipientsCanScheduleBetween', {
+                  duration: duration,
+                  earliest: '24 hours',
+                  farthest: '2 weeks',
+                })
+              }}
+            </div>
+      </div>
+    </form>
+  </div>
+  <div class="buttons">
+    <secondary-button
+      class="btn-back"
+      :title="t('label.back')"
+      v-if="hasPreviousStep"
+      :disabled="isLoading"
+      @click="previousStep()"
+    >Back</secondary-button>
+    <primary-button
+      class="btn-continue"
+      :title="t('label.continue')"
+      v-if="hasNextStep"
+      @click="onSubmit()"
+      :disabled="isLoading"
+    >Continue</primary-button>
+  </div>
+</template>
 <script setup>
 
 import TextInput from '@/tbpro/elements/TextInput.vue';
@@ -11,8 +53,7 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
-import { defaultSlotDuration } from '@/definitions';
+import { dateFormatStrings, defaultSlotDuration } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useCalendarStore } from '@/stores/calendar-store';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
@@ -84,6 +125,9 @@ const onSubmit = async () => {
     end_time: timeToBackendTime(schedule.value.endTime),
     slot_duration: schedule.value.duration,
     weekdays: schedule.value.days,
+    earliest_booking: 1440,
+    farthest_booking: 20160,
+    start_date: dj().format(dateFormatStrings.qalendarFullDay),
   };
 
   const data = schedules.value.length > 0
@@ -102,14 +146,12 @@ const onSubmit = async () => {
 
 onMounted(async () => {
   isLoading.value = true;
-  infoMessage.value = 'You can edit this schedule later';
+  infoMessage.value = t('ftue.setupScheduleInfo');
 
   await Promise.all([
     calendarStore.fetch(call),
     scheduleStore.fetch(call),
   ]);
-
-  console.log(schedules.value);
 
   schedule.value.calendar = connectedCalendars.value[0].id;
 
@@ -130,60 +172,22 @@ onMounted(async () => {
 });
 
 </script>
-
-<template>
-  <div class="content">
-    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <div class="column">
-        <text-input name="scheduleName" v-model="schedule.name" required>Schedule's Name</text-input>
-        <div class="pair">
-        <text-input type="time" name="startTime" v-model="schedule.startTime" required>Start Time</text-input>
-        <text-input type="time" name="endTime" v-model="schedule.endTime" required>End Time</text-input>
-        </div>
-        <bubble-select :options="scheduleDayOptions" v-model="schedule.days" />
-      </div>
-      <div class="column">
-        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>Select Calendar</select-input>
-        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>Booking Duration</select-input>
-        <div class="scheduleInfo">{{
-                t('text.recipientsCanScheduleBetween', {
-                  duration: duration,
-                  earliest: '24 hours',
-                  farthest: '2 weeks',
-                })
-              }}
-            </div>
-      </div>
-    </form>
-  </div>
-  <div class="absolute bottom-[5.75rem] flex w-full justify-end gap-4">
-    <secondary-button
-      class="btn-back"
-      title="Back"
-      v-if="hasPreviousStep"
-      :disabled="isLoading"
-      @click="previousStep()"
-    >Back</secondary-button>
-    <primary-button
-      class="btn-continue"
-      title="Continue"
-      v-if="hasNextStep"
-      @click="onSubmit()"
-      :disabled="isLoading"
-    >Continue</primary-button>
-  </div>
-</template>
-
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
 form {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   border-radius: 0.5625rem;
   background-color: color-mix(in srgb, var(--surface-base) 65%, transparent);
   width: 100%;
   height: 100%;
   padding: 1rem;
+}
+
+.bubbleSelect {
+  overflow-x: scroll;
 }
 
 .content {
@@ -205,10 +209,23 @@ form {
   line-height: 163%;
   font-weight: 400;
 }
+.buttons {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
 
 @media (--md) {
+  .buttons {
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 5.75rem;
+    margin: 0;
+  }
   form {
-    display: flex;
+    flex-direction: row;
     width: 40.0rem;
     height: 18rem
   }
