@@ -4,7 +4,6 @@ import { i18n } from '@/composables/i18n';
 import { computed } from 'vue';
 
 const initialUserObject = {
-  setup: false,
   email: null,
   preferredEmail: null,
   level: null,

@@ -51,7 +51,10 @@ onMounted(async () => {
 const onSubmit = async () => {
   isLoading.value = true;
 
+  // Can't run async together!
   await userStore.finishFTUE(call);
+  await userStore.profile(call);
+
   await nextStep();
   // Yeet them to calendar!
   window.location = '/calendar';
