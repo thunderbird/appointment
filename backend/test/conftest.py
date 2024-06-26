@@ -21,6 +21,7 @@ from factory.schedule_factory import make_schedule  # noqa: F401
 from factory.slot_factory import make_appointment_slot  # noqa: F401
 from factory.subscriber_factory import make_subscriber, make_basic_subscriber, make_pro_subscriber  # noqa: F401
 from factory.invite_factory import make_invite  # noqa: F401
+from factory.invite_bucket_factory import make_invite_bucket  # noqa: F401
 
 # Load our env
 load_dotenv(find_dotenv('.env.test'))

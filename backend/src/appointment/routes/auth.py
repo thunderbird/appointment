@@ -288,6 +288,11 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     return True  # Covered by get_admin_subscriber
 
 
+@router.post('/join-the-waiting-list')
+def join_the_invite_bucket(data: schemas.JoinTheInviteBucketIn, db: Session = Depends(get_db)):
+    return repo.invite.add_to_invite_bucket(db, data.email)
+
+
 # @router.get('/test-create-account')
 # def test_create_account(email: str, password: str, timezone: str, db: Session = Depends(get_db)):
 #     """Used to create a test account"""

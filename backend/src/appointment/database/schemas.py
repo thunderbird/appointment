@@ -384,3 +384,7 @@ class TokenData(BaseModel):
 
 class SendInviteEmailIn(BaseModel):
     email: str = Field(title='Email', min_length=1)
+
+
+class JoinTheInviteBucketIn(BaseModel):
+    email: str = Field(title='Email', min_length=1)

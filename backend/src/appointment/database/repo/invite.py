@@ -9,7 +9,11 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 
 
-def get_by_code(db: Session, code: str):
+def get_by_subscriber(db: Session, subscriber_id: int) -> models.Invite:
+    return db.query(models.Invite).filter(models.Invite.subscriber_id == subscriber_id).first()
+
+
+def get_by_code(db: Session, code: str) -> models.Invite:
     """retrieve invite by code"""
     return db.query(models.Invite).filter(models.Invite.code == code).first()
 
@@ -68,4 +72,22 @@ def revoke_code(db: Session, code: str):
     db_invite.status = models.InviteStatus.revoked
     db.commit()
     db.refresh(db_invite)
+    return True
+
+
+def get_bucket_by_email(db: Session, email: str):
+    return db.query(models.InviteBucket).filter(models.InviteBucket.email == email).first()
+
+
+def add_to_invite_bucket(db: Session, email: str):
+    """Add a given email to the invite bucket"""
+    # Check if they're already in the invite bucket
+    bucket = db.query(models.InviteBucket).filter(models.InviteBucket.email == email).first()
+    if bucket:
+        return True
+
+    bucket = models.InviteBucket(email=email)
+    db.add(bucket)
+    db.commit()
+    db.refresh(bucket)
     return True
