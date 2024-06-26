@@ -5,7 +5,7 @@
         <div class="modal-header">
           <word-mark v-if="currentStep === ftueStep.setupProfile || currentStep === ftueStep.finish"/>
           <h2 id="ftue-title">
-            {{ stepTitle }}
+            {{ t(stepTitle) }}
           </h2>
           <notice-bar type="error" v-if="errorMessage">
             {{ errorMessage }}
@@ -23,9 +23,9 @@
           <finish v-else-if="currentStep === ftueStep.finish"/>
           <div class="error-page" v-else>
             <span>🤔</span>
-            <h2>Huh, how did this happen?</h2>
-            <p>Looks like there was an error. Click the button below to go back!</p>
-            <primary-button @click="ftueStore.$reset()">Go back</primary-button>
+            <h2>{{ t('ftue.errorHeading') }}</h2>
+            <p>{{ t('ftue.errorBody') }}</p>
+            <primary-button @click="ftueStore.$reset()">{{ t('label.goBack') }}</primary-button>
           </div>
         </div>
         <div class="divider"></div>
@@ -52,11 +52,14 @@ import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
+import { useI18n } from 'vue-i18n';
 
 const ftueStore = useFTUEStore();
 const {
   stepTitle, currentStep, infoMessage, errorMessage,
 } = storeToRefs(ftueStore);
+
+const { t } = useI18n();
 
 onMounted(() => {
   // Force light-mode

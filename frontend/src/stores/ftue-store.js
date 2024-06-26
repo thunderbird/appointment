@@ -30,32 +30,32 @@ export const useFTUEStore = defineStore('FTUE', () => {
     [ftueStep.setupProfile]: {
       previous: null,
       next: ftueStep.googlePermissions,
-      title: 'Create your profile',
+      title: 'ftue.steps.setupProfile',
     },
     [ftueStep.googlePermissions]: {
       previous: ftueStep.setupProfile,
       next: ftueStep.connectCalendars,
-      title: 'Allow Google Calendar permissions',
+      title: 'ftue.steps.googlePermissions',
     },
     [ftueStep.connectCalendars]: {
       previous: ftueStep.googlePermissions,
       next: ftueStep.setupSchedule,
-      title: 'Connect calendars',
+      title: 'ftue.steps.connectCalendars',
     },
     [ftueStep.setupSchedule]: {
       previous: ftueStep.connectCalendars,
       next: ftueStep.connectVideoConferencing,
-      title: 'Set up your appointment availability',
+      title: 'ftue.steps.setupSchedule',
     },
     [ftueStep.connectVideoConferencing]: {
       previous: ftueStep.setupSchedule,
       next: ftueStep.finish,
-      title: 'Connect your video meeting link',
+      title: 'ftue.steps.connectVideo',
     },
     [ftueStep.finish]: {
       previous: ftueStep.connectVideoConferencing,
       next: ftueStep.finish,
-      title: 'You are ready to start booking',
+      title: 'ftue.steps.finish',
     },
   };
 
@@ -69,7 +69,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
 
   const hasNextStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].next));
   const hasPreviousStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].previous));
-  const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'Unknown Step!');
+  const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'ftue.steps.error');
 
   const clearMessages = () => {
     infoMessage.value = null;

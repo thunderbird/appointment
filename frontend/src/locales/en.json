@@ -385,6 +385,17 @@
     "finishScreenText": "Before you close this screen, copy your shareable schedule link to start receiving appointments.",
     "finishAltText": "A user icon in front of two calendars.",
     "finish": "Finish",
-    "setupScheduleInfo": "You can edit this schedule later"
+    "setupScheduleInfo": "You can edit this schedule later",
+    "errorHeading": "Huh, how did this happen?",
+    "errorBody": "Looks like there was an error. Click the button below to go back!",
+    "steps": {
+      "setupProfile": "Create your profile",
+      "googlePermissions": "Allow Google Calendar permissions",
+      "connectCalendars": "Connect calendars",
+      "setupSchedule": "Set up your appointment availability",
+      "connectVideo": "Connect your video meeting link",
+      "finish": "You are ready to start booking",
+      "error": "Uh-oh!"
+    }
   }
 }
