@@ -1,4 +1,4 @@
-import { ExternalConnection, ExternalConnectionCollection, FetchExternalConnectionCollection } from '@/models';
+import { ExternalConnection, ExternalConnectionCollection, FetchAny, ExternalConnectionCollectionResponse } from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -22,12 +22,12 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
    * Get all external connections for current user
    * @param call preconfigured API fetch function
    */
-  const fetch = async (call: FetchExternalConnectionCollection) => {
+  const fetch = async (call: FetchAny) => {
     if (isLoaded.value) {
       return;
     }
 
-    const { data } = await call('account/external-connections').get().json();
+    const { data }: ExternalConnectionCollectionResponse = await call('account/external-connections').get().json();
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
     google.value = data.value?.google ?? [];

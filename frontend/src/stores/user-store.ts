@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
 import { computed } from 'vue';
-import { Schedule, Subscriber, User, FetchAny, FetchBoolean, Error } from '@/models';
+import { Schedule, Subscriber, User, FetchAny, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse } from '@/models';
 
 const initialUserObject = {
   email: null,
@@ -57,13 +57,13 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Retrieve the current signed url and update store
-   * @param {FetchSignature} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    */
   const updateSignedUrl = async (call: FetchAny): Promise<Error> => {
-    const { error, data: sigData } = await call('me/signature').get().json();
+    const { error, data: sigData }: SignatureResponse = await call('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
-      return { error: sigData.value?.detail ?? error.value };
+      return { error: sigData.value ?? error.value };
     }
 
     data.value.signedUrl = sigData.value.url;
@@ -73,15 +73,15 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Update store with profile data from db
-   * @param {FetchSubscriber} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    */
   const profile = async (call: FetchAny): Promise<Error> => {
-    const { error, data: userData } = await call('me').get().json();
+    const { error, data: userData }: SubscriberResponse = await call('me').get().json();
 
     // Failed to get profile data, log this user out and return false
     if (error.value || !userData.value) {
       $reset();
-      return { error: userData.value?.detail ?? error.value };
+      return { error: userData.value ?? error.value };
     }
 
     updateProfile(userData.value);
@@ -93,8 +93,8 @@ export const useUserStore = defineStore('user', () => {
    * Invalidate the current signed url and replace it with a new one
    * @param call preconfigured API fetch function
    */
-  const changeSignedUrl = async (call: FetchBoolean): Promise<Error> => {
-    const { error, data: sigData } = await call('me/signature').post().json();
+  const changeSignedUrl = async (call: FetchAny): Promise<Error> => {
+    const { error, data: sigData }: BooleanResponse = await call('me/signature').post().json();
 
     if (error.value) {
       return { error: sigData.value ?? error.value };
@@ -105,7 +105,7 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Request subscriber login
-   * @param {FetchToken} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    * @param username
    * @param password or null if fxa authentication
    */
@@ -117,10 +117,10 @@ export const useUserStore = defineStore('user', () => {
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
       formData.set('password', password);
-      const { error, data: tokenData } = await call('token').post(formData).json();
+      const { error, data: tokenData }: TokenResponse = await call('token').post(formData).json();
 
       if (error.value || !tokenData.value.access_token) {
-        return { error: tokenData.value?.detail ?? error.value };
+        return { error: tokenData.value ?? error.value };
       }
 
       data.value.accessToken = tokenData.value.access_token;
@@ -138,8 +138,8 @@ export const useUserStore = defineStore('user', () => {
    * Do subscriber logout and reset store
    * @param call preconfigured API fetch function
    */
-  const logout = async (call: FetchBoolean) => {
-    const { error } = await call('logout').get().json();
+  const logout = async (call: FetchAny) => {
+    const { error }: BooleanResponse = await call('logout').get().json();
 
     if (error.value) {
       // TODO: show error message

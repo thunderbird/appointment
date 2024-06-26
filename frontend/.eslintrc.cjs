@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     'import/extensions': ['error', 'ignorePackages', {
       '': 'never',
+      ts: 'never',
       js: 'never',
       vue: 'off',
     }],
@@ -37,7 +38,7 @@ module.exports = {
         map: [
           ['@', './src'],
         ],
-        extensions: ['.js', '.vue'],
+        extensions: ['.ts', '.js', '.vue'],
       },
     },
   },

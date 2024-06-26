@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { FetchScheduleList, Schedule } from '@/models';
+import { FetchAny, Schedule, ScheduleListResponse } from '@/models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useScheduleStore = defineStore('schedules', () => {
@@ -18,12 +18,12 @@ export const useScheduleStore = defineStore('schedules', () => {
    * @param call preconfigured API fetch function
    * @param force Force a fetch even if we already have data
    */
-  const fetch = async (call: FetchScheduleList, force: boolean = false) => {
+  const fetch = async (call: FetchAny, force: boolean = false) => {
     if (isLoaded.value && !force) {
       return;
     }
 
-    const { data, error } = await call('schedule/').get().json();
+    const { data, error }: ScheduleListResponse = await call('schedule/').get().json();
 
     if (error.value || data.value === null || typeof data.value === 'undefined') {
       return;

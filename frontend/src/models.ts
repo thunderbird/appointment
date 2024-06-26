@@ -128,14 +128,14 @@ export type Signature = {
 
 // Types and aliases used for our custom createFetch API calls and return types
 export type FetchAny = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
-export type FetchBoolean = (url: string) => UseFetchReturn<boolean> & PromiseLike<UseFetchReturn<boolean>>;
-export type FetchSignature = (url: string) => UseFetchReturn<Signature> & PromiseLike<UseFetchReturn<Signature>>;
-export type FetchSubscriber = (url: string) => UseFetchReturn<Subscriber> & PromiseLike<UseFetchReturn<Subscriber>>;
-export type FetchToken = (url: string) => UseFetchReturn<Token> & PromiseLike<UseFetchReturn<Token>>;
-export type FetchAppointmentList = (url: string) => UseFetchReturn<Appointment[]> & PromiseLike<UseFetchReturn<Appointment[]>>;
-export type FetchCalendarList = (url: string) => UseFetchReturn<Calendar[]> & PromiseLike<UseFetchReturn<Calendar[]>>;
-export type FetchScheduleList = (url: string) => UseFetchReturn<Schedule[]> & PromiseLike<UseFetchReturn<Schedule[]>>;
-export type FetchExternalConnectionCollection = (url: string) => UseFetchReturn<ExternalConnectionCollection> & PromiseLike<UseFetchReturn<ExternalConnectionCollection>>;
+export type BooleanResponse = UseFetchReturn<boolean>;
+export type SignatureResponse = UseFetchReturn<Signature>;
+export type SubscriberResponse = UseFetchReturn<Subscriber>;
+export type TokenResponse = UseFetchReturn<Token>;
+export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
+export type CalendarListResponse = UseFetchReturn<Calendar[]>;
+export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
+export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
 export type Error = { error: boolean|string|null };
 export type Token = {
