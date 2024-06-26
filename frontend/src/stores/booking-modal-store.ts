@@ -6,7 +6,7 @@ import { modalStates } from '@/definitions';
 export const useBookingModalStore = defineStore('bookingModal', () => {
   const open = ref(false);
   const state = ref(modalStates.open);
-  const stateData = ref < string > (null);
+  const stateData = ref<string>(null);
 
   const isLoading = computed(() => state.value === modalStates.loading);
   const isFinished = computed(() => state.value === modalStates.finished);
