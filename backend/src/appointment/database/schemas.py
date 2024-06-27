@@ -8,7 +8,7 @@ from uuid import UUID
 from datetime import datetime, date, time
 from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from .models import (
     AppointmentStatus,
@@ -395,4 +395,4 @@ class TokenForWaitingList(BaseModel):
 
 
 class CheckEmail(BaseModel):
-    email: str = Field(title='Email', min_length=1)
+    email: EmailStr = Field(title='Email', min_length=1)

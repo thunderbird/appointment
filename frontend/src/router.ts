@@ -14,9 +14,9 @@ const AppointmentsView = defineAsyncComponent(() => import('@/views/Appointments
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
+const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
-
 /**
  * Defined routes for Thunderbird Appointment
  * Note: All routes require authentication unless otherwise specified in App.vue::routeIsPublic
@@ -91,6 +91,11 @@ const routes: RouteRecordRaw[] = [
     path: '/terms',
     name: 'terms',
     component: LegalView,
+  },
+  {
+    path: '/waiting-list/:token',
+    name: 'waiting-list',
+    component: WaitingListActionView,
   },
   // Admin
   {

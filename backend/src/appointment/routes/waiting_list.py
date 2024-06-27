@@ -75,4 +75,7 @@ def act_on_waiting_list(
 
         raise exception
 
-    return True
+    return {
+        'action': action,
+        'success': success,
+    }
