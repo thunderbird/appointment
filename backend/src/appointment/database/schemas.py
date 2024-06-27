@@ -388,3 +388,11 @@ class SendInviteEmailIn(BaseModel):
 
 class JoinTheWaitingList(BaseModel):
     email: str = Field(title='Email', min_length=1)
+
+
+class TokenForWaitingList(BaseModel):
+    token: str = Field(title='Token')
+
+
+class CheckEmail(BaseModel):
+    email: str = Field(title='Email', min_length=1)

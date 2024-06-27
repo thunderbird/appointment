@@ -24,6 +24,7 @@ def upgrade() -> None:
         'waiting_list',
         sa.Column('id', sa.Integer, primary_key=True, index=True),
         sa.Column('email', encrypted_type(sa.String), unique=True, index=True, nullable=False),
+        sa.Column('email_verified', sa.Boolean, nullable=False, index=True, default=False),
         sa.Column('invite_id', sa.Integer, ForeignKey('invites.id'), nullable=True, index=True),
         sa.Column('time_created', sa.DateTime, server_default=func.now()),
         sa.Column('time_updated', sa.DateTime, server_default=func.now()),

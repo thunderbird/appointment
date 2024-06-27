@@ -273,3 +273,26 @@ class InviteAccountMail(Mailer):
 
     def html(self):
         return get_template('new_account.jinja2').render(homepage_url=os.getenv('FRONTEND_URL'))
+
+
+class ConfirmYourEmailMail(Mailer):
+    def __init__(self, confirm_url, decline_url, *args, **kwargs):
+        default_kwargs = {'subject': l10n('confirm-email-mail-subject')}
+        self.confirm_url = confirm_url
+        self.decline_url = decline_url
+        super(ConfirmYourEmailMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n(
+            'confirm-email-mail-plain',
+            {
+                'confirm_email_url': self.confirm_url,
+                'decline_email_url': self.decline_url,
+            },
+        )
+
+    def html(self):
+        return get_template('confirm_email.jinja2').render(
+            confirm_email_url=self.confirm_url,
+            decline_email_url=self.decline_url
+        )

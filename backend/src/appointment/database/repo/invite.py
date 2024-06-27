@@ -75,7 +75,7 @@ def revoke_code(db: Session, code: str):
     return True
 
 
-def get_waiting_list_entry_by_email(db: Session, email: str):
+def get_waiting_list_entry_by_email(db: Session, email: str) -> models.WaitingList:
     return db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
 
 
@@ -84,10 +84,36 @@ def add_to_waiting_list(db: Session, email: str):
     # Check if they're already in the invite bucket
     bucket = get_waiting_list_entry_by_email(db, email)
     if bucket:
-        return True
+        # Already in waiting list
+        return False
 
     bucket = models.WaitingList(email=email)
     db.add(bucket)
     db.commit()
     db.refresh(bucket)
+    return True
+
+
+def confirm_waiting_list_email(db: Session, email: str):
+    """Flip the email_verified field to True"""
+    bucket = get_waiting_list_entry_by_email(db, email)
+    if not bucket:
+        return False
+
+    bucket.email_verified = True
+    db.add(bucket)
+    db.commit()
+    db.refresh(bucket)
+    return True
+
+
+def remove_waiting_list_email(db: Session, email: str):
+    """Remove an existing email from the waiting list"""
+    bucket = get_waiting_list_entry_by_email(db, email)
+    # Already done, lol!
+    if not bucket:
+        return True
+
+    db.delete(bucket)
+    db.commit()
     return True

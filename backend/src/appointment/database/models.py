@@ -365,6 +365,7 @@ class WaitingList(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(encrypted_type(String), unique=True, index=True, nullable=False)
+    email_verified = Column(Boolean, nullable=False, index=True, default=False)
     invite_id = Column(Integer, ForeignKey('invites.id'), nullable=True, index=True)
 
     invite: Mapped['Invite'] = relationship('Invite', back_populates='waiting_list', single_parent=True)

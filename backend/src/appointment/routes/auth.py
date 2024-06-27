@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import RedirectResponse
 
 from .. import utils
@@ -26,6 +26,7 @@ from ..dependencies.fxa import get_fxa_client
 from ..exceptions import validation
 from ..exceptions.fxa_api import NotInAllowListException
 from ..l10n import l10n
+from ..tasks.emails import send_confirm_email
 
 router = APIRouter()
 
@@ -41,12 +42,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-@router.get('/auth/can-login')
-def can_login(request: Request, email: str, db: Session = Depends(get_db), fxa_client: FxaClient = Depends(get_fxa_client)):
+@router.post('/can-login')
+def can_login(
+    data: schemas.CheckEmail,
+    db: Session = Depends(get_db),
+    fxa_client: FxaClient = Depends(get_fxa_client)
+):
     """Determines if a user can go through the login flow"""
     if os.getenv('AUTH_SCHEME') == 'fxa':
         # This checks if a subscriber exists, or is in allowed list
-        return fxa_client.is_in_allow_list(db, email)
+        return fxa_client.is_in_allow_list(db, data.email)
 
     # There's no waiting list setting on password login
     return True
@@ -297,11 +302,6 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     if subscriber.is_deleted:
         raise validation.InvalidPermissionLevelException()
     return True  # Covered by get_admin_subscriber
-
-
-@router.post('/join-the-waiting-list')
-def join_the_waiting_list(data: schemas.JoinTheWaitingList, db: Session = Depends(get_db)):
-    return repo.invite.add_to_waiting_list(db, data.email)
 
 
 # @router.get('/test-create-account')
