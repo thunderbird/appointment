@@ -127,7 +127,7 @@ export type Signature = {
 }
 
 // Types and aliases used for our custom createFetch API calls and return types
-export type FetchAny = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
+export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
 export type BooleanResponse = UseFetchReturn<boolean>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;

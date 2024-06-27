@@ -1,4 +1,4 @@
-import { Calendar, CalendarListResponse, FetchAny } from '@/models';
+import { Calendar, CalendarListResponse, Fetch } from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -18,7 +18,7 @@ export const useCalendarStore = defineStore('calendars', () => {
    * Get all calendars for current user
    * @param call preconfigured API fetch function
    */
-  const fetch = async (call: FetchAny) => {
+  const fetch = async (call: Fetch) => {
     if (isLoaded.value) {
       return;
     }

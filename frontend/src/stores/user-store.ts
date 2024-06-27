@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
 import { computed } from 'vue';
-import { Schedule, Subscriber, User, FetchAny, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse } from '@/models';
+import { Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse } from '@/models';
 
 const initialUserObject = {
   email: null,
@@ -59,7 +59,7 @@ export const useUserStore = defineStore('user', () => {
    * Retrieve the current signed url and update store
    * @param call preconfigured API fetch function
    */
-  const updateSignedUrl = async (call: FetchAny): Promise<Error> => {
+  const updateSignedUrl = async (call: Fetch): Promise<Error> => {
     const { error, data: sigData }: SignatureResponse = await call('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
@@ -75,7 +75,7 @@ export const useUserStore = defineStore('user', () => {
    * Update store with profile data from db
    * @param call preconfigured API fetch function
    */
-  const profile = async (call: FetchAny): Promise<Error> => {
+  const profile = async (call: Fetch): Promise<Error> => {
     const { error, data: userData }: SubscriberResponse = await call('me').get().json();
 
     // Failed to get profile data, log this user out and return false
@@ -93,7 +93,7 @@ export const useUserStore = defineStore('user', () => {
    * Invalidate the current signed url and replace it with a new one
    * @param call preconfigured API fetch function
    */
-  const changeSignedUrl = async (call: FetchAny): Promise<Error> => {
+  const changeSignedUrl = async (call: Fetch): Promise<Error> => {
     const { error, data: sigData }: BooleanResponse = await call('me/signature').post().json();
 
     if (error.value) {
@@ -109,7 +109,7 @@ export const useUserStore = defineStore('user', () => {
    * @param username
    * @param password or null if fxa authentication
    */
-  const login = async (call: FetchAny, username: string, password: string|null): Promise<Error> => {
+  const login = async (call: Fetch, username: string, password: string|null): Promise<Error> => {
     $reset();
 
     if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
@@ -138,7 +138,7 @@ export const useUserStore = defineStore('user', () => {
    * Do subscriber logout and reset store
    * @param call preconfigured API fetch function
    */
-  const logout = async (call: FetchAny) => {
+  const logout = async (call: Fetch) => {
     const { error }: BooleanResponse = await call('logout').get().json();
 
     if (error.value) {

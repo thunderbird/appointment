@@ -1,4 +1,4 @@
-import { ExternalConnection, ExternalConnectionCollection, FetchAny, ExternalConnectionCollectionResponse } from '@/models';
+import { ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse } from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -22,7 +22,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
    * Get all external connections for current user
    * @param call preconfigured API fetch function
    */
-  const fetch = async (call: FetchAny) => {
+  const fetch = async (call: Fetch) => {
     if (isLoaded.value) {
       return;
     }

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { bookingStatus } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
-import { Appointment, AppointmentListResponse, FetchAny, Slot } from '@/models';
+import { Appointment, AppointmentListResponse, Fetch, Slot } from '@/models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
@@ -38,7 +38,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
    * Get all appointments for current user
    * @param call preconfigured API fetch function
    */
-  const fetch = async (call: FetchAny) => {
+  const fetch = async (call: Fetch) => {
     const { data, error }: AppointmentListResponse = await call('me/appointments').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
