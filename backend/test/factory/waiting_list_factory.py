@@ -5,12 +5,12 @@ from defines import FAKER_RANDOM_VALUE, factory_has_value
 
 
 @pytest.fixture
-def make_invite_bucket(with_db):
+def make_waiting_list(with_db):
     fake = Faker()
 
-    def _make_invite_bucket(invite_id=None, email=FAKER_RANDOM_VALUE) -> models.InviteBucket:
+    def _make_waiting_list(invite_id=None, email=FAKER_RANDOM_VALUE) -> models.WaitingList:
         with with_db() as db:
-            invite = models.InviteBucket(
+            invite = models.WaitingList(
                 email=email if factory_has_value(email) else fake.email(),
                 invite_id=invite_id,
             )
@@ -19,4 +19,4 @@ def make_invite_bucket(with_db):
             db.refresh(invite)
             return invite
 
-    return _make_invite_bucket
+    return _make_waiting_list

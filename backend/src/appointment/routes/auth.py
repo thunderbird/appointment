@@ -289,8 +289,8 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
 
 
 @router.post('/join-the-waiting-list')
-def join_the_invite_bucket(data: schemas.JoinTheInviteBucketIn, db: Session = Depends(get_db)):
-    return repo.invite.add_to_invite_bucket(db, data.email)
+def join_the_waiting_list(data: schemas.JoinTheWaitingList, db: Session = Depends(get_db)):
+    return repo.invite.add_to_waiting_list(db, data.email)
 
 
 # @router.get('/test-create-account')

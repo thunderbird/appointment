@@ -1,4 +1,4 @@
-"""create invite bucket table
+"""create waiting list table
 
 Revision ID: a9ca5a4325ec
 Revises: f732d6e597fe
@@ -21,7 +21,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        'invite_bucket',
+        'waiting_list',
         sa.Column('id', sa.Integer, primary_key=True, index=True),
         sa.Column('email', encrypted_type(sa.String), unique=True, index=True, nullable=False),
         sa.Column('invite_id', sa.Integer, ForeignKey('invites.id'), nullable=True, index=True),
@@ -31,4 +31,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table('invites')
+    op.drop_table('waiting_list')

@@ -386,5 +386,5 @@ class SendInviteEmailIn(BaseModel):
     email: str = Field(title='Email', min_length=1)
 
 
-class JoinTheInviteBucketIn(BaseModel):
+class JoinTheWaitingList(BaseModel):
     email: str = Field(title='Email', min_length=1)

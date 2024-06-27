@@ -30,39 +30,39 @@ class TestAppointment:
                 assert len(db.query(models.Appointment).filter(models.Appointment.uuid == appointment.uuid).all()) == 1
 
 
-class TestInviteBucket:
-    def test_successful_relationship(self, with_db, make_pro_subscriber, make_invite, make_invite_bucket):
+class TestWaitingList:
+    def test_successful_relationship(self, with_db, make_pro_subscriber, make_invite, make_waiting_list):
         subscriber = make_pro_subscriber()
         invite = make_invite(subscriber_id=subscriber.id)
-        invite_bucket = make_invite_bucket(invite_id=invite.id)
+        waiting_list = make_waiting_list(invite_id=invite.id)
 
         with with_db() as db:
             db.add(subscriber)
             db.add(invite)
-            db.add(invite_bucket)
+            db.add(waiting_list)
 
-            assert invite_bucket.invite == invite
-            assert invite_bucket.invite.subscriber == subscriber
+            assert waiting_list.invite == invite
+            assert waiting_list.invite.subscriber == subscriber
 
-            assert invite.invite_bucket == invite_bucket
-            assert subscriber.invite.invite_bucket == invite_bucket
+            assert invite.waiting_list == waiting_list
+            assert subscriber.invite.waiting_list == waiting_list
 
-    def test_empty_relationship(self, with_db, make_invite_bucket):
-        invite_bucket = make_invite_bucket()
+    def test_empty_relationship(self, with_db, make_waiting_list):
+        waiting_list = make_waiting_list()
 
         with with_db() as db:
-            db.add(invite_bucket)
+            db.add(waiting_list)
 
-            assert not invite_bucket.invite
+            assert not waiting_list.invite
 
-    def test_email_is_unique(self, make_invite_bucket):
+    def test_email_is_unique(self, make_waiting_list):
         email = 'greg@example.org'
 
-        invite_bucket = make_invite_bucket(email=email)
-        assert invite_bucket
+        waiting_list = make_waiting_list(email=email)
+        assert waiting_list
 
         # Raises integrity error due to unique constraint failure
         with pytest.raises(IntegrityError):
-            invite_bucket_2 = make_invite_bucket(email=email)
-            assert not invite_bucket_2
+            waiting_list_2 = make_waiting_list(email=email)
+            assert not waiting_list_2
 

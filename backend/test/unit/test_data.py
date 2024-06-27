@@ -33,7 +33,7 @@ class TestData:
         make_caldav_calendar,
         make_external_connections,
         make_invite,
-        make_invite_bucket,
+        make_waiting_list,
     ):
         """Test that our delete account functionality actually deletes everything"""
         subscriber = make_pro_subscriber()
@@ -46,7 +46,7 @@ class TestData:
             make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.zoom),
         ]
         invite = make_invite(subscriber_id=subscriber.id)
-        invite_bucket = make_invite_bucket(email=subscriber.email, invite_id=invite.id)
+        waiting_list = make_waiting_list(email=subscriber.email, invite_id=invite.id)
 
         # Get some relationships
         slots = appointment.slots
@@ -58,7 +58,7 @@ class TestData:
             appointment,
             schedule,
             invite,
-            invite_bucket,
+            waiting_list,
             *external_connections,
             *slots,
         ]

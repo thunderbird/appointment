@@ -341,7 +341,7 @@ class Invite(Base):
     status = Column(Enum(InviteStatus), index=True)
 
     subscriber: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True)
-    invite_bucket: Mapped['InviteBucket'] = relationship('InviteBucket', cascade='all,delete', back_populates='invite', uselist=False)
+    waiting_list: Mapped['WaitingList'] = relationship('WaitingList', cascade='all,delete', back_populates='invite', uselist=False)
 
     @property
     def is_used(self) -> bool:
@@ -359,12 +359,12 @@ class Invite(Base):
         return self.subscriber_id is None and self.status == InviteStatus.active
 
 
-class InviteBucket(Base):
+class WaitingList(Base):
     """Holds a list of hopefully future-Appointment users"""
-    __tablename__ = 'invite_bucket'
+    __tablename__ = 'waiting_list'
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(encrypted_type(String), unique=True, index=True, nullable=False)
     invite_id = Column(Integer, ForeignKey('invites.id'), nullable=True, index=True)
 
-    invite: Mapped['Invite'] = relationship('Invite', back_populates='invite_bucket', single_parent=True)
+    invite: Mapped['Invite'] = relationship('Invite', back_populates='waiting_list', single_parent=True)

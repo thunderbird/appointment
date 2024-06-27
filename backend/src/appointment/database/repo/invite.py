@@ -75,18 +75,18 @@ def revoke_code(db: Session, code: str):
     return True
 
 
-def get_bucket_by_email(db: Session, email: str):
-    return db.query(models.InviteBucket).filter(models.InviteBucket.email == email).first()
+def get_waiting_list_entry_by_email(db: Session, email: str):
+    return db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
 
 
-def add_to_invite_bucket(db: Session, email: str):
+def add_to_waiting_list(db: Session, email: str):
     """Add a given email to the invite bucket"""
     # Check if they're already in the invite bucket
-    bucket = db.query(models.InviteBucket).filter(models.InviteBucket.email == email).first()
+    bucket = get_waiting_list_entry_by_email(db, email)
     if bucket:
         return True
 
-    bucket = models.InviteBucket(email=email)
+    bucket = models.WaitingList(email=email)
     db.add(bucket)
     db.commit()
     db.refresh(bucket)
