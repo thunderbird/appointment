@@ -138,7 +138,7 @@ const handleError = (data) => {
 
   if (data?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
     errorHeading.value = '';
-    errorBody.value = data.value.detail.message;
+    errorBody.value = data?.detail.message;
   }
 };
 
