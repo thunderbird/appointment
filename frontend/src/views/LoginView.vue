@@ -22,7 +22,7 @@
             @keydown.enter="isFxaAuth ? login() : null"
           />
         </label>
-        <label class="flex flex-col items-center pl-4">
+        <label class="flex flex-col items-center pl-4" v-if="showInviteFlow">
           <span class="w-full" >
           {{ t('label.inviteCode') }}
           </span>
@@ -81,6 +81,7 @@ const dj = inject('dayjs');
 const router = useRouter();
 const isPasswordAuth = inject('isPasswordAuth');
 const isFxaAuth = inject('isFxaAuth');
+const showInviteFlow = ref(false);
 
 // form input and error
 const username = ref('');
@@ -93,6 +94,12 @@ const login = async () => {
   if (!username.value || (isPasswordAuth && !password.value)) {
     loginError.value = t('error.credentialsIncomplete');
     return;
+  }
+
+  const { data: canLogin } = await call(`/auth/can-login?email=${encodeURIComponent(username.value)}`);
+  console.log('Can i login?', canLogin);
+  if (!canLogin) {
+
   }
 
   if (isFxaAuth) {

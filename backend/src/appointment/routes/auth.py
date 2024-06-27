@@ -41,6 +41,17 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
+@router.get('/auth/can-login')
+def can_login(request: Request, email: str, db: Session = Depends(get_db), fxa_client: FxaClient = Depends(get_fxa_client)):
+    """Determines if a user can go through the login flow"""
+    if os.getenv('AUTH_SCHEME') == 'fxa':
+        # This checks if a subscriber exists, or is in allowed list
+        return fxa_client.is_in_allow_list(db, email)
+
+    # There's no waiting list setting on password login
+    return True
+
+
 @router.get('/fxa_login')
 def fxa_login(
     request: Request,
