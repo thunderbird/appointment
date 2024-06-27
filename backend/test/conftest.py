@@ -23,7 +23,7 @@ from factory.subscriber_factory import make_subscriber, make_basic_subscriber, m
 from factory.invite_factory import make_invite  # noqa: F401
 
 # Load our env
-load_dotenv(find_dotenv('.env.test'))
+load_dotenv(find_dotenv('.env.test'), override=True)
 
 from appointment.main import server  # noqa: E402
 from appointment.database import models, repo, schemas  # noqa: E402
