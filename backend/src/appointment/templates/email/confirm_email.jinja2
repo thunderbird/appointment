@@ -1,0 +1,37 @@
+<html lang="{{ l10n('locale') }}">
+  <body>
+    <p>
+      {{ l10n('confirm-email-mail-html-body') }}
+    </p>
+    <div>
+      <a
+        href="{{ confirm_email_url }}"
+        style="
+          display:inline-block;
+          padding:.5rem 1rem;
+          color:white;
+          background:#0e757f;
+          border-radius:6px;
+          text-decoration:none;
+        "
+      >{{ l10n('confirm-email-mail-confirm-action') }}</a>
+    </div>
+    <p>
+      {{ l10n('confirm-email-mail-html-body-2') }}
+    </p>
+      <div>
+      <a
+        href="{{ decline_email_url }}"
+        style="
+          display:inline-block;
+          padding:.5rem 1rem;
+          color:white;
+          background:#ef8990;
+          border-radius:6px;
+          text-decoration:none;
+        "
+      >{{ l10n('confirm-email-mail-decline-action') }}</a>
+    </div>
+    {% include 'includes/footer.jinja2' %}
+  </body>
+</html>
