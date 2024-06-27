@@ -1,21 +1,23 @@
+import { Dayjs, ConfigType } from 'dayjs';
 import { defineStore } from 'pinia';
 import { ref, inject } from 'vue';
 import { bookingCalendarViews } from '@/definitions';
+import { Appointment, Attendee } from '@/models';
 
 /**
  * Store for BookingView and its tightly coupled components.
  */
 // eslint-disable-next-line import/prefer-default-export
 export const useBookingViewStore = defineStore('bookingView', () => {
-  const dj = inject('dayjs');
+  const dj = inject<(date?: ConfigType) => Dayjs>('dayjs');
 
   // States
   const activeView = ref(bookingCalendarViews.loading);
   const activeDate = ref(dj());
   // Data
-  const selectedEvent = ref(null);
-  const appointment = ref(null);
-  const attendee = ref(null);
+  const selectedEvent = ref<Dayjs>(null);
+  const appointment = ref<Appointment>(null);
+  const attendee = ref<Attendee>(null);
 
   /**
    * Restore default state, set date to today and remove other data

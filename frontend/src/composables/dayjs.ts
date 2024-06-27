@@ -39,6 +39,7 @@ export default function useDayJS(app: App<Element>, locale: string) {
   // provide the configured dayjs instance as well es some helper functions
   // TODO: provide method to live update the dayjs locale
   app.provide('dayjs', dayjs);
+  app.provide('tzGuess', dayjs.tz.guess());
 
   const hDuration = (m: number): string => ((m < 60)
     ? dayjs.duration(m, 'minutes').humanize()

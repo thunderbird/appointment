@@ -1,3 +1,4 @@
+import { Calendar, CalendarListResponse, Fetch } from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -7,22 +8,22 @@ export const useCalendarStore = defineStore('calendars', () => {
   const isLoaded = ref(false);
 
   // Data
-  const calendars = ref([]);
-  const unconnectedCalendars = computed(() => calendars.value.filter((cal) => !cal.connected));
-  const connectedCalendars = computed(() => calendars.value.filter((cal) => cal.connected));
+  const calendars = ref<Calendar[]>([]);
+  const unconnectedCalendars = computed((): Calendar[] => calendars.value.filter((cal) => !cal.connected));
+  const connectedCalendars = computed((): Calendar[] => calendars.value.filter((cal) => cal.connected));
 
   const hasConnectedCalendars = computed(() => connectedCalendars.value.length > 0);
 
   /**
    * Get all calendars for current user
-   * @param {function} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    */
-  const fetch = async (call) => {
+  const fetch = async (call: Fetch) => {
     if (isLoaded.value) {
       return;
     }
 
-    const { data, error } = await call('me/calendars?only_connected=false').get().json();
+    const { data, error }: CalendarListResponse = await call('me/calendars?only_connected=false').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
       calendars.value = data.value;

@@ -27,7 +27,7 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
     external_connections = defaultdict(list)
 
     if os.getenv('ZOOM_API_ENABLED'):
-        external_connections['Zoom'] = []
+        external_connections['zoom'] = []
 
     for ec in subscriber.external_connections:
         external_connections[ec.type.name].append(

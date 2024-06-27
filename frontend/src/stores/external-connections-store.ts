@@ -1,3 +1,4 @@
+import { ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse } from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -7,10 +8,10 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const isLoaded = ref(false);
 
   // Data
-  const zoom = ref([]);
-  const fxa = ref([]);
-  const google = ref([]);
-  const connections = computed(() => ({
+  const zoom = ref<ExternalConnection[]>([]);
+  const fxa = ref<ExternalConnection[]>([]);
+  const google = ref<ExternalConnection[]>([]);
+  const connections = computed((): ExternalConnectionCollection => ({
     // FXA should be at the top since it represents the Appointment subscriber.
     fxa: fxa.value,
     google: google.value,
@@ -19,14 +20,14 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
 
   /**
    * Get all external connections for current user
-   * @param {function} call preconfigured API fetch function
+   * @param call preconfigured API fetch function
    */
-  const fetch = async (call) => {
+  const fetch = async (call: Fetch) => {
     if (isLoaded.value) {
       return;
     }
 
-    const { data } = await call('account/external-connections').get().json();
+    const { data }: ExternalConnectionCollectionResponse = await call('account/external-connections').get().json();
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
     google.value = data.value?.google ?? [];
