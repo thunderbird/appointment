@@ -47,7 +47,7 @@
               @keydown.enter="isFxaAuth ? login() : null"
             />
           </label>
-          <div v-if="isFxaAuth" class="text-center text-sm">{{ t('text.login.continueToFxa') }}</div>
+          <div v-if="isFxaAuth && (!showInviteFlow || inviteCode.length > 0)" class="text-center text-sm">{{ t('text.login.continueToFxa') }}</div>
           <label v-if="isPasswordAuth" class="flex flex-col items-center pl-4">
             <span class="w-full">{{ t('label.password') }}</span>
             <input

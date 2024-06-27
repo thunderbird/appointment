@@ -71,7 +71,7 @@ class TestWaitingListActionConfirm:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() is True
+        assert response.json() == { "action": WaitingListAction.CONFIRM_EMAIL.value, "success": True }
 
         with with_db() as db:
             self.assert_email_verified(db, waiting_list, success=True)
@@ -170,7 +170,7 @@ class TestWaitingListActionLeave:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() is True
+        assert response.json() == {"action": WaitingListAction.LEAVE.value, "success": True}
 
         with with_db() as db:
             self.assert_waiting_list_exists(db, waiting_list, success=True)
@@ -185,7 +185,7 @@ class TestWaitingListActionLeave:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() is True
+        assert response.json() == { "action": WaitingListAction.LEAVE.value, "success": True }
 
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
