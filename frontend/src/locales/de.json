@@ -18,7 +18,8 @@
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
-    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
+    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar.",
+    "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto."
   },
   "fields": {
     "slot_duration": "Dauer",
