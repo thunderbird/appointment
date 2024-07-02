@@ -718,7 +718,7 @@ watch(
 </script>
 <style scoped>
 input[type="time"]::-webkit-calendar-picker-indicator {
-  @apply -mr-2;
+  margin-right: -0.5rem;
   background: none;
 }
 
