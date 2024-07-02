@@ -58,8 +58,8 @@
       "postcss-custom-media": {}
     }
   },
-  "type": "module",
   "engines": {
     "node": ">=20.15.0"
-  }
+  },
+  "type": "module"
 }

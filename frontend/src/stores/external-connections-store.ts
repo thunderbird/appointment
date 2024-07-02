@@ -1,7 +1,8 @@
-import {ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse} from '@/models';
-import {defineStore} from 'pinia';
-import {ref, computed} from 'vue';
-import {useRouter} from "vue-router";
+import {
+  ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse,
+} from '@/models';
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useExternalConnectionsStore = defineStore('externalConnections', () => {
@@ -28,7 +29,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
       return;
     }
 
-    const {data}: ExternalConnectionCollectionResponse = await call('account/external-connections').get().json();
+    const { data }: ExternalConnectionCollectionResponse = await call('account/external-connections').get().json();
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
     google.value = data.value?.google ?? [];
@@ -47,7 +48,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
 
   const connect = async (call: Fetch, category: string, router: any) => {
     if (category === 'zoom') {
-      const {data} = await call('zoom/auth').get().json();
+      const { data } = await call('zoom/auth').get().json();
       // Ship them to the auth link
       window.location.href = data.value.url;
     } else if (category === 'google') {
@@ -58,14 +59,14 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const disconnect = async (call: Fetch, category: string) => {
     if (category === 'zoom') {
       return call('zoom/disconnect').post();
-    } else if (category === 'google') {
+    } if (category === 'google') {
       return call('google/disconnect').post();
     }
 
     return null;
-  }
+  };
 
   return {
-    connections, isLoaded, fxa, zoom, google, fetch, $reset, connect, disconnect
+    connections, isLoaded, fxa, zoom, google, fetch, $reset, connect, disconnect,
   };
 });
