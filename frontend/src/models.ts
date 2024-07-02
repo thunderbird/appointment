@@ -121,6 +121,7 @@ export type Subscriber = {
   level: number;
   timezone: string;
   avatar_url: string;
+  is_setup: boolean;
 }
 
 export type Signature = {

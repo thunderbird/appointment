@@ -53,7 +53,11 @@ import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user-store.ts';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const user = useUserStore();
 const ftueStore = useFTUEStore();
 const {
   stepTitle, currentStep, infoMessage, errorMessage,
@@ -62,6 +66,12 @@ const {
 const { t } = useI18n();
 
 onMounted(() => {
+  // If they're setup, boot them calendars
+  if (user.data.isSetup) {
+    router.replace('calendar');
+    return;
+  }
+
   // Force light-mode
   localStorage?.setItem('theme', 'light');
 });

@@ -53,13 +53,13 @@ import {
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useUserStore } from '@/stores/user-store';
+import { useUserStore } from '@/stores/user-store.ts';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { dateFormatStrings, defaultSlotDuration } from '@/definitions';
 import { useI18n } from 'vue-i18n';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { useCalendarStore } from '@/stores/calendar-store.ts';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { useScheduleStore } from '@/stores/schedule-store.ts';
 
 const { t } = useI18n();
 const dj = inject('dayjs');
@@ -103,6 +103,7 @@ const schedule = ref({
   endTime: '17:00',
   duration: defaultSlotDuration,
   days: [1, 2, 3, 4, 5],
+  details: '',
 });
 
 const duration = computed(() => `${schedule.value.duration} minute`);
@@ -130,6 +131,7 @@ const onSubmit = async () => {
     earliest_booking: 1440,
     farthest_booking: 20160,
     start_date: dj().format(dateFormatStrings.qalendarFullDay),
+    details: schedule.value?.details ?? '',
   };
 
   const data = schedules.value.length > 0
@@ -150,8 +152,8 @@ onMounted(async () => {
   infoMessage.value = t('ftue.setupScheduleInfo');
 
   await Promise.all([
-    calendarStore.fetch(call),
-    scheduleStore.fetch(call),
+    calendarStore.fetch(call, true),
+    scheduleStore.fetch(call, true),
   ]);
 
   schedule.value.calendar = connectedCalendars.value[0].id;

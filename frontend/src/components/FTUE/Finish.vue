@@ -24,9 +24,9 @@ import {
   onMounted, inject, ref,
 } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { useScheduleStore } from '@/stores/schedule-store.ts';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import { useUserStore } from '@/stores/user-store';
+import { useUserStore } from '@/stores/user-store.ts';
 import TextButton from '@/elements/TextButton.vue';
 
 const { t } = useI18n();
@@ -54,6 +54,9 @@ const onSubmit = async () => {
   // Can't run async together!
   await userStore.finishFTUE(call);
   await userStore.profile(call);
+
+  // Clear the FTUE flow
+  window.localStorage?.removeItem('tba/ftue');
 
   await nextStep();
   // Yeet them to calendar!
