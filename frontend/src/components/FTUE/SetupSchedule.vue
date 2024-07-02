@@ -30,14 +30,16 @@
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
-    >Back</secondary-button>
+    >{{ t('label.back') }}
+    </secondary-button>
     <primary-button
       class="btn-continue"
       :title="t('label.continue')"
       v-if="hasNextStep"
       @click="onSubmit()"
       :disabled="isLoading"
-    >Continue</primary-button>
+    >{{ t('label.continue') }}
+    </primary-button>
   </div>
 </template>
 <script setup>
@@ -133,7 +135,6 @@ const onSubmit = async () => {
   const data = schedules.value.length > 0
     ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData)
     : await scheduleStore.createSchedule(call, scheduleData);
-  console.log(data);
 
   if (data?.error) {
     errorMessage.value = data?.message;

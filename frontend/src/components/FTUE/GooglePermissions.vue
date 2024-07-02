@@ -36,7 +36,7 @@
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
-    >Back
+    >{{ t('label.back') }}
     </secondary-button>
     <secondary-button
       class="btn-continue"

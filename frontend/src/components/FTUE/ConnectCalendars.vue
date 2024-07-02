@@ -17,7 +17,7 @@
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
-    >Back
+    >{{ t('label.back') }}
     </secondary-button>
     <primary-button
       class="btn-continue"
@@ -27,8 +27,7 @@
       :tooltip="!selected ? t('ftue.oneCalendarRequired') : null"
       :disabled="isLoading || !selected"
     >
-      Continue
-
+      {{ t('label.continue') }}
     </primary-button>
   </div>
 </template>

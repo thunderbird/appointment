@@ -25,7 +25,7 @@
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
-    >Back
+    >{{ t('label.back') }}
     </secondary-button>
     <primary-button
       class="btn-continue"
@@ -35,7 +35,7 @@
       @click="onSubmit()"
       :disabled="isLoading || customMeetingLink.length === 0"
     >
-      Continue
+      {{ t('label.continue') }}
     </primary-button>
   </div>
 </template>
