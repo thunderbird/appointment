@@ -93,13 +93,14 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
+import { dayjsKey } from "@/keys";
 // import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
 const user = useUserStore();
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject('call');
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 // handle ui languages
 // TODO: move to settings store

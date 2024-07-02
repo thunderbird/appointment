@@ -15,9 +15,10 @@ import {
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
+import { dayjsKey } from "@/keys";
 
 // component constants
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const router = useRouter();
 const route = useRoute();
 

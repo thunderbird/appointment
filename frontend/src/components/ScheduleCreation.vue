@@ -377,13 +377,14 @@ import ToolTip from '@/elements/ToolTip.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import SnackishBar from '@/elements/SnackishBar.vue';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const user = useUserStore();
 const calendarStore = useCalendarStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const { t } = useI18n();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
 const dateFormat = dateFormatStrings.qalendarFullDay;

@@ -45,10 +45,11 @@ import ScheduleCreation from '@/components/ScheduleCreation';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
+import { dayjsKey } from "@/keys";
 
 const { t } = useI18n();
 const route = useRoute();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const call = inject('call');
 const refresh = inject('refresh');
 

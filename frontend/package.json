@@ -32,6 +32,8 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
     "autoprefixer": "^10.4.12",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -44,8 +46,7 @@
     "node-fetch": "^3.3.2",
     "postcss": "^8.4.17",
     "postcss-nesting": "^12.0.3",
-    "postcss-custom-media": "^10.0.6",
-    "typescript": "^5.4.5",
+    "typescript": "^5.5.3",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^1.1.0"
   },

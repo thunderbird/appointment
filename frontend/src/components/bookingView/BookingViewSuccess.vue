@@ -36,11 +36,12 @@ import { useRouter } from 'vue-router';
 
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import PrimaryButton from '@/elements/PrimaryButton';
+import { dayjsKey } from "@/keys";
 
 const { t } = useI18n();
 const router = useRouter();
 
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 defineProps({
   selectedEvent: Object,

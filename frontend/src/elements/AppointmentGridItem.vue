@@ -46,11 +46,12 @@ import {
   IconCalendar,
   IconClock,
 } from '@tabler/icons-vue';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
 const paintBackground = inject('paintBackground');
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 // component properties
 const props = defineProps({

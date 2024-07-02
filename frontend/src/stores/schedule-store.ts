@@ -2,12 +2,13 @@ import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { dateFormatStrings } from '@/definitions.js';
+import { dateFormatStrings } from '@/definitions';
 import { Fetch, Schedule, ScheduleListResponse } from '@/models';
+import { dayjsKey } from '@/keys';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useScheduleStore = defineStore('schedules', () => {
-  const dj = inject('dayjs');
+  const dj = inject(dayjsKey);
 
   // State
   const isLoaded = ref(false);

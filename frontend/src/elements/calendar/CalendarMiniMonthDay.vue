@@ -24,8 +24,9 @@
 
 <script setup>
 import { inject } from 'vue';
+import { dayjsKey } from "@/keys";
 
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 // component properties
 defineProps({

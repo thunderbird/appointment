@@ -30,9 +30,10 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
+import { dayjsKey } from "@/keys";
 
 const { t } = useI18n();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const call = inject('call');
 const ftueStore = useFTUEStore();
 const {

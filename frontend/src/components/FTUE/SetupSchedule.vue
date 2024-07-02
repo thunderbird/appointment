@@ -60,9 +60,10 @@ import { useI18n } from 'vue-i18n';
 import { useCalendarStore } from '@/stores/calendar-store.ts';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
 import { useScheduleStore } from '@/stores/schedule-store.ts';
+import { dayjsKey } from "@/keys";
 
 const { t } = useI18n();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const call = inject('call');
 const isoWeekdays = inject('isoWeekdays');
 

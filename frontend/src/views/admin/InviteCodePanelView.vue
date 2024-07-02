@@ -70,12 +70,13 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import { IconSend } from '@tabler/icons-vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
+import { dayjsKey } from "@/keys";
 
 const router = useRouter();
 const { t } = useI18n();
 
 const call = inject('call');
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 const invites = ref([]);
 const displayPage = ref(false);

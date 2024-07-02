@@ -13,6 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
+import { dayjsKey } from '@/keys';
 
 export type IsoWeekday = {
   iso: number,
@@ -38,7 +39,7 @@ export default function useDayJS(app: App<Element>, locale: string) {
 
   // provide the configured dayjs instance as well es some helper functions
   // TODO: provide method to live update the dayjs locale
-  app.provide('dayjs', dayjs);
+  app.provide(dayjsKey, dayjs);
   app.provide('tzGuess', dayjs.tz.guess());
 
   const hDuration = (m: number): string => ((m < 60)

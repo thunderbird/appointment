@@ -1,4 +1,4 @@
-import { Dayjs } from "dayjs";
+import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
 
 export type Attendee = {
@@ -128,6 +128,12 @@ export type Signature = {
   url: string;
 }
 
+export type Error = { error: boolean|string|null };
+export type Token = {
+  access_token: string;
+  token_type: string;
+}
+
 // Types and aliases used for our custom createFetch API calls and return types
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
 export type BooleanResponse = UseFetchReturn<boolean>;
@@ -138,9 +144,3 @@ export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
-
-export type Error = { error: boolean|string|null };
-export type Token = {
-  access_token: string;
-  token_type: string;
-}

@@ -71,8 +71,9 @@ import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview';
 import CalendarEventRemote from '@/elements/calendar/CalendarEventRemote';
 import CalendarEventScheduled from '@/elements/calendar/CalendarEventScheduled';
 import EventPopup from '@/elements/EventPopup';
+import { dayjsKey } from "@/keys";
 
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 // component properties
 const props = defineProps({
