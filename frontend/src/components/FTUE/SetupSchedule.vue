@@ -13,13 +13,13 @@
         <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>{{ t('label.selectCalendar') }}</select-input>
         <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>{{ t('label.slotLength') }}</select-input>
         <div class="scheduleInfo">{{
-                t('text.recipientsCanScheduleBetween', {
-                  duration: duration,
-                  earliest: '24 hours',
-                  farthest: '2 weeks',
-                })
-              }}
-            </div>
+            t('text.recipientsCanScheduleBetween', {
+              duration: duration,
+              earliest: '24 hours',
+              farthest: '2 weeks',
+            })
+          }}
+        </div>
       </div>
     </form>
   </div>

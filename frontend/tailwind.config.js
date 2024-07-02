@@ -1,5 +1,4 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
-const plugin = require('tailwindcss/plugin.js');
 
 module.exports = {
   content: ['./public/index.html', './src/**/*.{vue,js}'],
