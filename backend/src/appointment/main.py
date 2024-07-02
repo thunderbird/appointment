@@ -121,6 +121,7 @@ def server():
     from .routes import invite
     from .routes import subscriber
     from .routes import zoom
+    from .routes import waiting_list
     from .routes import webhooks
 
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
@@ -180,6 +181,7 @@ def server():
     app.include_router(schedule.router, prefix='/schedule')
     app.include_router(invite.router, prefix='/invite')
     app.include_router(subscriber.router, prefix='/subscriber')
+    app.include_router(waiting_list.router, prefix='/waiting-list')
     app.include_router(webhooks.router, prefix='/webhooks')
     if os.getenv('ZOOM_API_ENABLED'):
         app.include_router(zoom.router, prefix='/zoom')

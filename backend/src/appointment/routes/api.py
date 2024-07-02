@@ -1,7 +1,6 @@
-import enum
+import logging
 import os
 import secrets
-from enum import Enum
 
 import requests.exceptions
 import sentry_sdk

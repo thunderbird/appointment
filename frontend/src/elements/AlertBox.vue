@@ -32,6 +32,9 @@
 <script setup>
 import { IconX } from '@tabler/icons-vue';
 import { alertSchemes } from '@/definitions';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps({
   title: String,

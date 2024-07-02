@@ -262,6 +262,16 @@ export const tableDataButtonType = {
   caution: 3,
 };
 
+/**
+ * This should match the enum in routes/waiting_list.py
+ * @enum
+ * @readonly
+ */
+export const waitingListAction = {
+  confirm: 1,
+  leave: 2,
+};
+
 export default {
   subscriberLevels,
   appointmentState,
@@ -280,4 +290,5 @@ export default {
   qalendarSlotDurations,
   tableDataType,
   tableDataButtonType,
+  waitingListAction,
 };

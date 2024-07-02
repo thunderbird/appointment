@@ -114,3 +114,21 @@ new-account-mail-plain = You've been invited to Thunderbird Appointment.
                     Login with this email address to continue.
                     { $homepage_url }
                     {-brand-footer}
+
+## Confirm Email for waiting list
+confirm-email-mail-subject = Confirm your email to join the waiting list!
+confirm-email-mail-confirm-action = Confirm your email
+confirm-email-mail-decline-action = Remove your email
+confirm-email-mail-html-body = Thank you for your interest in Thunderbird Appointment.
+                               Before we add you to our waiting list we need you to confirm your email address below.
+confirm-email-mail-html-body-2 = Did you receive this email in error, or are you no longer interested?
+# Variables:
+# $confirm_email_url (String) - URL to confirm your email
+# $decline_email_url (String) - URL to remove the email from the waiting list
+confirm-email-mail-plain = Thank you for your interest in Thunderbird Appointment.
+                    Before we add you to our waiting list we need you to confirm your email address at the link below.
+                    { $confirm_email_url }
+
+                    Did you receive this email in error, or are you no longer interested? Just follow this link to remove your email from our waiting list.
+                    { $decline_email_url }
+                    {-brand-footer}
