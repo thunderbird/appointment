@@ -82,7 +82,6 @@ const onSubmit = async () => {
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-/*flex w-full max-w-sm flex-col gap-4*/
 .content {
   display: flex;
   flex-direction: column;
