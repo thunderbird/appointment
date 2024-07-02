@@ -110,6 +110,7 @@ export type User = {
   avatarUrl: string;
   accessToken: string;
   scheduleSlugs: string[];
+  isSetup: boolean,
 }
 
 export type Subscriber = {
