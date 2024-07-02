@@ -8,7 +8,7 @@ from uuid import UUID
 from datetime import datetime, date, time
 from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from .models import (
     AppointmentStatus,
@@ -386,3 +386,15 @@ class TokenData(BaseModel):
 
 class SendInviteEmailIn(BaseModel):
     email: str = Field(title='Email', min_length=1)
+
+
+class JoinTheWaitingList(BaseModel):
+    email: str = Field(title='Email', min_length=1)
+
+
+class TokenForWaitingList(BaseModel):
+    token: str = Field(title='Token')
+
+
+class CheckEmail(BaseModel):
+    email: EmailStr = Field(title='Email', min_length=1)

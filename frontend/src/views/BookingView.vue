@@ -138,7 +138,7 @@ const handleError = (data) => {
 
   if (data?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
     errorHeading.value = '';
-    errorBody.value = data.value.detail.message;
+    errorBody.value = data?.detail.message;
   }
 };
 
@@ -183,9 +183,10 @@ const bookEvent = async (attendeeData) => {
     attendee: attendeeData,
   };
 
+  const url = window.location.href.split('#')[0];
   const request = call('schedule/public/availability/request').put({
     s_a: obj,
-    url: window.location.href,
+    url,
   });
 
   // Data should just be true here.

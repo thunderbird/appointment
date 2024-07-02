@@ -278,3 +278,14 @@ class SubscriberSelfDeleteException(APIException):
 
     def get_msg(self):
         return l10n('subscriber-self-delete')
+
+
+class WaitingListActionFailed(APIException):
+    """Raise if the waiting list link was valid but failed for some reason"""
+
+    id_code = 'WAITING_LIST_FAIL'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('unknown-error')
+

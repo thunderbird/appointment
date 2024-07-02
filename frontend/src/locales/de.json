@@ -89,6 +89,7 @@
     "addCalendar": "{provider} Kalender hinzufügen",
     "addDay": "Tag hinzufügen",
     "addTime": "Zeit hinzufügen",
+    "addToWaitingList": "Der Warteliste beitreten",
     "admin-invite-codes-panel": "Einladungen",
     "admin-subscriber-panel": "Abonnenten",
     "all": "Alle",
@@ -111,6 +112,7 @@
     "attendees": "Teilnehmer",
     "availabilityDay": "Verfügbarer Tag",
     "availableDays": "Verfügbare Tage",
+    "back": "Zurück",
     "bookEvent": "Buchen",
     "booked": "Gebucht",
     "bookingLink": "Buchungslink",
@@ -178,6 +180,7 @@
     "goForward": "Weiter",
     "google": "Google",
     "guest": "{count} Gäste | {count} Gast | {count} Gäste",
+    "home": "Start",
     "immediately": "Sofort",
     "inPerson": "Vor Ort",
     "inviteCode": "Du hast einen Einladungscode?",
@@ -236,6 +239,7 @@
     "shareMyLink": "Meinen Link teilen",
     "showSecondaryTimeZone": "Zeige sekundäre Zeitzone",
     "signInWithGoogle": "Mit Google anmelden",
+    "signUpWithInviteCode": "Anmeldung mit Einladungscode",
     "slotLength": "Termindauer",
     "start": "Start",
     "startDate": "Startdatum",
@@ -359,6 +363,18 @@
   "units": {
     "minutes": "{value} Minuten",
     "none": "{value}"
+  },
+  "waitingList": {
+    "confirmHeading": "Deine E-Mail-Adresse wurde bestätigt!",
+    "confirmInfo": "Deine E-Mail-Adresse ist nun bestätigt. Sobald Du ausgewählt wurdest, wirst Du einen Einladungscode bekommen.",
+    "errorHeading": "Es gab ein Problem mit diesem Link",
+    "errorInfo": "Leider ist dieser Link abgelaufen oder ungültig.",
+    "leaveHeading": "Du hast die Warteliste erfolgreich verlassen",
+    "leaveInfo": "Schade, dass Du gehst. Du kannst Dich jederzeit wieder auf die Warteliste setzen lassen!",
+    "signUpAlreadyExists": "Du bist bereits auf der Warteliste.",
+    "signUpCheckYourEmail": "Weitere Informationen findest Du in Deiner E-Mail.",
+    "signUpHeading": "Nur noch ein Schritt!",
+    "signUpInfo": "Bevor Du in die Warteliste aufgenommen werden kannst, musst Du Deine E-Mail-Adresse bestätigen."
   },
   "icons": {
     "calendar": "Kalender",

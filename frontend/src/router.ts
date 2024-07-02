@@ -1,5 +1,5 @@
 import { defineAsyncComponent } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import CalendarView from '@/views/CalendarView.vue';
@@ -10,12 +10,13 @@ import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
 
 // lazy loaded components
-const ContactView = defineAsyncComponent(() => import('@/views/ContactView'));
-const AppointmentsView = defineAsyncComponent(() => import('@/views/AppointmentsView'));
-const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView'));
-const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView'));
-const LegalView = defineAsyncComponent(() => import('@/views/LegalView'));
-const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView'));
+const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
+const AppointmentsView = defineAsyncComponent(() => import('@/views/AppointmentsView.vue'));
+const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
+const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
+const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
+const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
+const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
 const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
 
@@ -23,7 +24,7 @@ const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/F
  * Defined routes for Thunderbird Appointment
  * Note: All routes require authentication unless otherwise specified in App.vue::routeIsPublic
  */
-const routes = [
+const routes: RouteRecordRaw[] = [
   // instant loaded routes
   {
     path: '/',
@@ -119,6 +120,14 @@ const routes = [
     path: '/setup',
     name: 'setup',
     component: FirstTimeUserExperienceView,
+  },
+  {
+    path: '/waiting-list/:token',
+    name: 'waiting-list',
+    component: WaitingListActionView,
+    meta: {
+      isPublic: true,
+    },
   },
   // Admin
   {

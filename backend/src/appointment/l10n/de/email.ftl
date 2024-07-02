@@ -55,6 +55,7 @@ reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfe
                     {-brand-footer}
 
 ## Pending Appointment
+
 pending-mail-subject = deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
@@ -101,4 +102,33 @@ support-mail-html-details = { $details }
 support-mail-plain = { $requestee_name } ({ $requestee_email }) hat folgende Supportanfrage per Kontaktformular auf {-brand-name} gestellt.
                     Thema: { $topic }
                     Inhalt: { $details }
+                    {-brand-footer}
+
+## New/Invited Account Email
+new-account-mail-subject = Du wurdest zu Thunderbird Appointment eingeladen
+new-account-mail-action = Weiter zu Thunderbird Appointment
+new-account-mail-html-heading = Du wurdest zu Thunderbird Appointment eingeladen. Logge dich mit dieser E-Mail-Adresse ein um fortzufahren.
+# Variables:
+# $homepage_url (String) - URL to Thunderbird Appointment
+new-account-mail-plain = Du wurdest zu Thunderbird Appointment eingeladen.
+                    Logge dich mit dieser E-Mail-Adresse ein um fortzufahren.
+                    { $homepage_url }
+                    {-brand-footer}
+
+## Confirm Email for waiting list
+confirm-email-mail-subject = Bestätige deine E-Mail-Adresse um der Warteliste beizutreten!
+confirm-email-mail-confirm-action = Bestätige deine E-Mail-Adresse
+confirm-email-mail-decline-action = Entferne deine E-Mail-Adresse
+confirm-email-mail-html-body = Danke für Dein Interesse an Thunderbird Appointment.
+                               Bevor wir Dich auf unsere Warteliste setzen, musst Du Deine E-Mail-Adresse unten bestätigen.
+confirm-email-mail-html-body-2 = Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert?
+# Variables:
+# $confirm_email_url (String) - URL to confirm your email
+# $decline_email_url (String) - URL to remove the email from the waiting list
+confirm-email-mail-plain = Danke für Dein Interesse an Thunderbird Appointment.
+                    Bevor wir Dich auf unsere Warteliste setzen, musst Du Deine E-Mail-Adresse über den unten stehenden Link bestätigen.
+                    { $confirm_email_url }
+
+                    Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert? Folge einfach diesem Link, um Deine E-Mail-Adresse von der Warteliste zu löschen.
+                    { $decline_email_url }
                     {-brand-footer}

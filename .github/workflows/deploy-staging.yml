@@ -123,7 +123,7 @@ jobs:
       - deploy-stage-iac
     if: |
       always() &&
-      (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
       needs.detect-changes.outputs.deploy-frontend == 'true'
     environment: staging
     runs-on: ubuntu-latest
@@ -139,7 +139,7 @@ jobs:
       - name: Setup NPM
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
 
       - name: Install dependencies
         run: cd frontend && yarn install
@@ -229,12 +229,13 @@ jobs:
           path: ecr_tag.zip
 
   deploy-stage-backend:
-    needs: 
+    needs:
+      - build-backend-image
       - detect-changes
       - deploy-stage-iac
     if: |
       always() &&
-      (needs.deploy-iac.result == 'success' || needs.deploy-iac.result == 'skipped') &&
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
       needs.detect-changes.outputs.deploy-backend == 'true'
     environment: staging
     runs-on: ubuntu-latest
@@ -316,7 +317,7 @@ jobs:
       - name: Setup NPM
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
 
       - name: Install dependencies
         run: cd frontend && yarn install

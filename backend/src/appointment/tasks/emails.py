@@ -1,3 +1,6 @@
+import os
+import urllib.parse
+
 from appointment.controller.mailer import (
     PendingRequestMail,
     ConfirmationMail,
@@ -5,7 +8,7 @@ from appointment.controller.mailer import (
     ZoomMeetingFailedMail,
     RejectionMail,
     SupportRequestMail,
-    InviteAccountMail,
+    InviteAccountMail, ConfirmYourEmailMail,
 )
 
 
@@ -47,4 +50,13 @@ def send_support_email(requestee_name, requestee_email, topic, details):
 
 def send_invite_account_email(to):
     mail = InviteAccountMail(to=to)
+    mail.send()
+
+
+def send_confirm_email(to, confirm_token, decline_token):
+    base_url = f"{os.getenv('FRONTEND_URL')}/waiting-list"
+    confirm_url = f"{base_url}/{confirm_token}"
+    decline_url = f"{base_url}/{decline_token}"
+
+    mail = ConfirmYourEmailMail(to=to, confirm_url=confirm_url, decline_url=decline_url)
     mail.send()

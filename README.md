@@ -37,6 +37,7 @@ On first-run the database will initialize, and a first time setup command will b
 Contributions are very welcome. Please lint/format code before creating PRs.
 
 Check out the project's respective readmes:
+
 * [Backend Readme](backend/README.md)
 * [Frontend Readme](frontend/README.md)
 

@@ -14,7 +14,7 @@
       :class="{
         'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
         '!pt-24': routeIsHome || isAuthenticated,
-        'min-h-full pb-32 pt-8': routeIsPublic,
+        'min-h-full pb-32 pt-8': routeIsPublic && !routeHasModal,
       }"
     >
       <router-view/>
@@ -141,6 +141,9 @@ const routeIsPublic = computed(
 );
 const routeIsHome = computed(
   () => ['home'].includes(route.name),
+);
+const routeHasModal = computed(
+  () => ['login'].includes(route.name),
 );
 
 // retrieve calendars and appointments after checking login and persisting user to db

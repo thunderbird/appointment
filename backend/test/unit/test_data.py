@@ -1,6 +1,7 @@
 from argon2 import PasswordHasher
 
 from appointment.controller.data import model_to_csv_buffer, delete_account
+from appointment.database import models
 
 
 class TestData:
@@ -31,19 +32,36 @@ class TestData:
         make_schedule,
         make_caldav_calendar,
         make_external_connections,
+        make_invite,
+        make_waiting_list,
     ):
         """Test that our delete account functionality actually deletes everything"""
         subscriber = make_pro_subscriber()
         calendar = make_caldav_calendar(subscriber_id=subscriber.id)
         appointment = make_appointment(calendar_id=calendar.id)
         schedule = make_schedule(calendar_id=calendar.id)
-        external_connection = make_external_connections(subscriber_id=subscriber.id)
+        external_connections = [
+            make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa),
+            make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.google),
+            make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.zoom),
+        ]
+        invite = make_invite(subscriber_id=subscriber.id)
+        waiting_list = make_waiting_list(email=subscriber.email, invite_id=invite.id)
 
         # Get some relationships
         slots = appointment.slots
 
         # Bunch them together into a list. They must have an id field, otherwise assert them manually.
-        models_to_check = [subscriber, external_connection, calendar, appointment, schedule, *slots]
+        models_to_check = [
+            subscriber,
+            calendar,
+            appointment,
+            schedule,
+            invite,
+            waiting_list,
+            *external_connections,
+            *slots,
+        ]
 
         with with_db() as db:
             ret = delete_account(db, subscriber)

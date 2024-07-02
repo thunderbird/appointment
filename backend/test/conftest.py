@@ -21,9 +21,10 @@ from factory.schedule_factory import make_schedule  # noqa: F401
 from factory.slot_factory import make_appointment_slot  # noqa: F401
 from factory.subscriber_factory import make_subscriber, make_basic_subscriber, make_pro_subscriber  # noqa: F401
 from factory.invite_factory import make_invite  # noqa: F401
+from factory.waiting_list_factory import make_waiting_list  # noqa: F401
 
 # Load our env
-load_dotenv(find_dotenv('.env.test'))
+load_dotenv(find_dotenv('.env.test'), override=True)
 
 from appointment.main import server  # noqa: E402
 from appointment.database import models, repo, schemas  # noqa: E402

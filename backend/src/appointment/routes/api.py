@@ -3,11 +3,12 @@ import os
 import secrets
 
 import requests.exceptions
+import sentry_sdk
 from redis import Redis, RedisCluster
 
 # database
 from sqlalchemy.orm import Session
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, JSONResponse
 
 from .. import utils
 from ..database import repo, schemas
@@ -30,9 +31,23 @@ router = APIRouter()
 
 
 @router.get('/')
-def health():
+def health(db: Session = Depends(get_db)):
     """Small route with no processing that will be used for health checks"""
-    return l10n('health-ok')
+    try:
+        db.query(Subscriber).first()
+    except Exception as ex:
+        sentry_sdk.capture_exception(ex)
+        return JSONResponse(content=l10n('health-bad'), status_code=503)
+
+    if os.getenv('REDIS_URL'):
+        try:
+            redis_instance: Redis | RedisCluster | None = get_redis()
+            redis_instance.ping()
+        except Exception as ex:
+            sentry_sdk.capture_exception(ex)
+            return JSONResponse(content=l10n('health-bad'), status_code=503)
+
+    return JSONResponse(l10n('health-ok'), status_code=200)
 
 
 @router.put('/me', response_model=schemas.SubscriberBase)

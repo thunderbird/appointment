@@ -1,14 +1,13 @@
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig, mergeConfig } from 'vitest/config';
 import viteConfig from './vite.config';
 
-export default defineConfig({
-  viteConfig,
+export default mergeConfig(viteConfig, defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
-    extensions: ['.js', '.vue'],
+    extensions: ['ts', '.js', '.vue'],
   },
   test: {
     setupFiles: [
@@ -18,4 +17,4 @@ export default defineConfig({
     environment: 'jsdom',
     root: fileURLToPath(new URL('./', import.meta.url)),
   },
-});
+}));

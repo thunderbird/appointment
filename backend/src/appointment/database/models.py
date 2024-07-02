@@ -144,7 +144,7 @@ class Subscriber(HasSoftDelete, Base):
     calendars = relationship('Calendar', cascade='all,delete', back_populates='owner')
     slots = relationship('Slot', cascade='all,delete', back_populates='subscriber')
     external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
-    invite: Mapped['Invite'] = relationship('Invite', back_populates='subscriber', uselist=False)
+    invite: Mapped['Invite'] = relationship('Invite', cascade='all,delete', back_populates='subscriber', uselist=False)
 
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
@@ -186,7 +186,7 @@ class Appointment(Base):
     __tablename__ = 'appointments'
 
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(UUIDType(native=False), default=uuid.uuid4(), index=True)
+    uuid = Column(UUIDType(native=False), default=uuid.uuid4, index=True, unique=True)
     calendar_id = Column(Integer, ForeignKey('calendars.id'))
     duration = Column(Integer)
     title = Column(encrypted_type(String))
@@ -348,6 +348,7 @@ class Invite(Base):
     status = Column(Enum(InviteStatus), index=True)
 
     subscriber: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True)
+    waiting_list: Mapped['WaitingList'] = relationship('WaitingList', cascade='all,delete', back_populates='invite', uselist=False)
 
     @property
     def is_used(self) -> bool:
@@ -363,3 +364,15 @@ class Invite(Base):
     def is_available(self) -> bool:
         """True if the invite code is not assigned nor revoked"""
         return self.subscriber_id is None and self.status == InviteStatus.active
+
+
+class WaitingList(Base):
+    """Holds a list of hopefully future-Appointment users"""
+    __tablename__ = 'waiting_list'
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(encrypted_type(String), unique=True, index=True, nullable=False)
+    email_verified = Column(Boolean, nullable=False, index=True, default=False)
+    invite_id = Column(Integer, ForeignKey('invites.id'), nullable=True, index=True)
+
+    invite: Mapped['Invite'] = relationship('Invite', back_populates='waiting_list', single_parent=True)

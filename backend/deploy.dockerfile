@@ -25,6 +25,7 @@ COPY src .
 
 # Remove setup.py as we don't need it on stage/prod
 RUN rm /app/appointment/commands/setup.py
+COPY scripts/dummy_setup.py /app/appointment/commands/setup.py
 
 RUN pip install --upgrade pip
 RUN pip install .'[deploy]'
