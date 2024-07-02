@@ -137,7 +137,7 @@ const scheduleStore = useScheduleStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
-  () => ['availability', 'home', 'login', 'post-login', 'confirmation', 'terms', 'privacy', 'waiting-list'].includes(route.name),
+  () => route.meta?.isPublic,
 );
 const routeIsHome = computed(
   () => ['home'].includes(route.name),

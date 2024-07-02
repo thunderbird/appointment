@@ -7,6 +7,7 @@ import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
+import { useUserStore } from '@/stores/user-store';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
@@ -17,6 +18,8 @@ const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
+const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
+
 /**
  * Defined routes for Thunderbird Appointment
  * Note: All routes require authentication unless otherwise specified in App.vue::routeIsPublic
@@ -27,26 +30,41 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: HomeView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/post-login/:token',
     name: 'post-login',
     component: PostLoginView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/user/:username/:signatureOrSlug',
     name: 'availability',
     component: BookingView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/user/:username/:signature/confirm/:slot/:token/:confirmed',
     name: 'confirmation',
     component: BookingConfirmationView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/schedule',
@@ -86,16 +104,30 @@ const routes: RouteRecordRaw[] = [
     path: '/privacy',
     name: 'privacy',
     component: LegalView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/terms',
     name: 'terms',
     component: LegalView,
+    meta: {
+      isPublic: true,
+    },
+  },
+  {
+    path: '/setup',
+    name: 'setup',
+    component: FirstTimeUserExperienceView,
   },
   {
     path: '/waiting-list/:token',
     name: 'waiting-list',
     component: WaitingListActionView,
+    meta: {
+      isPublic: true,
+    },
   },
   // Admin
   {
@@ -114,6 +146,15 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from) => {
+  if (!to.meta?.isPublic && !['setup', 'contact', undefined].includes(to.name)) {
+    const user = useUserStore();
+    if (user && user.data?.email && !user.data.isSetup) {
+      return { ...to, name: 'setup' };
+    }
+  }
 });
 
 export default router;

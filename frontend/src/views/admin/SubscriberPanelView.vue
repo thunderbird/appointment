@@ -67,6 +67,7 @@ import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { dayjsKey } from "@/keys";
 
 const user = useUserStore();
 
@@ -74,7 +75,7 @@ const router = useRouter();
 const { t } = useI18n();
 
 const call = inject('call');
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 const subscribers = ref([]);
 const displayPage = ref(false);

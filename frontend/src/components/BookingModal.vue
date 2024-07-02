@@ -102,12 +102,13 @@ import { IconX } from '@tabler/icons-vue';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
 import { storeToRefs } from 'pinia';
 import { modalStates } from '@/definitions';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const user = useUserStore();
 const { t } = useI18n();
 const route = useRoute();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 const emit = defineEmits(['book', 'close']);
 

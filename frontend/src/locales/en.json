@@ -18,7 +18,8 @@
     "somethingWentWrong": "Something went wrong",
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
     "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
-    "usernameIsNotAvailable": "Username not available. Please choose another."
+    "usernameIsNotAvailable": "Username not available. Please choose another.",
+    "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account."
   },
   "fields": {
     "slot_duration": "Slot Duration",
@@ -121,7 +122,7 @@
     "bookings": "Bookings | Booking | Bookings",
     "busy": "Busy",
     "caldav": "CalDAV",
-    "calendar": "Calendar",
+    "calendar": "Calendar | Calendars",
     "calendarDeletion": "Remove Calendar",
     "calendarUrl": "Calendar URL",
     "cancel": "Cancel",
@@ -283,7 +284,7 @@
     "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
-    "connectZoom": "You can connect your Zoom account to enable instant meeting invites with your appointments.",
+    "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
     "contactRequestForm": "Please use the contact form below to send any feedback, questions, or concerns to our support team. If needed we will try and contact you for further information as soon as possible.",
     "defineDaysAndTimeSlots": "Choose the days and times this event can be booked.",
     "denialSentToAddress": "We've let the booker ({address}) know you can't make this event.",
@@ -374,5 +375,43 @@
     "signUpCheckYourEmail": "Check your email for more information.",
     "signUpHeading": "Just one more step!",
     "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
+  },
+  "icons": {
+    "calendar": "Calendar",
+    "info": "Information",
+    "success": "Success",
+    "warning": "Warning",
+    "critical": "Critical"
+  },
+  "ftue": {
+    "oneCalendarRequired": "Please enable one calendar to continue",
+    "fullName": "Full Name",
+    "googleCalendarLogo": "Google Calendar Logo",
+    "itemsSelected": "{count} Selected",
+    "selectAll": "Select All",
+    "selectAllCalendars": "Select All Calendars",
+    "calendarIcon": "Calendar icon",
+    "connectCalendarInfo": "Connect your calendars to manage your availability",
+    "customVideoMeetingLink": "Custom Video meeting link",
+    "customVideoMeetingText": "Use a single meeting link for all bookings from your selected provider",
+    "videoMeetingLink": "Video meeting link",
+    "skipConnectVideo": "Skip connect video",
+    "scheduleName": "Schedule's Name",
+    "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
+    "finishScreenText": "Before you close this screen, copy your shareable schedule link to start receiving appointments.",
+    "finishAltText": "A user icon in front of two calendars.",
+    "finish": "Finish",
+    "setupScheduleInfo": "You can edit this schedule later",
+    "errorHeading": "Huh, how did this happen?",
+    "errorBody": "Looks like there was an error. Click the button below to go back!",
+    "steps": {
+      "setupProfile": "Create your profile",
+      "googlePermissions": "Allow Google Calendar permissions",
+      "connectCalendars": "Connect calendars",
+      "setupSchedule": "Set up your appointment availability",
+      "connectVideo": "Connect your video meeting link",
+      "finish": "You are ready to start booking",
+      "error": "Uh-oh!"
+    }
   }
 }

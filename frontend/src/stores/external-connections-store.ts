@@ -1,4 +1,6 @@
-import { ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse } from '@/models';
+import {
+  ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse,
+} from '@/models';
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -44,7 +46,27 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     isLoaded.value = false;
   };
 
+  const connect = async (call: Fetch, category: string, router: any) => {
+    if (category === 'zoom') {
+      const { data } = await call('zoom/auth').get().json();
+      // Ship them to the auth link
+      window.location.href = data.value.url;
+    } else if (category === 'google') {
+      await router.push('/settings/calendar');
+    }
+  };
+
+  const disconnect = async (call: Fetch, category: string) => {
+    if (category === 'zoom') {
+      return call('zoom/disconnect').post();
+    } if (category === 'google') {
+      return call('google/disconnect').post();
+    }
+
+    return null;
+  };
+
   return {
-    connections, isLoaded, fxa, zoom, google, fetch, $reset,
+    connections, isLoaded, fxa, zoom, google, fetch, $reset, connect, disconnect,
   };
 });

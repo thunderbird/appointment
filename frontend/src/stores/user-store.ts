@@ -15,6 +15,7 @@ const initialUserObject = {
   avatarUrl: null,
   accessToken: null,
   scheduleSlugs: [],
+  isSetup: false,
 } as User;
 
 export const useUserStore = defineStore('user', () => {
@@ -45,6 +46,7 @@ export const useUserStore = defineStore('user', () => {
       level: subscriber.level,
       timezone: subscriber.timezone,
       avatarUrl: subscriber.avatar_url,
+      isSetup: subscriber.is_setup,
     };
   };
 
@@ -70,6 +72,21 @@ export const useUserStore = defineStore('user', () => {
 
     return { error: false };
   };
+
+  const updateUser = async (fetch, inputData) => {
+    const { data: userData, error } = await fetch('me').put(inputData).json();
+    if (!error.value) {
+      // update user in store
+      await updateProfile(userData.value);
+      await updateSignedUrl(fetch);
+
+      return { error: false };
+    }
+
+    return { error: data.value ?? error.value };
+  };
+
+  const finishFTUE = async (fetch) => fetch('subscriber/setup').post().json();
 
   /**
    * Update store with profile data from db
@@ -150,6 +167,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateScheduleUrls,
+    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateScheduleUrls, updateUser, finishFTUE,
   };
 });

@@ -54,10 +54,11 @@ import {
   IconChevronRight,
 } from '@tabler/icons-vue';
 import { appointmentState } from '@/definitions';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const isoWeekdays = inject('isoWeekdays');
 const isoFirstDayOfWeek = inject('isoFirstDayOfWeek');
 

@@ -292,6 +292,7 @@ def me(
         level=subscriber.level,
         timezone=subscriber.timezone,
         avatar_url=subscriber.avatar_url,
+        is_setup=subscriber.is_setup,
     )
 
 

@@ -6,9 +6,11 @@ module.exports = {
     browser: true,
     es2021: true,
   },
+  parser: '@typescript-eslint/parser',
   extends: [
     'plugin:vue/vue3-essential',
     'plugin:tailwindcss/recommended',
+    'plugin:@typescript-eslint/recommended',
     'airbnb-base',
   ],
   overrides: [],
@@ -18,6 +20,7 @@ module.exports = {
   },
   plugins: [
     'vue',
+    '@typescript-eslint',
   ],
   rules: {
     'import/extensions': ['error', 'ignorePackages', {
@@ -31,6 +34,18 @@ module.exports = {
     'tailwindcss/no-custom-classname': 'off',
     'import/prefer-default-export': 'off',
     radix: 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    // Disable full warning, and customize the typescript one
+    // Warn about unused vars unless they start with an underscore
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      },
+    ],
   },
   settings: {
     'import/resolver': {

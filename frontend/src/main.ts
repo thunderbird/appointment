@@ -13,7 +13,7 @@ import useDayJS from '@/composables/dayjs';
 import i18ninstance from '@/composables/i18n';
 
 // init basic css with tailwind imports
-import '@/assets/main.css';
+import '@/assets/styles/main.css';
 
 // init sentry
 // eslint-disable-next-line import/no-extraneous-dependencies

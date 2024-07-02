@@ -9,7 +9,7 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 
-[*.{vue,html,css,js,json,yml}]
+[*.{vue,html,css,js,json,yml,ts}]
 charset = utf-8
 indent_style = space
 indent_size = 2

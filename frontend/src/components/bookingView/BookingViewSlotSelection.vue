@@ -51,11 +51,12 @@ import { dateFormatStrings } from '@/definitions';
 import PrimaryButton from '@/elements/PrimaryButton';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import { useScheduleStore } from '@/stores/schedule-store';
+import { dayjsKey } from "@/keys";
 
 const { t } = useI18n();
 const { activeSchedules } = storeToRefs(useScheduleStore());
 const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 const emit = defineEmits(['openModal']);
 

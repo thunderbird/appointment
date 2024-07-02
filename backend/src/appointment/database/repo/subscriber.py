@@ -5,6 +5,7 @@ Repository providing CRUD functions for subscriber database models.
 
 import re
 import datetime
+import urllib.parse
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
@@ -124,6 +125,8 @@ def verify_link(db: Session, url: str):
     Return subscriber if valid.
     """
     username, signature, clean_url = utils.retrieve_user_url_data(url)
+
+    username = urllib.parse.unquote_plus(username)
 
     subscriber = get_by_username(db, username)
     if not subscriber:

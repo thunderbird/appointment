@@ -18,7 +18,8 @@
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
-    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
+    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar.",
+    "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto."
   },
   "fields": {
     "slot_duration": "Dauer",
@@ -121,7 +122,7 @@
     "bookings": "Buchungen | Buchung | Buchungen",
     "busy": "Beschäftigt",
     "caldav": "CalDAV",
-    "calendar": "Kalender",
+    "calendar": "Kalender | Kalender",
     "calendarDeletion": "Kalenderverbindung entfernen",
     "calendarUrl": "Kalender URL",
     "cancel": "Abbrechen",
@@ -283,7 +284,7 @@
     "accountDeletionWarning": "Achtung: Die Löschung des Benutzerkontos ist dauerhaft! Du wirst all deine Daten von Thunderbird Appointment verlieren. Deine verbundenen Kalender bleiben selbstverständlich unverändert. Du kannst jederzeit ein neues Benutzerkonto erstellen.",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalender gespeichert sind.",
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
-    "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erweitern.",
+    "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erstellen.",
     "contactRequestForm": "Bitte verwende das nachstehende Kontaktformular, um Feedback, Fragen oder Anliegen an unser Support-Team zu senden. Wir werden ggf. versuchen, so schnell wie möglich zu antworten.",
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können …",
     "denialSentToAddress": "Die Informationen über die Ablehnung der Anfrage wurde per E-Mail an {address} geschickt.",
@@ -374,5 +375,43 @@
     "signUpCheckYourEmail": "Weitere Informationen findest Du in Deiner E-Mail.",
     "signUpHeading": "Nur noch ein Schritt!",
     "signUpInfo": "Bevor Du in die Warteliste aufgenommen werden kannst, musst Du Deine E-Mail-Adresse bestätigen."
+  },
+  "icons": {
+    "calendar": "Kalender",
+    "info": "Information",
+    "success": "Erfolg",
+    "warning": "Warnung",
+    "critical": "Kritisch"
+  },
+  "ftue": {
+    "oneCalendarRequired": "Bitte mindestens einen Kalendar auswählen um fortzufahren",
+    "fullName": "Vollständiger Name",
+    "googleCalendarLogo": "Google Kalender Logo",
+    "itemsSelected": "{count} ausgewählt",
+    "selectAll": "Alle auswählen",
+    "selectAllCalendars": "Alle Kalender auswählen",
+    "calendarIcon": "Kalender Icon",
+    "connectCalendarInfo": "Verbinde deine Kalender zur Anzeige der Verfügbarkeit",
+    "customVideoMeetingLink": "Eigener Videokonferenz-Link",
+    "customVideoMeetingText": "Einen einzigen Videokonferenz-Link für alle Termin-Buchungen verwenden",
+    "videoMeetingLink": "Videokonferenz-Link",
+    "skipConnectVideo": "Diesen Schritt überspringen",
+    "scheduleName": "Titel des Terminplans",
+    "videoConnectionRequired": "Zoom-Konto verbinden und einen benutzerdefinierten Meeting-Link angeben um fortzufahren.",
+    "finishScreenText": "Bevor Du gehst: Kopiere den Link zu Deinem Terminplan, um Termin-Buchungen zu erhalten",
+    "finishAltText": "Ein Benutzer-Icon vor zwei Kalendern.",
+    "finish": "Fertig",
+    "setupScheduleInfo": "Der Terminplan kann später angepasst werden",
+    "errorHeading": "Huch, wie konnte das passieren?",
+    "errorBody": "Es gab wohl einen Fehler. Klicke den Button unten um zurück zu kommen!",
+    "steps": {
+      "setupProfile": "Dein Profil erstellen",
+      "googlePermissions": "Google Kalender-Berechtigungen zulassen",
+      "connectCalendars": "Kalender verbinden",
+      "setupSchedule": "Terminverfügbarkeit einstellen",
+      "connectVideo": "Videokonferenz-Link verbinden",
+      "finish": "Jetzt kann es mit den Terminbuchung losgehen",
+      "error": "Oh nein!"
+    }
   }
 }

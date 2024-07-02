@@ -147,12 +147,13 @@ import {
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
 import { useUserStore } from '@/stores/user-store';
+import { dayjsKey } from "@/keys";
 
 const user = useUserStore();
 
 // component constants
 const { t } = useI18n();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 
 // component properties
 const props = defineProps({

@@ -66,6 +66,7 @@ def update_me(
         name=me.name,
         level=me.level,
         timezone=me.timezone,
+        is_setup=me.is_setup,
     )
 
 

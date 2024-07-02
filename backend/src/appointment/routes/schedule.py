@@ -108,6 +108,14 @@ def update_schedule(
         and subscriber.get_external_connection(ExternalConnectionType.zoom) is None
     ):
         raise validation.ZoomNotConnectedException()
+
+    if schedule.slug is None:
+        # If slug isn't provided, give them the last 8 characters from a uuid4
+        schedule.slug = repo.schedule.generate_slug(db, id)
+        if not schedule.slug:
+            # A little extra, but things are a little out of place right now..
+            raise validation.ScheduleCreationException()
+
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
 
@@ -435,7 +443,7 @@ def decide_on_schedule_availability_slot(
         title=title,
         start=slot.start.replace(tzinfo=timezone.utc),
         end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
-        description=schedule.details,
+        description=schedule.details or '',
         location=schemas.EventLocation(
             type=schedule.location_type,
             url=location_url,

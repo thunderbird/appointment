@@ -256,10 +256,43 @@ export const tableDataType = {
   bool: 5,
 };
 
+/**
+ * @enum
+ * @readonly
+ */
 export const tableDataButtonType = {
   primary: 1,
   secondary: 2,
   caution: 3,
+};
+
+/**
+ * First Time User Experience Steps
+ * Step amounts are 10-based to allow us flexibility in adding steps later.
+ * @enum
+ * @readonly
+ */
+export const ftueStep = {
+  setupProfile: 10,
+  // Right now we only support Google calendars during ftue
+  googlePermissions: 20,
+  connectCalendars: 30,
+  setupSchedule: 40,
+  connectVideoConferencing: 50,
+  finish: 100,
+};
+
+/**
+ *
+ * @enum
+ * @readonly
+ */
+export const tooltipPosition = {
+  none: 'pos-none',
+  top: 'pos-top',
+  bottom: 'pos-bottom',
+  left: 'pos-left',
+  right: 'pos-right',
 };
 
 /**
@@ -290,5 +323,6 @@ export default {
   qalendarSlotDurations,
   tableDataType,
   tableDataButtonType,
+  tooltipPosition,
   waitingListAction,
 };

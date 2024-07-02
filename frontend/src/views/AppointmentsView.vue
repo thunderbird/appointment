@@ -222,12 +222,13 @@ import {
 } from '@tabler/icons-vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { storeToRefs } from 'pinia';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const refresh = inject('refresh');
 
 const appointmentStore = useAppointmentStore();

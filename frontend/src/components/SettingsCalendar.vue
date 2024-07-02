@@ -306,21 +306,21 @@ const addCalendar = (provider) => {
 const connectCalendar = async (id) => {
   loading.value = true;
 
-  await call(`cal/${id}/connect`).post();
+  await calendarStore.connectCalendar(call, id);
   await refreshData();
   await resetInput();
 };
 const disconnectCalendar = async (id) => {
   loading.value = true;
 
-  await call(`cal/${id}/disconnect`).post();
+  await calendarStore.disconnectCalendar(call, id);
   await refreshData();
   await resetInput();
 };
 const syncCalendars = async () => {
   loading.value = true;
 
-  await call('rmt/sync').post();
+  await calendarStore.syncCalendars(call);
   await refreshData();
 };
 const editCalendar = async (id) => {
@@ -367,9 +367,8 @@ const saveCalendar = async () => {
   }
   // add all google calendars connected to given gmail address
   if (isGoogle.value && inputMode.value === inputModes.add) {
-    const urlFriendlyEmail = encodeURIComponent(calendarInput.data.user);
-    const googleUrl = await call(`google/auth?email=${urlFriendlyEmail}`).get();
-    window.location.href = googleUrl.data.value.slice(1, -1);
+    await calendarStore.connectGoogleCalendar(call, calendarInput.data.user);
+    return;
   }
   // edit existing calendar connection
   if (inputMode.value === inputModes.edit) {

@@ -1,0 +1,55 @@
+html {
+  /* Generic colours */
+  --neutral: #FEFFFF;
+  --neutral-200: #E4E4E7;
+  --neutral-500: #737584;
+
+  --teal-700: #008080;
+
+  --yellow-900: #713F12;
+
+  --warning: #FACC15;
+  --warning-background: #FEFAE8;
+
+  --critical: #DC2626;
+  --critical-default: #991B1B;
+  --critical-pressed: #7F1D1D;
+  --critical-soft: #FEF2F2;
+
+  --surface-base: #FEFFFF;
+  --surface-subtle: #F7F7F7;
+  --surface-lower: #F7F7F7;
+  --surface-raised: var(--neutral);
+  --surface-border: var(--neutral-200);
+  --surface-intense: #777580;
+
+  --success: #1D783B;
+  --success-soft: #F4F9F4;
+  --success-pressed: #194E2C;
+
+  --text-highlight: #107781;
+
+  --tbpro-primary: var(--teal-700);
+  --tbpro-primary-hover: #066769;
+  --tbpro-primary-pressed: #0A5757;
+
+  --tbpro-secondary: var(--surface-subtle);
+  --tbpro-secondary-border: var(--surface-border);
+  --tbpro-secondary-pressed: var(--neutral-500);
+  --tbpro-secondary-pressed-border: var(--surface-intense);
+
+  --tbpro-disabled: var(--neutral-200);
+
+  --tbpro-input: var(--surface-base);
+  --tbpro-input-border: var(--surface-border);
+  --tbpro-input-hover-border: var(--surface-intense);
+  --tbpro-select-open: var(--surface-subtle);
+  --tbpro-select-open-border: var(--surface-intense);
+
+  --tbpro-soft: #F3F9FC;
+
+  --tbpro-text: #26272A;
+  --tbpro-text-muted: #737584;
+
+
+}

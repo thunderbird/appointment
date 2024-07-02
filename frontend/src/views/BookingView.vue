@@ -61,10 +61,11 @@ import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSe
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
 import { useRoute } from 'vue-router';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const call = inject('call');
 const bookingViewStore = useBookingViewStore();
 const bookingModalStore = useBookingModalStore();

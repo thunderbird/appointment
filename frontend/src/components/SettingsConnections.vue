@@ -83,7 +83,6 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
@@ -91,8 +90,9 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 
 // stores
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { useUserStore } from '@/stores/user-store.ts';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store.ts';
+import { useCalendarStore } from '@/stores/calendar-store.ts';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -138,22 +138,11 @@ const displayModal = async (category) => {
 };
 
 const connectAccount = async (category) => {
-  if (category === 'zoom') {
-    const { data } = await call('zoom/auth').get().json();
-    // Ship them to the auth link
-    window.location.href = data.value.url;
-  } else if (category === 'google') {
-    await router.push('/settings/calendar');
-  }
+  await externalConnectionsStore.connect(call, category, router);
 };
 
 const disconnectAccount = async (category) => {
-  if (category === 'zoom') {
-    await call('zoom/disconnect').post();
-  } else if (category === 'google') {
-    await call('google/disconnect').post();
-  }
-
+  await externalConnectionsStore.disconnect(call, category);
   await resetConnections();
   await refreshData();
   await closeModals();

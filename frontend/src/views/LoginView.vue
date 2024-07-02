@@ -102,6 +102,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
 import AlertBox from '@/elements/AlertBox';
+import { dayjsKey } from "@/keys";
 
 // component constants
 const user = useUserStore();
@@ -109,7 +110,7 @@ const user = useUserStore();
 // component constants
 const { t } = useI18n();
 const call = inject('call');
-const dj = inject('dayjs');
+const dj = inject(dayjsKey);
 const router = useRouter();
 const isPasswordAuth = inject('isPasswordAuth');
 const isFxaAuth = inject('isFxaAuth');

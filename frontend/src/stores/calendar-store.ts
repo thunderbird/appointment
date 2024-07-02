@@ -14,12 +14,19 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   const hasConnectedCalendars = computed(() => connectedCalendars.value.length > 0);
 
+  const connectGoogleCalendar = async (call, email) => {
+    const urlFriendlyEmail = encodeURIComponent(email);
+    const googleUrl = await call(`google/auth?email=${urlFriendlyEmail}`).get();
+    window.location.href = googleUrl.data.value.slice(1, -1);
+  };
+
   /**
    * Get all calendars for current user
    * @param call preconfigured API fetch function
+   * @param force force a refetch
    */
-  const fetch = async (call: Fetch) => {
-    if (isLoaded.value) {
+  const fetch = async (call: Fetch, force = false) => {
+    if (isLoaded.value && !force) {
       return;
     }
 
@@ -39,7 +46,17 @@ export const useCalendarStore = defineStore('calendars', () => {
     isLoaded.value = false;
   };
 
+  const connectCalendar = async (call, id) => {
+    await call(`cal/${id}/connect`).post();
+  };
+  const disconnectCalendar = async (call, id) => {
+    await call(`cal/${id}/disconnect`).post();
+  };
+  const syncCalendars = async (call) => {
+    await call('rmt/sync').post();
+  };
+
   return {
-    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset,
+    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset, connectGoogleCalendar, connectCalendar, disconnectCalendar, syncCalendars,
   };
 });

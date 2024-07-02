@@ -139,6 +139,8 @@ class Subscriber(HasSoftDelete, Base):
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
     minimum_valid_iat_time = Column('minimum_valid_iat_time', encrypted_type(DateTime))
 
+    ftue_level = Column(Integer, nullable=False, default=0, index=True)
+
     calendars = relationship('Calendar', cascade='all,delete', back_populates='owner')
     slots = relationship('Slot', cascade='all,delete', back_populates='subscriber')
     external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
@@ -152,6 +154,11 @@ class Subscriber(HasSoftDelete, Base):
     def preferred_email(self):
         """Returns the preferred email address."""
         return self.secondary_email if self.secondary_email is not None else self.email
+
+    @property
+    def is_setup(self) -> bool:
+        """Has the user been through the First Time User Experience?"""
+        return self.ftue_level > 0
 
 
 class Calendar(Base):

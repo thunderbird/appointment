@@ -3,11 +3,14 @@ import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { bookingStatus } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
-import { Appointment, AppointmentListResponse, Fetch, Slot } from '@/models';
+import {
+  Appointment, AppointmentListResponse, Fetch, Slot,
+} from '@/models';
+import { dayjsKey } from '@/keys';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
-  const dj = inject<(date?: ConfigType) => Dayjs>('dayjs');
+  const dj = inject(dayjsKey);
   const tzGuess = inject<string>('tzGuess');
 
   // State
