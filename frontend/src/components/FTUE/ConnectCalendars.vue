@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <form class="form" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <sync-card class="sync-card" v-model="calendars" :title="t('label.calendars')">
+      <sync-card class="sync-card" v-model="calendars" :title="t('label.calendar', 2)">
         <template v-slot:icon>
         <span class="icon-calendar">
           <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>

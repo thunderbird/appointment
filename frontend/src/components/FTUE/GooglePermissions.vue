@@ -58,10 +58,11 @@ import {
 } from 'vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useUserStore } from '@/stores/user-store';
+import { useCalendarStore } from '@/stores/calendar-store.ts';
+import { useUserStore } from '@/stores/user-store.ts';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store.ts';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -77,17 +78,26 @@ const {
 const { previousStep, nextStep } = ftueStore;
 
 const calendarStore = useCalendarStore();
+const externalConnectionStore = useExternalConnectionsStore();
 const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
 
 onMounted(async () => {
-  await calendarStore.fetch(call);
+  await calendarStore.fetch(call, true);
   const hasFlowKey = localStorage?.getItem(initFlowKey);
+  const noCalendarsError = hasFlowKey && calendars.value.length === 0;
 
   // Error occurred during flow
-  if (route.query.error || (hasFlowKey && calendars.value.length === 0)) {
+  if (route.query.error || noCalendarsError) {
     localStorage?.removeItem(initFlowKey);
-    errorMessage.value = route.query.error;
+    if (noCalendarsError) {
+      errorMessage.value = t('error.externalAccountHasNoCalendars', { external: 'Google' });
+
+      // Also remove the google calendar
+      if (externalConnectionStore.google.length > 0) await externalConnectionStore.disconnect(call, 'google');
+    } else {
+      errorMessage.value = route.query.error;
+    }
     await router.replace(route.path);
   }
 

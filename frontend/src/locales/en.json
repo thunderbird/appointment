@@ -18,7 +18,8 @@
     "somethingWentWrong": "Something went wrong",
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
     "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
-    "usernameIsNotAvailable": "Username not available. Please choose another."
+    "usernameIsNotAvailable": "Username not available. Please choose another.",
+    "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account."
   },
   "fields": {
     "slot_duration": "Slot Duration",
@@ -121,8 +122,7 @@
     "bookings": "Bookings | Booking | Bookings",
     "busy": "Busy",
     "caldav": "CalDAV",
-    "calendar": "Calendar",
-    "calendars": "Calendars",
+    "calendar": "Calendar | Calendars",
     "calendarDeletion": "Remove Calendar",
     "calendarUrl": "Calendar URL",
     "cancel": "Cancel",
