@@ -7,6 +7,7 @@ locale = en
 
 # Should indicate application wellness.
 health-ok = Health OK
+health-bad = Health BAD
 
 ## General Exceptions
 
