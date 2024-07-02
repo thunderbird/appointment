@@ -88,8 +88,8 @@
     "activeAppointment": "Active booking",
     "addCalendar": "Add {provider} calendar",
     "addDay": "Add day",
-    "addToWaitingList": "Join the waiting list",
     "addTime": "Add time",
+    "addToWaitingList": "Join the waiting list",
     "admin-invite-codes-panel": "Invites",
     "admin-subscriber-panel": "Subscribers",
     "all": "All",
@@ -364,16 +364,15 @@
     "none": "{value}"
   },
   "waitingList": {
-    "signUpHeading": "Just one more step!",
-    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address.",
-    "signUpCheckYourEmail": "Check your email for more information.",
-    "signUpAlreadyExists": "You are already on the waiting list.",
     "confirmHeading": "Your email is confirmed!",
     "confirmInfo": "Your email is now confirmed and if selected you will be contacted about an invite code in the future.",
+    "errorHeading": "There was a problem with that link",
+    "errorInfo": "Unfortunately this link is expired or is invalid.",
     "leaveHeading": "You successfully left the waiting list",
     "leaveInfo": "Sorry to see you go. You're welcome to re-join the waiting list at any time!",
-    "errorHeading": "There was a problem with that link",
-    "errorInfo": "Unfortunately this link is expired or is invalid."
+    "signUpAlreadyExists": "You are already on the waiting list.",
+    "signUpCheckYourEmail": "Check your email for more information.",
+    "signUpHeading": "Just one more step!",
+    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
   }
-
 }
