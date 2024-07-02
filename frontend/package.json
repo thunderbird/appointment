@@ -45,6 +45,7 @@
     "msw": "^2.0.11",
     "node-fetch": "^3.3.2",
     "postcss": "^8.4.17",
+    "postcss-custom-media": "^10.0.7",
     "postcss-nesting": "^12.0.3",
     "typescript": "^5.5.3",
     "vite-plugin-eslint": "^1.8.1",
