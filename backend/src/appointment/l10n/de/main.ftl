@@ -6,7 +6,8 @@ locale = de
 ## Health Check
 
 # Should indicate application wellness.
-health-ok = Betriebsbereit
+health-ok = Zustand in Ordnung
+health-bad = Zustand schlecht
 
 ## General Exceptions
 
@@ -33,6 +34,7 @@ slot-not-found = Es gibt keine freien Zeitfenster zu buchen.
 slot-already-taken = Das gewählte Zeitfenster ist nicht mehr verfügbar. Bitte erneut versuchen.
 slot-invalid-email = Die angegebene E-Mail-Adresse war nicht gültig. Bitte erneut versuchen.
 invite-code-not-valid = Der Einladungscode ist leider nicht gültig.
+not-in-allow-list = Deine E-Mail-Adresse ist nicht in der Liste erlaubter Adressen enthalten.
 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 
