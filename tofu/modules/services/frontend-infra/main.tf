@@ -208,6 +208,12 @@ resource "aws_cloudfront_function" "rewrite" {
       // If we're not in one of the ignorePaths then force them to /index.html
       request.uri = '/index.html';
     }
+
+    // If empty, then add a slash!
+    if (request.uri === '') {
+      request.uri = '/';
+    }
+
     // else carry on like normal.
     return request;
   }
