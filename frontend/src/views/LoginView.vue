@@ -135,7 +135,7 @@ const goHome = () => {
 const signUp = async () => {
   isLoading.value = true;
   loginError.value = '';
-  const { data } = await call('/waiting-list/join').post({
+  const { data } = await call('waiting-list/join').post({
     email: username.value,
   }).json();
 
@@ -159,7 +159,7 @@ const login = async () => {
   // If they come here the first time we check if they're allowed to login
   // If they come here a second time after not being allowed it's because they have an invite code.
   if (!showInviteFlow.value) {
-    const { data: canLogin, error } = await call('/can-login').post({
+    const { data: canLogin, error } = await call('can-login').post({
       email: username.value,
     }).json();
 
