@@ -34,6 +34,7 @@ slot-not-found = There are no available time slots to book.
 slot-already-taken = The time slot you have selected is no longer available. Please try again.
 slot-invalid-email = The email you have provided was not valid. Please try again.
 invite-code-not-valid = The invite code you used is not valid.
+not-in-allow-list = Your email is not in the allow list.
 
 schedule-not-active = The schedule has been turned off. Please contact the schedule owner for more information.
 

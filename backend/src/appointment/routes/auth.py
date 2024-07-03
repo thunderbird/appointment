@@ -72,11 +72,21 @@ def fxa_login(
 
     fxa_client.setup()
 
-    try:
-        url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
-    except NotInAllowListException:
-        if not invite_code:
-            raise HTTPException(status_code=403, detail='Your email is not in the allow list')
+    # Check if they're in the allowed list, but only if they didn't provide an invite code
+    # This checks to see if they're already a user (bypasses allow list) or in the allow list.
+    is_in_allow_list = fxa_client.is_in_allow_list(db, email)
+
+    if not is_in_allow_list and not invite_code:
+        raise HTTPException(status_code=403, detail=l10n('not-in-allow-list'))
+    elif not is_in_allow_list and invite_code:
+        # For slightly nicer error handling do the invite code check now.
+        # Only if they're not in the allow list and have an invite code.
+        if not repo.invite.code_exists(db, invite_code):
+            raise HTTPException(404, l10n('invite-code-not-valid'))
+        if not repo.invite.code_is_available(db, invite_code):
+            raise HTTPException(403, l10n('invite-code-not-valid'))
+
+    url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
 
     request.session['fxa_state'] = state
     request.session['fxa_user_email'] = email
@@ -142,6 +152,7 @@ def fxa_callback(
     new_subscriber_flow = not fxa_subscriber and not subscriber
 
     if new_subscriber_flow:
+        # Double check:
         # Ensure the invite code exists and is available
         # Use some inline-errors for now. We don't have a good error flow!
         is_in_allow_list = fxa_client.is_in_allow_list(db, email)
