@@ -75,7 +75,8 @@ def fxa_login(
     try:
         url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
     except NotInAllowListException:
-        raise HTTPException(status_code=403, detail='Your email is not in the allow list')
+        if not invite_code:
+            raise HTTPException(status_code=403, detail='Your email is not in the allow list')
 
     request.session['fxa_state'] = state
     request.session['fxa_user_email'] = email
