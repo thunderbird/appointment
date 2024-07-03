@@ -98,6 +98,74 @@ class TestFXA:
         assert 'url' in data
         assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
 
+    def test_fxa_with_allowlist_and_without_invite(self, with_client, with_l10n):
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@example.org'
+
+        email = 'not-in-allow-list@bad-example.org'
+        response = with_client.get(
+            '/fxa_login',
+            params={
+                'email': email,
+            },
+        )
+        assert response.status_code == 403, response.text
+        data = response.json()
+        assert data.get('detail') == l10n('not-in-allow-list')
+
+    def test_fxa_with_allowlist_and_with_bad_invite_code(self, with_client, with_l10n):
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@example.org'
+
+        email = 'not-in-allow-list@bad-example.org'
+        response = with_client.get(
+            '/fxa_login',
+            params={
+                'email': email,
+                'invite_code': 'absolute nonsense!'
+            },
+        )
+        assert response.status_code == 404, response.text
+        data = response.json()
+        assert data.get('detail') == l10n('invite-code-not-valid')
+
+    def test_fxa_with_allowlist_and_with_used_invite_code(self, with_client, with_l10n, make_invite, make_pro_subscriber):
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@example.org'
+
+        other_guy = make_pro_subscriber()
+        invite = make_invite(subscriber_id=other_guy.id)
+
+        email = 'not-in-allow-list@bad-example.org'
+        response = with_client.get(
+            '/fxa_login',
+            params={
+                'email': email,
+                'invite_code': invite.code
+            },
+        )
+        assert response.status_code == 403, response.text
+        data = response.json()
+        assert data.get('detail') == l10n('invite-code-not-valid')
+
+    def test_fxa_with_allowlist_and_with_invite(self, with_client, with_l10n, make_invite):
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['FXA_ALLOW_LIST'] = '@example.org'
+
+        invite = make_invite()
+        email = 'not-in-allow-list@bad-example.org'
+        response = with_client.get(
+            '/fxa_login',
+            params={
+                'email': email,
+                'invite_code': invite.code,
+            },
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert 'url' in data
+        assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
+
     def test_fxa_callback_with_invite(self, with_db, with_client, monkeypatch, make_invite):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""
         os.environ['AUTH_SCHEME'] = 'fxa'
