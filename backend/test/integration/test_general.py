@@ -27,7 +27,7 @@ class TestGeneral:
         # Try german next
         response = with_client.get('/', headers={'accept-language': 'de'})
         assert response.status_code == 200
-        assert response.json() == 'Betriebsbereit'
+        assert response.json() == 'Zustand in Ordnung'
 
     def test_access_without_authentication_token(self, with_client):
         # response = client.get("/login")
