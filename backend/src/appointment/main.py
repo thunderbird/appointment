@@ -13,8 +13,6 @@ from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 
-# Ignore "Module level import not at top of file"
-# ruff: noqa: E402
 from .secrets import normalize_secrets
 
 from google.auth.exceptions import RefreshError, DefaultCredentialsError
