@@ -97,9 +97,6 @@ class FxaClient:
         return email.endswith(tuple(allow_list.split(',')))
 
     def get_redirect_url(self, db, state, email):
-        if not self.is_in_allow_list(db, email):
-            raise NotInAllowListException()
-
         utm_campaign = f"{self.ENTRYPOINT}_{os.getenv('APP_ENV')}"
         utm_source = 'login'
 
