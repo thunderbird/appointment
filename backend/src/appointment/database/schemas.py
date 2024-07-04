@@ -129,6 +129,7 @@ class AppointmentOut(AppointmentBase):
     owner_name: str | None = None
     slots: list[SlotBase | SlotOut] = []
     slot_duration: int
+    booking_confirmation: bool
 
 
 """ SCHEDULE model schemas

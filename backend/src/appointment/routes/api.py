@@ -475,6 +475,7 @@ def read_public_appointment(slug: str, db: Session = Depends(get_db)):
         owner_name=s.name,
         slots=slots,
         slot_duration=slots[0].duration if len(slots) > 0 else 0,
+        booking_confirmation=False
     )
 
 
