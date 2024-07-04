@@ -3,7 +3,14 @@
     <div class="flex flex-col gap-4 px-1 py-4">
       <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
         <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
-        <switch-toggle v-if="existing" class="mt-0.5 pr-3" :active="schedule.active" no-legend @changed="toggleActive"/>
+        <switch-toggle
+          v-if="existing"
+          class="mt-0.5 pr-3"
+          :active="schedule.active"
+          no-legend
+          @changed="toggleActive"
+          :title="t(schedule.active ? 'label.deactivateSchedule' : 'label.activateSchedule')"
+        />
       </div>
       <alert-box
         @close="scheduleCreationError = ''"
@@ -284,6 +291,20 @@
           </label>
         </div>
       </div>
+      <!-- option to deactivate confirmation -->
+      <div class="px-4">
+        <switch-toggle
+          class="my-1 pr-3 text-sm font-medium text-gray-500 dark:text-gray-300"
+          :active="schedule.booking_confirmation"
+          :label="t('label.bookingConfirmation')"
+          :disabled="!scheduleInput.active"
+          @changed="toggleBookingConfirmation"
+          no-legend
+        />
+        <div class="text-xs">
+          {{ t('text.ownerNeedsToConfirmBooking') }}
+        </div>
+      </div>
     </div>
     <!-- Snack-ish Bar - The dark info bubble at the bottom of this form -->
     <!-- First time no calendars -->
@@ -444,6 +465,7 @@ const defaultSchedule = {
   weekdays: [1, 2, 3, 4, 5],
   slot_duration: defaultSlotDuration,
   meeting_link_provider: meetingLinkProviderType.none,
+  booking_confirmation: true,
 };
 const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
@@ -676,6 +698,11 @@ const toggleZoomLinkCreation = () => {
   scheduleInput.value.meeting_link_provider = meetingLinkProviderType.none;
 };
 
+// handle schedule booking confirmation activation / deactivation
+const toggleBookingConfirmation = (newValue) => {
+  scheduleInput.value.booking_confirmation = newValue;
+};
+
 // track if steps were already visited
 watch(
   () => scheduleInput.value.active,
@@ -705,6 +732,7 @@ watch(
     scheduleInput.value.start_time,
     scheduleInput.value.end_time,
     scheduleInput.value.weekdays,
+    scheduleInput.value.booking_confirmation,
     props.activeDate,
   ],
   () => {

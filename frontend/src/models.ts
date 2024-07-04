@@ -97,6 +97,7 @@ export type Schedule = {
   time_updated: string;
   availabilities?: Availability[];
   calendar: Calendar;
+  booking_confirmation: boolean;
 };
 
 export type User = {

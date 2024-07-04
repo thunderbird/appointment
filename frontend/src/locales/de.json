@@ -8,6 +8,7 @@
     "authenticationRequired": "Entschuldigung, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
+    "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",
     "generalBookingError": "Beim Abrufen des Zeitplans ist ein Problem aufgetreten. Bitte später nochmal versuchen.",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
     "loginMethodNotSupported": "Login-Methode wird nicht unterstützt. Bitte nochmal versuchen.",
@@ -18,12 +19,42 @@
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
-    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar.",
-    "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto."
+    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
   },
   "fields": {
     "slot_duration": "Dauer",
     "unknown": "Unbekannt"
+  },
+  "ftue": {
+    "calendarIcon": "Kalender Icon",
+    "connectCalendarInfo": "Verbinde deine Kalender zur Anzeige der Verfügbarkeit",
+    "customVideoMeetingLink": "Eigener Videokonferenz-Link",
+    "customVideoMeetingText": "Einen einzigen Videokonferenz-Link für alle Termin-Buchungen verwenden",
+    "errorBody": "Es gab wohl einen Fehler. Klicke den Button unten um zurück zu kommen!",
+    "errorHeading": "Huch, wie konnte das passieren?",
+    "finish": "Fertig",
+    "finishAltText": "Ein Benutzer-Icon vor zwei Kalendern.",
+    "finishScreenText": "Bevor Du gehst: Kopiere den Link zu Deinem Terminplan, um Termin-Buchungen zu erhalten",
+    "fullName": "Vollständiger Name",
+    "googleCalendarLogo": "Google Kalender Logo",
+    "itemsSelected": "{count} ausgewählt",
+    "oneCalendarRequired": "Bitte mindestens einen Kalendar auswählen um fortzufahren",
+    "scheduleName": "Titel des Terminplans",
+    "selectAll": "Alle auswählen",
+    "selectAllCalendars": "Alle Kalender auswählen",
+    "setupScheduleInfo": "Der Terminplan kann später angepasst werden",
+    "skipConnectVideo": "Diesen Schritt überspringen",
+    "steps": {
+      "connectCalendars": "Kalender verbinden",
+      "connectVideo": "Videokonferenz-Link verbinden",
+      "error": "Oh nein!",
+      "finish": "Jetzt kann es mit den Terminbuchung losgehen",
+      "googlePermissions": "Google Kalender-Berechtigungen zulassen",
+      "setupProfile": "Dein Profil erstellen",
+      "setupSchedule": "Terminverfügbarkeit einstellen"
+    },
+    "videoConnectionRequired": "Zoom-Konto verbinden und einen benutzerdefinierten Meeting-Link angeben um fortzufahren.",
+    "videoMeetingLink": "Videokonferenz-Link"
   },
   "heading": {
     "accountData": "Benutzerkonto Daten",
@@ -59,6 +90,13 @@
     },
     "zoom": "Zoom"
   },
+  "icons": {
+    "calendar": "Kalender",
+    "critical": "Kritisch",
+    "info": "Information",
+    "success": "Erfolg",
+    "warning": "Warnung"
+  },
   "info": {
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht. Bitte überprüfe deinen Posteingang, um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
@@ -85,6 +123,7 @@
     "account": "Konto",
     "accountData": "Benutzerdaten",
     "accountDeletion": "Benutzerkonto löschen",
+    "activateSchedule": "Zeitplan aktivieren",
     "active": "Aktiv",
     "activeAppointment": "Aktiver Termin",
     "addCalendar": "{provider} Kalender hinzufügen",
@@ -116,6 +155,7 @@
     "back": "Zurück",
     "bookEvent": "Buchen",
     "booked": "Gebucht",
+    "bookingConfirmation": "Bestätigung für Buchungen",
     "bookingLink": "Buchungslink",
     "bookingSettings": "Buchungseinstellungen",
     "bookingSlot": "Gebuchtes Zeitfenster",
@@ -148,6 +188,7 @@
     "dark": "Dunkel",
     "dateFormat": "Datumsformat",
     "day": "Tag",
+    "deactivateSchedule": "Zeitplan deaktivieren",
     "defaultFont": "Standard Schriftart",
     "delete": "Löschen",
     "deleteYourAccount": "Benutzerkonto löschen",
@@ -317,6 +358,7 @@
       "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
     },
     "nameIsInvitingYou": "{name} lädt dich ein",
+    "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, werden Termine nur gebucht, wenn der Kalenderbesitzer sie bestätigt hat.",
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "Dadurch wird dein Link erneuert. Deine alten Links werden nicht länger funktionieren.",
@@ -375,43 +417,5 @@
     "signUpCheckYourEmail": "Weitere Informationen findest Du in Deiner E-Mail.",
     "signUpHeading": "Nur noch ein Schritt!",
     "signUpInfo": "Bevor Du in die Warteliste aufgenommen werden kannst, musst Du Deine E-Mail-Adresse bestätigen."
-  },
-  "icons": {
-    "calendar": "Kalender",
-    "info": "Information",
-    "success": "Erfolg",
-    "warning": "Warnung",
-    "critical": "Kritisch"
-  },
-  "ftue": {
-    "oneCalendarRequired": "Bitte mindestens einen Kalendar auswählen um fortzufahren",
-    "fullName": "Vollständiger Name",
-    "googleCalendarLogo": "Google Kalender Logo",
-    "itemsSelected": "{count} ausgewählt",
-    "selectAll": "Alle auswählen",
-    "selectAllCalendars": "Alle Kalender auswählen",
-    "calendarIcon": "Kalender Icon",
-    "connectCalendarInfo": "Verbinde deine Kalender zur Anzeige der Verfügbarkeit",
-    "customVideoMeetingLink": "Eigener Videokonferenz-Link",
-    "customVideoMeetingText": "Einen einzigen Videokonferenz-Link für alle Termin-Buchungen verwenden",
-    "videoMeetingLink": "Videokonferenz-Link",
-    "skipConnectVideo": "Diesen Schritt überspringen",
-    "scheduleName": "Titel des Terminplans",
-    "videoConnectionRequired": "Zoom-Konto verbinden und einen benutzerdefinierten Meeting-Link angeben um fortzufahren.",
-    "finishScreenText": "Bevor Du gehst: Kopiere den Link zu Deinem Terminplan, um Termin-Buchungen zu erhalten",
-    "finishAltText": "Ein Benutzer-Icon vor zwei Kalendern.",
-    "finish": "Fertig",
-    "setupScheduleInfo": "Der Terminplan kann später angepasst werden",
-    "errorHeading": "Huch, wie konnte das passieren?",
-    "errorBody": "Es gab wohl einen Fehler. Klicke den Button unten um zurück zu kommen!",
-    "steps": {
-      "setupProfile": "Dein Profil erstellen",
-      "googlePermissions": "Google Kalender-Berechtigungen zulassen",
-      "connectCalendars": "Kalender verbinden",
-      "setupSchedule": "Terminverfügbarkeit einstellen",
-      "connectVideo": "Videokonferenz-Link verbinden",
-      "finish": "Jetzt kann es mit den Terminbuchung losgehen",
-      "error": "Oh nein!"
-    }
   }
 }

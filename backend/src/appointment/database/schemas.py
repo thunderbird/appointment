@@ -170,6 +170,7 @@ class ScheduleBase(BaseModel):
     weekdays: list[int] | None = [1, 2, 3, 4, 5]
     slot_duration: int | None = None
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
+    booking_confirmation: bool | None = True
 
     class Config:
         json_encoders = {
