@@ -169,14 +169,12 @@ export const settingsSections = {
 };
 
 /**
- * available color schemes for theme
- * @readonly
- * @enum
+ * Available color schemes for theme
  */
-export const colorSchemes = {
-  system: 1,
-  dark: 2,
-  light: 3,
+export enum ColorSchemes {
+  System = 'system',
+  Dark = 'dark',
+  Light = 'light',
 };
 
 /**
@@ -311,7 +309,7 @@ export default {
   appointmentViews,
   bookingCalendarViews,
   calendarViews,
-  colorSchemes,
+  ColorSchemes,
   scheduleCreationState,
   filterOptions,
   listColumns,

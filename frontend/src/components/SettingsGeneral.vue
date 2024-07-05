@@ -19,8 +19,8 @@
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
         <select v-model="theme" class="w-full max-w-sm rounded-md">
-          <option v-for="(key, label) in colorSchemes" :key="key" :value="key">
-            {{ t('label.' + label) }}
+          <option v-for="value in Object.values(ColorSchemes)" :key="value" :value="value">
+            {{ t('label.' + value) }}
           </option>
         </select>
       </label>
@@ -87,10 +87,8 @@
 </template>
 
 <script setup>
-import { colorSchemes } from '@/definitions';
-import {
-  ref, reactive, inject, watch,
-} from 'vue';
+import { ColorSchemes } from '@/definitions';
+import { ref, reactive, inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { dayjsKey } from "@/keys";
@@ -112,20 +110,20 @@ watch(locale, (newValue) => {
 // handle theme mode
 // TODO: move to settings store
 const initialTheme = localStorage?.getItem('theme')
-  ? colorSchemes[localStorage?.getItem('theme')]
-  : colorSchemes.system;
+  ? localStorage.getItem('theme')
+  : ColorSchemes.System;
 const theme = ref(initialTheme);
 watch(theme, (newValue) => {
   switch (newValue) {
-    case colorSchemes.dark:
+    case ColorSchemes.Dark:
       localStorage?.setItem('theme', 'dark');
       document.documentElement.classList.add('dark');
       break;
-    case colorSchemes.light:
+    case ColorSchemes.Light:
       localStorage?.setItem('theme', 'light');
       document.documentElement.classList.remove('dark');
       break;
-    case colorSchemes.system:
+    case ColorSchemes.System:
       localStorage?.removeItem('theme');
       if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.remove('dark');
