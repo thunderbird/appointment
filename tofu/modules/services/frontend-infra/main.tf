@@ -210,6 +210,7 @@ resource "aws_cloudfront_function" "rewrite" {
     }
 
     // If empty, then add a slash!
+    // Required by AWS, see https://github.com/thunderbird/appointment/pull/510/
     if (request.uri === '') {
       request.uri = '/';
     }
