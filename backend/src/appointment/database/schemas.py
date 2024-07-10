@@ -167,7 +167,7 @@ class ScheduleBase(BaseModel):
     end_time: time | None = None
     earliest_booking: int | None = None
     farthest_booking: int | None = None
-    weekdays: list[int] | None = [1, 2, 3, 4, 5]
+    weekdays: list[int] | None = Field(min_length=1, default=[1, 2, 3, 4, 5])
     slot_duration: int | None = None
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
 

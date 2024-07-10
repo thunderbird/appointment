@@ -112,7 +112,6 @@ const isLoading = ref(false);
 
 const onSubmit = async () => {
   isLoading.value = true;
-
   errorMessage.value = null;
 
   if (!formRef.value.checkValidity()) {

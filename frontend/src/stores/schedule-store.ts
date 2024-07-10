@@ -80,6 +80,8 @@ export const useScheduleStore = defineStore('schedules', () => {
             field: fieldLocalized,
             value: valueLocalized,
           });
+        } else if (err.type === 'too_short' && field === 'weekdays') {
+          message = i18n.t('error.selectOneDay');
         }
 
         return message;
