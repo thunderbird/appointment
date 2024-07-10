@@ -48,6 +48,9 @@ const isError = props.type === 'error';
 }
 .body {
   margin: auto;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
 }
 .notice {
   position: relative;

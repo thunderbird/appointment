@@ -19,7 +19,8 @@
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
     "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
     "usernameIsNotAvailable": "Username not available. Please choose another.",
-    "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account."
+    "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
+    "selectOneDay": "You need to select at least one day to continue."
   },
   "fields": {
     "slot_duration": "Slot Duration",

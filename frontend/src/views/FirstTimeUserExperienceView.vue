@@ -10,6 +10,9 @@
           <notice-bar type="error" v-if="errorMessage">
             {{ errorMessage }}
           </notice-bar>
+          <notice-bar type="warning" v-else-if="warningMessage">
+            {{ warningMessage }}
+          </notice-bar>
           <notice-bar v-else-if="infoMessage">
             {{ infoMessage }}
           </notice-bar>
@@ -60,7 +63,7 @@ const router = useRouter();
 const user = useUserStore();
 const ftueStore = useFTUEStore();
 const {
-  stepTitle, currentStep, infoMessage, errorMessage,
+  stepTitle, currentStep, infoMessage, errorMessage, warningMessage,
 } = storeToRefs(ftueStore);
 
 const { t } = useI18n();
