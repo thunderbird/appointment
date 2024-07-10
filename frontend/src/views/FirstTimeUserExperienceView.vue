@@ -73,7 +73,7 @@ onMounted(() => {
   }
 
   // Force light-mode
-  localStorage?.setItem('theme', 'light');
+  document.documentElement.classList.remove('dark');
 });
 
 </script>
