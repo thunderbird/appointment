@@ -144,12 +144,12 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd frontend && yarn install
+        run: cd frontend && npm install
 
       - name: Build stage frontend
         run: |
           cp frontend/.env.stage.example frontend/.env.stage
-          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
 
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
@@ -324,12 +324,12 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd frontend && yarn install
+        run: cd frontend && npm install
 
       - name: Build prod frontend
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
-          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
           zip ../frontend.zip dist
 
       - name: download ecr tag

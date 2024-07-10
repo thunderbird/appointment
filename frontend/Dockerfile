@@ -8,6 +8,6 @@ ENV PATH /app/node_modules/.bin:$PATH
 RUN apk add --no-cache git
 
 COPY . .
-RUN yarn install
+RUN npm install
 
 CMD vite dev --port 8080

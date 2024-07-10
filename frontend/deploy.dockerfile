@@ -15,11 +15,9 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesourc
 RUN apt-get update
 RUN apt-get install -y nodejs
 
-RUN npm install --global yarn
-
 # Build site
-RUN cd /build/frontend && yarn install
-RUN cd /build/frontend && yarn build --mode stage
+RUN cd /build/frontend && npm install
+RUN cd /build/frontend && npm run build -- --mode stage
 
 # Use our custom nginx config
 RUN rm /etc/nginx/conf.d/default.conf
