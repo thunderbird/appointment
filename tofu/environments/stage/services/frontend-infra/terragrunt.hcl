@@ -31,9 +31,6 @@ locals {
   project_tags     = include.root.locals.tags
   environment_tags = include.environment.locals.tags
   tags             = "${merge(local.project_tags, local.environment_tags)}"
-
-
-  ssl_cert = "arn:aws:acm:us-east-1:768512802988:certificate/4a53e27b-0cd3-4855-a13f-5bac50015e43"
 }
 
 inputs = {
@@ -41,7 +38,7 @@ inputs = {
   name_prefix      = local.name_prefix
   region           = local.region
   tags             = local.tags
-  ssl_cert         = local.ssl_cert
+  ssl_cert         = get_env("TF_VAR_frontend_url")
   backend_id       = dependency.backend.outputs.alb_id
   backend_dns_name = dependency.backend.outputs.dns_name
   x_allow_secret   = dependency.backend.outputs.x_allow_secret
