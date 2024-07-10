@@ -18,6 +18,7 @@ const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
+const WaitingListPanelView = defineAsyncComponent(() => import('@/views/admin/WaitingListPanelView.vue'));
 const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
 
 /**
@@ -139,6 +140,11 @@ const routes: RouteRecordRaw[] = [
     path: '/admin/invites',
     name: 'admin-invite-codes-panel',
     component: InviteCodePanelView,
+  },
+  {
+    path: '/admin/waiting-list',
+    name: 'admin-waiting-list-panel',
+    component: WaitingListPanelView,
   },
 ];
 

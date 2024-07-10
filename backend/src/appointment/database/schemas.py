@@ -398,3 +398,17 @@ class TokenForWaitingList(BaseModel):
 
 class CheckEmail(BaseModel):
     email: EmailStr = Field(title='Email', min_length=1)
+
+
+class WaitingListAdminOut(BaseModel):
+    id: int
+    email: str
+    email_verified: bool
+    invite_id: int | None = None
+    time_created: datetime
+    time_updated: datetime
+
+    invite: Invite | None = None
+
+    class Config:
+        from_attributes = True
