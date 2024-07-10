@@ -1,3 +1,35 @@
+<script setup lang="ts">
+import { eventColor, getAccessibleColor } from '@/utils';
+import { computed } from 'vue';
+
+// component properties
+const props = defineProps({
+  isMonthView: Boolean, // flag, are we in month view?
+  event: Object, // the event to show, TODO: use CustomEvent type
+  label: String, // event title
+});
+
+const eventBackgroundColor = computed(() => {
+  if (props.event.all_day) {
+    return null;
+  }
+  if (props.isMonthView || (!props.isMonthView && props.event.tentative)) {
+    return 'transparent';
+  }
+  return props.event.calendar_color;
+});
+
+const eventTextColor = computed(() => {
+  if (props.isMonthView) {
+    return null;
+  }
+  if (props.event.tentative) {
+    return props.event.calendar_color;
+  }
+  return getAccessibleColor(props.event.calendar_color);
+});
+</script>
+
 <template>
   <div
     class="
@@ -34,35 +66,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { eventColor, getAccessibleColor } from '@/utils';
-import { computed } from 'vue';
-
-// component properties
-const props = defineProps({
-  isMonthView: Boolean, // flag, are we in month view?
-  event: Object, // the event to show
-  label: String, // event title
-});
-
-const eventBackgroundColor = computed(() => {
-  if (props.event.all_day) {
-    return null;
-  }
-  if (props.isMonthView || (!props.isMonthView && props.event.tentative)) {
-    return 'transparent';
-  }
-  return props.event.calendar_color;
-});
-
-const eventTextColor = computed(() => {
-  if (props.isMonthView) {
-    return null;
-  }
-  if (props.event.tentative) {
-    return props.event.calendar_color;
-  }
-  return getAccessibleColor(props.event.calendar_color);
-});
-</script>

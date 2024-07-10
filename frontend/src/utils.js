@@ -67,6 +67,8 @@ export const initialEventPopupData = {
   event: null,
   display: 'none',
   top: 0,
+  right: 'initial',
+  bottom: 'initial',
   left: 'initial',
 };
 // calculate properties of event popup for given element and show popup

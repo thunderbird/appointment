@@ -1,3 +1,14 @@
+<script setup lang="ts">
+import { eventColor, getAccessibleColor } from '@/utils';
+
+// component properties
+defineProps({
+  isMonthView: Boolean, // flag, are we in month view?
+  event: Object, // the event to show
+  label: String, // event title
+});
+</script>
+
 <template>
   <div
     class="
@@ -18,14 +29,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { eventColor, getAccessibleColor } from '@/utils';
-
-// component properties
-defineProps({
-  isMonthView: Boolean, // flag, are we in month view?
-  event: Object, // the event to show
-  label: String, // event title
-});
-</script>

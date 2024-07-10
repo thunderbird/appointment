@@ -1,3 +1,18 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+// component properties
+defineProps({
+  isBusy: Boolean, // flag showing this event as busy and non-selectable
+  isSelected: Boolean, // flag showing if the event is currently selected by user
+  isMonthView: Boolean, // flag, are we in month view?
+  label: String, // event title
+});
+
+</script>
+
 <template>
   <div
     class="m-auto size-[95%] shrink-0 text-sm text-gray-700 hover:shadow-md dark:text-gray-200"
@@ -25,18 +40,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-
-// component properties
-defineProps({
-  isBusy: Boolean, // flag showing this event as busy and non-selectable
-  isSelected: Boolean, // flag showing if the event is currently selected by user
-  isMonthView: Boolean, // flag, are we in month view?
-  label: String, // event title
-});
-
-</script>
