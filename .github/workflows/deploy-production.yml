@@ -35,6 +35,7 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+      TF_VAR_ssl_cert_arn: ${{ vars.SSL_CERT_ARN }}
 
     steps:
       - name: Get Artifact from Release
@@ -169,6 +170,7 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+      TF_VAR_ssl_cert_arn: ${{ vars.SSL_CERT_ARN }}
 
     steps:
       - name: Get IaC from Release
