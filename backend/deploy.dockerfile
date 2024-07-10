@@ -36,6 +36,8 @@ RUN pip install .'[deploy]'
 RUN mkdir src
 RUN ln -s /app/appointment src/appointment
 
+ARG RELEASE_VERSION
+ENV RELEASE_VERSION=$RELEASE_VERSION
 
 EXPOSE 5000
 CMD ["/bin/sh", "./scripts/entry.sh"]
