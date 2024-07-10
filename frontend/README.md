@@ -9,19 +9,19 @@ Copy the [.env.example](.env.example) as `.env`.
 Then simply run:
 
 ```bash
-yarn install
+npm install
 ```
 
 ### Compiles and hot-reloads for development
 
 ```bash
-yarn run serve
+npm run serve
 ```
 
 ### Compiles and minifies for production
 
 ```bash
-yarn run build
+npm run build
 ```
 
 ### Post-CSS
@@ -42,14 +42,14 @@ We use post-css to enhance our css. Any post-css that isn't in a SFC must be in 
 Frontend is formatted using ESlint with airbnb rules.
 
 ```bash
-yarn run lint
-yarn run lint --fix
+npm run lint
+npm run lint -- --fix
 ```
 
 ### Run tests
 
 ```bash
-yarn run test
+npm run test
 ```
 
 ### Customize configuration
