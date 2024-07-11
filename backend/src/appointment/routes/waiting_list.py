@@ -3,7 +3,8 @@ import os
 import sentry_sdk
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, BackgroundTasks
-from ..database import repo, schemas
+from ..database import repo, schemas, models
+from ..dependencies.auth import get_admin_subscriber
 
 from ..dependencies.database import get_db
 from ..exceptions import validation
@@ -79,3 +80,15 @@ def act_on_waiting_list(
         'action': action,
         'success': success,
     }
+
+
+""" ADMIN ROUTES 
+These require get_admin_subscriber!
+"""
+
+
+@router.get('/', response_model=list[schemas.WaitingListAdminOut])
+def get_all_waiting_list_users(db: Session = Depends(get_db), _: models.Subscriber = Depends(get_admin_subscriber)):
+    """List all existing waiting list users, needs admin permissions"""
+    response = db.query(models.WaitingList).all()
+    return response

@@ -8,6 +8,7 @@
     "authenticationRequired": "Sorry, this page requires you to be logged in.",
     "credentialsIncomplete": "Please provide login credentials.",
     "dataSourceIsEmpty": "No {name} could be found.",
+    "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
     "generalBookingError": "Sorry, there was a problem retrieving the schedule details. Please try again later.",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "loginMethodNotSupported": "Login method not supported. Please try again.",
@@ -15,16 +16,46 @@
     "noConnectedCalendars": "Calendar setup required. Connect a calendar to continue. {0}.",
     "noConnectedCalendarsLink": "Go to settings",
     "routeNotFound": "Sorry, this page could not be found.",
+    "selectOneDay": "You need to select at least one day to continue.",
     "somethingWentWrong": "Something went wrong",
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
     "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
-    "usernameIsNotAvailable": "Username not available. Please choose another.",
-    "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
-    "selectOneDay": "You need to select at least one day to continue."
+    "usernameIsNotAvailable": "Username not available. Please choose another."
   },
   "fields": {
     "slot_duration": "Slot Duration",
     "unknown": "Unknown"
+  },
+  "ftue": {
+    "calendarIcon": "Calendar icon",
+    "connectCalendarInfo": "Connect your calendars to manage your availability",
+    "customVideoMeetingLink": "Custom Video meeting link",
+    "customVideoMeetingText": "Use a single meeting link for all bookings from your selected provider",
+    "errorBody": "Looks like there was an error. Click the button below to go back!",
+    "errorHeading": "Huh, how did this happen?",
+    "finish": "Finish",
+    "finishAltText": "A user icon in front of two calendars.",
+    "finishScreenText": "Before you close this screen, copy your shareable schedule link to start receiving appointments.",
+    "fullName": "Full Name",
+    "googleCalendarLogo": "Google Calendar Logo",
+    "itemsSelected": "{count} Selected",
+    "oneCalendarRequired": "Please enable one calendar to continue",
+    "scheduleName": "Schedule's Name",
+    "selectAll": "Select All",
+    "selectAllCalendars": "Select All Calendars",
+    "setupScheduleInfo": "You can edit this schedule later",
+    "skipConnectVideo": "Skip connect video",
+    "steps": {
+      "connectCalendars": "Connect calendars",
+      "connectVideo": "Connect your video meeting link",
+      "error": "Uh-oh!",
+      "finish": "You are ready to start booking",
+      "googlePermissions": "Allow Google Calendar permissions",
+      "setupProfile": "Create your profile",
+      "setupSchedule": "Set up your appointment availability"
+    },
+    "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
+    "videoMeetingLink": "Video meeting link"
   },
   "heading": {
     "accountData": "Account data",
@@ -60,6 +91,13 @@
     },
     "zoom": "Zoom"
   },
+  "icons": {
+    "calendar": "Calendar",
+    "critical": "Critical",
+    "info": "Information",
+    "success": "Success",
+    "warning": "Warning"
+  },
   "info": {
     "bookedPleaseCheckEmail": "This event has been booked. Check your email to add it to your calendar.",
     "bookingLinkHasAlreadyBeenUsed": "It looks like this link has been used.",
@@ -94,6 +132,7 @@
     "addToWaitingList": "Join the waiting list",
     "admin-invite-codes-panel": "Invites",
     "admin-subscriber-panel": "Subscribers",
+    "admin-waiting-list-panel": "Waiting List Users",
     "all": "All",
     "allAppointments": "All bookings",
     "allDay": "All day",
@@ -376,43 +415,5 @@
     "signUpCheckYourEmail": "Check your email for more information.",
     "signUpHeading": "Just one more step!",
     "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
-  },
-  "icons": {
-    "calendar": "Calendar",
-    "info": "Information",
-    "success": "Success",
-    "warning": "Warning",
-    "critical": "Critical"
-  },
-  "ftue": {
-    "oneCalendarRequired": "Please enable one calendar to continue",
-    "fullName": "Full Name",
-    "googleCalendarLogo": "Google Calendar Logo",
-    "itemsSelected": "{count} Selected",
-    "selectAll": "Select All",
-    "selectAllCalendars": "Select All Calendars",
-    "calendarIcon": "Calendar icon",
-    "connectCalendarInfo": "Connect your calendars to manage your availability",
-    "customVideoMeetingLink": "Custom Video meeting link",
-    "customVideoMeetingText": "Use a single meeting link for all bookings from your selected provider",
-    "videoMeetingLink": "Video meeting link",
-    "skipConnectVideo": "Skip connect video",
-    "scheduleName": "Schedule's Name",
-    "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
-    "finishScreenText": "Before you close this screen, copy your shareable schedule link to start receiving appointments.",
-    "finishAltText": "A user icon in front of two calendars.",
-    "finish": "Finish",
-    "setupScheduleInfo": "You can edit this schedule later",
-    "errorHeading": "Huh, how did this happen?",
-    "errorBody": "Looks like there was an error. Click the button below to go back!",
-    "steps": {
-      "setupProfile": "Create your profile",
-      "googlePermissions": "Allow Google Calendar permissions",
-      "connectCalendars": "Connect calendars",
-      "setupSchedule": "Set up your appointment availability",
-      "connectVideo": "Connect your video meeting link",
-      "finish": "You are ready to start booking",
-      "error": "Uh-oh!"
-    }
   }
 }
