@@ -330,7 +330,7 @@ jobs:
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
-          zip ../frontend.zip dist
+          zip -r ../frontend.zip dist
 
       - name: download ecr tag
         uses: actions/download-artifact@v4
