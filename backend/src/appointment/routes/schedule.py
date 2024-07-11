@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Body, BackgroundTasks
 import logging
 import os
 
+from oauthlib.oauth2 import OAuth2Error
 from requests import HTTPError
 from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
@@ -434,10 +435,18 @@ def decide_on_schedule_availability_slot(
 
             # Notify the organizer that the meeting link could not be created!
             background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
+        except OAuth2Error as err:
+            logging.error('OAuth flow error during zoom meeting creation: ', err)
+            if os.getenv('SENTRY_DSN') != '':
+                capture_exception(err)
+
+            # Notify the organizer that the meeting link could not be created!
+            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error('Failed to save the zoom meeting link to the appointment: ', err)
             if os.getenv('SENTRY_DSN') != '':
                 capture_exception(err)
+
 
     event = schemas.Event(
         title=title,
