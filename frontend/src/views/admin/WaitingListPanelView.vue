@@ -1,36 +1,3 @@
-<template>
-  <div class="flex w-full justify-center">
-    <alert-box
-      @close="pageNotification = ''"
-      v-if="pageNotification"
-      :scheme="alertSchemes.success"
-    >
-      {{ pageNotification }}
-    </alert-box>
-    <alert-box
-      @close="pageError = ''"
-      v-if="pageError"
-    >
-      {{ pageError }}
-    </alert-box>
-  </div>
-  <admin-nav/>
-  <div v-if="displayPage">
-    <data-table
-      data-name="Waiting List Users"
-      :allow-multi-select="false"
-      :data-list="filteredUsers"
-      :columns="columns"
-      :filters="filters"
-      :loading="loading"
-    >
-    </data-table>
-  </div>
-  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
-    <loading-spinner/>
-  </div>
-</template>
-
 <script setup>
 import {
   computed, inject, onMounted, ref,
@@ -168,7 +135,6 @@ const filters = [
      * @returns {*}
      */
     fn: (selectedKey, mutableDataList) => {
-      console.log(mutableDataList)
       switch (selectedKey) {
         case 'all':
           return null;
@@ -214,3 +180,37 @@ onMounted(async () => {
 });
 
 </script>
+
+<template>
+  <div class="flex w-full justify-center">
+    <alert-box
+      @close="pageNotification = ''"
+      v-if="pageNotification"
+      :scheme="alertSchemes.success"
+    >
+      {{ pageNotification }}
+    </alert-box>
+    <alert-box
+      @close="pageError = ''"
+      v-if="pageError"
+    >
+      {{ pageError }}
+    </alert-box>
+  </div>
+  <admin-nav/>
+  <div v-if="displayPage">
+    <data-table
+      data-name="Waiting List Users"
+      :allow-multi-select="false"
+      :data-list="filteredUsers"
+      :columns="columns"
+      :filters="filters"
+      :loading="loading"
+    >
+    </data-table>
+  </div>
+  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
+    <loading-spinner/>
+  </div>
+</template>
+
