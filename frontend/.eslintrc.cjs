@@ -6,7 +6,7 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  parser: '@typescript-eslint/parser',
+  parser: 'vue-eslint-parser',
   extends: [
     'plugin:vue/vue3-essential',
     'plugin:tailwindcss/recommended',
@@ -15,6 +15,7 @@ module.exports = {
   ],
   overrides: [],
   parserOptions: {
+    parser: '@typescript-eslint/parser',
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
