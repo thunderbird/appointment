@@ -358,7 +358,7 @@
       "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
     },
     "nameIsInvitingYou": "{name} lädt dich ein",
-    "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, werden Termine nur gebucht, wenn der Kalenderbesitzer sie bestätigt hat.",
+    "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, müssen Buchungen dieses Zeitplans bestätigt oder ablehnt werden. Wenn diese Option deaktiviert ist, werden alle Zeiten automatisch bestätigt.",
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "refreshLinkNotice": "Dadurch wird dein Link erneuert. Deine alten Links werden nicht länger funktionieren.",
