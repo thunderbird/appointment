@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('schedules', sa.Column('booking_confirmation', sa.Boolean, default=True, index=True))
+    op.add_column('schedules', sa.Column('booking_confirmation', sa.Boolean, nullable=False, default=True, index=True))
 
 
 def downgrade() -> None:

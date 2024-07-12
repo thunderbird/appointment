@@ -144,7 +144,8 @@ def read_schedule_availabilities(
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
-    """Returns the calculated availability for the first schedule from a subscribers public profile link"""
+    """Returns the calculated availability for the first schedule from a subscribers public profile link
+    """
     # Raise a schedule not found exception if the schedule owner does not have a timezone set.
     if subscriber.timezone is None:
         raise validation.ScheduleNotFoundException()
@@ -179,6 +180,7 @@ def read_schedule_availabilities(
     if not actual_slots or len(actual_slots) == 0:
         raise validation.SlotNotFoundException()
 
+    # TODO: dedicate an own schema to this endpoint
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,
@@ -431,13 +433,7 @@ def handle_schedule_availability_decision(
             # delete the scheduled slot to make the time available again
             repo.slot.delete(db, slot.id)
 
-        # Early return
-        return schemas.AvailabilitySlotAttendee(
-            slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
-            attendee=schemas.AttendeeBase(
-                email=slot.attendee.email, name=slot.attendee.name, timezone=slot.attendee.timezone
-            ),
-        )
+        return True
 
     # otherwise, confirm slot and create event
     location_url = schedule.location_url
@@ -535,3 +531,5 @@ def handle_schedule_availability_decision(
     slot = repo.slot.book(db, slot.id)
 
     Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+
+    return True
