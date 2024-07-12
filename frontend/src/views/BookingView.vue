@@ -25,7 +25,7 @@
       <booking-view-success
         :attendee-email="attendee.email"
         :selected-event="selectedEvent"
-        :requested="appointment?.booking_confirmation"
+        :requested="appointment.booking_confirmation"
       />
     </main>
     <!-- booking page content: time slot selection -->
@@ -42,7 +42,7 @@
     <booking-modal
       :open="showBookingModal"
       :event="selectedEvent"
-      :requires-confirmation="appointment?.booking_confirmation"
+      :requires-confirmation="appointment.booking_confirmation"
       @book="bookEvent"
       @close="closeModal()"
     />
