@@ -25,6 +25,7 @@
       <booking-view-success
         :attendee-email="attendee.email"
         :selected-event="selectedEvent"
+        :requested="appointment.booking_confirmation"
       />
     </main>
     <!-- booking page content: time slot selection -->
@@ -41,7 +42,7 @@
     <booking-modal
       :open="showBookingModal"
       :event="selectedEvent"
-      :requires-confirmation="true"
+      :requires-confirmation="appointment.booking_confirmation"
       @book="bookEvent"
       @close="closeModal()"
     />
@@ -60,7 +61,6 @@ import BookingModal from '@/components/BookingModal';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
-import { useRoute } from 'vue-router';
 import { dayjsKey } from "@/keys";
 
 // component constants
@@ -69,7 +69,6 @@ const dj = inject(dayjsKey);
 const call = inject('call');
 const bookingViewStore = useBookingViewStore();
 const bookingModalStore = useBookingModalStore();
-const route = useRoute();
 
 const errorHeading = ref(null);
 const errorBody = ref(null);

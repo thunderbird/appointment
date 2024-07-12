@@ -1,7 +1,8 @@
 <template>
   <div class="flex-center min-w-[50%] flex-col gap-12">
     <div class="text-2xl font-semibold text-teal-500">
-      <span>{{ t('info.bookingSuccessfullyRequested') }}</span>
+      <span v-if="requested">{{ t('info.bookingSuccessfullyRequested') }}</span>
+      <span v-else>{{ t('info.bookingSuccessfullyConfirmed') }}</span>
     </div>
     <div class="flex w-full max-w-sm flex-col gap-1 rounded-lg shadow-lg">
       <div class="flex h-14 items-center justify-around rounded-t-md bg-teal-500">
@@ -46,6 +47,7 @@ const dj = inject(dayjsKey);
 defineProps({
   selectedEvent: Object,
   attendeeEmail: String,
+  requested: Boolean, // True if we are requesting a booking, false if already confirmed
 });
 
 </script>

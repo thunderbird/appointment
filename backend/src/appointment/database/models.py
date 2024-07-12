@@ -269,6 +269,7 @@ class Schedule(Base):
     farthest_booking: int = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
     weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
+    booking_confirmation: bool = Column(Boolean, index=True, nullable=False, default=True)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(
