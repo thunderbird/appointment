@@ -7,7 +7,7 @@ Create Date: 2024-07-04 15:01:47.090876
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy import true
 
 # revision identifiers, used by Alembic.
 revision = 'fb1feb76c467'
@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('schedules', sa.Column('booking_confirmation', sa.Boolean, nullable=False, default=True, index=True))
+    op.add_column('schedules', sa.Column('booking_confirmation', sa.Boolean, nullable=False, server_default=true(), index=True))
 
 
 def downgrade() -> None:
