@@ -8,7 +8,7 @@ import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
   appointmentState,
   bookingStatus,
-  colorSchemes,
+  ColorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
   qalendarSlotDurations,
@@ -363,8 +363,8 @@ watch(route, () => {
 <template>
   <div
     class="w-full"
-    :style="{'color-scheme': preferredTheme === colorSchemes.dark ? 'dark' : null}"
-    :class="{'is-light-mode': preferredTheme === colorSchemes.light}"
+    :style="{'color-scheme': preferredTheme === ColorSchemes.Dark ? 'dark' : null}"
+    :class="{'is-light-mode': preferredTheme === ColorSchemes.Light}"
   >
     <qalendar
       :events="calendarEvents"

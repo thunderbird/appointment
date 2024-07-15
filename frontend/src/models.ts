@@ -49,6 +49,26 @@ export type Appointment = {
   active: boolean;
 };
 
+export type CustomEvent = {
+  attendee?: Attendee;
+  slot_status: number; // TODO: definitions.bookingStatus
+  booking_status: number; // TODO: definitions.appointmentState
+  calendar_title: string;
+  calendar_color: string;
+  duration: number;
+  preview: boolean;
+  all_day: boolean;
+  remote: boolean;
+  tentative: boolean;
+};
+
+export type EventPopup = {
+  event: CustomEvent;
+  display: string;
+  top: string|number;
+  left: string|number;
+};
+
 export type Calendar = {
   id?: number;
   connected: boolean;
@@ -145,3 +165,14 @@ export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
+
+// Utility types
+export type Coloring = {
+  border?: string;
+  background?: string;
+}
+
+export type HTMLElementEvent = Event & {
+  target: HTMLElement; 
+  currentTarget: HTMLElement;
+}
