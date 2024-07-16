@@ -1,3 +1,50 @@
+<script setup>
+
+import { useFTUEStore } from '@/stores/ftue-store';
+import { storeToRefs } from 'pinia';
+import { ColorSchemes, ftueStep } from '@/definitions.ts';
+import { onMounted, inject } from 'vue';
+import WordMark from '@/elements/WordMark.vue';
+import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
+import SetupProfile from '@/components/FTUE/SetupProfile.vue';
+import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
+import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
+import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
+import Finish from '@/components/FTUE/Finish.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
+import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user-store.ts';
+import { useRouter } from 'vue-router';
+import { getPreferredTheme } from '@/utils.ts';
+
+const router = useRouter();
+const user = useUserStore();
+const ftueStore = useFTUEStore();
+const {
+  stepTitle, currentStep, infoMessage, errorMessage, warningMessage,
+} = storeToRefs(ftueStore);
+
+const { t } = useI18n();
+const refresh = inject('refresh');
+
+onMounted(async () => {
+  await refresh();
+
+  // If they're setup, boot them calendars
+  if (user.data.isSetup) {
+    if (getPreferredTheme() === ColorSchemes.Dark) {
+      document.documentElement.classList.add('dark');
+    }
+    router.replace('calendar');
+    return;
+  }
+
+  // Force light-mode
+  document.documentElement.classList.remove('dark');
+});
+
+</script>
 <template>
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
@@ -39,48 +86,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-
-import { useFTUEStore } from '@/stores/ftue-store';
-import { storeToRefs } from 'pinia';
-import { ftueStep } from '@/definitions';
-import { onMounted } from 'vue';
-import WordMark from '@/elements/WordMark.vue';
-import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
-import SetupProfile from '@/components/FTUE/SetupProfile.vue';
-import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
-import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
-import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
-import Finish from '@/components/FTUE/Finish.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
-import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store.ts';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-const user = useUserStore();
-const ftueStore = useFTUEStore();
-const {
-  stepTitle, currentStep, infoMessage, errorMessage, warningMessage,
-} = storeToRefs(ftueStore);
-
-const { t } = useI18n();
-
-onMounted(() => {
-  // If they're setup, boot them calendars
-  if (user.data.isSetup) {
-    router.replace('calendar');
-    return;
-  }
-
-  // Force light-mode
-  document.documentElement.classList.remove('dark');
-});
-
-</script>
-
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

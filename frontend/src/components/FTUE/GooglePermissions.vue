@@ -1,3 +1,77 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import {
+  onMounted, inject, ref,
+} from 'vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import { useFTUEStore } from '@/stores/ftue-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useUserStore } from '@/stores/user-store';
+import { storeToRefs } from 'pinia';
+import { useRoute, useRouter } from 'vue-router';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
+const call = inject('call');
+
+const isLoading = ref(false);
+
+const ftueStore = useFTUEStore();
+const {
+  hasNextStep, hasPreviousStep, errorMessage,
+} = storeToRefs(ftueStore);
+const { previousStep, nextStep } = ftueStore;
+
+const calendarStore = useCalendarStore();
+const externalConnectionStore = useExternalConnectionsStore();
+const { calendars } = storeToRefs(calendarStore);
+const initFlowKey = 'tba/startedCalConnect';
+
+onMounted(async () => {
+  await calendarStore.fetch(call, true);
+  const hasFlowKey = localStorage?.getItem(initFlowKey);
+  const noCalendarsError = hasFlowKey && calendars.value.length === 0;
+
+  // Error occurred during flow
+  if (route.query.error || noCalendarsError) {
+    localStorage?.removeItem(initFlowKey);
+    if (noCalendarsError) {
+      errorMessage.value = t('error.externalAccountHasNoCalendars', { external: 'Google' });
+
+      // Also remove the google calendar
+      if (externalConnectionStore.google.length > 0) await externalConnectionStore.disconnect(call, 'google');
+    } else {
+      errorMessage.value = route.query.error;
+    }
+    await router.replace(route.path);
+  }
+
+  if (localStorage?.getItem(initFlowKey)) {
+    const { data } = await call('google/auth-status').get().json();
+    // Did they hit back?
+    if (data.value?.in_progress) {
+      console.log(data.value);
+      return;
+    }
+
+    localStorage?.removeItem(initFlowKey);
+    await nextStep();
+  }
+});
+
+const onSubmit = async () => {
+  const user = useUserStore();
+
+  isLoading.value = true;
+
+  // Create key so we can move to the next page after we come back
+  localStorage?.setItem(initFlowKey, 'true');
+  await calendarStore.connectGoogleCalendar(call, user.data.email);
+};
+
+</script>
 <template>
   <div class="content">
     <div class="card">
@@ -50,74 +124,6 @@
     </secondary-button>
   </div>
 </template>
-
-<script setup>
-import { useI18n } from 'vue-i18n';
-import {
-  onMounted, inject, ref,
-} from 'vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store.ts';
-import { useUserStore } from '@/stores/user-store.ts';
-import { storeToRefs } from 'pinia';
-import { useRoute, useRouter } from 'vue-router';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store.ts';
-
-const { t } = useI18n();
-const route = useRoute();
-const router = useRouter();
-const call = inject('call');
-
-const isLoading = ref(false);
-
-const ftueStore = useFTUEStore();
-const {
-  hasNextStep, hasPreviousStep, errorMessage,
-} = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
-
-const calendarStore = useCalendarStore();
-const externalConnectionStore = useExternalConnectionsStore();
-const { calendars } = storeToRefs(calendarStore);
-const initFlowKey = 'tba/startedCalConnect';
-
-onMounted(async () => {
-  await calendarStore.fetch(call, true);
-  const hasFlowKey = localStorage?.getItem(initFlowKey);
-  const noCalendarsError = hasFlowKey && calendars.value.length === 0;
-
-  // Error occurred during flow
-  if (route.query.error || noCalendarsError) {
-    localStorage?.removeItem(initFlowKey);
-    if (noCalendarsError) {
-      errorMessage.value = t('error.externalAccountHasNoCalendars', { external: 'Google' });
-
-      // Also remove the google calendar
-      if (externalConnectionStore.google.length > 0) await externalConnectionStore.disconnect(call, 'google');
-    } else {
-      errorMessage.value = route.query.error;
-    }
-    await router.replace(route.path);
-  }
-
-  if (localStorage?.getItem(initFlowKey)) {
-    localStorage?.removeItem(initFlowKey);
-    await nextStep();
-  }
-});
-
-const onSubmit = async () => {
-  const user = useUserStore();
-
-  isLoading.value = true;
-
-  // Create key so we can move to the next page after we come back
-  localStorage?.setItem(initFlowKey, 'true');
-  await calendarStore.connectGoogleCalendar(call, user.data.email);
-};
-
-</script>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

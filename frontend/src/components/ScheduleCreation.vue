@@ -380,7 +380,7 @@
 <script setup>
 import {
   dateFormatStrings, defaultSlotDuration, locationTypes, meetingLinkProviderType, scheduleCreationState,
-} from '@/definitions';
+} from '@/definitions.ts';
 import {
   ref, reactive, computed, inject, watch, onMounted,
 } from 'vue';
@@ -398,7 +398,7 @@ import ToolTip from '@/elements/ToolTip.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import SnackishBar from '@/elements/SnackishBar.vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 // component constants
 const user = useUserStore();

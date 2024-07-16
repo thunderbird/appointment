@@ -134,6 +134,7 @@ const navItems = [
 const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
+const userStore = useUserStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
@@ -150,6 +151,7 @@ const routeHasModal = computed(
 const getDbData = async () => {
   if (currentUser?.exists()) {
     await Promise.all([
+      userStore.profile(call),
       calendarStore.fetch(call),
       appointmentStore.fetch(call),
       scheduleStore.fetch(call),
