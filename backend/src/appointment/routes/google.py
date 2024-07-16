@@ -12,7 +12,7 @@ from ..dependencies.database import get_db
 
 from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.google import get_google_client
-from ..exceptions.google_api import GoogleInvalidCredentials
+from ..exceptions.google_api import GoogleInvalidCredentials, GoogleOAuthFlowNotFinished
 from ..exceptions.google_api import GoogleScopeChanged
 from ..l10n import l10n
 
@@ -22,16 +22,19 @@ SESSION_OAUTH_STATE = 'google_oauth_state'
 SESSION_OAUTH_SUBSCRIBER_ID = 'google_oauth_subscriber_id'
 
 
-@router.get('/auth-status')
+@router.get('/ftue-status')
 def google_auth_status(
     request: Request,
     subscriber: Subscriber = Depends(get_subscriber)
 ):
-    """Checks if oauth flow has started, only if they're not setup."""
+    """Checks if oauth flow has started but not finished, if so raises an error."""
     same_subscriber = subscriber.id == request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
-    return {
-        'in_progress': request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
-    }
+    in_progress = request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
+
+    if in_progress:
+        raise GoogleOAuthFlowNotFinished()
+
+    return True
 
 
 @router.get('/auth')

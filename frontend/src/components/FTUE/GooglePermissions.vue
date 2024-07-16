@@ -10,11 +10,12 @@ import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { callKey } from '@/keys';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const call = inject('call');
+const call = inject(callKey);
 
 const isLoading = ref(false);
 
@@ -49,14 +50,15 @@ onMounted(async () => {
   }
 
   if (localStorage?.getItem(initFlowKey)) {
-    const { data } = await call('google/auth-status').get().json();
+    localStorage?.removeItem(initFlowKey);
+
+    const { data, error } = await call('google/ftue-status').get().json();
     // Did they hit back?
-    if (data.value?.in_progress) {
-      console.log(data.value);
+    if (error?.value) {
+      errorMessage.value = data.value?.detail?.message;
       return;
     }
 
-    localStorage?.removeItem(initFlowKey);
     await nextStep();
   }
 });

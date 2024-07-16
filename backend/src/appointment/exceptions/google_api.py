@@ -22,3 +22,13 @@ class APIGoogleRefreshError(APIException):
 
     def get_msg(self):
         return l10n('google-connection-error')
+
+
+class GoogleOAuthFlowNotFinished(APIException):
+    """Raise when an oauth flow was started but not finished. Used for FTUE."""
+
+    id_code = 'GOOGLE_OAUTH_FLOW_NOT_FINISHED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('google-connect-to-continue')
