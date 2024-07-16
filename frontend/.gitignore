@@ -26,5 +26,5 @@ pnpm-debug.log*
 # Sentry Config File
 .env.sentry-build-plugin
 
-# npm lock
-package-lock.json
+# yarn lock
+yarn.lock

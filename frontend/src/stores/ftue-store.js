@@ -16,6 +16,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));
   const infoMessage = ref(null);
   const errorMessage = ref(null);
+  const warningMessage = ref(null);
 
   /**
    * State information for navigating the First Time User Experience
@@ -74,6 +75,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const clearMessages = () => {
     infoMessage.value = null;
     errorMessage.value = null;
+    warningMessage.value = null;
   };
 
   const nextStep = async () => {
@@ -97,6 +99,6 @@ export const useFTUEStore = defineStore('FTUE', () => {
   };
 
   return {
-    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset, infoMessage, errorMessage,
+    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset, infoMessage, errorMessage, warningMessage,
   };
 });

@@ -54,6 +54,7 @@ jobs:
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
       TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_ssl_cert_arn: ${{ vars.SSL_CERT_ARN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -132,6 +133,7 @@ jobs:
       TF_VAR_environment: ${{ vars.ENV_SHORT_NAME }}
       TF_VAR_name_prefix: "tb-${{ vars.PROJECT_SHORT_NAME }}-${{ vars.ENV_SHORT_NAME }}"
       TF_VAR_frontend_url: ${{ vars.FRONTEND_URL }}
+      TF_VAR_ssl_cert_arn: ${{ vars.SSL_CERT_ARN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -142,12 +144,12 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd frontend && yarn install
+        run: cd frontend && npm install
 
       - name: Build stage frontend
         run: |
           cp frontend/.env.stage.example frontend/.env.stage
-          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
 
       - name: install opentofu
         uses: opentofu/setup-opentofu@v1
@@ -212,11 +214,12 @@ jobs:
         id: build-backend
         env:
           ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/${{ vars.PROJECT }}:backend-${{ github.sha }}'
+          RELEASE_VERSION: ${{ github.sha }}
         run: |
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
+          docker build --build-arg "RELEASE_VERSION=$RELEASE_VERSION" -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > ecr_tag.txt
@@ -254,6 +257,7 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.ZOOM_SECRET }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+      TF_VAR_ssl_cert_arn: ${{ vars.SSL_CERT_ARN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -320,13 +324,13 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd frontend && yarn install
+        run: cd frontend && npm install
 
       - name: Build prod frontend
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
-          cd frontend && yarn build --mode ${{ vars.APP_ENV }}
-          zip ../frontend.zip dist
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+          zip -r ../frontend.zip dist
 
       - name: download ecr tag
         uses: actions/download-artifact@v4

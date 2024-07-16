@@ -6,6 +6,7 @@ import NavBarItem from '@/elements/NavBarItem.vue';
 const { t } = useI18n();
 
 const navItems = [
+  'admin-waiting-list-panel',
   'admin-invite-codes-panel',
   'admin-subscriber-panel',
 ];

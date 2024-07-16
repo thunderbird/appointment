@@ -3,10 +3,13 @@ import pytest
 from itsdangerous import URLSafeSerializer
 from sqlalchemy.exc import InvalidRequestError
 
-from appointment.database import models
+from appointment.database import models, schemas
 from unittest.mock import patch
 
+from appointment.dependencies.auth import get_admin_subscriber, get_subscriber
+from appointment.routes.auth import create_access_token
 from appointment.routes.waiting_list import WaitingListAction
+from defines import auth_headers
 
 
 class TestJoinWaitingList:
@@ -189,3 +192,32 @@ class TestWaitingListActionLeave:
 
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
+
+
+class TestWaitingListAdminView:
+    def test_view_with_admin(self, with_client, with_db, with_l10n, make_waiting_list):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        waiting_list_user = make_waiting_list()
+
+        response = with_client.get('/waiting-list/', headers=auth_headers)
+
+        # Ensure the response was okay!
+        data = response.json()
+
+        assert response.status_code == 200, data
+        assert len(data) > 0
+        assert 'id' in data[0]
+        assert data[0]['id'] == waiting_list_user.id
+
+    def test_view_with_admin_non_admin(self, with_client, with_db, with_l10n, make_waiting_list):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = f"{os.getenv('TEST_USER_EMAIL')}-naw.com"
+
+        make_waiting_list()
+
+        response = with_client.get('/waiting-list/', headers=auth_headers)
+
+        # Ensure the response was okay!
+        data = response.json()
+
+        assert response.status_code == 401, data

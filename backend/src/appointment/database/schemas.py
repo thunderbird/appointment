@@ -129,6 +129,7 @@ class AppointmentOut(AppointmentBase):
     owner_name: str | None = None
     slots: list[SlotBase | SlotOut] = []
     slot_duration: int
+    booking_confirmation: bool
 
 
 """ SCHEDULE model schemas
@@ -167,9 +168,10 @@ class ScheduleBase(BaseModel):
     end_time: time | None = None
     earliest_booking: int | None = None
     farthest_booking: int | None = None
-    weekdays: list[int] | None = [1, 2, 3, 4, 5]
+    weekdays: list[int] | None = Field(min_length=1, default=[1, 2, 3, 4, 5])
     slot_duration: int | None = None
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
+    booking_confirmation: bool = True
 
     class Config:
         json_encoders = {
@@ -398,3 +400,17 @@ class TokenForWaitingList(BaseModel):
 
 class CheckEmail(BaseModel):
     email: EmailStr = Field(title='Email', min_length=1)
+
+
+class WaitingListAdminOut(BaseModel):
+    id: int
+    email: str
+    email_verified: bool
+    invite_id: int | None = None
+    time_created: datetime
+    time_updated: datetime
+
+    invite: Invite | None = None
+
+    class Config:
+        from_attributes = True

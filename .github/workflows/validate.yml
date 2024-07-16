@@ -59,6 +59,7 @@ jobs:
       TF_VAR_zoom_callback: ${{ vars.ZOOM_CALLBACK }}
       TF_VAR_zoom_secret: ${{ vars.zoom_secret }}
       TF_VAR_sentry_dsn: ${{ vars.SENTRY_DSN }}
+      TF_VAR_ssl_cert_arn: ${{ vars.SSL_CERT_ARN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -158,14 +159,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
-          cache-dependency-path: 'frontend/yarn.lock'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Install dependencies
         run: |
           cd ./frontend
-          yarn install
+          npm install
           
       - name: Test with vitest
         run: |
-          cd ./frontend && yarn test --run
+          cd ./frontend && npm run test -- --run

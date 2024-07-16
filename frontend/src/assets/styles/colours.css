@@ -33,6 +33,7 @@ html {
   --tbpro-primary-hover: #066769;
   --tbpro-primary-pressed: #0A5757;
 
+  --tbpro-appointment-seconday: #81D4B5;
   --tbpro-secondary: var(--surface-subtle);
   --tbpro-secondary-border: var(--surface-border);
   --tbpro-secondary-pressed: var(--neutral-500);

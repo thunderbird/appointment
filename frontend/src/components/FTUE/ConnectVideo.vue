@@ -2,6 +2,7 @@
   <div class="content">
     <div class="cards">
       <div class="card zoom" @click="connectZoom">
+        <div class="chip">Recommended</div>
         <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" :alt="t('heading.zoom')"/>
         <p class="zoom-description">
           {{ t('text.connectZoom') }}
@@ -142,6 +143,21 @@ const connectZoom = async () => {
     border-color: var(--teal-700);
     cursor: pointer;
   }
+}
+
+.chip {
+  display: flex;
+  justify-content: center;
+  align-self: flex-end;
+  align-items: center;
+  width: 6.0625rem;
+  min-height: 1.0625rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: var(--tbpro-text);
+  background-color: var(--tbpro-appointment-seconday);
+  border-radius: 0.1875rem;
+  text-transform: uppercase;
 }
 
 .zoom-logo {

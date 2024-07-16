@@ -35,7 +35,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import {
-  onMounted, inject, ref, computed,
+  onMounted, inject, ref, computed, watch,
 } from 'vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
@@ -52,7 +52,7 @@ const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
 const {
-  hasNextStep, hasPreviousStep, infoMessage,
+  hasNextStep, hasPreviousStep, infoMessage, warningMessage,
 } = storeToRefs(ftueStore);
 
 const { previousStep, nextStep } = ftueStore;
@@ -61,6 +61,14 @@ const calendarStore = useCalendarStore();
 const calendars = ref([]);
 const selected = computed(() => calendars.value.filter((item) => item.checked).length);
 const continueTitle = computed(() => (selected.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
+
+watch(selected, (val) => {
+  if (val === 0) {
+    warningMessage.value = t('ftue.oneCalendarRequired');
+  } else {
+    warningMessage.value = null;
+  }
+});
 
 onMounted(async () => {
   isLoading.value = true;
