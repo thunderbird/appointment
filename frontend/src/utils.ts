@@ -1,10 +1,12 @@
 // get the first key of given object that points to given value
-import { colorSchemes } from '@/definitions';
+import { ColorSchemes } from '@/definitions';
+import { CustomEvent, Coloring, EventPopup, HTMLElementEvent } from './models';
 
-export const keyByValue = (o, v) => Object.keys(o).find((k) => o[k] === v);
+// find a key by a given value and return it
+export const keyByValue = (o: Object, v: number|string): number|string => Object.keys(o).find((k) => o[k] === v);
 
 // create event color for border and background, inherited from calendar color attribute
-export const eventColor = (event, placeholder) => {
+export const eventColor = (event: CustomEvent, placeholder: Boolean): Coloring => {
   const color = {
     border: null,
     background: null,
@@ -23,7 +25,7 @@ export const eventColor = (event, placeholder) => {
 };
 
 // create initials from given name
-export const initials = (name) => {
+export const initials = (name: string): string => {
   if (name) {
     const parts = name.toUpperCase().split(' ');
     return parts.length > 1
@@ -34,45 +36,39 @@ export const initials = (name) => {
 };
 
 // file download
-export const download = (data, filename, contenttype = 'text/plain') => {
+export const download = (data: BlobPart, filename: string, contenttype: string = 'text/plain'): void => {
   const a = document.createElement('a');
   const file = new Blob([data], { type: `${contenttype};charset=UTF-8`, endings: 'native' });
-  // IE10+
-  if (window.navigator.msSaveOrOpenBlob) {
-    window.navigator.msSaveOrOpenBlob(file, filename);
-  } else {
-    // other browsers
-    const url = URL.createObjectURL(file);
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    }, 0);
-  }
+  // TODO: use fetch or similar to programmatically trigger a download
+  const url = URL.createObjectURL(file);
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 0);
 };
 
 // handle time format, return dayjs format string
 // can be either set by the user (local storage) or detected from system
-export const timeFormat = () => {
+export const timeFormat = (): string => {
   const is12HourTime = Intl.DateTimeFormat().resolvedOptions().hour12 ? 12 : 24;
   const format = Number(localStorage?.getItem('timeFormat')) ?? is12HourTime;
   return format === 24 ? 'HH:mm' : 'hh:mm A';
 };
 
 // event popup handling
-export const initialEventPopupData = {
+export const initialEventPopupData: EventPopup = {
   event: null,
   display: 'none',
   top: 0,
-  right: 'initial',
-  bottom: 'initial',
   left: 'initial',
 };
+
 // calculate properties of event popup for given element and show popup
-export const showEventPopup = (el, event, position = 'right') => {
+export const showEventPopup = (el: HTMLElementEvent, event: CustomEvent, position: string = 'right') => {
   const obj = { ...initialEventPopupData };
   obj.event = event;
   obj.display = 'block';
@@ -93,9 +89,8 @@ export const showEventPopup = (el, event, position = 'right') => {
 /**
  * Returns the stored locale setting or null if none is set.
  * TODO: This should be moved to a settings store
- * @returns {string|null}
  */
-export const getLocale = () => {
+export const getLocale = (): string|null => {
   const locale = localStorage?.getItem('locale');
   if (!locale) {
     return null;
@@ -106,30 +101,30 @@ export const getLocale = () => {
 /**
  * Returns the stored theme value. If the stored value does not exist, it will guess based on prefers-color-scheme.
  * TODO: This should be moved to a settings store
- * @returns {colorSchemes} - Colour theme value
+ * @returns {ColorSchemes} - Colour theme value
  */
-export const getPreferredTheme = () => {
+export const getPreferredTheme = (): string => {
   const theme = localStorage?.getItem('theme');
   if (!theme) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? colorSchemes.dark : colorSchemes.light;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
   }
 
   switch (theme) {
     case 'dark':
-      return colorSchemes.dark;
+      return ColorSchemes.Dark;
     case 'light':
-      return colorSchemes.light;
+      return ColorSchemes.Light;
     default:
-      // This would be colorSchemes.system, but I feel like we need a definitive answer here.
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? colorSchemes.dark : colorSchemes.light;
+      // This would be ColorSchemes.System, but I feel like we need a definitive answer here.
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
   }
 };
 
 /**
  * via: https://stackoverflow.com/a/11868398
  */
-export const getAccessibleColor = (hexcolor) => {
-  const defaultColor = getPreferredTheme() === colorSchemes.dark ? 'white' : 'black';
+export const getAccessibleColor = (hexcolor: string): string => {
+  const defaultColor = getPreferredTheme() === ColorSchemes.Dark ? 'white' : 'black';
   if (!hexcolor) {
     return defaultColor;
   }
