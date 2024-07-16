@@ -47,6 +47,7 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
+import { callKey } from '@/keys';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
@@ -117,7 +118,11 @@ const call = createFetch({
     credentials: 'include',
   },
 });
+
+// Deprecated - Please use callKey, as it's typed!
 provide('call', call);
+provide(callKey, call);
+
 provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
 provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
