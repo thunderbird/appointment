@@ -58,6 +58,7 @@ oauth-error = There was an error with the authentication flow. Please try again.
 ## Zoom Exceptions
 
 zoom-not-connected = You need a connected Zoom account in order to create a meeting link.
+zoom-connect-to-continue = You must connect a Zoom account, enter a custom meeting link, or click "Skip Connect Video" to continue.
 
 ## Google Exceptions
 

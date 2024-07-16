@@ -9,8 +9,13 @@ class APIException(HTTPException):
 
     id_code = 'UNKNOWN'
     status_code = 500
+    message_key = None
 
     def __init__(self, **kwargs):
+        message_key = kwargs.pop('message_key', False)
+        if message_key is not False:
+            self.message_key = message_key
+
         super().__init__(
             status_code=self.status_code,
             detail={
@@ -22,6 +27,9 @@ class APIException(HTTPException):
         )
 
     def get_msg(self):
+        if self.message_key:
+            return l10n(self.message_key)
+
         return l10n('unknown-error')
 
 
@@ -289,3 +297,10 @@ class WaitingListActionFailed(APIException):
     def get_msg(self):
         return l10n('unknown-error')
 
+
+class OAuthFlowNotFinished(APIException):
+    """Raise when an oauth flow was started but not finished. Used for FTUE. Please override message_key."""
+
+    id_code = 'OAUTH_FLOW_NOT_FINISHED'
+    status_code = 400
+    message_key = 'oauth-error'  # By default

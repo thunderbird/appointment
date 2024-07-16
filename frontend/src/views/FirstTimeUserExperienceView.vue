@@ -2,7 +2,7 @@
 
 import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
-import { ColorSchemes, ftueStep } from '@/definitions.ts';
+import { ColorSchemes, ftueStep } from '@/definitions';
 import { onMounted, inject } from 'vue';
 import WordMark from '@/elements/WordMark.vue';
 import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
@@ -14,9 +14,9 @@ import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store.ts';
+import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
-import { getPreferredTheme } from '@/utils.ts';
+import { getPreferredTheme } from '@/utils';
 
 const router = useRouter();
 const user = useUserStore();
@@ -63,6 +63,7 @@ onMounted(async () => {
           <notice-bar v-else-if="infoMessage">
             {{ infoMessage }}
           </notice-bar>
+          <div class="pls-keep-height" v-else/>
         </div>
         <div class="modal-body flex w-full flex-col items-center justify-center">
           <setup-profile v-if="currentStep === ftueStep.setupProfile"/>
@@ -108,9 +109,14 @@ onMounted(async () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 8.0rem;
+  min-height: 8.0rem;
   width: 100%;
   gap: 1rem;
+}
+
+/* Empty space if a notice bar isn't shown */
+.pls-keep-height {
+  min-height: 2.0625rem; /* 33px */
 }
 
 #ftue-title {

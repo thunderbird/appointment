@@ -1,3 +1,73 @@
+<script setup>
+import { useI18n } from 'vue-i18n';
+import {
+  onMounted, inject, ref,
+} from 'vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import { useFTUEStore } from '@/stores/ftue-store';
+import { storeToRefs } from 'pinia';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+
+const { t } = useI18n();
+
+const call = inject('call');
+const isLoading = ref(false);
+
+const ftueStore = useFTUEStore();
+const {
+  hasNextStep, hasPreviousStep, errorMessage,
+} = storeToRefs(ftueStore);
+const { previousStep, nextStep } = ftueStore;
+
+const externalConnectionStore = useExternalConnectionsStore();
+const customMeetingLink = ref('');
+const customMeetingLinkRef = ref();
+
+const initFlowKey = 'tba/startedMeetingConnect';
+
+onMounted(async () => {
+  isLoading.value = true;
+  await externalConnectionStore.fetch(call);
+  isLoading.value = false;
+
+  console.log(customMeetingLinkRef.value);
+
+  const isBackFromConnectFlow = localStorage?.getItem(initFlowKey);
+  localStorage?.removeItem(initFlowKey);
+
+  if (isBackFromConnectFlow) {
+    const { data, error } = await call('zoom/ftue-status').get().json();
+    // Did they hit back?
+    if (error?.value) {
+      errorMessage.value = data.value?.detail?.message;
+      return;
+    }
+
+    await nextStep();
+  }
+});
+
+const onSubmit = async () => {
+  isLoading.value = true;
+  await nextStep();
+};
+
+const onSkip = async () => {
+  isLoading.value = true;
+  await nextStep();
+};
+
+const connectZoom = async () => {
+  localStorage?.setItem(initFlowKey, true);
+  isLoading.value = true;
+  const { data } = await call('zoom/auth').get().json();
+  // Ship them to the auth link
+  window.location.href = data.value.url;
+};
+
+</script>
 <template>
   <div class="content">
     <div class="cards">
@@ -9,10 +79,10 @@
         </p>
         <primary-button class="connect-zoom" :disabled="isLoading">{{ t('label.connect') }}</primary-button>
       </div>
-      <div class="card">
+      <div class="card" :class="{'card-selected': customMeetingLink.length > 0}" @click="customMeetingLinkRef.focus()">
         <strong>{{ t('ftue.customVideoMeetingLink') }}</strong>
         <p>{{ t('ftue.customVideoMeetingText') }}</p>
-        <text-input name="custom-meeting-link" v-model="customMeetingLink" placeholder="http://meet.google.com">{{ t('ftue.videoMeetingLink') }}</text-input>
+        <text-input name="custom-meeting-link" v-model="customMeetingLink" ref="customMeetingLinkRef" placeholder="http://meet.google.com">{{ t('ftue.videoMeetingLink') }}</text-input>
       </div>
     </div>
     <div class="skip-text">
@@ -40,73 +110,6 @@
     </primary-button>
   </div>
 </template>
-
-<script setup>
-import { useI18n } from 'vue-i18n';
-import {
-  onMounted, inject, ref,
-} from 'vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { storeToRefs } from 'pinia';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-
-const { t } = useI18n();
-
-const call = inject('call');
-const isLoading = ref(false);
-
-const ftueStore = useFTUEStore();
-const {
-  hasNextStep, hasPreviousStep,
-} = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
-
-const externalConnectionStore = useExternalConnectionsStore();
-const { zoom } = storeToRefs(externalConnectionStore);
-const customMeetingLink = ref('');
-
-const initFlowKey = 'tba/startedMeetingConnect';
-
-onMounted(async () => {
-  isLoading.value = true;
-  await externalConnectionStore.fetch(call);
-  isLoading.value = false;
-
-  const isBackFromConnectFlow = localStorage?.getItem(initFlowKey);
-  localStorage?.removeItem(initFlowKey);
-
-  // Error occurred during flow
-  if (isBackFromConnectFlow && zoom.value.length === 0) {
-    return;
-  }
-
-  if (isBackFromConnectFlow) {
-    await nextStep();
-  }
-});
-
-const onSubmit = async () => {
-  isLoading.value = true;
-  await nextStep();
-};
-
-const onSkip = async () => {
-  isLoading.value = true;
-  await nextStep();
-};
-
-const connectZoom = async () => {
-  localStorage?.setItem(initFlowKey, true);
-  isLoading.value = true;
-  const { data } = await call('zoom/auth').get().json();
-  // Ship them to the auth link
-  window.location.href = data.value.url;
-};
-
-</script>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -139,10 +142,16 @@ const connectZoom = async () => {
   border: 0.0625rem solid color-mix(in srgb, var(--neutral) 65%, transparent);
   transition: var(--transition);
 
-  &.zoom:hover {
+  &:hover,
+  &:focus-within {
     border-color: var(--teal-700);
     cursor: pointer;
   }
+}
+
+.card-selected {
+  border-color: var(--teal-700);
+  cursor: pointer;
 }
 
 .chip {
@@ -173,16 +182,16 @@ const connectZoom = async () => {
   margin-top: 2rem;
 }
 
-  .skip-text {
-    color: var(--tbpro-primary-pressed);
-    margin-right: 0;
-    margin-left: auto;
-    text-transform: uppercase;
-    font-size: 0.5625rem;
-    font-weight: 600;
-    text-decoration: underline;
-    padding: 0.75rem 1.5rem;
-  }
+.skip-text {
+  color: var(--tbpro-primary-pressed);
+  margin-right: 0;
+  margin-left: auto;
+  text-transform: uppercase;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 0.75rem 1.5rem;
+}
 
 @media (--md) {
   .buttons {

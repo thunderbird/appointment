@@ -12,8 +12,9 @@ from ..dependencies.database import get_db
 
 from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.google import get_google_client
-from ..exceptions.google_api import GoogleInvalidCredentials, GoogleOAuthFlowNotFinished
+from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
+from ..exceptions.validation import OAuthFlowNotFinished
 from ..l10n import l10n
 
 router = APIRouter()
@@ -32,7 +33,7 @@ def google_auth_status(
     in_progress = request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
 
     if in_progress:
-        raise GoogleOAuthFlowNotFinished()
+        raise OAuthFlowNotFinished(message_key='google-connect-to-continue')
 
     return True
 

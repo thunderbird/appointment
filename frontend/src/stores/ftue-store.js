@@ -6,8 +6,6 @@ import { ftueStep } from '@/definitions';
 const initialObject = {
   // First step
   step: ftueStep.setupProfile,
-  previousStep: ftueStep.setupProfile,
-  nextStep: ftueStep.googlePermissions,
 };
 
 // eslint-disable-next-line import/prefer-default-export
