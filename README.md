@@ -1,6 +1,6 @@
 # Thunderbird Appointment
 
-**Note: Thunderbird Appointment is a prototype still in active development, and is not production ready.**
+**Note: Thunderbird Appointment is in an alpha state, so be prepared to encounter bugs**
 
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
