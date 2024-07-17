@@ -1,12 +1,12 @@
 // get the first key of given object that points to given value
 import { ColorSchemes } from '@/definitions';
-import { CustomEvent, Coloring, EventPopup, HTMLElementEvent } from './models';
+import { CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent } from './models';
 
 // find a key by a given value and return it
 export const keyByValue = (o: Object, v: number|string): number|string => Object.keys(o).find((k) => o[k] === v);
 
 // create event color for border and background, inherited from calendar color attribute
-export const eventColor = (event: CustomEvent, placeholder: Boolean): Coloring => {
+export const eventColor = (event: CustomEventData, placeholder: Boolean): Coloring => {
   const color = {
     border: null,
     background: null,
@@ -68,9 +68,9 @@ export const initialEventPopupData: EventPopup = {
 };
 
 // calculate properties of event popup for given element and show popup
-export const showEventPopup = (el: HTMLElementEvent, event: CustomEvent, position: string = 'right') => {
+export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, position: string = 'right') => {
   const obj = { ...initialEventPopupData };
-  obj.event = event;
+  obj.event = event.customData;
   obj.display = 'block';
   obj.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
   if (!position || position === 'right') {

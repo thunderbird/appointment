@@ -7,23 +7,25 @@ import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview.vue';
 import CalendarEventRemote from '@/elements/calendar/CalendarEventRemote.vue';
 import CalendarEventScheduled from '@/elements/calendar/CalendarEventScheduled.vue';
 import EventPopup from '@/elements/EventPopup.vue';
+import { CalendarEvent } from "@/models";
 import { dayjsKey } from "@/keys";
 
 const dj = inject(dayjsKey);
 
 // component properties
-const props = defineProps({
-  day: String, // number of day in its month
-  isSelected: Boolean, // flag showing if the event is currently selected by user
-  placeholder: Boolean, // flag formating events as placeholder
-  monthView: Boolean, // flag, are we in month view?
-  event: Object, // the event to show
-  showDetails: Boolean, // flag enabling event popups with details
-  popupPosition: String, // currently supported: right, left, top
-  disabled: Boolean, // flag making this day non-selectable and inactive
-  timeSlotDuration: Number, // minimum time shown: [15, 30, 60]
-  timeSlotHeight: Number, // height in pixels of each minimum time instance.
-});
+interface Props {
+  day: string; // number of day in its month
+  isSelected: boolean; // flag showing if the event is currently selected by user
+  placeholder: boolean; // flag formating events as placeholder
+  monthView: boolean; // flag, are we in month view?
+  event: CalendarEvent; // the event to show
+  showDetails: boolean; // flag enabling event popups with details
+  popupPosition: string; // currently supported: right, left, top
+  disabled: boolean; // flag making this day non-selectable and inactive
+  timeSlotDuration: number; // minimum time shown: [15, 30, 60]
+  timeSlotHeight: number; // height in pixels of each minimum time instance.
+}
+const props = defineProps<Props>();
 
 const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
 
@@ -38,8 +40,7 @@ const emit = defineEmits(['eventSelected']);
 const popup = ref({ ...initialEventPopupData });
 
 // formatted time range
-// TODO: eventObj:CalendarEvent (see CalendarQalendar.vue)
-const formattedTimeRange = (eventObj) => {
+const formattedTimeRange = (eventObj: CalendarEvent) => {
   const start = dj(eventObj.time.start);
   const end = dj(eventObj.time.end);
   return `${start.format(timeFormat())} - ${end.format(timeFormat())}`;
@@ -70,7 +71,7 @@ const formattedTimeRange = (eventObj) => {
       <calendar-event-remote
         v-else-if="eventData.remote"
         :is-month-view="monthView"
-        :event="eventData"
+        :event-data="eventData"
         :label="event.title"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       />
@@ -79,7 +80,7 @@ const formattedTimeRange = (eventObj) => {
       <calendar-event-preview
         v-else-if="eventData.preview"
         :is-month-view="monthView"
-        :event="eventData"
+        :event-data="eventData"
         :label="formattedTimeRange(event)"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       />
@@ -88,7 +89,7 @@ const formattedTimeRange = (eventObj) => {
       <calendar-event-scheduled
         v-else
         :is-month-view="monthView"
-        :event="eventData"
+        :event-data="eventData"
         :label="event.title"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       />

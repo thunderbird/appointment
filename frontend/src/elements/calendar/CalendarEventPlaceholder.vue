@@ -4,12 +4,13 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 // component properties
-defineProps({
-  isBusy: Boolean, // flag showing this event as busy and non-selectable
-  isSelected: Boolean, // flag showing if the event is currently selected by user
-  isMonthView: Boolean, // flag, are we in month view?
-  label: String, // event title
-});
+interface Props {
+  isBusy: boolean, // flag showing this event as busy and non-selectable
+  isSelected: boolean, // flag showing if the event is currently selected by user
+  isMonthView: boolean, // flag, are we in month view?
+  label: string, // event title
+};
+defineProps<Props>();
 
 </script>
 
