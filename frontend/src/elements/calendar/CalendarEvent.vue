@@ -14,16 +14,16 @@ const dj = inject(dayjsKey);
 
 // component properties
 interface Props {
-  day: string; // number of day in its month
+  day?: string; // number of day in its month
   isSelected: boolean; // flag showing if the event is currently selected by user
   placeholder: boolean; // flag formating events as placeholder
   monthView: boolean; // flag, are we in month view?
   event: CalendarEvent; // the event to show
   showDetails: boolean; // flag enabling event popups with details
-  popupPosition: string; // currently supported: right, left, top
+  popupPosition?: string; // currently supported: right, left, top
   disabled: boolean; // flag making this day non-selectable and inactive
-  timeSlotDuration: number; // minimum time shown: [15, 30, 60]
-  timeSlotHeight: number; // height in pixels of each minimum time instance.
+  timeSlotDuration?: number; // minimum time shown: [15, 30, 60]
+  timeSlotHeight?: number; // height in pixels of each minimum time instance.
 }
 const props = defineProps<Props>();
 
@@ -38,6 +38,9 @@ const emit = defineEmits(['eventSelected']);
 
 // event details
 const popup = ref({ ...initialEventPopupData });
+const resetPopup = () => {
+  popup.value = { ...initialEventPopupData };
+};
 
 // formatted time range
 const formattedTimeRange = (eventObj: CalendarEvent) => {
@@ -50,7 +53,7 @@ const formattedTimeRange = (eventObj: CalendarEvent) => {
 <template>
   <div
     :class="{ 'cursor-not-allowed text-gray-400': disabled, 'h-full': !monthView }"
-    @mouseleave="popup = {...initialEventPopupData}"
+    @mouseleave="resetPopup"
   >
     <div
       class="flex flex-col gap-1.5 overflow-y-auto"

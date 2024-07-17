@@ -68,9 +68,9 @@ export const initialEventPopupData: EventPopup = {
 };
 
 // calculate properties of event popup for given element and show popup
-export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, position: string = 'right') => {
+export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, position: string = 'right'): EventPopup => {
   const obj = { ...initialEventPopupData };
-  obj.event = event.customData;
+  obj.event = event;
   obj.display = 'block';
   obj.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
   if (!position || position === 'right') {

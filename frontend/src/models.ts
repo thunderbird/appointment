@@ -66,7 +66,7 @@ export type CalendarEvent = {
   id: number|string;
   title: string;
   colorScheme: string;
-  time: TimeFormatted;
+  time?: TimeFormatted;
   description: string;
   with: string;
   customData: CustomEventData;
@@ -74,7 +74,7 @@ export type CalendarEvent = {
 };
 
 export type EventPopup = {
-  event: CustomEventData;
+  event: CalendarEvent;
   display: string;
   top: string|number;
   left: string|number;
