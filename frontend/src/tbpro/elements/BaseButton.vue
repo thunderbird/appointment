@@ -87,6 +87,8 @@ button:hover > .tooltip,
   .text {
     padding: 0;
     user-select: all;
+    font-weight: 400;
+    line-height: 1;
   }
 }
 
