@@ -1,33 +1,13 @@
-<template>
-  <div class="content">
-    <img src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
-    <div class="copy">
-      <p>{{ t('ftue.finishScreenText') }}</p>
-      <text-button class="link" :copy="myLink" :label="myLink"/>
-    </div>
-  </div>
-  <div class="buttons">
-    <primary-button
-      class="btn-finish"
-      :title="t('ftue.finish')"
-      @click="onSubmit()"
-      :disabled="isLoading"
-    >
-      {{ t('ftue.finish') }}
-    </primary-button>
-  </div>
-</template>
-
 <script setup>
 import { useI18n } from 'vue-i18n';
 import {
   onMounted, inject, ref,
 } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useScheduleStore } from '@/stores/schedule-store.ts';
+import { useScheduleStore } from '@/stores/schedule-store';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import { useUserStore } from '@/stores/user-store.ts';
-import TextButton from '@/elements/TextButton.vue';
+import { useUserStore } from '@/stores/user-store';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 const { t } = useI18n();
 const call = inject('call');
@@ -39,6 +19,8 @@ const { nextStep } = ftueStore;
 
 const isLoading = ref(false);
 const myLink = ref('');
+const myLinkTooltip = ref(t('label.copyLink'));
+const myLinkShow = ref(false);
 
 onMounted(async () => {
   await Promise.all([
@@ -63,7 +45,47 @@ const onSubmit = async () => {
   window.location = '/calendar';
 };
 
+const copyLink = async () => {
+  await navigator.clipboard.writeText(myLink.value);
+
+  myLinkShow.value = true;
+  myLinkTooltip.value = t('info.copiedToClipboard');
+
+  // Fade out after a bit
+  setTimeout(() => {
+    myLinkShow.value = false;
+
+    // After the animation fades...
+    setTimeout(() => {
+      myLinkTooltip.value = t('label.copyLink');
+    }, 500);
+  }, 4000);
+};
 </script>
+<template>
+  <div class="content">
+    <img src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
+    <div class="copy">
+      <p>{{ t('ftue.finishScreenText') }}</p>
+      <link-button class="my-link-btn" @click="copyLink" :tooltip="myLinkTooltip" :force-tooltip="myLinkShow">
+        <template v-slot:icon>
+          <img :alt="t('label.copyLink')" src="@/assets/svg/icons/copy.svg"/>
+        </template>
+        {{ myLink }}
+      </link-button>
+    </div>
+  </div>
+  <div class="buttons">
+    <primary-button
+      class="btn-finish"
+      :title="t('ftue.finish')"
+      @click="onSubmit()"
+      :disabled="isLoading"
+    >
+      {{ t('ftue.finish') }}
+    </primary-button>
+  </div>
+</template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -83,6 +105,10 @@ const onSubmit = async () => {
   gap: 1rem;
   font-size: 0.8125rem;
   text-align: center;
+}
+
+.my-link-btn {
+  flex-direction: row-reverse;
 }
 
 .link {
