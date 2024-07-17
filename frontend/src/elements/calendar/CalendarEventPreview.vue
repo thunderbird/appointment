@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import { eventColor, getAccessibleColor } from '@/utils';
+import { CustomEventData } from "@/models";
+
+// component properties
+interface Props {
+  isMonthView: boolean, // flag, are we in month view?
+  eventData: CustomEventData, // the event data to show
+  label: string, // event title
+};
+defineProps<Props>();
+
+</script>
+
 <template>
   <div
     class="
@@ -6,9 +20,9 @@
     "
     :class="{ 'h-full': !isMonthView }"
     :style="{
-      borderColor: eventColor(event, false).border,
-      backgroundColor: isMonthView ? eventColor(event, false).background : event.calendar_color,
-      color: !isMonthView ? getAccessibleColor(event.calendar_color) : null,
+      borderColor: eventColor(eventData, false).border,
+      backgroundColor: isMonthView ? eventColor(eventData, false).background : eventData.calendar_color,
+      color: !isMonthView ? getAccessibleColor(eventData.calendar_color) : null,
     }"
   >
     <div class="grid">
@@ -18,13 +32,3 @@
     </div>
   </div>
 </template>
-<script setup>
-import { eventColor, getAccessibleColor } from '@/utils';
-
-// component properties
-defineProps({
-  isMonthView: Boolean, // flag, are we in month view?
-  event: Object, // the event to show
-  label: String, // event title
-});
-</script>

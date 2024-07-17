@@ -30,7 +30,7 @@
         :is-selected="d.date === date"
         :is-today="d.date === today"
         :placeholder="placeholder"
-        :events="eventsByDate(d.date)"
+        :has-events="!!eventsByDate(d.date).length"
         :show-details="!placeholder"
         :popup-position="popupPosition"
         :disabled="dateDisabled(d.date)"
@@ -127,7 +127,7 @@ const eventsByDate = (d) => {
             || e.preview,
       );
   }
-  return null;
+  return [];
 };
 const eventSelected = (d) => {
   emit('eventSelected', d);

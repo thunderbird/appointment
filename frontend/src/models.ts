@@ -49,7 +49,7 @@ export type Appointment = {
   active: boolean;
 };
 
-export type CustomEvent = {
+export type CustomEventData = {
   attendee?: Attendee;
   slot_status: number; // TODO: definitions.bookingStatus
   booking_status: number; // TODO: definitions.appointmentState
@@ -62,11 +62,24 @@ export type CustomEvent = {
   tentative: boolean;
 };
 
+export type CalendarEvent = {
+  id: number|string;
+  title: string;
+  colorScheme: string;
+  time?: TimeFormatted;
+  description: string;
+  with: string;
+  customData: CustomEventData;
+  isCustom?: boolean;
+};
+
 export type EventPopup = {
-  event: CustomEvent;
+  event: CalendarEvent;
   display: string;
   top: string|number;
   left: string|number;
+  right?: string|number;
+  bottom?: string|number;
 };
 
 export type Calendar = {
@@ -89,7 +102,7 @@ export type ExternalConnectionCollection = {
   zoom?: ExternalConnection[];
 };
 
-// This will be used later if we provide custom availabilities
+// The type `Availability` will be used later if we provide custom availabilities
 // in addition to general availability too
 export type Availability = {
   id?: number;
@@ -167,6 +180,13 @@ export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
 // Utility types
+export type Time<T> = {
+  start: T;
+  end: T;
+}
+export type TimeNumeric = Time<number>;
+export type TimeFormatted = Time<string>;
+
 export type Coloring = {
   border?: string;
   background?: string;
