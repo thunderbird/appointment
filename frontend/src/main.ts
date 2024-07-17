@@ -24,9 +24,20 @@ import UAParser from 'ua-parser-js';
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
 
+// The modes we use -> short names for sorting
+const environmentMap = {
+  // Development is used by vite in dev mode...
+  development: 'dev',
+  // We set these correctly :)
+  stage: 'stage',
+  prod: 'prod',
+};
+const environment = environmentMap[import.meta.env.MODE] ?? 'unknown';
+
 if (useSentry) {
   Sentry.init({
     app,
+    environment,
     dsn: import.meta.env.VITE_SENTRY_DSN,
     integrations: [
       Sentry.browserTracingIntegration({
