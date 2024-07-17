@@ -184,7 +184,7 @@ export type Time<T> = {
   start: T;
   end: T;
 }
-export type TimeInHours = Time<number>;
+export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
 
 export type Coloring = {

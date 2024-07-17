@@ -259,7 +259,7 @@ const calendarEvents = computed(() => {
 
 /**
  * Calculate the start and end times, and then space them our by 2 hours for style!
- * @type {ComputedRef<TimeInHours>}
+ * @type {ComputedRef<TimeNumeric>}
  */
 const dayBoundary = computed(() => {
   if (calendarEvents?.value.length === 0) {
