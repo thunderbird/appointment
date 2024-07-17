@@ -1,5 +1,5 @@
 <template>
-  <button :class="type" type="button">
+  <button :class="{[type]: type, 'small': size === 'small'}" type="button">
     <span class="icon" v-if="$slots?.icon">
       <slot name="icon"/>
     </span>
