@@ -12,7 +12,7 @@ import urllib.parse
 from sqlalchemy.orm import Session
 
 from .apis.fxa_client import FxaClient
-from ..database import schemas, models
+from ..database import schemas, models, repo
 
 
 def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | None, deny_previous_tokens=True):
@@ -58,3 +58,17 @@ def signed_url_by_subscriber(subscriber: schemas.Subscriber):
 
     # We return with the signed url signature
     return f'{short_url}/{url_safe_username}/{signature}'
+
+
+def schedule_links_by_subscriber(db, subscriber: models.Subscriber):
+    # Generate some schedule links
+    schedules = repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
+    short_url = os.getenv('SHORT_BASE_URL')
+    base_url = f"{os.getenv('FRONTEND_URL')}/user"
+
+    # If we don't have a short url, then use the default url with /user added to it
+    if not short_url:
+        short_url = base_url
+
+    # Empty space at join is for trailing slash!
+    return list(map(lambda sch: '/'.join([short_url, subscriber.username, sch.slug, '']), schedules))

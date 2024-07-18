@@ -279,6 +279,10 @@ class Subscriber(SubscriberAuth):
         from_attributes = True
 
 
+class SubscriberMeOut(SubscriberBase):
+    schedule_links: list[str] = []
+
+
 class SubscriberAdminOut(Subscriber):
     invite: Invite | None = None
     time_created: datetime

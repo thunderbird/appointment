@@ -17,7 +17,7 @@ from ..database import repo, schemas
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
-from ..controller.auth import signed_url_by_subscriber
+from ..controller.auth import signed_url_by_subscriber, schedule_links_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
@@ -50,16 +50,18 @@ def health(db: Session = Depends(get_db)):
     return JSONResponse(l10n('health-ok'), status_code=200)
 
 
-@router.put('/me', response_model=schemas.SubscriberBase)
+@router.put('/me', response_model=schemas.SubscriberMeOut)
 def update_me(
-    data: schemas.SubscriberIn, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
+    data: schemas.SubscriberIn,
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber)
 ):
     """endpoint to update data of authenticated subscriber"""
     if subscriber.username != data.username and repo.subscriber.get_by_username(db, data.username):
         raise HTTPException(status_code=403, detail=l10n('username-not-available'))
 
     me = repo.subscriber.update(db=db, data=data, subscriber_id=subscriber.id)
-    return schemas.SubscriberBase(
+    return schemas.SubscriberMeOut(
         username=me.username,
         email=me.email,
         preferred_email=me.preferred_email,
@@ -67,6 +69,8 @@ def update_me(
         level=me.level,
         timezone=me.timezone,
         is_setup=me.is_setup,
+        avatar_url=me.avatar_url,
+        schedule_links=schedule_links_by_subscriber(db, subscriber)
     )
 
 

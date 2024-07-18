@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from fastapi.responses import RedirectResponse
 
 from .. import utils
+from ..controller.auth import schedule_links_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 
@@ -291,12 +292,13 @@ def logout(
     return True
 
 
-@router.get('/me', response_model=schemas.SubscriberBase)
+@router.get('/me', response_model=schemas.SubscriberMeOut)
 def me(
+    db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Return the currently authed user model"""
-    return schemas.SubscriberBase(
+    return schemas.SubscriberMeOut(
         username=subscriber.username,
         email=subscriber.email,
         preferred_email=subscriber.preferred_email,
@@ -305,6 +307,7 @@ def me(
         timezone=subscriber.timezone,
         avatar_url=subscriber.avatar_url,
         is_setup=subscriber.is_setup,
+        schedule_links=schedule_links_by_subscriber(db, subscriber)
     )
 
 
