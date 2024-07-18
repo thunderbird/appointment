@@ -1,23 +1,3 @@
-<template>
-  <div class="content">
-    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <text-input name="full-name" v-model="fullName" required>{{ t('ftue.fullName') }}</text-input>
-      <text-input name="username" v-model="username" required>{{ t('label.username') }}</text-input>
-      <select-input name="timezone" :options="timezoneOptions" v-model="timezone" required>{{ t('label.timeZone') }}</select-input>
-    </form>
-  </div>
-  <div class="buttons">
-    <primary-button
-      class="btn-continue"
-      :title="t('label.continue')"
-      v-if="hasNextStep"
-      @click="onSubmit"
-    >
-      {{ t('label.continue') }}
-    </primary-button>
-  </div>
-</template>
-
 <script setup>
 
 import TextInput from '@/tbpro/elements/TextInput.vue';
@@ -79,7 +59,32 @@ const onSubmit = async () => {
 };
 
 </script>
-
+<template>
+  <div class="content">
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
+      <text-input name="full-name" v-model="fullName" :required="true">{{ t('ftue.fullName') }}</text-input>
+      <text-input name="username" v-model="username" :required="true">{{ t('label.username') }}</text-input>
+      <select-input
+        name="timezone"
+        :options="timezoneOptions"
+        v-model="timezone"
+        :required="true"
+      >
+        {{ t('label.timeZone') }}
+      </select-input>
+    </form>
+  </div>
+  <div class="buttons">
+    <primary-button
+      class="btn-continue"
+      :title="t('label.continue')"
+      v-if="hasNextStep"
+      @click="onSubmit"
+    >
+      {{ t('label.continue') }}
+    </primary-button>
+  </div>
+</template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -90,11 +95,13 @@ const onSubmit = async () => {
   max-width: 23.75rem;
   gap: 2rem;
 }
+
 form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 .buttons {
   display: flex;
   width: 100%;
@@ -102,6 +109,7 @@ form {
   justify-content: center;
   margin-top: 2rem;
 }
+
 @media (--md) {
   .buttons {
     justify-content: flex-end;

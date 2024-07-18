@@ -32,8 +32,6 @@ onMounted(async () => {
   await externalConnectionStore.fetch(call);
   isLoading.value = false;
 
-  console.log(customMeetingLinkRef.value);
-
   const isBackFromConnectFlow = localStorage?.getItem(initFlowKey);
   localStorage?.removeItem(initFlowKey);
 
@@ -60,6 +58,12 @@ const onSkip = async () => {
 };
 
 const connectZoom = async () => {
+  // If they have zoom attached, just skip for now.
+  if (externalConnectionStore.zoom.length > 0) {
+    await nextStep();
+    return;
+  }
+
   localStorage?.setItem(initFlowKey, true);
   isLoading.value = true;
   const { data } = await call('zoom/auth').get().json();
@@ -82,7 +86,14 @@ const connectZoom = async () => {
       <div class="card" :class="{'card-selected': customMeetingLink.length > 0}" @click="customMeetingLinkRef.focus()">
         <strong>{{ t('ftue.customVideoMeetingLink') }}</strong>
         <p>{{ t('ftue.customVideoMeetingText') }}</p>
-        <text-input name="custom-meeting-link" v-model="customMeetingLink" ref="customMeetingLinkRef" placeholder="http://meet.google.com">{{ t('ftue.videoMeetingLink') }}</text-input>
+        <text-input
+          name="custom-meeting-link"
+          v-model="customMeetingLink"
+          ref="customMeetingLinkRef"
+          placeholder="https://meet.google.com"
+        >
+          {{ t('ftue.videoMeetingLink') }}
+        </text-input>
       </div>
     </div>
     <div class="skip-text">
