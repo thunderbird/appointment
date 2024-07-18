@@ -30,7 +30,7 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -51,8 +51,8 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone) => ({
  * @type {Ref<HTMLFormElement>}
  */
 const formRef = ref();
-const fullName = ref(user.data.name);
-const username = ref(user.data.username);
+const fullName = ref(user.data?.name ?? '');
+const username = ref(user.data?.username ?? '');
 const timezone = ref(user.data.timezone ?? dj.tz.guess());
 const isLoading = ref(false);
 
