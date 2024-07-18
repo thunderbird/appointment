@@ -1,54 +1,3 @@
-<template>
-  <div>
-    <!-- booking page content: loading -->
-    <main
-      v-if="activeView === views.loading"
-      class="flex-center h-screen select-none"
-    >
-      <loading-spinner/>
-    </main>
-    <!-- booking page content: invalid link -->
-    <main
-      v-else-if="activeView === views.invalid"
-      class="flex-center h-screen select-none flex-col gap-8 px-4"
-    >
-      <booking-view-error
-        :heading="errorHeading"
-        :body="errorBody"
-      />
-    </main>
-    <!-- booking page content: successful booking -->
-    <main
-      v-else-if="activeView === views.success"
-      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
-    >
-      <booking-view-success
-        :attendee-email="attendee.email"
-        :selected-event="selectedEvent"
-        :requested="appointment?.booking_confirmation"
-      />
-    </main>
-    <!-- booking page content: time slot selection -->
-    <main
-      v-else
-      class="mx-auto max-w-screen-2xl select-none px-4"
-    >
-      <booking-view-slot-selection
-        :show-navigation="showNavigation"
-        @open-modal="openModal()"
-      />
-    </main>
-    <!-- modals -->
-    <booking-modal
-      :open="showBookingModal"
-      :event="selectedEvent"
-      :requires-confirmation="appointment?.booking_confirmation"
-      @book="bookEvent"
-      @close="closeModal()"
-    />
-  </div>
-</template>
-
 <script setup>
 import { bookingCalendarViews as views, modalStates } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
@@ -61,7 +10,7 @@ import BookingModal from '@/components/BookingModal';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 // component constants
 const { t } = useI18n();
@@ -136,7 +85,12 @@ const handleError = (data) => {
   errorHeading.value = null;
   errorBody.value = null;
 
-  if (data?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
+  const id = data?.detail?.id;
+
+  if (id === 'SCHEDULE_NOT_ACTIVE') {
+    errorHeading.value = '';
+    errorBody.value = data?.detail.message;
+  } else if (id === 'RATE_LIMIT_EXCEEDED') {
     errorHeading.value = '';
     errorBody.value = data?.detail.message;
   }
@@ -223,3 +177,53 @@ onMounted(async () => {
   }
 });
 </script>
+<template>
+  <div>
+    <!-- booking page content: loading -->
+    <main
+      v-if="activeView === views.loading"
+      class="flex-center h-screen select-none"
+    >
+      <loading-spinner/>
+    </main>
+    <!-- booking page content: invalid link -->
+    <main
+      v-else-if="activeView === views.invalid"
+      class="flex-center h-screen select-none flex-col gap-8 px-4"
+    >
+      <booking-view-error
+        :heading="errorHeading"
+        :body="errorBody"
+      />
+    </main>
+    <!-- booking page content: successful booking -->
+    <main
+      v-else-if="activeView === views.success"
+      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
+    >
+      <booking-view-success
+        :attendee-email="attendee.email"
+        :selected-event="selectedEvent"
+        :requested="appointment?.booking_confirmation"
+      />
+    </main>
+    <!-- booking page content: time slot selection -->
+    <main
+      v-else
+      class="mx-auto max-w-screen-2xl select-none px-4"
+    >
+      <booking-view-slot-selection
+        :show-navigation="showNavigation"
+        @open-modal="openModal()"
+      />
+    </main>
+    <!-- modals -->
+    <booking-modal
+      :open="showBookingModal"
+      :event="selectedEvent"
+      :requires-confirmation="appointment?.booking_confirmation"
+      @book="bookEvent"
+      @close="closeModal()"
+    />
+  </div>
+</template>

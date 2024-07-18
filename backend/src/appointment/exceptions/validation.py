@@ -304,3 +304,13 @@ class OAuthFlowNotFinished(APIException):
     id_code = 'OAUTH_FLOW_NOT_FINISHED'
     status_code = 400
     message_key = 'oauth-error'  # By default
+
+
+class APIRateLimitExceeded(APIException):
+    """Is raised when rate limit is exceeded"""
+
+    id_code = 'RATE_LIMIT_EXCEEDED'
+    status_code = 429
+
+    def get_msg(self):
+        return l10n('rate-limit-exceeded')
