@@ -12,6 +12,7 @@ from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
 
 from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
+from .exceptions.validation import APIRateLimitExceeded
 from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
@@ -33,6 +34,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exception_handlers import (
     http_exception_handler,
 )
+
+from slowapi.errors import RateLimitExceeded
+
 
 import sentry_sdk
 
@@ -181,6 +185,10 @@ def server():
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
         return await http_exception_handler(request, APIGoogleRefreshError())
+
+    @app.exception_handler(RateLimitExceeded)
+    async def catch_rate_limit_exceeded_errors(request, exc):
+        return await http_exception_handler(request, APIRateLimitExceeded())
 
     # Mix in our extra routes
     app.include_router(api.router)
