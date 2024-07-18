@@ -36,9 +36,6 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     schedules.value = data.value;
     isLoaded.value = true;
-
-    const { updateScheduleUrls } = useUserStore();
-    updateScheduleUrls(data.value);
   };
 
   /**

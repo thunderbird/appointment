@@ -41,7 +41,6 @@ if (useSentry) {
     dsn: import.meta.env.VITE_SENTRY_DSN,
     integrations: [
       Sentry.browserTracingIntegration({
-        // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
         router,
       }),
       Sentry.replayIntegration(),
@@ -57,7 +56,8 @@ if (useSentry) {
     // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where
     // errors occur.
     replaysOnErrorSampleRate: 1.0,
-    tracePropagationTargets: ['localhost:8080', 'stage.appointment.day'],
+    // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
+    tracePropagationTargets: ['localhost', 'stage.appointment.day', 'appointment.day'],
   });
 }
 

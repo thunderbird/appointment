@@ -60,7 +60,7 @@ import { useI18n } from 'vue-i18n';
 import { useCalendarStore } from '@/stores/calendar-store.ts';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
 import { useScheduleStore } from '@/stores/schedule-store.ts';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -190,7 +190,9 @@ form {
 }
 
 .bubbleSelect {
-  overflow-x: scroll;
+  overflow-x: auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .content {
@@ -221,6 +223,9 @@ form {
 }
 
 @media (--md) {
+  .bubbleSelect {
+    padding: 0;
+  }
   .buttons {
     justify-content: flex-end;
     position: absolute;

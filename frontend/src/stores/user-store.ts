@@ -2,7 +2,9 @@ import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
 import { computed } from 'vue';
-import { Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse } from '@/models';
+import {
+  Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
+} from '@/models';
 
 const initialUserObject = {
   email: null,
@@ -14,18 +16,23 @@ const initialUserObject = {
   signedUrl: null,
   avatarUrl: null,
   accessToken: null,
-  scheduleSlugs: [],
+  scheduleLinks: [],
   isSetup: false,
 } as User;
 
 export const useUserStore = defineStore('user', () => {
   const data = useLocalStorage('tba/user', structuredClone(initialUserObject));
 
+  /**
+   * Return the first schedule link or their signed url
+   */
   const myLink = computed((): string => {
-    const scheduleSlug = data.value?.scheduleSlugs?.length > 0 ? data.value?.scheduleSlugs[0] : null;
-    if (scheduleSlug) {
-      return `${import.meta.env.VITE_SHORT_BASE_URL}/${data.value.username}/${scheduleSlug}/`;
+    const scheduleLinks = data?.value?.scheduleLinks ?? [];
+    if (scheduleLinks.length > 0) {
+      return scheduleLinks[0];
     }
+
+    console.warn('Signed urls are deprecated here!');
     return data.value.signedUrl;
   });
 
@@ -47,13 +54,7 @@ export const useUserStore = defineStore('user', () => {
       timezone: subscriber.timezone,
       avatarUrl: subscriber.avatar_url,
       isSetup: subscriber.is_setup,
-    };
-  };
-
-  const updateScheduleUrls = (scheduleData: Schedule[]) => {
-    data.value = {
-      ...data.value,
-      scheduleSlugs: scheduleData.map((schedule) => schedule?.slug),
+      scheduleLinks: subscriber.schedule_links,
     };
   };
 
@@ -167,6 +168,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateScheduleUrls, updateUser, finishFTUE,
+    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateUser, finishFTUE,
   };
 });

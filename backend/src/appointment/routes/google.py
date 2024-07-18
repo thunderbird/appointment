@@ -14,9 +14,28 @@ from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
+from ..exceptions.validation import OAuthFlowNotFinished
 from ..l10n import l10n
 
 router = APIRouter()
+
+SESSION_OAUTH_STATE = 'google_oauth_state'
+SESSION_OAUTH_SUBSCRIBER_ID = 'google_oauth_subscriber_id'
+
+
+@router.get('/ftue-status')
+def google_auth_status(
+    request: Request,
+    subscriber: Subscriber = Depends(get_subscriber)
+):
+    """Checks if oauth flow has started but not finished, if so raises an error."""
+    same_subscriber = subscriber.id == request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
+    in_progress = request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
+
+    if in_progress:
+        raise OAuthFlowNotFinished(message_key='google-connect-to-continue')
+
+    return True
 
 
 @router.get('/auth')
@@ -30,8 +49,8 @@ def google_auth(
     """Starts the google oauth process"""
     url, state = google_client.get_redirect_url(email)
 
-    request.session['google_oauth_state'] = state
-    request.session['google_oauth_subscriber_id'] = subscriber.id
+    request.session[SESSION_OAUTH_STATE] = state
+    request.session[SESSION_OAUTH_SUBSCRIBER_ID] = subscriber.id
 
     return url
 
@@ -39,13 +58,21 @@ def google_auth(
 @router.get('/callback')
 def google_callback(
     request: Request,
-    code: str,
     state: str,
+    code: str | None = None,
+    error: str | None = None,
     google_client: GoogleClient = Depends(get_google_client),
     db: Session = Depends(get_db),
 ):
     """Callback for google to redirect the user back to us with a code.
     This is called directly, and is not an api function!"""
+
+    if error is not None:
+        # Specific error for cancelling the flow
+        if error == 'access_denied':
+            return google_callback_error(l10n('google-connect-to-continue'))
+        return google_callback_error(l10n('google-sync-fail'))
+
     try:
         creds = google_client.get_credentials(code)
     except GoogleScopeChanged:
@@ -53,15 +80,15 @@ def google_callback(
     except GoogleInvalidCredentials:
         return google_callback_error(l10n('google-invalid-creds'))
 
-    if 'google_oauth_state' not in request.session or request.session['google_oauth_state'] != state:
+    if SESSION_OAUTH_STATE not in request.session or request.session[SESSION_OAUTH_STATE] != state:
         return google_callback_error(l10n('google-auth-fail'))
 
-    subscriber_id = request.session.get('google_oauth_subscriber_id')
+    subscriber_id = request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
     subscriber = repo.subscriber.get(db, subscriber_id)
 
     # Clear session keys
-    request.session.pop('google_oauth_state')
-    request.session.pop('google_oauth_subscriber_id')
+    request.session.pop(SESSION_OAUTH_STATE)
+    request.session.pop(SESSION_OAUTH_SUBSCRIBER_ID)
 
     if subscriber is None:
         return google_callback_error(l10n('google-auth-fail'))

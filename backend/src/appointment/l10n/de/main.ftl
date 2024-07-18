@@ -57,7 +57,8 @@ oauth-error = Es ist ein Fehler bei der Authentifizierung aufgetreten. Bitte ern
 
 ## Zoom Exceptions
 
-zoom-not-connected = Es wird ein verbundenes Zoom-Konto benötigt, um einen Meeting-Link zu erstellen.
+zoom-not-connected = Es wird ein Zoom-Konto benötigt, um einen Meeting-Link zu erstellen.
+zoom-connect-to-continue = Bitte ein Zoom-Konto verbinden, einen benutzerdefinierten Meeting-Link eingeben oder auf "Videoverbindung überspringen" klicken, um fortzufahren.
 
 ## Google Exceptions
 
@@ -68,6 +69,7 @@ google-auth-fail = Google-Authentifizierung fehlgeschlagen.
 google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte erneut versuchen.
 google-sync-fail = Bei der Synchronisierung von Kalendern ist ein Fehler aufgetreten. Bitte später noch einmal versuchen.
 google-only-one = Es kann nur ein einziges Google-Konto verbunden sein.
+google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto verbunden werden.
 
 ## Frontend Facing Strings
 

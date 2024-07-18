@@ -58,6 +58,7 @@ oauth-error = There was an error with the authentication flow. Please try again.
 ## Zoom Exceptions
 
 zoom-not-connected = You need a connected Zoom account in order to create a meeting link.
+zoom-connect-to-continue = You must connect a Zoom account, enter a custom meeting link, or click "Skip Connect Video" to continue.
 
 ## Google Exceptions
 
@@ -68,6 +69,7 @@ google-auth-fail = Google authentication failed.
 google-auth-expired = Google authentication session expired, please try again.
 google-sync-fail = An error occurred while syncing calendars. Please try again later.
 google-only-one = You can only have one Google account connected.
+google-connect-to-continue = You must connect at least one Google account to continue.
 
 ## Frontend Facing Strings
 

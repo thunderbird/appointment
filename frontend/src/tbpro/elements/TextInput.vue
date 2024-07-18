@@ -1,6 +1,18 @@
 <script setup>
 import { ref } from 'vue';
 
+const inputRef = ref(null);
+/**
+ * Forwards focus intent to the text input element.
+ * Unlike HTMLElement.focus() this does not take any parameters.
+ */
+const focus = () => {
+  if (!inputRef.value) {
+    return;
+  }
+  inputRef.value.focus();
+};
+
 defineProps({
   name: String,
   type: {
@@ -21,6 +33,9 @@ defineProps({
   },
 });
 defineEmits(['submit']);
+defineExpose({
+  focus,
+});
 const model = defineModel();
 const isInvalid = ref(false);
 const validationMessage = ref('');
@@ -36,7 +51,7 @@ const onInvalid = (evt) => {
   <label class="wrapper" :for="name">
     <span class="label">
       <slot/>
-      <span v-if="required && model.length === 0" class="required">*</span>
+      <span v-if="required && model?.length === 0" class="required">*</span>
     </span>
     <input
       v-model="model"
@@ -47,6 +62,7 @@ const onInvalid = (evt) => {
       :placeholder="placeholder"
       :required="required"
       @invalid="onInvalid"
+      ref="inputRef"
     />
     <span :class="{'visible': isInvalid}" class="help-label">
       {{ validationMessage }}

@@ -1,14 +1,3 @@
-<template>
-  <button :class="{'primary': type === 'primary', 'secondary': type === 'secondary', 'small': size === 'small'}" type="button">
-    <span class="icon">
-      <slot name="icon"/>
-    </span>
-    <span class="text">
-      <slot/>
-    </span>
-    <tool-tip v-if="tooltip" class="tooltip" @click.prevent :position="tooltipPosition.bottom">{{ tooltip }}</tool-tip>
-  </button>
-</template>
 <script setup>
 import { tooltipPosition } from '@/definitions';
 import ToolTip from '@/tbpro/elements/ToolTip.vue';
@@ -26,16 +15,40 @@ defineProps({
     type: String,
     default: '',
   },
+  forceTooltip: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
+<template>
+  <button :class="{[type]: type, 'small': size === 'small'}" type="button">
+    <span class="icon" v-if="$slots?.icon">
+      <slot name="icon"/>
+    </span>
+    <span class="text">
+      <slot/>
+    </span>
+    <tool-tip
+      v-if="tooltip"
+      class="tooltip"
+      :class="{'display-tooltip': forceTooltip}"
+      :position="tooltipPosition.bottom"
+      @click.prevent
+    >
+      {{ tooltip }}
+    </tool-tip>
+  </button>
+</template>
 <style scoped>
 .tooltip {
   transform: translate(0, -100%);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 250ms ease-out;
 }
-button:hover > .tooltip {
+button:hover > .tooltip,
+.display-tooltip {
   opacity: 1;
 }
 
@@ -69,6 +82,21 @@ button:hover > .tooltip {
     background-color: var(--tbpro-secondary-pressed);
     border-color: var(--tbpro-secondary-pressed-border);
     color: var(--neutral);
+  }
+}
+
+.link {
+  background-color: transparent;
+  color: var(--tbpro-primary);
+  text-decoration: underline;
+  box-shadow: none;
+  border: none;
+
+  .text {
+    padding: 0;
+    user-select: all;
+    font-weight: 400;
+    line-height: 1;
   }
 }
 
@@ -122,6 +150,7 @@ button {
   height: 100%;
 
   padding-left: 0.75rem;
+  padding-right: 0.75rem;
   margin-right: -0.75rem;
 }
 

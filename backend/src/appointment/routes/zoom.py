@@ -12,9 +12,28 @@ from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
+from ..exceptions.validation import OAuthFlowNotFinished
 from ..l10n import l10n
 
 router = APIRouter()
+
+SESSION_OAUTH_STATE = 'zoom_state'
+SESSION_OAUTH_SUBSCRIBER_ID = 'zoom_user_id'
+
+
+@router.get('/ftue-status')
+def zoom_auth_status(
+    request: Request,
+    subscriber: Subscriber = Depends(get_subscriber)
+):
+    """Checks if oauth flow has started but not finished, if so raises an error."""
+    same_subscriber = subscriber.id == request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
+    in_progress = request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
+
+    if in_progress:
+        raise OAuthFlowNotFinished(message_key='zoom-connect-to-continue')
+
+    return True
 
 
 @router.get('/auth')
@@ -28,8 +47,8 @@ def zoom_auth(
     url, state = zoom_client.get_redirect_url(state=sign_url(str(subscriber.id)))
 
     # We'll need to store this in session
-    request.session['zoom_state'] = state
-    request.session['zoom_user_id'] = subscriber.id
+    request.session[SESSION_OAUTH_STATE] = state
+    request.session[SESSION_OAUTH_SUBSCRIBER_ID] = subscriber.id
 
     return {'url': url}
 
@@ -41,17 +60,17 @@ def zoom_callback(
     state: str,
     db=Depends(get_db),
 ):
-    if 'zoom_state' not in request.session or request.session['zoom_state'] != state:
+    if SESSION_OAUTH_STATE not in request.session or request.session[SESSION_OAUTH_STATE] != state:
         raise HTTPException(400, l10n('oauth-error'))
-    if 'zoom_user_id' not in request.session or 'zoom_user_id' == '':
+    if SESSION_OAUTH_SUBSCRIBER_ID not in request.session or SESSION_OAUTH_SUBSCRIBER_ID == '':
         raise HTTPException(400, l10n('oauth-error'))
 
     # Retrieve the user id set at the start of the zoom oauth process
-    subscriber = repo.subscriber.get(db, request.session['zoom_user_id'])
+    subscriber = repo.subscriber.get(db, request.session[SESSION_OAUTH_SUBSCRIBER_ID])
 
     # Clear zoom session keys
-    request.session.pop('zoom_state')
-    request.session.pop('zoom_user_id')
+    request.session.pop(SESSION_OAUTH_STATE)
+    request.session.pop(SESSION_OAUTH_SUBSCRIBER_ID)
 
     # Generate the zoom client instance based on our subscriber
     # This can't be set as a dep injection since subscriber is based on session.

@@ -204,7 +204,7 @@ const getAvailableEmails = async () => {
 };
 
 const refreshData = async () => Promise.all([
-  user.updateSignedUrl(call),
+  user.profile(call),
   schedule.fetch(call, true),
   externalConnectionsStore.fetch(call),
   getAvailableEmails(),

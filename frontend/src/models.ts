@@ -143,7 +143,7 @@ export type User = {
   signedUrl: string;
   avatarUrl: string;
   accessToken: string;
-  scheduleSlugs: string[];
+  scheduleLinks: string[];
   isSetup: boolean,
 }
 
@@ -156,6 +156,7 @@ export type Subscriber = {
   timezone: string;
   avatar_url: string;
   is_setup: boolean;
+  schedule_links: string[];
 }
 
 export type Signature = {
@@ -193,6 +194,6 @@ export type Coloring = {
 }
 
 export type HTMLElementEvent = Event & {
-  target: HTMLElement; 
+  target: HTMLElement;
   currentTarget: HTMLElement;
 }

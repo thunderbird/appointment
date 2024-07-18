@@ -6,8 +6,6 @@ import { ftueStep } from '@/definitions';
 const initialObject = {
   // First step
   step: ftueStep.setupProfile,
-  previousStep: ftueStep.setupProfile,
-  nextStep: ftueStep.googlePermissions,
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -60,14 +58,6 @@ export const useFTUEStore = defineStore('FTUE', () => {
     },
   };
 
-  /**
-   * Returns a deferred component instance.
-   * @type {ComputedRef}
-   */
-  const ftueView = computed(() => stepList[data.value.step]?.component ?? defineAsyncComponent({
-    loader: () => import('@/components/FTUE/SetupProfile.vue'),
-  }));
-
   const hasNextStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].next));
   const hasPreviousStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].previous));
   const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'ftue.steps.error');
@@ -99,6 +89,6 @@ export const useFTUEStore = defineStore('FTUE', () => {
   };
 
   return {
-    data, ftueView, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset, infoMessage, errorMessage, warningMessage,
+    data, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset, infoMessage, errorMessage, warningMessage,
   };
 });
