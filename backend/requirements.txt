@@ -20,7 +20,7 @@ python-dotenv==1.0.1
 python-multipart==0.0.9
 PyJWT==2.6.0
 pydantic[email]==2.7.4
-sentry-sdk==2.8.0
+sentry-sdk==2.10.0
 starlette-context==0.3.6
 sqlalchemy-utils==0.41.2
 sqlalchemy==2.0.31

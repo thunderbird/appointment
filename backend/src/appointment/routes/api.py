@@ -4,6 +4,7 @@ import secrets
 
 import requests.exceptions
 import sentry_sdk
+from sentry_sdk import metrics
 from redis import Redis, RedisCluster
 
 # database
@@ -48,6 +49,16 @@ def health(db: Session = Depends(get_db)):
             return JSONResponse(content=l10n('health-bad'), status_code=503)
 
     return JSONResponse(l10n('health-ok'), status_code=200)
+
+
+@router.post('/page-load')
+def page_load(data: schemas.PageLoadIn):
+    if os.getenv('SENTRY_DSN') == '' or os.getenv('SENTRY_DSN') is None:
+        return True
+
+    metrics.increment('page_load', 1, tags=data.model_dump())
+
+    return True
 
 
 @router.put('/me', response_model=schemas.SubscriberMeOut)

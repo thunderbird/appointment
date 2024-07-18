@@ -418,3 +418,18 @@ class WaitingListAdminOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PageLoadIn(BaseModel):
+    browser: Optional[str]
+    browser_version: Optional[str]
+    os: Optional[str]
+    os_version: Optional[str]
+    device: Optional[str]
+    device_model: Optional[str]
+    resolution: Optional[str]
+    effective_resolution: Optional[str]
+    user_agent: Optional[str]
+    locale: Optional[str]
+    theme: Optional[str]
+

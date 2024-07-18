@@ -88,20 +88,26 @@ if (useSentry) {
   const deviceRes = `${window?.screen?.width ?? -1}x${window?.screen?.height ?? -1}`;
   const effectiveDeviceRes = `${window?.screen?.availWidth ?? -1}x${window?.screen?.availHeight ?? -1}`;
 
-  Sentry.metrics.increment('page_load', 1, {
-    tags: {
+  // Native fetch!
+  await fetch(`${apiUrl}/page-load`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       browser: browser.name,
-      browserVersion: `${browser.name}:${browser.version}`,
+      browser_version: `${browser.name}:${browser.version}`,
       os: os.name,
-      osVersion: `${os.name}:${os.version}`,
+      os_version: `${os.name}:${os.version}`,
       device: device.model,
-      deviceModel: `${device.vendor}:${device.model}`,
+      device_model: `${device.vendor}:${device.model}`,
       resolution: deviceRes,
-      effectiveResolution: effectiveDeviceRes,
-      userAgent: navigator.userAgent,
+      effective_resolution: effectiveDeviceRes,
+      user_agent: navigator.userAgent,
       locale: loc,
       theme: getPreferredTheme(),
-    },
+    }),
   });
 }
 
