@@ -1,7 +1,59 @@
+<script setup lang="ts">
+import { bookingStatus } from '@/definitions';
+import { computed, inject, ref, toRefs } from 'vue';
+import { timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
+import CalendarEventPlaceholder from '@/elements/calendar/CalendarEventPlaceholder.vue';
+import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview.vue';
+import CalendarEventRemote from '@/elements/calendar/CalendarEventRemote.vue';
+import CalendarEventScheduled from '@/elements/calendar/CalendarEventScheduled.vue';
+import EventPopup from '@/elements/EventPopup.vue';
+import { CalendarEvent } from "@/models";
+import { dayjsKey } from "@/keys";
+
+const dj = inject(dayjsKey);
+
+// component properties
+interface Props {
+  day?: string; // number of day in its month
+  isSelected: boolean; // flag showing if the event is currently selected by user
+  placeholder: boolean; // flag formating events as placeholder
+  monthView: boolean; // flag, are we in month view?
+  event: CalendarEvent; // the event to show
+  showDetails: boolean; // flag enabling event popups with details
+  popupPosition?: string; // currently supported: right, left, top
+  disabled: boolean; // flag making this day non-selectable and inactive
+  timeSlotDuration?: number; // minimum time shown: [15, 30, 60]
+  timeSlotHeight?: number; // height in pixels of each minimum time instance.
+}
+const props = defineProps<Props>();
+
+const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
+
+const eventData = event.value.customData;
+const elementHeight = computed(() => (eventData.duration / timeSlotDuration.value) * timeSlotHeight.value);
+const isBusy = computed(() => eventData.slot_status === bookingStatus.booked);
+
+// component emits
+const emit = defineEmits(['eventSelected']);
+
+// event details
+const popup = ref({ ...initialEventPopupData });
+const resetPopup = () => {
+  popup.value = { ...initialEventPopupData };
+};
+
+// formatted time range
+const formattedTimeRange = (eventObj: CalendarEvent) => {
+  const start = dj(eventObj.time.start);
+  const end = dj(eventObj.time.end);
+  return `${start.format(timeFormat())} - ${end.format(timeFormat())}`;
+};
+</script>
+
 <template>
   <div
     :class="{ 'cursor-not-allowed text-gray-400': disabled, 'h-full': !monthView }"
-    @mouseleave="popup = {...initialEventPopupData}"
+    @mouseleave="resetPopup"
   >
     <div
       class="flex flex-col gap-1.5 overflow-y-auto"
@@ -22,7 +74,7 @@
       <calendar-event-remote
         v-else-if="eventData.remote"
         :is-month-view="monthView"
-        :event="eventData"
+        :event-data="eventData"
         :label="event.title"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       />
@@ -31,7 +83,7 @@
       <calendar-event-preview
         v-else-if="eventData.preview"
         :is-month-view="monthView"
-        :event="eventData"
+        :event-data="eventData"
         :label="formattedTimeRange(event)"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       />
@@ -40,7 +92,7 @@
       <calendar-event-scheduled
         v-else
         :is-month-view="monthView"
-        :event="eventData"
+        :event-data="eventData"
         :label="event.title"
         @mouseenter="element => showDetails ? popup=showEventPopup(element, event, popupPosition) : null"
       />
@@ -59,52 +111,3 @@
     />
   </div>
 </template>
-
-<script setup>
-import { bookingStatus } from '@/definitions';
-import {
-  computed, inject, ref, toRefs,
-} from 'vue';
-import { timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
-import CalendarEventPlaceholder from '@/elements/calendar/CalendarEventPlaceholder';
-import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview';
-import CalendarEventRemote from '@/elements/calendar/CalendarEventRemote';
-import CalendarEventScheduled from '@/elements/calendar/CalendarEventScheduled';
-import EventPopup from '@/elements/EventPopup';
-import { dayjsKey } from "@/keys";
-
-const dj = inject(dayjsKey);
-
-// component properties
-const props = defineProps({
-  day: String, // number of day in its month
-  isSelected: Boolean, // flag showing if the event is currently selected by user
-  placeholder: Boolean, // flag formating events as placeholder
-  monthView: Boolean, // flag, are we in month view?
-  event: Object, // the event to show
-  showDetails: Boolean, // flag enabling event popups with details
-  popupPosition: String, // currently supported: right, left, top
-  disabled: Boolean, // flag making this day non-selectable and inactive
-  timeSlotDuration: Number, // minimum time shown: [15, 30, 60]
-  timeSlotHeight: Number, // height in pixels of each minimum time instance.
-});
-
-const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
-
-const eventData = event.value.customData;
-const elementHeight = computed(() => (eventData.duration / timeSlotDuration.value) * timeSlotHeight.value);
-const isBusy = computed(() => eventData.slot_status === bookingStatus.booked);
-
-// component emits
-const emit = defineEmits(['eventSelected']);
-
-// event details
-const popup = ref({ ...initialEventPopupData });
-
-// formatted time range
-const formattedTimeRange = (eventObj) => {
-  const start = dj(eventObj.time.start);
-  const end = dj(eventObj.time.end);
-  return `${start.format(timeFormat())} - ${end.format(timeFormat())}`;
-};
-</script>

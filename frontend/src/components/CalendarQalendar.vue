@@ -179,7 +179,7 @@ const applyTimezone = (d) => dj(d).utc().tz(dj.tz.guess());
 
 /**
  * Generates a list of Qalendar friendly event objects from events and appointments props.
- * @type {ComputedRef<*[]>}
+ * @type {ComputedRef<CalendarEvent[]>}
  */
 const calendarEvents = computed(() => {
   const evts = events?.value?.map((event) => {
@@ -259,7 +259,7 @@ const calendarEvents = computed(() => {
 
 /**
  * Calculate the start and end times, and then space them our by 2 hours for style!
- * @type {ComputedRef<{start, end}>}
+ * @type {ComputedRef<TimeNumeric>}
  */
 const dayBoundary = computed(() => {
   if (calendarEvents?.value.length === 0) {

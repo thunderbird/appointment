@@ -1,3 +1,10 @@
+<script setup lang="ts">
+interface Props {
+  title: string,
+};
+defineProps<Props>();
+</script>
+
 <template>
   <div class="mb-20 flex w-full flex-col shadow-[0_-5px_5px_-5px_rgb(0_0_0/0.3)] md:w-1/3
 ">
@@ -10,9 +17,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-defineProps({
-  title: String,
-});
-</script>

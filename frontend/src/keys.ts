@@ -6,10 +6,7 @@ import { Fetch } from '@/models';
  * These are typed Symbols for use with inject/provide in VueJS
  */
 
-// ...this works, don't touch.
-/**
- * Provides Dayjs class functionality as well as the timezone plugin
- */
+// Provides Dayjs class functionality as well as the timezone plugin
 type DayjsType = ((_?:ConfigType) => Dayjs) & {
   tz: DayjsTimezone
 };

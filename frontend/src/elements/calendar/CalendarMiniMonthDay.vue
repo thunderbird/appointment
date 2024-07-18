@@ -1,3 +1,25 @@
+<script setup lang="ts">
+import { inject } from 'vue';
+import { dayjsKey } from "@/keys";
+
+const dj = inject(dayjsKey);
+
+// component properties
+interface Props {
+  day: string, // number of day in its month
+  isActive: boolean, // flag showing if the day belongs to active month
+  isSelected: boolean, // flag showing if the day is currently selected by user
+  isToday: boolean, // flag showing if the day is today
+  placeholder: boolean, // flag formating events as placeholder
+  hasEvents: boolean, // if true show event indicator
+  showDetails: boolean, // flag enabling event popups with details
+  popupPosition?: string, // currently supported: right, left, top
+  disabled?: boolean, // flag making this day non-selectable and inactive
+};
+defineProps<Props>();
+
+</script>
+
 <template>
   <div
     class="group/day cursor-pointer px-1 py-2"
@@ -17,27 +39,7 @@
       }"
     >
       {{ dj(day).format('D') }}
-      <div v-if="events" class="absolute -bottom-1 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-teal-600"></div>
+      <div v-if="hasEvents" class="absolute -bottom-1 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-teal-600"></div>
     </div>
   </div>
 </template>
-
-<script setup>
-import { inject } from 'vue';
-import { dayjsKey } from "@/keys";
-
-const dj = inject(dayjsKey);
-
-// component properties
-defineProps({
-  day: String, // number of day in its month
-  isActive: Boolean, // flag showing if the day belongs to active month
-  isSelected: Boolean, // flag showing if the day is currently selected by user
-  isToday: Boolean, // flag showing if the day is today
-  placeholder: Boolean, // flag formating events as placeholder
-  events: Array, // list of events to show on this day or null
-  showDetails: Boolean, // flag enabling event popups with details
-  popupPosition: String, // currently supported: right, left, top
-  disabled: Boolean, // flag making this day non-selectable and inactive
-});
-</script>
