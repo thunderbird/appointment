@@ -86,6 +86,12 @@ describe('Appointment Store', () => {
     expect(apmt.pendingAppointments.length).toBe(1);
   });
 
+  test('timezone', async () => {
+    const apmt = useAppointmentStore();
+    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T09:00:00.000Z');
+  });
+
   test('reset', async () => {
     const apmt = useAppointmentStore();
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
@@ -94,7 +100,7 @@ describe('Appointment Store', () => {
     expect(apmt.isLoaded).toBe(true);
     expect(apmt.appointments.length).toBe(2);
 
-    // Reset the user which should null all user data.
+    // Reset the appointment which should null all appointment data.
     apmt.$reset();
 
     // Ensure our data is null/don't exist
