@@ -1,5 +1,7 @@
 import json
+import time
 
+import sentry_sdk
 from requests_oauthlib import OAuth2Session
 from ...database import models, repo
 
@@ -23,10 +25,26 @@ class ZoomClient:
         self.subscriber_id = None
         self.client = None
 
+    def check_expiry(self, token: dict | None):
+        """Checks expires_at and if expired sets expires_in to a negative number to trigger refresh"""
+        if not token:
+            return token
+
+        expires_at = token.get('expires_at')
+        if expires_at and expires_at <= time.time():
+            token['expires_in'] = -100
+        elif not expires_at:
+            # We shouldn't have to handle this but just in case alert us!
+            sentry_sdk.capture_message("Expires at is missing!")
+        
+        return token
+
     def setup(self, subscriber_id=None, token=None):
         """Setup our oAuth session"""
         if isinstance(token, str):
             token = json.loads(token)
+
+        token = self.check_expiry(token)
 
         self.subscriber_id = subscriber_id
         self.client = OAuth2Session(
