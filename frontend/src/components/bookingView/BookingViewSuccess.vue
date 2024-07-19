@@ -21,6 +21,7 @@
       </div>
     </div>
     <primary-button
+      v-if="!user.exists()"
       class="btn-start mt-12 p-7"
       :label="t('label.startUsingTba')"
       @click="router.push({ name: 'home' })"
@@ -34,6 +35,7 @@ import { inject } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
 
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
 import PrimaryButton from '@/elements/PrimaryButton';
@@ -43,6 +45,7 @@ const { t } = useI18n();
 const router = useRouter();
 
 const dj = inject(dayjsKey);
+const user = useUserStore();
 
 defineProps({
   selectedEvent: Object,
