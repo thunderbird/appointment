@@ -89,7 +89,8 @@ if (useSentry) {
   const effectiveDeviceRes = `${window?.screen?.availWidth ?? -1}x${window?.screen?.availHeight ?? -1}`;
 
   // Native fetch!
-  fetch(`${apiUrl}/page-load`, {
+  const url = apiUrl.endsWith('/') ? `${apiUrl}page-load` : `${apiUrl}/page-load`;
+  fetch(url, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
