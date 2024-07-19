@@ -22,7 +22,7 @@
       <div v-if="!isFinished" class="mb-4 text-center text-sm text-teal-500 underline underline-offset-2">
         {{ t('label.timeZone') }}: {{ dj.tz.guess() }}
       </div>
-      <div v-if="!isFinished && route.name === 'availability'" class="text-center text-sm font-semibold">
+      <div v-if="!isFinished && route.name === 'availability' && requiresConfirmation" class="text-center text-sm font-semibold">
         {{ t('text.disclaimerGABooking') }}
       </div>
       <form v-if="!isFinished" ref="bookingForm" class="my-8 flex flex-col gap-4">

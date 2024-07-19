@@ -32,7 +32,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
       a.active = a.status !== bookingStatus.booked;
       // convert start dates from UTC back to users timezone
       a.slots.forEach((s: Slot) => {
-        s.start = dj(s.start).utc().tz(userStore.data.timezone ?? tzGuess);
+        s.start = dj(s.start).utc(true).tz(userStore.data.timezone ?? tzGuess);
       });
     });
   };

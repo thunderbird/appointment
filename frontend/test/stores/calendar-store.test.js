@@ -83,7 +83,7 @@ describe('Calendar Store', () => {
     expect(calStore.isLoaded).toBe(true);
     expect(calStore.calendars.length).toBe(2);
 
-    // Reset the user which should null all user data.
+    // Reset the calendar which should null all calendar data.
     calStore.$reset();
 
     // Ensure our data is null/don't exist
