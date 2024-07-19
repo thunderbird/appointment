@@ -89,6 +89,9 @@ describe('Appointment Store', () => {
   test('timezone', async () => {
     const apmt = useAppointmentStore();
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    // TODO This check depends on the timzone set in the user store.
+    // If no user timezone is set it defaults to UTC, which is currently the case.
+    // So we might want to adjust the github workflow runner to set a timezone for testing.
     expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T09:00:00.000Z');
   });
 
