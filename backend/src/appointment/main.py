@@ -1,6 +1,7 @@
 """Module: main
 
 Boot application, init database, authenticate user and provide all API endpoints.
+
 """
 
 from sentry_sdk.integrations.fastapi import FastApiIntegration
