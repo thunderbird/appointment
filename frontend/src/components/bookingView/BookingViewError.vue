@@ -7,6 +7,7 @@
     {{ body ?? t('error.generalBookingError') }}
   </div>
   <primary-button
+    v-if="!user.exists()"
     class="btn-start mt-12 p-7"
     :label="t('label.startUsingTba')"
     @click="router.push({ name: 'home' })"
@@ -18,9 +19,11 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
 
 const { t } = useI18n();
 const router = useRouter();
+const user = useUserStore();
 
 defineProps({
   heading: [String, null],
