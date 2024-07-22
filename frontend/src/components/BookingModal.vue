@@ -1,3 +1,76 @@
+<script setup>
+import {
+  inject, computed, reactive, ref, onMounted,
+} from 'vue';
+import { timeFormat } from '@/utils';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+import ArtConfetti from '@/elements/arts/ArtConfetti';
+import PrimaryButton from '@/elements/PrimaryButton';
+import SecondaryButton from '@/elements/SecondaryButton';
+
+// icons
+import { IconX } from '@tabler/icons-vue';
+import { useBookingModalStore } from '@/stores/booking-modal-store';
+import { storeToRefs } from 'pinia';
+import { modalStates } from '@/definitions';
+import { dayjsKey } from '@/keys';
+
+// component constants
+const user = useUserStore();
+const { t } = useI18n();
+const route = useRoute();
+const dj = inject(dayjsKey);
+
+const emit = defineEmits(['book', 'close']);
+
+const props = defineProps({
+  event: Object, // event data to display and book
+  requiresConfirmation: Boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
+});
+
+// Store
+const bookingModalStore = useBookingModalStore();
+const {
+  open, state, stateData, isLoading, hasErrors, isFinished, isEditable,
+} = storeToRefs(bookingModalStore);
+
+// Refs
+
+const attendee = reactive({
+  name: '',
+  email: '',
+  timezone: dj.tz.guess(),
+});
+
+const bookingForm = ref();
+
+// Computed
+
+const time = computed(() => dj(props.event.start).format(`dddd, MMMM D, YYYY ${timeFormat()}`));
+const validAttendee = computed(() => attendee.email.length > 2);
+
+// Functions
+
+/**
+ * Submit the booking details
+ */
+const bookIt = () => {
+  if (bookingForm.value.reportValidity() && validAttendee.value) {
+    state.value = modalStates.loading;
+    emit('book', attendee);
+  }
+};
+
+onMounted(() => {
+  if (user.exists()) {
+    attendee.name = user.data.name;
+    attendee.email = user.data.preferredEmail;
+    attendee.timezone = user.data.timezone;
+  }
+});
+</script>
 <template>
   <div v-if="open">
     <div
@@ -84,77 +157,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import {
-  inject, computed, reactive, ref, onMounted,
-} from 'vue';
-import { timeFormat } from '@/utils';
-import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-import ArtConfetti from '@/elements/arts/ArtConfetti';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
-
-// icons
-import { IconX } from '@tabler/icons-vue';
-import { useBookingModalStore } from '@/stores/booking-modal-store';
-import { storeToRefs } from 'pinia';
-import { modalStates } from '@/definitions';
-import { dayjsKey } from "@/keys";
-
-// component constants
-const user = useUserStore();
-const { t } = useI18n();
-const route = useRoute();
-const dj = inject(dayjsKey);
-
-const emit = defineEmits(['book', 'close']);
-
-const props = defineProps({
-  event: Object, // event data to display and book
-  requiresConfirmation: Boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
-});
-
-// Store
-const bookingModalStore = useBookingModalStore();
-const {
-  open, state, stateData, isLoading, hasErrors, isFinished, isEditable,
-} = storeToRefs(bookingModalStore);
-
-// Refs
-
-const attendee = reactive({
-  name: '',
-  email: '',
-  timezone: dj.tz.guess(),
-});
-
-const bookingForm = ref();
-
-// Computed
-
-const time = computed(() => dj(props.event.start).format(`dddd, MMMM D, YYYY ${timeFormat()}`));
-const validAttendee = computed(() => attendee.email.length > 2);
-
-// Functions
-
-/**
- * Submit the booking details
- */
-const bookIt = () => {
-  if (bookingForm.value.reportValidity() && validAttendee.value) {
-    state.value = modalStates.loading;
-    emit('book', attendee);
-  }
-};
-
-onMounted(() => {
-  if (user.exists()) {
-    attendee.name = user.data.name;
-    attendee.email = user.data.preferredEmail;
-    attendee.timezone = user.data.timezone;
-  }
-});
-</script>

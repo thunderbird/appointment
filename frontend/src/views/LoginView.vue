@@ -102,7 +102,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import PrimaryButton from '@/elements/PrimaryButton';
 import AlertBox from '@/elements/AlertBox';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 // component constants
 const user = useUserStore();
@@ -135,11 +135,16 @@ const goHome = () => {
 const signUp = async () => {
   isLoading.value = true;
   loginError.value = '';
-  const { data } = await call('waiting-list/join').post({
+  const { data, error } = await call('waiting-list/join').post({
     email: username.value,
   }).json();
 
-  if (!data.value) {
+  if (error.value) {
+    const id = data?.value?.detail?.id;
+    if (id === 'RATE_LIMIT_EXCEEDED') {
+      loginError.value = data.value.detail.message;
+    }
+  } else if (!data.value) {
     loginError.value = t('waitingList.signUpAlreadyExists');
   } else {
     showConfirmEmailScreen.value = true;

@@ -38,6 +38,10 @@ We use post-css to enhance our css. Any post-css that isn't in a SFC must be in 
 }
 ```
 
+### Rate limits
+
+We use slowapi for rate limiting. In order for rate limiting to function an api route needs to be have the @limiter decorator below the request decorator, and they need to have `request: Request` as a parameter.
+
 ### Lints and fixes files
 
 Frontend is formatted using ESlint with airbnb rules.
@@ -52,6 +56,7 @@ npm run lint -- --fix
 ```bash
 npm run test
 ```
+
 
 ### Customize configuration
 

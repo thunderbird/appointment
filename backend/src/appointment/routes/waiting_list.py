@@ -1,8 +1,10 @@
 import os
 
 import sentry_sdk
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Request
 from ..database import repo, schemas, models
 from ..dependencies.auth import get_admin_subscriber
 
@@ -10,10 +12,10 @@ from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..tasks.emails import send_confirm_email
 from itsdangerous import URLSafeSerializer, BadSignature
-from secrets import token_bytes
 from enum import Enum
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 class WaitingListAction(Enum):
@@ -22,8 +24,12 @@ class WaitingListAction(Enum):
 
 
 @router.post('/join')
+@limiter.limit("2/minute")
 def join_the_waiting_list(
-    data: schemas.JoinTheWaitingList, background_tasks: BackgroundTasks, db: Session = Depends(get_db)
+    request: Request,
+    data: schemas.JoinTheWaitingList,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
 ):
     """Join the waiting list!"""
     added = repo.invite.add_to_waiting_list(db, data.email)
