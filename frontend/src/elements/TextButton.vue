@@ -54,7 +54,7 @@ const copyToClipboard = async () => {
     <transition>
       <tool-tip v-show="copied" :content="t('info.copiedToClipboard')" />
     </transition>
-    <transition>
+    <transition v-if="tooltip">
       <tool-tip class="w-24" v-show="hover && tooltip && !copied" :content="tooltip" />
     </transition>
   </button>

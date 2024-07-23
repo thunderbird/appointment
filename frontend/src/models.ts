@@ -74,7 +74,7 @@ export type CalendarEvent = {
 };
 
 export type EventPopup = {
-  event: CalendarEvent;
+  event?: CalendarEvent;
   display: string;
   top: string|number;
   left: string|number;

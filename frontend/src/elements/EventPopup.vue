@@ -18,8 +18,8 @@ const dj = inject(dayjsKey);
 
 // component properties
 interface Props {
-  event: CalendarEvent, // event to show details in popup for
-  position: string, // Popup position relative to the trigger element
+  event?: CalendarEvent, // event to show details in popup for
+  position?: string, // Popup position relative to the trigger element
 };
 const props = defineProps<Props>();
 

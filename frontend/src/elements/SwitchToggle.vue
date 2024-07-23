@@ -14,9 +14,9 @@ const emit = defineEmits(['changed']);
 // component properties
 interface Props {
   active: boolean; // initial toggle state
-  disabled: boolean; // flag for making toggle non changable
-  label: string; // input label
-  noLegend: boolean; // hide "on" and "off" labels
+  disabled?: boolean; // flag for making toggle non changable
+  label?: string; // input label
+  noLegend?: boolean; // hide "on" and "off" labels
 };
 const props = defineProps<Props>();
 
