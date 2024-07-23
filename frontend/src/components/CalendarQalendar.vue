@@ -6,7 +6,6 @@ import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
-  appointmentState,
   bookingStatus,
   ColorSchemes,
   dateFormatStrings,
@@ -202,7 +201,7 @@ const calendarEvents = computed(() => {
       customData: {
         attendee: null,
         slot_status: null,
-        booking_status: appointmentState.booked,
+        booking_status: bookingStatus.booked,
         calendar_title: event.calendar_title,
         calendar_color: event.calendar_color,
         duration: event.duration,

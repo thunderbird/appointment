@@ -1,3 +1,13 @@
+<script setup lang="ts">
+// component properties
+interface Props {
+  active: boolean; // indicator for currently active item
+  label: string; // item text label
+  linkName: string; // name of the route link target
+};
+defineProps<Props>();
+</script>
+
 <template>
   <div
     class="group relative flex text-base font-medium"
@@ -15,12 +25,3 @@
     ></div>
   </div>
 </template>
-
-<script setup>
-// component properties
-defineProps({
-  active: Boolean, // indicator for currently active item
-  label: String, // item text label
-  linkName: String, // name of the route link target
-});
-</script>

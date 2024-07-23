@@ -52,7 +52,7 @@ export type Appointment = {
 export type CustomEventData = {
   attendee?: Attendee;
   slot_status: number; // TODO: definitions.bookingStatus
-  booking_status: number; // TODO: definitions.appointmentState
+  booking_status: number; // TODO: definitions.bookingStatus 
   calendar_title: string;
   calendar_color: string;
   duration: number;
@@ -171,6 +171,7 @@ export type Token = {
 
 // Types and aliases used for our custom createFetch API calls and return types
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
+export type Refresh = () => Promise<void>;
 export type BooleanResponse = UseFetchReturn<boolean>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
@@ -187,6 +188,11 @@ export type Time<T> = {
 }
 export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
+
+export type IsoWeekdayOption = {
+  label: string;
+  value: string;
+}
 
 export type Coloring = {
   border?: string;

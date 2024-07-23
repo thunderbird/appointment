@@ -53,7 +53,6 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-vue';
-import { appointmentState } from '@/definitions';
 import { dayjsKey } from "@/keys";
 
 // component constants
@@ -121,10 +120,7 @@ const eventsByDate = (d) => {
     return props.placeholder
       ? events.value[key].filter((e) => dj(e.start).isAfter(dj()))
       : events.value[key].filter(
-        (e) => (dj(e.start).add(e.duration, 'minutes').isAfter(dj()) && e.status === appointmentState.pending)
-            || (e.attendee && e.status === appointmentState.pending)
-            || e.remote
-            || e.preview,
+        (e) => (dj(e.start).add(e.duration, 'minutes').isAfter(dj())) || e.remote || e.preview,
       );
   }
   return [];

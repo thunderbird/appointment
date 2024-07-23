@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, durationHumanizedKey } from '@/keys';
 
 export type IsoWeekday = {
   iso: number,
@@ -42,10 +42,10 @@ export default function useDayJS(app: App<Element>, locale: string) {
   app.provide(dayjsKey, dayjs);
   app.provide('tzGuess', dayjs.tz.guess());
 
-  const hDuration = (m: number): string => ((m < 60)
-    ? dayjs.duration(m, 'minutes').humanize()
-    : dayjs.duration(m / 60, 'hours').humanize());
-  app.provide('hDuration', hDuration);
+  const durationHumanized = (minutes: number): string => ((minutes < 60)
+    ? dayjs.duration(minutes, 'minutes').humanize()
+    : dayjs.duration(minutes / 60, 'hours').humanize());
+  app.provide(durationHumanizedKey, durationHumanized);
 
   // locale aware first day of week
   const firstDayOfWeek = dayjs.localeData().firstDayOfWeek();

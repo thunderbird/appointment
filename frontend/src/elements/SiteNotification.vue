@@ -1,3 +1,14 @@
+<script setup lang="ts">
+import { IconChevronRight } from '@tabler/icons-vue';
+
+// component properties
+interface Props {
+  title: string,
+  actionUrl: string,
+};
+defineProps<Props>();
+</script>
+
 <template>
   <a :href="actionUrl">
     <div
@@ -14,12 +25,3 @@
     </div>
   </a>
 </template>
-
-<script setup>
-import { IconChevronRight } from '@tabler/icons-vue';
-
-defineProps({
-  title: String,
-  actionUrl: String,
-});
-</script>

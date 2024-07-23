@@ -1,3 +1,36 @@
+<script setup lang="ts">
+import { bookingStatus } from '@/definitions';
+import { inject, computed } from 'vue';
+import { keyByValue, timeFormat } from '@/utils';
+import { useI18n } from 'vue-i18n';
+import { Appointment } from '@/models';
+
+// icons
+import {
+  IconBulb,
+  IconCalendar,
+  IconClock,
+} from '@tabler/icons-vue';
+import { dayjsKey, paintBackgroundKey } from "@/keys";
+
+// component constants
+const { t } = useI18n();
+const paintBackground = inject(paintBackgroundKey);
+const dj = inject(dayjsKey);
+
+// component properties
+interface Props {
+  appointment: Appointment; // appointment to show details for
+};
+const props = defineProps<Props>();
+
+// true if an appointment from the past was given
+const isPast = computed(() => props.appointment.slots[0].start < dj());
+
+// true if a pending appointment was given
+const isPending = computed(() => props.appointment.slots[0].booking_status === bookingStatus.requested);
+</script>
+
 <template>
   <div
     class="rounded border-l-8 border-sky-400"
@@ -7,7 +40,7 @@
     }"
     :style="{ borderColor: appointment.calendar_color }"
     @mouseover="el => !isPast ? paintBackground(el, appointment.calendar_color, '22') : null"
-    @mouseout="el => !isPast ? paintBackground(el, appointment.calendar_color, _, true) : null"
+    @mouseout="el => !isPast ? paintBackground(el, appointment.calendar_color, '', true) : null"
   >
     <div
       class="flex h-full flex-col gap-1 rounded-r border-y-2 border-r-2 border-solid border-sky-400 px-4 py-3"
@@ -33,34 +66,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { appointmentState, bookingStatus } from '@/definitions';
-import { inject, computed } from 'vue';
-import { keyByValue, timeFormat } from '@/utils';
-import { useI18n } from 'vue-i18n';
-
-// icons
-import {
-  IconBulb,
-  IconCalendar,
-  IconClock,
-} from '@tabler/icons-vue';
-import { dayjsKey } from "@/keys";
-
-// component constants
-const { t } = useI18n();
-const paintBackground = inject('paintBackground');
-const dj = inject(dayjsKey);
-
-// component properties
-const props = defineProps({
-  appointment: Object, // appointment to show details for
-});
-
-// true if an appointment from the past was given
-const isPast = computed(() => props.appointment.status === appointmentState.past);
-
-// true if a pending appointment was given
-const isPending = computed(() => props.appointment.status === appointmentState.pending);
-</script>

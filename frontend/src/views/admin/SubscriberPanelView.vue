@@ -3,7 +3,7 @@
     <alert-box
       @close="pageNotification = ''"
       v-if="pageNotification"
-      :scheme="alertSchemes.success"
+      :scheme="AlertSchemes.success"
     >
       {{ pageNotification }}
     </alert-box>
@@ -53,8 +53,8 @@
   </div>
 </template>
 
-<script setup>
-import { alertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
+<script setup lang="ts">
+import { AlertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
 import {
   computed, inject, onMounted, ref,
 } from 'vue';
@@ -67,14 +67,14 @@ import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey, callKey } from "@/keys";
 
 const user = useUserStore();
 
 const router = useRouter();
 const { t } = useI18n();
 
-const call = inject('call');
+const call = inject(callKey);
 const dj = inject(dayjsKey);
 
 const subscribers = ref([]);

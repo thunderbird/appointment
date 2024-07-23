@@ -1,20 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { alertSchemes, tableDataType } from '@/definitions';
+import { AlertSchemes, tableDataType } from '@/definitions';
 import DataTable from '@/components/DataTable.vue';
 import { useRouter } from 'vue-router';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey, callKey } from "@/keys";
 
 const router = useRouter();
 const { t } = useI18n();
 
-const call = inject('call');
+const call = inject(callKey);
 const dj = inject(dayjsKey);
 
 const waitingListUsers = ref([]);
@@ -186,7 +186,7 @@ onMounted(async () => {
     <alert-box
       @close="pageNotification = ''"
       v-if="pageNotification"
-      :scheme="alertSchemes.success"
+      :scheme="AlertSchemes.success"
     >
       {{ pageNotification }}
     </alert-box>
@@ -213,4 +213,3 @@ onMounted(async () => {
     <loading-spinner/>
   </div>
 </template>
-

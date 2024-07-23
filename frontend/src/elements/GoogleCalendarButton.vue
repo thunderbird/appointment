@@ -1,3 +1,11 @@
+<script setup lang="ts">
+// component properties
+interface Props {
+  label?: string; // button text
+};
+defineProps<Props>();
+</script>
+
 <template>
   <button
     class="
@@ -25,10 +33,3 @@
     </template>
   </button>
 </template>
-
-<script setup>
-// component properties
-defineProps({
-  label: String, // button text
-});
-</script>

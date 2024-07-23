@@ -88,18 +88,6 @@ export const bookingCalendarViews = {
 };
 
 /**
- * Available appointment states
- * @enum
- * @readonly
- */
-// available appointment views - This doesn't align with anything anymore!
-export const appointmentState = {
-  booked: 1,
-  pending: 2,
-  past: 3,
-};
-
-/**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
  * @enum
  * @readonly
@@ -112,7 +100,9 @@ export const bookingStatus = {
 
 // available appointment views
 export const appointmentViews = {
-  ...appointmentState,
+  booked: 1,
+  pending: 2,
+  past: 3,
   all: 4,
 };
 
@@ -215,11 +205,11 @@ export const modalStates = {
  * @enum
  * @readonly
  */
-export const alertSchemes = {
-  error: 1, // Alert indicates something's gone wrong
-  warning: 2, // Alert indicates something important
-  success: 3, // Alert indicates something's gone right
-  info: 4, // Alert indicates some neutral information
+export enum AlertSchemes {
+  error = 1, // Alert indicates something's gone wrong
+  warning = 2, // Alert indicates something important
+  success = 3, // Alert indicates something's gone right
+  info = 4, // Alert indicates some neutral information
 };
 
 /**
@@ -305,7 +295,6 @@ export const waitingListAction = {
 
 export default {
   subscriberLevels,
-  appointmentState,
   appointmentViews,
   bookingCalendarViews,
   calendarViews,

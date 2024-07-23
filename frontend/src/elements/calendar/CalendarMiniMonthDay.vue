@@ -6,15 +6,15 @@ const dj = inject(dayjsKey);
 
 // component properties
 interface Props {
-  day: string, // number of day in its month
-  isActive: boolean, // flag showing if the day belongs to active month
-  isSelected: boolean, // flag showing if the day is currently selected by user
-  isToday: boolean, // flag showing if the day is today
-  placeholder: boolean, // flag formating events as placeholder
-  hasEvents: boolean, // if true show event indicator
-  showDetails: boolean, // flag enabling event popups with details
-  popupPosition?: string, // currently supported: right, left, top
-  disabled?: boolean, // flag making this day non-selectable and inactive
+  day: string; // number of day in its month
+  isActive: boolean; // flag showing if the day belongs to active month
+  isSelected: boolean; // flag showing if the day is currently selected by user
+  isToday: boolean; // flag showing if the day is today
+  placeholder: boolean; // flag formating events as placeholder
+  hasEvents: boolean; // if true show event indicator
+  showDetails: boolean; // flag enabling event popups with details
+  popupPosition?: string; // currently supported: right, left, top
+  disabled?: boolean; // flag making this day non-selectable and inactive
 };
 defineProps<Props>();
 
