@@ -4,12 +4,13 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AlertSchemes, tableDataType } from '@/definitions';
-import DataTable from '@/components/DataTable.vue';
 import { useRouter } from 'vue-router';
+import { WaitingListEntry, WaitingListResponse, BooleanResponse, Exception } from "@/models";
+import { dayjsKey, callKey } from "@/keys";
+import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
-import { dayjsKey, callKey } from "@/keys";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -17,7 +18,7 @@ const { t } = useI18n();
 const call = inject(callKey);
 const dj = inject(dayjsKey);
 
-const waitingListUsers = ref([]);
+const waitingListUsers = ref<WaitingListEntry[]>([]);
 const displayPage = ref(false);
 const loading = ref(true);
 const pageError = ref('');
@@ -94,6 +95,7 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
+     * TODO: Add types when DataTable.vue is typed
      * @param selectedKey
      * @param mutableDataList
      * @returns {*}
@@ -130,6 +132,7 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
+     * TODO: Add types when DataTable.vue is typed
      * @param selectedKey
      * @param mutableDataList
      * @returns {*}
@@ -149,13 +152,20 @@ const filters = [
     },
   },
 ];
+
+/**
+ * Retrieve waiting list entries
+ */
 const getInvites = async () => {
-  const response = await call('waiting-list/').get().json();
+  const response: WaitingListResponse = await call('waiting-list/').get().json();
   const { data } = response;
 
-  waitingListUsers.value = data.value;
+  waitingListUsers.value = data.value as WaitingListEntry[];
 };
 
+/**
+ * Update list of all existing waiting list entries
+ */
 const refresh = async () => {
   loading.value = true;
   await getInvites();
@@ -163,7 +173,7 @@ const refresh = async () => {
 };
 
 const amIAdmin = async () => {
-  const response = await call('permission-check').post().json();
+  const response: BooleanResponse = await call('permission-check').post().json();
   const { error } = response;
 
   return !error.value;

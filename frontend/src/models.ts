@@ -173,6 +173,16 @@ export type Subscriber = {
   time_deleted?: string;
 }
 
+export type WaitingListEntry = {
+  id: number;
+  email: string;
+  email_verified: boolean;
+  invite_id?: number;
+  invite?: Invite;
+  time_created?: string;
+  time_updated?: string;
+}
+
 export type Signature = {
   url: string;
 };
@@ -204,6 +214,7 @@ export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
+export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
 export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
