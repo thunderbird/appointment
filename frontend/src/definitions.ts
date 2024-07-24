@@ -98,6 +98,14 @@ export const bookingStatus = {
   booked: 3,
 };
 
+/**
+ * Status to indicate if an invite code ist still valid or no longer valid
+ */
+export enum InviteStatus {
+  Active = 1,
+  Revoked = 2,
+};
+
 // available appointment views
 export const appointmentViews = {
   booked: 1,

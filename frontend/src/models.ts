@@ -1,12 +1,13 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
+import { InviteStatus } from './definitions';
 
 export type Attendee = {
   id: number;
   email: string;
   name: string;
   timezone: string;
-}
+};
 
 export type Slot = {
   id: number;
@@ -22,7 +23,7 @@ export type Slot = {
   subscriber_id: number;
   time_updated: string;
   attendee: Attendee;
-}
+};
 
 export type Appointment = {
   id: number;
@@ -133,6 +134,14 @@ export type Schedule = {
   booking_confirmation: boolean;
 };
 
+export type Invite = {
+  subscriber_id?: number;
+  code: string;
+  status: InviteStatus;
+  time_created: string;
+  time_updated: string;
+};
+
 export type User = {
   email: string;
   preferredEmail: string;
@@ -145,7 +154,7 @@ export type User = {
   accessToken: string;
   scheduleLinks: string[];
   isSetup: boolean,
-}
+};
 
 export type Subscriber = {
   username: string;
@@ -161,13 +170,23 @@ export type Subscriber = {
 
 export type Signature = {
   url: string;
-}
+};
 
 export type Error = { error: boolean|string|null };
+export type Exception = {
+  status_code?: number;
+  detail?: { msg: string }[]|ExceptionDetail;
+  headers?: any[];
+};
+export type ExceptionDetail = {
+  id?: string;
+  message?: string;
+  status?: number;
+}
 export type Token = {
   access_token: string;
   token_type: string;
-}
+};
 
 // Types and aliases used for our custom createFetch API calls and return types
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
@@ -179,27 +198,28 @@ export type TokenResponse = UseFetchReturn<Token>;
 export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
+export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
 // Utility types
 export type Time<T> = {
   start: T;
   end: T;
-}
+};
 export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
 
 export type IsoWeekdayOption = {
   label: string;
   value: string;
-}
+};
 
 export type Coloring = {
   border?: string;
   background?: string;
-}
+};
 
 export type HTMLElementEvent = Event & {
   target: HTMLElement;
   currentTarget: HTMLElement;
-}
+};

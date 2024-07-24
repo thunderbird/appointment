@@ -8,8 +8,8 @@ const { t } = useI18n();
 // component properties
 interface Props {
   title?: string; // flag showing this event as busy and non-selectable
-  canClose: boolean; // flag for making this alert closable
-  scheme: AlertSchemes; // flag, are we in month view?
+  canClose?: boolean; // flag for making this alert closable
+  scheme?: AlertSchemes; // flag, are we in month view?
 };
 withDefaults(defineProps<Props>(), {
   canClose: true,
