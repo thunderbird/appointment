@@ -214,10 +214,10 @@ export const modalStates = {
  * @readonly
  */
 export enum AlertSchemes {
-  error = 1, // Alert indicates something's gone wrong
-  warning = 2, // Alert indicates something important
-  success = 3, // Alert indicates something's gone right
-  info = 4, // Alert indicates some neutral information
+  Error = 1, // Alert indicates something's gone wrong
+  Warning = 2, // Alert indicates something important
+  Success = 3, // Alert indicates something's gone right
+  Info = 4, // Alert indicates some neutral information
 };
 
 /**

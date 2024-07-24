@@ -4,18 +4,18 @@
     <div class="text-4xl font-light">{{ t('heading.contactRequest') }}</div>
     <div class="w-full max-w-lg">{{ t('text.contactRequestForm') }}</div>
     <alert-box
-      v-if="sendingState === AlertSchemes.success"
+      v-if="sendingState === AlertSchemes.Success"
       :title="t('label.success')"
       @close="sendingState = 0"
-      :scheme="AlertSchemes.success"
+      :scheme="AlertSchemes.Success"
     >
       {{ t('info.messageWasSent') }}
     </alert-box>
     <alert-box
-      v-if="sendingState === AlertSchemes.error"
+      v-if="sendingState === AlertSchemes.Error"
       :title="t('label.error')"
       @close="sendingState = 0"
-      :scheme="AlertSchemes.error"
+      :scheme="AlertSchemes.Error"
     >
       {{ t('info.messageWasNotSent') }}
     </alert-box>
@@ -82,10 +82,10 @@ const send = async () => {
   }
   const { error, data } = await call('support').post({ topic: topic.value, details: details.value }).json();
   if (!error.value && data.value) {
-    sendingState.value = AlertSchemes.success;
+    sendingState.value = AlertSchemes.Success;
     resetForm();
   } else {
-    sendingState.value = AlertSchemes.error;
+    sendingState.value = AlertSchemes.Error;
   }
 };
 </script>

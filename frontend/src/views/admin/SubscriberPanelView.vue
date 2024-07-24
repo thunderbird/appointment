@@ -3,7 +3,7 @@
     <alert-box
       @close="pageNotification = ''"
       v-if="pageNotification"
-      :scheme="AlertSchemes.success"
+      :scheme="AlertSchemes.Success"
     >
       {{ pageNotification }}
     </alert-box>

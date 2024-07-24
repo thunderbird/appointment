@@ -2,7 +2,7 @@
   <div class="m-8 mt-0 flex w-full flex-col justify-center lg:flex-row">
     <alert-box
       title="Calendar Setup"
-      :scheme="AlertSchemes.warning"
+      :scheme="AlertSchemes.Warning"
       v-if="connectedCalendars.length === 0 && !hideUntilRefreshed"
     >
       <i18n-t keypath="error.noConnectedCalendars" tag="label" for="error.noConnectedCalendars">

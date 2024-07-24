@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full justify-center">
-    <alert-box v-if="pageNotification" @close="pageNotification = ''" :scheme="AlertSchemes.success">
+    <alert-box v-if="pageNotification" @close="pageNotification = ''" :scheme="AlertSchemes.Success">
       {{ pageNotification }}
     </alert-box>
     <alert-box v-if="pageError" @close="pageError = ''">
