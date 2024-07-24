@@ -2,7 +2,7 @@
   <div class="flex flex-col items-center justify-center gap-4">
     <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
       <div>
-        <span class="font-bold">{{ paginatedDataList.length }}</span> {{ dataName }}
+        <span class="font-bold">{{ totalDataLength }}</span> {{ dataName }}
       </div>
       <div v-for="filter in filters" :key="filter.name">
         <label class="flex items-center gap-4 whitespace-nowrap">
