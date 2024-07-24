@@ -157,6 +157,7 @@ export type User = {
 };
 
 export type Subscriber = {
+  id?: number;
   username: string;
   name: string;
   email: string;
@@ -166,6 +167,10 @@ export type Subscriber = {
   avatar_url: string;
   is_setup: boolean;
   schedule_links: string[];
+  secondary_email?: string;
+  invite?: Invite;
+  time_created?: string;
+  time_deleted?: string;
 }
 
 export type Signature = {
@@ -199,6 +204,7 @@ export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
+export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
 // Utility types

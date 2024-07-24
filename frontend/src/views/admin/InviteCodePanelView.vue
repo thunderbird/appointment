@@ -1,55 +1,3 @@
-<template>
-  <div class="flex w-full justify-center">
-    <alert-box v-if="pageNotification" @close="pageNotification = ''" :scheme="AlertSchemes.Success">
-      {{ pageNotification }}
-    </alert-box>
-    <alert-box v-if="pageError" @close="pageError = ''">
-      {{ pageError }}
-    </alert-box>
-  </div>
-  <admin-nav/>
-  <div v-if="displayPage">
-    <data-table
-      data-name="Invite Codes"
-      :allow-multi-select="false"
-      :data-list="filteredInvites"
-      :columns="columns"
-      :filters="filters"
-      :loading="loading"
-      @field-click="(_key, field) => revokeInvite(field.code.value)"
-    >
-      <template v-slot:footer>
-        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
-          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
-            <span>{{ t('label.amountOfCodes') }}</span>
-            <input
-              class="mx-4 w-60 rounded-md text-sm"
-              type="number"
-              v-model="generateCodeAmount"
-              :disabled="loading"
-              enterkeyhint="done"
-              @keyup.enter="generateInvites"
-            />
-          </label>
-          <primary-button
-            class="btn-generate"
-            :disabled="loading"
-            @click="generateInvites"
-            :title="t('label.generate')"
-          >
-            <icon-send/>
-            {{ t('label.generate') }}
-          </primary-button>
-        </div>
-      </template>
-
-    </data-table>
-  </div>
-  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
-    <loading-spinner/>
-  </div>
-</template>
-
 <script setup lang="ts">
 import {
   computed, inject, onMounted, ref,
@@ -274,3 +222,55 @@ onMounted(async () => {
 });
 
 </script>
+
+<template>
+  <div class="flex w-full justify-center">
+    <alert-box v-if="pageNotification" @close="pageNotification = ''" :scheme="AlertSchemes.Success">
+      {{ pageNotification }}
+    </alert-box>
+    <alert-box v-if="pageError" @close="pageError = ''">
+      {{ pageError }}
+    </alert-box>
+  </div>
+  <admin-nav/>
+  <div v-if="displayPage">
+    <data-table
+      data-name="Invite Codes"
+      :allow-multi-select="false"
+      :data-list="filteredInvites"
+      :columns="columns"
+      :filters="filters"
+      :loading="loading"
+      @field-click="(_key, field) => revokeInvite(field.code.value)"
+    >
+      <template v-slot:footer>
+        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
+          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+            <span>{{ t('label.amountOfCodes') }}</span>
+            <input
+              class="mx-4 w-60 rounded-md text-sm"
+              type="number"
+              v-model="generateCodeAmount"
+              :disabled="loading"
+              enterkeyhint="done"
+              @keyup.enter="generateInvites"
+            />
+          </label>
+          <primary-button
+            class="btn-generate"
+            :disabled="loading"
+            @click="generateInvites"
+            :title="t('label.generate')"
+          >
+            <icon-send/>
+            {{ t('label.generate') }}
+          </primary-button>
+        </div>
+      </template>
+
+    </data-table>
+  </div>
+  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
+    <loading-spinner/>
+  </div>
+</template>
