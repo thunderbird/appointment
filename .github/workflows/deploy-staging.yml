@@ -180,6 +180,7 @@ jobs:
         id: get-frontend-resources
         working-directory: ./tofu/environments/stage/services/frontend-infra
         run: |
+          terragrunt init -upgrade
           echo "bucket=$(terragrunt output bucket_name | tr -d '"')" >> $GITHUB_OUTPUT
           echo "distribution=$(terragrunt output cloudfront_id)" >> $GITHUB_OUTPUT
 
