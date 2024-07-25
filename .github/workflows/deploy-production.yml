@@ -110,6 +110,7 @@ jobs:
         id: output-bucket-name
         working-directory: ./tofu/environments/prod/services/frontend-infra
         run: |
+          terragrunt init -upgrade
           output=$(terragrunt output bucket_name | tr -d '"')
           echo bucket=$output >> $GITHUB_OUTPUT
 
@@ -117,6 +118,7 @@ jobs:
         id: output-cloudfront-distro
         working-directory: ./tofu/environments/prod/services/frontend-infra
         run: |
+          terragrunt init -upgrade
           output=$(terragrunt output cloudfront_id)
           echo cloudfront_id=$output >> $GITHUB_OUTPUT
 
