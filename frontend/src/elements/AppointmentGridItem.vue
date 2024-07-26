@@ -40,7 +40,7 @@ const isPending = computed(() => props.appointment.slots[0].booking_status === b
     }"
     :style="{ borderColor: appointment.calendar_color }"
     @mouseover="el => !isPast ? paintBackground(el, appointment.calendar_color, '22') : null"
-    @mouseout="el => !isPast ? paintBackground(el, appointment.calendar_color, '', true) : null"
+    @mouseout="el => !isPast ? paintBackground(el, appointment.calendar_color, undefined, true) : null"
   >
     <div
       class="flex h-full flex-col gap-1 rounded-r border-y-2 border-r-2 border-solid border-sky-400 px-4 py-3"

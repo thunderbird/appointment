@@ -188,16 +188,16 @@ export type Signature = {
 };
 
 export type Error = { error: boolean|string|null };
-export type Exception = {
-  status_code?: number;
-  detail?: { msg: string }[]|ExceptionDetail;
-  headers?: any[];
-};
 export type ExceptionDetail = {
   id?: string;
   message?: string;
   status?: number;
 }
+export type Exception = {
+  status_code?: number;
+  detail?: { msg: string }[]|ExceptionDetail;
+  headers?: any[];
+};
 export type Token = {
   access_token: string;
   token_type: string;
