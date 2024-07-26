@@ -1,3 +1,16 @@
+<script setup lang="ts">
+// icons
+import { IconCheck, IconCopy } from '@tabler/icons-vue';
+
+// component properties
+interface Props {
+  label?: string; // button text
+  icon?: 'copy'|'check'; // optional icon displayed before label
+  waiting?: boolean; // if true, spinning animation is shown instead of label
+};
+defineProps<Props>();
+</script>
+
 <template>
   <button
     class="
@@ -23,18 +36,3 @@
     </template>
   </button>
 </template>
-
-<script setup>
-// icons
-import {
-  IconCheck,
-  IconCopy,
-} from '@tabler/icons-vue';
-
-// component properties
-defineProps({
-  label: String, // button text
-  icon: String, // optional icon displayed before label
-  waiting: Boolean, // if true, spinning animation is shown instead of label
-});
-</script>

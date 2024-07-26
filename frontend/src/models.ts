@@ -1,12 +1,13 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
+import { InviteStatus } from './definitions';
 
 export type Attendee = {
   id: number;
   email: string;
   name: string;
   timezone: string;
-}
+};
 
 export type Slot = {
   id: number;
@@ -22,7 +23,7 @@ export type Slot = {
   subscriber_id: number;
   time_updated: string;
   attendee: Attendee;
-}
+};
 
 export type Appointment = {
   id: number;
@@ -52,7 +53,7 @@ export type Appointment = {
 export type CustomEventData = {
   attendee?: Attendee;
   slot_status: number; // TODO: definitions.bookingStatus
-  booking_status: number; // TODO: definitions.appointmentState
+  booking_status: number; // TODO: definitions.bookingStatus 
   calendar_title: string;
   calendar_color: string;
   duration: number;
@@ -74,7 +75,7 @@ export type CalendarEvent = {
 };
 
 export type EventPopup = {
-  event: CalendarEvent;
+  event?: CalendarEvent;
   display: string;
   top: string|number;
   left: string|number;
@@ -133,6 +134,14 @@ export type Schedule = {
   booking_confirmation: boolean;
 };
 
+export type Invite = {
+  subscriber_id?: number;
+  code: string;
+  status: InviteStatus;
+  time_created: string;
+  time_updated: string;
+};
+
 export type User = {
   email: string;
   preferredEmail: string;
@@ -145,9 +154,10 @@ export type User = {
   accessToken: string;
   scheduleLinks: string[];
   isSetup: boolean,
-}
+};
 
 export type Subscriber = {
+  id?: number;
   username: string;
   name: string;
   email: string;
@@ -157,20 +167,45 @@ export type Subscriber = {
   avatar_url: string;
   is_setup: boolean;
   schedule_links: string[];
+  secondary_email?: string;
+  invite?: Invite;
+  time_created?: string;
+  time_deleted?: string;
+}
+
+export type WaitingListEntry = {
+  id: number;
+  email: string;
+  email_verified: boolean;
+  invite_id?: number;
+  invite?: Invite;
+  time_created?: string;
+  time_updated?: string;
 }
 
 export type Signature = {
   url: string;
-}
+};
 
 export type Error = { error: boolean|string|null };
+export type ExceptionDetail = {
+  id?: string;
+  message?: string;
+  status?: number;
+}
+export type Exception = {
+  status_code?: number;
+  detail?: { msg: string }[]|ExceptionDetail;
+  headers?: any[];
+};
 export type Token = {
   access_token: string;
   token_type: string;
-}
+};
 
 // Types and aliases used for our custom createFetch API calls and return types
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
+export type Refresh = () => Promise<void>;
 export type BooleanResponse = UseFetchReturn<boolean>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
@@ -178,22 +213,30 @@ export type TokenResponse = UseFetchReturn<Token>;
 export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
+export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
+export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
+export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
 // Utility types
 export type Time<T> = {
   start: T;
   end: T;
-}
+};
 export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
+
+export type IsoWeekdayOption = {
+  label: string;
+  value: string;
+};
 
 export type Coloring = {
   border?: string;
   background?: string;
-}
+};
 
 export type HTMLElementEvent = Event & {
   target: HTMLElement;
   currentTarget: HTMLElement;
-}
+};

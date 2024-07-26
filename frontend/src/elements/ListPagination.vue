@@ -1,40 +1,16 @@
-<template>
-  <nav class="flex flex-nowrap items-center gap-2">
-    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'text-gray-500': isFirstPage }">
-      <icon-chevron-left class="stroke-1.5 size-5" />
-    </button>
-    <div
-      v-for="(p, i) in pageCount" :key="i"
-      v-show="showPageItem(p)"
-    >
-      <div v-show="showFirstEllipsis(p)">&hellip;</div>
-      <button
-        class="btn-jump cursor-pointer px-2 py-1"
-        :class="{ 'text-gray-500': (p-1) === currentPage }"
-        v-show="showPageItemLink(p)"
-        @click="goto(p-1)"
-      >
-        {{ p }}
-      </button>
-      <div v-show="showLastEllipsis(p)">&hellip;</div>
-    </div>
-    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'text-gray-500': isLastPage }">
-      <icon-chevron-right class="stroke-1.5 size-5" />
-    </button>
-  </nav>
-</template>
-
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 
 // icons
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
 
 // component properties and emits
-const props = defineProps({
-  listLength: Number, // number of total items in the displayed list
-  pageSize: Number, // number of items per page
-});
+interface Props {
+  listLength: number; // number of total items in the displayed list
+  pageSize: number; // number of items per page
+};
+const props = defineProps<Props>();
+
 const emit = defineEmits(['update']);
 
 const currentPage = ref(0); // index of active page
@@ -72,3 +48,29 @@ const showFirstEllipsis = (p) => pageCount.value >= 6 && currentPage.value > 2 &
 const showPageItemLink = (p) => pageCount.value < 6 || p === 1 || isVisibleInnerPage(p);
 const showLastEllipsis = (p) => pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p === pageCount.value - 1;
 </script>
+
+<template>
+  <nav class="flex flex-nowrap items-center gap-2">
+    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'text-gray-500': isFirstPage }">
+      <icon-chevron-left class="stroke-1.5 size-5" />
+    </button>
+    <div
+      v-for="(p, i) in pageCount" :key="i"
+      v-show="showPageItem(p)"
+    >
+      <div v-show="showFirstEllipsis(p)">&hellip;</div>
+      <button
+        class="btn-jump cursor-pointer px-2 py-1"
+        :class="{ 'text-gray-500': (p-1) === currentPage }"
+        v-show="showPageItemLink(p)"
+        @click="goto(p-1)"
+      >
+        {{ p }}
+      </button>
+      <div v-show="showLastEllipsis(p)">&hellip;</div>
+    </div>
+    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'text-gray-500': isLastPage }">
+      <icon-chevron-right class="stroke-1.5 size-5" />
+    </button>
+  </nav>
+</template>

@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { vOnClickOutside } from '@vueuse/components';
+
+const open = ref(false);
+const toggle = () => { open.value = !open.value; };
+const close = () => { open.value = false; };
+</script>
+
 <template>
   <div class="relative" v-on-click-outside="close">
     <div class="cursor-pointer select-none" @click="toggle">
@@ -10,12 +19,3 @@
     </transition>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { vOnClickOutside } from '@vueuse/components';
-
-const open = ref(false);
-const toggle = () => { open.value = !open.value; };
-const close = () => { open.value = false; };
-</script>

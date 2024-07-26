@@ -1,60 +1,5 @@
-<template>
-  <div class="flex w-full justify-center">
-    <alert-box
-      @close="pageNotification = ''"
-      v-if="pageNotification"
-      :scheme="alertSchemes.success"
-    >
-      {{ pageNotification }}
-    </alert-box>
-    <alert-box
-      @close="pageError = ''"
-      v-if="pageError"
-    >
-      {{ pageError }}
-    </alert-box>
-  </div>
-  <admin-nav/>
-  <div v-if="displayPage">
-    <data-table
-      data-name="Subscribers"
-      :allow-multi-select="false"
-      :data-list="filteredSubscribers"
-      :columns="columns"
-      :filters="filters"
-      :loading="loading"
-      @field-click="(_key, field) => toggleSubscriberState(field.email.value, field.timeDeleted.value === '')"
-    >
-      <template v-slot:footer>
-        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
-          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
-            <span>{{ t('label.enterEmailToInvite') }}</span>
-            <input
-              class="mx-4 w-60 rounded-md text-sm"
-              type="email"
-              placeholder="e.g. test@example.org"
-              v-model="inviteEmail"
-              :disabled="loading"
-              enterkeyhint="send"
-              @keyup.enter="sendInvite"
-            />
-          </label>
-          <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
-            <icon-send />
-            {{ t('label.send') }}
-          </primary-button>
-        </div>
-      </template>
-
-    </data-table>
-  </div>
-  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
-    <loading-spinner/>
-  </div>
-</template>
-
-<script setup>
-import { alertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
+<script setup lang="ts">
+import { AlertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
 import {
   computed, inject, onMounted, ref,
 } from 'vue';
@@ -62,22 +7,23 @@ import { IconSend } from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
+import { Subscriber, SubscriberListResponse, BooleanResponse, Exception } from "@/models";
+import { dayjsKey, callKey } from "@/keys";
 import AdminNav from '@/elements/admin/AdminNav.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
-import { dayjsKey } from "@/keys";
 
 const user = useUserStore();
 
 const router = useRouter();
 const { t } = useI18n();
 
-const call = inject('call');
+const call = inject(callKey);
 const dj = inject(dayjsKey);
 
-const subscribers = ref([]);
+const subscribers = ref<Subscriber[]>([]);
 const displayPage = ref(false);
 const inviteEmail = ref('');
 const loading = ref(true);
@@ -173,6 +119,7 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
+     * TODO: Add types when DataTable.vue is typed
      * @param selectedKey
      * @param mutableDataList
      * @returns {*}
@@ -185,13 +132,20 @@ const filters = [
     },
   },
 ];
+
+/**
+ * Retrieve list of all existing subscribers
+ */
 const getSubscribers = async () => {
-  const response = await call('subscriber/').get().json();
+  const response: SubscriberListResponse = await call('subscriber/').get().json();
   const { data } = response;
 
-  subscribers.value = data.value;
+  subscribers.value = data.value as Subscriber[];
 };
 
+/**
+ * Update list of all existing subscribers
+ */
 const refresh = async () => {
   loading.value = true;
   await getSubscribers();
@@ -201,15 +155,15 @@ const refresh = async () => {
 /**
  * Disables a subscriber
  * @param email
- * @returns {Promise<void>}
+ * @param currentState True if currently enabled (= not deleted)
  */
-const toggleSubscriberState = async (email, currentState) => {
+const toggleSubscriberState = async (email: string, currentState: boolean) => {
   if (!email) {
     return;
   }
 
   const action = currentState ? 'disable' : 'enable';
-  const response = await call(`subscriber/${action}/${email}`).put().json();
+  const response: BooleanResponse = await call(`subscriber/${action}/${email}`).put().json();
   const { data } = response;
 
   if (data.value) {
@@ -217,6 +171,9 @@ const toggleSubscriberState = async (email, currentState) => {
   }
 };
 
+/**
+ * Update list of all existing subscribers
+ */
 const sendInvite = async () => {
   loading.value = true;
   pageError.value = '';
@@ -229,7 +186,7 @@ const sendInvite = async () => {
   const { data, error } = response;
 
   if (error.value) {
-    const errorObj = data.value?.detail;
+    const errorObj = (data.value as Exception)?.detail;
 
     if (!errorObj) {
       pageError.value = t('error.somethingWentWrong');
@@ -248,7 +205,7 @@ const sendInvite = async () => {
 };
 
 const amIAdmin = async () => {
-  const response = await call('permission-check').post().json();
+  const response: BooleanResponse = await call('permission-check').post().json();
   const { error } = response;
 
   return !error.value;
@@ -265,3 +222,58 @@ onMounted(async () => {
 });
 
 </script>
+
+<template>
+  <div class="flex w-full justify-center">
+    <alert-box
+      @close="pageNotification = ''"
+      v-if="pageNotification"
+      :scheme="AlertSchemes.Success"
+    >
+      {{ pageNotification }}
+    </alert-box>
+    <alert-box
+      @close="pageError = ''"
+      v-if="pageError"
+    >
+      {{ pageError }}
+    </alert-box>
+  </div>
+  <admin-nav/>
+  <div v-if="displayPage">
+    <data-table
+      data-name="Subscribers"
+      :allow-multi-select="false"
+      :data-list="filteredSubscribers"
+      :columns="columns"
+      :filters="filters"
+      :loading="loading"
+      @field-click="(_key, field) => toggleSubscriberState(field.email.value, field.timeDeleted.value === '')"
+    >
+      <template v-slot:footer>
+        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
+          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+            <span>{{ t('label.enterEmailToInvite') }}</span>
+            <input
+              class="mx-4 w-60 rounded-md text-sm"
+              type="email"
+              placeholder="e.g. test@example.org"
+              v-model="inviteEmail"
+              :disabled="loading"
+              enterkeyhint="send"
+              @keyup.enter="sendInvite"
+            />
+          </label>
+          <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
+            <icon-send />
+            {{ t('label.send') }}
+          </primary-button>
+        </div>
+      </template>
+
+    </data-table>
+  </div>
+  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
+    <loading-spinner/>
+  </div>
+</template>

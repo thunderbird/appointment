@@ -2,7 +2,7 @@
   <div class="m-8 mt-0 flex w-full flex-col justify-center lg:flex-row">
     <alert-box
       title="Calendar Setup"
-      :scheme="alertSchemes.warning"
+      :scheme="AlertSchemes.Warning"
       v-if="connectedCalendars.length === 0 && !hideUntilRefreshed"
     >
       <i18n-t keypath="error.noConnectedCalendars" tag="label" for="error.noConnectedCalendars">
@@ -12,8 +12,7 @@
   </div>
   <!-- page content -->
   <div
-    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8"
-    :class="{ 'lg:mt-10': tabActive === calendarViews.month }"
+    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8 lg:mt-10"
   >
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
@@ -32,7 +31,7 @@
           :nav="true"
           :events="calendarEvents"
           @prev="dateNav('month', false)"
-          @next="dateNav('month')"
+          @next="dateNav('month', true)"
           @day-selected="selectDate"
         />
         <!-- appointments and events list -->
@@ -69,42 +68,40 @@
   </div>
 </template>
 
-<script setup>
-import { calendarViews, alertSchemes } from '@/definitions';
+<script setup lang="ts">
+import { AlertSchemes } from '@/definitions';
 import {
   ref, inject, computed, onMounted,
 } from 'vue';
+import { ManipulateType } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import AppointmentListItem from '@/elements/AppointmentListItem';
-import CalendarMiniMonth from '@/components/CalendarMiniMonth';
+import AppointmentListItem from '@/elements/AppointmentListItem.vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
+import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { storeToRefs } from 'pinia';
-import CalendarQalendar from '@/components/CalendarQalendar.vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey, callKey, refreshKey } from "@/keys";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject(dayjsKey);
-const call = inject('call');
-const refresh = inject('refresh');
+const call = inject(callKey);
+const refresh = inject(refreshKey);
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
 const { connectedCalendars } = storeToRefs(calendarStore);
 
 // current selected date, if not in route: defaults to now
-const activeDate = ref(route.params.date ? dj(route.params.date) : dj());
+const activeDate = ref(route.params.date ? dj(route.params.date as string) : dj());
 const activeDateRange = computed(() => ({
   start: activeDate.value.startOf('month'),
   end: activeDate.value.endOf('month'),
 }));
-
-// active menu item for tab navigation of calendar views
-const tabActive = calendarViews.month;
 
 // get remote calendar data for current year
 const calendarEvents = ref([]);
@@ -157,10 +154,7 @@ const selectDate = async (d) => {
 };
 
 // date navigation
-const dateNav = (unit = 'auto', forward = true) => {
-  if (unit === 'auto') {
-    unit = Object.keys(calendarViews).find((key) => calendarViews[key] === tabActive.value);
-  }
+const dateNav = (unit: ManipulateType = 'month', forward = true) => {
   if (forward) {
     selectDate(activeDate.value.add(1, unit));
   } else {

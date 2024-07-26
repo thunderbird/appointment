@@ -1,3 +1,34 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ToolTip from '@/elements/ToolTip.vue';
+
+// icons
+import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';
+
+// component constants
+const { t } = useI18n();
+
+// component properties
+interface Props {
+  label?: string; // button text
+  tooltip?: string, // optional tooltip
+  copy?: string; // text to copy to clipboard
+};
+const props = defineProps<Props>();
+
+// state for copy click
+const copied = ref(false);
+const hover = ref(false);
+
+// copy text to clipboard
+const copyToClipboard = async () => {
+  await navigator.clipboard.writeText(props.copy);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 4000);
+};
+</script>
+
 <template>
   <button
     class="
@@ -23,38 +54,8 @@
     <transition>
       <tool-tip v-show="copied" :content="t('info.copiedToClipboard')" />
     </transition>
-    <transition>
+    <transition v-if="tooltip">
       <tool-tip class="w-24" v-show="hover && tooltip && !copied" :content="tooltip" />
     </transition>
   </button>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import ToolTip from '@/elements/ToolTip';
-
-// icons
-import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';
-
-// component constants
-const { t } = useI18n();
-
-// component properties
-const props = defineProps({
-  label: String, // button text
-  tooltip: String, // optional tooltip
-  copy: String, // text to copy to clipboard
-});
-
-// state for copy click
-const copied = ref(false);
-const hover = ref(false);
-
-// copy text to clipboard
-const copyToClipboard = async () => {
-  await navigator.clipboard.writeText(props.copy);
-  copied.value = true;
-  setTimeout(() => { copied.value = false; }, 4000);
-};
-</script>

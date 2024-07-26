@@ -207,10 +207,10 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
-import AppointmentGridItem from '@/elements/AppointmentGridItem';
-import AppointmentModal from '@/components/AppointmentModal';
-import CalendarMiniMonth from '@/components/CalendarMiniMonth';
-import TabBar from '@/components/TabBar';
+import AppointmentGridItem from '@/elements/AppointmentGridItem.vue';
+import AppointmentModal from '@/components/AppointmentModal.vue';
+import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
+import TabBar from '@/components/TabBar.vue';
 
 // icons
 import {
@@ -222,7 +222,7 @@ import {
 } from '@tabler/icons-vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { storeToRefs } from 'pinia';
-import { dayjsKey } from "@/keys";
+import { dayjsKey, paintBackgroundKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
@@ -396,12 +396,12 @@ onMounted(async () => {
 });
 
 // paint elements background or reset it to transparent
-const paintBackground = (element, hexColor, hexTransparency, reset = false) => {
+const paintBackground = (element, hexColor, hexTransparency = 'ff', reset = false) => {
   if (hexColor) {
     element.currentTarget.style.backgroundColor = reset
       ? 'transparent'
       : hexColor + hexTransparency;
   }
 };
-provide('paintBackground', paintBackground);
+provide(paintBackgroundKey, paintBackground);
 </script>

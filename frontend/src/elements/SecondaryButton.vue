@@ -1,3 +1,33 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ToolTip from '@/elements/ToolTip.vue';
+
+// icons
+import { IconClipboardCheck, IconCopy } from '@tabler/icons-vue';
+
+// component constants
+const { t } = useI18n();
+
+// component properties
+interface Props {
+  label?: string; // button text
+  copy?: string; // text to copy to clipboard
+  waiting?: boolean; // if true, spinning animation is shown instead of label
+};
+const props = defineProps<Props>();
+
+// state for copy click
+const copied = ref(false);
+
+// copy text to clipboard
+const copyToClipboard = async () => {
+  await navigator.clipboard.writeText(props.copy);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 4000);
+};
+</script>
+
 <template>
   <button
     class="
@@ -32,32 +62,3 @@
     </transition>
   </button>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import ToolTip from '@/elements/ToolTip';
-
-// icons
-import { IconClipboardCheck, IconCopy } from '@tabler/icons-vue';
-
-// component constants
-const { t } = useI18n();
-
-// component properties
-const props = defineProps({
-  label: String, // button text
-  copy: String, // text to copy to clipboard
-  waiting: Boolean, // if true, spinning animation is shown instead of label
-});
-
-// state for copy click
-const copied = ref(false);
-
-// copy text to clipboard
-const copyToClipboard = async () => {
-  await navigator.clipboard.writeText(props.copy);
-  copied.value = true;
-  setTimeout(() => { copied.value = false; }, 4000);
-};
-</script>

@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import { initials } from '@/utils';
+import { useUserStore } from '@/stores/user-store';
+
+const user = useUserStore();
+</script>
+
 <template>
 <div
   class="flex-center mr-4 size-12 self-center rounded-full bg-white text-lg font-normal text-white"
@@ -11,10 +18,3 @@
   </span>
 </div>
 </template>
-
-<script setup>
-import { initials } from '@/utils';
-import { useUserStore } from '@/stores/user-store';
-
-const user = useUserStore();
-</script>

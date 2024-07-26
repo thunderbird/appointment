@@ -1,3 +1,11 @@
+<script setup lang="ts">
+// component properties
+interface Props {
+  content: string; // Tooltip text
+};
+defineProps<Props>();
+</script>
+
 <template>
   <div
     class="
@@ -11,10 +19,3 @@
     </svg>
   </div>
 </template>
-
-<script setup>
-// component properties
-defineProps({
-  content: String, // Tooltip text
-});
-</script>

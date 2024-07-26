@@ -1,15 +1,20 @@
-<script setup>
-defineProps({
-  options: Array,
-});
-const model = defineModel({ default: [] });
+<script setup lang="ts">
+import { IsoWeekdayOption } from "@/models";
+
+// component properties
+interface Props {
+  options: IsoWeekdayOption[];
+};
+defineProps<Props>();
+
+const model = defineModel<string[]>({ default: [] });
 
 /**
  * Adds or removes the option value from the model.
  * There's probably a better way to do this lol!
  * @param option
  */
-const toggleBubble = (option) => {
+const toggleBubble = (option: IsoWeekdayOption) => {
   // Detect what our current state is
   const val = model.value.indexOf(option.value);
 
@@ -32,7 +37,11 @@ const toggleBubble = (option) => {
 <template>
   <ul>
     <li v-for="option in options" :key="option.value">
-      <button :class="{'selected': model.indexOf(option.value) > -1}" type="button" @click="() => toggleBubble(option)">
+      <button
+        :class="{'selected': model.indexOf(option.value) > -1}"
+        type="button"
+        @click="() => toggleBubble(option)"
+      >
         {{ option.label }}
       </button>
     </li>

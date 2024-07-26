@@ -5,10 +5,10 @@ const { t } = useI18n();
 
 // component properties
 interface Props {
-  isBusy: boolean, // flag showing this event as busy and non-selectable
-  isSelected: boolean, // flag showing if the event is currently selected by user
-  isMonthView: boolean, // flag, are we in month view?
-  label: string, // event title
+  isBusy: boolean; // flag showing this event as busy and non-selectable
+  isSelected: boolean; // flag showing if the event is currently selected by user
+  isMonthView: boolean; // flag, are we in month view?
+  label: string; // event title
 };
 defineProps<Props>();
 

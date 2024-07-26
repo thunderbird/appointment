@@ -1,3 +1,22 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+
+// component properties
+const props = defineProps({
+  placeholder: String, // Textarea placeholder text
+  maxlength: Number, // text to copy to clipboard
+});
+
+// component models
+const details = defineModel<string>();
+
+// handle textarea char limit
+const charCount = computed(() => details.value.length);
+const limitIsClose = computed(() => charCount.value >= props.maxlength * 0.92);
+const limitIsReached = computed(() => charCount.value >= props.maxlength);
+
+</script>
+
 <template>
   <div class="relative">
     <textarea
@@ -18,22 +37,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { computed } from 'vue';
-
-// component properties
-const props = defineProps({
-  placeholder: String, // Textarea placeholder text
-  maxlength: Number, // text to copy to clipboard
-});
-
-// component models
-const details = defineModel();
-
-// handle textarea char limit
-const charCount = computed(() => details.value.length);
-const limitIsClose = computed(() => charCount.value >= props.maxlength * 0.92);
-const limitIsReached = computed(() => charCount.value >= props.maxlength);
-
-</script>

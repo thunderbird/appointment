@@ -4,18 +4,18 @@
     <div class="text-4xl font-light">{{ t('heading.contactRequest') }}</div>
     <div class="w-full max-w-lg">{{ t('text.contactRequestForm') }}</div>
     <alert-box
-      v-if="sendingState === alertSchemes.success"
+      v-if="sendingState === AlertSchemes.Success"
       :title="t('label.success')"
       @close="sendingState = 0"
-      :scheme="alertSchemes.success"
+      :scheme="AlertSchemes.Success"
     >
       {{ t('info.messageWasSent') }}
     </alert-box>
     <alert-box
-      v-if="sendingState === alertSchemes.error"
+      v-if="sendingState === AlertSchemes.Error"
       :title="t('label.error')"
       @close="sendingState = 0"
-      :scheme="alertSchemes.error"
+      :scheme="AlertSchemes.Error"
     >
       {{ t('info.messageWasNotSent') }}
     </alert-box>
@@ -44,12 +44,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { alertSchemes } from '@/definitions';
-import PrimaryButton from '@/elements/PrimaryButton';
+import { AlertSchemes } from '@/definitions';
+import { callKey } from '@/keys';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import TextInput from '@/elements/TextInput.vue';
 
@@ -59,7 +60,7 @@ import { IconSend } from '@tabler/icons-vue';
 // component constants
 const user = useUserStore();
 const { t } = useI18n();
-const call = inject('call');
+const call = inject(callKey);
 
 // form data
 const form = ref(null);
@@ -81,10 +82,10 @@ const send = async () => {
   }
   const { error, data } = await call('support').post({ topic: topic.value, details: details.value }).json();
   if (!error.value && data.value) {
-    sendingState.value = alertSchemes.success;
+    sendingState.value = AlertSchemes.Success;
     resetForm();
   } else {
-    sendingState.value = alertSchemes.error;
+    sendingState.value = AlertSchemes.Error;
   }
 };
 </script>

@@ -7,7 +7,7 @@ import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview.vue';
 import CalendarEventRemote from '@/elements/calendar/CalendarEventRemote.vue';
 import CalendarEventScheduled from '@/elements/calendar/CalendarEventScheduled.vue';
 import EventPopup from '@/elements/EventPopup.vue';
-import { CalendarEvent } from "@/models";
+import { CalendarEvent, EventPopup as EventPopupType } from "@/models";
 import { dayjsKey } from "@/keys";
 
 const dj = inject(dayjsKey);
@@ -37,7 +37,7 @@ const isBusy = computed(() => eventData.slot_status === bookingStatus.booked);
 const emit = defineEmits(['eventSelected']);
 
 // event details
-const popup = ref({ ...initialEventPopupData });
+const popup = ref<EventPopupType>({ ...initialEventPopupData });
 const resetPopup = () => {
   popup.value = { ...initialEventPopupData };
 };
@@ -104,7 +104,7 @@ const formattedTimeRange = (eventObj: CalendarEvent) => {
         display: popup.display,
         top: popup.top,
         left: popup.left,
-        right: popup.right,
+        right: popup.right ?? 'initial',
       }"
       :event="popup.event"
       :position="popupPosition"
