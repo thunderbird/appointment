@@ -164,9 +164,14 @@ class Subscriber(HasSoftDelete, Base):
     @property
     def unique_hash(self):
         """Retrieve the unique hash for the subscriber"""
-        fxa_id = self.get_external_connection(type=ExternalConnectionType.fxa).type_id
+        fxa = self.get_external_connection(type=ExternalConnectionType.fxa)
+        # If we somehow don't have a fxa connection, use id.
+        if fxa is None:
+            id = self.id
+        else:
+            id = fxa.type_id
         hash_instance = hashlib.sha3_256()
-        hash_instance.update(str(fxa_id).encode('utf-8'))
+        hash_instance.update(str(id).encode('utf-8'))
         return hash_instance.hexdigest()
 
 
