@@ -18,6 +18,7 @@ const initialUserObject = {
   accessToken: null,
   scheduleLinks: [],
   isSetup: false,
+  uniqueHash: null,
 } as User;
 
 export const useUserStore = defineStore('user', () => {
@@ -55,6 +56,7 @@ export const useUserStore = defineStore('user', () => {
       avatarUrl: subscriber.avatar_url,
       isSetup: subscriber.is_setup,
       scheduleLinks: subscriber.schedule_links,
+      uniqueHash: subscriber.unique_hash,
     };
   };
 

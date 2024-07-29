@@ -40,7 +40,7 @@ const onSubmit = async () => {
   // Clear the FTUE flow
   window.localStorage?.removeItem('tba/ftue');
 
-  await nextStep();
+  await nextStep(call);
   // Yeet them to calendar!
   window.location = '/calendar';
 };

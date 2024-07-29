@@ -280,6 +280,7 @@ class Subscriber(SubscriberAuth):
 
 
 class SubscriberMeOut(SubscriberBase):
+    unique_hash: Optional[str] = None
     schedule_links: list[str] = []
 
 
@@ -432,4 +433,9 @@ class PageLoadIn(BaseModel):
     user_agent: Optional[str]
     locale: Optional[str]
     theme: Optional[str]
+
+
+class FTUEStepIn(BaseModel):
+    step_level: int
+    step_name: str
 

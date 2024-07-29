@@ -307,7 +307,8 @@ def me(
         timezone=subscriber.timezone,
         avatar_url=subscriber.avatar_url,
         is_setup=subscriber.is_setup,
-        schedule_links=schedule_links_by_subscriber(db, subscriber)
+        schedule_links=schedule_links_by_subscriber(db, subscriber),
+        unique_hash=subscriber.unique_hash
     )
 
 

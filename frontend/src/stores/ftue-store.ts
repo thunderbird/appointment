@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, defineAsyncComponent } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
 import { ftueStep } from '@/definitions';
+import { Fetch } from '@/models';
 
 const initialObject = {
   // First step
@@ -22,7 +23,6 @@ export const useFTUEStore = defineStore('FTUE', () => {
    *   previous: null|ftueStep,
    *   next: null|ftueStep,
    *   title: string,
-   *   component: ComponentPublicInstance,
    * }}
    */
   const stepList = {
@@ -68,10 +68,15 @@ export const useFTUEStore = defineStore('FTUE', () => {
     warningMessage.value = null;
   };
 
-  const nextStep = async () => {
+  const nextStep = async (call: Fetch) => {
     if (hasNextStep.value) {
       clearMessages();
       data.value.step = stepList[data.value.step].next;
+
+      call('metrics/ftue-step').post({
+        step_level: data.value.step,
+        step_name: stepList[data.value.step].title.replace('ftue.steps.', ''),
+      });
     }
   };
 
@@ -89,6 +94,16 @@ export const useFTUEStore = defineStore('FTUE', () => {
   };
 
   return {
-    data, nextStep, previousStep, currentStep, hasNextStep, hasPreviousStep, stepTitle, $reset, infoMessage, errorMessage, warningMessage,
+    data,
+    nextStep,
+    previousStep,
+    currentStep,
+    hasNextStep,
+    hasPreviousStep,
+    stepTitle,
+    $reset,
+    infoMessage,
+    errorMessage,
+    warningMessage,
   };
 });

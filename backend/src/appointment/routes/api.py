@@ -51,16 +51,6 @@ def health(db: Session = Depends(get_db)):
     return JSONResponse(l10n('health-ok'), status_code=200)
 
 
-@router.post('/page-load')
-def page_load(data: schemas.PageLoadIn):
-    if os.getenv('SENTRY_DSN') == '' or os.getenv('SENTRY_DSN') is None:
-        return True
-
-    metrics.increment('page_load', 1, tags=data.model_dump())
-
-    return True
-
-
 @router.put('/me', response_model=schemas.SubscriberMeOut)
 def update_me(
     data: schemas.SubscriberIn,
@@ -81,7 +71,8 @@ def update_me(
         timezone=me.timezone,
         is_setup=me.is_setup,
         avatar_url=me.avatar_url,
-        schedule_links=schedule_links_by_subscriber(db, subscriber)
+        schedule_links=schedule_links_by_subscriber(db, subscriber),
+        unique_hash=me.unique_hash
     )
 
 

@@ -31,7 +31,9 @@
 
 <script setup>
 import { createFetch } from '@vueuse/core';
-import { inject, provide, computed } from 'vue';
+import {
+  inject, provide, computed, onMounted,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import NavBar from '@/components/NavBar';
 import TitleBar from '@/components/TitleBar';
@@ -39,6 +41,7 @@ import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification';
 import { useSiteNotificationStore } from '@/stores/alert-store';
 import { storeToRefs } from 'pinia';
+import { getPreferredTheme } from '@/utils';
 
 // stores
 import { useUserStore } from '@/stores/user-store';
@@ -47,7 +50,9 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-import { callKey, refreshKey } from '@/keys';
+import { callKey, refreshKey, usePosthogKey } from '@/keys';
+import UAParser from 'ua-parser-js';
+import posthog from 'posthog-js';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
@@ -164,8 +169,47 @@ const getDbData = async () => {
   }
 };
 
+const onPageLoad = async () => {
+  /**
+   * Metric collection for development purposes.
+   * This data will be used to help guide development, design, and user experience decisions.
+   */
+  const parser = new UAParser(navigator.userAgent);
+  const browser = parser.getBrowser();
+  const os = parser.getOS();
+  const device = parser.getDevice();
+  const deviceRes = `${window?.screen?.width ?? -1}x${window?.screen?.height ?? -1}`;
+  const effectiveDeviceRes = `${window?.screen?.availWidth ?? -1}x${window?.screen?.availHeight ?? -1}`;
+
+  const response = await call('metrics/page-load').post({
+    browser: browser.name,
+    browser_version: `${browser.name}:${browser.version}`,
+    os: os.name,
+    os_version: `${os.name}:${os.version}`,
+    device: device.model,
+    device_model: `${device.vendor}:${device.model}`,
+    resolution: deviceRes,
+    effective_resolution: effectiveDeviceRes,
+    user_agent: navigator.userAgent,
+    locale: localStorage?.getItem('locale') ?? navigator.language,
+    theme: getPreferredTheme(),
+  });
+};
+
 // Deprecated - Please use refreshKey, as it's typed!
 provide('refresh', getDbData);
 // provide refresh functions for components
 provide(refreshKey, getDbData);
+
+onMounted(async () => {
+  const usePosthog = inject(usePosthogKey);
+  if (isAuthenticated.value) {
+    if (usePosthog) {
+      const profile = useUserStore();
+      posthog.identify(profile.data.uniqueHash);
+    }
+    onPageLoad();
+  }
+});
+
 </script>
