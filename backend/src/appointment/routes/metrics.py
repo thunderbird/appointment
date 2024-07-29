@@ -32,12 +32,10 @@ def page_load(
         'theme': data.theme,
     }
     posthog.set(distinct_id=subscriber.unique_hash, properties={
-        'apmt.user': {
-            'locale': data.locale,
-            'theme': data.theme,
-            'screen': data.resolution,
-            'ftue_max_level': subscriber.ftue_level
-        }
+        'apmt.user.locale': data.locale,
+        'apmt.user.theme': data.theme,
+        'apmt.user.screen': data.resolution,
+        'apmt.user.ftue_max_level': subscriber.ftue_level
     })
     posthog.capture(distinct_id=subscriber.unique_hash, event='page.loaded', properties=payload)
 
@@ -52,8 +50,6 @@ def ftue_step(
     subscriber: Subscriber | None = Depends(get_subscriber),
 ):
     posthog.set(distinct_id=subscriber.unique_hash, properties={
-        'apmt.ftue': {
-            'step.name': data.step_name,
-            'step.level': data.step_level,
-        }
+        'apmt.ftue.step.name': data.step_name,
+        'apmt.ftue.step.level': data.step_level
     })
