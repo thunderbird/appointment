@@ -33,10 +33,10 @@ def page_load(
     }
     posthog.set(distinct_id=subscriber.unique_hash, properties={
         'apmt.user': {
-            'apmt.locale': data.locale,
-            'apmt.theme': data.theme,
-            'apmt.screen': data.resolution,
-            'apmt.ftue_max_level': subscriber.ftue_level
+            'locale': data.locale,
+            'theme': data.theme,
+            'screen': data.resolution,
+            'ftue_max_level': subscriber.ftue_level
         }
     })
     posthog.capture(distinct_id=subscriber.unique_hash, event='page.loaded', properties=payload)
