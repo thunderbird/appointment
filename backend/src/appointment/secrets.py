@@ -73,3 +73,7 @@ def normalize_secrets():
         os.environ['FXA_CALLBACK'] = secrets.get('callback_url')
         os.environ['FXA_ALLOW_LIST'] = secrets.get('allow_list')
         os.environ['APP_ADMIN_ALLOW_LIST'] = secrets.get('admin_list')
+        # Need to stuff these somewhere
+        os.environ['POSTHOG_PROJECT_KEY'] = secrets.get('posthog_project_key')
+        os.environ['POSTHOT_HOST'] = secrets.get('posthog_host')
+
