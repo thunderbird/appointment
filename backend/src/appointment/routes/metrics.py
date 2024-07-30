@@ -46,10 +46,10 @@ def page_load(
     }
 
     if not subscriber:
-        sauce = '-'.join([request.client.host, data.browser_version, data.os_version])
+        anon_id = '-'.join([request.client.host, data.browser_version, data.os_version])
 
         hash_instance = hashlib.sha3_256()
-        hash_instance.update(sauce.encode('utf-8'))
+        hash_instance.update(anon_id.encode('utf-8'))
         distinct_id = f'anon-{hash_instance.hexdigest()}'
     else:
         distinct_id = subscriber.unique_hash
