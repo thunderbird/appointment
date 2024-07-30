@@ -193,7 +193,10 @@ const onPageLoad = async () => {
     user_agent: navigator.userAgent,
     locale: localStorage?.getItem('locale') ?? navigator.language,
     theme: getPreferredTheme(),
-  });
+  }).json();
+
+  const { data } = response;
+  return data.value?.id ?? false;
 };
 
 // Deprecated - Please use refreshKey, as it's typed!
@@ -203,12 +206,13 @@ provide(refreshKey, getDbData);
 
 onMounted(async () => {
   const usePosthog = inject(usePosthogKey);
-  if (isAuthenticated.value) {
-    if (usePosthog) {
-      const profile = useUserStore();
-      posthog.identify(profile.data.uniqueHash);
-    }
-    onPageLoad();
+  const id = await onPageLoad();
+
+  if (usePosthog && isAuthenticated.value) {
+    const profile = useUserStore();
+    posthog.identify(profile.data.uniqueHash);
+  } else if (usePosthog && id) {
+    posthog.identify(id);
   }
 });
 

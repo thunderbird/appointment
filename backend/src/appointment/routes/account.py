@@ -2,6 +2,7 @@ import os
 from collections import defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException
+from posthog import Posthog
 
 from ..controller import data
 from sqlalchemy.orm import Session
@@ -15,6 +16,7 @@ from ..database import schemas
 
 from fastapi.responses import StreamingResponse
 
+from ..dependencies.metrics import get_posthog
 from ..exceptions.account_api import AccountDeletionException
 
 router = APIRouter()
@@ -49,7 +51,7 @@ def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depend
 
 
 @router.delete('/delete')
-def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), posthog: Posthog = Depends(get_posthog)):
     """Delete your account and all the data associated with it forever!"""
     try:
         return data.delete_account(db, subscriber)

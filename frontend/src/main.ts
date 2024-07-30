@@ -67,7 +67,12 @@ if (useSentry) {
 }
 
 if (usePosthog) {
-  posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, { api_host: import.meta.env.VITE_POSTHOG_HOST, person_profiles: 'identified_only' });
+  posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
+    api_host: import.meta.env.VITE_POSTHOG_HOST,
+    person_profiles: 'identified_only',
+    persistence: 'memory',
+
+  });
 }
 
 const pinia = createPinia();

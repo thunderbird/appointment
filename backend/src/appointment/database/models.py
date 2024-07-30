@@ -161,7 +161,7 @@ class Subscriber(HasSoftDelete, Base):
         """Has the user been through the First Time User Experience?"""
         return self.ftue_level > 0
 
-    @property
+    @cached_property
     def unique_hash(self):
         """Retrieve the unique hash for the subscriber"""
         fxa = self.get_external_connection(type=ExternalConnectionType.fxa)

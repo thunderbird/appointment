@@ -2,7 +2,7 @@ import os
 from typing import Annotated
 
 import sentry_sdk
-from fastapi import Depends, Body
+from fastapi import Depends, Body, Request, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
@@ -67,6 +67,27 @@ def get_subscriber(
         )
 
     return user
+
+
+async def get_subscriber_or_none(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Retrieve the subscriber or return None. This does not automatically error out like the other deps"""
+    try:
+        token: str = await oauth2_scheme(request)
+        subscriber = get_subscriber(token, db)
+    except InvalidTokenException:
+        return None
+    except HTTPException:
+        return None
+    except Exception as ex:
+        # Catch any un-expected exceptions
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_exception(ex)
+        return None
+
+    return subscriber
 
 
 def get_admin_subscriber(
