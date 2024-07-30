@@ -300,6 +300,9 @@ const dayBoundary = computed(() => {
   };
 });
 
+// For now we only support English and German
+const locale = getLocale();
+
 /**
  * Calendar Config Object
  */
@@ -308,7 +311,7 @@ const config = ref({
     showEventsOnMobileView: false,
   },
   week: {
-    startsOn: 'sunday',
+    startsOn: locale === 'de' ? 'monday' : 'sunday',
   },
   style: {
     // Just the pre-calculated list from tailwind, could use some fine-tuning.
@@ -334,13 +337,8 @@ const config = ref({
     // We roll our own
     isDisabled: true,
   },
+  locale: locale === 'de' ? 'de-DE' : 'en-US'
 });
-
-// We only support two locales right now so just stick this in.
-const locale = getLocale();
-if (locale) {
-  config.value.locale = locale === 'de' ? 'de-DE' : 'en-US';
-}
 
 /**
  * Qalendar's selectedDate is only set on init and never updated. So we have to poke at their internals...
