@@ -1,6 +1,6 @@
 <script setup>
 import {
-  ref, computed, inject, toRefs, watch,
+  ref, computed, inject, toRefs, watch, onMounted
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
@@ -274,7 +274,7 @@ const calendarEvents = computed(() => {
 });
 
 /**
- * Calculate the start and end times, and then space them our by 2 hours for style!
+ * Calculate the start and end times, and then space them out by 2 hours for style!
  * @type {ComputedRef<TimeNumeric>}
  */
 const dayBoundary = computed(() => {
@@ -332,7 +332,10 @@ const config = ref({
     length: timeSlotDuration.value, // Accepts [15, 30, 60]
     height: timeSlotHeight.value, // pixel height of each length
   },
-  dayBoundaries: dayBoundary,
+  dayBoundaries: {
+    start: dayBoundary.value.start,
+    end: dayBoundary.value.end
+  },
   eventDialog: {
     // We roll our own
     isDisabled: true,
@@ -358,6 +361,7 @@ watch(dayBoundary, () => {
     return;
   }
 
+  // TODO: This does update the boundary values, but does NOT update the container height!
   qalendarRef.value.time.DAY_START = dayBoundary.value.start * 100;
   qalendarRef.value.time.DAY_END = dayBoundary.value.end * 100;
 });
@@ -376,7 +380,6 @@ watch(route, () => {
 </script>
 <template>
   <div
-    class="w-full"
     :style="{'color-scheme': preferredTheme === ColorSchemes.Dark ? 'dark' : null}"
     :class="{'is-light-mode': preferredTheme === ColorSchemes.Light}"
   >
