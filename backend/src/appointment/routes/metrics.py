@@ -48,7 +48,7 @@ def page_load(
     if not subscriber:
         anon_id = '-'.join([request.client.host, data.browser_version, data.os_version])
 
-        hash_instance = hashlib.sha3_256()
+        hash_instance = hashlib.sha256()
         hash_instance.update(anon_id.encode('utf-8'))
         distinct_id = f'anon-{hash_instance.hexdigest()}'
     else:

@@ -170,7 +170,7 @@ class Subscriber(HasSoftDelete, Base):
             id = self.id
         else:
             id = fxa.type_id
-        hash_instance = hashlib.sha3_256()
+        hash_instance = hashlib.sha256()
         hash_instance.update(str(id).encode('utf-8'))
         return hash_instance.hexdigest()
 
