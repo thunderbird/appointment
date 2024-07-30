@@ -224,6 +224,8 @@ jobs:
           terragrunt init -upgrade
           cd ../../data-store/cache
           terragrunt init -upgrade
+          cd ../../services/backend-infra
+          terragrunt init -upgrade
 
       - name: Deploy Backend
         working-directory: ./tofu/environments/prod/services/backend-service
