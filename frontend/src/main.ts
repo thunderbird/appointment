@@ -71,7 +71,9 @@ if (usePosthog) {
     api_host: import.meta.env.VITE_POSTHOG_HOST,
     person_profiles: 'identified_only',
     persistence: 'memory',
-
+  });
+  posthog.register({
+    service: 'apmt',
   });
 }
 

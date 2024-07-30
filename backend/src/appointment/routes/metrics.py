@@ -11,6 +11,7 @@ from ..dependencies.metrics import get_posthog
 
 router = APIRouter()
 
+
 def get_api_url(request: Request):
     return f'{request.url.scheme}://{request.headers.get("Host")}/api/v1{request.url.path}'
 
