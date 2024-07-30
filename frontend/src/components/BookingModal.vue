@@ -20,7 +20,7 @@
         <div>{{ time }}</div>
       </div>
       <div v-if="!isFinished" class="mb-4 text-center text-sm text-teal-500 underline underline-offset-2">
-        {{ t('label.timeZone') }}: {{ dj.tz.guess() }}
+        {{ t('label.timeZone') }}: {{ attendee?.timezone ?? dj.tz.guess() }}
       </div>
       <div v-if="!isFinished && route.name === 'availability' && requiresConfirmation" class="text-center text-sm font-semibold">
         {{ t('text.disclaimerGABooking') }}
@@ -102,7 +102,7 @@ import { IconX } from '@tabler/icons-vue';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
 import { storeToRefs } from 'pinia';
 import { modalStates } from '@/definitions';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 // component constants
 const user = useUserStore();
@@ -154,7 +154,9 @@ onMounted(() => {
   if (user.exists()) {
     attendee.name = user.data.name;
     attendee.email = user.data.preferredEmail;
-    attendee.timezone = user.data.timezone;
+    if (user.data.timezone !== null) {
+      attendee.timezone = user.data.timezone;
+    }
   }
 });
 </script>
