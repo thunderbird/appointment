@@ -146,7 +146,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Deploy frontend to S3
-        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-prod-iac.outputs.bucket }}"
+        run: aws s3 sync ./dist "s3://${{ needs.deploy-prod-iac.outputs.bucket }}"
 
       - name: Invalidate Cloudfront cache
         run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-prod-iac.outputs.cloudfront_id }} --paths "/*"
