@@ -43,6 +43,7 @@ def page_load(
         'locale': data.locale,
         'theme': data.theme,
         '$current_url': current_url,
+        'service': 'apmt',
     }
 
     if not subscriber:
@@ -89,5 +90,6 @@ def ftue_step(
     posthog.set(distinct_id=subscriber.unique_hash, properties=payload)
     posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.ftue.step', properties={
         'step_name': data.step_name,
-        'step_level': data.step_level
+        'step_level': data.step_level,
+        'service': 'apmt',
     })
