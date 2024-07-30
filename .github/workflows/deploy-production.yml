@@ -72,7 +72,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan  # will be re-enabled once release workflow is tested
+          terragrunt apply tfplan
 
       - name: backend-infra
         working-directory: ./tofu/environments/prod/services/backend-infra
@@ -80,7 +80,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+          terragrunt apply tfplan
 
       - name: cache
         working-directory: ./tofu/environments/prod/data-store/cache
@@ -88,7 +88,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+          terragrunt apply tfplan
 
       - name: database
         working-directory: ./tofu/environments/prod/data-store/database
@@ -96,7 +96,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+          terragrunt apply tfplan
           
       - name: frontend-infra
         working-directory: ./tofu/environments/prod/services/frontend-infra
@@ -104,7 +104,7 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -out tfplan
-#          terragrunt apply tfplan # will be re-enabled once release workflow is tested
+          terragrunt apply tfplan
 
       - name: output-bucket-name
         id: output-bucket-name
@@ -145,9 +145,8 @@ jobs:
           role-session-name: Appointment_GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ vars.AWS_REGION }}
 
-# will be re-enabled once release workflow is tested
-#      - name: Deploy frontend to S3
-#        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-prod-iac.outputs.bucket }}"
+      - name: Deploy frontend to S3
+        run: aws s3 sync ./frontend/frontend/dist "s3://${{ needs.deploy-prod-iac.outputs.bucket }}"
 
       - name: Invalidate Cloudfront cache
         run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-prod-iac.outputs.cloudfront_id }} --paths "/*"
@@ -233,6 +232,4 @@ jobs:
           terragrunt init -upgrade
           terragrunt validate
           terragrunt plan -var "image=${{ steps.get_ecr_tag.outputs.ecr_tag }}" -out tfplan
-          cat tfplan
-  #        terragrunt apply tfplan # will be re-enabled once release workflow is tested
-
+          terragrunt apply tfplan
