@@ -37,7 +37,7 @@ def page_load(
         'apmt.user.screen': data.resolution,
         'apmt.user.ftue_max_level': subscriber.ftue_level
     })
-    posthog.capture(distinct_id=subscriber.unique_hash, event='page.loaded', properties=payload)
+    posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.page.loaded', properties=payload)
 
     return True
 
@@ -49,7 +49,12 @@ def ftue_step(
     posthog: Posthog | None = Depends(get_posthog),
     subscriber: Subscriber | None = Depends(get_subscriber),
 ):
-    posthog.set(distinct_id=subscriber.unique_hash, properties={
+    payload = {
         'apmt.ftue.step.name': data.step_name,
         'apmt.ftue.step.level': data.step_level
+    }
+    posthog.set(distinct_id=subscriber.unique_hash, properties=payload)
+    posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.ftue.step', properties={
+        'step_name': data.step_name,
+        'step_level': data.step_level
     })
