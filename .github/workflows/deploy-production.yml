@@ -222,7 +222,7 @@ jobs:
           terragrunt init -upgrade
           cd ../../data-store/database
           terragrunt init -upgrade
-          cd ../data-store/cache
+          cd ../../data-store/cache
           terragrunt init -upgrade
 
       - name: Deploy Backend
