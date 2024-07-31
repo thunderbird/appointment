@@ -115,8 +115,8 @@ const emit = defineEmits(['book', 'close']);
 
 // component properties
 interface Props {
-  event: Appointment & Slot, // event data to display and book
-  requiresConfirmation: boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
+  event?: Appointment & Slot, // event data to display and book
+  requiresConfirmation?: boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
 };
 const props = defineProps<Props>();
 
