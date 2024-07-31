@@ -15,7 +15,9 @@ invite-mail-html = {-brand-footer}
 
 ## Confirm Appointment
 
-confirm-mail-subject = Confirm booking request from {-brand-name}
+# Variables
+# $attendee_name (String) - Name of the person who requested the appointment
+confirm-mail-subject = Action Required: Confirm booking request from { $attendee_name }
 # Variables:
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment

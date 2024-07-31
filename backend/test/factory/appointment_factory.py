@@ -55,7 +55,7 @@ def make_appointment(with_db, make_caldav_calendar, make_appointment_slot):
 
             if not factory_has_value(slots):
                 make_appointment_slot(appointment_id=appointment.id)
-            else:
+            elif slots is not None:
                 repo.slot.add_for_appointment(db, slots, appointment.id)
 
             # Refresh our appointment now that is has slot data
