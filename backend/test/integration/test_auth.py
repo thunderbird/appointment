@@ -62,7 +62,7 @@ class TestPassword:
         # Test good credentials
         response = with_client.post(
             '/token',
-            data={'username': subscriber.username, 'password': password},
+            data={'username': subscriber.email, 'password': password},
         )
         assert response.status_code == 200, response.text
         data = response.json()
@@ -72,14 +72,14 @@ class TestPassword:
         # Test bad credentials
         response = with_client.post(
             '/token',
-            data={'username': subscriber.username, 'password': bad_password},
+            data={'username': subscriber.email, 'password': bad_password},
         )
         assert response.status_code == 403, response.text
 
         # Test credentials with non-existent user
         response = with_client.post(
             '/token',
-            data={'username': subscriber.username + '1', 'password': password},
+            data={'username': subscriber.email + '1', 'password': password},
         )
         assert response.status_code == 403, response.text
 
