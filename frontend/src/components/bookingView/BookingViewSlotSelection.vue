@@ -1,3 +1,51 @@
+<script setup lang="ts">
+import { inject } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
+
+import { useBookingViewStore } from '@/stores/booking-view-store';
+import { useScheduleStore } from '@/stores/schedule-store';
+import { dateFormatStrings } from '@/definitions';
+import { Slot } from '@/models';
+import { dayjsKey } from "@/keys";
+
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import CalendarQalendar from '@/components/CalendarQalendar.vue';
+
+const { t } = useI18n();
+const { activeSchedules } = storeToRefs(useScheduleStore());
+const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
+const dj = inject(dayjsKey);
+
+const emit = defineEmits(['openModal']);
+
+// component properties
+interface Props {
+  showNavigation: boolean,
+};
+defineProps<Props>();
+
+/**
+ * Select a specific time slot
+ * @param day string
+ */
+const selectEvent = (day: String) => {
+  // set event selected
+  for (let i = 0; i < appointment.value.slots.length; i += 1) {
+    const slot: Slot = appointment.value.slots[i];
+    if (slot.start.format(dateFormatStrings.qalendar) === day) {
+      slot.selected = true;
+      const e = { ...appointment.value, ...slot };
+      delete e.slots;
+      selectedEvent.value = e;
+    } else {
+      slot.selected = false;
+    }
+  }
+};
+
+</script>
+
 <template>
   <div v-if="appointment">
     <div class="mb-4 text-3xl text-gray-700 dark:text-gray-400">
@@ -20,7 +68,7 @@
       :current-date="activeDate"
       :appointments="[appointment]"
       :is-booking-route="true"
-      :fixed-duration="appointment?.slot_duration ?? activeSchedules[0]?.slot_duration"
+      :fixed-duration="activeSchedules[0]?.slot_duration"
       @event-selected="selectEvent"
     >
     </calendar-qalendar>
@@ -40,47 +88,3 @@
     </div>
   </footer>
 </template>
-<script setup>
-import { inject } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
-
-import { useBookingViewStore } from '@/stores/booking-view-store';
-import { dateFormatStrings } from '@/definitions';
-
-import PrimaryButton from '@/elements/PrimaryButton';
-import CalendarQalendar from '@/components/CalendarQalendar.vue';
-import { useScheduleStore } from '@/stores/schedule-store';
-import { dayjsKey } from "@/keys";
-
-const { t } = useI18n();
-const { activeSchedules } = storeToRefs(useScheduleStore());
-const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
-const dj = inject(dayjsKey);
-
-const emit = defineEmits(['openModal']);
-
-defineProps({
-  showNavigation: Boolean,
-});
-
-/**
- * Select a specific time slot
- * @param day string
- */
-const selectEvent = (day) => {
-  // set event selected
-  for (let i = 0; i < appointment.value.slots.length; i += 1) {
-    const slot = appointment.value.slots[i];
-    if (slot.start.format(dateFormatStrings.qalendar) === day) {
-      slot.selected = true;
-      const e = { ...appointment.value, ...slot };
-      delete e.slots;
-      selectedEvent.value = e;
-    } else {
-      slot.selected = false;
-    }
-  }
-};
-
-</script>

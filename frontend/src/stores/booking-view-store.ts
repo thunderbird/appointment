@@ -2,7 +2,7 @@ import { Dayjs, ConfigType } from 'dayjs';
 import { defineStore } from 'pinia';
 import { ref, inject } from 'vue';
 import { bookingCalendarViews } from '@/definitions';
-import { Appointment, Attendee } from '@/models';
+import { Appointment, Attendee, Slot } from '@/models';
 import { dayjsKey } from '@/keys';
 
 /**
@@ -15,8 +15,9 @@ export const useBookingViewStore = defineStore('bookingView', () => {
   // States
   const activeView = ref(bookingCalendarViews.loading);
   const activeDate = ref(dj());
+
   // Data
-  const selectedEvent = ref<Dayjs>(null);
+  const selectedEvent = ref<Appointment & Slot>(null); // The selected slot also needs some data from its parent
   const appointment = ref<Appointment>(null);
   const attendee = ref<Attendee>(null);
 

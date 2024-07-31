@@ -23,6 +23,7 @@ export type Slot = {
   subscriber_id: number;
   time_updated: string;
   attendee: Attendee;
+  selected?: boolean;
 };
 
 export type Appointment = {
@@ -48,6 +49,7 @@ export type Appointment = {
   calendar_title: string;
   calendar_color: string;
   active: boolean;
+  owner_name?: string;
 };
 
 export type CustomEventData = {
