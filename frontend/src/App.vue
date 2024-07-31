@@ -1,3 +1,153 @@
+<script setup lang="ts">
+import { createFetch } from '@vueuse/core';
+import { inject, provide, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import NavBar from '@/components/NavBar.vue';
+import TitleBar from '@/components/TitleBar.vue';
+import FooterBar from '@/components/FooterBar.vue';
+import SiteNotification from '@/elements/SiteNotification.vue';
+import { useSiteNotificationStore } from '@/stores/alert-store';
+import { storeToRefs } from 'pinia';
+
+// stores
+import { useUserStore } from '@/stores/user-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
+import { useScheduleStore } from '@/stores/schedule-store';
+import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
+import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
+import { apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
+import { StringResponse } from '@/models';
+
+// component constants
+const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
+const apiUrl = inject(apiUrlKey);
+const route = useRoute();
+const routeName = typeof route.name === 'string' ? route.name : '';
+const router = useRouter();
+const siteNotificationStore = useSiteNotificationStore();
+const {
+  isVisible: visibleNotification,
+  title: notificationTitle,
+  actionUrl: notificationActionUrl,
+  message: notificationMessage,
+} = storeToRefs(siteNotificationStore);
+
+const {
+  isSame: isSameNotification,
+  show: showNotification,
+  lock: lockNotification,
+} = siteNotificationStore;
+
+// handle auth and fetch
+const isAuthenticated = computed(() => currentUser?.exists());
+const call = createFetch({
+  baseUrl: apiUrl,
+  options: {
+    beforeFetch({ options }) {
+      if (isAuthenticated.value) {
+        const token = currentUser.data.accessToken;
+        // @ts-ignore
+        options.headers.Authorization = `Bearer ${token}`;
+      }
+      return { options };
+    },
+    updateDataOnError: true, // Needed to access the actual error message...
+    async onFetchError(context) {
+      const { data, response } = context;
+      // Catch any google refresh error that may occur
+      if (
+        data?.detail?.id === 'GOOGLE_REFRESH_ERROR'
+        && !isSameNotification('GOOGLE_REFRESH_ERROR')
+      ) {
+        // Ensure other async calls don't reach here
+        lockNotification(data.detail.error);
+
+        // Retrieve the google auth url, and if that fails send them to calendar settings!
+        const { data: urlData, error: urlError }: StringResponse = await call('google/auth').get();
+        const url = urlError.value ? '/settings/calendar' : (urlData.value as string).slice(1, -1);
+
+        // Update our site notification store with the error details
+        showNotification(
+          data.detail.error,
+          'Action needed!',
+          data.detail?.message || 'Please re-connect with Google',
+          url,
+        );
+      } else if (response && response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
+        // Clear current user data, and ship them to the login screen!
+        currentUser.$reset();
+        await router.push('/login');
+        return context;
+      }
+
+      // Pass the error along
+      return context;
+    },
+  },
+  fetchOptions: {
+    mode: 'cors',
+    credentials: 'include',
+  },
+});
+
+// TODO: Deprecated - Please use callKey, as it's typed!
+provide('call', call);
+provide(callKey, call);
+
+// TODO: Deprecated - Please use isPasswordAuthKey, as it's typed!
+provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
+provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'password');
+// TODO: Deprecated - Please use isFxaAuthKey, as it's typed!
+provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
+provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
+// TODO: Deprecated - Please use fxaEditProfileUrlKey, as it's typed!
+provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
+provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
+
+// menu items for main navigation
+const navItems = [
+  'calendar',
+  'schedule',
+  'appointments',
+  'settings',
+];
+
+// db tables
+const calendarStore = useCalendarStore();
+const appointmentStore = useAppointmentStore();
+const scheduleStore = useScheduleStore();
+const userStore = useUserStore();
+
+// true if route can be accessed without authentication
+const routeIsPublic = computed(
+  () => route.meta?.isPublic,
+);
+const routeIsHome = computed(
+  () => ['home'].includes(routeName),
+);
+const routeHasModal = computed(
+  () => ['login'].includes(routeName),
+);
+
+// retrieve calendars and appointments after checking login and persisting user to db
+const getDbData = async () => {
+  if (currentUser?.exists()) {
+    await Promise.all([
+      userStore.profile(call),
+      calendarStore.fetch(call),
+      appointmentStore.fetch(call),
+      scheduleStore.fetch(call),
+    ]);
+  }
+};
+
+// TODO: Deprecated - Please use refreshKey, as it's typed!
+provide('refresh', getDbData);
+// provide refresh functions for components
+provide(refreshKey, getDbData);
+</script>
+
 <template>
   <!-- authenticated subscriber content -->
   <template v-if="router.hasRoute(route.name) && (isAuthenticated || routeIsPublic)">
@@ -28,144 +178,3 @@
     <route-not-found-view/>
   </template>
 </template>
-
-<script setup>
-import { createFetch } from '@vueuse/core';
-import { inject, provide, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import NavBar from '@/components/NavBar';
-import TitleBar from '@/components/TitleBar';
-import FooterBar from '@/components/FooterBar.vue';
-import SiteNotification from '@/elements/SiteNotification';
-import { useSiteNotificationStore } from '@/stores/alert-store';
-import { storeToRefs } from 'pinia';
-
-// stores
-import { useUserStore } from '@/stores/user-store';
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useAppointmentStore } from '@/stores/appointment-store';
-import { useScheduleStore } from '@/stores/schedule-store';
-import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
-import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-import { callKey, refreshKey } from '@/keys';
-
-// component constants
-const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
-const apiUrl = inject('apiUrl');
-const route = useRoute();
-const router = useRouter();
-const siteNotificationStore = useSiteNotificationStore();
-const {
-  isVisible: visibleNotification,
-  title: notificationTitle,
-  actionUrl: notificationActionUrl,
-  message: notificationMessage,
-} = storeToRefs(siteNotificationStore);
-
-const {
-  isSame: isSameNotification,
-  show: showNotification,
-  lock: lockNotification,
-} = siteNotificationStore;
-
-// handle auth and fetch
-const isAuthenticated = computed(() => currentUser?.exists());
-const call = createFetch({
-  baseUrl: apiUrl,
-  options: {
-    async beforeFetch({ options }) {
-      if (isAuthenticated.value) {
-        const token = await currentUser.data.accessToken;
-        options.headers.Authorization = `Bearer ${token}`;
-      }
-      return { options };
-    },
-    updateDataOnError: true, // Needed to access the actual error message...
-    async onFetchError(context) {
-      const { data, response } = context;
-      // Catch any google refresh error that may occur
-      if (
-        data?.detail?.id === 'GOOGLE_REFRESH_ERROR'
-        && !isSameNotification('GOOGLE_REFRESH_ERROR')
-      ) {
-        // Ensure other async calls don't reach here
-        lockNotification(data.detail.error);
-
-        // Retrieve the google auth url, and if that fails send them to calendar settings!
-        const { data: urlData, error: urlError } = await call('google/auth').get();
-        const url = urlError.value ? '/settings/calendar' : urlData.value.slice(1, -1);
-
-        // Update our site notification store with the error details
-        showNotification(
-          data.detail.error,
-          'Action needed!',
-          data.detail?.message || 'Please re-connect with Google',
-          url,
-        );
-      } else if (response && response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
-        // Clear current user data, and ship them to the login screen!
-        await currentUser.$reset();
-        await router.push('/login');
-        return context;
-      }
-
-      // Pass the error along
-      return context;
-    },
-  },
-  fetchOptions: {
-    mode: 'cors',
-    credentials: 'include',
-  },
-});
-
-// Deprecated - Please use callKey, as it's typed!
-provide('call', call);
-provide(callKey, call);
-
-provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
-provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
-provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
-
-// menu items for main navigation
-const navItems = [
-  'calendar',
-  'schedule',
-  'appointments',
-  'settings',
-];
-
-// db tables
-const calendarStore = useCalendarStore();
-const appointmentStore = useAppointmentStore();
-const scheduleStore = useScheduleStore();
-const userStore = useUserStore();
-
-// true if route can be accessed without authentication
-const routeIsPublic = computed(
-  () => route.meta?.isPublic,
-);
-const routeIsHome = computed(
-  () => ['home'].includes(route.name),
-);
-const routeHasModal = computed(
-  () => ['login'].includes(route.name),
-);
-
-// retrieve calendars and appointments after checking login and persisting user to db
-const getDbData = async () => {
-  if (currentUser?.exists()) {
-    await Promise.all([
-      userStore.profile(call),
-      calendarStore.fetch(call),
-      appointmentStore.fetch(call),
-      scheduleStore.fetch(call),
-    ]);
-  }
-};
-
-// Deprecated - Please use refreshKey, as it's typed!
-provide('refresh', getDbData);
-// provide refresh functions for components
-provide(refreshKey, getDbData);
-</script>

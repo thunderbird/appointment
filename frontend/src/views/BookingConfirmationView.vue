@@ -1,3 +1,45 @@
+<script setup lang="ts">
+import { ref, inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import { callKey } from '@/keys';
+import { AvailabilitySlotResponse } from '@/models';
+import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
+import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+
+const { t } = useI18n();
+const route = useRoute();
+const call = inject(callKey);
+
+// retrieve all required data from url
+const [signedUrl] = window.location.href.split('/confirm/');
+const slotId = Number(route.params.slot);
+const slotToken = route.params.token;
+const confirmed = parseInt(route.params.confirmed as string) === 1;
+
+const isError = ref<boolean|null>(null);
+const attendeeEmail = ref<string|null>(null);
+
+// initially load data when component gets remounted
+onMounted(async () => {
+  // build data object for put request
+  const obj = {
+    slot_id: slotId,
+    slot_token: slotToken,
+    owner_url: signedUrl,
+    confirmed,
+  };
+  const { error, data }: AvailabilitySlotResponse = await call('schedule/public/availability/booking').put(obj).json();
+  if (error.value) {
+    isError.value = true;
+  } else {
+    isError.value = false;
+    attendeeEmail.value = data.value?.attendee?.email;
+  }
+});
+</script>
+
 <template>
   <div class="flex-center h-full flex-col gap-12 p-4">
     <div v-if="isError === null">
@@ -20,7 +62,7 @@
         </div>
         <div class="text-center text-gray-800 dark:text-gray-300">
           {{ t('info.eventWasCreated') }}<br>
-          {{ t('text.invitationSentToAddress', { 'address': attendee?.email }) }}
+          {{ t('text.invitationSentToAddress', { 'address': attendeeEmail }) }}
         </div>
       </template>
       <template v-else>
@@ -28,7 +70,7 @@
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
         <div class="text-center text-gray-800 dark:text-gray-300">
-          {{ t('text.denialSentToAddress', { 'address': attendee?.email }) }}<br>
+          {{ t('text.denialSentToAddress', { 'address': attendeeEmail }) }}<br>
           {{ t('info.slotIsAvailableAgain') }}
         </div>
       </template>
@@ -36,45 +78,3 @@
   </div>
 
 </template>
-
-<script setup>
-import { ref, inject, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-import ArtInvalidLink from '@/elements/arts/ArtInvalidLink';
-import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
-import LoadingSpinner from '@/elements/LoadingSpinner';
-
-const { t } = useI18n();
-const route = useRoute();
-const call = inject('call');
-
-// retrieve all required data from url
-const [signedUrl] = window.location.href.split('/confirm/');
-const slotId = Number(route.params.slot);
-const slotToken = route.params.token;
-const confirmed = parseInt(route.params.confirmed) === 1;
-
-const isError = ref(null);
-const event = ref(null);
-const attendee = ref(null);
-
-// initially load data when component gets remounted
-onMounted(async () => {
-  // build data object for put request
-  const obj = {
-    slot_id: slotId,
-    slot_token: slotToken,
-    owner_url: signedUrl,
-    confirmed,
-  };
-  const { error, data } = await call('schedule/public/availability/booking').put(obj).json();
-  if (error.value) {
-    isError.value = true;
-  } else {
-    isError.value = false;
-    event.value = data.value?.slot;
-    attendee.value = data.value?.attendee;
-  }
-});
-</script>
