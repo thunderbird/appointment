@@ -1,34 +1,3 @@
-<template>
-  <!-- authenticated subscriber content -->
-  <template v-if="router.hasRoute(route.name) && (isAuthenticated || routeIsPublic)">
-    <site-notification
-      v-if="isAuthenticated && visibleNotification"
-      :title="notificationTitle"
-      :action-url="notificationActionUrl"
-    >
-      {{ notificationMessage }}
-    </site-notification>
-    <nav-bar v-if="isAuthenticated" :nav-items="navItems"/>
-    <title-bar v-if="routeIsPublic"/>
-    <main
-      :class="{
-        'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
-        '!pt-24': routeIsHome || isAuthenticated,
-        'min-h-full pb-32 pt-8': routeIsPublic && !routeHasModal,
-      }"
-    >
-      <router-view/>
-    </main>
-    <footer-bar/>
-  </template>
-  <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
-    <not-authenticated-view/>
-  </template>
-  <template v-else>
-    <route-not-found-view/>
-  </template>
-</template>
-
 <script setup lang="ts">
 import { createFetch } from '@vueuse/core';
 import { inject, provide, computed } from 'vue';
@@ -178,3 +147,34 @@ provide('refresh', getDbData);
 // provide refresh functions for components
 provide(refreshKey, getDbData);
 </script>
+
+<template>
+  <!-- authenticated subscriber content -->
+  <template v-if="router.hasRoute(route.name) && (isAuthenticated || routeIsPublic)">
+    <site-notification
+      v-if="isAuthenticated && visibleNotification"
+      :title="notificationTitle"
+      :action-url="notificationActionUrl"
+    >
+      {{ notificationMessage }}
+    </site-notification>
+    <nav-bar v-if="isAuthenticated" :nav-items="navItems"/>
+    <title-bar v-if="routeIsPublic"/>
+    <main
+      :class="{
+        'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
+        '!pt-24': routeIsHome || isAuthenticated,
+        'min-h-full pb-32 pt-8': routeIsPublic && !routeHasModal,
+      }"
+    >
+      <router-view/>
+    </main>
+    <footer-bar/>
+  </template>
+  <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
+    <not-authenticated-view/>
+  </template>
+  <template v-else>
+    <route-not-found-view/>
+  </template>
+</template>
