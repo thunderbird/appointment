@@ -8,7 +8,8 @@ from appointment.controller.mailer import (
     ZoomMeetingFailedMail,
     RejectionMail,
     SupportRequestMail,
-    InviteAccountMail, ConfirmYourEmailMail,
+    InviteAccountMail,
+    ConfirmYourEmailMail,
 )
 
 

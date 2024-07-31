@@ -247,8 +247,8 @@ def token(
     if os.getenv('AUTH_SCHEME') == 'fxa':
         raise HTTPException(status_code=405)
 
-    """Retrieve an access token from a given username and password."""
-    subscriber = repo.subscriber.get_by_username(db, form_data.username)
+    """Retrieve an access token from a given email (=username) and password."""
+    subscriber = repo.subscriber.get_by_email(db, form_data.username)
     if not subscriber or subscriber.password is None:
         raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
@@ -267,11 +267,11 @@ def token(
         db.add(subscriber)
         db.commit()
 
-    # Generate our jwt token, we only store the username on the token
+    # Generate our jwt token, we only store the user id on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
     access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'}, expires_delta=access_token_expires)
 
-    """Log a user in with the passed username and password information"""
+    """Log a user in with the passed user id and password information"""
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 

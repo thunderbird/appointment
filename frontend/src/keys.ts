@@ -12,6 +12,15 @@ type DayjsType = ((_?:ConfigType) => Dayjs) & {
 };
 export const dayjsKey = Symbol('dayjs') as InjectionKey<DayjsType>;
 
+// Provide urls for API and booking
+export const apiUrlKey = Symbol('apiUrl') as InjectionKey<string>;
+export const bookingUrlKey = Symbol('bookingUrl') as InjectionKey<string>;
+
+// Provide environment and authentication keys
+export const isPasswordAuthKey = Symbol('isPasswordAuth') as InjectionKey<boolean>;
+export const isFxaAuthKey = Symbol('isFxaAuth') as InjectionKey<boolean>;
+export const fxaEditProfileUrlKey = Symbol('fxaEditProfileUrl') as InjectionKey<string>;
+
 // Provides configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
 

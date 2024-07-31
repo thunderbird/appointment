@@ -228,13 +228,13 @@ class GoogleConnector(BaseConnector):
         body = {
             'iCalUID': event.uuid.hex,
             'summary': event.title,
-            'location': event.location.name,
+            'location': event.location.url if event.location.url else None,
             'description': '\n'.join(description),
             'start': {'dateTime': event.start.isoformat()},
             'end': {'dateTime': event.end.isoformat()},
             'attendees': [
-                {'displayName': organizer.name, 'email': organizer_email},
-                {'displayName': attendee.name, 'email': attendee.email},
+                {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
+                {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'accepted'},
             ],
             'organizer': {
                 'displayName': organizer.name,
@@ -414,13 +414,14 @@ class Tools:
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
         event.add('dtstamp', datetime.now(UTC))
+        event.add('status', 'CONFIRMED')
         event['description'] = appointment.details
         event['organizer'] = org
 
         # Prefer the slot meeting link url over the appointment location url
         location_url = slot.meeting_link_url if slot.meeting_link_url is not None else appointment.location_url
 
-        if location_url != '' or location_url is not None:
+        if location_url:
             event.add('location', location_url)
 
         cal.add_component(event)
@@ -435,10 +436,11 @@ class Tools:
         attendee: schemas.AttendeeBase,
     ):
         """send a booking confirmation email to attendee with .ics file attached"""
+        ics = self.create_vevent(appointment, slot, organizer)
         invite = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
-            data=self.create_vevent(appointment, slot, organizer),
+            data=ics,
         )
         background_tasks.add_task(send_invite_email, to=attendee.email, attachment=invite)
 

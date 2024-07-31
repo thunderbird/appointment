@@ -2,6 +2,7 @@
 import App from '@/App.vue';
 import { createApp } from 'vue';
 import { getPreferredTheme } from '@/utils';
+import { apiUrlKey, bookingUrlKey } from '@/keys';
 
 // pinia state management
 import { createPinia } from 'pinia';
@@ -85,8 +86,8 @@ app.use(router);
 const protocol = import.meta.env.VITE_API_SECURE === 'true' ? 'https' : 'http';
 const port = import.meta.env.VITE_API_PORT !== undefined ? `:${import.meta.env.VITE_API_PORT}` : '';
 const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
-app.provide('apiUrl', apiUrl);
-app.provide('bookingUrl', `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
+app.provide(apiUrlKey, apiUrl);
+app.provide(bookingUrlKey, `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
 
 const loc = localStorage?.getItem('locale') ?? navigator.language;
 app.use(i18ninstance);

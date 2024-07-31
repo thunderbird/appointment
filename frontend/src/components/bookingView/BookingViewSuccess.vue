@@ -1,3 +1,31 @@
+<script setup lang="ts">
+import { inject } from 'vue';
+import { timeFormat } from '@/utils';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+
+import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { dayjsKey } from "@/keys";
+import { Appointment, Slot } from '@/models';
+
+const { t } = useI18n();
+const router = useRouter();
+
+const dj = inject(dayjsKey);
+const user = useUserStore();
+
+// component properties
+interface Props {
+  selectedEvent: Appointment & Slot,
+  attendeeEmail: string,
+  requested: boolean, // True if we are requesting a booking, false if already confirmed
+};
+defineProps<Props>();
+
+</script>
+
 <template>
   <div class="flex-center min-w-[50%] flex-col gap-12">
     <div class="text-2xl font-semibold text-teal-500">
@@ -29,28 +57,3 @@
   </div>
   <art-successful-booking class="m-6 h-auto w-full max-w-md sm:w-auto sm:max-w-md"/>
 </template>
-
-<script setup>
-import { inject } from 'vue';
-import { timeFormat } from '@/utils';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-
-import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking';
-import PrimaryButton from '@/elements/PrimaryButton';
-import { dayjsKey } from "@/keys";
-
-const { t } = useI18n();
-const router = useRouter();
-
-const dj = inject(dayjsKey);
-const user = useUserStore();
-
-defineProps({
-  selectedEvent: Object,
-  attendeeEmail: String,
-  requested: Boolean, // True if we are requesting a booking, false if already confirmed
-});
-
-</script>

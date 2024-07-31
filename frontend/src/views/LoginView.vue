@@ -25,10 +25,10 @@
         <div class="my-8 grid w-full gap-8">
           <label class="flex flex-col items-center pl-4">
           <span class="w-full">
-            {{ isPasswordAuth ? t('label.username') : t('label.email') }}
+            {{ t('label.email') }}
           </span>
             <input
-              v-model="username"
+              v-model="email"
               type="email"
               class="mr-6 w-full rounded-md"
               :class="{'mr-4': isFxaAuth}"
@@ -118,7 +118,7 @@ const showInviteFlow = ref(false);
 const isLoading = ref(false);
 
 // form input and error
-const username = ref('');
+const email = ref('');
 const password = ref('');
 const loginError = ref(null);
 const inviteCode = ref('');
@@ -136,7 +136,7 @@ const signUp = async () => {
   isLoading.value = true;
   loginError.value = '';
   const { data } = await call('waiting-list/join').post({
-    email: username.value,
+    email: email.value,
   }).json();
 
   if (!data.value) {
@@ -149,7 +149,7 @@ const signUp = async () => {
 };
 
 const login = async () => {
-  if (!username.value || (isPasswordAuth && !password.value)) {
+  if (!email.value || (isPasswordAuth && !password.value)) {
     loginError.value = t('error.credentialsIncomplete');
     return;
   }
@@ -160,7 +160,7 @@ const login = async () => {
   // If they come here a second time after not being allowed it's because they have an invite code.
   if (!showInviteFlow.value) {
     const { data: canLogin, error } = await call('can-login').post({
-      email: username.value,
+      email: email.value,
     }).json();
 
     if (error?.value) {
@@ -179,7 +179,7 @@ const login = async () => {
 
   if (isFxaAuth) {
     const params = new URLSearchParams({
-      email: username.value,
+      email: email.value,
       timezone: dj.tz.guess(),
     });
 
@@ -200,7 +200,7 @@ const login = async () => {
     return;
   }
 
-  const { error } = await user.login(call, username.value, password.value);
+  const { error } = await user.login(call, email.value, password.value);
   if (error) {
     loginError.value = error;
     isLoading.value = false;

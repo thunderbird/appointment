@@ -3,7 +3,7 @@ import { UseFetchReturn } from '@vueuse/core';
 import { InviteStatus } from './definitions';
 
 export type Attendee = {
-  id: number;
+  id?: number;
   email: string;
   name: string;
   timezone: string;
@@ -22,6 +22,12 @@ export type Slot = {
   appointment_id: number;
   subscriber_id: number;
   time_updated: string;
+  attendee: Attendee;
+  selected?: boolean;
+};
+
+export type SlotAttendee = {
+  slot: Slot;
   attendee: Attendee;
 };
 
@@ -48,6 +54,9 @@ export type Appointment = {
   calendar_title: string;
   calendar_color: string;
   active: boolean;
+  owner_name?: string;
+  slot_duration?: number;
+  booking_confirmation?: boolean;
 };
 
 export type CustomEventData = {
@@ -206,19 +215,23 @@ export type Token = {
 };
 
 // Types and aliases used for our custom createFetch API calls and return types
-export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
-export type Refresh = () => Promise<void>;
+export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
+export type AppointmentResponse = UseFetchReturn<Appointment>;
+export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean>;
+export type CalendarListResponse = UseFetchReturn<Calendar[]>;
+export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
+export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
+export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
+export type Refresh = () => Promise<void>;
+export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
+export type SlotResponse = UseFetchReturn<Slot|Exception>;
+export type StringResponse = UseFetchReturn<string|Exception>;
+export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
-export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
-export type CalendarListResponse = UseFetchReturn<Calendar[]>;
-export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
-export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
-export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
-export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 
 // Utility types
 export type Time<T> = {

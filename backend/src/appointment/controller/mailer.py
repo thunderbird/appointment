@@ -173,7 +173,7 @@ class ConfirmationMail(Mailer):
         self.date = date
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
-        default_kwargs = {'subject': l10n('confirm-mail-subject')}
+        default_kwargs = {'subject': l10n('confirm-mail-subject', {'attendee_name': self.attendee_name})}
         super(ConfirmationMail, self).__init__(*args, **default_kwargs, **kwargs)
 
     def text(self):

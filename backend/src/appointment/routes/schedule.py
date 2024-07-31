@@ -484,15 +484,14 @@ def handle_schedule_availability_decision(
             if os.getenv('SENTRY_DSN') != '':
                 capture_exception(err)
 
-
     event = schemas.Event(
         title=title,
         start=slot.start.replace(tzinfo=timezone.utc),
         end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         description=schedule.details or '',
         location=schemas.EventLocation(
-            type=schedule.location_type,
-            url=location_url,
+            type=models.LocationType.online,
+            url=slot.meeting_link_url if slot.meeting_link_url else location_url,
             name=None,
         ),
         uuid=slot.appointment.uuid if slot.appointment else None,
