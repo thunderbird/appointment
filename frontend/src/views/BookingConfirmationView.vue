@@ -1,42 +1,3 @@
-<template>
-  <div class="flex-center h-full flex-col gap-12 p-4">
-    <div v-if="isError === null">
-      <loading-spinner />
-    </div>
-    <div v-else-if="isError === true" class="flex-center flex-col gap-8 px-4">
-      <art-invalid-link class="my-6 h-auto max-w-sm" />
-      <div class="text-xl font-semibold text-sky-600">
-        {{ t('info.bookingLinkIsInvalid') }}
-      </div>
-      <div class="text-gray-800 dark:text-gray-300">
-        {{ t('text.invalidOrAlreadyBooked') }}
-      </div>
-    </div>
-    <div v-else class="flex-center flex-col gap-8 px-4">
-      <art-successful-booking class="my-6 h-auto max-w-sm" />
-      <template v-if="confirmed">
-        <div class="text-xl font-semibold text-sky-600">
-          {{ t('info.bookingSuccessfullyConfirmed') }}
-        </div>
-        <div class="text-center text-gray-800 dark:text-gray-300">
-          {{ t('info.eventWasCreated') }}<br>
-          {{ t('text.invitationSentToAddress', { 'address': attendeeEmail }) }}
-        </div>
-      </template>
-      <template v-else>
-        <div class="text-xl font-semibold text-sky-600">
-          {{ t('info.bookingSuccessfullyDenied') }}
-        </div>
-        <div class="text-center text-gray-800 dark:text-gray-300">
-          {{ t('text.denialSentToAddress', { 'address': attendeeEmail }) }}<br>
-          {{ t('info.slotIsAvailableAgain') }}
-        </div>
-      </template>
-    </div>
-  </div>
-
-</template>
-
 <script setup lang="ts">
 import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -78,3 +39,42 @@ onMounted(async () => {
   }
 });
 </script>
+
+<template>
+  <div class="flex-center h-full flex-col gap-12 p-4">
+    <div v-if="isError === null">
+      <loading-spinner />
+    </div>
+    <div v-else-if="isError === true" class="flex-center flex-col gap-8 px-4">
+      <art-invalid-link class="my-6 h-auto max-w-sm" />
+      <div class="text-xl font-semibold text-sky-600">
+        {{ t('info.bookingLinkIsInvalid') }}
+      </div>
+      <div class="text-gray-800 dark:text-gray-300">
+        {{ t('text.invalidOrAlreadyBooked') }}
+      </div>
+    </div>
+    <div v-else class="flex-center flex-col gap-8 px-4">
+      <art-successful-booking class="my-6 h-auto max-w-sm" />
+      <template v-if="confirmed">
+        <div class="text-xl font-semibold text-sky-600">
+          {{ t('info.bookingSuccessfullyConfirmed') }}
+        </div>
+        <div class="text-center text-gray-800 dark:text-gray-300">
+          {{ t('info.eventWasCreated') }}<br>
+          {{ t('text.invitationSentToAddress', { 'address': attendeeEmail }) }}
+        </div>
+      </template>
+      <template v-else>
+        <div class="text-xl font-semibold text-sky-600">
+          {{ t('info.bookingSuccessfullyDenied') }}
+        </div>
+        <div class="text-center text-gray-800 dark:text-gray-300">
+          {{ t('text.denialSentToAddress', { 'address': attendeeEmail }) }}<br>
+          {{ t('info.slotIsAvailableAgain') }}
+        </div>
+      </template>
+    </div>
+  </div>
+
+</template>

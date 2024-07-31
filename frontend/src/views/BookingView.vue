@@ -1,54 +1,3 @@
-<template>
-  <div>
-    <!-- booking page content: loading -->
-    <main
-      v-if="activeView === BookingCalendarViews.Loading"
-      class="flex-center h-screen select-none"
-    >
-      <loading-spinner/>
-    </main>
-    <!-- booking page content: invalid link -->
-    <main
-      v-else-if="activeView === BookingCalendarViews.Invalid"
-      class="flex-center h-screen select-none flex-col gap-8 px-4"
-    >
-      <booking-view-error
-        :heading="errorHeading"
-        :body="errorBody"
-      />
-    </main>
-    <!-- booking page content: successful booking -->
-    <main
-      v-else-if="activeView === BookingCalendarViews.Success"
-      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
-    >
-      <booking-view-success
-        :attendee-email="attendee.email"
-        :selected-event="selectedEvent"
-        :requested="appointment?.booking_confirmation"
-      />
-    </main>
-    <!-- booking page content: time slot selection -->
-    <main
-      v-else
-      class="mx-auto max-w-screen-2xl select-none px-4"
-    >
-      <booking-view-slot-selection
-        :show-navigation="showNavigation"
-        @open-modal="openModal()"
-      />
-    </main>
-    <!-- modals -->
-    <booking-modal
-      :open="showBookingModal"
-      :event="selectedEvent"
-      :requires-confirmation="appointment?.booking_confirmation"
-      @book="bookEvent"
-      @close="closeModal()"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { BookingCalendarViews, ModalStates } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
@@ -220,3 +169,54 @@ onMounted(async () => {
   }
 });
 </script>
+
+<template>
+  <div>
+    <!-- booking page content: loading -->
+    <main
+      v-if="activeView === BookingCalendarViews.Loading"
+      class="flex-center h-screen select-none"
+    >
+      <loading-spinner/>
+    </main>
+    <!-- booking page content: invalid link -->
+    <main
+      v-else-if="activeView === BookingCalendarViews.Invalid"
+      class="flex-center h-screen select-none flex-col gap-8 px-4"
+    >
+      <booking-view-error
+        :heading="errorHeading"
+        :body="errorBody"
+      />
+    </main>
+    <!-- booking page content: successful booking -->
+    <main
+      v-else-if="activeView === BookingCalendarViews.Success"
+      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
+    >
+      <booking-view-success
+        :attendee-email="attendee.email"
+        :selected-event="selectedEvent"
+        :requested="appointment?.booking_confirmation"
+      />
+    </main>
+    <!-- booking page content: time slot selection -->
+    <main
+      v-else
+      class="mx-auto max-w-screen-2xl select-none px-4"
+    >
+      <booking-view-slot-selection
+        :show-navigation="showNavigation"
+        @open-modal="openModal()"
+      />
+    </main>
+    <!-- modals -->
+    <booking-modal
+      :open="showBookingModal"
+      :event="selectedEvent"
+      :requires-confirmation="appointment?.booking_confirmation"
+      @book="bookEvent"
+      @close="closeModal()"
+    />
+  </div>
+</template>
