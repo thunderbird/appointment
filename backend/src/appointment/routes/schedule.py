@@ -37,7 +37,7 @@ from ..tasks.emails import (
     send_pending_email,
     send_confirmation_email,
     send_rejection_email,
-    send_zoom_meeting_failed_email,
+    send_zoom_meeting_failed_email, send_new_booking_email,
 )
 
 router = APIRouter()
@@ -305,15 +305,14 @@ def request_schedule_availability_slot(
     # generate confirm and deny links with encoded booking token and signed owner url
     url = f'{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}'
 
+    # human readable date in subscribers timezone
+    # TODO: handle locale date representation
+    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
+    date = f'{date}, {slot.duration} minutes ({subscriber.timezone})'
+
     # If bookings are configured to be confirmed by the owner for this schedule,
     # send emails to owner for confirmation and attendee for information
     if schedule.booking_confirmation:
-
-        # human readable date in subscribers timezone
-        # TODO: handle locale date representation
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
-        date = f'{date}, {slot.duration} minutes ({subscriber.timezone})'
-
         # human readable date in attendee timezone
         # TODO: handle locale date representation
         attendee_date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(slot.attendee.timezone)).strftime('%c')
@@ -334,6 +333,15 @@ def request_schedule_availability_slot(
     else:
         handle_schedule_availability_decision(
             True, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
+        )
+
+        # Notify the subscriber that they have a new confirmed booking
+        background_tasks.add_task(
+            send_new_booking_email,
+            attendee_name=attendee.name,
+            attendee_email=attendee.email,
+            date=date,
+            to=subscriber.preferred_email
         )
 
     # Mini version of slot, so we can grab the newly created slot id for tests

@@ -228,6 +228,33 @@ class PendingRequestMail(Mailer):
         return get_template('pending.jinja2').render(owner_name=self.owner_name, date=self.date)
 
 
+class NewBookingMail(Mailer):
+    def __init__(self, attendee_name, attendee_email, date, *args, **kwargs):
+        """init Mailer with confirmation specific defaults"""
+        self.attendee_name = attendee_name
+        self.attendee_email = attendee_email
+        self.date = date
+        default_kwargs = {'subject': l10n('new-booking-subject', {'attendee_name': self.attendee_name})}
+        super(NewBookingMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+    def text(self):
+        return l10n(
+            'new-booking-plain',
+            {
+                'attendee_name': self.attendee_name,
+                'attendee_email': self.attendee_email,
+                'date': self.date,
+            },
+        )
+
+    def html(self):
+        return get_template('new_booking.jinja2').render(
+            attendee_name=self.attendee_name,
+            attendee_email=self.attendee_email,
+            date=self.date,
+        )
+
+
 class SupportRequestMail(Mailer):
     def __init__(self, requestee_name, requestee_email, topic, details, *args, **kwargs):
         """init Mailer with support specific defaults"""

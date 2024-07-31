@@ -13,6 +13,25 @@ invite-mail-subject = Invitation sent from {-brand-name}
 invite-mail-plain = {-brand-footer}
 invite-mail-html = {-brand-footer}
 
+## New Booking
+
+# Variables
+# $attendee_name (String) - Name of the person who requested the appointment
+new-booking-subject = You have a new confirmed booking with { $attendee_name }
+# Variables:
+# $attendee_name (String) - Name of the person who requested the appointment
+# $appointment_email (String) - Email of the person who requested the appointment
+# $date (String) - Date of the Appointment
+new-booking-plain = { $attendee_name } ({ $attendee_email }) has just booked { $date }
+
+                    {-brand-footer}
+
+# Variables:
+# $attendee_name (String) - Name of the person who requested the appointment
+# $appointment_email (String) - Email of the person who requested the appointment
+# $date (String) - Date of the requested appointment
+new-booking-html-heading = { $attendee_name } ({ $attendee_email }) has just booked { $date }
+
 ## Confirm Appointment
 
 # Variables

@@ -1,6 +1,7 @@
 import datetime
 
-from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail
+from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
+    NewBookingMail
 from appointment.database import schemas
 
 
@@ -27,6 +28,20 @@ class TestMailer:
             fault = 'text' if idx == 0 else 'html'
             assert confirm_url in content, fault
             assert deny_url in content, fault
+            assert attendee.name in content, fault
+            assert attendee.email in content, fault
+
+    def test_new_booking(self, faker, with_l10n):
+        fake_email = 'to@example.org'
+        now = datetime.datetime.now()
+        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
+
+        mailer = NewBookingMail(attendee.name, attendee.email, now, to=fake_email)
+        assert mailer.html()
+        assert mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
             assert attendee.name in content, fault
             assert attendee.email in content, fault
 
