@@ -3,7 +3,7 @@ import { UseFetchReturn } from '@vueuse/core';
 import { InviteStatus } from './definitions';
 
 export type Attendee = {
-  id: number;
+  id?: number;
   email: string;
   name: string;
   timezone: string;
@@ -24,6 +24,11 @@ export type Slot = {
   time_updated: string;
   attendee: Attendee;
   selected?: boolean;
+};
+
+export type SlotAttendee = {
+  slot: Slot;
+  attendee: Attendee;
 };
 
 export type Appointment = {
@@ -50,6 +55,8 @@ export type Appointment = {
   calendar_color: string;
   active: boolean;
   owner_name?: string;
+  slot_duration?: number;
+  booking_confirmation?: boolean;
 };
 
 export type CustomEventData = {
@@ -212,6 +219,7 @@ export type BooleanResponse = UseFetchReturn<boolean>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
+export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
@@ -219,6 +227,8 @@ export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
 export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
+export type SlotResponse = UseFetchReturn<Slot|Exception>;
+export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 
 // Utility types
 export type Time<T> = {

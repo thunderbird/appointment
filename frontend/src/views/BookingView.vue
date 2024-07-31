@@ -2,14 +2,14 @@
   <div>
     <!-- booking page content: loading -->
     <main
-      v-if="activeView === views.loading"
+      v-if="activeView === BookingCalendarViews.Loading"
       class="flex-center h-screen select-none"
     >
       <loading-spinner/>
     </main>
     <!-- booking page content: invalid link -->
     <main
-      v-else-if="activeView === views.invalid"
+      v-else-if="activeView === BookingCalendarViews.Invalid"
       class="flex-center h-screen select-none flex-col gap-8 px-4"
     >
       <booking-view-error
@@ -19,7 +19,7 @@
     </main>
     <!-- booking page content: successful booking -->
     <main
-      v-else-if="activeView === views.success"
+      v-else-if="activeView === BookingCalendarViews.Success"
       class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
     >
       <booking-view-success
@@ -49,29 +49,30 @@
   </div>
 </template>
 
-<script setup>
-import { bookingCalendarViews as views, modalStates } from '@/definitions';
+<script setup lang="ts">
+import { BookingCalendarViews, ModalStates } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
-import LoadingSpinner from '@/elements/LoadingSpinner';
-import BookingModal from '@/components/BookingModal';
+import { dayjsKey, callKey } from "@/keys";
+import { Appointment, Slot, Exception, Attendee, ExceptionDetail, AppointmentResponse, SlotResponse } from '@/models';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+import BookingModal from '@/components/BookingModal.vue';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
-import { dayjsKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
 const dj = inject(dayjsKey);
-const call = inject('call');
+const call = inject(callKey);
 const bookingViewStore = useBookingViewStore();
 const bookingModalStore = useBookingModalStore();
 
-const errorHeading = ref(null);
-const errorBody = ref(null);
+const errorHeading = ref<string>(null);
+const errorBody = ref<string>(null);
 
 const bookingRequestFinished = ref(false);
 
@@ -86,16 +87,12 @@ const {
   selectedEvent,
 } = storeToRefs(bookingViewStore);
 
-const {
-  openModal, closeModal,
-} = bookingModalStore;
+const { openModal, closeModal } = bookingModalStore;
 
-const {
-  state: modalState, stateData: modalStateData,
-} = storeToRefs(bookingModalStore);
+const { state: modalState, stateData: modalStateData } = storeToRefs(bookingModalStore);
 
 // check if slots are distributed over different months, weeks, days or only on a single day
-const getViewBySlotDistribution = (slots) => {
+const getViewBySlotDistribution = (slots: Slot[]) => {
   let monthChanged = false;
   let weekChanged = false;
   let dayChanged = false;
@@ -118,38 +115,39 @@ const getViewBySlotDistribution = (slots) => {
   });
   if (monthChanged) {
     showNavigation.value = true;
-    return views.month;
+    return BookingCalendarViews.Month;
   }
   if (weekChanged) {
-    return views.month;
+    return BookingCalendarViews.Month;
   }
   if (dayChanged) {
-    return views.week;
+    return BookingCalendarViews.Week;
   }
   if (!dayChanged) {
-    return views.day;
+    return BookingCalendarViews.Day;
   }
-  return views.invalid;
+  return BookingCalendarViews.Invalid;
 };
 
-const handleError = (data) => {
+const handleError = (data: Exception) => {
   errorHeading.value = null;
   errorBody.value = null;
 
-  if (data?.detail?.id === 'SCHEDULE_NOT_ACTIVE') {
+  const errorDetail = data?.detail as ExceptionDetail;
+
+  if (errorDetail?.id === 'SCHEDULE_NOT_ACTIVE') {
     errorHeading.value = '';
-    errorBody.value = data?.detail.message;
+    errorBody.value = errorDetail.message;
   }
 };
 
 /**
  * Retrieve the appointment from either availability or booking routes.
  * Returns null if there was an error, or the Appointment object if it was successful.
- * @returns {Promise<Object|null>}
  */
-const getAppointment = async () => {
+const getAppointment = async (): Promise<Appointment|null> => {
   const url = window.location.href.split('#')[0];
-  const request = call('schedule/public/availability').post({ url });
+  const request: AppointmentResponse = call('schedule/public/availability').post({ url });
 
   const { data, error } = await request.json();
 
@@ -160,7 +158,7 @@ const getAppointment = async () => {
   }
 
   // convert start dates from UTC back to users timezone
-  data.value.slots.forEach((s) => {
+  data.value.slots.forEach((s: Slot) => {
     s.start = dj(s.start).tz(dj.tz.guess());
   });
 
@@ -170,9 +168,8 @@ const getAppointment = async () => {
 /**
  * Book or request to book a selected time.
  * @param attendeeData
- * @returns {Promise<void>}
  */
-const bookEvent = async (attendeeData) => {
+const bookEvent = async (attendeeData: Attendee) => {
   bookingRequestFinished.value = false;
 
   const obj = {
@@ -184,7 +181,7 @@ const bookEvent = async (attendeeData) => {
   };
 
   const url = window.location.href.split('#')[0];
-  const request = call('schedule/public/availability/request').put({
+  const request: SlotResponse = call('schedule/public/availability/request').put({
     s_a: obj,
     url,
   });
@@ -193,7 +190,7 @@ const bookEvent = async (attendeeData) => {
   const { data, error } = await request.json();
 
   if (error.value || !data.value) {
-    modalState.value = modalStates.error;
+    modalState.value = ModalStates.Error;
     modalStateData.value = data?.value?.detail?.message ?? t('error.unknownAppointmentError');
     appointment.value = await getAppointment();
     return;
@@ -202,9 +199,9 @@ const bookEvent = async (attendeeData) => {
   // replace calendar view if every thing worked fine
   attendee.value = attendeeData;
   // update view to prevent reselection
-  activeView.value = views.success;
+  activeView.value = BookingCalendarViews.Success;
   // update modal view as well
-  modalState.value = modalStates.finished;
+  modalState.value = ModalStates.Finished;
 };
 
 // initially retrieve slot data and decide which view to show
@@ -219,7 +216,7 @@ onMounted(async () => {
     // check appointment slots for appropriate view
     activeView.value = getViewBySlotDistribution(appointment.value.slots);
   } else {
-    activeView.value = views.invalid;
+    activeView.value = BookingCalendarViews.Invalid;
   }
 });
 </script>

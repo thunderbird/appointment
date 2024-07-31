@@ -85,7 +85,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   inject, computed, reactive, ref, onMounted,
 } from 'vue';
@@ -93,15 +93,16 @@ import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import ArtConfetti from '@/elements/arts/ArtConfetti';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
+import { Appointment, Slot, Attendee } from '@/models';
+import ArtConfetti from '@/elements/arts/ArtConfetti.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
 
 // icons
 import { IconX } from '@tabler/icons-vue';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
 import { storeToRefs } from 'pinia';
-import { modalStates } from '@/definitions';
+import { ModalStates } from '@/definitions';
 import { dayjsKey } from '@/keys';
 
 // component constants
@@ -112,10 +113,12 @@ const dj = inject(dayjsKey);
 
 const emit = defineEmits(['book', 'close']);
 
-const props = defineProps({
-  event: Object, // event data to display and book
-  requiresConfirmation: Boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
-});
+// component properties
+interface Props {
+  event: Appointment & Slot, // event data to display and book
+  requiresConfirmation: boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
+};
+const props = defineProps<Props>();
 
 // Store
 const bookingModalStore = useBookingModalStore();
@@ -125,13 +128,13 @@ const {
 
 // Refs
 
-const attendee = reactive({
+const attendee = reactive<Attendee>({
   name: '',
   email: '',
   timezone: dj.tz.guess(),
 });
 
-const bookingForm = ref();
+const bookingForm = ref<HTMLFormElement>();
 
 // Computed
 
@@ -145,7 +148,7 @@ const validAttendee = computed(() => attendee.email.length > 2);
  */
 const bookIt = () => {
   if (bookingForm.value.reportValidity() && validAttendee.value) {
-    state.value = modalStates.loading;
+    state.value = ModalStates.Loading;
     emit('book', attendee);
   }
 };

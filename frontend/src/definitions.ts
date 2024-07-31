@@ -76,15 +76,15 @@ export const calendarViews = {
 
 /**
  * Booking calendar view modes
- * @enum
- * @readonly
  */
-export const bookingCalendarViews = {
-  ...calendarViews,
-  weekAfterMonth: 4,
-  loading: 10,
-  success: 11,
-  invalid: 12,
+export enum BookingCalendarViews {
+  Day = 1,
+  Week = 2,
+  Month = 3,
+  WeekAfterMonth = 4,
+  Loading = 10,
+  Success = 11,
+  Invalid = 12,
 };
 
 /**
@@ -198,14 +198,12 @@ export const meetingLinkProviderType = {
 
 /**
  * Model states
- * @enum
- * @readonly
  */
-export const modalStates = {
-  loading: 1, // Modal is loading, this includes submission requests
-  open: 2, // Modal is open for editing
-  error: 3, // Modal is open for editing but contains errors
-  finished: 4, // Modal is finished, so either self-close, or show a success screen
+export enum ModalStates {
+  Loading = 1, // Modal is loading, this includes submission requests
+  Open = 2, // Modal is open for editing
+  Error = 3, // Modal is open for editing but contains errors
+  Finished = 4, // Modal is finished, so either self-close, or show a success screen
 };
 
 /**
@@ -302,22 +300,31 @@ export const waitingListAction = {
 };
 
 export default {
-  subscriberLevels,
+  AlertSchemes,
+  appointmentCreationState,
   appointmentViews,
-  bookingCalendarViews,
+  BookingCalendarViews,
+  bookingStatus,
+  calendarManagementType,
   calendarViews,
   ColorSchemes,
-  scheduleCreationState,
+  dateFormatStrings,
+  defaultSlotDuration,
   filterOptions,
+  ftueStep,
+  InviteStatus,
   listColumns,
   locationTypes,
-  settingsSections,
-  viewTypes,
+  loginRedirectKey,
   meetingLinkProviderType,
-  dateFormatStrings,
+  ModalStates,
   qalendarSlotDurations,
-  tableDataType,
+  scheduleCreationState,
+  settingsSections,
+  subscriberLevels,
   tableDataButtonType,
+  tableDataType,
   tooltipPosition,
+  viewTypes,
   waitingListAction,
 };
