@@ -25,6 +25,7 @@ def make_schedule(with_db, make_caldav_calendar):
         slot_duration=FAKER_RANDOM_VALUE,
         meeting_link_provider=models.MeetingLinkProviderType.none,
         slug=FAKER_RANDOM_VALUE,
+        booking_confirmation=True,
     ):
         with with_db() as db:
             return repo.schedule.create(
@@ -47,6 +48,7 @@ def make_schedule(with_db, make_caldav_calendar):
                     slot_duration=slot_duration if factory_has_value(slot_duration) else fake.pyint(15, 60),
                     meeting_link_provider=meeting_link_provider,
                     slug=slug if factory_has_value(slug) else fake.uuid4(),
+                    booking_confirmation=booking_confirmation,
                     calendar_id=calendar_id
                     if factory_has_value(calendar_id)
                     else make_caldav_calendar(connected=True).id,

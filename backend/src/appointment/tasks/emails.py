@@ -9,7 +9,7 @@ from appointment.controller.mailer import (
     RejectionMail,
     SupportRequestMail,
     InviteAccountMail,
-    ConfirmYourEmailMail,
+    ConfirmYourEmailMail, NewBookingMail,
 )
 
 
@@ -21,6 +21,12 @@ def send_invite_email(to, attachment):
 def send_confirmation_email(url, attendee_name, attendee_email, date, to):
     # send confirmation mail to owner
     mail = ConfirmationMail(f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, to=to)
+    mail.send()
+
+
+def send_new_booking_email(attendee_name, attendee_email, date, to):
+    # send notice mail to owner
+    mail = NewBookingMail(attendee_name, attendee_email, date, to=to)
     mail.send()
 
 

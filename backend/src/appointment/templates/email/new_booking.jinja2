@@ -1,0 +1,8 @@
+<html lang="{{ l10n('locale') }}">
+  <body>
+    <p>
+      {{ l10n('new-booking-html-heading', {'attendee_name': attendee_name, 'attendee_email': attendee_email, 'date': date}) }}
+    </p>
+    {% include 'includes/footer.jinja2' %}
+  </body>
+</html>

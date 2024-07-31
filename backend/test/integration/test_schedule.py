@@ -1,14 +1,15 @@
 import zoneinfo
 from datetime import date, time, datetime, timedelta
+from unittest.mock import patch
 
 from freezegun import freeze_time
 
+from appointment.tasks import emails as email_tasks
 from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
 from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
-
 
 class TestSchedule:
     def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar):
@@ -419,7 +420,9 @@ class TestSchedule:
                     else models.BookingStatus.booked.value
                 )
 
-    def test_request_schedule_availability_slot(
+
+class TestRequestScheduleAvailability:
+    def test_fail_and_success(
         self, monkeypatch, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
     ):
         """Test that a user can request a booking from a schedule"""
@@ -517,6 +520,86 @@ class TestSchedule:
         with with_db() as db:
             slot = repo.slot.get(db, slot_id)
             assert slot.appointment_id
+
+    def test_success_with_no_confirmation(
+        self, monkeypatch, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
+        """Test that a user can request a booking from a schedule"""
+        start_date = date(2024, 4, 1)
+        start_time = time(9)
+        start_datetime = datetime.combine(start_date, start_time)
+        end_time = time(10)
+
+        class MockCaldavConnector:
+            @staticmethod
+            def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
+                """We don't want to initialize a client"""
+                pass
+
+            @staticmethod
+            def list_events(self, start, end):
+                return []
+
+            @staticmethod
+            def bust_cached_events(self, all_calendars=False):
+                pass
+
+        monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
+        monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
+        monkeypatch.setattr(CalDavConnector, 'bust_cached_events', MockCaldavConnector.bust_cached_events)
+
+        subscriber = make_pro_subscriber()
+        generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+        make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=start_date,
+            start_time=start_time,
+            end_time=end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+            booking_confirmation=False
+        )
+
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=start_datetime, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 200, response.text
+            data = response.json()
+
+            assert data.get('id')
+
+            slot_id = data.get('id')
+
+            # Look up the slot
+            with with_db() as db:
+                slot = repo.slot.get(db, slot_id)
+                assert slot.appointment_id
+
+            # Ensure we sent out an invite email and a new booking email
+            assert mock.call_count == 2
+            send_invite_email_call, send_new_booking_email_call = mock.call_args_list
+
+            # Functions are stored in a tuple as the first item on the call
+            assert email_tasks.send_invite_email in send_invite_email_call[0]
+            assert email_tasks.send_new_booking_email in send_new_booking_email_call[0]
 
 
 class TestDecideScheduleAvailabilitySlot:
