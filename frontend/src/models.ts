@@ -213,22 +213,23 @@ export type Token = {
 };
 
 // Types and aliases used for our custom createFetch API calls and return types
-export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
-export type Refresh = () => Promise<void>;
+export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
+export type AppointmentResponse = UseFetchReturn<Appointment>;
+export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean>;
+export type CalendarListResponse = UseFetchReturn<Calendar[]>;
+export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
+export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
+export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
+export type Refresh = () => Promise<void>;
+export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
+export type SlotResponse = UseFetchReturn<Slot|Exception>;
+export type StringResponse = UseFetchReturn<string|Exception>;
+export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
-export type AppointmentResponse = UseFetchReturn<Appointment>;
-export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
-export type CalendarListResponse = UseFetchReturn<Calendar[]>;
-export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
-export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
-export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
-export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
-export type SlotResponse = UseFetchReturn<Slot|Exception>;
-export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 
 // Utility types
 export type Time<T> = {
