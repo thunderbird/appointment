@@ -59,7 +59,7 @@ onMounted(async () => {
       return;
     }
 
-    await nextStep();
+    await nextStep(call);
   }
 });
 

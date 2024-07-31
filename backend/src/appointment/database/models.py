@@ -5,6 +5,7 @@ Definitions of database tables and their relationships.
 
 import datetime
 import enum
+import hashlib
 import os
 import uuid
 import zoneinfo
@@ -159,6 +160,19 @@ class Subscriber(HasSoftDelete, Base):
     def is_setup(self) -> bool:
         """Has the user been through the First Time User Experience?"""
         return self.ftue_level > 0
+
+    @cached_property
+    def unique_hash(self):
+        """Retrieve the unique hash for the subscriber"""
+        fxa = self.get_external_connection(type=ExternalConnectionType.fxa)
+        # If we somehow don't have a fxa connection, use id.
+        if fxa is None:
+            id = self.id
+        else:
+            id = fxa.type_id
+        hash_instance = hashlib.sha256()
+        hash_instance.update(str(id).encode('utf-8'))
+        return hash_instance.hexdigest()
 
 
 class Calendar(Base):

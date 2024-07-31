@@ -20,10 +20,15 @@ import '@/assets/styles/main.css';
 // init sentry
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Sentry from '@sentry/vue';
-import UAParser from 'ua-parser-js';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import posthog from 'posthog-js';
+import { usePosthogKey } from '@/keys';
 
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
+const usePosthog = !!import.meta.env.VITE_POSTHOG_PROJECT_KEY;
+
+app.provide(usePosthogKey, usePosthog);
 
 // The modes we use -> short names for sorting
 const environmentMap = {
@@ -62,6 +67,17 @@ if (useSentry) {
   });
 }
 
+if (usePosthog) {
+  posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
+    api_host: import.meta.env.VITE_POSTHOG_HOST,
+    person_profiles: 'identified_only',
+    persistence: 'memory',
+  });
+  posthog.register({
+    service: 'apmt',
+  });
+}
+
 const pinia = createPinia();
 app.use(pinia);
 app.use(router);
@@ -76,42 +92,6 @@ app.provide(bookingUrlKey, `${protocol}://${import.meta.env.VITE_BASE_URL}/appoi
 const loc = localStorage?.getItem('locale') ?? navigator.language;
 app.use(i18ninstance);
 useDayJS(app, loc);
-
-if (useSentry) {
-  /**
-   * Metric collection for development purposes.
-   * This data will be used to help guide development, design, and user experience decisions.
-   */
-  const parser = new UAParser(navigator.userAgent);
-  const browser = parser.getBrowser();
-  const os = parser.getOS();
-  const device = parser.getDevice();
-  const deviceRes = `${window?.screen?.width ?? -1}x${window?.screen?.height ?? -1}`;
-  const effectiveDeviceRes = `${window?.screen?.availWidth ?? -1}x${window?.screen?.availHeight ?? -1}`;
-
-  // Native fetch!
-  const url = apiUrl.endsWith('/') ? `${apiUrl}page-load` : `${apiUrl}/page-load`;
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      browser: browser.name,
-      browser_version: `${browser.name}:${browser.version}`,
-      os: os.name,
-      os_version: `${os.name}:${os.version}`,
-      device: device.model,
-      device_model: `${device.vendor}:${device.model}`,
-      resolution: deviceRes,
-      effective_resolution: effectiveDeviceRes,
-      user_agent: navigator.userAgent,
-      locale: loc,
-      theme: getPreferredTheme(),
-    }),
-  });
-}
 
 // ready? let's go!
 app.mount('#app');

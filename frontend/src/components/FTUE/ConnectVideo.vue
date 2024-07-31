@@ -43,24 +43,24 @@ onMounted(async () => {
       return;
     }
 
-    await nextStep();
+    await nextStep(call);
   }
 });
 
 const onSubmit = async () => {
   isLoading.value = true;
-  await nextStep();
+  await nextStep(call);
 };
 
 const onSkip = async () => {
   isLoading.value = true;
-  await nextStep();
+  await nextStep(call);
 };
 
 const connectZoom = async () => {
   // If they have zoom attached, just skip for now.
   if (externalConnectionStore.zoom.length > 0) {
-    await nextStep();
+    await nextStep(call);
     return;
   }
 

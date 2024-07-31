@@ -93,7 +93,7 @@ const onSubmit = async () => {
   await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(call, id)));
   await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(call, id)));
 
-  await nextStep();
+  await nextStep(call);
 };
 
 </script>

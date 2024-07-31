@@ -62,7 +62,7 @@ export type Appointment = {
 export type CustomEventData = {
   attendee?: Attendee;
   slot_status: number; // TODO: definitions.bookingStatus
-  booking_status: number; // TODO: definitions.bookingStatus 
+  booking_status: number; // TODO: definitions.bookingStatus
   calendar_title: string;
   calendar_color: string;
   duration: number;
@@ -163,6 +163,7 @@ export type User = {
   accessToken: string;
   scheduleLinks: string[];
   isSetup: boolean,
+  uniqueHash: string;
 };
 
 export type Subscriber = {
@@ -175,6 +176,7 @@ export type Subscriber = {
   timezone: string;
   avatar_url: string;
   is_setup: boolean;
+  unique_hash: string;
   schedule_links: string[];
   secondary_email?: string;
   invite?: Invite;

@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import {
   Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
 } from '@/models';
+import { usePosthogKey } from '@/keys';
+import posthog from 'posthog-js';
 
 const initialUserObject = {
   email: null,
@@ -18,6 +20,7 @@ const initialUserObject = {
   accessToken: null,
   scheduleLinks: [],
   isSetup: false,
+  uniqueHash: null,
 } as User;
 
 export const useUserStore = defineStore('user', () => {
@@ -38,6 +41,10 @@ export const useUserStore = defineStore('user', () => {
 
   const exists = () => data.value.accessToken !== null;
   const $reset = () => {
+    const usePosthog = inject(usePosthogKey);
+    if (usePosthog) {
+      posthog.reset();
+    }
     data.value = structuredClone(initialUserObject);
   };
 
@@ -55,6 +62,7 @@ export const useUserStore = defineStore('user', () => {
       avatarUrl: subscriber.avatar_url,
       isSetup: subscriber.is_setup,
       scheduleLinks: subscriber.schedule_links,
+      uniqueHash: subscriber.unique_hash,
     };
   };
 
