@@ -31,6 +31,11 @@ from appointment.database import models, repo, schemas  # noqa: E402
 from appointment.dependencies import database, auth, google  # noqa: E402
 from appointment.middleware.l10n import L10n  # noqa: E402
 
+# PyCharm likes to set the working directory to backend/test...
+# Small hack to fix that automagically
+if os.getcwd().endswith('test'):
+    os.chdir('../')
+
 
 def _patch_caldav_connector(monkeypatch):
     """Standard function to patch caldav connector"""
