@@ -114,7 +114,7 @@ provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
 const navItems = [
   'calendar',
   'schedule',
-  'appointments',
+  'bookings',
   'settings',
 ];
 

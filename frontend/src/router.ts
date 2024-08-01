@@ -84,6 +84,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/appointments/:view?/:slug?',
     name: 'appointments',
+    redirect: { name: 'bookings' },
+  },
+  {
+    path: '/bookings/:view?/:slug?',
+    name: 'bookings',
     component: AppointmentsView,
   },
   {
