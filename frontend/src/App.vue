@@ -193,7 +193,7 @@ onMounted(async () => {
       person_profiles: 'identified_only',
       persistence: 'memory',
       mask_all_text: true,
-      sanitize_properties: (properties) => {
+      sanitize_properties: (properties, event) => {
         // If the route isn't available to use right now, ignore the capture.
         if (!route.name) {
           return {};
@@ -213,6 +213,11 @@ onMounted(async () => {
           if (properties.$initial_person_info?.u === oldUrl) {
             properties.$initial_person_info.u = properties.$current_url;
           }
+        }
+
+        if (event === '$pageleave') {
+          // We don't have access to the previous route, so just null it out.
+          properties.$prev_pageview_pathname = null;
         }
 
         return properties;
