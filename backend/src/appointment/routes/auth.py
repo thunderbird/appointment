@@ -1,5 +1,7 @@
 import json
 import os
+import secrets
+import uuid
 from datetime import timedelta, datetime, UTC
 from secrets import token_urlsafe
 from typing import Annotated
@@ -19,7 +21,7 @@ from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 
 from ..dependencies.database import get_db
-from ..dependencies.auth import get_subscriber, get_admin_subscriber
+from ..dependencies.auth import get_subscriber, get_admin_subscriber, get_subscriber_from_onetime_token
 
 from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
@@ -233,10 +235,25 @@ def fxa_callback(
     repo.subscriber.update(db, data, subscriber.id)
 
     # Generate our jwt token, we only store the username on the token
-    access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
-    access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'}, expires_delta=access_token_expires)
+    access_token_expires = timedelta(minutes=float(10))
+    one_time_access_token = create_access_token(data={
+        'sub': f'uid-{subscriber.id}',
+        'jti': secrets.token_urlsafe(16)
+    }, expires_delta=access_token_expires)
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{access_token}")
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{one_time_access_token}")
+
+
+@router.post('/fxa-token')
+def fxa_token(subscriber=Depends(get_subscriber_from_onetime_token)):
+    """Generate a access token from a one time token retrieved after login"""
+    # Generate our jwt token, we only store the username on the token
+    access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
+    access_token = create_access_token(data={
+        'sub': f'uid-{subscriber.id}',
+    }, expires_delta=access_token_expires)
+
+    return {'access_token': access_token, 'token_type': 'bearer'}
 
 
 @router.post('/token')

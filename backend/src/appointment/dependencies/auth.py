@@ -1,3 +1,4 @@
+import datetime
 import os
 from typing import Annotated
 
@@ -16,18 +17,19 @@ from ..exceptions.validation import InvalidTokenException, InvalidPermissionLeve
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
-def get_user_from_token(db, token: str):
+def get_user_from_token(db, token: str, require_jti = False):
     try:
         payload = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=[os.getenv('JWT_ALGO')])
         sub = payload.get('sub')
         iat = payload.get('iat')
+        jti = payload.get('jti')
         if sub is None:
             raise InvalidTokenException()
     except jwt.exceptions.InvalidTokenError:
         raise InvalidTokenException()
 
-    id = sub.replace('uid-', '')
-    subscriber = repo.subscriber.get(db, int(id))
+    sub_id = sub.replace('uid-', '')
+    subscriber = repo.subscriber.get(db, int(sub_id))
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
     if any(
@@ -37,10 +39,20 @@ def get_user_from_token(db, token: str):
             subscriber and subscriber.minimum_valid_iat_time and not iat,
             subscriber
             and subscriber.minimum_valid_iat_time
-            and subscriber.minimum_valid_iat_time.timestamp() > int(iat),
+            # We only need second resolution
+            and int(subscriber.minimum_valid_iat_time.timestamp()) > int(iat),
+            # If we require this token to be a one time token, then require the claim
+            require_jti and not jti
         ]
     ):
         raise InvalidTokenException()
+
+    # If we're a one-time token, set the minimum valid iat time to now!
+    # Beats having to store them multiple times, and it's only used in post-login.
+    if jti:
+        subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+        db.add(subscriber)
+        db.commit()
 
     return subscriber
 
@@ -48,12 +60,13 @@ def get_user_from_token(db, token: str):
 def get_subscriber(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Session = Depends(get_db),
+    require_jti=False
 ):
     """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
 
-    user = get_user_from_token(db, token)
+    user = get_user_from_token(db, token, require_jti)
 
     if user is None:
         raise InvalidTokenException()
@@ -67,6 +80,15 @@ def get_subscriber(
         )
 
     return user
+
+
+async def get_subscriber_from_onetime_token(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Retrieve the subscriber via a one-time token only!"""
+    token: str = await oauth2_scheme(request)
+    return get_subscriber(token, db, require_jti=True)
 
 
 async def get_subscriber_or_none(
