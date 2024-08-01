@@ -184,13 +184,16 @@ provide(refreshKey, getDbData);
 
 onMounted(async () => {
   const usePosthog = inject(usePosthogKey);
-  const id = await onPageLoad();
+  
+  if (usePosthog) {
+    const id = await onPageLoad();
 
-  if (usePosthog && isAuthenticated.value) {
-    const profile = useUserStore();
-    posthog.identify(profile.data.uniqueHash);
-  } else if (usePosthog && id) {
-    posthog.identify(id);
+    if (isAuthenticated.value) {
+      const profile = useUserStore();
+      posthog.identify(profile.data.uniqueHash);
+    } else if (id) {
+      posthog.identify(id);
+    }
   }
 });
 
