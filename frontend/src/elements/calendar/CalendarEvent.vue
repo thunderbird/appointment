@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { bookingStatus } from '@/definitions';
+import { BookingStatus } from '@/definitions';
 import { computed, inject, ref, toRefs } from 'vue';
 import { timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
 import CalendarEventPlaceholder from '@/elements/calendar/CalendarEventPlaceholder.vue';
@@ -31,7 +31,7 @@ const { event, timeSlotDuration, timeSlotHeight } = toRefs(props);
 
 const eventData = event.value.customData;
 const elementHeight = computed(() => (eventData.duration / timeSlotDuration.value) * timeSlotHeight.value);
-const isBusy = computed(() => eventData.slot_status === bookingStatus.booked);
+const isBusy = computed(() => eventData.slot_status === BookingStatus.Booked);
 
 // component emits
 const emit = defineEmits(['eventSelected']);

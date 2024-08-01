@@ -1,200 +1,3 @@
-<template>
-  <!-- page title area -->
-  <div class="flex select-none flex-col justify-between text-center lg:flex-row lg:items-start">
-    <div class="mb-8 text-4xl font-light lg:mb-0">{{ t('label.appointments') }}</div>
-    <div class="mx-auto flex flex-col items-center gap-8 lg:mx-0 lg:flex-row">
-      <tab-bar
-        :tab-items="enumToObject(BookingsViews)"
-        :active="tabActive"
-        @update="updateTab"
-        class="text-xl"
-      />
-    </div>
-  </div>
-  <!-- page content -->
-  <div class="mt-8 flex flex-col justify-between gap-4 lg:flex-row xl:gap-24">
-    <!-- main section: list/grid of appointments with filter -->
-    <div class="w-full lg:w-4/5">
-      <!-- filter bar -->
-      <div class="relative flex select-none gap-5">
-        <select v-model="filter" class="rounded border text-sm">
-          <option v-for="(value, key) in enumToObject(BookingsTableFilterOptions)" :key="key" :value="value">
-            {{ t("label." + key) }}
-          </option>
-        </select>
-        <div class="relative w-full">
-          <label
-            for="appointments-search"
-            class="absolute left-3 top-1/2 -translate-y-1/2 cursor-text"
-          >
-            <icon-search class="size-4 fill-transparent stroke-gray-300 stroke-2 dark:stroke-gray-500" />
-          </label>
-          <input
-            v-model="search"
-            type="search"
-            id="appointments-search"
-            class="w-full rounded pl-10 text-sm"
-            :placeholder="t('label.searchAppointments')"
-          />
-        </div>
-        <div class="flex rounded border border-gray-300 dark:border-gray-500">
-          <div
-            class="
-              btn-toggle flex cursor-pointer items-center overflow-hidden border-r border-gray-300 px-1.5
-              py-1 dark:border-gray-500
-            "
-            :class="{
-              'bg-gray-300 dark:bg-gray-600': view === BookingsViewTypes.List,
-              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== BookingsViewTypes.List,
-            }"
-            @click="view = BookingsViewTypes.List"
-          >
-            <icon-list class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
-          </div>
-          <div
-            class="btn-toggle flex cursor-pointer items-center overflow-hidden px-1.5 py-1"
-            :class="{
-              'bg-gray-300 dark:bg-gray-600': view === BookingsViewTypes.Grid,
-              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== BookingsViewTypes.Grid,
-            }"
-            @click="view = BookingsViewTypes.Grid"
-          >
-            <icon-layout-grid class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
-          </div>
-        </div>
-        <div
-          class="btn-toggle flex items-center rounded border border-gray-300 px-1.5 py-1 dark:border-gray-500"
-          :class="{
-            'bg-gray-300 dark:bg-gray-600': showAdjustments,
-            'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === BookingsViewTypes.List,
-            'opacity-30': view === BookingsViewTypes.Grid,
-            'cursor-pointer': view === BookingsViewTypes.List,
-          }"
-          @click="openAdjustments"
-        >
-          <icon-adjustments class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
-        </div>
-        <div
-          v-show="showAdjustments"
-          class="
-            absolute right-0 top-10 z-40 rounded border border-gray-300 bg-white
-            p-2 shadow-md dark:border-gray-500 dark:bg-gray-700
-          "
-          v-on-click-outside="closeAdjustments"
-        >
-          <div
-            v-for="(value, key) in columns"
-            :key="key"
-            class="
-              grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
-              hover:bg-gray-100 dark:hover:bg-gray-500
-            "
-            @click="toggleColumnVisibility(value)"
-          >
-            <div class="flex items-center">
-              <icon-check
-                v-show="visibleColumns.includes(value)"
-                class="size-4 fill-transparent stroke-gray-800 stroke-1 dark:stroke-gray-200"
-              />
-            </div>
-            <div class="text-sm">{{ t("label." + key) }}</div>
-          </div>
-          <div class="my-2 border-t border-gray-300 dark:border-gray-500"></div>
-          <div
-            class="
-              grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
-              hover:bg-gray-100 dark:hover:bg-gray-500
-            "
-            @click="restoreColumnOrder"
-          >
-            <div></div>
-            <div class="text-sm">{{ t("label.restoreColumnOrder") }}</div>
-          </div>
-        </div>
-      </div>
-      <!-- appointments list -->
-      <table v-show="view === BookingsViewTypes.List" class="mt-4 w-full">
-        <thead>
-          <tr class="bg-gray-100 dark:bg-gray-600">
-            <th class="py-1"></th>
-            <template v-for="(_, key) in columns" :key="key">
-              <th v-if="columnVisible(key)" class="group px-2 py-1 text-left font-normal">
-                <div class="border-r border-gray-300 py-1 group-last:border-none dark:border-gray-500">
-                  {{ t("label." + key) }}
-                </div>
-              </th>
-            </template>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(appointment, i) in filteredAppointments"
-            :key="i"
-            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
-            @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
-            @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
-            @click="showAppointmentModal(appointment)"
-          >
-            <td class="align-middle">
-              <div
-                class="mx-auto size-3 rounded-full bg-sky-400"
-                :style="{ backgroundColor: appointment.calendar_color }"
-              ></div>
-            </td>
-            <td v-if="columnVisible('title')" class="max-w-2xs truncate p-2">
-              <span>{{ appointment.title }}</span>
-            </td>
-            <td v-if="columnVisible('status')" class="p-2 text-sm">
-              <span>{{ t('label.' + keyByValue(BookingStatus, appointment?.slots[0].booking_status ?? 'Unknown', true)) }}</span>
-            </td>
-            <td v-if="columnVisible('calendar')" class="p-2 text-sm">
-              <span>{{ appointment.calendar_title }}</span>
-            </td>
-            <td v-if="columnVisible('time')" class="p-2 text-sm">
-              <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
-              <div>
-                {{ dj(appointment?.slots[0].start).format(timeFormat()) }}
-                {{ t('label.to')}}
-                {{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <!-- appointments grid -->
-      <div
-        v-show="view === BookingsViewTypes.Grid"
-        class="mt-4 grid w-full grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] gap-8 p-4 xl:grid-cols-3"
-      >
-        <appointment-grid-item
-          v-for="(appointment, i) in filteredAppointments"
-          :key="i"
-          :appointment="appointment"
-          @click="showAppointmentModal(appointment)"
-        />
-      </div>
-    </div>
-    <!-- page side bar -->
-    <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 lg:w-1/5">
-      <div>
-        <!-- monthly mini calendar -->
-        <calendar-mini-month
-          :selected="activeDate"
-          :nav="true"
-          @prev="dateNav(false)"
-          @next="dateNav()"
-          @day-selected="selectDate"
-        />
-      </div>
-    </div>
-  </div>
-  <appointment-modal
-    :open="showAppointment !== null"
-    :appointment="showAppointment"
-    @close="closeAppointmentModal"
-  />
-</template>
-
 <script setup lang="ts">
 import {
   BookingStatus,
@@ -423,3 +226,200 @@ const paintBackground = (element: Event, hexColor: string, hexTransparency = 'ff
 };
 provide(paintBackgroundKey, paintBackground);
 </script>
+
+<template>
+  <!-- page title area -->
+  <div class="flex select-none flex-col justify-between text-center lg:flex-row lg:items-start">
+    <div class="mb-8 text-4xl font-light lg:mb-0">{{ t('label.appointments') }}</div>
+    <div class="mx-auto flex flex-col items-center gap-8 lg:mx-0 lg:flex-row">
+      <tab-bar
+        :tab-items="enumToObject(BookingsViews)"
+        :active="tabActive"
+        @update="updateTab"
+        class="text-xl"
+      />
+    </div>
+  </div>
+  <!-- page content -->
+  <div class="mt-8 flex flex-col justify-between gap-4 lg:flex-row xl:gap-24">
+    <!-- main section: list/grid of appointments with filter -->
+    <div class="w-full lg:w-4/5">
+      <!-- filter bar -->
+      <div class="relative flex select-none gap-5">
+        <select v-model="filter" class="rounded border text-sm">
+          <option v-for="(value, key) in enumToObject(BookingsTableFilterOptions)" :key="key" :value="value">
+            {{ t("label." + key) }}
+          </option>
+        </select>
+        <div class="relative w-full">
+          <label
+            for="appointments-search"
+            class="absolute left-3 top-1/2 -translate-y-1/2 cursor-text"
+          >
+            <icon-search class="size-4 fill-transparent stroke-gray-300 stroke-2 dark:stroke-gray-500" />
+          </label>
+          <input
+            v-model="search"
+            type="search"
+            id="appointments-search"
+            class="w-full rounded pl-10 text-sm"
+            :placeholder="t('label.searchAppointments')"
+          />
+        </div>
+        <div class="flex rounded border border-gray-300 dark:border-gray-500">
+          <div
+            class="
+              btn-toggle flex cursor-pointer items-center overflow-hidden border-r border-gray-300 px-1.5
+              py-1 dark:border-gray-500
+            "
+            :class="{
+              'bg-gray-300 dark:bg-gray-600': view === BookingsViewTypes.List,
+              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== BookingsViewTypes.List,
+            }"
+            @click="view = BookingsViewTypes.List"
+          >
+            <icon-list class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
+          </div>
+          <div
+            class="btn-toggle flex cursor-pointer items-center overflow-hidden px-1.5 py-1"
+            :class="{
+              'bg-gray-300 dark:bg-gray-600': view === BookingsViewTypes.Grid,
+              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== BookingsViewTypes.Grid,
+            }"
+            @click="view = BookingsViewTypes.Grid"
+          >
+            <icon-layout-grid class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
+          </div>
+        </div>
+        <div
+          class="btn-toggle flex items-center rounded border border-gray-300 px-1.5 py-1 dark:border-gray-500"
+          :class="{
+            'bg-gray-300 dark:bg-gray-600': showAdjustments,
+            'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === BookingsViewTypes.List,
+            'opacity-30': view === BookingsViewTypes.Grid,
+            'cursor-pointer': view === BookingsViewTypes.List,
+          }"
+          @click="openAdjustments"
+        >
+          <icon-adjustments class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
+        </div>
+        <div
+          v-show="showAdjustments"
+          class="
+            absolute right-0 top-10 z-40 rounded border border-gray-300 bg-white
+            p-2 shadow-md dark:border-gray-500 dark:bg-gray-700
+          "
+          v-on-click-outside="closeAdjustments"
+        >
+          <div
+            v-for="(value, key) in columns"
+            :key="key"
+            class="
+              grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
+              hover:bg-gray-100 dark:hover:bg-gray-500
+            "
+            @click="toggleColumnVisibility(value)"
+          >
+            <div class="flex items-center">
+              <icon-check
+                v-show="visibleColumns.includes(value)"
+                class="size-4 fill-transparent stroke-gray-800 stroke-1 dark:stroke-gray-200"
+              />
+            </div>
+            <div class="text-sm">{{ t("label." + key) }}</div>
+          </div>
+          <div class="my-2 border-t border-gray-300 dark:border-gray-500"></div>
+          <div
+            class="
+              grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
+              hover:bg-gray-100 dark:hover:bg-gray-500
+            "
+            @click="restoreColumnOrder"
+          >
+            <div></div>
+            <div class="text-sm">{{ t("label.restoreColumnOrder") }}</div>
+          </div>
+        </div>
+      </div>
+      <!-- appointments list -->
+      <table v-show="view === BookingsViewTypes.List" class="mt-4 w-full">
+        <thead>
+          <tr class="bg-gray-100 dark:bg-gray-600">
+            <th class="py-1"></th>
+            <template v-for="(_, key) in columns" :key="key">
+              <th v-if="columnVisible(key)" class="group px-2 py-1 text-left font-normal">
+                <div class="border-r border-gray-300 py-1 group-last:border-none dark:border-gray-500">
+                  {{ t("label." + key) }}
+                </div>
+              </th>
+            </template>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(appointment, i) in filteredAppointments"
+            :key="i"
+            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
+            @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
+            @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
+            @click="showAppointmentModal(appointment)"
+          >
+            <td class="align-middle">
+              <div
+                class="mx-auto size-3 rounded-full bg-sky-400"
+                :style="{ backgroundColor: appointment.calendar_color }"
+              ></div>
+            </td>
+            <td v-if="columnVisible('title')" class="max-w-2xs truncate p-2">
+              <span>{{ appointment.title }}</span>
+            </td>
+            <td v-if="columnVisible('status')" class="p-2 text-sm">
+              <span>{{ t('label.' + keyByValue(BookingStatus, appointment?.slots[0].booking_status ?? 'Unknown', true)) }}</span>
+            </td>
+            <td v-if="columnVisible('calendar')" class="p-2 text-sm">
+              <span>{{ appointment.calendar_title }}</span>
+            </td>
+            <td v-if="columnVisible('time')" class="p-2 text-sm">
+              <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
+              <div>
+                {{ dj(appointment?.slots[0].start).format(timeFormat()) }}
+                {{ t('label.to')}}
+                {{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- appointments grid -->
+      <div
+        v-show="view === BookingsViewTypes.Grid"
+        class="mt-4 grid w-full grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] gap-8 p-4 xl:grid-cols-3"
+      >
+        <appointment-grid-item
+          v-for="(appointment, i) in filteredAppointments"
+          :key="i"
+          :appointment="appointment"
+          @click="showAppointmentModal(appointment)"
+        />
+      </div>
+    </div>
+    <!-- page side bar -->
+    <div class="mx-auto mb-10 w-full min-w-[310px] sm:w-1/2 md:mb-0 lg:w-1/5">
+      <div>
+        <!-- monthly mini calendar -->
+        <calendar-mini-month
+          :selected="activeDate"
+          :nav="true"
+          @prev="dateNav(false)"
+          @next="dateNav()"
+          @day-selected="selectDate"
+        />
+      </div>
+    </div>
+  </div>
+  <appointment-modal
+    :open="showAppointment !== null"
+    :appointment="showAppointment"
+    @close="closeAppointmentModal"
+  />
+</template>
