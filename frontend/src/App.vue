@@ -193,6 +193,7 @@ onMounted(async () => {
       person_profiles: 'identified_only',
       persistence: 'memory',
       mask_all_text: true,
+      mask_all_element_attributes: true,
       sanitize_properties: (properties, event) => {
         // If the route isn't available to use right now, ignore the capture.
         if (!route.name) {
