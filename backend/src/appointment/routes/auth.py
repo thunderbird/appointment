@@ -247,6 +247,9 @@ def fxa_callback(
 @router.post('/fxa-token')
 def fxa_token(subscriber=Depends(get_subscriber_from_onetime_token)):
     """Generate a access token from a one time token retrieved after login"""
+    if os.getenv('AUTH_SCHEME') != 'fxa':
+        raise HTTPException(status_code=405)
+
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
     access_token = create_access_token(data={

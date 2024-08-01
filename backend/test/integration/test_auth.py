@@ -1,6 +1,10 @@
 import os
+import secrets
+from datetime import timedelta
 
+from appointment.dependencies import auth
 from appointment.l10n import l10n
+from appointment.routes.auth import create_access_token
 from defines import FXA_CLIENT_PATCH, auth_headers
 from appointment.database import repo, models
 
@@ -328,3 +332,73 @@ class TestFXA:
         assert response.status_code == 403, response.text
         # This will just key match due to the lack of context.
         assert response.json().get('detail') == l10n('invalid-credentials')
+
+    def test_fxa_token_success(self, make_basic_subscriber, with_client):
+        os.environ['AUTH_SCHEME'] = 'fxa'
+
+        # Clear get_subscriber dep, so we can retrieve the real subscriber info later
+        del with_client.app.dependency_overrides[auth.get_subscriber]
+
+        subscriber = make_basic_subscriber(email='apple@example.org')
+        access_token_expires = timedelta(minutes=float(10))
+        one_time_access_token = create_access_token(data={
+            'sub': f'uid-{subscriber.id}',
+            'jti': secrets.token_urlsafe(16)
+        }, expires_delta=access_token_expires)
+
+        # Exchange the one-time token with a long-living token
+        response = with_client.post(
+            '/fxa-token', headers={
+                'Authorization': f'Bearer {one_time_access_token}'
+            }
+        )
+
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+        access_token = data.get('access_token')
+
+        assert access_token
+        assert data.get('token_type') == 'bearer'
+
+        # Test it out!
+        response = with_client.get(
+            '/me', headers={
+                'Authorization': f'Bearer {access_token}'
+            }
+        )
+
+        assert response.status_code == 200, response.text
+        assert response.json().get('email') == subscriber.email
+
+    def test_fxa_token_failed_due_to_non_one_time_token(self, make_basic_subscriber, with_client):
+        """Ensure fxa-token only works with access tokens that have a jti claim"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+
+        del with_client.app.dependency_overrides[auth.get_subscriber]
+
+        subscriber = make_basic_subscriber(email='apple@example.org')
+        access_token_expires = timedelta(minutes=float(10))
+        regular_access_token = create_access_token(data={
+            'sub': f'uid-{subscriber.id}',
+        }, expires_delta=access_token_expires)
+
+        response = with_client.post(
+            '/fxa-token', headers={
+                'Authorization': f'Bearer {regular_access_token}'
+            }
+        )
+
+        assert response.status_code == 401, response.text
+
+    def test_fxa_token_failed_due_to_empty_auth(self, make_basic_subscriber, with_client):
+        """Ensure fxa-token only works with access tokens that have a jti claim"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+
+        del with_client.app.dependency_overrides[auth.get_subscriber]
+
+        response = with_client.post(
+            '/fxa-token'
+        )
+
+        assert response.status_code == 401, response.text
