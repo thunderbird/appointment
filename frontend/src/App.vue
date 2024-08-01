@@ -21,7 +21,9 @@ import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 import UAParser from 'ua-parser-js';
 import posthog from 'posthog-js';
-import { apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, usePosthogKey } from '@/keys';
+import {
+  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, usePosthogKey,
+} from '@/keys';
 import { StringResponse } from '@/models';
 
 // component constants
@@ -184,8 +186,42 @@ provide(refreshKey, getDbData);
 
 onMounted(async () => {
   const usePosthog = inject(usePosthogKey);
-  
+
   if (usePosthog) {
+    posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
+      api_host: import.meta.env.VITE_POSTHOG_HOST,
+      person_profiles: 'identified_only',
+      persistence: 'memory',
+      mask_all_text: true,
+      sanitize_properties: (properties, event) => {
+        // If the route isn't available to use right now, ignore the capture.
+        if (!route.name) {
+          return {};
+        }
+
+        // Do we need to mask the path?
+        if (route.meta?.maskForMetrics) {
+          // Replace recorded path with the path definition
+          const vuePath = route.matched[0]?.path ?? '<unknown path to mask>';
+          const oldPath = properties.$pathname;
+          const oldUrl = properties.$current_url;
+
+          properties.$pathname = vuePath;
+          properties.$current_url = properties.$current_url.replace(oldPath, vuePath);
+
+          // Also if this is the first capture, ensure we cover their initial url
+          if (properties.$initial_person_info?.u === oldUrl) {
+            properties.$initial_person_info.u = properties.$current_url;
+          }
+        }
+
+        return properties;
+      },
+    });
+    posthog.register({
+      service: 'apmt',
+    });
+
     const id = await onPageLoad();
 
     if (isAuthenticated.value) {

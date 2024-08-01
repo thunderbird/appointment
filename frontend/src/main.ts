@@ -2,7 +2,7 @@
 import App from '@/App.vue';
 import { createApp } from 'vue';
 import { getPreferredTheme } from '@/utils';
-import { apiUrlKey, bookingUrlKey } from '@/keys';
+import { apiUrlKey, bookingUrlKey, usePosthogKey } from '@/keys';
 
 // pinia state management
 import { createPinia } from 'pinia';
@@ -22,7 +22,6 @@ import '@/assets/styles/main.css';
 import * as Sentry from '@sentry/vue';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import posthog from 'posthog-js';
-import { usePosthogKey } from '@/keys';
 
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
@@ -64,17 +63,6 @@ if (useSentry) {
     replaysOnErrorSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
     tracePropagationTargets: ['localhost', 'stage.appointment.day', 'appointment.day'],
-  });
-}
-
-if (usePosthog) {
-  posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST,
-    person_profiles: 'identified_only',
-    persistence: 'memory',
-  });
-  posthog.register({
-    service: 'apmt',
   });
 }
 
