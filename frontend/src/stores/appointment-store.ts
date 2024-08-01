@@ -21,6 +21,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
   const pendingAppointments = computed(
     (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === bookingStatus.requested),
   );
+  const pendingFutureAppointments = computed(
+    (): Appointment[] => pendingAppointments.value.filter((a) => a?.slots[0]?.start > dj()),
+  );
 
   /**
    * Append additional data to retrieved appointments
@@ -61,6 +64,6 @@ export const useAppointmentStore = defineStore('appointments', () => {
   };
 
   return {
-    isLoaded, appointments, pendingAppointments, postFetchProcess, fetch, $reset,
+    isLoaded, appointments, pendingAppointments, pendingFutureAppointments, postFetchProcess, fetch, $reset,
   };
 });

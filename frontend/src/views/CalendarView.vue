@@ -12,7 +12,7 @@
   </div>
   <!-- page content -->
   <div
-    class="mt-8 flex flex-col-reverse items-stretch justify-between gap-4 md:flex-row lg:gap-8 lg:mt-10"
+    class="mt-8 flex flex-col-reverse justify-between gap-4 md:flex-row lg:gap-8 lg:mt-10"
   >
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
@@ -48,7 +48,7 @@
             </router-link>
           </div>
           <div
-            v-if="appointmentStore.pendingAppointments.length === 0"
+            v-if="appointmentStore.pendingFutureAppointments.length === 0"
             class="mt-4 flex flex-col items-center justify-center gap-8 text-gray-500"
           >
             <div class="mt-4 text-center">
@@ -57,7 +57,7 @@
           </div>
           <div v-else class="mt-4 flex flex-col gap-8">
             <appointment-list-item
-              v-for="a in appointmentStore.pendingAppointments"
+              v-for="a in appointmentStore.pendingFutureAppointments"
               :key="a.id"
               :appointment="a"
             />
