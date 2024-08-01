@@ -3,8 +3,12 @@
   <div class="flex select-none flex-col justify-between text-center lg:flex-row lg:items-start">
     <div class="mb-8 text-4xl font-light lg:mb-0">{{ t('label.appointments') }}</div>
     <div class="mx-auto flex flex-col items-center gap-8 lg:mx-0 lg:flex-row">
-      <tab-bar :tab-items="views" :active="tabActive" @update="updateTab" class="text-xl" />
-
+      <tab-bar
+        :tab-items="enumToObject(BookingsViews)"
+        :active="tabActive"
+        @update="updateTab"
+        class="text-xl"
+      />
     </div>
   </div>
   <!-- page content -->
@@ -14,7 +18,7 @@
       <!-- filter bar -->
       <div class="relative flex select-none gap-5">
         <select v-model="filter" class="rounded border text-sm">
-          <option v-for="(value, key) in filterOptions" :key="key" :value="value">
+          <option v-for="(value, key) in enumToObject(BookingsTableFilterOptions)" :key="key" :value="value">
             {{ t("label." + key) }}
           </option>
         </select>
@@ -40,20 +44,20 @@
               py-1 dark:border-gray-500
             "
             :class="{
-              'bg-gray-300 dark:bg-gray-600': view === viewTypes.list,
-              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.list,
+              'bg-gray-300 dark:bg-gray-600': view === BookingsViewTypes.List,
+              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== BookingsViewTypes.List,
             }"
-            @click="view = viewTypes.list"
+            @click="view = BookingsViewTypes.List"
           >
             <icon-list class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
           </div>
           <div
             class="btn-toggle flex cursor-pointer items-center overflow-hidden px-1.5 py-1"
             :class="{
-              'bg-gray-300 dark:bg-gray-600': view === viewTypes.grid,
-              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== viewTypes.grid,
+              'bg-gray-300 dark:bg-gray-600': view === BookingsViewTypes.Grid,
+              'hover:bg-gray-100 dark:hover:bg-gray-500': view !== BookingsViewTypes.Grid,
             }"
-            @click="view = viewTypes.grid"
+            @click="view = BookingsViewTypes.Grid"
           >
             <icon-layout-grid class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
           </div>
@@ -62,9 +66,9 @@
           class="btn-toggle flex items-center rounded border border-gray-300 px-1.5 py-1 dark:border-gray-500"
           :class="{
             'bg-gray-300 dark:bg-gray-600': showAdjustments,
-            'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === viewTypes.list,
-            'opacity-30': view === viewTypes.grid,
-            'cursor-pointer': view === viewTypes.list,
+            'hover:bg-gray-100 dark:hover:bg-gray-500': !showAdjustments && view === BookingsViewTypes.List,
+            'opacity-30': view === BookingsViewTypes.Grid,
+            'cursor-pointer': view === BookingsViewTypes.List,
           }"
           @click="openAdjustments"
         >
@@ -109,7 +113,7 @@
         </div>
       </div>
       <!-- appointments list -->
-      <table v-show="view === viewTypes.list" class="mt-4 w-full">
+      <table v-show="view === BookingsViewTypes.List" class="mt-4 w-full">
         <thead>
           <tr class="bg-gray-100 dark:bg-gray-600">
             <th class="py-1"></th>
@@ -128,7 +132,7 @@
             :key="i"
             class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
-            @mouseout="(el) => paintBackground(el, appointment.calendar_color, _, true)"
+            @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
             @click="showAppointmentModal(appointment)"
           >
             <td class="align-middle">
@@ -141,7 +145,7 @@
               <span>{{ appointment.title }}</span>
             </td>
             <td v-if="columnVisible('status')" class="p-2 text-sm">
-              <span>{{ t('label.' + keyByValue(bookingStatus, appointment?.slots[0].booking_status ?? 'Unknown')) }}</span>
+              <span>{{ t('label.' + keyByValue(BookingStatus, appointment?.slots[0].booking_status ?? 'Unknown', true)) }}</span>
             </td>
             <td v-if="columnVisible('calendar')" class="p-2 text-sm">
               <span>{{ appointment.calendar_title }}</span>
@@ -159,7 +163,7 @@
       </table>
       <!-- appointments grid -->
       <div
-        v-show="view === viewTypes.grid"
+        v-show="view === BookingsViewTypes.Grid"
         class="mt-4 grid w-full grid-cols-[repeat(_auto-fit,_minmax(250px,_1fr))] gap-8 p-4 xl:grid-cols-3"
       >
         <appointment-grid-item
@@ -177,8 +181,8 @@
         <calendar-mini-month
           :selected="activeDate"
           :nav="true"
-          @prev="dateNav('month', false)"
-          @next="dateNav('month')"
+          @prev="dateNav(false)"
+          @next="dateNav()"
           @day-selected="selectDate"
         />
       </div>
@@ -191,15 +195,15 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
-  bookingStatus,
-  listColumns as columns,
-  appointmentViews as views,
-  filterOptions,
-  viewTypes,
+  BookingStatus,
+  BookingsTableColumns,
+  BookingsViews,
+  BookingsTableFilterOptions,
+  BookingsViewTypes,
 } from '@/definitions';
-import { keyByValue, timeFormat } from '@/utils';
+import { keyByValue, timeFormat, enumToObject } from '@/utils';
 
 import {
   ref, inject, provide, computed, onMounted,
@@ -222,14 +226,15 @@ import {
 } from '@tabler/icons-vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { storeToRefs } from 'pinia';
-import { dayjsKey, paintBackgroundKey } from "@/keys";
+import { dayjsKey, refreshKey, paintBackgroundKey } from "@/keys";
 
 // component constants
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject(dayjsKey);
-const refresh = inject('refresh');
+const refresh = inject(refreshKey);
+const columns = enumToObject(BookingsTableColumns);
 
 const appointmentStore = useAppointmentStore();
 
@@ -237,54 +242,67 @@ const { appointments } = storeToRefs(appointmentStore);
 
 // handle calendar output
 const activeDate = ref(dj()); // current selected date, defaults to now
-const selectDate = (d) => {
+const selectDate = (d: string) => {
   activeDate.value = dj(d);
 };
 
-// active menu item for tab navigation of appointment views
-const tabActive = ref(route.params.view ? views[route.params.view] : views.all);
-const updateTab = (view) => {
-  router.replace({ name: route.name, params: { view } });
-  tabActive.value = views[view];
-};
-const tabActiveToParam = (view) => {
+const viewToParam = (view: number) => {
   switch (view) {
-    case views.booked:
+    case BookingsViews.Booked:
       return 'booked';
-    case views.pending:
+    case BookingsViews.Pending:
       return 'pending';
-    case views.past:
+    case BookingsViews.Past:
       return 'past';
+    case BookingsViews.All:
     default:
       return 'all';
   }
 };
-// date navigation
-const dateNav = (unit = 'auto', forward = true) => {
-  if (unit === 'auto') {
-    unit = Object.keys(views).find((key) => views[key] === tabActive.value);
+const paramToView = (param: string): number => {
+  switch (param) {
+    case 'booked':
+      return BookingsViews.Booked;
+    case 'pending':
+      return BookingsViews.Pending;
+    case 'past':
+      return BookingsViews.Past;
+    case 'all':
+    default:
+      return BookingsViews.All;
   }
+};
+
+// active menu item for tab navigation of appointment views
+const tabActive = ref(route.params.view ? paramToView(route.params.view as string) : BookingsViews.All);
+const updateTab = (view: string) => {
+  router.replace({ name: route.name, params: { view } });
+  tabActive.value = paramToView(view);
+};
+
+// date navigation
+const dateNav = (forward = true) => {
   if (forward) {
-    activeDate.value = activeDate.value.add(1, unit);
+    activeDate.value = activeDate.value.add(1, 'month');
   } else {
-    activeDate.value = activeDate.value.subtract(1, unit);
+    activeDate.value = activeDate.value.subtract(1, 'month');
   }
 };
 
 // handle data filter
-const filter = ref(filterOptions.appointmentsInMonth);
+const filter = ref(BookingsTableFilterOptions.AppointmentsInMonth);
 
 // handle data search
 const search = ref('');
 
 // handle data view
-const view = ref(viewTypes.list);
+const view = ref(BookingsViewTypes.List);
 
 // handle view adjustments: column visibility
 const showAdjustments = ref(false);
 const visibleColumns = ref(Object.values(columns));
 const openAdjustments = () => {
-  if (view.value === viewTypes.list) {
+  if (view.value === BookingsViewTypes.List) {
     showAdjustments.value = true;
   }
 };
@@ -300,7 +318,7 @@ const toggleColumnVisibility = (key) => {
     visibleColumns.value.push(key);
   }
 };
-const columnVisible = (key) => visibleColumns.value.includes(columns[key]);
+const columnVisible = (key: string) => visibleColumns.value.includes(columns[key]);
 const restoreColumnOrder = () => {
   visibleColumns.value = Object.values(columns);
 };
@@ -314,25 +332,25 @@ const filteredAppointments = computed(() => {
   }
   // by active tab
   switch (tabActive.value) {
-    case views.booked:
-      list = list.filter((a) => a.slots[0].booking_status === bookingStatus.booked);
+    case BookingsViews.Booked:
+      list = list.filter((a) => a.slots[0].booking_status === BookingStatus.Booked);
       break;
-    case views.pending:
-      list = list.filter((a) => a.slots[0].booking_status === bookingStatus.requested);
+    case BookingsViews.Pending:
+      list = list.filter((a) => a.slots[0].booking_status === BookingStatus.Requested);
       break;
-    case views.past:
+    case BookingsViews.Past:
       list = list.filter((a) => a.slots[0].start < dj());
       break;
-    case views.all:
+    case BookingsViews.All:
     default:
       break;
   }
   // by select filter
   switch (filter.value) {
-    case filterOptions.appointmentsToday:
+    case BookingsTableFilterOptions.AppointmentsToday:
       list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isToday(), false));
       break;
-    case filterOptions.appointmentsNext7Days:
+    case BookingsTableFilterOptions.AppointmentsNext7Days:
       list = list.filter((a) => a.slots.reduce(
         (p, c) => p
             || dj(c.start).isToday()
@@ -340,7 +358,7 @@ const filteredAppointments = computed(() => {
         false,
       ));
       break;
-    case filterOptions.appointmentsNext14Days:
+    case BookingsTableFilterOptions.AppointmentsNext14Days:
       list = list.filter((a) => a.slots.reduce(
         (p, c) => p
             || dj(c.start).isToday()
@@ -348,7 +366,7 @@ const filteredAppointments = computed(() => {
         false,
       ));
       break;
-    case filterOptions.appointmentsNext31Days:
+    case BookingsTableFilterOptions.AppointmentsNext31Days:
       list = list.filter((a) => a.slots.reduce(
         (p, c) => p
             || dj(c.start).isToday()
@@ -356,16 +374,16 @@ const filteredAppointments = computed(() => {
         false,
       ));
       break;
-    case filterOptions.appointmentsInMonth:
+    case BookingsTableFilterOptions.AppointmentsInMonth:
       list = list.filter((a) => a.slots.reduce(
         (p, c) => p || dj(c.start).isToday() || dj(c.start).isSame(dj(), 'month'),
         false,
       ));
       break;
-    case filterOptions.allFutureAppointments:
+    case BookingsTableFilterOptions.AllFutureAppointments:
       list = list.filter((a) => a.slots.reduce((p, c) => p || dj(c.start).isAfter(dj()), false));
       break;
-    case filterOptions.allAppointments:
+    case BookingsTableFilterOptions.AllAppointments:
     default:
       break;
   }
@@ -376,13 +394,13 @@ const filteredAppointments = computed(() => {
 const showAppointment = ref(null);
 const showAppointmentModal = (appointment) => {
   showAppointment.value = appointment;
-  router.replace(`/appointments/${tabActiveToParam(tabActive.value)}/${appointment.slug}`);
+  router.replace(`/appointments/${viewToParam(tabActive.value)}/${appointment.slug}`);
 };
 const closeAppointmentModal = () => {
   showAppointment.value = null;
 
   // Shuffle them back to the appointments route.
-  router.replace(`/appointments/${tabActiveToParam(tabActive.value)}`);
+  router.replace(`/appointments/${viewToParam(tabActive.value)}`);
 };
 
 // initially load data when component gets remounted
@@ -396,9 +414,9 @@ onMounted(async () => {
 });
 
 // paint elements background or reset it to transparent
-const paintBackground = (element, hexColor, hexTransparency = 'ff', reset = false) => {
+const paintBackground = (element: Event, hexColor: string, hexTransparency = 'ff', reset = false) => {
   if (hexColor) {
-    element.currentTarget.style.backgroundColor = reset
+    (element.currentTarget as HTMLTableRowElement).style.backgroundColor = reset
       ? 'transparent'
       : hexColor + hexTransparency;
   }
