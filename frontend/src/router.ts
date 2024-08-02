@@ -84,6 +84,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/appointments/:view?/:slug?',
     name: 'appointments',
+    redirect: { name: 'bookings' },
+  },
+  {
+    path: '/bookings/:view?/:slug?',
+    name: 'bookings',
     component: AppointmentsView,
   },
   {
@@ -155,7 +160,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from) => {
-  if (!to.meta?.isPublic && !['setup', 'contact', undefined].includes(to.name)) {
+  if (!to.meta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
     const user = useUserStore();
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };

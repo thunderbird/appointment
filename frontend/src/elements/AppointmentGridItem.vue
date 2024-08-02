@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { bookingStatus } from '@/definitions';
+import { BookingStatus } from '@/definitions';
 import { inject, computed } from 'vue';
 import { keyByValue, timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
@@ -28,7 +28,7 @@ const props = defineProps<Props>();
 const isPast = computed(() => props.appointment.slots[0].start < dj());
 
 // true if a pending appointment was given
-const isPending = computed(() => props.appointment.slots[0].booking_status === bookingStatus.requested);
+const isPending = computed(() => props.appointment.slots[0].booking_status === BookingStatus.Requested);
 </script>
 
 <template>
@@ -50,7 +50,7 @@ const isPending = computed(() => props.appointment.slots[0].booking_status === b
       <div>{{ appointment.title }}</div>
       <div class="flex items-center gap-1 text-sm">
         <icon-bulb class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
-        {{ t('label.' + keyByValue(bookingStatus, appointment?.slots[0].booking_status ?? 'Unknown')) }}
+        {{ t('label.' + keyByValue(BookingStatus, appointment?.slots[0].booking_status ?? 'Unknown', true)) }}
       </div>
       <div class="flex items-center gap-1 text-sm">
         <icon-calendar class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
