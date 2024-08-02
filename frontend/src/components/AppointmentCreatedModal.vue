@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import ArtConfetti from '@/elements/arts/ArtConfetti.vue';

@@ -1,152 +1,3 @@
-<template>
-  <div class="flex flex-col gap-8">
-    <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
-    <div class="flex max-w-3xl flex-col pl-6">
-      <div class="text-xl">{{ t('heading.profile') }}</div>
-      <label class="mt-4 flex items-center pl-4">
-        <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
-        <div class="w-full">
-          <input
-            v-model="activeUsername"
-            type="text"
-            class="w-full rounded-md"
-            :class="{ '!border-red-500': errorUsername }"
-          />
-          <div v-if="errorUsername" class="text-sm text-red-500">
-            {{ t('error.usernameIsNotAvailable') }}
-          </div>
-        </div>
-      </label>
-      <label class="tooltip-label mt-4 flex items-center pl-4">
-        <div class="flex w-full max-w-2xs gap-2">{{ t('label.preferredEmail') }}
-          <span class="relative cursor-help" role="tooltip" aria-labelledby="preferred-email-help-tooltip">
-          <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
-            <span class="tooltip hidden">
-              <transition>
-                  <tool-tip id="preferred-email-help-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.preferredEmailHelp')"/>
-              </transition>
-            </span>
-        </span>
-        </div>
-        <select v-model="activePreferredEmail" class="w-full rounded-md">
-          <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
-        </select>
-      </label>
-      <label class="mt-4 flex items-center pl-4">
-        <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
-        <input
-          v-model="activeDisplayName"
-          type="text"
-          class="w-full rounded-md"
-        />
-      </label>
-      <label class="mt-6 flex items-center pl-4">
-        <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
-        <div class="flex w-full items-center justify-between gap-4">
-          <div class="relative w-full">
-            <input
-              :value="user.myLink"
-              type="text"
-              class="mr-2 w-full rounded-md pr-7"
-              readonly
-            />
-            <a
-              :href="user.myLink"
-              target="_blank"
-              class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              <icon-external-link class="size-5"/>
-            </a>
-          </div>
-          <text-button
-            class="btn-copy"
-            :tooltip="t('label.copyLink')"
-            :copy="user.myLink"
-            :title="t('label.copy')"
-          />
-        </div>
-      </label>
-      <div class="mt-6 flex gap-4 self-end">
-        <secondary-button
-          :label="t('label.refreshLink')"
-          class="btn-refresh !text-teal-500"
-          @click="refreshLink"
-          :title="t('label.refresh')"
-        />
-        <secondary-button
-          :label="t('label.saveChanges')"
-          class="btn-save !text-teal-500"
-          @click="updateUserCheckForConfirmation"
-          :title="t('label.save')"
-        />
-      </div>
-    </div>
-    <div class="pl-6">
-      <div class="text-xl">{{ t('heading.accountData') }}</div>
-      <div class="mt-4 pl-4">
-        <primary-button
-          :label="t('label.downloadYourData')"
-          class="btn-download"
-          @click="downloadData"
-          :title="t('label.download')"
-        />
-      </div>
-    </div>
-    <div class="pl-6">
-      <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
-      <div class="mt-4 pl-4">
-        <caution-button
-          :label="t('label.deleteYourAccount')"
-          class="btn-delete"
-          @click="deleteAccount"
-          :title="t('label.delete')"
-        />
-      </div>
-    </div>
-  </div>
-  <!-- Refresh link confirmation modal -->
-  <confirmation-modal
-    :open="refreshLinkModalOpen"
-    :title="t('label.refreshLink')"
-    :message="t('text.refreshLinkNotice')"
-    :confirm-label="t('label.refresh')"
-    :cancel-label="t('label.cancel')"
-    @confirm="() => refreshLinkConfirm()"
-    @close="closeModals"
-  ></confirmation-modal>
-  <!-- Update username confirmation modal -->
-  <confirmation-modal
-    :open="updateUsernameModalOpen"
-    :title="t('label.updateUsername')"
-    :message="t('text.updateUsernameNotice')"
-    :confirm-label="t('label.saveChanges')"
-    :cancel-label="t('label.cancel')"
-    @confirm="() => updateUser()"
-    @close="closeModals"
-  ></confirmation-modal>
-  <!-- Account download modal -->
-  <confirmation-modal
-    :open="downloadAccountModalOpen"
-    :title="t('label.accountData')"
-    :message="t('text.accountDataNotice')"
-    :confirm-label="t('label.continue')"
-    :cancel-label="t('label.cancel')"
-    @confirm="actuallyDownloadData"
-    @close="closeModals"
-  ></confirmation-modal>
-  <!-- Account deletion modals -->
-  <confirmation-modal
-    :open="deleteAccountFirstModalOpen"
-    :title="t('label.deleteYourAccount')"
-    :message="t('text.accountDeletionWarning')"
-    :confirm-label="t('label.deleteYourAccount')"
-    :cancel-label="t('label.cancel')"
-    :use-caution-button="true"
-    @confirm="actuallyDeleteAccount"
-    @close="closeModals"
-  ></confirmation-modal>
-</template>
-
 <script setup lang="ts">
 import {
   ref, inject, onMounted,
@@ -307,6 +158,155 @@ const actuallyDeleteAccount = async () => {
 };
 
 </script>
+
+<template>
+  <div class="flex flex-col gap-8">
+    <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
+    <div class="flex max-w-3xl flex-col pl-6">
+      <div class="text-xl">{{ t('heading.profile') }}</div>
+      <label class="mt-4 flex items-center pl-4">
+        <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
+        <div class="w-full">
+          <input
+            v-model="activeUsername"
+            type="text"
+            class="w-full rounded-md"
+            :class="{ '!border-red-500': errorUsername }"
+          />
+          <div v-if="errorUsername" class="text-sm text-red-500">
+            {{ t('error.usernameIsNotAvailable') }}
+          </div>
+        </div>
+      </label>
+      <label class="tooltip-label mt-4 flex items-center pl-4">
+        <div class="flex w-full max-w-2xs gap-2">{{ t('label.preferredEmail') }}
+          <span class="relative cursor-help" role="tooltip" aria-labelledby="preferred-email-help-tooltip">
+          <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
+            <span class="tooltip hidden">
+              <transition>
+                  <tool-tip id="preferred-email-help-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.preferredEmailHelp')"/>
+              </transition>
+            </span>
+        </span>
+        </div>
+        <select v-model="activePreferredEmail" class="w-full rounded-md">
+          <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
+        </select>
+      </label>
+      <label class="mt-4 flex items-center pl-4">
+        <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
+        <input
+          v-model="activeDisplayName"
+          type="text"
+          class="w-full rounded-md"
+        />
+      </label>
+      <label class="mt-6 flex items-center pl-4">
+        <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
+        <div class="flex w-full items-center justify-between gap-4">
+          <div class="relative w-full">
+            <input
+              :value="user.myLink"
+              type="text"
+              class="mr-2 w-full rounded-md pr-7"
+              readonly
+            />
+            <a
+              :href="user.myLink"
+              target="_blank"
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              <icon-external-link class="size-5"/>
+            </a>
+          </div>
+          <text-button
+            class="btn-copy"
+            :tooltip="t('label.copyLink')"
+            :copy="user.myLink"
+            :title="t('label.copy')"
+          />
+        </div>
+      </label>
+      <div class="mt-6 flex gap-4 self-end">
+        <secondary-button
+          :label="t('label.refreshLink')"
+          class="btn-refresh !text-teal-500"
+          @click="refreshLink"
+          :title="t('label.refresh')"
+        />
+        <secondary-button
+          :label="t('label.saveChanges')"
+          class="btn-save !text-teal-500"
+          @click="updateUserCheckForConfirmation"
+          :title="t('label.save')"
+        />
+      </div>
+    </div>
+    <div class="pl-6">
+      <div class="text-xl">{{ t('heading.accountData') }}</div>
+      <div class="mt-4 pl-4">
+        <primary-button
+          :label="t('label.downloadYourData')"
+          class="btn-download"
+          @click="downloadData"
+          :title="t('label.download')"
+        />
+      </div>
+    </div>
+    <div class="pl-6">
+      <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
+      <div class="mt-4 pl-4">
+        <caution-button
+          :label="t('label.deleteYourAccount')"
+          class="btn-delete"
+          @click="deleteAccount"
+          :title="t('label.delete')"
+        />
+      </div>
+    </div>
+  </div>
+  <!-- Refresh link confirmation modal -->
+  <confirmation-modal
+    :open="refreshLinkModalOpen"
+    :title="t('label.refreshLink')"
+    :message="t('text.refreshLinkNotice')"
+    :confirm-label="t('label.refresh')"
+    :cancel-label="t('label.cancel')"
+    @confirm="() => refreshLinkConfirm()"
+    @close="closeModals"
+  ></confirmation-modal>
+  <!-- Update username confirmation modal -->
+  <confirmation-modal
+    :open="updateUsernameModalOpen"
+    :title="t('label.updateUsername')"
+    :message="t('text.updateUsernameNotice')"
+    :confirm-label="t('label.saveChanges')"
+    :cancel-label="t('label.cancel')"
+    @confirm="() => updateUser()"
+    @close="closeModals"
+  ></confirmation-modal>
+  <!-- Account download modal -->
+  <confirmation-modal
+    :open="downloadAccountModalOpen"
+    :title="t('label.accountData')"
+    :message="t('text.accountDataNotice')"
+    :confirm-label="t('label.continue')"
+    :cancel-label="t('label.cancel')"
+    @confirm="actuallyDownloadData"
+    @close="closeModals"
+  ></confirmation-modal>
+  <!-- Account deletion modals -->
+  <confirmation-modal
+    :open="deleteAccountFirstModalOpen"
+    :title="t('label.deleteYourAccount')"
+    :message="t('text.accountDeletionWarning')"
+    :confirm-label="t('label.deleteYourAccount')"
+    :cancel-label="t('label.cancel')"
+    :use-caution-button="true"
+    @confirm="actuallyDeleteAccount"
+    @close="closeModals"
+  ></confirmation-modal>
+</template>
 
 <style scoped>
 

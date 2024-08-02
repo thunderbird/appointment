@@ -1,3 +1,32 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import {
+  IconArrowRight, IconCalendar, IconPencil, IconX, IconRefresh,
+} from '@tabler/icons-vue';
+import { useI18n } from 'vue-i18n';
+import { CalendarManagementType } from '@/definitions';
+import { Calendar } from '@/models';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
+
+const { t } = useI18n({ useScope: 'global' });
+const emit = defineEmits(['modify', 'remove', 'sync']);
+
+// component properties
+interface Props {
+  calendars: Calendar[], // List of calendars to display
+  title: String,
+  type: CalendarManagementType,
+  loading: boolean,
+};
+const props = defineProps<Props>();
+
+// Filter by connected or not connected depending on the list type
+const filteredCalendars = computed(() => props.calendars.filter((calendar: Calendar) => (
+  props.type === CalendarManagementType.Edit ? calendar.connected : !calendar.connected
+)));
+
+</script>
+
 <template>
   <div class="flex max-w-2xl">
     <div class="text-xl">{{ title }}</div>
@@ -61,32 +90,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue';
-import {
-  IconArrowRight, IconCalendar, IconPencil, IconX, IconRefresh,
-} from '@tabler/icons-vue';
-import { useI18n } from 'vue-i18n';
-import { CalendarManagementType } from '@/definitions';
-import { Calendar } from '@/models';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
-
-const { t } = useI18n({ useScope: 'global' });
-const emit = defineEmits(['modify', 'remove', 'sync']);
-
-// component properties
-interface Props {
-  calendars: Calendar[], // List of calendars to display
-  title: String,
-  type: CalendarManagementType,
-  loading: boolean,
-};
-const props = defineProps<Props>();
-
-// Filter by connected or not connected depending on the list type
-const filteredCalendars = computed(() => props.calendars.filter((calendar: Calendar) => (
-  props.type === CalendarManagementType.Edit ? calendar.connected : !calendar.connected
-)));
-
-</script>

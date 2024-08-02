@@ -1,3 +1,87 @@
+<script setup lang="ts">
+import { ColorSchemes } from '@/definitions';
+import { ref, reactive, inject, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user-store';
+import { dayjsKey, callKey } from "@/keys";
+import { SubscriberResponse } from "@/models";
+// import SwitchToggle from '@/elements/SwitchToggle';
+
+// component constants
+const user = useUserStore();
+const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
+const call = inject(callKey);
+const dj = inject(dayjsKey);
+
+// handle ui languages
+// TODO: move to settings store
+watch(locale, (newValue) => {
+  localStorage?.setItem('locale', newValue);
+  window.location.reload();
+});
+
+// handle theme mode
+// TODO: move to settings store
+const initialTheme = localStorage?.getItem('theme')
+  ? localStorage.getItem('theme')
+  : ColorSchemes.System;
+const theme = ref(initialTheme);
+watch(theme, (newValue) => {
+  switch (newValue) {
+    case ColorSchemes.Dark:
+      localStorage?.setItem('theme', 'dark');
+      document.documentElement.classList.add('dark');
+      break;
+    case ColorSchemes.Light:
+      localStorage?.setItem('theme', 'light');
+      document.documentElement.classList.remove('dark');
+      break;
+    case ColorSchemes.System:
+      localStorage?.removeItem('theme');
+      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+      break;
+    default:
+      break;
+  }
+});
+
+// handle time format
+// TODO: move to settings store
+const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? '24' : '12';
+const initialTimeFormat = localStorage?.getItem('timeFormat') ?? detectedTimeFormat;
+const timeFormat = ref(initialTimeFormat);
+watch(timeFormat, (newValue) => {
+  localStorage?.setItem('timeFormat', newValue);
+});
+
+// timezones
+const activeTimezone = reactive({
+  primary: user.data.timezone ?? dj.tz.guess(),
+  secondary: dj.tz.guess(),
+});
+// @ts-ignore
+// See https://github.com/microsoft/TypeScript/issues/49231
+const timezones = Intl.supportedValuesOf('timeZone');
+
+// save timezone config
+const updateTimezone = async () => {
+  const obj = {
+    username: user.data.username,
+    timezone: activeTimezone.primary,
+  };
+  const { error }: SubscriberResponse = await call('me').put(obj).json();
+  if (!error.value) {
+    // update user in store
+    user.data.timezone = activeTimezone.primary;
+    // TODO show some confirmation
+  }
+};
+</script>
+
 <template>
 <div class="flex flex-col gap-8">
   <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.generalSettings') }}</div>
@@ -85,87 +169,3 @@
   </div>
 </div>
 </template>
-
-<script setup lang="ts">
-import { ColorSchemes } from '@/definitions';
-import { ref, reactive, inject, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey } from "@/keys";
-import { SubscriberResponse } from "@/models";
-// import SwitchToggle from '@/elements/SwitchToggle';
-
-// component constants
-const user = useUserStore();
-const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
-const call = inject(callKey);
-const dj = inject(dayjsKey);
-
-// handle ui languages
-// TODO: move to settings store
-watch(locale, (newValue) => {
-  localStorage?.setItem('locale', newValue);
-  window.location.reload();
-});
-
-// handle theme mode
-// TODO: move to settings store
-const initialTheme = localStorage?.getItem('theme')
-  ? localStorage.getItem('theme')
-  : ColorSchemes.System;
-const theme = ref(initialTheme);
-watch(theme, (newValue) => {
-  switch (newValue) {
-    case ColorSchemes.Dark:
-      localStorage?.setItem('theme', 'dark');
-      document.documentElement.classList.add('dark');
-      break;
-    case ColorSchemes.Light:
-      localStorage?.setItem('theme', 'light');
-      document.documentElement.classList.remove('dark');
-      break;
-    case ColorSchemes.System:
-      localStorage?.removeItem('theme');
-      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
-      break;
-    default:
-      break;
-  }
-});
-
-// handle time format
-// TODO: move to settings store
-const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? '24' : '12';
-const initialTimeFormat = localStorage?.getItem('timeFormat') ?? detectedTimeFormat;
-const timeFormat = ref(initialTimeFormat);
-watch(timeFormat, (newValue) => {
-  localStorage?.setItem('timeFormat', newValue);
-});
-
-// timezones
-const activeTimezone = reactive({
-  primary: user.data.timezone ?? dj.tz.guess(),
-  secondary: dj.tz.guess(),
-});
-// @ts-ignore
-// See https://github.com/microsoft/TypeScript/issues/49231
-const timezones = Intl.supportedValuesOf('timeZone');
-
-// save timezone config
-const updateTimezone = async () => {
-  const obj = {
-    username: user.data.username,
-    timezone: activeTimezone.primary,
-  };
-  const { error }: SubscriberResponse = await call('me').put(obj).json();
-  if (!error.value) {
-    // update user in store
-    user.data.timezone = activeTimezone.primary;
-    // TODO show some confirmation
-  }
-};
-</script>
