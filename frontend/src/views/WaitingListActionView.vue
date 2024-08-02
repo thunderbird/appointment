@@ -1,3 +1,48 @@
+<script setup lang="ts">
+import { inject, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { WaitingListAction } from '@/definitions';
+import { WaitingListActionResponse } from '@/models';
+import { useI18n } from 'vue-i18n';
+import { callKey } from '@/keys';
+import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
+import ArtLeave from '@/elements/arts/ArtLeave.vue';
+import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+
+const route = useRoute();
+const router = useRouter();
+
+const { t } = useI18n();
+
+// component constants
+const call = inject(callKey);
+
+const isLoading = ref(false);
+const isError = ref(false);
+const action = ref(null);
+
+const goHome = () => {
+  router.push('/');
+};
+
+onMounted(async () => {
+  isLoading.value = true;
+  const { data, error }: WaitingListActionResponse = await call('waiting-list/action').post({
+    token: route.params.token,
+  }).json();
+  isLoading.value = false;
+
+  if (error?.value) {
+    isError.value = true;
+    return;
+  }
+
+  action.value = data?.value?.action;
+});
+</script>
+
 <template>
   <div class="flex-center h-full flex-col gap-12 p-4">
     <div v-if="isLoading">
@@ -19,7 +64,7 @@
       />
     </div>
     <div v-else class="flex-center flex-col gap-8 px-4">
-      <template v-if="action === waitingListAction.confirm">
+      <template v-if="action === WaitingListAction.Confirm">
         <art-successful-booking class="my-6 h-auto max-w-sm"/>
         <div class="text-xl font-semibold text-sky-600">
           {{ t('waitingList.confirmHeading') }}
@@ -52,48 +97,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import {
-  inject, onMounted, ref,
-} from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { waitingListAction } from '@/definitions';
-import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
-import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import { useI18n } from 'vue-i18n';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import ArtLeave from '@/elements/arts/ArtLeave.vue';
-import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
-
-const route = useRoute();
-const router = useRouter();
-
-const { t } = useI18n();
-
-// component constants
-const call = inject('call');
-
-const isLoading = ref(false);
-const isError = ref(false);
-const action = ref(null);
-
-const goHome = () => {
-  router.push('/');
-};
-
-onMounted(async () => {
-  isLoading.value = true;
-  const { data, error } = await call('waiting-list/action').post({
-    token: route.params.token,
-  }).json();
-  isLoading.value = false;
-
-  if (error?.value) {
-    isError.value = true;
-    return;
-  }
-
-  action.value = data?.value?.action;
-});
-</script>

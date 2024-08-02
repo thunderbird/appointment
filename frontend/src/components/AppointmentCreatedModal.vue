@@ -1,3 +1,29 @@
+
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import ArtConfetti from '@/elements/arts/ArtConfetti.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
+
+// icons
+import { IconX } from '@tabler/icons-vue';
+
+// component constants
+const { t } = useI18n();
+
+// component properties
+interface Props {
+  open: boolean, // modal state
+  isSchedule: boolean, // confirmation is for a schedule instead of a common appointment
+  title: string, // title of created appointment
+  publicLink: string, // public link of created appointment for sharing
+};
+defineProps<Props>();
+
+// component emits
+const emit = defineEmits(['close']);
+</script>
+
 <template>
   <div
     v-if="open"
@@ -39,27 +65,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { useI18n } from 'vue-i18n';
-import ArtConfetti from '@/elements/arts/ArtConfetti';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
-
-// icons
-import { IconX } from '@tabler/icons-vue';
-
-// component constants
-const { t } = useI18n();
-
-// component properties
-defineProps({
-  open: Boolean, // modal state
-  isSchedule: Boolean, // confirmation is for a schedule instead of a common appointment
-  title: String, // title of created appointment
-  publicLink: String, // public link of created appointment for sharing
-});
-
-// component emits
-const emit = defineEmits(['close']);
-</script>

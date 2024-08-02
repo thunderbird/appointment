@@ -154,6 +154,16 @@ export enum BookingsViewTypes {
   Grid = 2,
 };
 
+
+/**
+ * Type for event location.
+ * Corresponds to models.LocationType
+ */
+export enum EventLocationType {
+  InPerson = 1,
+  Online = 2,
+}
+
 /**
  * Settings page sections
  * @enum
@@ -291,12 +301,10 @@ export const tooltipPosition = {
 
 /**
  * This should match the enum in routes/waiting_list.py
- * @enum
- * @readonly
  */
-export const waitingListAction = {
-  confirm: 1,
-  leave: 2,
+export enum WaitingListAction {
+  Confirm = 1,
+  Leave = 2,
 };
 
 export default {
@@ -314,6 +322,7 @@ export default {
   ColorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
+  EventLocationType,
   ftueStep,
   InviteStatus,
   locationTypes,
@@ -327,5 +336,5 @@ export default {
   tableDataButtonType,
   tableDataType,
   tooltipPosition,
-  waitingListAction,
+  WaitingListAction,
 };
