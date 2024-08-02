@@ -1,7 +1,7 @@
 <template>
   <div class="flex max-w-2xl">
     <div class="text-xl">{{ title }}</div>
-    <div class="mx-auto mr-0 inline-flex" v-if="type === calendarManagementType.connect">
+    <div class="mx-auto mr-0 inline-flex" v-if="type === CalendarManagementType.Connect">
       <secondary-button
         class="btn-sync text-sm !text-teal-500 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
         :disabled="loading"
@@ -24,7 +24,7 @@
       {{ cal.title }}
       </span>
       <button
-        v-if="type === calendarManagementType.connect"
+        v-if="type === CalendarManagementType.Connect"
         @click="emit('modify', cal.id)"
         :disabled="loading"
         class="
@@ -37,7 +37,7 @@
         {{ t('label.connectCalendar') }}
       </button>
       <button
-        v-if="type === calendarManagementType.edit"
+        v-if="type === CalendarManagementType.Edit"
         @click="emit('modify', cal.id)"
         :disabled="loading"
         class="
@@ -62,32 +62,31 @@
   </div>
 </template>
 
-<script setup>
-import { calendarManagementType } from '@/definitions';
+<script setup lang="ts">
 import { computed } from 'vue';
 import {
   IconArrowRight, IconCalendar, IconPencil, IconX, IconRefresh,
 } from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
-import SecondaryButton from '@/elements/SecondaryButton';
+import { CalendarManagementType } from '@/definitions';
+import { Calendar } from '@/models';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
 
 const { t } = useI18n({ useScope: 'global' });
 const emit = defineEmits(['modify', 'remove', 'sync']);
 
-const props = defineProps({
-  calendars: Array, // List of calendars to display
+// component properties
+interface Props {
+  calendars: Calendar[], // List of calendars to display
   title: String,
-  type: {
-    validator(value) {
-      return Object.values(calendarManagementType).includes(value);
-    },
-  },
-  loading: Boolean,
-});
+  type: CalendarManagementType,
+  loading: boolean,
+};
+const props = defineProps<Props>();
 
 // Filter by connected or not connected depending on the list type
-const filteredCalendars = computed(() => props.calendars.filter((calendar) => (
-  props.type === calendarManagementType.edit ? calendar.connected : !calendar.connected
+const filteredCalendars = computed(() => props.calendars.filter((calendar: Calendar) => (
+  props.type === CalendarManagementType.Edit ? calendar.connected : !calendar.connected
 )));
 
 </script>

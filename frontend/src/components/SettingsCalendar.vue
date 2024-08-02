@@ -11,7 +11,7 @@
     <!-- list of possible calendars to connect -->
     <calendar-management
       :title="t('heading.calendarsUnconnected')"
-      :type="calendarManagementType.connect"
+      :type="CalendarManagementType.Connect"
       :calendars="calendarStore.unconnectedCalendars"
       :loading="loading"
       @sync="syncCalendars"
@@ -22,7 +22,7 @@
     <!-- list of connected calendars -->
     <calendar-management
       :title="t('heading.calendarsConnected')"
-      :type="calendarManagementType.edit"
+      :type="CalendarManagementType.Edit"
       :calendars="calendarStore.connectedCalendars"
       :loading="loading"
       @modify="editCalendar"
@@ -32,14 +32,14 @@
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.google') })"
         class="btn-add text-sm !text-teal-500"
-        @click="addCalendar(calendarProviders.google)"
+        @click="addCalendar(CalendarProviders.Google)"
         :disabled="inputMode"
         :title="t('label.addCalendar', { provider: t('label.google') })"
       />
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.caldav') })"
         class="btn-add text-sm !text-teal-500"
-        @click="addCalendar(calendarProviders.caldav)"
+        @click="addCalendar(CalendarProviders.Caldav)"
         :disabled="inputMode"
         :title="t('label.addCalendar', { provider: t('label.caldav') })"
       />
@@ -205,7 +205,7 @@
   </div>
 </div>
 <!-- Calendar disconnect confirmation modal -->
-<ConfirmationModal
+<confirmation-modal
   :open="deleteCalendarModalOpen"
   :title="t('label.calendarDeletion')"
   :message="t('text.calendarDeletionWarning')"
@@ -214,57 +214,55 @@
   :useCautionButton="true"
   @confirm="deleteCalendarConfirm"
   @close="closeModals"
-></ConfirmationModal>
+></confirmation-modal>
 </template>
 
-<script setup>
-import { calendarManagementType } from '@/definitions';
+<script setup lang="ts">
+import { CalendarManagementType, CalendarProviders } from '@/definitions';
 import { IconArrowRight } from '@tabler/icons-vue';
 import {
   ref, reactive, inject, onMounted, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import AlertBox from '@/elements/AlertBox';
-import CalendarManagement from '@/components/CalendarManagement.vue';
-import GoogleCalendarButton from '@/elements/GoogleCalendarButton';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
+import { callKey, refreshKey } from '@/keys';
+import { Calendar, CalendarResponse, CalendarListResponse, Exception, ExceptionDetail } from '@/models';
+import AlertBox from '@/elements/AlertBox.vue';
+import CalendarManagement from '@/components/CalendarManagement.vue';
 import CautionButton from '@/elements/CautionButton.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import GoogleCalendarButton from '@/elements/GoogleCalendarButton.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
-const call = inject('call');
-const refresh = inject('refresh');
+const call = inject(callKey);
+const refresh = inject(refreshKey);
 const calendarStore = useCalendarStore();
 
 const calendarConnectError = ref('');
 
 const deleteCalendarModalOpen = ref(false);
-const deleteCalendarModalTarget = ref(null);
+const deleteCalendarModalTarget = ref<number>(null);
 
 // Temp until we get a store solution rolling
 const loading = ref(false);
 
 // handle calendar user input to add or edit calendar connections
-const inputModes = {
-  hidden: 0,
-  add: 1,
-  edit: 2,
+enum InputModes {
+  Hidden,
+  Add,
+  Edit,
 };
-const inputMode = ref(inputModes.hidden);
-const addMode = computed(() => inputMode.value === inputModes.add);
-const editMode = computed(() => inputMode.value === inputModes.edit);
+const inputMode = ref(InputModes.Hidden);
+const addMode = computed(() => inputMode.value === InputModes.Add);
+const editMode = computed(() => inputMode.value === InputModes.Edit);
 
 // supported calendar providers
-const calendarProviders = {
-  caldav: 1,
-  google: 2,
-};
 const defaultCalendarInput = {
-  provider: calendarProviders.caldav,
+  provider: CalendarProviders.Caldav,
   title: '',
   color: '',
   url: '',
@@ -275,8 +273,8 @@ const calendarInput = reactive({
   id: null,
   data: { ...defaultCalendarInput },
 });
-const isCalDav = computed(() => calendarInput.data.provider === calendarProviders.caldav);
-const isGoogle = computed(() => calendarInput.data.provider === calendarProviders.google);
+const isCalDav = computed(() => calendarInput.data.provider === CalendarProviders.Caldav);
+const isGoogle = computed(() => calendarInput.data.provider === CalendarProviders.Google);
 
 const closeModals = async () => {
   deleteCalendarModalTarget.value = null;
@@ -285,7 +283,7 @@ const closeModals = async () => {
 
 const refreshData = async () => {
   // Invalidate our calendar store
-  await calendarStore.$reset();
+  calendarStore.$reset();
   await refresh();
   loading.value = false;
 };
@@ -294,28 +292,28 @@ const refreshData = async () => {
 const resetInput = () => {
   calendarInput.id = null;
   calendarInput.data = { ...defaultCalendarInput };
-  inputMode.value = inputModes.hidden;
+  inputMode.value = InputModes.Hidden;
   loading.value = false;
 };
 
 // set input mode for adding or editing
-const addCalendar = (provider) => {
-  inputMode.value = inputModes.add;
+const addCalendar = (provider: number) => {
+  inputMode.value = InputModes.Add;
   calendarInput.data.provider = provider;
 };
-const connectCalendar = async (id) => {
+const connectCalendar = async (id: number) => {
   loading.value = true;
 
   await calendarStore.connectCalendar(call, id);
   await refreshData();
-  await resetInput();
+  resetInput();
 };
-const disconnectCalendar = async (id) => {
+const disconnectCalendar = async (id: number) => {
   loading.value = true;
 
   await calendarStore.disconnectCalendar(call, id);
   await refreshData();
-  await resetInput();
+  resetInput();
 };
 const syncCalendars = async () => {
   loading.value = true;
@@ -323,12 +321,12 @@ const syncCalendars = async () => {
   await calendarStore.syncCalendars(call);
   await refreshData();
 };
-const editCalendar = async (id) => {
+const editCalendar = async (id: number) => {
   loading.value = true;
 
-  inputMode.value = inputModes.edit;
+  inputMode.value = InputModes.Edit;
   calendarInput.id = id;
-  const { data } = await call(`cal/${id}`).get().json();
+  const { data }: CalendarResponse = await call(`cal/${id}`).get().json();
   Object.keys(data.value).forEach((attr) => {
     calendarInput.data[attr] = data.value[attr];
   });
@@ -336,7 +334,7 @@ const editCalendar = async (id) => {
   loading.value = false;
 };
 
-const deleteCalendar = async (id) => {
+const deleteCalendar = async (id: number) => {
   deleteCalendarModalTarget.value = id;
   deleteCalendarModalOpen.value = true;
 };
@@ -355,10 +353,10 @@ const saveCalendar = async () => {
   loading.value = true;
 
   // add new caldav calendar
-  if (isCalDav.value && inputMode.value === inputModes.add) {
-    const { error, data } = await call('cal').post(calendarInput.data).json();
+  if (isCalDav.value && inputMode.value === InputModes.Add) {
+    const { error, data }: CalendarResponse = await call('cal').post(calendarInput.data).json();
     if (error.value) {
-      calendarConnectError.value = data.value?.detail?.message;
+      calendarConnectError.value = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
       loading.value = false;
       // Show them the error message because I haven't thought this ux process through.
       window.scrollTo(0, 0);
@@ -366,12 +364,12 @@ const saveCalendar = async () => {
     }
   }
   // add all google calendars connected to given gmail address
-  if (isGoogle.value && inputMode.value === inputModes.add) {
+  if (isGoogle.value && inputMode.value === InputModes.Add) {
     await calendarStore.connectGoogleCalendar(call, calendarInput.data.user);
     return;
   }
   // edit existing calendar connection
-  if (inputMode.value === inputModes.edit) {
+  if (inputMode.value === InputModes.Edit) {
     await call(`cal/${calendarInput.id}`).put(calendarInput.data);
   }
   // refresh list of calendars
@@ -386,17 +384,17 @@ const principal = reactive({
   password: '',
 });
 const processPrincipal = ref(false);
-const searchResultCalendars = ref([]);
+const searchResultCalendars = ref<Calendar[]>([]);
 const getRemoteCalendars = async () => {
   processPrincipal.value = true;
-  const { error, data } = await call('rmt/calendars').post(principal);
-  searchResultCalendars.value = !error.value ? JSON.parse(data.value) : [];
+  const { error, data }: CalendarListResponse = await call('rmt/calendars').post(principal).json();
+  searchResultCalendars.value = !error.value ? data.value : [];
   processPrincipal.value = false;
 };
 
 // fill input form with data from principal discovery
-const assignCalendar = (title, url) => {
-  inputMode.value = inputModes.add;
+const assignCalendar = (title: string, url: string) => {
+  inputMode.value = InputModes.Add;
   calendarInput.data.title = title;
   calendarInput.data.url = url;
   calendarInput.data.user = principal.user;
@@ -424,7 +422,7 @@ onMounted(async () => {
 
   // Error should be a string value, so don't worry about any obj deconstruction.
   if (route.query.error) {
-    calendarConnectError.value = route.query.error;
+    calendarConnectError.value = route.query.error as string;
     await router.replace(route.path);
   }
 

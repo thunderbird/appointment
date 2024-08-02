@@ -96,6 +96,7 @@ export const bookingStatus = {
   requested: 2,
   booked: 3,
 };
+
 /**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
  */
@@ -187,12 +188,27 @@ export enum ColorSchemes {
 
 /**
  * Calendar management type states
- * @enum
- * @readonly
  */
-export const calendarManagementType = {
-  connect: 1,
-  edit: 2,
+export enum CalendarManagementType {
+  Connect = 1,
+  Edit = 2,
+};
+
+/**
+ * Supported calendar providers
+ */
+export enum CalendarProviders {
+  Caldav = 1,
+  Google = 2,
+};
+
+/**
+ * Supported external connection providers
+ */
+export enum ExternalConnectionProviders {
+  Fxa = 1,
+  Google = 2,
+  Zoom = 3,
 };
 
 /**
@@ -218,8 +234,6 @@ export enum ModalStates {
 
 /**
  * Alert levels
- * @enum
- * @readonly
  */
 export enum AlertSchemes {
   Error = 1, // Alert indicates something's gone wrong
@@ -317,12 +331,14 @@ export default {
   BookingStatus,
   BookingsViews,
   BookingsViewTypes,
-  calendarManagementType,
+  CalendarManagementType,
+  CalendarProviders,
   calendarViews,
   ColorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
   EventLocationType,
+  ExternalConnectionProviders,
   ftueStep,
   InviteStatus,
   locationTypes,

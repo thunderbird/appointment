@@ -86,18 +86,19 @@
 </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ColorSchemes } from '@/definitions';
 import { ref, reactive, inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey } from "@/keys";
+import { dayjsKey, callKey } from "@/keys";
+import { SubscriberResponse } from "@/models";
 // import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
 const user = useUserStore();
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
-const call = inject('call');
+const call = inject(callKey);
 const dj = inject(dayjsKey);
 
 // handle ui languages
@@ -138,7 +139,7 @@ watch(theme, (newValue) => {
 
 // handle time format
 // TODO: move to settings store
-const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
+const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? '24' : '12';
 const initialTimeFormat = localStorage?.getItem('timeFormat') ?? detectedTimeFormat;
 const timeFormat = ref(initialTimeFormat);
 watch(timeFormat, (newValue) => {
@@ -150,6 +151,8 @@ const activeTimezone = reactive({
   primary: user.data.timezone ?? dj.tz.guess(),
   secondary: dj.tz.guess(),
 });
+// @ts-ignore
+// See https://github.com/microsoft/TypeScript/issues/49231
 const timezones = Intl.supportedValuesOf('timeZone');
 
 // save timezone config
@@ -158,7 +161,7 @@ const updateTimezone = async () => {
     username: user.data.username,
     timezone: activeTimezone.primary,
   };
-  const { error } = await call('me').put(obj).json();
+  const { error }: SubscriberResponse = await call('me').put(obj).json();
   if (!error.value) {
     // update user in store
     user.data.timezone = activeTimezone.primary;

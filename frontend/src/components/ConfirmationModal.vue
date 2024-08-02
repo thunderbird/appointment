@@ -16,7 +16,7 @@ interface Props {
   message: string,
   confirmLabel: string,
   cancelLabel: string,
-  useCautionButton: boolean,
+  useCautionButton?: boolean,
 };
 defineProps<Props>();
 

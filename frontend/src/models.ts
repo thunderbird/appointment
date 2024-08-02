@@ -1,6 +1,6 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
-import { InviteStatus, WaitingListAction, EventLocationType } from './definitions';
+import { InviteStatus, WaitingListAction, EventLocationType, CalendarProviders } from './definitions';
 
 export type Attendee = {
   id?: number;
@@ -128,6 +128,9 @@ export type Calendar = {
   connected: boolean;
   title: string;
   color: string;
+  provider?: CalendarProviders;
+  url?: string;
+  user?: string;
 };
 
 export type ExternalConnection = {
@@ -255,6 +258,8 @@ export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean>;
+export type BlobResponse = UseFetchReturn<Blob>;
+export type CalendarResponse = UseFetchReturn<Calendar|Exception>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
@@ -265,6 +270,7 @@ export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot|Exception>;
 export type StringResponse = UseFetchReturn<string|Exception>;
+export type StringListResponse = UseFetchReturn<string[]>;
 export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
