@@ -167,14 +167,12 @@ export enum EventLocationType {
 
 /**
  * Settings page sections
- * @enum
- * @readonly
  */
-export const settingsSections = {
-  general: 1,
-  calendar: 2,
-  account: 3,
-  connectedAccounts: 4,
+export enum SettingsSections {
+  General = 1,
+  Calendar = 2,
+  Account = 3,
+  ConnectedAccounts = 4,
 };
 
 /**
@@ -347,7 +345,7 @@ export default {
   ModalStates,
   qalendarSlotDurations,
   scheduleCreationState,
-  settingsSections,
+  SettingsSections,
   subscriberLevels,
   tableDataButtonType,
   tableDataType,

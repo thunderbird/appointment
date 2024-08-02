@@ -14,7 +14,7 @@ export const lcFirst = (s: string): string => {
 }
 
 // Convert a numeric enum to an object for key-value iteration
-export const enumToObject = (e: Object): Object => {
+export const enumToObject = (e: Object): { [key in string]: number } => {
   const o = {};
   Object.keys(e).filter((v) => isNaN(Number(v))).forEach((k) => o[lcFirst(k)] = e[k]);
   return o;
