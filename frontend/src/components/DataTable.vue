@@ -41,7 +41,7 @@
               </span>
               <span v-else-if="fieldData.type === tableDataType.code" class="flex items-center gap-4">
                 <code>{{ fieldData.value }}</code>
-                <text-button class="btn-copy" :copy="fieldData.value" :title="t('label.copy')" />
+                <text-button :uid="fieldKey" class="btn-copy" :copy="fieldData.value" :title="t('label.copy')" />
               </span>
               <span v-else-if="fieldData.type === tableDataType.bool">
                 <span v-if="fieldData.value">Yes</span>

@@ -46,6 +46,7 @@
             </router-link>
             <text-button
               v-show="user.myLink"
+              uid="myLink"
               :label="t('label.shareMyLink')"
               :copy="user.myLink"
               :title="t('label.copy')"

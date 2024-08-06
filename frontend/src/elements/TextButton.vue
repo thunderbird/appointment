@@ -5,16 +5,19 @@ import ToolTip from '@/elements/ToolTip.vue';
 
 // icons
 import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';
+import { posthog, usePosthog } from '@/composables/posthog';
+import { MetricEvents } from '@/definitions';
 
 // component constants
 const { t } = useI18n();
 
 // component properties
 interface Props {
+  uid: string; // id for this button
   label?: string; // button text
   tooltip?: string, // optional tooltip
   copy?: string; // text to copy to clipboard
-};
+}
 const props = defineProps<Props>();
 
 // state for copy click
@@ -26,6 +29,13 @@ const copyToClipboard = async () => {
   await navigator.clipboard.writeText(props.copy);
   copied.value = true;
   setTimeout(() => { copied.value = false; }, 4000);
+
+  if (usePosthog) {
+    posthog.capture(MetricEvents.CopyToClipboard, {
+      uid: props.uid,
+      label: props.label,
+    });
+  }
 };
 </script>
 

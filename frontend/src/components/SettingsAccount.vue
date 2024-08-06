@@ -59,6 +59,7 @@
             </a>
           </div>
           <text-button
+            uid="myLink"
             class="btn-copy"
             :tooltip="t('label.copyLink')"
             :copy="user.myLink"
@@ -168,6 +169,9 @@ import { useExternalConnectionsStore } from '@/stores/external-connections-store
 import ToolTip from '@/elements/ToolTip.vue';
 import { useScheduleStore } from '@/stores/schedule-store';
 
+import { MetricEvents } from '@/definitions';
+import { usePosthog, posthog } from '@/composables/posthog';
+
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject('call');
@@ -250,6 +254,17 @@ onMounted(async () => {
   await refreshData();
 });
 
+/**
+ * Send off some metrics
+ * @param event {MetricEvents}
+ * @param properties {Object}
+ */
+const sendMetrics = (event, properties = {}) => {
+  if (usePosthog) {
+    posthog.capture(event, properties);
+  }
+};
+
 const downloadData = async () => {
   downloadAccountModalOpen.value = true;
 };
@@ -266,6 +281,8 @@ const refreshLinkConfirm = async () => {
   await user.changeSignedUrl(call);
   await refreshData();
   closeModals();
+
+  sendMetrics(MetricEvents.RefreshLink);
 };
 
 /**
@@ -284,6 +301,7 @@ const actuallyDownloadData = async () => {
   window.location.assign(fileObj);
 
   closeModals();
+  sendMetrics(MetricEvents.DownloadData);
 };
 
 /**
@@ -294,6 +312,8 @@ const actuallyDeleteAccount = async () => {
   deleteAccountSecondModalOpen.value = false;
 
   const { error } = await call('account/delete').delete();
+
+  sendMetrics(MetricEvents.DeleteAccount);
 
   if (error.value) {
     // TODO: show error
