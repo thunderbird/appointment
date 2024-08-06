@@ -196,7 +196,7 @@ router.beforeEach((to, from) => {
     }
   }
 
-  if (toMeta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
+  if (!toMeta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
     const user = useUserStore();
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };
