@@ -5,8 +5,7 @@ import { computed, inject } from 'vue';
 import {
   Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
 } from '@/models';
-import { usePosthogKey } from '@/keys';
-import posthog from 'posthog-js';
+import { usePosthog, posthog } from '@/composables/posthog';
 
 const initialUserObject = {
   email: null,
@@ -41,7 +40,6 @@ export const useUserStore = defineStore('user', () => {
 
   const exists = () => data.value.accessToken !== null;
   const $reset = () => {
-    const usePosthog = inject(usePosthogKey);
     if (usePosthog) {
       posthog.reset();
     }

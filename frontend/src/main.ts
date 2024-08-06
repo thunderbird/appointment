@@ -2,7 +2,7 @@
 import App from '@/App.vue';
 import { createApp } from 'vue';
 import { getPreferredTheme } from '@/utils';
-import { apiUrlKey, bookingUrlKey, usePosthogKey } from '@/keys';
+import { apiUrlKey, bookingUrlKey } from '@/keys';
 
 // pinia state management
 import { createPinia } from 'pinia';
@@ -20,14 +20,9 @@ import '@/assets/styles/main.css';
 // init sentry
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Sentry from '@sentry/vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import posthog from 'posthog-js';
 
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
-const usePosthog = !!import.meta.env.VITE_POSTHOG_PROJECT_KEY;
-
-app.provide(usePosthogKey, usePosthog);
 
 // The modes we use -> short names for sorting
 const environmentMap = {

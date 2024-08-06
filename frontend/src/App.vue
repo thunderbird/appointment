@@ -17,14 +17,16 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
+
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
+
 import UAParser from 'ua-parser-js';
-import posthog from 'posthog-js';
 import {
-  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, usePosthogKey,
+  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
+import { usePosthog, posthog } from '@/composables/posthog';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
@@ -185,8 +187,6 @@ provide('refresh', getDbData);
 provide(refreshKey, getDbData);
 
 onMounted(async () => {
-  const usePosthog = inject(usePosthogKey);
-
   if (usePosthog) {
     posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
       api_host: import.meta.env.VITE_POSTHOG_HOST,

@@ -34,5 +34,3 @@ export const paintBackgroundKey = Symbol('paintBackground') as InjectionKey<Pain
 // Provides duration data in human friendly form
 type DurationHumanizedType = (minutes: number) => string;
 export const durationHumanizedKey = Symbol('durationHumanizedKey') as InjectionKey<DurationHumanizedType>;
-
-export const usePosthogKey = Symbol('usePosthog') as InjectionKey<boolean>;

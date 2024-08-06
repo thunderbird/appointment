@@ -8,8 +8,7 @@ import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
-import { usePosthogKey } from '@/keys';
-import posthog from 'posthog-js';
+import { usePosthog, posthog } from '@/composables/posthog';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
@@ -186,7 +185,6 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
   const fromMeta: ApmtRouteMeta = from?.meta ?? {};
-  const usePosthog = inject(usePosthogKey);
 
   if (usePosthog) {
     // Handle disableMetrics meta property
