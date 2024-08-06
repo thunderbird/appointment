@@ -5,6 +5,7 @@ from posthog import Posthog
 
 from ..database import schemas
 from ..database.models import Subscriber
+from ..defines import APP_NAME_SHORT
 from ..dependencies.auth import get_subscriber, get_subscriber_or_none
 
 from ..dependencies.metrics import get_posthog
@@ -38,12 +39,11 @@ def page_load(
         'hostname': request.headers.get('Host'),
         'language': lang,
         'url': url,
-        'referrer': request.headers.get('Referer'),
         'screen': data.resolution,
         'locale': data.locale,
         'theme': data.theme,
         '$current_url': current_url,
-        'service': 'apmt',
+        'service': APP_NAME_SHORT,
     }
 
     if not subscriber:
@@ -68,6 +68,9 @@ def page_load(
     posthog.set(distinct_id=distinct_id, properties={
         'display_id': distinct_id
     })
+    posthog.set_once(distinct_id=distinct_id, properties={
+        'initial_service': APP_NAME_SHORT
+    })
 
     posthog.capture(distinct_id=distinct_id, event='apmt.page.loaded', properties=payload)
     return {'id': distinct_id}
@@ -91,5 +94,5 @@ def ftue_step(
     posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.ftue.step', properties={
         'step_name': data.step_name,
         'step_level': data.step_level,
-        'service': 'apmt',
+        'service': APP_NAME_SHORT,
     })

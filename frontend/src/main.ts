@@ -20,15 +20,9 @@ import '@/assets/styles/main.css';
 // init sentry
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Sentry from '@sentry/vue';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import posthog from 'posthog-js';
-import { usePosthogKey } from '@/keys';
 
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
-const usePosthog = !!import.meta.env.VITE_POSTHOG_PROJECT_KEY;
-
-app.provide(usePosthogKey, usePosthog);
 
 // The modes we use -> short names for sorting
 const environmentMap = {
@@ -64,17 +58,6 @@ if (useSentry) {
     replaysOnErrorSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
     tracePropagationTargets: ['localhost', 'stage.appointment.day', 'appointment.day'],
-  });
-}
-
-if (usePosthog) {
-  posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST,
-    person_profiles: 'identified_only',
-    persistence: 'memory',
-  });
-  posthog.register({
-    service: 'apmt',
   });
 }
 

@@ -1,4 +1,4 @@
-import { defineAsyncComponent } from 'vue';
+import { defineAsyncComponent, inject } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
@@ -8,6 +8,7 @@ import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
+import { usePosthog, posthog } from '@/composables/posthog';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
@@ -20,6 +21,12 @@ const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/Sub
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
 const WaitingListPanelView = defineAsyncComponent(() => import('@/views/admin/WaitingListPanelView.vue'));
 const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
+
+type ApmtRouteMeta = {
+  isPublic?: boolean; // Can the page be accessed without authentication?
+  maskForMetrics?: boolean; // Mask url parameters before sending information to metrics
+  disableMetrics?: boolean; // Disable all metric capturing for this page
+};
 
 /**
  * Defined routes for Thunderbird Appointment
@@ -49,6 +56,7 @@ const routes: RouteRecordRaw[] = [
     component: PostLoginView,
     meta: {
       isPublic: true,
+      maskForMetrics: true,
     },
   },
   {
@@ -57,6 +65,7 @@ const routes: RouteRecordRaw[] = [
     component: BookingView,
     meta: {
       isPublic: true,
+      maskForMetrics: true,
     },
   },
   {
@@ -65,6 +74,7 @@ const routes: RouteRecordRaw[] = [
     component: BookingConfirmationView,
     meta: {
       isPublic: true,
+      maskForMetrics: true,
     },
   },
   {
@@ -90,6 +100,9 @@ const routes: RouteRecordRaw[] = [
     path: '/bookings/:view?/:slug?',
     name: 'bookings',
     component: AppointmentsView,
+    meta: {
+      maskForMetrics: true,
+    },
   },
   {
     path: '/settings/:view?',
@@ -133,6 +146,7 @@ const routes: RouteRecordRaw[] = [
     component: WaitingListActionView,
     meta: {
       isPublic: true,
+      maskForMetrics: true,
     },
   },
   // Admin
@@ -140,16 +154,25 @@ const routes: RouteRecordRaw[] = [
     path: '/admin/subscribers',
     name: 'admin-subscriber-panel',
     component: SubscriberPanelView,
+    meta: {
+      disableMetrics: true,
+    },
   },
   {
     path: '/admin/invites',
     name: 'admin-invite-codes-panel',
     component: InviteCodePanelView,
+    meta: {
+      disableMetrics: true,
+    },
   },
   {
     path: '/admin/waiting-list',
     name: 'admin-waiting-list-panel',
     component: WaitingListPanelView,
+    meta: {
+      disableMetrics: true,
+    },
   },
 ];
 
@@ -160,7 +183,20 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from) => {
-  if (!to.meta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
+  const toMeta: ApmtRouteMeta = to?.meta ?? {};
+  const fromMeta: ApmtRouteMeta = from?.meta ?? {};
+
+  if (usePosthog) {
+    // Handle disableMetrics meta property
+    if (toMeta?.disableMetrics && !fromMeta?.disableMetrics) {
+      posthog.opt_out_capturing();
+    }
+    if (!toMeta?.disableMetrics && fromMeta?.disableMetrics) {
+      posthog.opt_in_capturing();
+    }
+  }
+
+  if (toMeta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
     const user = useUserStore();
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };

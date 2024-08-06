@@ -5,8 +5,7 @@ import { computed, inject } from 'vue';
 import {
   Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
 } from '@/models';
-import { usePosthogKey } from '@/keys';
-import posthog from 'posthog-js';
+import { usePosthog, posthog } from '@/composables/posthog';
 
 const initialUserObject = {
   email: null,
@@ -41,7 +40,6 @@ export const useUserStore = defineStore('user', () => {
 
   const exists = () => data.value.accessToken !== null;
   const $reset = () => {
-    const usePosthog = inject(usePosthogKey);
     if (usePosthog) {
       posthog.reset();
     }
@@ -151,8 +149,15 @@ export const useUserStore = defineStore('user', () => {
 
       data.value.accessToken = tokenData.value.access_token;
     } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
-      // For FXA we re-use the username parameter as our access token
+      // We get a one-time token back from the api, use it to fetch the real access token
       data.value.accessToken = username;
+      const { error, data: tokenData }: TokenResponse = await call('fxa-token').post().json();
+
+      if (error.value || !tokenData.value.access_token) {
+        return { error: tokenData.value ?? error.value };
+      }
+
+      data.value.accessToken = tokenData.value.access_token;
     } else {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }
