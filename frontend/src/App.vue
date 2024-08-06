@@ -190,6 +190,7 @@ onMounted(async () => {
   if (usePosthog) {
     posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
       api_host: import.meta.env.VITE_POSTHOG_HOST,
+      ui_host: import.meta.env.VITE_POSTHOG_UI_HOST,
       person_profiles: 'identified_only',
       persistence: 'memory',
       mask_all_text: true,
