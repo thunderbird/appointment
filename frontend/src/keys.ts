@@ -28,7 +28,7 @@ export const callKey = Symbol('call') as InjectionKey<Fetch>;
 export const refreshKey = Symbol('refresh') as InjectionKey<Refresh>;
 
 // Provides functionality to paint background of event objects
-type PaintBackgroundType = (element: Event, hexColor: string, hexTransparency?: string, reset?: boolean) => string;
+type PaintBackgroundType = (element: Event, hexColor: string, hexTransparency?: string, reset?: boolean) => void;
 export const paintBackgroundKey = Symbol('paintBackground') as InjectionKey<PaintBackgroundType>;
 
 // Provides duration data in human friendly form

@@ -1,3 +1,25 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+// component properties
+interface Props {
+  tabItems: Object, // list of tab items. Keys are used as lang keys (label.<key>), values as index
+  active: number, // value of active tab
+  disabled?: boolean, // flag for making toggle non changable
+};
+defineProps<Props>();
+
+// component emits
+const emit = defineEmits(['update']);
+
+// handle click events
+const activate = (key: string) => {
+  emit('update', key);
+};
+</script>
+
 <template>
   <div class="rounded-2xl bg-gray-200 dark:bg-gray-600">
     <nav class="flex">
@@ -22,24 +44,3 @@
     </nav>
   </div>
 </template>
-
-<script setup>
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-
-// component properties
-defineProps({
-  tabItems: Object, // list of tab items. Keys are used as lang keys (label.<key>), values as index
-  active: Number, // value of active tab
-  disabled: Boolean, // flag for making toggle non changable
-});
-
-// component emits
-const emit = defineEmits(['update']);
-
-// handle click events
-const activate = (key) => {
-  emit('update', key);
-};
-</script>

@@ -2,8 +2,29 @@
 import { ColorSchemes } from '@/definitions';
 import { CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent } from './models';
 
+/**
+* Lowercases the first character of a string
+*/
+export const lcFirst = (s: string): string => {  
+  if (typeof s !== 'string' || !s) { 
+    return '';
+  }
+ 
+  return s[0].toLowerCase() + s.slice(1)
+}
+
+// Convert a numeric enum to an object for key-value iteration
+export const enumToObject = (e: Object): Object => {
+  const o = {};
+  Object.keys(e).filter((v) => isNaN(Number(v))).forEach((k) => o[lcFirst(k)] = e[k]);
+  return o;
+};
+
 // find a key by a given value and return it
-export const keyByValue = (o: Object, v: number|string): number|string => Object.keys(o).find((k) => o[k] === v);
+export const keyByValue = (o: Object, v: number|string, isEnum = false): number|string => {
+  const e = isEnum ? enumToObject(o) : o;
+  return Object.keys(e).find((k) => e[k] === v);
+}
 
 // create event color for border and background, inherited from calendar color attribute
 export const eventColor = (event: CustomEventData, placeholder: Boolean): Coloring => {

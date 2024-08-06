@@ -89,13 +89,20 @@ export enum BookingCalendarViews {
 
 /**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
- * @enum
- * @readonly
+ * @deprecated Can be removed if all occurences are TS-ified.
  */
 export const bookingStatus = {
   none: 1,
   requested: 2,
   booked: 3,
+};
+/**
+ * Booking status for slots. This mirrors models.BookingStatus on the backend
+ */
+export enum BookingStatus {
+  None = 1,
+  Requested = 2,
+  Booked = 3,
 };
 
 /**
@@ -106,52 +113,45 @@ export enum InviteStatus {
   Revoked = 2,
 };
 
-// available appointment views
-export const appointmentViews = {
-  booked: 1,
-  pending: 2,
-  past: 3,
-  all: 4,
+/**
+ * Available appointment views
+ */
+export enum BookingsViews {
+  Booked = 1,
+  Pending = 2,
+  Past = 3,
+  All = 4,
 };
 
 /**
  * List columns for bookings page
- * @enum
- * @readonly
  */
-export const listColumns = {
-  title: 1,
-  status: 2,
-  // active: 3,
-  calendar: 3,
-  time: 4,
-  // bookingLink: 4,
-  // replies: 4,
+export enum BookingsTableColumns {
+  Title = 1,
+  Status = 2,
+  Calendar = 3,
+  Time = 4,
 };
 
 /**
  * Filter options for bookings page
- * @enum
- * @readonly
  */
-export const filterOptions = {
-  allAppointments: 1,
-  appointmentsToday: 2,
-  appointmentsNext7Days: 3,
-  appointmentsNext14Days: 4,
-  appointmentsNext31Days: 5,
-  appointmentsInMonth: 6,
-  allFutureAppointments: 7,
+export enum BookingsTableFilterOptions {
+  AllAppointments = 1,
+  AppointmentsToday = 2,
+  AppointmentsNext7Days = 3,
+  AppointmentsNext14Days = 4,
+  AppointmentsNext31Days = 5,
+  AppointmentsInMonth = 6,
+  AllFutureAppointments = 7,
 };
 
 /**
  * View types for the bookings page
- * @enum
- * @readonly
  */
-export const viewTypes = {
-  list: 1,
-  grid: 2,
+export enum BookingsViewTypes {
+  List = 1,
+  Grid = 2,
 };
 
 /**
@@ -302,18 +302,20 @@ export const waitingListAction = {
 export default {
   AlertSchemes,
   appointmentCreationState,
-  appointmentViews,
   BookingCalendarViews,
+  BookingsTableColumns,
+  BookingsTableFilterOptions,
   bookingStatus,
+  BookingStatus,
+  BookingsViews,
+  BookingsViewTypes,
   calendarManagementType,
   calendarViews,
   ColorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
-  filterOptions,
   ftueStep,
   InviteStatus,
-  listColumns,
   locationTypes,
   loginRedirectKey,
   meetingLinkProviderType,
@@ -325,6 +327,5 @@ export default {
   tableDataButtonType,
   tableDataType,
   tooltipPosition,
-  viewTypes,
   waitingListAction,
 };

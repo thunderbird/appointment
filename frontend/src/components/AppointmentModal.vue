@@ -1,3 +1,56 @@
+<script setup lang="ts">
+import { BookingStatus } from '@/definitions';
+import { timeFormat } from '@/utils';
+import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { Appointment } from '@/models';
+
+// icons
+import {
+  IconCalendar,
+  IconCalendarEvent,
+  IconClock,
+  IconNotes,
+  IconUsers,
+  IconVideo,
+  IconX,
+} from '@tabler/icons-vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import CautionButton from '@/elements/CautionButton.vue';
+import { useUserStore } from '@/stores/user-store';
+import { dayjsKey } from "@/keys";
+
+const user = useUserStore();
+
+// component constants
+const { t } = useI18n();
+const dj = inject(dayjsKey);
+
+// component properties
+interface Props {
+  open: boolean, // modal state
+  appointment?: Appointment; // appointment data to display
+};
+const props = defineProps<Props>();
+
+// attendees list
+const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
+
+// calculate initials
+const initials = (name: string) => name.split(' ').map((p) => p[0]).join('');
+
+const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
+const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
+
+const answer = (isConfirmed: boolean) => {
+  window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
+};
+
+// component emits
+const emit = defineEmits(['close']);
+
+</script>
+
 <template>
   <transition>
     <div
@@ -110,7 +163,7 @@
         </div>
         <div class="rounded-lg border border-gray-400 p-4 dark:border-gray-600">{{ appointment.details }}</div>
       </div>
-      <div class="p-6" v-if="appointment?.slots[0].booking_status === bookingStatus.requested">
+      <div class="p-6" v-if="appointment?.slots[0].booking_status === BookingStatus.Requested">
         <p>{{ attendeesSlots.map((s) => s.attendee.email).join(', ') }} have requested a booking at this time.</p>
         <div class="mt-4 flex justify-center gap-4">
           <primary-button class="btn-confirm" @click="answer(true)" :title="t('label.confirm')">
@@ -121,60 +174,9 @@
           </caution-button>
         </div>
       </div>
-      <div class="p-6" v-if="appointment?.slots[0].booking_status === bookingStatus.booked">
+      <div class="p-6" v-if="appointment?.slots[0].booking_status === BookingStatus.Booked">
         <p>This booking is confirmed.</p>
       </div>
     </div>
   </transition>
 </template>
-
-<script setup>
-import { bookingStatus } from '@/definitions';
-import { timeFormat } from '@/utils';
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-// icons
-import {
-  IconCalendar,
-  IconCalendarEvent,
-  IconClock,
-  IconNotes,
-  IconUsers,
-  IconVideo,
-  IconX,
-} from '@tabler/icons-vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import CautionButton from '@/elements/CautionButton.vue';
-import { useUserStore } from '@/stores/user-store';
-import { dayjsKey } from "@/keys";
-
-const user = useUserStore();
-
-// component constants
-const { t } = useI18n();
-const dj = inject(dayjsKey);
-
-// component properties
-const props = defineProps({
-  open: Boolean, // modal state
-  appointment: Object, // appointment data to display
-});
-
-// attendees list
-const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-
-// calculate initials
-const initials = (name) => name.split(' ').map((p) => p[0]).join('');
-
-const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
-const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
-
-const answer = (isConfirmed) => {
-  window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
-};
-
-// component emits
-const emit = defineEmits(['close']);
-
-</script>

@@ -1,7 +1,7 @@
 import { Dayjs, ConfigType } from 'dayjs';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
-import { bookingStatus } from '@/definitions';
+import { BookingStatus } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import {
   Appointment, AppointmentListResponse, Fetch, Slot,
@@ -19,7 +19,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
   // Data
   const appointments = ref<Appointment[]>([]);
   const pendingAppointments = computed(
-    (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === bookingStatus.requested),
+    (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === BookingStatus.Requested),
   );
 
   /**
@@ -29,7 +29,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
     const userStore = useUserStore();
 
     appointments.value.forEach((a) => {
-      a.active = a.status !== bookingStatus.booked;
+      a.active = a.status !== BookingStatus.Booked;
       // convert start dates from UTC back to users timezone
       a.slots.forEach((s: Slot) => {
         s.start = dj(s.start).utc(true).tz(userStore.data.timezone ?? tzGuess);
