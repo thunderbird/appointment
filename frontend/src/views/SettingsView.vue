@@ -20,9 +20,8 @@ const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 const sections = enumToObject(SettingsSections);
-const routeView = route.params.view as string;
-
-const activeView = computed<number>(() => (routeView && sections[routeView] ? sections[routeView] : SettingsSections.General));
+// Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
+const activeView = computed<number>(() => (route.params.view && sections[route.params.view as string] ? sections[route.params.view as string] : SettingsSections.General));
 
 // menu navigation of different views
 const show = (key: string) => {
