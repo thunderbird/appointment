@@ -1,8 +1,4 @@
-<template>
-  <div class="px-4 md:px-20" v-html="pageContents"></div>
-</template>
-
-<script setup>
+<script setup lang="ts">
 import {
   computed, onMounted, ref,
 } from 'vue';
@@ -23,6 +19,11 @@ onMounted(async () => {
   }
 });
 </script>
+
+<template>
+  <div class="px-4 md:px-20" v-html="pageContents"></div>
+</template>
+
 <style scoped>
 /* Needed for v-html */
 :deep {

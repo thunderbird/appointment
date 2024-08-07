@@ -1,6 +1,13 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
-import { InviteStatus } from './definitions';
+import {
+  InviteStatus,
+  WaitingListAction,
+  EventLocationType,
+  CalendarProviders,
+  TableDataButtonType,
+  TableDataType,
+} from './definitions';
 
 export type Attendee = {
   id?: number;
@@ -83,6 +90,37 @@ export type CalendarEvent = {
   isCustom?: boolean;
 };
 
+/**
+ * Event location.
+ * Corresponds to schemas.EventLocation
+ */
+export type EventLocation = {
+  type: EventLocationType;
+  suggestions?: string;
+  selected?: string;
+  name?: string;
+  url?: string;
+  phone?: string;
+};
+
+/**
+ * Event from a remote calendar.
+ * Corresponds to schemas.Event
+ */
+export type RemoteEvent = {
+  title: string;
+  start: string;
+  end: string;
+  all_day?: boolean;
+  tentative?: boolean;
+  description?: string;
+  calendar_title?: string;
+  calendar_color?: string;
+  location?: EventLocation;
+  uuid?: string;
+  duration?: number;
+};
+
 export type EventPopup = {
   event?: CalendarEvent;
   display: string;
@@ -97,6 +135,9 @@ export type Calendar = {
   connected: boolean;
   title: string;
   color: string;
+  provider?: CalendarProviders;
+  url?: string;
+  user?: string;
 };
 
 export type ExternalConnection = {
@@ -194,6 +235,11 @@ export type WaitingListEntry = {
   time_updated?: string;
 }
 
+export type WaitingListStatus = {
+  action: WaitingListAction;
+  success: boolean;
+}
+
 export type Signature = {
   url: string;
 };
@@ -213,25 +259,59 @@ export type Token = {
   access_token: string;
   token_type: string;
 };
+export type AuthUrl = {
+  url: string;
+};
 
 // Types and aliases used for our custom createFetch API calls and return types
+export type AuthUrlResponse = UseFetchReturn<AuthUrl|Exception>;
 export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
-export type BooleanResponse = UseFetchReturn<boolean>;
+export type BooleanResponse = UseFetchReturn<boolean|Exception>;
+export type BlobResponse = UseFetchReturn<Blob>;
+export type CalendarResponse = UseFetchReturn<Calendar|Exception>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
 export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type Refresh = () => Promise<void>;
+export type RemoteEventListResponse = UseFetchReturn<RemoteEvent[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot|Exception>;
 export type StringResponse = UseFetchReturn<string|Exception>;
+export type StringListResponse = UseFetchReturn<string[]>;
 export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
+export type WaitingListActionResponse = UseFetchReturn<WaitingListStatus>;
+
+// Table types
+export type TableDataField = {
+  type: TableDataType;
+  value: string|number|boolean;
+  link?: string;
+  buttonType?: TableDataButtonType;
+  disabled?: boolean;
+};
+export type TableDataRow = {
+  [key:string]: TableDataField
+};
+export type TableDataColumn = {
+  name: string;
+  key: string;
+};
+export type TableFilterOption = {
+  name: string;
+  key: string;
+};
+export type TableFilter = {
+  name: string;
+  options: TableFilterOption[];
+  fn: (value: string, list: TableDataRow[]) => TableDataRow[];
+};
 
 // Utility types
 export type Time<T> = {
@@ -254,4 +334,8 @@ export type Coloring = {
 export type HTMLElementEvent = Event & {
   target: HTMLElement;
   currentTarget: HTMLElement;
+};
+export type HTMLInputElementEvent = Event & {
+  target: HTMLInputElement;
+  currentTarget: HTMLInputElement;
 };

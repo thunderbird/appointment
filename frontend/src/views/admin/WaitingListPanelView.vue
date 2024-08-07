@@ -3,9 +3,9 @@ import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AlertSchemes, tableDataType } from '@/definitions';
+import { AlertSchemes, TableDataType } from '@/definitions';
 import { useRouter } from 'vue-router';
-import { WaitingListEntry, WaitingListResponse, BooleanResponse, Exception } from "@/models";
+import { WaitingListEntry, WaitingListResponse, BooleanResponse, TableDataRow, TableDataColumn, TableFilter } from "@/models";
 import { dayjsKey, callKey } from "@/keys";
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
@@ -26,30 +26,30 @@ const pageNotification = ref('');
 
 const filteredUsers = computed(() => waitingListUsers.value.map((user) => ({
   id: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: user.id,
   },
   email: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: user.email,
   },
   email_verified: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: user.email_verified ? 'Verified' : 'Not Verified',
   },
   invite_id: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: user.invite_id ?? 'Awaiting Access',
   },
   timeCreated: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: dj(user.time_created).format('ll LTS'),
   },
   timeUpdated: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: dj(user.time_updated).format('ll LTS'),
   },
-})));
+} as TableDataRow)));
 const columns = [
   {
     key: 'id',
@@ -75,7 +75,7 @@ const columns = [
     key: 'updatedAt',
     name: 'Time Updated',
   },
-];
+] as TableDataColumn[];
 const filters = [
   {
     name: 'Invite Status',
@@ -95,12 +95,8 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
-     * TODO: Add types when DataTable.vue is typed
-     * @param selectedKey
-     * @param mutableDataList
-     * @returns {*}
      */
-    fn: (selectedKey, mutableDataList) => {
+    fn: (selectedKey: string, mutableDataList: TableDataRow[]) => {
       switch (selectedKey) {
         case 'all':
           return null;
@@ -132,12 +128,8 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
-     * TODO: Add types when DataTable.vue is typed
-     * @param selectedKey
-     * @param mutableDataList
-     * @returns {*}
      */
-    fn: (selectedKey, mutableDataList) => {
+    fn: (selectedKey: string, mutableDataList: TableDataRow[]) => {
       switch (selectedKey) {
         case 'all':
           return null;
@@ -151,7 +143,7 @@ const filters = [
       return null;
     },
   },
-];
+] as TableFilter[];
 
 /**
  * Retrieve waiting list entries

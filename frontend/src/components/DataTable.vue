@@ -31,42 +31,42 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="datum in paginatedDataList" :key="datum">
+          <tr v-for="(datum, i) in paginatedDataList" :key="i">
             <td v-if="allowMultiSelect">
               <input type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
             </td>
             <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey" :class="`column-${fieldKey}`">
-              <span v-if="fieldData.type === tableDataType.text">
+              <span v-if="fieldData.type === TableDataType.Text">
                 {{ fieldData.value }}
               </span>
-              <span v-else-if="fieldData.type === tableDataType.code" class="flex items-center gap-4">
+              <span v-else-if="fieldData.type === TableDataType.Code" class="flex items-center gap-4">
                 <code>{{ fieldData.value }}</code>
-                <text-button :uid="fieldKey" class="btn-copy" :copy="fieldData.value" :title="t('label.copy')" />
+                <text-button :uid="fieldKey" class="btn-copy" :copy="String(fieldData.value)" :title="t('label.copy')" />
               </span>
-              <span v-else-if="fieldData.type === tableDataType.bool">
+              <span v-else-if="fieldData.type === TableDataType.Bool">
                 <span v-if="fieldData.value">Yes</span>
                 <span v-else>No</span>
               </span>
-              <span v-else-if="fieldData.type === tableDataType.link">
+              <span v-else-if="fieldData.type === TableDataType.Link">
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
               </span>
-              <span v-else-if="fieldData.type === tableDataType.button">
+              <span v-else-if="fieldData.type === TableDataType.Button">
                 <primary-button
-                  v-if="fieldData.buttonType === tableDataButtonType.primary"
+                  v-if="fieldData.buttonType === TableDataButtonType.Primary"
                   :disabled="fieldData.disabled"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}
                 </primary-button>
                 <secondary-button
-                  v-else-if="fieldData.buttonType === tableDataButtonType.secondary"
+                  v-else-if="fieldData.buttonType === TableDataButtonType.Secondary"
                   :disabled="fieldData.disabled"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}
                 </secondary-button>
                 <caution-button
-                  v-else-if="fieldData.buttonType === tableDataButtonType.caution"
+                  v-else-if="fieldData.buttonType === TableDataButtonType.Caution"
                   :disabled="fieldData.disabled"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
@@ -98,41 +98,31 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * Data Table
- * @typedef {{type: tableDataType, value: string, link?: string, buttonType?: tableDataButtonType }} DataField
- * @typedef {{name: string, key: string}} DataColumn
- * @typedef {{name: string, key: string}} FilterOption
- * @typedef {{name: string, options: Array<FilterOption>, fn: function}} Filter
- *
- * @param allowMultiSelect {boolean} - Displays checkboxes next to each row, and emits the `fieldSelect` event with a list of currently selected rows
- * @param dataName {string} - The name for the object being represented on the table
- * @param columns {Array<DataColumn>} - List of columns to be displayed (these don't filter data, filter that yourself!)
- * @param dataList {Array<DataField>} - List of data to be displayed
- * @param filters {Array<Filter>} - List of filters to be displayed
- * @param loading {boolean} - Displays a loading spinner
  */
-import ListPagination from '@/elements/ListPagination.vue';
 import { useI18n } from 'vue-i18n';
-import {
-  computed, ref, toRefs,
-} from 'vue';
-import { tableDataButtonType, tableDataType } from '@/definitions';
+import { computed, ref, toRefs } from 'vue';
+import { TableDataButtonType, TableDataType } from '@/definitions';
+import { TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent } from '@/models';
+import ListPagination from '@/elements/ListPagination.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
 import TextButton from '@/elements/TextButton.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
-const props = defineProps({
-  allowMultiSelect: Boolean,
-  dataName: String,
-  dataList: Array,
-  columns: Array,
-  filters: Array,
-  loading: Boolean,
-});
+// component properties
+interface Props {
+  allowMultiSelect: boolean, // Displays checkboxes next to each row, and emits the `fieldSelect` event with a list of currently selected rows
+  dataName: string, // The name for the object being represented on the table
+  columns: TableDataColumn[], // List of columns to be displayed (these don't filter data, filter that yourself!)
+  dataList: TableDataRow[], // List of data to be displayed
+  filters: TableFilter[], // List of filters to be displayed
+  loading: boolean, // Displays a loading spinner
+};
+const props = defineProps<Props>();
 
 const {
   dataList, columns, dataName, allowMultiSelect, loading,
@@ -144,14 +134,13 @@ const emit = defineEmits(['fieldSelect', 'fieldClick']);
 // pagination
 const pageSize = 10;
 const currentPage = ref(0);
-const updatePage = (index) => {
+const updatePage = (index: number) => {
   currentPage.value = index;
 };
 
 const columnSpan = computed(() => (columns.value.length + (allowMultiSelect.value ? 1 : 0)));
-const selectedFields = ref([]);
-
-const mutableDataList = ref(null);
+const selectedRows = ref<TableDataRow[]>([]);
+const mutableDataList = ref<TableDataRow[]>(null);
 
 /**
  * Returns either a filtered data list, or the original all nice and paginated
@@ -177,22 +166,22 @@ const totalDataLength = computed(() => {
   return 0;
 });
 
-const onFieldSelect = (evt, fieldData) => {
-  const isChecked = evt?.target?.checked;
+const onFieldSelect = (evt: Event, row: TableDataRow) => {
+  const isChecked = (evt as HTMLInputElementEvent)?.target?.checked;
 
   if (isChecked) {
-    selectedFields.value.push(fieldData);
+    selectedRows.value.push(row);
   } else {
-    const index = selectedFields.value.indexOf(fieldData);
+    const index = selectedRows.value.indexOf(row);
     if (index !== -1) {
-      selectedFields.value.splice(index, 1);
+      selectedRows.value.splice(index, 1);
     }
   }
-  emit('fieldSelect', selectedFields.value);
+  emit('fieldSelect', selectedRows.value);
 };
 
-const onColumnFilter = (evt, filter) => {
-  mutableDataList.value = filter.fn(evt.target.value, dataList.value);
+const onColumnFilter = (evt: Event, filter: TableFilter) => {
+  mutableDataList.value = filter.fn((evt as HTMLInputElementEvent).target.value, dataList.value);
   if (mutableDataList.value === dataList.value) {
     mutableDataList.value = null;
   }

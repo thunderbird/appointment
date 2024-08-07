@@ -1,3 +1,22 @@
+<script setup lang="ts">
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import InfoBox from '@/elements/home/InfoBox.vue';
+import HomeFooter from '@/components/HomeFooter.vue';
+import { useUserStore } from '@/stores/user-store';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const isAuthenticated = useUserStore().exists();
+
+const enter = () => {
+  router.push('/calendar');
+};
+const login = () => {
+  router.push('/login');
+};
+</script>
+
 <template>
   <div>
     <section>
@@ -96,22 +115,3 @@
     <home-footer></home-footer>
   </div>
 </template>
-
-<script setup>
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import InfoBox from '@/elements/home/InfoBox.vue';
-import HomeFooter from '@/components/HomeFooter.vue';
-import { useUserStore } from '@/stores/user-store';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
-const isAuthenticated = useUserStore().exists();
-
-const enter = () => {
-  router.push('/calendar');
-};
-const login = () => {
-  router.push('/login');
-};
-</script>

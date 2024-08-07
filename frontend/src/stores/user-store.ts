@@ -84,7 +84,7 @@ export const useUserStore = defineStore('user', () => {
     const { data: userData, error } = await fetch('me').put(inputData).json();
     if (!error.value) {
       // update user in store
-      await updateProfile(userData.value);
+      updateProfile(userData.value);
       await updateSignedUrl(fetch);
 
       return { error: false };

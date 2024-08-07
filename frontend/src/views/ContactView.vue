@@ -1,3 +1,51 @@
+<script setup lang="ts">
+import { inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user-store';
+import { AlertSchemes } from '@/definitions';
+import { callKey } from '@/keys';
+import { BooleanResponse } from '@/models';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import AlertBox from '@/elements/AlertBox.vue';
+import TextInput from '@/elements/TextInput.vue';
+
+// icons
+import { IconSend } from '@tabler/icons-vue';
+
+// component constants
+const user = useUserStore();
+const { t } = useI18n();
+const call = inject(callKey);
+
+// form data
+const form = ref<HTMLFormElement>(null);
+const topic = ref('');
+const details = ref('');
+const sendingState = ref(0);
+
+// empty all form inputs
+const resetForm = () => {
+  topic.value = '';
+  details.value = '';
+};
+
+// send support request
+const send = async () => {
+  if (!form.value.checkValidity()) {
+    form.value.reportValidity();
+    return;
+  }
+  const postObj = { topic: topic.value, details: details.value };
+  const { error, data }: BooleanResponse = await call('support').post(postObj).json();
+  if (!error.value && data.value) {
+    sendingState.value = AlertSchemes.Success;
+    resetForm();
+  } else {
+    sendingState.value = AlertSchemes.Error;
+  }
+};
+</script>
+
 <template>
   <!-- page title area -->
   <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-4">
@@ -43,49 +91,3 @@
     </primary-button>
   </div>
 </template>
-
-<script setup lang="ts">
-import { inject, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store';
-import { AlertSchemes } from '@/definitions';
-import { callKey } from '@/keys';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import AlertBox from '@/elements/AlertBox.vue';
-import TextInput from '@/elements/TextInput.vue';
-
-// icons
-import { IconSend } from '@tabler/icons-vue';
-
-// component constants
-const user = useUserStore();
-const { t } = useI18n();
-const call = inject(callKey);
-
-// form data
-const form = ref(null);
-const topic = ref('');
-const details = ref('');
-const sendingState = ref(0);
-
-// empty all form inputs
-const resetForm = () => {
-  topic.value = '';
-  details.value = '';
-};
-
-// send support request
-const send = async () => {
-  if (!form.value.checkValidity()) {
-    form.value.reportValidity();
-    return;
-  }
-  const { error, data } = await call('support').post({ topic: topic.value, details: details.value }).json();
-  if (!error.value && data.value) {
-    sendingState.value = AlertSchemes.Success;
-    resetForm();
-  } else {
-    sendingState.value = AlertSchemes.Error;
-  }
-};
-</script>
