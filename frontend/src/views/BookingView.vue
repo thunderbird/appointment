@@ -156,8 +156,11 @@ const bookEvent = async (attendeeData: Attendee) => {
   modalState.value = ModalStates.Finished;
 
   if (usePosthog) {
+    // Not chained because it's the inverse of booking_confirmation, and it defaults to false.
+    const autoConfirmed = appointment && appointment.value.booking_confirmation !== undefined
+      ? !appointment.value.booking_confirmation : false;
     posthog.capture(MetricEvents.RequestBooking, {
-      autoConfirmed: appointment?.value.booking_confirmation,
+      autoConfirmed
     });
   }
 };
