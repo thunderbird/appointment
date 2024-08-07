@@ -3,10 +3,10 @@ import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AlertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
+import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
 import { useRouter } from 'vue-router';
 import { IconSend } from '@tabler/icons-vue';
-import { Invite, InviteListResponse, BooleanResponse, Exception } from "@/models";
+import { Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter } from "@/models";
 import { InviteStatus } from "@/definitions";
 import { dayjsKey, callKey } from "@/keys";
 import DataTable from '@/components/DataTable.vue';
@@ -30,32 +30,32 @@ const pageNotification = ref('');
 
 const filteredInvites = computed(() => invites.value.map((invite) => ({
   code: {
-    type: tableDataType.code,
+    type: TableDataType.Code,
     value: invite.code,
   },
   status: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: invite.status === InviteStatus.Active ? 'Available' : 'Revoked',
   },
   subscriber_id: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: invite.subscriber_id ?? 'Unused',
   },
   timeCreated: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: dj(invite.time_created).format('ll LTS'),
   },
   timeUpdated: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: dj(invite.time_updated).format('ll LTS'),
   },
   revoke: {
-    type: tableDataType.button,
-    buttonType: tableDataButtonType.secondary,
+    type: TableDataType.Button,
+    buttonType: TableDataButtonType.Secondary,
     value: 'Revoke',
     disabled: invite.subscriber_id || invite.status === InviteStatus.Revoked,
   },
-})));
+} as TableDataRow)));
 const columns = [
   {
     key: 'code',
@@ -81,7 +81,7 @@ const columns = [
     key: 'revoke',
     name: '',
   },
-];
+] as TableDataColumn[];
 const filters = [
   {
     name: 'Invite Status',
@@ -105,12 +105,8 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
-     * TODO: Add types when DataTable.vue is typed
-     * @param selectedKey
-     * @param mutableDataList
-     * @returns {*}
      */
-    fn: (selectedKey, mutableDataList) => {
+    fn: (selectedKey: string, mutableDataList: TableDataRow[]) => {
       switch (selectedKey) {
         case 'all':
           return null;
@@ -138,7 +134,7 @@ const filters = [
       return null;
     },
   },
-];
+] as TableFilter[];
 
 /**
  * Retrieve list of all existing invites

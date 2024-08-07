@@ -31,22 +31,22 @@ const next = () => {
     emit('update', currentPage.value);
   }
 };
-const goto = (index) => {
+const goto = (index: number) => {
   currentPage.value = index;
   emit('update', currentPage.value);
 };
 
-const isVisibleInnerPage = (p) => (currentPage.value === 0 && p === 3)
+const isVisibleInnerPage = (p: number) => (currentPage.value === 0 && p === 3)
     || ((currentPage.value === 0 || currentPage.value === 1) && p === 4)
     || (p > currentPage.value - 1 && p < currentPage.value + 3)
     || ((currentPage.value === pageCount.value - 1 || currentPage.value === pageCount.value - 2) && p === pageCount.value - 3)
     || (currentPage.value === pageCount.value - 1 && p === pageCount.value - 2)
     || p === pageCount.value;
 
-const showPageItem = (p) => pageCount.value < 6 || p === 1 || p === 2 || isVisibleInnerPage(p) || p === pageCount.value - 1;
-const showFirstEllipsis = (p) => pageCount.value >= 6 && currentPage.value > 2 && p === 2;
-const showPageItemLink = (p) => pageCount.value < 6 || p === 1 || isVisibleInnerPage(p);
-const showLastEllipsis = (p) => pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p === pageCount.value - 1;
+const showPageItem = (p: number) => pageCount.value < 6 || p === 1 || p === 2 || isVisibleInnerPage(p) || p === pageCount.value - 1;
+const showFirstEllipsis = (p: number) => pageCount.value >= 6 && currentPage.value > 2 && p === 2;
+const showPageItemLink = (p: number) => pageCount.value < 6 || p === 1 || isVisibleInnerPage(p);
+const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p === pageCount.value - 1;
 </script>
 
 <template>

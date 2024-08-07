@@ -1,6 +1,13 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
-import { InviteStatus, WaitingListAction, EventLocationType, CalendarProviders } from './definitions';
+import {
+  InviteStatus,
+  WaitingListAction,
+  EventLocationType,
+  CalendarProviders,
+  TableDataButtonType,
+  TableDataType,
+} from './definitions';
 
 export type Attendee = {
   id?: number;
@@ -252,12 +259,16 @@ export type Token = {
   access_token: string;
   token_type: string;
 };
+export type AuthUrl = {
+  url: string;
+};
 
 // Types and aliases used for our custom createFetch API calls and return types
+export type AuthUrlResponse = UseFetchReturn<AuthUrl|Exception>;
 export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
-export type BooleanResponse = UseFetchReturn<boolean>;
+export type BooleanResponse = UseFetchReturn<boolean|Exception>;
 export type BlobResponse = UseFetchReturn<Blob>;
 export type CalendarResponse = UseFetchReturn<Calendar|Exception>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
@@ -276,6 +287,31 @@ export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
 export type WaitingListActionResponse = UseFetchReturn<WaitingListStatus>;
+
+// Table types
+export type TableDataField = {
+  type: TableDataType;
+  value: string|number|boolean;
+  link?: string;
+  buttonType?: TableDataButtonType;
+  disabled?: boolean;
+};
+export type TableDataRow = {
+  [key:string]: TableDataField
+};
+export type TableDataColumn = {
+  name: string;
+  key: string;
+};
+export type TableFilterOption = {
+  name: string;
+  key: string;
+};
+export type TableFilter = {
+  name: string;
+  options: TableFilterOption[];
+  fn: (value: string, list: TableDataRow[]) => TableDataRow[];
+};
 
 // Utility types
 export type Time<T> = {
@@ -298,4 +334,8 @@ export type Coloring = {
 export type HTMLElementEvent = Event & {
   target: HTMLElement;
   currentTarget: HTMLElement;
+};
+export type HTMLInputElementEvent = Event & {
+  target: HTMLInputElement;
+  currentTarget: HTMLInputElement;
 };

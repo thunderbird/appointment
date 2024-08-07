@@ -1,14 +1,9 @@
-<template>
-  <div>
-    <!-- Intentionally left blank -->
-  </div>
-</template>
-
-<script setup>
+<script setup lang="ts">
 import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store.ts';
+import { useUserStore } from '@/stores/user-store';
 import { loginRedirectKey } from '@/definitions';
+import { callKey } from '@/keys';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,7 +12,7 @@ const router = useRouter();
 const user = useUserStore();
 
 // component constants
-const call = inject('call');
+const call = inject(callKey);
 
 const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 
@@ -33,7 +28,13 @@ onMounted(async () => {
     return;
   }
 
-  await user.login(call, route.params.token, null);
+  await user.login(call, route.params.token as string, null);
   await router.push(redirectTo ?? '/calendar');
 });
 </script>
+
+<template>
+  <div>
+    <!-- Intentionally left blank -->
+  </div>
+</template>
