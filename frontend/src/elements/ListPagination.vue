@@ -31,7 +31,7 @@ const next = () => {
     emit('update', currentPage.value);
   }
 };
-const goto = (index) => {
+const goto = (index: number) => {
   currentPage.value = index;
   emit('update', currentPage.value);
 };
