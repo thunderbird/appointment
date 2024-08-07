@@ -7,6 +7,8 @@ import { AvailabilitySlotResponse } from '@/models';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+import { usePosthog, posthog } from '@/composables/posthog';
+import { MetricEvents } from '@/definitions';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -33,9 +35,16 @@ onMounted(async () => {
   const { error, data }: AvailabilitySlotResponse = await call('schedule/public/availability/booking').put(obj).json();
   if (error.value) {
     isError.value = true;
-  } else {
-    isError.value = false;
-    attendeeEmail.value = data.value?.attendee?.email;
+
+    return;
+  }
+
+  isError.value = false;
+  attendeeEmail.value = data.value?.attendee?.email;
+
+  if (usePosthog) {
+    const event = confirmed ? MetricEvents.ConfirmBooking : MetricEvents.DenyBooking;
+    posthog.capture(event);
   }
 });
 </script>

@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { BookingCalendarViews, ModalStates } from '@/definitions';
+import { BookingCalendarViews, MetricEvents, ModalStates } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
-import { dayjsKey, callKey } from "@/keys";
-import { Appointment, Slot, Exception, Attendee, ExceptionDetail, AppointmentResponse, SlotResponse } from '@/models';
+import { dayjsKey, callKey } from '@/keys';
+import {
+  Appointment, Slot, Exception, Attendee, ExceptionDetail, AppointmentResponse, SlotResponse,
+} from '@/models';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import BookingModal from '@/components/BookingModal.vue';
 import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
 import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
 import BookingViewError from '@/components/bookingView/BookingViewError.vue';
+import { usePosthog, posthog } from '@/composables/posthog';
 
 // component constants
 const { t } = useI18n();
@@ -151,6 +154,12 @@ const bookEvent = async (attendeeData: Attendee) => {
   activeView.value = BookingCalendarViews.Success;
   // update modal view as well
   modalState.value = ModalStates.Finished;
+
+  if (usePosthog) {
+    posthog.capture(MetricEvents.RequestBooking, {
+      autoConfirmed: appointment?.value.booking_confirmation,
+    });
+  }
 };
 
 // initially retrieve slot data and decide which view to show
