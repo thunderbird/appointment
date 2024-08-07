@@ -188,6 +188,9 @@ provide(refreshKey, getDbData);
 
 onMounted(async () => {
   if (usePosthog) {
+    const REMOVED_PROPERTY = '<removed>';
+    const UNKNOWN_PROPERTY = '<unknown>';
+
     // Hack to clear $set_once until we get confirmation that this can be filtered.
     // Move the function reference so we can patch it and still retrieve the results before we sanitize it.
     if (posthog['_original_calculate_set_once_properties'] === undefined) {
@@ -197,8 +200,8 @@ onMounted(async () => {
       dataSetOnce = posthog['_original_calculate_set_once_properties'](dataSetOnce);
 
       if (dataSetOnce?.$initial_current_url || dataSetOnce?.$initial_pathname) {
-        dataSetOnce.$initial_current_url = '<removed>';
-        dataSetOnce.$initial_pathname = '<removed>';
+        dataSetOnce.$initial_current_url = REMOVED_PROPERTY;
+        dataSetOnce.$initial_pathname = REMOVED_PROPERTY;
       }
 
       return dataSetOnce;
@@ -224,7 +227,7 @@ onMounted(async () => {
         if (route.meta?.maskForMetrics) {
           // Replace recorded path with the path definition
           // So basically: /user/melissaa/dfb0d2aa/ -> /user/:username/:signatureOrSlug
-          const vuePath = route.matched[0]?.path ?? '<unknown>';
+          const vuePath = route.matched[0]?.path ?? UNKNOWN_PROPERTY;
           const oldPath = properties.$pathname;
 
           // Easiest just to string replace all instances!
@@ -238,21 +241,24 @@ onMounted(async () => {
 
         if (event === '$pageleave') {
           // FIXME: Removed pending matching with vue routes
-          properties.$prev_pageview_pathname = '<removed>';
+          properties.$prev_pageview_pathname = REMOVED_PROPERTY;
         }
 
         // Remove initial properties
-        if (!properties.$set_once) {
-          properties.$set_once = {};
-        }
         if (!properties.$set) {
           properties.$set = {};
         }
 
-        properties.$set_once.$initial_current_url = '<removed>';
-        properties.$set_once.$initial_pathname = '<removed>';
-        properties.$set.$initial_current_url = '<removed>';
-        properties.$set.$initial_pathname = '<removed>';
+        properties.$set.$initial_current_url = REMOVED_PROPERTY;
+        properties.$set.$initial_pathname = REMOVED_PROPERTY;
+
+        // Clean up webvitals
+        // Ref: https://github.com/PostHog/posthog-js/blob/f5a0d12603197deab305a7e25843f04f3fa4c99e/src/extensions/web-vitals/index.ts#L175
+        ['LCP', 'CLS', 'FCP', 'INP'].forEach((metric) => {
+          if (properties[`$web_vitals_${metric}_event`]?.$current_url) {
+            properties[`$web_vitals_${metric}_event`].$current_url = REMOVED_PROPERTY;
+          }
+        });
 
         return properties;
       },
