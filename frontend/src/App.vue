@@ -188,6 +188,20 @@ provide(refreshKey, getDbData);
 
 onMounted(async () => {
   if (usePosthog) {
+    // Hack to clear $set_once until we get confirmation that this can be filtered.
+    // Move the function reference so we can patch it and still retrieve the results before we sanitize it.
+    posthog['_original_calculate_set_once_properties'] = posthog._calculate_set_once_properties;
+    posthog._calculate_set_once_properties = function (dataSetOnce?) {
+      dataSetOnce = posthog['_original_calculate_set_once_properties'](dataSetOnce);
+
+      if (dataSetOnce?.$initial_current_url || dataSetOnce?.$initial_pathname) {
+        dataSetOnce.$initial_current_url = '<removed>';
+        dataSetOnce.$initial_pathname = '<removed>';
+      }
+
+      return dataSetOnce;
+    };
+
     posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
       api_host: import.meta.env.VITE_POSTHOG_HOST,
       ui_host: import.meta.env.VITE_POSTHOG_UI_HOST,
@@ -195,16 +209,20 @@ onMounted(async () => {
       persistence: 'memory',
       mask_all_text: true,
       mask_all_element_attributes: true,
+      autocapture: false, // Off for now until we can figure out $set_once.
       sanitize_properties: (properties, event) => {
         // If the route isn't available to use right now, ignore the capture.
         if (!route.name) {
-          return {};
+          return {
+            captureFailedMessage: 'route.name was not available.',
+          };
         }
 
         // Do we need to mask the path?
         if (route.meta?.maskForMetrics) {
           // Replace recorded path with the path definition
-          const vuePath = route.matched[0]?.path ?? '<unknown path to mask>';
+          // So basically: /user/melissaa/dfb0d2aa/ -> /user/:username/:signatureOrSlug
+          const vuePath = route.matched[0]?.path ?? '<unknown>';
           const oldPath = properties.$pathname;
 
           // Easiest just to string replace all instances!
@@ -217,13 +235,27 @@ onMounted(async () => {
         }
 
         if (event === '$pageleave') {
-          // We don't have access to the previous route, so just null it out.
-          properties.$prev_pageview_pathname = null;
+          // FIXME: Removed pending matching with vue routes
+          properties.$prev_pageview_pathname = '<removed>';
         }
+
+        // Remove initial properties
+        if (!properties.$set_once) {
+          properties.$set_once = {};
+        }
+        if (!properties.$set) {
+          properties.$set = {};
+        }
+
+        properties.$set_once.$initial_current_url = '<removed>';
+        properties.$set_once.$initial_pathname = '<removed>';
+        properties.$set.$initial_current_url = '<removed>';
+        properties.$set.$initial_pathname = '<removed>';
 
         return properties;
       },
     });
+    posthog.debug();
     posthog.register({
       service: 'apmt',
     });
