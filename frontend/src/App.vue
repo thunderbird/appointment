@@ -190,7 +190,9 @@ onMounted(async () => {
   if (usePosthog) {
     // Hack to clear $set_once until we get confirmation that this can be filtered.
     // Move the function reference so we can patch it and still retrieve the results before we sanitize it.
-    posthog['_original_calculate_set_once_properties'] = posthog._calculate_set_once_properties;
+    if (posthog['_original_calculate_set_once_properties'] === undefined) {
+      posthog['_original_calculate_set_once_properties'] = posthog._calculate_set_once_properties;
+    }
     posthog._calculate_set_once_properties = function (dataSetOnce?) {
       dataSetOnce = posthog['_original_calculate_set_once_properties'](dataSetOnce);
 
