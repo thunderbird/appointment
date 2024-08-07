@@ -96,6 +96,7 @@ export const bookingStatus = {
   requested: 2,
   booked: 3,
 };
+
 /**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
  */
@@ -154,16 +155,24 @@ export enum BookingsViewTypes {
   Grid = 2,
 };
 
+
+/**
+ * Type for event location.
+ * Corresponds to models.LocationType
+ */
+export enum EventLocationType {
+  InPerson = 1,
+  Online = 2,
+}
+
 /**
  * Settings page sections
- * @enum
- * @readonly
  */
-export const settingsSections = {
-  general: 1,
-  calendar: 2,
-  account: 3,
-  connectedAccounts: 4,
+export enum SettingsSections {
+  General = 1,
+  Calendar = 2,
+  Account = 3,
+  ConnectedAccounts = 4,
 };
 
 /**
@@ -177,12 +186,27 @@ export enum ColorSchemes {
 
 /**
  * Calendar management type states
- * @enum
- * @readonly
  */
-export const calendarManagementType = {
-  connect: 1,
-  edit: 2,
+export enum CalendarManagementType {
+  Connect = 1,
+  Edit = 2,
+};
+
+/**
+ * Supported calendar providers
+ */
+export enum CalendarProviders {
+  Caldav = 1,
+  Google = 2,
+};
+
+/**
+ * Supported external connection providers
+ */
+export enum ExternalConnectionProviders {
+  Fxa = 1,
+  Google = 2,
+  Zoom = 3,
 };
 
 /**
@@ -208,8 +232,6 @@ export enum ModalStates {
 
 /**
  * Alert levels
- * @enum
- * @readonly
  */
 export enum AlertSchemes {
   Error = 1, // Alert indicates something's gone wrong
@@ -291,12 +313,10 @@ export const tooltipPosition = {
 
 /**
  * This should match the enum in routes/waiting_list.py
- * @enum
- * @readonly
  */
-export const waitingListAction = {
-  confirm: 1,
-  leave: 2,
+export enum WaitingListAction {
+  Confirm = 1,
+  Leave = 2,
 };
 
 export default {
@@ -309,11 +329,14 @@ export default {
   BookingStatus,
   BookingsViews,
   BookingsViewTypes,
-  calendarManagementType,
+  CalendarManagementType,
+  CalendarProviders,
   calendarViews,
   ColorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
+  EventLocationType,
+  ExternalConnectionProviders,
   ftueStep,
   InviteStatus,
   locationTypes,
@@ -322,10 +345,10 @@ export default {
   ModalStates,
   qalendarSlotDurations,
   scheduleCreationState,
-  settingsSections,
+  SettingsSections,
   subscriberLevels,
   tableDataButtonType,
   tableDataType,
   tooltipPosition,
-  waitingListAction,
+  WaitingListAction,
 };

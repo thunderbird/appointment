@@ -11,6 +11,7 @@ import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
+import { ExternalConnectionProviders } from '@/definitions';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -42,7 +43,9 @@ onMounted(async () => {
       errorMessage.value = t('error.externalAccountHasNoCalendars', { external: 'Google' });
 
       // Also remove the google calendar
-      if (externalConnectionStore.google.length > 0) await externalConnectionStore.disconnect(call, 'google');
+      if (externalConnectionStore.google.length > 0) {
+        await externalConnectionStore.disconnect(call, ExternalConnectionProviders.Google);
+      }
     } else {
       errorMessage.value = route.query.error;
     }
@@ -74,6 +77,7 @@ const onSubmit = async () => {
 };
 
 </script>
+
 <template>
   <div class="content">
     <div class="card">
@@ -126,6 +130,7 @@ const onSubmit = async () => {
     </secondary-button>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

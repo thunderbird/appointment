@@ -1,6 +1,6 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
-import { InviteStatus } from './definitions';
+import { InviteStatus, WaitingListAction, EventLocationType, CalendarProviders } from './definitions';
 
 export type Attendee = {
   id?: number;
@@ -83,6 +83,37 @@ export type CalendarEvent = {
   isCustom?: boolean;
 };
 
+/**
+ * Event location.
+ * Corresponds to schemas.EventLocation
+ */
+export type EventLocation = {
+  type: EventLocationType;
+  suggestions?: string;
+  selected?: string;
+  name?: string;
+  url?: string;
+  phone?: string;
+};
+
+/**
+ * Event from a remote calendar.
+ * Corresponds to schemas.Event
+ */
+export type RemoteEvent = {
+  title: string;
+  start: string;
+  end: string;
+  all_day?: boolean;
+  tentative?: boolean;
+  description?: string;
+  calendar_title?: string;
+  calendar_color?: string;
+  location?: EventLocation;
+  uuid?: string;
+  duration?: number;
+};
+
 export type EventPopup = {
   event?: CalendarEvent;
   display: string;
@@ -97,6 +128,9 @@ export type Calendar = {
   connected: boolean;
   title: string;
   color: string;
+  provider?: CalendarProviders;
+  url?: string;
+  user?: string;
 };
 
 export type ExternalConnection = {
@@ -194,6 +228,11 @@ export type WaitingListEntry = {
   time_updated?: string;
 }
 
+export type WaitingListStatus = {
+  action: WaitingListAction;
+  success: boolean;
+}
+
 export type Signature = {
   url: string;
 };
@@ -219,19 +258,24 @@ export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean>;
+export type BlobResponse = UseFetchReturn<Blob>;
+export type CalendarResponse = UseFetchReturn<Calendar|Exception>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
 export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type Refresh = () => Promise<void>;
+export type RemoteEventListResponse = UseFetchReturn<RemoteEvent[]>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot|Exception>;
 export type StringResponse = UseFetchReturn<string|Exception>;
+export type StringListResponse = UseFetchReturn<string[]>;
 export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
+export type WaitingListActionResponse = UseFetchReturn<WaitingListStatus>;
 
 // Utility types
 export type Time<T> = {

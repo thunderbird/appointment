@@ -1,3 +1,164 @@
+<script setup lang="ts">
+import {
+  ref, inject, onMounted,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+import { callKey } from '@/keys';
+import { StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse } from '@/models';
+import CautionButton from '@/elements/CautionButton.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
+import TextButton from '@/elements/TextButton.vue';
+import ToolTip from '@/elements/ToolTip.vue';
+
+// icons
+import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
+
+// stores
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { useScheduleStore } from '@/stores/schedule-store';
+
+// component constants
+const { t } = useI18n({ useScope: 'global' });
+const call = inject(callKey);
+const router = useRouter();
+const user = useUserStore();
+const schedule = useScheduleStore();
+const externalConnectionsStore = useExternalConnectionsStore();
+
+const activeUsername = ref(user.data.username);
+const activeDisplayName = ref(user.data.name);
+const downloadAccountModalOpen = ref(false);
+const deleteAccountFirstModalOpen = ref(false);
+const deleteAccountSecondModalOpen = ref(false);
+const refreshLinkModalOpen = ref(false);
+const updateUsernameModalOpen = ref(false);
+const availableEmails = ref([user.data.preferredEmail]);
+const activePreferredEmail = ref(user.data.preferredEmail);
+
+const closeModals = () => {
+  downloadAccountModalOpen.value = false;
+  deleteAccountFirstModalOpen.value = false;
+  deleteAccountSecondModalOpen.value = false;
+  refreshLinkModalOpen.value = false;
+  updateUsernameModalOpen.value = false;
+};
+
+const getAvailableEmails = async () => {
+  const { data }: StringListResponse = await call('account/available-emails').get().json();
+  if (!data || !data.value) {
+    availableEmails.value = [];
+  }
+
+  availableEmails.value = data.value;
+};
+
+const refreshData = async () => Promise.all([
+  user.profile(call),
+  schedule.fetch(call, true),
+  externalConnectionsStore.fetch(call),
+  getAvailableEmails(),
+]);
+
+// save user data
+const errorUsername = ref(false);
+const updateUser = async () => {
+  const inputData = {
+    username: activeUsername.value,
+    name: activeDisplayName.value,
+    secondary_email: activePreferredEmail.value,
+  };
+  const { data, error }: SubscriberResponse = await call('me').put(inputData).json();
+  if (!error.value) {
+    // update user in store
+    user.updateProfile(data.value);
+    await user.updateSignedUrl(call);
+    errorUsername.value = false;
+    // TODO show some confirmation
+    await refreshData();
+  } else {
+    errorUsername.value = true;
+  }
+
+  closeModals();
+};
+
+/**
+ * Check if the username has been changed, and open a modal to warn the user their short link is going to change
+ * If it didn't change, then just update the user immediately.
+ */
+const updateUserCheckForConfirmation = async () => {
+  if (activeUsername.value !== user.data.username) {
+    updateUsernameModalOpen.value = true;
+    return;
+  }
+
+  await updateUser();
+};
+
+onMounted(async () => {
+  await refreshData();
+});
+
+const downloadData = async () => {
+  downloadAccountModalOpen.value = true;
+};
+
+const deleteAccount = async () => {
+  deleteAccountFirstModalOpen.value = true;
+};
+
+const refreshLink = async () => {
+  refreshLinkModalOpen.value = true;
+};
+
+const refreshLinkConfirm = async () => {
+  await user.changeSignedUrl(call);
+  await refreshData();
+  closeModals();
+};
+
+/**
+ * Request a data download, and prompt the user to download the data.
+ */
+const actuallyDownloadData = async () => {
+  const { data }: BlobResponse = await call('account/download').get().blob();
+  if (!data || !data.value) {
+    // TODO: show error
+    // console.error('Failed to download blob!!');
+    return;
+  }
+  // Data is a ref to our new blob
+  const fileObj = window.URL.createObjectURL(data.value);
+  window.location.assign(fileObj);
+
+  closeModals();
+};
+
+/**
+ * Request an account deletion, and then log out.
+ */
+const actuallyDeleteAccount = async () => {
+  deleteAccountSecondModalOpen.value = false;
+
+  const { error }: BooleanResponse = await call('account/delete').delete();
+
+  if (error.value) {
+    // TODO: show error
+    // console.warn('ERROR: ', error.value);
+    return;
+  }
+
+  // We can't logout since we've deleted the user by now, so just delete local storage data.
+  user.$reset();
+  await router.push('/');
+};
+
+</script>
+
 <template>
   <div class="flex flex-col gap-8">
     <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
@@ -105,7 +266,7 @@
     </div>
   </div>
   <!-- Refresh link confirmation modal -->
-  <ConfirmationModal
+  <confirmation-modal
     :open="refreshLinkModalOpen"
     :title="t('label.refreshLink')"
     :message="t('text.refreshLinkNotice')"
@@ -113,9 +274,9 @@
     :cancel-label="t('label.cancel')"
     @confirm="() => refreshLinkConfirm()"
     @close="closeModals"
-  ></ConfirmationModal>
+  ></confirmation-modal>
   <!-- Update username confirmation modal -->
-  <ConfirmationModal
+  <confirmation-modal
     :open="updateUsernameModalOpen"
     :title="t('label.updateUsername')"
     :message="t('text.updateUsernameNotice')"
@@ -123,9 +284,9 @@
     :cancel-label="t('label.cancel')"
     @confirm="() => updateUser()"
     @close="closeModals"
-  ></ConfirmationModal>
+  ></confirmation-modal>
   <!-- Account download modal -->
-  <ConfirmationModal
+  <confirmation-modal
     :open="downloadAccountModalOpen"
     :title="t('label.accountData')"
     :message="t('text.accountDataNotice')"
@@ -133,9 +294,9 @@
     :cancel-label="t('label.cancel')"
     @confirm="actuallyDownloadData"
     @close="closeModals"
-  ></ConfirmationModal>
+  ></confirmation-modal>
   <!-- Account deletion modals -->
-  <ConfirmationModal
+  <confirmation-modal
     :open="deleteAccountFirstModalOpen"
     :title="t('label.deleteYourAccount')"
     :message="t('text.accountDeletionWarning')"
@@ -144,169 +305,9 @@
     :use-caution-button="true"
     @confirm="actuallyDeleteAccount"
     @close="closeModals"
-  ></ConfirmationModal>
+  ></confirmation-modal>
 </template>
 
-<script setup>
-import {
-  ref, inject, onMounted,
-} from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-import CautionButton from '@/elements/CautionButton.vue';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
-import TextButton from '@/elements/TextButton.vue';
-
-// icons
-import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
-
-// stores
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import ToolTip from '@/elements/ToolTip.vue';
-import { useScheduleStore } from '@/stores/schedule-store';
-
-// component constants
-const { t } = useI18n({ useScope: 'global' });
-const call = inject('call');
-const router = useRouter();
-const user = useUserStore();
-const schedule = useScheduleStore();
-const externalConnectionsStore = useExternalConnectionsStore();
-
-const activeUsername = ref(user.data.username);
-const activeDisplayName = ref(user.data.name);
-const downloadAccountModalOpen = ref(false);
-const deleteAccountFirstModalOpen = ref(false);
-const deleteAccountSecondModalOpen = ref(false);
-const refreshLinkModalOpen = ref(false);
-const updateUsernameModalOpen = ref(false);
-const availableEmails = ref([user.data.preferredEmail]);
-const activePreferredEmail = ref(user.data.preferredEmail);
-
-const closeModals = () => {
-  downloadAccountModalOpen.value = false;
-  deleteAccountFirstModalOpen.value = false;
-  deleteAccountSecondModalOpen.value = false;
-  refreshLinkModalOpen.value = false;
-  updateUsernameModalOpen.value = false;
-};
-
-const getAvailableEmails = async () => {
-  const { data } = await call('account/available-emails').get().json();
-  if (!data || !data.value) {
-    availableEmails.value = [];
-  }
-
-  availableEmails.value = data.value;
-};
-
-const refreshData = async () => Promise.all([
-  user.profile(call),
-  schedule.fetch(call, true),
-  externalConnectionsStore.fetch(call),
-  getAvailableEmails(),
-]);
-
-// save user data
-const errorUsername = ref(false);
-const updateUser = async () => {
-  const inputData = {
-    username: activeUsername.value,
-    name: activeDisplayName.value,
-    secondary_email: activePreferredEmail.value,
-  };
-  const { data, error } = await call('me').put(inputData).json();
-  if (!error.value) {
-    // update user in store
-    user.updateProfile(data.value);
-    await user.updateSignedUrl(call);
-    errorUsername.value = false;
-    // TODO show some confirmation
-    await refreshData();
-  } else {
-    errorUsername.value = true;
-  }
-
-  closeModals();
-};
-
-/**
- * Check if the username has been changed, and open a modal to warn the user their short link is going to change
- * If it didn't change, then just update the user immediately.
- */
-const updateUserCheckForConfirmation = async () => {
-  if (activeUsername.value !== user.data.username) {
-    updateUsernameModalOpen.value = true;
-    return;
-  }
-
-  await updateUser();
-};
-
-onMounted(async () => {
-  await refreshData();
-});
-
-const downloadData = async () => {
-  downloadAccountModalOpen.value = true;
-};
-
-const deleteAccount = async () => {
-  deleteAccountFirstModalOpen.value = true;
-};
-
-const refreshLink = async () => {
-  refreshLinkModalOpen.value = true;
-};
-
-const refreshLinkConfirm = async () => {
-  await user.changeSignedUrl(call);
-  await refreshData();
-  closeModals();
-};
-
-/**
- * Request a data download, and prompt the user to download the data.
- * @returns {Promise<void>}
- */
-const actuallyDownloadData = async () => {
-  const { data } = await call('account/download').get().blob();
-  if (!data || !data.value) {
-    // TODO: show error
-    // console.error('Failed to download blob!!');
-    return;
-  }
-  // Data is a ref to our new blob
-  const fileObj = window.URL.createObjectURL(data.value);
-  window.location.assign(fileObj);
-
-  closeModals();
-};
-
-/**
- * Request an account deletion, and then log out.
- * @returns {Promise<void>}
- */
-const actuallyDeleteAccount = async () => {
-  deleteAccountSecondModalOpen.value = false;
-
-  const { error } = await call('account/delete').delete();
-
-  if (error.value) {
-    // TODO: show error
-    // console.warn('ERROR: ', error.value);
-    return;
-  }
-
-  // We can't logout since we've deleted the user by now, so just delete local storage data.
-  await user.$reset();
-  await router.push('/');
-};
-
-</script>
 <style scoped>
 
 /* If the device does not support hover (i.e. mobile) then make it activate on focus within */

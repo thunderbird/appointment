@@ -1,3 +1,35 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { SettingsSections } from '@/definitions';
+import { enumToObject } from '@/utils';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import SettingsGeneral from '@/components/SettingsGeneral.vue';
+import SettingsCalendar from '@/components/SettingsCalendar.vue';
+
+// icons
+import {
+  IconChevronRight,
+  IconSearch,
+} from '@tabler/icons-vue';
+import SettingsAccount from '@/components/SettingsAccount.vue';
+import SettingsConnections from '@/components/SettingsConnections.vue';
+
+// component constants
+const { t } = useI18n({ useScope: 'global' });
+const route = useRoute();
+const router = useRouter();
+const sections = enumToObject(SettingsSections);
+const routeView = route.params.view as string;
+
+const activeView = computed<number>(() => (routeView && sections[routeView] ? sections[routeView] : SettingsSections.General));
+
+// menu navigation of different views
+const show = (key: string) => {
+  router.push({ name: route.name, params: { view: key } });
+};
+</script>
+
 <template>
   <!-- page title area -->
   <div class="flex select-none items-start justify-between">
@@ -23,7 +55,7 @@
       </label>
       <!-- menu -->
       <div
-        v-for="(view, key) in settingsSections"
+        v-for="(view, key) in sections"
         :key="key"
         class="
           btn-jump flex cursor-pointer justify-between rounded-lg bg-gray-100 p-4
@@ -44,39 +76,10 @@
     </div>
     <!-- content -->
     <div class="w-full pt-2 lg:w-4/5 lg:pt-14">
-      <settings-general v-if="activeView === settingsSections.general" />
-      <settings-calendar v-if="activeView === settingsSections.calendar" />
-      <settings-account v-if="activeView === settingsSections.account" />
-      <settings-connections v-if="activeView === settingsSections.connectedAccounts" />
+      <settings-general v-if="activeView === SettingsSections.General" />
+      <settings-calendar v-if="activeView === SettingsSections.Calendar" />
+      <settings-account v-if="activeView === SettingsSections.Account" />
+      <settings-connections v-if="activeView === SettingsSections.ConnectedAccounts" />
     </div>
   </div>
 </template>
-
-<script setup>
-import { computed } from 'vue';
-import { settingsSections } from '@/definitions';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-import SettingsGeneral from '@/components/SettingsGeneral';
-import SettingsCalendar from '@/components/SettingsCalendar';
-
-// icons
-import {
-  IconChevronRight,
-  IconSearch,
-} from '@tabler/icons-vue';
-import SettingsAccount from '@/components/SettingsAccount.vue';
-import SettingsConnections from '@/components/SettingsConnections.vue';
-
-// component constants
-const { t } = useI18n({ useScope: 'global' });
-const route = useRoute();
-const router = useRouter();
-
-const activeView = computed(() => (route.params.view && settingsSections[route.params.view] ? settingsSections[route.params.view] : settingsSections.general));
-
-// menu navigation of different views
-const show = (key) => {
-  router.push({ name: route.name, params: { view: key } });
-};
-</script>

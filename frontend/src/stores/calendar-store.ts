@@ -14,7 +14,7 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   const hasConnectedCalendars = computed(() => connectedCalendars.value.length > 0);
 
-  const connectGoogleCalendar = async (call, email) => {
+  const connectGoogleCalendar = async (call: Fetch, email: string) => {
     const urlFriendlyEmail = encodeURIComponent(email);
     const googleUrl = await call(`google/auth?email=${urlFriendlyEmail}`).get();
     window.location.href = googleUrl.data.value.slice(1, -1);
@@ -46,13 +46,13 @@ export const useCalendarStore = defineStore('calendars', () => {
     isLoaded.value = false;
   };
 
-  const connectCalendar = async (call, id) => {
+  const connectCalendar = async (call: Fetch, id: number) => {
     await call(`cal/${id}/connect`).post();
   };
-  const disconnectCalendar = async (call, id) => {
+  const disconnectCalendar = async (call: Fetch, id: number) => {
     await call(`cal/${id}/disconnect`).post();
   };
-  const syncCalendars = async (call) => {
+  const syncCalendars = async (call: Fetch) => {
     await call('rmt/sync').post();
   };
 

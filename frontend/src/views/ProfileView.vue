@@ -1,3 +1,48 @@
+<script setup lang="ts">
+import { inject } from 'vue';
+import { keyByValue } from '@/utils';
+import { callKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
+import { useI18n } from 'vue-i18n';
+import { subscriberLevels } from '@/definitions';
+import { useUserStore } from '@/stores/user-store';
+import { storeToRefs } from 'pinia';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
+
+// icons
+import { IconPencil } from '@tabler/icons-vue';
+import { useRouter } from 'vue-router';
+
+// Stores
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
+
+// component constants
+const user = useUserStore();
+const router = useRouter();
+
+// component constants
+const { t } = useI18n();
+const call = inject(callKey);
+const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
+const isFxaAuth = inject(isFxaAuthKey);
+
+const appointmentStore = useAppointmentStore();
+const calendarStore = useCalendarStore();
+const { pendingAppointments } = storeToRefs(appointmentStore);
+const { connectedCalendars } = storeToRefs(calendarStore);
+
+// do log out
+const logout = async () => {
+  await user.logout(call);
+  await router.push('/');
+};
+
+const editProfile = async () => {
+  window.location.href = fxaEditProfileUrl;
+};
+</script>
+
 <template>
   <!-- page title area -->
   <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-2">
@@ -40,47 +85,3 @@
     />
   </div>
 </template>
-
-<script setup>
-import { inject } from 'vue';
-import { keyByValue } from '@/utils';
-import { useI18n } from 'vue-i18n';
-import { subscriberLevels } from '@/definitions';
-import { useUserStore } from '@/stores/user-store';
-import { storeToRefs } from 'pinia';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
-
-// icons
-import { IconPencil } from '@tabler/icons-vue';
-import { useRouter } from 'vue-router';
-
-// Stores
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useAppointmentStore } from '@/stores/appointment-store';
-
-// component constants
-const user = useUserStore();
-const router = useRouter();
-
-// component constants
-const { t } = useI18n();
-const call = inject('call');
-const fxaEditProfileUrl = inject('fxaEditProfileUrl');
-const isFxaAuth = inject('isFxaAuth');
-
-const appointmentStore = useAppointmentStore();
-const calendarStore = useCalendarStore();
-const { pendingAppointments } = storeToRefs(appointmentStore);
-const { connectedCalendars } = storeToRefs(calendarStore);
-
-// do log out
-const logout = async () => {
-  await user.logout(call);
-  await router.push('/');
-};
-
-const editProfile = async () => {
-  window.location = fxaEditProfileUrl;
-};
-</script>

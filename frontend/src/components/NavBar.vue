@@ -1,3 +1,34 @@
+<script setup lang="ts">
+import { inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+import { callKey } from '@/keys';
+import UserAvatar from '@/elements/UserAvatar.vue';
+import DropDown from '@/elements/DropDown.vue';
+import NavBarItem from '@/elements/NavBarItem.vue';
+import TextButton from '@/elements/TextButton.vue';
+
+// component constants
+const user = useUserStore();
+const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
+const call = inject(callKey);
+
+// component properties
+interface Props {
+  navItems: string[], // list of route names that are also lang keys (format: label.<key>), used as nav items
+};
+defineProps<Props>();
+
+// do log out
+const logout = async () => {
+  await user.logout(call);
+  await router.push('/');
+};
+</script>
+
 <template>
   <header
     class="
@@ -64,32 +95,3 @@
     </nav>
   </header>
 </template>
-
-<script setup>
-import { inject } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-import UserAvatar from '@/elements/UserAvatar';
-import DropDown from '@/elements/DropDown';
-import NavBarItem from '@/elements/NavBarItem';
-import TextButton from '@/elements/TextButton';
-
-// component constants
-const user = useUserStore();
-const route = useRoute();
-const router = useRouter();
-const { t } = useI18n();
-const call = inject('call');
-
-// component properties
-defineProps({
-  navItems: Array, // list of route names that are also lang keys (format: label.<key>), used as nav items
-});
-
-// do log out
-const logout = async () => {
-  await user.logout(call);
-  await router.push('/');
-};
-</script>

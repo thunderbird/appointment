@@ -1,3 +1,29 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
+import CautionButton from '@/elements/CautionButton.vue';
+
+// icons
+import { IconX } from '@tabler/icons-vue';
+
+const { t } = useI18n();
+
+// component properties
+interface Props {
+  open: boolean, // modal state
+  title: string,
+  message: string,
+  confirmLabel: string,
+  cancelLabel: string,
+  useCautionButton?: boolean,
+};
+defineProps<Props>();
+
+// component emits
+const emit = defineEmits(['close', 'confirm', 'error']);
+</script>
+
 <template>
   <div
     v-if="open"
@@ -41,28 +67,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { useI18n } from 'vue-i18n';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
-import CautionButton from '@/elements/CautionButton';
-
-// icons
-import { IconX } from '@tabler/icons-vue';
-
-const { t } = useI18n();
-
-// component properties
-defineProps({
-  open: Boolean, // modal state
-  title: String,
-  message: String,
-  confirmLabel: String,
-  cancelLabel: String,
-  useCautionButton: Boolean,
-});
-
-// component emits
-const emit = defineEmits(['close', 'confirm', 'error']);
-</script>

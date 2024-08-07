@@ -1,6 +1,7 @@
 import {
   ExternalConnection, ExternalConnectionCollection, Fetch, ExternalConnectionCollectionResponse,
 } from '@/models';
+import { ExternalConnectionProviders } from "@/definitions";
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -46,20 +47,20 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     isLoaded.value = false;
   };
 
-  const connect = async (call: Fetch, category: string, router: any) => {
-    if (category === 'zoom') {
+  const connect = async (call: Fetch, provider: ExternalConnectionProviders, router: any) => {
+    if (provider === ExternalConnectionProviders.Zoom) {
       const { data } = await call('zoom/auth').get().json();
       // Ship them to the auth link
       window.location.href = data.value.url;
-    } else if (category === 'google') {
+    } else if (provider === ExternalConnectionProviders.Google) {
       await router.push('/settings/calendar');
     }
   };
 
-  const disconnect = async (call: Fetch, category: string) => {
-    if (category === 'zoom') {
+  const disconnect = async (call: Fetch, provider: ExternalConnectionProviders) => {
+    if (provider === ExternalConnectionProviders.Zoom) {
       return call('zoom/disconnect').post();
-    } if (category === 'google') {
+    } if (provider === ExternalConnectionProviders.Google) {
       return call('google/disconnect').post();
     }
 
