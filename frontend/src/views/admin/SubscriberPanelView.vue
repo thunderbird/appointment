@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertSchemes, tableDataButtonType, tableDataType } from '@/definitions';
+import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
 import {
   computed, inject, onMounted, ref,
 } from 'vue';
@@ -7,7 +7,7 @@ import { IconSend } from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { Subscriber, SubscriberListResponse, BooleanResponse, Exception } from "@/models";
+import { Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter } from "@/models";
 import { dayjsKey, callKey } from "@/keys";
 import AdminNav from '@/elements/admin/AdminNav.vue';
 import AlertBox from '@/elements/AlertBox.vue';
@@ -32,40 +32,40 @@ const pageNotification = ref('');
 
 const filteredSubscribers = computed(() => subscribers.value.map((subscriber) => ({
   id: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: subscriber.id,
   },
   username: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: subscriber.username,
   },
   email: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: subscriber.email,
   },
   timeCreated: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: dj(subscriber.time_created).format('ll LTS'),
   },
   timeDeleted: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: subscriber.time_deleted ? dj(subscriber.time_deleted).format('ll LTS') : '',
   },
   timezone: {
-    type: tableDataType.text,
+    type: TableDataType.Text,
     value: subscriber.timezone ?? 'Unset',
   },
   wasInvited: {
-    type: tableDataType.bool,
+    type: TableDataType.Bool,
     value: Boolean(subscriber.invite),
   },
   disable: {
-    type: tableDataType.button,
-    buttonType: subscriber.time_deleted ? tableDataButtonType.primary : tableDataButtonType.caution,
+    type: TableDataType.Button,
+    buttonType: subscriber.time_deleted ? TableDataButtonType.Primary : TableDataButtonType.Caution,
     value: subscriber.time_deleted ? 'Enable' : 'Disable',
     disabled: !subscriber.time_deleted && subscriber.email === user.data.email,
   },
-})));
+} as TableDataRow)));
 const columns = [
   {
     key: 'id',
@@ -99,7 +99,7 @@ const columns = [
     key: 'disable',
     name: '',
   },
-];
+] as TableDataColumn[];
 const filters = [
   {
     name: 'Was Invited',
@@ -119,19 +119,15 @@ const filters = [
     ],
     /**
      * Callback function, filter the list by selectedKey and return it back to the table
-     * TODO: Add types when DataTable.vue is typed
-     * @param selectedKey
-     * @param mutableDataList
-     * @returns {*}
      */
-    fn: (selectedKey, mutableDataList) => {
+    fn: (selectedKey: string, mutableDataList: TableDataRow[]) => {
       if (selectedKey === 'all') {
         return mutableDataList;
       }
       return mutableDataList.filter((data) => data.wasInvited.value?.toString().toLowerCase() === selectedKey);
     },
   },
-];
+] as TableFilter[];
 
 /**
  * Retrieve list of all existing subscribers

@@ -1,3 +1,121 @@
+<script setup lang="ts">
+import { inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+import { dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey } from "@/keys";
+import { BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error } from "@/models";
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import AlertBox from '@/elements/AlertBox.vue';
+
+// component constants
+const user = useUserStore();
+
+// component constants
+const { t } = useI18n();
+const call = inject(callKey);
+const dj = inject(dayjsKey);
+const router = useRouter();
+const isPasswordAuth = inject(isPasswordAuthKey);
+const isFxaAuth = inject(isFxaAuthKey);
+const showInviteFlow = ref(false);
+const isLoading = ref(false);
+
+// form input and error
+const email = ref('');
+const password = ref('');
+const loginError = ref<string>(null);
+const inviteCode = ref('');
+const showConfirmEmailScreen = ref(false);
+
+const closeError = () => {
+  loginError.value = null;
+};
+
+const goHome = () => {
+  router.push('/');
+};
+
+const signUp = async () => {
+  isLoading.value = true;
+  loginError.value = '';
+  const { data }: BooleanResponse = await call('waiting-list/join').post({
+    email: email.value,
+  }).json();
+
+  if (!data.value) {
+    loginError.value = t('waitingList.signUpAlreadyExists');
+  } else {
+    showConfirmEmailScreen.value = true;
+  }
+
+  isLoading.value = false;
+};
+
+const login = async () => {
+  if (!email.value || (isPasswordAuth && !password.value)) {
+    loginError.value = t('error.credentialsIncomplete');
+    return;
+  }
+
+  isLoading.value = true;
+
+  // If they come here the first time we check if they're allowed to login
+  // If they come here a second time after not being allowed it's because they have an invite code.
+  if (!showInviteFlow.value) {
+    const { data: canLogin, error }: BooleanResponse = await call('can-login').post({
+      email: email.value,
+    }).json();
+
+    if (error?.value) {
+      // Bleh
+      loginError.value = (canLogin?.value as Exception)?.detail[0]?.msg;
+      isLoading.value = false;
+      return;
+    }
+
+    if (!canLogin.value) {
+      showInviteFlow.value = true;
+      isLoading.value = false;
+      return;
+    }
+  }
+
+  if (isFxaAuth) {
+    const params = new URLSearchParams({
+      email: email.value,
+      timezone: dj.tz.guess(),
+    });
+
+    if (inviteCode.value) {
+      params.append('invite_code', inviteCode.value);
+    }
+
+    const { error, data }: AuthUrlResponse = await call(`fxa_login?${params}`).get().json();
+
+    if (error.value) {
+      loginError.value = (data.value as Exception)?.detail[0]?.msg;
+      isLoading.value = false;
+      return;
+    }
+
+    const { url } = data.value as AuthUrl;
+
+    window.location.href = url;
+    return;
+  }
+
+  const { error }: Error = await user.login(call, email.value, password.value);
+  if (error) {
+    loginError.value = error as string;
+    isLoading.value = false;
+    return;
+  }
+
+  await router.push('/calendar');
+};
+</script>
+
 <template>
   <!-- page title area -->
   <div class="flex-center runded flex h-screen w-full bg-gray-100 dark:bg-gray-600">
@@ -94,119 +212,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { inject, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-import PrimaryButton from '@/elements/PrimaryButton';
-import AlertBox from '@/elements/AlertBox';
-import { dayjsKey } from "@/keys";
-
-// component constants
-const user = useUserStore();
-
-// component constants
-const { t } = useI18n();
-const call = inject('call');
-const dj = inject(dayjsKey);
-const router = useRouter();
-const isPasswordAuth = inject('isPasswordAuth');
-const isFxaAuth = inject('isFxaAuth');
-const showInviteFlow = ref(false);
-const isLoading = ref(false);
-
-// form input and error
-const email = ref('');
-const password = ref('');
-const loginError = ref(null);
-const inviteCode = ref('');
-const showConfirmEmailScreen = ref(false);
-
-const closeError = () => {
-  loginError.value = null;
-};
-
-const goHome = () => {
-  router.push('/');
-};
-
-const signUp = async () => {
-  isLoading.value = true;
-  loginError.value = '';
-  const { data } = await call('waiting-list/join').post({
-    email: email.value,
-  }).json();
-
-  if (!data.value) {
-    loginError.value = t('waitingList.signUpAlreadyExists');
-  } else {
-    showConfirmEmailScreen.value = true;
-  }
-
-  isLoading.value = false;
-};
-
-const login = async () => {
-  if (!email.value || (isPasswordAuth && !password.value)) {
-    loginError.value = t('error.credentialsIncomplete');
-    return;
-  }
-
-  isLoading.value = true;
-
-  // If they come here the first time we check if they're allowed to login
-  // If they come here a second time after not being allowed it's because they have an invite code.
-  if (!showInviteFlow.value) {
-    const { data: canLogin, error } = await call('can-login').post({
-      email: email.value,
-    }).json();
-
-    if (error?.value) {
-      // Bleh
-      loginError.value = canLogin?.value?.detail[0]?.msg;
-      isLoading.value = false;
-      return;
-    }
-
-    if (!canLogin.value) {
-      showInviteFlow.value = true;
-      isLoading.value = false;
-      return;
-    }
-  }
-
-  if (isFxaAuth) {
-    const params = new URLSearchParams({
-      email: email.value,
-      timezone: dj.tz.guess(),
-    });
-
-    if (inviteCode.value) {
-      params.append('invite_code', inviteCode.value);
-    }
-
-    const { error, data } = await call(`fxa_login?${params}`).get().json();
-    const { url } = data.value;
-
-    if (error.value) {
-      loginError.value = data.value?.detail;
-      isLoading.value = false;
-      return;
-    }
-
-    window.location = url;
-    return;
-  }
-
-  const { error } = await user.login(call, email.value, password.value);
-  if (error) {
-    loginError.value = error;
-    isLoading.value = false;
-    return;
-  }
-
-  await router.push('/calendar');
-};
-</script>

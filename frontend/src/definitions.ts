@@ -255,32 +255,28 @@ export const qalendarSlotDurations = {
 
 /**
  * Used as the session storage key for the location the user wanted to go to before logging in.
- * @type {string}
  */
 export const loginRedirectKey = 'loginRedirect';
 
 /**
  * Data types for table row items
- * @enum
- * @readonly
  */
-export const tableDataType = {
-  text: 1,
-  link: 2,
-  button: 3,
-  code: 4,
-  bool: 5,
-};
+export enum TableDataType {
+  Text = 1,
+  Link = 2,
+  Button = 3,
+  Code = 4,
+  Bool = 5,
+}
 
 /**
- * @enum
- * @readonly
+ * Button types for table data fields
  */
-export const tableDataButtonType = {
-  primary: 1,
-  secondary: 2,
-  caution: 3,
-};
+export enum TableDataButtonType {
+  Primary = 1,
+  Secondary = 2,
+  Caution = 3,
+}
 
 /**
  * First Time User Experience Steps
@@ -347,8 +343,8 @@ export default {
   scheduleCreationState,
   SettingsSections,
   subscriberLevels,
-  tableDataButtonType,
-  tableDataType,
+  TableDataButtonType,
+  TableDataType,
   tooltipPosition,
   WaitingListAction,
 };
