@@ -85,7 +85,7 @@ export enum BookingCalendarViews {
   Loading = 10,
   Success = 11,
   Invalid = 12,
-};
+}
 
 /**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
@@ -104,7 +104,7 @@ export enum BookingStatus {
   None = 1,
   Requested = 2,
   Booked = 3,
-};
+}
 
 /**
  * Status to indicate if an invite code ist still valid or no longer valid
@@ -112,7 +112,7 @@ export enum BookingStatus {
 export enum InviteStatus {
   Active = 1,
   Revoked = 2,
-};
+}
 
 /**
  * Available appointment views
@@ -122,7 +122,7 @@ export enum BookingsViews {
   Pending = 2,
   Past = 3,
   All = 4,
-};
+}
 
 /**
  * List columns for bookings page
@@ -132,7 +132,7 @@ export enum BookingsTableColumns {
   Status = 2,
   Calendar = 3,
   Time = 4,
-};
+}
 
 /**
  * Filter options for bookings page
@@ -145,7 +145,7 @@ export enum BookingsTableFilterOptions {
   AppointmentsNext31Days = 5,
   AppointmentsInMonth = 6,
   AllFutureAppointments = 7,
-};
+}
 
 /**
  * View types for the bookings page
@@ -153,7 +153,7 @@ export enum BookingsTableFilterOptions {
 export enum BookingsViewTypes {
   List = 1,
   Grid = 2,
-};
+}
 
 
 /**
@@ -182,7 +182,7 @@ export enum ColorSchemes {
   System = 'system',
   Dark = 'dark',
   Light = 'light',
-};
+}
 
 /**
  * Calendar management type states
@@ -228,7 +228,7 @@ export enum ModalStates {
   Open = 2, // Modal is open for editing
   Error = 3, // Modal is open for editing but contains errors
   Finished = 4, // Modal is finished, so either self-close, or show a success screen
-};
+}
 
 /**
  * Alert levels
@@ -238,7 +238,7 @@ export enum AlertSchemes {
   Warning = 2, // Alert indicates something important
   Success = 3, // Alert indicates something's gone right
   Info = 4, // Alert indicates some neutral information
-};
+}
 
 /**
  * Only available duration values supported for Qalendar
@@ -315,6 +315,26 @@ export enum WaitingListAction {
   Leave = 2,
 };
 
+export enum MetricEvents {
+  PageLoaded = 'apmt.page.loaded',
+  FTUEStep = 'apmt.ftue.step',
+  CopyToClipboard = 'apmt.copy',
+  AddCalendar = 'apmt.calendar.add',
+  EditCalendar = 'apmt.calendar.edit',
+  DeleteCalendar = 'apmt.calendar.delete',
+  ConnectCalendar = 'apmt.calendar.connect',
+  DisconnectCalendar = 'apmt.calendar.disconnect',
+  SyncCalendars = 'apmt.calendar.sync',
+  RefreshLink = 'apmt.account.refreshLink',
+  DownloadData = 'apmt.account.download',
+  DeleteAccount = 'apmt.account.delete',
+  ConfirmBooking = 'apmt.booking.confirm',
+  DenyBooking = 'apmt.booking.deny',
+  RequestBooking = 'apmt.booking.request',
+  ScheduleCreated = 'apmt.schedule.created',
+  ScheduleUpdated = 'apmt.schedule.updated',
+}
+
 export default {
   AlertSchemes,
   appointmentCreationState,
@@ -347,4 +367,5 @@ export default {
   TableDataType,
   tooltipPosition,
   WaitingListAction,
+  MetricEvents,
 };

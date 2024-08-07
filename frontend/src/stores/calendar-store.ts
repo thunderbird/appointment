@@ -21,6 +21,12 @@ export const useCalendarStore = defineStore('calendars', () => {
   };
 
   /**
+   * Retrieve the calendar object by id
+   * @param id
+   */
+  const calendarById = (id: number) => calendars.value.filter((calendar) => calendar.id === id)?.at(0) ?? null;
+
+  /**
    * Get all calendars for current user
    * @param call preconfigured API fetch function
    * @param force force a refetch
@@ -57,6 +63,17 @@ export const useCalendarStore = defineStore('calendars', () => {
   };
 
   return {
-    isLoaded, hasConnectedCalendars, calendars, unconnectedCalendars, connectedCalendars, fetch, $reset, connectGoogleCalendar, connectCalendar, disconnectCalendar, syncCalendars,
+    isLoaded,
+    hasConnectedCalendars,
+    calendars,
+    unconnectedCalendars,
+    connectedCalendars,
+    fetch,
+    $reset,
+    connectGoogleCalendar,
+    connectCalendar,
+    disconnectCalendar,
+    syncCalendars,
+    calendarById,
   };
 });

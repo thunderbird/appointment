@@ -188,6 +188,25 @@ provide(refreshKey, getDbData);
 
 onMounted(async () => {
   if (usePosthog) {
+    const REMOVED_PROPERTY = '<removed>';
+    const UNKNOWN_PROPERTY = '<unknown>';
+
+    // Hack to clear $set_once until we get confirmation that this can be filtered.
+    // Move the function reference so we can patch it and still retrieve the results before we sanitize it.
+    if (posthog['_original_calculate_set_once_properties'] === undefined) {
+      posthog['_original_calculate_set_once_properties'] = posthog._calculate_set_once_properties;
+    }
+    posthog._calculate_set_once_properties = function (dataSetOnce?) {
+      dataSetOnce = posthog['_original_calculate_set_once_properties'](dataSetOnce);
+
+      if (dataSetOnce?.$initial_current_url || dataSetOnce?.$initial_pathname) {
+        dataSetOnce.$initial_current_url = REMOVED_PROPERTY;
+        dataSetOnce.$initial_pathname = REMOVED_PROPERTY;
+      }
+
+      return dataSetOnce;
+    };
+
     posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
       api_host: import.meta.env.VITE_POSTHOG_HOST,
       ui_host: import.meta.env.VITE_POSTHOG_UI_HOST,
@@ -195,16 +214,20 @@ onMounted(async () => {
       persistence: 'memory',
       mask_all_text: true,
       mask_all_element_attributes: true,
+      autocapture: false, // Off for now until we can figure out $set_once.
       sanitize_properties: (properties, event) => {
         // If the route isn't available to use right now, ignore the capture.
         if (!route.name) {
-          return {};
+          return {
+            captureFailedMessage: 'route.name was not available.',
+          };
         }
 
         // Do we need to mask the path?
         if (route.meta?.maskForMetrics) {
           // Replace recorded path with the path definition
-          const vuePath = route.matched[0]?.path ?? '<unknown path to mask>';
+          // So basically: /user/melissaa/dfb0d2aa/ -> /user/:username/:signatureOrSlug
+          const vuePath = route.matched[0]?.path ?? UNKNOWN_PROPERTY;
           const oldPath = properties.$pathname;
 
           // Easiest just to string replace all instances!
@@ -217,9 +240,25 @@ onMounted(async () => {
         }
 
         if (event === '$pageleave') {
-          // We don't have access to the previous route, so just null it out.
-          properties.$prev_pageview_pathname = null;
+          // FIXME: Removed pending matching with vue routes
+          properties.$prev_pageview_pathname = REMOVED_PROPERTY;
         }
+
+        // Remove initial properties
+        if (!properties.$set) {
+          properties.$set = {};
+        }
+
+        properties.$set.$initial_current_url = REMOVED_PROPERTY;
+        properties.$set.$initial_pathname = REMOVED_PROPERTY;
+
+        // Clean up webvitals
+        // Ref: https://github.com/PostHog/posthog-js/blob/f5a0d12603197deab305a7e25843f04f3fa4c99e/src/extensions/web-vitals/index.ts#L175
+        ['LCP', 'CLS', 'FCP', 'INP'].forEach((metric) => {
+          if (properties[`$web_vitals_${metric}_event`]?.$current_url) {
+            properties[`$web_vitals_${metric}_event`].$current_url = REMOVED_PROPERTY;
+          }
+        });
 
         return properties;
       },

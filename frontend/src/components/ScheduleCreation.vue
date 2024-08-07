@@ -392,18 +392,22 @@ import SecondaryButton from '@/elements/SecondaryButton';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
+
 import AlertBox from '@/elements/AlertBox';
 import SwitchToggle from '@/elements/SwitchToggle';
 import ToolTip from '@/elements/ToolTip.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+
 import SnackishBar from '@/elements/SnackishBar.vue';
 import { dayjsKey } from '@/keys';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 // component constants
 const user = useUserStore();
 const calendarStore = useCalendarStore();
 const externalConnectionStore = useExternalConnectionsStore();
+const scheduleStore = useScheduleStore();
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject('call');
@@ -656,18 +660,21 @@ const saveSchedule = async (withConfirmation = true) => {
   delete obj.id;
 
   // save schedule data
-  const { data, error } = props.schedule
-    ? await call(`schedule/${props.schedule.id}`).put(obj).json()
-    : await call('schedule/').post(obj).json();
+  const response = props.schedule
+    ? await scheduleStore.updateSchedule(call, props.schedule.id, obj)
+    : await scheduleStore.createSchedule(call, obj);
 
-  if (error.value) {
+  if (response.error) {
     // error message is in data
-    handleErrorResponse(data);
+    scheduleCreationError.value = response.message;
     // go back to the start
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
   }
+
+  // Otherwise it's just data!
+  const { data } = response;
 
   if (withConfirmation) {
     // show confirmation

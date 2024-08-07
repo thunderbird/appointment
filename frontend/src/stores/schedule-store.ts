@@ -2,9 +2,10 @@ import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { dateFormatStrings } from '@/definitions';
+import { dateFormatStrings, MetricEvents } from '@/definitions';
 import { Fetch, Schedule, ScheduleListResponse } from '@/models';
 import { dayjsKey } from '@/keys';
+import { posthog, usePosthog } from '@/composables/posthog';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useScheduleStore = defineStore('schedules', () => {
@@ -89,7 +90,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     return i18n.t('error.unknownScheduleError');
   };
 
-  const createSchedule = async (call, scheduleData) => {
+  const createSchedule = async (call: Fetch, scheduleData: object) => {
     // save schedule data
     const { data, error } = await call('schedule/').post(scheduleData).json();
 
@@ -103,10 +104,14 @@ export const useScheduleStore = defineStore('schedules', () => {
     // Update the schedule
     await fetch(call, true);
 
+    if (usePosthog) {
+      posthog.capture(MetricEvents.ScheduleCreated);
+    }
+
     return data;
   };
 
-  const updateSchedule = async (call, id, scheduleData) => {
+  const updateSchedule = async (call: Fetch, id: number, scheduleData: object) => {
     // save schedule data
     const { data, error } = await call(`schedule/${id}`).put(scheduleData).json();
 
@@ -119,6 +124,10 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     // Update the schedule
     await fetch(call, true);
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.ScheduleUpdated);
+    }
 
     return data;
   };

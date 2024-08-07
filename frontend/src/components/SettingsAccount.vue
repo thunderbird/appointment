@@ -21,6 +21,9 @@ import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 
+import { MetricEvents } from '@/definitions';
+import { usePosthog, posthog } from '@/composables/posthog';
+
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
@@ -103,6 +106,17 @@ onMounted(async () => {
   await refreshData();
 });
 
+/**
+ * Send off some metrics
+ * @param event {MetricEvents}
+ * @param properties {Object}
+ */
+const sendMetrics = (event, properties = {}) => {
+  if (usePosthog) {
+    posthog.capture(event, properties);
+  }
+};
+
 const downloadData = async () => {
   downloadAccountModalOpen.value = true;
 };
@@ -119,6 +133,8 @@ const refreshLinkConfirm = async () => {
   await user.changeSignedUrl(call);
   await refreshData();
   closeModals();
+
+  sendMetrics(MetricEvents.RefreshLink);
 };
 
 /**
@@ -136,6 +152,7 @@ const actuallyDownloadData = async () => {
   window.location.assign(fileObj);
 
   closeModals();
+  sendMetrics(MetricEvents.DownloadData);
 };
 
 /**
@@ -145,6 +162,8 @@ const actuallyDeleteAccount = async () => {
   deleteAccountSecondModalOpen.value = false;
 
   const { error }: BooleanResponse = await call('account/delete').delete();
+
+  sendMetrics(MetricEvents.DeleteAccount);
 
   if (error.value) {
     // TODO: show error
@@ -220,6 +239,7 @@ const actuallyDeleteAccount = async () => {
             </a>
           </div>
           <text-button
+            uid="myLink"
             class="btn-copy"
             :tooltip="t('label.copyLink')"
             :copy="user.myLink"
@@ -307,18 +327,3 @@ const actuallyDeleteAccount = async () => {
     @close="closeModals"
   ></confirmation-modal>
 </template>
-
-<style scoped>
-
-/* If the device does not support hover (i.e. mobile) then make it activate on focus within */
-@media (hover: none) {
-  .tooltip-label:focus-within .tooltip {
-    display: block;
-  }
-}
-
-.tooltip-icon:hover ~ .tooltip {
-  display: block;
-}
-
-</style>

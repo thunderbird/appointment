@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CalendarManagementType, CalendarProviders } from '@/definitions';
+import { CalendarManagementType, CalendarProviders, MetricEvents } from '@/definitions';
 import { IconArrowRight } from '@tabler/icons-vue';
 import {
   ref, reactive, inject, onMounted, computed,
@@ -16,6 +16,7 @@ import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import GoogleCalendarButton from '@/elements/GoogleCalendarButton.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
+import { posthog, usePosthog } from '@/composables/posthog';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -77,6 +78,17 @@ const resetInput = () => {
   loading.value = false;
 };
 
+/**
+ * Send off some metrics
+ * @param event {MetricEvents}
+ * @param properties {Object}
+ */
+const sendMetrics = (event, properties = {}) => {
+  if (usePosthog) {
+    posthog.capture(event, properties);
+  }
+};
+
 // set input mode for adding or editing
 const addCalendar = (provider: number) => {
   inputMode.value = InputModes.Add;
@@ -88,6 +100,7 @@ const connectCalendar = async (id: number) => {
   await calendarStore.connectCalendar(call, id);
   await refreshData();
   resetInput();
+  sendMetrics(MetricEvents.ConnectCalendar, { provider: calendarStore.calendarById(id)?.provider });
 };
 const disconnectCalendar = async (id: number) => {
   loading.value = true;
@@ -95,12 +108,19 @@ const disconnectCalendar = async (id: number) => {
   await calendarStore.disconnectCalendar(call, id);
   await refreshData();
   resetInput();
+  sendMetrics(MetricEvents.DisconnectCalendar, { provider: calendarStore.calendarById(id)?.provider });
 };
 const syncCalendars = async () => {
-  loading.value = true;
+loading.value = true;
+
+  const oldCount = calendarStore.calendars.value.length;
 
   await calendarStore.syncCalendars(call);
   await refreshData();
+
+  const newCount = calendarStore.calendars.value.length;
+
+  sendMetrics(MetricEvents.DisconnectCalendar, { oldCount, newCount });
 };
 const editCalendar = async (id: number) => {
   loading.value = true;
@@ -133,6 +153,10 @@ const deleteCalendarConfirm = async () => {
 const saveCalendar = async () => {
   loading.value = true;
 
+  if (inputMode.value === inputModes.add) {
+    sendMetrics(MetricEvents.AddCalendar, { provider: calendarInput.data.provider });
+  }
+
   // add new caldav calendar
   if (isCalDav.value && inputMode.value === InputModes.Add) {
     const { error, data }: CalendarResponse = await call('cal').post(calendarInput.data).json();
@@ -149,10 +173,13 @@ const saveCalendar = async () => {
     await calendarStore.connectGoogleCalendar(call, calendarInput.data.user);
     return;
   }
+
   // edit existing calendar connection
-  if (inputMode.value === InputModes.Edit) {
+  if (inputMode.value === inputModes.edit) {
     await call(`cal/${calendarInput.id}`).put(calendarInput.data);
+    sendMetrics(MetricEvents.EditCalendar, { provider: calendarInput.data.provider });
   }
+
   // refresh list of calendars
   await refreshData();
   resetInput();
