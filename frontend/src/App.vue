@@ -252,6 +252,11 @@ onMounted(async () => {
         properties.$set.$initial_current_url = REMOVED_PROPERTY;
         properties.$set.$initial_pathname = REMOVED_PROPERTY;
 
+        // Remove initial person url
+        if ($initial_person_info?.u) {
+          $initial_person_info.u = REMOVED_PROPERTY;
+        }
+
         // Clean up webvitals
         // Ref: https://github.com/PostHog/posthog-js/blob/f5a0d12603197deab305a7e25843f04f3fa4c99e/src/extensions/web-vitals/index.ts#L175
         ['LCP', 'CLS', 'FCP', 'INP'].forEach((metric) => {
