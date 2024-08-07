@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { dayjsKey, callKey } from "@/keys";
 import { SubscriberResponse } from "@/models";
-// import SwitchToggle from '@/elements/SwitchToggle';
 
 // component constants
 const user = useUserStore();
