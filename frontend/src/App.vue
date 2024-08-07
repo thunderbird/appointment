@@ -255,7 +255,6 @@ onMounted(async () => {
         return properties;
       },
     });
-    posthog.debug();
     posthog.register({
       service: 'apmt',
     });
