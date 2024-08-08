@@ -1,9 +1,11 @@
+import datetime
 import logging
 import os
 import secrets
 
 import requests.exceptions
 import sentry_sdk
+import tzlocal
 from sentry_sdk import metrics
 from redis import Redis, RedisCluster
 
@@ -26,7 +28,7 @@ from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
-from ..tasks.emails import send_support_email
+from ..tasks.emails import send_support_email, send_confirmation_email
 
 router = APIRouter()
 
@@ -49,6 +51,21 @@ def health(db: Session = Depends(get_db)):
             return JSONResponse(content=l10n('health-bad'), status_code=503)
 
     return JSONResponse(l10n('health-ok'), status_code=200)
+
+
+@router.get('/mail-pls')
+def mail_pls(background_task: BackgroundTasks):
+    #send_confirmation_email('https://localhost:8080', 'Hannah Edmunds', 'hannah@example.org', datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()), 60, 'melissa@example.org', 'My schedule')
+
+    background_task.add_task(send_confirmation_email,
+                             'https://localhost:8080',
+                             'Hannah Edmunds',
+                             'hannah@example.org',
+                             datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()),
+                             60,
+                             'melissa@example.org',
+                             'My schedule')
+    return True
 
 
 @router.put('/me', response_model=schemas.SubscriberMeOut)

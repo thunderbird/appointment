@@ -3,9 +3,16 @@
 ## General
 
 -brand-name = Thunderbird Appointment
--brand-footer = This message is sent from {-brand-name}.
+-brand-slogan = Plan less, do more.
+-brand-sign-up-with-url = Sign up on appointment.day
+-brand-sign-up-with-no-url = Sign up on
+-brand-footer = This message was sent from:
+                {-brand-name}
+                {-brand-slogan} {-brand-sign-up-with-url}
 
-mail-brand-footer = {-brand-footer}
+mail-brand-footer = This message was sent from:
+                    {-brand-name}
+                    {-brand-slogan} {-brand-sign-up-with-no-url}
 
 ## Invitation
 
@@ -56,11 +63,15 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested thi
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-confirm-mail-html-heading = { $attendee_name } ({ $attendee_email }) just requested this time slot from your schedule: { $date }.
+confirm-mail-html-heading-attendee-name = { $attendee_name }
+confirm-mail-html-heading-attendee-email = ({ $attendee_email })
+confirm-mail-html-heading-text = is requesting to book a time slot in { $schedule_name }:
+confirm-mail-html-time = { $duration } mins
+
 confirm-mail-html-confirm-text = Click here to confirm the booking request:
-confirm-mail-html-confirm-action = Confirm Booking
+confirm-mail-html-confirm-action = Confirm
 confirm-mail-html-deny-text = Or here if you want to deny it:
-confirm-mail-html-deny-action = Deny Booking
+confirm-mail-html-deny-action = Decline
 
 ## Rejected Appointment
 

@@ -307,8 +307,7 @@ def request_schedule_availability_slot(
 
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
-    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
-    date = f'{date}, {slot.duration} minutes ({subscriber.timezone})'
+    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone))#.strftime('%c')
 
     # If bookings are configured to be confirmed by the owner for this schedule,
     # send emails to owner for confirmation and attendee for information
@@ -321,7 +320,7 @@ def request_schedule_availability_slot(
         # Sending confirmation email to owner
         background_tasks.add_task(
             send_confirmation_email, url=url, attendee_name=attendee.name, attendee_email=attendee.email, date=date,
-            to=subscriber.preferred_email
+            duration=slot.duration, to=subscriber.preferred_email, schedule_name=schedule.name
         )
 
         # Sending pending email to attendee
