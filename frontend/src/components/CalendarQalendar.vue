@@ -6,11 +6,9 @@ import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
-  bookingStatus,
   ColorSchemes,
   dateFormatStrings,
   defaultSlotDuration,
-  qalendarSlotDurations,
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
@@ -37,6 +35,25 @@ const props = defineProps({
 const {
   events, appointments, schedules, isBookingRoute, currentDate, fixedDuration,
 } = toRefs(props);
+
+const bookingStatus = {
+  none: 1,
+  requested: 2,
+  booked: 3,
+};
+
+/**
+ * Only available duration values supported for Qalendar
+ * This defines basically the number of intervals there will be.
+ * See: https://tomosterlund.github.io/qalendar/guide.html#intervals
+ * @enum
+ * @readonly
+ */
+const qalendarSlotDurations = {
+  15: 15,
+  30: 30,
+  60: 60,
+};
 
 const qalendarRef = ref();
 

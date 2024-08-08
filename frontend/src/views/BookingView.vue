@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookingCalendarViews, MetricEvents, ModalStates } from '@/definitions';
+import { BookingCalendarView, MetricEvents, ModalStates } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
@@ -67,18 +67,18 @@ const getViewBySlotDistribution = (slots: Slot[]) => {
   });
   if (monthChanged) {
     showNavigation.value = true;
-    return BookingCalendarViews.Month;
+    return BookingCalendarView.Month;
   }
   if (weekChanged) {
-    return BookingCalendarViews.Month;
+    return BookingCalendarView.Month;
   }
   if (dayChanged) {
-    return BookingCalendarViews.Week;
+    return BookingCalendarView.Week;
   }
   if (!dayChanged) {
-    return BookingCalendarViews.Day;
+    return BookingCalendarView.Day;
   }
-  return BookingCalendarViews.Invalid;
+  return BookingCalendarView.Invalid;
 };
 
 const handleError = (data: Exception) => {
@@ -151,7 +151,7 @@ const bookEvent = async (attendeeData: Attendee) => {
   // replace calendar view if every thing worked fine
   attendee.value = attendeeData;
   // update view to prevent reselection
-  activeView.value = BookingCalendarViews.Success;
+  activeView.value = BookingCalendarView.Success;
   // update modal view as well
   modalState.value = ModalStates.Finished;
 
@@ -177,7 +177,7 @@ onMounted(async () => {
     // check appointment slots for appropriate view
     activeView.value = getViewBySlotDistribution(appointment.value.slots);
   } else {
-    activeView.value = BookingCalendarViews.Invalid;
+    activeView.value = BookingCalendarView.Invalid;
   }
 });
 </script>
@@ -186,14 +186,14 @@ onMounted(async () => {
   <div>
     <!-- booking page content: loading -->
     <main
-      v-if="activeView === BookingCalendarViews.Loading"
+      v-if="activeView === BookingCalendarView.Loading"
       class="flex-center h-screen select-none"
     >
       <loading-spinner/>
     </main>
     <!-- booking page content: invalid link -->
     <main
-      v-else-if="activeView === BookingCalendarViews.Invalid"
+      v-else-if="activeView === BookingCalendarView.Invalid"
       class="flex-center h-screen select-none flex-col gap-8 px-4"
     >
       <booking-view-error
@@ -203,7 +203,7 @@ onMounted(async () => {
     </main>
     <!-- booking page content: successful booking -->
     <main
-      v-else-if="activeView === BookingCalendarViews.Success"
+      v-else-if="activeView === BookingCalendarView.Success"
       class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
     >
       <booking-view-success

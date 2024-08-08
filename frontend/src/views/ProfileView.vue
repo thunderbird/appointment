@@ -3,7 +3,7 @@ import { inject } from 'vue';
 import { keyByValue } from '@/utils';
 import { callKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
-import { subscriberLevels } from '@/definitions';
+import { SubscriberLevels } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -49,7 +49,7 @@ const editProfile = async () => {
     <div class="text-4xl font-light">{{ user.data.name }}</div>
     <div class="flex items-center gap-4">
       <div class="rounded-full border border-gray-500 px-2 text-xs uppercase text-gray-500">
-        {{ keyByValue(subscriberLevels, user.data.level) }}
+        {{ keyByValue(SubscriberLevels, user.data.level, true) }}
       </div>
       <div class="flex gap-1 text-gray-500">
         {{ user.data.timezone }}

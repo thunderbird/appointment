@@ -68,8 +68,8 @@ export type Appointment = {
 
 export type CustomEventData = {
   attendee?: Attendee;
-  slot_status: number; // TODO: definitions.bookingStatus
-  booking_status: number; // TODO: definitions.bookingStatus
+  slot_status: number; // TODO: definitions.BookingStatus?
+  booking_status: number; // TODO: definitions.BookingStatus
   calendar_title: string;
   calendar_color: string;
   duration: number;

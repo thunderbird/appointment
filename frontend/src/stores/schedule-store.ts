@@ -2,7 +2,7 @@ import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { dateFormatStrings, MetricEvents } from '@/definitions';
+import { DateFormatStrings, MetricEvents } from '@/definitions';
 import { Fetch, Schedule, ScheduleListResponse } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -137,7 +137,7 @@ export const useScheduleStore = defineStore('schedules', () => {
    * @param {string} time
    */
   const timeToBackendTime = (time) => {
-    const dateFormat = dateFormatStrings.qalendarFullDay;
+    const dateFormat = DateFormatStrings.QalendarFullDay;
 
     const user = useUserStore();
     return dj(`${dj().format(dateFormat)}T${time}:00`)
@@ -151,7 +151,7 @@ export const useScheduleStore = defineStore('schedules', () => {
    * @param {string} time
    */
   const timeToFrontendTime = (time) => {
-    const dateFormat = dateFormatStrings.qalendarFullDay;
+    const dateFormat = DateFormatStrings.QalendarFullDay;
     const user = useUserStore();
 
     return dj(`${dj().format(dateFormat)}T${time}:00`)

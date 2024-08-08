@@ -1,7 +1,5 @@
 /**
- * Available date format strings
- * @readonly
- * @enum
+ * @deprecated Use DateFormatStrings enum instead
  */
 export const dateFormatStrings = {
   // Qalendar specific formats (These have to be in this format for qalendar to understand them)
@@ -11,45 +9,39 @@ export const dateFormatStrings = {
   display12Hour: 'hh:mma',
   display24Hour: 'HH:mm',
 };
+/**
+ * Available date format strings
+ */
+export enum DateFormatStrings {
+  // Qalendar specific formats (These have to be in this format for qalendar to understand them)
+  Qalendar = 'YYYY-MM-DD HH:mm',
+  QalendarFullDay = 'YYYY-MM-DD',
+  // Time display formats
+  Display12Hour = 'hh:mma',
+  Display24Hour = 'HH:mm',
+}
 
 /**
  * The amount of time in minutes a schedule's slot duration will default to
- * @type {number}
  */
 export const defaultSlotDuration = 30;
 
 /**
  * Appointment subscriber levels
- * @enum
- * @readonly
  */
-export const subscriberLevels = {
-  basic: 1,
-  plus: 2,
-  pro: 3,
-  admin: 99,
-};
+export enum SubscriberLevels {
+  Basic = 1,
+  Plus = 2,
+  Pro = 3,
+  Admin = 99,
+}
 
 /**
- * Appointment location types for schedules
- * @enum
- * @readonly
+ * @deprecated use EventLocationType
  */
 export const locationTypes = {
   inPerson: 1,
   online: 2,
-};
-
-/**
- * Appointment creation state
- * @enum
- * @readonly
- */
-export const appointmentCreationState = {
-  hidden: 0,
-  details: 1,
-  availability: 2,
-  finished: 3,
 };
 
 /**
@@ -64,9 +56,7 @@ export const scheduleCreationState = {
 };
 
 /**
- * Calendar view mode
- * @enum
- * @readonly
+ * @deprecated Use BookingCalendarView
  */
 export const calendarViews = {
   day: 1,
@@ -77,7 +67,7 @@ export const calendarViews = {
 /**
  * Booking calendar view modes
  */
-export enum BookingCalendarViews {
+export enum BookingCalendarView {
   Day = 1,
   Week = 2,
   Month = 3,
@@ -86,16 +76,6 @@ export enum BookingCalendarViews {
   Success = 11,
   Invalid = 12,
 }
-
-/**
- * Booking status for slots. This mirrors models.BookingStatus on the backend
- * @deprecated Can be removed if all occurences are TS-ified.
- */
-export const bookingStatus = {
-  none: 1,
-  requested: 2,
-  booked: 3,
-};
 
 /**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
@@ -173,7 +153,7 @@ export enum SettingsSections {
   Calendar = 2,
   Account = 3,
   ConnectedAccounts = 4,
-};
+}
 
 /**
  * Available color schemes for theme
@@ -190,7 +170,7 @@ export enum ColorSchemes {
 export enum CalendarManagementType {
   Connect = 1,
   Edit = 2,
-};
+}
 
 /**
  * Supported calendar providers
@@ -198,7 +178,7 @@ export enum CalendarManagementType {
 export enum CalendarProviders {
   Caldav = 1,
   Google = 2,
-};
+}
 
 /**
  * Supported external connection providers
@@ -207,18 +187,24 @@ export enum ExternalConnectionProviders {
   Fxa = 1,
   Google = 2,
   Zoom = 3,
-};
+}
 
 /**
- * Meeting provider types (matches the backends version)
- * @enum
- * @readonly
+ * @deprecated Use MeetingLinkProviderType instead
  */
 export const meetingLinkProviderType = {
   none: 'none',
   zoom: 'zoom',
   google_meet: 'google_meet',
 };
+/**
+ * Meeting provider types (matches the backends version)
+ */
+export enum MeetingLinkProviderType {
+  None = 'none',
+  Zoom = 'zoom',
+  GoogleMeet = 'google_meet',
+}
 
 /**
  * Model states
@@ -238,19 +224,6 @@ export enum AlertSchemes {
   Warning = 2, // Alert indicates something important
   Success = 3, // Alert indicates something's gone right
   Info = 4, // Alert indicates some neutral information
-}
-
-/**
- * Only available duration values supported for Qalendar
- * This defines basically the number of intervals there will be.
- * See: https://tomosterlund.github.io/qalendar/guide.html#intervals
- * @enum
- * @readonly
- */
-export const qalendarSlotDurations = {
-  15: 15,
-  30: 30,
-  60: 60,
 };
 
 /**
@@ -337,11 +310,9 @@ export enum MetricEvents {
 
 export default {
   AlertSchemes,
-  appointmentCreationState,
-  BookingCalendarViews,
+  BookingCalendarView,
   BookingsTableColumns,
   BookingsTableFilterOptions,
-  bookingStatus,
   BookingStatus,
   BookingsViews,
   BookingsViewTypes,
@@ -350,6 +321,7 @@ export default {
   calendarViews,
   ColorSchemes,
   dateFormatStrings,
+  DateFormatStrings,
   defaultSlotDuration,
   EventLocationType,
   ExternalConnectionProviders,
@@ -358,14 +330,13 @@ export default {
   locationTypes,
   loginRedirectKey,
   meetingLinkProviderType,
+  MetricEvents,
   ModalStates,
-  qalendarSlotDurations,
   scheduleCreationState,
   SettingsSections,
-  subscriberLevels,
+  SubscriberLevels,
   TableDataButtonType,
   TableDataType,
   tooltipPosition,
   WaitingListAction,
-  MetricEvents,
 };
