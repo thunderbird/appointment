@@ -1,5 +1,4 @@
 import os
-import urllib.parse
 
 from appointment.controller.mailer import (
     PendingRequestMail,
@@ -13,14 +12,14 @@ from appointment.controller.mailer import (
 )
 
 
-def send_invite_email(to, attachment):
-    mail = InvitationMail(to=to, attachments=[attachment])
+def send_invite_email(owner_name, owner_email, date, duration, to, attachment):
+    mail = InvitationMail(name=owner_name, email=owner_email, date=date, duration=duration, to=to, attachments=[attachment])
     mail.send()
 
 
-def send_confirmation_email(url, attendee_name, attendee_email, date, to):
+def send_confirmation_email(url, attendee_name, attendee_email, date, duration, to, schedule_name):
     # send confirmation mail to owner
-    mail = ConfirmationMail(f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, to=to)
+    mail = ConfirmationMail(f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name, to=to)
     mail.send()
 
 

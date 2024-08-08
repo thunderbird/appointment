@@ -1,9 +1,12 @@
+import datetime
 import logging
 import os
 import secrets
+import uuid
 
 import requests.exceptions
 import sentry_sdk
+import tzlocal
 from sentry_sdk import metrics
 from redis import Redis, RedisCluster
 
@@ -12,6 +15,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import HTMLResponse, JSONResponse
 
 from .. import utils
+from ..controller.mailer import Attachment
 from ..database import repo, schemas
 
 # authentication
@@ -26,7 +30,7 @@ from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
-from ..tasks.emails import send_support_email
+from ..tasks.emails import send_support_email, send_confirmation_email, send_invite_email
 
 router = APIRouter()
 

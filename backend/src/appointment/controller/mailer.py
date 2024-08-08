@@ -2,20 +2,17 @@
 
 Handle outgoing emails.
 """
-
+import datetime
 import logging
 import os
 import smtplib
 import ssl
+from email.message import EmailMessage
 
 import jinja2
 import validators
 
 from html import escape
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from fastapi.templating import Jinja2Templates
 
 from ..l10n import l10n
@@ -26,7 +23,10 @@ def get_jinja():
 
     templates = Jinja2Templates(path)
     # Add our l10n function
+    templates.env.trim_blocks = True
+    templates.env.lstrip_blocks = True
     templates.env.globals.update(l10n=l10n)
+    templates.env.globals.update(homepage_url=os.getenv('FRONTEND_URL'))
 
     return templates
 
@@ -38,7 +38,7 @@ def get_template(template_name) -> 'jinja2.Template':
 
 
 class Attachment:
-    def __init__(self, mime: tuple[str], filename: str, data: str):
+    def __init__(self, mime: tuple[str,str], filename: str, data: str|bytes):
         self.mime_main = mime[0]
         self.mime_sub = mime[1]
         self.filename = filename
@@ -61,6 +61,7 @@ class Mailer:
         self.body_html = html
         self.body_plain = plain
         self.attachments = attachments
+        print("Attachments -> ", self.attachments)
 
     def html(self):
         """provide email body as html per default"""
@@ -71,31 +72,33 @@ class Mailer:
         # TODO: do some real html tag stripping and sanitizing here
         return self.body_plain if self.body_plain != '' else escape(self.body_html)
 
-    def attachments(self):
+    def _attachments(self):
         """provide all attachments as list"""
         return self.attachments
 
     def build(self):
         """build email header, body and attachments"""
         # create mail header
-        message = MIMEMultipart('alternative')
+
+        message = EmailMessage()
         message['Subject'] = self.subject
         message['From'] = self.sender
         message['To'] = self.to
 
         # add body as html and text parts
-        if self.text():
-            message.attach(MIMEText(self.text(), 'plain'))
-        if self.html():
-            message.attach(MIMEText(self.html(), 'html'))
+        message.set_content(self.text())
+        message.add_alternative(self.html(), subtype='html')
 
         # add attachment(s) as multimedia parts
-        for a in self.attachments:
-            part = MIMEBase(a.mime_main, a.mime_sub)
-            part.set_payload(a.data)
-            encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f'attachment; filename={a.filename}')
-            message.attach(part)
+        for a in self._attachments():
+            # Attach it to the html payload
+            message.get_payload()[1].add_related(
+                a.data,
+                a.mime_main,
+                a.mime_sub,
+                cid=f'<{a.filename}>',
+                filename=a.filename
+            )
 
         return message.as_string()
 
@@ -137,17 +140,71 @@ class Mailer:
                 server.quit()
 
 
-class InvitationMail(Mailer):
+class BaseBookingMail(Mailer):
+    def __init__(self, name, email, date, duration, *args, **kwargs):
+        """Base class for emails with name, email, and event information"""
+        self.name = name
+        self.email = email
+        self.date = date
+        self.duration = duration
+        super().__init__(*args, **kwargs)
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+
+        self.time_range = ' - '.join([date.strftime('%I:%M%p'), date_end.strftime('%I:%M%p')])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone += f'({date.strftime("%Z")})'
+        self.day = date.strftime('%A, %B %d %Y')
+
+    def _attachments(self):
+        """We need these little icons for the message body"""
+        path = 'src/appointment/templates/assets/img/icons'
+
+        with open(f'{path}/calendar.png', 'rb') as fh:
+            calendar_icon = fh.read()
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+
+        return [
+            Attachment(
+                mime=('image', 'png'),
+                filename='calendar.png',
+                data=calendar_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            *self.attachments,
+        ]
+
+
+class InvitationMail(BaseBookingMail):
     def __init__(self, *args, **kwargs):
         """init Mailer with invitation specific defaults"""
         default_kwargs = {
             'subject': l10n('invite-mail-subject'),
             'plain': l10n('invite-mail-plain'),
         }
-        super(InvitationMail, self).__init__(*args, **default_kwargs, **kwargs)
+        super().__init__(*args, **default_kwargs, **kwargs)
 
     def html(self):
-        return get_template('invite.jinja2').render()
+        print("->",self._attachments())
+        return get_template('invite.jinja2').render(
+            name=self.name,
+            email=self.email,
+            time_range=self.time_range,
+            timezone=self.timezone,
+            day=self.day,
+            duration=self.duration,
+            # Icon cids
+            calendar_icon_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[1].filename,
+            # Calendar ics cid
+            invite_cid=self._attachments()[2].filename,
+        )
 
 
 class ZoomMeetingFailedMail(Mailer):
@@ -165,24 +222,34 @@ class ZoomMeetingFailedMail(Mailer):
         return l10n('zoom-invite-failed-plain', {'title': self.appointment_title})
 
 
-class ConfirmationMail(Mailer):
-    def __init__(self, confirm_url, deny_url, attendee_name, attendee_email, date, *args, **kwargs):
+class ConfirmationMail(BaseBookingMail):
+    def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
-        self.attendee_name = attendee_name
-        self.attendee_email = attendee_email
-        self.date = date
+        print("Init!")
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
-        default_kwargs = {'subject': l10n('confirm-mail-subject', {'attendee_name': self.attendee_name})}
-        super(ConfirmationMail, self).__init__(*args, **default_kwargs, **kwargs)
+        self.schedule_name = schedule_name
+        default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name})}
+        super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+
+        self.time_range = ' - '.join([date.strftime('%I:%M%p'), date_end.strftime('%I:%M%p')])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone += f'({date.strftime("%Z")})'
+        self.day = date.strftime('%A, %B %d %Y')
 
     def text(self):
         return l10n(
             'confirm-mail-plain',
             {
-                'attendee_name': self.attendee_name,
-                'attendee_email': self.attendee_email,
-                'date': self.date,
+                'name': self.name,
+                'email': self.email,
+                'day': self.day,
+                'duration': self.duration,
+                'time_range': self.time_range,
+                'timezone': self.timezone,
                 'confirm_url': self.confirmUrl,
                 'deny_url': self.denyUrl,
             },
@@ -190,11 +257,18 @@ class ConfirmationMail(Mailer):
 
     def html(self):
         return get_template('confirm.jinja2').render(
-            attendee_name=self.attendee_name,
-            attendee_email=self.attendee_email,
-            date=self.date,
+            name=self.name,
+            email=self.email,
+            time_range=self.time_range,
+            timezone=self.timezone,
+            day=self.day,
+            duration=self.duration,
             confirm=self.confirmUrl,
             deny=self.denyUrl,
+            schedule_name=self.schedule_name,
+            # Icon cids
+            calendar_icon_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[1].filename,
         )
 
 
