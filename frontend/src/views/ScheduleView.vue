@@ -1,36 +1,3 @@
-<template>
-  <!-- page title area -->
-  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
-    <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
-  </div>
-  <!-- page content -->
-  <div
-    class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4"
-    :class="{ 'lg:mt-10': tabActive === BookingCalendarView.Month }"
-  >
-    <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-3/4 min-w-80 sm:w-1/4 md:mb-0 xl:w-1/6">
-      <schedule-creation
-        v-if="schedulesReady"
-        :calendars="connectedCalendars"
-        :schedule="firstSchedule"
-        :active-date="activeDate"
-        @created="getFirstSchedule"
-        @updated="schedulePreview"
-      />
-    </div>
-    <!-- main section: big calendar showing active month, week or day -->
-    <calendar-qalendar
-      class="w-full md:w-9/12 xl:w-10/12"
-      :selected="activeDate"
-      :appointments="pendingAppointments"
-      :events="calendarEvents"
-      :schedules="schedulesPreviews"
-      @date-change="onDateChange"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { BookingCalendarView } from '@/definitions';
 import {
@@ -144,3 +111,36 @@ onMounted(async () => {
   await getRemoteEvents(eventsFrom, eventsTo);
 });
 </script>
+
+<template>
+  <!-- page title area -->
+  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
+    <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
+  </div>
+  <!-- page content -->
+  <div
+    class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4"
+    :class="{ 'lg:mt-10': tabActive === BookingCalendarView.Month }"
+  >
+    <!-- schedule creation dialog -->
+    <div class="mx-auto mb-10 w-3/4 min-w-80 sm:w-1/4 md:mb-0 xl:w-1/6">
+      <schedule-creation
+        v-if="schedulesReady"
+        :calendars="connectedCalendars"
+        :schedule="firstSchedule"
+        :active-date="activeDate"
+        @created="getFirstSchedule"
+        @updated="schedulePreview"
+      />
+    </div>
+    <!-- main section: big calendar showing active month, week or day -->
+    <calendar-qalendar
+      class="w-full md:w-9/12 xl:w-10/12"
+      :selected="activeDate"
+      :appointments="pendingAppointments"
+      :events="calendarEvents"
+      :schedules="schedulesPreviews"
+      @date-change="onDateChange"
+    />
+  </div>
+</template>

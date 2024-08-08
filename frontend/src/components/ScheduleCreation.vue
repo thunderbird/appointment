@@ -1,382 +1,3 @@
-<template>
-  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600">
-    <div class="flex flex-col gap-4 px-1 py-4">
-      <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
-        <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
-        <switch-toggle
-          v-if="existing"
-          class="mt-0.5 pr-3"
-          :active="schedule.active"
-          no-legend
-          @changed="toggleActive"
-          :title="t(schedule.active ? 'label.deactivateSchedule' : 'label.activateSchedule')"
-        />
-      </div>
-      <alert-box
-        @close="scheduleCreationError = ''"
-        v-if="scheduleCreationError"
-      >
-        {{ scheduleCreationError }}
-      </alert-box>
-
-      <div class="px-4">
-        <label for="scheduleName" class="flex-column flex">
-          <input
-            id="scheduleName"
-            type="text"
-            v-model="scheduleInput.name"
-            :placeholder="t('placeholder.mySchedule')"
-            :disabled="!scheduleInput.active"
-            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0 dark:bg-transparent"
-            required
-          />
-          <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
-        </label>
-      </div>
-      <!-- step 1 -->
-      <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep1}"
-        id="schedule-availability"
-      >
-        <div
-          @click="state = ScheduleCreationState.Availability"
-          class="btn-step-1 flex cursor-pointer items-center justify-between"
-        >
-          <div class="flex flex-col gap-1">
-            <h2>
-              {{ t("label.chooseYourAvailability") }}
-            </h2>
-            <h3 class="text-xs">
-              {{ t('label.scheduleSettings.availabilitySubHeading') }}
-            </h3>
-          </div>
-          <icon-chevron-down
-            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
-            :class="{ '!rotate-0': activeStep1 }"
-          />
-        </div>
-        <div v-show="activeStep1" class="flex flex-col gap-3">
-          <hr/>
-          <div class="flex w-full flex-col justify-between gap-2 md:flex-row lg:gap-4">
-            <label class="w-full">
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.startTime") }}
-              </div>
-              <input
-                type="time"
-                v-model="scheduleInput.start_time"
-                :disabled="!scheduleInput.active"
-                class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
-              />
-            </label>
-            <label class="w-full">
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.endTime") }}
-              </div>
-              <input
-                type="time"
-                v-model="scheduleInput.end_time"
-                :disabled="!scheduleInput.active"
-                class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
-              />
-            </label>
-          </div>
-          <div>
-            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.availableDays") }}
-            </div>
-            <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg p-4">
-              <label
-                v-for="w in isoWeekdays"
-                :key="w.iso"
-                class="flex cursor-pointer select-none items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  v-model="scheduleInput.weekdays"
-                  :value="w.iso"
-                  :disabled="!scheduleInput.active"
-                  class="size-5 text-teal-500"
-                />
-                <span>{{ w.long }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- step 2 -->
-      <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50':activeStep2}"
-        id="schedule-settings"
-      >
-        <div
-          @click="state = ScheduleCreationState.Settings"
-          class="btn-step-2 flex cursor-pointer items-center justify-between"
-        >
-          <div class="flex flex-col gap-1">
-            <h2>
-              {{ t("label.scheduleDetails") }}
-            </h2>
-            <h3 class="text-xs">
-              {{ t('label.scheduleSettings.schedulingDetailsSubHeading') }}
-            </h3>
-          </div>
-          <icon-chevron-down
-            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
-            :class="{ '!rotate-0': activeStep2 }"
-          />
-        </div>
-        <div v-show="activeStep2" class="flex flex-col gap-3">
-          <hr/>
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.selectCalendar") }}
-            </div>
-            <select v-model="scheduleInput.calendar_id" class="w-full rounded-md" :disabled="!scheduleInput.active">
-              <option
-                v-for="calendar in calendars"
-                :key="calendar.id"
-                :value="calendar.id"
-              >
-                {{ calendar.title }}
-              </option>
-            </select>
-          </label>
-          <div class="grid grid-cols-2 gap-4">
-            <label>
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.earliestBooking") }}
-              </div>
-              <select
-                v-model="scheduleInput.earliest_booking"
-                class="w-full rounded-md capitalize"
-                :disabled="!scheduleInput.active"
-              >
-                <option
-                  v-for="(label, value) in earliestOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </label>
-            <label>
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.farthestBooking") }}
-              </div>
-              <select
-                v-model="scheduleInput.farthest_booking"
-                class="w-full rounded-md"
-                :disabled="!scheduleInput.active"
-              >
-                <option
-                  v-for="(label, value) in farthestOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </label>
-            <label class="col-span-2">
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.slotLength") }}
-              </div>
-              <select
-                v-model="scheduleInput.slot_duration"
-                :disabled="!scheduleInput.active"
-                class="w-7/12 rounded-md"
-              >
-                <option
-                  v-for="(label, value) in durationOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </label>
-          </div>
-          <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
-            <div>{{
-                t('text.recipientsCanScheduleBetween', {
-                  duration: duration,
-                  earliest: earliest,
-                  farthest: farthest
-                })
-              }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- step 3 -->
-      <div
-        @click="state = ScheduleCreationState.Details"
-        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep3}"
-        id="schedule-details"
-      >
-        <div class="flex cursor-pointer items-center justify-between">
-          <div class="flex flex-col gap-1">
-            <h2>
-              {{ t("label.meetingDetails") }}
-            </h2>
-            <h3 class="text-xs">
-              {{ t('label.scheduleSettings.meetingDetailsSubHeading') }}
-            </h3>
-          </div>
-          <icon-chevron-down
-            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
-            :class="{ '!rotate-0': activeStep3 }"
-          />
-        </div>
-        <div v-show="activeStep3" class="flex flex-col gap-2">
-          <hr/>
-          <label class="tooltip-label">
-            <div class="relative mb-1 flex flex-row items-center gap-2 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.videoLink") }}
-              <span class="relative cursor-help" role="tooltip" aria-labelledby="video-link-tooltip">
-              <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
-                <span class="tooltip hidden">
-                  <transition>
-                      <tool-tip id="video-link-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.videoLinkNotice')"/>
-                  </transition>
-                </span>
-            </span>
-            </div>
-            <input
-              type="text"
-              v-model="scheduleInput.location_url"
-              v-if="scheduleInput.meeting_link_provider === MeetingLinkProviderType.None"
-              :placeholder="t('placeholder.zoomCom')"
-              :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== MeetingLinkProviderType.None"
-              class="place-holder w-full rounded-md disabled:cursor-not-allowed"
-            />
-          </label>
-          <label class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
-              :disabled="!scheduleInput.active || !hasZoomAccount"
-              @change="toggleZoomLinkCreation"
-              class="size-5 rounded-md"
-            />
-            <div class="font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.generateZoomLink") }}
-            </div>
-          </label>
-          <label class="relative flex flex-col gap-1">
-            <div class="font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.notes") }}
-            </div>
-            <textarea
-              v-model="scheduleInput.details"
-              :placeholder="t('placeholder.writeHere')"
-              :disabled="!scheduleInput.active"
-              class="place-holder h-24 w-full resize-none rounded-md text-sm"
-              :maxlength="charLimit"
-            ></textarea>
-            <div
-              class="absolute bottom-3 right-3 text-xs"
-              :class="{
-              'text-orange-500': charCount >= charLimit * 0.92,
-              '!text-rose-600': charCount === charLimit,
-            }"
-            >
-              {{ charCount }}/{{ charLimit }}
-            </div>
-          </label>
-        </div>
-      </div>
-      <!-- option to deactivate confirmation -->
-      <div class="px-4">
-        <switch-toggle
-          class="my-1 pr-3 text-sm font-medium text-gray-500 dark:text-gray-300"
-          :active="schedule.booking_confirmation"
-          :label="t('label.bookingConfirmation')"
-          :disabled="!scheduleInput.active"
-          @changed="toggleBookingConfirmation"
-          no-legend
-        />
-        <div class="text-xs">
-          {{ t('text.ownerNeedsToConfirmBooking') }}
-        </div>
-      </div>
-    </div>
-    <!-- Snack-ish Bar - The dark info bubble at the bottom of this form -->
-    <!-- First time no calendars -->
-    <snackish-bar :show-icon=true v-if="!calendarStore.hasConnectedCalendars">
-      <div class="flex flex-col gap-2">
-        <p>{{ t('text.scheduleSettings.noCalendars') }}</p>
-        <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
-      </div>
-    </snackish-bar>
-    <!-- No schedule? Create one please! -->
-    <snackish-bar v-else-if="!existing">
-      <div class="flex flex-col items-center justify-center gap-2">
-        <p>{{ t('text.scheduleSettings.create') }}</p>
-        <primary-button
-          :label="t('label.save')"
-          class="btn-save w-1/2"
-          @click="saveSchedule(!existing)"
-          :waiting="savingInProgress"
-          :disabled="!scheduleInput.active"
-          :title="t('label.save')"
-        />
-      </div>
-    </snackish-bar>
-    <!-- Schedule is not active -->
-    <snackish-bar :show-icon=true v-else-if="!scheduleInput.active">
-      <p>{{ t('text.scheduleSettings.notActive') }}</p>
-    </snackish-bar>
-    <!-- Form is dirty, please clean it -->
-    <snackish-bar v-else-if="isFormDirty">
-      <div class="flex flex-col gap-2">
-      <p>{{ t('text.scheduleSettings.formDirty') }}</p>
-      <div class="flex gap-4">
-          <secondary-button
-            :label="t('label.revert')"
-            class="btn-revert w-1/2"
-            @click="resetSchedule()"
-            :disabled="!scheduleInput.active"
-            :title="t('label.revert')"
-          />
-          <primary-button
-            :label="t('label.save')"
-            class="btn-save w-1/2"
-            @click="saveSchedule(!existing)"
-            :waiting="savingInProgress"
-            :disabled="!scheduleInput.active"
-            :title="t('label.save')"
-          />
-        </div>
-        </div>
-    </snackish-bar>
-    <div v-else>
-      <div class="my-8 flex justify-center gap-4">
-        <primary-button
-          v-if="user.myLink && existing"
-          :label="t('label.shareMyLink')"
-          class="btn-copy"
-          :copy="user.myLink"
-          :title="t('label.copy')"
-        />
-      </div>
-    </div>
-  </div>
-  <!-- modals -->
-  <appointment-created-modal
-    :open="savedConfirmation.show"
-    :is-schedule="true"
-    :title="savedConfirmation.title"
-    :public-link="user.data.signedUrl"
-    @close="closeCreatedModal"
-  />
-</template>
-
 <script setup lang="ts">
 import {
   DateFormatStrings, defaultSlotDuration, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
@@ -757,6 +378,385 @@ watch(
   },
 );
 </script>
+
+<template>
+  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600">
+    <div class="flex flex-col gap-4 px-1 py-4">
+      <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
+        <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
+        <switch-toggle
+          v-if="existing"
+          class="mt-0.5 pr-3"
+          :active="schedule.active"
+          no-legend
+          @changed="toggleActive"
+          :title="t(schedule.active ? 'label.deactivateSchedule' : 'label.activateSchedule')"
+        />
+      </div>
+      <alert-box
+        @close="scheduleCreationError = ''"
+        v-if="scheduleCreationError"
+      >
+        {{ scheduleCreationError }}
+      </alert-box>
+
+      <div class="px-4">
+        <label for="scheduleName" class="flex-column flex">
+          <input
+            id="scheduleName"
+            type="text"
+            v-model="scheduleInput.name"
+            :placeholder="t('placeholder.mySchedule')"
+            :disabled="!scheduleInput.active"
+            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0 dark:bg-transparent"
+            required
+          />
+          <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
+        </label>
+      </div>
+      <!-- step 1 -->
+      <div
+        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50': activeStep1}"
+        id="schedule-availability"
+      >
+        <div
+          @click="state = ScheduleCreationState.Availability"
+          class="btn-step-1 flex cursor-pointer items-center justify-between"
+        >
+          <div class="flex flex-col gap-1">
+            <h2>
+              {{ t("label.chooseYourAvailability") }}
+            </h2>
+            <h3 class="text-xs">
+              {{ t('label.scheduleSettings.availabilitySubHeading') }}
+            </h3>
+          </div>
+          <icon-chevron-down
+            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+            :class="{ '!rotate-0': activeStep1 }"
+          />
+        </div>
+        <div v-show="activeStep1" class="flex flex-col gap-3">
+          <hr/>
+          <div class="flex w-full flex-col justify-between gap-2 md:flex-row lg:gap-4">
+            <label class="w-full">
+              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+                {{ t("label.startTime") }}
+              </div>
+              <input
+                type="time"
+                v-model="scheduleInput.start_time"
+                :disabled="!scheduleInput.active"
+                class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
+              />
+            </label>
+            <label class="w-full">
+              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+                {{ t("label.endTime") }}
+              </div>
+              <input
+                type="time"
+                v-model="scheduleInput.end_time"
+                :disabled="!scheduleInput.active"
+                class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
+              />
+            </label>
+          </div>
+          <div>
+            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.availableDays") }}
+            </div>
+            <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg p-4">
+              <label
+                v-for="w in isoWeekdays"
+                :key="w.iso"
+                class="flex cursor-pointer select-none items-center gap-2 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  v-model="scheduleInput.weekdays"
+                  :value="w.iso"
+                  :disabled="!scheduleInput.active"
+                  class="size-5 text-teal-500"
+                />
+                <span>{{ w.long }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- step 2 -->
+      <div
+        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50':activeStep2}"
+        id="schedule-settings"
+      >
+        <div
+          @click="state = ScheduleCreationState.Settings"
+          class="btn-step-2 flex cursor-pointer items-center justify-between"
+        >
+          <div class="flex flex-col gap-1">
+            <h2>
+              {{ t("label.scheduleDetails") }}
+            </h2>
+            <h3 class="text-xs">
+              {{ t('label.scheduleSettings.schedulingDetailsSubHeading') }}
+            </h3>
+          </div>
+          <icon-chevron-down
+            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+            :class="{ '!rotate-0': activeStep2 }"
+          />
+        </div>
+        <div v-show="activeStep2" class="flex flex-col gap-3">
+          <hr/>
+          <label>
+            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.selectCalendar") }}
+            </div>
+            <select v-model="scheduleInput.calendar_id" class="w-full rounded-md" :disabled="!scheduleInput.active">
+              <option
+                v-for="calendar in calendars"
+                :key="calendar.id"
+                :value="calendar.id"
+              >
+                {{ calendar.title }}
+              </option>
+            </select>
+          </label>
+          <div class="grid grid-cols-2 gap-4">
+            <label>
+              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+                {{ t("label.earliestBooking") }}
+              </div>
+              <select
+                v-model="scheduleInput.earliest_booking"
+                class="w-full rounded-md capitalize"
+                :disabled="!scheduleInput.active"
+              >
+                <option
+                  v-for="(label, value) in earliestOptions"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label }}
+                </option>
+              </select>
+            </label>
+            <label>
+              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+                {{ t("label.farthestBooking") }}
+              </div>
+              <select
+                v-model="scheduleInput.farthest_booking"
+                class="w-full rounded-md"
+                :disabled="!scheduleInput.active"
+              >
+                <option
+                  v-for="(label, value) in farthestOptions"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label }}
+                </option>
+              </select>
+            </label>
+            <label class="col-span-2">
+              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
+                {{ t("label.slotLength") }}
+              </div>
+              <select
+                v-model="scheduleInput.slot_duration"
+                :disabled="!scheduleInput.active"
+                class="w-7/12 rounded-md"
+              >
+                <option
+                  v-for="(label, value) in durationOptions"
+                  :key="value"
+                  :value="value"
+                >
+                  {{ label }}
+                </option>
+              </select>
+            </label>
+          </div>
+          <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
+            <div>{{
+                t('text.recipientsCanScheduleBetween', {
+                  duration: duration,
+                  earliest: earliest,
+                  farthest: farthest
+                })
+              }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- step 3 -->
+      <div
+        @click="state = ScheduleCreationState.Details"
+        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50': activeStep3}"
+        id="schedule-details"
+      >
+        <div class="flex cursor-pointer items-center justify-between">
+          <div class="flex flex-col gap-1">
+            <h2>
+              {{ t("label.meetingDetails") }}
+            </h2>
+            <h3 class="text-xs">
+              {{ t('label.scheduleSettings.meetingDetailsSubHeading') }}
+            </h3>
+          </div>
+          <icon-chevron-down
+            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+            :class="{ '!rotate-0': activeStep3 }"
+          />
+        </div>
+        <div v-show="activeStep3" class="flex flex-col gap-2">
+          <hr/>
+          <label class="tooltip-label">
+            <div class="relative mb-1 flex flex-row items-center gap-2 font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.videoLink") }}
+              <span class="relative cursor-help" role="tooltip" aria-labelledby="video-link-tooltip">
+              <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
+                <span class="tooltip hidden">
+                  <transition>
+                      <tool-tip id="video-link-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.videoLinkNotice')"/>
+                  </transition>
+                </span>
+            </span>
+            </div>
+            <input
+              type="text"
+              v-model="scheduleInput.location_url"
+              v-if="scheduleInput.meeting_link_provider === MeetingLinkProviderType.None"
+              :placeholder="t('placeholder.zoomCom')"
+              :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== MeetingLinkProviderType.None"
+              class="place-holder w-full rounded-md disabled:cursor-not-allowed"
+            />
+          </label>
+          <label class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
+              :disabled="!scheduleInput.active || !hasZoomAccount"
+              @change="toggleZoomLinkCreation"
+              class="size-5 rounded-md"
+            />
+            <div class="font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.generateZoomLink") }}
+            </div>
+          </label>
+          <label class="relative flex flex-col gap-1">
+            <div class="font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.notes") }}
+            </div>
+            <textarea
+              v-model="scheduleInput.details"
+              :placeholder="t('placeholder.writeHere')"
+              :disabled="!scheduleInput.active"
+              class="place-holder h-24 w-full resize-none rounded-md text-sm"
+              :maxlength="charLimit"
+            ></textarea>
+            <div
+              class="absolute bottom-3 right-3 text-xs"
+              :class="{
+              'text-orange-500': charCount >= charLimit * 0.92,
+              '!text-rose-600': charCount === charLimit,
+            }"
+            >
+              {{ charCount }}/{{ charLimit }}
+            </div>
+          </label>
+        </div>
+      </div>
+      <!-- option to deactivate confirmation -->
+      <div class="px-4">
+        <switch-toggle
+          class="my-1 pr-3 text-sm font-medium text-gray-500 dark:text-gray-300"
+          :active="schedule.booking_confirmation"
+          :label="t('label.bookingConfirmation')"
+          :disabled="!scheduleInput.active"
+          @changed="toggleBookingConfirmation"
+          no-legend
+        />
+        <div class="text-xs">
+          {{ t('text.ownerNeedsToConfirmBooking') }}
+        </div>
+      </div>
+    </div>
+    <!-- Snack-ish Bar - The dark info bubble at the bottom of this form -->
+    <!-- First time no calendars -->
+    <snackish-bar :show-icon=true v-if="!calendarStore.hasConnectedCalendars">
+      <div class="flex flex-col gap-2">
+        <p>{{ t('text.scheduleSettings.noCalendars') }}</p>
+        <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
+      </div>
+    </snackish-bar>
+    <!-- No schedule? Create one please! -->
+    <snackish-bar v-else-if="!existing">
+      <div class="flex flex-col items-center justify-center gap-2">
+        <p>{{ t('text.scheduleSettings.create') }}</p>
+        <primary-button
+          :label="t('label.save')"
+          class="btn-save w-1/2"
+          @click="saveSchedule(!existing)"
+          :waiting="savingInProgress"
+          :disabled="!scheduleInput.active"
+          :title="t('label.save')"
+        />
+      </div>
+    </snackish-bar>
+    <!-- Schedule is not active -->
+    <snackish-bar :show-icon=true v-else-if="!scheduleInput.active">
+      <p>{{ t('text.scheduleSettings.notActive') }}</p>
+    </snackish-bar>
+    <!-- Form is dirty, please clean it -->
+    <snackish-bar v-else-if="isFormDirty">
+      <div class="flex flex-col gap-2">
+      <p>{{ t('text.scheduleSettings.formDirty') }}</p>
+      <div class="flex gap-4">
+          <secondary-button
+            :label="t('label.revert')"
+            class="btn-revert w-1/2"
+            @click="resetSchedule()"
+            :disabled="!scheduleInput.active"
+            :title="t('label.revert')"
+          />
+          <primary-button
+            :label="t('label.save')"
+            class="btn-save w-1/2"
+            @click="saveSchedule(!existing)"
+            :waiting="savingInProgress"
+            :disabled="!scheduleInput.active"
+            :title="t('label.save')"
+          />
+        </div>
+        </div>
+    </snackish-bar>
+    <div v-else>
+      <div class="my-8 flex justify-center gap-4">
+        <primary-button
+          v-if="user.myLink && existing"
+          :label="t('label.shareMyLink')"
+          class="btn-copy"
+          :copy="user.myLink"
+          :title="t('label.copy')"
+        />
+      </div>
+    </div>
+  </div>
+  <!-- modals -->
+  <appointment-created-modal
+    :open="savedConfirmation.show"
+    :is-schedule="true"
+    :title="savedConfirmation.title"
+    :public-link="user.data.signedUrl"
+    @close="closeCreatedModal"
+  />
+</template>
 
 <style scoped>
 input[type="time"]::-webkit-calendar-picker-indicator {
