@@ -51,6 +51,12 @@ services:
       - 6379:6379 # Redis exposed on port 6379
       - 8070:8001 # Insights exposed on port 8070
 
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - 8025:8025 # Web UI
+      - 1025:1024 # SMTP
+
 volumes:
   db: {}
   cache: {}
