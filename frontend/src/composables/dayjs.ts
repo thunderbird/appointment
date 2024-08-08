@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import 'dayjs/locale/de';
-import { dayjsKey, durationHumanizedKey } from '@/keys';
+import { dayjsKey, durationHumanizedKey, isoWeekdaysKey } from '@/keys';
 
 export type IsoWeekday = {
   iso: number,
@@ -67,5 +67,6 @@ export default function useDayJS(app: App<Element>, locale: string) {
     });
   });
 
-  app.provide('isoWeekdays', isoWeekdays);
+  app.provide('isoWeekdays', isoWeekdays); // TODO: remove if all components are typed
+  app.provide(isoWeekdaysKey, isoWeekdays);
 }
