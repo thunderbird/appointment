@@ -8,7 +8,7 @@ from appointment.database import schemas
 
 
 class TestMailer:
-    @pytest.xfail(reason="FIXME: Need to update")
+    @pytest.mark.xfail(reason="FIXME: Need to update")
     def test_invite(self, with_l10n):
         fake_email = 'to@example.org'
 
@@ -16,7 +16,7 @@ class TestMailer:
         assert mailer.html()
         assert mailer.text()
 
-    @pytest.xfail(reason="FIXME: Need to update")
+    @pytest.mark.xfail(reason="FIXME: Need to update")
     def test_confirm(self, faker, with_l10n):
         confirm_url = 'https://example.org/yes'
         deny_url = 'https://example.org/no'

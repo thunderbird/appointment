@@ -610,7 +610,7 @@ class TestDecideScheduleAvailabilitySlot:
     start_datetime = datetime.combine(start_date, start_time)
     end_time = time(10)
 
-    @pytest.xfail(reason="FIXME: Need to update")
+    @pytest.mark.xfail(reason="FIXME: Need to update")
     def test_confirm(
         self,
         with_db,
