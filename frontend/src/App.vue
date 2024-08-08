@@ -253,8 +253,8 @@ onMounted(async () => {
         properties.$set.$initial_pathname = REMOVED_PROPERTY;
 
         // Remove initial person url
-        if ($initial_person_info?.u) {
-          $initial_person_info.u = REMOVED_PROPERTY;
+        if (properties?.$initial_person_info?.u) {
+          properties.$initial_person_info.u = REMOVED_PROPERTY;
         }
 
         // Clean up webvitals
