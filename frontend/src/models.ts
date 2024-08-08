@@ -18,18 +18,18 @@ export type Attendee = {
 
 export type Slot = {
   id: number;
-  start: Dayjs;
+  start: Dayjs|string;
   duration: number;
   attendee_id: number;
-  booking_tkn: string;
-  booking_expires_at: string;
-  booking_status: number;
-  meeting_link_id: number;
-  meeting_link_url: string;
-  appointment_id: number;
-  subscriber_id: number;
-  time_updated: string;
-  attendee: Attendee;
+  booking_tkn?: string;
+  booking_expires_at?: string;
+  booking_status?: number;
+  meeting_link_id?: number;
+  meeting_link_url?: string;
+  appointment_id?: number;
+  subscriber_id?: number;
+  time_updated?: string;
+  attendee?: Attendee;
   selected?: boolean;
 };
 
@@ -46,13 +46,13 @@ export type Appointment = {
   location_url: string;
   calendar_id: number;
   duration: number;
-  location_type: number;
+  location_type: number; // TODO
   location_suggestions: string;
   location_selected: number;
   location_name: string;
   location_phone: string;
   keep_open: boolean;
-  status: number;
+  status: number; // TODO
   meeting_link_provider: string;
   uuid: string;
   time_created: string;
@@ -64,6 +64,21 @@ export type Appointment = {
   owner_name?: string;
   slot_duration?: number;
   booking_confirmation?: boolean;
+};
+
+/**
+ * Appointment with slots from current schedule data
+ */
+export type ScheduleAppointment = {
+  title: string;
+  calendar_id: number;
+  calendar_title: string;
+  location_type: number; // TODO
+  location_url: string;
+  details: string;
+  status: number; // TODO
+  slots: Slot[];
+  type: string; // TODO
 };
 
 export type CustomEventData = {
@@ -162,7 +177,7 @@ export type Availability = {
 export type Schedule = {
   active: boolean;
   name: string;
-  slug: string;
+  slug?: string;
   calendar_id: number;
   location_type: number;
   location_url: string;
@@ -176,11 +191,11 @@ export type Schedule = {
   weekdays: number[];
   slot_duration: number;
   meeting_link_provider: string;
-  id: number;
-  time_created: string;
-  time_updated: string;
+  id?: number;
+  time_created?: string;
+  time_updated?: string;
   availabilities?: Availability[];
-  calendar: Calendar;
+  calendar?: Calendar;
   booking_confirmation: boolean;
 };
 
@@ -244,7 +259,10 @@ export type Signature = {
   url: string;
 };
 
-export type Error = { error: boolean|string|null };
+export type Error = {
+  error: boolean|string|null;
+  message?: string;
+};
 export type ExceptionDetail = {
   id?: string;
   message?: string;
@@ -277,6 +295,7 @@ export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchR
 export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type Refresh = () => Promise<void>;
 export type RemoteEventListResponse = UseFetchReturn<RemoteEvent[]>;
+export type ScheduleResponse = UseFetchReturn<Schedule>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot|Exception>;

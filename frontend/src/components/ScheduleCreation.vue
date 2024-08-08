@@ -40,7 +40,7 @@
         id="schedule-availability"
       >
         <div
-          @click="state = scheduleCreationState.availability"
+          @click="state = ScheduleCreationState.Availability"
           class="btn-step-1 flex cursor-pointer items-center justify-between"
         >
           <div class="flex flex-col gap-1">
@@ -112,7 +112,7 @@
         id="schedule-settings"
       >
         <div
-          @click="state = scheduleCreationState.settings"
+          @click="state = ScheduleCreationState.Settings"
           class="btn-step-2 flex cursor-pointer items-center justify-between"
         >
           <div class="flex flex-col gap-1">
@@ -214,7 +214,7 @@
       </div>
       <!-- step 3 -->
       <div
-        @click="state = scheduleCreationState.details"
+        @click="state = ScheduleCreationState.Details"
         class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
         :class="{'bg-neutral-50': activeStep3}"
         id="schedule-details"
@@ -250,16 +250,16 @@
             <input
               type="text"
               v-model="scheduleInput.location_url"
-              v-if="scheduleInput.meeting_link_provider === meetingLinkProviderType.none"
+              v-if="scheduleInput.meeting_link_provider === MeetingLinkProviderType.None"
               :placeholder="t('placeholder.zoomCom')"
-              :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== meetingLinkProviderType.none"
+              :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== MeetingLinkProviderType.None"
               class="place-holder w-full rounded-md disabled:cursor-not-allowed"
             />
           </label>
           <label class="flex items-center gap-2">
             <input
               type="checkbox"
-              :checked="scheduleInput.meeting_link_provider === meetingLinkProviderType.zoom"
+              :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
               :disabled="!scheduleInput.active || !hasZoomAccount"
               @change="toggleZoomLinkCreation"
               class="size-5 rounded-md"
@@ -377,30 +377,33 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
-  dateFormatStrings, defaultSlotDuration, locationTypes, meetingLinkProviderType, scheduleCreationState,
-} from '@/definitions.ts';
+  DateFormatStrings, defaultSlotDuration, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
+} from '@/definitions';
+import { Calendar, Schedule, Slot, ScheduleAppointment, Error } from "@/models";
 import {
-  ref, reactive, computed, inject, watch, onMounted,
+  ref, reactive, computed, inject, watch, onMounted, Ref
 } from 'vue';
+import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import AppointmentCreatedModal from '@/components/AppointmentCreatedModal';
-import PrimaryButton from '@/elements/PrimaryButton';
-import SecondaryButton from '@/elements/SecondaryButton';
+import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+
+import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import SecondaryButton from '@/elements/SecondaryButton.vue';
+import AlertBox from '@/elements/AlertBox.vue';
+import SwitchToggle from '@/elements/SwitchToggle.vue';
+import ToolTip from '@/elements/ToolTip.vue';
+import SnackishBar from '@/elements/SnackishBar.vue';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 
-import AlertBox from '@/elements/AlertBox';
-import SwitchToggle from '@/elements/SwitchToggle';
-import ToolTip from '@/elements/ToolTip.vue';
+// stores
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-
-import SnackishBar from '@/elements/SnackishBar.vue';
-import { dayjsKey } from '@/keys';
 import { useScheduleStore } from '@/stores/schedule-store';
 
 // component constants
@@ -410,11 +413,10 @@ const externalConnectionStore = useExternalConnectionsStore();
 const scheduleStore = useScheduleStore();
 const { t } = useI18n();
 const dj = inject(dayjsKey);
-const call = inject('call');
-const isoWeekdays = inject('isoWeekdays');
-const dateFormat = dateFormatStrings.qalendarFullDay;
-
-const firstStep = scheduleCreationState.availability;
+const call = inject(callKey);
+const isoWeekdays = inject(isoWeekdaysKey);
+const dateFormat = DateFormatStrings.QalendarFullDay;
+const firstStep = ScheduleCreationState.Availability;
 
 // component emits
 const emit = defineEmits(['created', 'updated']);
@@ -422,11 +424,12 @@ const emit = defineEmits(['created', 'updated']);
 const hasZoomAccount = computed(() => externalConnectionStore.zoom[0]);
 
 // component properties
-const props = defineProps({
-  calendars: Array, // list of user defined calendars
-  schedule: Object, // existing schedule to update or null
-  activeDate: Object, // dayjs object indicating the currently active calendar view date
-});
+interface Props {
+  calendars: Calendar[], // list of user defined calendars
+  schedule: Schedule, // existing schedule to update or null
+  activeDate: Dayjs, // dayjs object indicating the currently active calendar view date
+}
+const props = defineProps<Props>();
 
 // check if existing schedule is given
 const existing = computed(() => Boolean(props.schedule) && Boolean(props.schedule.calendar.connected));
@@ -439,8 +442,8 @@ const state = ref(firstStep);
 // second step is the availability configuration
 // third step are the booking settings
 const activeStep1 = computed(() => state.value === firstStep);
-const activeStep2 = computed(() => state.value === scheduleCreationState.settings);
-const activeStep3 = computed(() => state.value === scheduleCreationState.details);
+const activeStep2 = computed(() => state.value === ScheduleCreationState.Settings);
+const activeStep3 = computed(() => state.value === ScheduleCreationState.Details);
 const visitedStep1 = ref(false);
 
 // calculate calendar titles
@@ -453,11 +456,11 @@ const calendarTitles = computed(() => {
 });
 
 // default schedule object (for start and reset) and schedule form data
-const defaultSchedule = {
+const defaultSchedule: Schedule = {
   active: calendarStore.hasConnectedCalendars,
   name: `${user.data.name}'s Availability`,
   calendar_id: props.calendars[0]?.id,
-  location_type: locationTypes.inPerson,
+  location_type: EventLocationType.InPerson,
   location_url: '',
   details: '',
   start_date: dj().format(dateFormat),
@@ -468,7 +471,7 @@ const defaultSchedule = {
   farthest_booking: 20160,
   weekdays: [1, 2, 3, 4, 5],
   slot_duration: defaultSlotDuration,
-  meeting_link_provider: meetingLinkProviderType.none,
+  meeting_link_provider: MeetingLinkProviderType.None,
   booking_confirmation: true,
 };
 const scheduleInput = ref({ ...defaultSchedule });
@@ -513,7 +516,7 @@ const scheduledRangeMinutes = computed(() => {
 
 // generate time slots from current schedule configuration for the displayed month
 const getSlotPreviews = () => {
-  const slots = [];
+  const slots: Slot[] = [];
   // Add 1 week to the end of month here to display slots in displayed next month days too
   const end = scheduleInput.value.end_date
     ? dj.min(dj(scheduleInput.value.end_date), dj(props.activeDate).endOf('month').add(1, 'week'))
@@ -534,7 +537,7 @@ const getSlotPreviews = () => {
   return slots;
 };
 // generate an appointment object with slots from current schedule data
-const getScheduleAppointment = () => ({
+const getScheduleAppointment = (): ScheduleAppointment => ({
   title: scheduleInput.value.name,
   calendar_id: scheduleInput.value.calendar_id,
   calendar_title: calendarTitles.value[scheduleInput.value.calendar_id],
@@ -573,8 +576,10 @@ const durationOptions = {};
 });
 
 // humanize selected durations
-const earliest = computed(() => (parseInt(scheduleInput.value.earliest_booking, 10) === 0
-  ? t('label.now') : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
+const earliest = computed(() => scheduleInput.value.earliest_booking === 0
+  ? t('label.now')
+  : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()
+);
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
 const duration = computed(() => t('units.minutes', { value: scheduleInput.value.slot_duration }));
 
@@ -595,6 +600,7 @@ const resetSchedule = (resetData = true) => {
   }
 };
 
+// TODO: Is this function still needed? It's currently unused.
 const handleErrorResponse = (responseData) => {
   scheduleCreationError.value = null;
 
@@ -664,9 +670,9 @@ const saveSchedule = async (withConfirmation = true) => {
     ? await scheduleStore.updateSchedule(call, props.schedule.id, obj)
     : await scheduleStore.createSchedule(call, obj);
 
-  if (response.error) {
+  if (response.hasOwnProperty('error')) {
     // error message is in data
-    scheduleCreationError.value = response.message;
+    scheduleCreationError.value = (response as Error).message;
     // go back to the start
     savingInProgress.value = false;
     window.scrollTo(0, 0);
@@ -674,7 +680,7 @@ const saveSchedule = async (withConfirmation = true) => {
   }
 
   // Otherwise it's just data!
-  const { data } = response;
+  const data = response as Ref<Schedule>;
 
   if (withConfirmation) {
     // show confirmation
@@ -690,23 +696,23 @@ const saveSchedule = async (withConfirmation = true) => {
 };
 
 // handle schedule activation / deactivation
-const toggleActive = async (newValue) => {
+const toggleActive = async (newValue: boolean) => {
   scheduleInput.value.active = newValue;
   await saveSchedule(false);
 };
 
 // Work-around for v-model and value not working for some reason...
 const toggleZoomLinkCreation = () => {
-  if (scheduleInput.value.meeting_link_provider === meetingLinkProviderType.none) {
-    scheduleInput.value.meeting_link_provider = meetingLinkProviderType.zoom;
+  if (scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.None) {
+    scheduleInput.value.meeting_link_provider = MeetingLinkProviderType.Zoom;
     return;
   }
 
-  scheduleInput.value.meeting_link_provider = meetingLinkProviderType.none;
+  scheduleInput.value.meeting_link_provider = MeetingLinkProviderType.None;
 };
 
 // handle schedule booking confirmation activation / deactivation
-const toggleBookingConfirmation = (newValue) => {
+const toggleBookingConfirmation = (newValue: boolean) => {
   scheduleInput.value.booking_confirmation = newValue;
 };
 
@@ -723,7 +729,7 @@ watch(
   () => state.value,
   (_, oldValue) => {
     if (scheduleInput.value.active) {
-      if (oldValue === 1) visitedStep1.value = true;
+      if (oldValue === ScheduleCreationState.Availability) visitedStep1.value = true;
       emit('updated', getScheduleAppointment());
     }
   },
@@ -751,6 +757,7 @@ watch(
   },
 );
 </script>
+
 <style scoped>
 input[type="time"]::-webkit-calendar-picker-indicator {
   margin-right: -0.5rem;

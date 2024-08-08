@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
 import { DateFormatStrings, MetricEvents } from '@/definitions';
-import { Fetch, Schedule, ScheduleListResponse } from '@/models';
+import { Error, Fetch, Schedule, ScheduleListResponse,ScheduleResponse } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
 
@@ -92,13 +92,13 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   const createSchedule = async (call: Fetch, scheduleData: object) => {
     // save schedule data
-    const { data, error } = await call('schedule/').post(scheduleData).json();
+    const { data, error }: ScheduleResponse = await call('schedule/').post(scheduleData).json();
 
     if (error.value) {
       return {
         error: true,
         message: handleErrorResponse(data),
-      };
+      } as Error;
     }
 
     // Update the schedule
@@ -113,13 +113,13 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   const updateSchedule = async (call: Fetch, id: number, scheduleData: object) => {
     // save schedule data
-    const { data, error } = await call(`schedule/${id}`).put(scheduleData).json();
+    const { data, error }: ScheduleResponse = await call(`schedule/${id}`).put(scheduleData).json();
 
     if (error.value) {
       return {
         error: true,
         message: handleErrorResponse(data),
-      };
+      } as Error;
     }
 
     // Update the schedule

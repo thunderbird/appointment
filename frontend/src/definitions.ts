@@ -46,23 +46,12 @@ export const locationTypes = {
 
 /**
  * Schedule creation state
- * @enum
- * @readonly
  */
-export const scheduleCreationState = {
-  availability: 1,
-  settings: 2,
-  details: 3,
-};
-
-/**
- * @deprecated Use BookingCalendarView
- */
-export const calendarViews = {
-  day: 1,
-  week: 2,
-  month: 3,
-};
+export enum ScheduleCreationState {
+  Availability = 1,
+  Settings = 2,
+  Details = 3,
+}
 
 /**
  * Booking calendar view modes
@@ -318,7 +307,6 @@ export default {
   BookingsViewTypes,
   CalendarManagementType,
   CalendarProviders,
-  calendarViews,
   ColorSchemes,
   dateFormatStrings,
   DateFormatStrings,
@@ -332,7 +320,7 @@ export default {
   meetingLinkProviderType,
   MetricEvents,
   ModalStates,
-  scheduleCreationState,
+  ScheduleCreationState,
   SettingsSections,
   SubscriberLevels,
   TableDataButtonType,
