@@ -2,24 +2,17 @@
 
 Handle outgoing emails.
 """
-import base64
 import datetime
 import logging
 import os
 import smtplib
 import ssl
 from email.message import EmailMessage
-from email.mime.image import MIMEImage
 
 import jinja2
 import validators
 
 from html import escape
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.utils import make_msgid
 from fastapi.templating import Jinja2Templates
 
 from ..l10n import l10n
@@ -30,6 +23,8 @@ def get_jinja():
 
     templates = Jinja2Templates(path)
     # Add our l10n function
+    templates.env.trim_blocks = True
+    templates.env.lstrip_blocks = True
     templates.env.globals.update(l10n=l10n)
     templates.env.globals.update(homepage_url=os.getenv('FRONTEND_URL'))
 
@@ -66,6 +61,7 @@ class Mailer:
         self.body_html = html
         self.body_plain = plain
         self.attachments = attachments
+        print("Attachments -> ", self.attachments)
 
     def html(self):
         """provide email body as html per default"""
@@ -144,47 +140,14 @@ class Mailer:
                 server.quit()
 
 
-class InvitationMail(Mailer):
-    def __init__(self, *args, **kwargs):
-        """init Mailer with invitation specific defaults"""
-        default_kwargs = {
-            'subject': l10n('invite-mail-subject'),
-            'plain': l10n('invite-mail-plain'),
-        }
-        super(InvitationMail, self).__init__(*args, **default_kwargs, **kwargs)
-
-    def html(self):
-        return get_template('invite.jinja2').render()
-
-
-class ZoomMeetingFailedMail(Mailer):
-    def __init__(self, appointment_title, *args, **kwargs):
-        """init Mailer with invitation specific defaults"""
-        default_kwargs = {'subject': l10n('zoom-invite-failed-subject')}
-        super(ZoomMeetingFailedMail, self).__init__(*args, **default_kwargs, **kwargs)
-
-        self.appointment_title = appointment_title
-
-    def html(self):
-        return get_template('errors/zoom_invite_failed.jinja2').render(title=self.appointment_title)
-
-    def text(self):
-        return l10n('zoom-invite-failed-plain', {'title': self.appointment_title})
-
-
-class ConfirmationMail(Mailer):
-    def __init__(self, confirm_url, deny_url, attendee_name, attendee_email, date, duration, schedule_name, *args, **kwargs):
-        """init Mailer with confirmation specific defaults"""
-        print("Init!")
-        self.attendee_name = attendee_name
-        self.attendee_email = attendee_email
+class BaseBookingMail(Mailer):
+    def __init__(self, name, email, date, duration, *args, **kwargs):
+        """Base class for emails with name, email, and event information"""
+        self.name = name
+        self.email = email
         self.date = date
         self.duration = duration
-        self.confirmUrl = confirm_url
-        self.denyUrl = deny_url
-        self.schedule_name = schedule_name
-        default_kwargs = {'subject': l10n('confirm-mail-subject', {'attendee_name': self.attendee_name})}
-        super(ConfirmationMail, self).__init__(*args, **default_kwargs, **kwargs)
+        super().__init__(*args, **kwargs)
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 
@@ -214,15 +177,79 @@ class ConfirmationMail(Mailer):
                 filename='clock.png',
                 data=clock_icon,
             ),
+            *self.attachments,
         ]
+
+
+class InvitationMail(BaseBookingMail):
+    def __init__(self, *args, **kwargs):
+        """init Mailer with invitation specific defaults"""
+        default_kwargs = {
+            'subject': l10n('invite-mail-subject'),
+            'plain': l10n('invite-mail-plain'),
+        }
+        super().__init__(*args, **default_kwargs, **kwargs)
+
+    def html(self):
+        print("->",self._attachments())
+        return get_template('invite.jinja2').render(
+            name=self.name,
+            email=self.email,
+            time_range=self.time_range,
+            timezone=self.timezone,
+            day=self.day,
+            duration=self.duration,
+            # Icon cids
+            calendar_icon_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[1].filename,
+            # Calendar ics cid
+            invite_cid=self._attachments()[2].filename,
+        )
+
+
+class ZoomMeetingFailedMail(Mailer):
+    def __init__(self, appointment_title, *args, **kwargs):
+        """init Mailer with invitation specific defaults"""
+        default_kwargs = {'subject': l10n('zoom-invite-failed-subject')}
+        super(ZoomMeetingFailedMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+        self.appointment_title = appointment_title
+
+    def html(self):
+        return get_template('errors/zoom_invite_failed.jinja2').render(title=self.appointment_title)
+
+    def text(self):
+        return l10n('zoom-invite-failed-plain', {'title': self.appointment_title})
+
+
+class ConfirmationMail(BaseBookingMail):
+    def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
+        """init Mailer with confirmation specific defaults"""
+        print("Init!")
+        self.confirmUrl = confirm_url
+        self.denyUrl = deny_url
+        self.schedule_name = schedule_name
+        default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name})}
+        super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+
+        self.time_range = ' - '.join([date.strftime('%I:%M%p'), date_end.strftime('%I:%M%p')])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone += f'({date.strftime("%Z")})'
+        self.day = date.strftime('%A, %B %d %Y')
 
     def text(self):
         return l10n(
             'confirm-mail-plain',
             {
-                'attendee_name': self.attendee_name,
-                'attendee_email': self.attendee_email,
-                'date': self.date,
+                'name': self.name,
+                'email': self.email,
+                'day': self.day,
+                'duration': self.duration,
+                'time_range': self.time_range,
+                'timezone': self.timezone,
                 'confirm_url': self.confirmUrl,
                 'deny_url': self.denyUrl,
             },
@@ -230,8 +257,8 @@ class ConfirmationMail(Mailer):
 
     def html(self):
         return get_template('confirm.jinja2').render(
-            attendee_name=self.attendee_name,
-            attendee_email=self.attendee_email,
+            name=self.name,
+            email=self.email,
             time_range=self.time_range,
             timezone=self.timezone,
             day=self.day,

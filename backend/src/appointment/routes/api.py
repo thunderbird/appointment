@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import secrets
+import uuid
 
 import requests.exceptions
 import sentry_sdk
@@ -14,6 +15,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import HTMLResponse, JSONResponse
 
 from .. import utils
+from ..controller.mailer import Attachment
 from ..database import repo, schemas
 
 # authentication
@@ -28,7 +30,7 @@ from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
-from ..tasks.emails import send_support_email, send_confirmation_email
+from ..tasks.emails import send_support_email, send_confirmation_email, send_invite_email
 
 router = APIRouter()
 
@@ -55,16 +57,57 @@ def health(db: Session = Depends(get_db)):
 
 @router.get('/mail-pls')
 def mail_pls(background_task: BackgroundTasks):
+    slot = schemas.Slot(
+        start=datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()),
+        duration=60,
+        id=1,
+        appointment_id=1,
+        subscriber_id=1,
+        attendee=schemas.Attendee(
+            id=1,
+            email='hannah@example.org',
+            name='Hannah Edmunds',
+            timezone='America/Vancouver'
+        )
+    )
+
+    ics = Tools().create_vevent(schemas.Appointment(
+        id=1,
+        calendar_id=1,
+        title='My Calendar!',
+        uuid=uuid.uuid4(),
+        slots=[slot]
+    ), slot=slot,
+        organizer=schemas.Subscriber(
+            timezone='America/Vancouver',
+            username='Mel',
+            name='Melissa Breen',
+            email='melissa@example.org',
+            preferred_email='melissa@example.org',
+            id=1,
+            ftue_level=1,
+        )
+    )
+
+    send_invite_email('Melissa Breen', 'melissa@example.org',
+                      datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()), 60,
+                      'hannah@example.org',
+                      attachment=
+                          Attachment(
+                              mime=('text', 'calendar'),
+                              filename='AppointmentInvite.ics',
+                              data=ics)
+                      )
     #send_confirmation_email('https://localhost:8080', 'Hannah Edmunds', 'hannah@example.org', datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()), 60, 'melissa@example.org', 'My schedule')
 
-    background_task.add_task(send_confirmation_email,
-                             'https://localhost:8080',
-                             'Hannah Edmunds',
-                             'hannah@example.org',
-                             datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()),
-                             60,
-                             'melissa@example.org',
-                             'My schedule')
+    # background_task.add_task(send_confirmation_email,
+    #                          'https://localhost:8080',
+    #                          'Hannah Edmunds',
+    #                          'hannah@example.org',
+    #                          datetime.datetime.now().replace(hour=12, minute=0, second=0, tzinfo=tzlocal.get_localzone()),
+    #                          60,
+    #                          'melissa@example.org',
+    #                          'My schedule')
     return True
 
 

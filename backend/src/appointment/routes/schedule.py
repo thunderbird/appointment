@@ -307,7 +307,7 @@ def request_schedule_availability_slot(
 
     # human readable date in subscribers timezone
     # TODO: handle locale date representation
-    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone))#.strftime('%c')
+    date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone))
 
     # If bookings are configured to be confirmed by the owner for this schedule,
     # send emails to owner for confirmation and attendee for information

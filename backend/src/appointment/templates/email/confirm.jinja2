@@ -7,10 +7,10 @@
 {% block introduction %}
   <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
     <p style="font-weight: 700; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-attendee-name', {'attendee_name': attendee_name}) }}
+      {{ l10n('confirm-mail-html-heading-name', {'name': name}) }}
     </p>
     <p style="color: {{ colour_text_muted }}; font-size: 9px; line-height: 10px; font-weight: 700; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-attendee-email', {'attendee_email': attendee_email}) }}
+      {{ l10n('confirm-mail-html-heading-email', {'email': email}) }}
     </p>
     <p style="font-weight: 400; margin: 0;">
       {{ l10n('confirm-mail-html-heading-text', {'schedule_name': schedule_name}) }}
@@ -78,41 +78,3 @@
     >{{ l10n('confirm-mail-html-deny-action') }}</a>
   </div>
 {% endblock %}
-{#
-<html lang="{{ l10n('locale') }}">
-  <body>
-    <p>
-      {{ l10n('confirm-mail-html-heading', {'attendee_name': attendee_name, 'attendee_email': attendee_email, 'date': date}) }}
-    </p>
-    <p>
-      {{ l10n('confirm-mail-html-confirm-text') }}<br>
-      <a
-        href="{{ confirm }}"
-        style="
-          display:inline-block;
-          padding:.5rem 1rem;
-          color:white;
-          background:#0e757f;
-          border-radius:6px;
-          text-decoration:none;
-        "
-      >{{ l10n('confirm-mail-html-confirm-action') }}</a>
-    </p>
-    <p>
-      {{ l10n('confirm-mail-html-deny-text') }}<br>
-      <a
-        href="{{ deny }}"
-        style="
-          display:inline-block;
-          padding:.5rem 1rem;
-          color:white;
-          background:#ef8990;
-          border-radius:6px;
-          text-decoration:none;
-        "
-      >{{ l10n('confirm-mail-html-deny-action') }}</a>
-    </p>
-    {% include 'includes/footer.jinja2' %}
-  </body>
-</html>
-#}

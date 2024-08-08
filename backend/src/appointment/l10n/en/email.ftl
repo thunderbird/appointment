@@ -20,6 +20,13 @@ invite-mail-subject = Invitation sent from {-brand-name}
 invite-mail-plain = {-brand-footer}
 invite-mail-html = {-brand-footer}
 
+invite-mail-html-heading-name = { $name }
+invite-mail-html-heading-email = ({ $email })
+invite-mail-html-heading-text = has accepted your booking:
+invite-mail-html-time = { $duration } mins
+invite-mail-html-invite-is-attached = You can download the calendar invite file below:
+invite-mail-html-download = Download
+
 ## New Booking
 
 # Variables
@@ -50,7 +57,11 @@ confirm-mail-subject = Action Required: Confirm booking request from { $attendee
 # $date (String) - Date of the Appointment
 # $confirm_url (String) - URL that when clicked will confirm the appointment
 # $deny_url (String) - URL that when clicked will deny the appointment
-confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested this time slot from your schedule: { $date }
+confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in: { $schedule_name }
+
+                    { $duration } mins
+                    { $time_range } ({ $timezone })
+                    { $day }
 
                     Visit this link to confirm the booking request:
                     { $confirm_url }
@@ -63,8 +74,8 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested thi
 # $attendee_name (String) - Name of the person who requested the appointment
 # $appointment_email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-confirm-mail-html-heading-attendee-name = { $attendee_name }
-confirm-mail-html-heading-attendee-email = ({ $attendee_email })
+confirm-mail-html-heading-name = { $name }
+confirm-mail-html-heading-email = ({ $email })
 confirm-mail-html-heading-text = is requesting to book a time slot in { $schedule_name }:
 confirm-mail-html-time = { $duration } mins
 

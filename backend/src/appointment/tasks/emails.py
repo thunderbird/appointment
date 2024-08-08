@@ -12,8 +12,8 @@ from appointment.controller.mailer import (
 )
 
 
-def send_invite_email(to, attachment):
-    mail = InvitationMail(to=to, attachments=[attachment])
+def send_invite_email(owner_name, owner_email, date, duration, to, attachment):
+    mail = InvitationMail(name=owner_name, email=owner_email, date=date, duration=duration, to=to, attachments=[attachment])
     mail.send()
 
 
