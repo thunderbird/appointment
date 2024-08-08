@@ -49,12 +49,16 @@ new-booking-html-heading = { $attendee_name } ({ $attendee_email }) has just boo
 ## Confirm Appointment
 
 # Variables
-# $attendee_name (String) - Name of the person who requested the appointment
-confirm-mail-subject = Action Required: Confirm booking request from { $attendee_name }
+# $name (String) - Name of the person who requested the appointment
+confirm-mail-subject = Action Required: Confirm booking request from { $name }
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the Appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
+# $duration (String) - Length of meeting in minutes
+# $day (String) - Formatted date string
+# $time_range (String) - Formatted time string
+# $timezone (String) - Timezone (e.g. UTC, PST, etc...)
+# $schedule_name - Name of the schedule the appointment was booked on
 # $confirm_url (String) - URL that when clicked will confirm the appointment
 # $deny_url (String) - URL that when clicked will deny the appointment
 confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in: { $schedule_name }

@@ -10,6 +10,7 @@ import ssl
 from email.message import EmailMessage
 
 import jinja2
+import sentry_sdk
 import validators
 
 from html import escape
@@ -61,7 +62,6 @@ class Mailer:
         self.body_html = html
         self.body_plain = plain
         self.attachments = attachments
-        print("Attachments -> ", self.attachments)
 
     def html(self):
         """provide email body as html per default"""
@@ -135,6 +135,8 @@ class Mailer:
         except Exception as e:
             # sending email was not possible
             logging.error('[mailer.send] An error occurred on sending email: ' + str(e))
+            if os.getenv('SENTRY_DSN'):
+                sentry_sdk.capture_exception(e)
         finally:
             if server:
                 server.quit()
