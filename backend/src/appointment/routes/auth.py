@@ -318,6 +318,9 @@ def me(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Return the currently authed user model"""
+
+    hash = subscriber.unique_hash
+
     return schemas.SubscriberMeOut(
         username=subscriber.username,
         email=subscriber.email,
@@ -328,7 +331,7 @@ def me(
         avatar_url=subscriber.avatar_url,
         is_setup=subscriber.is_setup,
         schedule_links=schedule_links_by_subscriber(db, subscriber),
-        unique_hash=subscriber.unique_hash
+        unique_hash=hash
     )
 
 

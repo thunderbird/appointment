@@ -3,20 +3,29 @@ import datetime
 import pytest
 
 from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
-    NewBookingMail
+    NewBookingMail, Attachment
 from appointment.database import schemas
 
 
 class TestMailer:
-    @pytest.mark.xfail(reason="FIXME: Need to update")
     def test_invite(self, with_l10n):
         fake_email = 'to@example.org'
 
-        mailer = InvitationMail(to=fake_email)
+        mailer = InvitationMail(
+            to=fake_email,
+            name='fake',
+            email='fake@example.org',
+            date=datetime.datetime.now(),
+            duration=30,
+            attachments=[Attachment(
+                mime=('text', 'calendar'),
+                filename='test.ics',
+                data=b''
+            )]
+        )
         assert mailer.html()
         assert mailer.text()
 
-    @pytest.mark.xfail(reason="FIXME: Need to update")
     def test_confirm(self, faker, with_l10n):
         confirm_url = 'https://example.org/yes'
         deny_url = 'https://example.org/no'
@@ -24,7 +33,7 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email)
+        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test')
         assert mailer.html()
         assert mailer.text()
 

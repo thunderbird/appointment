@@ -442,6 +442,8 @@ class Tools:
             filename='AppointmentInvite.ics',
             data=ics,
         )
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(attendee.timezone))
         background_tasks.add_task(
             send_invite_email,

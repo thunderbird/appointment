@@ -193,7 +193,6 @@ class InvitationMail(BaseBookingMail):
         super().__init__(*args, **default_kwargs, **kwargs)
 
     def html(self):
-        print("->",self._attachments())
         return get_template('invite.jinja2').render(
             name=self.name,
             email=self.email,
