@@ -1,8 +1,48 @@
-<html lang="{{ l10n('locale') }}">
-  <body>
-    <p>
-      {{ l10n('new-booking-html-heading', {'attendee_name': attendee_name, 'attendee_email': attendee_email, 'date': date}) }}
+{% extends "includes/base.jinja2" %}
+{# Helper vars #}
+{% set clock_image_small = '<img style="width: 11px; height: 11px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
+{% set clock_image = '<img style="width: 15px; height: 15px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
+{% set calendar_image = '<img style="width: 14px; height: 14px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=calendar_icon_cid) %}
+{# Code begins! #}
+{% block introduction %}
+  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
+    <p style="font-weight: 700; margin: 0;">
+      {{ l10n('new-booking-html-heading-name', {'name': name}) }}
     </p>
-    {% include 'includes/footer.jinja2' %}
-  </body>
-</html>
+    <p style="color: {{ colour_text_muted }}; font-size: 9px; line-height: 10px; font-weight: 700; margin: 0;">
+      {{ l10n('new-booking-html-heading-email', {'email': email}) }}
+    </p>
+    <p style="font-weight: 400; margin: 0;">
+      {{ l10n('new-booking-html-heading-text', {'schedule_name': schedule_name}) }}
+    </p>
+  </div>
+{% endblock %}
+{% block information %}
+  <div style="display: flex">
+    {# Time details #}
+    <div style="width: 100%; font-weight: 700; margin: 24px 12px;">
+      <div style="margin-bottom: 6px;">
+        {{ clock_image|safe }} {{ time_range }}
+        <span style="color: {{ colour_icon_secondary }}; font-size: 9px">{{ timezone }}</span>
+      </div>
+      <div>
+        {{ calendar_image|safe }} {{ day }}
+      </div>
+    </div>
+    {# Chip #}
+    <div style="
+      min-width: 60px;
+      margin-left: auto;
+      margin-right: 0;
+      text-align: center;
+      background-color: {{ colour_tbpro_apmt_secondary }};
+      padding: 3px 12px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      height: 16px;
+      ">
+      {{ clock_image_small|safe }} {{ l10n('new-booking-html-time', {'duration': duration}) }}
+    </div>
+  </div>
+{% endblock %}

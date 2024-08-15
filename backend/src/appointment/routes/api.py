@@ -30,7 +30,7 @@ from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException
 from ..l10n import l10n
-from ..tasks.emails import send_support_email, send_confirmation_email, send_invite_email
+from ..tasks.emails import send_support_email
 
 router = APIRouter()
 
@@ -520,6 +520,14 @@ def send_feedback(
 ):
     """Send a subscriber's support request to the configured support email address"""
     if not os.getenv('SUPPORT_EMAIL'):
+        # Ensure sentry at least captures it!
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_message("No SUPPORT_EMAIL is set, support messages are being ignored!")
+            sentry_sdk.capture_message(f"""
+            Support Email Alert!
+            FROM: {subscriber.name} <{subscriber.preferred_email}>
+            SUBJECT: {form_data.topic}
+            MESSAGE: {form_data.details}""")
         raise APIException()
 
     background_tasks.add_task(

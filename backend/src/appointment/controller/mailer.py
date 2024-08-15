@@ -149,15 +149,27 @@ class BaseBookingMail(Mailer):
         self.email = email
         self.date = date
         self.duration = duration
+
+        # Pass to super now!
         super().__init__(*args, **kwargs)
+
+        # Localize date and time range format
+        self.time_format = l10n('time-format')
+        self.date_format = l10n('date-format')
+
+        # If value is key then there's no localization available, set a default.
+        if self.time_format == 'time-format':
+            self.time_format = '%I:%M%p'
+        if self.date_format == 'date-format':
+            self.date_format = '%A, %B %d %Y'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 
-        self.time_range = ' - '.join([date.strftime('%I:%M%p'), date_end.strftime('%I:%M%p')])
+        self.time_range = ' - '.join([date.strftime(self.time_format), date_end.strftime(self.time_format)])
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone += f'({date.strftime("%Z")})'
-        self.day = date.strftime('%A, %B %d %Y')
+        self.day = date.strftime(self.date_format)
 
     def _attachments(self):
         """We need these little icons for the message body"""
@@ -226,20 +238,12 @@ class ZoomMeetingFailedMail(Mailer):
 class ConfirmationMail(BaseBookingMail):
     def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
-        print("Init!")
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
         self.schedule_name = schedule_name
         default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name})}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
 
-        date_end = self.date + datetime.timedelta(minutes=self.duration)
-
-        self.time_range = ' - '.join([date.strftime('%I:%M%p'), date_end.strftime('%I:%M%p')])
-        self.timezone = ''
-        if self.date.tzinfo:
-            self.timezone += f'({date.strftime("%Z")})'
-        self.day = date.strftime('%A, %B %d %Y')
 
     def text(self):
         return l10n(
@@ -303,30 +307,35 @@ class PendingRequestMail(Mailer):
         return get_template('pending.jinja2').render(owner_name=self.owner_name, date=self.date)
 
 
-class NewBookingMail(Mailer):
-    def __init__(self, attendee_name, attendee_email, date, *args, **kwargs):
+class NewBookingMail(BaseBookingMail):
+    def __init__(self, name, email, date, duration, schedule_name, *args, **kwargs):
         """init Mailer with confirmation specific defaults"""
-        self.attendee_name = attendee_name
-        self.attendee_email = attendee_email
-        self.date = date
-        default_kwargs = {'subject': l10n('new-booking-subject', {'attendee_name': self.attendee_name})}
-        super(NewBookingMail, self).__init__(*args, **default_kwargs, **kwargs)
+        self.schedule_name = schedule_name
+        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name})}
+        super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
 
     def text(self):
         return l10n(
             'new-booking-plain',
             {
-                'attendee_name': self.attendee_name,
-                'attendee_email': self.attendee_email,
+                'name': self.name,
+                'email': self.email,
                 'date': self.date,
             },
         )
 
     def html(self):
         return get_template('new_booking.jinja2').render(
-            attendee_name=self.attendee_name,
-            attendee_email=self.attendee_email,
-            date=self.date,
+            name=self.name,
+            email=self.email,
+            time_range=self.time_range,
+            timezone=self.timezone,
+            day=self.day,
+            duration=self.duration,
+            schedule_name=self.schedule_name,
+            # Icon cids
+            calendar_icon_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[1].filename,
         )
 
 
@@ -338,7 +347,7 @@ class SupportRequestMail(Mailer):
         self.topic = topic
         self.details = details
         default_kwargs = {'subject': l10n('support-mail-subject', {'topic': topic})}
-        super(SupportRequestMail, self).__init__(os.getenv('SUPPORT_EMAIL'), *args, **default_kwargs, **kwargs)
+        super(SupportRequestMail, self).__init__(os.getenv('SUPPORT_EMAIL', 'help@tb.net'), *args, **default_kwargs, **kwargs)
 
     def text(self):
         return l10n(

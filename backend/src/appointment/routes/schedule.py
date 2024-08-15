@@ -337,9 +337,11 @@ def request_schedule_availability_slot(
         # Notify the subscriber that they have a new confirmed booking
         background_tasks.add_task(
             send_new_booking_email,
-            attendee_name=attendee.name,
-            attendee_email=attendee.email,
+            name=attendee.name,
+            email=attendee.email,
             date=date,
+            duration=slot.duration,
+            schedule_name=schedule.name,
             to=subscriber.preferred_email
         )
 

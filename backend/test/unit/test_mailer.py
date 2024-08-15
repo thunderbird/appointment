@@ -49,7 +49,7 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = NewBookingMail(attendee.name, attendee.email, now, to=fake_email)
+        mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', to=fake_email)
         assert mailer.html()
         assert mailer.text()
 

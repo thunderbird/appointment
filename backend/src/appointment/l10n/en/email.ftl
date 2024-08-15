@@ -18,7 +18,6 @@ mail-brand-footer = This message was sent from:
 
 invite-mail-subject = Invitation sent from {-brand-name}
 invite-mail-plain = {-brand-footer}
-invite-mail-html = {-brand-footer}
 
 invite-mail-html-heading-name = { $name }
 invite-mail-html-heading-email = ({ $email })
@@ -31,20 +30,25 @@ invite-mail-html-download = Download
 
 # Variables
 # $attendee_name (String) - Name of the person who requested the appointment
-new-booking-subject = You have a new confirmed booking with { $attendee_name }
+new-booking-subject = You have a new confirmed booking with { $name }
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the Appointment
-new-booking-plain = { $attendee_name } ({ $attendee_email }) has just booked { $date }
+new-booking-plain = { $name } ({ $email }) has just booked { $date }
 
                     {-brand-footer}
 
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-new-booking-html-heading = { $attendee_name } ({ $attendee_email }) has just booked { $date }
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment will be
+new-booking-html-heading-name = { $name }
+new-booking-html-heading-email = ({ $email })
+new-booking-html-heading-text = has just booked time in { $schedule_name }:
+new-booking-html-time = { $duration } mins
 
 ## Confirm Appointment
 
@@ -75,9 +79,11 @@ confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in
 
                     {-brand-footer}
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment will be
 confirm-mail-html-heading-name = { $name }
 confirm-mail-html-heading-email = ({ $email })
 confirm-mail-html-heading-text = is requesting to book a time slot in { $schedule_name }:
@@ -154,7 +160,8 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) sent the followi
 ## New/Invited Account Email
 new-account-mail-subject = You've been invited to Thunderbird Appointment
 new-account-mail-action = Continue to Thunderbird Appointment
-new-account-mail-html-heading = You've been invited to Thunderbird Appointment. Login with this email address to continue.
+new-account-mail-html-heading = You've been invited to Thunderbird Appointment.
+new-account-mail-html-body = Login with this email address to continue.
 # Variables:
 # $homepage_url (String) - URL to Thunderbird Appointment
 new-account-mail-plain = You've been invited to Thunderbird Appointment.
@@ -166,8 +173,8 @@ new-account-mail-plain = You've been invited to Thunderbird Appointment.
 confirm-email-mail-subject = Confirm your email to join the waiting list!
 confirm-email-mail-confirm-action = Confirm your email
 confirm-email-mail-decline-action = Remove your email
-confirm-email-mail-html-body = Thank you for your interest in Thunderbird Appointment.
-                               Before we add you to our waiting list we need you to confirm your email address below.
+confirm-email-mail-html-heading = Thank you for your interest in Thunderbird Appointment.
+confirm-email-mail-html-body = Before we add you to our waiting list we need you to confirm your email address below.
 confirm-email-mail-html-body-2 = Did you receive this email in error, or are you no longer interested?
 # Variables:
 # $confirm_email_url (String) - URL to confirm your email

@@ -1,12 +1,17 @@
-<html lang="{{ l10n('locale') }}">
-  <body>
+{% extends "includes/base.jinja2" %}
+{# Code begins! #}
+{% block introduction %}
+  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
     <p>
       {{ l10n('support-mail-html-heading', {'requestee_name': requestee_name, 'requestee_email': requestee_email}) }}
     </p>
+  </div>
+{% endblock %}
+{% block information %}
+  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
     <p>
       <b>{{ l10n('support-mail-html-topic', {'topic': topic}) }}</b><br>
       {{ l10n('support-mail-html-details', {'details': details}) }}
     </p>
-    {% include 'includes/footer.jinja2' %}
-  </body>
-</html>
+  </div>
+{% endblock %}
