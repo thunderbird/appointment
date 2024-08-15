@@ -25,7 +25,7 @@ const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/F
 type ApmtRouteMeta = {
   isPublic?: boolean; // Can the page be accessed without authentication?
   maskForMetrics?: boolean; // Mask url parameters before sending information to metrics
-  disableMetrics?: boolean; // Disable all metric capturing for this page
+  disableMetrics?: boolean; // Disable all metric capturing for this page. FIXME: Not Impl
 };
 
 /**
@@ -163,7 +163,7 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-subscriber-panel',
     component: SubscriberPanelView,
     meta: {
-      disableMetrics: true,
+      //disableMetrics: true,
     },
   },
   {
@@ -171,7 +171,7 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-invite-codes-panel',
     component: InviteCodePanelView,
     meta: {
-      disableMetrics: true,
+      //disableMetrics: true,
     },
   },
   {
@@ -179,7 +179,7 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-waiting-list-panel',
     component: WaitingListPanelView,
     meta: {
-      disableMetrics: true,
+      //disableMetrics: true,
     },
   },
 ];
@@ -193,16 +193,6 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
   const fromMeta: ApmtRouteMeta = from?.meta ?? {};
-
-  if (usePosthog) {
-    // Handle disableMetrics meta property
-    if (toMeta?.disableMetrics && !fromMeta?.disableMetrics) {
-      posthog.opt_out_capturing();
-    }
-    if (!toMeta?.disableMetrics && fromMeta?.disableMetrics) {
-      posthog.opt_in_capturing();
-    }
-  }
 
   if (!toMeta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
     const user = useUserStore();
