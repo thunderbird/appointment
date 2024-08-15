@@ -51,6 +51,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/waiting-list',
+    name: 'join-the-waiting-list',
+    component: LoginView,
+    meta: {
+      isPublic: true,
+    },
+  },
+  {
     path: '/post-login/:token',
     name: 'post-login',
     component: PostLoginView,

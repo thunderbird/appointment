@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import {inject, onMounted, ref} from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import { dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey } from "@/keys";
 import { BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error } from "@/models";
@@ -15,9 +15,11 @@ const user = useUserStore();
 const { t } = useI18n();
 const call = inject(callKey);
 const dj = inject(dayjsKey);
+const route = useRoute();
 const router = useRouter();
 const isPasswordAuth = inject(isPasswordAuthKey);
 const isFxaAuth = inject(isFxaAuthKey);
+const onlyShowInvite = ref(false);
 const showInviteFlow = ref(false);
 const isLoading = ref(false);
 
@@ -27,6 +29,13 @@ const password = ref('');
 const loginError = ref<string>(null);
 const inviteCode = ref('');
 const showConfirmEmailScreen = ref(false);
+
+onMounted(() => {
+  if (route.name === 'join-the-waiting-list') {
+    showInviteFlow.value = true;
+    onlyShowInvite.value = true;
+  }
+});
 
 const closeError = () => {
   loginError.value = null;
@@ -153,7 +162,7 @@ const login = async () => {
               @keydown.enter="isFxaAuth ? login() : null"
             />
           </label>
-          <label class="flex flex-col items-center pl-4" v-if="showInviteFlow">
+          <label class="flex flex-col items-center pl-4" v-if="showInviteFlow && !onlyShowInvite">
           <span class="w-full">
           {{ t('label.inviteCode') }}
           </span>

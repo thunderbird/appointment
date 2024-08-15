@@ -17,6 +17,9 @@ const enter = () => {
 const login = () => {
   router.push('/login');
 };
+const signUp = () => {
+  router.push('/waiting-list')
+};
 </script>
 
 <template>
@@ -45,6 +48,15 @@ const login = () => {
               class="btn-continue"
               @click="enter"
               :title="$t('label.continue')"
+            />
+          </div>
+          <div class="mt-4 mb-4">
+            <primary-button
+              v-if="!isAuthenticated"
+              :label="$t('label.signUpForBeta')"
+              class="btn-login"
+              @click="signUp"
+              :title="$t('label.signUpForBeta')"
             />
           </div>
         </div>
