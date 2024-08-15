@@ -50,6 +50,8 @@
   <p style="margin: 12px;">
   {{ l10n('invite-mail-html-invite-is-attached') }}
   </p>
+  {#
+  # This doesn't work Apple Mail, and it also hides the attachment...bleh.
   <div style="margin-bottom: 12px">
     <a
       href="cid:{{ invite_cid }}"
@@ -67,4 +69,5 @@
         "
     >{{ l10n('invite-mail-html-download') }}</a>
   </div>
+  #}
 {% endblock %}

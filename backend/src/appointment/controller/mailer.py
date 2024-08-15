@@ -216,7 +216,7 @@ class InvitationMail(BaseBookingMail):
             calendar_icon_cid=self._attachments()[0].filename,
             clock_icon_cid=self._attachments()[1].filename,
             # Calendar ics cid
-            invite_cid=self._attachments()[2].filename,
+            #invite_cid=self._attachments()[2].filename,
         )
 
 

@@ -23,7 +23,7 @@ invite-mail-html-heading-name = { $name }
 invite-mail-html-heading-email = ({ $email })
 invite-mail-html-heading-text = has accepted your booking:
 invite-mail-html-time = { $duration } mins
-invite-mail-html-invite-is-attached = You can download the calendar invite file below:
+invite-mail-html-invite-is-attached = Your calendar invite is attached.
 invite-mail-html-download = Download
 
 ## New Booking
