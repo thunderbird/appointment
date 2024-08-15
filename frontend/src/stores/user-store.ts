@@ -3,7 +3,7 @@ import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
 import { computed, inject } from 'vue';
 import {
-  Schedule, Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
+  Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 
@@ -38,6 +38,14 @@ export const useUserStore = defineStore('user', () => {
     return data.value.signedUrl;
   });
 
+
+  const authenticated = computed((): boolean => {
+    return data.value.accessToken !== null;
+  });
+  /**
+   * @deprecated - Use authenticated
+   * @see this.authenticated
+   */
   const exists = () => data.value.accessToken !== null;
   const $reset = () => {
     if (usePosthog) {
@@ -181,6 +189,18 @@ export const useUserStore = defineStore('user', () => {
   };
 
   return {
-    data, exists, $reset, updateSignedUrl, profile, updateProfile, changeSignedUrl, login, logout, myLink, updateUser, finishFTUE,
+    data,
+    authenticated,
+    exists,
+    $reset,
+    updateSignedUrl,
+    profile,
+    updateProfile,
+    changeSignedUrl,
+    login,
+    logout,
+    myLink,
+    updateUser,
+    finishFTUE,
   };
 });

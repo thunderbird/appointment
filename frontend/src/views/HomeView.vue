@@ -4,10 +4,12 @@ import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
+import {storeToRefs} from "pinia";
 
 const router = useRouter();
 
-const isAuthenticated = useUserStore().exists();
+const userStore = useUserStore();
+const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
 const enter = () => {
   router.push('/calendar');
