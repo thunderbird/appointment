@@ -9,6 +9,7 @@ from unittest.mock import patch
 from appointment.dependencies.auth import get_admin_subscriber, get_subscriber
 from appointment.routes.auth import create_access_token
 from appointment.routes.waiting_list import WaitingListAction
+from appointment.tasks.emails import send_confirm_email, send_invite_account_email
 from defines import auth_headers
 
 
@@ -221,3 +222,141 @@ class TestWaitingListAdminView:
         data = response.json()
 
         assert response.status_code == 401, data
+
+
+class TestWaitingListAdminInvite:
+    def test_invite_one_user(self, with_client, with_db, with_l10n, make_waiting_list):
+        """Test a successful invitation of one user"""
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        waiting_list_user = make_waiting_list()
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            response = with_client.post('/waiting-list/invite',
+                                        json={
+                                            'id_list': [waiting_list_user.id]
+                                        },
+                                        headers=auth_headers)
+
+            # Ensure the response was okay!
+            data = response.json()
+
+            assert response.status_code == 200, data
+            assert len(data['accepted']) == 1
+            assert len(data['errors']) == 0
+            assert data['accepted'][0] == waiting_list_user.id
+
+            # Ensure we sent out an email
+            mock.assert_called_once()
+            # Triple access D:, one for ArgList, one for Call<Function, Args...>), and then the function is in a tuple?!
+            assert mock.call_args_list[0][0][0] == send_invite_account_email
+            assert mock.call_args_list[0].kwargs == {'to': waiting_list_user.email}
+
+        with with_db() as db:
+            db.add(waiting_list_user)
+            db.refresh(waiting_list_user)
+
+            assert waiting_list_user.invite_id
+            assert waiting_list_user.invite.subscriber_id
+            assert waiting_list_user.invite.subscriber.email == waiting_list_user.email
+
+    def test_invite_many_users(self, with_client, with_db, with_l10n, make_waiting_list):
+        """Test a successful invite of many users"""
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        waiting_list_users = [ make_waiting_list().id for i in range(0, 10) ]
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            response = with_client.post('/waiting-list/invite',
+                                        json={
+                                            'id_list': waiting_list_users
+                                        },
+                                        headers=auth_headers)
+
+            # Ensure the response was okay!
+            data = response.json()
+
+            assert response.status_code == 200, data
+            assert len(data['accepted']) == len(waiting_list_users)
+            assert len(data['errors']) == 0
+
+            for i, id in enumerate(waiting_list_users):
+                assert data['accepted'][i] == id
+
+            # Ensure we sent out an email
+            mock.assert_called()
+
+            with with_db() as db:
+                for i, id in enumerate(waiting_list_users):
+                    waiting_list_user = db.query(models.WaitingList).filter(models.WaitingList.id == id).first()
+
+                    assert waiting_list_user
+                    assert waiting_list_user.invite_id
+                    assert waiting_list_user.invite.subscriber_id
+                    assert waiting_list_user.invite.subscriber.email == waiting_list_user.email
+
+                    assert mock.call_args_list[i][0][0] == send_invite_account_email
+                    assert mock.call_args_list[i].kwargs == {'to': waiting_list_user.email}
+
+    def test_invite_existing_subscriber(self, with_client, with_db, with_l10n, make_waiting_list, make_basic_subscriber):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        sub = make_basic_subscriber()
+        waiting_list_user = make_waiting_list(email=sub.email)
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            response = with_client.post('/waiting-list/invite',
+                                        json={
+                                            'id_list': [waiting_list_user.id]
+                                        },
+                                        headers=auth_headers)
+
+            # Ensure the response was okay!
+            data = response.json()
+
+            assert response.status_code == 200, data
+            assert len(data['accepted']) == 0
+            assert len(data['errors']) == 1
+
+            assert sub.email in data['errors'][0]
+
+            mock.assert_not_called()
+
+    def test_invite_many_users_with_one_existing_subscriber(self, with_client, with_db, with_l10n, make_waiting_list, make_basic_subscriber):
+        os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
+
+        sub = make_basic_subscriber()
+        waiting_list_users = [ make_waiting_list().id for i in range(0, 10) ]
+        waiting_list_users.append(make_waiting_list(email=sub.email).id)
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+
+            response = with_client.post('/waiting-list/invite',
+                                        json={
+                                            'id_list': waiting_list_users
+                                        },
+                                        headers=auth_headers)
+
+            # Ensure the response was okay!
+            data = response.json()
+
+            assert response.status_code == 200, data
+            assert len(data['accepted']) == len(waiting_list_users) - 1
+            assert len(data['errors']) == 1
+
+            for i, id in enumerate(waiting_list_users):
+                # Last entry was an error!
+                if i == 10:
+                    # Should be in the error list, and it shouldn't have called add_task
+                    assert sub.email in data['errors'][0]
+                    assert i not in mock.call_args_list
+                else:
+                    assert data['accepted'][i] == id
+
+                    with with_db() as db:
+                        waiting_list_user = db.query(models.WaitingList).filter(models.WaitingList.id == id).first()
+
+                        assert waiting_list_user
+                        assert mock.call_args_list[i][0][0] == send_invite_account_email
+                        assert mock.call_args_list[i].kwargs == {'to': waiting_list_user.email}
+

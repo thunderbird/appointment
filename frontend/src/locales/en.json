@@ -278,6 +278,8 @@
     "selectCalendar": "Select calendar",
     "send": "Send",
     "sendInvitationToAnotherEmail": "Send to another email",
+    "sendInviteToWaitingList": "Select someone to send an invite! | Send an invite to {count} folk | Send an invite to {count} folks",
+    "sentCountInvitesSuccessfully": "All selected users are already invited! | Sent {count} invite! | Sent {count} invites!",
     "settings": "Settings",
     "shareMyLink": "Share my link",
     "showSecondaryTimeZone": "Show secondary time zone",
@@ -419,6 +421,7 @@
     "signUpAlreadyExists": "You are already on the waiting list.",
     "signUpCheckYourEmail": "Check your email for more information.",
     "signUpHeading": "Just one more step!",
-    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
+    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address.",
+    "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!"
   }
 }

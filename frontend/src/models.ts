@@ -225,6 +225,11 @@ export type Subscriber = {
   time_deleted?: string;
 }
 
+export type WaitingListInvite = {
+  accepted: number[];
+  errors: string[]
+}
+
 export type WaitingListEntry = {
   id: number;
   email: string;
@@ -285,6 +290,7 @@ export type StringListResponse = UseFetchReturn<string[]>;
 export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
+export type WaitingListInviteResponse = UseFetchReturn<WaitingListInvite|Exception>
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
 export type WaitingListActionResponse = UseFetchReturn<WaitingListStatus>;
 

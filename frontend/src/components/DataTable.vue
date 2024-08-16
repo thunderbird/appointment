@@ -25,15 +25,18 @@
         <thead>
           <tr>
             <th v-if="allowMultiSelect">
-              <!-- Decide if we want to select all for the paginated list or all data -->
+              <input :checked="paginatedDataList.every((row) => selectedRows.includes(row))" @change="(evt) => onPageSelect(evt, paginatedDataList)" id="select-page-input" class="mr-2" type="checkbox"/>
+              <label class="select-none cursor-pointer" for="select-page-input">
+              Select Page
+              </label>
             </th>
             <th v-for="column in columns" :key="column.key">{{ column.name }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(datum, i) in paginatedDataList" :key="i">
+          <tr v-for="(datum, i) in paginatedDataList" :key="datum[dataKey] as unknown as string">
             <td v-if="allowMultiSelect">
-              <input type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
+              <input :checked="selectedRows.includes(datum)" type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
             </td>
             <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey" :class="`column-${fieldKey}`">
               <span v-if="fieldData.type === TableDataType.Text">
@@ -117,6 +120,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 interface Props {
   allowMultiSelect: boolean, // Displays checkboxes next to each row, and emits the `fieldSelect` event with a list of currently selected rows
   dataName: string, // The name for the object being represented on the table
+  dataKey: string, // A property to use as the list key
   columns: TableDataColumn[], // List of columns to be displayed (these don't filter data, filter that yourself!)
   dataList: TableDataRow[], // List of data to be displayed
   filters: TableFilter[], // List of filters to be displayed
@@ -125,7 +129,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const {
-  dataList, columns, dataName, allowMultiSelect, loading,
+  dataList, dataKey, columns, dataName, allowMultiSelect, loading,
 } = toRefs(props);
 
 const { t } = useI18n();
@@ -165,6 +169,28 @@ const totalDataLength = computed(() => {
   }
   return 0;
 });
+
+const onPageSelect = (evt: Event, list: TableDataRow[]) => {
+  const target = evt.target as HTMLInputElement;
+  const isChecked = target.checked;
+
+  list.forEach((row) => {
+    const index = selectedRows.value.indexOf(row);
+
+    // Add and we're already in? OR Remove and we're not in? Skip!
+    if ((isChecked && index !== -1) || (!isChecked && index === -1)) {
+      return;
+    }
+
+    if (isChecked) {
+      selectedRows.value.push(row);
+    } else {
+      selectedRows.value.splice(index, 1);
+    }
+  });
+
+  emit('fieldSelect', selectedRows.value);
+}
 
 const onFieldSelect = (evt: Event, row: TableDataRow) => {
   const isChecked = (evt as HTMLInputElementEvent)?.target?.checked;

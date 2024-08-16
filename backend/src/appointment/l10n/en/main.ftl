@@ -93,6 +93,10 @@ join-online = Join online at: { $url }
 # $phone (String) - An unformatted phone number for the meeting
 join-phone = Join by phone: { $phone }
 
+# Waiting List Errors
+wl-subscriber-already-exists = { $email } is already a subscriber...that's weird!
+wl-subscriber-failed-to-create = { $email } was unable to be invited. Please make a bug report!
+
 ## Account Data Readme
 
 # This is a text file that is generated and bundled along with your account data

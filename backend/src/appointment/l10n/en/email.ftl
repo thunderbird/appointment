@@ -159,7 +159,7 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) sent the followi
 
 ## New/Invited Account Email
 new-account-mail-subject = You've been invited to Thunderbird Appointment
-new-account-mail-action = Continue to Thunderbird Appointment
+new-account-mail-action = Log In
 new-account-mail-html-heading = You've been invited to Thunderbird Appointment.
 new-account-mail-html-body = Login with this email address to continue.
 # Variables:
