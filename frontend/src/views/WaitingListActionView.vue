@@ -42,6 +42,12 @@ onMounted(async () => {
 
   action.value = data?.value?.action;
 
+  // They're already a user, and they need to go to settings to delete their account!
+  if (data?.value?.redirectToSettings) {
+    await router.replace('/settings/account#delete-your-account');
+    return;
+  }
+
  if (usePosthog) {
     if (action.value === WaitingListAction.Confirm) {
       posthog.capture(MetricEvents.WaitingListEmailConfirmed, {});

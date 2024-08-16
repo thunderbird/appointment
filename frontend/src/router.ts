@@ -194,7 +194,7 @@ router.beforeEach((to, from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
   const fromMeta: ApmtRouteMeta = from?.meta ?? {};
 
-  if (!toMeta?.isPublic && !['setup', 'contact', 'undefined'].includes(String(to.name))) {
+  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'undefined'].includes(String(to.name))) {
     const user = useUserStore();
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };

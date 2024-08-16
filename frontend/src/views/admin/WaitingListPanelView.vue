@@ -193,7 +193,6 @@ const amIAdmin = async () => {
 };
 
 const sendInvites = async () => {
-  console.log("Send!");
   loading.value = true;
 
   const idList = selectedFields.value.map((row) => row.id.value);
@@ -202,12 +201,12 @@ const sendInvites = async () => {
   const { data, error } = response;
 
   if (error.value) {
-
+    pageError.value = data?.value?.detail?.message ?? t('error.somethingWentWrong');
+    loading.value = false;
+    return;
   }
 
   const { accepted, errors } = data.value;
-
-  console.log(data.value);
 
   pageNotification.value = t('label.sentCountInvitesSuccessfully', {count: accepted.length})
 

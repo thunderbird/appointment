@@ -1,12 +1,14 @@
 import os
 
 import sentry_sdk
+from posthog import Posthog
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, BackgroundTasks
 from ..database import repo, schemas, models
 from ..dependencies.auth import get_admin_subscriber
 
 from ..dependencies.database import get_db
+from ..dependencies.metrics import get_posthog
 from ..exceptions import validation
 from ..l10n import l10n
 from ..tasks.emails import send_confirm_email, send_invite_account_email
@@ -55,6 +57,7 @@ def act_on_waiting_list(data: schemas.TokenForWaitingList, db: Session = Depends
 
     action = token_data.get('action')
     email = token_data.get('email')
+    print(email)
 
     if action is None or email is None:
         raise validation.InvalidLinkException()
@@ -62,6 +65,16 @@ def act_on_waiting_list(data: schemas.TokenForWaitingList, db: Session = Depends
     if action == WaitingListAction.CONFIRM_EMAIL.value:
         success = repo.invite.confirm_waiting_list_email(db, email)
     elif action == WaitingListAction.LEAVE.value:
+        # If they're a user already then tell the frontend to ship them to the settings page.
+        waiting_list_entry = repo.invite.get_waiting_list_entry_by_email(db, email)
+
+        if waiting_list_entry and waiting_list_entry.invite_id and waiting_list_entry.invite.subscriber_id:
+            return {
+                'action': action,
+                'success': False,
+                'redirectToSettings': True
+            }
+
         success = repo.invite.remove_waiting_list_email(db, email)
     else:
         raise validation.InvalidLinkException()
@@ -98,7 +111,8 @@ def invite_waiting_list_users(
     data: schemas.WaitingListInviteAdminIn,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    _: models.Subscriber = Depends(get_admin_subscriber),
+    posthog: Posthog | None = Depends(get_posthog),
+    admin: models.Subscriber = Depends(get_admin_subscriber),
 ):
     """Invites a list of ids to TBA
     For each waiting list id:
@@ -152,6 +166,14 @@ def invite_waiting_list_users(
 
         background_tasks.add_task(send_invite_account_email, to=subscriber.email)
         accepted.append(waiting_list_user.id)
+
+    if posthog:
+        posthog.capture(distinct_id=admin.unique_hash, event='apmt.admin.invited', properties={
+            'from': 'waitingList',
+            'waiting-list-ids': accepted,
+            'errors-encountered': len(errors),
+            'service': 'apmt'
+        })
 
     return schemas.WaitingListInviteAdminOut(
         accepted=accepted,

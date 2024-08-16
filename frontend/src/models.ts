@@ -243,6 +243,7 @@ export type WaitingListEntry = {
 export type WaitingListStatus = {
   action: WaitingListAction;
   success: boolean;
+  redirectToSettings?: boolean;
 }
 
 export type Signature = {

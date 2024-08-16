@@ -194,6 +194,23 @@ class TestWaitingListActionLeave:
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
 
+    def test_already_is_a_subscriber(self, with_db, with_client, make_waiting_list, make_basic_subscriber, make_invite):
+        """Someone is who already a subscriber should be notified to delete their accounts in the settings page!"""
+        email = 'hello@example.org'
+
+        sub = make_basic_subscriber(email=email)
+        invite = make_invite(subscriber_id=sub.id)
+        _waiting_list = make_waiting_list(email=email, invite_id=invite.id)
+
+        serializer = URLSafeSerializer(os.getenv('SIGNED_SECRET'), 'waiting-list')
+        confirm_token = serializer.dumps({'email': email, 'action': WaitingListAction.LEAVE.value})
+
+        response = with_client.post('/waiting-list/action', json={'token': confirm_token})
+
+        # Ensure the response was okay!
+        assert response.status_code == 200, response.json()
+        assert response.json() == { "action": WaitingListAction.LEAVE.value, "success": False, "redirectToSettings": True }
+
 
 class TestWaitingListAdminView:
     def test_view_with_admin(self, with_client, with_db, with_l10n, make_waiting_list):
