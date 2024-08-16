@@ -129,7 +129,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const {
-  dataList, dataKey, columns, dataName, allowMultiSelect, loading,
+  dataList, dataKey, columns, dataName, allowMultiSelect, loading
 } = toRefs(props);
 
 const { t } = useI18n();
@@ -145,6 +145,14 @@ const updatePage = (index: number) => {
 const columnSpan = computed(() => (columns.value.length + (allowMultiSelect.value ? 1 : 0)));
 const selectedRows = ref<TableDataRow[]>([]);
 const mutableDataList = ref<TableDataRow[]>(null);
+
+const clearSelectedRows = () => {
+  selectedRows.value = [];
+}
+
+defineExpose({
+  clearSelectedRows,
+});
 
 /**
  * Returns either a filtered data list, or the original all nice and paginated

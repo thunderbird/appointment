@@ -34,6 +34,7 @@ const loading = ref(true);
 const pageError = ref('');
 const pageNotification = ref('');
 const selectedFields = ref([]);
+const dataTableRef = ref(null);
 
 const filteredUsers = computed(() => waitingListUsers.value.map((user) => ({
   id: {
@@ -216,6 +217,7 @@ const sendInvites = async () => {
 
   // Unselect everything!
   selectedFields.value = [];
+  dataTableRef.value.clearSelectedRows();
 
   await refresh();
   loading.value = false;
@@ -254,6 +256,7 @@ onMounted(async () => {
   <admin-nav/>
   <div v-if="displayPage">
     <data-table
+      ref="dataTableRef"
       data-name="Waiting List Users"
       data-key="id"
       :allow-multi-select="true"
