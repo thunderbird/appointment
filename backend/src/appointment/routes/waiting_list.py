@@ -57,7 +57,6 @@ def act_on_waiting_list(data: schemas.TokenForWaitingList, db: Session = Depends
 
     action = token_data.get('action')
     email = token_data.get('email')
-    print(email)
 
     if action is None or email is None:
         raise validation.InvalidLinkException()
