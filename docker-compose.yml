@@ -7,8 +7,7 @@ services:
     ports:
       - 5173:5173
     volumes:
-      - ./backend/.env:/app/.env
-      - ./backend/src/appointment:/app/appointment
+      - ./backend/.env.example:/app/.env
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
     depends_on:
@@ -17,9 +16,6 @@ services:
 
   frontend:
     build: ./frontend
-    volumes:
-      - './frontend:/app'
-      - 'node_modules:/app/node_modules'
     ports:
       - 8080:8080
     environment:
