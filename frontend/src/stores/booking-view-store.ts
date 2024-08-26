@@ -1,7 +1,7 @@
 import { Dayjs, ConfigType } from 'dayjs';
 import { defineStore } from 'pinia';
 import { ref, inject } from 'vue';
-import { BookingCalendarViews } from '@/definitions';
+import { BookingCalendarView } from '@/definitions';
 import { Appointment, Attendee, Slot } from '@/models';
 import { dayjsKey } from '@/keys';
 
@@ -13,7 +13,7 @@ export const useBookingViewStore = defineStore('bookingView', () => {
   const dj = inject(dayjsKey);
 
   // States
-  const activeView = ref(BookingCalendarViews.Loading);
+  const activeView = ref(BookingCalendarView.Loading);
   const activeDate = ref(dj());
 
   // Data
@@ -25,7 +25,7 @@ export const useBookingViewStore = defineStore('bookingView', () => {
    * Restore default state, set date to today and remove other data
    */
   const $reset = () => {
-    activeView.value = BookingCalendarViews.Loading;
+    activeView.value = BookingCalendarView.Loading;
     activeDate.value = dj();
     selectedEvent.value = null;
     appointment.value = null;

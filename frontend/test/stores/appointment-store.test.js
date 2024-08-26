@@ -12,7 +12,7 @@ import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
-import { bookingStatus } from '@/definitions';
+import { BookingStatus } from '@/definitions';
 import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
@@ -25,7 +25,7 @@ const restHandlers = [
       duration: 180,
       location_type: 2,
       slots: [
-        { start: '3000-01-01T09:00:00Z', duration: 60, booking_status: bookingStatus.none },
+        { start: '3000-01-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None },
       ],
     },
     {
@@ -35,7 +35,7 @@ const restHandlers = [
       location_type: 2,
       slots: [
         {
-          start: '2024-01-01T09:00:00Z', duration: 60, attendee_id: 1, booking_status: bookingStatus.requested,
+          start: '2024-01-01T09:00:00Z', duration: 60, attendee_id: 1, booking_status: BookingStatus.Requested,
         },
       ],
     },
@@ -43,9 +43,6 @@ const restHandlers = [
 ];
 
 const server = setupServer(...restHandlers);
-/* server.events.on('request:start', ({ request }) => {
-  console.log('Outgoing:', request.method, request.url);
-}); */
 
 describe('Appointment Store', () => {
   let app = null;
@@ -76,6 +73,7 @@ describe('Appointment Store', () => {
   test('fetch', async () => {
     const apmt = useAppointmentStore();
     await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    console.log(apmt.appointments);
     expect(apmt.appointments.length).toBe(2);
     expect(apmt.appointments[0].slots.length).toBe(1);
   });
