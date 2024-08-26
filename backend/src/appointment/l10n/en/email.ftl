@@ -3,47 +3,73 @@
 ## General
 
 -brand-name = Thunderbird Appointment
--brand-footer = This message is sent from {-brand-name}.
+-brand-slogan = Plan less, do more.
+-brand-sign-up-with-url = Sign up on appointment.day
+-brand-sign-up-with-no-url = Sign up on
+-brand-footer = This message was sent from:
+                {-brand-name}
+                {-brand-slogan} {-brand-sign-up-with-url}
 
-mail-brand-footer = {-brand-footer}
+mail-brand-footer = This message was sent from:
+                    {-brand-name}
+                    {-brand-slogan} {-brand-sign-up-with-no-url}
 
 ## Invitation
 
 invite-mail-subject = Invitation sent from {-brand-name}
 invite-mail-plain = {-brand-footer}
-invite-mail-html = {-brand-footer}
+
+invite-mail-html-heading-name = { $name }
+invite-mail-html-heading-email = ({ $email })
+invite-mail-html-heading-text = has accepted your booking:
+invite-mail-html-time = { $duration } mins
+invite-mail-html-invite-is-attached = Your calendar invite is attached.
+invite-mail-html-download = Download
 
 ## New Booking
 
 # Variables
 # $attendee_name (String) - Name of the person who requested the appointment
-new-booking-subject = You have a new confirmed booking with { $attendee_name }
+new-booking-subject = You have a new confirmed booking with { $name }
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the Appointment
-new-booking-plain = { $attendee_name } ({ $attendee_email }) has just booked { $date }
+new-booking-plain = { $name } ({ $email }) has just booked { $date }
 
                     {-brand-footer}
 
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-new-booking-html-heading = { $attendee_name } ({ $attendee_email }) has just booked { $date }
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment will be
+new-booking-html-heading-name = { $name }
+new-booking-html-heading-email = ({ $email })
+new-booking-html-heading-text = has just booked time in { $schedule_name }:
+new-booking-html-time = { $duration } mins
 
 ## Confirm Appointment
 
 # Variables
-# $attendee_name (String) - Name of the person who requested the appointment
-confirm-mail-subject = Action Required: Confirm booking request from { $attendee_name }
+# $name (String) - Name of the person who requested the appointment
+confirm-mail-subject = Action Required: Confirm booking request from { $name }
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the Appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
+# $duration (String) - Length of meeting in minutes
+# $day (String) - Formatted date string
+# $time_range (String) - Formatted time string
+# $timezone (String) - Timezone (e.g. UTC, PST, etc...)
+# $schedule_name - Name of the schedule the appointment was booked on
 # $confirm_url (String) - URL that when clicked will confirm the appointment
 # $deny_url (String) - URL that when clicked will deny the appointment
-confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested this time slot from your schedule: { $date }
+confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in: { $schedule_name }
+
+                    { $duration } mins
+                    { $time_range } ({ $timezone })
+                    { $day }
 
                     Visit this link to confirm the booking request:
                     { $confirm_url }
@@ -53,14 +79,20 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) just requested thi
 
                     {-brand-footer}
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-confirm-mail-html-heading = { $attendee_name } ({ $attendee_email }) just requested this time slot from your schedule: { $date }.
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment will be
+confirm-mail-html-heading-name = { $name }
+confirm-mail-html-heading-email = ({ $email })
+confirm-mail-html-heading-text = is requesting to book a time slot in { $schedule_name }:
+confirm-mail-html-time = { $duration } mins
+
 confirm-mail-html-confirm-text = Click here to confirm the booking request:
-confirm-mail-html-confirm-action = Confirm Booking
+confirm-mail-html-confirm-action = Confirm
 confirm-mail-html-deny-text = Or here if you want to deny it:
-confirm-mail-html-deny-action = Deny Booking
+confirm-mail-html-deny-action = Decline
 
 ## Rejected Appointment
 
@@ -127,8 +159,9 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) sent the followi
 
 ## New/Invited Account Email
 new-account-mail-subject = You've been invited to Thunderbird Appointment
-new-account-mail-action = Continue to Thunderbird Appointment
-new-account-mail-html-heading = You've been invited to Thunderbird Appointment. Login with this email address to continue.
+new-account-mail-action = Log In
+new-account-mail-html-heading = You've been invited to Thunderbird Appointment.
+new-account-mail-html-body = Login with this email address to continue.
 # Variables:
 # $homepage_url (String) - URL to Thunderbird Appointment
 new-account-mail-plain = You've been invited to Thunderbird Appointment.
@@ -140,8 +173,8 @@ new-account-mail-plain = You've been invited to Thunderbird Appointment.
 confirm-email-mail-subject = Confirm your email to join the waiting list!
 confirm-email-mail-confirm-action = Confirm your email
 confirm-email-mail-decline-action = Remove your email
-confirm-email-mail-html-body = Thank you for your interest in Thunderbird Appointment.
-                               Before we add you to our waiting list we need you to confirm your email address below.
+confirm-email-mail-html-heading = Thank you for your interest in Thunderbird Appointment.
+confirm-email-mail-html-body = Before we add you to our waiting list we need you to confirm your email address below.
 confirm-email-mail-html-body-2 = Did you receive this email in error, or are you no longer interested?
 # Variables:
 # $confirm_email_url (String) - URL to confirm your email

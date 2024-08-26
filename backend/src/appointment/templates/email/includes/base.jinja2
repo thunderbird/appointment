@@ -1,0 +1,58 @@
+{# Helper vars! These are accessible from any template that extends base #}
+{% set colour_surface_base = '#FEFFFF' %}
+{% set colour_surface_raised = '#FEFFFF' %}
+{% set colour_text_base = '#18181B' %}
+{% set colour_text_muted = '#737584' %}
+{% set colour_icon_secondary = '#4C4D58' %}
+{% set colour_neutral = '#FEFFFF' %}
+{% set colour_tbpro_apmt_primary = '#008080' %}
+{% set colour_tbpro_apmt_primary_hover = '#066769' %}
+{% set colour_tbpro_apmt_secondary = '#81D4B5' %}
+<html lang="{{ l10n('locale') }}" style="
+  font-size: 13px;
+  color: {{ colour_text_base }};
+  background-color: {{ colour_surface_base }};
+  font-family: 'Inter', sans-serif;
+  margin: 24px 0;
+  ">
+<body>
+{% if self.introduction()|trim %}
+<div style="
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 24px;
+    ">
+  {% block introduction %}{% endblock %}
+</div>
+{% endif %}
+{% if self.information()|trim %}
+<div style="
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 24px;
+  max-width: 310px;
+  border: 1px solid {{ colour_tbpro_apmt_primary }};
+  border-radius: 6px;
+  padding: 12px;
+  background-color: {{ colour_surface_raised }}
+  ">
+  {% block information %}{% endblock %}
+</div>
+{% endif %}
+{% if self.call_to_action()|trim %}
+<div style="text-align: center; margin-left: auto; margin-right: auto; margin-bottom: 24px; padding: 12px">
+  {% block call_to_action %}{% endblock %}
+</div>
+{% endif %}
+<div style="
+      display: block;
+      width: 100%;
+      padding-bottom: 1px;
+      border-radius: unset;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
+      "></div>
+{% include './includes/footer.jinja2' %}
+</body>
+</html>

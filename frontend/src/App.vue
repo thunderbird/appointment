@@ -253,9 +253,8 @@ onMounted(async () => {
         properties.$set.$initial_pathname = REMOVED_PROPERTY;
 
         // Remove initial person url
-        // TODO: Cannot find name '$initial_person_info'. ts(2304)
-        if ($initial_person_info?.u) {
-          $initial_person_info.u = REMOVED_PROPERTY;
+        if (properties?.$initial_person_info?.u) {
+          properties.$initial_person_info.u = REMOVED_PROPERTY;
         }
 
         // Clean up webvitals

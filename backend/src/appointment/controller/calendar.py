@@ -442,7 +442,19 @@ class Tools:
             filename='AppointmentInvite.ics',
             data=ics,
         )
-        background_tasks.add_task(send_invite_email, to=attendee.email, attachment=invite)
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(attendee.timezone))
+        background_tasks.add_task(
+            send_invite_email,
+            organizer.name,
+            organizer.
+            email,
+            date=date,
+            duration=slot.duration,
+            to=attendee.email,
+            attachment=invite
+        )
 
     @staticmethod
     def available_slots_from_schedule(schedule: models.Schedule) -> list[schemas.SlotBase]:

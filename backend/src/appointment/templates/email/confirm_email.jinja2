@@ -1,37 +1,47 @@
-<html lang="{{ l10n('locale') }}">
-  <body>
-    <p>
-      {{ l10n('confirm-email-mail-html-body') }}
+{% extends "includes/base.jinja2" %}
+{# Code begins! #}
+{% block introduction %}
+  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
+    <p style="font-weight: 700; margin: 0;">
+      {{ l10n('confirm-email-mail-html-heading') }}
     </p>
-    <div>
-      <a
-        href="{{ confirm_email_url }}"
-        style="
-          display:inline-block;
-          padding:.5rem 1rem;
-          color:white;
-          background:#0e757f;
-          border-radius:6px;
-          text-decoration:none;
+  </div>
+{% endblock %}
+{% block call_to_action %}
+  <p>
+    {{ l10n('confirm-email-mail-html-body') }}
+  </p>
+  <div style="margin-bottom: 12px">
+    <a
+      href="{{ confirm_email_url }}"
+      style="
+        display: inline-block;
+        font-size: 13px;
+        padding: 12px 24px;
+        color: {{ colour_neutral }};
+        background: {{ colour_tbpro_apmt_primary }};
+        border-radius: 3px;
+        border: 1px solid {{ colour_tbpro_apmt_primary_hover }};
+        box-shadow: 0px 6px 3px -4px rgba(21, 47, 60, 0.30);
+        text-decoration:none;
+        white-space: nowrap;
         "
-      >{{ l10n('confirm-email-mail-confirm-action') }}</a>
-    </div>
-    <p>
-      {{ l10n('confirm-email-mail-html-body-2') }}
-    </p>
-      <div>
-      <a
-        href="{{ decline_email_url }}"
-        style="
-          display:inline-block;
-          padding:.5rem 1rem;
-          color:white;
-          background:#ef8990;
-          border-radius:6px;
-          text-decoration:none;
+    >{{ l10n('confirm-email-mail-confirm-action') }}</a>
+  </div>
+  <p>
+    {{ l10n('confirm-email-mail-html-body-2') }}
+  </p>
+  <div>
+    <a
+      href="{{ decline_email_url }}"
+      style="
+        display: inline-block;
+        font-size: 13px;
+        padding: 12px 24px;
+        color: {{ colour_tbpro_apmt_primary }};
+        text-decoration-line: underline;
+        font-weight: 400;
         "
-      >{{ l10n('confirm-email-mail-decline-action') }}</a>
-    </div>
-    {% include 'includes/footer.jinja2' %}
-  </body>
-</html>
+    >{{ l10n('confirm-email-mail-decline-action') }}</a>
+  </div>
+{% endblock %}

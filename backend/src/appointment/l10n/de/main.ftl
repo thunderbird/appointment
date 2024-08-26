@@ -3,6 +3,13 @@
 # Locale code
 locale = de
 
+# Format Strings
+
+# Time Format: 20:23
+time-format = %H:%M
+# Date Format: Sunday, 04. April 2024
+date-format = %A, %d. %B %Y
+
 ## Health Check
 
 # Should indicate application wellness.

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import {inject, onMounted, ref} from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import { dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey } from "@/keys";
 import { BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error } from "@/models";
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import {posthog, usePosthog} from "@/composables/posthog";
+import {MetricEvents} from "@/definitions";
 
 // component constants
 const user = useUserStore();
@@ -15,10 +17,14 @@ const user = useUserStore();
 const { t } = useI18n();
 const call = inject(callKey);
 const dj = inject(dayjsKey);
+const route = useRoute();
 const router = useRouter();
 const isPasswordAuth = inject(isPasswordAuthKey);
 const isFxaAuth = inject(isFxaAuthKey);
+// Show the invite flow if they've failed to login
 const showInviteFlow = ref(false);
+// Don't show the invite code field, only the "Join the waiting list" part
+const onlyShowJoin = ref(false);
 const isLoading = ref(false);
 
 // form input and error
@@ -28,6 +34,13 @@ const loginError = ref<string>(null);
 const inviteCode = ref('');
 const showConfirmEmailScreen = ref(false);
 
+onMounted(() => {
+  if (route.name === 'join-the-waiting-list') {
+    showInviteFlow.value = true;
+    onlyShowJoin.value = true;
+  }
+});
+
 const closeError = () => {
   loginError.value = null;
 };
@@ -36,7 +49,30 @@ const goHome = () => {
   router.push('/');
 };
 
+/**
+ * What to do when hitting the enter key on a particular input
+ * @param isEmailField - Is this the email field? Only needed for password auth
+ */
+const onEnter = (isEmailField: boolean) => {
+  if (isEmailField && !isFxaAuth) {
+    return;
+  }
+
+  if (showInviteFlow.value && onlyShowJoin.value) {
+    signUp();
+  } else {
+    login();
+  }
+}
+
+/**
+ * Sign up for the beta / waiting list
+ */
 const signUp = async () => {
+  if (!email.value) {
+    return;
+  }
+
   isLoading.value = true;
   loginError.value = '';
   const { data }: BooleanResponse = await call('waiting-list/join').post({
@@ -45,8 +81,22 @@ const signUp = async () => {
 
   if (!data.value) {
     loginError.value = t('waitingList.signUpAlreadyExists');
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.SignUpAlreadyExists, {
+        waitingList: true,
+        for: 'beta',
+      });
+    }
   } else {
     showConfirmEmailScreen.value = true;
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.SignUp, {
+        waitingList: true,
+        for: 'beta',
+      });
+    }
   }
 
   isLoading.value = false;
@@ -97,6 +147,12 @@ const login = async () => {
       loginError.value = (data.value as Exception)?.detail[0]?.msg;
       isLoading.value = false;
       return;
+    }
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.Login, {
+        inviteCodeUsed: !!inviteCode.value,
+      });
     }
 
     const { url } = data.value as AuthUrl;
@@ -150,10 +206,10 @@ const login = async () => {
               type="email"
               class="mr-6 w-full rounded-md"
               :class="{'mr-4': isFxaAuth}"
-              @keydown.enter="isFxaAuth ? login() : null"
+              @keydown.enter="onEnter(true)"
             />
           </label>
-          <label class="flex flex-col items-center pl-4" v-if="showInviteFlow">
+          <label class="flex flex-col items-center pl-4" v-if="showInviteFlow && !onlyShowJoin">
           <span class="w-full">
           {{ t('label.inviteCode') }}
           </span>
@@ -162,7 +218,7 @@ const login = async () => {
               type="text"
               class="mr-6 w-full rounded-md"
               :class="{'mr-4': isFxaAuth}"
-              @keydown.enter="isFxaAuth ? login() : null"
+              @keydown.enter="onEnter(false)"
             />
           </label>
           <div v-if="isFxaAuth && (!showInviteFlow || inviteCode.length > 0)" class="text-center text-sm">{{ t('text.login.continueToFxa') }}</div>
@@ -172,7 +228,7 @@ const login = async () => {
               v-model="password"
               type="password"
               class="mr-6 w-full rounded-md"
-              @keyup.enter="login"
+              @keyup.enter="onEnter(false)"
             />
           </label>
         </div>

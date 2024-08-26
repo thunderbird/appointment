@@ -1,9 +1,12 @@
+import datetime
 import logging
 import os
 import secrets
+import uuid
 
 import requests.exceptions
 import sentry_sdk
+import tzlocal
 from sentry_sdk import metrics
 from redis import Redis, RedisCluster
 
@@ -12,6 +15,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import HTMLResponse, JSONResponse
 
 from .. import utils
+from ..controller.mailer import Attachment
 from ..database import repo, schemas
 
 # authentication
@@ -516,6 +520,14 @@ def send_feedback(
 ):
     """Send a subscriber's support request to the configured support email address"""
     if not os.getenv('SUPPORT_EMAIL'):
+        # Ensure sentry at least captures it!
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_message("No SUPPORT_EMAIL is set, support messages are being ignored!")
+            sentry_sdk.capture_message(f"""
+            Support Email Alert!
+            FROM: {subscriber.name} <{subscriber.preferred_email}>
+            SUBJECT: {form_data.topic}
+            MESSAGE: {form_data.details}""")
         raise APIException()
 
     background_tasks.add_task(

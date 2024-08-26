@@ -11,7 +11,7 @@ from ..l10n import l10n
 
 def model_to_csv_buffer(models):
     """Dumps a DeclarationBase model to csv and returns an in-memory buffer"""
-    if len(models) == 0:
+    if len(models) == 0 or not models[0]:
         return StringIO()
 
     # Don't write out these columns
@@ -46,7 +46,9 @@ def download(db, subscriber: Subscriber):
     schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
     availability = [repo.schedule.get_availability(db, schedule.id) for schedule in schedules]
     invite = repo.invite.get_by_subscriber(db, subscriber.id)
-    waiting_list = invite.waiting_list
+    waiting_list = None
+    if invite:
+        waiting_list = invite.waiting_list
 
     # Convert models to csv
     attendee_buffer = model_to_csv_buffer(attendees)

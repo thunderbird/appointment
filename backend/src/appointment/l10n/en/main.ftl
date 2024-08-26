@@ -3,6 +3,13 @@
 # Locale code
 locale = en
 
+# Format Strings
+
+# Time Format: 8:23pm
+time-format = %I:%M%p
+# Date Format: Sunday, April 04 2024
+date-format = %A, %B %d %Y
+
 ## Health Check
 
 # Should indicate application wellness.
@@ -85,6 +92,10 @@ join-online = Join online at: { $url }
 # Variables:
 # $phone (String) - An unformatted phone number for the meeting
 join-phone = Join by phone: { $phone }
+
+# Waiting List Errors
+wl-subscriber-already-exists = { $email } is already a subscriber...that's weird!
+wl-subscriber-failed-to-create = { $email } was unable to be invited. Please make a bug report!
 
 ## Account Data Readme
 

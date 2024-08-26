@@ -231,6 +231,7 @@ onMounted(async () => {
   <admin-nav/>
   <div v-if="displayPage">
     <data-table
+      data-key="code"
       data-name="Invite Codes"
       :allow-multi-select="false"
       :data-list="filteredInvites"

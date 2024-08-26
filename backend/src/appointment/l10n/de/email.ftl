@@ -11,37 +11,50 @@ mail-brand-footer = {-brand-footer}
 
 invite-mail-subject = Einladung gesendet von {-brand-name}
 invite-mail-plain = {-brand-footer}
-invite-mail-html = {-brand-footer}
 
 ## New Booking
 
 # Variables
-# $attendee_name (String) - Name of the person who requested the appointment
-new-booking-subject = Du hast eine neue bestätigte Terminbuchung mit { $attendee_name }
+# $name (String) - Name of the person who requested the appointment
+new-booking-subject = Du hast eine neue bestätigte Terminbuchung mit { $name }
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the Appointment
-new-booking-plain = { $attendee_name } ({ $attendee_email }) hat soeben { $date } gebucht
+new-booking-plain = { $name } ({ $email }) hat soeben { $date } gebucht
 
                     {-brand-footer}
 
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-new-booking-html-heading = { $attendee_name } ({ $attendee_email }) hat soeben { $date } gebucht
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment will be
+new-booking-html-heading-name = { $name }
+new-booking-html-heading-email = ({ $email })
+# FIXME: Google Translate Patch !
+new-booking-html-heading-text = hat gerade Zeit im { $schedule_name } gebucht
+new-booking-html-time = { $duration } mins
 
 ## Confirm Appointment
 
 confirm-mail-subject = Buchungsanfrage von {-brand-name} bestätigen
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the Appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
+# $duration (String) - Length of meeting in minutes
+# $day (String) - Formatted date string
+# $time_range (String) - Formatted time string
+# $timezone (String) - Timezone (e.g. UTC, PST, etc...)
+# $schedule_name - Name of the schedule the appointment was booked on
 # $confirm_url (String) - URL that when clicked will confirm the appointment
 # $deny_url (String) - URL that when clicked will deny the appointment
-confirm-mail-plain = { $attendee_name } ({ $attendee_email }) hat soeben dieses Zeitfenster aus deinem Kalender angefordert: { $date }
+confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus deinem Kalender angefordert:
+
+                    { $duration } mins
+                    { $time_range } ({ $timezone })
+                    { $day }
 
                     Dieser Link führt zur Bestätigung der Buchungsanfrage:
                     { $confirm_url }
@@ -51,10 +64,17 @@ confirm-mail-plain = { $attendee_name } ({ $attendee_email }) hat soeben dieses 
 
                     {-brand-footer}
 # Variables:
-# $attendee_name (String) - Name of the person who requested the appointment
-# $appointment_email (String) - Email of the person who requested the appointment
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $date (String) - Date of the requested appointment
-confirm-mail-html-heading = { $attendee_name } ({ $attendee_email })  hat soeben dieses Zeitfenster aus deinem Kalender angefordert: { $date }.
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment will be
+# FIXME: Google Translation patch !
+confirm-mail-html-heading-name = { $name }
+confirm-mail-html-heading-email = ({ $email })
+confirm-mail-html-heading-text = fordert die Buchung eines Zeitfensters in { $schedule_name } an
+confirm-mail-html-time = { $duration } mins
+
 confirm-mail-html-confirm-text = Dieser Link führt zur Bestätigung der Buchungsanfrage:
 confirm-mail-html-confirm-action = Buchung bestätigen
 confirm-mail-html-deny-text = Dieser Link führt zur Ablehnung der Buchungsanfrage:
@@ -126,7 +146,8 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) hat folgende Sup
 ## New/Invited Account Email
 new-account-mail-subject = Du wurdest zu Thunderbird Appointment eingeladen
 new-account-mail-action = Weiter zu Thunderbird Appointment
-new-account-mail-html-heading = Du wurdest zu Thunderbird Appointment eingeladen. Logge dich mit dieser E-Mail-Adresse ein um fortzufahren.
+new-account-mail-html-heading = Du wurdest zu Thunderbird Appointment eingeladen.
+new-account-mail-html-body = Logge dich mit dieser E-Mail-Adresse ein um fortzufahren.
 # Variables:
 # $homepage_url (String) - URL to Thunderbird Appointment
 new-account-mail-plain = Du wurdest zu Thunderbird Appointment eingeladen.
@@ -138,8 +159,8 @@ new-account-mail-plain = Du wurdest zu Thunderbird Appointment eingeladen.
 confirm-email-mail-subject = Bestätige deine E-Mail-Adresse um der Warteliste beizutreten!
 confirm-email-mail-confirm-action = Bestätige deine E-Mail-Adresse
 confirm-email-mail-decline-action = Entferne deine E-Mail-Adresse
-confirm-email-mail-html-body = Danke für Dein Interesse an Thunderbird Appointment.
-                               Bevor wir Dich auf unsere Warteliste setzen, musst Du Deine E-Mail-Adresse unten bestätigen.
+confirm-email-mail-html-heading = Danke für Dein Interesse an Thunderbird Appointment.
+confirm-email-mail-html-body = Bevor wir Dich auf unsere Warteliste setzen, musst Du Deine E-Mail-Adresse unten bestätigen.
 confirm-email-mail-html-body-2 = Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert?
 # Variables:
 # $confirm_email_url (String) - URL to confirm your email

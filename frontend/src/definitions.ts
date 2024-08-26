@@ -295,6 +295,11 @@ export enum MetricEvents {
   RequestBooking = 'apmt.booking.request',
   ScheduleCreated = 'apmt.schedule.created',
   ScheduleUpdated = 'apmt.schedule.updated',
+  SignUp = 'apmt.signup',
+  SignUpAlreadyExists = 'apmt.signup.already-exists',
+  Login = 'apmt.login',
+  WaitingListEmailConfirmed = 'apmt.signup.email-confirmed',
+  WaitingListEmailRemoved = 'apmt.signup.email-removed',
 }
 
 export default {

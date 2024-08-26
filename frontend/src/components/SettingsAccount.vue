@@ -181,7 +181,7 @@ const actuallyDeleteAccount = async () => {
 <template>
   <div class="flex flex-col gap-8">
     <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
-    <div class="flex max-w-3xl flex-col pl-6">
+    <div class="flex max-w-3xl flex-col pl-6" id="profile">
       <div class="text-xl">{{ t('heading.profile') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
@@ -262,7 +262,7 @@ const actuallyDeleteAccount = async () => {
         />
       </div>
     </div>
-    <div class="pl-6">
+    <div class="pl-6" id="download-your-data">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="mt-4 pl-4">
         <primary-button
@@ -273,7 +273,7 @@ const actuallyDeleteAccount = async () => {
         />
       </div>
     </div>
-    <div class="pl-6">
+    <div class="pl-6" id="delete-your-account">
       <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
       <div class="mt-4 pl-4">
         <caution-button

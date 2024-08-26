@@ -239,6 +239,7 @@ onMounted(async () => {
   <div v-if="displayPage">
     <data-table
       data-name="Subscribers"
+      data-key="id"
       :allow-multi-select="false"
       :data-list="filteredSubscribers"
       :columns="columns"

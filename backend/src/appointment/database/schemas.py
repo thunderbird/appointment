@@ -407,6 +407,15 @@ class CheckEmail(BaseModel):
     email: EmailStr = Field(title='Email', min_length=1)
 
 
+class WaitingListInviteAdminIn(BaseModel):
+    id_list: list[int]
+
+
+class WaitingListInviteAdminOut(BaseModel):
+    accepted: list[int]
+    errors: list[str]
+
+
 class WaitingListAdminOut(BaseModel):
     id: int
     email: str

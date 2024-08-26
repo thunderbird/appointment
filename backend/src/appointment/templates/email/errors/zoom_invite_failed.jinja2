@@ -1,6 +1,7 @@
-<html lang="{{ l10n('locale') }}">
-  <body>
+{% extends "includes/base.jinja2" %}
+{# Code begins! #}
+{% block introduction %}
+  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
     <p>{{ l10n('zoom-invite-failed-html-heading', {'title': title}) }}</p>
-    {% include 'includes/footer.jinja2' %}
-  </body>
-</html>
+  </div>
+{% endblock %}
