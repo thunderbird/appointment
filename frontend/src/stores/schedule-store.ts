@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
 import { DateFormatStrings, MetricEvents } from '@/definitions';
-import { Error, Fetch, Schedule, ScheduleListResponse,ScheduleResponse } from '@/models';
+import { Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
 
