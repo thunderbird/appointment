@@ -7,8 +7,8 @@ locale = en
 
 # Time Format: 8:23pm
 time-format = %I:%M%p
-# Date Format: Sunday, April 04 2024
-date-format = %A, %B %d %Y
+# Date Format: Sunday, April 04, 2024
+date-format = %A, %B %d, %Y
 
 ## Health Check
 
