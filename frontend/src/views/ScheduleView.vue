@@ -54,9 +54,9 @@ const getRemoteEvents = async (from: string, to: string) => {
     const { data }: RemoteEventListResponse = await call(`rmt/cal/${calendar.id}/${from}/${inclusiveTo}`).get().json();
     if (Array.isArray(data.value)) {
       calendarEvents.value.push(
-        ...data.value.map((e) => ({
-          ...e,
-          duration: dj(e.end).diff(dj(e.start), 'minutes')
+        ...data.value.map((event) => ({
+          ...event,
+          duration: dj(event.end).diff(dj(event.start), 'minutes')
         }))
       );
     }
