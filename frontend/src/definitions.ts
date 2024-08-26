@@ -243,17 +243,15 @@ export enum TableDataButtonType {
 /**
  * First Time User Experience Steps
  * Step amounts are 10-based to allow us flexibility in adding steps later.
- * @enum
- * @readonly
  */
-export const ftueStep = {
-  setupProfile: 10,
+export enum FtueStep {
+  SetupProfile = 10,
   // Right now we only support Google calendars during ftue
-  googlePermissions: 20,
-  connectCalendars: 30,
-  setupSchedule: 40,
-  connectVideoConferencing: 50,
-  finish: 100,
+  GooglePermissions = 20,
+  ConnectCalendars = 30,
+  SetupSchedule = 40,
+  ConnectVideoConferencing = 50,
+  Finish = 100,
 };
 
 /**
@@ -318,7 +316,7 @@ export default {
   defaultSlotDuration,
   EventLocationType,
   ExternalConnectionProviders,
-  ftueStep,
+  FtueStep,
   InviteStatus,
   locationTypes,
   loginRedirectKey,

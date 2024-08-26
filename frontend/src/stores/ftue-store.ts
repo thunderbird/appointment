@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref, computed, defineAsyncComponent } from 'vue';
+import { ref, computed } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
-import { ftueStep } from '@/definitions';
+import { FtueStep } from '@/definitions';
 import { Fetch } from '@/models';
 
 const initialObject = {
   // First step
-  step: ftueStep.setupProfile,
+  step: FtueStep.SetupProfile,
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -20,40 +20,40 @@ export const useFTUEStore = defineStore('FTUE', () => {
   /**
    * State information for navigating the First Time User Experience
    * @type {{
-   *   previous: null|ftueStep,
-   *   next: null|ftueStep,
+   *   previous: null|FtueStep,
+   *   next: null|FtueStep,
    *   title: string,
    * }}
    */
   const stepList = {
-    [ftueStep.setupProfile]: {
+    [FtueStep.SetupProfile]: {
       previous: null,
-      next: ftueStep.googlePermissions,
+      next: FtueStep.GooglePermissions,
       title: 'ftue.steps.setupProfile',
     },
-    [ftueStep.googlePermissions]: {
-      previous: ftueStep.setupProfile,
-      next: ftueStep.connectCalendars,
+    [FtueStep.GooglePermissions]: {
+      previous: FtueStep.SetupProfile,
+      next: FtueStep.ConnectCalendars,
       title: 'ftue.steps.googlePermissions',
     },
-    [ftueStep.connectCalendars]: {
-      previous: ftueStep.googlePermissions,
-      next: ftueStep.setupSchedule,
+    [FtueStep.ConnectCalendars]: {
+      previous: FtueStep.GooglePermissions,
+      next: FtueStep.SetupSchedule,
       title: 'ftue.steps.connectCalendars',
     },
-    [ftueStep.setupSchedule]: {
-      previous: ftueStep.connectCalendars,
-      next: ftueStep.connectVideoConferencing,
+    [FtueStep.SetupSchedule]: {
+      previous: FtueStep.ConnectCalendars,
+      next: FtueStep.ConnectVideoConferencing,
       title: 'ftue.steps.setupSchedule',
     },
-    [ftueStep.connectVideoConferencing]: {
-      previous: ftueStep.setupSchedule,
-      next: ftueStep.finish,
+    [FtueStep.ConnectVideoConferencing]: {
+      previous: FtueStep.SetupSchedule,
+      next: FtueStep.Finish,
       title: 'ftue.steps.connectVideo',
     },
-    [ftueStep.finish]: {
-      previous: ftueStep.connectVideoConferencing,
-      next: ftueStep.finish,
+    [FtueStep.Finish]: {
+      previous: FtueStep.ConnectVideoConferencing,
+      next: FtueStep.Finish,
       title: 'ftue.steps.finish',
     },
   };
@@ -89,7 +89,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
 
   const currentStep = computed(() => data.value.step);
   const $reset = () => {
-    data.value.step = ftueStep.setupProfile;
+    data.value.step = FtueStep.SetupProfile;
     clearMessages();
   };
 
