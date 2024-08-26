@@ -3,14 +3,28 @@
 ## General
 
 -brand-name = Thunderbird Appointment
--brand-footer = Diese Nachricht wurde gesendet von {-brand-name}.
+-brand-slogan = Weniger planen, mehr schaffen.
+-brand-sign-up-with-url = Registrieren auf appointment.day
+-brand-sign-up-with-no-url = Registrieren auf
+-brand-footer = Diese Nachricht wurde gesendet von:
+                {-brand-name}
+                {-brand-slogan} {-brand-sign-up-with-url}
 
-mail-brand-footer = {-brand-footer}
+mail-brand-footer = Diese Nachricht wurde gesendet von:
+                    {-brand-name}
+                    {-brand-slogan} {-brand-sign-up-with-no-url}
 
 ## Invitation
 
 invite-mail-subject = Einladung gesendet von {-brand-name}
 invite-mail-plain = {-brand-footer}
+
+invite-mail-html-heading-name = { $name }
+invite-mail-html-heading-email = ({ $email })
+invite-mail-html-heading-text = hat deine Buchung bestätigt:
+invite-mail-html-time = { $duration } min
+invite-mail-html-invite-is-attached = Deine Kalendereinladung ist angehängt.
+invite-mail-html-download = Download
 
 ## New Booking
 

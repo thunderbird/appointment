@@ -283,8 +283,8 @@
     "settings": "Settings",
     "shareMyLink": "Share my link",
     "showSecondaryTimeZone": "Show secondary time zone",
-    "signUpForBeta": "Sign up for the beta",
     "signInWithGoogle": "Sign in with Google",
+    "signUpForBeta": "Sign up for the beta",
     "signUpWithInviteCode": "Sign up with invite code",
     "slotLength": "Booking Duration",
     "start": "Start",
@@ -412,6 +412,7 @@
     "none": "{value}"
   },
   "waitingList": {
+    "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!",
     "confirmHeading": "Your email is confirmed!",
     "confirmInfo": "Your email is now confirmed and if selected you will be contacted about an invite code in the future.",
     "errorHeading": "There was a problem with that link",
@@ -421,7 +422,6 @@
     "signUpAlreadyExists": "You are already on the waiting list.",
     "signUpCheckYourEmail": "Check your email for more information.",
     "signUpHeading": "Just one more step!",
-    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address.",
-    "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!"
+    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
   }
 }
