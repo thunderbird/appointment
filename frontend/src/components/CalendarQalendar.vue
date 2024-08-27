@@ -7,7 +7,7 @@ import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
   ColorSchemes,
-  dateFormatStrings,
+  DateFormatStrings,
   defaultSlotDuration,
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
@@ -208,11 +208,11 @@ const calendarEvents = computed(() => {
       colorScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
       time: {
         start: event.all_day
-          ? start.format(dateFormatStrings.qalendarFullDay)
-          : start.format(dateFormatStrings.qalendar),
+          ? start.format(DateFormatStrings.QalendarFullDay)
+          : start.format(DateFormatStrings.Qalendar),
         end: event.all_day
-          ? end.subtract(1, 'minute').format(dateFormatStrings.qalendarFullDay)
-          : end.format(dateFormatStrings.qalendar),
+          ? end.subtract(1, 'minute').format(DateFormatStrings.QalendarFullDay)
+          : end.format(DateFormatStrings.Qalendar),
       },
       description: event.description,
       customData: {
@@ -240,7 +240,7 @@ const calendarEvents = computed(() => {
     const end = start.add(slot.duration, 'minutes');
 
     return {
-      id: appointment.id ?? start.format(dateFormatStrings.qalendar),
+      id: appointment.id ?? start.format(DateFormatStrings.Qalendar),
       title: !isBookingRoute.value
         ? appointment.title
         : `${start.format(displayFormat)} - ${end.format(displayFormat)}`,
@@ -249,8 +249,8 @@ const calendarEvents = computed(() => {
         appointment?.calendar_color ?? 'rgb(20, 184, 166)',
       ),
       time: {
-        start: start.format(dateFormatStrings.qalendar),
-        end: end.format(dateFormatStrings.qalendar),
+        start: start.format(DateFormatStrings.Qalendar),
+        end: end.format(DateFormatStrings.Qalendar),
       },
       description: appointment.details,
       with: slot.attendee ? [slot.attendee].map((attendee) => `${attendee.name} <${attendee.email}>`).join(', ') : '',

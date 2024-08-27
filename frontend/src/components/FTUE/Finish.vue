@@ -1,16 +1,15 @@
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import {
-  onMounted, inject, ref,
-} from 'vue';
+import { onMounted, inject, ref } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { useUserStore } from '@/stores/user-store';
+import { callKey } from '@/keys';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 const { t } = useI18n();
-const call = inject('call');
+const call = inject(callKey);
 
 const scheduleStore = useScheduleStore();
 const userStore = useUserStore();
@@ -42,7 +41,7 @@ const onSubmit = async () => {
 
   await nextStep(call);
   // Yeet them to calendar!
-  window.location = '/calendar';
+  window.location.href = '/calendar';
 };
 
 const copyLink = async () => {
@@ -62,6 +61,7 @@ const copyLink = async () => {
   }, 4000);
 };
 </script>
+
 <template>
   <div class="content">
     <img src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
@@ -86,6 +86,7 @@ const copyLink = async () => {
     </primary-button>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

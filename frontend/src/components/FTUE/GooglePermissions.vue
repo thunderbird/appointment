@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import {
-  onMounted, inject, ref,
-} from 'vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import { onMounted, inject, ref } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
@@ -12,6 +9,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
+import { BooleanResponse, Exception, ExceptionDetail } from '@/models';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -47,7 +46,7 @@ onMounted(async () => {
         await externalConnectionStore.disconnect(call, ExternalConnectionProviders.Google);
       }
     } else {
-      errorMessage.value = route.query.error;
+      errorMessage.value = route.query.error as string;
     }
     await router.replace(route.path);
   }
@@ -55,10 +54,10 @@ onMounted(async () => {
   if (localStorage?.getItem(initFlowKey)) {
     localStorage?.removeItem(initFlowKey);
 
-    const { data, error } = await call('google/ftue-status').get().json();
+    const { data, error }: BooleanResponse = await call('google/ftue-status').get().json();
     // Did they hit back?
     if (error?.value) {
-      errorMessage.value = data.value?.detail?.message;
+      errorMessage.value = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
       return;
     }
 

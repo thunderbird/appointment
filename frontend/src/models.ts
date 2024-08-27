@@ -4,6 +4,7 @@ import {
   InviteStatus,
   WaitingListAction,
   EventLocationType,
+  FtueStep,
   CalendarProviders,
   TableDataButtonType,
   TableDataType,
@@ -155,6 +156,12 @@ export type Calendar = {
   user?: string;
 };
 
+export type CalendarItem = {
+  key: number;
+  label: string;
+  checked: boolean;
+};
+
 export type ExternalConnection = {
   owner_id: number;
   name: string;
@@ -265,6 +272,7 @@ export type Signature = {
   url: string;
 };
 
+// Types for authentication and error handling
 export type Error = {
   error: boolean|string|null;
   message?: string;
@@ -339,6 +347,14 @@ export type TableFilter = {
   fn: (value: string, list: TableDataRow[]) => TableDataRow[];
 };
 
+
+// First Time User Experience State
+export type FtueState = {
+  previous: FtueStep;
+  next: FtueStep;
+  title: string;
+};
+
 // Utility types
 export type Time<T> = {
   start: T;
@@ -347,9 +363,9 @@ export type Time<T> = {
 export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
 
-export type IsoWeekdayOption = {
+export type SelectOption = {
   label: string;
-  value: string;
+  value: number;
 };
 
 export type Coloring = {

@@ -1,15 +1,4 @@
 /**
- * @deprecated Use DateFormatStrings enum instead
- */
-export const dateFormatStrings = {
-  // Qalendar specific formats (These have to be in this format for qalendar to understand them)
-  qalendar: 'YYYY-MM-DD HH:mm',
-  qalendarFullDay: 'YYYY-MM-DD',
-  // Time display formats
-  display12Hour: 'hh:mma',
-  display24Hour: 'HH:mm',
-};
-/**
  * Available date format strings
  */
 export enum DateFormatStrings {
@@ -35,14 +24,6 @@ export enum SubscriberLevels {
   Pro = 3,
   Admin = 99,
 }
-
-/**
- * @deprecated use EventLocationType
- */
-export const locationTypes = {
-  inPerson: 1,
-  online: 2,
-};
 
 /**
  * Schedule creation state
@@ -179,14 +160,6 @@ export enum ExternalConnectionProviders {
 }
 
 /**
- * @deprecated Use MeetingLinkProviderType instead
- */
-export const meetingLinkProviderType = {
-  none: 'none',
-  zoom: 'zoom',
-  google_meet: 'google_meet',
-};
-/**
  * Meeting provider types (matches the backends version)
  */
 export enum MeetingLinkProviderType {
@@ -255,7 +228,7 @@ export enum FtueStep {
 };
 
 /**
- *
+ * @deprecated
  * @enum
  * @readonly
  */
@@ -265,6 +238,13 @@ export const tooltipPosition = {
   bottom: 'pos-bottom',
   left: 'pos-left',
   right: 'pos-right',
+};
+export enum TooltipPosition {
+  None = 'pos-none',
+  Top = 'pos-top',
+  Bottom = 'pos-bottom',
+  Left = 'pos-left',
+  Right = 'pos-right',
 };
 
 /**
@@ -311,16 +291,13 @@ export default {
   CalendarManagementType,
   CalendarProviders,
   ColorSchemes,
-  dateFormatStrings,
   DateFormatStrings,
   defaultSlotDuration,
   EventLocationType,
   ExternalConnectionProviders,
   FtueStep,
   InviteStatus,
-  locationTypes,
   loginRedirectKey,
-  meetingLinkProviderType,
   MetricEvents,
   ModalStates,
   ScheduleCreationState,
@@ -329,5 +306,6 @@ export default {
   TableDataButtonType,
   TableDataType,
   tooltipPosition,
+  TooltipPosition,
   WaitingListAction,
 };

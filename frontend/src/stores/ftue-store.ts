@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useLocalStorage } from '@vueuse/core';
 import { FtueStep } from '@/definitions';
-import { Fetch } from '@/models';
+import { Fetch, FtueState } from '@/models';
 
 const initialObject = {
   // First step
@@ -13,19 +13,14 @@ const initialObject = {
 export const useFTUEStore = defineStore('FTUE', () => {
   // State
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));
-  const infoMessage = ref(null);
-  const errorMessage = ref(null);
-  const warningMessage = ref(null);
+  const infoMessage = ref<string>(null);
+  const errorMessage = ref<string>(null);
+  const warningMessage = ref<string>(null);
 
   /**
    * State information for navigating the First Time User Experience
-   * @type {{
-   *   previous: null|FtueStep,
-   *   next: null|FtueStep,
-   *   title: string,
-   * }}
    */
-  const stepList = {
+  const stepList: Record<FtueStep, FtueState> = {
     [FtueStep.SetupProfile]: {
       previous: null,
       next: FtueStep.GooglePermissions,

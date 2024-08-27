@@ -24,29 +24,31 @@
       :aria-label="continueTitle"
       v-if="hasNextStep"
       @click="onSubmit()"
-      :tooltip="!selected ? t('ftue.oneCalendarRequired') : null"
-      :disabled="isLoading || !selected"
+      :tooltip="!selectedCount ? t('ftue.oneCalendarRequired') : null"
+      :disabled="isLoading || !selectedCount"
     >
       {{ t('label.continue') }}
     </primary-button>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import {
   onMounted, inject, ref, computed, watch,
 } from 'vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store.ts';
+import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
+import { callKey } from '@/keys';
+import { CalendarItem } from '@/models';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
 
 const { t } = useI18n();
 
-const call = inject('call');
+const call = inject(callKey);
 
 const isLoading = ref(false);
 
@@ -58,11 +60,11 @@ const {
 const { previousStep, nextStep } = ftueStore;
 
 const calendarStore = useCalendarStore();
-const calendars = ref([]);
-const selected = computed(() => calendars.value.filter((item) => item.checked).length);
-const continueTitle = computed(() => (selected.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
+const calendars = ref<CalendarItem[]>([]);
+const selectedCount = computed(() => calendars.value.filter((item) => item.checked).length);
+const continueTitle = computed(() => (selectedCount.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
 
-watch(selected, (val) => {
+watch(selectedCount, (val) => {
   if (val === 0) {
     warningMessage.value = t('ftue.oneCalendarRequired');
   } else {
@@ -97,6 +99,7 @@ const onSubmit = async () => {
 };
 
 </script>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
