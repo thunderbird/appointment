@@ -1,26 +1,29 @@
 <script setup lang="ts">
 import {
-  computed, inject, onMounted, Ref, ref,
+  computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AlertSchemes, TableDataType } from '@/definitions';
 import { useRouter } from 'vue-router';
 import {
   WaitingListEntry,
+  WaitingListInvite,
   WaitingListResponse,
   BooleanResponse,
   TableDataRow,
   TableDataColumn,
   TableFilter,
-  WaitingListInviteResponse
+  WaitingListInviteResponse,
+  Exception,
+  ExceptionDetail
 } from "@/models";
 import { dayjsKey, callKey } from "@/keys";
+import { IconSend } from "@tabler/icons-vue";
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
 import PrimaryButton from "@/elements/PrimaryButton.vue";
-import {IconSend} from "@tabler/icons-vue";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -201,14 +204,14 @@ const sendInvites = async () => {
   const { data, error } = response;
 
   if (error.value) {
-    pageError.value = data?.value?.detail?.message ?? t('error.somethingWentWrong');
+    pageError.value = ((data?.value as Exception)?.detail as ExceptionDetail)?.message ?? t('error.somethingWentWrong');
     loading.value = false;
     return;
   }
 
-  const { accepted, errors } = data.value;
+  const { accepted, errors } = data.value as WaitingListInvite;
 
-  pageNotification.value = t('label.sentCountInvitesSuccessfully', {count: accepted.length})
+  pageNotification.value = t('label.sentCountInvitesSuccessfully', { count: accepted.length })
 
   if (errors.length) {
     pageError.value = errors.join('\n');

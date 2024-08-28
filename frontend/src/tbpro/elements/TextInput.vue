@@ -23,6 +23,7 @@ interface Props {
   disabled: boolean;
 };
 withDefaults(defineProps<Props>(), {
+  type: 'text',
   text: 'test',
   placeholder: '',
   required: false,

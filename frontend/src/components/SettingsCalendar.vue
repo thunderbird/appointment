@@ -111,14 +111,14 @@ const disconnectCalendar = async (id: number) => {
   sendMetrics(MetricEvents.DisconnectCalendar, { provider: calendarStore.calendarById(id)?.provider });
 };
 const syncCalendars = async () => {
-loading.value = true;
+  loading.value = true;
 
-  const oldCount = calendarStore.calendars.value.length;
+  const oldCount = calendarStore.calendars.length;
 
   await calendarStore.syncCalendars(call);
   await refreshData();
 
-  const newCount = calendarStore.calendars.value.length;
+  const newCount = calendarStore.calendars.length;
 
   sendMetrics(MetricEvents.DisconnectCalendar, { oldCount, newCount });
 };
@@ -153,7 +153,7 @@ const deleteCalendarConfirm = async () => {
 const saveCalendar = async () => {
   loading.value = true;
 
-  if (inputMode.value === inputModes.add) {
+  if (inputMode.value === InputModes.Add) {
     sendMetrics(MetricEvents.AddCalendar, { provider: calendarInput.data.provider });
   }
 
@@ -175,7 +175,7 @@ const saveCalendar = async () => {
   }
 
   // edit existing calendar connection
-  if (inputMode.value === inputModes.edit) {
+  if (inputMode.value === InputModes.Edit) {
     await call(`cal/${calendarInput.id}`).put(calendarInput.data);
     sendMetrics(MetricEvents.EditCalendar, { provider: calendarInput.data.provider });
   }
