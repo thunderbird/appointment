@@ -10,7 +10,9 @@
           {{ t('ftue.itemsSelected', {'count': selected}) }}
         </div>
       </div>
-      <primary-button class="select-all" size="small" @click="selectAll" :title="t('ftue.selectAllCalendars')">{{ t('ftue.selectAll') }}</primary-button>
+      <primary-button class="select-all" size="small" @click="selectAll" :title="t('ftue.selectAllCalendars')">
+        {{ t('ftue.selectAll') }}
+      </primary-button>
     </div>
     <ul class="rows">
       <li class="row" v-for="(item, index) in model" :key="item.key">
@@ -22,13 +24,15 @@
     </ul>
   </div>
 </template>
-<script setup>
+
+<script setup lang="ts">
 import { computed } from 'vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import { useI18n } from 'vue-i18n';
+import { CalendarItem } from '@/models';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 const { t } = useI18n();
-const model = defineModel();
+const model = defineModel<CalendarItem[]>();
 
 const selected = computed(() => model.value.filter((item) => item.checked).length);
 const selectAll = () => {
@@ -38,9 +42,11 @@ const selectAll = () => {
   }));
 };
 
-defineProps({
-  title: String,
-});
+// component properties
+interface Props {
+  title: string;
+};
+defineProps<Props>();
 </script>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';

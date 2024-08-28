@@ -13,17 +13,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 // component properties
-import { tooltipPosition } from '@/definitions';
+import { TooltipPosition } from '@/definitions';
 
-defineProps({
-  alt: String, // Tooltip text
-  position: {
-    type: tooltipPosition,
-    default: tooltipPosition.bottom,
-  },
-});
+// component properties
+interface Props {
+  alt: string;
+  position: TooltipPosition;
+};
+withDefaults(defineProps<Props>(), {
+  alt: '',
+  position: TooltipPosition.Bottom,
+})
 </script>
 
 <style scoped>

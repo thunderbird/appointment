@@ -1,24 +1,25 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
+import { HTMLInputElementEvent, SelectOption } from '@/models';
 
-defineProps({
-  name: String,
-  options: Object,
-  required: {
-    type: Boolean,
-    default: false,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-});
+// component properties
+interface Props {
+  name: string;
+  options: SelectOption[];
+  required: boolean;
+  disabled: boolean;
+};
+withDefaults(defineProps<Props>(), {
+  required: false,
+  disabled: false,
+})
+
 defineEmits(['submit']);
-const model = defineModel();
+const model = defineModel<number|string>();
 const isInvalid = ref(false);
 const validationMessage = ref('');
 
-const onInvalid = (evt) => {
+const onInvalid = (evt: HTMLInputElementEvent) => {
   isInvalid.value = true;
   validationMessage.value = evt.target.validationMessage;
 };
@@ -28,7 +29,7 @@ const onInvalid = (evt) => {
   <label class="wrapper" :for="name">
     <span class="label">
       <slot/>
-      <span v-if="required && model.length === 0" class="required">*</span>
+      <span v-if="required && (model === null || model === '')" class="required">*</span>
     </span>
     <select
       class="w-full rounded-md"

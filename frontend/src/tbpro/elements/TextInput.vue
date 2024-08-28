@@ -1,7 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
+import { HTMLInputElementEvent } from '@/models';
 
-const inputRef = ref(null);
+const inputRef = ref<HTMLInputElement>(null);
 /**
  * Forwards focus intent to the text input element.
  * Unlike HTMLElement.focus() this does not take any parameters.
@@ -13,38 +14,32 @@ const focus = () => {
   inputRef.value.focus();
 };
 
-defineProps({
-  name: String,
-  type: {
-    type: String,
-    default: 'text',
-  },
-  placeholder: {
-    type: String,
-    default: '',
-  },
-  required: {
-    type: Boolean,
-    default: false,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-});
+// component properties
+interface Props {
+  name: string;
+  type: string;
+  placeholder: string;
+  required: boolean;
+  disabled: boolean;
+};
+withDefaults(defineProps<Props>(), {
+  text: 'test',
+  placeholder: '',
+  required: false,
+  disabled: false,
+})
+
 defineEmits(['submit']);
-defineExpose({
-  focus,
-});
-const model = defineModel();
+defineExpose({ focus });
+
+const model = defineModel<string>();
 const isInvalid = ref(false);
 const validationMessage = ref('');
 
-const onInvalid = (evt) => {
+const onInvalid = (evt: HTMLInputElementEvent) => {
   isInvalid.value = true;
   validationMessage.value = evt.target.validationMessage;
 };
-
 </script>
 
 <template>

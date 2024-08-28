@@ -1,16 +1,16 @@
-<script setup>
-
+<script setup lang="ts">
 import NoticeInfoIcon from '@/tbpro/icons/NoticeInfoIcon.vue';
 import NoticeSuccessIcon from '@/tbpro/icons/NoticeSuccessIcon.vue';
 import NoticeWarningIcon from '@/tbpro/icons/NoticeWarningIcon.vue';
 import NoticeCriticalIcon from '@/tbpro/icons/NoticeCriticalIcon.vue';
 
-const props = defineProps({
-  type: {
-    type: String,
-    default: 'info',
-  },
-});
+// component properties
+interface Props {
+  type: string;
+};
+const props = withDefaults(defineProps<Props>(), {
+  type: 'info',
+})
 
 const isInfo = props.type === 'info';
 const isSuccess = props.type === 'success;';

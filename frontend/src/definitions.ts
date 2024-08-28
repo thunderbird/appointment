@@ -227,18 +227,6 @@ export enum FtueStep {
   Finish = 100,
 };
 
-/**
- * @deprecated
- * @enum
- * @readonly
- */
-export const tooltipPosition = {
-  none: 'pos-none',
-  top: 'pos-top',
-  bottom: 'pos-bottom',
-  left: 'pos-left',
-  right: 'pos-right',
-};
 export enum TooltipPosition {
   None = 'pos-none',
   Top = 'pos-top',
@@ -298,6 +286,7 @@ export default {
   FtueStep,
   InviteStatus,
   loginRedirectKey,
+  MeetingLinkProviderType,
   MetricEvents,
   ModalStates,
   ScheduleCreationState,
@@ -305,7 +294,6 @@ export default {
   SubscriberLevels,
   TableDataButtonType,
   TableDataType,
-  tooltipPosition,
   TooltipPosition,
   WaitingListAction,
 };
