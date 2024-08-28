@@ -93,6 +93,10 @@ join-online = Online teilnehmen unter: { $url }
 # $phone (String) - An unformatted phone number for the meeting
 join-phone = Per Telefon teilnehmen: { $phone }
 
+# Waiting List Errors
+wl-subscriber-already-exists = { $email } ist bereits Abonnent.
+wl-subscriber-failed-to-create = { $email } konnte nicht eingeladen werden. Bitte den Fehler melden!
+
 ## Account Data Readme
 
 # This is a text file that is generated and bundled along with your account data

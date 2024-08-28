@@ -161,7 +161,7 @@ class BaseBookingMail(Mailer):
         if self.time_format == 'time-format':
             self.time_format = '%I:%M%p'
         if self.date_format == 'date-format':
-            self.date_format = '%A, %B %d %Y'
+            self.date_format = '%A, %B %d, %Y'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 

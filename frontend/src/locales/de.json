@@ -278,10 +278,13 @@
     "selectCalendar": "Kalender auswählen",
     "send": "Senden",
     "sendInvitationToAnotherEmail": "Die Einladung an eine andere E-Mail-Adresse senden",
+    "sendInviteToWaitingList": "Wähle jemanden aus, um eine Einladung zu senden! | Eine Einladung an {Anzahl} Person senden | Eine Einladung an {Anzahl} Leute senden",
+    "sentCountInvitesSuccessfully": "Alle ausgewählten Benutzer sind bereits eingeladen! | {Anzahl} Einladung gesendet! | {Anzahl} Einladungen gesendet!",
     "settings": "Einstellungen",
     "shareMyLink": "Meinen Link teilen",
     "showSecondaryTimeZone": "Zeige sekundäre Zeitzone",
     "signInWithGoogle": "Mit Google anmelden",
+    "signUpForBeta": "Registriere dich für die Beta",
     "signUpWithInviteCode": "Anmeldung mit Einladungscode",
     "slotLength": "Termindauer",
     "start": "Start",
@@ -409,6 +412,7 @@
     "none": "{value}"
   },
   "waitingList": {
+    "adminInviteNotice": "Hinweis: Der Senden-Button wird bereits akzeptierte Personen nicht erneut einladen, sie können aber dennoch ausgewählt werden. Verwende die Filter für eine bessere Übersicht!",
     "confirmHeading": "Deine E-Mail-Adresse wurde bestätigt!",
     "confirmInfo": "Deine E-Mail-Adresse ist nun bestätigt. Sobald Du ausgewählt wurdest, wirst Du einen Einladungscode bekommen.",
     "errorHeading": "Es gab ein Problem mit diesem Link",
