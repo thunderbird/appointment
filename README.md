@@ -44,3 +44,9 @@ Check out the project's respective readmes:
 ### Localization
 
 This project uses [Fluent](https://projectfluent.org/) for localization. Files are located in their respective `l10n/<locale>/*.ftl`.
+
+### Deployment
+
+When changes are merged to main, a new [release](https://github.com/thunderbird/appointment/releases/) is cut, and the changes are deployed to [stage.appointment.day](https://stage.appointment.day/).
+
+After you've checked staging and it's ready to push to production, edit the release entry, and press the 'Publish release' button.
