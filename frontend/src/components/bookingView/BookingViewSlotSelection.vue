@@ -33,7 +33,7 @@ const selectEvent = (day: String) => {
   // set event selected
   for (let i = 0; i < appointment.value.slots.length; i += 1) {
     const slot: Slot = appointment.value.slots[i];
-    if (slot.start.format(DateFormatStrings.Qalendar) === day) {
+    if (dj(slot.start).format(DateFormatStrings.Qalendar) === day) {
       slot.selected = true;
       const e = { ...appointment.value, ...slot };
       delete e.slots;

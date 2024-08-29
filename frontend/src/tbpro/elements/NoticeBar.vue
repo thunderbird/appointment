@@ -6,7 +6,7 @@ import NoticeCriticalIcon from '@/tbpro/icons/NoticeCriticalIcon.vue';
 
 // component properties
 interface Props {
-  type: string;
+  type?: string;
 };
 const props = withDefaults(defineProps<Props>(), {
   type: 'info',

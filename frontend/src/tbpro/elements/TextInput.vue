@@ -17,14 +17,13 @@ const focus = () => {
 // component properties
 interface Props {
   name: string;
-  type: string;
-  placeholder: string;
-  required: boolean;
-  disabled: boolean;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
 };
 withDefaults(defineProps<Props>(), {
   type: 'text',
-  text: 'test',
   placeholder: '',
   required: false,
   disabled: false,

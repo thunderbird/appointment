@@ -48,6 +48,7 @@ interface Props {
 };
 defineProps<Props>();
 </script>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -138,7 +139,6 @@ input {
   .select-all {
     position: relative;
     margin-right: 0.25rem;
-    top: 2.25rem;
   }
 }
 </style>

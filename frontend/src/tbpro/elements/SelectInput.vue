@@ -6,8 +6,8 @@ import { HTMLInputElementEvent, SelectOption } from '@/models';
 interface Props {
   name: string;
   options: SelectOption[];
-  required: boolean;
-  disabled: boolean;
+  required?: boolean;
+  disabled?: boolean;
 };
 withDefaults(defineProps<Props>(), {
   required: false,

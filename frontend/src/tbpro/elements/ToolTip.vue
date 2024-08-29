@@ -19,8 +19,8 @@ import { TooltipPosition } from '@/definitions';
 
 // component properties
 interface Props {
-  alt: string;
-  position: TooltipPosition;
+  alt?: string;
+  position?: TooltipPosition;
 };
 withDefaults(defineProps<Props>(), {
   alt: '',

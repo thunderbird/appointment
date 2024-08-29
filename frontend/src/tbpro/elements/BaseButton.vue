@@ -4,10 +4,10 @@ import ToolTip from '@/tbpro/elements/ToolTip.vue';
 
 // component properties
 interface Props {
-  type: string;
-  size: string;
-  tooltip: string;
-  forceTooltip: boolean;
+  type?: string;
+  size?: string;
+  tooltip?: string;
+  forceTooltip?: boolean;
 };
 withDefaults(defineProps<Props>(), {
   type: 'secondary',
