@@ -116,7 +116,6 @@ provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
 
 // menu items for main navigation
 const navItems = [
-  'calendar',
   'schedule',
   'bookings',
   'settings',

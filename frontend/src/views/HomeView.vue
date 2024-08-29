@@ -4,7 +4,7 @@ import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
-import {storeToRefs} from "pinia";
+import { storeToRefs } from "pinia";
 
 const router = useRouter();
 
@@ -12,13 +12,13 @@ const userStore = useUserStore();
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
 const enter = () => {
-  router.push('/calendar');
+  router.push({ name: 'schedule' });
 };
 const login = () => {
-  router.push('/login');
+  router.push({ name: 'login' });
 };
 const signUp = () => {
-  router.push('/waiting-list')
+  router.push({ name: 'join-the-waiting-list' })
 };
 </script>
 

@@ -31,12 +31,12 @@ const refresh = inject('refresh');
 onMounted(async () => {
   await refresh();
 
-  // If they're setup, boot them calendars
+  // If they're setup, boot them schedule
   if (user.data.isSetup) {
     if (getPreferredTheme() === ColorSchemes.Dark) {
       document.documentElement.classList.add('dark');
     }
-    router.replace('calendar');
+    await router.replace('schedule');
     return;
   }
 

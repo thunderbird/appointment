@@ -2,13 +2,11 @@ import { defineAsyncComponent, inject } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
-import CalendarView from '@/views/CalendarView.vue';
 import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
-import { usePosthog, posthog } from '@/composables/posthog';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
@@ -91,13 +89,8 @@ const routes: RouteRecordRaw[] = [
     component: ScheduleView,
   },
   {
-    path: '/calendar',
-    redirect: { name: 'calendar' },
-  },
-  {
     path: '/calendar/:date?',
-    name: 'calendar',
-    component: CalendarView,
+    redirect: { name: 'schedule' },
   },
   {
     path: '/appointments/:view?/:slug?',
