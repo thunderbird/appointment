@@ -96,7 +96,7 @@ const routes: RouteRecordRaw[] = [
   {
     // This is just to auto-redirect old links. Can be removed in the future.
     path: '/calendar/:date?',
-    redirect: { name: 'schedule' },
+    redirect: { name: 'dashboard' },
   },
   {
     path: '/appointments/:view?/:slug?',
