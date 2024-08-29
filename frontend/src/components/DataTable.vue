@@ -1,106 +1,3 @@
-<template>
-  <div class="flex flex-col items-center justify-center gap-4">
-    <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
-      <div>
-        <span class="font-bold">{{ totalDataLength }}</span> {{ dataName }}
-      </div>
-      <div v-for="filter in filters" :key="filter.name">
-        <label class="flex items-center gap-4 whitespace-nowrap">
-        {{ filter.name }} {{ t('label.filter') }}:
-        <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter)">
-          <option :value="option.key" v-for="option in filter.options" :key="option.key">
-            {{ option.name }}
-          </option>
-        </select>
-        </label>
-      </div>
-      <list-pagination
-        :list-length="totalDataLength"
-        :page-size="pageSize"
-        @update="updatePage"
-      />
-    </div>
-    <div class="data-table overflow-x-auto">
-      <table>
-        <thead>
-          <tr>
-            <th v-if="allowMultiSelect">
-              <input :checked="paginatedDataList.every((row) => selectedRows.includes(row))" @change="(evt) => onPageSelect(evt, paginatedDataList)" id="select-page-input" class="mr-2" type="checkbox"/>
-              <label class="select-none cursor-pointer" for="select-page-input">
-              Select Page
-              </label>
-            </th>
-            <th v-for="column in columns" :key="column.key">{{ column.name }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(datum, i) in paginatedDataList" :key="datum[dataKey] as unknown as string">
-            <td v-if="allowMultiSelect">
-              <input :checked="selectedRows.includes(datum)" type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
-            </td>
-            <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey" :class="`column-${fieldKey}`">
-              <span v-if="fieldData.type === TableDataType.Text">
-                {{ fieldData.value }}
-              </span>
-              <span v-else-if="fieldData.type === TableDataType.Code" class="flex items-center gap-4">
-                <code>{{ fieldData.value }}</code>
-                <text-button :uid="fieldKey as string" class="btn-copy" :copy="String(fieldData.value)" :title="t('label.copy')" />
-              </span>
-              <span v-else-if="fieldData.type === TableDataType.Bool">
-                <span v-if="fieldData.value">Yes</span>
-                <span v-else>No</span>
-              </span>
-              <span v-else-if="fieldData.type === TableDataType.Link">
-                <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
-              </span>
-              <span v-else-if="fieldData.type === TableDataType.Button">
-                <primary-button
-                  v-if="fieldData.buttonType === TableDataButtonType.Primary"
-                  :disabled="fieldData.disabled"
-                  @click="emit('fieldClick', fieldKey, datum)"
-                >
-                  {{ fieldData.value }}
-                </primary-button>
-                <secondary-button
-                  v-else-if="fieldData.buttonType === TableDataButtonType.Secondary"
-                  :disabled="fieldData.disabled"
-                  @click="emit('fieldClick', fieldKey, datum)"
-                >
-                  {{ fieldData.value }}
-                </secondary-button>
-                <caution-button
-                  v-else-if="fieldData.buttonType === TableDataButtonType.Caution"
-                  :disabled="fieldData.disabled"
-                  @click="emit('fieldClick', fieldKey, datum)"
-                >
-                  {{ fieldData.value }}
-                </caution-button>
-              </span>
-            </td>
-          </tr>
-          <tr v-if="loading">
-            <td :colspan="columnSpan">
-              <div class="flex w-full justify-center">
-              <loading-spinner/>
-              </div>
-            </td>
-          </tr>
-          <tr v-else-if="paginatedDataList.length === 0">
-            <td :colspan="columnSpan">{{ t('error.dataSourceIsEmpty', {name: dataName}) }}</td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <th :colspan="columnSpan">
-              <slot name="footer"></slot>
-            </th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 /**
  * Data Table
@@ -222,3 +119,106 @@ const onColumnFilter = (evt: Event, filter: TableFilter) => {
 };
 
 </script>
+
+<template>
+  <div class="flex flex-col items-center justify-center gap-4">
+    <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
+      <div>
+        <span class="font-bold">{{ totalDataLength }}</span> {{ dataName }}
+      </div>
+      <div v-for="filter in filters" :key="filter.name">
+        <label class="flex items-center gap-4 whitespace-nowrap">
+        {{ filter.name }} {{ t('label.filter') }}:
+        <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter)">
+          <option :value="option.key" v-for="option in filter.options" :key="option.key">
+            {{ option.name }}
+          </option>
+        </select>
+        </label>
+      </div>
+      <list-pagination
+        :list-length="totalDataLength"
+        :page-size="pageSize"
+        @update="updatePage"
+      />
+    </div>
+    <div class="data-table overflow-x-auto">
+      <table>
+        <thead>
+          <tr>
+            <th v-if="allowMultiSelect">
+              <input :checked="paginatedDataList.every((row) => selectedRows.includes(row))" @change="(evt) => onPageSelect(evt, paginatedDataList)" id="select-page-input" class="mr-2" type="checkbox"/>
+              <label class="select-none cursor-pointer" for="select-page-input">
+              Select Page
+              </label>
+            </th>
+            <th v-for="column in columns" :key="column.key">{{ column.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(datum, i) in paginatedDataList" :key="datum[dataKey] as unknown as string">
+            <td v-if="allowMultiSelect">
+              <input :checked="selectedRows.includes(datum)" type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
+            </td>
+            <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey" :class="`column-${fieldKey}`">
+              <span v-if="fieldData.type === TableDataType.Text">
+                {{ fieldData.value }}
+              </span>
+              <span v-else-if="fieldData.type === TableDataType.Code" class="flex items-center gap-4">
+                <code>{{ fieldData.value }}</code>
+                <text-button :uid="fieldKey as string" class="btn-copy" :copy="String(fieldData.value)" :title="t('label.copy')" />
+              </span>
+              <span v-else-if="fieldData.type === TableDataType.Bool">
+                <span v-if="fieldData.value">Yes</span>
+                <span v-else>No</span>
+              </span>
+              <span v-else-if="fieldData.type === TableDataType.Link">
+                <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
+              </span>
+              <span v-else-if="fieldData.type === TableDataType.Button">
+                <primary-button
+                  v-if="fieldData.buttonType === TableDataButtonType.Primary"
+                  :disabled="fieldData.disabled"
+                  @click="emit('fieldClick', fieldKey, datum)"
+                >
+                  {{ fieldData.value }}
+                </primary-button>
+                <secondary-button
+                  v-else-if="fieldData.buttonType === TableDataButtonType.Secondary"
+                  :disabled="fieldData.disabled"
+                  @click="emit('fieldClick', fieldKey, datum)"
+                >
+                  {{ fieldData.value }}
+                </secondary-button>
+                <caution-button
+                  v-else-if="fieldData.buttonType === TableDataButtonType.Caution"
+                  :disabled="fieldData.disabled"
+                  @click="emit('fieldClick', fieldKey, datum)"
+                >
+                  {{ fieldData.value }}
+                </caution-button>
+              </span>
+            </td>
+          </tr>
+          <tr v-if="loading">
+            <td :colspan="columnSpan">
+              <div class="flex w-full justify-center">
+              <loading-spinner/>
+              </div>
+            </td>
+          </tr>
+          <tr v-else-if="paginatedDataList.length === 0">
+            <td :colspan="columnSpan">{{ t('error.dataSourceIsEmpty', {name: dataName}) }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th :colspan="columnSpan">
+              <slot name="footer"></slot>
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</template>

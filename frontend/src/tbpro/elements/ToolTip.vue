@@ -1,18 +1,3 @@
-<template>
-  <div class="tooltip" :aria-label="alt">
-    <div class="tooltip-container">
-      <div class="tooltip-body">
-        <slot></slot>
-      </div>
-      <svg class="beak" :class="position" width="28" height="6" viewBox="0 0 28 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g>
-          <path d="M15.4142 4.58579C14.6332 5.36683 13.3668 5.36683 12.5858 4.58579L8 0L20 0L15.4142 4.58579Z" fill="currentColor"/>
-        </g>
-      </svg>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 // component properties
 import { TooltipPosition } from '@/definitions';
@@ -27,6 +12,21 @@ withDefaults(defineProps<Props>(), {
   position: TooltipPosition.Bottom,
 })
 </script>
+
+<template>
+  <div class="tooltip" :aria-label="alt">
+    <div class="tooltip-container">
+      <div class="tooltip-body">
+        <slot></slot>
+      </div>
+      <svg class="beak" :class="position" width="28" height="6" viewBox="0 0 28 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <path d="M15.4142 4.58579C14.6332 5.36683 13.3668 5.36683 12.5858 4.58579L8 0L20 0L15.4142 4.58579Z" fill="currentColor"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .tooltip {

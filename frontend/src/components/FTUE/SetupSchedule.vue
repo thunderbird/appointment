@@ -1,54 +1,3 @@
-<template>
-  <div class="content">
-    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <div class="column">
-        <text-input name="scheduleName" v-model="schedule.name" required>{{ t('ftue.scheduleName') }}</text-input>
-        <div class="pair">
-        <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
-        <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
-        </div>
-        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
-      </div>
-      <div class="column">
-        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>
-          {{ t('label.selectCalendar') }}
-        </select-input>
-        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>
-          {{ t('label.slotLength') }}
-        </select-input>
-        <div class="scheduleInfo">{{
-            t('text.recipientsCanScheduleBetween', {
-              duration: duration,
-              earliest: '24 hours',
-              farthest: '2 weeks',
-            })
-          }}
-        </div>
-      </div>
-    </form>
-  </div>
-  <div class="buttons">
-    <secondary-button
-      class="btn-back"
-      :title="t('label.back')"
-      v-if="hasPreviousStep"
-      :disabled="isLoading"
-      @click="previousStep()"
-    >
-      {{ t('label.back') }}
-    </secondary-button>
-    <primary-button
-      class="btn-continue"
-      :title="t('label.continue')"
-      v-if="hasNextStep"
-      @click="onSubmit()"
-      :disabled="isLoading"
-    >
-      {{ t('label.continue') }}
-    </primary-button>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -177,6 +126,57 @@ onMounted(async () => {
 });
 
 </script>
+
+<template>
+  <div class="content">
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
+      <div class="column">
+        <text-input name="scheduleName" v-model="schedule.name" required>{{ t('ftue.scheduleName') }}</text-input>
+        <div class="pair">
+        <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
+        <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
+        </div>
+        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
+      </div>
+      <div class="column">
+        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>
+          {{ t('label.selectCalendar') }}
+        </select-input>
+        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>
+          {{ t('label.slotLength') }}
+        </select-input>
+        <div class="scheduleInfo">{{
+            t('text.recipientsCanScheduleBetween', {
+              duration: duration,
+              earliest: '24 hours',
+              farthest: '2 weeks',
+            })
+          }}
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="buttons">
+    <secondary-button
+      class="btn-back"
+      :title="t('label.back')"
+      v-if="hasPreviousStep"
+      :disabled="isLoading"
+      @click="previousStep()"
+    >
+      {{ t('label.back') }}
+    </secondary-button>
+    <primary-button
+      class="btn-continue"
+      :title="t('label.continue')"
+      v-if="hasNextStep"
+      @click="onSubmit()"
+      :disabled="isLoading"
+    >
+      {{ t('label.continue') }}
+    </primary-button>
+  </div>
+</template>
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';

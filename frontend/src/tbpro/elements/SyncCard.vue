@@ -1,3 +1,27 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { CalendarItem } from '@/models';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+
+const { t } = useI18n();
+const model = defineModel<CalendarItem[]>();
+
+const selected = computed(() => model.value.filter((item) => item.checked).length);
+const selectAll = () => {
+  model.value = model.value.map((item) => ({
+    ...item,
+    checked: true,
+  }));
+};
+
+// component properties
+interface Props {
+  title: string;
+};
+defineProps<Props>();
+</script>
+
 <template>
   <div class="wrapper">
     <div class="header">
@@ -24,30 +48,6 @@
     </ul>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { CalendarItem } from '@/models';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-
-const { t } = useI18n();
-const model = defineModel<CalendarItem[]>();
-
-const selected = computed(() => model.value.filter((item) => item.checked).length);
-const selectAll = () => {
-  model.value = model.value.map((item) => ({
-    ...item,
-    checked: true,
-  }));
-};
-
-// component properties
-interface Props {
-  title: string;
-};
-defineProps<Props>();
-</script>
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';

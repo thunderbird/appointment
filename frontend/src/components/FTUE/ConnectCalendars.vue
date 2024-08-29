@@ -1,37 +1,3 @@
-<template>
-  <div class="content">
-    <form class="form" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <sync-card class="sync-card" v-model="calendars" :title="t('label.calendar', 2)">
-        <template v-slot:icon>
-        <span class="icon-calendar">
-          <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>
-        </span>
-        </template>
-      </sync-card>
-    </form>
-  </div>
-  <div class="buttons">
-    <secondary-button
-      class="btn-back"
-      :title="t('label.back')"
-      v-if="hasPreviousStep"
-      :disabled="isLoading"
-      @click="previousStep()"
-    >{{ t('label.back') }}
-    </secondary-button>
-    <primary-button
-      class="btn-continue"
-      :aria-label="continueTitle"
-      v-if="hasNextStep"
-      @click="onSubmit()"
-      :tooltip="!selectedCount ? t('ftue.oneCalendarRequired') : null"
-      :disabled="isLoading || !selectedCount"
-    >
-      {{ t('label.continue') }}
-    </primary-button>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import {
@@ -99,6 +65,40 @@ const onSubmit = async () => {
 };
 
 </script>
+
+<template>
+  <div class="content">
+    <form class="form" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
+      <sync-card class="sync-card" v-model="calendars" :title="t('label.calendar', 2)">
+        <template v-slot:icon>
+        <span class="icon-calendar">
+          <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>
+        </span>
+        </template>
+      </sync-card>
+    </form>
+  </div>
+  <div class="buttons">
+    <secondary-button
+      class="btn-back"
+      :title="t('label.back')"
+      v-if="hasPreviousStep"
+      :disabled="isLoading"
+      @click="previousStep()"
+    >{{ t('label.back') }}
+    </secondary-button>
+    <primary-button
+      class="btn-continue"
+      :aria-label="continueTitle"
+      v-if="hasNextStep"
+      @click="onSubmit()"
+      :tooltip="!selectedCount ? t('ftue.oneCalendarRequired') : null"
+      :disabled="isLoading || !selectedCount"
+    >
+      {{ t('label.continue') }}
+    </primary-button>
+  </div>
+</template>
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
