@@ -38,7 +38,7 @@ const logout = async () => {
   >
     <router-link
       class="shrink-0 border-r border-gray-300 py-4 pl-4 pr-8 dark:border-gray-600"
-      :to="{ name: 'schedule' }"
+      :to="{ name: 'dashboard' }"
     >
       <img class="h-8" src="/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>

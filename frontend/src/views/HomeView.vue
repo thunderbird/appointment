@@ -12,7 +12,7 @@ const userStore = useUserStore();
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
 const enter = () => {
-  router.push({ name: 'schedule' });
+  router.push({ name: 'dashboard' });
 };
 const login = () => {
   router.push({ name: 'login' });

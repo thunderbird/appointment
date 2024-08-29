@@ -86,9 +86,15 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/schedule',
     name: 'schedule',
+    redirect: { name: 'dashboard' },
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
     component: ScheduleView,
   },
   {
+    // This is just to auto-redirect old links. Can be removed in the future.
     path: '/calendar/:date?',
     redirect: { name: 'schedule' },
   },
