@@ -168,7 +168,7 @@ const login = async () => {
     return;
   }
 
-  await router.push('/calendar');
+  await router.push({ name: 'dashboard' });
 };
 </script>
 

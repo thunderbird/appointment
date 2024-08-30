@@ -2,13 +2,11 @@ import { defineAsyncComponent, inject } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
-import CalendarView from '@/views/CalendarView.vue';
 import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
-import { usePosthog, posthog } from '@/composables/posthog';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
@@ -88,16 +86,17 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/schedule',
     name: 'schedule',
+    redirect: { name: 'dashboard' },
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
     component: ScheduleView,
   },
   {
-    path: '/calendar',
-    redirect: { name: 'calendar' },
-  },
-  {
+    // This is just to auto-redirect old links. Can be removed in the future.
     path: '/calendar/:date?',
-    name: 'calendar',
-    component: CalendarView,
+    redirect: { name: 'dashboard' },
   },
   {
     path: '/appointments/:view?/:slug?',

@@ -115,7 +115,7 @@ onMounted(async () => {
 <template>
   <!-- page title area -->
   <div class="flex select-none flex-col items-start justify-between lg:flex-row">
-    <div class="text-4xl font-light">{{ t('label.schedule') }}</div>
+    <div class="text-4xl font-light">{{ t('label.dashboard') }}</div>
   </div>
   <!-- page content -->
   <div
