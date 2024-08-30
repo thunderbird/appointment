@@ -2,7 +2,7 @@
 import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { loginRedirectKey } from '@/definitions';
+import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import { callKey } from '@/keys';
 
 const route = useRoute();
@@ -18,8 +18,8 @@ const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 
 onMounted(async () => {
   // Retrieve and remove temp login redirect location
-  const redirectTo = window.sessionStorage?.getItem(loginRedirectKey);
-  window.sessionStorage?.removeItem(loginRedirectKey);
+  const redirectTo = window.sessionStorage?.getItem(LOGIN_REDIRECT_KEY);
+  window.sessionStorage?.removeItem(LOGIN_REDIRECT_KEY);
   // Remove any ftue steps on new login
   window.localStorage?.removeItem('tba/ftue');
 

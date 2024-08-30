@@ -8,7 +8,7 @@ import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
   ColorSchemes,
   DateFormatStrings,
-  defaultSlotDuration,
+  DEFAULT_SLOT_DURATION,
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
@@ -76,7 +76,7 @@ const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
 const timeSlotDuration = computed(() => {
   // Duration on slots are fixed, so grab the first one.
   // This is the same data on schedule.slot_duration, but we never actually pull that info down to the frontend.
-  const duration = fixedDuration.value ?? defaultSlotDuration;
+  const duration = fixedDuration.value ?? DEFAULT_SLOT_DURATION;
   if (duration <= 15) {
     return qalendarSlotDurations['15'];
   }
@@ -92,7 +92,7 @@ const timeSlotDuration = computed(() => {
  * @type {ComputedRef<number>}
  */
 const timeSlotHeight = computed(() => {
-  const duration = fixedDuration.value ?? defaultSlotDuration;
+  const duration = fixedDuration.value ?? DEFAULT_SLOT_DURATION;
   if (duration >= 15) {
     return 40;
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { DateFormatStrings, defaultSlotDuration } from '@/definitions';
+import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { useI18n } from 'vue-i18n';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
@@ -37,7 +37,7 @@ const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.
   label: calendar.title,
   value: calendar.id,
 })));
-const durationOptions: SelectOption[] = [15, 30, 45, 60, 75, 90].map((min) => ({
+const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((min) => ({
   label: `${min} min`,
   value: min,
 }));
@@ -53,7 +53,7 @@ const schedule = ref({
   calendar: 0,
   startTime: '09:00',
   endTime: '17:00',
-  duration: defaultSlotDuration,
+  duration: DEFAULT_SLOT_DURATION,
   days: [1, 2, 3, 4, 5],
   details: '',
 });

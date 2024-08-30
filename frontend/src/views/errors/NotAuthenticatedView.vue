@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { loginRedirectKey } from '@/definitions';
+import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 
@@ -11,7 +11,7 @@ const router = useRouter();
 
 const goToLogin = () => {
   // Save their intended destination!
-  window.sessionStorage?.setItem(loginRedirectKey, route.fullPath);
+  window.sessionStorage?.setItem(LOGIN_REDIRECT_KEY, route.fullPath);
   router.push('/login');
 };
 

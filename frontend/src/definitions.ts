@@ -11,9 +11,15 @@ export enum DateFormatStrings {
 }
 
 /**
- * The amount of time in minutes a schedule's slot duration will default to
+ * Defined durations in minutes for scheduled time slots
  */
-export const defaultSlotDuration = 30;
+export const SLOT_DURATION_OPTIONS = [15, 30, 45, 60, 75, 90];
+
+/**
+ * The amount of time in minutes a schedule's slot duration will default to
+ * Must be a value from SLOT_DURATION_OPTIONS
+ */
+export const DEFAULT_SLOT_DURATION = 30;
 
 /**
  * Appointment subscriber levels
@@ -191,7 +197,7 @@ export enum AlertSchemes {
 /**
  * Used as the session storage key for the location the user wanted to go to before logging in.
  */
-export const loginRedirectKey = 'loginRedirect';
+export const LOGIN_REDIRECT_KEY = 'loginRedirect';
 
 /**
  * Data types for table row items
@@ -280,17 +286,18 @@ export default {
   CalendarProviders,
   ColorSchemes,
   DateFormatStrings,
-  defaultSlotDuration,
+  DEFAULT_SLOT_DURATION,
   EventLocationType,
   ExternalConnectionProviders,
   FtueStep,
   InviteStatus,
-  loginRedirectKey,
+  LOGIN_REDIRECT_KEY,
   MeetingLinkProviderType,
   MetricEvents,
   ModalStates,
   ScheduleCreationState,
   SettingsSections,
+  SLOT_DURATION_OPTIONS,
   SubscriberLevels,
   TableDataButtonType,
   TableDataType,
