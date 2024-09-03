@@ -5,6 +5,7 @@ import HomeFooter from '@/components/HomeFooter.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from "pinia";
+import ArtLogo from "@/elements/arts/ArtLogo.vue";
 
 const router = useRouter();
 
@@ -26,10 +27,7 @@ const signUp = () => {
   <div>
     <section>
       <div class="flex-center mt-8 flex-col gap-12">
-        <img class="w-full max-w-xs md:max-w-sm lg:max-w-md" src="@/assets/svg/appointment_logo_wText.svg" alt="Appointment Logo" />
-        <h2 class="pt-6 text-center font-display text-lg uppercase tracking-[0.19em] md:text-3xl lg:text-5xl">
-          {{ $t('app.title') }}
-        </h2>
+        <ArtLogo class="w-full max-w-xs md:max-w-sm lg:max-w-md -mb-12"/>
         <div class="flex-center -mb-12 flex flex-col md:-mb-20 lg:-mb-28 xl:-mb-40">
           <h4 class="max-w-2xl pt-12 text-center text-xl font-light leading-9 tracking-wide">
             {{ $t('text.homepage.intro') }}
