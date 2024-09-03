@@ -50,6 +50,21 @@ class TestJoinWaitingList:
             # Ensure we did not send out an email
             mock.assert_not_called()
 
+    def test_bad_emails(self, with_db, with_client, make_waiting_list):
+        # Variety of bad emails
+        emails = ['', 'test', 'test@', '@example.org']
+
+        for email in emails:
+            with patch('fastapi.BackgroundTasks.add_task') as mock:
+                response = with_client.post('/waiting-list/join', json={'email': email})
+
+                # Ensure we hit the email validation error
+                assert response.status_code == 422, response.json()
+                assert 'value is not a valid email address' in response.json()['detail'][0]['msg']
+
+                # Ensure we did not send out an email
+                mock.assert_not_called()
+
 
 class TestWaitingListActionConfirm:
     def assert_email_verified(self, db, waiting_list, success=True):

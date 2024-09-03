@@ -392,11 +392,11 @@ class TokenData(BaseModel):
 
 
 class SendInviteEmailIn(BaseModel):
-    email: str = Field(title='Email', min_length=1)
+    email: EmailStr = Field(title='Email', min_length=1)
 
 
 class JoinTheWaitingList(BaseModel):
-    email: str = Field(title='Email', min_length=1)
+    email: EmailStr = Field(title='Email', min_length=1)
 
 
 class TokenForWaitingList(BaseModel):

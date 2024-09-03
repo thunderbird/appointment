@@ -100,7 +100,7 @@ class Mailer:
                 filename=a.filename
             )
 
-        return message.as_string()
+        return message.as_string().encode('utf-8')
 
     def send(self):
         """actually send the email"""
