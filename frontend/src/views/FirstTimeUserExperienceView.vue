@@ -1,9 +1,13 @@
-<script setup>
-
+<script setup lang="ts">
 import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
-import { ColorSchemes, ftueStep } from '@/definitions';
 import { onMounted, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/user-store';
+import { useRouter } from 'vue-router';
+import { ColorSchemes, FtueStep } from '@/definitions';
+import { refreshKey } from '@/keys';
+import { getPreferredTheme } from '@/utils';
 import WordMark from '@/elements/WordMark.vue';
 import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
 import SetupProfile from '@/components/FTUE/SetupProfile.vue';
@@ -13,10 +17,6 @@ import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
-import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store';
-import { useRouter } from 'vue-router';
-import { getPreferredTheme } from '@/utils';
 
 const router = useRouter();
 const user = useUserStore();
@@ -26,7 +26,7 @@ const {
 } = storeToRefs(ftueStore);
 
 const { t } = useI18n();
-const refresh = inject('refresh');
+const refresh = inject(refreshKey);
 
 onMounted(async () => {
   await refresh();
@@ -43,14 +43,14 @@ onMounted(async () => {
   // Force light-mode
   document.documentElement.classList.remove('dark');
 });
-
 </script>
+
 <template>
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
         <div class="modal-header">
-          <word-mark v-if="currentStep === ftueStep.setupProfile || currentStep === ftueStep.finish"/>
+          <word-mark v-if="currentStep === FtueStep.SetupProfile || currentStep === FtueStep.Finish"/>
           <h2 id="ftue-title">
             {{ t(stepTitle) }}
           </h2>
@@ -66,12 +66,12 @@ onMounted(async () => {
           <div class="pls-keep-height" v-else/>
         </div>
         <div class="modal-body flex w-full flex-col items-center justify-center">
-          <setup-profile v-if="currentStep === ftueStep.setupProfile"/>
-          <google-permissions v-else-if="currentStep === ftueStep.googlePermissions"/>
-          <connect-calendars v-else-if="currentStep === ftueStep.connectCalendars"/>
-          <setup-schedule v-else-if="currentStep === ftueStep.setupSchedule"/>
-          <connect-video v-else-if="currentStep === ftueStep.connectVideoConferencing"/>
-          <finish v-else-if="currentStep === ftueStep.finish"/>
+          <setup-profile v-if="currentStep === FtueStep.SetupProfile"/>
+          <google-permissions v-else-if="currentStep === FtueStep.GooglePermissions"/>
+          <connect-calendars v-else-if="currentStep === FtueStep.ConnectCalendars"/>
+          <setup-schedule v-else-if="currentStep === FtueStep.SetupSchedule"/>
+          <connect-video v-else-if="currentStep === FtueStep.ConnectVideoConferencing"/>
+          <finish v-else-if="currentStep === FtueStep.Finish"/>
           <div class="error-page" v-else>
             <span>🤔</span>
             <h2>{{ t('ftue.errorHeading') }}</h2>
@@ -87,6 +87,7 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

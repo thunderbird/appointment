@@ -1,15 +1,4 @@
 /**
- * @deprecated Use DateFormatStrings enum instead
- */
-export const dateFormatStrings = {
-  // Qalendar specific formats (These have to be in this format for qalendar to understand them)
-  qalendar: 'YYYY-MM-DD HH:mm',
-  qalendarFullDay: 'YYYY-MM-DD',
-  // Time display formats
-  display12Hour: 'hh:mma',
-  display24Hour: 'HH:mm',
-};
-/**
  * Available date format strings
  */
 export enum DateFormatStrings {
@@ -22,9 +11,15 @@ export enum DateFormatStrings {
 }
 
 /**
- * The amount of time in minutes a schedule's slot duration will default to
+ * Defined durations in minutes for scheduled time slots
  */
-export const defaultSlotDuration = 30;
+export const SLOT_DURATION_OPTIONS = [15, 30, 45, 60, 75, 90];
+
+/**
+ * The amount of time in minutes a schedule's slot duration will default to
+ * Must be a value from SLOT_DURATION_OPTIONS
+ */
+export const DEFAULT_SLOT_DURATION = 30;
 
 /**
  * Appointment subscriber levels
@@ -35,14 +30,6 @@ export enum SubscriberLevels {
   Pro = 3,
   Admin = 99,
 }
-
-/**
- * @deprecated use EventLocationType
- */
-export const locationTypes = {
-  inPerson: 1,
-  online: 2,
-};
 
 /**
  * Schedule creation state
@@ -179,14 +166,6 @@ export enum ExternalConnectionProviders {
 }
 
 /**
- * @deprecated Use MeetingLinkProviderType instead
- */
-export const meetingLinkProviderType = {
-  none: 'none',
-  zoom: 'zoom',
-  google_meet: 'google_meet',
-};
-/**
  * Meeting provider types (matches the backends version)
  */
 export enum MeetingLinkProviderType {
@@ -218,7 +197,7 @@ export enum AlertSchemes {
 /**
  * Used as the session storage key for the location the user wanted to go to before logging in.
  */
-export const loginRedirectKey = 'loginRedirect';
+export const LOGIN_REDIRECT_KEY = 'loginRedirect';
 
 /**
  * Data types for table row items
@@ -243,30 +222,23 @@ export enum TableDataButtonType {
 /**
  * First Time User Experience Steps
  * Step amounts are 10-based to allow us flexibility in adding steps later.
- * @enum
- * @readonly
  */
-export const ftueStep = {
-  setupProfile: 10,
+export enum FtueStep {
+  SetupProfile = 10,
   // Right now we only support Google calendars during ftue
-  googlePermissions: 20,
-  connectCalendars: 30,
-  setupSchedule: 40,
-  connectVideoConferencing: 50,
-  finish: 100,
+  GooglePermissions = 20,
+  ConnectCalendars = 30,
+  SetupSchedule = 40,
+  ConnectVideoConferencing = 50,
+  Finish = 100,
 };
 
-/**
- *
- * @enum
- * @readonly
- */
-export const tooltipPosition = {
-  none: 'pos-none',
-  top: 'pos-top',
-  bottom: 'pos-bottom',
-  left: 'pos-left',
-  right: 'pos-right',
+export enum TooltipPosition {
+  None = 'pos-none',
+  Top = 'pos-top',
+  Bottom = 'pos-bottom',
+  Left = 'pos-left',
+  Right = 'pos-right',
 };
 
 /**
@@ -313,23 +285,22 @@ export default {
   CalendarManagementType,
   CalendarProviders,
   ColorSchemes,
-  dateFormatStrings,
   DateFormatStrings,
-  defaultSlotDuration,
+  DEFAULT_SLOT_DURATION,
   EventLocationType,
   ExternalConnectionProviders,
-  ftueStep,
+  FtueStep,
   InviteStatus,
-  locationTypes,
-  loginRedirectKey,
-  meetingLinkProviderType,
+  LOGIN_REDIRECT_KEY,
+  MeetingLinkProviderType,
   MetricEvents,
   ModalStates,
   ScheduleCreationState,
   SettingsSections,
+  SLOT_DURATION_OPTIONS,
   SubscriberLevels,
   TableDataButtonType,
   TableDataType,
-  tooltipPosition,
+  TooltipPosition,
   WaitingListAction,
 };

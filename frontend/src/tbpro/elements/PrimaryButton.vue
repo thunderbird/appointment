@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import BaseButton from '@/tbpro/elements/BaseButton.vue';
+</script>
+
 <template>
   <base-button type="primary">
     <template v-for="(_, name) in $slots" v-slot:[name]="slotData">
@@ -5,6 +9,3 @@
     </template>
   </base-button>
 </template>
-<script setup>
-import BaseButton from '@/tbpro/elements/BaseButton.vue';
-</script>

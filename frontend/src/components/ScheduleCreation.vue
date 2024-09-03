@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
-  DateFormatStrings, defaultSlotDuration, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
+  DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS,
+  DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
 import { Calendar, Schedule, Slot, ScheduleAppointment, Error } from "@/models";
 import {
@@ -91,7 +92,7 @@ const defaultSchedule: Schedule = {
   earliest_booking: 1440,
   farthest_booking: 20160,
   weekdays: [1, 2, 3, 4, 5],
-  slot_duration: defaultSlotDuration,
+  slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
   booking_confirmation: true,
 };
@@ -192,7 +193,7 @@ const farthestOptions = {};
 });
 
 const durationOptions = {};
-[15, 30, 45, 60, 75, 90].forEach((duration) => {
+SLOT_DURATION_OPTIONS.forEach((duration) => {
   durationOptions[duration] = t('units.minutes', { value: duration });
 });
 

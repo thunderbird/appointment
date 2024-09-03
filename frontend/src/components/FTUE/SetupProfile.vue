@@ -1,36 +1,30 @@
-<script setup>
-
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import {
-  inject, ref,
-} from 'vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+<script setup lang="ts">
+import { inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, callKey } from '@/keys';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
-const call = inject('call');
+const call = inject(callKey);
 const ftueStore = useFTUEStore();
-const {
-  hasNextStep,
-} = storeToRefs(ftueStore);
+const { hasNextStep } = storeToRefs(ftueStore);
 const { nextStep } = ftueStore;
 const user = useUserStore();
 
-const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone) => ({
+// @ts-ignore
+// See https://github.com/microsoft/TypeScript/issues/49231
+const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string) => ({
   label: timezone.replaceAll('_', ' '),
   value: timezone,
 }));
 
-/**
- * @type {Ref<HTMLFormElement>}
- */
-const formRef = ref();
+const formRef = ref<HTMLFormElement>();
 const fullName = ref(user.data?.name ?? '');
 const username = ref(user.data?.username ?? '');
 const timezone = ref(user.data.timezone ?? dj.tz.guess());
@@ -59,6 +53,7 @@ const onSubmit = async () => {
 };
 
 </script>
+
 <template>
   <div class="content">
     <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
@@ -85,6 +80,7 @@ const onSubmit = async () => {
     </primary-button>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

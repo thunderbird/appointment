@@ -1,26 +1,22 @@
-<script setup>
-import { tooltipPosition } from '@/definitions';
+<script setup lang="ts">
+import { TooltipPosition } from '@/definitions';
 import ToolTip from '@/tbpro/elements/ToolTip.vue';
 
-defineProps({
-  type: {
-    type: String,
-    default: 'secondary',
-  },
-  size: {
-    type: String,
-    default: 'regular',
-  },
-  tooltip: {
-    type: String,
-    default: '',
-  },
-  forceTooltip: {
-    type: Boolean,
-    default: false,
-  },
-});
+// component properties
+interface Props {
+  type?: string;
+  size?: string;
+  tooltip?: string;
+  forceTooltip?: boolean;
+};
+withDefaults(defineProps<Props>(), {
+  type: 'secondary',
+  size: 'regular',
+  tooltip: '',
+  forceTooltip: false,
+})
 </script>
+
 <template>
   <button :class="{[type]: type, 'small': size === 'small'}" type="button">
     <span class="icon" v-if="$slots?.icon">
@@ -33,13 +29,14 @@ defineProps({
       v-if="tooltip"
       class="tooltip"
       :class="{'display-tooltip': forceTooltip}"
-      :position="tooltipPosition.bottom"
+      :position="TooltipPosition.Bottom"
       @click.prevent
     >
       {{ tooltip }}
     </tool-tip>
   </button>
 </template>
+
 <style scoped>
 .tooltip {
   transform: translate(0, -100%);

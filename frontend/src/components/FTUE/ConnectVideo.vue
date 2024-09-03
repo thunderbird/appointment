@@ -1,18 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import {
-  onMounted, inject, ref,
-} from 'vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import { onMounted, inject, ref } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { storeToRefs } from 'pinia';
+import { callKey } from '@/keys';
+import { AuthUrl, AuthUrlResponse, BooleanResponse, Exception, ExceptionDetail } from '@/models';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 
 const { t } = useI18n();
 
-const call = inject('call');
+const call = inject(callKey);
 const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
@@ -23,7 +23,7 @@ const { previousStep, nextStep } = ftueStore;
 
 const externalConnectionStore = useExternalConnectionsStore();
 const customMeetingLink = ref('');
-const customMeetingLinkRef = ref();
+const customMeetingLinkRef = ref<typeof TextInput>();
 
 const initFlowKey = 'tba/startedMeetingConnect';
 
@@ -36,10 +36,10 @@ onMounted(async () => {
   localStorage?.removeItem(initFlowKey);
 
   if (isBackFromConnectFlow) {
-    const { data, error } = await call('zoom/ftue-status').get().json();
+    const { data, error }: BooleanResponse = await call('zoom/ftue-status').get().json();
     // Did they hit back?
     if (error?.value) {
-      errorMessage.value = data.value?.detail?.message;
+      errorMessage.value = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
       return;
     }
 
@@ -64,14 +64,15 @@ const connectZoom = async () => {
     return;
   }
 
-  localStorage?.setItem(initFlowKey, true);
+  localStorage?.setItem(initFlowKey, 'true');
   isLoading.value = true;
-  const { data } = await call('zoom/auth').get().json();
+  const { data }: AuthUrlResponse = await call('zoom/auth').get().json();
   // Ship them to the auth link
-  window.location.href = data.value.url;
+  window.location.href = (data.value as AuthUrl).url;
 };
 
 </script>
+
 <template>
   <div class="content">
     <div class="cards">
@@ -121,6 +122,7 @@ const connectZoom = async () => {
     </primary-button>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

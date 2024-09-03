@@ -1,71 +1,24 @@
-<template>
-  <div class="content">
-    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <div class="column">
-        <text-input name="scheduleName" v-model="schedule.name" required>{{ t('ftue.scheduleName') }}</text-input>
-        <div class="pair">
-        <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
-        <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
-        </div>
-        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
-      </div>
-      <div class="column">
-        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>{{ t('label.selectCalendar') }}</select-input>
-        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>{{ t('label.slotLength') }}</select-input>
-        <div class="scheduleInfo">{{
-            t('text.recipientsCanScheduleBetween', {
-              duration: duration,
-              earliest: '24 hours',
-              farthest: '2 weeks',
-            })
-          }}
-        </div>
-      </div>
-    </form>
-  </div>
-  <div class="buttons">
-    <secondary-button
-      class="btn-back"
-      :title="t('label.back')"
-      v-if="hasPreviousStep"
-      :disabled="isLoading"
-      @click="previousStep()"
-    >{{ t('label.back') }}
-    </secondary-button>
-    <primary-button
-      class="btn-continue"
-      :title="t('label.continue')"
-      v-if="hasNextStep"
-      @click="onSubmit()"
-      :disabled="isLoading"
-    >{{ t('label.continue') }}
-    </primary-button>
-  </div>
-</template>
-<script setup>
-
+<script setup lang="ts">
+import { computed, inject, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
+import { useI18n } from 'vue-i18n';
+import { useFTUEStore } from '@/stores/ftue-store';
+import { useUserStore } from '@/stores/user-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useScheduleStore } from '@/stores/schedule-store';
+import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+import { Error, SelectOption } from '@/models';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import {
-  computed,
-  inject, onMounted, ref,
-} from 'vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import { storeToRefs } from 'pinia';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { useUserStore } from '@/stores/user-store.ts';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import { dateFormatStrings, defaultSlotDuration } from '@/definitions';
-import { useI18n } from 'vue-i18n';
-import { useCalendarStore } from '@/stores/calendar-store.ts';
 import BubbleSelect from '@/elements/BubbleSelect.vue';
-import { useScheduleStore } from '@/stores/schedule-store.ts';
-import { dayjsKey } from '@/keys';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
-const call = inject('call');
-const isoWeekdays = inject('isoWeekdays');
+const call = inject(callKey);
+const isoWeekdays = inject(isoWeekdaysKey);
 
 const ftueStore = useFTUEStore();
 const {
@@ -80,29 +33,27 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
-const calendarOptions = computed(() => connectedCalendars.value.map((calendar) => ({
+const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
   value: calendar.id,
 })));
-const durationOptions = [15, 30, 45, 60, 75, 90].map((min) => ({
+const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((min) => ({
   label: `${min} min`,
   value: min,
 }));
-const scheduleDayOptions = isoWeekdays.map((day) => ({
+const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
   value: day.iso,
 }));
-/**
- * @type {Ref<HTMLFormElement>}
- */
-const formRef = ref();
+
+const formRef = ref<HTMLFormElement>();
 
 const schedule = ref({
   name: `${user.data.name}'s Availability`,
   calendar: 0,
   startTime: '09:00',
   endTime: '17:00',
-  duration: defaultSlotDuration,
+  duration: DEFAULT_SLOT_DURATION,
   days: [1, 2, 3, 4, 5],
   details: '',
 });
@@ -130,7 +81,7 @@ const onSubmit = async () => {
     weekdays: schedule.value.days,
     earliest_booking: 1440,
     farthest_booking: 20160,
-    start_date: dj().format(dateFormatStrings.qalendarFullDay),
+    start_date: dj().format(DateFormatStrings.QalendarFullDay),
     details: schedule.value?.details ?? '',
   };
 
@@ -138,8 +89,8 @@ const onSubmit = async () => {
     ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData)
     : await scheduleStore.createSchedule(call, scheduleData);
 
-  if (data?.error) {
-    errorMessage.value = data?.message;
+  if ((data as Error)?.error) {
+    errorMessage.value = (data as Error)?.message;
     isLoading.value = false;
     return;
   }
@@ -175,6 +126,58 @@ onMounted(async () => {
 });
 
 </script>
+
+<template>
+  <div class="content">
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
+      <div class="column">
+        <text-input name="scheduleName" v-model="schedule.name" required>{{ t('ftue.scheduleName') }}</text-input>
+        <div class="pair">
+        <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
+        <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
+        </div>
+        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
+      </div>
+      <div class="column">
+        <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>
+          {{ t('label.selectCalendar') }}
+        </select-input>
+        <select-input name="duration" v-model="schedule.duration" :options="durationOptions" required>
+          {{ t('label.slotLength') }}
+        </select-input>
+        <div class="scheduleInfo">{{
+            t('text.recipientsCanScheduleBetween', {
+              duration: duration,
+              earliest: '24 hours',
+              farthest: '2 weeks',
+            })
+          }}
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="buttons">
+    <secondary-button
+      class="btn-back"
+      :title="t('label.back')"
+      v-if="hasPreviousStep"
+      :disabled="isLoading"
+      @click="previousStep()"
+    >
+      {{ t('label.back') }}
+    </secondary-button>
+    <primary-button
+      class="btn-continue"
+      :title="t('label.continue')"
+      v-if="hasNextStep"
+      @click="onSubmit()"
+      :disabled="isLoading"
+    >
+      {{ t('label.continue') }}
+    </primary-button>
+  </div>
+</template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 

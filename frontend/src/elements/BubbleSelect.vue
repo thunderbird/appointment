@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { IsoWeekdayOption } from "@/models";
+import { SelectOption } from "@/models";
 
 // component properties
 interface Props {
-  options: IsoWeekdayOption[];
+  options: SelectOption[];
 };
 defineProps<Props>();
 
-const model = defineModel<string[]>({ default: [] });
+const model = defineModel<number[]>({ default: [] });
 
 /**
  * Adds or removes the option value from the model.
  * There's probably a better way to do this lol!
  * @param option
  */
-const toggleBubble = (option: IsoWeekdayOption) => {
+const toggleBubble = (option: SelectOption) => {
   // Detect what our current state is
   const val = model.value.indexOf(option.value);
 

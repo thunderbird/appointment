@@ -1,3 +1,18 @@
+<script setup lang="ts">
+// component properties
+import { TooltipPosition } from '@/definitions';
+
+// component properties
+interface Props {
+  alt?: string;
+  position?: TooltipPosition;
+};
+withDefaults(defineProps<Props>(), {
+  alt: '',
+  position: TooltipPosition.Bottom,
+})
+</script>
+
 <template>
   <div class="tooltip" :aria-label="alt">
     <div class="tooltip-container">
@@ -12,19 +27,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-// component properties
-import { tooltipPosition } from '@/definitions';
-
-defineProps({
-  alt: String, // Tooltip text
-  position: {
-    type: tooltipPosition,
-    default: tooltipPosition.bottom,
-  },
-});
-</script>
 
 <style scoped>
 .tooltip {
