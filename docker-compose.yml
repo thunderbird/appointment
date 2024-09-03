@@ -53,6 +53,8 @@ services:
 
   mailpit:
     image: axllent/mailpit
+    environment:
+      - MP_SMTP_AUTH_ALLOW_INSECURE=true
     ports:
       - 8025:8025 # Web UI
       - 1025:1024 # SMTP

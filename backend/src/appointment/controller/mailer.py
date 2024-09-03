@@ -97,10 +97,10 @@ class Mailer:
                 a.mime_main,
                 a.mime_sub,
                 cid=f'<{a.filename}>',
-                filename=a.filename
+                filename=a.filename,
             )
 
-        return message.as_string().encode('utf-8')
+        return message
 
     def send(self):
         """actually send the email"""
@@ -131,12 +131,13 @@ class Mailer:
             else:
                 server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
             # now send email
-            server.sendmail(self.sender, self.to, self.build())
+            server.send_message(self.build())
         except Exception as e:
             # sending email was not possible
             logging.error('[mailer.send] An error occurred on sending email: ' + str(e))
             if os.getenv('SENTRY_DSN'):
                 sentry_sdk.capture_exception(e)
+            raise e
         finally:
             if server:
                 server.quit()
