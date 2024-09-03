@@ -75,9 +75,16 @@ const signUp = async () => {
 
   isLoading.value = true;
   loginError.value = '';
-  const { data }: BooleanResponse = await call('waiting-list/join').post({
+  const { data, error }: BooleanResponse = await call('waiting-list/join').post({
     email: email.value,
   }).json();
+
+  if (error?.value) {
+    // Handle error
+    loginError.value = (data?.value as Exception)?.detail[0]?.msg;
+    isLoading.value = false;
+    return;
+  }
 
   if (!data.value) {
     loginError.value = t('waitingList.signUpAlreadyExists');
