@@ -198,7 +198,7 @@ resource "aws_cloudfront_function" "rewrite" {
   async function handler(event) {
     const request = event.request;
     const apiPath = "/api/v1";
-    const ignorePaths = ['/fxa', '/assets', '/appointment_logo.svg'];
+    const ignorePaths = ['/fxa', '/assets', '/appointment_logo.svg', '/sitemap.txt'];
     const pathCheckFn = (path) => request.uri.startsWith(path);
 
     // If our api path is the first thing that's found in the uri then remove it from the uri.
