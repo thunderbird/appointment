@@ -131,7 +131,7 @@ class Mailer:
             else:
                 server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
             # now send email
-            server.send_message(self.build())
+            server.send_message(self.build(), to_addrs=self.to)
         except Exception as e:
             # sending email was not possible
             logging.error('[mailer.send] An error occurred on sending email: ' + str(e))
