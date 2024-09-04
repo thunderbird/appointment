@@ -56,14 +56,6 @@ class TestGeneral:
         assert response.status_code == 401
         response = with_client.get('/rmt/cal/1/' + DAY1 + '/' + DAY5)
         assert response.status_code == 401
-        response = with_client.post('/apmt')
-        assert response.status_code == 401
-        response = with_client.get('/apmt/1')
-        assert response.status_code == 401
-        response = with_client.put('/apmt/1')
-        assert response.status_code == 401
-        response = with_client.delete('/apmt/1')
-        assert response.status_code == 401
         response = with_client.post('/rmt/sync')
         assert response.status_code == 401
         response = with_client.get('/account/download')

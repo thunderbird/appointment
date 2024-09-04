@@ -52,15 +52,3 @@ class TestProfile:
         assert response.status_code == 200, response.text
         url_new = response.json()['url']
         assert url_old != url_new
-
-    def test_signed_short_link_verification(self, with_client):
-        """Tests our signed url functionality is working"""
-        response = with_client.get('/me/signature', headers=auth_headers)
-        assert response.status_code == 200, response.text
-        url = response.json()['url']
-        assert url
-        response = with_client.post('/verify/signature', json={'url': url})
-        assert response.status_code == 200, response.text
-        assert response.json()
-        response = with_client.post('/verify/signature', json={'url': url + 'evil'})
-        assert response.status_code == 400, response.text

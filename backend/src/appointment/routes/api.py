@@ -134,15 +134,6 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
     return True
 
 
-@router.post('/verify/signature', deprecated=True)
-def verify_signature(url: str = Body(..., embed=True), db: Session = Depends(get_db)):
-    """Verify a signed short link"""
-    if repo.subscriber.verify_link(db, url):
-        return True
-
-    raise validation.InvalidLinkException()
-
-
 @router.post('/cal', response_model=schemas.CalendarOut)
 def create_my_calendar(
     calendar: schemas.CalendarConnection,
@@ -400,93 +391,6 @@ def read_remote_events(
         e.calendar_title = db_calendar.title
         e.calendar_color = db_calendar.color
     return events
-
-
-@router.post('/apmt', response_model=schemas.Appointment, deprecated=True)
-def create_my_calendar_appointment(
-    a_s: schemas.AppointmentSlots, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
-):
-    """endpoint to add a new appointment with slots for a given calendar"""
-    if not repo.calendar.exists(db, calendar_id=a_s.appointment.calendar_id):
-        raise validation.CalendarNotFoundException()
-    if not repo.calendar.is_owned(db, calendar_id=a_s.appointment.calendar_id, subscriber_id=subscriber.id):
-        raise validation.CalendarNotAuthorizedException()
-    if not repo.calendar.is_connected(db, calendar_id=a_s.appointment.calendar_id):
-        raise validation.CalendarNotConnectedException()
-    if (
-        a_s.appointment.meeting_link_provider == MeetingLinkProviderType.zoom
-        and subscriber.get_external_connection(ExternalConnectionType.zoom) is None
-    ):
-        raise validation.ZoomNotConnectedException()
-    return repo.appointment.create(db=db, appointment=a_s.appointment, slots=a_s.slots)
-
-
-@router.get('/apmt/{id}', response_model=schemas.Appointment, deprecated=True)
-def read_my_appointment(id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    """endpoint to get an appointment from db by id"""
-    db_appointment = repo.appointment.get(db, appointment_id=id)
-
-    if db_appointment is None:
-        raise validation.AppointmentNotFoundException()
-    if not repo.appointment.is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
-        raise validation.AppointmentNotAuthorizedException()
-
-    return db_appointment
-
-
-@router.put('/apmt/{id}', response_model=schemas.Appointment, deprecated=True)
-def update_my_appointment(
-    id: int,
-    a_s: schemas.AppointmentSlots,
-    db: Session = Depends(get_db),
-    subscriber: Subscriber = Depends(get_subscriber),
-):
-    """endpoint to update an existing appointment with slots"""
-    db_appointment = repo.appointment.get(db, appointment_id=id)
-
-    if db_appointment is None:
-        raise validation.AppointmentNotFoundException()
-    if not repo.appointment.is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
-        raise validation.AppointmentNotAuthorizedException()
-
-    return repo.appointment.update(db=db, appointment=a_s.appointment, slots=a_s.slots, appointment_id=id)
-
-
-@router.delete('/apmt/{id}', response_model=schemas.Appointment, deprecated=True)
-def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    """endpoint to remove an appointment from db"""
-    db_appointment = repo.appointment.get(db, appointment_id=id)
-
-    if db_appointment is None:
-        raise validation.AppointmentNotFoundException()
-    if not repo.appointment.is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
-        raise validation.AppointmentNotAuthorizedException()
-
-    return repo.appointment.delete(db=db, appointment_id=id)
-
-
-@router.get('/apmt/public/{slug}', response_model=schemas.AppointmentOut, deprecated=True)
-def read_public_appointment(slug: str, db: Session = Depends(get_db)):
-    """endpoint to retrieve an appointment from db via public link and only expose necessary data"""
-    a = repo.appointment.get_public(db, slug=slug)
-    if a is None:
-        raise validation.AppointmentNotFoundException()
-    s = repo.subscriber.get_by_appointment(db=db, appointment_id=a.id)
-    if s is None:
-        raise validation.SubscriberNotFoundException()
-    slots = [
-        schemas.SlotOut(id=sl.id, start=sl.start, duration=sl.duration, attendee_id=sl.attendee_id) for sl in a.slots
-    ]
-    return schemas.AppointmentOut(
-        id=a.id,
-        title=a.title,
-        details=a.details,
-        slug=a.slug,
-        owner_name=s.name,
-        slots=slots,
-        slot_duration=slots[0].duration if len(slots) > 0 else 0,
-        booking_confirmation=False
-    )
 
 
 @router.get('/apmt/serve/ics/{slug}/{slot_id}', response_model=schemas.FileDownload)

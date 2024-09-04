@@ -75,13 +75,14 @@ def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depen
     return repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
 
 
-@router.get('/{id}', response_model=schemas.Schedule, deprecated=True)
+@router.get('/{id}', response_model=schemas.Schedule)
 def read_schedule(
     id: int,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
-    """Gets information regarding a specific schedule"""
+    """Gets information regarding a specific schedule
+    TODO: Currently unused, but we'll need it soon."""
     schedule = repo.schedule.get(db, schedule_id=id)
     if schedule is None:
         raise validation.ScheduleNotFoundException()

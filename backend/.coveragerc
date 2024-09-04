@@ -1,0 +1,13 @@
+[run]
+omit =
+    # omit some folders we don't want coverage results for
+    scripts/*
+    src/appointment/migrations/*
+    test/*
+
+[report]
+omit =
+    # omit some folders we don't want coverage results for
+    scripts/*
+    src/appointment/migrations/*
+    test/*

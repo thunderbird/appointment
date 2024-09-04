@@ -162,7 +162,7 @@ def server():
                 logging.warning(f"Use of deprecated route: `{request.scope['route'].path}`!")
             elif app_env == APP_ENV_TEST:
                 # Stale test runtime error
-                # raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
+                raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
                 # Just log for this PR, we'll fix it another PR.
                 logging.error(f"Test uses deprecated route: `{request.scope['route'].path}`!")
         return response
