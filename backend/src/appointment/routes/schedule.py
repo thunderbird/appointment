@@ -120,24 +120,6 @@ def update_schedule(
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
 
-@router.post("/public/url")
-def get_signed_url_from_slug(
-    schedule_slug: schemas.ScheduleSlug,
-    db: Session = Depends(get_db),
-) -> dict:
-    schedule = repo.schedule.get_by_slug(db, schedule_slug.slug)
-    if not schedule:
-        raise validation.ScheduleNotFoundException()
-
-    owner = schedule.owner
-    if not owner:
-        raise validation.ScheduleNotFoundException()
-
-    return {
-        'url': signed_url_by_subscriber(owner)
-    }
-
-
 @router.post('/public/availability', response_model=schemas.AppointmentOut)
 def read_schedule_availabilities(
     subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
