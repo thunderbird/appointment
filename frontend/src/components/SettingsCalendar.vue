@@ -113,12 +113,12 @@ const disconnectCalendar = async (id: number) => {
 const syncCalendars = async () => {
   loading.value = true;
 
-  const oldCount = calendarStore.calendars.length;
+  const oldCount = calendarStore?.calendars?.length ?? 0;
 
   await calendarStore.syncCalendars(call);
   await refreshData();
 
-  const newCount = calendarStore.calendars.length;
+  const newCount = calendarStore?.calendars?.length ?? 0;
 
   sendMetrics(MetricEvents.DisconnectCalendar, { oldCount, newCount });
 };
