@@ -1,6 +1,7 @@
 import logging
 
 import requests
+import sentry_sdk
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -46,6 +47,7 @@ def fxa_process(
                 except MissingRefreshTokenException:
                     logging.warning("Subscriber doesn't have refresh token.")
                 except requests.exceptions.HTTPError as ex:
+                    sentry_sdk.capture_exception(ex)
                     logging.error(f'Error logging out user: {ex.response}')
             case 'https://schemas.accounts.firefox.com/event/profile-change':
                 if event_data.get('email') is not None:
@@ -73,11 +75,13 @@ def fxa_process(
                 except MissingRefreshTokenException:
                     logging.warning("Subscriber doesn't have refresh token.")
                 except requests.exceptions.HTTPError as ex:
+                    sentry_sdk.capture_exception(ex)
                     logging.error(f'Error logging out user: {ex.response}')
             case 'https://schemas.accounts.firefox.com/event/delete-user':
                 try:
                     data.delete_account(db, subscriber)
                 except AccountDeletionSubscriberFail as ex:
+                    sentry_sdk.capture_exception(ex)
                     logging.error(f'Account deletion webhook failed: {ex.message}')
 
             case _:
