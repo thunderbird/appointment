@@ -49,6 +49,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
       <span v-if="required && model?.length === 0" class="required">*</span>
     </span>
     <input
+      class="tbpro-input"
       v-model="model"
       :type="type"
       :id="name"
@@ -66,11 +67,13 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 </template>
 
 <style scoped>
+@import '@/assets/styles/mixins.pcss';
+
 .wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--tbpro-text);
+  color: var(--colour-ti-base);
   font-family: 'Inter', 'sans-serif';
   font-size: var(--txt-input);
   line-height: var(--line-height-input);
@@ -85,7 +88,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 .help-label {
   visibility: hidden;
   display: flex;
-  color: var(--critical-default);
+  color: var(--colour-danger-default);
 
   width: 100%;
   min-height: 0.9375rem;
@@ -98,23 +101,23 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 }
 
 .required {
-  color: var(--critical);
+  color: var(--colour-ti-critical);
 }
 
-input {
+.tbpro-input {
+  --colour-btn-border: var(--colour-neutral-border);
   width: 100%;
 
-  background-color: var(--tbpro-input);
-  border-color: var(--tbpro-input-border);
+  background-color: var(--colour-neutral-base);
   border-radius: var(--border-radius);
+  @mixin faded-border var(--colour-btn-border);
 
   &:hover:enabled {
-    border-color: var(--tbpro-input-hover-border);
+    --colour-btn-border: var(--colour-neutral-border-intense);
   }
 
   &:active:enabled {
-    background-color: var(--tbpro-select-open);
-    border-color: var(--tbpro-select-open-border);
+    --colour-btn-border: var(--colour-neutral-border-intense);
   }
 
   &:focus:enabled {
@@ -122,7 +125,7 @@ input {
   }
 
   &:invalid {
-    border-color: var(--critical);
+    --colour-btn-border: var(--colour-ti-critical);
   }
 
   &:disabled {
@@ -131,7 +134,12 @@ input {
   }
 
   &::placeholder {
-    color: var(--tbpro-text-muted);
+    color: var(--colour-ti-muted);
+  }
+}
+.dark {
+  .tbpro-input {
+    background-color: var(--colour-neutral-lower);
   }
 }
 </style>

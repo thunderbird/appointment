@@ -64,16 +64,16 @@ button {
 
   width: 2rem;
   height: 2rem;
-  border: 0.0625rem solid var(--surface-border);
+  border: 0.0625rem solid var(--colour-neutral-border);
   border-radius: 100%;
-  background-color: var(--surface-subtle);
+  background-color: var(--colour-neutral-subtle);
   font-weight: 700;
   line-height: 150%;
-  color: var(--tbpro-text-muted);
+  color: var(--colour-ti-muted);
 }
 .selected {
-  background-color: var(--tbpro-primary);
-  border-color: var(--tbpro-primary-pressed);
-  color: var(--neutral);
+  background-color: var(--colour-service-primary);
+  border-color: var(--colour-service-primary-pressed);
+  color: var(--colour-neutral-base);
 }
 </style>

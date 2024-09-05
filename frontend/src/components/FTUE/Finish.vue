@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import CopyIcon from "@/tbpro/icons/CopyIcon.vue";
 
 const { t } = useI18n();
 const call = inject(callKey);
@@ -64,12 +65,13 @@ const copyLink = async () => {
 
 <template>
   <div class="content">
-    <img src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
+    <img class="is-dark-mode" src="@/assets/svg/ftue-finish-dark.svg" :alt="t('ftue.finishAltText')"/>
+    <img class="is-light-mode" src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
     <div class="copy">
       <p>{{ t('ftue.finishScreenText') }}</p>
       <link-button class="my-link-btn" @click="copyLink" :tooltip="myLinkTooltip" :force-tooltip="myLinkShow">
         <template v-slot:icon>
-          <img :alt="t('label.copyLink')" src="@/assets/svg/icons/copy.svg"/>
+          <copy-icon/>
         </template>
         {{ myLink }}
       </link-button>
@@ -89,6 +91,24 @@ const copyLink = async () => {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+.is-light-mode {
+  display: block;
+}
+
+.is-dark-mode {
+  display: none;
+}
+
+.dark {
+  .is-light-mode {
+    display: none;
+  }
+
+  .is-dark-mode {
+    display: block;
+  }
+}
 
 .content {
   display: flex;
@@ -113,7 +133,7 @@ const copyLink = async () => {
 }
 
 .link {
-  color: var(--tbpro-primary);
+  color: var(--colour-service-accent-1);
   text-decoration: underline;
   border: none;
 

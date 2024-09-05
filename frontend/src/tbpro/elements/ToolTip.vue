@@ -33,9 +33,9 @@ withDefaults(defineProps<Props>(), {
   position: absolute;
   text-wrap: wrap;
   border-radius: 0.25rem;
-  background-color: var(--surface-subtle);
+  background-color: var(--colour-neutral-subtle);
   font-family: 'Inter', sans-serif;
-  color: var(--tbpro-text);
+  color: var(--colour-ti-base);
   z-index: 100;
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.14), 0px 0px 2px 0px rgba(0, 0, 0, 0.12);
 }
@@ -58,7 +58,7 @@ withDefaults(defineProps<Props>(), {
 
 .beak {
   position: absolute;
-  color: var(--surface-subtle);
+  color: var(--colour-neutral-subtle);
 }
 
 .pos-none {

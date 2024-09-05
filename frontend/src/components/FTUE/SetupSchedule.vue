@@ -13,7 +13,7 @@ import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import BubbleSelect from '@/elements/BubbleSelect.vue';
+import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -180,16 +180,24 @@ onMounted(async () => {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+@import '@/assets/styles/mixins.pcss';
 
 form {
+  --colour-background: var(--colour-neutral-base);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   border-radius: 0.5625rem;
-  background-color: color-mix(in srgb, var(--surface-base) 65%, transparent);
+  @mixin faded-background var(--colour-background);
   width: 100%;
   height: 100%;
   padding: 1rem;
+}
+
+.dark {
+  .card {
+    --colour-background: var(--colour-neutral-lower);
+  }
 }
 
 .bubbleSelect {
@@ -209,14 +217,22 @@ form {
 }
 
 .scheduleInfo {
+  --colour-background: var(--colour-neutral-raised);
   padding: 1rem;
   border-radius: 0.3565625rem;
-  border: 0.0625rem solid var(--surface-border);
-  background-color: var(--surface-raised);
+  border: 0.0625rem solid var(--colour-neutral-border);
+  background-color: var(--colour-background);
   font-size: 0.6875rem;
   line-height: 163%;
   font-weight: 400;
 }
+
+.dark {
+  .scheduleInfo {
+    --colour-background: var(--colour-neutral-lower);
+  }
+}
+
 .buttons {
   display: flex;
   width: 100%;

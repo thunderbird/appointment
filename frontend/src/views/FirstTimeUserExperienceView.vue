@@ -30,18 +30,6 @@ const refresh = inject(refreshKey);
 
 onMounted(async () => {
   await refresh();
-
-  // If they're setup, boot them dashboard
-  if (user.data.isSetup) {
-    if (getPreferredTheme() === ColorSchemes.Dark) {
-      document.documentElement.classList.add('dark');
-    }
-    await router.replace('dashboard');
-    return;
-  }
-
-  // Force light-mode
-  document.documentElement.classList.remove('dark');
 });
 </script>
 
@@ -100,7 +88,7 @@ onMounted(async () => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #727375;
+  background-color: var(--colour-neutral-border-intense);
   align-items: center;
   justify-content: center;
 }
@@ -121,7 +109,7 @@ onMounted(async () => {
 }
 
 #ftue-title {
-  color: var(--tbpro-text);
+  color: var(--colour-ti-base);
   font-family: 'Inter', 'sans-serif';
   font-weight: 400;
   font-size: 1.375rem;
@@ -130,17 +118,24 @@ onMounted(async () => {
 
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
+  --background-color: transparent;
+  --background: url('@/assets/svg/ftue-background.svg');
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: white;
-  background-image: url('@/assets/svg/ftue-background.svg');
+  background-color: var(--background-color);
+  background-image: var(--background);
   background-size: cover;
   background-repeat: no-repeat;
   border-radius: 0.75rem;
   padding: 1rem 1rem 0;
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+.dark .modal {
+  --background-color: transparent;
+  --background: url('@/assets/svg/ftue-background-dark.svg');
 }
 
 .modal:before {
@@ -173,7 +168,7 @@ onMounted(async () => {
   padding-bottom: 1rem;
 
   a {
-    color: var(--tbpro-primary);
+    color: var(--colour-service-primary-pressed);
     font-size: 0.75rem;
     line-height: 1.5rem;
   }
@@ -232,4 +227,5 @@ onMounted(async () => {
     padding-bottom: 0;
   }
 }
+
 </style>

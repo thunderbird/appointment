@@ -38,6 +38,8 @@ withDefaults(defineProps<Props>(), {
 </template>
 
 <style scoped>
+@import '@/assets/styles/mixins.pcss';
+
 .tooltip {
   transform: translate(0, -100%);
   pointer-events: none;
@@ -50,41 +52,39 @@ button:hover > .tooltip,
 }
 
 .primary {
-  background-color: var(--tbpro-primary);
-  border-color: var(--tbpro-primary-hover);
-  color: var(--neutral);
+  background-color: var(--colour-service-primary);
+  border-color: var(--colour-service-primary-hover);
+  color: var(--colour-neutral-base);
 
   &:hover:enabled {
-    background-color: var(--tbpro-primary-hover);
-    border-color: var(--success-pressed);
+    background-color: var(--colour-service-primary-hover);
+    border-color: var(--colour-success-pressed);
   }
 
   &:active:enabled {
-    background-color: var(--tbpro-primary-pressed);
-    border-color: var(--tbpro-primary-pressed);
+    background-color: var(--colour-service-primary-pressed);
+    border-color: var(--colour-service-primary-pressed);
     box-shadow: none;
   }
 }
 
 .secondary {
-  background-color: var(--tbpro-secondary);
-  border-color: var(--tbpro-secondary-border);
-  color: var(--tbpro-text);
+  background-color: var(--colour-neutral-subtle);
+  color: var(--colour-ti-base);
 
   &:hover:enabled {
     box-shadow: 0 0.25rem 0.125rem -0.1875rem #0000001A;
   }
 
   &:active:enabled {
-    background-color: var(--tbpro-secondary-pressed);
-    border-color: var(--tbpro-secondary-pressed-border);
-    color: var(--neutral);
+    background-color: var(--colour-neutral-border);
+    border-color: var(--colour-neutral-border);
   }
 }
 
 .link {
   background-color: transparent;
-  color: var(--tbpro-primary);
+  color: var(--colour-service-primary);
   text-decoration: underline;
   box-shadow: none;
   border: none;
@@ -98,13 +98,14 @@ button:hover > .tooltip,
 }
 
 button {
+  --colour-btn-border: var(--colour-neutral-border);
   display: flex;
 
   justify-content: center;
   align-items: center;
 
-  border: solid 0.063rem;
   border-radius: var(--border-radius);
+  @mixin faded-border var(--colour-btn-border);
   box-shadow: 0 0.375rem 0.188rem -0.25rem #152F3C4D;
   font-family: 'Inter', 'sans-serif';
   font-size: var(--txt-input); /* 13px */
@@ -127,15 +128,15 @@ button {
   }
 
   &:focus {
-    outline: 0.125rem solid var(--tbpro-primary);
+    outline: 0.125rem solid var(--colour-service-primary);
     outline-offset: 0.0625rem;
     box-shadow: none;
   }
 
   &:disabled {
-    background-color: var(--tbpro-disabled);
-    border-color: var(--tbpro-disabled);
-    color: var(--tbpro-text-muted);
+    background-color: var(--colour-neutral-border);
+    border-color: var(--colour-neutral-border);
+    color: var(--colour-ti-muted);
     box-shadow: none;
     cursor: not-allowed;
   }

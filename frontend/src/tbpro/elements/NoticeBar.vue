@@ -63,24 +63,31 @@ const isError = props.type === 'error';
   padding: 0.5625rem 0.5625rem 0.5625rem 1.75rem;
 }
 .info {
-  background-color: var(--tbpro-soft);
-  border-color: var(--tbpro-primary);
-  color: var(--tbpro-primary-pressed);
+  background-color: var(--colour-service-soft);
+  border-color: var(--colour-service-primary);
+  color: var(--colour-service-primary-pressed);
 }
 .success {
-  background-color: var(--success-soft);
-  border-color: var(--success);
-  color: var(--success-pressed);
+  background-color: var(--colour-success-soft);
+  border-color: var(--colour-success-default);
+  color: var(--colour-ti-success);
 }
 .warning {
-  background-color: var(--warning-background);
-  border-color: var(--warning);
-  color: var(--yellow-900);
+  background-color: var(--colour-warning-soft);
+  border-color: var(--colour-warning-default);
+  color: var(--colour-ti-warning);
 }
 .error {
-  background-color: var(--critical-soft);
-  border-color: var(--critical-default);
-  color: var(--critical-pressed);
+  background-color: var(--colour-danger-soft);
+  border-color: var(--colour-danger-default);
+  color: var(--colour-danger-pressed);
+}
+
+.dark {
+  .info {
+    color: var(--colour-service-accent-1);
+    border-color: var(--colour-service-accent-1);
+  }
 }
 
 @media (--md) {
