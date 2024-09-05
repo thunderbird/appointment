@@ -78,7 +78,8 @@ const connectZoom = async () => {
     <div class="cards">
       <div class="card zoom" @click="connectZoom">
         <div class="chip">Recommended</div>
-        <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" :alt="t('heading.zoom')"/>
+        <img class="is-light-mode zoom-logo" src="@/assets/svg/zoom-logo.svg" :alt="t('heading.zoom')"/>
+        <img class="is-dark-mode zoom-logo" src="@/assets/svg/zoom-logo-dark.svg" :alt="t('heading.zoom')"/>
         <p class="zoom-description">
           {{ t('text.connectZoom') }}
         </p>

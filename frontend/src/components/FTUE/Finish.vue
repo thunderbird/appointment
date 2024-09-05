@@ -92,24 +92,6 @@ const copyLink = async () => {
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-.is-light-mode {
-  display: block;
-}
-
-.is-dark-mode {
-  display: none;
-}
-
-.dark {
-  .is-light-mode {
-    display: none;
-  }
-
-  .is-dark-mode {
-    display: block;
-  }
-}
-
 .content {
   display: flex;
   flex-direction: column;
@@ -152,6 +134,10 @@ const copyLink = async () => {
 }
 
 @media (--md) {
+  .content {
+    margin-top: -6rem;
+    gap: 0;
+  }
   .copy {
     width: 60%;
   }

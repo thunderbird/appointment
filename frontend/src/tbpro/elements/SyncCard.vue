@@ -125,15 +125,17 @@ input {
     outline-color: var(--colour-highlight);
   }
 
-  &:checked {
+  &:checked, &:checked:hover, &:checked:focus {
+    background-color: var(--colour-highlight);
     border-color: var(--colour-highlight);
-    color: var(--colour-highlight);
+    color: var(--colour-neutral-raised);
   }
 }
 
 .select-all {
   margin-left: auto;
   margin-right: auto;
+  top: 2.0625rem;
 }
 
 @media (--md) {

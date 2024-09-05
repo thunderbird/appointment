@@ -180,3 +180,22 @@
 .page-ftue {
   font-family: 'Inter', 'sans-serif';
 }
+
+
+.is-light-mode {
+  display: block;
+}
+
+.is-dark-mode {
+  display: none;
+}
+
+.dark {
+  .is-light-mode {
+    display: none;
+  }
+
+  .is-dark-mode {
+    display: block;
+  }
+}
