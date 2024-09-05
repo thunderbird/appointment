@@ -4,6 +4,12 @@ html {
    */
 
   /*
+   * Generic Colours
+   * Prefer the named colours over these!
+   */
+  --colour-neutral-900: #26272A;
+
+  /*
    * Neutral
    * Applied frequently for backgrounds, surfaces, dividers, and outlines.
    */

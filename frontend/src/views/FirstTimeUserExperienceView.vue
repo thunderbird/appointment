@@ -17,6 +17,7 @@ import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
+import ScheduleView from "@/views/ScheduleView.vue";
 
 const router = useRouter();
 const user = useUserStore();
@@ -34,6 +35,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <schedule-view></schedule-view>
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
@@ -75,7 +77,12 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
+<style>
+/* Ensure you can't scroll the background! */
+body {
+    overflow: hidden;
+}
+</style>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -87,8 +94,8 @@ onMounted(async () => {
   z-index: 55;
   width: 100vw;
   height: 100vh;
-  overflow: visible;
-  background-color: color-mix(in srgb, var(--colour-neutral-border-intense) 75%, black);
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--colour-neutral-900) 60%, transparent);
   align-items: center;
   justify-content: center;
 }
