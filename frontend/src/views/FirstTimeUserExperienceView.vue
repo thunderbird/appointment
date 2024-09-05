@@ -87,8 +87,8 @@ onMounted(async () => {
   z-index: 55;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
-  background-color: var(--colour-neutral-border-intense);
+  overflow: visible;
+  background-color: color-mix(in srgb, var(--colour-neutral-border-intense) 75%, black);
   align-items: center;
   justify-content: center;
 }
@@ -118,7 +118,7 @@ onMounted(async () => {
 
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
-  --background-color: transparent;
+  --background-color: var(--colour-neutral-raised);
   --background: url('@/assets/svg/ftue-background.svg');
   position: relative;
   width: 100%;
@@ -134,20 +134,27 @@ onMounted(async () => {
 }
 
 .dark .modal {
-  --background-color: transparent;
   --background: url('@/assets/svg/ftue-background-dark.svg');
 }
 
-.modal:before {
+.modal::before {
   content: '';
   position: absolute;
   inset: -4px;
-  border-radius: 12px;
-  filter: blur(64px);
   margin: 50% 5% 0;
   opacity: 0.8;
   z-index: -1;
-  background: linear-gradient(118.89deg, #A3ECE3 -1.91%, #03AFD7 48.8%, #008080 100.54%);
+  border-radius: 9px;
+  background: linear-gradient(119deg, #A3ECE3 -1.91%, #03AFD7 48.8%, #008080 100.54%);
+  filter: blur(30px);
+}
+
+.dark {
+  .modal::before {
+    border-radius: 9px;
+    background: linear-gradient(119deg, #0B8C86 -1.91%, #1C6395 100.54%);
+    filter: blur(30px);
+  }
 }
 
 .divider {
@@ -155,7 +162,11 @@ onMounted(async () => {
   padding-bottom: 1px;
   border-radius: unset;
   background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
-
+}
+.dark {
+  .divider {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.40) 50%, rgba(255, 255, 255, 0.00) 100%);
+  }
 }
 
 .footer {
@@ -208,7 +219,7 @@ onMounted(async () => {
     width: 50rem; /* 800px */
     height: 37.5rem; /* 600px */
     padding: 2rem 2rem 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .modal-body {
