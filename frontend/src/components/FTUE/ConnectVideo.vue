@@ -190,6 +190,12 @@ const connectZoom = async () => {
   text-transform: uppercase;
 }
 
+.dark {
+  .chip {
+    color: var(--colour-neutral-base);
+  }
+}
+
 .zoom-logo {
   margin: auto;
   width: 8.25rem;

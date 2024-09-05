@@ -87,7 +87,7 @@ button:hover > .tooltip,
   color: var(--colour-service-primary);
   text-decoration: underline;
   box-shadow: none;
-  border: none;
+  border: none !important;
 
   .text {
     padding: 0;
