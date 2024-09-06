@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import {
+  computed, onMounted, ref, watch,
+} from 'vue';
 import { SettingsSections } from '@/definitions';
 import { enumToObject } from '@/utils';
 import { useI18n } from 'vue-i18n';
@@ -14,19 +16,49 @@ import {
 } from '@tabler/icons-vue';
 import SettingsAccount from '@/components/SettingsAccount.vue';
 import SettingsConnections from '@/components/SettingsConnections.vue';
+import { useUserStore } from '@/stores/user-store';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
-const sections = enumToObject(SettingsSections);
+const sections = ref(enumToObject(SettingsSections));
 // Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
-const activeView = computed<number>(() => (route.params.view && sections[route.params.view as string] ? sections[route.params.view as string] : SettingsSections.General));
+const activeView = computed<number>(() => (route.params.view && sections.value[route.params.view as string] ? sections.value[route.params.view as string] : SettingsSections.General));
+const user = useUserStore();
 
 // menu navigation of different views
 const show = (key: string) => {
   router.push({ name: route.name, params: { view: key } });
 };
+
+/**
+ * If the user isn't setup, redirect them to account
+ * @param view
+ */
+const redirectSetupUsers = (view: string) => {
+  if (!view) {
+    return;
+  }
+  if (view !== 'account') {
+    router.replace({ name: 'settings', params: { view: 'account' } });
+  }
+};
+
+onMounted(() => {
+  if (!user?.data.isSetup) {
+    // If we're not setup watch (and initially apply) the view param
+    watch(() => route.params.view, (val) => {
+      redirectSetupUsers(val as string);
+    });
+    redirectSetupUsers(route.params.view as string);
+
+    // Restrict settings to just the account settings
+    sections.value = {
+      account: SettingsSections.Account,
+    };
+  }
+});
 </script>
 
 <template>

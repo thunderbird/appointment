@@ -99,7 +99,11 @@ def zoom_callback(
     ):
         repo.external_connection.create(db, external_connection_schema)
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/account")
+    # Redirect non-setup subscribers back to the setup page
+    if not subscriber.is_setup:
+        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/connectedAccounts")
 
 
 @router.post('/disconnect')

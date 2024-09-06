@@ -66,32 +66,34 @@ def google_callback(
 ):
     """Callback for google to redirect the user back to us with a code.
     This is called directly, and is not an api function!"""
+    subscriber_id = request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
+    subscriber = repo.subscriber.get(db, subscriber_id)
+    # Not the end of the world if someone gets redirected to /calendar
+    # because that will redirect them to setup if they're not setup!
+    is_setup = subscriber.is_setup if subscriber else True
 
     if error is not None:
         # Specific error for cancelling the flow
         if error == 'access_denied':
-            return google_callback_error(l10n('google-connect-to-continue'))
-        return google_callback_error(l10n('google-sync-fail'))
+            return google_callback_error(is_setup, l10n('google-connect-to-continue'))
+        return google_callback_error(is_setup, l10n('google-sync-fail'))
 
     try:
         creds = google_client.get_credentials(code)
     except GoogleScopeChanged:
-        return google_callback_error(l10n('google-scope-changed'))
+        return google_callback_error(is_setup, l10n('google-scope-changed'))
     except GoogleInvalidCredentials:
-        return google_callback_error(l10n('google-invalid-creds'))
+        return google_callback_error(is_setup, l10n('google-invalid-creds'))
 
     if SESSION_OAUTH_STATE not in request.session or request.session[SESSION_OAUTH_STATE] != state:
-        return google_callback_error(l10n('google-auth-fail'))
-
-    subscriber_id = request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
-    subscriber = repo.subscriber.get(db, subscriber_id)
+        return google_callback_error(is_setup, l10n('google-auth-fail'))
 
     # Clear session keys
     request.session.pop(SESSION_OAUTH_STATE)
     request.session.pop(SESSION_OAUTH_SUBSCRIBER_ID)
 
     if subscriber is None:
-        return google_callback_error(l10n('google-auth-fail'))
+        return google_callback_error(is_setup, l10n('google-auth-fail'))
 
     profile = google_client.get_profile(token=creds)
     google_email = profile.get('email')
@@ -99,7 +101,7 @@ def google_callback(
 
     # We need sub, it should always be there, but we should bail if it's not.
     if google_id is None:
-        return google_callback_error(l10n('google-auth-fail'))
+        return google_callback_error(is_setup, l10n('google-auth-fail'))
 
     external_connection = repo.external_connection.get_by_type(
         db, subscriber.id, ExternalConnectionType.google, google_id
@@ -114,7 +116,7 @@ def google_callback(
     )
 
     if len(remainder) > 0:
-        return google_callback_error(l10n('google-only-one'))
+        return google_callback_error(is_setup, l10n('google-only-one'))
 
     # Create or update the external connection
     if not external_connection:
@@ -136,13 +138,21 @@ def google_callback(
 
     # And then redirect back to frontend
     if error_occurred:
-        return google_callback_error(l10n('google-sync-fail'))
+        return google_callback_error(is_setup, l10n('google-sync-fail'))
+
+    # Redirect non-setup subscribers back to the setup page
+    if not is_setup:
+        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")
 
 
-def google_callback_error(error: str):
+def google_callback_error(is_setup: bool, error: str):
     """Call if you encounter an unrecoverable error with the Google callback function"""
+    # Redirect non-setup subscribers back to the setup page
+    if not is_setup:
+        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar?error={error}")
 
 
