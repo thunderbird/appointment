@@ -282,9 +282,19 @@ export type ExceptionDetail = {
   message?: string;
   status?: number;
 }
+export type PydanticExceptionDetail = {
+  ctx: { reason: string },
+  input: string,
+  loc: Array<string>,
+  msg: string,
+  type: string
+}
+export type PydanticException = {
+  detail?: Array<PydanticExceptionDetail>;
+}
 export type Exception = {
   status_code?: number;
-  detail?: { msg: string }[]|ExceptionDetail;
+  detail?: ExceptionDetail | Array<PydanticExceptionDetail>;
   headers?: any[];
 };
 export type Token = {
@@ -346,7 +356,6 @@ export type TableFilter = {
   options: TableFilterOption[];
   fn: (value: string, list: TableDataRow[]) => TableDataRow[];
 };
-
 
 // First Time User Experience State
 export type FtueState = {

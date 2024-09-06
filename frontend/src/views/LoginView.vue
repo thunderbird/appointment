@@ -7,7 +7,14 @@ import {
   dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey,
 } from '@/keys';
 import {
-  BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error,
+  BooleanResponse,
+  AuthUrlResponse,
+  Exception,
+  AuthUrl,
+  Error,
+  PydanticExceptionDetail,
+  ExceptionDetail,
+  PydanticException,
 } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
@@ -54,9 +61,8 @@ onMounted(() => {
   }
 });
 
-const handleFormError = (errObj: Exception) => {
+const handleFormError = (errObj: PydanticException) => {
   const { detail } = errObj;
-  console.log(formRef.value, detail);
   const fields = formRef.value.elements;
 
   detail.forEach((err) => {
@@ -65,7 +71,9 @@ const handleFormError = (errObj: Exception) => {
       fields[name].setCustomValidity(err.ctx.reason);
     }
   });
-  console.log(fields);
+
+  // Finally report it!
+  formRef.value.reportValidity();
 };
 
 /**
@@ -84,8 +92,7 @@ const signUp = async () => {
 
   if (error?.value) {
     // Handle error
-    handleFormError(data.value as Exception);
-    loginError.value = (data?.value as Exception)?.detail[0]?.msg;
+    handleFormError(data.value as PydanticException);
     isLoading.value = false;
     return;
   }
@@ -127,9 +134,7 @@ const login = async () => {
     console.log(error.value, canLogin.value);
     if (error?.value) {
       // Handle error
-      handleFormError(canLogin.value as Exception);
-      // Bleh
-      loginError.value = (canLogin?.value as Exception)?.detail[0]?.msg;
+      handleFormError(canLogin.value as PydanticException);
       isLoading.value = false;
       return;
     }
@@ -155,7 +160,7 @@ const login = async () => {
     const { error, data }: AuthUrlResponse = await call(`fxa_login?${params}`).get().json();
 
     if (error.value) {
-      loginError.value = (data.value as Exception)?.detail[0]?.msg;
+      handleFormError(data.value as PydanticException);
       isLoading.value = false;
       return;
     }
