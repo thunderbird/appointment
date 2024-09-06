@@ -1,0 +1,6 @@
+@define-mixin faded-border $colour {
+  border: 0.0625rem solid color-mix(in srgb, $colour 65%, transparent) !important;
+}
+@define-mixin faded-background $colour {
+  background-color: color-mix(in srgb, $colour 65%, transparent);
+}

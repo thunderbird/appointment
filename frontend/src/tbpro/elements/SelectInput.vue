@@ -32,7 +32,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
       <span v-if="required && (model === null || model === '')" class="required">*</span>
     </span>
     <select
-      class="w-full rounded-md"
+      class="tbpro-select w-full rounded-md"
       v-model="model"
       :id="name"
       :name="name"
@@ -51,11 +51,13 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 </template>
 
 <style scoped>
+@import '@/assets/styles/mixins.pcss';
+
 .wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--tbpro-text);
+  color: var(--colour-ti-base);
   font-family: 'Inter', 'sans-serif';
   font-size: var(--txt-input);
   line-height: var(--line-height-input);
@@ -70,7 +72,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 .help-label {
   visibility: hidden;
   display: flex;
-  color: var(--critical-default);
+  color: var(--colour-ti-critical);
 
   width: 100%;
   min-height: 0.9375rem;
@@ -83,23 +85,29 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 }
 
 .required {
-  color: var(--critical);
+  color: var(--colour-ti-critical);
 }
 
-select {
-  background-color: var(--tbpro-input);
-  border-color: var(--tbpro-input-border);
+.tbpro-select {
+  --colour-select-border: var(--colour-neutral-border);
+  background-color: var(--colour-neutral-base);
+  @mixin faded-border var(--colour-select-border);
   border-radius: var(--border-radius);
-
   font-weight: 400;
 
-  &:hover {
-    border-color: var(--tbpro-input-hover-border);
+
+  &:hover, &:focus {
+    --colour-select-border: var(--colour-neutral-border-intense);
   }
 
   &:active {
-    background-color: var(--tbpro-select-open);
-    border-color: var(--tbpro-select-open-border);
+    background-color: var(--colour-neutral-subtle);
+    --colour-select-border: var(--colour-neutral-border-intense);
+  }
+}
+.dark {
+  .tbpro-select {
+    background-color: var(--colour-neutral-lower);
   }
 }
 </style>

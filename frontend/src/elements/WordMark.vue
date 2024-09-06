@@ -1,8 +1,8 @@
 <template>
   <div class="wrapper">
     <div class="logo"></div>
-    <h1 class="title" aria-label="Thunderbird Appointment.">
-      <span>Thunderbird</span> Appointment
+    <h1 class="title" aria-label="Thunderbird Pro Appointment.">
+      <span>Thunderbird Pro</span> Appointment
     </h1>
   </div>
 </template>
@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
 
-  color: var(--tbpro-primary);
+  color: var(--ti-base);
   font-family: 'Metropolis', sans-serif;
   font-weight: 200;
   font-size: 2rem;
@@ -36,7 +36,7 @@
   background-image: url('@/assets/svg/logo.svg');
   background-size: contain;
   background-repeat: no-repeat;
-  width: 5.375rem;
-  height: 2.25rem;
+  width: 4rem;
+  height: 4rem;
 }
 </style>

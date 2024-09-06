@@ -78,7 +78,8 @@ const connectZoom = async () => {
     <div class="cards">
       <div class="card zoom" @click="connectZoom">
         <div class="chip">Recommended</div>
-        <img class="zoom-logo" src="@/assets/svg/zoom-logo.svg" :alt="t('heading.zoom')"/>
+        <img class="is-light-mode zoom-logo" src="@/assets/svg/zoom-logo.svg" :alt="t('heading.zoom')"/>
+        <img class="is-dark-mode zoom-logo" src="@/assets/svg/zoom-logo-dark.svg" :alt="t('heading.zoom')"/>
         <p class="zoom-description">
           {{ t('text.connectZoom') }}
         </p>
@@ -125,6 +126,7 @@ const connectZoom = async () => {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+@import '@/assets/styles/mixins.pcss';
 
 .content {
   display: flex;
@@ -145,25 +147,32 @@ const connectZoom = async () => {
 }
 
 .card {
+  --colour-background: var(--colour-neutral-base);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   width: 100%;
   padding: 1rem;
   border-radius: 0.5625rem;
-  background-color: color-mix(in srgb, var(--neutral) 65%, transparent);
-  border: 0.0625rem solid color-mix(in srgb, var(--neutral) 65%, transparent);
+  @mixin faded-background var(--colour-background);
+  @mixin faded-border var(--colour-background);
   transition: var(--transition);
 
   &:hover,
   &:focus-within {
-    border-color: var(--teal-700);
+    border-color: var(--colour-service-primary);
     cursor: pointer;
   }
 }
 
+.dark {
+  .card {
+    --colour-background: var(--colour-neutral-lower);
+  }
+}
+
 .card-selected {
-  border-color: var(--teal-700);
+  border-color: var(--colour-service-primary);
   cursor: pointer;
 }
 
@@ -176,10 +185,16 @@ const connectZoom = async () => {
   min-height: 1.0625rem;
   font-size: 0.5625rem;
   font-weight: 700;
-  color: var(--tbpro-text);
-  background-color: var(--tbpro-appointment-seconday);
+  color: var(--colour-ti-base);
+  background-color: var(--colour-service-secondary);
   border-radius: 0.1875rem;
   text-transform: uppercase;
+}
+
+.dark {
+  .chip {
+    color: var(--colour-neutral-base);
+  }
 }
 
 .zoom-logo {
@@ -196,7 +211,7 @@ const connectZoom = async () => {
 }
 
 .skip-text {
-  color: var(--tbpro-primary-pressed);
+  color: var(--colour-service-primary-pressed);
   margin-right: 0;
   margin-left: auto;
   text-transform: uppercase;

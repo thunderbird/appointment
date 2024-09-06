@@ -1,57 +1,247 @@
 html {
-  /* Generic colours */
-  --neutral: #FEFFFF;
-  --neutral-200: #E4E4E7;
-  --neutral-500: #737584;
+  /*
+   * Reference:  https://www.figma.com/design/3pWlMatoNdA2BT3BPVziFL/
+   */
 
-  --teal-700: #008080;
+  /*
+   * Generic Colours
+   * Prefer the named colours over these!
+   */
+  --colour-neutral-900: #26272A;
 
-  --yellow-900: #713F12;
+  /*
+   * Neutral
+   * Applied frequently for backgrounds, surfaces, dividers, and outlines.
+   */
+  --colour-neutral-base: #FEFFFF;
+  --colour-neutral-lower: #F7F7F7;
+  --colour-neutral-raised: var(--colour-neutral-base);
+  --colour-neutral-subtle: var(--colour-neutral-lower);
+  --colour-neutral-border: #E4E4E7;
+  --colour-neutral-border-intense: #91939F;
 
-  --warning: #FACC15;
-  --warning-background: #FEFAE8;
+  /*
+   * Primary
+   * Applied frequently to surfaces highlight actions & information.
+   */
+  --colour-primary-soft: #F0F8FF;
+  --colour-primary-default: #1373D9;
+  --colour-primary-hover: #175FB6;
+  --colour-primary-pressed: #19518F;
 
-  --critical: #DC2626;
-  --critical-default: #991B1B;
-  --critical-pressed: #7F1D1D;
-  --critical-soft: #FEF2F2;
+  /*
+   * Secondary
+   * Applied sparingly to highlight information.
+   */
+  --colour-secondary-soft: #FAF5FF;
+  --colour-secondary-default: #6B21A8;
+  --colour-secondary-hover: #571C87;
+  --colour-secondary-pressed: #3A0764;
 
-  --surface-base: #FEFFFF;
-  --surface-subtle: #F7F7F7;
-  --surface-lower: #F7F7F7;
-  --surface-raised: var(--neutral);
-  --surface-border: var(--neutral-200);
-  --surface-intense: #777580;
+  /*
+   * Success
+   * Applied sparingly to show positive feedback/status.
+   */
+  --colour-success-soft: #F4F9F4;
+  --colour-success-default: #1D783B;
+  --colour-success-hover: #1C5F32;
+  --colour-success-pressed: #194E2C;
 
-  --success: #1D783B;
-  --success-soft: #F4F9F4;
-  --success-pressed: #194E2C;
+  /*
+   * Warning
+   * Applied sparingly to show warning feedback/status.
+   * Notifications/messaging
+   */
+  --colour-warning-soft: #FEFAE8;
+  --colour-warning-default: #FACC15;
+  --colour-warning-hover: #EABD08;
+  --colour-warning-pressed: #CAA204;
 
-  --text-base: #18181B;
-  --text-highlight: #107781;
+  /*
+   * Danger
+   * Applied sparingly to show negative feedback/status or dangerous actions.
+   * Errors
+   */
+  --colour-danger-soft: #FEF2F2;
+  --colour-danger-default: #991B1B;
+  --colour-danger-hover: #7F1D1D;
+  --colour-danger-pressed: #7F1D1D;
 
-  --tbpro-primary: var(--teal-700);
-  --tbpro-primary-hover: #066769;
-  --tbpro-primary-pressed: #0A5757;
+  /*
+   * Text+Icon
+   * Applied frequently for text and icons.
+   */
+  --colour-ti-base: #1A202C;
+  --colour-ti-secondary: #4C4D58;
+  --colour-ti-muted: #737584;
+  --colour-ti-highlight: #1373D9;
+  --colour-ti-warning: #713F12;
+  --colour-ti-critical: #DC2626;
+  --colour-ti-success: #1D783B;
 
-  --tbpro-appointment-seconday: #81D4B5;
-  --tbpro-secondary: var(--surface-subtle);
-  --tbpro-secondary-border: var(--surface-border);
-  --tbpro-secondary-pressed: var(--neutral-500);
-  --tbpro-secondary-pressed-border: var(--surface-intense);
+  /*
+   * Accent Colours
+   * Used for accents, gradients, highlights.
+   * *Do not use with text
+   */
+  --colour-accent-teal: #25A6A0;
+  --colour-accent-blue: #58C9FF;
+  --colour-accent-purple: #AE55F7;
+  --colour-accent-orange: #EA7308;
+  --colour-accent-pink: #E247C4;
+  --colour-accent-gray: #6E6F9B;
 
-  --tbpro-disabled: var(--neutral-200);
+  /*
+   * Brand Colours
+   * Appointment
+   */
+  --colour-apmt-soft: #F3F9FC;
+  --colour-apmt-primary: #008080;
+  --colour-apmt-primary-hover: #066769;
+  --colour-apmt-primary-pressed: #0A5757;
+  --colour-apmt-secondary: #81D4B5;
+  --colour-apmt-accent-1: #A3ECE3;
+  --colour-apmt-accent-2: #03AFD7;
 
-  --tbpro-input: var(--surface-base);
-  --tbpro-input-border: var(--surface-border);
-  --tbpro-input-hover-border: var(--surface-intense);
-  --tbpro-select-open: var(--surface-subtle);
-  --tbpro-select-open-border: var(--surface-intense);
+  /*
+   * Brand Colours
+   * Send
+   */
+  --colour-send-soft: #FEF7EC;
+  --colour-send-primary: #F09D38;
+  --colour-send-primary-hover: #F09D38;
+  --colour-send-primary-pressed: #F09D38;
+  --colour-send-primary-secondary: #AA6000;
+  --colour-send-primary-accent-1: #1F8DDB;
+  --colour-send-primary-accent-2: #1F8DDB;
 
-  --tbpro-soft: #F3F9FC;
+  &.dark {
+    /*
+     * Neutral
+     * Applied frequently for backgrounds, surfaces, dividers, and outlines.
+     */
+    --colour-neutral-base: #1A202C;
+    --colour-neutral-lower: #18181B;
+    --colour-neutral-raised: #262D3B;
+    --colour-neutral-subtle: var(--colour-neutral-raised);
+    --colour-neutral-border: #303A4A;
+    --colour-neutral-border-intense: #3D4D67;
 
-  --tbpro-text: #26272A;
-  --tbpro-text-muted: #737584;
+    /*
+     * Primary
+     * Applied frequently to surfaces highlight actions & information.
+     */
+    --colour-primary-soft: #262C40;
+    --colour-primary-default: #58C9FF;
+    --colour-primary-hover: #32AEFF;
+    --colour-primary-pressed: #1B90F5;
+    /*--primary-text: #1A202C; // No matching light-mode variable! */
+
+    /*
+     * Secondary
+     * Applied sparingly to highlight information.
+     */
+    --colour-secondary-soft: #3A0764;
+    --colour-secondary-default: #F5E8FF;
+    --colour-secondary-hover: #ECD5FF;
+    --colour-secondary-pressed: #DDB4FE;
+
+    /*
+     * Success
+     * Applied sparingly to show positive feedback/status.
+     */
+    --colour-success-soft: #082B16;
+    --colour-success-default: #DEFAE7;
+    --colour-success-hover: #C0F2CF;
+    --colour-success-pressed: #8EE7AA;
+
+    /*
+     * Warning
+     * Applied sparingly to show warning feedback/status.
+     * Notifications/messaging
+     */
+    --colour-warning-soft: #423606;
+    --colour-warning-default: #FEF2C3;
+    --colour-warning-hover: #FEE78A;
+    --colour-warning-pressed: #FDD847;
+
+    /*
+     * Danger
+     * Applied sparingly to show negative feedback/status or dangerous actions.
+     * Errors
+     */
+    --colour-danger-soft: #7F1D1D;
+    --colour-danger-default: #FEE2E2;
+    --colour-danger-hover: #FECACA;
+    --colour-danger-pressed: #FCA5A5;
+
+    /*
+     * Text+Icon
+     * Applied frequently for text and icons.
+     */
+    --colour-ti-base: #EEEEF0;
+    --colour-ti-secondary: #D9D9DE;
+    --colour-ti-muted: #7F94AC;
+    --colour-ti-highlight: #58C9FF;
+    --colour-ti-warning: #FEE78A;
+    --colour-ti-critical: #EF4444;
+    --colour-ti-success: #55D37E;
+
+    /*
+     * Accent Colours
+     * Used for accents, gradients, highlights.
+     * *Do not use with text
+     */
+    --colour-accent-teal: #A3ECE3;
+    --colour-accent-blue: #58C9FF;
+    --colour-accent-purple: #8022CE;
+    --colour-accent-orange: #FEC18A;
+    --colour-accent-pink: #FBD3F6;
+    --colour-accent-gray: #C3CADE;
+
+    /*
+     * Brand Colours
+     * Appointment
+     */
+    --colour-apmt-soft: #152F3C;
+    --colour-apmt-primary: #A3ECE3;
+    --colour-apmt-primary-hover: #6DDBD1;
+    --colour-apmt-primary-pressed: #3EC3BA;
+    --colour-apmt-secondary: #25A6A0;
+    --colour-apmt-accent-1: #A3ECE3;
+    --colour-apmt-accent-2: #58C9FF;
+
+    /*
+     * Brand Colours
+     * Send
+     */
+    --colour-send-soft: #411107;
+    --colour-send-primary: #F09D38;
+    --colour-send-primary-hover: #F09D38;
+    --colour-send-primary-pressed: #F09D38;
+    --colour-send-primary-secondary: #AA6000;
+    --colour-send-primary-accent-1: #1F8DDB;
+    --colour-send-primary-accent-2: #1F8DDB;
+  }
+
+  &[data-tbpro-service='apmt'] {
+    --colour-service-soft: var(--colour-apmt-soft);
+    --colour-service-primary: var(--colour-apmt-primary);
+    --colour-service-primary-hover: var(--colour-apmt-primary-hover);
+    --colour-service-primary-pressed: var(--colour-apmt-primary-pressed);
+    --colour-service-secondary: var(--colour-apmt-secondary);
+    --colour-service-accent-1: var(--colour-apmt-accent-1);
+    --colour-service-accent-2: var(--colour-apmt-accent-2);
+  }
+  &[data-tbpro-service='send'] {
+    --colour-service-soft: var(--colour-send-soft);
+    --colour-service-primary: var(--colour-send-primary);
+    --colour-service-primary-hover: var(--colour-send-primary-hover);
+    --colour-service-primary-pressed: var(--colour-send-primary-pressed);
+    --colour-service-secondary: var(--colour-send-primary-secondary);
+    --colour-service-accent-1: var(--colour-send-primary-accent-1);
+    --colour-service-accent-2: var(--colour-send-primary-accent-2);
+  }
 
 
 }

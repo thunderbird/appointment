@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="" data-tbpro-service="apmt">
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/appointment_logo.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thunderbird Appointment</title>
     <script>
-      const currentPath = new URL(location.href).pathname;
       // handle theme color scheme
       if (
-        !currentPath.startsWith('/setup')
-        && (localStorage?.getItem('theme') === 'dark'
+        (localStorage?.getItem('theme') === 'dark'
         || (!localStorage?.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches))
       ) {
         document.documentElement.classList.add('dark');

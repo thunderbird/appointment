@@ -48,8 +48,9 @@
     "jsdom": "^24.0.0",
     "msw": "^2.0.11",
     "node-fetch": "^3.3.2",
-    "postcss": "^8.4.17",
+    "postcss": "^8.4.45",
     "postcss-custom-media": "^10.0.7",
+    "postcss-mixins": "^10.0.1",
     "postcss-nesting": "^12.0.3",
     "typescript": "^5.5.3",
     "vite-plugin-eslint": "^1.8.1",
@@ -59,6 +60,7 @@
     "plugins": {
       "tailwindcss": {},
       "autoprefixer": {},
+      "postcss-mixins": {},
       "postcss-nesting": {},
       "postcss-custom-media": {}
     }

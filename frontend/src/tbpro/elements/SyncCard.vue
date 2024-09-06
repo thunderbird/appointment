@@ -53,12 +53,19 @@ defineProps<Props>();
 @import '@/assets/styles/custom-media.pcss';
 
 .wrapper {
+  --colour-highlight: var(--colour-service-primary);
   border-radius: 0.5625rem;
-  border: 0.0625rem solid var(--surface-border);
-  background: var(--neutral);
+  border: 0.0625rem solid var(--colour-neutral-border);
+  background: var(--colour-neutral-base);
   font-family: 'Inter', 'sans-serif';
   font-size: var(--txt-input);
-  color: var(--tbpro-text);
+  color: var(--colour-ti-base);
+}
+
+.dark {
+  .wrapper {
+    --colour-highlight: var(--colour-service-secondary);
+  }
 }
 
 .header {
@@ -74,14 +81,14 @@ defineProps<Props>();
   padding: 0.75rem 0.625rem;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
-  border-bottom: 0.0625rem solid var(--surface-border);
-  background-color: var(--surface-lower);
+  border-bottom: 0.0625rem solid var(--colour-neutral-border);
+  background-color: var(--colour-neutral-lower);
   font-weight: 700;
 }
 
 .selected {
   font-size: 0.5625rem;
-  color: var(--text-highlight);
+  color: var(--colour-highlight);
 }
 
 .rows {
@@ -92,12 +99,12 @@ defineProps<Props>();
 
 .row {
   width: 100%;
-  background-color: white;
+  background-color: var(--colour-neutral-base);
   padding: 0.375rem 0.75rem;
   font-size: var(--txt-input);
 
   &:nth-child(even) {
-    background-color: var(--surface-lower);
+    background-color: var(--colour-neutral-lower);
   }
 }
 
@@ -112,21 +119,23 @@ input {
   width: 1.0rem;
   height: 1.0rem;
   border-radius: var(--border-radius);
-  border: 1px solid var(--surface-intense);
+  border: 1px solid var(--colour-neutral-border-intense);
 
   &:focus {
-    outline-color: var(--text-highlight);
+    outline-color: var(--colour-highlight);
   }
 
-  &:checked {
-    border-color: var(--text-highlight);
-    color: var(--text-highlight);
+  &:checked, &:checked:hover, &:checked:focus {
+    background-color: var(--colour-highlight);
+    border-color: var(--colour-highlight);
+    color: var(--colour-neutral-raised);
   }
 }
 
 .select-all {
   margin-left: auto;
   margin-right: auto;
+  top: 2.0625rem;
 }
 
 @media (--md) {

@@ -17,6 +17,7 @@ import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
+import ScheduleView from "@/views/ScheduleView.vue";
 
 const router = useRouter();
 const user = useUserStore();
@@ -30,22 +31,11 @@ const refresh = inject(refreshKey);
 
 onMounted(async () => {
   await refresh();
-
-  // If they're setup, boot them dashboard
-  if (user.data.isSetup) {
-    if (getPreferredTheme() === ColorSchemes.Dark) {
-      document.documentElement.classList.add('dark');
-    }
-    await router.replace('dashboard');
-    return;
-  }
-
-  // Force light-mode
-  document.documentElement.classList.remove('dark');
 });
 </script>
 
 <template>
+  <schedule-view></schedule-view>
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
@@ -87,7 +77,12 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
+<style>
+/* Ensure you can't scroll the background! */
+body {
+    overflow: hidden;
+}
+</style>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -100,7 +95,7 @@ onMounted(async () => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #727375;
+  background-color: color-mix(in srgb, var(--colour-neutral-900) 60%, transparent);
   align-items: center;
   justify-content: center;
 }
@@ -121,7 +116,7 @@ onMounted(async () => {
 }
 
 #ftue-title {
-  color: var(--tbpro-text);
+  color: var(--colour-ti-base);
   font-family: 'Inter', 'sans-serif';
   font-weight: 400;
   font-size: 1.375rem;
@@ -130,11 +125,13 @@ onMounted(async () => {
 
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
+  --background-color: var(--colour-neutral-raised);
+  --background: url('@/assets/svg/ftue-background.svg');
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: white;
-  background-image: url('@/assets/svg/ftue-background.svg');
+  background-color: var(--background-color);
+  background-image: var(--background);
   background-size: cover;
   background-repeat: no-repeat;
   border-radius: 0.75rem;
@@ -143,16 +140,28 @@ onMounted(async () => {
   overflow-x: hidden;
 }
 
-.modal:before {
+.dark .modal {
+  --background: url('@/assets/svg/ftue-background-dark.svg');
+}
+
+.modal::before {
   content: '';
   position: absolute;
   inset: -4px;
-  border-radius: 12px;
-  filter: blur(64px);
   margin: 50% 5% 0;
   opacity: 0.8;
   z-index: -1;
-  background: linear-gradient(118.89deg, #A3ECE3 -1.91%, #03AFD7 48.8%, #008080 100.54%);
+  border-radius: 9px;
+  background: linear-gradient(119deg, #A3ECE3 -1.91%, #03AFD7 48.8%, #008080 100.54%);
+  filter: blur(30px);
+}
+
+.dark {
+  .modal::before {
+    border-radius: 9px;
+    background: linear-gradient(119deg, #0B8C86 -1.91%, #1C6395 100.54%);
+    filter: blur(30px);
+  }
 }
 
 .divider {
@@ -160,7 +169,11 @@ onMounted(async () => {
   padding-bottom: 1px;
   border-radius: unset;
   background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
-
+}
+.dark {
+  .divider {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.40) 50%, rgba(255, 255, 255, 0.00) 100%);
+  }
 }
 
 .footer {
@@ -173,7 +186,7 @@ onMounted(async () => {
   padding-bottom: 1rem;
 
   a {
-    color: var(--tbpro-primary);
+    color: var(--colour-service-primary-pressed);
     font-size: 0.75rem;
     line-height: 1.5rem;
   }
@@ -213,7 +226,7 @@ onMounted(async () => {
     width: 50rem; /* 800px */
     height: 37.5rem; /* 600px */
     padding: 2rem 2rem 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .modal-body {
@@ -232,4 +245,5 @@ onMounted(async () => {
     padding-bottom: 0;
   }
 }
+
 </style>

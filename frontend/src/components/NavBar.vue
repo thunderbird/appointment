@@ -27,6 +27,18 @@ const logout = async () => {
   await user.logout(call);
   await router.push('/');
 };
+
+/**
+ * Is this nav entry active?
+ * @param item
+ */
+const isNavEntryActive = (item: string) => {
+  // Hack for FTUE!
+  if (item === 'dashboard' && route.name === 'setup') {
+    return true;
+  }
+  return route.name === item;
+};
 </script>
 
 <template>
@@ -61,7 +73,7 @@ const logout = async () => {
         <nav-bar-item
           v-for="item in navItems"
           :key="item"
-          :active="route.name == item"
+          :active="isNavEntryActive(item)"
           :label="t(`label.${item}`)"
           :link-name="item"
         />

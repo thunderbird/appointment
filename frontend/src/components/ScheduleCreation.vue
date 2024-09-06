@@ -409,7 +409,7 @@ watch(
             v-model="scheduleInput.name"
             :placeholder="t('placeholder.mySchedule')"
             :disabled="!scheduleInput.active"
-            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-0 dark:bg-transparent"
+            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-2 dark:bg-transparent"
             required
           />
           <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>

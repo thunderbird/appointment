@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { BookingCalendarView } from '@/definitions';
+import {
+  BookingCalendarView,
+  DateFormatStrings,
+  DEFAULT_SLOT_DURATION,
+  EventLocationType,
+  MeetingLinkProviderType
+} from '@/definitions';
 import {
   ref, inject, computed, onMounted,
 } from 'vue';
@@ -103,6 +109,36 @@ const onDateChange = (dateObj: TimeFormatted) => {
 
 // initially load data when component gets remounted
 onMounted(async () => {
+  // Don't actually load anything during the FTUE
+  if (route.name === 'setup') {
+    // Setup a fake schedule so the schedule creation bar works correctly...
+    schedules.value = [{
+      active: false,
+      name: ``,
+      calendar_id: 0,
+      location_type: EventLocationType.InPerson,
+      location_url: '',
+      details: '',
+      start_date: dj().format(DateFormatStrings.QalendarFullDay),
+      end_date: null,
+      start_time: '09:00',
+      end_time: '17:00',
+      earliest_booking: 1440,
+      farthest_booking: 20160,
+      weekdays: [1, 2, 3, 4, 5],
+      slot_duration: DEFAULT_SLOT_DURATION,
+      meeting_link_provider: MeetingLinkProviderType.None,
+      booking_confirmation: true,
+      calendar: {
+        id: 0,
+        title: '',
+        color: '#000',
+        connected: true,
+      },
+    }];
+    schedulesReady.value = true;
+    return;
+  }
   await refresh();
   await getFirstSchedule();
   schedulesReady.value = true;
