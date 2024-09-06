@@ -38,10 +38,7 @@ export const useUserStore = defineStore('user', () => {
     return data.value.signedUrl;
   });
 
-
-  const authenticated = computed((): boolean => {
-    return data.value.accessToken !== null;
-  });
+  const authenticated = computed((): boolean => data.value.accessToken !== null);
   /**
    * @deprecated - Use authenticated
    * @see this.authenticated
@@ -109,6 +106,11 @@ export const useUserStore = defineStore('user', () => {
    */
   const profile = async (call: Fetch): Promise<Error> => {
     const { error, data: userData }: SubscriberResponse = await call('me').get().json();
+
+    // Type error means they refreshed midway through the request. Don't log them out for this!
+    if (error.value instanceof TypeError) {
+      return { error: error.value as unknown as string };
+    }
 
     // Failed to get profile data, log this user out and return false
     if (error.value || !userData.value) {
