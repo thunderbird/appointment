@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import {inject, onMounted, ref} from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {useRoute, useRouter} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey } from "@/keys";
-import { BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error } from "@/models";
+import {
+  dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey,
+} from '@/keys';
+import {
+  BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error,
+} from '@/models';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
-import {posthog, usePosthog} from "@/composables/posthog";
-import {MetricEvents} from "@/definitions";
+import { posthog, usePosthog } from '@/composables/posthog';
+import { MetricEvents } from '@/definitions';
 
 // component constants
 const user = useUserStore();
@@ -48,22 +52,6 @@ const closeError = () => {
 const goHome = () => {
   router.push('/');
 };
-
-/**
- * What to do when hitting the enter key on a particular input
- * @param isEmailField - Is this the email field? Only needed for password auth
- */
-const onEnter = (isEmailField: boolean) => {
-  if (isEmailField && !isFxaAuth) {
-    return;
-  }
-
-  if (showInviteFlow.value && onlyShowJoin.value) {
-    signUp();
-  } else {
-    login();
-  }
-}
 
 /**
  * Sign up for the beta / waiting list
@@ -176,6 +164,22 @@ const login = async () => {
   }
 
   await router.push({ name: 'dashboard' });
+};
+
+/**
+ * What to do when hitting the enter key on a particular input
+ * @param isEmailField - Is this the email field? Only needed for password auth
+ */
+const onEnter = (isEmailField: boolean) => {
+  if (isEmailField && !isFxaAuth) {
+    return;
+  }
+
+  if (showInviteFlow.value && onlyShowJoin.value) {
+    signUp();
+  } else {
+    login();
+  }
 };
 </script>
 

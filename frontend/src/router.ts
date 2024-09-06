@@ -7,6 +7,7 @@ import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
+import LogoutView from '@/views/LogoutView.vue';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
@@ -47,6 +48,11 @@ const routes: RouteRecordRaw[] = [
     meta: {
       isPublic: true,
     },
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: LogoutView,
   },
   {
     path: '/waiting-list',
@@ -162,7 +168,7 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-subscriber-panel',
     component: SubscriberPanelView,
     meta: {
-      //disableMetrics: true,
+      // disableMetrics: true,
     },
   },
   {
@@ -170,7 +176,7 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-invite-codes-panel',
     component: InviteCodePanelView,
     meta: {
-      //disableMetrics: true,
+      // disableMetrics: true,
     },
   },
   {
@@ -178,7 +184,7 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-waiting-list-panel',
     component: WaitingListPanelView,
     meta: {
-      //disableMetrics: true,
+      // disableMetrics: true,
     },
   },
 ];
@@ -191,9 +197,8 @@ const router = createRouter({
 
 router.beforeEach((to, from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
-  const fromMeta: ApmtRouteMeta = from?.meta ?? {};
 
-  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'undefined'].includes(String(to.name))) {
+  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'logout', 'undefined'].includes(String(to.name))) {
     const user = useUserStore();
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };

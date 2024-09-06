@@ -29,7 +29,14 @@ onMounted(async () => {
   }
 
   await user.login(call, route.params.token as string, null);
-  await router.push(redirectTo ?? '/calendar');
+
+  // If we don't have a redirectTo or it's to logout then push to dashboard!
+  if (!redirectTo || redirectTo === '/logout') {
+    await router.push('/dashboard');
+    return;
+  }
+
+  await router.push(redirectTo);
 });
 </script>
 

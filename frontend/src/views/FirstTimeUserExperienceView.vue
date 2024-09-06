@@ -17,7 +17,7 @@ import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/Finish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
-import ScheduleView from "@/views/ScheduleView.vue";
+import ScheduleView from '@/views/ScheduleView.vue';
 
 const router = useRouter();
 const user = useUserStore();
@@ -72,6 +72,7 @@ onMounted(async () => {
         <div class="divider"></div>
         <div class="footer">
           <router-link to="contact">Support</router-link>
+          <router-link to="logout">Log out</router-link>
         </div>
       </div>
     </div>
@@ -184,6 +185,7 @@ body {
   justify-content: center;
   align-items: center;
   padding-bottom: 1rem;
+  gap: 1rem;
 
   a {
     color: var(--colour-service-primary-pressed);
