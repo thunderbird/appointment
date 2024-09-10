@@ -5,11 +5,13 @@ Handle connection to a CalDAV server.
 
 import json
 import logging
+import time
 import zoneinfo
 import os
 
 import caldav.lib.error
 import requests
+import sentry_sdk
 from redis import Redis, RedisCluster
 from caldav import DAVClient
 from fastapi import BackgroundTasks
@@ -56,9 +58,14 @@ class BaseConnector:
 
         key_scope = self.obscure_key(key_scope)
 
+        timer_boot = time.perf_counter_ns()
+
         encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
         if encrypted_events is None:
+            sentry_sdk.set_measurement('redis_get_miss_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
             return None
+
+        sentry_sdk.set_measurement('redis_get_hit_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
         return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
 
@@ -68,11 +75,13 @@ class BaseConnector:
             return False
 
         key_scope = self.obscure_key(key_scope)
+        timer_boot = time.perf_counter_ns()
 
         encrypted_events = json.dumps([event.model_dump_redis() for event in events])
         self.redis_instance.set(
             f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}', value=encrypted_events, ex=expiry
         )
+        sentry_sdk.set_measurement('redis_put_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
         return True
 
@@ -81,6 +90,8 @@ class BaseConnector:
         Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber."""
         if self.redis_instance is None:
             return False
+
+        timer_boot = time.perf_counter_ns()
 
         # Scan returns a tuple like: (Cursor start, [...keys found])
         ret = self.redis_instance.scan(
@@ -92,6 +103,8 @@ class BaseConnector:
 
         # Expand the list in position 1, which is a list of keys found from the scan
         self.redis_instance.delete(*ret[1])
+
+        sentry_sdk.set_measurement('redis_bust_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
         return True
 

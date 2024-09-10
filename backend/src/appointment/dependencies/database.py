@@ -1,5 +1,7 @@
 import os
+import time
 
+import sentry_sdk.metrics
 from redis import Redis, RedisCluster
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -41,8 +43,10 @@ def get_redis() -> Redis | RedisCluster | None:
     password = os.getenv('REDIS_PASSWORD')
     ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1') else False
 
+    timer_boot = time.perf_counter_ns()
+
     if os.getenv('REDIS_USE_CLUSTER'):
-        return RedisCluster(
+        cluster = RedisCluster(
             host=host,
             port=port,
             password=password,
@@ -50,7 +54,11 @@ def get_redis() -> Redis | RedisCluster | None:
             decode_responses=True,
         )
 
-    return Redis(
+        sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
+
+        return cluster
+
+    redis = Redis(
         host=host,
         port=port,
         db=db,
@@ -58,3 +66,6 @@ def get_redis() -> Redis | RedisCluster | None:
         ssl=ssl,
         decode_responses=True,
     )
+
+    sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
+    return redis
