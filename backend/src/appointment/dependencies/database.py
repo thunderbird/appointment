@@ -5,6 +5,8 @@ from typing import Optional
 
 import sentry_sdk.metrics
 from redis import Redis, RedisCluster
+from redis.backoff import ExponentialBackoff
+from redis.retry import Retry
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -47,6 +49,9 @@ def boot_redis_cluster():
     ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1') else False
     timer_boot = time.perf_counter_ns()
 
+    # Retry strategy
+    retry = Retry(ExponentialBackoff(), 3)
+
     _redis_instance = RedisCluster(
             host=host,
             port=port,
@@ -54,6 +59,8 @@ def boot_redis_cluster():
             ssl=ssl,
             decode_responses=True,
             skip_full_coverage_check=True,
+            retry=retry,
+            cluster_error_retry_attempts=1
         )
     sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
     logging.info("Connected to redis cluster")
