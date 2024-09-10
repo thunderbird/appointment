@@ -52,19 +52,24 @@ class BaseConnector:
     def get_cached_events(self, key_scope):
         """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
         if self.redis_instance is None:
+            logging.info("NO REDIS, NO GET")
             return None
 
         key_scope = self.obscure_key(key_scope)
 
         encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
         if encrypted_events is None:
+            logging.info("CACHE MISS")
             return None
+
+        logging.info("CACHE HIT")
 
         return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
 
     def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS')):
         """Sets the passed cached events with an option to set a custom expiry time."""
         if self.redis_instance is None:
+            logging.info("NO REDIS, NO GET")
             return False
 
         key_scope = self.obscure_key(key_scope)
@@ -73,6 +78,8 @@ class BaseConnector:
         self.redis_instance.set(
             f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}', value=encrypted_events, ex=expiry
         )
+
+        logging.info("CACHE SET")
 
         return True
 
