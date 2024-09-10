@@ -66,6 +66,7 @@ const state = ref(firstStep);
 const activeStep1 = computed(() => state.value === firstStep);
 const activeStep2 = computed(() => state.value === ScheduleCreationState.Settings);
 const activeStep3 = computed(() => state.value === ScheduleCreationState.Details);
+const activeStep4 = computed(() => state.value === ScheduleCreationState.Booking);
 const visitedStep1 = ref(false);
 
 // calculate calendar titles
@@ -415,6 +416,7 @@ watch(
           <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
         </label>
       </div>
+
       <!-- step 1 -->
       <div
         class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
@@ -487,6 +489,7 @@ watch(
           </div>
         </div>
       </div>
+
       <!-- step 2 -->
       <div
         class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
@@ -594,6 +597,7 @@ watch(
           </div>
         </div>
       </div>
+  
       <!-- step 3 -->
       <div
         @click="state = ScheduleCreationState.Details"
@@ -673,18 +677,57 @@ watch(
           </label>
         </div>
       </div>
-      <!-- option to deactivate confirmation -->
-      <div class="px-4">
-        <switch-toggle
-          class="my-1 pr-3 text-sm font-medium text-gray-500 dark:text-gray-300"
-          :active="schedule.booking_confirmation"
-          :label="t('label.bookingConfirmation')"
-          :disabled="!scheduleInput.active"
-          @changed="toggleBookingConfirmation"
-          no-legend
-        />
-        <div class="text-xs">
-          {{ t('text.ownerNeedsToConfirmBooking') }}
+
+      <!-- step 4 -->
+      <div
+        @click="state = ScheduleCreationState.Booking"
+        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50': activeStep4}"
+        id="schedule-details"
+      >
+        <div class="flex cursor-pointer items-center justify-between">
+          <div class="flex flex-col gap-1">
+            <h2>
+              {{ t("label.bookingSettings") }}
+            </h2>
+            <h3 class="text-xs">
+              {{ t('label.scheduleSettings.bookingSettingsSubHeading') }}
+            </h3>
+          </div>
+          <icon-chevron-down
+            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+            :class="{ '!rotate-0': activeStep4 }"
+          />
+        </div>
+        <div v-show="activeStep4" class="flex flex-col gap-2">
+          <hr/>
+          <!-- option to deactivate confirmation -->
+          <div class="flex flex-col gap-3">
+            <switch-toggle
+              class="my-1 text-sm font-medium text-gray-500 dark:text-gray-300"
+              :active="schedule.booking_confirmation"
+              :label="t('label.bookingConfirmation')"
+              :disabled="!scheduleInput.active"
+              @changed="toggleBookingConfirmation"
+              no-legend
+            />
+            <div class="whitespace-pre-line rounded-lg bg-white p-4 text-xs text-gray-500 dark:bg-gray-800">
+              <div>
+                {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
+                <i18n-t keypath="text.toUpdateYourUsername.text" for="text.toUpdateYourUsername.link">
+                  <router-link class="underline" :to="{ name: 'settings' }" target="_blank">
+                    {{ t('text.toUpdateYourUsername.link') }}
+                  </router-link>
+                </i18n-t>
+                <span v-if="scheduleInput.booking_confirmation">
+                  {{ t('text.bookingsWillRequireToBeConfirmed') }}
+                </span>
+                <span v-else>
+                  {{ t('text.bookingsWillAutomaticallyBeConfirmed') }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

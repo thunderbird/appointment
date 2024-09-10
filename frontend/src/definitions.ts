@@ -38,6 +38,7 @@ export enum ScheduleCreationState {
   Availability = 1,
   Settings = 2,
   Details = 3,
+  Booking = 4,
 }
 
 /**

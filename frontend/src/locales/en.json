@@ -270,6 +270,7 @@
     "scheduleDetails": "Scheduling Details",
     "scheduleSettings": {
       "availabilitySubHeading": "Set your availability days and times",
+      "bookingSettingsSubHeading": "Edit your quick link and more",
       "meetingDetailsSubHeading": "Add video and/or notes to events",
       "schedulingDetailsSubHeading": "Set booking intervals and duration"
     },
@@ -329,6 +330,8 @@
   "text": {
     "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
     "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
+    "bookingsWillAutomaticallyBeConfirmed": "Bookings will automatically be confirmed and added to your calendar.",
+    "bookingsWillRequireToBeConfirmed": "You will need to confirm or decline bookings on your calendar.",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
     "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
@@ -405,8 +408,13 @@
     },
     "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
+    "toUpdateYourUsername": {
+      "link": "Account Settings",
+      "text": "To update your username, go to {0}. "
+    },
     "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work.",
-    "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created."
+    "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created.",
+    "yourQuickLinkIs": "Your quick link is:\n{url}"
   },
   "units": {
     "minutes": "{value} minutes",
