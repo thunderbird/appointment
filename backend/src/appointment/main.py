@@ -3,6 +3,7 @@
 Boot application, init database, authenticate user and provide all API endpoints.
 
 """
+from contextlib import asynccontextmanager
 
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
@@ -11,6 +12,7 @@ from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
 
 from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
+from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 
@@ -172,6 +174,14 @@ def server():
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
         return await http_exception_handler(request, APIGoogleRefreshError())
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Boot the redis cluster as the app starts up
+        boot_redis_cluster()
+        yield
+        close_redis_cluster()
+
 
     # Mix in our extra routes
     app.include_router(api.router)

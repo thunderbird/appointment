@@ -1,11 +1,15 @@
+import logging
 import os
 import time
+from typing import Optional
 
 import sentry_sdk.metrics
 from redis import Redis, RedisCluster
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+
+_redis_instance : Optional[RedisCluster] = None
 
 def get_engine_and_session():
     database_url = os.getenv('DATABASE_URL')
@@ -31,6 +35,40 @@ def get_db():
         db.close()
 
 
+def boot_redis_cluster():
+    """Open a connection to a redis cluster"""
+    global _redis_instance
+    if not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER'):
+        return None
+
+    host = os.getenv('REDIS_URL')
+    port = int(os.getenv('REDIS_PORT'))
+    password = os.getenv('REDIS_PASSWORD')
+    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1') else False
+    timer_boot = time.perf_counter_ns()
+
+    _redis_instance = RedisCluster(
+            host=host,
+            port=port,
+            password=password,
+            ssl=ssl,
+            decode_responses=True,
+            skip_full_coverage_check=True,
+        )
+    sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
+    logging.info("Connected to redis cluster")
+
+
+def close_redis_cluster():
+    """Close a connection to a redis cluster"""
+    global _redis_instance
+    if not _redis_instance or not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER'):
+        return None
+
+    _redis_instance.close()
+    logging.info("Closed connection to redis cluster")
+
+
 def get_redis() -> Redis | RedisCluster | None:
     """Retrieves a redis instance or None if redis isn't available."""
     # TODO: Create pool and simply grab instance?
@@ -46,18 +84,7 @@ def get_redis() -> Redis | RedisCluster | None:
     timer_boot = time.perf_counter_ns()
 
     if os.getenv('REDIS_USE_CLUSTER'):
-        cluster = RedisCluster(
-            host=host,
-            port=port,
-            password=password,
-            ssl=ssl,
-            decode_responses=True,
-            skip_full_coverage_check=True,
-        )
-
-        sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
-
-        return cluster
+        return _redis_instance
 
     redis = Redis(
         host=host,
