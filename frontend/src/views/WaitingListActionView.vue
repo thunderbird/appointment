@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import { inject, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import {MetricEvents, WaitingListAction} from '@/definitions';
-import { WaitingListActionResponse } from '@/models';
 import { useI18n } from 'vue-i18n';
-import { callKey } from '@/keys';
-import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
-import ArtLeave from '@/elements/arts/ArtLeave.vue';
-import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
-import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import {posthog, usePosthog} from "@/composables/posthog";
+import { useRoute, useRouter } from 'vue-router';
+import {
+  callKey,
+} from '@/keys';
+import {
+  WaitingListActionResponse,
+} from '@/models';
+import { posthog, usePosthog } from '@/composables/posthog';
+import { MetricEvents, WaitingListAction } from '@/definitions';
+import GenericModal from '@/components/GenericModal.vue';
+import HomeView from '@/views/HomeView.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import WordMark from '@/elements/WordMark.vue';
 
+// component constants
 const route = useRoute();
 const router = useRouter();
 
+// component constants
 const { t } = useI18n();
 
 // component constants
@@ -22,11 +27,8 @@ const call = inject(callKey);
 
 const isLoading = ref(false);
 const isError = ref(false);
+const errorMsg = ref(null);
 const action = ref(null);
-
-const goHome = () => {
-  router.push('/');
-};
 
 onMounted(async () => {
   isLoading.value = true;
@@ -48,68 +50,84 @@ onMounted(async () => {
     return;
   }
 
- if (usePosthog) {
+  if (usePosthog) {
     if (action.value === WaitingListAction.Confirm) {
       posthog.capture(MetricEvents.WaitingListEmailConfirmed, {});
     } else if (action.value === WaitingListAction.Leave) {
       posthog.capture(MetricEvents.WaitingListEmailRemoved, {});
     }
   }
-
 });
 </script>
 
 <template>
-  <div class="flex-center h-full flex-col gap-12 p-4">
-    <div v-if="isLoading">
-      <loading-spinner/>
-    </div>
-    <div v-else-if="isError" class="flex-center flex-col gap-8 px-4">
-      <art-invalid-link class="my-6 h-auto max-w-sm"/>
-      <div class="text-xl font-semibold text-sky-600">
+  <div>
+  <home-view></home-view>
+  <generic-modal :error-message="errorMsg">
+    <template v-slot:header>
+      <word-mark/>
+      <h2 id="title" v-if="isError">
         {{ t('waitingList.errorHeading') }}
-      </div>
-      <div class="text-center text-gray-800 dark:text-gray-300">
-        {{ t('waitingList.errorInfo') }}<br>
-      </div>
+      </h2>
+      <h2 id="title" v-else-if="action === WaitingListAction.Confirm">
+        {{ t('waitingList.confirmHeading') }}
+      </h2>
+      <h2 id="title" v-else-if="action === WaitingListAction.Leave">
+        {{ t('waitingList.leaveHeading') }}
+      </h2>
+    </template>
+    <img class="img is-dark-mode" src="@/assets/svg/ftue-finish-dark.svg" :alt="t('ftue.finishAltText')"/>
+    <img class="img is-light-mode" src="@/assets/svg/ftue-finish.svg" :alt="t('ftue.finishAltText')"/>
+    <div class="intro-text" v-if="isError">
+      <p>{{ t('waitingList.errorInfo') }}</p>
+    </div>
+    <div class="intro-text" v-else-if="action === WaitingListAction.Confirm">
+      <p>{{ t('waitingList.confirmInfo') }}</p>
+    </div>
+    <div class="intro-text" v-else-if="action === WaitingListAction.Leave">
+      <p>{{ t('waitingList.leaveInfo') }}</p>
+    </div>
+    <div class="intro-text marketing-text">
+      <p><strong>{{ t('waitingList.marketing.0') }}</strong></p>
+      <p>{{ t('waitingList.marketing.1') }}</p>
+    </div>
+
+    <template v-slot:actions>
       <primary-button
-        :label="t('label.home')"
-        class="btn-back"
-        @click="goHome"
-        :title="t('label.home')"
-      />
-    </div>
-    <div v-else class="flex-center flex-col gap-8 px-4">
-      <template v-if="action === WaitingListAction.Confirm">
-        <art-successful-booking class="my-6 h-auto max-w-sm"/>
-        <div class="text-xl font-semibold text-sky-600">
-          {{ t('waitingList.confirmHeading') }}
-        </div>
-        <div class="text-center text-gray-800 dark:text-gray-300">
-          {{ t('waitingList.confirmInfo') }}<br>
-        </div>
-        <primary-button
-          :label="t('label.home')"
-          class="btn-back"
-          @click="goHome"
-          :title="t('label.home')"
-        />
-      </template>
-      <template v-else>
-        <art-leave class="my-6 h-auto max-w-sm"/>
-        <div class="text-xl font-semibold text-sky-600">
-          {{ t('waitingList.leaveHeading') }}
-        </div>
-        <div class="text-center text-gray-800 dark:text-gray-300">
-          {{ t('waitingList.leaveInfo') }}
-        </div>
-        <primary-button
-          :label="t('label.home')"
-          class="btn-back"
-          @click="goHome"
-          :title="t('label.home')"
-        />
-      </template>
-    </div>
+        class="btn-close"
+        :title="t('label.close')"
+        :disabled="isLoading"
+        @click="router.push({name: 'home'})"
+      >
+        {{ t('label.close') }}
+      </primary-button>
+    </template>
+    <template v-slot:footer>
+      <router-link :to="{name: 'home'}">{{ t('app.tagline') }}</router-link>
+    </template>
+  </generic-modal>
   </div>
 </template>
+<style scoped>
+.img {
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+}
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  max-width:30.0rem;
+  margin-bottom: 1rem;
+  white-space: break-spaces;
+}
+.marketing-text {
+  margin-bottom: 1.5625rem;
+}
+
+.btn-close {
+  /* Right align */
+  margin-right: 2rem;
+  margin-left: auto;
+}
+</style>

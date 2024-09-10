@@ -9,11 +9,8 @@ import {
 import {
   BooleanResponse,
   AuthUrlResponse,
-  Exception,
   AuthUrl,
   Error,
-  PydanticExceptionDetail,
-  ExceptionDetail,
   PydanticException,
 } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -214,34 +211,43 @@ const onEnter = () => {
     <template v-slot:header>
       <word-mark/>
       <h2 id="title" v-if="loginStep === LoginSteps.Login">
-        Simplify your day – just enter your email:
+        {{ t('login.login.title') }}
       </h2>
       <h2 id="title" v-else-if="loginStep === LoginSteps.SignUp">
-        Have an invite code? Enter it here
+        {{ t('login.signUp.title') }}
       </h2>
       <h2 id="title" v-else>
-        Complete your sign up
+        {{ t('login.confirm.title') }}
       </h2>
     </template>
     <div class="intro-text" v-if="loginStep === LoginSteps.Login">
-      <p><strong>Returning?</strong> We'll recognize you and direct you to your account.</p>
-      <p><strong>New?</strong> We'll help you set up quickly.</p>
+      <i18n-t keypath="login.login.intro.returning.1" tag="p">
+        <template v-slot:strong>
+          <strong>{{ t('login.login.intro.returning.0') }}</strong>
+        </template>
+      </i18n-t>
+      <i18n-t keypath="login.login.intro.new.1" tag="p">
+        <template v-slot:strong>
+          <strong>{{ t('login.login.intro.new.0') }}</strong>
+        </template>
+      </i18n-t>
     </div>
     <div class="intro-text" v-if="loginStep === LoginSteps.SignUpConfirm">
-      <p><strong>Please confirm your email to join our waiting list.</strong></p>
-      <p>Check your inbox for more information shortly.</p>
+      <p><strong>{{ t('login.confirm.intro.0') }}</strong></p>
+      <p>{{ t('login.confirm.intro.1') }}</p>
     </div>
     <div class="form-body">
       <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
-        <text-input name="email" v-model="email" :required="true" :help="loginStep === LoginSteps.Login || hideInviteField ? 'Your privacy is important to us.' : null">{{ t('label.email') }}</text-input>
+        <text-input name="email" v-model="email" :required="true" :help="loginStep === LoginSteps.Login || hideInviteField ? t('login.form.privacy') : null">{{ t('label.email') }}</text-input>
         <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true">{{ t('label.password') }}</text-input>
-        <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" help="If you don't have an invite code, add your email to our waiting list">{{ t('label.inviteCode') }}</text-input>
+        <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
       </form>
     </div>
     <template v-slot:actions>
       <primary-button
         class="btn-continue"
         :title="t('label.continue')"
+        :disabled="isLoading"
         @click="onEnter()"
         v-if="loginStep !== LoginSteps.SignUpConfirm"
       >
@@ -250,6 +256,7 @@ const onEnter = () => {
       <primary-button
         class="btn-close"
         :title="t('label.close')"
+        :disabled="isLoading"
         @click="router.push({name: 'home'})"
         v-else
       >
@@ -257,7 +264,7 @@ const onEnter = () => {
       </primary-button>
     </template>
     <template v-slot:footer>
-      <router-link :to="{name: 'home'}">Plan less, do more</router-link>
+      <router-link :to="{name: 'home'}">{{ t('app.tagline') }}</router-link>
     </template>
   </generic-modal>
   </div>
@@ -269,6 +276,10 @@ const onEnter = () => {
   text-align: center;
   gap: 0.983125rem;
   margin-bottom: 1.5625rem;
+}
+/* Tweak the generic-modal's modal-body style */
+:deep(.modal-body) {
+  margin-top: 1rem;
 }
 .form-body {
   display: flex;

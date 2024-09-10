@@ -1,7 +1,8 @@
 {
   "app": {
     "summary": "Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.",
-    "title": "Thunderbird Appointment"
+    "title": "Thunderbird Appointment",
+    "tagline": "Plan less, do more"
   },
   "error": {
     "actionNeeded": "Action needed",
@@ -320,6 +321,35 @@
     "de": "German",
     "en": "English"
   },
+  "login": {
+    "login": {
+      "title": "Simplify your day – just enter your email:",
+      "intro": {
+        "returning": [
+          "Returning?",
+          "{strong} We'll recognize you and direct you to your account."
+        ],
+        "new": [
+          "New?",
+          "{strong} We'll help you set up quickly."
+        ]
+      }
+    },
+    "signUp": {
+      "title": "Have an invite code? Enter it here"
+    },
+    "confirm": {
+      "title": "Complete your sign up",
+      "intro": [
+        "Please confirm your email to join our waiting list.",
+        "Check your inbox for more information shortly."
+      ]
+    },
+    "form": {
+      "privacy": "Your privacy is important to us.",
+      "no-invite-code": "If you don't have an invite code, add your email to our waiting list."
+    }
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
     "emailAddress": "john.doe{'@'}example.com",
@@ -417,15 +447,22 @@
   },
   "waitingList": {
     "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!",
-    "confirmHeading": "Your email is confirmed!",
-    "confirmInfo": "Your email is now confirmed and if selected you will be contacted about an invite code in the future.",
+    "confirmHeading": "You’re on the waitlist",
+    "confirmInfo": "You'll receive an invitation as soon as registration opens.",
     "errorHeading": "There was a problem with that link",
     "errorInfo": "Unfortunately this link is expired or is invalid.",
-    "leaveHeading": "You successfully left the waiting list",
-    "leaveInfo": "Sorry to see you go. You're welcome to re-join the waiting list at any time!",
+    "leaveHeading": "You’ve been removed from the waitlist",
+    "leaveInfo": "Your email has been successfully removed from our waitlist.\nIf you change your mind, you can always rejoin.",
     "signUpAlreadyExists": "You are already on the waiting list.",
     "signUpCheckYourEmail": "Check your email for more information.",
-    "signUpHeading": "Just one more step!",
-    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
+    "signUpHeading": "Complete your sign up",
+    "signUpInfo": [
+      "Please confirm your email to join our waiting list.",
+      "Check your inbox for more information shortly."
+    ],
+    "marketing": [
+      "Own your calendar, share your time.",
+      "Thunderbird Appointment simplifies the way you find time to connect so you can soar past the planning, and get to the living."
+    ]
   }
 }

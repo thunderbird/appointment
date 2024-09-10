@@ -84,7 +84,6 @@ onUnmounted(() => {
   width: 100%;
   flex-direction: column;
   align-items: center;
-  margin-top: 1rem;
 }
 
 .modal-actions {
