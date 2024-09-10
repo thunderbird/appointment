@@ -45,7 +45,6 @@ def get_redis() -> Redis | RedisCluster | None:
         return RedisCluster(
             host=host,
             port=port,
-            db=db,
             password=password,
             ssl=ssl,
             decode_responses=True,
