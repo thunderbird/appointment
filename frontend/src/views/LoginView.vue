@@ -7,12 +7,22 @@ import {
   dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey,
 } from '@/keys';
 import {
-  BooleanResponse, AuthUrlResponse, Exception, AuthUrl, Error,
+  BooleanResponse,
+  AuthUrlResponse,
+  Exception,
+  AuthUrl,
+  Error,
+  PydanticExceptionDetail,
+  ExceptionDetail,
+  PydanticException,
 } from '@/models';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import AlertBox from '@/elements/AlertBox.vue';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
+import GenericModal from '@/components/GenericModal.vue';
+import HomeView from '@/views/HomeView.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import WordMark from '@/elements/WordMark.vue';
 
 // component constants
 const user = useUserStore();
@@ -25,32 +35,45 @@ const route = useRoute();
 const router = useRouter();
 const isPasswordAuth = inject(isPasswordAuthKey);
 const isFxaAuth = inject(isFxaAuthKey);
-// Show the invite flow if they've failed to login
-const showInviteFlow = ref(false);
 // Don't show the invite code field, only the "Join the waiting list" part
-const onlyShowJoin = ref(false);
+const hideInviteField = ref(false);
 const isLoading = ref(false);
+const formRef = ref();
+
+// eslint-disable-next-line no-shadow
+enum LoginSteps {
+  Login = 1,
+  SignUp = 2,
+  SignUpConfirm = 3,
+}
 
 // form input and error
 const email = ref('');
 const password = ref('');
-const loginError = ref<string>(null);
 const inviteCode = ref('');
-const showConfirmEmailScreen = ref(false);
+const loginStep = ref(LoginSteps.Login);
+const loginError = ref<string>(null);
 
 onMounted(() => {
   if (route.name === 'join-the-waiting-list') {
-    showInviteFlow.value = true;
-    onlyShowJoin.value = true;
+    hideInviteField.value = true;
+    loginStep.value = LoginSteps.SignUp;
   }
 });
 
-const closeError = () => {
-  loginError.value = null;
-};
+const handleFormError = (errObj: PydanticException) => {
+  const { detail } = errObj;
+  const fields = formRef.value.elements;
 
-const goHome = () => {
-  router.push('/');
+  detail.forEach((err) => {
+    const name = err?.loc[1];
+    if (name) {
+      fields[name].setCustomValidity(err.ctx.reason);
+    }
+  });
+
+  // Finally report it!
+  formRef.value.reportValidity();
 };
 
 /**
@@ -69,7 +92,7 @@ const signUp = async () => {
 
   if (error?.value) {
     // Handle error
-    loginError.value = (data?.value as Exception)?.detail[0]?.msg;
+    handleFormError(data.value as PydanticException);
     isLoading.value = false;
     return;
   }
@@ -84,7 +107,8 @@ const signUp = async () => {
       });
     }
   } else {
-    showConfirmEmailScreen.value = true;
+    // Advance them to the "Check your email" step
+    loginStep.value = LoginSteps.SignUpConfirm;
 
     if (usePosthog) {
       posthog.capture(MetricEvents.SignUp, {
@@ -98,29 +122,26 @@ const signUp = async () => {
 };
 
 const login = async () => {
-  if (!email.value || (isPasswordAuth && !password.value)) {
-    loginError.value = t('error.credentialsIncomplete');
-    return;
-  }
-
   isLoading.value = true;
 
   // If they come here the first time we check if they're allowed to login
   // If they come here a second time after not being allowed it's because they have an invite code.
-  if (!showInviteFlow.value) {
+  if (loginStep.value === LoginSteps.Login) {
     const { data: canLogin, error }: BooleanResponse = await call('can-login').post({
       email: email.value,
     }).json();
 
+    console.log(error.value, canLogin.value);
     if (error?.value) {
-      // Bleh
-      loginError.value = (canLogin?.value as Exception)?.detail[0]?.msg;
+      // Handle error
+      handleFormError(canLogin.value as PydanticException);
       isLoading.value = false;
       return;
     }
 
     if (!canLogin.value) {
-      showInviteFlow.value = true;
+      // Advance them to the SignUp step (waiting list right now!)
+      loginStep.value = LoginSteps.SignUp;
       isLoading.value = false;
       return;
     }
@@ -139,7 +160,7 @@ const login = async () => {
     const { error, data }: AuthUrlResponse = await call(`fxa_login?${params}`).get().json();
 
     if (error.value) {
-      loginError.value = (data.value as Exception)?.detail[0]?.msg;
+      handleFormError(data.value as PydanticException);
       isLoading.value = false;
       return;
     }
@@ -168,14 +189,17 @@ const login = async () => {
 
 /**
  * What to do when hitting the enter key on a particular input
- * @param isEmailField - Is this the email field? Only needed for password auth
  */
-const onEnter = (isEmailField: boolean) => {
-  if (isEmailField && !isFxaAuth) {
+const onEnter = () => {
+  // Validate the form first
+  loginError.value = null;
+  if (!formRef.value.checkValidity()) {
+    formRef.value.reportValidity();
+    isLoading.value = false;
     return;
   }
 
-  if (showInviteFlow.value && onlyShowJoin.value) {
+  if (loginStep.value === LoginSteps.SignUp || hideInviteField.value) {
     signUp();
   } else {
     login();
@@ -184,98 +208,84 @@ const onEnter = (isEmailField: boolean) => {
 </script>
 
 <template>
-  <!-- page title area -->
-  <div class="flex-center runded flex h-screen w-full bg-gray-100 dark:bg-gray-600">
-    <div class="my-auto flex w-full flex-col items-center justify-center gap-2 rounded-md bg-white px-4 py-12 shadow-lg dark:bg-gray-700 md:w-1/2 md:max-w-lg">
-      <img class="mb-2 w-full max-w-32" src="/appointment_logo.svg" alt="Appointment Logo"/>
-      <div class="text-center text-4xl font-light">{{ t('app.title') }}</div>
-      <alert-box v-if="loginError" @close="closeError" class="mt-4">
-        {{ loginError }}
-      </alert-box>
-      <div class="flex w-full flex-col items-center justify-center px-4" v-if="showConfirmEmailScreen">
-        <div class="my-8 grid w-full gap-8">
-          <h2 class="text-xl">{{ t('waitingList.signUpHeading') }}</h2>
-          <p>{{ t('waitingList.signUpInfo') }}</p>
-          <p>{{ t('waitingList.signUpCheckYourEmail') }}</p>
-        </div>
-        <primary-button
-          :label="t('label.back')"
-          class="btn-back"
-          @click="goHome"
-          :title="t('label.back')"
-          :disabled="isLoading"
-        />
-      </div>
-      <div class="flex w-full flex-col items-center justify-center px-4" v-else>
-        <div class="my-8 grid w-full gap-8">
-          <label class="flex flex-col items-center pl-4">
-          <span class="w-full">
-            {{ t('label.email') }}
-          </span>
-            <input
-              v-model="email"
-              type="email"
-              class="mr-6 w-full rounded-md"
-              :class="{'mr-4': isFxaAuth}"
-              @keydown.enter="onEnter(true)"
-            />
-          </label>
-          <label class="flex flex-col items-center pl-4" v-if="showInviteFlow && !onlyShowJoin">
-          <span class="w-full">
-          {{ t('label.inviteCode') }}
-          </span>
-            <input
-              v-model="inviteCode"
-              type="text"
-              class="mr-6 w-full rounded-md"
-              :class="{'mr-4': isFxaAuth}"
-              @keydown.enter="onEnter(false)"
-            />
-          </label>
-          <div v-if="isFxaAuth && (!showInviteFlow || inviteCode.length > 0)" class="text-center text-sm">{{ t('text.login.continueToFxa') }}</div>
-          <label v-if="isPasswordAuth" class="flex flex-col items-center pl-4">
-            <span class="w-full">{{ t('label.password') }}</span>
-            <input
-              v-model="password"
-              type="password"
-              class="mr-6 w-full rounded-md"
-              @keyup.enter="onEnter(false)"
-            />
-          </label>
-        </div>
-        <primary-button
-          v-if="showInviteFlow && inviteCode.length > 0"
-          :label="t('label.signUpWithInviteCode')"
-          class="btn-login-with-invite-code"
-          @click="login"
-          :title="t('label.signUpWithInviteCode')"
-          :disabled="isLoading"
-        />
-        <primary-button
-          v-else-if="showInviteFlow"
-          :label="t('label.addToWaitingList')"
-          class="btn-add-to-waiting-list"
-          @click="signUp"
-          :title="t('label.addToWaitingList')"
-          :disabled="isLoading"
-        />
-        <primary-button
-          v-else-if="!isFxaAuth"
-          :label="t('label.logIn')"
-          class="btn-login"
-          @click="login"
-          :title="t('label.logIn')"
-          :disabled="isLoading"
-        />
-        <primary-button
-          v-else
-          :label="t('label.continue')"
-          class="btn-continue"
-          @click="login"
-          :title="t('label.continue')"
-          :disabled="isLoading"
-        />
-      </div>
+  <div>
+  <home-view></home-view>
+  <generic-modal :error-message="loginError">
+    <template v-slot:header>
+      <word-mark/>
+      <h2 id="title" v-if="loginStep === LoginSteps.Login">
+        Simplify your day – just enter your email:
+      </h2>
+      <h2 id="title" v-else-if="loginStep === LoginSteps.SignUp">
+        Have an invite code? Enter it here
+      </h2>
+      <h2 id="title" v-else>
+        Complete your sign up
+      </h2>
+    </template>
+    <div class="intro-text" v-if="loginStep === LoginSteps.Login">
+      <p><strong>Returning?</strong> We'll recognize you and direct you to your account.</p>
+      <p><strong>New?</strong> We'll help you set up quickly.</p>
     </div>
+    <div class="intro-text" v-if="loginStep === LoginSteps.SignUpConfirm">
+      <p><strong>Please confirm your email to join our waiting list.</strong></p>
+      <p>Check your inbox for more information shortly.</p>
+    </div>
+    <div class="form-body">
+      <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
+        <text-input name="email" v-model="email" :required="true" :help="loginStep === LoginSteps.Login || hideInviteField ? 'Your privacy is important to us.' : null">{{ t('label.email') }}</text-input>
+        <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true">{{ t('label.password') }}</text-input>
+        <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" help="If you don't have an invite code, add your email to our waiting list">{{ t('label.inviteCode') }}</text-input>
+      </form>
+    </div>
+    <template v-slot:actions>
+      <primary-button
+        class="btn-continue"
+        :title="t('label.continue')"
+        @click="onEnter()"
+        v-if="loginStep !== LoginSteps.SignUpConfirm"
+      >
+        {{ t('label.continue') }}
+      </primary-button>
+      <primary-button
+        class="btn-close"
+        :title="t('label.close')"
+        @click="router.push({name: 'home'})"
+        v-else
+      >
+        {{ t('label.close') }}
+      </primary-button>
+    </template>
+    <template v-slot:footer>
+      <router-link :to="{name: 'home'}">Plan less, do more</router-link>
+    </template>
+  </generic-modal>
   </div>
 </template>
+<style scoped>
+.intro-text {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 0.983125rem;
+  margin-bottom: 1.5625rem;
+}
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 23.75rem;
+}
+
+.btn-continue, .btn-close {
+  /* Right align */
+  margin-right: 2rem;
+  margin-left: auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+</style>
