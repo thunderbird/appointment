@@ -52,6 +52,7 @@ def get_redis() -> Redis | RedisCluster | None:
             password=password,
             ssl=ssl,
             decode_responses=True,
+            skip_full_coverage_check=True,
         )
 
         sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
