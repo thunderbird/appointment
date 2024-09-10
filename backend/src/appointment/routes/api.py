@@ -97,7 +97,7 @@ def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber =
     # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
     appointments = map(
         lambda x: schemas.AppointmentWithCalendarOut(
-            **x.__dict__, slots=x.slots, calendar_title=x.calendar.title, calendar_color=x.calendar.color
+            **x.__dict__, calendar_title=x.calendar.title, calendar_color=x.calendar.color
         ),
         appointments,
     )
