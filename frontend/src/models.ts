@@ -285,16 +285,16 @@ export type ExceptionDetail = {
 export type PydanticExceptionDetail = {
   ctx: { reason: string },
   input: string,
-  loc: Array<string>,
+  loc: string[],
   msg: string,
   type: string
 }
 export type PydanticException = {
-  detail?: Array<PydanticExceptionDetail>;
+  detail?: PydanticExceptionDetail[];
 }
 export type Exception = {
   status_code?: number;
-  detail?: ExceptionDetail | Array<PydanticExceptionDetail>;
+  detail?: ExceptionDetail | PydanticExceptionDetail[];
   headers?: any[];
 };
 export type Token = {
