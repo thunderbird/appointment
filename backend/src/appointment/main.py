@@ -129,8 +129,15 @@ def server():
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
     openapi_url = '/openapi.json' if os.getenv('APP_ENV') == APP_ENV_DEV else None
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Boot the redis cluster as the app starts up
+        boot_redis_cluster()
+        yield
+        close_redis_cluster()
+
     # init app
-    app = FastAPI(openapi_url=openapi_url)
+    app = FastAPI(openapi_url=openapi_url, lifespan=lifespan)
 
     app.add_middleware(RawContextMiddleware, plugins=(L10n(),))
 
@@ -174,14 +181,6 @@ def server():
     async def catch_google_refresh_errors(request, exc):
         """Catch google refresh errors, and use our error instead."""
         return await http_exception_handler(request, APIGoogleRefreshError())
-
-    @asynccontextmanager
-    async def lifespan(app: FastAPI):
-        # Boot the redis cluster as the app starts up
-        boot_redis_cluster()
-        yield
-        close_redis_cluster()
-
 
     # Mix in our extra routes
     app.include_router(api.router)
