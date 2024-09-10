@@ -91,6 +91,9 @@
     },
     "zoom": "Zoom"
   },
+  "navBar": {
+    "report-bug": "Report Bug"
+  },
   "icons": {
     "calendar": "Calendar",
     "critical": "Critical",
@@ -343,7 +346,7 @@
     "googlePermissionEventsName": "View and edit events on all your calendars",
     "homepage": {
       "calendarCopy": "Connect your calendar and see all your meetings in one place. Book one-off or recurring events and invite people to join you.",
-      "copywrite": "Thunderbird is now part of {mzlaLink}, a wholly owned subsidiary of Mozilla Foundation. Portions of this content are ©1998–2023 by individual contributors. Content available under a {creativeCommonsLink}.",
+      "copywrite": "Thunderbird is now part of {mzlaLink}, a wholly owned subsidiary of Mozilla Foundation. Portions of this content are ©1998–2024 by individual contributors. Content available under a {creativeCommonsLink}.",
       "creativeCommonsLinkText": "Creative Commons license",
       "intro": "Thunderbird Appointment makes it easy to find a time to meet. So you can ditch the admin and streamline your day.",
       "mzlaLinkText": "MZLA Technologies Corporation",

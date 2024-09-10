@@ -300,7 +300,7 @@ onMounted(async () => {
       :class="{
         'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
         '!pt-24': routeIsHome || isAuthenticated,
-        'min-h-full pb-32 pt-8': routeIsPublic && !routeHasModal,
+        'min-h-full': routeIsPublic && !routeHasModal,
       }"
     >
       <router-view/>

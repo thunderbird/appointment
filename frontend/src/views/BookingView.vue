@@ -160,7 +160,7 @@ const bookEvent = async (attendeeData: Attendee) => {
     const autoConfirmed = appointment && appointment.value.booking_confirmation !== undefined
       ? !appointment.value.booking_confirmation : false;
     posthog.capture(MetricEvents.RequestBooking, {
-      autoConfirmed
+      autoConfirmed,
     });
   }
 };
@@ -204,7 +204,7 @@ onMounted(async () => {
     <!-- booking page content: successful booking -->
     <main
       v-else-if="activeView === BookingCalendarView.Success"
-      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row"
+      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row "
     >
       <booking-view-success
         :attendee-email="attendee.email"
@@ -215,7 +215,7 @@ onMounted(async () => {
     <!-- booking page content: time slot selection -->
     <main
       v-else
-      class="mx-auto max-w-screen-2xl select-none px-4"
+      class="mx-auto max-w-screen-2xl select-none px-4 pb-32 "
     >
       <booking-view-slot-selection
         :show-navigation="showNavigation"
