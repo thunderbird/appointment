@@ -1,6 +1,7 @@
 {
   "app": {
     "summary": "Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.",
+    "tagline": "Plan less, do more",
     "title": "Thunderbird Appointment"
   },
   "error": {
@@ -227,7 +228,7 @@
     "home": "Home",
     "immediately": "instant",
     "inPerson": "In person",
-    "inviteCode": "Have an invite code?",
+    "inviteCode": "Invite code",
     "language": "Choose language",
     "legal": "Legal",
     "light": "Light",
@@ -319,6 +320,38 @@
     "de": "German",
     "en": "English"
   },
+  "login": {
+    "confirm": {
+      "intro": [
+        "Please confirm your email to join our waiting list.",
+        "Check your inbox for more information shortly."
+      ],
+      "title": "Complete your sign up"
+    },
+    "form": {
+      "no-invite-code": "If you don't have an invite code, add your email to our waiting list.",
+      "privacy": "Your privacy is important to us."
+    },
+    "login": {
+      "intro": {
+        "new": [
+          "New?",
+          "{strong} We'll help you set up quickly."
+        ],
+        "returning": [
+          "Returning?",
+          "{strong} We'll recognize you and direct you to your account."
+        ]
+      },
+      "title": "Simplify your day – just enter your email:"
+    },
+    "signUp": {
+      "title": "Have an invite code? Enter it here"
+    }
+  },
+  "navBar": {
+    "report-bug": "Report Bug"
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
     "emailAddress": "john.doe{'@'}example.com",
@@ -347,7 +380,7 @@
     "googlePermissionEventsName": "View and edit events on all your calendars",
     "homepage": {
       "calendarCopy": "Connect your calendar and see all your meetings in one place. Book one-off or recurring events and invite people to join you.",
-      "copywrite": "Thunderbird is now part of {mzlaLink}, a wholly owned subsidiary of Mozilla Foundation. Portions of this content are ©1998–2023 by individual contributors. Content available under a {creativeCommonsLink}.",
+      "copywrite": "Thunderbird is now part of {mzlaLink}, a wholly owned subsidiary of Mozilla Foundation. Portions of this content are ©1998–2024 by individual contributors. Content available under a {creativeCommonsLink}.",
       "creativeCommonsLinkText": "Creative Commons license",
       "intro": "Thunderbird Appointment makes it easy to find a time to meet. So you can ditch the admin and streamline your day.",
       "mzlaLinkText": "MZLA Technologies Corporation",
@@ -423,15 +456,22 @@
   },
   "waitingList": {
     "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!",
-    "confirmHeading": "Your email is confirmed!",
-    "confirmInfo": "Your email is now confirmed and if selected you will be contacted about an invite code in the future.",
+    "confirmHeading": "You’re on the waitlist",
+    "confirmInfo": "You'll receive an invitation as soon as registration opens.",
     "errorHeading": "There was a problem with that link",
     "errorInfo": "Unfortunately this link is expired or is invalid.",
-    "leaveHeading": "You successfully left the waiting list",
-    "leaveInfo": "Sorry to see you go. You're welcome to re-join the waiting list at any time!",
+    "leaveHeading": "You’ve been removed from the waitlist",
+    "leaveInfo": "Your email has been successfully removed from our waitlist.\nIf you change your mind, you can always rejoin.",
+    "marketing": [
+      "Own your calendar, share your time.",
+      "Thunderbird Appointment simplifies the way you find time to connect so you can soar past the planning, and get to the living."
+    ],
     "signUpAlreadyExists": "You are already on the waiting list.",
     "signUpCheckYourEmail": "Check your email for more information.",
-    "signUpHeading": "Just one more step!",
-    "signUpInfo": "Before you can be added to the waiting list, you need to confirm your email address."
+    "signUpHeading": "Complete your sign up",
+    "signUpInfo": [
+      "Please confirm your email to join our waiting list.",
+      "Check your inbox for more information shortly."
+    ]
   }
 }

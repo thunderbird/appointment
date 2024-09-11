@@ -3,6 +3,7 @@
 Boot application, init database, authenticate user and provide all API endpoints.
 
 """
+from contextlib import asynccontextmanager
 
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
@@ -11,6 +12,7 @@ from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
 
 from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
+from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 
@@ -127,8 +129,15 @@ def server():
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
     openapi_url = '/openapi.json' if os.getenv('APP_ENV') == APP_ENV_DEV else None
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Boot the redis cluster as the app starts up
+        boot_redis_cluster()
+        yield
+        close_redis_cluster()
+
     # init app
-    app = FastAPI(openapi_url=openapi_url)
+    app = FastAPI(openapi_url=openapi_url, lifespan=lifespan)
 
     app.add_middleware(RawContextMiddleware, plugins=(L10n(),))
 

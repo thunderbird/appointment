@@ -8,6 +8,7 @@ import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
+import { IconExternalLink } from '@tabler/icons-vue';
 
 // component constants
 const user = useUserStore();
@@ -19,14 +20,8 @@ const call = inject(callKey);
 // component properties
 interface Props {
   navItems: string[], // list of route names that are also lang keys (format: label.<key>), used as nav items
-};
+}
 defineProps<Props>();
-
-// do log out
-const logout = async () => {
-  await user.logout(call);
-  await router.push('/');
-};
 
 /**
  * Is this nav entry active?
@@ -95,13 +90,16 @@ const isNavEntryActive = (item: string) => {
               :title="t('label.copy')"
               class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
             />
+            <router-link :to="{ name: 'report-bug' }" class="flex items-center justify-between gap-1 p-2">
+              {{ t('navBar.report-bug') }} <icon-external-link class="size-4"/>
+            </router-link>
             <router-link :to="{ name: 'contact' }" class="p-2">
               {{ t('label.contact') }}
             </router-link>
             <hr class="border-teal-500" />
-            <div @click="logout" class="btn-logout cursor-pointer p-2" :title="t('label.logOut')">
+            <router-link :to="{ name: 'logout' }" class="p-2">
               {{ t('label.logOut') }}
-            </div>
+            </router-link>
           </div>
         </template>
       </drop-down>

@@ -1,17 +1,30 @@
 {% extends "includes/base.jinja2" %}
 {# Code begins! #}
 {% block introduction %}
-  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
+  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;margin-bottom: 32px;">
     <p style="font-weight: 700; margin: 0;">
       {{ l10n('confirm-email-mail-html-heading') }}
     </p>
   </div>
 {% endblock %}
 {% block call_to_action %}
-  <p>
-    {{ l10n('confirm-email-mail-html-body') }}
+  <center>
+    <p style="max-width: 380px; text-align: center;">
+      {{ l10n('confirm-email-mail-html-body') }}
+    </p>
+  </center>
+  <p style="
+    color: {{ colour_tbpro_apmt_primary }};
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-decoration-line: underline;
+    margin-bottom: 32px;
+    ">
+    {{ confirm_email_url }}
   </p>
-  <div style="margin-bottom: 12px">
+  <div style="margin-bottom: 32px">
     <a
       href="{{ confirm_email_url }}"
       style="
@@ -28,20 +41,23 @@
         "
     >{{ l10n('confirm-email-mail-confirm-action') }}</a>
   </div>
-  <p>
+  <center>
+    <p style="
+    color: {{ colour_text_muted }};
+    text-align: center;
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin-bottom: 32px;
+    max-width: 315px;
+    ">
     {{ l10n('confirm-email-mail-html-body-2') }}
-  </p>
-  <div>
-    <a
-      href="{{ decline_email_url }}"
-      style="
-        display: inline-block;
-        font-size: 13px;
-        padding: 12px 24px;
+    <a style="
         color: {{ colour_tbpro_apmt_primary }};
-        text-decoration-line: underline;
-        font-weight: 400;
-        "
-    >{{ l10n('confirm-email-mail-decline-action') }}</a>
-  </div>
+        text-decoration-line: underline;"
+       href="{{ decline_email_url }}">{{ l10n('confirm-email-mail-html-body-2-link-text') }}</a>
+  </p>
+  </center>
+  
 {% endblock %}

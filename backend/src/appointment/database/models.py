@@ -221,7 +221,7 @@ class Appointment(Base):
     )
 
     calendar: Mapped[Calendar] = relationship('Calendar', back_populates='appointments')
-    slots: Mapped[list['Slot']] = relationship('Slot', cascade='all,delete', back_populates='appointment')
+    slots: Mapped[list['Slot']] = relationship('Slot', cascade='all,delete', back_populates='appointment', lazy='joined')
 
 
 class Attendee(Base):
@@ -257,7 +257,7 @@ class Slot(Base):
     booking_expires_at = Column(DateTime)
     booking_status = Column(Enum(BookingStatus), default=BookingStatus.none)
 
-    appointment: Mapped[Appointment] = relationship('Appointment', back_populates='slots')
+    appointment: Mapped[Appointment] = relationship('Appointment', back_populates='slots', lazy='joined')
     schedule: Mapped['Schedule'] = relationship('Schedule', back_populates='slots')
 
     attendee: Mapped[Attendee] = relationship('Attendee', cascade='all,delete', back_populates='slots')

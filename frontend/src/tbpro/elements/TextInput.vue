@@ -2,6 +2,10 @@
 import { ref } from 'vue';
 import { HTMLInputElementEvent } from '@/models';
 
+const model = defineModel<string>();
+const isInvalid = ref(false);
+const validationMessage = ref('');
+const isDirty = ref(false);
 const inputRef = ref<HTMLInputElement>(null);
 /**
  * Forwards focus intent to the text input element.
@@ -17,28 +21,37 @@ const focus = () => {
 // component properties
 interface Props {
   name: string;
+  help?: string;
+  remoteError?: string;
   type?: string;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
-};
+}
 withDefaults(defineProps<Props>(), {
   type: 'text',
+  help: null,
+  remoteError: null,
   placeholder: '',
   required: false,
   disabled: false,
-})
+});
 
 defineEmits(['submit']);
 defineExpose({ focus });
 
-const model = defineModel<string>();
-const isInvalid = ref(false);
-const validationMessage = ref('');
-
 const onInvalid = (evt: HTMLInputElementEvent) => {
   isInvalid.value = true;
+  isDirty.value = true;
   validationMessage.value = evt.target.validationMessage;
+};
+/**
+ * On any change we mark the element as dirty
+ * this is so we can delay :invalid until
+ * the user does something worth invalidating
+ */
+const onChange = () => {
+  isDirty.value = true;
 };
 </script>
 
@@ -51,6 +64,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
     <input
       class="tbpro-input"
       v-model="model"
+      :class="{'dirty': isDirty}"
       :type="type"
       :id="name"
       :name="name"
@@ -58,10 +72,17 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
       :placeholder="placeholder"
       :required="required"
       @invalid="onInvalid"
+      @change="onChange"
       ref="inputRef"
     />
-    <span :class="{'visible': isInvalid}" class="help-label">
+    <span v-if="isInvalid" class="help-label invalid">
       {{ validationMessage }}
+    </span>
+    <span v-else-if="help" class="help-label">
+      {{ help }}
+    </span>
+    <span v-else class="help-label">
+      <!-- Empty space -->
     </span>
   </label>
 </template>
@@ -86,18 +107,18 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 }
 
 .help-label {
-  visibility: hidden;
   display: flex;
-  color: var(--colour-danger-default);
+  color: var(--colour-ti-base);
 
   width: 100%;
   min-height: 0.9375rem;
   font-size: 0.625rem;
   line-height: 0.9375rem;
-}
+  padding: 0.1875rem;
 
-.visible {
-  visibility: visible;
+  &.invalid {
+    color: var(--colour-danger-default);
+  }
 }
 
 .required {
@@ -124,7 +145,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
     border-radius: 0.125rem;
   }
 
-  &:invalid {
+  &.dirty:invalid {
     --colour-btn-border: var(--colour-ti-critical);
   }
 

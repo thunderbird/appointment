@@ -177,8 +177,9 @@
 }
 
 /* Force First Time User Experience to be different from the rest of the site */
-.page-ftue {
+.page-ftue, .new-design {
   font-family: 'Inter', 'sans-serif';
+  font-size: 0.8125rem;
 }
 
 
@@ -198,4 +199,8 @@
   .is-dark-mode {
     display: block;
   }
+}
+
+.modal-active {
+  overflow: hidden;
 }

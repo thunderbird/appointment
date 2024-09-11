@@ -171,11 +171,12 @@ new-account-mail-plain = Du wurdest zu Thunderbird Appointment eingeladen.
 
 ## Confirm Email for waiting list
 confirm-email-mail-subject = Bestätige deine E-Mail-Adresse um der Warteliste beizutreten!
-confirm-email-mail-confirm-action = Bestätige deine E-Mail-Adresse
-confirm-email-mail-decline-action = Entferne deine E-Mail-Adresse
+confirm-email-mail-confirm-action = Bestätigen
 confirm-email-mail-html-heading = Danke für Dein Interesse an Thunderbird Appointment.
-confirm-email-mail-html-body = Bevor wir Dich auf unsere Warteliste setzen, musst Du Deine E-Mail-Adresse unten bestätigen.
-confirm-email-mail-html-body-2 = Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert?
+confirm-email-mail-html-body = Um der Warteliste beizutreten, bestätige bitte deine E-Mail-Adresse, indem du den Button unten klickst oder diesen Link in deinen Browser einfügst:
+confirm-email-mail-html-body-2 = Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert, dann kannst du
+confirm-email-mail-html-body-2-link-text = deine E-Mail-Adresse entfernen.
+
 # Variables:
 # $confirm_email_url (String) - URL to confirm your email
 # $decline_email_url (String) - URL to remove the email from the waiting list

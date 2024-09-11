@@ -3,7 +3,7 @@
 Repository providing CRUD functions for appointment database models.
 """
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from .. import models, schemas, repo
 
 
@@ -34,7 +34,7 @@ def get_public(db: Session, slug: str):
 
 def get_by_subscriber(db: Session, subscriber_id: int):
     """retrieve list of appointments by owner id"""
-    return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
+    return db.query(models.Appointment).options(joinedload(models.Appointment.calendar)).all()
 
 
 def is_owned(db: Session, appointment_id: int, subscriber_id: int):

@@ -1,6 +1,7 @@
 {
   "app": {
     "summary": "Lass Freunde und Kollegen Zeiten in deinem Kalender wählen. Terminabsprachen so simpel wie möglich.",
+    "tagline": "Weniger planen, mehr schaffen",
     "title": "Thunderbird Appointment"
   },
   "error": {
@@ -319,6 +320,38 @@
     "de": "Deutsch",
     "en": "Englisch"
   },
+  "login": {
+    "confirm": {
+      "intro": [
+        "Bitte bestätige die Registrierung um der Warteliste beizutreten.",
+        "Check dein Postfach, du erhälst in Kürze weitere Informationen."
+      ],
+      "title": "Vervollständige die Registrierung"
+    },
+    "form": {
+      "no-invite-code": "Wenn du keinen Einladungscode hast, setze deine E-Mail-Adresse auf unsere Warteliste.",
+      "privacy": "Datenschutz ist uns wichtig."
+    },
+    "login": {
+      "intro": {
+        "new": [
+          "Neu hier?",
+          "{strong} Wir helfen bei der schnellen Einrichtung."
+        ],
+        "returning": [
+          "Du bist zurück?",
+          "{strong} Wir leiten dich zu deinem Benutzerkonto weiter."
+        ]
+      },
+      "title": "Mach deinen Tag leichter – gibt deine E-Mail-Adresse ein:"
+    },
+    "signUp": {
+      "title": "Du hast einen Einladungscode? Gib ihn hier ein"
+    }
+  },
+  "navBar": {
+    "report-bug": "Fehler melden"
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen …",
     "emailAddress": "max.muster{'@'}beispiel.de",
@@ -347,7 +380,7 @@
     "googlePermissionEventsName": "Anzeigen und Bearbeiten von Terminen in allen Kalendern",
     "homepage": {
       "calendarCopy": "Verbinde deine Kalender und finde alle deine Termine an einem Ort. Buche einmalige oder wiederkehrende Veranstaltungen und lade andere dazu ein.",
-      "copywrite": "Thunderbird gehört nun zu {mzlaLink}, eine vollständige Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts sind ©1998-2023 von einzelnen Mitwirkenden. Der Inhalt ist unter einem {creativeCommonsLink} verfügbar.",
+      "copywrite": "Thunderbird gehört nun zu {mzlaLink}, eine vollständige Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts sind ©1998-2024 von einzelnen Mitwirkenden. Der Inhalt ist unter einem {creativeCommonsLink} verfügbar.",
       "creativeCommonsLinkText": "Creative-Commons-Lizenz",
       "intro": "Thunderbird Appointment macht Termine finden zum Kinderspiel. Spar dir den Aufwand und gestalte deinen Tag effizienter.",
       "mzlaLinkText": "MZLA Technologies Corporation",
@@ -423,15 +456,22 @@
   },
   "waitingList": {
     "adminInviteNotice": "Hinweis: Der Senden-Button wird bereits akzeptierte Personen nicht erneut einladen, sie können aber dennoch ausgewählt werden. Verwende die Filter für eine bessere Übersicht!",
-    "confirmHeading": "Deine E-Mail-Adresse wurde bestätigt!",
-    "confirmInfo": "Deine E-Mail-Adresse ist nun bestätigt. Sobald Du ausgewählt wurdest, wirst Du einen Einladungscode bekommen.",
+    "confirmHeading": "Du bist auf der Warteliste",
+    "confirmInfo": "Du bekommst eine Einladung sobald die Registrierung startet.",
     "errorHeading": "Es gab ein Problem mit diesem Link",
     "errorInfo": "Leider ist dieser Link abgelaufen oder ungültig.",
-    "leaveHeading": "Du hast die Warteliste erfolgreich verlassen",
-    "leaveInfo": "Schade, dass Du gehst. Du kannst Dich jederzeit wieder auf die Warteliste setzen lassen!",
+    "leaveHeading": "Du wurdest von von der Warteliste entfernt",
+    "leaveInfo": "Deine E-Mail-Adresse wurde erfolgreich von unserer Warteliste entfernt. Falls du deine Meinung änderst, kannst du dich jederzeit wieder auf die Warteliste setzen lassen.",
+    "marketing": [
+      "Behalte deinen Kalender, teile deine Zeit.",
+      "Thunderbird Appointment vereinfacht die Art und Weise gemeinsamer Terminfindung, um durch weniger Planen mehr Zeit für die wichtigen Dinge zu haben."
+    ],
     "signUpAlreadyExists": "Du bist bereits auf der Warteliste.",
     "signUpCheckYourEmail": "Weitere Informationen findest Du in Deiner E-Mail.",
-    "signUpHeading": "Nur noch ein Schritt!",
-    "signUpInfo": "Bevor Du in die Warteliste aufgenommen werden kannst, musst Du Deine E-Mail-Adresse bestätigen."
+    "signUpHeading": "Registrierung abschließen",
+    "signUpInfo": [
+      "Bitte bestätige deine E-Mail-Adresse, um auf die Warteliste zu kommen.",
+      "In Kürze erhätst du weitere Informationen in deinen Posteingang."
+    ]
   }
 }
