@@ -150,8 +150,11 @@ onUnmounted(() => {
 
 .divider {
   width: 100%;
+  height: 0.0625rem;
   padding-bottom: 1px;
   border-radius: unset;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
 }
 .dark {
@@ -214,7 +217,7 @@ onUnmounted(() => {
     position: absolute;
     bottom: 4rem;
     width: 50rem;
-    height: 0.0625rem;
+    margin: 0;
   }
 
   .footer {

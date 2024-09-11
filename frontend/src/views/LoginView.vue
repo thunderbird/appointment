@@ -206,70 +206,72 @@ const onEnter = () => {
 
 <template>
   <div>
-  <home-view></home-view>
-  <generic-modal :error-message="loginError">
-    <template v-slot:header>
-      <word-mark/>
-      <h2 id="title" v-if="loginStep === LoginSteps.Login">
-        {{ t('login.login.title') }}
-      </h2>
-      <h2 id="title" v-else-if="loginStep === LoginSteps.SignUp">
-        {{ t('login.signUp.title') }}
-      </h2>
-      <h2 id="title" v-else>
-        {{ t('login.confirm.title') }}
-      </h2>
-    </template>
-    <div class="intro-text" v-if="loginStep === LoginSteps.Login">
-      <i18n-t keypath="login.login.intro.returning.1" tag="p">
-        <template v-slot:strong>
-          <strong>{{ t('login.login.intro.returning.0') }}</strong>
-        </template>
-      </i18n-t>
-      <i18n-t keypath="login.login.intro.new.1" tag="p">
-        <template v-slot:strong>
-          <strong>{{ t('login.login.intro.new.0') }}</strong>
-        </template>
-      </i18n-t>
-    </div>
-    <div class="intro-text" v-if="loginStep === LoginSteps.SignUpConfirm">
-      <p><strong>{{ t('login.confirm.intro.0') }}</strong></p>
-      <p>{{ t('login.confirm.intro.1') }}</p>
-    </div>
-    <div class="form-body">
-      <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
-        <text-input name="email" v-model="email" :required="true" :help="loginStep === LoginSteps.Login || hideInviteField ? t('login.form.privacy') : null">{{ t('label.email') }}</text-input>
-        <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true">{{ t('label.password') }}</text-input>
-        <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
-      </form>
-    </div>
-    <template v-slot:actions>
-      <primary-button
-        class="btn-continue"
-        :title="t('label.continue')"
-        :disabled="isLoading"
-        @click="onEnter()"
-        v-if="loginStep !== LoginSteps.SignUpConfirm"
-      >
-        {{ t('label.continue') }}
-      </primary-button>
-      <primary-button
-        class="btn-close"
-        :title="t('label.close')"
-        :disabled="isLoading"
-        @click="router.push({name: 'home'})"
-        v-else
-      >
-        {{ t('label.close') }}
-      </primary-button>
-    </template>
-    <template v-slot:footer>
-      <router-link :to="{name: 'home'}">{{ t('app.tagline') }}</router-link>
-    </template>
-  </generic-modal>
+    <home-view></home-view>
+    <generic-modal :error-message="loginError">
+      <template v-slot:header>
+        <word-mark/>
+        <h2 id="title" v-if="loginStep === LoginSteps.Login">
+          {{ t('login.login.title') }}
+        </h2>
+        <h2 id="title" v-else-if="loginStep === LoginSteps.SignUp">
+          {{ t('login.signUp.title') }}
+        </h2>
+        <h2 id="title" v-else>
+          {{ t('login.confirm.title') }}
+        </h2>
+      </template>
+      <div class="intro-text" v-if="loginStep === LoginSteps.Login">
+        <i18n-t keypath="login.login.intro.returning.1" tag="p">
+          <template v-slot:strong>
+            <strong>{{ t('login.login.intro.returning.0') }}</strong>
+          </template>
+        </i18n-t>
+        <i18n-t keypath="login.login.intro.new.1" tag="p">
+          <template v-slot:strong>
+            <strong>{{ t('login.login.intro.new.0') }}</strong>
+          </template>
+        </i18n-t>
+      </div>
+      <div class="intro-text" v-if="loginStep === LoginSteps.SignUpConfirm">
+        <p><strong>{{ t('login.confirm.intro.0') }}</strong></p>
+        <p>{{ t('login.confirm.intro.1') }}</p>
+      </div>
+      <div class="form-body">
+        <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
+          <text-input name="email" v-model="email" :required="true" :help="loginStep === LoginSteps.Login || hideInviteField ? t('login.form.privacy') : null">{{ t('label.email') }}</text-input>
+          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true">{{ t('label.password') }}</text-input>
+          <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
+        </form>
+      </div>
+      <template v-slot:actions>
+        <primary-button
+          class="btn-continue"
+          :title="t('label.continue')"
+          :disabled="isLoading"
+          @click="onEnter()"
+          v-if="loginStep !== LoginSteps.SignUpConfirm"
+        >
+          {{ t('label.continue') }}
+        </primary-button>
+        <primary-button
+          class="btn-close"
+          :title="t('label.close')"
+          :disabled="isLoading"
+          @click="router.push({name: 'home'})"
+          v-else
+        >
+          {{ t('label.close') }}
+        </primary-button>
+      </template>
+      <template v-slot:footer>
+        <router-link :to="{name: 'home'}">{{ t('app.tagline') }}</router-link>
+      </template>
+    </generic-modal>
   </div>
 </template>
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .intro-text {
   display: flex;
   flex-direction: column;
@@ -277,26 +279,34 @@ const onEnter = () => {
   gap: 0.983125rem;
   margin-bottom: 1.5625rem;
 }
+
 /* Tweak the generic-modal's modal-body style */
 :deep(.modal-body) {
   margin-top: 1rem;
 }
+
 .form-body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-width: 23.75rem;
-}
-
-.btn-continue, .btn-close {
-  /* Right align */
-  margin-right: 2rem;
-  margin-left: auto;
+  width: 100%;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+@media (--md) {
+  .form-body {
+    max-width: 23.75rem;
+  }
+
+  .btn-continue, .btn-close {
+    /* Right align */
+    margin-right: 2rem;
+    margin-left: auto;
+  }
 }
 </style>
