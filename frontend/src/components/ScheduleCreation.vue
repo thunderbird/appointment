@@ -101,6 +101,9 @@ const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
 const referenceSchedule = ref({ ...defaultSchedule });
 
+// Separate input for user link, since it's not directly part of the schedule object
+const slugInput = ref(user.mySlug);
+
 onMounted(() => {
   // Retrieve the current external connections
   externalConnectionStore.fetch(call);
@@ -341,14 +344,6 @@ const toggleBookingConfirmation = (newValue: boolean) => {
 
 // track if steps were already visited
 watch(
-  () => scheduleInput.value.active,
-  (newValue) => {
-    emit('updated', newValue ? getScheduleAppointment() : null);
-  },
-);
-
-// track if steps were already visited
-watch(
   () => state.value,
   (_, oldValue) => {
     if (scheduleInput.value.active) {
@@ -361,6 +356,7 @@ watch(
 // track changes and send schedule updates
 watch(
   () => [
+    scheduleInput.value.active,
     scheduleInput.value.name,
     scheduleInput.value.calendar_id,
     scheduleInput.value.start_date,
@@ -701,6 +697,19 @@ watch(
         </div>
         <div v-show="activeStep4" class="flex flex-col gap-2">
           <hr/>
+          <!-- custom quick link -->
+          <label class="relative flex flex-col gap-1">
+            <div class="font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.quickLink") }}
+            </div>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                v-model="slugInput"
+                class="w-full rounded-md disabled:cursor-not-allowed"
+              />
+            </div>
+          </label>
           <!-- option to deactivate confirmation -->
           <div class="flex flex-col gap-3">
             <switch-toggle
