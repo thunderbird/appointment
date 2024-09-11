@@ -69,7 +69,7 @@ class BaseConnector:
 
         return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
 
-    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS')):
+    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)):
         """Sets the passed cached events with an option to set a custom expiry time."""
         if self.redis_instance is None:
             return False
