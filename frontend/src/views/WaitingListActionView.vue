@@ -125,9 +125,11 @@ onMounted(async () => {
   margin-bottom: 1.5625rem;
 }
 
-.btn-close {
-  /* Right align */
-  margin-right: 2rem;
-  margin-left: auto;
+@media (--md) {
+  .btn-close {
+    /* Right align */
+    margin-right: 2rem;
+    margin-left: auto;
+  }
 }
 </style>
