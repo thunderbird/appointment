@@ -139,7 +139,6 @@ const onChange = () => {
   color: var(--colour-ti-critical);
 }
 
-
 .tbpro-input {
   display: inline-block;
   position: relative;

@@ -260,7 +260,7 @@ class Slot(Base):
     appointment: Mapped[Appointment] = relationship('Appointment', back_populates='slots', lazy='joined')
     schedule: Mapped['Schedule'] = relationship('Schedule', back_populates='slots')
 
-    attendee: Mapped[Attendee] = relationship('Attendee', cascade='all,delete', back_populates='slots')
+    attendee: Mapped[Attendee] = relationship('Attendee', cascade='all,delete', back_populates='slots', lazy='joined')
     subscriber: Mapped[Subscriber] = relationship('Subscriber', back_populates='slots')
 
 
