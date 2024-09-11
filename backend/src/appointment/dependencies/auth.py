@@ -31,16 +31,17 @@ def get_user_from_token(db, token: str, require_jti = False):
     sub_id = sub.replace('uid-', '')
     subscriber = repo.subscriber.get(db, int(sub_id))
 
+    # Check this first as any doesn't short-circuit
+    if subscriber is None:
+        raise InvalidTokenException()
+
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
     if any(
         [
-            subscriber is None,
             subscriber.is_deleted,
-            subscriber and subscriber.minimum_valid_iat_time and not iat,
-            subscriber
-            and subscriber.minimum_valid_iat_time
+            subscriber.minimum_valid_iat_time and not iat,
             # We only need second resolution
-            and int(subscriber.minimum_valid_iat_time.timestamp()) > int(iat),
+            subscriber.minimum_valid_iat_time and int(subscriber.minimum_valid_iat_time.timestamp()) > int(iat),
             # If we require this token to be a one time token, then require the claim
             require_jti and not jti
         ]
