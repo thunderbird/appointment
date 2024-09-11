@@ -47,6 +47,8 @@ def health(db: Session = Depends(get_db)):
     if os.getenv('REDIS_URL'):
         try:
             redis_instance: Redis | RedisCluster | None = get_redis()
+            if not redis_instance:
+                raise RuntimeError("Redis is not available despite being configured. Check settings!")
             redis_instance.ping()
         except Exception as ex:
             sentry_sdk.capture_exception(ex)
