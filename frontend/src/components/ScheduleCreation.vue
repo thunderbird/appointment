@@ -354,6 +354,14 @@ const toggleBookingConfirmation = (newValue: boolean) => {
 
 // track if steps were already visited
 watch(
+  () => scheduleInput.value.active,
+  (newValue) => {
+    emit('updated', newValue ? getScheduleAppointment() : null);
+  },
+);
+
+// track if steps were already visited
+watch(
   () => state.value,
   (_, oldValue) => {
     if (scheduleInput.value.active) {
