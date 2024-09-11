@@ -19,6 +19,8 @@ import AlertBox from '@/elements/AlertBox.vue';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
@@ -175,7 +177,9 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
   type: 'schedule',
 });
 
-const isFormDirty = computed(() => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value));
+const isFormDirty = computed(
+  () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value) || slugInput.value !== user.mySlug
+);
 
 // handle notes char limit
 const charLimit = 250;
@@ -218,11 +222,12 @@ const closeCreatedModal = () => {
   savedConfirmation.show = false;
 };
 
-// reset the Schedule creation form
-const resetSchedule = (resetData = true) => {
+// Revert the Schedule creation form to its initial values
+const revertForm = (resetData = true) => {
   scheduleCreationError.value = null;
   if (resetData) {
     scheduleInput.value = { ...referenceSchedule.value };
+    slugInput.value = user.mySlug;
   }
 };
 
@@ -318,7 +323,12 @@ const saveSchedule = async (withConfirmation = true) => {
   emit('created');
   // Update our reference schedule!
   referenceSchedule.value = { ...scheduleInput.value };
-  resetSchedule(false);
+  revertForm(false);
+};
+
+// Update slug with a random 8 character string
+const refreshSlug = () => {
+  slugInput.value = (Math.random() + 1).toString(36).substring(4);
 };
 
 // handle schedule activation / deactivation
@@ -703,11 +713,14 @@ watch(
               {{ t("label.quickLink") }}
             </div>
             <div class="flex gap-2">
-              <input
+              <text-input
                 type="text"
+                name="slug"
+                :prefix="`/${user.data.username}/`"
                 v-model="slugInput"
                 class="w-full rounded-md disabled:cursor-not-allowed"
               />
+              <refresh-icon class="cursor-pointer mt-2.5 text-teal-600" @click.prevent="refreshSlug" />
             </div>
           </label>
           <!-- option to deactivate confirmation -->
@@ -774,7 +787,7 @@ watch(
           <secondary-button
             :label="t('label.revert')"
             class="btn-revert w-1/2"
-            @click="resetSchedule()"
+            @click="revertForm()"
             :disabled="!scheduleInput.active"
             :title="t('label.revert')"
           />
