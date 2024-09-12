@@ -175,6 +175,9 @@ def fxa_callback(
             ),
         )
 
+        # Give them 10 invites
+        repo.invite.generate_codes(db, 10, subscriber.id)
+
         if not is_in_allow_list:
             # Use the invite code after we've created the new subscriber
             used = repo.invite.use_code(db, invite_code, subscriber.id)

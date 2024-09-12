@@ -241,6 +241,7 @@ class CalendarOut(CalendarBase):
 
 class Invite(BaseModel):
     subscriber_id: int | None = None
+    owner_id: Optional[int] = None
     code: str
     status: InviteStatus = InviteStatus.active
     time_created: datetime | None = None

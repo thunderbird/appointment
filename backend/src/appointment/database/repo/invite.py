@@ -4,6 +4,7 @@ Repository providing CRUD functions for invite database models.
 """
 
 import uuid
+from typing import Optional
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
@@ -18,13 +19,13 @@ def get_by_code(db: Session, code: str) -> models.Invite:
     return db.query(models.Invite).filter(models.Invite.code == code).first()
 
 
-def generate_codes(db: Session, n: int):
+def generate_codes(db: Session, n: int, owner_id: Optional[int] = None):
     """generate n invite codes and return the list of created invite objects"""
     codes = [str(uuid.uuid4()) for _ in range(n)]
     db_invites = []
     for code in codes:
-        invite = schemas.Invite(code=code)
-        db_invite = models.Invite(**invite.dict())
+        invite = schemas.Invite(code=code, owner_id=owner_id)
+        db_invite = models.Invite(**invite.model_dump())
         db.add(db_invite)
         db.commit()
         db_invites.append(db_invite)

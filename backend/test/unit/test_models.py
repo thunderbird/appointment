@@ -66,3 +66,27 @@ class TestWaitingList:
             waiting_list_2 = make_waiting_list(email=email)
             assert not waiting_list_2
 
+
+class TestInvite:
+    def test_owned_invites_are_removed_after_subscriber_is_deleted(self, with_db, make_basic_subscriber, make_invite):
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            assert len(subscriber.owned_invites) == 0
+
+            invite = make_invite(owner_id=subscriber.id)
+            db.add(invite)
+            db.refresh(subscriber)
+
+            assert invite
+            assert len(subscriber.owned_invites) == 1
+            assert subscriber.owned_invites[0].id == invite.id
+
+            # Delete the subscriber
+            db.delete(subscriber)
+            db.commit()
+
+            # This also deletes the invite
+            invite = db.query(models.Invite).filter(models.Invite.id == invite.id).first()
+            assert not invite

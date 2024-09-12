@@ -145,7 +145,8 @@ class Subscriber(HasSoftDelete, Base):
     calendars = relationship('Calendar', cascade='all,delete', back_populates='owner')
     slots = relationship('Slot', cascade='all,delete', back_populates='subscriber')
     external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
-    invite: Mapped['Invite'] = relationship('Invite', cascade='all,delete', back_populates='subscriber', uselist=False)
+    invite: Mapped['Invite'] = relationship('Invite', cascade='all,delete', back_populates='subscriber', uselist=False, foreign_keys='Invite.subscriber_id')
+    owned_invites: Mapped[list['Invite']] = relationship('Invite', cascade='all,delete', back_populates='owner', foreign_keys='[Invite.owner_id]')
 
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
@@ -358,11 +359,13 @@ class Invite(Base):
     __tablename__ = 'invites'
 
     id = Column(Integer, primary_key=True, index=True)
+    owner_id = Column(Integer, ForeignKey('subscribers.id'), nullable=True)
     subscriber_id = Column(Integer, ForeignKey('subscribers.id'))
     code = Column(encrypted_type(String), index=False)
     status = Column(Enum(InviteStatus), index=True)
 
-    subscriber: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True)
+    owner: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True, foreign_keys=[owner_id])
+    subscriber: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True, foreign_keys=[subscriber_id])
     waiting_list: Mapped['WaitingList'] = relationship('WaitingList', cascade='all,delete', back_populates='invite', uselist=False)
 
     @property
