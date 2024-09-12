@@ -3,7 +3,7 @@ import {
   DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS,
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
-import { Calendar, Schedule, Slot, ScheduleAppointment, Error } from "@/models";
+import { Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption } from "@/models";
 import {
   ref, reactive, computed, inject, watch, onMounted, Ref
 } from 'vue';
@@ -19,6 +19,7 @@ import AlertBox from '@/elements/AlertBox.vue';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
+import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
 
@@ -182,6 +183,12 @@ const isFormDirty = computed(
 // handle notes char limit
 const charLimit = 250;
 const charCount = computed(() => scheduleInput.value.details.length);
+
+// Weekday options
+const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
+  label: day.min[0],
+  value: day.iso,
+}));
 
 // booking options
 const earliestOptions = {};
@@ -481,22 +488,7 @@ watch(
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.availableDays") }}
             </div>
-            <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg p-4">
-              <label
-                v-for="w in isoWeekdays"
-                :key="w.iso"
-                class="flex cursor-pointer select-none items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  v-model="scheduleInput.weekdays"
-                  :value="w.iso"
-                  :disabled="!scheduleInput.active"
-                  class="size-5 text-teal-500"
-                />
-                <span>{{ w.long }}</span>
-              </label>
-            </div>
+            <bubble-select class="bubble-select" :options="scheduleDayOptions" v-model="scheduleInput.weekdays" />
           </div>
         </div>
       </div>
@@ -862,5 +854,9 @@ input[type=checkbox]:disabled {
 
 .tooltip-icon:hover ~ .tooltip {
   display: block;
+}
+
+.bubble-select {
+  gap: .25rem;
 }
 </style>
