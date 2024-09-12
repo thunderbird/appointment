@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useElementSize } from '@vueuse/core';
 import { HTMLInputElementEvent } from '@/models';
 
 const model = defineModel<string>();
@@ -7,6 +8,9 @@ const isInvalid = ref(false);
 const validationMessage = ref('');
 const isDirty = ref(false);
 const inputRef = ref<HTMLInputElement>(null);
+const inputPrefix = ref<HTMLSpanElement>(null);
+const { width: inputPrefixWidth } = useElementSize(inputPrefix); // Calculate the width of the prefix element
+
 /**
  * Forwards focus intent to the text input element.
  * Unlike HTMLElement.focus() this does not take any parameters.
@@ -25,20 +29,27 @@ interface Props {
   remoteError?: string;
   type?: string;
   placeholder?: string;
+  prefix?: string; // A prefix shows up at the start of the input field and moves the actual input to the right.
   required?: boolean;
   disabled?: boolean;
 }
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   help: null,
   remoteError: null,
-  placeholder: '',
+  placeholder: null,
+  prefix: null,
   required: false,
   disabled: false,
 });
 
 defineEmits(['submit']);
 defineExpose({ focus });
+
+// Calculate padding left for the actual input considering prefix width and existing padding
+const inputPaddingLeft = computed(() => {
+  return props.prefix ? `${inputPrefixWidth.value+12}px` : '12px';
+});
 
 const onInvalid = (evt: HTMLInputElementEvent) => {
   isInvalid.value = true;
@@ -61,20 +72,24 @@ const onChange = () => {
       <slot/>
       <span v-if="required && model?.length === 0" class="required">*</span>
     </span>
-    <input
-      class="tbpro-input"
-      v-model="model"
-      :class="{'dirty': isDirty}"
-      :type="type"
-      :id="name"
-      :name="name"
-      :disabled="disabled"
-      :placeholder="placeholder"
-      :required="required"
-      @invalid="onInvalid"
-      @change="onChange"
-      ref="inputRef"
-    />
+    <div class="tbpro-input">
+      <span v-if="prefix" ref="inputPrefix" class="tbpro-input-prefix">{{ prefix }}</span>
+      <input
+        class="tbpro-input-element"
+        v-model="model"
+        :class="{ 'dirty': isDirty }"
+        :type="type"
+        :id="name"
+        :name="name"
+        :disabled="disabled"
+        :placeholder="placeholder"
+        :required="required"
+        @invalid="onInvalid"
+        @change="onChange"
+        ref="inputRef"
+        :style="{ paddingLeft: inputPaddingLeft }"
+      />
+    </div>
     <span v-if="isInvalid" class="help-label invalid">
       {{ validationMessage }}
     </span>
@@ -126,40 +141,56 @@ const onChange = () => {
 }
 
 .tbpro-input {
-  --colour-btn-border: var(--colour-neutral-border);
-  width: 100%;
+  display: inline-block;
+  position: relative;
 
-  background-color: var(--colour-neutral-base);
-  border-radius: var(--border-radius);
-  @mixin faded-border var(--colour-btn-border);
-
-  &:hover:enabled {
-    --colour-btn-border: var(--colour-neutral-border-intense);
-  }
-
-  &:active:enabled {
-    --colour-btn-border: var(--colour-neutral-border-intense);
-  }
-
-  &:focus:enabled {
-    border-radius: 0.125rem;
-  }
-
-  &.dirty:invalid {
-    --colour-btn-border: var(--colour-ti-critical);
-  }
-
-  &:disabled {
-    filter: grayscale(50%);
-    cursor: not-allowed;
-  }
-
-  &::placeholder {
+  .tbpro-input-prefix {
+    position: absolute;
+    top: .675em;
+    left: 12px;
+    font-size: 1rem;
+    line-height: var(--line-height-input);
     color: var(--colour-ti-muted);
+    user-select: none;
+  }
+
+  .tbpro-input-element {
+    --colour-btn-border: var(--colour-neutral-border);
+    width: 100%;
+    transition-property: none;
+  
+    background-color: var(--colour-neutral-base);
+    border-radius: var(--border-radius);
+    @mixin faded-border var(--colour-btn-border);
+  
+    &:hover:enabled {
+      --colour-btn-border: var(--colour-neutral-border-intense);
+    }
+  
+    &:active:enabled {
+      --colour-btn-border: var(--colour-neutral-border-intense);
+    }
+  
+    &:focus:enabled {
+      border-radius: 0.125rem;
+    }
+  
+    &.dirty:invalid {
+      --colour-btn-border: var(--colour-ti-critical);
+    }
+  
+    &:disabled {
+      filter: grayscale(50%);
+      cursor: not-allowed;
+    }
+  
+    &::placeholder {
+      color: var(--colour-ti-muted);
+    }
   }
 }
 .dark {
-  .tbpro-input {
+  .tbpro-input-element {
     background-color: var(--colour-neutral-lower);
   }
 }

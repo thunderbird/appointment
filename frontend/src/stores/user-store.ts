@@ -38,6 +38,14 @@ export const useUserStore = defineStore('user', () => {
     return data.value.signedUrl;
   });
 
+  /**
+   * Return the last unique URL part of the users link
+   */
+  const mySlug = computed((): string => {
+    const link = myLink.value.replace(/\/+$/, '');
+    return link.slice(link.lastIndexOf('/')+1);
+  });
+
   const authenticated = computed((): boolean => data.value.accessToken !== null);
   /**
    * @deprecated - Use authenticated
@@ -202,6 +210,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     logout,
     myLink,
+    mySlug,
     updateUser,
     finishFTUE,
   };

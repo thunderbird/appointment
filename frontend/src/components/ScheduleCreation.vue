@@ -3,7 +3,7 @@ import {
   DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS,
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
-import { Calendar, Schedule, Slot, ScheduleAppointment, Error } from "@/models";
+import { Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption } from "@/models";
 import {
   ref, reactive, computed, inject, watch, onMounted, Ref
 } from 'vue';
@@ -19,6 +19,10 @@ import AlertBox from '@/elements/AlertBox.vue';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
+import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
@@ -27,6 +31,7 @@ import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useScheduleStore } from '@/stores/schedule-store';
+import router from '@/router';
 
 // component constants
 const user = useUserStore();
@@ -66,6 +71,7 @@ const state = ref(firstStep);
 const activeStep1 = computed(() => state.value === firstStep);
 const activeStep2 = computed(() => state.value === ScheduleCreationState.Settings);
 const activeStep3 = computed(() => state.value === ScheduleCreationState.Details);
+const activeStep4 = computed(() => state.value === ScheduleCreationState.Booking);
 const visitedStep1 = ref(false);
 
 // calculate calendar titles
@@ -94,6 +100,7 @@ const defaultSchedule: Schedule = {
   weekdays: [1, 2, 3, 4, 5],
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
+  slug: user.mySlug,
   booking_confirmation: true,
 };
 const scheduleInput = ref({ ...defaultSchedule });
@@ -171,11 +178,19 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
   type: 'schedule',
 });
 
-const isFormDirty = computed(() => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value));
+const isFormDirty = computed(
+  () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value)
+);
 
 // handle notes char limit
 const charLimit = 250;
 const charCount = computed(() => scheduleInput.value.details.length);
+
+// Weekday options
+const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
+  label: day.min[0],
+  value: day.iso,
+}));
 
 // booking options
 const earliestOptions = {};
@@ -214,8 +229,8 @@ const closeCreatedModal = () => {
   savedConfirmation.show = false;
 };
 
-// reset the Schedule creation form
-const resetSchedule = (resetData = true) => {
+// Revert the Schedule creation form to its initial values
+const revertForm = (resetData = true) => {
   scheduleCreationError.value = null;
   if (resetData) {
     scheduleInput.value = { ...referenceSchedule.value };
@@ -314,7 +329,12 @@ const saveSchedule = async (withConfirmation = true) => {
   emit('created');
   // Update our reference schedule!
   referenceSchedule.value = { ...scheduleInput.value };
-  resetSchedule(false);
+  revertForm(false);
+};
+
+// Update slug with a random 8 character string
+const refreshSlug = () => {
+  scheduleInput.value.slug = self.crypto.randomUUID().substring(0, 8);
 };
 
 // handle schedule activation / deactivation
@@ -360,6 +380,7 @@ watch(
 // track changes and send schedule updates
 watch(
   () => [
+    scheduleInput.value.active,
     scheduleInput.value.name,
     scheduleInput.value.calendar_id,
     scheduleInput.value.start_date,
@@ -415,6 +436,7 @@ watch(
           <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
         </label>
       </div>
+
       <!-- step 1 -->
       <div
         class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
@@ -468,25 +490,22 @@ watch(
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.availableDays") }}
             </div>
-            <div class="grid grid-flow-col grid-cols-2 grid-rows-4 gap-2 rounded-lg p-4">
-              <label
-                v-for="w in isoWeekdays"
-                :key="w.iso"
-                class="flex cursor-pointer select-none items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  v-model="scheduleInput.weekdays"
-                  :value="w.iso"
-                  :disabled="!scheduleInput.active"
-                  class="size-5 text-teal-500"
-                />
-                <span>{{ w.long }}</span>
-              </label>
+            <bubble-select class="bubble-select" :options="scheduleDayOptions" v-model="scheduleInput.weekdays" />
+          </div>
+          <div>
+            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.timeZone") }}
+            </div>
+            <div class="flex justify-between">
+              <div class="text-gray-600 dark:text-gray-200">{{ user.data.timezone ?? dj.tz.guess() }}</div>
+              <link-button class="edit-link-btn" @click="router.push({ name: 'settings' })" :tooltip="t('label.editInSettings')">
+                {{ t('label.edit') }}
+              </link-button>
             </div>
           </div>
         </div>
       </div>
+
       <!-- step 2 -->
       <div
         class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
@@ -594,6 +613,7 @@ watch(
           </div>
         </div>
       </div>
+  
       <!-- step 3 -->
       <div
         @click="state = ScheduleCreationState.Details"
@@ -673,18 +693,75 @@ watch(
           </label>
         </div>
       </div>
-      <!-- option to deactivate confirmation -->
-      <div class="px-4">
-        <switch-toggle
-          class="my-1 pr-3 text-sm font-medium text-gray-500 dark:text-gray-300"
-          :active="schedule.booking_confirmation"
-          :label="t('label.bookingConfirmation')"
-          :disabled="!scheduleInput.active"
-          @changed="toggleBookingConfirmation"
-          no-legend
-        />
-        <div class="text-xs">
-          {{ t('text.ownerNeedsToConfirmBooking') }}
+
+      <!-- step 4 -->
+      <div
+        @click="state = ScheduleCreationState.Booking"
+        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50': activeStep4}"
+        id="schedule-details"
+      >
+        <div class="flex cursor-pointer items-center justify-between">
+          <div class="flex flex-col gap-1">
+            <h2>
+              {{ t("label.bookingSettings") }}
+            </h2>
+            <h3 class="text-xs">
+              {{ t('label.scheduleSettings.bookingSettingsSubHeading') }}
+            </h3>
+          </div>
+          <icon-chevron-down
+            class="size-6 -rotate-90 fill-transparent stroke-gray-800 stroke-1 transition-transform dark:stroke-gray-100"
+            :class="{ '!rotate-0': activeStep4 }"
+          />
+        </div>
+        <div v-show="activeStep4" class="flex flex-col gap-2">
+          <hr/>
+          <!-- custom quick link -->
+          <label class="relative flex flex-col gap-1">
+            <div class="font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.quickLink") }}
+            </div>
+            <div class="flex gap-2">
+              <text-input
+                type="text"
+                name="slug"
+                :prefix="`/${user.data.username}/`"
+                v-model="scheduleInput.slug"
+                class="w-full rounded-md disabled:cursor-not-allowed"
+              />
+              <refresh-icon class="cursor-pointer mt-2.5 text-teal-600" @click.prevent="refreshSlug" />
+            </div>
+          </label>
+          <!-- option to deactivate confirmation -->
+          <div class="flex flex-col gap-3">
+            <switch-toggle
+              class="my-1 text-sm font-medium text-gray-500 dark:text-gray-300"
+              :active="schedule.booking_confirmation"
+              :label="t('label.bookingConfirmation')"
+              :disabled="!scheduleInput.active"
+              @changed="toggleBookingConfirmation"
+              no-legend
+            />
+            <div class="whitespace-pre-line rounded-lg bg-white p-4 text-xs text-gray-500 dark:bg-gray-800">
+              <div>
+                {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
+                <i18n-t keypath="text.toUpdateYourUsername.text" tag="span">
+                  <template v-slot:link>
+                    <router-link class="underline" :to="{ name: 'settings' }" target="_blank">
+                      {{ t('text.toUpdateYourUsername.link') }}
+                    </router-link>
+                  </template>
+                </i18n-t>
+                <span v-if="scheduleInput.booking_confirmation">
+                  {{ t('text.bookingsWillRequireToBeConfirmed') }}
+                </span>
+                <span v-else>
+                  {{ t('text.bookingsWillAutomaticallyBeConfirmed') }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -722,7 +799,7 @@ watch(
           <secondary-button
             :label="t('label.revert')"
             class="btn-revert w-1/2"
-            @click="resetSchedule()"
+            @click="revertForm()"
             :disabled="!scheduleInput.active"
             :title="t('label.revert')"
           />
@@ -790,5 +867,13 @@ input[type=checkbox]:disabled {
 
 .tooltip-icon:hover ~ .tooltip {
   display: block;
+}
+
+.bubble-select {
+  gap: .25rem;
+}
+
+.edit-link-btn {
+  min-width: auto;
 }
 </style>
