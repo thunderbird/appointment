@@ -3,9 +3,11 @@ import {
   DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS,
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
-import { Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption } from "@/models";
 import {
-  ref, reactive, computed, inject, watch, onMounted, Ref
+  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption,
+} from '@/models';
+import {
+  ref, reactive, computed, inject, watch, onMounted, Ref,
 } from 'vue';
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
@@ -179,7 +181,7 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
 });
 
 const isFormDirty = computed(
-  () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value)
+  () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value),
 );
 
 // handle notes char limit
@@ -213,10 +215,9 @@ SLOT_DURATION_OPTIONS.forEach((duration) => {
 });
 
 // humanize selected durations
-const earliest = computed(() => scheduleInput.value.earliest_booking === 0
+const earliest = computed(() => (scheduleInput.value.earliest_booking === 0
   ? t('label.now')
-  : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()
-);
+  : dj.duration(scheduleInput.value.earliest_booking, 'minutes').humanize()));
 const farthest = computed(() => dj.duration(scheduleInput.value.farthest_booking, 'minutes').humanize());
 const duration = computed(() => t('units.minutes', { value: scheduleInput.value.slot_duration }));
 
@@ -613,7 +614,7 @@ watch(
           </div>
         </div>
       </div>
-  
+
       <!-- step 3 -->
       <div
         @click="state = ScheduleCreationState.Details"
@@ -729,8 +730,10 @@ watch(
                 :prefix="`/${user.data.username}/`"
                 v-model="scheduleInput.slug"
                 class="w-full rounded-md disabled:cursor-not-allowed"
+                :small-text="true"
+                maxLength="16"
               />
-              <refresh-icon class="cursor-pointer mt-2.5 text-teal-600" @click.prevent="refreshSlug" />
+              <refresh-icon class="mt-2.5 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
             </div>
           </label>
           <!-- option to deactivate confirmation -->

@@ -3,7 +3,9 @@ import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { useUserStore } from '@/stores/user-store';
 import { DateFormatStrings, MetricEvents } from '@/definitions';
-import { Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse } from '@/models';
+import {
+  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse,
+} from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
 
@@ -80,6 +82,8 @@ export const useScheduleStore = defineStore('schedules', () => {
           });
         } else if (err.type === 'too_short' && field === 'weekdays') {
           message = i18n.t('error.selectOneDay');
+        } else if (err.type === 'string_pattern_mismatch') {
+          message = i18n.t('error.noSpecialCharacters');
         }
 
         return message;

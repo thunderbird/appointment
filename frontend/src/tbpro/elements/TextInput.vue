@@ -33,6 +33,7 @@ interface Props {
   required?: boolean;
   disabled?: boolean;
   smallText?: boolean;
+  maxLength?: number|string;
 }
 const props = withDefaults(defineProps<Props>(), {
   type: 'text',
@@ -43,6 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
   required: false,
   disabled: false,
   smallText: false,
+  maxLength: null,
 });
 
 defineEmits(['submit']);
@@ -84,6 +86,7 @@ const onChange = () => {
         :disabled="disabled"
         :placeholder="placeholder"
         :required="required"
+        :maxLength="maxLength"
         @invalid="onInvalid"
         @change="onChange"
         ref="inputRef"
@@ -158,7 +161,7 @@ const onChange = () => {
     user-select: none;
     text-overflow: '.../';
     overflow: hidden;
-    max-width: 35%;
+    max-width: 40%;
     text-wrap: nowrap;
   }
 

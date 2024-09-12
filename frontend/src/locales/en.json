@@ -16,6 +16,7 @@
     "minimumValue": "{field} should be at least {value}.",
     "noConnectedCalendars": "Calendar setup required. Connect a calendar to continue. {0}.",
     "noConnectedCalendarsLink": "Go to settings",
+    "noSpecialCharacters": "Please remove the special characters and try again.",
     "routeNotFound": "Sorry, this page could not be found.",
     "selectOneDay": "You need to select at least one day to continue.",
     "somethingWentWrong": "Something went wrong",
