@@ -32,6 +32,7 @@ interface Props {
   prefix?: string; // A prefix shows up at the start of the input field and moves the actual input to the right.
   required?: boolean;
   disabled?: boolean;
+  smallText?: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
   type: 'text',
@@ -41,15 +42,14 @@ const props = withDefaults(defineProps<Props>(), {
   prefix: null,
   required: false,
   disabled: false,
+  smallText: false,
 });
 
 defineEmits(['submit']);
 defineExpose({ focus });
 
 // Calculate padding left for the actual input considering prefix width and existing padding
-const inputPaddingLeft = computed(() => {
-  return props.prefix ? `${inputPrefixWidth.value+12}px` : '12px';
-});
+const inputPaddingLeft = computed(() => (props.prefix ? `${inputPrefixWidth.value + 12}px` : '12px'));
 
 const onInvalid = (evt: HTMLInputElementEvent) => {
   isInvalid.value = true;
@@ -72,7 +72,7 @@ const onChange = () => {
       <slot/>
       <span v-if="required && model?.length === 0" class="required">*</span>
     </span>
-    <div class="tbpro-input">
+    <span class="tbpro-input" :class="{'small-text': props.smallText}" >
       <span v-if="prefix" ref="inputPrefix" class="tbpro-input-prefix">{{ prefix }}</span>
       <input
         class="tbpro-input-element"
@@ -89,7 +89,7 @@ const onChange = () => {
         ref="inputRef"
         :style="{ paddingLeft: inputPaddingLeft }"
       />
-    </div>
+    </span>
     <span v-if="isInvalid" class="help-label invalid">
       {{ validationMessage }}
     </span>
@@ -121,6 +121,10 @@ const onChange = () => {
   font-weight: 600;
 }
 
+.small-text {
+  --txt-input: 0.7384375rem;
+}
+
 .help-label {
   display: flex;
   color: var(--colour-ti-base);
@@ -146,44 +150,49 @@ const onChange = () => {
 
   .tbpro-input-prefix {
     position: absolute;
-    top: .675em;
+    top: 0.70rem;
     left: 12px;
-    font-size: 1rem;
+    font-size: var(--txt-input);
     line-height: var(--line-height-input);
     color: var(--colour-ti-muted);
     user-select: none;
+    text-overflow: '.../';
+    overflow: hidden;
+    max-width: 35%;
+    text-wrap: nowrap;
   }
 
   .tbpro-input-element {
     --colour-btn-border: var(--colour-neutral-border);
     width: 100%;
     transition-property: none;
-  
+    font-size: var(--txt-input);
+
     background-color: var(--colour-neutral-base);
     border-radius: var(--border-radius);
     @mixin faded-border var(--colour-btn-border);
-  
+
     &:hover:enabled {
       --colour-btn-border: var(--colour-neutral-border-intense);
     }
-  
+
     &:active:enabled {
       --colour-btn-border: var(--colour-neutral-border-intense);
     }
-  
+
     &:focus:enabled {
       border-radius: 0.125rem;
     }
-  
+
     &.dirty:invalid {
       --colour-btn-border: var(--colour-ti-critical);
     }
-  
+
     &:disabled {
       filter: grayscale(50%);
       cursor: not-allowed;
     }
-  
+
     &::placeholder {
       color: var(--colour-ti-muted);
     }
