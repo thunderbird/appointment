@@ -427,7 +427,7 @@ watch(
             v-model="scheduleInput.name"
             :placeholder="t('placeholder.mySchedule')"
             :disabled="!scheduleInput.active"
-            class="place-holder w-full rounded-none border-0 border-b bg-transparent px-2 dark:bg-transparent"
+            class="schedule-name place-holder w-full rounded-none border-0 border-b bg-transparent px-2 dark:bg-transparent"
             required
           />
           <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
@@ -833,6 +833,10 @@ input[type=checkbox]:disabled {
   .tooltip-label:focus-within .tooltip {
     display: block;
   }
+}
+
+.schedule-name {
+  background-color: transparent !important;
 }
 
 .tooltip-icon:hover ~ .tooltip {
