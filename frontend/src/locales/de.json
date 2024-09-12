@@ -444,7 +444,7 @@
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "toUpdateYourUsername": {
       "link": "Kontoeinstellungen",
-      "text": "Der Nutzername kann unter {0} angepasst werden. "
+      "text": "Der Nutzername kann unter {link} angepasst werden. "
     },
     "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
     "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt.",

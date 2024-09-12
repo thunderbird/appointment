@@ -328,7 +328,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
 // Update slug with a random 8 character string
 const refreshSlug = () => {
-  slugInput.value = (Math.random() + 1).toString(36).substring(4);
+  slugInput.value = self.crypto.randomUUID().substring(0, 8);
 };
 
 // handle schedule activation / deactivation
@@ -744,10 +744,12 @@ watch(
             <div class="whitespace-pre-line rounded-lg bg-white p-4 text-xs text-gray-500 dark:bg-gray-800">
               <div>
                 {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
-                <i18n-t keypath="text.toUpdateYourUsername.text" for="text.toUpdateYourUsername.link">
-                  <router-link class="underline" :to="{ name: 'settings' }" target="_blank">
-                    {{ t('text.toUpdateYourUsername.link') }}
-                  </router-link>
+                <i18n-t keypath="text.toUpdateYourUsername.text" tag="span">
+                  <template v-slot:link>
+                    <router-link class="underline" :to="{ name: 'settings' }" target="_blank">
+                      {{ t('text.toUpdateYourUsername.link') }}
+                    </router-link>
+                  </template>
                 </i18n-t>
                 <span v-if="scheduleInput.booking_confirmation">
                   {{ t('text.bookingsWillRequireToBeConfirmed') }}

@@ -444,7 +444,7 @@
     "titleIsReadyForBookings": "{title} is ready for bookings",
     "toUpdateYourUsername": {
       "link": "Account Settings",
-      "text": "To update your username, go to {0}. "
+      "text": "To update your username, go to {link}. "
     },
     "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work.",
     "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created.",

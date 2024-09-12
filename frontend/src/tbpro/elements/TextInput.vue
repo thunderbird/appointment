@@ -37,8 +37,8 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   help: null,
   remoteError: null,
-  placeholder: '',
-  prefix: '',
+  placeholder: null,
+  prefix: null,
   required: false,
   disabled: false,
 });
@@ -75,6 +75,7 @@ const onChange = () => {
     <div class="tbpro-input">
       <span v-if="prefix" ref="inputPrefix" class="prefix">{{ prefix }}</span>
       <input
+        class="tbpro-input-element"
         v-model="model"
         :class="{ 'dirty': isDirty }"
         :type="type"
@@ -153,7 +154,7 @@ const onChange = () => {
     user-select: none;
   }
 
-  input {
+  .tbpro-input-element {
     --colour-btn-border: var(--colour-neutral-border);
     width: 100%;
     transition-property: none;
@@ -189,7 +190,7 @@ const onChange = () => {
   }
 }
 .dark {
-  .tbpro-input input {
+  .tbpro-input-element {
     background-color: var(--colour-neutral-lower);
   }
 }
