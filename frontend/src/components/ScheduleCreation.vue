@@ -15,16 +15,18 @@ import { useUserStore } from '@/stores/user-store';
 import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import SwitchToggle from '@/elements/SwitchToggle.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
+import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
@@ -194,25 +196,38 @@ const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   value: day.iso,
 }));
 
-// booking options
-const earliestOptions = {};
-[0, 0.5, 1, 2, 3, 4, 5].forEach((d) => {
+// Connected calendar options
+const calendarOptions = computed<SelectOption[]>(() => props.calendars.map((calendar) => ({
+  label: calendar.title,
+  value: calendar.id,
+})));
+
+// Earliest booking options
+const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
   // Special case to avoid "in a few seconds"
   if (d === 0) {
-    earliestOptions[0] = t('label.immediately');
-    return;
+    return {
+      label: t('label.immediately'),
+      value: 0,
+    };
   }
-  earliestOptions[d * 60 * 24] = dj.duration(d, 'days').humanize();
-});
-const farthestOptions = {};
-[1, 2, 3, 4].forEach((d) => {
-  farthestOptions[d * 60 * 24 * 7] = dj.duration(d, 'weeks').humanize();
+  return {
+    label: dj.duration(d, 'days').humanize(),
+    value: d * 60 * 24,
+  };
 });
 
-const durationOptions = {};
-SLOT_DURATION_OPTIONS.forEach((duration) => {
-  durationOptions[duration] = t('units.minutes', { value: duration });
-});
+// Farthest booking options
+const farthestOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
+  label: dj.duration(d, 'weeks').humanize(),
+  value: d * 60 * 24 * 7,
+}));
+
+// Appointment duration options
+const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((duration) => ({
+  label: t('units.minutes', { value: duration }),
+  value: duration,
+}));
 
 // humanize selected durations
 const earliest = computed(() => (scheduleInput.value.earliest_booking === 0
@@ -320,6 +335,26 @@ const toggleBookingConfirmation = (newValue: boolean) => {
   scheduleInput.value.booking_confirmation = newValue;
 };
 
+// Link copy
+const myLinkTooltip = ref(t('label.copyLink'));
+const myLinkShow = ref(false);
+const copyLink = async () => {
+  await navigator.clipboard.writeText(user.myLink);
+
+  myLinkShow.value = true;
+  myLinkTooltip.value = t('info.copiedToClipboard');
+
+  // Fade out after a bit
+  setTimeout(() => {
+    myLinkShow.value = false;
+
+    // After the animation fades...
+    setTimeout(() => {
+      myLinkTooltip.value = t('label.copyLink');
+    }, 500);
+  }, 4000);
+};
+
 // track if steps were already visited
 watch(
   () => scheduleInput.value.active,
@@ -424,29 +459,25 @@ watch(
         </div>
         <div v-show="activeStep1" class="flex flex-col gap-3">
           <hr/>
-          <div class="flex w-full flex-col justify-between gap-2 md:flex-row lg:gap-4">
-            <label class="w-full">
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.startTime") }}
-              </div>
-              <input
-                type="time"
-                v-model="scheduleInput.start_time"
-                :disabled="!scheduleInput.active"
-                class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
-              />
-            </label>
-            <label class="w-full">
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.endTime") }}
-              </div>
-              <input
-                type="time"
-                v-model="scheduleInput.end_time"
-                :disabled="!scheduleInput.active"
-                class="text-md min-h-10 w-full rounded-lg leading-4 tracking-tight"
-              />
-            </label>
+          <div class="flex w-full gap-2 lg:gap-4">
+            <text-input
+              type="time"
+              name="start_time"
+              class="w-full"
+              v-model="scheduleInput.start_time"
+              :disabled="!scheduleInput.active"
+            >
+              {{ t("label.startTime") }}
+            </text-input>
+            <text-input
+              type="time"
+              name="end_time"
+              class="w-full"
+              v-model="scheduleInput.end_time"
+              :disabled="!scheduleInput.active"
+            >
+              {{ t("label.endTime") }}
+            </text-input>
           </div>
           <div>
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
@@ -493,76 +524,44 @@ watch(
         </div>
         <div v-show="activeStep2" class="flex flex-col gap-3">
           <hr/>
-          <label>
-            <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.selectCalendar") }}
-            </div>
-            <select v-model="scheduleInput.calendar_id" class="w-full rounded-md" :disabled="!scheduleInput.active">
-              <option
-                v-for="calendar in calendars"
-                :key="calendar.id"
-                :value="calendar.id"
-              >
-                {{ calendar.title }}
-              </option>
-            </select>
-          </label>
-          <div class="grid grid-cols-2 gap-4">
-            <label>
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.earliestBooking") }}
-              </div>
-              <select
-                v-model="scheduleInput.earliest_booking"
-                class="w-full rounded-md capitalize"
-                :disabled="!scheduleInput.active"
-              >
-                <option
-                  v-for="(label, value) in earliestOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </label>
-            <label>
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.farthestBooking") }}
-              </div>
-              <select
-                v-model="scheduleInput.farthest_booking"
-                class="w-full rounded-md"
-                :disabled="!scheduleInput.active"
-              >
-                <option
-                  v-for="(label, value) in farthestOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </label>
-            <label class="col-span-2">
-              <div class="mb-1 font-medium text-gray-500 dark:text-gray-300">
-                {{ t("label.slotLength") }}
-              </div>
-              <select
-                v-model="scheduleInput.slot_duration"
-                :disabled="!scheduleInput.active"
-                class="w-7/12 rounded-md"
-              >
-                <option
-                  v-for="(label, value) in durationOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </label>
+          <select-input
+            name="calendar"
+            v-model="scheduleInput.calendar_id"
+            class="w-full"
+            :options="calendarOptions"
+            :disabled="!scheduleInput.active"
+          >
+            {{ t("label.selectCalendar") }}
+          </select-input>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+            <select-input
+              name="earliest_booking"
+              v-model="scheduleInput.earliest_booking"
+              class="w-full"
+              :options="earliestOptions"
+              :disabled="!scheduleInput.active"
+            >
+              {{ t("label.earliestBooking") }}
+            </select-input>
+            <select-input
+              name="farthest_booking"
+              v-model="scheduleInput.farthest_booking"
+              class="w-full"
+              :options="farthestOptions"
+              :disabled="!scheduleInput.active"
+            >
+              {{ t("label.farthestBooking") }}
+            </select-input>
           </div>
+          <select-input
+            name="slot_duration"
+            v-model="scheduleInput.slot_duration"
+            :options="durationOptions"
+            :disabled="!scheduleInput.active"
+            class="w-full"
+          >
+            {{ t("label.slotLength") }}
+          </select-input>
           <div class="flex-center rounded-lg bg-white px-4 py-6 text-center text-sm dark:bg-gray-800">
             <div>{{
                 t('text.recipientsCanScheduleBetween', {
@@ -599,27 +598,31 @@ watch(
         </div>
         <div v-show="activeStep3" class="flex flex-col gap-2">
           <hr/>
-          <label class="tooltip-label">
-            <div class="relative mb-1 flex flex-row items-center gap-2 font-medium text-gray-500 dark:text-gray-300">
+          <text-input
+            v-if="scheduleInput.meeting_link_provider === MeetingLinkProviderType.None"
+            type="text"
+            name="location_url"
+            v-model="scheduleInput.location_url"
+            class="w-full"
+            :placeholder="t('placeholder.zoomCom')"
+            :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== MeetingLinkProviderType.None"
+          >
+            <div class="tooltip-label relative flex flex-row items-center gap-2">
               {{ t("label.videoLink") }}
               <span class="relative cursor-help" role="tooltip" aria-labelledby="video-link-tooltip">
-              <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
+                <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
                 <span class="tooltip hidden">
                   <transition>
-                      <tool-tip id="video-link-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.videoLinkNotice')"/>
+                    <tool-tip
+                      id="video-link-tooltip"
+                      class="tooltip left-[-8.5rem] w-72"
+                      :content="t('text.videoLinkNotice')"
+                    />
                   </transition>
                 </span>
-            </span>
+              </span>
             </div>
-            <input
-              type="text"
-              v-model="scheduleInput.location_url"
-              v-if="scheduleInput.meeting_link_provider === MeetingLinkProviderType.None"
-              :placeholder="t('placeholder.zoomCom')"
-              :disabled="!scheduleInput.active || scheduleInput.meeting_link_provider !== MeetingLinkProviderType.None"
-              class="place-holder w-full rounded-md disabled:cursor-not-allowed"
-            />
-          </label>
+          </text-input>
           <label class="flex items-center gap-2">
             <input
               type="checkbox"
@@ -742,13 +745,12 @@ watch(
       <div class="flex flex-col items-center justify-center gap-2">
         <p>{{ t('text.scheduleSettings.create') }}</p>
         <primary-button
-          :label="t('label.save')"
           class="btn-save w-1/2"
           @click="saveSchedule(!existing)"
-          :waiting="savingInProgress"
           :disabled="!scheduleInput.active"
-          :title="t('label.save')"
-        />
+        >
+          {{ t('label.save') }}
+        </primary-button>
       </div>
     </snackish-bar>
     <!-- Schedule is not active -->
@@ -761,20 +763,19 @@ watch(
       <p>{{ t('text.scheduleSettings.formDirty') }}</p>
       <div class="flex gap-4">
           <secondary-button
-            :label="t('label.revert')"
             class="btn-revert w-1/2"
             @click="revertForm()"
             :disabled="!scheduleInput.active"
-            :title="t('label.revert')"
-          />
+          >
+            {{ t('label.revert') }}
+          </secondary-button>
           <primary-button
-            :label="t('label.save')"
             class="btn-save w-1/2"
             @click="saveSchedule(!existing)"
-            :waiting="savingInProgress"
             :disabled="!scheduleInput.active"
-            :title="t('label.save')"
-          />
+          >
+            {{ t('label.save') }}
+          </primary-button>
         </div>
         </div>
     </snackish-bar>
@@ -782,11 +783,16 @@ watch(
       <div class="my-8 flex justify-center gap-4">
         <primary-button
           v-if="user.myLink && existing"
-          :label="t('label.shareMyLink')"
           class="btn-copy"
-          :copy="user.myLink"
-          :title="t('label.copy')"
-        />
+          @click="copyLink"
+          :tooltip="myLinkTooltip"
+          :force-tooltip="myLinkShow"
+        >
+          <template v-slot:icon>
+            <copy-icon/>
+          </template>
+          {{ t('label.shareMyLink') }}
+        </primary-button>
       </div>
     </div>
   </div>
