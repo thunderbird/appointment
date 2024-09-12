@@ -66,7 +66,7 @@ onUnmounted(() => {
 @import '@/assets/styles/mixins.pcss';
 
 .overlay {
-  @mixin faded-background var(--colour-neutral-900);
+  @mixin faded-background var(--colour-shark-900);
   position: fixed;
   display: flex;
   left: 0;

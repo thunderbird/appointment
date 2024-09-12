@@ -96,7 +96,7 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: color-mix(in srgb, var(--colour-neutral-900) 60%, transparent);
+  background-color: color-mix(in srgb, var(--colour-shark-900) 60%, transparent);
   align-items: center;
   justify-content: center;
 }
