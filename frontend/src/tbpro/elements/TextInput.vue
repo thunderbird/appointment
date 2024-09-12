@@ -73,7 +73,7 @@ const onChange = () => {
       <span v-if="required && model?.length === 0" class="required">*</span>
     </span>
     <div class="tbpro-input">
-      <span v-if="prefix" ref="inputPrefix" class="prefix">{{ prefix }}</span>
+      <span v-if="prefix" ref="inputPrefix" class="tbpro-input-prefix">{{ prefix }}</span>
       <input
         class="tbpro-input-element"
         v-model="model"
@@ -144,7 +144,7 @@ const onChange = () => {
   display: inline-block;
   position: relative;
 
-  .prefix {
+  .tbpro-input-prefix {
     position: absolute;
     top: .675em;
     left: 12px;
