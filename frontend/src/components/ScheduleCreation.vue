@@ -21,6 +21,7 @@ import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
 import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
 
 // icons
@@ -30,6 +31,7 @@ import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useScheduleStore } from '@/stores/schedule-store';
+import router from '@/router';
 
 // component constants
 const user = useUserStore();
@@ -490,6 +492,17 @@ watch(
             </div>
             <bubble-select class="bubble-select" :options="scheduleDayOptions" v-model="scheduleInput.weekdays" />
           </div>
+          <div>
+            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+              {{ t("label.timeZone") }}
+            </div>
+            <div class="flex justify-between">
+              <div class="text-gray-600 dark:text-gray-200">{{ user.data.timezone ?? dj.tz.guess() }}</div>
+              <link-button class="edit-link-btn" @click="router.push({ name: 'settings' })" :tooltip="t('label.editInSettings')">
+                {{ t('label.edit') }}
+              </link-button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -858,5 +871,9 @@ input[type=checkbox]:disabled {
 
 .bubble-select {
   gap: .25rem;
+}
+
+.edit-link-btn {
+  min-width: auto;
 }
 </style>
