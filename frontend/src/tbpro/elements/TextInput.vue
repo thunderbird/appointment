@@ -150,6 +150,7 @@ const onChange = () => {
 .tbpro-input {
   display: inline-block;
   position: relative;
+  width: 100%;
 
   .tbpro-input-prefix {
     position: absolute;
