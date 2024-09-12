@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import CopyIcon from "@/tbpro/icons/CopyIcon.vue";
+import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
 
 const { t } = useI18n();
 const call = inject(callKey);
@@ -115,7 +115,6 @@ const copyLink = async () => {
 }
 
 .link {
-  color: var(--colour-service-accent-1);
   text-decoration: underline;
   border: none;
 

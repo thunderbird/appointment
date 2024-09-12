@@ -8,13 +8,13 @@ interface Props {
   size?: string;
   tooltip?: string;
   forceTooltip?: boolean;
-};
+}
 withDefaults(defineProps<Props>(), {
   type: 'secondary',
   size: 'regular',
   tooltip: '',
   forceTooltip: false,
-})
+});
 </script>
 
 <template>
@@ -92,7 +92,7 @@ button:hover > .tooltip,
   .text {
     padding: 0;
     user-select: all;
-    font-weight: 400;
+    font-weight: 600;
     line-height: 1;
   }
 }
