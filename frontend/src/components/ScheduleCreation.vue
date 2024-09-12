@@ -238,49 +238,6 @@ const revertForm = (resetData = true) => {
   }
 };
 
-// TODO: Is this function still needed? It's currently unused.
-const handleErrorResponse = (responseData) => {
-  scheduleCreationError.value = null;
-
-  const { value } = responseData;
-
-  if (value?.detail?.message) {
-    scheduleCreationError.value = value?.detail?.message;
-  } else if (value?.detail instanceof Array) {
-    // TODO: Move logic to backend (https://github.com/thunderbird/appointment/issues/270)
-
-    // List of fields to units
-    const fieldUnits = {
-      slot_duration: 'units.minutes',
-      unknown: 'units.none',
-    };
-
-    // Create a list of localized error messages, this is temp code because it shouldn't live here.
-    // We do a look-up on field, and the field's unit (if any) along with the error type.
-    const errorDetails = value.detail.map((err) => {
-      const field = err.loc[1] ?? 'unknown';
-      const fieldLocalized = t(`fields.${field}`);
-      let message = t('error.unknownScheduleError');
-
-      if (err.type === 'greater_than_equal') {
-        const contextValue = err.ctx.ge;
-        const valueLocalized = t(fieldUnits[field] ?? 'units.none', { value: contextValue });
-
-        message = t('error.minimumValue', {
-          field: fieldLocalized,
-          value: valueLocalized,
-        });
-      }
-
-      return message;
-    });
-
-    scheduleCreationError.value = errorDetails.join('\n');
-  } else {
-    scheduleCreationError.value = t('error.unknownScheduleError');
-  }
-};
-
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -326,6 +283,10 @@ const saveSchedule = async (withConfirmation = true) => {
     savedConfirmation.show = true;
   }
 
+  // We retrieve the slugs from the user store
+  // ...we should adjust this, but for now just refresh the profile.
+  await user.profile(call);
+
   savingInProgress.value = false;
   emit('created');
   // Update our reference schedule!
@@ -335,7 +296,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
 // Update slug with a random 8 character string
 const refreshSlug = () => {
-  scheduleInput.value.slug = self.crypto.randomUUID().substring(0, 8);
+  scheduleInput.value.slug = window.crypto.randomUUID().substring(0, 8);
 };
 
 // handle schedule activation / deactivation
