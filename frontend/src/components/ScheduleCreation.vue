@@ -97,14 +97,12 @@ const defaultSchedule: Schedule = {
   weekdays: [1, 2, 3, 4, 5],
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
+  slug: user.mySlug,
   booking_confirmation: true,
 };
 const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
 const referenceSchedule = ref({ ...defaultSchedule });
-
-// Separate input for user link, since it's not directly part of the schedule object
-const slugInput = ref(user.mySlug);
 
 onMounted(() => {
   // Retrieve the current external connections
@@ -178,7 +176,7 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
 });
 
 const isFormDirty = computed(
-  () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value) || slugInput.value !== user.mySlug
+  () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value)
 );
 
 // handle notes char limit
@@ -227,7 +225,6 @@ const revertForm = (resetData = true) => {
   scheduleCreationError.value = null;
   if (resetData) {
     scheduleInput.value = { ...referenceSchedule.value };
-    slugInput.value = user.mySlug;
   }
 };
 
@@ -328,7 +325,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
 // Update slug with a random 8 character string
 const refreshSlug = () => {
-  slugInput.value = self.crypto.randomUUID().substring(0, 8);
+  scheduleInput.value.slug = self.crypto.randomUUID().substring(0, 8);
 };
 
 // handle schedule activation / deactivation
@@ -725,7 +722,7 @@ watch(
                 type="text"
                 name="slug"
                 :prefix="`/${user.data.username}/`"
-                v-model="slugInput"
+                v-model="scheduleInput.slug"
                 class="w-full rounded-md disabled:cursor-not-allowed"
               />
               <refresh-icon class="cursor-pointer mt-2.5 text-teal-600" @click.prevent="refreshSlug" />
