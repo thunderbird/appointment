@@ -145,13 +145,24 @@ def server():
 
     @app.middleware("http")
     async def apply_x_forwarded_headers_to_client(request: Request, call_next):
+        """Apply the x-forwarded-for to the client host if available"""
         ip_list = request.headers.get('x-forwarded-for')
         port = request.headers.get('x-forwarded-port')
-        if ip_list:
-            client_ip = ip_list.split(',')[0]
-            request.client.host = client_ip
-        if port:
-            request.client.port = port
+
+        # Grab the client scope and turn it into a list
+        client = list(request.scope.get('client'))
+
+        # Apply our client and port if available
+        if client is not None:
+            if ip_list:
+                client_ip = ip_list.split(',')
+                client[0] = client_ip[0]
+            if port:
+                client[1] = port
+
+            # Transform it back into a tuple and update the request
+            request.scope.update({'client': tuple(client)})
+
         response = await call_next(request)
         return response
 
