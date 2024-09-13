@@ -142,6 +142,7 @@ def with_db():
             email=os.getenv('TEST_USER_EMAIL'),
             name='Test Account',
             level=models.SubscriberLevel.pro,
+            short_link_hash='abc1234',
         )
         db.add(subscriber)
         db.commit()
