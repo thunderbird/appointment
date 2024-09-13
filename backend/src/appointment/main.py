@@ -143,6 +143,18 @@ def server():
     # init app
     app = FastAPI(openapi_url=openapi_url, lifespan=lifespan)
 
+    @app.middleware("http")
+    async def apply_x_forwarded_headers_to_client(request: Request, call_next):
+        ip_list = request.headers.get('x-forwarded-for')
+        port = request.headers.get('x-forwarded-port')
+        if ip_list:
+            client_ip = ip_list.split(',')[0]
+            request.client.host = client_ip
+        if port:
+            request.client.port = port
+        response = await call_next(request)
+        return response
+
     app.add_middleware(RawContextMiddleware, plugins=(L10n(),))
 
     # strip html tags from input requests
