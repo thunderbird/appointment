@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends
+import json
+import logging
+
+from fastapi import APIRouter, Depends, Request
 
 from sqlalchemy.orm import Session
 
@@ -16,9 +19,10 @@ These require get_admin_subscriber!
 """
 
 @router.get('/', response_model=list[schemas.SubscriberAdminOut])
-def get_all_subscriber(db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
+def get_all_subscriber(request: Request, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
     response = db.query(models.Subscriber).all()
+    logging.info("Headers ->",json.dumps(request.headers))
     return response
 
 
