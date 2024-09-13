@@ -26,7 +26,7 @@ const focus = () => {
 interface Props {
   name: string;
   help?: string;
-  remoteError?: string;
+  error?: string;
   type?: string;
   placeholder?: string;
   prefix?: string; // A prefix shows up at the start of the input field and moves the actual input to the right.
@@ -38,7 +38,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   help: null,
-  remoteError: null,
+  error: null,
   placeholder: null,
   prefix: null,
   required: false,
@@ -95,6 +95,9 @@ const onChange = () => {
     </span>
     <span v-if="isInvalid" class="help-label invalid">
       {{ validationMessage }}
+    </span>
+    <span v-else-if="error" class="help-label invalid">
+      {{ error }}
     </span>
     <span v-else-if="help" class="help-label">
       {{ help }}

@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
-import { dayjsKey, callKey } from '@/keys';
+import { dayjsKey, callKey, hasProfanityKey } from '@/keys';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -12,6 +12,8 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
+const hasProfanity = inject(hasProfanityKey);
+
 const ftueStore = useFTUEStore();
 const { hasNextStep } = storeToRefs(ftueStore);
 const { nextStep } = ftueStore;
@@ -30,10 +32,27 @@ const username = ref(user.data?.username ?? '');
 const timezone = ref(user.data.timezone ?? dj.tz.guess());
 const isLoading = ref(false);
 
+// Form validation
+const errorFullName = ref<string>(null);
+const errorUsername = ref<string>(null);
+
 const onSubmit = async () => {
   isLoading.value = true;
+  errorFullName.value = null;
+  errorUsername.value = null;
 
   if (!formRef.value.checkValidity()) {
+    isLoading.value = false;
+    return;
+  }
+
+  if (hasProfanity(fullName.value)) {
+    errorFullName.value = t('validation.fieldContainsProfanity', { field: t('ftue.fullName') });
+  }
+  if (hasProfanity(username.value)) {
+    errorUsername.value = t('validation.fieldContainsProfanity', { field: t('label.username') });
+  }
+  if (errorFullName.value || errorUsername.value) {
     isLoading.value = false;
     return;
   }
@@ -57,8 +76,12 @@ const onSubmit = async () => {
 <template>
   <div class="content">
     <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
-      <text-input name="full-name" v-model="fullName" :required="true">{{ t('ftue.fullName') }}</text-input>
-      <text-input name="username" v-model="username" :required="true">{{ t('label.username') }}</text-input>
+      <text-input name="full-name" v-model="fullName" :required="true" :error="errorFullName">
+        {{ t('ftue.fullName') }}
+      </text-input>
+      <text-input name="username" v-model="username" :required="true" :error="errorUsername">
+        {{ t('label.username') }}
+      </text-input>
       <select-input
         name="timezone"
         :options="timezoneOptions"
