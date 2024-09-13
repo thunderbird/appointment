@@ -22,7 +22,6 @@ These require get_admin_subscriber!
 def get_all_subscriber(request: Request, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
     response = db.query(models.Subscriber).all()
-    logging.info("Headers ->",json.dumps(request.headers.items()))
     return response
 
 
