@@ -7,11 +7,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { getPreferredTheme } from '@/utils';
 import {
-  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
+  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, hasProfanityKey
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import UAParser from 'ua-parser-js';
+import { Profanity } from '@2toad/profanity';
 
 import NavBar from '@/components/NavBar.vue';
 import TitleBar from '@/components/TitleBar.vue';
@@ -33,6 +34,8 @@ const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
+const lang = localStorage?.getItem('locale') ?? navigator.language;
+
 const siteNotificationStore = useSiteNotificationStore();
 const {
   isVisible: visibleNotification,
@@ -46,6 +49,11 @@ const {
   show: showNotification,
   lock: lockNotification,
 } = siteNotificationStore;
+
+// Handle input filters
+const profanity = new Profanity();
+const hasProfanity = (input: string) => profanity.exists(input);
+provide(hasProfanityKey, hasProfanity);
 
 // handle auth and fetch
 const isAuthenticated = computed(() => currentUser?.exists());
@@ -162,7 +170,7 @@ const onPageLoad = async () => {
     resolution: deviceRes,
     effective_resolution: effectiveDeviceRes,
     user_agent: navigator.userAgent,
-    locale: localStorage?.getItem('locale') ?? navigator.language,
+    locale: lang,
     theme: getPreferredTheme(),
   }).json();
 

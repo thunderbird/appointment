@@ -29,16 +29,20 @@ export const isPasswordAuthKey = Symbol('isPasswordAuth') as InjectionKey<boolea
 export const isFxaAuthKey = Symbol('isFxaAuth') as InjectionKey<boolean>;
 export const fxaEditProfileUrlKey = Symbol('fxaEditProfileUrl') as InjectionKey<string>;
 
-// Provides configured fetch call to our backend API
+// Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
 
-// Provides a freresh data function
+// Provide a freresh data function
 export const refreshKey = Symbol('refresh') as InjectionKey<Refresh>;
 
-// Provides functionality to paint background of event objects
+// Provide functionality to paint background of event objects
 type PaintBackgroundType = (element: Event, hexColor: string, hexTransparency?: string, reset?: boolean) => void;
 export const paintBackgroundKey = Symbol('paintBackground') as InjectionKey<PaintBackgroundType>;
 
-// Provides duration data in human friendly form
+// Provide duration data in human friendly form
 type DurationHumanizedType = (minutes: number) => string;
-export const durationHumanizedKey = Symbol('durationHumanizedKey') as InjectionKey<DurationHumanizedType>;
+export const durationHumanizedKey = Symbol('durationHumanized') as InjectionKey<DurationHumanizedType>;
+
+// Profice profanity filter
+type HasProfanityType = (url: string) => Boolean;
+export const hasProfanityKey = Symbol('hasProfanity') as InjectionKey<HasProfanityType>;
