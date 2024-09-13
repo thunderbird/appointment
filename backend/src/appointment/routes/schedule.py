@@ -125,7 +125,7 @@ def update_schedule(
 
 
 @router.post('/public/availability', response_model=schemas.AppointmentOut)
-@limiter.limit("10/minute")
+@limiter.limit("20/minute")
 def read_schedule_availabilities(
     request: Request,
     subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
@@ -181,7 +181,7 @@ def read_schedule_availabilities(
 
 
 @router.put('/public/availability/request')
-@limiter.limit("10/minute")
+@limiter.limit("20/minute")
 def request_schedule_availability_slot(
     request: Request,
     s_a: schemas.AvailabilitySlotAttendee,

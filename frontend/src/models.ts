@@ -289,8 +289,13 @@ export type PydanticExceptionDetail = {
   msg: string,
   type: string
 }
+export type FormExceptionDetail = {
+  id: string,
+  message: string,
+  status: number
+}
 export type PydanticException = {
-  detail?: PydanticExceptionDetail[];
+  detail?: FormExceptionDetail|PydanticExceptionDetail[];
 }
 export type Exception = {
   status_code?: number;

@@ -62,12 +62,16 @@ const handleFormError = (errObj: PydanticException) => {
   const { detail } = errObj;
   const fields = formRef.value.elements;
 
-  detail.forEach((err) => {
-    const name = err?.loc[1];
-    if (name) {
-      fields[name].setCustomValidity(err.ctx.reason);
-    }
-  });
+  if (Array.isArray(detail)) {
+    detail.forEach((err) => {
+      const name = err?.loc[1];
+      if (name) {
+        fields[name].setCustomValidity(err.ctx.reason);
+      }
+    });
+  } else {
+    loginError.value = detail.message;
+  }
 
   // Finally report it!
   formRef.value.reportValidity();
