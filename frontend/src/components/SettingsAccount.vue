@@ -6,7 +6,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
-import { StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse } from '@/models';
+import {
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
+} from '@/models';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -23,6 +25,7 @@ import { useScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
+import UserInviteTable from '@/components/UserInviteTable.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -260,6 +263,15 @@ const actuallyDeleteAccount = async () => {
           @click="updateUserCheckForConfirmation"
           :title="t('label.save')"
         />
+      </div>
+    </div>
+    <div class="pl-6" id="invites">
+      <div class="text-xl">{{ t('label.admin-invite-codes-panel') }}</div>
+      <p class="mt-4 pl-4">
+        {{ t('settings.invite.brief') }}
+      </p>
+      <div class="mt-4 pl-4">
+      <user-invite-table></user-invite-table>
       </div>
     </div>
     <div class="pl-6" id="download-your-data">

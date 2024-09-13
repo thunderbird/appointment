@@ -363,6 +363,11 @@
     "writeHere": "Write here…",
     "zoomCom": "zoom.com…"
   },
+  "settings": {
+    "invite": {
+      "brief": "Below are invite codes for Thunderbird Appointment. Feel free to give them out, and tell the individual to present it during the login screen."
+    }
+  },
   "text": {
     "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
     "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",

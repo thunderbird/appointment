@@ -13,6 +13,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from appointment.database import models, repo
+from appointment.defines import INVITES_TO_GIVE_OUT
 
 # revision identifiers, used by Alembic.
 revision = '01d80f00243f'
@@ -31,7 +32,7 @@ def upgrade() -> None:
 
     count = 0
     for subscriber in subs:
-        invites = repo.invite.generate_codes(session, 10, subscriber.id)
+        invites = repo.invite.generate_codes(session, INVITES_TO_GIVE_OUT, subscriber.id)
         count += len(invites)
 
     print(f"Generated {count} invites!")

@@ -248,6 +248,11 @@ class Invite(BaseModel):
     time_updated: datetime | None = None
 
 
+class InviteOut(BaseModel):
+    code: str
+    status: InviteStatus = InviteStatus.active
+
+
 """ SUBSCRIBER model schemas
 """
 

@@ -15,6 +15,11 @@ from ..tasks.emails import send_invite_account_email
 router = APIRouter()
 
 
+"""
+ADMIN ROUTES
+"""
+
+
 @router.get('/', response_model=list[schemas.Invite])
 def get_all_invites(db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""

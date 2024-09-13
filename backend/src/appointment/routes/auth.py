@@ -19,6 +19,7 @@ from .. import utils
 from ..controller.auth import schedule_links_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
+from ..defines import INVITES_TO_GIVE_OUT
 
 from ..dependencies.database import get_db
 from ..dependencies.auth import get_subscriber, get_admin_subscriber, get_subscriber_from_onetime_token
@@ -176,7 +177,7 @@ def fxa_callback(
         )
 
         # Give them 10 invites
-        repo.invite.generate_codes(db, 10, subscriber.id)
+        repo.invite.generate_codes(db, INVITES_TO_GIVE_OUT, subscriber.id)
 
         if not is_in_allow_list:
             # Use the invite code after we've created the new subscriber

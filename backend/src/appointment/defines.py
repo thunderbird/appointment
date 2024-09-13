@@ -13,3 +13,5 @@ APP_ENV_PROD = 'prod'
 
 APP_NAME = 'Appointment'
 APP_NAME_SHORT = 'apmt'
+
+INVITES_TO_GIVE_OUT = 10

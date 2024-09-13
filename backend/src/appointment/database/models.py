@@ -145,6 +145,8 @@ class Subscriber(HasSoftDelete, Base):
     calendars = relationship('Calendar', cascade='all,delete', back_populates='owner')
     slots = relationship('Slot', cascade='all,delete', back_populates='subscriber')
     external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
+
+    # FIXME: Invite will be deleted if either the owner or the invited subscriber is deleted.
     invite: Mapped['Invite'] = relationship('Invite', cascade='all,delete', back_populates='subscriber', uselist=False, foreign_keys='Invite.subscriber_id')
     owned_invites: Mapped[list['Invite']] = relationship('Invite', cascade='all,delete', back_populates='owner', foreign_keys='[Invite.owner_id]')
 

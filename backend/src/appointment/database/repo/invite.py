@@ -8,10 +8,24 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
+from ..models import InviteStatus
 
 
 def get_by_subscriber(db: Session, subscriber_id: int) -> models.Invite:
     return db.query(models.Invite).filter(models.Invite.subscriber_id == subscriber_id).first()
+
+
+def get_by_owner(db: Session, subscriber_id: int, status: Optional[InviteStatus] = None, only_unused: bool = False) -> list[models.Invite]:
+    """Retrieve invites by the invite owner. Optionally filter by status, or unused."""
+    query = db.query(models.Invite)
+    filters = [models.Invite.owner_id == subscriber_id]
+    if status:
+        filters.append(models.Invite.status == status)
+    if only_unused:
+        filters.append(models.Invite.subscriber_id.is_(None))
+
+    query = query.filter(*filters)
+    return query.all()
 
 
 def get_by_code(db: Session, code: str) -> models.Invite:

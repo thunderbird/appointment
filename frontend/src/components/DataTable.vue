@@ -4,8 +4,10 @@
  */
 import { useI18n } from 'vue-i18n';
 import { computed, ref, toRefs } from 'vue';
-import { TableDataButtonType, TableDataType } from '@/definitions';
-import { TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent } from '@/models';
+import { TableDataButtonType, TableDataType, TooltipPosition } from '@/definitions';
+import {
+  TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent,
+} from '@/models';
 import ListPagination from '@/elements/ListPagination.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
@@ -20,13 +22,18 @@ interface Props {
   dataKey: string, // A property to use as the list key
   columns: TableDataColumn[], // List of columns to be displayed (these don't filter data, filter that yourself!)
   dataList: TableDataRow[], // List of data to be displayed
-  filters: TableFilter[], // List of filters to be displayed
+  filters?: TableFilter[], // List of filters to be displayed
   loading: boolean, // Displays a loading spinner
-};
-const props = defineProps<Props>();
+  showPagination: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  filters: null,
+  showPagination: true,
+});
 
 const {
-  dataList, dataKey, columns, dataName, allowMultiSelect, loading
+  dataList, dataKey, columns, dataName, allowMultiSelect, loading,
 } = toRefs(props);
 
 const { t } = useI18n();
@@ -45,7 +52,7 @@ const mutableDataList = ref<TableDataRow[]>(null);
 
 const clearSelectedRows = () => {
   selectedRows.value = [];
-}
+};
 
 defineExpose({
   clearSelectedRows,
@@ -95,7 +102,7 @@ const onPageSelect = (evt: Event, list: TableDataRow[]) => {
   });
 
   emit('fieldSelect', selectedRows.value);
-}
+};
 
 const onFieldSelect = (evt: Event, row: TableDataRow) => {
   const isChecked = (evt as HTMLInputElementEvent)?.target?.checked;
@@ -137,6 +144,7 @@ const onColumnFilter = (evt: Event, filter: TableFilter) => {
         </label>
       </div>
       <list-pagination
+        v-if="showPagination"
         :list-length="totalDataLength"
         :page-size="pageSize"
         @update="updatePage"
@@ -148,7 +156,7 @@ const onColumnFilter = (evt: Event, filter: TableFilter) => {
           <tr>
             <th v-if="allowMultiSelect">
               <input :checked="paginatedDataList.every((row) => selectedRows.includes(row))" @change="(evt) => onPageSelect(evt, paginatedDataList)" id="select-page-input" class="mr-2" type="checkbox"/>
-              <label class="select-none cursor-pointer" for="select-page-input">
+              <label class="cursor-pointer select-none" for="select-page-input">
               Select Page
               </label>
             </th>
