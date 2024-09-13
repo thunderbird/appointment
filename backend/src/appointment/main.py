@@ -158,7 +158,7 @@ def server():
                 client_ip = ip_list.split(',')
                 client[0] = client_ip[0]
             if port:
-                client[1] = port
+                client[1] = int(port)
 
             # Transform it back into a tuple and update the request
             request.scope.update({'client': tuple(client)})
