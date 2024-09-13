@@ -455,6 +455,10 @@
     "minutes": "{value} Minuten",
     "none": "{value}"
   },
+  "validation": {
+    "fieldContainsProfanity": "Bitte verwende keine beleidigenden Ausdrücke (entdeckt in {field}).",
+    "fieldIsRequired": "{field} darf nicht leer sein."
+  },
   "waitingList": {
     "adminInviteNotice": "Hinweis: Der Senden-Button wird bereits akzeptierte Personen nicht erneut einladen, sie können aber dennoch ausgewählt werden. Verwende die Filter für eine bessere Übersicht!",
     "confirmHeading": "Du bist auf der Warteliste",

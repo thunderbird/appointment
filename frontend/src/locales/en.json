@@ -456,6 +456,10 @@
     "minutes": "{value} minutes",
     "none": "{value}"
   },
+  "validation": {
+    "fieldContainsProfanity": "Please don't use offensive language (detected in {field}).",
+    "fieldIsRequired": "{field} cannot be empty."
+  },
   "waitingList": {
     "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!",
     "confirmHeading": "You’re on the waitlist",

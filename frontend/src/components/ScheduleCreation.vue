@@ -12,7 +12,7 @@ import {
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+import { dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -46,6 +46,7 @@ const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
+const hasProfanity = inject(hasProfanityKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
 
@@ -253,6 +254,20 @@ const revertForm = (resetData = true) => {
   }
 };
 
+// Form validation
+const scheduleValidationError = (schedule: Schedule): string|null => {
+  // Schedule name is empty
+  if (schedule.name === '') {
+    return t('validation.fieldIsRequired', { field: t('ftue.scheduleName') });
+  }
+  // Schedule name contains profanity
+  if (hasProfanity(schedule.name)) {
+    return t('validation.fieldContainsProfanity', { field: t('ftue.scheduleName') });
+  }
+  // All good
+  return null;
+};
+
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -274,6 +289,15 @@ const saveSchedule = async (withConfirmation = true) => {
   delete obj.time_created;
   delete obj.time_updated;
   delete obj.id;
+
+  // validate schedule data
+  const validationError = scheduleValidationError(obj);
+  if (validationError) {
+    scheduleCreationError.value = validationError;
+    savingInProgress.value = false;
+    window.scrollTo(0, 0);
+    return;
+  }
 
   // save schedule data
   const response = props.schedule
