@@ -7,6 +7,7 @@ from appointment.database import models
 from unittest.mock import patch
 
 from appointment.exceptions.validation import APIRateLimitExceeded
+from appointment.routes import waiting_list
 from appointment.routes.waiting_list import WaitingListAction
 from appointment.tasks.emails import send_confirm_email, send_invite_account_email
 from defines import auth_headers
@@ -66,6 +67,9 @@ class TestJoinWaitingList:
 
     def test_rate_limited(self, with_db, with_client):
         """Make sure our rate limit kicks in after 2 requests."""
+        # Reset the waiting list limiter
+        # FIXME: There's gotta be a nicer way to compose this...
+        waiting_list.limiter.reset()
 
         # Oops, they messed up the first sign-up
         email = 'incorrect_spelling_oops@example.org'
