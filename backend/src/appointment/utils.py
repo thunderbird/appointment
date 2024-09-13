@@ -65,6 +65,9 @@ def retrieve_user_url_data(url):
     signature = None
     if len(split_path) > 1:
         signature = split_path[1]
+        # Strip any tailing slashes
         clean_url = clean_url.replace(signature, "").rstrip('/')
+        # Re-add just the last one
+        clean_url = f'{clean_url}/'
 
     return username, signature, clean_url

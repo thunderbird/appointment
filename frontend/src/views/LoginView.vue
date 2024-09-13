@@ -128,7 +128,6 @@ const login = async () => {
       email: email.value,
     }).json();
 
-    console.log(error.value, canLogin.value);
     if (error?.value) {
       // Handle error
       handleFormError(canLogin.value as PydanticException);
@@ -151,7 +150,7 @@ const login = async () => {
     });
 
     if (inviteCode.value) {
-      params.append('invite_code', inviteCode.value);
+      params.append('invite_code', inviteCode.value.trim());
     }
 
     const { error, data }: AuthUrlResponse = await call(`fxa_login?${params}`).get().json();
@@ -196,7 +195,7 @@ const onEnter = () => {
     return;
   }
 
-  if (loginStep.value === LoginSteps.SignUp || hideInviteField.value) {
+  if ((loginStep.value === LoginSteps.SignUp || hideInviteField.value) && inviteCode.value === '') {
     signUp();
   } else {
     login();

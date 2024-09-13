@@ -1,3 +1,5 @@
+import secrets
+
 import pytest
 from argon2 import PasswordHasher
 from faker import Faker
@@ -15,12 +17,13 @@ def make_subscriber(with_db):
         with with_db() as db:
             subscriber = repo.subscriber.create(
                 db,
-                schemas.SubscriberBase(
+                schemas.SubscriberAuth(
                     name=name if factory_has_value(name) else fake.name(),
                     username=username if factory_has_value(username) else fake.name().replace(' ', '_'),
                     email=email if factory_has_value(email) else fake.email(),
                     level=level,
                     timezone='America/Vancouver',
+                    short_link_hash=secrets.token_hex(32)
                 ),
             )
             # If we've passed in a password then hash it and save it to the subscriber

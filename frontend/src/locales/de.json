@@ -16,6 +16,7 @@
     "minimumValue": "{field} sollte wenigstens {value} sein.",
     "noConnectedCalendars": "Kalendereinrichtung zum Fortfahren erforderlich. {0}.",
     "noConnectedCalendarsLink": "Zu den Einstellungen wechseln.",
+    "noSpecialCharacters": "Bitte die Sonderzeichen entfernen und nochmal versuchen.",
     "routeNotFound": "Entschuldigung, diese Seite wurde nicht gefunden.",
     "selectOneDay": "Es muss mindestens ein Tag ausgewählt werden, um fortzufahren.",
     "somethingWentWrong": "Etwas ist schiefgelaufen",
@@ -361,6 +362,11 @@
     "never": "Nie",
     "writeHere": "Hier notieren …",
     "zoomCom": "zoom.com …"
+  },
+  "settings": {
+    "invite": {
+      "brief": "Nachfolgend gibt es Einladungscodes für Thunderbird Appointment. Diese können gerne an Freunde weitergegeben und ihnen für die Anmeldung genutzt werden."
+    }
   },
   "text": {
     "accountDataNotice": "Lade all deine Daten von Thunderbird Appointment herunter.",

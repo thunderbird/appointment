@@ -193,7 +193,7 @@ class Schedule(ScheduleBase):
 class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
     # Regex to exclude any character can be mess with a url
-    slug: Annotated[str, Field(min_length=2, max_length=16, pattern=r"^[^\;\/\?\:\@\&\=\+\$\,\#]*$")]
+    slug: Annotated[Optional[str], Field(min_length=2, max_length=16, pattern=r"^[^\;\/\?\:\@\&\=\+\$\,\#]*$")] = None
     slot_duration: Annotated[int, Field(ge=10, default=30)]
 
 
@@ -241,10 +241,16 @@ class CalendarOut(CalendarBase):
 
 class Invite(BaseModel):
     subscriber_id: int | None = None
+    owner_id: Optional[int] = None
     code: str
     status: InviteStatus = InviteStatus.active
     time_created: datetime | None = None
     time_updated: datetime | None = None
+
+
+class InviteOut(BaseModel):
+    code: str
+    status: InviteStatus = InviteStatus.active
 
 
 """ SUBSCRIBER model schemas
