@@ -141,7 +141,7 @@ onMounted(() => {
   referenceSchedule.value = { ...scheduleInput.value };
 });
 
-const scheduleCreationError = ref(null);
+const scheduleCreationError = ref<string>(null);
 const scheduledRangeMinutes = computed(() => {
   const start = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`);
   const end = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`);
@@ -436,10 +436,7 @@ watch(
           :title="t(schedule.active ? 'label.deactivateSchedule' : 'label.activateSchedule')"
         />
       </div>
-      <alert-box
-        @close="scheduleCreationError = ''"
-        v-if="scheduleCreationError"
-      >
+      <alert-box @close="scheduleCreationError = ''" v-if="scheduleCreationError">
         {{ scheduleCreationError }}
       </alert-box>
 
