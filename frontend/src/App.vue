@@ -4,29 +4,28 @@ import {
   inject, provide, computed, onMounted,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import NavBar from '@/components/NavBar.vue';
-import TitleBar from '@/components/TitleBar.vue';
-import FooterBar from '@/components/FooterBar.vue';
-import SiteNotification from '@/elements/SiteNotification.vue';
-import { useSiteNotificationStore } from '@/stores/alert-store';
 import { storeToRefs } from 'pinia';
 import { getPreferredTheme } from '@/utils';
-
-// stores
-import { useUserStore } from '@/stores/user-store';
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useAppointmentStore } from '@/stores/appointment-store';
-import { useScheduleStore } from '@/stores/schedule-store';
-
-import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
-import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-
-import UAParser from 'ua-parser-js';
 import {
   apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
+import UAParser from 'ua-parser-js';
+
+import NavBar from '@/components/NavBar.vue';
+import TitleBar from '@/components/TitleBar.vue';
+import FooterBar from '@/components/FooterBar.vue';
+import SiteNotification from '@/elements/SiteNotification.vue';
+import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
+import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
+
+// stores
+import { useSiteNotificationStore } from '@/stores/alert-store';
+import { useUserStore } from '@/stores/user-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
@@ -100,18 +99,9 @@ const call = createFetch({
   },
 });
 
-// TODO: Deprecated - Please use callKey, as it's typed!
-provide('call', call);
 provide(callKey, call);
-
-// TODO: Deprecated - Please use isPasswordAuthKey, as it's typed!
-provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
 provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'password');
-// TODO: Deprecated - Please use isFxaAuthKey, as it's typed!
-provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
-// TODO: Deprecated - Please use fxaEditProfileUrlKey, as it's typed!
-provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
 provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
 
 // menu items for main navigation
@@ -180,8 +170,6 @@ const onPageLoad = async () => {
   return data.value?.id ?? false;
 };
 
-// TODO: Deprecated - Please use refreshKey, as it's typed!
-provide('refresh', getDbData);
 // provide refresh functions for components
 provide(refreshKey, getDbData);
 

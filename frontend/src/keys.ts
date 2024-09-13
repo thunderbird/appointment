@@ -17,6 +17,8 @@ type DayjsType = ((_?:ConfigType) => Dayjs) & {
 };
 export const dayjsKey = Symbol('dayjs') as InjectionKey<DayjsType>;
 export const isoWeekdaysKey = Symbol('isoWeekdays') as InjectionKey<IsoWeekday[]>;
+export const tzGuessKey = Symbol('tzGuess') as InjectionKey<string>;
+export const isoFirstDayOfWeekKey = Symbol('isoFirstDayOfWeek') as InjectionKey<number>;
 
 // Provide urls for API and booking
 export const apiUrlKey = Symbol('apiUrl') as InjectionKey<string>;
