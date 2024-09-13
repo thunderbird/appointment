@@ -101,18 +101,22 @@ const updateUser = async () => {
  * If it didn't change, then just update the user immediately.
  */
 const updateUserCheckForConfirmation = async () => {
+  errorUsername.value = null;
+  errorDisplayName.value = null;
+
   // Validate username
   if (activeUsername.value === '') {
     errorUsername.value = t('validation.fieldIsRequired', { field: t('label.username') });
-    return;
   }
   if (hasProfanity(activeUsername.value)) {
     errorUsername.value = t('validation.fieldContainsProfanity', { field: t('label.username') });
-    return;
   }
   // Validate display name
   if (hasProfanity(activeDisplayName.value)) {
     errorDisplayName.value = t('validation.fieldContainsProfanity', { field: t('label.displayName') });
+  }
+
+  if (errorUsername.value || errorDisplayName.value) {
     return;
   }
 
