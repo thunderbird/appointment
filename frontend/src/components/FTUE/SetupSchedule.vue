@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue';
+import {
+  computed, inject, onMounted, ref,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { useI18n } from 'vue-i18n';
@@ -136,7 +138,9 @@ onMounted(async () => {
         <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
         <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
         </div>
-        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
+        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" :required="true">
+          {{ t('label.availableDays') }}
+        </bubble-select>
       </div>
       <div class="column">
         <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>

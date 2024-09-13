@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { SelectOption } from "@/models";
+import { SelectOption } from '@/models';
 
 // component properties
 interface Props {
   options: SelectOption[];
-};
-defineProps<Props>();
+  required: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  required: false,
+});
 
 const model = defineModel<number[]>({ default: [] });
 
@@ -35,27 +39,54 @@ const toggleBubble = (option: SelectOption) => {
 </script>
 
 <template>
-  <ul>
-    <li v-for="option in options" :key="option.value">
-      <button
-        :class="{'selected': model.indexOf(option.value) > -1}"
-        type="button"
-        @click="() => toggleBubble(option)"
-      >
-        {{ option.label }}
-      </button>
-    </li>
-  </ul>
+  <div class="wrapper">
+    <label>
+      <span class="label">
+        <slot/>
+        <span v-if="required && model?.length === 0" class="required">*</span>
+      </span>
+    </label>
+    <ul class="bubble-list">
+      <li v-for="option in options" :key="option.value">
+        <button
+          class="tbpro-bubble"
+          :aria-pressed="model.indexOf(option.value) > -1"
+          :class="{'selected': model.indexOf(option.value) > -1}"
+          :title="option.fullLabel ?? option.value"
+          type="button"
+          @click="() => toggleBubble(option)"
+        >
+          {{ option.label }}
+        </button>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <style scoped>
-ul {
+.wrapper {
   display: flex;
-  gap: 0.625rem;
+  flex-direction: column;
+  color: var(--colour-ti-base);
+  font-family: 'Inter', 'sans-serif';
+  font-size: var(--txt-input);
+  line-height: var(--line-height-input);
+  font-weight: 400;
+}
+
+.bubble-list {
+  padding: 0;
+  display: flex;
+  gap: 0.25rem;
   list-style: none;
 }
 
-button {
+.label {
+  width: 100%;
+  font-weight: 600;
+}
+
+.tbpro-bubble {
   transition: all 250ms ease-out;
 
   display: flex;
@@ -75,5 +106,8 @@ button {
   background-color: var(--colour-service-primary);
   border-color: var(--colour-service-primary-pressed);
   color: var(--colour-neutral-base);
+}
+.required {
+  color: var(--colour-ti-critical);
 }
 </style>
