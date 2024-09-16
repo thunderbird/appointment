@@ -5,6 +5,7 @@ Repository providing CRUD functions for subscriber database models.
 
 import re
 import datetime
+import secrets
 import urllib.parse
 
 from sqlalchemy.orm import Session
@@ -55,6 +56,8 @@ def create(db: Session, subscriber: schemas.SubscriberBase):
     # Filter incoming data to just the available model columns
     columns = models.Subscriber().get_columns()
     data = {k: v for k, v in data.items() if k in columns}
+    # Generate a short link hash on subscriber create
+    data['short_link_hash'] = secrets.token_hex(32)
 
     db_subscriber = models.Subscriber(**data)
     db.add(db_subscriber)
@@ -125,9 +128,6 @@ def verify_link(db: Session, url: str):
     Return subscriber if valid.
     """
     username, signature, clean_url = utils.retrieve_user_url_data(url)
-
-    username = urllib.parse.unquote_plus(username)
-
     subscriber = get_by_username(db, username)
     if not subscriber:
         return False

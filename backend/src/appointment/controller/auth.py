@@ -48,7 +48,7 @@ def signed_url_by_subscriber(subscriber: schemas.Subscriber):
     if not short_url:
         short_url = base_url
 
-    url_safe_username = urllib.parse.quote_plus(subscriber.username)
+    url_safe_username = urllib.parse.quote(subscriber.username)
 
     # We sign with a different hash that the end-user doesn't have access to
     # We also need to use the default url, as short urls are currently setup as a redirect
@@ -70,5 +70,7 @@ def schedule_links_by_subscriber(db, subscriber: models.Subscriber):
     if not short_url:
         short_url = base_url
 
+    url_safe_username = urllib.parse.quote(subscriber.username)
+
     # Empty space at join is for trailing slash!
-    return list(map(lambda sch: '/'.join([short_url, subscriber.username, sch.slug, '']), schedules))
+    return list(map(lambda sch: '/'.join([short_url, url_safe_username, urllib.parse.quote(sch.slug), '']), schedules))

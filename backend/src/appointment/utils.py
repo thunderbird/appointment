@@ -48,9 +48,6 @@ def setup_encryption_engine():
 
 def retrieve_user_url_data(url):
     """URL Decodes, and retrieves username, signature, and main url from /<username>/<signature>/"""
-    # Decode the url so it can be parsed correctly
-    url = urllib.parse.unquote(url)
-
     parsed_url = parse.urlparse(url)
     split_path = [x for x in parsed_url.path.split('/') if x]
 
@@ -70,4 +67,5 @@ def retrieve_user_url_data(url):
         # Re-add just the last one
         clean_url = f'{clean_url}/'
 
-    return username, signature, clean_url
+    # Return the username and signature decoded, but ensure the clean_url is encoded.
+    return urllib.parse.unquote(username), urllib.parse.unquote(signature), clean_url
