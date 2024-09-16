@@ -90,6 +90,9 @@ const handleError = (data: Exception) => {
   if (errorDetail?.id === 'SCHEDULE_NOT_ACTIVE') {
     errorHeading.value = '';
     errorBody.value = errorDetail.message;
+  } else if (errorDetail.id === 'RATE_LIMIT_EXCEEDED') {
+    errorHeading.value = '';
+    errorBody.value = errorDetail.message;
   }
 };
 
