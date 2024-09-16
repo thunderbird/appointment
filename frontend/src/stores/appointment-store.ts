@@ -6,12 +6,12 @@ import { useUserStore } from '@/stores/user-store';
 import {
   Appointment, AppointmentListResponse, Fetch, Slot,
 } from '@/models';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, tzGuessKey } from '@/keys';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAppointmentStore = defineStore('appointments', () => {
   const dj = inject(dayjsKey);
-  const tzGuess = inject<string>('tzGuess');
+  const tzGuess = inject(tzGuessKey);
 
   // State
   const isLoaded = ref(false);

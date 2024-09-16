@@ -35,6 +35,7 @@ module.exports = {
     'tailwindcss/no-custom-classname': 'off',
     'import/prefer-default-export': 'off',
     radix: 'off',
+    'dot-notation': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     // Disable full warning, and customize the typescript one
     // Warn about unused vars unless they start with an underscore

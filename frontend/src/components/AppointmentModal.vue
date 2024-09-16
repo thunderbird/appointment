@@ -18,7 +18,7 @@ import {
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import CautionButton from '@/elements/CautionButton.vue';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 const user = useUserStore();
 
@@ -30,7 +30,7 @@ const dj = inject(dayjsKey);
 interface Props {
   open: boolean, // modal state
   appointment?: Appointment; // appointment data to display
-};
+}
 const props = defineProps<Props>();
 
 // attendees list

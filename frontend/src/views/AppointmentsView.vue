@@ -29,7 +29,7 @@ import {
 } from '@tabler/icons-vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { storeToRefs } from 'pinia';
-import { dayjsKey, refreshKey, paintBackgroundKey } from "@/keys";
+import { dayjsKey, refreshKey, paintBackgroundKey } from '@/keys';
 
 // component constants
 const { t } = useI18n();

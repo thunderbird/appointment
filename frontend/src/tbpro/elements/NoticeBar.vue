@@ -7,10 +7,10 @@ import NoticeCriticalIcon from '@/tbpro/icons/NoticeCriticalIcon.vue';
 // component properties
 interface Props {
   type?: string;
-};
+}
 const props = withDefaults(defineProps<Props>(), {
   type: 'info',
-})
+});
 
 const isInfo = props.type === 'info';
 const isSuccess = props.type === 'success;';

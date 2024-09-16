@@ -9,7 +9,7 @@ interface Props {
   isSelected: boolean; // flag showing if the event is currently selected by user
   isMonthView: boolean; // flag, are we in month view?
   label: string; // event title
-};
+}
 defineProps<Props>();
 
 </script>

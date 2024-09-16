@@ -4,8 +4,8 @@ import InfoBox from '@/elements/home/InfoBox.vue';
 import HomeFooter from '@/components/HomeFooter.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
-import { storeToRefs } from "pinia";
-import ArtLogo from "@/elements/arts/ArtLogo.vue";
+import { storeToRefs } from 'pinia';
+import ArtLogo from '@/elements/arts/ArtLogo.vue';
 
 const router = useRouter();
 
@@ -19,7 +19,7 @@ const login = () => {
   router.push({ name: 'login' });
 };
 const signUp = () => {
-  router.push({ name: 'join-the-waiting-list' })
+  router.push({ name: 'join-the-waiting-list' });
 };
 </script>
 
@@ -27,7 +27,7 @@ const signUp = () => {
   <div>
     <section>
       <div class="flex-center mt-8 flex-col gap-12">
-        <ArtLogo class="w-full max-w-xs md:max-w-sm lg:max-w-md -mb-12"/>
+        <ArtLogo class="-mb-12 w-full max-w-xs md:max-w-sm lg:max-w-md"/>
         <div class="flex-center -mb-12 flex flex-col md:-mb-20 lg:-mb-28 xl:-mb-40">
           <h4 class="max-w-2xl pt-12 text-center text-xl font-light leading-9 tracking-wide">
             {{ $t('text.homepage.intro') }}
@@ -48,7 +48,7 @@ const signUp = () => {
               :title="$t('label.continue')"
             />
           </div>
-          <div class="mt-4 mb-4">
+          <div class="my-4">
             <primary-button
               v-if="!isAuthenticated"
               :label="$t('label.signUpForBeta')"

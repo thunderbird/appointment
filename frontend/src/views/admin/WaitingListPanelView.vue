@@ -15,15 +15,15 @@ import {
   TableFilter,
   WaitingListInviteResponse,
   Exception,
-  ExceptionDetail
-} from "@/models";
-import { dayjsKey, callKey } from "@/keys";
-import { IconSend } from "@tabler/icons-vue";
+  ExceptionDetail,
+} from '@/models';
+import { dayjsKey, callKey } from '@/keys';
+import { IconSend } from '@tabler/icons-vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
-import PrimaryButton from "@/elements/PrimaryButton.vue";
+import PrimaryButton from '@/elements/PrimaryButton.vue';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -200,7 +200,7 @@ const sendInvites = async () => {
 
   const idList = selectedFields.value.map((row) => row.id.value);
 
-  const response: WaitingListInviteResponse = await call('waiting-list/invite').post({id_list: idList}).json();
+  const response: WaitingListInviteResponse = await call('waiting-list/invite').post({ id_list: idList }).json();
   const { data, error } = response;
 
   if (error.value) {
@@ -211,7 +211,7 @@ const sendInvites = async () => {
 
   const { accepted, errors } = data.value as WaitingListInvite;
 
-  pageNotification.value = t('label.sentCountInvitesSuccessfully', { count: accepted.length })
+  pageNotification.value = t('label.sentCountInvitesSuccessfully', { count: accepted.length });
 
   if (errors.length) {
     pageError.value = errors.join('\n');

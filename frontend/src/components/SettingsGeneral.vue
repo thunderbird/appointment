@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ColorSchemes } from '@/definitions';
-import { ref, reactive, inject, watch } from 'vue';
+import {
+  ref, reactive, inject, watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey } from "@/keys";
-import { SubscriberResponse } from "@/models";
+import { dayjsKey, callKey } from '@/keys';
+import { SubscriberResponse } from '@/models';
 
 // component constants
 const user = useUserStore();

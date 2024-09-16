@@ -7,8 +7,10 @@ import { IconSend } from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter } from "@/models";
-import { dayjsKey, callKey } from "@/keys";
+import {
+  Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter,
+} from '@/models';
+import { dayjsKey, callKey } from '@/keys';
 import AdminNav from '@/elements/admin/AdminNav.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';

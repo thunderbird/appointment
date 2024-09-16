@@ -16,7 +16,7 @@ interface Props {
   isSchedule: boolean, // confirmation is for a schedule instead of a common appointment
   title: string, // title of created appointment
   publicLink: string, // public link of created appointment for sharing
-};
+}
 defineProps<Props>();
 
 // component emits

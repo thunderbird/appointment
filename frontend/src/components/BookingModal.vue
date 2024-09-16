@@ -30,7 +30,7 @@ const emit = defineEmits(['book', 'close']);
 interface Props {
   event?: Appointment & Slot, // event data to display and book
   requiresConfirmation?: boolean, // Are we requesting a booking (availability) or booking it (one-off appointment.)
-};
+}
 const props = defineProps<Props>();
 
 // Store

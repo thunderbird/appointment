@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { eventColor, getAccessibleColor } from '@/utils';
 import { computed } from 'vue';
-import { CustomEventData } from "@/models";
+import { CustomEventData } from '@/models';
 
 // component properties
 interface Props {
   isMonthView: boolean; // flag, are we in month view?
   eventData: CustomEventData; // the event data to show
   label: string; // event title
-};
+}
 const props = defineProps<Props>();
 
 const eventBackgroundColor = computed(() => {

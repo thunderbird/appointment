@@ -5,7 +5,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { callKey } from '@/keys';
+import { callKey, hasProfanityKey } from '@/keys';
 import {
   StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
 } from '@/models';
@@ -30,6 +30,7 @@ import UserInviteTable from '@/components/UserInviteTable.vue';
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
+const hasProfanity = inject(hasProfanityKey);
 const router = useRouter();
 const user = useUserStore();
 const schedule = useScheduleStore();
@@ -44,6 +45,7 @@ const refreshLinkModalOpen = ref(false);
 const updateUsernameModalOpen = ref(false);
 const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
+const formRef = ref<HTMLFormElement>();
 
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
@@ -69,34 +71,65 @@ const refreshData = async () => Promise.all([
   getAvailableEmails(),
 ]);
 
-// save user data
-const errorUsername = ref(false);
+// Form validation
+const errorUsername = ref<string>(null);
+const errorDisplayName = ref<string>(null);
+
+// Save user data
 const updateUser = async () => {
   const inputData = {
     username: activeUsername.value,
     name: activeDisplayName.value,
     secondary_email: activePreferredEmail.value,
   };
+
   const { data, error }: SubscriberResponse = await call('me').put(inputData).json();
   if (!error.value) {
     // update user in store
     user.updateProfile(data.value);
     await user.updateSignedUrl(call);
-    errorUsername.value = false;
+    errorUsername.value = null;
+    errorDisplayName.value = null;
     // TODO show some confirmation
     await refreshData();
   } else {
-    errorUsername.value = true;
+    errorUsername.value = t('error.usernameIsNotAvailable');
   }
 
   closeModals();
 };
 
 /**
+ * Validate user input first and only open modal if no errors occured.
  * Check if the username has been changed, and open a modal to warn the user their short link is going to change
  * If it didn't change, then just update the user immediately.
  */
 const updateUserCheckForConfirmation = async () => {
+  errorUsername.value = null;
+  errorDisplayName.value = null;
+
+  // Form validation
+  if (!formRef.value.checkValidity()) {
+    return;
+  }
+
+  // Profanity validation
+  // if (activeUsername.value === '') {
+  //   errorUsername.value = t('error.fieldIsRequired', { field: t('label.username') });
+  // }
+  if (hasProfanity(activeUsername.value)) {
+    errorUsername.value = t('error.fieldContainsProfanity', { field: t('label.username') });
+  }
+  // Validate display name
+  if (hasProfanity(activeDisplayName.value)) {
+    errorDisplayName.value = t('error.fieldContainsProfanity', { field: t('label.displayName') });
+  }
+
+  if (errorUsername.value || errorDisplayName.value) {
+    return;
+  }
+
+  // Check for username change
   if (activeUsername.value !== user.data.username) {
     updateUsernameModalOpen.value = true;
     return;
@@ -184,7 +217,7 @@ const actuallyDeleteAccount = async () => {
 <template>
   <div class="flex flex-col gap-8">
     <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
-    <div class="flex max-w-3xl flex-col pl-6" id="profile">
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent class="flex max-w-3xl flex-col pl-6" id="profile">
       <div class="text-xl">{{ t('heading.profile') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
@@ -194,9 +227,10 @@ const actuallyDeleteAccount = async () => {
             type="text"
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
+            :required="true"
           />
           <div v-if="errorUsername" class="text-sm text-red-500">
-            {{ t('error.usernameIsNotAvailable') }}
+            {{ errorUsername }}
           </div>
         </div>
       </label>
@@ -217,11 +251,17 @@ const actuallyDeleteAccount = async () => {
       </label>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
-        <input
-          v-model="activeDisplayName"
-          type="text"
-          class="w-full rounded-md"
-        />
+        <div class="w-full">
+          <input
+            v-model="activeDisplayName"
+            type="text"
+            class="w-full rounded-md"
+            :class="{ '!border-red-500': errorDisplayName }"
+          />
+          <div v-if="errorDisplayName" class="text-sm text-red-500">
+            {{ errorDisplayName }}
+          </div>
+        </div>
       </label>
       <label class="mt-6 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
@@ -264,7 +304,7 @@ const actuallyDeleteAccount = async () => {
           :title="t('label.save')"
         />
       </div>
-    </div>
+    </form>
     <div class="pl-6" id="invites">
       <div class="text-xl">{{ t('label.admin-invite-codes-panel') }}</div>
       <p class="mt-4 pl-4">

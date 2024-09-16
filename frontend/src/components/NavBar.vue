@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { callKey } from '@/keys';
 import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
@@ -13,9 +11,7 @@ import { IconExternalLink } from '@tabler/icons-vue';
 // component constants
 const user = useUserStore();
 const route = useRoute();
-const router = useRouter();
 const { t } = useI18n();
-const call = inject(callKey);
 
 // component properties
 interface Props {

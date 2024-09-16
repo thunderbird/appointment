@@ -2,7 +2,7 @@
 // component properties
 interface Props {
   content: string; // Tooltip text
-};
+}
 defineProps<Props>();
 </script>
 

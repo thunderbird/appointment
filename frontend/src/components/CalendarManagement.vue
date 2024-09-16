@@ -14,10 +14,10 @@ const emit = defineEmits(['modify', 'remove', 'sync']);
 // component properties
 interface Props {
   calendars: Calendar[], // List of calendars to display
-  title: String,
+  title: string,
   type: CalendarManagementType,
   loading: boolean,
-};
+}
 const props = defineProps<Props>();
 
 // Filter by connected or not connected depending on the list type

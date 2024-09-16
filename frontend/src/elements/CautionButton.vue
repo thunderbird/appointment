@@ -7,7 +7,7 @@ interface Props {
   label?: string; // button text
   icon?: 'copy'|'check'; // optional icon displayed before label
   waiting?: boolean; // if true, spinning animation is shown instead of label
-};
+}
 defineProps<Props>();
 </script>
 

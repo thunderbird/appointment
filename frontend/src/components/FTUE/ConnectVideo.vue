@@ -5,7 +5,9 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
-import { AuthUrl, AuthUrlResponse, BooleanResponse, Exception, ExceptionDetail } from '@/models';
+import {
+  AuthUrl, AuthUrlResponse, BooleanResponse, Exception, ExceptionDetail,
+} from '@/models';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';

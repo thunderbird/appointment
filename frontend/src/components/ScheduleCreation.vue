@@ -12,7 +12,9 @@ import {
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+import {
+  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+} from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -46,6 +48,7 @@ const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
+const hasProfanity = inject(hasProfanityKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
 
@@ -140,7 +143,7 @@ onMounted(() => {
   referenceSchedule.value = { ...scheduleInput.value };
 });
 
-const scheduleCreationError = ref(null);
+const scheduleCreationError = ref<string>(null);
 const scheduledRangeMinutes = computed(() => {
   const start = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`);
   const end = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`);
@@ -253,6 +256,20 @@ const revertForm = (resetData = true) => {
   }
 };
 
+// Form validation
+const scheduleValidationError = (schedule: Schedule): string|null => {
+  // Schedule name is empty
+  if (schedule.name === '') {
+    return t('error.fieldIsRequired', { field: t('ftue.scheduleName') });
+  }
+  // Schedule name contains profanity
+  if (hasProfanity(schedule.name)) {
+    return t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
+  }
+  // All good
+  return null;
+};
+
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -274,6 +291,15 @@ const saveSchedule = async (withConfirmation = true) => {
   delete obj.time_created;
   delete obj.time_updated;
   delete obj.id;
+
+  // validate schedule data
+  const validationError = scheduleValidationError(obj);
+  if (validationError) {
+    scheduleCreationError.value = validationError;
+    savingInProgress.value = false;
+    window.scrollTo(0, 0);
+    return;
+  }
 
   // save schedule data
   const response = props.schedule
@@ -412,10 +438,7 @@ watch(
           :title="t(schedule.active ? 'label.deactivateSchedule' : 'label.activateSchedule')"
         />
       </div>
-      <alert-box
-        @close="scheduleCreationError = ''"
-        v-if="scheduleCreationError"
-      >
+      <alert-box @close="scheduleCreationError = ''" v-if="scheduleCreationError">
         {{ scheduleCreationError }}
       </alert-box>
 
@@ -483,7 +506,12 @@ watch(
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.availableDays") }}
             </div>
-            <bubble-select class="bubble-select" :options="scheduleDayOptions" v-model="scheduleInput.weekdays" />
+            <bubble-select
+              class="bubble-select"
+              :options="scheduleDayOptions"
+              v-model="scheduleInput.weekdays"
+              :required="true"
+            />
           </div>
           <div>
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">

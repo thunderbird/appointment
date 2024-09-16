@@ -4,29 +4,29 @@ import {
   inject, provide, computed, onMounted,
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { getPreferredTheme } from '@/utils';
+import {
+  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, hasProfanityKey,
+} from '@/keys';
+import { StringResponse } from '@/models';
+import { usePosthog, posthog } from '@/composables/posthog';
+import UAParser from 'ua-parser-js';
+import { Profanity } from '@2toad/profanity';
+
 import NavBar from '@/components/NavBar.vue';
 import TitleBar from '@/components/TitleBar.vue';
 import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification.vue';
-import { useSiteNotificationStore } from '@/stores/alert-store';
-import { storeToRefs } from 'pinia';
-import { getPreferredTheme } from '@/utils';
+import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
+import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 
 // stores
+import { useSiteNotificationStore } from '@/stores/alert-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-
-import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
-import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-
-import UAParser from 'ua-parser-js';
-import {
-  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
-} from '@/keys';
-import { StringResponse } from '@/models';
-import { usePosthog, posthog } from '@/composables/posthog';
 
 // component constants
 const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
@@ -34,6 +34,8 @@ const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
+const lang = localStorage?.getItem('locale') ?? navigator.language;
+
 const siteNotificationStore = useSiteNotificationStore();
 const {
   isVisible: visibleNotification,
@@ -47,6 +49,11 @@ const {
   show: showNotification,
   lock: lockNotification,
 } = siteNotificationStore;
+
+// Handle input filters
+const profanity = new Profanity();
+const hasProfanity = (input: string) => profanity.exists(input);
+provide(hasProfanityKey, hasProfanity);
 
 // handle auth and fetch
 const isAuthenticated = computed(() => currentUser?.exists());
@@ -100,18 +107,9 @@ const call = createFetch({
   },
 });
 
-// TODO: Deprecated - Please use callKey, as it's typed!
-provide('call', call);
 provide(callKey, call);
-
-// TODO: Deprecated - Please use isPasswordAuthKey, as it's typed!
-provide('isPasswordAuth', import.meta.env?.VITE_AUTH_SCHEME === 'password');
 provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'password');
-// TODO: Deprecated - Please use isFxaAuthKey, as it's typed!
-provide('isFxaAuth', import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
-// TODO: Deprecated - Please use fxaEditProfileUrlKey, as it's typed!
-provide('fxaEditProfileUrl', import.meta.env?.VITE_FXA_EDIT_PROFILE);
 provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
 
 // menu items for main navigation
@@ -172,7 +170,7 @@ const onPageLoad = async () => {
     resolution: deviceRes,
     effective_resolution: effectiveDeviceRes,
     user_agent: navigator.userAgent,
-    locale: localStorage?.getItem('locale') ?? navigator.language,
+    locale: lang,
     theme: getPreferredTheme(),
   }).json();
 
@@ -180,8 +178,6 @@ const onPageLoad = async () => {
   return data.value?.id ?? false;
 };
 
-// TODO: Deprecated - Please use refreshKey, as it's typed!
-provide('refresh', getDbData);
 // provide refresh functions for components
 provide(refreshKey, getDbData);
 

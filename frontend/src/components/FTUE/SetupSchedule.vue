@@ -9,7 +9,9 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+import {
+  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+} from '@/keys';
 import { Error, SelectOption } from '@/models';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
@@ -21,6 +23,7 @@ const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
+const hasProfanity = inject(hasProfanityKey);
 
 const ftueStore = useFTUEStore();
 const {
@@ -63,11 +66,21 @@ const schedule = ref({
 const duration = computed(() => `${schedule.value.duration} minute`);
 const isLoading = ref(false);
 
+// Form validation
+const errorScheduleName = ref<string>(null);
+
 const onSubmit = async () => {
   isLoading.value = true;
   errorMessage.value = null;
+  errorScheduleName.value = null;
 
   if (!formRef.value.checkValidity()) {
+    isLoading.value = false;
+    return;
+  }
+
+  if (hasProfanity(schedule.value.name)) {
+    errorScheduleName.value = t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
     isLoading.value = false;
     return;
   }
@@ -133,10 +146,16 @@ onMounted(async () => {
   <div class="content">
     <form ref="formRef" autocomplete="off" autofocus @submit.prevent @keyup.enter="onSubmit">
       <div class="column">
-        <text-input name="scheduleName" v-model="schedule.name" required>{{ t('ftue.scheduleName') }}</text-input>
+        <text-input name="scheduleName" v-model="schedule.name" required :error="errorScheduleName">
+          {{ t('ftue.scheduleName') }}
+        </text-input>
         <div class="pair">
-        <text-input type="time" name="startTime" v-model="schedule.startTime" required>{{ t('label.startTime') }}</text-input>
-        <text-input type="time" name="endTime" v-model="schedule.endTime" required>{{ t('label.endTime') }}</text-input>
+        <text-input type="time" name="startTime" v-model="schedule.startTime" required>
+          {{ t('label.startTime') }}
+        </text-input>
+        <text-input type="time" name="endTime" v-model="schedule.endTime" required>
+          {{ t('label.endTime') }}
+        </text-input>
         </div>
         <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" :required="true">
           {{ t('label.availableDays') }}

@@ -4,10 +4,10 @@ import { IconInfoCircle } from '@tabler/icons-vue';
 // component properties
 interface Props {
   showIcon?: boolean;
-};
+}
 withDefaults(defineProps<Props>(), {
   showIcon: false,
-})
+});
 </script>
 
 <template>

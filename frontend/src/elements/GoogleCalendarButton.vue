@@ -2,7 +2,7 @@
 // component properties
 interface Props {
   label?: string; // button text
-};
+}
 defineProps<Props>();
 </script>
 

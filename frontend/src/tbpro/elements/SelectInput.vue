@@ -8,11 +8,11 @@ interface Props {
   options: SelectOption[];
   required?: boolean;
   disabled?: boolean;
-};
+}
 withDefaults(defineProps<Props>(), {
   required: false,
   disabled: false,
-})
+});
 
 defineEmits(['submit']);
 const model = defineModel<number|string>();
@@ -94,7 +94,6 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
   @mixin faded-border var(--colour-select-border);
   border-radius: var(--border-radius);
   font-weight: 400;
-
 
   &:hover, &:focus {
     --colour-select-border: var(--colour-neutral-border-intense);
