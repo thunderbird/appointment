@@ -157,7 +157,9 @@ onMounted(async () => {
           {{ t('label.endTime') }}
         </text-input>
         </div>
-        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" />
+        <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" :required="true">
+          {{ t('label.availableDays') }}
+        </bubble-select>
       </div>
       <div class="column">
         <select-input name="calendar" v-model="schedule.calendar" :options="calendarOptions" required>

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Body, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Request
 import logging
 import os
 
@@ -39,8 +39,11 @@ from ..tasks.emails import (
     send_rejection_email,
     send_zoom_meeting_failed_email, send_new_booking_email,
 )
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post('/', response_model=schemas.Schedule)
@@ -122,7 +125,9 @@ def update_schedule(
 
 
 @router.post('/public/availability', response_model=schemas.AppointmentOut)
+@limiter.limit("20/minute")
 def read_schedule_availabilities(
+    request: Request,
     subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
@@ -176,7 +181,9 @@ def read_schedule_availabilities(
 
 
 @router.put('/public/availability/request')
+@limiter.limit("20/minute")
 def request_schedule_availability_slot(
+    request: Request,
     s_a: schemas.AvailabilitySlotAttendee,
     background_tasks: BackgroundTasks,
     subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),

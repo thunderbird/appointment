@@ -55,6 +55,8 @@ subscriber-already-deleted = The subscriber is already deleted.
 subscriber-already-enabled = The subscriber is already enabled.
 subscriber-self-delete = You are not allowed to delete yourself here.
 
+rate-limit-exceeded = Too many requests in a short period. Please try again later.
+
 ## Authentication Exceptions
 
 email-mismatch = Email mismatch.

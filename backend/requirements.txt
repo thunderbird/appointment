@@ -33,3 +33,4 @@ requests-oauthlib==2.0.0
 redis==5.0.7
 hiredis==2.3.2
 posthog==3.5.0
+slowapi==0.1.9

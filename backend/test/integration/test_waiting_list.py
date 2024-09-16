@@ -3,11 +3,11 @@ import pytest
 from itsdangerous import URLSafeSerializer
 from sqlalchemy.exc import InvalidRequestError
 
-from appointment.database import models, schemas
+from appointment.database import models
 from unittest.mock import patch
 
-from appointment.dependencies.auth import get_admin_subscriber, get_subscriber
-from appointment.routes.auth import create_access_token
+from appointment.exceptions.validation import APIRateLimitExceeded
+from appointment.routes import waiting_list
 from appointment.routes.waiting_list import WaitingListAction
 from appointment.tasks.emails import send_confirm_email, send_invite_account_email
 from defines import auth_headers
@@ -64,6 +64,37 @@ class TestJoinWaitingList:
 
                 # Ensure we did not send out an email
                 mock.assert_not_called()
+
+    def test_rate_limited(self, with_db, with_client):
+        """Make sure our rate limit kicks in after 2 requests."""
+        # Reset the waiting list limiter
+        # FIXME: There's gotta be a nicer way to compose this...
+        waiting_list.limiter.reset()
+
+        # Oops, they messed up the first sign-up
+        email = 'incorrect_spelling_oops@example.org'
+        response = with_client.post('/waiting-list/join', json={'email': email})
+
+        # Ensure the response was okay!
+        assert response.status_code == 200, response.json()
+        assert response.json() is True
+
+        # Quickly recover with the right email
+        email = 'hello@example.org'
+        response = with_client.post('/waiting-list/join', json={'email': email})
+
+        # Ensure the response was okay!
+        assert response.status_code == 200, response.json()
+        assert response.json() is True
+
+        # Oh so sneakily signing up a third!
+        email = 'hello2@example.org'
+        response = with_client.post('/waiting-list/join', json={'email': email})
+
+        # Ensure the response was rate limited
+        assert response.status_code == 429, response.json()
+        data = response.json()
+        assert data['detail']['id'] == APIRateLimitExceeded.id_code
 
 
 class TestWaitingListActionConfirm:

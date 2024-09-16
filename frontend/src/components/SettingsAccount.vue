@@ -25,6 +25,7 @@ import { useScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
+import UserInviteTable from '@/components/UserInviteTable.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -304,6 +305,15 @@ const actuallyDeleteAccount = async () => {
         />
       </div>
     </form>
+    <div class="pl-6" id="invites">
+      <div class="text-xl">{{ t('label.admin-invite-codes-panel') }}</div>
+      <p class="mt-4 pl-4">
+        {{ t('settings.invite.brief') }}
+      </p>
+      <div class="mt-4 pl-4">
+      <user-invite-table></user-invite-table>
+      </div>
+    </div>
     <div class="pl-6" id="download-your-data">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="mt-4 pl-4">

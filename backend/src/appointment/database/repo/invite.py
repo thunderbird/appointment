@@ -4,13 +4,28 @@ Repository providing CRUD functions for invite database models.
 """
 
 import uuid
+from typing import Optional
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
+from ..models import InviteStatus
 
 
 def get_by_subscriber(db: Session, subscriber_id: int) -> models.Invite:
     return db.query(models.Invite).filter(models.Invite.subscriber_id == subscriber_id).first()
+
+
+def get_by_owner(db: Session, subscriber_id: int, status: Optional[InviteStatus] = None, only_unused: bool = False) -> list[models.Invite]:
+    """Retrieve invites by the invite owner. Optionally filter by status, or unused."""
+    query = db.query(models.Invite)
+    filters = [models.Invite.owner_id == subscriber_id]
+    if status:
+        filters.append(models.Invite.status == status)
+    if only_unused:
+        filters.append(models.Invite.subscriber_id.is_(None))
+
+    query = query.filter(*filters)
+    return query.all()
 
 
 def get_by_code(db: Session, code: str) -> models.Invite:
@@ -18,13 +33,13 @@ def get_by_code(db: Session, code: str) -> models.Invite:
     return db.query(models.Invite).filter(models.Invite.code == code).first()
 
 
-def generate_codes(db: Session, n: int):
+def generate_codes(db: Session, n: int, owner_id: Optional[int] = None):
     """generate n invite codes and return the list of created invite objects"""
     codes = [str(uuid.uuid4()) for _ in range(n)]
     db_invites = []
     for code in codes:
-        invite = schemas.Invite(code=code)
-        db_invite = models.Invite(**invite.dict())
+        invite = schemas.Invite(code=code, owner_id=owner_id)
+        db_invite = models.Invite(**invite.model_dump())
         db.add(db_invite)
         db.commit()
         db_invites.append(db_invite)

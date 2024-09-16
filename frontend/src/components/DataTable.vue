@@ -4,7 +4,7 @@
  */
 import { useI18n } from 'vue-i18n';
 import { computed, ref, toRefs } from 'vue';
-import { TableDataButtonType, TableDataType } from '@/definitions';
+import { TableDataButtonType, TableDataType, TooltipPosition } from '@/definitions';
 import {
   TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent,
 } from '@/models';
@@ -22,10 +22,15 @@ interface Props {
   dataKey: string, // A property to use as the list key
   columns: TableDataColumn[], // List of columns to be displayed (these don't filter data, filter that yourself!)
   dataList: TableDataRow[], // List of data to be displayed
-  filters: TableFilter[], // List of filters to be displayed
+  filters?: TableFilter[], // List of filters to be displayed
   loading: boolean, // Displays a loading spinner
+  showPagination: boolean;
 }
-const props = defineProps<Props>();
+
+const props = withDefaults(defineProps<Props>(), {
+  filters: null,
+  showPagination: true,
+});
 
 const {
   dataList, dataKey, columns, dataName, allowMultiSelect, loading,
@@ -139,6 +144,7 @@ const onColumnFilter = (evt: Event, filter: TableFilter) => {
         </label>
       </div>
       <list-pagination
+        v-if="showPagination"
         :list-length="totalDataLength"
         :page-size="pageSize"
         @update="updatePage"

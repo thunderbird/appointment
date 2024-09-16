@@ -23,7 +23,8 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_links_by_subscriber
-from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType
+from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType, \
+    InviteStatus
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
@@ -134,6 +135,11 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
             logging.warning("Could not generate unique slug!")
 
     return True
+
+
+@router.get('/me/invites', response_model=list[schemas.InviteOut])
+def get_my_invites(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    return repo.invite.get_by_owner(db, subscriber.id, status=InviteStatus.active, only_unused=True)
 
 
 @router.post('/cal', response_model=schemas.CalendarOut)
