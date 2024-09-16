@@ -68,4 +68,4 @@ def retrieve_user_url_data(url):
         clean_url = f'{clean_url}/'
 
     # Return the username and signature decoded, but ensure the clean_url is encoded.
-    return urllib.parse.unquote(username), urllib.parse.unquote(signature), clean_url
+    return urllib.parse.unquote_plus(username), urllib.parse.unquote_plus(signature), clean_url
