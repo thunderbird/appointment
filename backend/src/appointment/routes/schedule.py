@@ -46,6 +46,38 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
+def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schemas.SlotBase) -> bool:
+    """Checks for timezone correctness, weekday and start/end time validity."""
+    # For now lets only accept utc bookings as that's what our frontend supplies us.
+    if booking_slot.start.tzname() != 'UTC':
+        logging.error(f'Non-UTC timezone requested: {booking_slot.start}.')
+        return False
+
+    # Now we can safely assume start is in UTC time!
+
+    # Check for slot duration correctness
+    if booking_slot.duration != schedule.slot_duration:
+        return False
+
+    # Is the time requested on a day of the week they have disabled?
+    iso_weekday = int(booking_slot.start.strftime('%u'))
+    if iso_weekday not in schedule.weekdays:
+        return False
+
+    # Is the time requested within our booking times?
+    today = booking_slot.start.date()
+    # If our end time is below start time, then it's the next day.
+    add_day = 1 if schedule.end_time <= schedule.start_time else 0
+
+    if (
+        booking_slot.start < datetime.combine(today, schedule.start_time, tzinfo=timezone.utc)
+        or (booking_slot.start + timedelta(minutes=schedule.slot_duration)) > datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day)
+    ):
+        return False
+
+    return True
+
+
 @router.post('/', response_model=schemas.Schedule)
 def create_calendar_schedule(
     schedule: schemas.ScheduleBase,
@@ -218,6 +250,9 @@ def request_schedule_availability_slot(
     # to prevent people from overriding this for now.
     s_a.slot.duration = schedule.slot_duration
 
+    if not is_this_a_valid_booking_time(schedule, s_a.slot):
+        raise validation.SlotAlreadyTakenException()
+
     # check if slot still available, might already be taken at this time
     slot = schemas.SlotBase(**s_a.slot.dict())
     if repo.slot.exists_on_schedule(db, slot, schedule.id):
@@ -256,7 +291,6 @@ def request_schedule_availability_slot(
         schedule, calendars, subscriber, google_client, db, redis
     )
     has_collision = Tools.events_roll_up_difference([slot], existing_remote_events)
-
     # If we only have booked entries in this list then it means our slot is not available.
     if all(evt.booking_status == BookingStatus.booked for evt in has_collision):
         raise validation.SlotAlreadyTakenException()

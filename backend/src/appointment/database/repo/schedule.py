@@ -18,7 +18,7 @@ def create(db: Session, schedule: schemas.ScheduleBase):
     return db_schedule
 
 
-def get_by_subscriber(db: Session, subscriber_id: int):
+def get_by_subscriber(db: Session, subscriber_id: int) -> list[models.Schedule]:
     """Get schedules by subscriber id"""
     return (
         db.query(models.Schedule)

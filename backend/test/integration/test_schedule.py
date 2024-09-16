@@ -1,8 +1,7 @@
 import zoneinfo
-from datetime import date, time, datetime, timedelta
+from datetime import date, time, datetime, timedelta, timezone
 from unittest.mock import patch
 
-import pytest
 from freezegun import freeze_time
 
 from appointment.tasks import emails as email_tasks
@@ -11,6 +10,7 @@ from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
 from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
+
 
 class TestSchedule:
     def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar):
@@ -429,8 +429,8 @@ class TestRequestScheduleAvailability:
         """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
         start_time = time(9)
-        start_datetime = datetime.combine(start_date, start_time)
-        end_time = time(10)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
+        end_time = time(15)
 
         class MockCaldavConnector:
             @staticmethod
@@ -440,12 +440,17 @@ class TestRequestScheduleAvailability:
 
             @staticmethod
             def list_events(self, start, end):
+
                 return [
-                    schemas.Event(title='A blocker!', start=start_datetime, end=datetime.combine(start_date, end_time)),
+                    schemas.Event(
+                        title='A blocker!',
+                        start=start_datetime,
+                        end=datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=10),
+                    ),
                     schemas.Event(
                         title='A second blocker!',
                         start=start_datetime + timedelta(minutes=10),
-                        end=datetime.combine(start_date, end_time) + timedelta(minutes=20),
+                        end=datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=20),
                     ),
                 ]
 
@@ -497,10 +502,7 @@ class TestRequestScheduleAvailability:
         assert data.get('detail').get('id') == validation.SlotAlreadyTakenException.id_code
 
         # Okay change up the time
-        start_time = time(11)
-
-        slot_availability['slot']['start'] = datetime.combine(start_date, start_time).isoformat()
-
+        slot_availability['slot']['start'] = datetime.combine(start_date, time(11), tzinfo=timezone.utc).isoformat()
         # Check availability at the start of the schedule
         # This should work
         response = with_client.put(
@@ -528,7 +530,7 @@ class TestRequestScheduleAvailability:
         """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
         start_time = time(9)
-        start_datetime = datetime.combine(start_date, start_time)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
         end_time = time(10)
 
         class MockCaldavConnector:
@@ -561,7 +563,7 @@ class TestRequestScheduleAvailability:
             earliest_booking=1440,
             farthest_booking=20160,
             slot_duration=30,
-            booking_confirmation=False
+            booking_confirmation=False,
         )
 
         signed_url = signed_url_by_subscriber(subscriber)
