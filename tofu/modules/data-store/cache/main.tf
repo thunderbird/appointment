@@ -52,7 +52,7 @@ resource "aws_vpc_security_group_ingress_rule" "ingress_6380" {
   })
 }
 
-resource "aws_vpc_security_group_egress_rule" "egress" {
+resource "aws_vpc_security_group_egress_rule" "egress_3306" {
   for_each = toset(var.database_subnet_cidrs)
 
   security_group_id = aws_security_group.redis.id
