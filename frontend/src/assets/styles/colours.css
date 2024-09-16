@@ -81,16 +81,6 @@ html {
   --colour-ti-success: #1D783B;
 
   /*
-   * Form elements
-   * Applied frequently for inputs, switches and interactive elements.
-   */
-  --colour-form-base: #E4E4E7;
-  --colour-form-active: #008080;
-  --colour-form-inactive: #FEFFFF;
-  --colour-form-highlight: #FEFFFF;
-  --colour-form-border-intense: #777580;
-
-  /*
    * Accent Colours
    * Used for accents, gradients, highlights.
    * *Do not use with text

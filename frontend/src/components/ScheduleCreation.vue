@@ -432,6 +432,7 @@ watch(
         <switch-toggle
           v-if="existing"
           class="mt-0.5 pr-3"
+          name="active"
           :active="schedule.active"
           no-legend
           @changed="toggleActive"
@@ -732,6 +733,7 @@ watch(
           <div class="flex flex-col gap-3">
             <switch-toggle
               class="my-1 text-sm font-medium text-gray-500 dark:text-gray-300"
+              name="booking_confirmation"
               :active="schedule.booking_confirmation"
               :label="t('label.bookingConfirmation')"
               :disabled="!scheduleInput.active"
