@@ -81,6 +81,16 @@ html {
   --colour-ti-success: #1D783B;
 
   /*
+   * Form elements
+   * Applied frequently for inputs, switches and interactive elements.
+   */
+  --colour-form-base: #E4E4E7;
+  --colour-form-active: #008080;
+  --colour-form-inactive: #FEFFFF;
+  --colour-form-highlight: #FEFFFF;
+  --colour-form-border-intense: #777580;
+
+  /*
    * Accent Colours
    * Used for accents, gradients, highlights.
    * *Do not use with text
@@ -187,6 +197,16 @@ html {
     --colour-ti-warning: #FEE78A;
     --colour-ti-critical: #EF4444;
     --colour-ti-success: #55D37E;
+
+    /*
+    * Form elements
+    * Applied frequently for inputs, switches and interactive elements.
+    */
+    --colour-form-base: #737584;
+    --colour-form-active: #A3ECE3;
+    --colour-form-inactive: #FEFFFF;
+    --colour-form-highlight: #1A202C;
+    --colour-form-border-intense: #777580;
 
     /*
      * Accent Colours
