@@ -2,7 +2,7 @@
 name = "appointment"
 version = "0.3.0"
 description = "Backend component to Thunderbird Appointment"
-requires-python = ">3.11"
+requires-python = ">3.12"
 dynamic = ["dependencies"]
 
 [project.scripts]
@@ -60,8 +60,8 @@ exclude = [
     "venv",
 ]
 
-# Always generate Python 3.11-compatible code.
-target-version = "py311"
+# Always generate Python 3.12-compatible code.
+target-version = "py312"
 
 [tool.ruff.format]
 # Prefer single quotes over double quotes.
