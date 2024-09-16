@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue';
+import {
+  computed, inject, onMounted, ref,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { useI18n } from 'vue-i18n';
@@ -7,7 +9,9 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey } from '@/keys';
+import {
+  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+} from '@/keys';
 import { Error, SelectOption } from '@/models';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';

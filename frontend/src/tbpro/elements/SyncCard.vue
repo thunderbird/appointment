@@ -18,7 +18,7 @@ const selectAll = () => {
 // component properties
 interface Props {
   title: string;
-};
+}
 defineProps<Props>();
 </script>
 

@@ -8,7 +8,7 @@ import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
 interface Props {
   listLength: number; // number of total items in the displayed list
   pageSize: number; // number of items per page
-};
+}
 const props = defineProps<Props>();
 
 const emit = defineEmits(['update']);

@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { BookingStatus } from '@/definitions';
-import { computed, inject, ref, toRefs } from 'vue';
+import {
+  computed, inject, ref, toRefs,
+} from 'vue';
 import { timeFormat, initialEventPopupData, showEventPopup } from '@/utils';
 import CalendarEventPlaceholder from '@/elements/calendar/CalendarEventPlaceholder.vue';
 import CalendarEventPreview from '@/elements/calendar/CalendarEventPreview.vue';
 import CalendarEventRemote from '@/elements/calendar/CalendarEventRemote.vue';
 import CalendarEventScheduled from '@/elements/calendar/CalendarEventScheduled.vue';
 import EventPopup from '@/elements/EventPopup.vue';
-import { CalendarEvent, EventPopup as EventPopupType } from "@/models";
-import { dayjsKey } from "@/keys";
+import { CalendarEvent, EventPopup as EventPopupType } from '@/models';
+import { dayjsKey } from '@/keys';
 
 const dj = inject(dayjsKey);
 

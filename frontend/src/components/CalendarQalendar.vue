@@ -12,7 +12,7 @@ import {
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 // component constants
 const dj = inject(dayjsKey);

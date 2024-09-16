@@ -7,7 +7,7 @@ import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { DateFormatStrings } from '@/definitions';
 import { Slot } from '@/models';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
@@ -22,14 +22,14 @@ const emit = defineEmits(['openModal']);
 // component properties
 interface Props {
   showNavigation: boolean,
-};
+}
 defineProps<Props>();
 
 /**
  * Select a specific time slot
  * @param day string
  */
-const selectEvent = (day: String) => {
+const selectEvent = (day: string) => {
   // set event selected
   for (let i = 0; i < appointment.value.slots.length; i += 1) {
     const slot: Slot = appointment.value.slots[i];

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 const dj = inject(dayjsKey);
 
@@ -15,7 +15,7 @@ interface Props {
   showDetails: boolean; // flag enabling event popups with details
   popupPosition?: string; // currently supported: right, left, top
   disabled?: boolean; // flag making this day non-selectable and inactive
-};
+}
 defineProps<Props>();
 
 </script>

@@ -17,7 +17,7 @@ interface Props {
   confirmLabel: string,
   cancelLabel: string,
   useCautionButton?: boolean,
-};
+}
 defineProps<Props>();
 
 // component emits

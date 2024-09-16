@@ -12,7 +12,9 @@ import {
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey } from '@/keys';
+import {
+  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+} from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';

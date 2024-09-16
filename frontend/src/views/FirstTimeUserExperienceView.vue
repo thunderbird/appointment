@@ -3,11 +3,8 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
 import { onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store';
-import { useRouter } from 'vue-router';
-import { ColorSchemes, FtueStep } from '@/definitions';
+import { FtueStep } from '@/definitions';
 import { refreshKey } from '@/keys';
-import { getPreferredTheme } from '@/utils';
 import WordMark from '@/elements/WordMark.vue';
 import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
 import SetupProfile from '@/components/FTUE/SetupProfile.vue';
@@ -19,8 +16,6 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import ScheduleView from '@/views/ScheduleView.vue';
 
-const router = useRouter();
-const user = useUserStore();
 const ftueStore = useFTUEStore();
 const {
   stepTitle, currentStep, infoMessage, errorMessage, warningMessage,

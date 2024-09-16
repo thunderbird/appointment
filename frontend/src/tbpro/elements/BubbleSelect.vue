@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { SelectOption } from "@/models";
+import { SelectOption } from '@/models';
 
 // component properties
 interface Props {
   options: SelectOption[];
-};
+}
 defineProps<Props>();
 
 const model = defineModel<number[]>({ default: [] });

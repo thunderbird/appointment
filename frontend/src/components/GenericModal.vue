@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  onMounted, inject, ref, toRefs, onUnmounted,
+  onMounted, inject, toRefs, onUnmounted,
 } from 'vue';
 import { refreshKey } from '@/keys';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';

@@ -4,7 +4,7 @@ import {
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
   EventLocationType,
-  MeetingLinkProviderType
+  MeetingLinkProviderType,
 } from '@/definitions';
 import {
   ref, inject, computed, onMounted,
@@ -12,7 +12,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { dayjsKey, callKey, refreshKey } from "@/keys";
+import { dayjsKey, callKey, refreshKey } from '@/keys';
 import {
   RemoteEvent,
   RemoteEventListResponse,
@@ -20,7 +20,7 @@ import {
   ScheduleListResponse,
   ScheduleAppointment,
   TimeFormatted,
-} from "@/models";
+} from '@/models';
 import ScheduleCreation from '@/components/ScheduleCreation.vue';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
 
@@ -62,8 +62,8 @@ const getRemoteEvents = async (from: string, to: string) => {
       calendarEvents.value.push(
         ...data.value.map((event) => ({
           ...event,
-          duration: dj(event.end).diff(dj(event.start), 'minutes')
-        }))
+          duration: dj(event.end).diff(dj(event.start), 'minutes'),
+        })),
       );
     }
   }));
@@ -114,7 +114,7 @@ onMounted(async () => {
     // Setup a fake schedule so the schedule creation bar works correctly...
     schedules.value = [{
       active: false,
-      name: ``,
+      name: '',
       calendar_id: 0,
       location_type: EventLocationType.InPerson,
       location_url: '',

@@ -11,7 +11,7 @@ import {
   IconCalendar,
   IconClock,
 } from '@tabler/icons-vue';
-import { dayjsKey, paintBackgroundKey } from "@/keys";
+import { dayjsKey, paintBackgroundKey } from '@/keys';
 
 // component constants
 const { t } = useI18n();
@@ -21,7 +21,7 @@ const dj = inject(dayjsKey);
 // component properties
 interface Props {
   appointment: Appointment; // appointment to show details for
-};
+}
 const props = defineProps<Props>();
 
 // true if an appointment from the past was given

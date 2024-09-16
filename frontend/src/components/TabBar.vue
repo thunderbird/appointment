@@ -8,7 +8,7 @@ interface Props {
   tabItems: Object, // list of tab items. Keys are used as lang keys (label.<key>), values as index
   active: number, // value of active tab
   disabled?: boolean, // flag for making toggle non changable
-};
+}
 defineProps<Props>();
 
 // component emits

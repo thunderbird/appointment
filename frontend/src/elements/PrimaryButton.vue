@@ -14,7 +14,7 @@ interface Props {
   label?: string; // button text
   copy?: string; // text to copy to clipboard
   waiting?: boolean; // if true, spinning animation is shown instead of label
-};
+}
 const props = defineProps<Props>();
 
 // state for copy click

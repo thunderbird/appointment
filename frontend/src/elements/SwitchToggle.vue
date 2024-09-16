@@ -17,7 +17,7 @@ interface Props {
   disabled?: boolean; // flag for making toggle non changable
   label?: string; // input label
   noLegend?: boolean; // hide "on" and "off" labels
-};
+}
 const props = defineProps<Props>();
 
 // current state

@@ -5,7 +5,7 @@ import { IconChevronRight } from '@tabler/icons-vue';
 interface Props {
   title: string,
   actionUrl: string,
-};
+}
 defineProps<Props>();
 </script>
 

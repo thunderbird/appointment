@@ -3,12 +3,15 @@ import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
+import {
+  AlertSchemes, TableDataButtonType, TableDataType, InviteStatus,
+} from '@/definitions';
 import { useRouter } from 'vue-router';
 import { IconSend } from '@tabler/icons-vue';
-import { Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter } from "@/models";
-import { InviteStatus } from "@/definitions";
-import { dayjsKey, callKey } from "@/keys";
+import {
+  Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter,
+} from '@/models';
+import { dayjsKey, callKey } from '@/keys';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';

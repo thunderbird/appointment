@@ -8,7 +8,9 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { callKey, refreshKey } from '@/keys';
-import { Calendar, CalendarResponse, CalendarListResponse, Exception, ExceptionDetail } from '@/models';
+import {
+  Calendar, CalendarResponse, CalendarListResponse, Exception, ExceptionDetail,
+} from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import CalendarManagement from '@/components/CalendarManagement.vue';
 import CautionButton from '@/elements/CautionButton.vue';
@@ -37,7 +39,7 @@ enum InputModes {
   Hidden,
   Add,
   Edit,
-};
+}
 const inputMode = ref(InputModes.Hidden);
 const addMode = computed(() => inputMode.value === InputModes.Add);
 const editMode = computed(() => inputMode.value === InputModes.Edit);

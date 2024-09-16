@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/user-store';
 
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 import { Appointment, Slot } from '@/models';
 
 const { t } = useI18n();
@@ -21,7 +21,7 @@ interface Props {
   selectedEvent: Appointment & Slot,
   attendeeEmail: string,
   requested: boolean, // True if we are requesting a booking, false if already confirmed
-};
+}
 defineProps<Props>();
 
 </script>

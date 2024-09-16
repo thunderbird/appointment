@@ -10,7 +10,7 @@ import {
   IconClock,
   IconUsers,
 } from '@tabler/icons-vue';
-import { dayjsKey } from "@/keys";
+import { dayjsKey } from '@/keys';
 
 // component constants
 const { t } = useI18n();
@@ -20,7 +20,7 @@ const dj = inject(dayjsKey);
 interface Props {
   event?: CalendarEvent, // event to show details in popup for
   position?: string, // Popup position relative to the trigger element
-};
+}
 const props = defineProps<Props>();
 
 const { event } = toRefs(props);

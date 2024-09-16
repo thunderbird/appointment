@@ -4,7 +4,7 @@ interface Props {
   active: boolean; // indicator for currently active item
   label: string; // item text label
   linkName: string; // name of the route link target
-};
+}
 defineProps<Props>();
 </script>
 

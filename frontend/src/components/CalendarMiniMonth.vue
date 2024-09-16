@@ -53,7 +53,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-vue';
-import { dayjsKey, isoWeekdaysKey, isoFirstDayOfWeekKey } from "@/keys";
+import { dayjsKey, isoWeekdaysKey, isoFirstDayOfWeekKey } from '@/keys';
 
 // component constants
 const { t } = useI18n();

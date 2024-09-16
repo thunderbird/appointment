@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { eventColor, getAccessibleColor } from '@/utils';
-import { CustomEventData } from "@/models";
+import { CustomEventData } from '@/models';
 
 // component properties
 interface Props {
   isMonthView: boolean; // flag, are we in month view?
   eventData: CustomEventData; // the event data to show
   label: string; // event title
-};
+}
 defineProps<Props>();
 </script>
 

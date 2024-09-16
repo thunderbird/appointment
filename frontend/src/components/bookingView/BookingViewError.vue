@@ -13,7 +13,7 @@ const user = useUserStore();
 interface Props {
   heading?: string | null;
   body?: string | null;
-};
+}
 defineProps<Props>();
 </script>
 

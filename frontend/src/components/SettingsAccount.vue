@@ -6,7 +6,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import { callKey, hasProfanityKey } from '@/keys';
-import { StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse } from '@/models';
+import {
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
+} from '@/models';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
