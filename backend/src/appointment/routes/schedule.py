@@ -246,12 +246,9 @@ def request_schedule_availability_slot(
     if calendar is None:
         raise validation.CalendarNotFoundException()
 
-    # Override the incoming slot duration with the schedules
-    # to prevent people from overriding this for now.
-    s_a.slot.duration = schedule.slot_duration
-
+    # Ensure the request is valid
     if not is_this_a_valid_booking_time(schedule, s_a.slot):
-        raise validation.SlotAlreadyTakenException()
+        raise validation.SlotNotFoundException()
 
     # check if slot still available, might already be taken at this time
     slot = schemas.SlotBase(**s_a.slot.dict())

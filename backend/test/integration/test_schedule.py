@@ -426,10 +426,6 @@ class TestSchedule:
 class TestRequestScheduleAvailability:
     @pytest.fixture
     def mock_connector(self, monkeypatch):
-        """setup any state tied to the execution of the given method in a
-        class.  setup_method is invoked for every test method of a class.
-        """
-
         class MockCaldavConnector:
             @staticmethod
             def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
