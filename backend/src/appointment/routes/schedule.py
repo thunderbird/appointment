@@ -181,7 +181,7 @@ def read_schedule_availabilities(
 
 
 @router.put('/public/availability/request')
-@limiter.limit("0/minute")
+@limiter.limit("20/minute")
 def request_schedule_availability_slot(
     request: Request,
     s_a: schemas.AvailabilitySlotAttendee,
