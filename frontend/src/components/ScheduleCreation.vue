@@ -20,9 +20,9 @@ import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
-import SwitchToggle from '@/elements/SwitchToggle.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
+import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
@@ -432,6 +432,7 @@ watch(
         <switch-toggle
           v-if="existing"
           class="mt-0.5 pr-3"
+          name="active"
           :active="schedule.active"
           no-legend
           @changed="toggleActive"
@@ -732,6 +733,7 @@ watch(
           <div class="flex flex-col gap-3">
             <switch-toggle
               class="my-1 text-sm font-medium text-gray-500 dark:text-gray-300"
+              name="booking_confirmation"
               :active="schedule.booking_confirmation"
               :label="t('label.bookingConfirmation')"
               :disabled="!scheduleInput.active"

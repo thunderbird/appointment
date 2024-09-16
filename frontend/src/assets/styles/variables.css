@@ -4,5 +4,5 @@ html {
   --line-height-input: 1.25rem; /* 20px */
 
   --transition: all 250ms ease-out;
-
+  --transition-transform: .15s transform ease-in-out;
 }
