@@ -177,10 +177,12 @@ class GoogleConnector(BaseConnector):
 
         events = []
         for event in remote_events:
+            # If the event doesn't have transparency assume its opaque (and thus blocks time) by default.
+            transparency = event.get('transparency', 'opaque').lower()
             status = event.get('status').lower()
 
-            # Ignore cancelled events
-            if status == 'cancelled':
+            # Ignore cancelled events or non-time blocking events
+            if status == 'cancelled' or transparency == 'transparent':
                 continue
 
             # Mark tentative events
@@ -333,10 +335,11 @@ class CalDavConnector(BaseConnector):
             expand=True,
         )
         for e in result:
+            transparency = e.icalendar_component['transp'].lower() if 'transp' in e.icalendar_component else 'opaque'
             status = e.icalendar_component['status'].lower() if 'status' in e.icalendar_component else ''
 
             # Ignore cancelled events
-            if status == 'cancelled':
+            if status == 'cancelled' or transparency == 'transparent':
                 continue
 
             # Mark tentative events
