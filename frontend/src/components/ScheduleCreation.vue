@@ -506,7 +506,12 @@ watch(
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
               {{ t("label.availableDays") }}
             </div>
-            <bubble-select class="bubble-select" :options="scheduleDayOptions" v-model="scheduleInput.weekdays" />
+            <bubble-select
+              class="bubble-select"
+              :options="scheduleDayOptions"
+              v-model="scheduleInput.weekdays"
+              :required="true"
+            />
           </div>
           <div>
             <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
