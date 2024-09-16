@@ -42,6 +42,7 @@ const refreshLinkModalOpen = ref(false);
 const updateUsernameModalOpen = ref(false);
 const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
+const formRef = ref<HTMLFormElement>();
 
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
@@ -104,16 +105,21 @@ const updateUserCheckForConfirmation = async () => {
   errorUsername.value = null;
   errorDisplayName.value = null;
 
-  // Validate username
-  if (activeUsername.value === '') {
-    errorUsername.value = t('validation.fieldIsRequired', { field: t('label.username') });
+  // Form validation
+  if (!formRef.value.checkValidity()) {
+    return;
   }
+
+  // Profanity validation
+  // if (activeUsername.value === '') {
+  //   errorUsername.value = t('error.fieldIsRequired', { field: t('label.username') });
+  // }
   if (hasProfanity(activeUsername.value)) {
-    errorUsername.value = t('validation.fieldContainsProfanity', { field: t('label.username') });
+    errorUsername.value = t('error.fieldContainsProfanity', { field: t('label.username') });
   }
   // Validate display name
   if (hasProfanity(activeDisplayName.value)) {
-    errorDisplayName.value = t('validation.fieldContainsProfanity', { field: t('label.displayName') });
+    errorDisplayName.value = t('error.fieldContainsProfanity', { field: t('label.displayName') });
   }
 
   if (errorUsername.value || errorDisplayName.value) {
@@ -208,7 +214,7 @@ const actuallyDeleteAccount = async () => {
 <template>
   <div class="flex flex-col gap-8">
     <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.accountSettings') }}</div>
-    <div class="flex max-w-3xl flex-col pl-6" id="profile">
+    <form ref="formRef" autocomplete="off" autofocus @submit.prevent class="flex max-w-3xl flex-col pl-6" id="profile">
       <div class="text-xl">{{ t('heading.profile') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
@@ -218,6 +224,7 @@ const actuallyDeleteAccount = async () => {
             type="text"
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
+            :required="true"
           />
           <div v-if="errorUsername" class="text-sm text-red-500">
             {{ errorUsername }}
@@ -294,7 +301,7 @@ const actuallyDeleteAccount = async () => {
           :title="t('label.save')"
         />
       </div>
-    </div>
+    </form>
     <div class="pl-6" id="download-your-data">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="mt-4 pl-4">

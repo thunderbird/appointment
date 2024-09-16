@@ -258,11 +258,11 @@ const revertForm = (resetData = true) => {
 const scheduleValidationError = (schedule: Schedule): string|null => {
   // Schedule name is empty
   if (schedule.name === '') {
-    return t('validation.fieldIsRequired', { field: t('ftue.scheduleName') });
+    return t('error.fieldIsRequired', { field: t('ftue.scheduleName') });
   }
   // Schedule name contains profanity
   if (hasProfanity(schedule.name)) {
-    return t('validation.fieldContainsProfanity', { field: t('ftue.scheduleName') });
+    return t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
   }
   // All good
   return null;

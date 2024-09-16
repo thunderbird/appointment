@@ -10,6 +10,8 @@
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",
+    "fieldContainsProfanity": "Bitte verwende keine beleidigenden Ausdrücke (entdeckt in {field}).",
+    "fieldIsRequired": "{field} darf nicht leer sein.",
     "generalBookingError": "Beim Abrufen des Zeitplans ist ein Problem aufgetreten. Bitte später nochmal versuchen.",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
     "loginMethodNotSupported": "Login-Methode wird nicht unterstützt. Bitte nochmal versuchen.",
@@ -454,10 +456,6 @@
   "units": {
     "minutes": "{value} Minuten",
     "none": "{value}"
-  },
-  "validation": {
-    "fieldContainsProfanity": "Bitte verwende keine beleidigenden Ausdrücke (entdeckt in {field}).",
-    "fieldIsRequired": "{field} darf nicht leer sein."
   },
   "waitingList": {
     "adminInviteNotice": "Hinweis: Der Senden-Button wird bereits akzeptierte Personen nicht erneut einladen, sie können aber dennoch ausgewählt werden. Verwende die Filter für eine bessere Übersicht!",

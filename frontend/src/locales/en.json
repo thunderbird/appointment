@@ -10,6 +10,8 @@
     "credentialsIncomplete": "Please provide login credentials.",
     "dataSourceIsEmpty": "No {name} could be found.",
     "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
+    "fieldContainsProfanity": "Please don't use offensive language (detected in {field}).",
+    "fieldIsRequired": "{field} cannot be empty.",
     "generalBookingError": "Sorry, there was a problem retrieving the schedule details. Please try again later.",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "loginMethodNotSupported": "Login method not supported. Please try again.",
@@ -455,10 +457,6 @@
   "units": {
     "minutes": "{value} minutes",
     "none": "{value}"
-  },
-  "validation": {
-    "fieldContainsProfanity": "Please don't use offensive language (detected in {field}).",
-    "fieldIsRequired": "{field} cannot be empty."
   },
   "waitingList": {
     "adminInviteNotice": "Notice: The Send button will not re-invite people already accepted, but you can still select them. Use the filters for clarity!",

@@ -76,7 +76,7 @@ const onSubmit = async () => {
   }
 
   if (hasProfanity(schedule.value.name)) {
-    errorScheduleName.value = t('validation.fieldContainsProfanity', { field: t('ftue.scheduleName') });
+    errorScheduleName.value = t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
     isLoading.value = false;
     return;
   }
