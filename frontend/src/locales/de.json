@@ -354,7 +354,8 @@
     }
   },
   "navBar": {
-    "report-bug": "Fehler melden"
+    "shareMyLink": "Meinen Link teilen",
+    "reportBug": "Fehler melden"
   },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen …",

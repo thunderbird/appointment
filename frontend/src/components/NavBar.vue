@@ -81,13 +81,13 @@ const isNavEntryActive = (item: string) => {
             <text-button
               v-show="user.myLink"
               uid="myLink"
-              :label="t('label.shareMyLink')"
+              :label="t('navBar.shareMyLink')"
               :copy="user.myLink"
               :title="t('label.copy')"
               class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
             />
             <router-link :to="{ name: 'report-bug' }" class="flex items-center justify-between gap-1 p-2">
-              {{ t('navBar.report-bug') }} <icon-external-link class="size-4"/>
+              {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
             </router-link>
             <router-link :to="{ name: 'contact' }" class="p-2">
               {{ t('label.contact') }}

@@ -354,7 +354,8 @@
     }
   },
   "navBar": {
-    "report-bug": "Report Bug"
+    "shareMyLink": "Share my link",
+    "reportBug": "Report Bug"
   },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
