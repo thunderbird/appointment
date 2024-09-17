@@ -121,7 +121,7 @@ body {
 
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
 .modal {
-  --background-color: var(--colour-neutral-raised);
+  --background-color: var(--colour-primary-soft);
   --background: url('@/assets/svg/ftue-background.svg');
   position: relative;
   width: 100%;
@@ -137,7 +137,9 @@ body {
 }
 
 .dark .modal {
+  --background-color: var(--colour-neutral-raised);
   --background: url('@/assets/svg/ftue-background-dark.svg');
+  border: 0.0625rem solid var(--colour-apmt-primary);
 }
 
 .modal::before {
