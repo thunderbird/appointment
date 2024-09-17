@@ -1,5 +1,5 @@
 import zoneinfo
-from datetime import date, time, datetime, timedelta
+from datetime import date, time, datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -11,6 +11,7 @@ from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
 from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
+
 
 class TestSchedule:
     def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar):
@@ -423,15 +424,8 @@ class TestSchedule:
 
 
 class TestRequestScheduleAvailability:
-    def test_fail_and_success(
-        self, monkeypatch, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
-    ):
-        """Test that a user can request a booking from a schedule"""
-        start_date = date(2024, 4, 1)
-        start_time = time(9)
-        start_datetime = datetime.combine(start_date, start_time)
-        end_time = time(10)
-
+    @pytest.fixture
+    def mock_connector(self, monkeypatch):
         class MockCaldavConnector:
             @staticmethod
             def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
@@ -440,14 +434,7 @@ class TestRequestScheduleAvailability:
 
             @staticmethod
             def list_events(self, start, end):
-                return [
-                    schemas.Event(title='A blocker!', start=start_datetime, end=datetime.combine(start_date, end_time)),
-                    schemas.Event(
-                        title='A second blocker!',
-                        start=start_datetime + timedelta(minutes=10),
-                        end=datetime.combine(start_date, end_time) + timedelta(minutes=20),
-                    ),
-                ]
+                return []
 
             @staticmethod
             def bust_cached_events(self, all_calendars=False):
@@ -456,6 +443,64 @@ class TestRequestScheduleAvailability:
         monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
         monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
         monkeypatch.setattr(CalDavConnector, 'bust_cached_events', MockCaldavConnector.bust_cached_events)
+
+    @pytest.fixture
+    def setup_schedule(self, make_pro_subscriber, make_caldav_calendar, make_schedule):
+        self.start_date = date(2024, 4, 1)
+        self.start_time = time(9)
+        self.end_time = time(10)
+
+        self.subscriber = make_pro_subscriber()
+        self.calendar = make_caldav_calendar(self.subscriber.id, connected=True)
+        self.schedule = make_schedule(
+            calendar_id=self.calendar.id,
+            active=True,
+            start_date=self.start_date,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+            booking_confirmation=False,
+            weekdays=[1, 2, 3, 4, 5],
+        )
+        self.signed_url = signed_url_by_subscriber(self.subscriber)
+
+    def test_fail_and_success(
+        self,
+        monkeypatch,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        mock_connector,
+    ):
+        """Test that a user can request a booking from a schedule"""
+        start_date = date(2024, 4, 1)
+        start_time = time(9)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
+        end_time = time(15)
+
+        class MockCaldavConnector:
+            @staticmethod
+            def list_events(self, start, end):
+                return [
+                    schemas.Event(
+                        title='A blocker!',
+                        start=start_datetime,
+                        end=datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=10),
+                    ),
+                    schemas.Event(
+                        title='A second blocker!',
+                        start=start_datetime + timedelta(minutes=10),
+                        end=datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=20),
+                    ),
+                ]
+
+        # Override the fixture's list_events
+        monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -497,10 +542,7 @@ class TestRequestScheduleAvailability:
         assert data.get('detail').get('id') == validation.SlotAlreadyTakenException.id_code
 
         # Okay change up the time
-        start_time = time(11)
-
-        slot_availability['slot']['start'] = datetime.combine(start_date, start_time).isoformat()
-
+        slot_availability['slot']['start'] = datetime.combine(start_date, time(11), tzinfo=timezone.utc).isoformat()
         # Check availability at the start of the schedule
         # This should work
         response = with_client.put(
@@ -523,31 +565,20 @@ class TestRequestScheduleAvailability:
             assert slot.appointment_id
 
     def test_success_with_no_confirmation(
-        self, monkeypatch, with_db, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+        self,
+        monkeypatch,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        mock_connector,
     ):
         """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
         start_time = time(9)
-        start_datetime = datetime.combine(start_date, start_time)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
         end_time = time(10)
-
-        class MockCaldavConnector:
-            @staticmethod
-            def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
-                """We don't want to initialize a client"""
-                pass
-
-            @staticmethod
-            def list_events(self, start, end):
-                return []
-
-            @staticmethod
-            def bust_cached_events(self, all_calendars=False):
-                pass
-
-        monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
-        monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
-        monkeypatch.setattr(CalDavConnector, 'bust_cached_events', MockCaldavConnector.bust_cached_events)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -561,7 +592,7 @@ class TestRequestScheduleAvailability:
             earliest_booking=1440,
             farthest_booking=20160,
             slot_duration=30,
-            booking_confirmation=False
+            booking_confirmation=False,
         )
 
         signed_url = signed_url_by_subscriber(subscriber)
@@ -601,6 +632,148 @@ class TestRequestScheduleAvailability:
             # Functions are stored in a tuple as the first item on the call
             assert email_tasks.send_invite_email in send_invite_email_call[0]
             assert email_tasks.send_new_booking_email in send_new_booking_email_call[0]
+
+    def test_fail_not_utc(self, with_client, mock_connector, setup_schedule):
+        """Ensure we fail validation because we submitted a non-utc booking time"""
+        booking_time = datetime.combine(self.start_date, self.start_time, tzinfo=zoneinfo.ZoneInfo('America/Vancouver'))
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=booking_time, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': self.signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 404, response.text
+            data = response.json()
+
+            assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
+
+            # Ensure we haven't sent out any emails
+            assert mock.call_count == 0
+
+    def test_fail_slot_duration_mismatch(self, with_client, mock_connector, setup_schedule):
+        """Ensure we fail validation because we submitted a 60 minute when the schedule only supports 30 minute slots."""
+        booking_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=booking_time, duration=60),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': self.signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 404, response.text
+            data = response.json()
+
+            assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
+
+            # Ensure we haven't sent out any emails
+            assert mock.call_count == 0
+
+    def test_fail_on_invalid_weekday(self, with_client, mock_connector, setup_schedule):
+        """Ensure we fail validation because we are booking on a Saturday and the schedule only supports bookings
+        Monday through Friday."""
+        booking_time = datetime.combine(date(2024, 4, 6), self.start_time, tzinfo=timezone.utc)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=booking_time, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': self.signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 404, response.text
+            data = response.json()
+
+            assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
+
+            # Ensure we haven't sent out any emails
+            assert mock.call_count == 0
+
+    def test_fail_on_before_time_range(self, with_client, mock_connector, setup_schedule):
+        """Ensure we fail validation because we're booking 30 minutes before the schedule starts."""
+        booking_time = datetime.combine(self.start_date, time(8, 30), tzinfo=timezone.utc)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=booking_time, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': self.signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 404, response.text
+            data = response.json()
+
+            assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
+
+            # Ensure we haven't sent out any emails
+            assert mock.call_count == 0
+
+    def test_fail_on_after_time_range(self, with_client, mock_connector, setup_schedule):
+        """Ensure we fail validation because we're booking on the schedule's end time."""
+        booking_time = datetime.combine(self.start_date, time(10), tzinfo=timezone.utc)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=booking_time, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': self.signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 404, response.text
+            data = response.json()
+
+            assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
+
+            # Ensure we haven't sent out any emails
+            assert mock.call_count == 0
+
 
 
 class TestDecideScheduleAvailabilitySlot:
