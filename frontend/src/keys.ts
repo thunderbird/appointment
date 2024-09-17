@@ -8,13 +8,13 @@ import { IsoWeekday } from '@/composables/dayjs';
  * These are typed Symbols for use with inject/provide in VueJS
  */
 
-// Provides Dayjs class functionality as well as the timezone plugin and related keys
+// Provides Dayjs class functionality as well as the timezone plugin, customParseFormat and related keys
 type DayjsType = ((_?:ConfigType) => Dayjs) & {
   tz: DayjsTimezone,
   max: (...dayjs: Dayjs[]) => Dayjs | null,
   min: (...dayjs: Dayjs[]) => Dayjs | null,
-  duration: CreateDurationType
-};
+  duration: CreateDurationType,
+} & ((objToParse: any, format: string) => Dayjs);
 export const dayjsKey = Symbol('dayjs') as InjectionKey<DayjsType>;
 export const isoWeekdaysKey = Symbol('isoWeekdays') as InjectionKey<IsoWeekday[]>;
 export const tzGuessKey = Symbol('tzGuess') as InjectionKey<string>;
@@ -44,5 +44,5 @@ type DurationHumanizedType = (minutes: number) => string;
 export const durationHumanizedKey = Symbol('durationHumanized') as InjectionKey<DurationHumanizedType>;
 
 // Profice profanity filter
-type HasProfanityType = (url: string) => Boolean;
+type HasProfanityType = (url: string) => boolean;
 export const hasProfanityKey = Symbol('hasProfanity') as InjectionKey<HasProfanityType>;

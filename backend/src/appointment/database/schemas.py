@@ -5,10 +5,13 @@ Definitions of valid data shapes for database and query models.
 
 import json
 from uuid import UUID
-from datetime import datetime, date, time
-from typing import Annotated, Optional
+from datetime import datetime, date, time, timezone, timedelta
+from typing import Annotated, Optional, Self
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, model_validator
+from pydantic_core import PydanticCustomError
+from ..l10n import l10n
+
 
 from .models import (
     AppointmentStatus,
@@ -22,7 +25,7 @@ from .models import (
     MeetingLinkProviderType,
     InviteStatus,
 )
-from .. import utils
+from .. import utils, defines
 
 """ ATTENDEE model schemas
 """
@@ -192,6 +195,7 @@ class Schedule(ScheduleBase):
 
 class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
+
     # Regex to exclude any character can be mess with a url
     slug: Annotated[Optional[str], Field(min_length=2, max_length=16, pattern=r"^[^\;\/\?\:\@\&\=\+\$\,\#]*$")] = None
     slot_duration: Annotated[int, Field(ge=10, default=30)]
@@ -199,6 +203,27 @@ class ScheduleValidationIn(ScheduleBase):
     start_date: date
     start_time: time
     end_time: time
+
+    @model_validator(mode='after')
+    def start_time_should_be_before_end_time(self) -> Self:
+        # Can't have the end time before the start time!
+        # (Well you can, it will roll over to the next day, but the ux is poor!)
+        start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc)
+        end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc)
+
+        start_time = (start_time + timedelta(minutes=self.slot_duration)).time()
+        end_time = end_time.time()
+        # Compare time objects!
+        if start_time > end_time:
+            msg = l10n('error-minimum-value')
+
+            # These can't be field or value because that will auto-format the msg? Weird feature but okay.
+            raise PydanticCustomError(defines.END_TIME_BEFORE_START_TIME_ERR, msg, {
+                'err_field': 'end_time',
+                'err_value': start_time
+            })
+
+        return self
 
 
 class ScheduleSlug(BaseModel):

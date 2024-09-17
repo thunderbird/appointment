@@ -12,8 +12,11 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import 'dayjs/locale/de';
-import { dayjsKey, durationHumanizedKey, isoWeekdaysKey, tzGuessKey, isoFirstDayOfWeekKey } from '@/keys';
+import {
+  dayjsKey, durationHumanizedKey, isoWeekdaysKey, tzGuessKey, isoFirstDayOfWeekKey,
+} from '@/keys';
 
 export type IsoWeekday = {
   iso: number,
@@ -36,6 +39,7 @@ export default function useDayJS(app: App<Element>, locale: string) {
   dayjs.extend(utc);
   dayjs.extend(timezone);
   dayjs.extend(weekday);
+  dayjs.extend(customParseFormat);
 
   // provide the configured dayjs instance as well es some helper functions
   // TODO: provide method to live update the dayjs locale

@@ -57,6 +57,9 @@ subscriber-self-delete = You are not allowed to delete yourself here.
 
 rate-limit-exceeded = Too many requests in a short period. Please try again later.
 
+# This is for the frontend, don't variable-ify!
+error-minimum-value = {field} should be at least {value}.
+
 ## Authentication Exceptions
 
 email-mismatch = Email mismatch.

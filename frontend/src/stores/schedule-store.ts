@@ -8,6 +8,7 @@ import {
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
+import { timeFormat } from '@/utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useScheduleStore = defineStore('schedules', () => {
@@ -84,6 +85,12 @@ export const useScheduleStore = defineStore('schedules', () => {
           message = i18n.t('error.selectOneDay');
         } else if (err.type === 'string_pattern_mismatch') {
           message = i18n.t('error.noSpecialCharacters');
+        } else if (err.type === 'end_time_before_start_time') {
+          // TODO: Re-work how we do custom pydantic errors...
+          // This is extremely specific because of locale and timezone concerns...
+          const timeZoned = dj(err.ctx['err_value'], 'HH:mm:ss').utc(true).tz(dj.tz.guess());
+          message = err.msg.replace('{field}', i18n.t('label.endTime'));
+          message = message.replace('{value}', timeZoned.format(timeFormat()));
         }
 
         return message;

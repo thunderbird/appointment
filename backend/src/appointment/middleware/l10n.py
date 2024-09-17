@@ -40,7 +40,7 @@ class L10n(Plugin):
         base_url = 'src/appointment/l10n'
 
         loader = FluentResourceLoader(f'{base_url}/{{locale}}')
-        fluent = FluentLocalization(supported_locales, ['main.ftl', 'email.ftl'], loader)
+        fluent = FluentLocalization(supported_locales, ['main.ftl', 'email.ftl', 'fields.ftl'], loader)
 
         return fluent.format_value
 

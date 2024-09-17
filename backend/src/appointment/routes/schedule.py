@@ -46,19 +46,6 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
-def is_valid_schedule(schedule: schemas.ScheduleValidationIn) -> bool:
-    """Checks the incoming schedule for additional validity."""
-    # Can't have the end time before the start time!
-    # (Well you can, it will roll over to the next day, but the ux is poor!)
-    start_time = datetime.combine(schedule.start_date, schedule.start_time, tzinfo=timezone.utc)
-    end_time = datetime.combine(schedule.start_date, schedule.end_time, tzinfo=timezone.utc)
-    # Compare time objects!
-    if (start_time + timedelta(minutes=schedule.slot_duration)).time() > end_time.time():
-        return False
-
-    return True
-
-
 def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schemas.SlotBase) -> bool:
     """Checks for timezone correctness, weekday and start/end time validity."""
     # For now lets only accept utc bookings as that's what our frontend supplies us.
@@ -104,8 +91,6 @@ def create_calendar_schedule(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
-    if not is_valid_schedule(schedule):
-        raise validation.ScheduleCreationException()
 
     db_schedule = repo.schedule.create(db=db, schedule=schedule)
 
@@ -160,8 +145,6 @@ def update_schedule(
         and subscriber.get_external_connection(ExternalConnectionType.zoom) is None
     ):
         raise validation.ZoomNotConnectedException()
-    if not is_valid_schedule(schedule):
-        raise validation.ScheduleCreationException()
 
     if schedule.slug is None:
         # If slug isn't provided, give them the last 8 characters from a uuid4

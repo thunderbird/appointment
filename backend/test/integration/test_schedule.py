@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 from freezegun import freeze_time
 
+from appointment import defines
 from appointment.tasks import emails as email_tasks
 from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
@@ -75,7 +76,19 @@ class TestSchedule:
             json={'calendar_id': generated_calendar.id, **schedule_data},
             headers=auth_headers,
         )
-        assert response.status_code == 500, response.text
+        assert response.status_code == 422, response.text
+        data = response.json()
+
+        assert 'detail' in data
+        assert len(data.get('detail')) == 1
+        # Should be at least start_time + slot_duration
+        # The frontend will format this because of locale and timezone concerns
+        assert data.get('detail')[0]['type'] == defines.END_TIME_BEFORE_START_TIME_ERR
+        assert data.get('detail')[0]['msg'] == '{field} should be at least {value}.'
+        assert data.get('detail')[0]['ctx']['err_field'] == 'end_time'
+        assert data.get('detail')[0]['ctx']['err_value'] == '09:30:00'
+
+
 
     def test_create_schedule_on_unconnected_calendar(
         self, with_client, make_caldav_calendar, make_schedule, schedule_input
