@@ -6,11 +6,12 @@ import { useExternalConnectionsStore } from '@/stores/external-connections-store
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
 import {
-  AuthUrl, AuthUrlResponse, BooleanResponse, Exception, ExceptionDetail,
+  AuthUrl, AuthUrlResponse, BooleanResponse, Error, Exception, ExceptionDetail,
 } from '@/models';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 const { t } = useI18n();
 
@@ -18,10 +19,13 @@ const call = inject(callKey);
 const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
+const scheduleStore = useScheduleStore();
+
 const {
   hasNextStep, hasPreviousStep, errorMessage,
 } = storeToRefs(ftueStore);
 const { previousStep, nextStep } = ftueStore;
+const { schedules } = storeToRefs(scheduleStore);
 
 const externalConnectionStore = useExternalConnectionsStore();
 const customMeetingLink = ref('');
@@ -51,6 +55,18 @@ onMounted(async () => {
 
 const onSubmit = async () => {
   isLoading.value = true;
+
+  const data = await scheduleStore.updateSchedule(call, schedules.value[0].id, {
+    ...schedules.value[0],
+    location_url: customMeetingLink.value,
+  });
+
+  if ((data as Error)?.error) {
+    errorMessage.value = (data as Error)?.message;
+    isLoading.value = false;
+    return;
+  }
+
   await nextStep(call);
 };
 
