@@ -47,8 +47,5 @@
 <stop stop-color="#03AFD7"/>
 <stop offset="1" stop-color="white"/>
 </radialGradient>
-<clipPath id="clip0_5124_5032">
-<rect x="2" y="2" width="800" height="600" rx="12" fill="white"/>
-</clipPath>
 </defs>
 </svg>
