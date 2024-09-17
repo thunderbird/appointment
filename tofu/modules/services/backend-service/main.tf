@@ -17,7 +17,7 @@ resource "aws_ecs_service" "backend_service" {
 
   health_check_grace_period_seconds = 180
   task_definition                   = aws_ecs_task_definition.backend.arn
-  desired_count                     = 1
+  desired_count                     = var.app_env != "prod" ? 1 : 2
   tags                              = var.tags
 }
 
