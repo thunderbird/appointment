@@ -138,6 +138,7 @@ body {
 
 .dark .modal {
   --background: url('@/assets/svg/ftue-background-dark.svg');
+  border: 1px solid var(--colour-apmt-primary);
 }
 
 .modal::before {
