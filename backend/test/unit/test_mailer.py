@@ -1,84 +1,127 @@
 import datetime
-
 import pytest
-
-from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
-    NewBookingMail, Attachment
+from unittest.mock import patch, MagicMock
+from appointment.controller.mailer import (
+    ConfirmationMail,
+    RejectionMail,
+    ZoomMeetingFailedMail,
+    InvitationMail,
+    NewBookingMail,
+    Attachment,
+)
 from appointment.database import schemas
 
 
 class TestMailer:
-    def test_invite(self, with_l10n):
-        fake_email = 'to@example.org'
-
+    @patch("appointment.controller.mailer.add_task", new_callable=MagicMock)
+    def test_invite(self, mock_add_task, with_l10n):
+        fake_email = "to@example.org"
         mailer = InvitationMail(
             to=fake_email,
-            name='fake',
-            email='fake@example.org',
+            name="fake",
+            email="fake@example.org",
             date=datetime.datetime.now(),
             duration=30,
-            attachments=[Attachment(
-                mime=('text', 'calendar'),
-                filename='test.ics',
-                data=b''
-            )]
+            attachments=[
+                Attachment(mime=("text", "calendar"), filename="test.ics", data=b"")
+            ],
         )
         assert mailer.html()
         assert mailer.text()
+        
+        mock_add_task.assert_called_with(
+            "InvitationMail",
+            fake_email,
+            "fake",
+            "fake@example.org",
+            mailer.date,
+            30,
+            "test.ics",
+        )
 
-    def test_confirm(self, faker, with_l10n):
-        confirm_url = 'https://example.org/yes'
-        deny_url = 'https://example.org/no'
-        fake_email = 'to@example.org'
+    @patch("appointment.controller.mailer.add_task", new_callable=MagicMock)
+    def test_confirm(self, mock_add_task, faker, with_l10n):
+        confirm_url = "https://example.org/yes"
+        deny_url = "https://example.org/no"
+        fake_email = "to@example.org"
         now = datetime.datetime.now()
-        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
-
-        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test')
+        attendee = schemas.AttendeeBase(
+            email=faker.email(), name=faker.name(), timezone="Europe/Berlin"
+        )
+        mailer = ConfirmationMail(
+            confirm_url,
+            deny_url,
+            attendee.name,
+            attendee.email,
+            now,
+            to=fake_email,
+            duration=30,
+            schedule_name="test",
+        )
         assert mailer.html()
         assert mailer.text()
-
         for idx, content in enumerate([mailer.text(), mailer.html()]):
-            fault = 'text' if idx == 0 else 'html'
+            fault = "text" if idx == 0 else "html"
             assert confirm_url in content, fault
             assert deny_url in content, fault
             assert attendee.name in content, fault
             assert attendee.email in content, fault
 
-    def test_new_booking(self, faker, with_l10n):
-        fake_email = 'to@example.org'
-        now = datetime.datetime.now()
-        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
+        mock_add_task.assert_called_with(
+            "ConfirmationMail",
+            confirm_url,
+            deny_url,
+            attendee.name,
+            attendee.email,
+            now,
+            30,
+            "test schedule",
+        )
 
-        mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', to=fake_email)
+    @patch("appointment.controller.mailer.add_task", new_callable=MagicMock)
+    def test_new_booking(self, mock_add_task, faker, with_l10n):
+        fake_email = "to@example.org"
+        now = datetime.datetime.now()
+        attendee = schemas.AttendeeBase(
+            email=faker.email(), name=faker.name(), timezone="Europe/Berlin"
+        )
+        mailer = NewBookingMail(
+            attendee.name, attendee.email, now, 30, "test schedule", to=fake_email
+        )
         assert mailer.html()
         assert mailer.text()
-
         for idx, content in enumerate([mailer.text(), mailer.html()]):
-            fault = 'text' if idx == 0 else 'html'
+            fault = "text" if idx == 0 else "html"
             assert attendee.name in content, fault
             assert attendee.email in content, fault
 
-    def test_reject(self, faker, with_l10n, make_pro_subscriber):
+        mock_add_task.assert_called_with(
+            "NewBookingMail", attendee.name, attendee.email, now, 30, "test schedule"
+        )
+
+    @patch("appointment.controller.mailer.add_task", new_callable=MagicMock)
+    def test_reject(self, mock_add_task, faker, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
         now = datetime.datetime.now()
-        fake_email = 'to@example.org'
-
+        fake_email = "to@example.org"
         mailer = RejectionMail(owner_name=subscriber.name, date=now, to=fake_email)
         assert mailer.html()
         assert mailer.text()
-
         for idx, content in enumerate([mailer.text(), mailer.html()]):
-            fault = 'text' if idx == 0 else 'html'
+            fault = "text" if idx == 0 else "html"
             assert subscriber.name in content, fault
 
-    def test_zoom_invite_failed(self, faker, with_l10n):
-        fake_title = faker.name()
-        fake_email = 'to@example.org'
+        mock_add_task.assert_called_with("RejectionMail", subscriber.name, now)
 
+    @patch("appointment.controller.mailer.add_task", new_callable=MagicMock)
+    def test_zoom_invite_failed(self, mock_add_task, faker, with_l10n):
+        fake_title = faker.name()
+        fake_email = "to@example.org"
         mailer = ZoomMeetingFailedMail(appointment_title=fake_title, to=fake_email)
         assert mailer.html()
         assert mailer.text()
-
         for idx, content in enumerate([mailer.text(), mailer.html()]):
-            fault = 'text' if idx == 0 else 'html'
+            fault = "text" if idx == 0 else "html"
             assert fake_title in content, fault
+
+        mock_add_task.assert_called_with("ZoomMeetingFailedMail", fake_title)
