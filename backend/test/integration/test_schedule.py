@@ -14,26 +14,30 @@ from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
 
 
 class TestSchedule:
-    def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar):
+    @pytest.fixture
+    def schedule_input(self):
+        """Sample schedule input data excluding the calendar id (add that in yourself!)"""
+        return {
+            'name': 'Schedule',
+            'location_type': 2,
+            'location_url': 'https://test.org',
+            'details': 'Lorem Ipsum',
+            'start_date': DAY1,
+            'end_date': DAY14,
+            'start_time': '10:00',
+            'end_time': '18:00',
+            'earliest_booking': 1440,
+            'farthest_booking': 20160,
+            'weekdays': [1, 2, 3, 4, 5],
+            'slot_duration': 30,
+        }
+
+    def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar, schedule_input):
         generated_calendar = make_caldav_calendar(connected=True)
 
         response = with_client.post(
             '/schedule',
-            json={
-                'calendar_id': generated_calendar.id,
-                'name': 'Schedule',
-                'location_type': 2,
-                'location_url': 'https://test.org',
-                'details': 'Lorem Ipsum',
-                'start_date': DAY1,
-                'end_date': DAY14,
-                'start_time': '10:00',
-                'end_time': '18:00',
-                'earliest_booking': 1440,
-                'farthest_booking': 20160,
-                'weekdays': [1, 2, 3, 4, 5],
-                'slot_duration': 30,
-            },
+            json={'calendar_id': generated_calendar.id, **schedule_input},
             headers=auth_headers,
         )
         assert response.status_code == 200, response.text
@@ -57,29 +61,47 @@ class TestSchedule:
         assert weekdays == [1, 2, 3, 4, 5]
         assert data['slot_duration'] == 30
 
-    def test_create_schedule_on_unconnected_calendar(self, with_client, make_caldav_calendar, make_schedule):
+    def test_create_schedule_with_end_time_before_start_time(
+        self, with_client, make_caldav_calendar, make_schedule, schedule_input
+    ):
+        generated_calendar = make_caldav_calendar(connected=True)
+
+        schedule_data = schedule_input
+        schedule_data['start_time'] = '09:00'
+        schedule_data['end_time'] = '06:00'
+
+        response = with_client.post(
+            '/schedule',
+            json={'calendar_id': generated_calendar.id, **schedule_data},
+            headers=auth_headers,
+        )
+        assert response.status_code == 500, response.text
+
+    def test_create_schedule_on_unconnected_calendar(
+        self, with_client, make_caldav_calendar, make_schedule, schedule_input
+    ):
         generated_calendar = make_caldav_calendar(connected=False)
         generated_schedule = make_schedule(calendar_id=generated_calendar.id)
 
         response = with_client.post(
             '/schedule',
-            json={'calendar_id': generated_schedule.calendar_id, 'name': 'Schedule'},
+            json={'calendar_id': generated_schedule.calendar_id, **schedule_input},
             headers=auth_headers,
         )
         assert response.status_code == 403, response.text
 
-    def test_create_schedule_on_missing_calendar(self, with_client, make_schedule):
+    def test_create_schedule_on_missing_calendar(self, with_client, make_schedule, schedule_input):
         generated_schedule = make_schedule()
 
         response = with_client.post(
             '/schedule',
-            json={'calendar_id': generated_schedule.id + 1, 'name': 'Schedule'},
+            json={'calendar_id': generated_schedule.id + 1, **schedule_input},
             headers=auth_headers,
         )
         assert response.status_code == 404, response.text
 
     def test_create_schedule_on_foreign_calendar(
-        self, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+        self, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule, schedule_input
     ):
         the_other_guy = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(the_other_guy.id)
@@ -87,7 +109,10 @@ class TestSchedule:
 
         response = with_client.post(
             '/schedule',
-            json={'calendar_id': generated_schedule.id, 'name': 'Schedule'},
+            json={
+                'calendar_id': generated_schedule.id,
+                **schedule_input,
+            },
             headers=auth_headers,
         )
         assert response.status_code == 403, response.text
@@ -211,6 +236,9 @@ class TestSchedule:
                 'calendar_id': generated_schedule.calendar_id,
                 'name': '<i>Schedule</i>',
                 'details': 'Lorem <p>test</p> Ipsum<br><script>run_evil();</script>',
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'start_date': DAY2,
             },
             headers=auth_headers,
         )
@@ -219,24 +247,26 @@ class TestSchedule:
         assert data['name'] == 'Schedule'
         assert data['details'] == 'Lorem test Ipsum'
 
-    def test_update_missing_schedule(self, with_client, make_schedule):
+    def test_update_missing_schedule(self, with_client, make_schedule, schedule_input):
         generated_schedule = make_schedule()
 
         response = with_client.put(
             f'/schedule/{generated_schedule.id + 1}',
-            json={'calendar_id': generated_schedule.calendar_id, 'name': 'Schedule'},
+            json={'calendar_id': generated_schedule.calendar_id, **schedule_input},
             headers=auth_headers,
         )
         assert response.status_code == 404, response.text
 
-    def test_update_foreign_schedule(self, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule):
+    def test_update_foreign_schedule(
+        self, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule, schedule_input
+    ):
         the_other_guy = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(the_other_guy.id)
         generated_schedule = make_schedule(calendar_id=generated_calendar.id)
 
         response = with_client.put(
             f'/schedule/{generated_schedule.id}',
-            json={'calendar_id': generated_schedule.calendar_id, 'name': 'Schedule'},
+            json={'calendar_id': generated_schedule.calendar_id, **schedule_input},
             headers=auth_headers,
         )
         assert response.status_code == 403, response.text
@@ -773,7 +803,6 @@ class TestRequestScheduleAvailability:
 
             # Ensure we haven't sent out any emails
             assert mock.call_count == 0
-
 
 
 class TestDecideScheduleAvailabilitySlot:
