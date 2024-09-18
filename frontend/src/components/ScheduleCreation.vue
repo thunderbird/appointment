@@ -802,7 +802,7 @@ watch(
           <primary-button
             class="btn-save w-1/2"
             @click="saveSchedule(!existing)"
-            :disabled="!scheduleInput.active"
+            :disabled="!scheduleInput.active || savingInProgress"
           >
             {{ t('label.save') }}
           </primary-button>
