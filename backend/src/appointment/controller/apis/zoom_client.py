@@ -1,4 +1,5 @@
 import json
+import os
 import time
 
 import sentry_sdk
@@ -14,6 +15,15 @@ class ZoomClient:
     OAUTH_REQUEST_URL = 'https://api.zoom.us/v2'
 
     SCOPES = ['user:read', 'user_info:read', 'meeting:write']
+    NEW_SCOPES = [
+        'meeting:read:meeting',
+        'meeting:write:meeting',
+        'meeting:update:meeting',
+        'meeting:delete:meeting',
+        'meeting:write:invite_links',
+        'user:read:email',
+        'user:read:user',
+    ]
 
     client: OAuth2Session | None = None
     subscriber_id: int | None = None
@@ -24,6 +34,14 @@ class ZoomClient:
         self.callback_url = callback_url
         self.subscriber_id = None
         self.client = None
+        self.use_new_scopes = os.getenv('ZOOM_API_NEW_APP', False) == 'True'
+
+    @property
+    def scopes(self):
+        """Returns the appropriate scopes"""
+        if self.use_new_scopes:
+            return self.NEW_SCOPES
+        return self.SCOPES
 
     def check_expiry(self, token: dict | None):
         """Checks expires_at and if expired sets expires_in to a negative number to trigger refresh"""
@@ -50,7 +68,7 @@ class ZoomClient:
         self.client = OAuth2Session(
             self.client_id,
             redirect_uri=self.callback_url,
-            scope=self.SCOPES,
+            scope=self.scopes,
             auto_refresh_url=self.OAUTH_TOKEN_URL,
             auto_refresh_kwargs={
                 'client_id': self.client_id,

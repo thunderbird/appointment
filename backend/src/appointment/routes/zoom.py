@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from ..controller import zoom
 from ..controller.apis.zoom_client import ZoomClient
 from ..controller.auth import sign_url
 from ..database import repo, schemas, models
@@ -115,13 +116,7 @@ def disconnect_account(
     zoom_connection = subscriber.get_external_connection(ExternalConnectionType.zoom)
 
     if zoom_connection:
-        repo.external_connection.delete_by_type(db, subscriber.id, zoom_connection.type, zoom_connection.type_id)
-        schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
-        for schedule in schedules:
-            if schedule.meeting_link_provider == models.MeetingLinkProviderType.zoom:
-                schedule.meeting_link_provider = models.MeetingLinkProviderType.none
-                db.add(schedule)
-        db.commit()
+        zoom.disconnect(db, subscriber.id, zoom_connection.type_id)
     else:
         return False
 

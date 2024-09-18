@@ -2,14 +2,16 @@ import logging
 
 import requests
 import sentry_sdk
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from ..controller import auth, data
+from ..controller import auth, data, zoom
 from ..controller.apis.fxa_client import FxaClient
 from ..database import repo, models, schemas
+from ..database.models import ExternalConnectionType
 from ..dependencies.database import get_db
-from ..dependencies.fxa import get_webhook_auth, get_fxa_client
+from ..dependencies.fxa import get_webhook_auth as get_webhook_auth_fxa, get_fxa_client
+from ..dependencies.zoom import get_webhook_auth as get_webhook_auth_zoom
 from ..exceptions.account_api import AccountDeletionSubscriberFail
 from ..exceptions.fxa_api import MissingRefreshTokenException
 
@@ -19,14 +21,14 @@ router = APIRouter()
 @router.post('/fxa-process')
 def fxa_process(
     db: Session = Depends(get_db),
-    decoded_token: dict = Depends(get_webhook_auth),
+    decoded_token: dict = Depends(get_webhook_auth_fxa),
     fxa_client: FxaClient = Depends(get_fxa_client),
 ):
     """Main for webhooks regarding fxa"""
 
     subscriber: models.Subscriber = repo.external_connection.get_subscriber_by_fxa_uid(db, decoded_token.get('sub'))
     if not subscriber:
-        logging.warning('Webhook event received for non-existent user.')
+        logging.warning('FXA webhook event received for non-existent user.')
         return
 
     subscriber_external_connection = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
@@ -86,3 +88,31 @@ def fxa_process(
 
             case _:
                 logging.warning(f'Ignoring event {event}')
+
+
+@router.post('/zoom-deauthorization')
+def zoom_deauthorization(
+    request: Request,
+    db: Session = Depends(get_db),
+    webhook_payload: dict | None = Depends(get_webhook_auth_zoom)
+):
+    if not webhook_payload:
+        logging.warning('Invalid zoom webhook event received.')
+        return
+
+    user_id = webhook_payload.get('user_id')
+
+    subscriber = repo.external_connection.get_subscriber_by_zoom_user_id(
+        db,
+        user_id
+    )
+
+    if not subscriber:
+        logging.warning('Zoom webhook event received for non-existent user.')
+        return
+
+    try:
+        zoom.disconnect(db, subscriber.id, user_id)
+    except Exception as ex:
+        sentry_sdk.capture_exception(ex)
+        logging.error(f'Error disconnecting zoom connection: {ex}')
