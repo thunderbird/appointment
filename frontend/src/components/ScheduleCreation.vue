@@ -18,7 +18,6 @@ import {
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
@@ -461,7 +460,7 @@ watch(
       <!-- step 1 -->
       <div
         class="mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 border-teal-600': activeStep1}"
+        :class="{'bg-neutral-50 !border-teal-600': activeStep1}"
         id="schedule-availability"
       >
         <div
@@ -531,7 +530,7 @@ watch(
       <!-- step 2 -->
       <div
         class="mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 border-teal-600': activeStep2}"
+        :class="{'bg-neutral-50 !border-teal-600': activeStep2}"
         id="schedule-settings"
       >
         <div
@@ -608,7 +607,7 @@ watch(
       <div
         @click="state = ScheduleCreationState.Details"
         class="btn-step-3 mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 border-teal-600': activeStep3}"
+        :class="{'bg-neutral-50 !border-teal-600': activeStep3}"
         id="schedule-details"
       >
         <div class="flex cursor-pointer items-center justify-between">
@@ -692,7 +691,7 @@ watch(
       <div
         @click="state = ScheduleCreationState.Booking"
         class="btn-step-3 mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 border-teal-600': activeStep4}"
+        :class="{'bg-neutral-50 !border-teal-600': activeStep4}"
         id="schedule-details"
       >
         <div class="flex cursor-pointer items-center justify-between">
@@ -763,50 +762,49 @@ watch(
     </div>
     <!-- Snack-ish Bar - The dark info bubble at the bottom of this form -->
     <!-- First time no calendars -->
-    <snackish-bar :show-icon=true v-if="!calendarStore.hasConnectedCalendars">
-      <div class="flex flex-col gap-2">
-        <p>{{ t('text.scheduleSettings.noCalendars') }}</p>
-        <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
-      </div>
+    <snackish-bar
+      v-if="!calendarStore.hasConnectedCalendars"
+      :show-icon=true
+      :message="t('text.scheduleSettings.noCalendars')"
+    >
+      <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
     </snackish-bar>
     <!-- No schedule? Create one please! -->
-    <snackish-bar v-else-if="!existing">
-      <div class="flex flex-col items-center justify-center gap-2">
-        <p>{{ t('text.scheduleSettings.create') }}</p>
-        <primary-button
-          class="btn-save w-1/2"
-          @click="saveSchedule(!existing)"
-          :disabled="!scheduleInput.active"
-        >
-          {{ t('label.save') }}
-        </primary-button>
-      </div>
+    <snackish-bar v-else-if="!existing" :message="t('text.scheduleSettings.create')">
+      <primary-button
+        class="btn-save w-1/2"
+        @click="saveSchedule(!existing)"
+        :disabled="!scheduleInput.active"
+      >
+        {{ t('label.save') }}
+      </primary-button>
     </snackish-bar>
     <!-- Schedule is not active -->
-    <snackish-bar :show-icon=true v-else-if="!scheduleInput.active">
-      <p>{{ t('text.scheduleSettings.notActive') }}</p>
-    </snackish-bar>
+    <snackish-bar
+      v-else-if="!scheduleInput.active"
+      :show-icon=true
+      :message="t('text.scheduleSettings.notActive')"
+    />
     <!-- Form is dirty, please clean it -->
-    <snackish-bar v-else-if="isFormDirty">
-      <div class="flex flex-col gap-2">
-      <p>{{ t('text.scheduleSettings.formDirty') }}</p>
-      <div class="flex gap-4">
-          <secondary-button
-            class="btn-revert w-1/2"
-            @click="revertForm()"
-            :disabled="!scheduleInput.active"
-          >
-            {{ t('label.revert') }}
-          </secondary-button>
-          <primary-button
-            class="btn-save w-1/2"
-            @click="saveSchedule(!existing)"
-            :disabled="!scheduleInput.active || savingInProgress"
-          >
-            {{ t('label.save') }}
-          </primary-button>
-        </div>
-        </div>
+    <snackish-bar
+      v-else-if="isFormDirty"
+      :show-icon="true"
+      :message="t('text.scheduleSettings.formDirty')"
+    >
+      <primary-button
+        class="btn-save w-full"
+        @click="saveSchedule(!existing)"
+        :disabled="!scheduleInput.active || savingInProgress"
+      >
+        {{ t('label.save') }}
+      </primary-button>
+      <link-button
+        class="btn-revert w-full py-4"
+        @click="revertForm()"
+        :disabled="!scheduleInput.active"
+      >
+        {{ t('label.clearForm') }}
+      </link-button>
     </snackish-bar>
     <div v-else>
       <div class="my-8 flex justify-center gap-4">
