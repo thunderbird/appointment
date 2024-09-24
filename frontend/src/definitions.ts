@@ -275,6 +275,10 @@ export enum MetricEvents {
   WaitingListEmailRemoved = 'apmt.signup.email-removed',
 }
 
+export enum Dismissibles {
+  BetaWarning = 'beta-warning'
+}
+
 export default {
   AlertSchemes,
   BookingCalendarView,
@@ -304,4 +308,5 @@ export default {
   TableDataType,
   TooltipPosition,
   WaitingListAction,
+  Dismissibles,
 };

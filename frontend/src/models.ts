@@ -229,6 +229,14 @@ export type User = {
   uniqueHash: string;
 };
 
+/**
+ * User activity as in the things they do within our application
+ * Used to store the state of dismissables and such.
+ */
+export type UserActivity = {
+  dismissedBetaWarning: boolean,
+};
+
 export type Subscriber = {
   id?: number;
   username: string;
