@@ -53,7 +53,7 @@ button:hover > .tooltip,
 
 .primary {
   background-color: var(--colour-service-primary);
-  border-color: var(--colour-service-primary-hover);
+  @mixin faded-border var(--colour-service-primary-hover);
   color: var(--colour-neutral-base);
 
   &:hover:enabled {
@@ -147,8 +147,7 @@ button {
   align-items: center;
   height: 100%;
 
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding-left: 1.5rem;
   margin-right: -0.75rem;
 }
 

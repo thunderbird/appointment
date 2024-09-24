@@ -116,7 +116,7 @@ const onChange = () => {
   flex-direction: column;
   align-items: center;
   color: var(--colour-ti-base);
-  font-family: 'Inter', 'sans-serif';
+  font-family: var(--font-sans);
   font-size: var(--txt-input);
   line-height: var(--line-height-input);
   font-weight: 400;
@@ -124,7 +124,7 @@ const onChange = () => {
 
 .label {
   width: 100%;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .small-text {
@@ -202,6 +202,11 @@ const onChange = () => {
 
     &::placeholder {
       color: var(--colour-ti-muted);
+    }
+
+    &[type="time"]::-webkit-calendar-picker-indicator {
+      margin-right: -0.5rem;
+      background: none;
     }
   }
 }

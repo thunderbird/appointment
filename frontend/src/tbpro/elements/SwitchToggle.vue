@@ -33,7 +33,7 @@ const toggleState = () => {
 
 <template>
   <div class="component-container" @click.prevent="toggleState">
-    <div v-if="label">{{ label }}</div>
+    <div v-if="label" class="input-label">{{ label }}</div>
     <div class="toggle-container">
       <div v-if="!noLegend" class="toggle-label">{{ t('label.off') }}</div>
       <div class="toggle">
@@ -71,6 +71,15 @@ const toggleState = () => {
   &:has(.toggle-input:disabled) {
     cursor: not-allowed;
   }
+}
+
+.input-label {
+  color: var(--colour-ti-base);
+  font-family: var(--font-sans);
+  font-size: var(--txt-input);
+  line-height: var(--line-height-input);
+  width: 100%;
+  font-weight: 500;  
 }
 
 .toggle-container {

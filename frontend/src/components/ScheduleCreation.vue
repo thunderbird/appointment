@@ -425,9 +425,9 @@ watch(
 </script>
 
 <template>
-  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600">
-    <div class="flex flex-col gap-4 px-1 py-4">
-      <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
+  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600 border border-zinc-200 dark:border-gray-500">
+    <div class="flex flex-col gap-2 py-4">
+      <div class="flex items-center justify-between text-center text-lg text-teal-600">
         <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
         <switch-toggle
           v-if="existing"
@@ -443,7 +443,7 @@ watch(
         {{ scheduleCreationError }}
       </alert-box>
 
-      <div class="px-4">
+      <div class="px-4 mb-1">
         <label for="scheduleName" class="flex-column flex">
           <input
             id="scheduleName"
@@ -451,7 +451,7 @@ watch(
             v-model="scheduleInput.name"
             :placeholder="t('placeholder.mySchedule')"
             :disabled="!scheduleInput.active"
-            class="schedule-name place-holder w-full rounded-none border-0 border-b bg-transparent px-2 dark:bg-transparent"
+            class="schedule-name place-holder w-full rounded-none border-0 border-b bg-transparent p-1 dark:bg-transparent"
             required
           />
           <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
@@ -460,15 +460,15 @@ watch(
 
       <!-- step 1 -->
       <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep1}"
+        class="mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50 border-teal-600': activeStep1}"
         id="schedule-availability"
       >
         <div
           @click="state = ScheduleCreationState.Availability"
           class="btn-step-1 flex cursor-pointer items-center justify-between"
         >
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.chooseYourAvailability") }}
             </h2>
@@ -504,7 +504,7 @@ watch(
             </text-input>
           </div>
           <div>
-            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label">
               {{ t("label.availableDays") }}
             </div>
             <bubble-select
@@ -515,7 +515,7 @@ watch(
             />
           </div>
           <div>
-            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label">
               {{ t("label.timeZone") }}
             </div>
             <div class="flex justify-between">
@@ -530,15 +530,15 @@ watch(
 
       <!-- step 2 -->
       <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50':activeStep2}"
+        class="mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50 border-teal-600': activeStep2}"
         id="schedule-settings"
       >
         <div
           @click="state = ScheduleCreationState.Settings"
           class="btn-step-2 flex cursor-pointer items-center justify-between"
         >
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.scheduleDetails") }}
             </h2>
@@ -607,12 +607,12 @@ watch(
       <!-- step 3 -->
       <div
         @click="state = ScheduleCreationState.Details"
-        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep3}"
+        class="btn-step-3 mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50 border-teal-600': activeStep3}"
         id="schedule-details"
       >
         <div class="flex cursor-pointer items-center justify-between">
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.meetingDetails") }}
             </h2>
@@ -660,12 +660,12 @@ watch(
               @change="toggleZoomLinkCreation"
               class="size-5 rounded-md"
             />
-            <div class="font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label">
               {{ t("label.generateZoomLink") }}
             </div>
           </label>
           <label class="relative flex flex-col gap-1">
-            <div class="font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label ">
               {{ t("label.notes") }}
             </div>
             <textarea
@@ -691,12 +691,12 @@ watch(
       <!-- step 4 -->
       <div
         @click="state = ScheduleCreationState.Booking"
-        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep4}"
+        class="btn-step-3 mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
+        :class="{'bg-neutral-50 border-teal-600': activeStep4}"
         id="schedule-details"
       >
         <div class="flex cursor-pointer items-center justify-between">
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.bookingSettings") }}
             </h2>
@@ -713,9 +713,6 @@ watch(
           <hr/>
           <!-- custom quick link -->
           <label class="relative flex flex-col gap-1">
-            <div class="font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.quickLink") }}
-            </div>
             <div class="flex gap-2">
               <text-input
                 type="text"
@@ -725,8 +722,10 @@ watch(
                 class="w-full rounded-md disabled:cursor-not-allowed"
                 :small-text="true"
                 maxLength="16"
-              />
-              <refresh-icon class="mt-2.5 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
+              >
+                {{ t("label.quickLink") }}
+              </text-input>
+              <refresh-icon class="mt-7 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
             </div>
           </label>
           <!-- option to deactivate confirmation -->
@@ -837,25 +836,13 @@ watch(
 </template>
 
 <style scoped>
-input[type="time"]::-webkit-calendar-picker-indicator {
-  margin-right: -0.5rem;
-  background: none;
-}
-
-label {
-  font-size: theme('fontSize.sm');
-}
-
-/* Lol come-on! */
-textarea:disabled,
-select:disabled,
-input:disabled {
-  color: theme('colors.neutral.400') !important;
-  cursor: not-allowed;
-}
-
-input[type=checkbox]:disabled {
-  filter: grayscale(100%);
+.input-label {
+  color: var(--colour-ti-base);
+  font-family: var(--font-sans);
+  font-size: var(--txt-input);
+  line-height: var(--line-height-input);
+  width: 100%;
+  font-weight: 500;
 }
 
 /* If the device does not support hover (i.e. mobile) then make it activate on focus within */

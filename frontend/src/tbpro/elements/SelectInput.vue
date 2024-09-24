@@ -66,7 +66,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 
 .label {
   width: 100%;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .help-label {
@@ -93,6 +93,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
   background-color: var(--colour-neutral-base);
   @mixin faded-border var(--colour-select-border);
   border-radius: var(--border-radius);
+  font-size: var(--txt-input);
   font-weight: 400;
 
   &:hover, &:focus {
@@ -102,6 +103,11 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
   &:active {
     background-color: var(--colour-neutral-subtle);
     --colour-select-border: var(--colour-neutral-border-intense);
+  }
+
+  &:disabled {
+    filter: grayscale(50%);
+    cursor: not-allowed;
   }
 }
 .dark {
