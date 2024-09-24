@@ -424,7 +424,7 @@ watch(
 </script>
 
 <template>
-  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600 border border-zinc-200 dark:border-gray-500">
+  <div class="schedule-creation-container">
     <div class="flex flex-col gap-2 py-4">
       <div class="flex items-center justify-between text-center text-lg text-teal-600">
         <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
@@ -458,11 +458,7 @@ watch(
       </div>
 
       <!-- step 1 -->
-      <div
-        class="mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 !border-teal-600': activeStep1}"
-        id="schedule-availability"
-      >
+      <div id="schedule-availability" class="schedule-creation-step" :class="{ 'active': activeStep1 }">
         <div
           @click="state = ScheduleCreationState.Availability"
           class="btn-step-1 flex cursor-pointer items-center justify-between"
@@ -528,11 +524,7 @@ watch(
       </div>
 
       <!-- step 2 -->
-      <div
-        class="mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 !border-teal-600': activeStep2}"
-        id="schedule-settings"
-      >
+      <div id="schedule-settings" class="schedule-creation-step" :class="{ 'active': activeStep2 }">
         <div
           @click="state = ScheduleCreationState.Settings"
           class="btn-step-2 flex cursor-pointer items-center justify-between"
@@ -605,10 +597,10 @@ watch(
 
       <!-- step 3 -->
       <div
-        @click="state = ScheduleCreationState.Details"
-        class="btn-step-3 mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 !border-teal-600': activeStep3}"
         id="schedule-details"
+        class="schedule-creation-step"
+        :class="{ 'active':  activeStep3 }"
+        @click="state = ScheduleCreationState.Details"
       >
         <div class="flex cursor-pointer items-center justify-between">
           <div class="flex flex-col">
@@ -689,10 +681,10 @@ watch(
 
       <!-- step 4 -->
       <div
-        @click="state = ScheduleCreationState.Booking"
-        class="btn-step-3 mx-3 flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50 !border-teal-600': activeStep4}"
         id="schedule-details"
+        class="schedule-creation-step"
+        :class="{ 'active': activeStep4 }"
+        @click="state = ScheduleCreationState.Booking"
       >
         <div class="flex cursor-pointer items-center justify-between">
           <div class="flex flex-col">
@@ -738,7 +730,7 @@ watch(
               @changed="toggleBookingConfirmation"
               no-legend
             />
-            <div class="whitespace-pre-line rounded-lg bg-white p-4 text-xs text-gray-500 dark:bg-gray-800">
+            <div class="whitespace-pre-line rounded-lg pb-3 text-xs text-gray-500">
               <div>
                 {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
                 <i18n-t keypath="text.toUpdateYourUsername.text" tag="span">
@@ -772,7 +764,7 @@ watch(
     <!-- No schedule? Create one please! -->
     <snackish-bar v-else-if="!existing" :message="t('text.scheduleSettings.create')">
       <primary-button
-        class="btn-save w-1/2"
+        class="btn-save w-full"
         @click="saveSchedule(!existing)"
         :disabled="!scheduleInput.active"
       >
@@ -834,6 +826,32 @@ watch(
 </template>
 
 <style scoped>
+.schedule-creation-container {
+  position: sticky;
+  top: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--colour-neutral-border);
+  background: var(--colour-neutral-lower);
+}
+
+.schedule-creation-step {
+  margin: 0 .75rem;
+  padding: .75rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  border-radius: .5rem;
+  border: 1px solid var(--colour-neutral-border);
+
+  &.active {
+    background: var(--colour-neutral-base);
+    border-color: var(--colour-service-primary);
+  }
+}
+
 .input-label {
   color: var(--colour-ti-base);
   font-family: var(--font-sans);
