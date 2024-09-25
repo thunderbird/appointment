@@ -49,6 +49,7 @@ const updatePage = (index: number) => {
 const columnSpan = computed(() => (columns.value.length + (allowMultiSelect.value ? 1 : 0)));
 const selectedRows = ref<TableDataRow[]>([]);
 const mutableDataList = ref<TableDataRow[]>(null);
+const selectedFilters = {};
 
 const clearSelectedRows = () => {
   selectedRows.value = [];
@@ -118,8 +119,24 @@ const onFieldSelect = (evt: Event, row: TableDataRow) => {
   emit('fieldSelect', selectedRows.value);
 };
 
-const onColumnFilter = (evt: Event, filter: TableFilter) => {
-  mutableDataList.value = filter.fn((evt as HTMLInputElementEvent).target.value, dataList.value);
+const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilter[]) => {
+  mutableDataList.value = dataList.value;
+  selectedFilters[eventFilter.name] = (evt as HTMLInputElementEvent).target.value;
+
+  // We need to loop through all filters to re-apply them on filter change
+  filters.forEach((filter: TableFilter) => {
+    if (mutableDataList.value === null || !(filter.name in selectedFilters)) {
+      return;
+    }
+
+    // The normal convention is to return null if we don't want to filter
+    // So only apply the results if we're not null.
+    const filteredDataList = filter.fn(selectedFilters[filter.name], mutableDataList.value);
+    if (filteredDataList !== null) {
+      mutableDataList.value = filteredDataList;
+    }
+  });
+
   if (mutableDataList.value === dataList.value) {
     mutableDataList.value = null;
   }
@@ -136,7 +153,7 @@ const onColumnFilter = (evt: Event, filter: TableFilter) => {
       <div v-for="filter in filters" :key="filter.name">
         <label class="flex items-center gap-4 whitespace-nowrap">
         {{ filter.name }} {{ t('label.filter') }}:
-        <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter)">
+        <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter, filters)">
           <option :value="option.key" v-for="option in filter.options" :key="option.key">
             {{ option.name }}
           </option>
