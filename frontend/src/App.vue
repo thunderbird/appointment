@@ -51,7 +51,8 @@ const {
 } = siteNotificationStore;
 
 // Handle input filters
-const profanity = new Profanity();
+const languageList = lang === 'en' ? ['en'] : [lang, 'en']
+const profanity = new Profanity({ languages: languageList });
 const hasProfanity = (input: string) => profanity.exists(input);
 provide(hasProfanityKey, hasProfanity);
 
