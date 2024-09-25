@@ -357,6 +357,21 @@
     "shareMyLink": "Share my link",
     "reportBug": "Report Bug"
   },
+  "notices": {
+    "betaWarning": {
+      "heading": "As we're currently in beta, we do have some issues we're dealing with:",
+      "list": [
+        "Please check your spam folder as some emails might end up there",
+        "If Zoom meetings don't appear in your appointment invite, please disconnect and reconnect your zoom account in the {connectedAccounts} section of the settings",
+        "If you experience other issues, please use the {contactUs} form, or join us on our {matrixChannel}"
+      ],
+      "linkText": {
+        "connectedAccounts": "Connected Accounts",
+        "contactUs": "contact us",
+        "matrixChannel": "Matrix Channel"
+      }
+    }
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
     "emailAddress": "john.doe{'@'}example.com",
