@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CalendarItem } from '@/models';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 
 const { t } = useI18n();
 const model = defineModel<CalendarItem[]>();
@@ -40,10 +41,7 @@ defineProps<Props>();
     </div>
     <ul class="rows">
       <li class="row" v-for="(item, index) in model" :key="item.key">
-        <label>
-          <input type="checkbox" v-model="model[index].checked"/>
-          {{ item.label }}
-        </label>
+        <checkbox-input :name="`calendar-${index}`" :label="item.label" v-model="model[index].checked" />
       </li>
     </ul>
   </div>
@@ -105,30 +103,6 @@ defineProps<Props>();
 
   &:nth-child(even) {
     background-color: var(--colour-neutral-lower);
-  }
-}
-
-label {
-  display: flex;
-  gap: 0.625rem;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-input {
-  width: 1.0rem;
-  height: 1.0rem;
-  border-radius: var(--border-radius);
-  border: 1px solid var(--colour-neutral-border-intense);
-
-  &:focus {
-    outline-color: var(--colour-highlight);
-  }
-
-  &:checked, &:checked:hover, &:checked:focus {
-    background-color: var(--colour-highlight);
-    border-color: var(--colour-highlight);
-    color: var(--colour-neutral-raised);
   }
 }
 

@@ -24,6 +24,7 @@ import SnackishBar from '@/elements/SnackishBar.vue';
 import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
@@ -643,18 +644,13 @@ watch(
               </span>
             </div>
           </text-input>
-          <label class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
-              :disabled="!scheduleInput.active || !hasZoomAccount"
-              @change="toggleZoomLinkCreation"
-              class="size-5 rounded-md"
-            />
-            <div class="input-label">
-              {{ t("label.generateZoomLink") }}
-            </div>
-          </label>
+          <checkbox-input
+            name="generateZoomLink"
+            :label="t('label.generateZoomLink')"
+            :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
+            :disabled="!scheduleInput.active || !hasZoomAccount"
+            @change="toggleZoomLinkCreation"
+          />
           <label class="relative flex flex-col gap-1">
             <div class="input-label ">
               {{ t("label.notes") }}
