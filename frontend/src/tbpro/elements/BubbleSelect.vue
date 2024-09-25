@@ -52,7 +52,7 @@ const toggleBubble = (option: SelectOption) => {
           class="tbpro-bubble"
           :aria-pressed="model.indexOf(option.value) > -1"
           :class="{'selected': model.indexOf(option.value) > -1}"
-          :title="option.fullLabel ?? option.value"
+          :title="option.label ?? String(option.value)"
           type="button"
           @click="() => toggleBubble(option)"
         >
@@ -77,7 +77,7 @@ const toggleBubble = (option: SelectOption) => {
 .bubble-list {
   padding: 0;
   display: flex;
-  gap: 0.25rem;
+  justify-content: space-between;
   list-style: none;
 }
 

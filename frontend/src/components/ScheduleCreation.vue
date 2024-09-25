@@ -18,13 +18,13 @@ import {
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
 import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
@@ -425,9 +425,9 @@ watch(
 </script>
 
 <template>
-  <div class="sticky top-24 flex flex-col gap-4 rounded-2xl bg-zinc-100 dark:bg-gray-600">
-    <div class="flex flex-col gap-4 px-1 py-4">
-      <div class="flex items-center justify-around text-center text-xl font-semibold text-teal-500">
+  <div class="schedule-creation-container">
+    <div class="flex flex-col gap-2 py-4">
+      <div class="flex items-center justify-between text-center text-lg text-teal-600">
         <span class="pl-3">{{ t("heading.generalAvailability") }}</span>
         <switch-toggle
           v-if="existing"
@@ -443,7 +443,7 @@ watch(
         {{ scheduleCreationError }}
       </alert-box>
 
-      <div class="px-4">
+      <div class="px-4 mb-1">
         <label for="scheduleName" class="flex-column flex">
           <input
             id="scheduleName"
@@ -451,7 +451,7 @@ watch(
             v-model="scheduleInput.name"
             :placeholder="t('placeholder.mySchedule')"
             :disabled="!scheduleInput.active"
-            class="schedule-name place-holder w-full rounded-none border-0 border-b bg-transparent px-2 dark:bg-transparent"
+            class="schedule-name place-holder w-full rounded-none border-0 border-b bg-transparent p-1 dark:bg-transparent"
             required
           />
           <div v-if="!scheduleInput.name" class="content-center text-red-500">*</div>
@@ -459,16 +459,12 @@ watch(
       </div>
 
       <!-- step 1 -->
-      <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep1}"
-        id="schedule-availability"
-      >
+      <div id="schedule-availability" class="schedule-creation-step" :class="{ 'active': activeStep1 }">
         <div
           @click="state = ScheduleCreationState.Availability"
           class="btn-step-1 flex cursor-pointer items-center justify-between"
         >
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.chooseYourAvailability") }}
             </h2>
@@ -504,7 +500,7 @@ watch(
             </text-input>
           </div>
           <div>
-            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label">
               {{ t("label.availableDays") }}
             </div>
             <bubble-select
@@ -515,7 +511,7 @@ watch(
             />
           </div>
           <div>
-            <div class="mb-1 text-sm font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label">
               {{ t("label.timeZone") }}
             </div>
             <div class="flex justify-between">
@@ -529,16 +525,12 @@ watch(
       </div>
 
       <!-- step 2 -->
-      <div
-        class="mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50':activeStep2}"
-        id="schedule-settings"
-      >
+      <div id="schedule-settings" class="schedule-creation-step" :class="{ 'active': activeStep2 }">
         <div
           @click="state = ScheduleCreationState.Settings"
           class="btn-step-2 flex cursor-pointer items-center justify-between"
         >
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.scheduleDetails") }}
             </h2>
@@ -606,13 +598,13 @@ watch(
 
       <!-- step 3 -->
       <div
-        @click="state = ScheduleCreationState.Details"
-        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep3}"
         id="schedule-details"
+        class="schedule-creation-step"
+        :class="{ 'active':  activeStep3 }"
+        @click="state = ScheduleCreationState.Details"
       >
         <div class="flex cursor-pointer items-center justify-between">
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.meetingDetails") }}
             </h2>
@@ -652,20 +644,15 @@ watch(
               </span>
             </div>
           </text-input>
-          <label class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
-              :disabled="!scheduleInput.active || !hasZoomAccount"
-              @change="toggleZoomLinkCreation"
-              class="size-5 rounded-md"
-            />
-            <div class="font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.generateZoomLink") }}
-            </div>
-          </label>
+          <checkbox-input
+            name="generateZoomLink"
+            :label="t('label.generateZoomLink')"
+            :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
+            :disabled="!scheduleInput.active || !hasZoomAccount"
+            @change="toggleZoomLinkCreation"
+          />
           <label class="relative flex flex-col gap-1">
-            <div class="font-medium text-gray-500 dark:text-gray-300">
+            <div class="input-label ">
               {{ t("label.notes") }}
             </div>
             <textarea
@@ -690,13 +677,13 @@ watch(
 
       <!-- step 4 -->
       <div
-        @click="state = ScheduleCreationState.Booking"
-        class="btn-step-3 mx-4 flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 text-gray-700 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100"
-        :class="{'bg-neutral-50': activeStep4}"
         id="schedule-details"
+        class="schedule-creation-step"
+        :class="{ 'active': activeStep4 }"
+        @click="state = ScheduleCreationState.Booking"
       >
         <div class="flex cursor-pointer items-center justify-between">
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col">
             <h2>
               {{ t("label.bookingSettings") }}
             </h2>
@@ -713,9 +700,6 @@ watch(
           <hr/>
           <!-- custom quick link -->
           <label class="relative flex flex-col gap-1">
-            <div class="font-medium text-gray-500 dark:text-gray-300">
-              {{ t("label.quickLink") }}
-            </div>
             <div class="flex gap-2">
               <text-input
                 type="text"
@@ -725,8 +709,10 @@ watch(
                 class="w-full rounded-md disabled:cursor-not-allowed"
                 :small-text="true"
                 maxLength="16"
-              />
-              <refresh-icon class="mt-2.5 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
+              >
+                {{ t("label.quickLink") }}
+              </text-input>
+              <refresh-icon class="mt-7 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
             </div>
           </label>
           <!-- option to deactivate confirmation -->
@@ -740,7 +726,7 @@ watch(
               @changed="toggleBookingConfirmation"
               no-legend
             />
-            <div class="whitespace-pre-line rounded-lg bg-white p-4 text-xs text-gray-500 dark:bg-gray-800">
+            <div class="whitespace-pre-line rounded-lg pb-3 text-xs text-gray-500">
               <div>
                 {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
                 <i18n-t keypath="text.toUpdateYourUsername.text" tag="span">
@@ -764,50 +750,49 @@ watch(
     </div>
     <!-- Snack-ish Bar - The dark info bubble at the bottom of this form -->
     <!-- First time no calendars -->
-    <snackish-bar :show-icon=true v-if="!calendarStore.hasConnectedCalendars">
-      <div class="flex flex-col gap-2">
-        <p>{{ t('text.scheduleSettings.noCalendars') }}</p>
-        <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
-      </div>
+    <snackish-bar
+      v-if="!calendarStore.hasConnectedCalendars"
+      :show-icon=true
+      :message="t('text.scheduleSettings.noCalendars')"
+    >
+      <u><a href="/settings/calendar">{{ t('text.scheduleSettings.clickHereToConnect') }}</a></u>
     </snackish-bar>
     <!-- No schedule? Create one please! -->
-    <snackish-bar v-else-if="!existing">
-      <div class="flex flex-col items-center justify-center gap-2">
-        <p>{{ t('text.scheduleSettings.create') }}</p>
-        <primary-button
-          class="btn-save w-1/2"
-          @click="saveSchedule(!existing)"
-          :disabled="!scheduleInput.active"
-        >
-          {{ t('label.save') }}
-        </primary-button>
-      </div>
+    <snackish-bar v-else-if="!existing" :message="t('text.scheduleSettings.create')">
+      <primary-button
+        class="btn-save w-full"
+        @click="saveSchedule(!existing)"
+        :disabled="!scheduleInput.active"
+      >
+        {{ t('label.save') }}
+      </primary-button>
     </snackish-bar>
     <!-- Schedule is not active -->
-    <snackish-bar :show-icon=true v-else-if="!scheduleInput.active">
-      <p>{{ t('text.scheduleSettings.notActive') }}</p>
-    </snackish-bar>
+    <snackish-bar
+      v-else-if="!scheduleInput.active"
+      :show-icon=true
+      :message="t('text.scheduleSettings.notActive')"
+    />
     <!-- Form is dirty, please clean it -->
-    <snackish-bar v-else-if="isFormDirty">
-      <div class="flex flex-col gap-2">
-      <p>{{ t('text.scheduleSettings.formDirty') }}</p>
-      <div class="flex gap-4">
-          <secondary-button
-            class="btn-revert w-1/2"
-            @click="revertForm()"
-            :disabled="!scheduleInput.active"
-          >
-            {{ t('label.revert') }}
-          </secondary-button>
-          <primary-button
-            class="btn-save w-1/2"
-            @click="saveSchedule(!existing)"
-            :disabled="!scheduleInput.active || savingInProgress"
-          >
-            {{ t('label.save') }}
-          </primary-button>
-        </div>
-        </div>
+    <snackish-bar
+      v-else-if="isFormDirty"
+      :show-icon="true"
+      :message="t('text.scheduleSettings.formDirty')"
+    >
+      <primary-button
+        class="btn-save w-full"
+        @click="saveSchedule(!existing)"
+        :disabled="!scheduleInput.active || savingInProgress"
+      >
+        {{ t('label.save') }}
+      </primary-button>
+      <link-button
+        class="btn-revert w-full py-4"
+        @click="revertForm()"
+        :disabled="!scheduleInput.active"
+      >
+        {{ t('label.clearForm') }}
+      </link-button>
     </snackish-bar>
     <div v-else>
       <div class="my-8 flex justify-center gap-4">
@@ -837,25 +822,39 @@ watch(
 </template>
 
 <style scoped>
-input[type="time"]::-webkit-calendar-picker-indicator {
-  margin-right: -0.5rem;
-  background: none;
+.schedule-creation-container {
+  position: sticky;
+  top: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--colour-neutral-border);
+  background: var(--colour-neutral-lower);
 }
 
-label {
-  font-size: theme('fontSize.sm');
+.schedule-creation-step {
+  margin: 0 .75rem;
+  padding: .75rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  border-radius: .5rem;
+  border: 1px solid var(--colour-neutral-border);
+
+  &.active {
+    background: var(--colour-neutral-base);
+    border-color: var(--colour-service-primary);
+  }
 }
 
-/* Lol come-on! */
-textarea:disabled,
-select:disabled,
-input:disabled {
-  color: theme('colors.neutral.400') !important;
-  cursor: not-allowed;
-}
-
-input[type=checkbox]:disabled {
-  filter: grayscale(100%);
+.input-label {
+  color: var(--colour-ti-base);
+  font-family: var(--font-sans);
+  font-size: var(--txt-input);
+  line-height: var(--line-height-input);
+  width: 100%;
+  font-weight: 500;
 }
 
 /* If the device does not support hover (i.e. mobile) then make it activate on focus within */
