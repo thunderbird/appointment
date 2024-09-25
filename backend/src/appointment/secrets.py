@@ -62,7 +62,7 @@ def normalize_secrets():
         os.environ['ZOOM_AUTH_CLIENT_ID'] = secrets.get('client_id')
         os.environ['ZOOM_AUTH_SECRET'] = secrets.get('secret')
         os.environ['ZOOM_API_SECRET'] = secrets.get('api_secret')
-        os.environ['ZOOM_API_NEW_APP'] = secrets.get('api_new_app', False)
+        os.environ['ZOOM_API_NEW_APP'] = secrets.get('api_new_app', 'False')
 
     fxa_secrets = os.getenv('FXA_SECRETS')
 
