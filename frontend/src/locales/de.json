@@ -357,6 +357,21 @@
     "shareMyLink": "Meinen Link teilen",
     "reportBug": "Fehler melden"
   },
+  "notices": {
+    "betaWarning": {
+      "heading": "Da wir aktuell in der Beta-Phase sind, hier einige Tips um Probleme zu umgehen:",
+      "list": [
+        "Überprüfe den Spam Ordner, da einige Emails dort landen könnten",
+        "Falls Zoom Meetings nicht in der Kalender-Einladung auftauchen, bitte trenne die Verbindung im {connectedAccounts} Abschnitt der Einstellungen, und stelle sie erneut her",
+        "Sollte es noch weitere Probleme geben, nutze das {contactUs}, oder kommt in unseren {matrixChannel}"
+      ],
+      "linkText": {
+        "connectedAccounts": "Verbundene Konten",
+        "contactUs": "Kontaktformular",
+        "matrixChannel": "Matrix Kanal"
+      }
+    }
+  },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen …",
     "emailAddress": "max.muster{'@'}beispiel.de",
