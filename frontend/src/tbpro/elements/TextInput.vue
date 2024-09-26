@@ -167,6 +167,7 @@ const onChange = () => {
     overflow: hidden;
     max-width: 40%;
     text-wrap: nowrap;
+    z-index: 1;
   }
 
   .tbpro-input-element {

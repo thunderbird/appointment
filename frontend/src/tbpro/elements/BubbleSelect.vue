@@ -5,10 +5,12 @@ import { SelectOption } from '@/models';
 interface Props {
   options: SelectOption[];
   required: boolean;
+  disabled?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   required: false,
+  disabled: false,
 });
 
 const model = defineModel<number[]>({ default: [] });
@@ -51,10 +53,13 @@ const toggleBubble = (option: SelectOption) => {
         <button
           class="tbpro-bubble"
           :aria-pressed="model.indexOf(option.value) > -1"
-          :class="{'selected': model.indexOf(option.value) > -1}"
+          :class="{
+            'selected': model.indexOf(option.value) > -1,
+            disabled,
+          }"
           :title="option.label ?? String(option.value)"
           type="button"
-          @click="() => toggleBubble(option)"
+          @click="() => !disabled ? toggleBubble(option) : null"
         >
           {{ option.label }}
         </button>
@@ -109,5 +114,13 @@ const toggleBubble = (option: SelectOption) => {
 }
 .required {
   color: var(--colour-ti-critical);
+}
+.disabled {
+  cursor: default;
+}
+.selected.disabled {
+  background-color: var(--colour-neutral-border);
+  border-color: var(--colour-ti-muted);
+  color: var(--colour-ti-muted);
 }
 </style>
