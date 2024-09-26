@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // component constants
@@ -29,6 +29,15 @@ const toggleState = () => {
     emit('changed', state.value);
   }
 };
+
+// Update state if parent changes active prop
+// e.g. after initializing async data
+watch(
+  () => props.active,
+  () => {
+    state.value = props.active;
+  }
+);
 </script>
 
 <template>
