@@ -16,7 +16,11 @@ interface Props {
   label?: string; // input label
   noLegend?: boolean; // hide "on" and "off" labels
 }
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  disabled: false,
+  label: null,
+  noLegend: true,
+});
 
 // current state
 const state = ref(false);
