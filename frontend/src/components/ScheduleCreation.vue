@@ -504,10 +504,10 @@ watch(
               {{ t("label.availableDays") }}
             </div>
             <bubble-select
-              class="bubble-select"
               :options="scheduleDayOptions"
               v-model="scheduleInput.weekdays"
               :required="true"
+              :disabled="!scheduleInput.active"
             />
           </div>
           <div>
@@ -709,6 +709,7 @@ watch(
                 class="w-full rounded-md disabled:cursor-not-allowed"
                 :small-text="true"
                 maxLength="16"
+                :disabled="!scheduleInput.active"
               >
                 {{ t("label.quickLink") }}
               </text-input>
@@ -870,10 +871,6 @@ watch(
 
 .tooltip-icon:hover ~ .tooltip {
   display: block;
-}
-
-.bubble-select {
-  gap: .25rem;
 }
 
 .edit-link-btn {
