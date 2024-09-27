@@ -10,6 +10,8 @@
                 {-brand-name}
                 {-brand-slogan} {-brand-sign-up-with-url}
 
+mail-brand-contact-form = Kontaktformular
+mail-brand-support-hint = Du hast Fragen? Wir helfen gern. Nutze unser { $contact_form_link }, oder antworte einfach auf diese E-Mail für Support.
 mail-brand-footer = Diese Nachricht wurde gesendet von:
                     {-brand-name}
                     {-brand-slogan} {-brand-sign-up-with-no-url}

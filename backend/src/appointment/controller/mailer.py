@@ -51,6 +51,7 @@ class Mailer:
         self,
         to: str,
         sender: str = os.getenv('SERVICE_EMAIL'),
+        reply_to: str = os.getenv('SUPPORT_EMAIL'),
         subject: str = '',
         html: str = '',
         plain: str = '',
@@ -58,6 +59,7 @@ class Mailer:
     ):
         self.sender = sender
         self.to = to
+        self.reply_to = reply_to
         self.subject = subject
         self.body_html = html
         self.body_plain = plain
@@ -84,6 +86,7 @@ class Mailer:
         message['Subject'] = self.subject
         message['From'] = self.sender
         message['To'] = self.to
+        message['Reply-To'] = self.reply_to
 
         # add body as html and text parts
         message.set_content(self.text())

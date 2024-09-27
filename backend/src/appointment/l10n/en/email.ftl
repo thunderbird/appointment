@@ -10,6 +10,8 @@
                 {-brand-name}
                 {-brand-slogan} {-brand-sign-up-with-url}
 
+mail-brand-contact-form = contact form
+mail-brand-support-hint = Got questions? We're here to help. Fill out our { $contact_form_link }, or simply reply to this email for support.
 mail-brand-footer = This message was sent from:
                     {-brand-name}
                     {-brand-slogan} {-brand-sign-up-with-no-url}

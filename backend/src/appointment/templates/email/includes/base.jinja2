@@ -14,14 +14,14 @@
   background-color: {{ colour_surface_base }};
   font-family: 'Inter', sans-serif;
   margin: 24px 0;
-  ">
+">
 <body>
 {% if self.introduction()|trim %}
 <div style="
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 24px;
-    ">
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 24px;
+">
   {% block introduction %}{% endblock %}
 </div>
 {% endif %}
@@ -35,7 +35,7 @@
   border-radius: 6px;
   padding: 12px;
   background-color: {{ colour_surface_raised }}
-  ">
+">
   {% block information %}{% endblock %}
 </div>
 {% endif %}
@@ -44,15 +44,21 @@
   {% block call_to_action %}{% endblock %}
 </div>
 {% endif %}
+{% if show_contact_form_hint %}
+{% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form')) %}
+<div style="text-align: center; margin-left: auto; margin-right: auto; margin-bottom: 24px; padding: 12px; max-width: 310px;">
+  {{ l10n('mail-brand-support-hint', {'contact_form_link': link})|safe }}
+</div>
+{% endif %}
 <div style="
-      display: block;
-      width: 100%;
-      padding-bottom: 1px;
-      border-radius: unset;
-      margin-top: 12px;
-      margin-bottom: 12px;
-      background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
-      "></div>
+  display: block;
+  width: 100%;
+  padding-bottom: 1px;
+  border-radius: unset;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, rgba(21, 66, 124, 0) 20.5%, rgba(21, 66, 124, 0.2) 50%, rgba(21, 66, 124, 0) 79.5%);
+"></div>
 {% include './includes/footer.jinja2' %}
 </body>
 </html>
