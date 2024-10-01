@@ -334,20 +334,12 @@
       "title": "Complete your sign up"
     },
     "form": {
+      "email": "Enter your email to sign in or create an account:",
+      "email-waiting-list": "Enter your email to join the waiting list:",
       "no-invite-code": "If you don't have an invite code, add your email to our waiting list.",
       "privacy": "Your privacy is important to us."
     },
     "login": {
-      "intro": {
-        "new": [
-          "New?",
-          "{strong} We'll help you set up quickly."
-        ],
-        "returning": [
-          "Returning?",
-          "{strong} We'll recognize you and direct you to your account."
-        ]
-      },
       "title": "Simplify your day – just enter your email:"
     },
     "signUp": {
