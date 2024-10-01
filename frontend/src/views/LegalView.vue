@@ -34,7 +34,7 @@ onMounted(async () => {
     @apply py-8 text-2xl text-teal-600 dark:text-teal-400;
   }
   h3 {
-    @apply py-4 text-lg text-teal-600 dark:text-teal-400;
+    @apply py-4 text-xl text-teal-600 dark:text-teal-400;
   }
   h4 {
     @apply py-4 text-lg text-teal-600 dark:text-teal-400;
