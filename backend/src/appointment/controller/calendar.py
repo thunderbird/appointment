@@ -185,8 +185,17 @@ class GoogleConnector(BaseConnector):
             if status == 'cancelled' or transparency == 'transparent':
                 continue
 
-            # Mark tentative events
+            # Grab the attendee list for marking tentative events / filtering out declined events
             attendees = event.get('attendees') or []
+            declined = any(
+                (attendee.get('self') and attendee.get('responseStatus') == 'declined') for attendee in attendees
+            )
+
+            # Don't show declined events
+            if declined:
+                continue
+
+            # Mark tentative events
             tentative = any(
                 (attendee.get('self') and attendee.get('responseStatus') == 'tentative') for attendee in attendees
             )
