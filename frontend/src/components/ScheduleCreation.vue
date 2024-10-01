@@ -721,7 +721,7 @@ watch(
             <switch-toggle
               class="my-1 text-sm font-medium text-gray-500 dark:text-gray-300"
               name="booking_confirmation"
-              :active="schedule.booking_confirmation"
+              :active="scheduleInput.booking_confirmation"
               :label="t('label.bookingConfirmation')"
               :disabled="!scheduleInput.active"
               @changed="toggleBookingConfirmation"
