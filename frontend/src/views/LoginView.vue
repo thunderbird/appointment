@@ -210,7 +210,7 @@ const onEnter = () => {
 <template>
   <div>
     <home-view></home-view>
-    <generic-modal :error-message="loginError">
+    <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})">
       <template v-slot:header>
         <word-mark/>
         <h2 id="title" v-if="loginStep === LoginSteps.Login || hideInviteField">

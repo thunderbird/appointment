@@ -4,18 +4,24 @@ import {
 } from 'vue';
 import { refreshKey } from '@/keys';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 // component properties
 interface Props {
   infoMessage?: string;
   warningMessage?: string;
   errorMessage?: string;
+  closable?: boolean,
 }
 const props = withDefaults(defineProps<Props>(), {
   infoMessage: null,
   warningMessage: null,
   errorMessage: null,
+  closable: true,
 });
+const emits = defineEmits(['close']);
 
 const { infoMessage, warningMessage, errorMessage } = toRefs(props);
 
@@ -35,6 +41,9 @@ onUnmounted(() => {
 <template>
   <div class="new-design overlay" role="dialog" tabindex="-1" aria-labelledby="title" aria-modal="true">
     <div class="modal">
+        <div class="modal-close" v-if="closable" @click="emits('close')" role="button" aria-labelledby="modal-close-button">
+          <img id="modal-close-button" src="@/assets/svg/icons/close.svg" :alt="t('label.close')" :title="t('label.close')"/>
+        </div>
         <div class="modal-header">
           <slot name="header"></slot>
           <notice-bar type="error" v-if="errorMessage">
@@ -77,6 +86,18 @@ onUnmounted(() => {
   overflow: hidden;
   align-items: center;
   justify-content: center;
+}
+
+.modal-close {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  cursor: pointer;
+}
+
+/* Filter it for dark-mode B^) */
+.dark .modal-close {
+  filter: invert(0.75)
 }
 
 .modal-body {
