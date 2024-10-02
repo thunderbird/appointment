@@ -334,20 +334,12 @@
       "title": "Vervollständige die Registrierung"
     },
     "form": {
+      "email": "Gib deine E-Mail-Adresse ein, um dich anzumelden oder ein Konto zu erstellen:",
+      "email-waiting-list": "Gib deine E-Mail-Adresse ein, um der Warteliste beizutreten:",
       "no-invite-code": "Wenn du keinen Einladungscode hast, setze deine E-Mail-Adresse auf unsere Warteliste.",
       "privacy": "Datenschutz ist uns wichtig."
     },
     "login": {
-      "intro": {
-        "new": [
-          "Neu hier?",
-          "{strong} Wir helfen bei der schnellen Einrichtung."
-        ],
-        "returning": [
-          "Du bist zurück?",
-          "{strong} Wir leiten dich zu deinem Benutzerkonto weiter."
-        ]
-      },
       "title": "Mach deinen Tag leichter – gibt deine E-Mail-Adresse ein:"
     },
     "signUp": {
