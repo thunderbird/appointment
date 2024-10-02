@@ -88,6 +88,7 @@ button:hover > .tooltip,
   text-decoration: underline;
   box-shadow: none;
   border: none !important;
+  min-width: 0;
 
   .text {
     padding: 0;
