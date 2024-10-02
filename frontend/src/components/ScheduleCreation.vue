@@ -113,6 +113,7 @@ const defaultSchedule: Schedule = {
 const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
 const referenceSchedule = ref({ ...defaultSchedule });
+const generateZoomLink = ref(scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom);
 
 onMounted(() => {
   // Retrieve the current external connections
@@ -138,6 +139,8 @@ onMounted(() => {
   } else {
     scheduleInput.value = { ...defaultSchedule };
   }
+
+  generateZoomLink.value = scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom;
 
   // Set a new reference
   referenceSchedule.value = { ...scheduleInput.value };
@@ -348,7 +351,7 @@ const toggleActive = async (newValue: boolean) => {
 
 // Work-around for v-model and value not working for some reason...
 const toggleZoomLinkCreation = () => {
-  if (scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.None) {
+  if (generateZoomLink.value) {
     scheduleInput.value.meeting_link_provider = MeetingLinkProviderType.Zoom;
     return;
   }
@@ -443,7 +446,7 @@ watch(
         {{ scheduleCreationError }}
       </alert-box>
 
-      <div class="px-4 mb-1">
+      <div class="mb-1 px-4">
         <label for="scheduleName" class="flex-column flex">
           <input
             id="scheduleName"
@@ -647,7 +650,7 @@ watch(
           <checkbox-input
             name="generateZoomLink"
             :label="t('label.generateZoomLink')"
-            :checked="scheduleInput.meeting_link_provider === MeetingLinkProviderType.Zoom"
+            v-model="generateZoomLink"
             :disabled="!scheduleInput.active || !hasZoomAccount"
             @change="toggleZoomLinkCreation"
           />
