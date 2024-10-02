@@ -26,7 +26,7 @@ from sqlalchemy.orm import Session
 
 from .. import utils
 from ..database.schemas import CalendarConnection
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, DATETIMEFMT
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -167,6 +167,11 @@ class GoogleConnector(BaseConnector):
             )
 
         return calendars
+
+    def get_busy_time(self, calendar_ids, start, end):
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
+        return self.google_client.get_free_busy(calendar_ids, time_min, time_max, self.google_token)
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
@@ -672,25 +677,25 @@ class Tools:
         """This helper retrieves all events existing in given calendars for the scheduled date range"""
         existing_events = []
 
+        google_calendars = []
+
+        now = datetime.now()
+
+        earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
+        farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
+
+        start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
+        end = (
+            min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking])
+            if schedule.end_date
+            else farthest_booking
+        )
+
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
-                external_connection = utils.list_first(
-                    repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-                )
-
-                if external_connection is None or external_connection.token is None:
-                    raise RemoteCalendarConnectionError()
-
-                con = GoogleConnector(
-                    db=db,
-                    redis_instance=redis,
-                    google_client=google_client,
-                    remote_calendar_id=calendar.user,
-                    calendar_id=calendar.id,
-                    subscriber_id=subscriber.id,
-                    google_tkn=external_connection.token,
-                )
+                google_calendars.append(calendar)
+                continue
             else:
                 con = CalDavConnector(
                     db=db,
@@ -702,23 +707,35 @@ class Tools:
                     calendar_id=calendar.id,
                 )
 
-            now = datetime.now()
-
-            earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
-            farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
-
-            start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
-            end = (
-                min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking])
-                if schedule.end_date
-                else farthest_booking
-            )
-
             try:
                 existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
             except requests.exceptions.ConnectionError:
                 # Connection error with remote caldav calendar, don't crash this route.
                 pass
+
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        con = GoogleConnector(
+            db=db,
+            redis_instance=redis,
+            google_client=google_client,
+            remote_calendar_id=google_calendars[0].user,
+            calendar_id=google_calendars[0].id,
+            subscriber_id=subscriber.id,
+            google_tkn=external_connection.token,
+        )
+        existing_events.extend([
+            schemas.Event(
+                start=datetime.strptime(busy.get('start'), DATETIMEFMT),
+                end=datetime.strptime(busy.get('end'), DATETIMEFMT),
+                title='Busy'
+            ) for busy in con.get_busy_time([calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT))
+        ])
 
         # handle already requested time slots
         for slot in schedule.slots:
