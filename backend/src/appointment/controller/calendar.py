@@ -141,6 +141,18 @@ class GoogleConnector(BaseConnector):
         if google_tkn:
             self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
 
+    def get_busy_time(self, calendar_ids: list, start: str, end: str):
+        """Retrieve a list of { start, end } dicts that will indicate busy time for a user
+        Note: This does not use the remote_calendar_id from the class,
+        all calendars must be available under the google_token provided to the class"""
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
+
+        results = []
+        for calendars in utils.chunk_list(calendar_ids, chunk_by=5):
+            results += self.google_client.get_free_busy(calendars, time_min, time_max, self.google_token)
+        return results
+
     def test_connection(self) -> bool:
         """This occurs during Google OAuth login"""
         return bool(self.google_token)
@@ -167,11 +179,6 @@ class GoogleConnector(BaseConnector):
             )
 
         return calendars
-
-    def get_busy_time(self, calendar_ids, start, end):
-        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
-        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
-        return self.google_client.get_free_busy(calendar_ids, time_min, time_max, self.google_token)
 
     def list_events(self, start, end):
         """find all events in given date range on the remote server"""
@@ -301,6 +308,22 @@ class CalDavConnector(BaseConnector):
 
         # connect to the CalDAV server
         self.client = DAVClient(url=self.url, username=self.user, password=self.password)
+
+    def get_busy_time(self, calendar_ids: list, start: str, end: str):
+        """Retrieve a list of { start, end } dicts that will indicate busy time for a user
+        Note: This does not use the remote_calendar_id from the class"""
+        time_min = datetime.strptime(start, DATEFMT)
+        time_max = datetime.strptime(end, DATEFMT)
+
+        results = []
+        calendar = self.client.calendar(url=self.url)
+        results = calendar.freebusy_request(time_min, time_max)
+        print(results)
+        return results
+        #for calendars in utils.chunk_list(calendar_ids, chunk_by=5):
+        #    results += self.client.calen
+        #    results += self.client.get_free_busy(calendars, time_min, time_max, self.google_token)
+        #return results
 
     def test_connection(self) -> bool:
         """Ensure the connection information is correct and the calendar connection works"""
