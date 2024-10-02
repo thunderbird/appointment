@@ -34,7 +34,7 @@ const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
-const lang = localStorage?.getItem('locale') ?? navigator.language;
+const lang = localStorage?.getItem('locale') ?? navigator.language.split('-')[0];
 
 const siteNotificationStore = useSiteNotificationStore();
 const {
@@ -51,7 +51,9 @@ const {
 } = siteNotificationStore;
 
 // Handle input filters
-const languageList = lang === 'en' ? ['en'] : [lang, 'en']
+// The library will error if we supply it with an unsupported language
+const supportedLanguages = ['en', 'de'];
+const languageList = supportedLanguages.indexOf(lang) !== -1 && lang !== 'en' ? [lang, 'en'] : ['en'];
 const profanity = new Profanity({ languages: languageList });
 const hasProfanity = (input: string) => profanity.exists(input);
 provide(hasProfanityKey, hasProfanity);

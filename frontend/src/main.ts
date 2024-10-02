@@ -72,7 +72,7 @@ const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide(apiUrlKey, apiUrl);
 app.provide(bookingUrlKey, `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
 
-const loc = localStorage?.getItem('locale') ?? navigator.language;
+const loc = localStorage?.getItem('locale') ?? navigator.language.split('-')[0];
 app.use(i18ninstance);
 useDayJS(app, loc);
 
