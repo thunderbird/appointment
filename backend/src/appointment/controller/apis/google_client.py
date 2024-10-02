@@ -1,5 +1,7 @@
 import logging
+import os
 
+import sentry_sdk
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -104,9 +106,7 @@ class GoogleClient:
 
         import time
 
-        t1 = time.perf_counter(), time.process_time()
-
-        print(calendar_ids)
+        perf_start = time.perf_counter_ns()
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             print([{'id': calendar_id} for calendar_id in calendar_ids])
             request = service.freebusy().query(
@@ -116,7 +116,6 @@ class GoogleClient:
             while request is not None:
                 try:
                     response = request.execute()
-                    print('>', response)
 
                     calendar_items = [calendar.get('busy', []) for calendar in response.get('calendars', {}).values()]
                     for busy in calendar_items:
@@ -127,10 +126,12 @@ class GoogleClient:
                     print(e)
 
                 request = service.calendarList().list_next(request, response)
-        t2 = time.perf_counter(), time.process_time()
-        print(f" Real time: {t2[0] - t1[0]:.2f} seconds")
-        print(f" CPU time: {t2[1] - t1[1]:.2f} seconds")
-        print("!", items)
+        perf_end = time.perf_counter_ns()
+
+        # Capture the metric if sentry is enabled
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.set_measurement('google_free_busy_time_response', perf_end - perf_start, 'nanosecond')
+
         return items
 
     def list_events(self, calendar_id, time_min, time_max, token):
