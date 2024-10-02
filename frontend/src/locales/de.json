@@ -329,7 +329,7 @@
     "confirm": {
       "intro": [
         "Bitte bestätige die Registrierung um der Warteliste beizutreten.",
-        "Check dein Postfach, du erhälst in Kürze weitere Informationen."
+        "Check dein Postfach, du erhältst in Kürze weitere Informationen."
       ],
       "title": "Vervollständige die Registrierung"
     },
@@ -340,10 +340,13 @@
       "privacy": "Datenschutz ist uns wichtig."
     },
     "login": {
-      "title": "Mach deinen Tag leichter – gibt deine E-Mail-Adresse ein:"
+      "title": "Log dich ein oder erstelle ein Benutzerkonto"
     },
     "signUp": {
       "title": "Du hast einen Einladungscode? Gib ihn hier ein"
+    },
+    "waitingListSignUp": {
+      "title": "Gib deine E-Mail-Adresse ein um der Warteliste beizutreten"
     }
   },
   "navBar": {
