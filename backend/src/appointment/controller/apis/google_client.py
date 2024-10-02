@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime
 
 import sentry_sdk
 from google_auth_oauthlib.flow import Flow
@@ -8,6 +9,7 @@ from googleapiclient.errors import HttpError
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
+from ...defines import DATETIMEFMT
 from ...exceptions.calendar import EventNotCreatedException
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
@@ -108,7 +110,6 @@ class GoogleClient:
 
         perf_start = time.perf_counter_ns()
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
-            print([{'id': calendar_id} for calendar_id in calendar_ids])
             request = service.freebusy().query(
                 body=dict(timeMin=time_min, timeMax=time_max, items=[{'id': calendar_id} for calendar_id in calendar_ids])
             )
@@ -119,11 +120,15 @@ class GoogleClient:
 
                     calendar_items = [calendar.get('busy', []) for calendar in response.get('calendars', {}).values()]
                     for busy in calendar_items:
-                        items += busy
+                        # Transform to datetimes to match caldav's behaviour
+                        items += [
+                            {
+                                'start': datetime.strptime(entry.get('start'), DATETIMEFMT),
+                                'end': datetime.strptime(entry.get('end'), DATETIMEFMT)
+                            } for entry in busy
+                        ]
                 except HttpError as e:
                     logging.warning(f'[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}')
-                except TypeError as e:
-                    print(e)
 
                 request = service.calendarList().list_next(request, response)
         perf_end = time.perf_counter_ns()
