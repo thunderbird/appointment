@@ -780,8 +780,8 @@ class Tools:
             )
             existing_events.extend([
                 schemas.Event(
-                    start=datetime.strptime(busy.get('start'), DATETIMEFMT),
-                    end=datetime.strptime(busy.get('end'), DATETIMEFMT),
+                    start=busy.get('start'),
+                    end=busy.get('end'),
                     title='Busy'
                 ) for busy in con.get_busy_time([calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT))
             ])
