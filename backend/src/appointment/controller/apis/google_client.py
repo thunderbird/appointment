@@ -96,6 +96,43 @@ class GoogleClient:
 
         return items
 
+    def get_free_busy(self, calendar_ids, time_min, time_max, token):
+        """Query the free busy api, we only support 1 calendar id right now
+        Ref: https://developers.google.com/calendar/api/v3/reference/freebusy/query"""
+        response = {}
+        items = []
+
+        import time
+
+        t1 = time.perf_counter(), time.process_time()
+
+        print(calendar_ids)
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            print([{'id': calendar_id} for calendar_id in calendar_ids])
+            request = service.freebusy().query(
+                body=dict(timeMin=time_min, timeMax=time_max, items=[{'id': calendar_id} for calendar_id in calendar_ids])
+            )
+
+            while request is not None:
+                try:
+                    response = request.execute()
+                    print('>', response)
+
+                    calendar_items = [calendar.get('busy', []) for calendar in response.get('calendars', {}).values()]
+                    for busy in calendar_items:
+                        items += busy
+                except HttpError as e:
+                    logging.warning(f'[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}')
+                except TypeError as e:
+                    print(e)
+
+                request = service.calendarList().list_next(request, response)
+        t2 = time.perf_counter(), time.process_time()
+        print(f" Real time: {t2[0] - t1[0]:.2f} seconds")
+        print(f" CPU time: {t2[1] - t1[1]:.2f} seconds")
+        print("!", items)
+        return items
+
     def list_events(self, calendar_id, time_min, time_max, token):
         response = {}
         items = []
