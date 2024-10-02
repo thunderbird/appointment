@@ -334,16 +334,18 @@
       "title": "Complete your sign up"
     },
     "form": {
-      "email": "Enter your email to sign in or create an account:",
-      "email-waiting-list": "Enter your email to join the waiting list:",
+      "email": "Email address",
       "no-invite-code": "If you don't have an invite code, add your email to our waiting list.",
       "privacy": "Your privacy is important to us."
     },
     "login": {
-      "title": "Simplify your day – just enter your email:"
+      "title": "Sign in or create an account"
     },
     "signUp": {
       "title": "Have an invite code? Enter it here"
+    },
+    "waitingListSignUp": {
+      "title": "Enter your email to join the waiting list"
     }
   },
   "navBar": {

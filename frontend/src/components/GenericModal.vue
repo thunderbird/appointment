@@ -5,6 +5,7 @@ import {
 import { refreshKey } from '@/keys';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import { useI18n } from 'vue-i18n';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 const { t } = useI18n();
 
@@ -40,10 +41,11 @@ onUnmounted(() => {
 
 <template>
   <div class="new-design overlay" role="dialog" tabindex="-1" aria-labelledby="title" aria-modal="true">
+    <div class="dismiss-zone" @click="emits('close')"></div>
     <div class="modal">
-        <div class="modal-close" v-if="closable" @click="emits('close')" role="button" aria-labelledby="modal-close-button">
+        <link-button class="modal-close" v-if="closable" @click="emits('close')" aria-labelledby="modal-close-button">
           <img id="modal-close-button" src="@/assets/svg/icons/close.svg" :alt="t('label.close')" :title="t('label.close')"/>
-        </div>
+        </link-button>
         <div class="modal-header">
           <slot name="header"></slot>
           <notice-bar type="error" v-if="errorMessage">
@@ -88,6 +90,12 @@ onUnmounted(() => {
   justify-content: center;
 }
 
+.dismiss-zone {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
 .modal-close {
   position: absolute;
   right: 1rem;
@@ -96,7 +104,7 @@ onUnmounted(() => {
 }
 
 /* Filter it for dark-mode B^) */
-.dark .modal-close {
+.dark .modal-close > :deep(.text) {
   filter: invert(0.75)
 }
 

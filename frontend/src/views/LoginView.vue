@@ -213,7 +213,10 @@ const onEnter = () => {
     <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})">
       <template v-slot:header>
         <word-mark/>
-        <h2 id="title" v-if="loginStep === LoginSteps.Login || hideInviteField">
+        <h2 id="title" v-if="hideInviteField">
+          {{ t('login.waitingListSignUp.title') }}
+        </h2>
+        <h2 id="title" v-else-if="loginStep === LoginSteps.Login">
           {{ t('login.login.title') }}
         </h2>
         <h2 id="title" v-else-if="loginStep === LoginSteps.SignUp">
@@ -229,7 +232,7 @@ const onEnter = () => {
       </div>
       <div class="form-body">
         <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
-          <text-input name="email" v-model="email" :required="true" :help="loginStep === LoginSteps.Login || hideInviteField ? t('login.form.privacy') : null">{{ hideInviteField ? t('login.form.email-waiting-list') : t('login.form.email') }}</text-input>
+          <text-input name="email" v-model="email" :required="true">{{ t('login.form.email') }}</text-input>
           <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true">{{ t('label.password') }}</text-input>
           <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
         </form>
