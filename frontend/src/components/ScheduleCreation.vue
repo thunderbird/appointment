@@ -795,7 +795,7 @@ watch(
         @click="revertForm()"
         :disabled="!scheduleInput.active"
       >
-        {{ t('label.clearForm') }}
+        {{ t('label.revertChanges') }}
       </link-button>
     </snackish-bar>
     <div v-else>
