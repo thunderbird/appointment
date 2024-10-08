@@ -99,6 +99,19 @@ class TestPassword:
 
         email2 = 'george@example.org'
 
+        # Disable first time registering
+        os.environ['APP_ALLOW_FIRST_TIME_REGISTER'] = ''
+
+        # Fails with improper env set
+        response = with_client.post(
+            '/token',
+            data={'username': email2, 'password': password},
+        )
+        assert response.status_code == 403, response.text
+
+        # Enable first time registering
+        os.environ['APP_ALLOW_FIRST_TIME_REGISTER'] = 'True'
+
         # Test non-user credentials
         response = with_client.post(
             '/token',

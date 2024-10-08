@@ -292,7 +292,7 @@ def token(
 
     has_subscribers = db.query(Subscriber).count()
 
-    if has_subscribers == 0:
+    if os.getenv('APP_ALLOW_FIRST_TIME_REGISTER') == 'True' and has_subscribers == 0:
         # Create an initial subscriber based with the UTC timezone, the FTUE will give them a change to adjust this
         create_subscriber(db, form_data.username, form_data.password, 'UTC')
 
