@@ -87,6 +87,35 @@ class TestPassword:
         )
         assert response.status_code == 403, response.text
 
+    def test_token_creates_user(self, with_db, with_client):
+        with with_db() as db:
+            # Remove all subscribers
+            for sub in db.query(models.Subscriber).all():
+                db.delete(sub)
+            db.commit()
+
+        email = 'greg@example.com'
+        password = 'test'
+
+        email2 = 'george@example.org'
+
+        # Test non-user credentials
+        response = with_client.post(
+            '/token',
+            data={'username': email, 'password': password},
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data['access_token']
+        assert data['token_type'] == 'bearer'
+
+        # Test second non-user credentials
+        response = with_client.post(
+            '/token',
+            data={'username': email2, 'password': password},
+        )
+        assert response.status_code == 403, response.text
+
 
 class TestFXA:
     def test_fxa_login(self, with_client):
