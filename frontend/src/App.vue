@@ -156,6 +156,7 @@ const onPageLoad = async () => {
    * Metric collection for development purposes.
    * This data will be used to help guide development, design, and user experience decisions.
    */
+  /*
   const parser = new UAParser(navigator.userAgent);
   const browser = parser.getBrowser();
   const os = parser.getOS();
@@ -179,6 +180,7 @@ const onPageLoad = async () => {
 
   const { data } = response;
   return data.value?.id ?? false;
+   */
 };
 
 // provide refresh functions for components
@@ -270,13 +272,9 @@ onMounted(async () => {
       service: 'apmt',
     });
 
-    const id = await onPageLoad();
-
     if (isAuthenticated.value) {
       const profile = useUserStore();
       posthog.identify(profile.data.uniqueHash);
-    } else if (id) {
-      posthog.identify(id);
     }
   }
 });
