@@ -287,6 +287,7 @@ class Schedule(Base):
     weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
     booking_confirmation: bool = Column(Boolean, index=True, nullable=False, default=True)
+    timezone: str = Column(encrypted_type(String), index=True, nullable=True)  # Not used right now but will be in the future
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(

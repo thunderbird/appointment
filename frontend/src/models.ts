@@ -303,7 +303,7 @@ export type FormExceptionDetail = {
   status: number
 }
 export type PydanticException = {
-  detail?: FormExceptionDetail|PydanticExceptionDetail[];
+  detail?: string|FormExceptionDetail|PydanticExceptionDetail[];
 }
 export type Exception = {
   status_code?: number;

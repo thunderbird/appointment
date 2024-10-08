@@ -45,6 +45,10 @@ Check out the project's respective readmes:
 
 This project uses [Fluent](https://projectfluent.org/) for localization. Files are located in their respective `l10n/<locale>/*.ftl`.
 
+### Self-hosting
+
+More information is coming soon! If you're adventurous follow the setup steps in each project. Once the project is running the first login will create a new user, any login attempts with new emails after that will check against existing credentials.
+
 ### Deployment
 
 When changes are merged to main, a new [release](https://github.com/thunderbird/appointment/releases/) is cut, and the changes are deployed to [stage.appointment.day](https://stage.appointment.day/).

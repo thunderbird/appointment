@@ -8,6 +8,10 @@ This is the backend component of Thunderbird Appointment written in Python using
 
 More information will be provided in the future. There is currently a docker file provided which we use to deploy to AWS' ECS which should help you get started.
 
+In order to create a user with password authentication mode, you will need to set `APP_ALLOW_FIRST_TIME_REGISTER=True` in your `.env`.
+
+After the first login you'll want to fill the `APP_ADMIN_ALLOW_LIST` env variable with your account's email to access the basic admin panel located at `/admin/subscribers`. 
+
 ### Configuration
 
 The backend project uses dotenv files to inject environment variables into the application. A starting template can be found as [.env.example](.env.example). Copy that as your `.env` to get started.
