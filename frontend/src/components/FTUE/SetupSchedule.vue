@@ -98,6 +98,7 @@ const onSubmit = async () => {
     farthest_booking: 20160,
     start_date: dj().format(DateFormatStrings.QalendarFullDay),
     details: schedule.value?.details ?? '',
+    timezone: user.data.timezone,
   };
 
   const data = schedules.value.length > 0

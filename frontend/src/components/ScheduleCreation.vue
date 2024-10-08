@@ -278,7 +278,7 @@ const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
   savingInProgress.value = true;
   // build data object for post request
-  const obj = { ...scheduleInput.value };
+  const obj = { ...scheduleInput.value, timezone: user.data.timezone };
   // convert local input times to utc times
 
   obj.start_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.start_time}:00`)
