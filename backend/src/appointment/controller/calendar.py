@@ -315,8 +315,14 @@ class CalDavConnector(BaseConnector):
         time_min = datetime.strptime(start, DATEFMT)
         time_max = datetime.strptime(end, DATEFMT)
 
+        perf_start = time.perf_counter_ns()
+
         calendar = self.client.calendar(url=calendar_ids[0])
         response = calendar.freebusy_request(time_min, time_max)
+
+        perf_end = time.perf_counter_ns()
+        print(f"CALDAV FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds")
+
 
         items = []
 
