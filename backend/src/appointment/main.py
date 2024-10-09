@@ -121,6 +121,7 @@ def server():
     from .routes import api
     from .routes import auth
     from .routes import account
+    from .routes import caldav
     from .routes import google
     from .routes import schedule
     from .routes import invite
@@ -217,6 +218,7 @@ def server():
     app.include_router(api.router)
     app.include_router(auth.router)  # Special case!
     app.include_router(account.router, prefix='/account')
+    app.include_router(caldav.router, prefix='/caldav')
     app.include_router(google.router, prefix='/google')
     app.include_router(schedule.router, prefix='/schedule')
     app.include_router(invite.router, prefix='/invite')

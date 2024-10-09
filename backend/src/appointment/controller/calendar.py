@@ -8,10 +8,13 @@ import logging
 import time
 import zoneinfo
 import os
+from socket import getaddrinfo
+from urllib.parse import urlparse, urljoin
 
 import caldav.lib.error
 import requests
 import sentry_sdk
+from dns.exception import DNSException
 from redis import Redis, RedisCluster
 from caldav import DAVClient
 from fastapi import BackgroundTasks
@@ -19,7 +22,10 @@ from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
 
+from sqlalchemy.orm import Session
+
 from .. import utils
+from ..database.schemas import CalendarConnection
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
@@ -279,28 +285,36 @@ class GoogleConnector(BaseConnector):
 
 
 class CalDavConnector(BaseConnector):
-    def __init__(self, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str):
+    def __init__(self, db: Session, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
+        self.db = db
         self.provider = CalendarProvider.caldav
-        self.url = url if url[-1] == '/' else url + '/'
+        self.url = Tools.fix_caldav_urls(url)
         self.password = password
         self.user = user
 
         # connect to the CalDAV server
-        self.client = DAVClient(url=url, username=user, password=password)
+        self.client = DAVClient(url=self.url, username=self.user, password=self.password)
 
     def test_connection(self) -> bool:
         """Ensure the connection information is correct and the calendar connection works"""
 
+        supports_vevent = False
+
         try:
-            cal = self.client.calendar(url=self.url)
-            supported_comps = cal.get_supported_components()
+            cals = self.client.principal()
+            for cal in cals.calendars():
+                supported_comps = cal.get_supported_components()
+                supports_vevent = 'VEVENT' in supported_comps
+                if not supports_vevent:
+                    break
         except IndexError as ex:  # Library has an issue with top level urls, probably due to caldav spec?
-            logging.error(f'Error testing connection {ex}')
+            logging.error(f'IE: Error testing connection {ex}')
             return False
         except KeyError as ex:
-            logging.error(f'Error testing connection {ex}')
+            print(ex)
+            logging.error(f'KE: Error testing connection {ex}')
             return False
         except requests.exceptions.RequestException:  # Max retries exceeded, bad connection, missing schema, etc...
             return False
@@ -308,11 +322,36 @@ class CalDavConnector(BaseConnector):
             return False
 
         # They need at least VEVENT support for appointment to work.
-        return 'VEVENT' in supported_comps
+        return supports_vevent
 
     def sync_calendars(self):
-        # We don't sync anything for caldav, but might as well bust event cache.
-        self.bust_cached_events(all_calendars=True)
+        error_occurred = False
+
+        principal = self.client.principal()
+        for cal in principal.calendars():
+            calendar = schemas.CalendarConnection(
+                title=cal.name,
+                url=str(cal.url),
+                user=self.user,
+                password='',
+                provider=CalendarProvider.caldav
+            )
+
+            # add calendar
+            try:
+                repo.calendar.update_or_create(
+                    db=self.db, calendar=calendar, calendar_url=calendar.url, subscriber_id=self.subscriber_id
+                )
+            except Exception as err:
+                logging.warning(
+                    f'[calendar.sync_calendars] Error occurred while creating calendar. Error: {str(err)}'
+                )
+                error_occurred = True
+
+        if not error_occurred:
+            self.bust_cached_events(all_calendars=True)
+
+        return error_occurred
 
     def list_calendars(self):
         """find all calendars on the remote server"""
@@ -647,6 +686,7 @@ class Tools:
                 )
             else:
                 con = CalDavConnector(
+                    db=db,
                     redis_instance=redis,
                     url=calendar.url,
                     user=calendar.user,
@@ -684,3 +724,61 @@ class Tools:
             )
 
         return existing_events
+
+    @staticmethod
+    def dns_caldav_lookup(url):
+        import dns.resolver
+
+        # Check if they have a caldav subdomain, on error just return none
+        try:
+            records = dns.resolver.resolve(f'_caldavs._tcp.{url}', 'SRV')
+        except DNSException:
+            return None
+
+        # Grab the first item or None
+        caldav_host = None
+        # ttl = records.rrset.ttl or 300
+        if len(records) > 0:
+            caldav_host = str(records[0].target)[:-1]
+
+        # We should only be pulling the secure link
+        if '://' not in caldav_host:
+            caldav_host = f'https://{caldav_host}'
+
+        return caldav_host
+
+    @staticmethod
+    def fix_caldav_urls(url: str) -> str:
+        """Fix up some common url issues with some caldav providers"""
+
+        parsed_url = urlparse(url)
+
+        # Do they have a well-known?
+        if parsed_url.path == '':
+            response = requests.get(urljoin(url, '/.well-known/caldav'), allow_redirects=False)
+            if response.is_redirect:
+                redirect = response.headers.get('Location')
+                if redirect:
+                    # Fastmail really needs that ending slash
+                    return redirect if redirect.endswith('/') else redirect + '/'
+
+        # Handle any fastmail issues
+        if 'fastmail.com' in parsed_url.hostname:
+            if not parsed_url.path.startswith('/dav'):
+                url = f'{url}/dav/'
+
+            # Url needs to end with slash
+            if not url.endswith('/'):
+                url += '/'
+
+        # Google is weird
+        elif ('api.googlecontent.com' in parsed_url.hostname
+              or 'apidata.googleusercontent.com' in parsed_url.hostname):
+            if len(parsed_url.path) == 0:
+                url += '/caldav/v2/'
+        elif 'calendar.google.com' in parsed_url.hostname or '':
+            # Use the caldav url instead
+            url = 'https://api.googlecontent.com/caldav/v2/'
+
+        print("Caldav -> ", url)
+        return url
