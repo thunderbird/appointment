@@ -54,6 +54,8 @@
       "connectVideo": "Connect your video meeting link",
       "error": "Uh-oh!",
       "finish": "You are ready to start booking",
+      "calendarProvider": "Select your calendar provider",
+      "caldav": "Setup your calendar connection",
       "googlePermissions": "Allow Google Calendar permissions",
       "setupProfile": "Create your profile",
       "setupSchedule": "Set up your appointment availability"

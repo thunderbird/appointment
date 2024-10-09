@@ -1,8 +1,10 @@
 import datetime
+import json
 import logging
 import os
 import secrets
 import uuid
+from urllib.parse import urlparse
 
 import requests.exceptions
 import sentry_sdk
@@ -172,6 +174,7 @@ def create_my_calendar(
         )
     else:
         con = CalDavConnector(
+            db=db,
             redis_instance=None,
             url=calendar.url,
             user=calendar.user,
@@ -294,6 +297,7 @@ def read_remote_calendars(
         )
     else:
         con = CalDavConnector(
+            db=None,
             redis_instance=None,
             url=connection.url,
             user=connection.user,
@@ -319,27 +323,43 @@ def sync_remote_calendars(
 ):
     """endpoint to sync calendars from a remote server"""
     # Create a list of connections and loop through them with sync
-    # TODO: Also handle CalDAV connections
-
-    external_connection = utils.list_first(
+    google_ec = utils.list_first(
         repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
     )
+    caldav_ecs = repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.caldav)
 
-    if external_connection is None or external_connection.token is None:
+    # Filter out any nulls
+    ecs = list(filter(lambda ec: ec, [
+        google_ec,
+        *caldav_ecs
+    ]))
+
+    if len(ecs) == 0:
         raise RemoteCalendarConnectionError()
 
-    connections = [
-        GoogleConnector(
-            db=db,
-            redis_instance=redis,
-            google_client=google_client,
-            remote_calendar_id=None,
-            calendar_id=None,
-            subscriber_id=subscriber.id,
-            google_tkn=external_connection.token,
-        ),
-    ]
-    for connection in connections:
+    for ec in ecs:
+        if ec.type == schemas.ExternalConnectionType.google:
+            connection = GoogleConnector(
+                db=db,
+                redis_instance=redis,
+                google_client=google_client,
+                remote_calendar_id=None,
+                calendar_id=None,
+                subscriber_id=subscriber.id,
+                google_tkn=ec.token,
+            )
+        else:
+            url, username = json.loads(ec.type_id)
+            connection = CalDavConnector(
+                db=db,
+                subscriber_id=subscriber.id,
+                redis_instance=redis,
+                url=url,
+                user=username,
+                password=ec.token,
+                calendar_id=None,
+            )
+
         error_occurred = connection.sync_calendars()
         # And then redirect back to frontend
         if error_occurred:
@@ -382,6 +402,7 @@ def read_remote_events(
         )
     else:
         con = CalDavConnector(
+            db=db,
             redis_instance=redis_instance,
             url=db_calendar.url,
             user=db_calendar.user,
@@ -464,3 +485,5 @@ def terms():
     with open(f'{os.path.dirname(__file__)}/../templates/legal/en/terms.jinja2') as fh:
         contents = fh.read()
     return HTMLResponse(contents)
+
+

@@ -273,6 +273,7 @@ def request_schedule_availability_slot(
         )
     else:
         con = CalDavConnector(
+            db=db,
             redis_instance=redis,
             subscriber_id=subscriber.id,
             calendar_id=calendar.id,
@@ -556,6 +557,7 @@ def handle_schedule_availability_decision(
         )
     else:
         con = CalDavConnector(
+            db=db,
             redis_instance=redis,
             subscriber_id=subscriber.id,
             calendar_id=calendar.id,

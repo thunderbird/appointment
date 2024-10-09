@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { FtueStep } from '@/definitions';
 import { refreshKey } from '@/keys';
 import WordMark from '@/elements/WordMark.vue';
-import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
+import GooglePermissions from '@/components/FTUE/CalendarProvider.vue';
 import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
