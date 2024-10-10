@@ -11,6 +11,7 @@ import { storeToRefs } from 'pinia';
 import { IconArrowRight } from '@tabler/icons-vue';
 import GoogleOauthProvider from '@/components/FTUE/GoogleOauthProvider.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 
 const ftueStore = useFTUEStore();
 const {
@@ -19,45 +20,51 @@ const {
 const { previousStep, nextStep } = ftueStore;
 const { t } = useI18n();
 const call = inject(callKey);
-const isLoading = ref(false);
 const provider = ref('google');
+
+const onNext = async () => {
+  await nextStep(call);
+};
+
+const onPrevious = () => {
+  previousStep();
+};
+
+const onSwitch = () => {
+  if (provider.value === 'google') {
+    provider.value = 'caldav';
+  } else {
+    provider.value = 'google';
+  }
+};
+
+const onError = (err: string) => {
+  errorMessage.value = err;
+};
 
 </script>
 
 <template>
   <div class="content">
-    <div>
-      <ul class="provider-selector">
-        <li @click="provider = 'google'">Google Calendar</li>
-        <li @click="provider = 'caldav'">CalDav</li>
-      </ul>
-    </div>
     <div class="provider-view">
-      <google-oauth-provider v-if="provider === 'google'"></google-oauth-provider>
-      <cal-dav-provider v-else-if="provider === 'caldav'"></cal-dav-provider>
+      <google-oauth-provider @next="onNext" @previous="onPrevious" @switch="onSwitch" :showPrevious="true" :showSwitch="true" v-if="provider === 'google'"></google-oauth-provider>
+      <cal-dav-provider @next="onNext" @previous="onPrevious" @switch="onSwitch" @error="onError" :showPrevious="true" :showSwitch="true" v-else-if="provider === 'caldav'"></cal-dav-provider>
     </div>
   </div>
 </template>
 
 <style scoped>
-  .content {
-    width: 100%;
-    display: flex;
-    gap: 2rem;
-  }
-  .provider-selector {
-    width: 4rem;
+@import '@/assets/styles/custom-media.pcss';
+@import '@/assets/styles/mixins.pcss';
 
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+.content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-    /* temp */
-    li {
-      cursor: pointer;
-    }
-  }
-  .provider-view {
-    width: 100%;
-  }
+.provider-view {
+  width: 100%;
+}
 </style>

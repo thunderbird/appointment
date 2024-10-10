@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  ref, inject, onMounted,
-} from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -17,6 +15,8 @@ import SecondaryButton from '@/elements/SecondaryButton.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useCalendarStore } from '@/stores/calendar-store';
+import GenericModal from '@/components/GenericModal.vue';
+import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -31,19 +31,27 @@ const providers = enumToObject(ExternalConnectionProviders);
 
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 
+const connectCalDavModalOpen = ref(false);
+const disconnectCalDavModalOpen = ref(false);
 const disconnectZoomModalOpen = ref(false);
 const disconnectGoogleModalOpen = ref(false);
+const disconnectTypeId = ref(null);
+
+const calDavErrorMessage = ref();
 
 const closeModals = () => {
+  connectCalDavModalOpen.value = false;
   disconnectZoomModalOpen.value = false;
   disconnectGoogleModalOpen.value = false;
+  disconnectCalDavModalOpen.value = false;
+  disconnectTypeId.value = null;
 };
 
 const refreshData = async () => {
   // Need to reset calendar store first!
   calendarStore.$reset();
   await Promise.all([
-    externalConnectionsStore.fetch(call),
+    externalConnectionsStore.fetch(call, true),
     calendarStore.fetch(call),
     // Need to update userStore in case they used an attached email
     userStore.profile(call),
@@ -54,20 +62,33 @@ onMounted(async () => {
   await refreshData();
 });
 
-const displayModal = async (provider: ExternalConnectionProviders) => {
+const displayModal = async (provider: ExternalConnectionProviders, typeId: string|null = null) => {
+  disconnectTypeId.value = typeId;
+
   if (provider === ExternalConnectionProviders.Zoom) {
     disconnectZoomModalOpen.value = true;
   } else if (provider === ExternalConnectionProviders.Google) {
     disconnectGoogleModalOpen.value = true;
+  } else if (provider === ExternalConnectionProviders.Caldav) {
+    disconnectCalDavModalOpen.value = true;
   }
 };
 
 const connectAccount = async (provider: ExternalConnectionProviders) => {
+  if (provider === ExternalConnectionProviders.Caldav) {
+    connectCalDavModalOpen.value = true;
+    return;
+  }
   await externalConnectionsStore.connect(call, provider, router);
 };
 
-const disconnectAccount = async (provider: ExternalConnectionProviders) => {
-  await externalConnectionsStore.disconnect(call, provider);
+const connectCalDAV = async () => {
+  await refreshData();
+  closeModals();
+};
+
+const disconnectAccount = async (provider: ExternalConnectionProviders, typeId: string|null = null) => {
+  await externalConnectionsStore.disconnect(call, provider, typeId);
   resetConnections();
   await refreshData();
   closeModals();
@@ -119,7 +140,7 @@ const editProfile = async () => {
           v-if="connection[0]"
           :label="t('label.disconnect')"
           class="btn-disconnect"
-          @click="() => displayModal(providers[provider])"
+          @click="() => displayModal(providers[provider], connection[0].type_id)"
           :title="t('label.disconnect')"
         />
         </div>
@@ -145,6 +166,17 @@ const editProfile = async () => {
       @confirm="() => disconnectAccount(ExternalConnectionProviders.Google)"
       @close="closeModals"
   ></confirmation-modal>
+  <!-- Disconnect CalDav Modal -->
+  <confirmation-modal
+      :open="disconnectCalDavModalOpen"
+      :title="t('text.settings.connectedAccounts.disconnect.caldav.title')"
+      :message="t('text.settings.connectedAccounts.disconnect.caldav.message')"
+      :confirm-label="t('text.settings.connectedAccounts.disconnect.caldav.confirm')"
+      :cancel-label="t('text.settings.connectedAccounts.disconnect.caldav.cancel')"
+      :use-caution-button="true"
+      @confirm="() => disconnectAccount(ExternalConnectionProviders.Caldav, disconnectTypeId)"
+      @close="closeModals"
+  ></confirmation-modal>
   <!-- Disconnect Zoom Modal -->
   <confirmation-modal
       :open="disconnectZoomModalOpen"
@@ -156,4 +188,22 @@ const editProfile = async () => {
       @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom)"
       @close="closeModals"
   ></confirmation-modal>
+  <!-- Bit of a hack until we figure out this ux flow -->
+  <generic-modal v-if="connectCalDavModalOpen" @close="closeModals()" :error-message="calDavErrorMessage">
+    <template v-slot:header>
+      <h2 class="modal-title">
+        {{ t('heading.settings.connectedAccounts.caldav') }}
+      </h2>
+    </template>
+    <cal-dav-provider @next="connectCalDAV()" @error="(err) => calDavErrorMessage = err"></cal-dav-provider>
+  </generic-modal>
 </template>
+<style scoped>
+.modal-title {
+  color: var(--colour-ti-base);
+  font-family: 'Inter', 'sans-serif';
+  font-weight: 400;
+  font-size: 1.375rem;
+  line-height: 1.664rem;
+}
+</style>

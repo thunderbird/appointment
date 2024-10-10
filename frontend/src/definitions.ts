@@ -112,7 +112,6 @@ export enum BookingsViewTypes {
   Grid = 2,
 }
 
-
 /**
  * Type for event location.
  * Corresponds to models.LocationType
@@ -164,6 +163,7 @@ export enum ExternalConnectionProviders {
   Fxa = 1,
   Google = 2,
   Zoom = 3,
+  Caldav = 4,
 }
 
 /**
@@ -193,7 +193,7 @@ export enum AlertSchemes {
   Warning = 2, // Alert indicates something important
   Success = 3, // Alert indicates something's gone right
   Info = 4, // Alert indicates some neutral information
-};
+}
 
 /**
  * Used as the session storage key for the location the user wanted to go to before logging in.
@@ -226,13 +226,12 @@ export enum TableDataButtonType {
  */
 export enum FtueStep {
   SetupProfile = 10,
-  // Right now we only support Google calendars during ftue
-  GooglePermissions = 20,
+  CalendarProvider = 20,
   ConnectCalendars = 30,
   SetupSchedule = 40,
   ConnectVideoConferencing = 50,
   Finish = 100,
-};
+}
 
 export enum TooltipPosition {
   None = 'pos-none',
@@ -240,7 +239,7 @@ export enum TooltipPosition {
   Bottom = 'pos-bottom',
   Left = 'pos-left',
   Right = 'pos-right',
-};
+}
 
 /**
  * This should match the enum in routes/waiting_list.py
@@ -248,7 +247,7 @@ export enum TooltipPosition {
 export enum WaitingListAction {
   Confirm = 1,
   Leave = 2,
-};
+}
 
 export enum MetricEvents {
   PageLoaded = 'apmt.page.loaded',

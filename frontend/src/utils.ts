@@ -1,17 +1,20 @@
 // get the first key of given object that points to given value
 import { ColorSchemes } from '@/definitions';
-import { CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent } from './models';
+import { Ref } from 'vue';
+import {
+  CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent, PydanticException,
+} from './models';
 
 /**
 * Lowercases the first character of a string
 */
-export const lcFirst = (s: string): string => {  
-  if (typeof s !== 'string' || !s) { 
+export const lcFirst = (s: string): string => {
+  if (typeof s !== 'string' || !s) {
     return '';
   }
- 
-  return s[0].toLowerCase() + s.slice(1)
-}
+
+  return s[0].toLowerCase() + s.slice(1);
+};
 
 // Convert a numeric enum to an object for key-value iteration
 export const enumToObject = (e: Object): { [key in string]: number } => {
@@ -24,10 +27,10 @@ export const enumToObject = (e: Object): { [key in string]: number } => {
 export const keyByValue = (o: Object, v: number|string, isEnum = false): number|string => {
   const e = isEnum ? enumToObject(o) : o;
   return Object.keys(e).find((k) => e[k] === v);
-}
+};
 
 // create event color for border and background, inherited from calendar color attribute
-export const eventColor = (event: CustomEventData, placeholder: Boolean): Coloring => {
+export const eventColor = (event: CustomEventData, placeholder: boolean): Coloring => {
   const color = {
     border: null,
     background: null,
@@ -156,6 +159,51 @@ export const getAccessibleColor = (hexcolor: string): string => {
   return (yiq >= 160) ? 'black' : 'white';
 };
 
+/**
+ * Handles Pydantic errors, returns a form-level error message
+ * or null if the error has to do with individual fields
+ * @param i18n - i18n instance
+ * @param formRef
+ * @param errObj
+ */
+export const handleFormError = (i18n: any, formRef: Ref, errObj: PydanticException) => {
+  if (!errObj) {
+    return i18n('error.somethingWentWrong');
+  }
+
+  const fields = formRef.value.elements;
+  const { detail } = errObj;
+
+  if (Array.isArray(detail)) {
+    detail.forEach((err) => {
+      const name = err?.loc[1];
+      if (name) {
+        // Could either be in the context, or as a general message
+        const msg = err?.ctx?.reason ?? err.msg;
+        fields[name].setCustomValidity(msg);
+      }
+    });
+  } else {
+    return detail.message;
+  }
+
+  // Finally report it!
+  formRef.value.reportValidity();
+  return null;
+};
+
+/**
+ * Clears any existing form errors
+ * @param formRef
+ */
+export const clearFormErrors = (formRef: Ref) => {
+  const { elements } = formRef.value;
+  // HTMLCollection doesn't support .forEach lol
+  for (const element of elements) {
+    element.setCustomValidity('');
+  }
+};
+
 export default {
   keyByValue,
   eventColor,
@@ -166,4 +214,5 @@ export default {
   showEventPopup,
   getAccessibleColor,
   getLocale,
+  handleFormError,
 };

@@ -1,9 +1,11 @@
 import json
+from typing import Optional
 from urllib.parse import urlparse
 
 import requests
 
 from fastapi import APIRouter, Depends, Request
+from redis import Redis
 from sqlalchemy.orm import Session
 
 from appointment import utils
@@ -11,7 +13,7 @@ from appointment.controller.apis.google_client import GoogleClient
 from appointment.controller.calendar import CalDavConnector, Tools, GoogleConnector
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber
-from appointment.dependencies.database import get_db
+from appointment.dependencies.database import get_db, get_redis
 from appointment.dependencies.google import get_google_client
 from appointment.exceptions.validation import RemoteCalendarConnectionError
 
@@ -20,17 +22,34 @@ router = APIRouter()
 
 @router.post('/auth')
 def caldav_autodiscover_auth(
-    connection: schemas.CalendarConnection,
+    connection: schemas.CalendarConnectionIn,
     db: Session = Depends(get_db),
     subscriber: models.Subscriber = Depends(get_subscriber),
+    redis_client: Redis = Depends(get_redis)
 ):
     """Connects a principal caldav server"""
 
+    # Does url need a protocol?
+    if '://' not in connection.url:
+        connection.url = f'https://{connection.url}'
+
+    dns_lookup_cache_key = f'dns:{utils.encrypt(connection.url)}'
+
+    lookup_url = None
+    if redis_client:
+        lookup_url = redis_client.get(dns_lookup_cache_key)
+
     # Do a dns lookup first
-    parsed_url = urlparse(connection.url)
-    lookup_url = Tools.dns_caldav_lookup(parsed_url.hostname)
-    if lookup_url:
-        connection.url = lookup_url
+    if lookup_url is None:
+        parsed_url = urlparse(connection.url)
+        lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname)
+        if lookup_url:
+            connection.url = lookup_url
+            # set the cached lookup for the remainder of the dns ttl
+            if redis_client:
+                redis_client.set(dns_lookup_cache_key, utils.encrypt(lookup_url), ex=ttl)
+    else:
+        connection.url = utils.decrypt(lookup_url)
 
     con = CalDavConnector(
         db=db,
@@ -70,12 +89,27 @@ def caldav_autodiscover_auth(
     return True
 
 
-@router.get('/dns')
-def dns_lookup(subscriber: models.Subscriber = Depends(get_subscriber)):
-    """Dns lookup for caldav information based on the subscriber's preferred email"""
-    caldav_url = Tools.dns_caldav_lookup(subscriber.preferred_email.split('@')[1])
-    caldav_url = Tools.fix_caldav_urls(caldav_url)
+@router.post('/disconnect')
+def disconnect_account(
+    type_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    subscriber: models.Subscriber = Depends(get_subscriber),
+):
+    """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
+    ec = utils.list_first(
+        repo.external_connection.get_by_type(db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id)
+    )
 
-    return {
-        'url': caldav_url
-    }
+    if ec is None:
+        return RemoteCalendarConnectionError()
+
+    # Deserialize the url/user
+    _, user = json.loads(ec.type_id)
+
+    # Remove all the caldav calendars associated with this user
+    repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.caldav, user=user)
+
+    # Remove their account details
+    repo.external_connection.delete_by_type(db, subscriber.id, ec.type, ec.type_id)
+
+    return True

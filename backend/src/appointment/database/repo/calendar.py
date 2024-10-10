@@ -4,6 +4,7 @@ Repository providing CRUD functions for calendar database models.
 """
 
 from datetime import datetime
+from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -135,11 +136,14 @@ def delete_by_subscriber(db: Session, subscriber_id: int):
     return True
 
 
-def delete_by_subscriber_and_provider(db: Session, subscriber_id: int, provider: models.CalendarProvider):
+def delete_by_subscriber_and_provider(db: Session, subscriber_id: int, provider: models.CalendarProvider, user: Optional[str] = None):
     """Delete all subscriber's calendar by a provider"""
     calendars = get_by_subscriber(db, subscriber_id=subscriber_id)
     for calendar in calendars:
         if calendar.provider == provider:
+            # If user is provided and it's not the same as the calendar user then we can skip
+            if user and user != calendar.user:
+                continue
             delete(db, calendar_id=calendar.id)
 
     return True
