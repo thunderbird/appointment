@@ -768,6 +768,10 @@ class Tools:
             port = str(records[0].port)
             caldav_host = str(records[0].target)[:-1]
 
+            # Service not provided
+            if caldav_host == ".":
+                return None, None
+
         if '://' in caldav_host:
             # Remove any protocols first!
             caldav_host.replace('http://', '').replace('https://', '')
