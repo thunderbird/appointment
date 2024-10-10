@@ -307,18 +307,18 @@ class CalDavConnector(BaseConnector):
             for cal in cals.calendars():
                 supported_comps = cal.get_supported_components()
                 supports_vevent = 'VEVENT' in supported_comps
-                if not supports_vevent:
+                # If one supports it, then that's good enough!
+                if supports_vevent:
                     break
         except IndexError as ex:  # Library has an issue with top level urls, probably due to caldav spec?
             logging.error(f'IE: Error testing connection {ex}')
             return False
         except KeyError as ex:
-            print(ex)
             logging.error(f'KE: Error testing connection {ex}')
             return False
-        except requests.exceptions.RequestException:  # Max retries exceeded, bad connection, missing schema, etc...
+        except requests.exceptions.RequestException as ex:  # Max retries exceeded, bad connection, missing schema, etc...
             return False
-        except caldav.lib.error.NotFoundError:  # Good server, bad url.
+        except caldav.lib.error.NotFoundError as ex:  # Good server, bad url.
             return False
 
         # They need at least VEVENT support for appointment to work.
@@ -329,6 +329,12 @@ class CalDavConnector(BaseConnector):
 
         principal = self.client.principal()
         for cal in principal.calendars():
+            # Does this calendar support vevents?
+            supported_comps = cal.get_supported_components()
+
+            if 'VEVENT' not in supported_comps:
+                continue
+
             calendar = schemas.CalendarConnection(
                 title=cal.name,
                 url=str(cal.url),
