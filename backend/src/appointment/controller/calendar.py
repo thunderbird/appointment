@@ -20,7 +20,7 @@ from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DATETIMEFMT
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -134,6 +134,18 @@ class GoogleConnector(BaseConnector):
         # Create the creds class from our token (requires a refresh token)
         if google_tkn:
             self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
+
+    def get_busy_time(self, calendar_ids: list, start: str, end: str):
+        """Retrieve a list of { start, end } dicts that will indicate busy time for a user
+        Note: This does not use the remote_calendar_id from the class,
+        all calendars must be available under the google_token provided to the class"""
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
+
+        results = []
+        for calendars in utils.chunk_list(calendar_ids, chunk_by=5):
+            results += self.google_client.get_free_busy(calendars, time_min, time_max, self.google_token)
+        return results
 
     def test_connection(self) -> bool:
         """This occurs during Google OAuth login"""
@@ -289,6 +301,32 @@ class CalDavConnector(BaseConnector):
 
         # connect to the CalDAV server
         self.client = DAVClient(url=url, username=user, password=password)
+
+    def get_busy_time(self, calendar_ids: list, start: str, end: str):
+        """Retrieve a list of { start, end } dicts that will indicate busy time for a user
+        Note: This does not use the remote_calendar_id from the class"""
+        time_min = datetime.strptime(start, DATEFMT)
+        time_max = datetime.strptime(end, DATEFMT)
+
+        calendar = self.client.calendar(url=calendar_ids[0])
+        response = calendar.freebusy_request(time_min, time_max)
+
+        items = []
+
+        # This is sort of dumb, freebusy object isn't exposed in the icalendar instance except through a list of tuple props
+        # Luckily the value is a vPeriod which is a tuple of date times/timedelta (0 = Start, 1 = End)
+        for prop in response.icalendar_instance.property_items():
+            if prop[0].lower() != 'freebusy':
+                continue
+
+            # Tuple of start datetime and end datetime (or timedelta!)
+            period = prop[1].dt
+            items.append({
+                'start': period[0],
+                'end': period[1] if isinstance(period[1], datetime) else period[0] + period[1]
+            })
+
+        return items
 
     def test_connection(self) -> bool:
         """Ensure the connection information is correct and the calendar connection works"""
@@ -625,27 +663,26 @@ class Tools:
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range"""
         existing_events = []
+        google_calendars = []
+
+        now = datetime.now()
+
+        earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
+        farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
+
+        start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
+        end = (
+            min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking])
+            if schedule.end_date
+            else farthest_booking
+        )
 
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
-                external_connection = utils.list_first(
-                    repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-                )
-
-                if external_connection is None or external_connection.token is None:
-                    raise RemoteCalendarConnectionError()
-
-                con = GoogleConnector(
-                    db=db,
-                    redis_instance=redis,
-                    google_client=google_client,
-                    remote_calendar_id=calendar.user,
-                    calendar_id=calendar.id,
-                    subscriber_id=subscriber.id,
-                    google_tkn=external_connection.token,
-                )
+                google_calendars.append(calendar)
             else:
+                # Caldav - We don't have a smart way to batch these right now so just call them 1 by 1
                 con = CalDavConnector(
                     redis_instance=redis,
                     url=calendar.url,
@@ -655,23 +692,52 @@ class Tools:
                     calendar_id=calendar.id,
                 )
 
-            now = datetime.now()
+                try:
+                    existing_events.extend([
+                        schemas.Event(
+                            start=busy.get('start'),
+                            end=busy.get('end'),
+                            title='Busy'
+                        ) for busy in
+                        con.get_busy_time([calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT))
+                    ])
 
-            earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
-            farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
+                    # We're good here, continue along the loop
+                    continue
+                except requests.exceptions.ConnectionError:
+                    pass
 
-            start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
-            end = (
-                min([datetime.combine(schedule.end_date, schedule.end_time), farthest_booking])
-                if schedule.end_date
-                else farthest_booking
+                # Okay maybe this server doesn't support freebusy, try the old way
+                try:
+                    existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
+                except requests.exceptions.ConnectionError:
+                    # Connection error with remote caldav calendar, don't crash this route.
+                    pass
+
+        # Batch up google calendar calls since we can only have one google calendar connected
+        if len(google_calendars) > 0 and google_calendars[0].provider == CalendarProvider.google:
+            external_connection = utils.list_first(
+                repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
             )
+            if external_connection is None or external_connection.token is None:
+                raise RemoteCalendarConnectionError()
 
-            try:
-                existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
-            except requests.exceptions.ConnectionError:
-                # Connection error with remote caldav calendar, don't crash this route.
-                pass
+            con = GoogleConnector(
+                db=db,
+                redis_instance=redis,
+                google_client=google_client,
+                remote_calendar_id=google_calendars[0].user,  # This isn't used for get_busy_time but is still needed.
+                calendar_id=google_calendars[0].id,  # This isn't used for get_busy_time but is still needed.
+                subscriber_id=subscriber.id,
+                google_tkn=external_connection.token,
+            )
+            existing_events.extend([
+                schemas.Event(
+                    start=busy.get('start'),
+                    end=busy.get('end'),
+                    title='Busy'
+                ) for busy in con.get_busy_time([calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT))
+            ])
 
         # handle already requested time slots
         for slot in schedule.slots:
