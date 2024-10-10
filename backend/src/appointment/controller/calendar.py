@@ -290,7 +290,7 @@ class CalDavConnector(BaseConnector):
 
         self.db = db
         self.provider = CalendarProvider.caldav
-        self.url = Tools.fix_caldav_urls(url)
+        self.url = url
         self.password = password
         self.user = user
 
@@ -732,31 +732,53 @@ class Tools:
         return existing_events
 
     @staticmethod
-    def dns_caldav_lookup(url):
+    def dns_caldav_lookup(url, secure=True):
         import dns.resolver
+
+        secure_character = 's' if secure else ''
+        dns_url = f'_caldav{secure_character}._tcp.{url}'
+        path = ''
 
         # Check if they have a caldav subdomain, on error just return none
         try:
-            records = dns.resolver.resolve(f'_caldavs._tcp.{url}', 'SRV')
+            records = dns.resolver.resolve(dns_url, 'SRV')
         except DNSException:
             return None, None
 
+        # Check if they have any relative paths setup
+        try:
+            txt_records = dns.resolver.resolve(dns_url, 'TXT')
+
+            for txt_record in txt_records:
+                # Remove any quotes from the txt record
+                txt_record = str(txt_record).replace('"', '')
+                if txt_record.startswith('path='):
+                    path = txt_record[5:]
+        except DNSException:
+            pass
+
+        # Append a slash at the end if it's missing
+        path += '' if path.endswith('/') else '/'
+
         # Grab the first item or None
         caldav_host = None
+        port = 443 if secure else 80
         ttl = records.rrset.ttl or 300
         if len(records) > 0:
+            port = str(records[0].port)
             caldav_host = str(records[0].target)[:-1]
 
+        if '://' in caldav_host:
+            # Remove any protocols first!
+            caldav_host.replace('http://', '').replace('https://', '')
+
         # We should only be pulling the secure link
-        if '://' not in caldav_host:
-            caldav_host = f'https://{caldav_host}'
+        caldav_host = f'http{secure_character}://{caldav_host}:{port}{path}'
 
         return caldav_host, ttl
 
     @staticmethod
-    def fix_caldav_urls(url: str) -> str:
-        """Fix up some common url issues with some caldav providers"""
-
+    def well_known_caldav_lookup(url: str) -> str|None:
         parsed_url = urlparse(url)
 
         # Do they have a well-known?
@@ -771,6 +793,12 @@ class Tools:
             except requests.exceptions.ConnectionError:
                 # Ignore connection errors here
                 pass
+        return None
+
+    @staticmethod
+    def fix_caldav_urls(url: str) -> str:
+        """Fix up some common url issues with some caldav providers"""
+        parsed_url = urlparse(url)
 
         # Handle any fastmail issues
         if 'fastmail.com' in parsed_url.hostname:

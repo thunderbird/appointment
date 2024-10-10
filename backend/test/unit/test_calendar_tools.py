@@ -70,3 +70,21 @@ class TestVCreate:
         ics = Tools().create_vevent(appointment, slot, subscriber)
         assert ics
         assert ':'.join(['LOCATION', slot.meeting_link_url])
+
+
+class TestDnsCaldavLookup:
+    def test_for_host(self):
+        host, ttl = Tools.dns_caldav_lookup('thunderbird.net')
+        assert host == 'https://apidata.googleusercontent.com:443/'
+        assert ttl
+
+    def test_for_txt_record(self):
+        """This domain is used with permission from the owner (me, melissa autumn!)"""
+        host, ttl = Tools.dns_caldav_lookup('melissaautumn.com')
+        assert host == 'https://caldav.fastmail.com:443/dav/'
+        assert ttl
+
+    def test_no_records(self):
+        host, ttl = Tools.dns_caldav_lookup('appointment.day')
+        assert host is None
+        assert ttl is None
