@@ -4,6 +4,15 @@
     "tagline": "Plan less, do more",
     "title": "Thunderbird Appointment"
   },
+  "calDAVForm": {
+    "switchToGoogleCalendar": "Switch to Google Calendar",
+    "switchToCalDAV": "Switch to CalDAV",
+    "help": {
+      "user": "This is usually an email address.",
+      "location": "The URL or hostname we will use to connect to your calendars.",
+      "password": "This is usually not your email address password, but an 'App Password'."
+    }
+  },
   "error": {
     "actionNeeded": "Action needed",
     "authenticationRequired": "Sorry, this page requires you to be logged in.",

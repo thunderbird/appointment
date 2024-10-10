@@ -81,25 +81,25 @@ const onSubmit = async () => {
 <template>
   <div class="content">
       <form class="form" ref="formRef" @submit.prevent @keyup.enter="() => onSubmit()">
-        <text-input :disabled="isLoading" name="user" v-model="principal.user" help="This is usually an email address." :required="true">
-          Username
+        <text-input :disabled="isLoading" name="user" v-model="principal.user" :help="t('calDAVForm.help.user')" :required="true">
+          {{ t('label.username') }}
         </text-input>
-        <text-input :disabled="isLoading" :placeholder="locationPreview" name="url" help="The URL or hostname we will use to connect to your calendars." v-model="principal.url">
-          Location
+        <text-input :disabled="isLoading" :placeholder="locationPreview" name="url" :help="t('calDAVForm.help.location')" v-model="principal.url">
+          {{ t('label.location') }}
         </text-input>
-        <text-input :disabled="isLoading" type="password" name="password" help="This is usually not your email address password, but an 'App Password'." v-model="principal.password">
-          Password
+        <text-input :disabled="isLoading" type="password" name="password" :help="t('calDAVForm.help.password')" v-model="principal.password">
+          {{ t('label.password') }}
         </text-input>
       </form>
       <div class="buttons">
         <secondary-button class="btn-switch" @click="emits('switch')" v-if="showSwitch">
-        Switch to Google Calendar
+        {{ t('calDAVForm.switchToGoogleCalendar') }}
         </secondary-button>
         <secondary-button @click="emits('previous')" v-if="showPrevious">
-        Back
+        {{ t('label.back') }}
         </secondary-button>
         <primary-button
-          :label="'Connect a Caldav principal server'"
+          :label="t('label.connect')"
           :disabled="isLoading"
           @click="onSubmit"
         >{{ t('label.connect') }}</primary-button>
