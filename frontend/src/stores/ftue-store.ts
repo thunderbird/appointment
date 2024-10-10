@@ -23,16 +23,16 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const stepList: Record<FtueStep, FtueState> = {
     [FtueStep.SetupProfile]: {
       previous: null,
-      next: FtueStep.GooglePermissions,
+      next: FtueStep.CalendarProvider,
       title: 'ftue.steps.setupProfile',
     },
-    [FtueStep.GooglePermissions]: {
+    [FtueStep.CalendarProvider]: {
       previous: FtueStep.SetupProfile,
       next: FtueStep.ConnectCalendars,
-      title: 'ftue.steps.googlePermissions',
+      title: 'ftue.steps.calendarProvider',
     },
     [FtueStep.ConnectCalendars]: {
-      previous: FtueStep.GooglePermissions,
+      previous: FtueStep.CalendarProvider,
       next: FtueStep.SetupSchedule,
       title: 'ftue.steps.connectCalendars',
     },

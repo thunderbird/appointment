@@ -30,7 +30,7 @@ def get_mock_connector_class():
 
     class MockCaldavConnector:
         @staticmethod
-        def __init__(self, subscriber_id, calendar_id, redis_instance, url, user, password):
+        def __init__(self, db, subscriber_id, calendar_id, redis_instance, url, user, password):
             """We don't want to initialize a client"""
             pass
 

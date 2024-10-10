@@ -43,7 +43,7 @@ def _patch_caldav_connector(monkeypatch):
     # Create a mock caldav connector
     class MockCaldavConnector:
         @staticmethod
-        def __init__(self, redis_instance, url, user, password, subscriber_id, calendar_id):
+        def __init__(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
             """We don't want to initialize a client"""
             pass
 

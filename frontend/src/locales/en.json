@@ -90,6 +90,7 @@
     "scheduleCreated": "Schedule created!",
     "settings": {
       "connectedAccounts": {
+        "caldav": "CalDAV Connection",
         "fxa": "Mozilla Accounts",
         "google": "Google Calendar",
         "zoom": "Zoom"
@@ -439,6 +440,7 @@
     "settings": {
       "connectedAccounts": {
         "connect": {
+          "caldav": "You can connect to a CalDav server and pull its associated calendars.",
           "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
           "google": "You can connect your Google account to access your calendars. Disconnecting your account will remove your calendars, and associated data.",
           "googleLegal": {
@@ -448,6 +450,12 @@
           "zoom": "You can connect your Zoom account to enable instant meeting invites with your appointments."
         },
         "disconnect": {
+          "caldav": {
+            "cancel": "Back",
+            "confirm": "Disconnect",
+            "message": "Disconnecting from your CalDAV server will remove all associated calendars and data from your Thunderbird Appointment account. If your schedule is setup with a CalDAV calendar then it will be turned off until you set it to a new calendar.",
+            "title": "Disconnect CalDAV"
+          },
           "google": {
             "cancel": "Back",
             "confirm": "Disconnect",

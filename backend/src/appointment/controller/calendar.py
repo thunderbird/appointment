@@ -333,7 +333,7 @@ class CalDavConnector(BaseConnector):
                 title=cal.name,
                 url=str(cal.url),
                 user=self.user,
-                password='',
+                password=self.password,
                 provider=CalendarProvider.caldav
             )
 
@@ -733,11 +733,11 @@ class Tools:
         try:
             records = dns.resolver.resolve(f'_caldavs._tcp.{url}', 'SRV')
         except DNSException:
-            return None
+            return None, None
 
         # Grab the first item or None
         caldav_host = None
-        # ttl = records.rrset.ttl or 300
+        ttl = records.rrset.ttl or 300
         if len(records) > 0:
             caldav_host = str(records[0].target)[:-1]
 
@@ -745,7 +745,7 @@ class Tools:
         if '://' not in caldav_host:
             caldav_host = f'https://{caldav_host}'
 
-        return caldav_host
+        return caldav_host, ttl
 
     @staticmethod
     def fix_caldav_urls(url: str) -> str:
@@ -754,13 +754,17 @@ class Tools:
         parsed_url = urlparse(url)
 
         # Do they have a well-known?
-        if parsed_url.path == '':
-            response = requests.get(urljoin(url, '/.well-known/caldav'), allow_redirects=False)
-            if response.is_redirect:
-                redirect = response.headers.get('Location')
-                if redirect:
-                    # Fastmail really needs that ending slash
-                    return redirect if redirect.endswith('/') else redirect + '/'
+        if parsed_url.path == '' and parsed_url.hostname != '':
+            try:
+                response = requests.get(urljoin(url, '/.well-known/caldav'), allow_redirects=False)
+                if response.is_redirect:
+                    redirect = response.headers.get('Location')
+                    if redirect:
+                        # Fastmail really needs that ending slash
+                        return redirect if redirect.endswith('/') else redirect + '/'
+            except requests.exceptions.ConnectionError:
+                # Ignore connection errors here
+                pass
 
         # Handle any fastmail issues
         if 'fastmail.com' in parsed_url.hostname:
@@ -771,7 +775,7 @@ class Tools:
             if not url.endswith('/'):
                 url += '/'
 
-        # Google is weird
+        # Google is weird - We also don't support them right now.
         elif ('api.googlecontent.com' in parsed_url.hostname
               or 'apidata.googleusercontent.com' in parsed_url.hostname):
             if len(parsed_url.path) == 0:
@@ -780,5 +784,4 @@ class Tools:
             # Use the caldav url instead
             url = 'https://api.googlecontent.com/caldav/v2/'
 
-        print("Caldav -> ", url)
         return url
