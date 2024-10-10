@@ -20,6 +20,7 @@ import HomeView from '@/views/HomeView.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import WordMark from '@/elements/WordMark.vue';
+import { handleFormError } from '@/utils';
 
 // component constants
 const user = useUserStore();
@@ -58,25 +59,6 @@ onMounted(() => {
   }
 });
 
-const handleFormError = (errObj: PydanticException) => {
-  const { detail } = errObj;
-  const fields = formRef.value.elements;
-
-  if (Array.isArray(detail)) {
-    detail.forEach((err) => {
-      const name = err?.loc[1];
-      if (name) {
-        fields[name].setCustomValidity(err.ctx.reason);
-      }
-    });
-  } else {
-    loginError.value = detail.message;
-  }
-
-  // Finally report it!
-  formRef.value.reportValidity();
-};
-
 /**
  * Sign up for the beta / waiting list
  */
@@ -93,7 +75,7 @@ const signUp = async () => {
 
   if (error?.value) {
     // Handle error
-    handleFormError(data.value as PydanticException);
+    loginError.value = handleFormError(t, formRef, data.value as PydanticException);
     isLoading.value = false;
     return;
   }
@@ -134,7 +116,7 @@ const login = async () => {
 
     if (error?.value) {
       // Handle error
-      handleFormError(canLogin.value as PydanticException);
+      loginError.value = handleFormError(t, formRef, canLogin.value as PydanticException);
       isLoading.value = false;
       return;
     }
@@ -160,7 +142,7 @@ const login = async () => {
     const { error, data }: AuthUrlResponse = await call(`fxa_login?${params}`).get().json();
 
     if (error.value) {
-      handleFormError(data.value as PydanticException);
+      loginError.value = handleFormError(t, formRef, data.value as PydanticException);
       isLoading.value = false;
       return;
     }

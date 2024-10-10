@@ -46,6 +46,14 @@ def setup_encryption_engine():
     return engine
 
 
+def encrypt(value):
+    return setup_encryption_engine().encrypt(value)
+
+
+def decrypt(value):
+    return setup_encryption_engine().decrypt(value)
+
+
 def retrieve_user_url_data(url):
     """URL Decodes, and retrieves username, signature, and main url from /<username>/<signature>/"""
     parsed_url = parse.urlparse(url)

@@ -173,6 +173,7 @@ export type ExternalConnectionCollection = {
   fxa?: ExternalConnection[];
   google?: ExternalConnection[];
   zoom?: ExternalConnection[];
+  caldav?: ExternalConnection[];
 };
 
 // The type `Availability` will be used later if we provide custom availabilities
