@@ -31,6 +31,7 @@ from ..exceptions import validation
 from ..exceptions.fxa_api import NotInAllowListException
 from ..l10n import l10n
 from ..tasks.emails import send_confirm_email
+from ..utils import get_password_hash
 
 router = APIRouter()
 
@@ -44,6 +45,24 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({'exp': expire, 'iat': int(datetime.now(UTC).timestamp())})
     encoded_jwt = jwt.encode(to_encode, os.getenv('JWT_SECRET'), algorithm=os.getenv('JWT_ALGO'))
     return encoded_jwt
+
+
+def create_subscriber(db, email, password, timezone):
+    subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
+        email=email,
+        username=email,
+        name=email.split('@')[0],
+        timezone=timezone
+    ))
+
+    # Update with password
+    subscriber.password = get_password_hash(password)
+
+    db.add(subscriber)
+    db.commit()
+    db.refresh(subscriber)
+
+    return subscriber
 
 
 @router.post('/can-login')
@@ -271,6 +290,12 @@ def token(
     if os.getenv('AUTH_SCHEME') == 'fxa':
         raise HTTPException(status_code=405)
 
+    has_subscribers = db.query(Subscriber).count()
+
+    if os.getenv('APP_ALLOW_FIRST_TIME_REGISTER') == 'True' and has_subscribers == 0:
+        # Create an initial subscriber based with the UTC timezone, the FTUE will give them a change to adjust this
+        create_subscriber(db, form_data.username, form_data.password, 'UTC')
+
     """Retrieve an access token from a given email (=username) and password."""
     subscriber = repo.subscriber.get_by_email(db, form_data.username)
     if not subscriber or subscriber.password is None:
@@ -347,27 +372,3 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
         raise validation.InvalidPermissionLevelException()
     return True  # Covered by get_admin_subscriber
 
-
-# @router.get('/test-create-account')
-# def test_create_account(email: str, password: str, timezone: str, db: Session = Depends(get_db)):
-#     """Used to create a test account"""
-#     if os.getenv('APP_ENV') != 'dev':
-#         raise HTTPException(status_code=405)
-#     if os.getenv('AUTH_SCHEME') != 'password':
-#         raise HTTPException(status_code=405)
-#
-#     subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
-#         email=email,
-#         username=email,
-#         name=email.split('@')[0],
-#         timezone=timezone
-#     ))
-#
-#     # Update with password
-#     subscriber.password = get_password_hash(password)
-#
-#     db.add(subscriber)
-#     db.commit()
-#     db.refresh(subscriber)
-#
-#     return subscriber

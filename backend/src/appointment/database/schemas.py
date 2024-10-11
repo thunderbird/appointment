@@ -4,6 +4,7 @@ Definitions of valid data shapes for database and query models.
 """
 
 import json
+import zoneinfo
 from uuid import UUID
 from datetime import datetime, date, time, timezone, timedelta
 from typing import Annotated, Optional, Self
@@ -175,6 +176,7 @@ class ScheduleBase(BaseModel):
     slot_duration: int | None = None
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
     booking_confirmation: bool = True
+    timezone: Optional[str] = None
 
     class Config:
         json_encoders = {
@@ -208,8 +210,13 @@ class ScheduleValidationIn(ScheduleBase):
     def start_time_should_be_before_end_time(self) -> Self:
         # Can't have the end time before the start time!
         # (Well you can, it will roll over to the next day, but the ux is poor!)
-        start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc)
-        end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc)
+        # Note we have to convert to the local timezone for this to work...
+
+        # Fallback to utc...
+        tz = self.timezone or 'UTC'
+
+        start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
+        end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
 
         start_time = (start_time + timedelta(minutes=self.slot_duration)).time()
         end_time = end_time.time()

@@ -62,13 +62,15 @@ const handleFormError = (errObj: PydanticException) => {
   const { detail } = errObj;
   const fields = formRef.value.elements;
 
-  if (Array.isArray(detail)) {
+  if (Array.isArray(detail)) { // Pydantic errors
     detail.forEach((err) => {
       const name = err?.loc[1];
       if (name) {
         fields[name].setCustomValidity(err.ctx.reason);
       }
     });
+  } else if (typeof detail === 'string') { // HttpException errors are just strings
+    loginError.value = detail;
   } else {
     loginError.value = detail.message;
   }
@@ -134,6 +136,7 @@ const login = async () => {
 
     if (error?.value) {
       // Handle error
+
       handleFormError(canLogin.value as PydanticException);
       isLoading.value = false;
       return;
@@ -179,7 +182,7 @@ const login = async () => {
 
   const { error }: Error = await user.login(call, email.value, password.value);
   if (error) {
-    loginError.value = error as string;
+    handleFormError(error as PydanticException);
     isLoading.value = false;
     return;
   }
@@ -233,7 +236,7 @@ const onEnter = () => {
       <div class="form-body">
         <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
           <text-input name="email" v-model="email" :required="true">{{ t('login.form.email') }}</text-input>
-          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true">{{ t('label.password') }}</text-input>
+          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true" type="password">{{ t('label.password') }}</text-input>
           <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
         </form>
       </div>

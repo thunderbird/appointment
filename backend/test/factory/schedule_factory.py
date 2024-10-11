@@ -26,6 +26,7 @@ def make_schedule(with_db, make_caldav_calendar):
         meeting_link_provider=models.MeetingLinkProviderType.none,
         slug=FAKER_RANDOM_VALUE,
         booking_confirmation=True,
+        timezone='UTC'
     ):
         with with_db() as db:
             return repo.schedule.create(
@@ -52,6 +53,7 @@ def make_schedule(with_db, make_caldav_calendar):
                     calendar_id=calendar_id
                     if factory_has_value(calendar_id)
                     else make_caldav_calendar(connected=True).id,
+                    timezone=timezone,
                 ),
             )
 
