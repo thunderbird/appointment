@@ -4,6 +4,15 @@
     "tagline": "Weniger planen, mehr schaffen",
     "title": "Thunderbird Appointment"
   },
+  "calDAVForm": {
+    "help": {
+      "location": "URL oder Hostname, den wir für die Verbindung deiner Kalender verwenden werden.",
+      "password": "Das ist üblicherweise kein E-Mail-Passwort, sondern ein 'App Passwort'.",
+      "user": "Das ist üblicherweise eine E-Mail-Adresse."
+    },
+    "switchToCalDAV": "Zu CalDAV wechseln",
+    "switchToGoogleCalendar": "Zu Google wechseln"
+  },
   "error": {
     "actionNeeded": "Aktion erforderlich!",
     "authenticationRequired": "Entschuldigung, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
@@ -50,6 +59,8 @@
     "setupScheduleInfo": "Der Terminplan kann später angepasst werden",
     "skipConnectVideo": "Diesen Schritt überspringen",
     "steps": {
+      "caldav": "Einrichten der Kalenderverbindung",
+      "calendarProvider": "Wähle deinen Kalenderanbieter",
       "connectCalendars": "Kalender verbinden",
       "connectVideo": "Videokonferenz-Link verbinden",
       "error": "Oh nein!",
@@ -88,7 +99,8 @@
     "scheduleCreated": "Zeitplan erstellt!",
     "settings": {
       "connectedAccounts": {
-        "fxa": "Mozilla-Konten",
+        "caldav": "CalDAV Verbindungen",
+        "fxa": "Mozilla Konten",
         "google": "Google Kalender",
         "zoom": "Zoom"
       }
@@ -336,7 +348,6 @@
     },
     "form": {
       "email": "Gib deine E-Mail-Adresse ein, um dich anzumelden oder ein Konto zu erstellen:",
-      "email-waiting-list": "Gib deine E-Mail-Adresse ein, um der Warteliste beizutreten:",
       "no-invite-code": "Wenn du keinen Einladungscode hast, setze deine E-Mail-Adresse auf unsere Warteliste.",
       "privacy": "Datenschutz ist uns wichtig."
     },
@@ -357,16 +368,16 @@
   "notices": {
     "betaWarning": {
       "heading": "Da wir aktuell in der Beta-Phase sind, hier einige Tips um Probleme zu umgehen:",
-      "list": [
-        "Überprüfe den Spam Ordner, da einige Emails dort landen könnten",
-        "Falls Zoom Meetings nicht in der Kalender-Einladung auftauchen, bitte trenne die Verbindung im {connectedAccounts} Abschnitt der Einstellungen, und stelle sie erneut her",
-        "Sollte es noch weitere Probleme geben, nutze das {contactUs}, oder kommt in unseren {matrixChannel}"
-      ],
       "linkText": {
         "connectedAccounts": "Verbundene Konten",
         "contactUs": "Kontaktformular",
         "matrixChannel": "Matrix Kanal"
-      }
+      },
+      "list": [
+        "Überprüfe den Spam Ordner, da einige Emails dort landen könnten",
+        "Falls Zoom Meetings nicht in der Kalender-Einladung auftauchen, bitte trenne die Verbindung im {connectedAccounts} Abschnitt der Einstellungen, und stelle sie erneut her",
+        "Sollte es noch weitere Probleme geben, nutze das {contactUs}, oder kommt in unseren {matrixChannel}"
+      ]
     }
   },
   "placeholder": {
@@ -438,6 +449,7 @@
     "settings": {
       "connectedAccounts": {
         "connect": {
+          "caldav": "Eine Verbindung zu einem CalDav-Server herstellen und die zugehörigen Kalender abrufen.",
           "fxa": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "google": "Ein Google-Konto kann verbunden werden, um auf die Kalender zuzugreifen. Wenn die Verbindung zum Google-Konto getrennt wird, werden die entsprechenden Kalender und die damit verbundenen Daten bei Thunderbird Appointment entfernt.",
           "googleLegal": {
@@ -447,10 +459,16 @@
           "zoom": "Ein Zoom-Konto kann verbunden werden, um Einladungen zu Zoom-Besprechungen an Terminen zu ermöglichen."
         },
         "disconnect": {
+          "caldav": {
+            "cancel": "Zurück",
+            "confirm": "Trennen",
+            "message": "Beim Trennen der Verbindung zum CalDAV-Server werden alle zugehörigen Kalender und Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem CalDAV-Kalender eingerichtet ist, wird er deaktiviert, bis er auf einen neuen Kalender umgestellt wurde.",
+            "title": "CalDAV Verbindung trennen"
+          },
           "google": {
             "cancel": "Abbrechen",
             "confirm": "Trennen",
-            "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis der Terminplan auf einen neuen Kalender eingestellt wurde.",
+            "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis er auf einen neuen Kalender umgestellt wurde.",
             "title": "Google Kalender trennen"
           },
           "zoom": {
