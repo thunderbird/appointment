@@ -63,7 +63,7 @@ onMounted(async () => {
 <template>
   <div>
   <home-view></home-view>
-  <generic-modal :error-message="errorMsg">
+  <generic-modal :error-message="errorMsg" @close="() => router.push({name: 'home'})">
     <template v-slot:header>
       <word-mark/>
       <h2 id="title" v-if="isError">
