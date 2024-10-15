@@ -183,6 +183,8 @@ export const handleFormError = (i18n: any, formRef: Ref, errObj: PydanticExcepti
         fields[name].setCustomValidity(msg);
       }
     });
+  } else if (typeof detail === 'string') { // HttpException errors are just strings
+    return detail;
   } else {
     return detail.message;
   }
