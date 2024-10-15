@@ -37,3 +37,4 @@ def run():
         else:
             print('Database already initialized, running migrations')
             command.upgrade(alembic_cfg, 'head')
+        print('Finished checking database')

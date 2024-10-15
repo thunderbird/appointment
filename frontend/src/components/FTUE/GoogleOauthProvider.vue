@@ -123,7 +123,7 @@ const onSubmit = async () => {
       class="btn-switch"
       @click="emits('switch')"
       v-if="showSwitch">
-        {{ t('calDavForm.switchToCalDAV') }}
+        {{ t('calDAVForm.switchToCalDAV') }}
     </secondary-button>
     <secondary-button
       class="btn-back"
