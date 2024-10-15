@@ -33,6 +33,8 @@ def caldav_autodiscover_auth(
     if '://' not in connection.url:
         connection.url = f'https://{connection.url}'
 
+    secure_protocol = 'https://' in connection.url
+
     dns_lookup_cache_key = f'dns:{utils.encrypt(connection.url)}'
 
     lookup_url = None
@@ -42,7 +44,7 @@ def caldav_autodiscover_auth(
     # Do a dns lookup first
     if lookup_url is None:
         parsed_url = urlparse(connection.url)
-        lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname)
+        lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname, secure=secure_protocol)
         # set the cached lookup for the remainder of the dns ttl
         if redis_client and lookup_url:
             redis_client.set(dns_lookup_cache_key, utils.encrypt(lookup_url), ex=ttl)

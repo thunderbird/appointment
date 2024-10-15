@@ -18,8 +18,8 @@ const router = useRouter();
 const call = inject(callKey);
 // component properties
 interface Props {
-  showPrevious: boolean,
-  showSwitch: boolean,
+  showPrevious?: boolean,
+  showSwitch?: boolean,
 }
 withDefaults(defineProps<Props>(), {
   showPrevious: false,

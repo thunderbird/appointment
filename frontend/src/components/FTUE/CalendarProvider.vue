@@ -1,21 +1,17 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import {
-  inject, onMounted, reactive, ref,
+  inject, ref,
 } from 'vue';
 import { callKey } from '@/keys';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
-import { IconArrowRight } from '@tabler/icons-vue';
 import GoogleOauthProvider from '@/components/FTUE/GoogleOauthProvider.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
-import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 
 const ftueStore = useFTUEStore();
 const {
-  hasNextStep, hasPreviousStep, errorMessage,
+  errorMessage,
 } = storeToRefs(ftueStore);
 const { previousStep, nextStep } = ftueStore;
 const { t } = useI18n();
