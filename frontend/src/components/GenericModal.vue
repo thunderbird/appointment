@@ -43,33 +43,33 @@ onUnmounted(() => {
   <div class="new-design overlay" role="dialog" tabindex="-1" aria-labelledby="title" aria-modal="true">
     <div class="dismiss-zone" @click="emits('close')"></div>
     <div class="modal">
-        <link-button class="modal-close" v-if="closable" @click="emits('close')" aria-labelledby="modal-close-button">
-          <img id="modal-close-button" src="@/assets/svg/icons/close.svg" :alt="t('label.close')" :title="t('label.close')"/>
-        </link-button>
-        <div class="modal-header">
-          <slot name="header"></slot>
-          <notice-bar type="error" v-if="errorMessage">
-            {{ errorMessage }}
-          </notice-bar>
-          <notice-bar type="warning" v-else-if="warningMessage">
-            {{ warningMessage }}
-          </notice-bar>
-          <notice-bar v-else-if="infoMessage">
-            {{ infoMessage }}
-          </notice-bar>
-          <div class="pls-keep-height" v-else/>
-        </div>
-        <div class="modal-body">
-          <slot></slot>
-        </div>
-        <div class="modal-actions">
-          <slot name="actions"></slot>
-        </div>
-        <div class="divider"></div>
-        <div class="footer">
-          <slot name="footer"></slot>
-        </div>
+      <link-button class="modal-close" v-if="closable" @click="emits('close')" aria-labelledby="modal-close-button">
+        <img id="modal-close-button" src="@/assets/svg/icons/close.svg" :alt="t('label.close')" :title="t('label.close')"/>
+      </link-button>
+      <div class="modal-header">
+        <slot name="header"></slot>
+        <notice-bar type="error" v-if="errorMessage">
+          {{ errorMessage }}
+        </notice-bar>
+        <notice-bar type="warning" v-else-if="warningMessage">
+          {{ warningMessage }}
+        </notice-bar>
+        <notice-bar v-else-if="infoMessage">
+          {{ infoMessage }}
+        </notice-bar>
+        <div class="pls-keep-height" v-else/>
       </div>
+      <div class="modal-body">
+        <slot></slot>
+      </div>
+      <div class="modal-actions">
+        <slot name="actions"></slot>
+      </div>
+      <div class="divider"></div>
+      <div class="footer">
+        <slot name="footer"></slot>
+      </div>
+    </div>
   </div>
 </template>
 <style scoped>
