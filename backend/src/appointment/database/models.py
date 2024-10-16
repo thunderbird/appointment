@@ -70,6 +70,7 @@ class ExternalConnectionType(enum.Enum):
     zoom = 1
     google = 2
     fxa = 3
+    caldav = 4
 
 
 class MeetingLinkProviderType(enum.StrEnum):

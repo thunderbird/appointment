@@ -1,11 +1,13 @@
+import json
 import os
 import secrets
 from datetime import timedelta
+from unittest.mock import patch
 
 from appointment.dependencies import auth
 from appointment.l10n import l10n
 from appointment.routes.auth import create_access_token
-from defines import FXA_CLIENT_PATCH, auth_headers
+from defines import FXA_CLIENT_PATCH, auth_headers, TEST_USER_ID
 from appointment.database import repo, models
 
 
@@ -444,3 +446,54 @@ class TestFXA:
         )
 
         assert response.status_code == 401, response.text
+
+
+class TestCalDAV:
+    def test_auth(self, with_db, with_client):
+        """Test authenticating a caldav connection"""
+        # Remove any possibility of caching
+        os.environ['REDIS_URL'] = ''
+
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.caldav)
+            assert len(ecs) == 0
+
+        with patch('appointment.controller.calendar.Tools.dns_caldav_lookup') as mock:
+            mock.return_value = "https://example.com", 300
+
+            with patch('appointment.controller.calendar.CalDavConnector.sync_calendars') as sync_mock:
+                sync_mock.return_value = None
+
+                response = with_client.post(
+                    '/caldav/auth', json={'user': 'test@example.com', 'url': 'example.com', 'password': 'test'}, headers=auth_headers
+                )
+
+                mock.assert_called()
+                sync_mock.assert_called()
+
+                assert response.status_code == 200
+
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.caldav)
+            assert len(ecs) == 1
+
+    def test_disconnect(self, with_db, with_client, make_external_connections, make_caldav_calendar):
+        """Ensure we remove the external connection and any related calendars"""
+        username = 'username'
+        type_id = json.dumps(['url', username])
+        ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.caldav, type_id=type_id)
+        calendar = make_caldav_calendar(subscriber_id=TEST_USER_ID, user=username)
+
+        response = with_client.post(
+            '/caldav/disconnect', json={'type_id': ec.type_id},
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200, response.content
+
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id)
+            assert len(ecs) == 0
+
+            calendar = repo.calendar.get(db, calendar.id)
+            assert calendar is None

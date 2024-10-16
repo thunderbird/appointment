@@ -16,6 +16,16 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const call = inject(callKey);
+// component properties
+interface Props {
+  showPrevious?: boolean,
+  showSwitch?: boolean,
+}
+withDefaults(defineProps<Props>(), {
+  showPrevious: false,
+  showSwitch: false,
+});
+const emits = defineEmits(['next', 'previous', 'switch']);
 
 const isLoading = ref(false);
 
@@ -61,7 +71,7 @@ onMounted(async () => {
       return;
     }
 
-    await nextStep(call);
+    emits('next');
   }
 });
 
@@ -110,11 +120,17 @@ const onSubmit = async () => {
   </div>
   <div class="buttons">
     <secondary-button
+      class="btn-switch"
+      @click="emits('switch')"
+      v-if="showSwitch">
+        {{ t('calDAVForm.switchToCalDAV') }}
+    </secondary-button>
+    <secondary-button
       class="btn-back"
       :title="t('label.back')"
-      v-if="hasPreviousStep"
+      v-if="showPrevious"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="emits('previous')"
     >{{ t('label.back') }}
     </secondary-button>
     <secondary-button
@@ -137,6 +153,7 @@ const onSubmit = async () => {
 .content {
   display: flex;
   margin: auto;
+  width: 100%;
 }
 
 .card {
@@ -166,12 +183,19 @@ const onSubmit = async () => {
   height: 1.625rem;
 }
 
+.btn-switch {
+  margin-left: 0;
+  margin-right: auto;
+}
+
 .buttons {
   display: flex;
   width: 100%;
   gap: 1rem;
   justify-content: center;
   margin-top: 2rem;
+  right: auto;
+  left: auto;
 }
 
 @media (--md) {

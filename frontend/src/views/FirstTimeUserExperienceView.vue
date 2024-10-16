@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { FtueStep } from '@/definitions';
 import { refreshKey } from '@/keys';
 import WordMark from '@/elements/WordMark.vue';
-import GooglePermissions from '@/components/FTUE/GooglePermissions.vue';
+import GooglePermissions from '@/components/FTUE/CalendarProvider.vue';
 import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
@@ -52,7 +52,7 @@ onMounted(async () => {
         </div>
         <div class="modal-body flex w-full flex-col items-center justify-center">
           <setup-profile v-if="currentStep === FtueStep.SetupProfile"/>
-          <google-permissions v-else-if="currentStep === FtueStep.GooglePermissions"/>
+          <google-permissions v-else-if="currentStep === FtueStep.CalendarProvider"/>
           <connect-calendars v-else-if="currentStep === FtueStep.ConnectCalendars"/>
           <setup-schedule v-else-if="currentStep === FtueStep.SetupSchedule"/>
           <connect-video v-else-if="currentStep === FtueStep.ConnectVideoConferencing"/>

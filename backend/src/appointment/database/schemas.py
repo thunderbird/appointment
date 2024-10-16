@@ -257,6 +257,12 @@ class CalendarConnection(CalendarConnectionOut):
     password: str
 
 
+class CalendarConnectionIn(CalendarConnection):
+    url: str = Field(min_length=1)
+    user: str = Field(min_length=1)
+    password: Optional[str]
+
+
 class Calendar(CalendarConnection):
     id: int
     owner_id: int
