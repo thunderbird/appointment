@@ -340,7 +340,8 @@ class CalDavConnector(BaseConnector):
                 url=str(cal.url),
                 user=self.user,
                 password=self.password,
-                provider=CalendarProvider.caldav
+                provider=CalendarProvider.caldav,
+                color='#c276c5'  # Pick a default colour for now!
             )
 
             # add calendar

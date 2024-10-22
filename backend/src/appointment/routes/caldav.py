@@ -2,19 +2,15 @@ import json
 from typing import Optional
 from urllib.parse import urlparse
 
-import requests
-
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from redis import Redis
 from sqlalchemy.orm import Session
 
 from appointment import utils
-from appointment.controller.apis.google_client import GoogleClient
-from appointment.controller.calendar import CalDavConnector, Tools, GoogleConnector
+from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
-from appointment.dependencies.google import get_google_client
 from appointment.exceptions.validation import RemoteCalendarConnectionError
 
 router = APIRouter()
