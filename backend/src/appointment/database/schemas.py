@@ -11,6 +11,8 @@ from typing import Annotated, Optional, Self
 
 from pydantic import BaseModel, Field, EmailStr, model_validator
 from pydantic_core import PydanticCustomError
+
+from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..l10n import l10n
 
 
@@ -243,7 +245,7 @@ class ScheduleSlug(BaseModel):
 
 class CalendarBase(BaseModel):
     title: str | None = None
-    color: str | None = None
+    color: str | None = DEFAULT_CALENDAR_COLOUR
     connected: bool | None = None
 
 

@@ -27,6 +27,7 @@ from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_links_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType, \
     InviteStatus
+from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
@@ -102,7 +103,7 @@ def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber =
     # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
     appointments = map(
         lambda x: schemas.AppointmentWithCalendarOut(
-            **x.__dict__, calendar_title=x.calendar.title, calendar_color=x.calendar.color
+            **x.__dict__, calendar_title=x.calendar.title, calendar_color=x.calendar.color or DEFAULT_CALENDAR_COLOUR
         ),
         appointments,
     )

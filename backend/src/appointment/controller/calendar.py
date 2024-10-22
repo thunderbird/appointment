@@ -26,7 +26,7 @@ from sqlalchemy.orm import Session
 
 from .. import utils
 from ..database.schemas import CalendarConnection
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -341,7 +341,7 @@ class CalDavConnector(BaseConnector):
                 user=self.user,
                 password=self.password,
                 provider=CalendarProvider.caldav,
-                color='#c276c5'  # Pick a default colour for now!
+                color=DEFAULT_CALENDAR_COLOUR  # Pick a default colour for now!
             )
 
             # add calendar
