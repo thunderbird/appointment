@@ -1,7 +1,7 @@
 locals {
   username = replace("${var.name_prefix}_user", "-", "_")
   secret = {
-    
+
   }
 }
 
@@ -19,7 +19,7 @@ module "db" {
   identifier = var.name_prefix
 
   engine            = "mysql"
-  engine_version    = "8.0.32"
+  engine_version    = "8.0.35"
   instance_class    = "db.t3.medium"
   allocated_storage = 20
 
