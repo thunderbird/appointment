@@ -1,7 +1,6 @@
 locals {
   username = replace("${var.name_prefix}_user", "-", "_")
   secret = {
-
   }
 }
 
