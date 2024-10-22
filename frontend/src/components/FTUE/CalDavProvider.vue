@@ -63,7 +63,7 @@ const onSubmit = async () => {
     password: principal.value.password,
   };
 
-  const { error, data }: CalendarListResponse = await call('/caldav/auth').post(requestData).json();
+  const { error, data }: CalendarListResponse = await call('caldav/auth').post(requestData).json();
 
   isLoading.value = false;
 
