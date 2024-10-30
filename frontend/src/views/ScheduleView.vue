@@ -27,6 +27,7 @@ import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 // stores
+import { useScheduleStore } from '@/stores/schedule-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
@@ -37,9 +38,11 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const refresh = inject(refreshKey);
 
+const scheduleStore = useScheduleStore();
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
 const userActivityStore = useUserActivityStore();
+const { schedules, firstSchedule } = storeToRefs(scheduleStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
@@ -75,14 +78,7 @@ const getRemoteEvents = async (from: string, to: string) => {
 };
 
 // user configured schedules from db (only the first for now, later multiple schedules will be available)
-const schedules = ref<Schedule[]>([]);
-const firstSchedule = computed(() => (schedules.value?.length > 0 ? schedules.value[0] : null));
 const schedulesReady = ref(false);
-const getFirstSchedule = async () => {
-  // trailing slash to prevent fast api redirect which doesn't work great on our container setup
-  const { data }: ScheduleListResponse = await call('schedule/').get().json();
-  schedules.value = data.value;
-};
 
 // schedule previews for showing corresponding placeholders in calendar views
 const schedulesPreviews = ref([]);
@@ -145,7 +141,6 @@ onMounted(async () => {
     return;
   }
   await refresh();
-  await getFirstSchedule();
   schedulesReady.value = true;
   const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
   const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
@@ -204,7 +199,7 @@ const dismiss = () => {
         :calendars="connectedCalendars"
         :schedule="firstSchedule"
         :active-date="activeDate"
-        @created="getFirstSchedule"
+        @created="scheduleStore.fetch"
         @updated="schedulePreview"
       />
     </div>

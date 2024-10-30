@@ -19,11 +19,12 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   // Data
   const schedules = ref<Schedule[]>([]);
+  const firstSchedule = computed((): Schedule => schedules.value?.length > 0 ? schedules.value[0] : null);
   const inactiveSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => !schedule.active));
   const activeSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => schedule.active));
 
   /**
-   * Get all calendars for current user
+   * Get all schedules for current user
    * @param call preconfigured API fetch function
    * @param force Force a fetch even if we already have data
    */
@@ -43,7 +44,7 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   /**
-   * Restore default state, empty and unload calendars
+   * Restore default state, empty and unload schedules
    */
   const $reset = () => {
     schedules.value = [];
@@ -172,6 +173,16 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   return {
-    isLoaded, schedules, inactiveSchedules, activeSchedules, fetch, $reset, createSchedule, updateSchedule, timeToBackendTime, timeToFrontendTime,
+    isLoaded,
+    schedules,
+    firstSchedule,
+    inactiveSchedules,
+    activeSchedules,
+    fetch,
+    $reset,
+    createSchedule,
+    updateSchedule,
+    timeToBackendTime,
+    timeToFrontendTime,
   };
 });
