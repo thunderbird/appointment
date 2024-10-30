@@ -716,7 +716,14 @@ watch(
               >
                 {{ t("label.quickLink") }}
               </text-input>
-              <refresh-icon class="mt-7 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
+              <refresh-icon
+                class="mt-7"
+                :class="{
+                  'text-teal-600 cursor-pointer': scheduleInput.active,
+                  'text-gray-500 cursor-not-allowed': !scheduleInput.active,
+                }"
+                @click.prevent="scheduleInput.active ? refreshSlug() : null"
+              />
             </div>
           </label>
           <!-- option to deactivate confirmation -->
