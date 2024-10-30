@@ -1,10 +1,10 @@
 import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, Ref } from 'vue';
 import { useUserStore } from '@/stores/user-store';
 import { DateFormatStrings, MetricEvents } from '@/definitions';
 import {
-  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse,
+  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -51,11 +51,11 @@ export const useScheduleStore = defineStore('schedules', () => {
     isLoaded.value = false;
   };
 
-  const handleErrorResponse = (responseData) => {
+  const handleErrorResponse = (responseData: Ref<Exception>) => {
     const { value } = responseData;
 
-    if (value?.detail?.message) {
-      return value?.detail?.message;
+    if ((value?.detail as ExceptionDetail)?.message) {
+      return (value?.detail as ExceptionDetail)?.message;
     }
 
     if (value?.detail instanceof Array) {
@@ -109,7 +109,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     if (error.value) {
       return {
         error: true,
-        message: handleErrorResponse(data),
+        message: handleErrorResponse(data as Ref<Exception>),
       } as Error;
     }
 
@@ -130,7 +130,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     if (error.value) {
       return {
         error: true,
-        message: handleErrorResponse(data),
+        message: handleErrorResponse(data as Ref<Exception>),
       } as Error;
     }
 

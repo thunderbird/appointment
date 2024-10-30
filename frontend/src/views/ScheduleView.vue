@@ -6,9 +6,7 @@ import {
   EventLocationType,
   MeetingLinkProviderType,
 } from '@/definitions';
-import {
-  ref, inject, computed, onMounted,
-} from 'vue';
+import { ref, inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -16,8 +14,6 @@ import { dayjsKey, callKey, refreshKey } from '@/keys';
 import {
   RemoteEvent,
   RemoteEventListResponse,
-  Schedule,
-  ScheduleListResponse,
   ScheduleAppointment,
   TimeFormatted,
 } from '@/models';
@@ -141,6 +137,7 @@ onMounted(async () => {
     return;
   }
   await refresh();
+  scheduleStore.fetch(call);
   schedulesReady.value = true;
   const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
   const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
@@ -199,7 +196,7 @@ const dismiss = () => {
         :calendars="connectedCalendars"
         :schedule="firstSchedule"
         :active-date="activeDate"
-        @created="scheduleStore.fetch"
+        @created="scheduleStore.fetch(call, true)"
         @updated="schedulePreview"
       />
     </div>

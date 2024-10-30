@@ -292,7 +292,7 @@ export type ExceptionDetail = {
   status?: number;
 }
 export type PydanticExceptionDetail = {
-  ctx: { reason: string },
+  ctx: { reason: string, ge?: string },
   input: string,
   loc: string[],
   msg: string,
@@ -333,7 +333,7 @@ export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchR
 export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type Refresh = () => Promise<void>;
 export type RemoteEventListResponse = UseFetchReturn<RemoteEvent[]>;
-export type ScheduleResponse = UseFetchReturn<Schedule>;
+export type ScheduleResponse = UseFetchReturn<Schedule|Exception>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot|Exception>;
