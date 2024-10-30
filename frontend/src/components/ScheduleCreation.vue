@@ -703,7 +703,7 @@ watch(
           <hr/>
           <!-- custom quick link -->
           <label class="relative flex flex-col gap-1">
-            <div class="flex gap-2">
+            <div class="flex items-center gap-2">
               <text-input
                 type="text"
                 name="slug"
@@ -716,7 +716,13 @@ watch(
               >
                 {{ t("label.quickLink") }}
               </text-input>
-              <refresh-icon class="mt-7 cursor-pointer text-teal-600" @click.prevent="refreshSlug" />
+              <link-button
+                class="p-0.5"
+                @click="scheduleInput.active ? refreshSlug() : null"
+                :disabled="!scheduleInput.active"
+              >
+                <refresh-icon />
+              </link-button>
             </div>
           </label>
           <!-- option to deactivate confirmation -->
