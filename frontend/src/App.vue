@@ -233,8 +233,12 @@ onMounted(async () => {
           // Easiest just to string replace all instances!
           let json = JSON.stringify(properties);
           // replaceAll that typescript won't complain about...
-          json = json.replace(new RegExp(properties.$current_url, 'gi'), properties.$current_url.replace(oldPath, vuePath));
-          json = json.replace(new RegExp(properties.$pathname, 'gi'), vuePath);
+          if (properties?.$current_url) {
+            json = json.replace(new RegExp(properties.$current_url, 'gi'), properties.$current_url.replace(oldPath, vuePath));
+          }
+          if (properties?.$pathname) {
+            json = json.replace(new RegExp(properties.$pathname, 'gi'), vuePath);
+          }
 
           properties = JSON.parse(json);
         }
