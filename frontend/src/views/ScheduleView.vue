@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  DateFormatStrings,
-  DEFAULT_SLOT_DURATION, Dismissibles,
-  EventLocationType,
-  MeetingLinkProviderType,
-} from '@/definitions';
+import { Dismissibles } from '@/definitions';
 import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
@@ -76,32 +71,8 @@ const onDateChange = async (dateObj: TimeFormatted) => {
 onMounted(async () => {
   // Don't actually load anything during the FTUE
   if (route.name === 'setup') {
-    // Setup a fake schedule so the schedule creation bar works correctly...
-    // TODO: move that to the schedule store as initial/default value
-    schedules.value = [{
-      active: false,
-      name: '',
-      calendar_id: 0,
-      location_type: EventLocationType.InPerson,
-      location_url: '',
-      details: '',
-      start_date: dj().format(DateFormatStrings.QalendarFullDay),
-      end_date: null,
-      start_time: '09:00',
-      end_time: '17:00',
-      earliest_booking: 1440,
-      farthest_booking: 20160,
-      weekdays: [1, 2, 3, 4, 5],
-      slot_duration: DEFAULT_SLOT_DURATION,
-      meeting_link_provider: MeetingLinkProviderType.None,
-      booking_confirmation: true,
-      calendar: {
-        id: 0,
-        title: '',
-        color: '#000',
-        connected: true,
-      },
-    }];
+    // Setup a default schedule so the schedule creation bar works correctly...
+    schedules.value = [scheduleStore.defaultSchedule];
     schedulesReady.value = true;
     return;
   }

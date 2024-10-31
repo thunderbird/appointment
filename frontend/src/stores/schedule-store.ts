@@ -2,7 +2,13 @@ import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
 import { ref, computed, inject, Ref } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { DateFormatStrings, MetricEvents } from '@/definitions';
+import {
+  DateFormatStrings,
+  MetricEvents,
+  DEFAULT_SLOT_DURATION,
+  EventLocationType,
+  MeetingLinkProviderType,
+} from '@/definitions';
 import {
   Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail
 } from '@/models';
@@ -13,6 +19,31 @@ import { timeFormat } from '@/utils';
 // eslint-disable-next-line import/prefer-default-export
 export const useScheduleStore = defineStore('schedules', () => {
   const dj = inject(dayjsKey);
+
+  const defaultSchedule = {
+    active: false,
+    name: '',
+    calendar_id: 0,
+    location_type: EventLocationType.InPerson,
+    location_url: '',
+    details: '',
+    start_date: dj().format(DateFormatStrings.QalendarFullDay),
+    end_date: null,
+    start_time: '09:00',
+    end_time: '17:00',
+    earliest_booking: 1440,
+    farthest_booking: 20160,
+    weekdays: [1, 2, 3, 4, 5],
+    slot_duration: DEFAULT_SLOT_DURATION,
+    meeting_link_provider: MeetingLinkProviderType.None,
+    booking_confirmation: true,
+    calendar: {
+      id: 0,
+      title: '',
+      color: '#000',
+      connected: true,
+    },
+  };
 
   // State
   const isLoaded = ref(false);
@@ -174,6 +205,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   return {
     isLoaded,
+    defaultSchedule,
     schedules,
     firstSchedule,
     inactiveSchedules,
