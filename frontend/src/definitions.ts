@@ -8,6 +8,8 @@ export enum DateFormatStrings {
   // Time display formats
   Display12Hour = 'hh:mma',
   Display24Hour = 'HH:mm',
+  // Other formats
+  UniqueMonth = 'YYYY-MM',
 }
 
 /**

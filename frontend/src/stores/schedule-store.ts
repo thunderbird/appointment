@@ -1,10 +1,16 @@
 import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, Ref } from 'vue';
 import { useUserStore } from '@/stores/user-store';
-import { DateFormatStrings, MetricEvents } from '@/definitions';
 import {
-  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse,
+  DateFormatStrings,
+  MetricEvents,
+  DEFAULT_SLOT_DURATION,
+  EventLocationType,
+  MeetingLinkProviderType,
+} from '@/definitions';
+import {
+  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -14,16 +20,42 @@ import { timeFormat } from '@/utils';
 export const useScheduleStore = defineStore('schedules', () => {
   const dj = inject(dayjsKey);
 
+  const defaultSchedule = {
+    active: false,
+    name: '',
+    calendar_id: 0,
+    location_type: EventLocationType.InPerson,
+    location_url: '',
+    details: '',
+    start_date: dj().format(DateFormatStrings.QalendarFullDay),
+    end_date: null,
+    start_time: '09:00',
+    end_time: '17:00',
+    earliest_booking: 1440,
+    farthest_booking: 20160,
+    weekdays: [1, 2, 3, 4, 5],
+    slot_duration: DEFAULT_SLOT_DURATION,
+    meeting_link_provider: MeetingLinkProviderType.None,
+    booking_confirmation: true,
+    calendar: {
+      id: 0,
+      title: '',
+      color: '#000',
+      connected: true,
+    },
+  };
+
   // State
   const isLoaded = ref(false);
 
   // Data
   const schedules = ref<Schedule[]>([]);
+  const firstSchedule = computed((): Schedule => schedules.value?.length > 0 ? schedules.value[0] : null);
   const inactiveSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => !schedule.active));
   const activeSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => schedule.active));
 
   /**
-   * Get all calendars for current user
+   * Get all schedules for current user
    * @param call preconfigured API fetch function
    * @param force Force a fetch even if we already have data
    */
@@ -43,18 +75,18 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   /**
-   * Restore default state, empty and unload calendars
+   * Restore default state, empty and unload schedules
    */
   const $reset = () => {
     schedules.value = [];
     isLoaded.value = false;
   };
 
-  const handleErrorResponse = (responseData) => {
+  const handleErrorResponse = (responseData: Ref<Exception>) => {
     const { value } = responseData;
 
-    if (value?.detail?.message) {
-      return value?.detail?.message;
+    if ((value?.detail as ExceptionDetail)?.message) {
+      return (value?.detail as ExceptionDetail)?.message;
     }
 
     if (value?.detail instanceof Array) {
@@ -108,7 +140,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     if (error.value) {
       return {
         error: true,
-        message: handleErrorResponse(data),
+        message: handleErrorResponse(data as Ref<Exception>),
       } as Error;
     }
 
@@ -129,7 +161,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     if (error.value) {
       return {
         error: true,
-        message: handleErrorResponse(data),
+        message: handleErrorResponse(data as Ref<Exception>),
       } as Error;
     }
 
@@ -172,6 +204,17 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   return {
-    isLoaded, schedules, inactiveSchedules, activeSchedules, fetch, $reset, createSchedule, updateSchedule, timeToBackendTime, timeToFrontendTime,
+    isLoaded,
+    defaultSchedule,
+    schedules,
+    firstSchedule,
+    inactiveSchedules,
+    activeSchedules,
+    fetch,
+    $reset,
+    createSchedule,
+    updateSchedule,
+    timeToBackendTime,
+    timeToFrontendTime,
   };
 });
