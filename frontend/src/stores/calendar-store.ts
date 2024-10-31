@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { dayjsKey } from '@/keys';
 import { Dayjs } from 'dayjs';
+import { DateFormatStrings } from '@/definitions';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useCalendarStore = defineStore('calendars', () => {
@@ -60,32 +61,36 @@ export const useCalendarStore = defineStore('calendars', () => {
    */
   const getRemoteEvents = async (call: Fetch, activeDate: Dayjs, force = false) => {
     // Get month identifier to remember this month's events are already retrieved
-    const month = activeDate.format('YYYY-MM');
+    const month = activeDate.format(DateFormatStrings.UniqueMonth);
     
     // Most calendar impl are non-inclusive of the last day, so just add one day to the end.
-    const from = activeDate.startOf('month').format('YYYY-MM-DD');
-    const to = activeDate.endOf('month').add(1, 'day').format('YYYY-MM-DD');
+    const from = activeDate.startOf('month').format(DateFormatStrings.QalendarFullDay);
+    const to = activeDate.endOf('month').add(1, 'day').format(DateFormatStrings.QalendarFullDay);
   
     // If retrieval is forced, delete cache and start with zero events again
     if (force) {
       remoteMonthsRetrieved.value = [];
     }
+
+    // If month is already cached, there's nothing more to do
+    if (remoteMonthsRetrieved.value.includes(month)) {
+      return;
+    }
+
     const calendarEvents = force ? [] : [...remoteEvents.value];
 
     // Only retrieve remote events if we don't have this month already cached
-    if (!remoteMonthsRetrieved.value.includes(month)) {
-      await Promise.all(connectedCalendars.value.map(async (calendar) => {
-        const { data }: RemoteEventListResponse = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
-        if (Array.isArray(data.value)) {
-          calendarEvents.push(
-            ...data.value.map((event) => ({
-              ...event,
-              duration: dj(event.end).diff(dj(event.start), 'minutes'),
-            })),
-          );
-        }
-      }));
-    }
+    await Promise.all(connectedCalendars.value.map(async (calendar) => {
+      const { data }: RemoteEventListResponse = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
+      if (Array.isArray(data.value)) {
+        calendarEvents.push(
+          ...data.value.map((event) => ({
+            ...event,
+            duration: dj(event.end).diff(dj(event.start), 'minutes'),
+          })),
+        );
+      }
+    }));
 
     // Remember month
     remoteMonthsRetrieved.value.push(month);
