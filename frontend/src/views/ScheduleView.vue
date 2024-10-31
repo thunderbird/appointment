@@ -11,12 +11,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, callKey, refreshKey } from '@/keys';
-import {
-  RemoteEvent,
-  RemoteEventListResponse,
-  ScheduleAppointment,
-  TimeFormatted,
-} from '@/models';
+import { ScheduleAppointment, TimeFormatted } from '@/models';
 import ScheduleCreation from '@/components/ScheduleCreation.vue';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
@@ -40,7 +35,7 @@ const calendarStore = useCalendarStore();
 const userActivityStore = useUserActivityStore();
 const { schedules, firstSchedule } = storeToRefs(scheduleStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
-const { connectedCalendars } = storeToRefs(calendarStore);
+const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
 // current selected date, if not in route: defaults to now
@@ -52,26 +47,6 @@ const activeDateRange = ref({
 
 // active menu item for tab navigation of calendar views
 const tabActive = ref(BookingCalendarView.Month);
-
-// get remote calendar data for current year
-const calendarEvents = ref<RemoteEvent[]>([]);
-const getRemoteEvents = async (from: string, to: string) => {
-  // Most calendar impl are non-inclusive of the last day, so just add one to the day.
-  const inclusiveTo = dj(to).add(1, 'day').format('YYYY-MM-DD');
-
-  calendarEvents.value = [];
-  await Promise.all(connectedCalendars.value.map(async (calendar) => {
-    const { data }: RemoteEventListResponse = await call(`rmt/cal/${calendar.id}/${from}/${inclusiveTo}`).get().json();
-    if (Array.isArray(data.value)) {
-      calendarEvents.value.push(
-        ...data.value.map((event) => ({
-          ...event,
-          duration: dj(event.end).diff(dj(event.start), 'minutes'),
-        })),
-      );
-    }
-  }));
-};
 
 // user configured schedules from db (only the first for now, later multiple schedules will be available)
 const schedulesReady = ref(false);
@@ -86,7 +61,7 @@ const schedulePreview = (schedule: ScheduleAppointment) => {
  * Retrieve new events if a user navigates to a different month
  * @param dateObj
  */
-const onDateChange = (dateObj: TimeFormatted) => {
+const onDateChange = async (dateObj: TimeFormatted) => {
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
 
@@ -94,13 +69,10 @@ const onDateChange = (dateObj: TimeFormatted) => {
 
   // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
   if (
-    dj(activeDateRange.value.end).format('YYYYMM') !== dj(end).format('YYYYMM')
-    || dj(activeDateRange.value.start).format('YYYYMM') !== dj(start).format('YYYYMM')
+    !dj(activeDateRange.value.end).isSame(dj(end), 'month')
+    || !dj(activeDateRange.value.start).isSame(dj(start), 'month')
   ) {
-    getRemoteEvents(
-      dj(start).format('YYYY-MM-DD'),
-      dj(end).format('YYYY-MM-DD'),
-    );
+    await calendarStore.getRemoteEvents(call, activeDate.value);
   }
 };
 
@@ -109,6 +81,7 @@ onMounted(async () => {
   // Don't actually load anything during the FTUE
   if (route.name === 'setup') {
     // Setup a fake schedule so the schedule creation bar works correctly...
+    // TODO: move that to the schedule store as initial/default value
     schedules.value = [{
       active: false,
       name: '',
@@ -139,9 +112,7 @@ onMounted(async () => {
   await refresh();
   scheduleStore.fetch(call);
   schedulesReady.value = true;
-  const eventsFrom = dj(activeDate.value).startOf('month').format('YYYY-MM-DD');
-  const eventsTo = dj(activeDate.value).endOf('month').format('YYYY-MM-DD');
-  await getRemoteEvents(eventsFrom, eventsTo);
+  await calendarStore.getRemoteEvents(call, activeDate.value);
 });
 
 const dismiss = () => {
@@ -205,7 +176,7 @@ const dismiss = () => {
       class="w-full md:w-9/12 xl:w-10/12"
       :selected="activeDate"
       :appointments="pendingAppointments"
-      :events="calendarEvents"
+      :events="remoteEvents"
       :schedules="schedulesPreviews"
       @date-change="onDateChange"
     />
