@@ -757,7 +757,8 @@ class Tools:
 
                     # We're good here, continue along the loop
                     continue
-                except requests.exceptions.ConnectionError:
+                except caldav.lib.error.ReportError:
+                    logging.debug("[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.")
                     pass
 
                 # Okay maybe this server doesn't support freebusy, try the old way
