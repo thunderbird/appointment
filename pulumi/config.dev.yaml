@@ -1,0 +1,102 @@
+---
+resources:
+  tb:network:MultiCidrVpc:
+    vpc:
+      cidr_block: 10.0.0.0/16
+      egress_via_internet_gateway: True
+      enable_dns_hostnames: True
+      enable_internet_gateway: True
+      endpoint_interfaces:
+        - ecr.api
+        - ecr.dkr
+        - logs
+        - secretsmanager
+        - ssm
+      endpoint_gateways:
+        - s3
+      public_subnets:
+        us-east-1a:
+          - 10.0.254.0/24
+        us-east-1b:
+          - 10.0.255.0/24
+      private_subnets:
+        us-east-1a:
+          - 10.0.0.0/24
+        us-east-1b:
+          - 10.0.1.0/24
+  tb:network:SecurityGroupWithRules:
+    backend:
+      rules:
+        ingress:
+          - source_security_group_id: backend-alb.id
+            description: Ingress from ALB
+            protocol: tcp
+            from_port: 5000
+            to_port: 5000
+        egress:
+          - source_security_group_id: rds.id
+            description: Egress to DB
+            protocol: tcp
+            from_port: 3306
+            to_port: 3306
+          - cidr_blocks: ["0.0.0.0/0"]
+            description: TLS Egress
+            protocol: tcp
+            from_port: 443
+            to_port: 443
+          - cidr_blocks: ["0.0.0.0/0"]
+            description: SMTP Egress
+            protocol: tcp
+            from_port: 587
+            to_port: 587
+          - source_security_group_id: redis.id
+            description: Egress to Redis
+            protocol: tcp
+            from_port: 6379
+            to_port: 6380
+    backend-alb:
+      rules:
+        ingress:
+          - prefix_list_ids: pl-3b927c52
+            description: Ingress from Cloudfront
+            protocol: tcp
+            from_port: 5000
+            to_port: 5000
+          - cidr_blocks: ["0.0.0.0/0"] 
+            description: Ingress from Internet
+            protocol: tcp
+            from_port: 80
+            to_port: 80
+        egress:
+          - source_security_group_id: backend.id
+            description: Egress to Backend
+            protocol: tcp
+            from_port: 5000
+            to_port: 5000
+    redis:
+      rules:
+        ingress:
+          - source_security_group_id:
+            description: Ingress from Backend
+            protocol: tcp
+            from_port: 6379
+            to_port: 6380
+        egress:
+          - source_security_group_id: rds.id
+            description: Egress to DB
+            protocol: tcp
+            from_port: 3306
+            to_port: 3306
+    rds:
+      rules:
+        ingress:
+          - source_security_group_id: backed.id
+            description: Ingress from Backend
+            protocol: tcp
+            from_port: 3306
+            to_port: 3306
+          - source_security_group_id: redis.id
+            description: Ingress from Redis
+            protocol: tcp
+            from_port: 3306
+            to_port: 3306
