@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {
-  BookingCalendarView,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION, Dismissibles,
   EventLocationType,
   MeetingLinkProviderType,
 } from '@/definitions';
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -38,15 +37,12 @@ const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
-// current selected date, if not in route: defaults to now
-const activeDate = ref(route.params.date ? dj(route.params.date as string) : dj());
-const activeDateRange = ref({
+// current selected date, defaults to now
+const activeDate = ref(dj());
+const activeDateRange = computed(() => ({
   start: activeDate.value.startOf('month'),
   end: activeDate.value.endOf('month'),
-});
-
-// active menu item for tab navigation of calendar views
-const tabActive = ref(BookingCalendarView.Month);
+}));
 
 // user configured schedules from db (only the first for now, later multiple schedules will be available)
 const schedulesReady = ref(false);
@@ -156,10 +152,7 @@ const dismiss = () => {
     <div class="text-4xl font-light">{{ t('label.dashboard') }}</div>
   </div>
   <!-- page content -->
-  <div
-    class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4"
-    :class="{ 'lg:mt-10': tabActive === BookingCalendarView.Month }"
-  >
+  <div class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4">
     <!-- schedule creation dialog -->
     <div class="mx-auto mb-10 w-3/4 min-w-80 sm:w-1/4 md:mb-0 xl:w-1/6">
       <schedule-creation
@@ -174,7 +167,6 @@ const dismiss = () => {
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
       class="w-full md:w-9/12 xl:w-10/12"
-      :selected="activeDate"
       :appointments="pendingAppointments"
       :events="remoteEvents"
       :schedules="schedulesPreviews"
