@@ -26,7 +26,7 @@ def is_owned(db: Session, calendar_id: int, subscriber_id: int):
     )
 
 
-def get(db: Session, calendar_id: int):
+def get(db: Session, calendar_id: int) -> models.Calendar|None:
     """retrieve calendar by id"""
     return db.get(models.Calendar, calendar_id)
 
@@ -36,7 +36,7 @@ def is_connected(db: Session, calendar_id: int):
     return get(db, calendar_id).connected
 
 
-def get_by_url(db: Session, url: str):
+def get_by_url(db: Session, url: str) -> models.Calendar|None:
     """retrieve calendar by calendar url"""
     return db.query(models.Calendar).filter(models.Calendar.url == url).first()
 
@@ -66,9 +66,8 @@ def create(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int
     return db_calendar
 
 
-def update(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):
-    """update existing calendar by id"""
-    db_calendar = get(db, calendar_id)
+def update_by_calendar(db: Session, calendar: schemas.CalendarConnection, db_calendar: models.Calendar) -> models.Calendar|None:
+    """Update a calendar from the database with calendar data."""
 
     # list of all attributes that must never be updated
     # # because they have dedicated update functions for security reasons
@@ -86,6 +85,13 @@ def update(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):
     db.commit()
     db.refresh(db_calendar)
     return db_calendar
+
+
+def update(db: Session, calendar: schemas.CalendarConnection, calendar_id: int):
+    """update existing calendar by id"""
+    db_calendar = get(db, calendar_id)
+
+    return update_by_calendar(db, calendar, db_calendar)
 
 
 def update_connection(db: Session, is_connected: bool, calendar_id: int):
@@ -117,7 +123,7 @@ def update_or_create(db: Session, calendar: schemas.CalendarConnection, calendar
     if subscriber_calendar is None:
         return create(db, calendar, subscriber_id)
 
-    return update(db, calendar, subscriber_calendar.id)
+    return update_by_calendar(db, calendar, subscriber_calendar)
 
 
 def delete(db: Session, calendar_id: int):
