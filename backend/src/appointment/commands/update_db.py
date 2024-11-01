@@ -23,18 +23,23 @@ def run():
 
     engine, _ = get_engine_and_session()
 
+    fresh_db = False
+
     with engine.begin() as connection:
         context = migration.MigrationContext.configure(connection)
         # Returns a tuple, empty if there's no revisions saved
         revisions = context.get_current_heads()
 
         # If we have no revisions, then fully create the database from the model metadata,
-        # and set our revision number to the latest revision. Otherwise run any new migrations
         if len(revisions) == 0:
             print('Initializing database, and setting it to the latest revision')
             models.Base.metadata.create_all(bind=engine)
-            command.stamp(alembic_cfg, 'head')
-        else:
-            print('Database already initialized, running migrations')
-            command.upgrade(alembic_cfg, 'head')
-        print('Finished checking database')
+            fresh_db = True
+
+    # If it's a fresh db set our revision number to the latest revision. Otherwise run any new migrations
+    if fresh_db:
+        command.stamp(alembic_cfg, 'head')
+    else:
+        print('Database already initialized, running migrations')
+        command.upgrade(alembic_cfg, 'head')
+    print('Finished checking database')
