@@ -1,6 +1,6 @@
 [project]
 name = "appointment"
-version = "0.4.0"
+version = "0.5.0"
 description = "Backend component to Thunderbird Appointment"
 requires-python = ">3.12"
 dynamic = ["dependencies"]
@@ -17,8 +17,7 @@ cli = [
     "ruff",
 ]
 db = [
-    "mysqlclient==2.1.1",
-    "mysql-connector-python==8.0.32",
+    "mysqlclient==2.2.5",
 ]
 test = [
     "Faker==26.0.0",

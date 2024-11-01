@@ -1,4 +1,4 @@
-alembic==1.13.2
+alembic==1.13.3
 argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
 Babel==2.15.0
@@ -15,7 +15,7 @@ icalendar==5.0.13
 itsdangerous==2.2.0
 markdown==3.6
 MarkupSafe==2.1.2
-nh3==0.2.17
+nh3==0.2.18
 python-dotenv==1.0.1
 python-multipart==0.0.9
 PyJWT==2.6.0
@@ -23,7 +23,7 @@ pydantic[email]==2.7.4
 sentry-sdk==2.10.0
 starlette-context==0.3.6
 sqlalchemy-utils==0.41.2
-sqlalchemy==2.0.31
+sqlalchemy==2.0.36
 typer==0.12.3
 tzdata==2024.1
 uvicorn==0.30.1
