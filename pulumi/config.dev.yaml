@@ -28,13 +28,13 @@ resources:
     backend:
       rules:
         ingress:
-          - source_security_group_id: backend-alb.id
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Ingress from ALB
             protocol: tcp
             from_port: 5000
             to_port: 5000
         egress:
-          - source_security_group_id: rds.id
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Egress to DB
             protocol: tcp
             from_port: 3306
@@ -49,7 +49,7 @@ resources:
             protocol: tcp
             from_port: 587
             to_port: 587
-          - source_security_group_id: redis.id
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Egress to Redis
             protocol: tcp
             from_port: 6379
@@ -57,7 +57,7 @@ resources:
     backend-alb:
       rules:
         ingress:
-          - prefix_list_ids: pl-3b927c52
+          - prefix_list_ids: ["pl-3b927c52"]
             description: Ingress from Cloudfront
             protocol: tcp
             from_port: 5000
@@ -68,7 +68,7 @@ resources:
             from_port: 80
             to_port: 80
         egress:
-          - source_security_group_id: backend.id
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Egress to Backend
             protocol: tcp
             from_port: 5000
@@ -76,13 +76,13 @@ resources:
     redis:
       rules:
         ingress:
-          - source_security_group_id:
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Ingress from Backend
             protocol: tcp
             from_port: 6379
             to_port: 6380
         egress:
-          - source_security_group_id: rds.id
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Egress to DB
             protocol: tcp
             from_port: 3306
@@ -90,13 +90,48 @@ resources:
     rds:
       rules:
         ingress:
-          - source_security_group_id: backed.id
+          - cidr_blocks: ["10.0.0.0/23"]
             description: Ingress from Backend
             protocol: tcp
             from_port: 3306
             to_port: 3306
-          - source_security_group_id: redis.id
-            description: Ingress from Redis
+#          - cidr_blocks: ["10.0.0.0/23"]
+#            description: Ingress from Redis
+#            protocol: tcp
+#            from_port: 3306
+#            to_port: 3306
+        egress:
+          - cidr_blocks: ["0.0.0.0/0"]
+            description: Egress to Internet
             protocol: tcp
-            from_port: 3306
-            to_port: 3306
+            from_port: 443
+            to_port: 443
+  tb:rds:RdsDatabaseGroup:
+    database:
+      db_name: database
+      subnets: vpc.private_subnets
+      vpc_cidr: 10.0.0.0/23
+      allocated_storage: 10
+      auto_minor_version_upgrade: True
+      apply_immediately: True
+      backup_retention_period: 0
+      blue_green_update: False
+      build_jumphost: False
+      db_username: user
+      enabled_cluster_cloudwatch_logs_exports: False
+      enabled_instance_cloudwatch_logs_exports: False
+      engine: mysql
+      engine_version: 8.0.35
+      instance_class: db.t3.medium
+      internal: True
+      jumphost_public_key: None
+      jumphost_source_cidrs: []
+      jumphost_user_data: None
+      max_allocated_storage: 0
+      num_instances: 1
+#      parameters: [{"require_secure_transport": "False"}]
+      parameter_group_family: mysql8.0
+      performance_insights_enabled: False
+      port: 3306
+      skip_final_snapshot: True
+      storage_type: gp3
