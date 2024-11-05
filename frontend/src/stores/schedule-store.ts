@@ -1,6 +1,8 @@
 import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
-import { ref, computed, inject, Ref } from 'vue';
+import {
+  ref, computed, inject, Ref,
+} from 'vue';
 import { useUserStore } from '@/stores/user-store';
 import {
   DateFormatStrings,
@@ -10,7 +12,7 @@ import {
   MeetingLinkProviderType,
 } from '@/definitions';
 import {
-  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail
+  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail,
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -43,6 +45,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       color: '#000',
       connected: true,
     },
+    time_updated: '1970-01-01T00:00:00',
   };
 
   // State
@@ -50,7 +53,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   // Data
   const schedules = ref<Schedule[]>([]);
-  const firstSchedule = computed((): Schedule => schedules.value?.length > 0 ? schedules.value[0] : null);
+  const firstSchedule = computed((): Schedule => (schedules.value?.length > 0 ? schedules.value[0] : null));
   const inactiveSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => !schedule.active));
   const activeSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => schedule.active));
 
@@ -179,7 +182,7 @@ export const useScheduleStore = defineStore('schedules', () => {
    * Converts a time (startTime or endTime) to a timezone that the backend expects
    * @param {string} time
    */
-  const timeToBackendTime = (time) => {
+  const timeToBackendTime = (time: string) => {
     const dateFormat = DateFormatStrings.QalendarFullDay;
 
     const user = useUserStore();
@@ -191,13 +194,14 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   /**
    * Converts a time (startTime or endTime) to the user's timezone from utc
-   * @param {string} time
+   * BaseTime is needed for daylight savings awareness. If your time is coming from the backend's schedule route
+   * then ensure you pass in schedule.time_updated as the baseTime!
    */
-  const timeToFrontendTime = (time) => {
+  const timeToFrontendTime = (time: string, baseTime: string) => {
     const dateFormat = DateFormatStrings.QalendarFullDay;
     const user = useUserStore();
 
-    return dj(`${dj().format(dateFormat)}T${time}:00`)
+    return dj(`${dj(baseTime).format(dateFormat)}T${time}:00`)
       .utc(true)
       .tz(user.data.timezone ?? dj.tz.guess())
       .format('HH:mm');

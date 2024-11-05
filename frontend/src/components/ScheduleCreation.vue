@@ -122,14 +122,8 @@ onMounted(() => {
   if (props.schedule) {
     scheduleInput.value = { ...props.schedule };
     // calculate utc back to user timezone
-    scheduleInput.value.start_time = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`)
-      .utc(true)
-      .tz(user.data.timezone ?? dj.tz.guess())
-      .format('HH:mm');
-    scheduleInput.value.end_time = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`)
-      .utc(true)
-      .tz(user.data.timezone ?? dj.tz.guess())
-      .format('HH:mm');
+    scheduleInput.value.start_time = scheduleStore.timeToFrontendTime(scheduleInput.value.start_time, scheduleInput.value.time_updated);
+    scheduleInput.value.end_time = scheduleStore.timeToFrontendTime(scheduleInput.value.end_time, scheduleInput.value.time_updated);
 
     // Adjust the default calendar if the one attached is not connected.
     const { calendar_id: calendarId } = scheduleInput.value;
