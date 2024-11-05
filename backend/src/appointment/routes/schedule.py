@@ -1,3 +1,4 @@
+import sentry_sdk
 from fastapi import APIRouter, Depends, BackgroundTasks, Request
 import logging
 import os
@@ -32,6 +33,7 @@ from zoneinfo import ZoneInfo
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.calendar import EventNotCreatedException
+from ..exceptions.misc import UnexpectedBehaviourWarning
 from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeAccepted
 from ..tasks.emails import (
     send_pending_email,
@@ -69,9 +71,11 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
     # If our end time is below start time, then it's the next day.
     add_day = 1 if schedule.end_time <= schedule.start_time else 0
 
+    booking_slot_end = booking_slot.start + timedelta(minutes=schedule.slot_duration)
+
     if (
         booking_slot.start < datetime.combine(today, schedule.start_time, tzinfo=timezone.utc)
-        or (booking_slot.start + timedelta(minutes=schedule.slot_duration)) > datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day)
+        or booking_slot_end > datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day)
     ):
         return False
 
@@ -248,6 +252,28 @@ def request_schedule_availability_slot(
 
     # Ensure the request is valid
     if not is_this_a_valid_booking_time(schedule, s_a.slot):
+        # Gather the relevant information for debugging, and capture it.
+        debug_obj = {
+            'schedule': {
+                'time_updated': schedule.time_updated,
+                'start': schedule.start_time,
+                'end': schedule.end_time,
+                'local_start': schedule.start_time_local,
+                'local_end': schedule.end_time_local,
+                'weekdays': schedule.weekdays,
+                'slot_duration': schedule.slot_duration,
+                'start_date': schedule.start_date,
+                'end_date': schedule.end_date,
+                'earliest_booking': schedule.earliest_booking,
+                'farthest_booking': schedule.farthest_booking
+            },
+            'slot': s_a.slot,
+            'submitter_timezone': s_a.attendee.timezone,
+            'owner_timezone': subscriber.timezone,
+        }
+        debug_exc = UnexpectedBehaviourWarning(message='Invalid booking time warning!', info=debug_obj)
+        sentry_sdk.capture_exception(debug_exc)
+
         raise validation.SlotNotFoundException()
 
     # check if slot still available, might already be taken at this time
