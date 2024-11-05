@@ -1,1 +1,2 @@
-git+https://github.com/thunderbird/pulumi.git@41/add_mixed_subnets
+git+https://github.com/thunderbird/pulumi.git@41/add_appointment_features
+#../../pulumi

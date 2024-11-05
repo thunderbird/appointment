@@ -27,18 +27,7 @@ resources:
   tb:network:SecurityGroupWithRules:
     backend:
       rules:
-        ingress:
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Ingress from ALB
-            protocol: tcp
-            from_port: 5000
-            to_port: 5000
         egress:
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Egress to DB
-            protocol: tcp
-            from_port: 3306
-            to_port: 3306
           - cidr_blocks: ["0.0.0.0/0"]
             description: TLS Egress
             protocol: tcp
@@ -49,11 +38,6 @@ resources:
             protocol: tcp
             from_port: 587
             to_port: 587
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Egress to Redis
-            protocol: tcp
-            from_port: 6379
-            to_port: 6380
     backend-alb:
       rules:
         ingress:
@@ -67,45 +51,66 @@ resources:
             protocol: tcp
             from_port: 80
             to_port: 80
-        egress:
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Egress to Backend
-            protocol: tcp
-            from_port: 5000
-            to_port: 5000
-    redis:
-      rules:
-        ingress:
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Ingress from Backend
-            protocol: tcp
-            from_port: 6379
-            to_port: 6380
-        egress:
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Egress to DB
-            protocol: tcp
-            from_port: 3306
-            to_port: 3306
-    rds:
-      rules:
-        ingress:
-          - cidr_blocks: ["10.0.0.0/23"]
-            description: Ingress from Backend
-            protocol: tcp
-            from_port: 3306
-            to_port: 3306
-#          - cidr_blocks: ["10.0.0.0/23"]
-#            description: Ingress from Redis
-#            protocol: tcp
-#            from_port: 3306
-#            to_port: 3306
-        egress:
-          - cidr_blocks: ["0.0.0.0/0"]
-            description: Egress to Internet
-            protocol: tcp
-            from_port: 443
-            to_port: 443
+  tb:network:SecurityGroup:
+    - cache
+    - db
+  tb:network:SecurityGroupRule:
+    backend_ingress_from_alb:
+      config:
+        description: Ingress from ALB
+        type: ingress
+        protocol: tcp
+        from_port: 5000
+        to_port: 5000
+    backend_egress_to_db:
+      config:
+        description: Egress to DB
+        type: egress
+        protocol: tcp
+        from_port: 3306
+        to_port: 3306
+    backend_egress_to_cache:
+      config:
+        description: Egress to cache
+        type: egress
+        protocol: tcp
+        from_port: 6379
+        to_port: 6380
+    backend_alb_egress_to_backend:
+      config:
+        description: Egress to backend
+        type: egress
+        protocol: tcp
+        from_port: 5000
+        to_port: 5000
+    cache_ingress_from_backend:
+      config:
+        description: Ingress from backend
+        type: ingress
+        protocol: tcp
+        from_port: 6379
+        to_port: 6380
+    cache_egress_to_db:
+      config:
+        description: Egress to DB
+        type: egress
+        protocol: tcp
+        from_port: 3306
+        to_port: 3306
+    db_ingress_from_backend:
+      config:
+        description: Ingress from backend
+        type: ingress
+        protocol: tcp
+        from_port: 3306
+        to_port: 3306
+    db_ingress_from_cache:
+      config:
+        description: Ingress from cache
+        type: ingress
+        protocol: tcp
+        from_port: 3306
+        to_port: 3306
   tb:rds:RdsDatabaseGroup:
     database:
       db_name: database
