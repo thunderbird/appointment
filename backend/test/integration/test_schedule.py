@@ -1,5 +1,5 @@
 import zoneinfo
-from datetime import date, time, datetime, timedelta, timezone
+from datetime import date, time, datetime, timedelta, timezone, UTC
 from unittest.mock import patch
 
 import pytest
@@ -301,9 +301,9 @@ class TestSchedule:
         monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
 
         start_date = date(2024, 3, 1)
-        start_time = time(16)
+        start_time = time(16, tzinfo=UTC)
         # Next day
-        end_time = time(0)
+        end_time = time(0, tzinfo=UTC)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -334,10 +334,11 @@ class TestSchedule:
 
             # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
             # Note: this should be in PST (Pacific Standard Time)
-            assert slots[0]['start'] == '2024-03-04T09:00:00-08:00'
+            assert slots[0]['start'] == '2024-03-04T08:00:00-08:00'
             # Based off the farthest_booking our latest slot is 4:30pm
             # Note: This should be in PDT (Pacific Daylight Time)
-            assert slots[-1]['start'] == '2024-03-15T16:30:00-07:00'
+            # Note2: The schedule ends at 0 UTC (or 16-07:00) so the last slot is 30 mins before that.
+            assert slots[-1]['start'] == '2024-03-15T15:30:00-07:00'
 
         # Check availability over a year from now
         with freeze_time(date(2025, 6, 1)):
@@ -350,8 +351,8 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-02T09:00:00-07:00'
-            assert slots[-1]['start'] == '2025-06-13T16:30:00-07:00'
+            assert slots[0]['start'] == '2025-06-02T08:00:00-07:00'
+            assert slots[-1]['start'] == '2025-06-13T15:30:00-07:00'
 
         # Check availability with a start date day greater than the farthest_booking day
         with freeze_time(date(2025, 6, 27)):
@@ -364,8 +365,8 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-30T09:00:00-07:00'
-            assert slots[-1]['start'] == '2025-07-11T16:30:00-07:00'
+            assert slots[0]['start'] == '2025-06-30T08:00:00-07:00'
+            assert slots[-1]['start'] == '2025-07-11T15:30:00-07:00'
 
     def test_public_availability_with_blockers(
         self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
@@ -379,8 +380,8 @@ class TestSchedule:
         tz = zoneinfo.ZoneInfo('America/Vancouver')
 
         # In UTC... 9 - 4 Vancouver time
-        schedule_start_time = time(16)
-        schedule_end_time = time(23)
+        schedule_start_time = time(17, tzinfo=UTC)
+        schedule_end_time = time(0, tzinfo=UTC)
 
         # Test times are asserted against events created by blocker times.
         # Follows the format:
@@ -490,8 +491,8 @@ class TestRequestScheduleAvailability:
     @pytest.fixture
     def setup_schedule(self, make_pro_subscriber, make_caldav_calendar, make_schedule):
         self.start_date = date(2024, 4, 1)
-        self.start_time = time(9)
-        self.end_time = time(10)
+        self.start_time = time(9, tzinfo=UTC)
+        self.end_time = time(10, tzinfo=UTC)
 
         self.subscriber = make_pro_subscriber()
         self.calendar = make_caldav_calendar(self.subscriber.id, connected=True)
@@ -522,9 +523,9 @@ class TestRequestScheduleAvailability:
     ):
         """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
-        start_time = time(9)
+        start_time = time(9, tzinfo=UTC)
         start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
-        end_time = time(15)
+        end_time = time(15, tzinfo=UTC)
 
         class MockCaldavConnector:
             @staticmethod
@@ -619,9 +620,9 @@ class TestRequestScheduleAvailability:
     ):
         """Test that a user can request a booking from a schedule"""
         start_date = date(2024, 4, 1)
-        start_time = time(9)
+        start_time = time(9, tzinfo=UTC)
         start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
-        end_time = time(10)
+        end_time = time(10, tzinfo=UTC)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -821,9 +822,9 @@ class TestRequestScheduleAvailability:
 class TestDecideScheduleAvailabilitySlot:
     start_date = datetime.now() - timedelta(days=4)
     start_date = start_date.date()
-    start_time = time(9)
+    start_time = time(9, tzinfo=UTC)
     start_datetime = datetime.combine(start_date, start_time)
-    end_time = time(10)
+    end_time = time(10, tzinfo=UTC)
 
     def test_confirm(
         self,
