@@ -482,17 +482,17 @@ class WaitingListAdminOut(BaseModel):
 
 
 class PageLoadIn(BaseModel):
-    browser: Optional[str]
-    browser_version: Optional[str]
-    os: Optional[str]
-    os_version: Optional[str]
-    device: Optional[str]
-    device_model: Optional[str]
-    resolution: Optional[str]
-    effective_resolution: Optional[str]
-    user_agent: Optional[str]
-    locale: Optional[str]
-    theme: Optional[str]
+    browser: Optional[str] = None
+    browser_version: Optional[str] = None
+    os: Optional[str] = None
+    os_version: Optional[str] = None
+    device: Optional[str] = None
+    device_model: Optional[str] = None
+    resolution: Optional[str] = None
+    effective_resolution: Optional[str] = None
+    user_agent: Optional[str] = None
+    locale: Optional[str] = None
+    theme: Optional[str] = None
 
 
 class FTUEStepIn(BaseModel):
