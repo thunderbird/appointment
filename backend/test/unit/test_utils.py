@@ -79,8 +79,8 @@ class TestIsAValidBookingTime:
             farthest_booking=10080,
             weekdays=[1, 2, 3, 4, 5],
             slot_duration=45,
-            start_time=17,
-            end_time=0,
+            start_time=16,  # 9AM PDT
+            end_time=0,  # 5PM PDT
             timezone='America/Vancouver',
             # This is not accurate, but it was probably saved before Nov 3rd.
             time_updated=datetime.datetime(2024, 11, 1, 12, 0,0, tzinfo=datetime.UTC),
