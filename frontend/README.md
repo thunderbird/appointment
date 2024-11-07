@@ -57,6 +57,7 @@ npm run lint -- --fix
 npm run test
 ```
 
+Note: Tests are setup to run in America/Vancouver timezone.
 
 ### Customize configuration
 
