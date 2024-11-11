@@ -1,6 +1,6 @@
 """Module: auth
 
-Handle authentification with Auth0 and get subscription data.
+Handle authentification with FxA and get subscription data.
 """
 
 import os

@@ -17,11 +17,14 @@ C4Component
   Container(c1, "Frontend", "Vue3 / Tailwind", "Provides all Appointment<br>functionality to customers<br>via their web browser")
   Container_Boundary(b1, "Backend") {
     Component(c3, "Subscriber Area", "FastAPI, JWT auth", "Provides functionality related<br>to calendar connections,<br>appointments, general availability")
-    Component(c2, "Auth Controller", "FastAPI", "Redirects to Auth0 service,<br>authenticates subscriber,<br>gets subscription level")
+    Component(c2, "Auth Controller", "FastAPI", "Redirects to FxA service,<br>authenticates subscriber,<br>gets subscription level")
     Component(c5, "Public Link Area", "FastAPI", "Allows visitors to choose<br>slots in given<br>availability timeline.")
-    System_Ext(e3, "Google Server", "Allows to query and write<br>event data into calendars<br>using Google API")
-    System_Ext(e2, "CalDAV Server", "Allows to query and write<br>event data into calendars<br>using CalDAV format")
-    System_Ext(e1, "Auth0", "Allows users to register,<br>sign in and subscribe<br>to an Appointment tier")
+    Boundary(e1, "External Connections") {
+      System_Ext(e3, "Google", "Allows to query and write<br>event data into calendars<br>using Google API")
+      System_Ext(e2, "CalDAV", "Allows to query and write<br>event data into calendars<br>using CalDAV format")
+      System_Ext(e1, "FxA", "Allows users to register,<br>sign in and subscribe<br>to an Appointment tier")
+      System_Ext(e4, "Zoom", "Allows to create meeting links<br>and attach them to events<br>using Zoom integration")
+    }
   }
   BiRel(c1, c2, "Call Sign up / in", "HTTPS")
   Rel(c2, c3, "Authentication<br>succeeded", "Session")
@@ -30,6 +33,7 @@ C4Component
   BiRel(c2, e1, "Authenticate Account", "OAuth2")
   BiRel(c3, e2, "Query event data", "JSON/HTTPS")
   BiRel(c3, e3, "Query event data", "JSON/HTTPS")
+  BiRel(c3, e4, "Meeting links", "JSON/HTTPS")
 
   UpdateRelStyle(c1, c2, $textColor="#999", $offsetY="-60", $offsetX="-110")
   UpdateRelStyle(c2, c3, $textColor="#999", $offsetY="20", $offsetX="-38")
@@ -38,6 +42,7 @@ C4Component
   UpdateRelStyle(c2, e1, $textColor="#999", $offsetY="0", $offsetX="10")
   UpdateRelStyle(c3, e2, $textColor="#999", $offsetY="0", $offsetX="10")
   UpdateRelStyle(c3, e3, $textColor="#999", $offsetY="0", $offsetX="10")
+  UpdateRelStyle(c3, e4, $textColor="#999", $offsetY="150", $offsetX="20")
   UpdateElementStyle(c4, $fontColor="black", $bgColor="#eddcea", $borderColor="#a30086")
   UpdateElementStyle(c2, $bgColor="#456789")
   UpdateElementStyle(c3, $bgColor="#456789")
