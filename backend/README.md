@@ -10,7 +10,7 @@ More information will be provided in the future. There is currently a docker fil
 
 In order to create a user with password authentication mode, you will need to set `APP_ALLOW_FIRST_TIME_REGISTER=True` in your `.env`.
 
-After the first login you'll want to fill the `APP_ADMIN_ALLOW_LIST` env variable with your account's email to access the basic admin panel located at `/admin/subscribers`. 
+After the first login you'll want to fill the `APP_ADMIN_ALLOW_LIST` env variable with your account's email to access the basic admin panel located at `/admin/subscribers`.
 
 ### Configuration
 

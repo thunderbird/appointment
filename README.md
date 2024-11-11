@@ -1,6 +1,7 @@
 # Thunderbird Appointment
 
-**Note: Thunderbird Appointment is in a beta state, so be prepared to encounter bugs**
+> [!IMPORTANT]  
+> Thunderbird Appointment is in a beta state, so be prepared to encounter bugs
 
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
