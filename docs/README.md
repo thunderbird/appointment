@@ -62,18 +62,18 @@ erDiagram
   SUBSCRIBERS {
     int id PK "Unique user key"
     string username "URL-friendly username, format is restricted"
-    string email "Preferred email address (synced with FxA)"
+    string email "FxA account email and email used for password auth"
     string name "Preferred display name"
     enum level "Subscription level [basic, plus, pro, admin]"
     int timezone "User selected home timezone, UTC offset"
     string avatar_url "Public link to an avatar image"
     string short_link_hash "Hash for verifying user link"
-    string minimum_valid_iat_time "Minimum valid issued at time timestamp"
+    string minimum_valid_iat_time "Minimum valid time to accept for JWT tokens"
     date time_created "UTC timestamp of subscriber creation"
     date time_updated "UTC timestamp of last subscriber modification"
     string secondary_email "Secondary email address"
     date time_deleted "UTC timestamp of deletion (soft delete)"
-    int ftue_level "Progress on first time user experience flow"
+    int ftue_level "Version of the FTUE the user has completed"
   }
   SUBSCRIBERS ||--o{ CALENDARS : own
   CALENDARS {
@@ -96,7 +96,7 @@ erDiagram
     int owner_id FK "Person who creates and owns this connection"
     string name "Custom connection title"
     enum type "Connection type [zoom, google, fxa, caldav]"
-    string type_id "Universal unique identifier"
+    string type_id "Type specific user or unique identifier (e.g. FXA/Zoom/etc. user id)"
     string token "Passphrase or passtoken for connecting"
     date time_created "UTC timestamp of connection creation"
     date time_updated "UTC timestamp of last connection modification"
@@ -104,12 +104,12 @@ erDiagram
   SUBSCRIBERS ||--o{ INVITES : hold
   INVITES {
     int id PK "Unique invite key"
-    int subscriber_id FK "Person who holds this invite"
+    int subscriber_id FK "User created from this invite"
     string code "Unique invitation code"
     enum status "Invitation status [active, revoked]"
     date time_created "UTC timestamp of invite creation"
     date time_updated "UTC timestamp of last invite modification"
-    int owner_id FK "Person who creates and owns this invite"
+    int owner_id FK "Used (admin) giving out this invitation"
   }
   INVITES ||--o{ WAITING_LIST : manage
   WAITING_LIST {
@@ -163,7 +163,7 @@ erDiagram
     string meeting_link_provider "Name of the provider for meeting links (e.g. Zoom)"
     string slug "Random or customized url part"
     bool booking_confirmation "True if booking requests need to be confirmed by owner"
-    string timezone "Configured timezone name"
+    string timezone "Configured timezone name (e.g. America/Vancouver, Europe/Berlin, etc)"
   }
   SCHEDULES ||--|{ AVAILABILITIES : hold_custom
   SCHEDULES ||--|{ SLOTS : provide_on_request
