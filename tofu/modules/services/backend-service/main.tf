@@ -26,8 +26,8 @@ resource "aws_ecs_task_definition" "backend" {
   execution_role_arn       = var.task_execution_role
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "512"
-  memory                   = "1024"
+  cpu                      = var.app_env == "prod" ? "1024" : "512"
+  memory                   = var.app_env == "prod" ? "4096" : "1024"
   runtime_platform {
     cpu_architecture        = "X86_64"
     operating_system_family = "LINUX"
