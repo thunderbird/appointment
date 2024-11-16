@@ -1,3 +1,5 @@
+import zoneinfo
+
 import sentry_sdk
 from fastapi import APIRouter, Depends, BackgroundTasks, Request
 import logging
@@ -48,6 +50,7 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
+
 def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schemas.SlotBase) -> bool:
     """Checks for timezone correctness, weekday and start/end time validity."""
     # For now lets only accept utc bookings as that's what our frontend supplies us.
@@ -62,7 +65,9 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
         return False
 
     # Is the time requested on a day of the week they have disabled?
-    iso_weekday = int(booking_slot.start.strftime('%u'))
+    # This should be based on the schedule timezone
+    start_date_tz = booking_slot.start.astimezone(zoneinfo.ZoneInfo(schedule.timezone))
+    iso_weekday = int(start_date_tz.strftime('%u'))
     if iso_weekday not in schedule.weekdays:
         return False
 
@@ -73,10 +78,9 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
 
     booking_slot_end = booking_slot.start + timedelta(minutes=schedule.slot_duration)
 
-    if (
-        booking_slot.start < datetime.combine(today, schedule.start_time, tzinfo=timezone.utc)
-        or booking_slot_end > datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day)
-    ):
+    if booking_slot.start < datetime.combine(
+        today, schedule.start_time, tzinfo=timezone.utc
+    ) or booking_slot_end > datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day):
         return False
 
     return True
