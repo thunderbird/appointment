@@ -49,7 +49,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 def create_subscriber(db, email, password, timezone):
     subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
-        email=email,
+        email=email.lower(), # Make sure to store the email address in lower case
         username=email,
         name=email.split('@')[0],
         timezone=timezone
@@ -94,6 +94,9 @@ def fxa_login(
         raise HTTPException(status_code=405)
 
     fxa_client.setup()
+
+    # Normalize email address to lower case
+    email = email.lower()
 
     # Check if they're in the allowed list, but only if they didn't provide an invite code
     # This checks to see if they're already a user (bypasses allow list) or in the allow list.
@@ -371,4 +374,3 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     if subscriber.is_deleted:
         raise validation.InvalidPermissionLevelException()
     return True  # Covered by get_admin_subscriber
-

@@ -146,6 +146,19 @@ class TestFXA:
         assert 'url' in data
         assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
 
+    def test_fxa_login_with_uppercase_email(self, with_client):
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        response = with_client.get(
+            '/fxa_login',
+            params={
+                'email': FXA_CLIENT_PATCH.get('subscriber_email').upper(),
+            },
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert 'url' in data
+        assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
+
     def test_fxa_with_allowlist_and_without_invite(self, with_client, with_l10n):
         os.environ['AUTH_SCHEME'] = 'fxa'
         os.environ['FXA_ALLOW_LIST'] = '@example.org'
