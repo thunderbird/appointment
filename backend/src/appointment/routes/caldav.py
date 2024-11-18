@@ -2,6 +2,7 @@ import json
 from typing import Optional
 from urllib.parse import urlparse
 
+import sentry_sdk
 from fastapi import APIRouter, Depends
 from redis import Redis
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
+from appointment.exceptions.misc import UnexpectedBehaviourWarning
 from appointment.exceptions.validation import RemoteCalendarConnectionError
 
 router = APIRouter()
@@ -33,28 +35,50 @@ def caldav_autodiscover_auth(
 
     dns_lookup_cache_key = f'dns:{utils.encrypt(connection.url)}'
 
+    lookup_branch = None
     lookup_url = None
     if redis_client:
         lookup_url = redis_client.get(dns_lookup_cache_key)
 
+    if lookup_url and 'http' not in lookup_url:
+        debug_obj = {
+            'url': lookup_url,
+            'branch': 'CACHE'
+        }
+        debug_exc = UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
+        sentry_sdk.capture_exception(debug_exc)
+        # Ignore cached result and look it up again
+        lookup_url = None
+
     # Do a dns lookup first
     if lookup_url is None:
+        lookup_branch = 'DNS'
         parsed_url = urlparse(connection.url)
         lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname, secure=secure_protocol)
         # set the cached lookup for the remainder of the dns ttl
         if redis_client and lookup_url:
             redis_client.set(dns_lookup_cache_key, utils.encrypt(lookup_url), ex=ttl)
     else:
+        lookup_branch = 'CACHED'
         # Extract the cached value
         lookup_url = utils.decrypt(lookup_url)
 
     # Check for well-known
     if lookup_url is None:
+        lookup_branch = 'WELL-KNOWN'
         lookup_url = Tools.well_known_caldav_lookup(connection.url)
 
     # If we have a lookup_url then apply it
     if lookup_url:
         connection.url = lookup_url
+
+    if not lookup_url or 'http' not in connection.url:
+        debug_obj = {
+            'url': lookup_url,
+            'branch': lookup_branch
+        }
+        debug_exc = UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
+        sentry_sdk.capture_exception(debug_exc)
 
     # Finally perform any final fixups needed
     connection.url = Tools.fix_caldav_urls(connection.url)
