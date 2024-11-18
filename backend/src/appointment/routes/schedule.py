@@ -78,9 +78,11 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
 
     booking_slot_end = booking_slot.start + timedelta(minutes=schedule.slot_duration)
 
-    if booking_slot.start < datetime.combine(
-        today, schedule.start_time, tzinfo=timezone.utc
-    ) or booking_slot_end > datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day):
+    too_early = booking_slot.start < datetime.combine(today, schedule.start_time, tzinfo=timezone.utc)
+    too_late = booking_slot_end > (
+      datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day)
+    )
+    if too_early or too_late:
         return False
 
     return True
