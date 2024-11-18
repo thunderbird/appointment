@@ -397,11 +397,17 @@ class CalDavConnector(BaseConnector):
             if status == 'cancelled' or transparency == 'transparent':
                 continue
 
+            vevent = e.vobject_instance.vevent
+
+            # Ignore events with missing datetime data
+            if not vevent.dtstart or (not vevent.dtend and not vevent.duration):
+                continue
+
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = e.vobject_instance.vevent.summary.value
-            start = e.vobject_instance.vevent.dtstart.value
+            title = vevent.summary.value if vevent.summary else ''
+            start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
             # if start doesn't hold time information (no datetime), it's a whole day
