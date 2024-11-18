@@ -400,13 +400,13 @@ class CalDavConnector(BaseConnector):
             vevent = e.vobject_instance.vevent
 
             # Ignore events with missing datetime data
-            if not vevent.dtstart or (not vevent.dtend and not vevent.duration):
+            if not vevent or not vevent.dtstart or (not vevent.dtend and not vevent.duration):
                 continue
 
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = vevent.summary.value if vevent.summary else ''
+            title = vevent.summary.value if vevent.summary else l10n('event-summary-default')
             start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
