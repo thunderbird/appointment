@@ -60,6 +60,8 @@ class TestRetrieveUserUrlData:
 
 class TestIsAValidBookingTime:
     def test_bug_735(self, make_schedule):
+        """A test case to cover unsuccessfully capturing bug 735, which is the seemingly random slot not found issue.
+        Ref: https://github.com/thunderbird/appointment/issues/735"""
         # Request data submitted from bug and anonymized.
         request_data = {
             's_a': {
@@ -93,6 +95,8 @@ class TestIsAValidBookingTime:
         assert is_valid is True
 
     def test_bug_735_case_2(self, make_schedule):
+        """A test case to cover successfully capturing bug 735, which is the seemingly random slot not found issue.
+        Ref: https://github.com/thunderbird/appointment/issues/735"""
         # Request data submitted from bug and anonymized.
         request_data = {
             's_a': {
