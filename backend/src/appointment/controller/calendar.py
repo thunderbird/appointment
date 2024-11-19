@@ -310,15 +310,21 @@ class CalDavConnector(BaseConnector):
                 # If one supports it, then that's good enough!
                 if supports_vevent:
                     break
-        except IndexError as ex:  # Library has an issue with top level urls, probably due to caldav spec?
+        # Library has an issue with top level urls, probably due to caldav spec?
+        except IndexError as ex:
             logging.error(f'IE: Error testing connection {ex}')
             return False
         except KeyError as ex:
             logging.error(f'KE: Error testing connection {ex}')
             return False
-        except requests.exceptions.RequestException as ex:  # Max retries exceeded, bad connection, missing schema, etc...
+        # Max retries exceeded, bad connection, missing schema, etc...
+        except requests.exceptions.RequestException as ex:
             return False
-        except caldav.lib.error.NotFoundError as ex:  # Good server, bad url.
+        # Good server, bad url.
+        except caldav.lib.error.NotFoundError as ex:
+            return False
+        # Some properties could not be retrieved.
+        except caldav.lib.error.PropfindError as ex:
             return False
 
         # They need at least VEVENT support for appointment to work.
