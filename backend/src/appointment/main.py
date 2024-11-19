@@ -65,6 +65,10 @@ def _common_setup():
 
     logging.basicConfig(**log_config)
 
+    # Adjust caldav
+    caldav_logger = logging.getLogger('caldav')
+    caldav_logger.setLevel(logging.CRITICAL)
+
     logging.debug('Logger started!')
 
     if os.getenv('SENTRY_DSN') != '' and os.getenv('SENTRY_DSN') is not None:
