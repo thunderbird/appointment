@@ -117,6 +117,10 @@ class TestInvite:
             invite = db.query(models.Invite).filter(models.Invite.id == invite.id).first()
             assert not invite
 
+            # Invited user should remain
+            inv_subscriber = db.query(models.Subscriber).filter(models.Subscriber.id == invited_subscriber.id).first()
+            assert inv_subscriber
+
     def test_deleting_invited_user_deletes_invite_and_waiting_list(self, with_db, make_basic_subscriber, make_invite, make_waiting_list):
         with with_db() as db:
             subscriber = make_basic_subscriber()

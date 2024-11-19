@@ -69,7 +69,7 @@ class TestVCreate:
 
         ics = Tools().create_vevent(appointment, slot, subscriber)
         assert ics
-        assert ':'.join(['LOCATION', slot.meeting_link_url])
+        assert ':'.join(['LOCATION', slot.meeting_link_url]) in ics.decode()
 
 
 class TestDnsCaldavLookup:
