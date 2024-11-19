@@ -74,7 +74,7 @@ zoom-connect-to-continue = Bitte ein Zoom-Konto verbinden, einen benutzerdefinie
 ## Google Exceptions
 
 google-connection-error = Fehler bei der Verbindung mit Google API, bitte Verbindung erneut herstellen.
-google-scope-changed = Der Zugriff auf Kalender und Ereignisse muss aktiviert sein, um Thunderbird Appointment verwenden zu können.
+google-scope-changed = Der Zugriff auf Kalender und Termine muss aktiviert sein, um Thunderbird Appointment verwenden zu können.
 google-invalid-creds = Die Anmeldedaten für die Google-Authentifizierung sind nicht gültig.
 google-auth-fail = Google-Authentifizierung fehlgeschlagen.
 google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte erneut versuchen.
@@ -85,7 +85,8 @@ google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto ver
 ## Frontend Facing Strings
 
 # If the calendar event does not have a title this will be used instead
-event-summary-not-found = Ereignis nicht gefunden!
+event-summary-not-found = Titel nicht gefunden!
+event-summary-default = Termin ohne Titel
 
 ## Event File Strings
 
