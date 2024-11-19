@@ -323,8 +323,12 @@ class CalDavConnector(BaseConnector):
         # Good server, bad url.
         except caldav.lib.error.NotFoundError as ex:
             return False
-        # Some properties could not be retrieved.
-        except caldav.lib.error.PropfindError as ex:
+        """
+        RequestException: Max retries exceeded, bad connection, missing schema, etc...
+        NotFoundError: Good server, bad url.
+        PropfindError: Some properties could not be retrieved.
+        """
+        except (requests.exceptions.RequestException, caldav.lib.error.NotFoundError, caldav.lib.error.PropfindError) as ex:
             return False
 
         # They need at least VEVENT support for appointment to work.
