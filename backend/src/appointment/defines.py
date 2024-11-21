@@ -2,6 +2,7 @@ SUPPORTED_LOCALES = ['en', 'de']
 FALLBACK_LOCALE = 'en'
 
 DATEFMT = '%Y-%m-%d'
+DATETIMEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
 # list of redis keys
 REDIS_REMOTE_EVENTS_KEY = 'rmt_events'

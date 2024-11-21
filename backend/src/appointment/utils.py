@@ -1,6 +1,7 @@
 import json
 import re
 import urllib.parse
+from contextlib import contextmanager
 from urllib import parse
 
 from functools import cache
@@ -77,3 +78,9 @@ def retrieve_user_url_data(url):
 
     # Return the username and signature decoded, but ensure the clean_url is encoded.
     return urllib.parse.unquote_plus(username), urllib.parse.unquote_plus(signature), clean_url
+
+
+def chunk_list(to_chunk: list, chunk_by: int):
+    """Chunk a to_chunk list by chunk_by"""
+    for i in range(0, len(to_chunk), chunk_by):
+        yield to_chunk[i:i+chunk_by]
