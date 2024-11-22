@@ -66,7 +66,8 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
 
     # Is the time requested on a day of the week they have disabled?
     # This should be based on the schedule timezone
-    start_date_tz = booking_slot.start.astimezone(zoneinfo.ZoneInfo(schedule.timezone))
+    schedule_tz = schedule.timezone or schedule.calendar.owner.timezone
+    start_date_tz = booking_slot.start.astimezone(zoneinfo.ZoneInfo(schedule_tz))
     iso_weekday = int(start_date_tz.strftime('%u'))
     if iso_weekday not in schedule.weekdays:
         return False
