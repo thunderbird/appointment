@@ -21,6 +21,7 @@ from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
 
@@ -33,7 +34,7 @@ from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
-from ..tasks.emails import send_invite_email
+from ..tasks.emails import send_invite_email, send_pending_email
 
 
 class BaseConnector:
@@ -237,7 +238,7 @@ class GoogleConnector(BaseConnector):
 
         return events
 
-    def create_event(
+    def save_event(
         self,
         event: schemas.Event,
         attendee: schemas.AttendeeBase,
@@ -271,7 +272,7 @@ class GoogleConnector(BaseConnector):
                 'email': self.remote_calendar_id,
             },
         }
-        self.google_client.create_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
+        self.google_client.save_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
 
         self.bust_cached_events()
 
@@ -438,7 +439,7 @@ class CalDavConnector(BaseConnector):
 
         return events
 
-    def create_event(
+    def save_event(
         self, event: schemas.Event, attendee: schemas.AttendeeBase, organizer: schemas.Subscriber, organizer_email: str
     ):
         """add a new event to the connected calendar"""
@@ -514,7 +515,8 @@ class Tools:
         cal.add_component(event)
         return cal.to_ical()
 
-    def send_vevent(
+
+    def send_invitation_vevent(
         self,
         background_tasks: BackgroundTasks,
         appointment: models.Appointment,
@@ -523,25 +525,57 @@ class Tools:
         attendee: schemas.AttendeeBase,
     ):
         """send a booking confirmation email to attendee with .ics file attached"""
-        ics = self.create_vevent(appointment, slot, organizer)
         invite = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
-            data=ics,
+            data=self.create_vevent(appointment, slot, organizer),
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(attendee.timezone))
+        # Human readable date in attendee timezone
+        # TODO: handle locale date representation
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone)).strftime('%c')
+        date = f'{date}, {slot.duration} minutes ({attendee.timezone})'
+        # Send mail
         background_tasks.add_task(
             send_invite_email,
             organizer.name,
-            organizer.
-            email,
+            organizer.email,
             date=date,
             duration=slot.duration,
             to=attendee.email,
             attachment=invite
         )
+
+    def send_hold_vevent(
+        self,
+        background_tasks: BackgroundTasks,
+        appointment: models.Appointment,
+        slot: schemas.Slot,
+        organizer: schemas.Subscriber,
+        attendee: schemas.AttendeeBase,
+    ):
+        """send a booking confirmation email to attendee with .ics file attached"""
+        invite = Attachment(
+            mime=('text', 'calendar'),
+            filename='AppointmentInvite.ics',
+            data=self.create_vevent(appointment, slot, organizer),
+        )
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
+        # Human readable date in attendee timezone
+        # TODO: handle locale date representation
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone)).strftime('%c')
+        date = f'{date}, {slot.duration} minutes ({attendee.timezone})'
+        # Send mail
+        background_tasks.add_task(
+            send_pending_email,
+            organizer.name,
+            date=date,
+            to=attendee.email,
+            attachment=invite
+        )
+
 
     @staticmethod
     def available_slots_from_schedule(schedule: models.Schedule) -> list[schemas.SlotBase]:

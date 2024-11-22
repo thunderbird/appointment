@@ -84,8 +84,8 @@ google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto ver
 
 ## Frontend Facing Strings
 
+event-hold-prefix = UNBESTÄTIGT:
 # If the calendar event does not have a title this will be used instead
-event-summary-not-found = Titel nicht gefunden!
 event-summary-default = Termin ohne Titel
 
 ## Event File Strings

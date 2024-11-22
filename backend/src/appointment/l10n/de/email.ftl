@@ -111,7 +111,7 @@ reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfe
 
 ## Pending Appointment
 
-pending-mail-subject = deine Buchungsanfrage wartet auf Bestätigung
+pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment

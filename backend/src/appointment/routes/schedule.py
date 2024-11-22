@@ -43,6 +43,7 @@ from ..tasks.emails import (
     send_rejection_email,
     send_zoom_meeting_failed_email, send_new_booking_email,
 )
+from ..l10n import l10n
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -338,7 +339,8 @@ def request_schedule_availability_slot(
     # Create a pending appointment
     attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
     subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
-    title = f'Appointment - {subscriber_name} and {attendee_name}'
+    hold = f'{l10n('event-hold-prefix')} ' if schedule.booking_confirmation else ''
+    title = f'{hold}Appointment - {subscriber_name} and {attendee_name}'
     status = models.AppointmentStatus.opened if schedule.booking_confirmation else models.AppointmentStatus.closed
 
     appointment = repo.appointment.create(
@@ -368,23 +370,33 @@ def request_schedule_availability_slot(
     date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone))
 
     # If bookings are configured to be confirmed by the owner for this schedule,
-    # send emails to owner for confirmation and attendee for information
+    # Create HOLD event in owners calender and send emails to owner for confirmation and attendee for information
     if schedule.booking_confirmation:
-        # human readable date in attendee timezone
-        # TODO: handle locale date representation
-        attendee_date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(slot.attendee.timezone)).strftime('%c')
-        attendee_date = f'{attendee_date}, {slot.duration} minutes ({slot.attendee.timezone})'
-
         # Sending confirmation email to owner
         background_tasks.add_task(
             send_confirmation_email, url=url, attendee_name=attendee.name, attendee_email=attendee.email, date=date,
             duration=slot.duration, to=subscriber.preferred_email, schedule_name=schedule.name
         )
 
-        # Sending pending email to attendee
-        background_tasks.add_task(
-            send_pending_email, owner_name=subscriber.name, date=attendee_date, to=slot.attendee.email
+        # Create remote HOLD event
+        event = schemas.Event(
+            title=title,
+            start=slot.start.replace(tzinfo=timezone.utc),
+            end=slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
+            description=schedule.details or '',
+            location=schemas.EventLocation(
+                type=models.LocationType.online,
+                url=schedule.location_url,
+                name=None,
+            ),
+            uuid=slot.appointment.uuid if slot.appointment else None,
         )
+
+        # create HOLD event in owners calender
+        save_remote_event(True, event, calendar, subscriber, slot, db, redis, google_client)
+
+        # Sending confirmation pending information email to attendee with HOLD event attached
+        Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 
     # If no confirmation is needed, directly confirm the booking and send invitation mail
     else:
@@ -449,7 +461,6 @@ def decide_on_schedule_availability_slot(
     slot = repo.slot.get(db, data.slot_id)
     if (
         not slot
-        or not repo.slot.is_available(db, slot.id)
         or not repo.schedule.has_slot(db, schedule.id, slot.id)
         or slot.booking_tkn != data.slot_token
     ):
@@ -500,6 +511,8 @@ def handle_schedule_availability_decision(
         else:
             # delete the scheduled slot to make the time available again
             repo.slot.delete(db, slot.id)
+        
+        # TODO: Delete remote HOLD event if existing
 
         return True
 
@@ -564,9 +577,23 @@ def handle_schedule_availability_decision(
         uuid=slot.appointment.uuid if slot.appointment else None,
     )
 
+    # Update HOLD event
+    save_remote_event(True, event, calendar, subscriber, slot, db, redis, google_client)
+
+    # Book the slot at the end
+    slot = repo.slot.book(db, slot.id)
+
+    Tools().send_invitation_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+
+    return True
+
+
+def save_remote_event(is_hold: bool, event, calendar, subscriber, slot, db, redis, google_client):
+    """Create or update a remote event
+    if is_hold: create an event in remote calendar and send invitation mail
+    """
     organizer_email = subscriber.email
 
-    # create remote event
     if calendar.provider == CalendarProvider.google:
         external_connection: ExternalConnection | None = utils.list_first(
             repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
@@ -599,13 +626,6 @@ def handle_schedule_availability_decision(
         )
 
     try:
-        con.create_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
+        con.save_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
-
-    # Book the slot at the end
-    slot = repo.slot.book(db, slot.id)
-
-    Tools().send_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
-
-    return True

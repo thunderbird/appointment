@@ -60,9 +60,9 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name):
             sentry_sdk.capture_exception(e)
 
 
-def send_pending_email(owner_name, date, to):
+def send_pending_email(owner_name, date, to, attachment):
     try:
-        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to)
+        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

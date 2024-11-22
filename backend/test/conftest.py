@@ -52,7 +52,7 @@ def _patch_caldav_connector(monkeypatch):
             return [schemas.CalendarConnectionOut(url=TEST_CALDAV_URL, user=TEST_CALDAV_USER)]
 
         @staticmethod
-        def create_event(self, event, attendee, organizer, organizer_email):
+        def save_event(self, event, attendee, organizer, organizer_email):
             return True
 
         @staticmethod
@@ -68,7 +68,7 @@ def _patch_caldav_connector(monkeypatch):
 
     monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
     monkeypatch.setattr(CalDavConnector, 'list_calendars', MockCaldavConnector.list_calendars)
-    monkeypatch.setattr(CalDavConnector, 'create_event', MockCaldavConnector.create_event)
+    monkeypatch.setattr(CalDavConnector, 'save_event', MockCaldavConnector.save_event)
     monkeypatch.setattr(CalDavConnector, 'delete_events', MockCaldavConnector.delete_event)
     monkeypatch.setattr(CalDavConnector, 'test_connection', MockCaldavConnector.test_connection)
 
