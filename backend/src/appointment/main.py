@@ -17,8 +17,6 @@ from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 
-from .secrets import normalize_secrets
-
 from google.auth.exceptions import RefreshError, DefaultCredentialsError
 from .exceptions.google_api import APIGoogleRefreshError
 import os
@@ -39,6 +37,8 @@ from slowapi.errors import RateLimitExceeded
 
 
 import sentry_sdk
+
+from .utils import normalize_secrets
 
 
 def _common_setup():
