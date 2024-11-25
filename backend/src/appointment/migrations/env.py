@@ -9,7 +9,7 @@ from alembic import context
 from appointment.defines import APP_ENV_DEV
 
 # This is ran from src/ so ignore the errors
-from appointment.secrets import normalize_secrets
+from appointment.utils import normalize_secrets
 
 import sentry_sdk
 
