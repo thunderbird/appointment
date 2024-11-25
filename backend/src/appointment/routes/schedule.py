@@ -34,7 +34,7 @@ from zoneinfo import ZoneInfo
 
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
-from ..exceptions.calendar import EventNotCreatedException
+from ..exceptions.calendar import EventNotCreatedException, EventNotDeletedException
 from ..exceptions.misc import UnexpectedBehaviourWarning
 from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeAccepted
 from ..tasks.emails import (
@@ -337,10 +337,8 @@ def request_schedule_availability_slot(
     attendee = repo.slot.update(db, slot.id, s_a.attendee)
 
     # Create a pending appointment
-    attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
-    subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
-    hold = f'{l10n('event-hold-prefix')} ' if schedule.booking_confirmation else ''
-    title = f'{hold}Appointment - {subscriber_name} and {attendee_name}'
+    prefix = f'{l10n('event-hold-prefix')} ' if schedule.booking_confirmation else ''
+    title = Tools.default_event_title(slot, subscriber, prefix)
     status = models.AppointmentStatus.opened if schedule.booking_confirmation else models.AppointmentStatus.closed
 
     appointment = repo.appointment.create(
@@ -393,7 +391,7 @@ def request_schedule_availability_slot(
         )
 
         # create HOLD event in owners calender
-        save_remote_event(True, event, calendar, subscriber, slot, db, redis, google_client)
+        save_remote_event(event, calendar, subscriber, slot, db, redis, google_client)
 
         # Sending confirmation pending information email to attendee with HOLD event attached
         Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
@@ -494,11 +492,11 @@ def handle_schedule_availability_decision(
     if confirmed: create an event in remote calendar and send invitation mail
     """
 
-    # TODO: check booking expiration date
+    # TODO: Check booking expiration date
     # check if request was denied
     if confirmed is False:
         # human readable date in subscribers timezone
-        # TODO: handle locale date representation
+        # TODO: Handle locale date representation
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
         date = f'{date}, {slot.duration} minutes'
         # send rejection information to bookee
@@ -512,22 +510,19 @@ def handle_schedule_availability_decision(
             # delete the scheduled slot to make the time available again
             repo.slot.delete(db, slot.id)
         
-        # TODO: Delete remote HOLD event if existing
+        # Delete remote HOLD event if existing
+        if slot.appointment:
+            delete_remote_event(slot.appointment.uuid, calendar, subscriber, db, redis, google_client)
 
         return True
 
     # otherwise, confirm slot and create event
     location_url = schedule.location_url
 
-    attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
-    subscriber_name = subscriber.name if subscriber.name is not None else subscriber.email
+    # Rebuild title to remove "HOLD: " if exists
+    title = Tools.default_event_title(slot, subscriber)
 
-    attendees = f'{subscriber_name} and {attendee_name}'
-
-    if not slot.appointment:
-        title = f'Appointment - {attendees}'
-    else:
-        title = slot.appointment.title
+    if slot.appointment:
         # Update the appointment to closed
         repo.appointment.update_status(db, slot.appointment_id, models.AppointmentStatus.closed)
 
@@ -535,7 +530,7 @@ def handle_schedule_availability_decision(
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
         try:
             zoom_client = get_zoom_client(subscriber)
-            response = zoom_client.create_meeting(attendees, slot.start.isoformat(), slot.duration, subscriber.timezone)
+            response = zoom_client.create_meeting(title, slot.start.isoformat(), slot.duration, subscriber.timezone)
             if 'id' in response:
                 location_url = zoom_client.get_meeting(response['id'])['join_url']
                 slot.meeting_link_id = response['id']
@@ -578,19 +573,20 @@ def handle_schedule_availability_decision(
     )
 
     # Update HOLD event
-    save_remote_event(True, event, calendar, subscriber, slot, db, redis, google_client)
+    appointment = repo.appointment.update_title(db, slot.appointment_id, title)
+    save_remote_event(event, calendar, subscriber, slot, db, redis, google_client)
 
     # Book the slot at the end
     slot = repo.slot.book(db, slot.id)
 
-    Tools().send_invitation_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+    Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
     return True
 
 
-def save_remote_event(is_hold: bool, event, calendar, subscriber, slot, db, redis, google_client):
-    """Create or update a remote event
-    if is_hold: create an event in remote calendar and send invitation mail
+def get_remote_connection(calendar, subscriber, db, redis, google_client):
+    """Retrieves the connector for the given calendar
+    Returns connector and organizer email address as tuple
     """
     organizer_email = subscriber.email
 
@@ -624,8 +620,28 @@ def save_remote_event(is_hold: bool, event, calendar, subscriber, slot, db, redi
             user=calendar.user,
             password=calendar.password,
         )
+    
+    return (con, organizer_email)
+
+
+def save_remote_event(event, calendar, subscriber, slot, db, redis, google_client):
+    """Create or update a remote event
+    """
+    con, organizer_email = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
         con.save_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
+
+
+def delete_remote_event(uid, calendar, subscriber, db, redis, google_client):
+    """Create or update a remote event
+    if is_hold: create an event in remote calendar and send invitation mail
+    """
+    con, _ = get_remote_connection(calendar, subscriber, db, redis, google_client)
+
+    try:
+        con.delete_event(uid)
+    except EventNotCreatedException:
+        raise EventCouldNotBeDeleted

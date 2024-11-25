@@ -89,3 +89,14 @@ def update_status(db: Session, appointment_id: int, status: models.AppointmentSt
 
     appointment.status = status
     db.commit()
+
+
+def update_title(db: Session, appointment_id: int, title: str):
+    db_appointment = get(db, appointment_id)
+    if not db_appointment:
+        return False
+
+    db_appointment.title = title
+    db.commit()
+    db.refresh(db_appointment)
+    return db_appointment

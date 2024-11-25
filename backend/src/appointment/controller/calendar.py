@@ -278,6 +278,12 @@ class GoogleConnector(BaseConnector):
 
         return event
 
+    def delete_event(self, uid: str):
+        """Delete remote event of given uid
+        """
+        self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
+        self.bust_cached_events()
+
     def delete_events(self, start):
         """delete all events in given date range from the server
         Not intended to be used in production. For cleaning purposes after testing only.
@@ -462,6 +468,13 @@ class CalDavConnector(BaseConnector):
 
         return event
 
+    def delete_event(self, uid: str):
+        """Delete remote event of given uid
+        """
+        event = self.client.calendar(url=self.url).event_by_uid(uid)
+        event.delete()
+        self.bust_cached_events()
+
     def delete_events(self, start):
         """delete all events in given date range from the server
         Not intended to be used in production. For cleaning purposes after testing only.
@@ -485,6 +498,7 @@ class Tools:
         appointment: schemas.Appointment,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
+        on_hold = False,
     ):
         """create an event in ical format for .ics file creation"""
         cal = Calendar()
@@ -502,7 +516,7 @@ class Tools:
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
         event.add('dtstamp', datetime.now(UTC))
-        event.add('status', 'CONFIRMED')
+        event.add('status', 'NEEDS-ACTION' if on_hold else 'CONFIRMED')
         event['description'] = appointment.details
         event['organizer'] = org
 
@@ -532,10 +546,7 @@ class Tools:
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        # Human readable date in attendee timezone
-        # TODO: handle locale date representation
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone)).strftime('%c')
-        date = f'{date}, {slot.duration} minutes ({attendee.timezone})'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
         # Send mail
         background_tasks.add_task(
             send_invite_email,
@@ -559,14 +570,11 @@ class Tools:
         invite = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
-            data=self.create_vevent(appointment, slot, organizer),
+            data=self.create_vevent(appointment, slot, organizer, True),
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        # Human readable date in attendee timezone
-        # TODO: handle locale date representation
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone)).strftime('%c')
-        date = f'{date}, {slot.duration} minutes ({attendee.timezone})'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
         # Send mail
         background_tasks.add_task(
             send_pending_email,
@@ -874,3 +882,9 @@ class Tools:
             url = 'https://api.googlecontent.com/caldav/v2/'
 
         return url
+
+    @staticmethod
+    def default_event_title(slot: schemas.Slot, owner: schemas.Subscriber, prefix='') -> str:
+        attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+        owner_name = owner.name if owner.name is not None else owner.email
+        return l10n('event-title-template', { 'prefix': prefix, 'name1': owner_name, 'name2': attendee_name })

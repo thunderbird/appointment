@@ -218,6 +218,14 @@ class EventCouldNotBeAccepted(APIException):
         return l10n('event-could-not-be-accepted')
 
 
+class EventCouldNotBeDeleted(APIException):
+    id_code = 'EVENT_COULD_NOT_BE_DELETED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('event-could-not-be-deleted')
+
+
 class InviteCodeNotFoundException(APIException):
     """Raise when the invite code is not found during route validation"""
 

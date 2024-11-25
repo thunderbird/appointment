@@ -48,6 +48,7 @@ schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Inform
 remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden. Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
 
 event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
+event-could-not-be-deleted = Es ist ein Fehler beim Entfernen des vorläufigen Termins aufgetreten. Bitte später noch einmal versuchen.
 
 failed-to-create-subscriber = Es gab einen Fehler beim Anlegen der Person. Bitte später erneut versuchen.
 subscriber-already-exists = Eine Person mit dieser E-Mail-Adresse existiert bereits.
@@ -84,6 +85,7 @@ google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto ver
 
 ## Frontend Facing Strings
 
+event-title-template = { $prefix }Termin - { $name1 } und { $name2 }
 event-hold-prefix = UNBESTÄTIGT:
 # If the calendar event does not have a title this will be used instead
 event-summary-default = Termin ohne Titel
