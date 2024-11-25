@@ -642,6 +642,6 @@ def delete_remote_event(uid, calendar, subscriber, db, redis, google_client):
     con, _ = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
-        con.delete_event(uid)
+        con.delete_event(uid=uid)
     except EventNotCreatedException:
         raise EventCouldNotBeDeleted
