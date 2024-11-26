@@ -244,7 +244,7 @@ class GoogleConnector(BaseConnector):
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
         organizer_email: str,
-    ):
+    ) -> schemas.Event:
         """add a new event to the connected calendar"""
 
         description = [event.description]
@@ -272,15 +272,22 @@ class GoogleConnector(BaseConnector):
                 'email': self.remote_calendar_id,
             },
         }
-        self.google_client.save_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
+
+        new_event = self.google_client.save_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
+
+        # Fill in the external_id so we can delete events later!
+        event.external_id = new_event.get('id')
+        print("Event -> ", event.model_dump())
+        print("new event -> ", new_event)
 
         self.bust_cached_events()
 
         return event
 
     def delete_event(self, uid: str):
-        """Delete remote event of given uid
+        """Delete remote event of given external_id
         """
+        print("->", uid)
         self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
         self.bust_cached_events()
 
@@ -471,6 +478,7 @@ class CalDavConnector(BaseConnector):
     def delete_event(self, uid: str):
         """Delete remote event of given uid
         """
+        print("->uid", uid)
         event = self.client.calendar(url=self.url).event_by_uid(uid)
         event.delete()
         self.bust_cached_events()

@@ -380,6 +380,7 @@ class Event(BaseModel):
     calendar_color: str | None = None
     location: EventLocation | None = None
     uuid: UUID | None = None
+    external_id: str | None = None
 
     """Ideally this would just be a mixin, but I'm having issues figuring out a good
     static constructor that will work for anything."""

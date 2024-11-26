@@ -100,3 +100,23 @@ def update_title(db: Session, appointment_id: int, title: str):
     db.commit()
     db.refresh(db_appointment)
     return db_appointment
+
+
+def update_external_id(db: Session, appointment: models.Appointment, external_id: str):
+    """Update appointment's external id field
+    Note: This requires a full appointment model to prevent a needless db lookup"""
+    db.add(appointment)
+
+    print("External ID -> ", appointment.__dict__)
+
+    appointment.external_id = external_id
+    db.commit()
+    db.refresh(appointment)
+    return appointment
+
+
+def update_external_id_by_id(db: Session, appointment_id: int, external_id: str):
+    appointment = get(db, appointment_id)
+    if not appointment:
+        return False
+    return update_external_id(db, appointment, external_id)

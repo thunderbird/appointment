@@ -103,6 +103,8 @@ class GoogleClient:
         # Limit the fields we request
         fields = ','.join(
             (
+                'items/id',
+                'items/iCalUID',
                 'items/status',
                 'items/summary',
                 'items/description',
