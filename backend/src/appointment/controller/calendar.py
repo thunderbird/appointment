@@ -277,8 +277,6 @@ class GoogleConnector(BaseConnector):
 
         # Fill in the external_id so we can delete events later!
         event.external_id = new_event.get('id')
-        print("Event -> ", event.model_dump())
-        print("new event -> ", new_event)
 
         self.bust_cached_events()
 
@@ -287,7 +285,6 @@ class GoogleConnector(BaseConnector):
     def delete_event(self, uid: str):
         """Delete remote event of given external_id
         """
-        print("->", uid)
         self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
         self.bust_cached_events()
 
@@ -478,7 +475,6 @@ class CalDavConnector(BaseConnector):
     def delete_event(self, uid: str):
         """Delete remote event of given uid
         """
-        print("->uid", uid)
         event = self.client.calendar(url=self.url).event_by_uid(uid)
         event.delete()
         self.bust_cached_events()

@@ -53,7 +53,7 @@ def _patch_caldav_connector(monkeypatch):
 
         @staticmethod
         def save_event(self, event, attendee, organizer, organizer_email):
-            return True
+            return event
 
         @staticmethod
         def delete_event(self, uid):

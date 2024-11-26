@@ -107,8 +107,6 @@ def update_external_id(db: Session, appointment: models.Appointment, external_id
     Note: This requires a full appointment model to prevent a needless db lookup"""
     db.add(appointment)
 
-    print("External ID -> ", appointment.__dict__)
-
     appointment.external_id = external_id
     db.commit()
     db.refresh(appointment)
