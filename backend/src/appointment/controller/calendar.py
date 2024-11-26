@@ -504,6 +504,7 @@ class Tools:
         cal = Calendar()
         cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
         cal.add('version', '2.0')
+        cal.add('method', 'REQUEST')
         org = vCalAddress('MAILTO:' + organizer.preferred_email)
         org.params['cn'] = vText(organizer.preferred_email)
         org.params['role'] = vText('CHAIR')
@@ -516,7 +517,7 @@ class Tools:
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
         event.add('dtstamp', datetime.now(UTC))
-        event.add('status', 'NEEDS-ACTION' if on_hold else 'CONFIRMED')
+        event.add('status', 'TENTATIVE' if on_hold else 'CONFIRMED')
         event['description'] = appointment.details
         event['organizer'] = org
 
