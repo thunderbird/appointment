@@ -886,6 +886,9 @@ class Tools:
 
     @staticmethod
     def default_event_title(slot: schemas.Slot, owner: schemas.Subscriber, prefix='') -> str:
+        """Builds a default event title for scheduled bookings
+           The prefix can be used e.g. for "HOLD: " events
+        """
         attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
         owner_name = owner.name if owner.name is not None else owner.email
         return l10n('event-title-template', { 'prefix': prefix, 'name1': owner_name, 'name2': attendee_name })
