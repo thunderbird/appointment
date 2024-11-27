@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from .apis.fxa_client import FxaClient
 from ..database import schemas, models, repo
+from ..defines import AuthScheme
 
 
 def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | None, deny_previous_tokens=True):
@@ -22,7 +23,7 @@ def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | N
         db.add(subscriber)
         db.commit()
 
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if AuthScheme.is_fxa():
         fxa_client.logout()
 
 
