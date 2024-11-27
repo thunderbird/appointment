@@ -18,7 +18,7 @@ from .. import utils
 from ..controller.auth import schedule_links_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
-from ..defines import INVITES_TO_GIVE_OUT
+from ..defines import INVITES_TO_GIVE_OUT, AuthScheme
 
 from ..dependencies.database import get_db
 from ..dependencies.auth import get_subscriber, get_admin_subscriber, get_subscriber_from_onetime_token
@@ -68,9 +68,11 @@ def create_subscriber(db, email, password, timezone):
 @router.post('/can-login')
 def can_login(data: schemas.CheckEmail, db: Session = Depends(get_db), fxa_client: FxaClient = Depends(get_fxa_client)):
     """Determines if a user can go through the login flow"""
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if AuthScheme.is_fxa():
         # This checks if a subscriber exists, or is in allowed list
         return fxa_client.is_in_allow_list(db, data.email.lower())
+    elif AuthScheme.is_accounts():
+        return None
 
     # There's no waiting list setting on password login
     return True
@@ -86,7 +88,7 @@ def fxa_login(
     fxa_client: FxaClient = Depends(get_fxa_client),
 ):
     """Request an authorization url from fxa"""
-    if os.getenv('AUTH_SCHEME') != 'fxa':
+    if not AuthScheme.is_fxa():
         raise HTTPException(status_code=405)
 
     fxa_client.setup()
@@ -148,7 +150,7 @@ def fxa_callback(
         'email-not-in-session': 'email-not-in-session',
     }
 
-    if os.getenv('AUTH_SCHEME') != 'fxa':
+    if not AuthScheme.is_fxa():
         raise HTTPException(status_code=405)
 
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
@@ -294,7 +296,7 @@ def fxa_callback(
 @router.post('/fxa-token')
 def fxa_token(subscriber=Depends(get_subscriber_from_onetime_token)):
     """Generate a access token from a one time token retrieved after login"""
-    if os.getenv('AUTH_SCHEME') != 'fxa':
+    if not AuthScheme.is_fxa():
         raise HTTPException(status_code=405)
 
     # Generate our jwt token, we only store the username on the token
@@ -314,7 +316,7 @@ def token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if not AuthScheme.is_password():
         raise HTTPException(status_code=405)
 
     has_subscribers = db.query(Subscriber).count()
@@ -359,7 +361,7 @@ def logout(
 ):
     """Logout a given subscriber session"""
 
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if AuthScheme.is_fxa():
         fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
 
     # Don't set a minimum_valid_iat_time here.
