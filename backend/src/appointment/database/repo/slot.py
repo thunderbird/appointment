@@ -114,11 +114,3 @@ def delete(db: Session, slot_id: int):
     db.delete(db_slot)
     db.commit()
     return db_slot
-
-
-def is_available(db: Session, slot_id: int):
-    """check if slot is still available for booking"""
-    slot = get(db, slot_id)
-    if slot.schedule:
-        return slot and slot.booking_status == models.BookingStatus.requested
-    return False

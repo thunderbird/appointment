@@ -218,6 +218,7 @@ class Appointment(Base):
     slug = Column(encrypted_type(String), unique=True, index=True)
     keep_open = Column(Boolean)
     status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
+    external_id = Column(encrypted_type(String), index=True, nullable=True)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider = Column(

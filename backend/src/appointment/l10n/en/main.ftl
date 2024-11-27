@@ -48,6 +48,7 @@ schedule-not-active = The schedule has been turned off. Please contact the sched
 remote-calendar-connection-error = The remote calendar could not be reached. Please verify your connection information and try again.
 
 event-could-not-be-accepted = There was an error accepting the booking details. Please try again later.
+event-could-not-be-deleted = There was an error removing the hold event. Please try again later.
 
 failed-to-create-subscriber = There was an error creating the subscriber. Please try again later.
 subscriber-already-exists = A subscriber with this email address already exists.
@@ -85,8 +86,9 @@ google-connect-to-continue = You must connect at least one Google account to con
 
 ## Frontend Facing Strings
 
+event-title-template = { $prefix }Appointment - { $name1 } and { $name2 }
+event-hold-prefix = HOLD:
 # If the calendar event does not have a title this will be used instead
-event-summary-not-found = Title not found!
 event-summary-default = Untitled Event
 
 ## Event File Strings
