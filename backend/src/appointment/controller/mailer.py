@@ -94,14 +94,24 @@ class Mailer:
 
         # add attachment(s) as multimedia parts
         for a in self._attachments():
-            # Attach it to the html payload
-            message.get_payload()[1].add_related(
-                a.data,
-                a.mime_main,
-                a.mime_sub,
-                cid=f'<{a.filename}>',
-                filename=a.filename,
-            )
+            # Handle ics files differently than inline images
+            if a.mime_main == 'text' and a.mime_sub == 'calendar':
+                message.add_attachment(
+                    a.data,
+                    maintype=a.mime_main, subtype=a.mime_sub,
+                    filename=a.filename
+                )
+                # Fix the header of the attachment
+                message.get_payload()[-1].replace_header('Content-Type', f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method=REQUEST')
+            else:
+                # Attach it to the html payload
+                message.get_payload()[1].add_related(
+                    a.data,
+                    a.mime_main,
+                    a.mime_sub,
+                    cid=f'<{a.filename}>',
+                    filename=a.filename,
+                )
 
         return message
 
