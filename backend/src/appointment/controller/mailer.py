@@ -56,6 +56,7 @@ class Mailer:
         html: str = '',
         plain: str = '',
         attachments: list[Attachment] = [],
+        method: str = 'REQUEST'
     ):
         self.sender = sender
         self.to = to
@@ -64,6 +65,7 @@ class Mailer:
         self.body_html = html
         self.body_plain = plain
         self.attachments = attachments
+        self.method = method
 
     def html(self):
         """provide email body as html per default"""
@@ -98,11 +100,15 @@ class Mailer:
             if a.mime_main == 'text' and a.mime_sub == 'calendar':
                 message.add_attachment(
                     a.data,
-                    maintype=a.mime_main, subtype=a.mime_sub,
+                    maintype=a.mime_main,
+                    subtype=a.mime_sub,
                     filename=a.filename
                 )
                 # Fix the header of the attachment
-                message.get_payload()[-1].replace_header('Content-Type', f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method=REQUEST')
+                message.get_payload()[-1].replace_header(
+                    'Content-Type',
+                    f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method={self.method}'
+                )
             else:
                 # Attach it to the html payload
                 message.get_payload()[1].add_related(
@@ -298,6 +304,7 @@ class RejectionMail(Mailer):
         self.date = date
         default_kwargs = {'subject': l10n('reject-mail-subject')}
         super(RejectionMail, self).__init__(*args, **default_kwargs, **kwargs)
+        self.method = 'CANCEL'
 
     def text(self):
         return l10n('reject-mail-plain', {'owner_name': self.owner_name, 'date': self.date})
