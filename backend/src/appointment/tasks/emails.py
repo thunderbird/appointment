@@ -72,9 +72,9 @@ def send_pending_email(owner_name, date, to, attachment):
             sentry_sdk.capture_exception(e)
 
 
-def send_rejection_email(owner_name, date, to):
+def send_rejection_email(owner_name, date, to, attachment):
     try:
-        mail = RejectionMail(owner_name=owner_name, date=date, to=to)
+        mail = RejectionMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

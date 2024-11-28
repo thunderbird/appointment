@@ -22,6 +22,7 @@ from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
 from zoneinfo import ZoneInfo
+from enum import Enum
 
 from sqlalchemy.orm import Session
 
@@ -34,8 +35,12 @@ from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
-from ..tasks.emails import send_invite_email, send_pending_email
+from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email
 
+class RemoteEventState(Enum):
+    CANCELLED = 'CANCELLED'
+    TENTATIVE = 'TENTATIVE'
+    CONFIRMED = 'CONFIRMED'
 
 class BaseConnector:
     redis_instance: Redis | RedisCluster | None
@@ -502,13 +507,13 @@ class Tools:
         appointment: schemas.Appointment,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
-        on_hold = False,
+        event_status = RemoteEventState.CONFIRMED.value,
     ):
         """create an event in ical format for .ics file creation"""
         cal = Calendar()
         cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
         cal.add('version', '2.0')
-        cal.add('method', 'REQUEST')
+        cal.add('method', 'CANCEL' if event_status == RemoteEventState.CANCELLED.value else 'REQUEST')
         org = vCalAddress('MAILTO:' + organizer.preferred_email)
         org.params['cn'] = vText(organizer.preferred_email)
         org.params['role'] = vText('CHAIR')
@@ -521,7 +526,7 @@ class Tools:
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
         event.add('dtstamp', datetime.now(UTC))
-        event.add('status', 'TENTATIVE' if on_hold else 'CONFIRMED')
+        event.add('status', event_status)
         event['description'] = appointment.details
         event['organizer'] = org
 
@@ -544,7 +549,7 @@ class Tools:
         attendee: schemas.AttendeeBase,
     ):
         """send a booking confirmation email to attendee with .ics file attached"""
-        invite = Attachment(
+        ics_file = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
             data=self.create_vevent(appointment, slot, organizer),
@@ -560,7 +565,7 @@ class Tools:
             date=date,
             duration=slot.duration,
             to=attendee.email,
-            attachment=invite
+            attachment=ics_file
         )
 
     def send_hold_vevent(
@@ -571,11 +576,11 @@ class Tools:
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
     ):
-        """send a booking confirmation email to attendee with .ics file attached"""
-        invite = Attachment(
+        """send a hold booking email to attendee with .ics file attached"""
+        ics_file = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
-            data=self.create_vevent(appointment, slot, organizer, True),
+            data=self.create_vevent(appointment, slot, organizer, RemoteEventState.TENTATIVE.value),
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
@@ -586,7 +591,33 @@ class Tools:
             organizer.name,
             date=date,
             to=attendee.email,
-            attachment=invite
+            attachment=ics_file
+        )
+
+    def send_cancel_vevent(
+        self,
+        background_tasks: BackgroundTasks,
+        appointment: models.Appointment,
+        slot: schemas.Slot,
+        organizer: schemas.Subscriber,
+        attendee: schemas.AttendeeBase,
+    ):
+        """send a hold booking email to attendee with .ics file attached"""
+        ics_file = Attachment(
+            mime=('text', 'calendar'),
+            filename='AppointmentInvite.ics',
+            data=self.create_vevent(appointment, slot, organizer, RemoteEventState.CANCELLED.value),
+        )
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+        # Send mail
+        background_tasks.add_task(
+            send_rejection_email,
+            organizer.name,
+            date=date,
+            to=attendee.email,
+            attachment=ics_file
         )
 
 

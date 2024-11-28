@@ -506,12 +506,8 @@ def handle_schedule_availability_decision(
     # TODO: Check booking expiration date
     # check if request was denied
     if confirmed is False:
-        # human readable date in subscribers timezone
-        # TODO: Handle locale date representation
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone)).strftime('%c')
-        date = f'{date}, {slot.duration} minutes'
         # send rejection information to bookee
-        background_tasks.add_task(send_rejection_email, owner_name=subscriber.name, date=date, to=slot.attendee.email)
+        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
         repo.slot.delete(db, slot.id)
 
         if slot.appointment_id:
