@@ -17,7 +17,7 @@ markdown==3.6
 MarkupSafe==2.1.2
 nh3==0.2.18
 python-dotenv==1.0.1
-python-multipart==0.0.17
+python-multipart==0.0.18
 PyJWT==2.6.0
 pydantic[email]==2.9.2
 sentry-sdk==2.10.0
