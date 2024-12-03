@@ -92,7 +92,7 @@ const updateTimezone = async () => {
       <div class="text-lg">{{ t('label.language') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
-        <select v-model="locale" class="w-full max-w-sm rounded-md">
+        <select v-model="locale" class="w-full max-w-sm rounded-md" data-testid="locale-select">
           <option v-for="l in availableLocales" :key="l" :value="l">
             {{ l.toUpperCase() + ' &mdash; ' + t('locales.' + l) }}
           </option>
@@ -103,7 +103,7 @@ const updateTimezone = async () => {
       <div class="text-lg">{{ t('label.appearance') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
-        <select v-model="theme" class="w-full max-w-sm rounded-md">
+        <select v-model="theme" class="w-full max-w-sm rounded-md" data-testid="theme-select">
           <option v-for="value in Object.values(ColorSchemes)" :key="value" :value="value">
             {{ t('label.' + value) }}
           </option>
@@ -148,6 +148,7 @@ const updateTimezone = async () => {
           v-model="activeTimezone.primary"
           class="w-full max-w-sm rounded-md"
           @change="updateTimezone"
+          data-testid="timezone-select"
         >
           <option v-for="tz in timezones" :key="tz" :value="tz">
             {{ tz }}

@@ -67,6 +67,7 @@ const isNavEntryActive = (item: string) => {
           :active="isNavEntryActive(item)"
           :label="t(`label.${item}`)"
           :link-name="item"
+          :data-testid=item
         />
       </div>
       <drop-down class="self-center">
@@ -85,15 +86,16 @@ const isNavEntryActive = (item: string) => {
               :copy="user.myLink"
               :title="t('label.copy')"
               class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
+              data-testid="user-nav-share-link"
             />
-            <router-link :to="{ name: 'report-bug' }" class="flex items-center justify-between gap-1 p-2">
+            <router-link :to="{ name: 'report-bug' }" class="flex items-center justify-between gap-1 p-2" data-testid="user-nav-report-bug">
               {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
             </router-link>
-            <router-link :to="{ name: 'contact' }" class="p-2">
+            <router-link :to="{ name: 'contact' }" class="p-2" data-testid="user-nav-contact">
               {{ t('label.contact') }}
             </router-link>
             <hr class="border-teal-500" />
-            <router-link :to="{ name: 'logout' }" class="p-2">
+            <router-link :to="{ name: 'logout' }" class="p-2" data-testid="user-nav-logout">
               {{ t('label.logOut') }}
             </router-link>
           </div>

@@ -39,6 +39,7 @@ const signUp = () => {
               class="btn-login"
               @click="login"
               :title="$t('label.logIn')"
+              data-testid="login-button"
             />
             <primary-button
               v-else-if="isAuthenticated"

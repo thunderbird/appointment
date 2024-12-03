@@ -9,6 +9,7 @@ const user = useUserStore();
 <div
   class="flex-center mr-4 size-12 self-center rounded-full bg-white text-lg font-normal text-white"
   :class="{'!bg-teal-500': user.data.avatarUrl === null}"
+  data-testid="user-menu-avatar"
 >
   <span v-if="user.data.avatarUrl === null">
     {{ initials(user.data.name) }}
