@@ -278,8 +278,11 @@ def request_schedule_availability_slot(
             'submitter_timezone': s_a.attendee.timezone,
             'owner_timezone': subscriber.timezone,
         }
-        debug_exc = UnexpectedBehaviourWarning(message='Invalid booking time warning!', info=debug_obj)
-        sentry_sdk.capture_exception(debug_exc)
+        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
+        try:
+            raise UnexpectedBehaviourWarning(message='Invalid booking time warning!', info=debug_obj)
+        except UnexpectedBehaviourWarning as ex:
+            sentry_sdk.capture_exception(ex)
 
         raise validation.SlotNotFoundException()
 

@@ -45,8 +45,11 @@ def caldav_autodiscover_auth(
             'url': lookup_url,
             'branch': 'CACHE'
         }
-        debug_exc = UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
-        sentry_sdk.capture_exception(debug_exc)
+        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
+        try:
+            raise UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
+        except UnexpectedBehaviourWarning as ex:
+            sentry_sdk.capture_exception(ex)
         # Ignore cached result and look it up again
         lookup_url = None
 
@@ -77,8 +80,11 @@ def caldav_autodiscover_auth(
             'url': lookup_url,
             'branch': lookup_branch
         }
-        debug_exc = UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
-        sentry_sdk.capture_exception(debug_exc)
+        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
+        try:
+            raise UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
+        except UnexpectedBehaviourWarning as ex:
+            sentry_sdk.capture_exception(ex)
 
     # Finally perform any final fixups needed
     connection.url = Tools.fix_caldav_urls(connection.url)

@@ -85,7 +85,7 @@ def _common_setup():
             profile_traces_max = 0.25
             sample_rate = 1.0
         elif environment == APP_ENV_PROD:
-            profile_traces_max = 0.50
+            profile_traces_max = 0.66
             sample_rate = 1.0
 
         def traces_sampler(sampling_context):
@@ -110,6 +110,7 @@ def _common_setup():
             ],
             profiles_sampler=traces_sampler,
             traces_sampler=traces_sampler,
+            attach_stacktrace=True,
         )
 
 
