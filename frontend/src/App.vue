@@ -6,7 +6,13 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import {
-  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
+  apiUrlKey,
+  callKey,
+  refreshKey,
+  isPasswordAuthKey,
+  isFxaAuthKey,
+  fxaEditProfileUrlKey,
+  isAccountsAuthKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -25,6 +31,7 @@ import { useUserStore } from '@/stores/user-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
+import { AuthSchemes } from '@/definitions';
 
 // component constants
 const user = useUserStore();
@@ -102,9 +109,10 @@ const call = createFetch({
 user.init(call);
 
 provide(callKey, call);
-provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'password');
-provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
+provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
+provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
 provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
+provide(isAccountsAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Accounts);
 
 // menu items for main navigation
 const navItems = [

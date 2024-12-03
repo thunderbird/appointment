@@ -8,7 +8,7 @@ import {
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
-import { ColourSchemes } from '@/definitions';
+import { ColourSchemes, AuthSchemes } from '@/definitions';
 
 const initialUserConfigObject = {
   language: null,
@@ -233,7 +233,7 @@ export const useUserStore = defineStore('user', () => {
   const login = async (username: string, password: string|null): Promise<Error> => {
     $reset();
 
-    if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
+    if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
       // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
@@ -245,7 +245,17 @@ export const useUserStore = defineStore('user', () => {
       }
 
       data.value.accessToken = tokenData.value.access_token;
-    } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
+    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
+      // We get a one-time token back from the api, use it to fetch the real access token
+      data.value.accessToken = username;
+      const { error, data: tokenData }: TokenResponse = await call('fxa-token').post().json();
+
+      if (error.value || !tokenData.value.access_token) {
+        return { error: tokenData.value ?? error.value };
+      }
+
+      data.value.accessToken = tokenData.value.access_token;
+    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Accounts) {
       // We get a one-time token back from the api, use it to fetch the real access token
       data.value.accessToken = username;
       const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
