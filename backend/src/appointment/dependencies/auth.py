@@ -9,6 +9,7 @@ import jwt
 
 from sqlalchemy.orm import Session
 
+from ..controller.apis.accounts_client import AccountsClient
 from ..database import repo, models
 from ..dependencies.database import get_db
 from ..exceptions import validation
@@ -17,7 +18,7 @@ from ..exceptions.validation import InvalidTokenException, InvalidPermissionLeve
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
-def get_user_from_token(db, token: str, require_jti = False):
+def get_user_from_token(db, token: str, require_jti=False):
     try:
         payload = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=[os.getenv('JWT_ALGO')])
         sub = payload.get('sub')
@@ -43,7 +44,7 @@ def get_user_from_token(db, token: str, require_jti = False):
             # We only need second resolution
             subscriber.minimum_valid_iat_time and int(subscriber.minimum_valid_iat_time.timestamp()) > int(iat),
             # If we require this token to be a one time token, then require the claim
-            require_jti and not jti
+            require_jti and not jti,
         ]
     ):
         raise InvalidTokenException()
@@ -58,11 +59,7 @@ def get_user_from_token(db, token: str, require_jti = False):
     return subscriber
 
 
-def get_subscriber(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Session = Depends(get_db),
-    require_jti=False
-):
+def get_subscriber(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), require_jti=False):
     """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
@@ -156,3 +153,10 @@ def get_subscriber_from_schedule_or_signed_url(
         raise validation.InvalidLinkException
 
     return subscriber
+
+
+def get_accounts_client():
+    """Returns an instance of Accounts."""
+    return AccountsClient(
+        os.getenv('TB_ACCOUNTS_CLIENT_ID'), os.getenv('TB_ACCOUNTS_SECRET'), os.getenv('TB_ACCOUNTS_CALLBACK')
+    )
