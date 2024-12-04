@@ -170,6 +170,7 @@ export type ExternalConnection = {
 };
 
 export type ExternalConnectionCollection = {
+  accounts?: ExternalConnection[];
   fxa?: ExternalConnection[];
   google?: ExternalConnection[];
   zoom?: ExternalConnection[];
