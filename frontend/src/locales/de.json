@@ -103,6 +103,7 @@
     "scheduleCreated": "Zeitplan erstellt!",
     "settings": {
       "connectedAccounts": {
+        "accounts": "Mozilla Konten",
         "caldav": "CalDAV Verbindungen",
         "fxa": "Mozilla Konten",
         "google": "Google Kalender",
@@ -497,6 +498,7 @@
     "settings": {
       "connectedAccounts": {
         "connect": {
+          "accounts": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "caldav": "Eine Verbindung zu einem CalDav-Server herstellen und die zugehörigen Kalender abrufen.",
           "fxa": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "google": "Ein Google-Konto kann verbunden werden, um auf die Kalender zuzugreifen. Wenn die Verbindung zum Google-Konto getrennt wird, werden die entsprechenden Kalender und die damit verbundenen Daten bei Thunderbird Appointment entfernt.",

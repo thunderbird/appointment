@@ -103,6 +103,7 @@
     "scheduleCreated": "Schedule created!",
     "settings": {
       "connectedAccounts": {
+        "accounts": "Mozilla Accounts",
         "caldav": "CalDAV Connection",
         "fxa": "Mozilla Accounts",
         "google": "Google Calendar",
@@ -497,6 +498,7 @@
     "settings": {
       "connectedAccounts": {
         "connect": {
+          "accounts": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
           "caldav": "You can connect to a CalDav server and pull its associated calendars.",
           "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
           "google": "You can connect your Google account to access your calendars. Disconnecting your account will remove your calendars, and associated data.",
