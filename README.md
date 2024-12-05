@@ -41,6 +41,7 @@ Check out the project's respective readmes:
 
 * [Backend Readme](backend/README.md)
 * [Frontend Readme](frontend/README.md)
+* [E2E Tests Readme](test/e2e/README.md)
 
 ### Localization
 
