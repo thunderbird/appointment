@@ -12,11 +12,13 @@ class AccountsClient:
         self.client_secret = client_secret
         self.callback_url = callback_url
         self.subscriber_id = None
+        self.token = None
 
         self.accounts_url = os.getenv('TB_ACCOUNTS_HOST')
 
     def setup(self, subscriber_id=None, token=None):
         self.subscriber_id = subscriber_id
+        self.token = token
 
     def is_in_allow_list(self, db, email: str):
         """FIXME: Not Impl"""
@@ -32,7 +34,6 @@ class AccountsClient:
                 },
                 headers={
                     'Accept': 'application/json',
-                    #'X-Forwarded-For': 'localhost:8080'
                 }
             )
 
@@ -41,7 +42,6 @@ class AccountsClient:
             login_url_response = response.json()
             return login_url_response.get('login'), login_url_response.get('state')
         except requests.HTTPError as e:
-            # Not great, but we can still continue along..
             logging.error(
                 f'Could not retrieve redirect url, error occurred: {e.response.status_code} - {e.response.text}'
             )
@@ -65,9 +65,8 @@ class AccountsClient:
             access_token_response = response.json()
             return access_token_response.get('access')
         except requests.HTTPError as e:
-            # Not great, but we can still continue along..
             logging.error(
-                f'Could not initialize metrics flow, error occurred: {e.response.status_code} - {e.response.text}'
+                f'Could not retrieve credentials, error occurred: {e.response.status_code} - {e.response.text}'
             )
             raise e
 
@@ -90,11 +89,28 @@ class AccountsClient:
         except requests.HTTPError as e:
             # Not great, but we can still continue along..
             logging.error(
-                f'Could not initialize metrics flow, error occurred: {e.response.status_code} - {e.response.text}'
+                f'Could not retrieve profile, error occurred: {e.response.status_code} - {e.response.text}'
             )
             raise e
 
     def logout(self):
-        """Invalidate the current refresh token
-        FIXME: Not Impl"""
-        return None
+        """Invalidate the current refresh token"""
+        try:
+            response = requests.post(
+                url=f'{self.accounts_url}/api/v1/auth/logout/',
+                headers={
+                    'Accept': 'application/json',
+                    'Authorization': f'Bearer {self.token}'
+                },
+            )
+
+            response.raise_for_status()
+
+            logout_response = response.json()
+            return logout_response.get('success')
+        except requests.HTTPError as e:
+            # Not great, but we can still continue along..
+            logging.error(
+                f'Could not log out the user, error occurred: {e.response.status_code} - {e.response.text}'
+            )
+            raise e

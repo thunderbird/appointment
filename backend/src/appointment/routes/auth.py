@@ -565,14 +565,23 @@ def logout(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     fxa_client: FxaClient = Depends(get_fxa_client),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
     """Logout a given subscriber session"""
+    auth_client = None
 
     if AuthScheme.is_fxa():
         fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
+        auth_client = fxa_client
+    elif AuthScheme.is_accounts():
+        blob = subscriber.get_external_connection(ExternalConnectionType.accounts).token
+        token = json.loads(blob)
+        if token:
+            accounts_client.setup(subscriber.id, token.get('access'))
+            auth_client = accounts_client
 
     # Don't set a minimum_valid_iat_time here.
-    auth.logout(db, subscriber, fxa_client, deny_previous_tokens=False)
+    auth.logout(db, subscriber, auth_client, deny_previous_tokens=False)
 
     return True
 
