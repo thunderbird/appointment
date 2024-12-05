@@ -237,7 +237,6 @@ provide(paintBackgroundKey, paintBackground);
         :active="tabActive"
         @update="updateTab"
         class="text-xl"
-        data-testid="booking-tab-bar"
       />
     </div>
   </div>
@@ -265,7 +264,7 @@ provide(paintBackgroundKey, paintBackground);
             id="appointments-search"
             class="w-full rounded pl-10 text-sm"
             :placeholder="t('label.searchAppointments')"
-            data-testid="search-bookings-input"
+            data-testid="bookings-search-input"
           />
         </div>
         <div class="flex rounded border border-gray-300 dark:border-gray-500">
@@ -304,7 +303,7 @@ provide(paintBackgroundKey, paintBackground);
             'cursor-pointer': view === BookingsViewTypes.List,
           }"
           @click="openAdjustments"
-          data-testid="adjust-table-btn"
+          data-testid="bookings-adjust-table-btn"
         >
           <icon-adjustments class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-300" />
         </div>
@@ -319,7 +318,7 @@ provide(paintBackgroundKey, paintBackground);
           <div
             v-for="(value, key) in columns"
             :key="key"
-            :data-testid=key
+            :data-testid="'bookings-adjust-table-' + key + '-menu'"
             class="
               grid cursor-pointer grid-cols-context rounded py-1 pl-1 pr-3
               hover:bg-gray-100 dark:hover:bg-gray-500
@@ -341,7 +340,7 @@ provide(paintBackgroundKey, paintBackground);
               hover:bg-gray-100 dark:hover:bg-gray-500
             "
             @click="restoreColumnOrder"
-            data-testid="restore-column-order"
+            data-testid="bookings-adjust-table-restore-menu"
           >
             <div></div>
             <div class="text-sm">{{ t("label.restoreColumnOrder") }}</div>
@@ -349,7 +348,7 @@ provide(paintBackgroundKey, paintBackground);
         </div>
       </div>
       <!-- appointments list -->
-      <table v-show="view === BookingsViewTypes.List" class="mt-4 w-full" data-testid="appointments-list-table">
+      <table v-show="view === BookingsViewTypes.List" class="mt-4 w-full" data-testid="bookings-appointments-list-table">
         <thead>
           <tr class="bg-gray-100 dark:bg-gray-600">
             <th class="py-1"></th>

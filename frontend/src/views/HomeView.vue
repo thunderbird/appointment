@@ -39,7 +39,7 @@ const signUp = () => {
               class="btn-login"
               @click="login"
               :title="$t('label.logIn')"
-              data-testid="login-button"
+              data-testid="home-login-btn"
             />
             <primary-button
               v-else-if="isAuthenticated"
@@ -47,6 +47,7 @@ const signUp = () => {
               class="btn-continue"
               @click="enter"
               :title="$t('label.continue')"
+              data-testid="home-continue-btn"
             />
           </div>
           <div class="my-4">
@@ -56,6 +57,7 @@ const signUp = () => {
               class="btn-login"
               @click="signUp"
               :title="$t('label.signUpForBeta')"
+              data-testid="home-sign-up-beta-btn"
             />
           </div>
         </div>

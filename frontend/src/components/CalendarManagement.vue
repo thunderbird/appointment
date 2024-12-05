@@ -61,7 +61,7 @@ const filteredCalendars = computed(() => props.calendars.filter((calendar: Calen
           text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
         "
         :title="t('label.connect')"
-        data-testid="connect-calendar-btn"
+        data-testid="settings-calendar-connect-calendar-btn"
       >
         <icon-arrow-right class="size-3 stroke-3"/>
         {{ t('label.connectCalendar') }}
@@ -75,7 +75,7 @@ const filteredCalendars = computed(() => props.calendars.filter((calendar: Calen
           text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
         "
         :title="t('label.edit')"
-        data-testid="edit-calendar-btn"
+        data-testid="settings-calendar-edit-calendar-btn"
       >
         <icon-pencil class="size-3 stroke-3"/>
         {{ t('label.editCalendar') }}
@@ -86,7 +86,7 @@ const filteredCalendars = computed(() => props.calendars.filter((calendar: Calen
         :disabled="loading"
         @click="emit('remove', cal.id)"
         :title="t('label.remove')"
-        data-testid="remove-calendar-btn"
+        data-testid="settings-calendar-remove-calendar-btn"
       >
         <icon-x class="size-5 stroke-red-500 stroke-2"/>
       </button>

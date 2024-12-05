@@ -48,10 +48,10 @@ const selectEvent = (day: string) => {
 
 <template>
   <div v-if="appointment">
-    <div class="mb-4 text-3xl text-gray-700 dark:text-gray-400" data-testid="booking-view-title">
+    <div class="mb-4 text-3xl text-gray-700 dark:text-gray-400" data-testid="booking-view-title-text">
       {{ appointment.title }}
     </div>
-    <div class="mb-4 font-semibold" data-testid="booking-view-inviting-you">
+    <div class="mb-4 font-semibold" data-testid="booking-view-inviting-you-text">
       {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
     </div>
     <div v-if="appointment.details" class="mb-6 text-gray-700 dark:text-gray-400">
@@ -70,7 +70,7 @@ const selectEvent = (day: string) => {
       :is-booking-route="true"
       :fixed-duration="activeSchedules[0]?.slot_duration"
       @event-selected="selectEvent"
-      data-testid="booking-view-calendar"
+      data-testid="booking-view-calendar-div"
     >
     </calendar-qalendar>
   </div>
@@ -85,7 +85,7 @@ const selectEvent = (day: string) => {
         :disabled="!selectedEvent"
         @click="emit('openModal')"
         :title="t('label.confirm')"
-        data-testid="confirm-selection-button"
+        data-testid="booking-view-confirm-selection-button"
       />
     </div>
   </footer>
