@@ -251,6 +251,22 @@ export enum WaitingListAction {
   Leave = 2,
 }
 
+/**
+ * Colors used for solor select inputs
+ */
+export enum ColorPalette {
+  Rose = '#ff7b91',
+  Pink = '#fe64b6',
+  Fuchsia = '#c276c5',
+  Purple = '#b865ff',
+  Blue = '#8fa5ff',
+  Sky = '#64c2d0',
+  Teal = '#64bead',
+  Green = '#73c690',
+  Orange = '#e0ad6a',
+  Red = '#ff8b67',
+}
+
 export enum MetricEvents {
   PageLoaded = 'apmt.page.loaded',
   FTUEStep = 'apmt.ftue.step',
@@ -290,9 +306,11 @@ export default {
   BookingsViewTypes,
   CalendarManagementType,
   CalendarProviders,
+  ColorPalette,
   ColorSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
+  Dismissibles,
   EventLocationType,
   ExternalConnectionProviders,
   FtueStep,
@@ -309,5 +327,4 @@ export default {
   TableDataType,
   TooltipPosition,
   WaitingListAction,
-  Dismissibles,
 };
