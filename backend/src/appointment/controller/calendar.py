@@ -333,11 +333,17 @@ class CalDavConnector(BaseConnector):
         except KeyError as ex:
             logging.error(f'KE: Error testing connection {ex}')
             return False
-        except (requests.exceptions.RequestException, caldav.lib.error.NotFoundError, caldav.lib.error.PropfindError) as ex:
+        except (
+            requests.exceptions.RequestException,
+            caldav.lib.error.NotFoundError,
+            caldav.lib.error.PropfindError,
+            caldav.lib.error.AuthorizationError
+        ) as ex:
             """
             RequestException: Max retries exceeded, bad connection, missing schema, etc...
             NotFoundError: Good server, bad url.
             PropfindError: Some properties could not be retrieved.
+            AuthorizationError: Credentials are not accepted.
             """
             return False
 
