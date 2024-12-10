@@ -331,6 +331,7 @@ onMounted(async () => {
               class="w-full max-w-sm rounded-md"
               :disabled="processPrincipal"
               required
+              data-testid="settings-calendar-caldav-url-input"
             />
           </label>
           <label class="flex items-center gap-2 pl-4">
@@ -344,6 +345,7 @@ onMounted(async () => {
               class="w-full max-w-sm rounded-md"
               :disabled="processPrincipal"
               required
+              data-testid="settings-calendar-caldav-user-input"
             />
           </label>
           <label class="flex items-center gap-2 pl-4">
@@ -357,6 +359,7 @@ onMounted(async () => {
               class="w-full max-w-sm rounded-md"
               :disabled="processPrincipal"
               required
+              data-testid="settings-calendar-caldav-password-input"
             />
           </label>
         </form>
@@ -367,6 +370,7 @@ onMounted(async () => {
             @click="resetInput"
             :title="t('label.cancel')"
             :disabled="processPrincipal"
+            data-testid="settings-calendar-caldav-cancel-button"
           />
           <primary-button
             :label="'Search for calendars'"
@@ -374,6 +378,7 @@ onMounted(async () => {
             :waiting="processPrincipal"
             @click="getRemoteCaldavCalendars"
             :title="t('label.search')"
+            data-testid="settings-calendar-caldav-process-principal-button"
           />
         </div>
       </div>
