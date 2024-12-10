@@ -49,13 +49,14 @@ new-booking-plain = { $name } ({ $email }) hat soeben { $date } gebucht
 # $duration (String) - Length of minutes the appointment will be
 new-booking-html-heading-name = { $name }
 new-booking-html-heading-email = ({ $email })
-# FIXME: Google Translate Patch !
 new-booking-html-heading-text = hat gerade Zeit im { $schedule_name } gebucht
 new-booking-html-time = { $duration } mins
 
 ## Confirm Appointment
 
-confirm-mail-subject = Buchungsanfrage von {-brand-name} bestätigen
+# Variables
+# $name (String) - Name of the person who requested the appointment
+confirm-mail-subject = Buchungsanfrage von { $name } bestätigen
 # Variables:
 # $name (String) - Name of the person who requested the appointment
 # $email (String) - Email of the person who requested the appointment
@@ -85,11 +86,10 @@ confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus de
 # $date (String) - Date of the requested appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
 # $duration (String) - Length of minutes the appointment will be
-# FIXME: Google Translation patch !
 confirm-mail-html-heading-name = { $name }
 confirm-mail-html-heading-email = ({ $email })
 confirm-mail-html-heading-text = fordert die Buchung eines Zeitfensters in { $schedule_name } an
-confirm-mail-html-time = { $duration } mins
+confirm-mail-html-time = { $duration } Minuten
 
 confirm-mail-html-confirm-text = Dieser Link führt zur Bestätigung der Buchungsanfrage:
 confirm-mail-html-confirm-action = Buchung bestätigen

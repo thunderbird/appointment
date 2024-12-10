@@ -10,6 +10,7 @@
       "password": "Das ist üblicherweise kein E-Mail-Passwort, sondern ein 'App Passwort'.",
       "user": "Das ist üblicherweise eine E-Mail-Adresse."
     },
+    "successfullyConnected": "Verbindung mit dem CalDAV Server hergestellt. Kalender werden abgefragt.",
     "switchToCalDAV": "Zu CalDAV wechseln",
     "switchToGoogleCalendar": "Zu Google wechseln"
   },
@@ -86,6 +87,7 @@
     "contactRequest": "Kontaktanfrage",
     "createNewAppointment": "Neuen Termin erstellen",
     "dateAndTimeFormatting": "Datums- und Zeitformat",
+    "discoverCaldavcalendars": "CalDAV-Kalender abfragen",
     "displayInformation": "Anzeige-Informationen",
     "eventBooked": "Event gebucht!",
     "externalConnections": "Verbindungen",
@@ -273,6 +275,7 @@
     "pending": "Ausstehend",
     "preferredEmail": "Bevorzugte E-Mail-Adresse",
     "primaryTimeZone": "Primäre Zeitzone",
+    "principal": "Basis URL (CalDAV)",
     "privacy": "Datenschutz",
     "quickLink": "Kurzlink",
     "refresh": "Erneuern",
