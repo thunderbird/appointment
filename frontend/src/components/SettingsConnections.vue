@@ -11,7 +11,9 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
-import { callKey, fxaEditProfileUrlKey, isAccountsAuthKey, isFxaAuthKey, isPasswordAuthKey } from '@/keys';
+import {
+  callKey, fxaEditProfileUrlKey, isAccountsAuthKey, isFxaAuthKey,
+} from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
 import { enumToObject } from '@/utils';
 

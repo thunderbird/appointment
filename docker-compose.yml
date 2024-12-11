@@ -5,6 +5,17 @@ services:
     extends:
       file: accounts/docker-compose.yml
       service: backend
+    ports:
+      - "8087:8087"
+    environment:
+      - DEFAULT_CLIENT=Appointment
+      - DEFAULT_CONTACT_NAME=Thunderbird
+      - DEFAULT_CONTACT_EMAIL=no-reply@example.org
+      - DEFAULT_CONTACT_WEBSITE=https://appointment.day
+      - DEFAULT_ENV_REDIRECT_URL=http://localhost:5173/auth/accounts/callback
+      - DEFAULT_ENV_ALLOWED_HOSTNAMES='["localhost:8080", "accounts:8087"]'
+      - DEFAULT_ENV_ACCESS_TOKEN=0xdeadbeef
+
   postgres:
     volumes:
       - accounts_db:/var/lib/postgresql/data
@@ -18,12 +29,13 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     ports:
-      - 5173:5173
+      - "5173:5173"
     volumes:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
+      - TB_ACCOUNTS_SECRET=0xdeadbeef
     depends_on:
       mysql:
         condition: service_healthy
@@ -34,7 +46,7 @@ services:
       - './frontend:/app'
       - '/app/node_modules'
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       - WATCHPACK_POLLING=true
 
@@ -43,7 +55,7 @@ services:
     volumes:
       - db:/var/lib/mysql
     ports:
-      - 3306:3306
+      - "3306:3306"
     environment:
       - MYSQL_DATABASE=appointment
       - MYSQL_USER=tba
@@ -61,16 +73,16 @@ services:
     volumes:
       - cache:/data
     ports:
-      - 6379:6379 # Redis exposed on port 6379
-      - 8070:8001 # Insights exposed on port 8070
+      - "6379:6379" # Redis exposed on port 6379
+      - "8070:8001" # Insights exposed on port 8070
 
   mailpit:
     image: axllent/mailpit
     environment:
       - MP_SMTP_AUTH_ALLOW_INSECURE=true
     ports:
-      - 8025:8025 # Web UI
-      - 1025:1024 # SMTP
+      - "8025:8025" # Web UI
+      - "1025:1024" # SMTP
 
 volumes:
   accounts_db: {}

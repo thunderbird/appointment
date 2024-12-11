@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import secrets
@@ -8,6 +9,7 @@ from typing import Annotated
 import argon2.exceptions
 import jwt
 from fastapi.security import OAuth2PasswordRequestForm
+from redis import Redis
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
@@ -21,7 +23,7 @@ from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 from ..defines import INVITES_TO_GIVE_OUT, AuthScheme
 
-from ..dependencies.database import get_db
+from ..dependencies.database import get_db, get_shared_redis
 from ..dependencies.auth import (
     get_subscriber,
     get_admin_subscriber,
@@ -134,9 +136,10 @@ def accounts_login(
 @router.get('/auth/accounts/callback')
 def accounts_callback(
     request: Request,
-    token: str,
+    user_session_id: str,
     state: str,
     db: Session = Depends(get_db),
+    shared_redis_client: Redis = Depends(get_shared_redis),
     accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
     """Auth callback from accounts. It's a bit of a journey:
@@ -158,6 +161,9 @@ def accounts_callback(
     if 'tb_accounts_user_email' not in request.session or request.session['tb_accounts_user_email'] == '':
         raise HTTPException(400, 'Email could not be retrieved.')
 
+    # Decode the user session
+    user_session_id = base64.b64decode(user_session_id).decode()
+
     email = request.session['tb_accounts_user_email']
     # We only use timezone during subscriber creation, or if their timezone is None
     timezone = request.session['tb_accounts_user_timezone']
@@ -173,17 +179,20 @@ def accounts_callback(
     accounts_client.setup()
 
     # Retrieve credentials and user profile
-    creds = accounts_client.get_credentials(token)
-    profile = accounts_client.get_profile(creds)
+    profile = shared_redis_client.get(f':1:tb_accounts_user_session.{user_session_id}')
 
-    print('PROFILE>', profile)
+    if not profile:
+        accounts_client.logout()
+        raise HTTPException(400, l10n('email-mismatch'))
+
+    profile = json.loads(profile)
 
     if profile['email'] != email:
         accounts_client.logout()
         raise HTTPException(400, l10n('email-mismatch'))
 
     accounts_subscriber = repo.external_connection.get_subscriber_by_accounts_uuid(db, profile.get('uuid'))
-    # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
+    # Also look up the subscriber (in case we have an existing account that's not tied to a given uuid)
     subscriber = repo.subscriber.get_by_email(db, email)
 
     new_subscriber_flow = not accounts_subscriber and not subscriber
@@ -245,7 +254,7 @@ def accounts_callback(
         type=ExternalConnectionType.accounts,
         type_id=profile['uuid'],
         owner_id=subscriber.id,
-        token=json.dumps({'refresh': token, 'access': creds}),
+        token=json.dumps({'access': user_session_id}),
     )
 
     if not accounts_subscriber:
@@ -253,7 +262,7 @@ def accounts_callback(
     else:
         repo.external_connection.update_token(
             db,
-            json.dumps({'refresh': token, 'access': creds}),
+            json.dumps({'access': user_session_id}),
             subscriber.id,
             external_connection_schema.type,
             external_connection_schema.type_id,
@@ -275,14 +284,10 @@ def accounts_callback(
 
     repo.subscriber.update(db, data, subscriber.id)
 
-    # Generate our jwt token, we only store the username on the token
-    access_token_expires = timedelta(minutes=float(10))
-    one_time_access_token = create_access_token(
-        data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
-    )
+    request.session['accounts_session'] = user_session_id
 
     print("Sending to frontend")
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{one_time_access_token}")
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/")
 
 
 @router.get('/fxa_login')
