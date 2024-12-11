@@ -2,6 +2,9 @@
 
 This place holds all additional technical documentation for Thunderbird Appointment.
 
+## Documents
+* [Updating Legal](./updating-legal.rst)
+
 ## API endpoints
 
 After starting the backend container, you can find the API documentation here: <http://localhost:8090/docs>
