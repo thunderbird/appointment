@@ -45,5 +45,8 @@ onMounted(async () => {
   p:first-of-type {
     @apply font-semibold;
   }
+  a {
+    @apply underline;
+  }
 }
 </style>

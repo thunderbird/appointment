@@ -20,7 +20,9 @@ def run():
     """
     print('Downloading the latest legal documents...')
 
-    extensions = ['markdown.extensions.attr_list']
+    # Attr_List: In-case remote markdown has attributes
+    # TOC: For ids on headers
+    extensions = ['markdown.extensions.attr_list', 'markdown.extensions.toc']
     # Only english for now. There's no german TB privacy policy?
     locales = ['en']
 
