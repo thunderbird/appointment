@@ -1,8 +1,15 @@
 import os
 import shutil
+import subprocess
 
 import dotenv
 import secrets
+
+def setup_accounts():
+    if os.getenv('AUTH_SCHEME') != 'accounts':
+        return
+
+    print("Setting up accounts!")
 
 
 def setup_env():
@@ -82,6 +89,7 @@ def run():
         return
 
     env = setup_env()
+    setup_accounts()
 
     if not env:
         print("Err: Could not setup env, permission issue?")

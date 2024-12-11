@@ -176,14 +176,12 @@ def accounts_callback(
     creds = accounts_client.get_credentials(token)
     profile = accounts_client.get_profile(creds)
 
-    print('PROFILE>', profile)
-
     if profile['email'] != email:
         accounts_client.logout()
         raise HTTPException(400, l10n('email-mismatch'))
 
     accounts_subscriber = repo.external_connection.get_subscriber_by_accounts_uuid(db, profile.get('uuid'))
-    # Also look up the subscriber (in case we have an existing account that's not tied to a given fxa account)
+    # Also look up the subscriber (in case we have an existing account that's not tied to a given uuid)
     subscriber = repo.subscriber.get_by_email(db, email)
 
     new_subscriber_flow = not accounts_subscriber and not subscriber
