@@ -214,9 +214,9 @@ const onEnter = () => {
       </div>
       <div class="form-body">
         <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
-          <text-input name="email" v-model="email" :required="true">{{ t('login.form.email') }}</text-input>
-          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true" type="password">{{ t('label.password') }}</text-input>
-          <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
+          <text-input name="email" v-model="email" :required="true" data-testid="login-email-input">{{ t('login.form.email') }}</text-input>
+          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true" type="password" data-testid="login-password-input">{{ t('label.password') }}</text-input>
+          <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')" data-testid="login-invite-code-input">{{ t('label.inviteCode') }}</text-input>
         </form>
       </div>
       <template v-slot:actions>
@@ -226,6 +226,7 @@ const onEnter = () => {
           :disabled="isLoading"
           @click="onEnter()"
           v-if="loginStep !== LoginSteps.SignUpConfirm"
+          data-testid="login-continue-btn"
         >
           {{ t('label.continue') }}
         </primary-button>
@@ -235,6 +236,7 @@ const onEnter = () => {
           :disabled="isLoading"
           @click="router.push({name: 'home'})"
           v-else
+          data-testid="login-close-btn"
         >
           {{ t('label.close') }}
         </primary-button>

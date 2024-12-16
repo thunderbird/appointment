@@ -67,7 +67,6 @@ const isNavEntryActive = (item: string) => {
           :active="isNavEntryActive(item)"
           :label="t(`label.${item}`)"
           :link-name="item"
-          :data-testid="'nav-bar-' + item + '-btn'"
         />
       </div>
       <drop-down class="self-center">
