@@ -31,9 +31,10 @@ cp .env.example .env
 ```
 
 Then edit your local `.env` file and provide the credentials for your Appointment test account:
-
-`APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>`</br>
-`APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>`
+```dotenv
+APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
+APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+```
 
 To run the production sanity test headless (still in `test/e2e`):
 
@@ -61,8 +62,10 @@ You can run the E2E tests from your local machine but against browsers provided 
 
 Once you have credentials for an existing Appointemnt test account, edit your local `.env` file and add the credentials:
 
-`APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>`</br>
-`APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>`
+```dotenv
+APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
+APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+```
 
 Also in order to run on BrowserStack you need to provide your BrowserStack credentials. Sign into your BrowserStack account and navigate to your `User Profile` and find your auth username and access key. In your local terminal export the following env vars to set the BrowserStack credentials that the tests will use:
 
