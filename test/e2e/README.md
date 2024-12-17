@@ -6,6 +6,8 @@ Guide for running the Thunderbird Appointment E2E tests.
 
 You must have a pre-existing Appointment user test account (using FxA credentials) on the platform where you are running the tests. ie. For the production sanity test you must have an Appointment test account on production (using production FxA credentials) already set up.
 
+The tests expect that default Appointment application settings exist for the provided test user; for example the user scheduling availability hasn't been changed from the default settings; and the default calendar view is the current month view. This is important so that the tests can find an available booking slot, etc.
+
 ## Installation
 
 First install the E2E suite (includes Playwright):
@@ -23,17 +25,29 @@ npx playwright install
 
 ## Running Locally
 
-The E2E tests require credentials for an existing Appointment (FxA) account and reads these from your local env vars. First copy over the provided `.example.env` to a local `.env`:
+The E2E tests require credentials for an existing Appointment (FxA) account and reads these from your local env vars.
+This includes the existing Appointment account's email address, password, user's display name and share link.
+<br><br>
+The display name is found in Appointment => Settings => Account => Display name.
+<br><br>
+The share link is found in Appointment => Settings => Account => My Link.
+<br><br>
+The tests also require an email address to be used when actually requesting bookings. This is the email address entered on the `Book selection` dialog (after an appoitment slot was selected on the booking share link page). Note that real Appointment emails will be sent to this email address.
+<br><br>
+First copy over the provided `.example.env` to a local `.env`:
 
 ```bash
 cd test/e2e
 cp .env.example .env
 ```
 
-Then edit your local `.env` file and provide the credentials for your Appointment test account:
+Then edit your local `.env` file and provide the following values:
 ```dotenv
 APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
 APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_PROD_DISPLAY_NAME=<appointment-user-display-name>
+APPT_PROD_MY_SHARE_LINK=<apointment-user-share-link>
+APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
 ```
 
 To run the production sanity test headless (still in `test/e2e`):
@@ -60,11 +74,14 @@ You can run the E2E tests from your local machine but against browsers provided 
 
 <b>For security reasons when running the tests on BrowserStack I recommend that you use a dedicated test Appointment FxA account / credentials (NOT your own personal Appointment (FxA) credentials).</b>
 
-Once you have credentials for an existing Appointemnt test account, edit your local `.env` file and add the credentials:
+Once you have credentials for an existing Appointemnt test account, edit your local `.env` file and add these details (more information found above):
 
 ```dotenv
 APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
 APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_PROD_DISPLAY_NAME=<appointment-user-display-name>
+APPT_PROD_MY_SHARE_LINK=<apointment-user-share-link>
+APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
 ```
 
 Also in order to run on BrowserStack you need to provide your BrowserStack credentials. Sign into your BrowserStack account and navigate to your `User Profile` and find your auth username and access key. In your local terminal export the following env vars to set the BrowserStack credentials that the tests will use:

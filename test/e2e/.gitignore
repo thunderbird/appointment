@@ -1,6 +1,11 @@
 .env
 node_modules/
+
+# PlayWright logging etc.
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# BrowserStack logging
+/log
