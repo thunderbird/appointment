@@ -23,17 +23,20 @@ npx playwright install
 
 ## Running Locally
 
-The E2E tests require credentials for an existing Appointment (FxA) account and reads these from your local env vars. First copy over the provided `.example.env` to a local `.env`:
+The E2E tests require credentials for an existing Appointment (FxA) account and reads these from your local env vars.
+The tests also require the Appointment account display name associated with those given user credentials. The Display name
+is found in Appointment => Settings => Account => Display name. First copy over the provided `.example.env` to a local `.env`:
 
 ```bash
 cd test/e2e
 cp .env.example .env
 ```
 
-Then edit your local `.env` file and provide the credentials for your Appointment test account:
+Then edit your local `.env` file and provide the following values:
 ```dotenv
 APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
 APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_PROD_ACCT_DISPLAY_NAME=<appointment-user-display-name>
 ```
 
 To run the production sanity test headless (still in `test/e2e`):
@@ -65,6 +68,7 @@ Once you have credentials for an existing Appointemnt test account, edit your lo
 ```dotenv
 APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
 APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_PROD_ACCT_DISPLAY_NAME=<appointment-user-display-name>
 ```
 
 Also in order to run on BrowserStack you need to provide your BrowserStack credentials. Sign into your BrowserStack account and navigate to your `User Profile` and find your auth username and access key. In your local terminal export the following env vars to set the BrowserStack credentials that the tests will use:
