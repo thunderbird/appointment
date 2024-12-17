@@ -1,5 +1,4 @@
-import { expect, type Page, type Locator } from '@playwright/test';
-import exp from 'constants';
+import { type Page, type Locator } from '@playwright/test';
 
 export class DashboardPage {
   readonly page: Page;
