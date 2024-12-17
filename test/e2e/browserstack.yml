@@ -29,11 +29,14 @@ platforms:
     osVersion: Sequoia
     browserName: playwright-firefox
     browserVersion: latest
+    playwrightConfigOptions:
+      name: Firefox-OSX
   - os: OS X
     osVersion: Sequoia
     browserName: playwright-chromium
     browserVersion: latest
-
+    playwrightConfigOptions:
+      name: Chromium-OSX
 # =======================
 # Parallels per Platform
 # =======================
