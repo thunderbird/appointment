@@ -32,7 +32,7 @@ export const fxaEditProfileUrlKey = Symbol('fxaEditProfileUrl') as InjectionKey<
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
 
-// Provide a freresh data function
+// Provide a refresh data function
 export const refreshKey = Symbol('refresh') as InjectionKey<Refresh>;
 
 // Provide functionality to paint background of event objects

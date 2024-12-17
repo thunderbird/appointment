@@ -161,7 +161,12 @@ const login = async () => {
 
   const { error }: Error = await user.login(call, email.value, password.value);
   if (error) {
-    handleFormError(error as PydanticException);
+    let errObj = error as PydanticException;
+    if (typeof error === 'string') {
+      errObj = { detail: error };
+    }
+
+    loginError.value = handleFormError(t, formRef, errObj);
     isLoading.value = false;
     return;
   }

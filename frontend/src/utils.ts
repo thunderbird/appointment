@@ -1,6 +1,7 @@
 // get the first key of given object that points to given value
 import { ColorSchemes } from '@/definitions';
 import { Ref } from 'vue';
+import { i18nType } from '@/composables/i18n';
 import {
   CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent, PydanticException,
 } from './models';
@@ -166,9 +167,10 @@ export const getAccessibleColor = (hexcolor: string): string => {
  * @param formRef
  * @param errObj
  */
-export const handleFormError = (i18n: any, formRef: Ref, errObj: PydanticException) => {
+export const handleFormError = (i18n: i18nType, formRef: Ref, errObj: PydanticException) => {
+  const unknownError = i18n('error.somethingWentWrong');
   if (!errObj) {
-    return i18n('error.somethingWentWrong');
+    return unknownError;
   }
 
   const fields = formRef.value.elements;
@@ -186,7 +188,7 @@ export const handleFormError = (i18n: any, formRef: Ref, errObj: PydanticExcepti
   } else if (typeof detail === 'string') { // HttpException errors are just strings
     return detail;
   } else {
-    return detail.message;
+    return detail?.message ?? unknownError;
   }
 
   // Finally report it!
