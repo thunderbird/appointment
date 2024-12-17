@@ -53,7 +53,9 @@
 {% if show_contact_form_reply_hint %}
 {% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form')) %}
 <div style="text-align: center; margin-left: auto; margin-right: auto; margin-bottom: 24px; padding: 12px; max-width: 310px;">
-  {{ l10n('mail-brand-reply-hint', {'contact_form_link': link, 'name': name, 'email': email })|safe }}
+  {{ l10n('mail-brand-reply-hint-attendee-info', { 'name': name })|safe }}
+  <br/><br/>
+  {{ l10n('mail-brand-reply-hint', {'contact_form_link': link})|safe }}
 </div>
 {% endif %}
 <div style="
