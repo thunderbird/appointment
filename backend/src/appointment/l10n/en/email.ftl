@@ -12,6 +12,7 @@
 
 mail-brand-contact-form = contact form
 mail-brand-support-hint = Got questions? We're here to help. Fill out our { $contact_form_link }, or simply reply to this email for support.
+mail-brand-reply-hint = Got questions? We're here to help, you can reach us via our { $contact_form_link }. Need to get in touch with { $name } ({ $email })? Simply reply to this email.
 mail-brand-footer = This message was sent from:
                     {-brand-name}
                     {-brand-slogan} {-brand-sign-up-with-no-url}
