@@ -223,6 +223,7 @@ class InvitationMail(BaseBookingMail):
             'plain': l10n('invite-mail-plain'),
         }
         super().__init__(*args, **default_kwargs, **kwargs)
+        self.reply_to = self.email
 
     def html(self):
         return get_template('invite.jinja2').render(
@@ -334,6 +335,7 @@ class NewBookingMail(BaseBookingMail):
         self.schedule_name = schedule_name
         default_kwargs = {'subject': l10n('new-booking-subject', {'name': name})}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+        self.reply_to = email
 
     def text(self):
         return l10n(

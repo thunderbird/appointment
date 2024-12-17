@@ -12,6 +12,9 @@
 
 mail-brand-contact-form = Kontaktformular
 mail-brand-support-hint = Du hast Fragen? Wir helfen gern. Nutze unser { $contact_form_link }, oder antworte einfach auf diese E-Mail für Support.
+mail-brand-reply-hint = Du hast Fragen? Wir helfen gern, Du erreichst uns über unser { $contact_form_link }.
+mail-brand-reply-hint-attendee-info = Du möchtest { $name } kontaktieren? Antworte einfach auf diese E-Mail.
+
 mail-brand-footer = Diese Nachricht wurde gesendet von:
                     {-brand-name}
                     {-brand-slogan} {-brand-sign-up-with-no-url}
