@@ -5,6 +5,21 @@ from fluent.runtime import FluentLocalization, FluentResourceLoader
 from ..defines import SUPPORTED_LOCALES, FALLBACK_LOCALE
 
 
+def get_fluent(locales: list[str]):
+    """Provides fluent's format_value function for given locales"""
+
+    # Make sure our fallback locale is always in locales
+    if FALLBACK_LOCALE not in locales:
+        locales.append(FALLBACK_LOCALE)
+
+    base_url = 'src/appointment/l10n'
+
+    loader = FluentResourceLoader(f'{base_url}/{{locale}}')
+    fluent = FluentLocalization(locales, ['main.ftl', 'email.ftl', 'fields.ftl'], loader)
+
+    return fluent.format_value
+
+
 class L10n(Plugin):
     """Provides fluent's format_value function via context['l10n']"""
 
@@ -30,19 +45,10 @@ class L10n(Plugin):
 
         return parsed_locales
 
-    def get_fluent(self, accept_languages):
+    def get_fluent_with_header(self, accept_languages):
         supported_locales = self.parse_accept_language(accept_languages)
 
-        # Make sure our fallback locale is always in supported_locales
-        if FALLBACK_LOCALE not in supported_locales:
-            supported_locales.append(FALLBACK_LOCALE)
-
-        base_url = 'src/appointment/l10n'
-
-        loader = FluentResourceLoader(f'{base_url}/{{locale}}')
-        fluent = FluentLocalization(supported_locales, ['main.ftl', 'email.ftl', 'fields.ftl'], loader)
-
-        return fluent.format_value
+        return get_fluent(supported_locales)
 
     async def process_request(self, request: Request):
-        return self.get_fluent(request.headers.get('accept-language', FALLBACK_LOCALE))
+        return self.get_fluent_with_header(request.headers.get('accept-language', FALLBACK_LOCALE))
