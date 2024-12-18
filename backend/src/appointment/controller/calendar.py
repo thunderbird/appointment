@@ -345,6 +345,7 @@ class CalDavConnector(BaseConnector):
             PropfindError: Some properties could not be retrieved.
             AuthorizationError: Credentials are not accepted.
             """
+            logging.error(f'Test Connection Error: {ex}')
             return False
 
         # They need at least VEVENT support for appointment to work.
