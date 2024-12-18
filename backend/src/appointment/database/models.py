@@ -16,6 +16,7 @@ from sqlalchemy_utils import StringEncryptedType, ChoiceType, UUIDType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship, as_declarative, declared_attr, Mapped
 from sqlalchemy.sql import func
+from appointment.defines import FALLBACK_LOCALE
 
 
 def secret():
@@ -133,6 +134,7 @@ class Subscriber(HasSoftDelete, Base):
 
     name = Column(encrypted_type(String), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
+    language = Column(encrypted_type(String), index=True)
     timezone = Column(encrypted_type(String), index=True)
     avatar_url = Column(encrypted_type(String, length=2048), index=False)
 
