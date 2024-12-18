@@ -127,7 +127,9 @@ onMounted(() => {
 
     // Adjust the default calendar if the one attached is not connected.
     const { calendar_id: calendarId } = scheduleInput.value;
-    if (!props.calendars[calendarId] || !props.calendars[calendarId].connected) {
+
+    const calendar = props.calendars.find((cal) => cal.id === calendarId);
+    if (!calendar || !calendar.connected) {
       scheduleInput.value.calendar_id = props.calendars[0]?.id;
     }
   } else {
