@@ -8,13 +8,13 @@
 {% block introduction %}
   <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
     <p style="font-weight: 700; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-name', {'name': name}) }}
+      {{ l10n('confirm-mail-html-heading-name', {'name': name}, lang) }}
     </p>
     <p style="color: {{ colour_text_muted }}; font-size: 9px; line-height: 10px; font-weight: 700; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-email', {'email': email}) }}
+      {{ l10n('confirm-mail-html-heading-email', {'email': email}, lang) }}
     </p>
     <p style="font-weight: 400; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-text', {'schedule_name': schedule_name}) }}
+      {{ l10n('confirm-mail-html-heading-text', {'schedule_name': schedule_name}, lang) }}
     </p>
   </div>
 {% endblock %}
@@ -43,7 +43,7 @@
       font-weight: 700;
       height: 16px;
       ">
-      {{ clock_image_small|safe }} {{ l10n('confirm-mail-html-time', {'duration': duration}) }}
+      {{ clock_image_small|safe }} {{ l10n('confirm-mail-html-time', {'duration': duration}, lang) }}
     </div>
   </div>
 {% endblock %}
@@ -63,7 +63,7 @@
         text-decoration:none;
         white-space: nowrap;
         "
-    >{{ l10n('confirm-mail-html-confirm-action') }}</a>
+    >{{ l10n('confirm-mail-html-confirm-action', lang=lang) }}</a>
   </div>
   <div>
     <a
@@ -76,6 +76,6 @@
         text-decoration-line: underline;
         font-weight: 400;
         "
-    >{{ l10n('confirm-mail-html-deny-action') }}</a>
+    >{{ l10n('confirm-mail-html-deny-action', lang=lang) }}</a>
   </div>
 {% endblock %}

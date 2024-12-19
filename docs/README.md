@@ -3,6 +3,7 @@
 This place holds all additional technical documentation for Thunderbird Appointment.
 
 ## Documents
+
 * [Updating Legal](./updating-legal.rst)
 
 ## API endpoints
@@ -77,6 +78,7 @@ erDiagram
     string secondary_email "Secondary email address"
     date time_deleted "UTC timestamp of deletion (soft delete)"
     int ftue_level "Version of the FTUE the user has completed"
+    string language "Lang code for subscribers preferred locale"
   }
   SUBSCRIBERS ||--o{ CALENDARS : own
   CALENDARS {

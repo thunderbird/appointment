@@ -486,5 +486,3 @@ def terms():
     with open(f'{os.path.dirname(__file__)}/../templates/legal/en/terms.jinja2') as fh:
         contents = fh.read()
     return HTMLResponse(contents)
-
-
