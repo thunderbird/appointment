@@ -19,6 +19,7 @@ health-bad = Health BAD
 ## General Exceptions
 
 unknown-error = An unknown error occurred. Please try again later.
+unknown-error-short = an unknown error
 
 appointment-not-found = The appointment could not be found.
 calendar-not-found = The calendar could not be found.
@@ -45,7 +46,14 @@ not-in-allow-list = Your email is not in the allow list.
 
 schedule-not-active = The schedule has been turned off. Please contact the schedule owner for more information.
 
-remote-calendar-connection-error = The remote calendar could not be reached. Please verify your connection information and try again.
+remote-calendar-connection-error = The remote calendar could not be reached due to {$reason}.
+
+        Please verify your connection information and try again.
+
+# Possible entries for $reason,
+remote-calendar-reason-doesnt-support-caldav = the remote calendar does not support CalDAV
+remote-calendar-reason-doesnt-support-auth = the remote calendar does not support authentication
+remote-calendar-reason-unauthorized = an issue with your username or password
 
 event-could-not-be-accepted = There was an error accepting the booking details. Please try again later.
 event-could-not-be-deleted = There was an error removing the hold event. Please try again later.

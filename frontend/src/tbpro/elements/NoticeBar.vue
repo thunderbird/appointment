@@ -51,6 +51,7 @@ const isError = props.type === 'error';
   font-size: 0.8125rem;
   font-weight: 700;
   line-height: 1;
+  white-space: pre;
 }
 .notice {
   position: relative;

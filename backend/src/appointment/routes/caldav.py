@@ -12,8 +12,10 @@ from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
+from appointment.exceptions.calendar import TestConnectionFailed
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 from appointment.exceptions.validation import RemoteCalendarConnectionError
+from appointment.l10n import l10n
 
 router = APIRouter()
 
@@ -99,8 +101,13 @@ def caldav_autodiscover_auth(
         calendar_id=None,
     )
 
-    if not con.test_connection():
-        raise RemoteCalendarConnectionError()
+    # If it returns False it doesn't support VEVENT (aka caldav)
+    # If it raises an exception there's a connection problem
+    try:
+        if not con.test_connection():
+            raise RemoteCalendarConnectionError(reason=l10n('remote-calendar-reason-doesnt-support-caldav'))
+    except TestConnectionFailed as ex:
+        raise RemoteCalendarConnectionError(reason=ex.reason)
 
     caldav_id = json.dumps([connection.url, connection.user])
     external_connection = repo.external_connection.get_by_type(
