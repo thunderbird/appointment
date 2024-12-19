@@ -136,21 +136,6 @@ def fxa_callback(
     - We also update (an initial set if the subscriber is new) the profile data for the subscriber.
     - And finally generate a jwt token for the frontend, and redirect them to a special frontend route with that token.
     """
-    if os.getenv('AUTH_SCHEME') != 'fxa':
-        raise HTTPException(status_code=405)
-
-    if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
-        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error=invalid-state")
-    if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
-        return RedirectResponse(
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error=email-not-in-session"
-        )
-
-    email = request.session['fxa_user_email']
-    # We only use timezone during subscriber creation, or if their timezone is None
-    timezone = request.session['fxa_user_timezone']
-    invite_code = request.session.get('fxa_user_invite_code')
-
     # These are error keys on the frontend
     # login.remoteError.<id>
     errors = {
@@ -159,7 +144,24 @@ def fxa_callback(
         'unknown-error': 'unknown-error',
         'disabled-account': 'disabled-account',
         'invalid-credentials': 'invalid-credentials',
+        'invalid-state': 'invalid-state',
+        'email-not-in-session': 'email-not-in-session',
     }
+
+    if os.getenv('AUTH_SCHEME') != 'fxa':
+        raise HTTPException(status_code=405)
+
+    if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
+        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-state']}")
+    if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
+        return RedirectResponse(
+            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-not-in-session']}"
+        )
+
+    email = request.session['fxa_user_email']
+    # We only use timezone during subscriber creation, or if their timezone is None
+    timezone = request.session['fxa_user_timezone']
+    invite_code = request.session.get('fxa_user_invite_code')
 
     # Clear session keys
     request.session.pop('fxa_state')
