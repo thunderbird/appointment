@@ -1,0 +1,50 @@
+name: nightly-tests
+
+concurrency:
+  group: nightly-tests
+  cancel-in-progress: true
+
+on:
+  schedule:
+    # run every day at 1am UTC (8PM EST)
+    - cron:  '0 1 * * *'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  prod-sanity-browserstack:
+    name: prod-sanity-browserstack
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      APPT_PROD_LOGIN_EMAIL: ${{ secrets.E2E_APPT_PROD_LOGIN_EMAIL }}
+      APPT_PROD_LOGIN_PWORD: ${{ secrets.E2E_APPT_PROD_LOGIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'test/e2e/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd ./test/e2e
+          npm install
+
+      - name: BrowserStack Env Setup
+        uses: browserstack/github-actions/setup-env@master
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          project-name: 'Thunderbird Appointment'
+
+      - name: Run Playwright Tests on Browserstack
+        run: |
+          cd ./test/e2e
+          cp .env.example .env
+          npm run prod-sanity-test-browserstack
