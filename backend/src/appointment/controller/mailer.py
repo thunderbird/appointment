@@ -271,7 +271,8 @@ class ConfirmationMail(BaseBookingMail):
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
         self.schedule_name = schedule_name
-        default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, kwargs['lang'])}
+        lang = kwargs['lang'] if 'lang' in kwargs else None
+        default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, lang)}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
 
 
@@ -351,7 +352,8 @@ class NewBookingMail(BaseBookingMail):
            Reply-To: Bookee
         """
         self.schedule_name = schedule_name
-        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, kwargs['lang'])}
+        lang = kwargs['lang'] if 'lang' in kwargs else None
+        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang)}
         super(NewBookingMail, self).__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
         self.reply_to = email
 
