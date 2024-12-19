@@ -375,8 +375,15 @@ def request_schedule_availability_slot(
     if schedule.booking_confirmation:
         # Sending confirmation email to owner
         background_tasks.add_task(
-            send_confirmation_email, url=url, attendee_name=attendee.name, attendee_email=attendee.email, date=date,
-            duration=slot.duration, to=subscriber.preferred_email, schedule_name=schedule.name
+            send_confirmation_email,
+            url=url,
+            attendee_name=attendee.name,
+            attendee_email=attendee.email,
+            date=date,
+            duration=slot.duration,
+            schedule_name=schedule.name,
+            to=subscriber.preferred_email,
+            lang=subscriber.language
         )
 
         # Create remote HOLD event
@@ -416,7 +423,8 @@ def request_schedule_availability_slot(
             date=date,
             duration=slot.duration,
             schedule_name=schedule.name,
-            to=subscriber.preferred_email
+            to=subscriber.preferred_email,
+            lang=subscriber.language
         )
 
     # Mini version of slot, so we can grab the newly created slot id for tests
