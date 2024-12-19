@@ -319,8 +319,9 @@ class TestFXA:
         response = with_client.get(
             '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
         )
-        # 404, invite code not found
-        assert response.status_code == 404, response.text
+        # this could contain the invite not valid error
+        assert response.status_code == 307, response.text
+        assert '?error=invite-not-valid' in response.headers.get('location')
 
         with with_db() as db:
             subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
@@ -385,10 +386,9 @@ class TestFXA:
             '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
         )
 
-        # This should error out as a 403
-        assert response.status_code == 403, response.text
-        # This will just key match due to the lack of context.
-        assert response.json().get('detail') == l10n('invalid-credentials')
+        # This should contain the invalid-credentials error
+        assert response.status_code == 307, response.text
+        assert '?error=invalid-credentials' in response.headers.get('location')
 
     def test_fxa_token_success(self, make_basic_subscriber, with_client):
         os.environ['AUTH_SCHEME'] = 'fxa'

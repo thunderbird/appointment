@@ -362,7 +362,9 @@
       "invite-not-valid": "The invite code you've entered is not valid.",
       "unknown-error": "An unknown error occurred.",
       "disabled-account": "This account is disabled.",
-      "invalid-credentials": "There was a problem with your credentials."
+      "invalid-credentials": "There was a problem with your credentials.",
+      "invalid-state": "The login session has expired. Please try again.",
+      "email-not-in-session": "There was a problem with the login session. Please try again."
     },
     "signUp": {
       "title": "Have an invite code? Enter it here"
