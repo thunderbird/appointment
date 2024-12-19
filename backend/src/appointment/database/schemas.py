@@ -12,7 +12,7 @@ from typing import Annotated, Optional, Self
 from pydantic import BaseModel, Field, EmailStr, model_validator
 from pydantic_core import PydanticCustomError
 
-from ..defines import DEFAULT_CALENDAR_COLOUR
+from ..defines import DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
 from ..l10n import l10n
 
 
@@ -307,6 +307,7 @@ class SubscriberIn(BaseModel):
     name: Optional[str] = Field(min_length=1, max_length=128, default=None)
     avatar_url: str | None = None
     secondary_email: str | None = None
+    language: str | None = FALLBACK_LOCALE
 
 
 class SubscriberBase(SubscriberIn):
@@ -499,4 +500,3 @@ class PageLoadIn(BaseModel):
 class FTUEStepIn(BaseModel):
     step_level: int
     step_name: str
-

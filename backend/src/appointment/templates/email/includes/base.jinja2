@@ -8,7 +8,7 @@
 {% set colour_tbpro_apmt_primary = '#008080' %}
 {% set colour_tbpro_apmt_primary_hover = '#066769' %}
 {% set colour_tbpro_apmt_secondary = '#81D4B5' %}
-<html lang="{{ l10n('locale') }}" style="
+<html lang="{{ l10n('locale', lang=lang if lang else None) }}" style="
   font-size: 13px;
   color: {{ colour_text_base }};
   background-color: {{ colour_surface_base }};
@@ -45,17 +45,17 @@
 </div>
 {% endif %}
 {% if show_contact_form_support_hint %}
-{% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form')) %}
+{% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
 <div style="text-align: center; margin-left: auto; margin-right: auto; margin-bottom: 24px; padding: 12px; max-width: 310px;">
-  {{ l10n('mail-brand-support-hint', {'contact_form_link': link})|safe }}
+  {{ l10n('mail-brand-support-hint', {'contact_form_link': link}, lang if lang else None)|safe }}
 </div>
 {% endif %}
 {% if show_contact_form_reply_hint %}
-{% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form')) %}
+{% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
 <div style="text-align: center; margin-left: auto; margin-right: auto; margin-bottom: 24px; padding: 12px; max-width: 310px;">
-  {{ l10n('mail-brand-reply-hint-attendee-info', { 'name': name })|safe }}
+  {{ l10n('mail-brand-reply-hint-attendee-info', { 'name': name }, lang if lang else None)|safe }}
   <br/><br/>
-  {{ l10n('mail-brand-reply-hint', {'contact_form_link': link})|safe }}
+  {{ l10n('mail-brand-reply-hint', {'contact_form_link': link}, lang if lang else None)|safe }}
 </div>
 {% endif %}
 <div style="

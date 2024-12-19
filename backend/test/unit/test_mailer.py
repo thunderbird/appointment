@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
-    NewBookingMail, Attachment
+    NewBookingMail, PendingRequestMail, Attachment
 from appointment.database import schemas
 
 
@@ -57,6 +57,19 @@ class TestMailer:
             fault = 'text' if idx == 0 else 'html'
             assert attendee.name in content, fault
             assert attendee.email in content, fault
+
+    def test_pending(self, faker, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        now = datetime.datetime.now()
+        fake_email = 'to@example.org'
+
+        mailer = PendingRequestMail(owner_name=subscriber.name, date=now, to=fake_email)
+        assert mailer.html()
+        assert mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
+            assert subscriber.name in content, fault
 
     def test_reject(self, faker, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
