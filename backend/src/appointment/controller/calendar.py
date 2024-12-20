@@ -33,6 +33,7 @@ from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
+from ..exceptions.calendar import TestConnectionFailed
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email
@@ -329,24 +330,36 @@ class CalDavConnector(BaseConnector):
         except IndexError as ex:
             # Library has an issue with top level urls, probably due to caldav spec?
             logging.error(f'IE: Error testing connection {ex}')
-            return False
+            raise TestConnectionFailed(reason=None)
         except KeyError as ex:
             logging.error(f'KE: Error testing connection {ex}')
-            return False
+            raise TestConnectionFailed(reason=None)
+        except requests.exceptions.RequestException:
+            raise TestConnectionFailed(reason=None)
+        except NotImplementedError:
+            # Doesn't support authorization by digest, bearer, or basic header values
+            raise TestConnectionFailed(reason=l10n('remote-calendar-reason-doesnt-support-auth'))
         except (
-            requests.exceptions.RequestException,
             caldav.lib.error.NotFoundError,
             caldav.lib.error.PropfindError,
             caldav.lib.error.AuthorizationError
         ) as ex:
             """
-            RequestException: Max retries exceeded, bad connection, missing schema, etc...
             NotFoundError: Good server, bad url.
             PropfindError: Some properties could not be retrieved.
             AuthorizationError: Credentials are not accepted.
             """
             logging.error(f'Test Connection Error: {ex}')
-            return False
+
+            # Don't use the default "no reason" error message if we encounter it.
+            if ex.reason == caldav.lib.error.DAVError.reason:
+                ex.reason = None
+            if ex.reason == 'Unauthorized':
+                # ex.reason seems to be pulling from status codes for some errors?
+                # Let's replace this with our own.
+                ex.reason = l10n('remote-calendar-reason-unauthorized')
+
+            raise TestConnectionFailed(reason=ex.reason)
 
         # They need at least VEVENT support for appointment to work.
         return supports_vevent
