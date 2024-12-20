@@ -21,7 +21,7 @@ depends_on = None
 
 def upgrade() -> None:
     # Add language column to subscribers table
-    op.add_column('subscribers', sa.Column('language', models.encrypted_type(sa.String), nullable=False, default=FALLBACK_LOCALE, index=True))
+    op.add_column('subscribers', sa.Column('language', models.encrypted_type(sa.String), nullable=False, server_default=FALLBACK_LOCALE, index=True))
 
 
 def downgrade() -> None:
