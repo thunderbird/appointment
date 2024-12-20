@@ -33,7 +33,7 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test')
+        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test', lang='en')
         assert mailer.html()
         assert mailer.text()
 
@@ -49,7 +49,7 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', to=fake_email)
+        mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', lang='en', to=fake_email)
         assert mailer.html()
         assert mailer.text()
 
