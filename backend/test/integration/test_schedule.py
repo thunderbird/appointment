@@ -905,8 +905,7 @@ class TestDecideScheduleAvailabilitySlot:
             headers=auth_headers,
         )
 
-        with with_db() as db:
-            assert response.status_code == 404, response.text
+        assert response.status_code == 404, response.text
 
 
     def test_deny(
@@ -983,5 +982,4 @@ class TestDecideScheduleAvailabilitySlot:
             headers=auth_headers,
         )
 
-        with with_db() as db:
-            assert response.status_code == 404, response.text
+        assert response.status_code == 404, response.text
