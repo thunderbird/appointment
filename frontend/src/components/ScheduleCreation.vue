@@ -285,6 +285,8 @@ const saveSchedule = async (withConfirmation = true) => {
     .tz(user.data.timezone ?? dj.tz.guess(), true)
     .utc()
     .format('HH:mm');
+  // Update the start_date with the current date
+  obj.start_date = dj().format(dateFormat);
   // remove unwanted properties
   delete obj.availabilities;
   delete obj.time_created;
