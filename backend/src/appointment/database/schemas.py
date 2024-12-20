@@ -220,16 +220,16 @@ class ScheduleValidationIn(ScheduleBase):
         start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
         end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
 
-        start_time = (start_time + timedelta(minutes=self.slot_duration)).time()
-        end_time = end_time.time()
+        start_time = (start_time + timedelta(minutes=self.slot_duration))
+        end_time = end_time
         # Compare time objects!
-        if start_time > end_time:
+        if start_time.time() > end_time.time():
             msg = l10n('error-minimum-value')
 
             # These can't be field or value because that will auto-format the msg? Weird feature but okay.
             raise PydanticCustomError(defines.END_TIME_BEFORE_START_TIME_ERR, msg, {
                 'err_field': 'end_time',
-                'err_value': start_time
+                'err_value': start_time.astimezone(timezone.utc).time()
             })
 
         return self
