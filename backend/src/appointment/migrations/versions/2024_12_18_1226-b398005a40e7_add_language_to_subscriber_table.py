@@ -21,7 +21,18 @@ depends_on = None
 
 def upgrade() -> None:
     # Add language column to subscribers table
-    op.add_column('subscribers', sa.Column('language', models.encrypted_type(sa.String), nullable=False, server_default=FALLBACK_LOCALE, index=True))
+    op.add_column('subscribers', sa.Column('language', models.encrypted_type(sa.String), nullable=True, default=FALLBACK_LOCALE, index=True))
+
+    # Prefill new column with default value
+    session = Session(op.get_bind())
+    subscribers: list[models.Subscriber] = session.query(models.Subscriber).all()
+    for subscriber in subscribers:
+        subscriber.language = FALLBACK_LOCALE
+
+        # Add the subscriber to the database session and commit (update) it
+        session.add(subscriber)
+        session.commit()
+
 
 
 def downgrade() -> None:

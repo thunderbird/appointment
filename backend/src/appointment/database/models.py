@@ -134,7 +134,7 @@ class Subscriber(HasSoftDelete, Base):
 
     name = Column(encrypted_type(String), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
-    language = Column(encrypted_type(String), nullable=False, server_default=FALLBACK_LOCALE, index=True)
+    language = Column(encrypted_type(String), nullable=False, default=FALLBACK_LOCALE, index=True)
     timezone = Column(encrypted_type(String), index=True)
     avatar_url = Column(encrypted_type(String, length=2048), index=False)
 
