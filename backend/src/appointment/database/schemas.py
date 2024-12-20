@@ -317,7 +317,7 @@ class Subscriber(SubscriberAuth):
     id: int
     calendars: list[Calendar] = []
     slots: list[Slot] = []
-    ftue_level: Optional[int] = Field(gte=0)
+    ftue_level: Optional[int] = Field(json_schema_extra={gte: 0})
 
 
 class SubscriberMeOut(SubscriberBase):
