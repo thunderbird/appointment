@@ -698,6 +698,7 @@ class TestRequestScheduleAvailability:
                 headers=auth_headers,
             )
             assert response.status_code == 404, response.text
+
             data = response.json()
 
             assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
@@ -726,6 +727,7 @@ class TestRequestScheduleAvailability:
                 headers=auth_headers,
             )
             assert response.status_code == 404, response.text
+
             data = response.json()
 
             assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
@@ -755,6 +757,7 @@ class TestRequestScheduleAvailability:
                 headers=auth_headers,
             )
             assert response.status_code == 404, response.text
+
             data = response.json()
 
             assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
@@ -783,6 +786,7 @@ class TestRequestScheduleAvailability:
                 headers=auth_headers,
             )
             assert response.status_code == 404, response.text
+
             data = response.json()
 
             assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
@@ -811,6 +815,7 @@ class TestRequestScheduleAvailability:
                 headers=auth_headers,
             )
             assert response.status_code == 404, response.text
+
             data = response.json()
 
             assert data.get('detail', {}).get('id') == 'SLOT_NOT_FOUND'
@@ -893,6 +898,16 @@ class TestDecideScheduleAvailabilitySlot:
             assert slot.booking_status == models.BookingStatus.booked
             assert appointment.status == models.AppointmentStatus.closed
 
+        # Now try to confirm the same event again
+        response = with_client.put(
+            '/schedule/public/availability/booking',
+            json=availability,
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 404, response.text
+
+
     def test_deny(
         self,
         with_db,
@@ -959,3 +974,12 @@ class TestDecideScheduleAvailabilitySlot:
 
             assert slot is None
             assert appointment is None
+
+        # Now try to deny the same event again
+        response = with_client.put(
+            '/schedule/public/availability/booking',
+            json=availability,
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 404, response.text

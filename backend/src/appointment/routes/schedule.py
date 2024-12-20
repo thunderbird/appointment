@@ -467,6 +467,7 @@ def decide_on_schedule_availability_slot(
         not slot
         or not repo.schedule.has_slot(db, schedule.id, slot.id)
         or slot.booking_tkn != data.slot_token
+        or slot.booking_status != BookingStatus.requested
     ):
         raise validation.SlotNotFoundException()
 
