@@ -287,7 +287,7 @@ def request_schedule_availability_slot(
         raise validation.SlotNotFoundException()
 
     # check if slot still available, might already be taken at this time
-    slot = schemas.SlotBase(**s_a.slot.dict())
+    slot = schemas.SlotBase(**s_a.slot.model_dump())
     if repo.slot.exists_on_schedule(db, slot, schedule.id):
         raise validation.SlotAlreadyTakenException()
 

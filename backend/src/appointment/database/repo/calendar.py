@@ -53,7 +53,7 @@ def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool
 
 def create(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int):
     """create new calendar for owner, if not already existing"""
-    db_calendar = models.Calendar(**calendar.dict(), owner_id=subscriber_id)
+    db_calendar = models.Calendar(**calendar.model_dump(), owner_id=subscriber_id)
     subscriber_calendars = get_by_subscriber(db, subscriber_id)
     subscriber_calendar_urls = [c.url for c in subscriber_calendars]
     # check if subscriber already holds this calendar by url
