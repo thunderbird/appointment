@@ -9,7 +9,7 @@ from .. import models, schemas, repo
 
 def create(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase] = []):
     """create new appointment with slots for calendar"""
-    db_appointment = models.Appointment(**appointment.dict())
+    db_appointment = models.Appointment(**appointment.model_dump())
     db.add(db_appointment)
     db.commit()
     db.refresh(db_appointment)

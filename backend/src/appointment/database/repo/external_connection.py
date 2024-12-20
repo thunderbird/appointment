@@ -13,7 +13,7 @@ from ..schemas import ExternalConnection
 
 
 def create(db: Session, external_connection: ExternalConnection):
-    db_external_connection = models.ExternalConnections(**external_connection.dict())
+    db_external_connection = models.ExternalConnections(**external_connection.model_dump())
     db.add(db_external_connection)
     db.commit()
     db.refresh(db_external_connection)

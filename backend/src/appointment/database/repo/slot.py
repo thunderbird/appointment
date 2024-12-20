@@ -37,7 +37,7 @@ def add_for_appointment(db: Session, slots: list[schemas.SlotBase], appointment_
     """create new slots for appointment of given id"""
     return_slots = []
     for slot in slots:
-        db_slot = models.Slot(**slot.dict())
+        db_slot = models.Slot(**slot.model_dump())
         db_slot.appointment_id = appointment_id
         db.add(db_slot)
         return_slots.append(db_slot)
@@ -47,7 +47,7 @@ def add_for_appointment(db: Session, slots: list[schemas.SlotBase], appointment_
 
 def add_for_schedule(db: Session, slot: schemas.SlotBase, schedule_id: int):
     """create new slot for schedule of given id"""
-    db_slot = models.Slot(**slot.dict())
+    db_slot = models.Slot(**slot.model_dump())
     db_slot.schedule_id = schedule_id
     db.add(db_slot)
     db.commit()
@@ -96,7 +96,7 @@ def delete_all_for_subscriber(db: Session, subscriber_id: int):
 def update(db: Session, slot_id: int, attendee: schemas.Attendee):
     """update existing slot by id and create corresponding attendee"""
     # create attendee
-    db_attendee = models.Attendee(**attendee.dict())
+    db_attendee = models.Attendee(**attendee.model_dump())
     db.add(db_attendee)
     db.commit()
     db.refresh(db_attendee)

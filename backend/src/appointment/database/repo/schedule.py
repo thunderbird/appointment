@@ -11,7 +11,7 @@ from ... import utils
 
 def create(db: Session, schedule: schemas.ScheduleBase):
     """create a new schedule with slots for calendar"""
-    db_schedule = models.Schedule(**schedule.dict())
+    db_schedule = models.Schedule(**schedule.model_dump())
     db.add(db_schedule)
     db.commit()
     db.refresh(db_schedule)
