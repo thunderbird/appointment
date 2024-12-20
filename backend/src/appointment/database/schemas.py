@@ -9,7 +9,7 @@ from uuid import UUID
 from datetime import datetime, date, time, timezone, timedelta
 from typing import Annotated, Optional, Self
 
-from pydantic import BaseModel, Field, EmailStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, model_validator
 from pydantic_core import PydanticCustomError
 
 from ..defines import DEFAULT_CALENDAR_COLOUR
@@ -41,10 +41,9 @@ class AttendeeBase(BaseModel):
 
 
 class Attendee(AttendeeBase):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int
 
 
 """ SLOT model schemas
@@ -63,14 +62,13 @@ class SlotBase(BaseModel):
 
 
 class Slot(SlotBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     appointment_id: int
     subscriber_id: int | None = None
     time_updated: datetime | None = None
     attendee: Attendee | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class SlotOut(SlotBase):
@@ -113,14 +111,13 @@ class AppointmentFull(AppointmentBase):
 
 
 class Appointment(AppointmentFull):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     uuid: UUID
     time_created: datetime | None = None
     time_updated: datetime | None = None
     slots: list[Slot] = []
-
-    class Config:
-        from_attributes = True
 
 
 class AppointmentWithCalendarOut(Appointment):
@@ -152,15 +149,16 @@ class AvailabilityBase(BaseModel):
 
 
 class Availability(AvailabilityBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
 
-    class Config:
-        from_attributes = True
-
 
 class ScheduleBase(BaseModel):
+    model_config = ConfigDict(json_encoders = { time: lambda t: t.strftime('%H:%M') })
+
     active: bool | None = True
     name: str = Field(min_length=1, max_length=128)
     slug: Optional[str] = None
@@ -180,21 +178,15 @@ class ScheduleBase(BaseModel):
     booking_confirmation: bool = True
     timezone: Optional[str] = None
 
-    class Config:
-        json_encoders = {
-            time: lambda t: t.strftime('%H:%M'),
-        }
-
 
 class Schedule(ScheduleBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
     availabilities: list[Availability] = []
     calendar: 'CalendarBase'
-
-    class Config:
-        from_attributes = True
 
 
 class ScheduleValidationIn(ScheduleBase):
@@ -266,13 +258,12 @@ class CalendarConnectionIn(CalendarConnection):
 
 
 class Calendar(CalendarConnection):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     owner_id: int
     appointments: list[Appointment] = []
     schedules: list[Schedule] = []
-
-    class Config:
-        from_attributes = True
 
 
 class CalendarOut(CalendarBase):
@@ -321,13 +312,12 @@ class SubscriberAuth(SubscriberBase):
 
 
 class Subscriber(SubscriberAuth):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     calendars: list[Calendar] = []
     slots: list[Slot] = []
     ftue_level: Optional[int] = Field(gte=0)
-
-    class Config:
-        from_attributes = True
 
 
 class SubscriberMeOut(SubscriberBase):
@@ -336,12 +326,11 @@ class SubscriberMeOut(SubscriberBase):
 
 
 class SubscriberAdminOut(Subscriber):
+    model_config = ConfigDict(from_attributes=True)
+
     invite: Invite | None = None
     time_created: datetime
     time_deleted: datetime | None
-
-    class Config:
-        from_attributes = True
 
 
 """ other schemas used for requests or data migration
@@ -469,6 +458,8 @@ class WaitingListInviteAdminOut(BaseModel):
 
 
 class WaitingListAdminOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: str
     email_verified: bool
@@ -477,9 +468,6 @@ class WaitingListAdminOut(BaseModel):
     time_updated: datetime
 
     invite: Invite | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class PageLoadIn(BaseModel):
@@ -499,4 +487,3 @@ class PageLoadIn(BaseModel):
 class FTUEStepIn(BaseModel):
     step_level: int
     step_name: str
-
