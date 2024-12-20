@@ -52,7 +52,14 @@ const inviteCode = ref('');
 const loginStep = ref(LoginSteps.Login);
 const loginError = ref<string>(null);
 
-onMounted(() => {
+onMounted(async () => {
+  // Error should be a string value, so don't worry about any obj deconstruction.
+  if (route.query.error) {
+    const queryError = route.query.error as string;
+    loginError.value = t(`login.remoteError.${queryError}`);
+    await router.replace(route.path);
+  }
+
   if (route.name === 'join-the-waiting-list') {
     hideInviteField.value = true;
     loginStep.value = LoginSteps.SignUp;

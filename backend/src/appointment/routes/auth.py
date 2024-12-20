@@ -1,7 +1,6 @@
 import json
 import os
 import secrets
-import uuid
 from datetime import timedelta, datetime, UTC
 from secrets import token_urlsafe
 from typing import Annotated
@@ -12,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
-from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
 from .. import utils
@@ -28,9 +27,7 @@ from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
 from ..exceptions import validation
-from ..exceptions.fxa_api import NotInAllowListException
 from ..l10n import l10n
-from ..tasks.emails import send_confirm_email
 from ..utils import get_password_hash
 
 router = APIRouter()
@@ -48,12 +45,15 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 def create_subscriber(db, email, password, timezone):
-    subscriber = repo.subscriber.create(db, schemas.SubscriberBase(
-        email=email.lower(), # Make sure to store the email address in lower case
-        username=email,
-        name=email.split('@')[0],
-        timezone=timezone
-    ))
+    subscriber = repo.subscriber.create(
+        db,
+        schemas.SubscriberBase(
+            email=email.lower(),  # Make sure to store the email address in lower case
+            username=email,
+            name=email.split('@')[0],
+            timezone=timezone,
+        ),
+    )
 
     # Update with password
     subscriber.password = get_password_hash(password)
@@ -66,11 +66,7 @@ def create_subscriber(db, email, password, timezone):
 
 
 @router.post('/can-login')
-def can_login(
-    data: schemas.CheckEmail,
-    db: Session = Depends(get_db),
-    fxa_client: FxaClient = Depends(get_fxa_client)
-):
+def can_login(data: schemas.CheckEmail, db: Session = Depends(get_db), fxa_client: FxaClient = Depends(get_fxa_client)):
     """Determines if a user can go through the login flow"""
     if os.getenv('AUTH_SCHEME') == 'fxa':
         # This checks if a subscriber exists, or is in allowed list
@@ -140,13 +136,27 @@ def fxa_callback(
     - We also update (an initial set if the subscriber is new) the profile data for the subscriber.
     - And finally generate a jwt token for the frontend, and redirect them to a special frontend route with that token.
     """
+    # These are error keys on the frontend
+    # login.remoteError.<id>
+    errors = {
+        'email-mismatch': 'email-mismatch',
+        'invite-not-valid': 'invite-not-valid',
+        'unknown-error': 'unknown-error',
+        'disabled-account': 'disabled-account',
+        'invalid-credentials': 'invalid-credentials',
+        'invalid-state': 'invalid-state',
+        'email-not-in-session': 'email-not-in-session',
+    }
+
     if os.getenv('AUTH_SCHEME') != 'fxa':
         raise HTTPException(status_code=405)
 
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
-        raise HTTPException(400, 'Invalid state.')
+        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-state']}")
     if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
-        raise HTTPException(400, 'Email could not be retrieved.')
+        return RedirectResponse(
+            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-not-in-session']}"
+        )
 
     email = request.session['fxa_user_email']
     # We only use timezone during subscriber creation, or if their timezone is None
@@ -168,7 +178,9 @@ def fxa_callback(
 
     if profile['email'] != email:
         fxa_client.logout()
-        raise HTTPException(400, l10n('email-mismatch'))
+        return RedirectResponse(
+            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-mismatch']}"
+        )
 
     # Check if we have an existing fxa connection by profile's uid
     fxa_subscriber = repo.external_connection.get_subscriber_by_fxa_uid(db, profile['uid'])
@@ -185,9 +197,13 @@ def fxa_callback(
 
         if not is_in_allow_list:
             if not repo.invite.code_exists(db, invite_code):
-                raise HTTPException(404, l10n('invite-code-not-valid'))
+                return RedirectResponse(
+                    f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invite-not-valid']}"
+                )
             if not repo.invite.code_is_available(db, invite_code):
-                raise HTTPException(403, l10n('invite-code-not-valid'))
+                return RedirectResponse(
+                    f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invite-not-valid']}"
+                )
 
         subscriber = repo.subscriber.create(
             db,
@@ -208,14 +224,18 @@ def fxa_callback(
             # This shouldn't happen, but just in case!
             if not used:
                 repo.subscriber.hard_delete(db, subscriber)
-                raise HTTPException(500, l10n('unknown-error'))
+                return RedirectResponse(
+                    f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['unknown-error']}"
+                )
 
     elif not subscriber:
         subscriber = fxa_subscriber
 
     # Only proceed if user account is enabled (which is the default case for new users)
     if subscriber.is_deleted:
-        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
+        return RedirectResponse(
+            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['disabled-account']}"
+        )
 
     fxa_connections = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.fxa)
 
@@ -227,7 +247,9 @@ def fxa_callback(
             e = Exception('Invalid Credentials, incoming profile uid does not match existing profile uid')
             capture_exception(e)
 
-        raise HTTPException(403, l10n('invalid-credentials'))
+        return RedirectResponse(
+            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-credentials']}"
+        )
 
     external_connection_schema = schemas.ExternalConnection(
         name=profile['email'],
@@ -262,10 +284,9 @@ def fxa_callback(
 
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(10))
-    one_time_access_token = create_access_token(data={
-        'sub': f'uid-{subscriber.id}',
-        'jti': secrets.token_urlsafe(16)
-    }, expires_delta=access_token_expires)
+    one_time_access_token = create_access_token(
+        data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
+    )
 
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{one_time_access_token}")
 
@@ -278,9 +299,12 @@ def fxa_token(subscriber=Depends(get_subscriber_from_onetime_token)):
 
     # Generate our jwt token, we only store the username on the token
     access_token_expires = timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
-    access_token = create_access_token(data={
-        'sub': f'uid-{subscriber.id}',
-    }, expires_delta=access_token_expires)
+    access_token = create_access_token(
+        data={
+            'sub': f'uid-{subscriber.id}',
+        },
+        expires_delta=access_token_expires,
+    )
 
     return {'access_token': access_token, 'token_type': 'bearer'}
 
@@ -363,7 +387,7 @@ def me(
         avatar_url=subscriber.avatar_url,
         is_setup=subscriber.is_setup,
         schedule_links=schedule_links_by_subscriber(db, subscriber),
-        unique_hash=hash
+        unique_hash=hash,
     )
 
 
