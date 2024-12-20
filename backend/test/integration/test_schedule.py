@@ -31,6 +31,7 @@ class TestSchedule:
             'farthest_booking': 20160,
             'weekdays': [1, 2, 3, 4, 5],
             'slot_duration': 30,
+            'timezone': 'America/Vancouver'
         }
 
     def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar, schedule_input):
@@ -68,8 +69,10 @@ class TestSchedule:
         generated_calendar = make_caldav_calendar(connected=True)
 
         schedule_data = schedule_input
-        schedule_data['start_time'] = '09:00'
-        schedule_data['end_time'] = '06:00'
+        # start_time and end_time are always in UTC
+        # 9am and 8am PT
+        schedule_data['start_time'] = '17:00'
+        schedule_data['end_time'] = '16:00'
 
         response = with_client.post(
             '/schedule',
@@ -86,7 +89,7 @@ class TestSchedule:
         assert data.get('detail')[0]['type'] == defines.END_TIME_BEFORE_START_TIME_ERR
         assert data.get('detail')[0]['msg'] == '{field} should be at least {value}.'
         assert data.get('detail')[0]['ctx']['err_field'] == 'end_time'
-        assert data.get('detail')[0]['ctx']['err_value'] == '09:30:00'
+        assert data.get('detail')[0]['ctx']['err_value'] == '17:30:00'
 
 
 

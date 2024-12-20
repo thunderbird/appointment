@@ -284,8 +284,8 @@ class Schedule(Base):
     details: str = Column(encrypted_type(String))
     start_date: datetime.date = Column(encrypted_type(Date), index=True)
     end_date: datetime.date = Column(encrypted_type(Date), index=True)
-    start_time: datetime.time = Column(encrypted_type(Time), index=True)
-    end_time: datetime.time = Column(encrypted_type(Time), index=True)
+    start_time: datetime.time = Column(encrypted_type(Time), index=True)  # in utc
+    end_time: datetime.time = Column(encrypted_type(Time), index=True)  # in utc
     earliest_booking: int = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
     farthest_booking: int = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
     weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7
