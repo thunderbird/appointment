@@ -19,6 +19,7 @@ health-bad = Zustand schlecht
 ## General Exceptions
 
 unknown-error = Ein unbekannter Fehler ist aufgetreten. Bitte später noch einmal versuchen.
+unknown-error-short = Unbekannter Fehler
 
 appointment-not-found = Der Termin konnte nicht gefunden werden.
 calendar-not-found = Der Kalender konnte nicht gefunden werden.
@@ -45,7 +46,15 @@ not-in-allow-list = Deine E-Mail-Adresse ist nicht in der Liste erlaubter Adress
 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 
-remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden. Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
+remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden: {$reason}.
+remote-calendar-connection-error = The remote calendar could not be reached due to {$reason}.
+
+        Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
+
+# Possible entries for $reason,
+remote-calendar-reason-doesnt-support-caldav = Der Kalender bietet keine CalDAV-Unterstützung
+remote-calendar-reason-doesnt-support-auth = Der Kalender unterstützt keine Authentifizierung
+remote-calendar-reason-unauthorized = Es gibt ein Problem mit Benutzername oder Passwort
 
 event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
 event-could-not-be-deleted = Es ist ein Fehler beim Entfernen des vorläufigen Termins aufgetreten. Bitte später noch einmal versuchen.
