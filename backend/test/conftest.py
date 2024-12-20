@@ -202,7 +202,7 @@ def with_l10n():
     Only supports English for now!
     """
     l10n_plugin = L10n()
-    l10n_fn = l10n_plugin.get_fluent('en')
+    l10n_fn = l10n_plugin.get_fluent_with_header('en')
 
     with request_cycle_context({'l10n': l10n_fn}):
         yield
