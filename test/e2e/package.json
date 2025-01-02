@@ -7,6 +7,7 @@
     "prod-sanity-test-ui": "npx playwright test --grep prod-sanity --project=firefox --headed",
     "prod-sanity-test-debug": "npx playwright test --grep prod-sanity --project=firefox --headed --ui",
     "prod-sanity-test-browserstack": "npx browserstack-node-sdk playwright test --grep prod-sanity --browserstack.buildName 'Production Sanity Test'",
+    "prod-sanity-test-browserstack-gha": "npx browserstack-node-sdk playwright test --grep prod-sanity",
     "postinstall": "npm update browserstack-node-sdk"
   },
   "keywords": [],
