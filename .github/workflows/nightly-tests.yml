@@ -42,9 +42,10 @@ jobs:
           username:  ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           project-name: 'Thunderbird Appointment'
+          build-name: 'Nightly Tests: BUILD_INFO'
 
       - name: Run Playwright Tests on Browserstack
         run: |
           cd ./test/e2e
           cp .env.example .env
-          npm run prod-sanity-test-browserstack
+          npm run prod-sanity-test-browserstack-gha
