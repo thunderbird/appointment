@@ -242,6 +242,8 @@ jobs:
     env:
       APPT_PROD_LOGIN_EMAIL: ${{ secrets.E2E_APPT_PROD_LOGIN_EMAIL }}
       APPT_PROD_LOGIN_PWORD: ${{ secrets.E2E_APPT_PROD_LOGIN_PASSWORD }}
+      APPT_PROD_DISPLAY_NAME: ${{ secrets.E2E_APPT_PROD_DISPLAY_NAME }}
+      APPT_PROD_MY_SHARE_LINK: ${{ secrets.E2E_APPT_PROD_MY_SHARE_LINK }}
     steps:
       - uses: actions/checkout@v4
 
