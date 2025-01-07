@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ColorSchemes } from '@/definitions';
 import {
-  ref, reactive, inject, watch,
+  ref, reactive, inject, watch, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey } from '@/keys';
+import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
 import { SubscriberResponse } from '@/models';
 
 // component constants
@@ -13,6 +13,10 @@ const user = useUserStore();
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const dj = inject(dayjsKey);
+const isoWeekdays = inject(isoWeekdaysKey);
+
+const startOfTheWeek = ref(localStorage?.getItem('startOfTheWeek') ?? isoWeekdays[0].long.toLowerCase());
+const availableStartOfTheWeekOptions = computed(() => isoWeekdays.filter((day) => day.long === 'Monday' || day.long === 'Sunday'));
 
 // handle ui languages
 // TODO: move to settings store
@@ -81,6 +85,11 @@ const updateTimezone = async () => {
     // TODO show some confirmation
   }
 };
+
+// save timezone config
+const updateStartOfTheWeek = async (evt) => {
+  localStorage?.setItem('startOfTheWeek', evt.target.value.toLowerCase());
+};
 </script>
 
 <template>
@@ -138,6 +147,22 @@ const updateTimezone = async () => {
       <label class="flex cursor-pointer items-center gap-4 pl-4">
         <!-- <input type="radio" name="dateFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.MMDDYYYY') }}</div> -->
+      </label>
+    </div>
+    <div class="mt-6 pl-6">
+      <div class="text-lg">{{ t('label.timeZone') }}</div>
+      <label class="mt-4 flex items-center pl-4">
+        <div class="w-full max-w-2xs">{{ t('label.startOfTheWeek') }}</div>
+        <select
+          v-model="startOfTheWeek"
+          class="w-full max-w-sm rounded-md"
+          @change="updateStartOfTheWeek"
+          data-testid="settings-general-timezone-select"
+        >
+          <option v-for="day in availableStartOfTheWeekOptions" :key="day.long" :value="day.long.toLowerCase()">
+            {{ day.long }}
+          </option>
+        </select>
       </label>
     </div>
     <div class="mt-6 pl-6">
