@@ -118,7 +118,6 @@ class Mailer:
                     a.mime_main,
                     a.mime_sub,
                     cid=f'<{a.filename}>',
-                    filename=a.filename,
                 )
 
         return message
