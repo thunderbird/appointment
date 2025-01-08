@@ -1,6 +1,6 @@
 <script setup>
 import {
-  ref, computed, inject, toRefs, watch, onMounted
+  ref, computed, inject, toRefs, watch, onMounted,
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
@@ -12,12 +12,13 @@ import {
 } from '@/definitions';
 import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, isoWeekdaysKey } from '@/keys';
 
 // component constants
 const dj = inject(dayjsKey);
 const router = useRouter();
 const route = useRoute();
+const isoWeekdays = inject(isoWeekdaysKey);
 
 // component properties
 const props = defineProps({
@@ -311,7 +312,7 @@ const config = ref({
     showEventsOnMobileView: false,
   },
   week: {
-    startsOn: locale === 'de' ? 'monday' : 'sunday',
+    startsOn: localStorage?.getItem('startOfTheWeek') ?? isoWeekdays[0].long.toLowerCase(),
   },
   style: {
     // Just the pre-calculated list from tailwind, could use some fine-tuning.
@@ -334,13 +335,13 @@ const config = ref({
   },
   dayBoundaries: {
     start: dayBoundary.value.start,
-    end: dayBoundary.value.end
+    end: dayBoundary.value.end,
   },
   eventDialog: {
     // We roll our own
     isDisabled: true,
   },
-  locale: locale === 'de' ? 'de-DE' : 'en-US'
+  locale: locale === 'de' ? 'de-DE' : 'en-US',
 });
 
 /**
