@@ -52,7 +52,14 @@ const inviteCode = ref('');
 const loginStep = ref(LoginSteps.Login);
 const loginError = ref<string>(null);
 
-onMounted(() => {
+onMounted(async () => {
+  // Error should be a string value, so don't worry about any obj deconstruction.
+  if (route.query.error) {
+    const queryError = route.query.error as string;
+    loginError.value = t(`login.remoteError.${queryError}`);
+    await router.replace(route.path);
+  }
+
   if (route.name === 'join-the-waiting-list') {
     hideInviteField.value = true;
     loginStep.value = LoginSteps.SignUp;
@@ -161,7 +168,12 @@ const login = async () => {
 
   const { error }: Error = await user.login(call, email.value, password.value);
   if (error) {
-    handleFormError(error as PydanticException);
+    let errObj = error as PydanticException;
+    if (typeof error === 'string') {
+      errObj = { detail: error };
+    }
+
+    loginError.value = handleFormError(t, formRef, errObj);
     isLoading.value = false;
     return;
   }
@@ -214,9 +226,9 @@ const onEnter = () => {
       </div>
       <div class="form-body">
         <form v-if="loginStep !== LoginSteps.SignUpConfirm" class="form" ref="formRef" autocomplete="off" @submit.prevent @keyup.enter="() => onEnter()">
-          <text-input name="email" v-model="email" :required="true">{{ t('login.form.email') }}</text-input>
-          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true" type="password">{{ t('label.password') }}</text-input>
-          <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')">{{ t('label.inviteCode') }}</text-input>
+          <text-input name="email" v-model="email" :required="true" data-testid="login-email-input">{{ t('login.form.email') }}</text-input>
+          <text-input v-if="isPasswordAuth" name="password" v-model="password" :required="true" type="password" data-testid="login-password-input">{{ t('label.password') }}</text-input>
+          <text-input v-if="loginStep === LoginSteps.SignUp && !hideInviteField" name="inviteCode" v-model="inviteCode" :help="t('login.form.no-invite-code')" data-testid="login-invite-code-input">{{ t('label.inviteCode') }}</text-input>
         </form>
       </div>
       <template v-slot:actions>
@@ -226,6 +238,7 @@ const onEnter = () => {
           :disabled="isLoading"
           @click="onEnter()"
           v-if="loginStep !== LoginSteps.SignUpConfirm"
+          data-testid="login-continue-btn"
         >
           {{ t('label.continue') }}
         </primary-button>
@@ -235,6 +248,7 @@ const onEnter = () => {
           :disabled="isLoading"
           @click="router.push({name: 'home'})"
           v-else
+          data-testid="login-close-btn"
         >
           {{ t('label.close') }}
         </primary-button>

@@ -32,11 +32,11 @@ def send_invite_email(owner_name, owner_email, date, duration, to, attachment):
             sentry_sdk.capture_exception(e)
 
 
-def send_confirmation_email(url, attendee_name, attendee_email, date, duration, to, schedule_name):
+def send_confirmation_email(url, attendee_name, attendee_email, date, duration, to, schedule_name, lang):
     # send confirmation mail to owner
     try:
         mail = ConfirmationMail(
-            f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name, to=to
+            f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name, to=to, lang=lang
         )
         mail.send()
     except Exception as e:
@@ -47,10 +47,10 @@ def send_confirmation_email(url, attendee_name, attendee_email, date, duration, 
             sentry_sdk.capture_exception(e)
 
 
-def send_new_booking_email(name, email, date, duration, to, schedule_name):
+def send_new_booking_email(name, email, date, duration, to, schedule_name, lang):
     # send notice mail to owner
     try:
-        mail = NewBookingMail(name, email, date, duration, schedule_name, to=to)
+        mail = NewBookingMail(name, email, date, duration, schedule_name, to=to, lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
@@ -60,9 +60,9 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name):
             sentry_sdk.capture_exception(e)
 
 
-def send_pending_email(owner_name, date, to):
+def send_pending_email(owner_name, date, to, attachment):
     try:
-        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to)
+        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
@@ -72,9 +72,9 @@ def send_pending_email(owner_name, date, to):
             sentry_sdk.capture_exception(e)
 
 
-def send_rejection_email(owner_name, date, to):
+def send_rejection_email(owner_name, date, to, attachment):
     try:
-        mail = RejectionMail(owner_name=owner_name, date=date, to=to)
+        mail = RejectionMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

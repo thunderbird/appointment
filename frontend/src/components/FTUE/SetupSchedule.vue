@@ -131,8 +131,8 @@ onMounted(async () => {
       ...schedule.value,
       name: dbSchedule.name,
       calendar: dbSchedule.calendar_id,
-      startTime: timeToFrontendTime(dbSchedule.start_time),
-      endTime: timeToFrontendTime(dbSchedule.end_time),
+      startTime: timeToFrontendTime(dbSchedule.start_time, dbSchedule.time_updated),
+      endTime: timeToFrontendTime(dbSchedule.end_time, dbSchedule.time_updated),
       duration: dbSchedule.slot_duration,
       days: dbSchedule.weekdays,
     };

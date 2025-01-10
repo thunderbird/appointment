@@ -205,9 +205,19 @@ class ZoomNotConnectedException(APIException):
 class RemoteCalendarConnectionError(APIException):
     id_code = 'REMOTE_CALENDAR_CONNECTION_ERROR'
     status_code = 400
+    reason = None
+
+    def __init__(self, reason: str|None, **kwargs):
+        if reason:
+            self.reason = reason
+        super().__init__(**kwargs)
 
     def get_msg(self):
-        return l10n('remote-calendar-connection-error')
+        reason = self.reason
+        if not self.reason:
+            reason = l10n('unknown-error-short')
+
+        return l10n('remote-calendar-connection-error', {'reason': reason})
 
 
 class EventCouldNotBeAccepted(APIException):
@@ -216,6 +226,14 @@ class EventCouldNotBeAccepted(APIException):
 
     def get_msg(self):
         return l10n('event-could-not-be-accepted')
+
+
+class EventCouldNotBeDeleted(APIException):
+    id_code = 'EVENT_COULD_NOT_BE_DELETED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('event-could-not-be-deleted')
 
 
 class InviteCodeNotFoundException(APIException):

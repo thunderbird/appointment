@@ -20,3 +20,4 @@ const instance = createI18n({
 
 export default instance;
 export const i18n = instance.global;
+export type i18nType = typeof i18n.t;

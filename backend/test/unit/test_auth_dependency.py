@@ -30,7 +30,8 @@ class TestAuthDependency:
                 subscriber_from_token = get_user_from_token(db, access_token)
 
             assert subscriber_from_token
-            assert subscriber_from_token == subscriber_from_token
+            assert subscriber_from_token.id == subscriber.id
+            assert subscriber_from_token.email == subscriber.email
 
         # The access token should still be valid the next day
         with freeze_time('Jan 10th 2024'):
@@ -38,7 +39,8 @@ class TestAuthDependency:
                 subscriber_from_token = get_user_from_token(db, access_token)
 
             assert subscriber_from_token
-            assert subscriber_from_token == subscriber_from_token
+            assert subscriber_from_token.id == subscriber.id
+            assert subscriber_from_token.email == subscriber.email
 
         # Pick a time outside the token expiry window, and ensure it breaks
         with freeze_time('Feb 1st 2024'):

@@ -52,11 +52,15 @@ def _patch_caldav_connector(monkeypatch):
             return [schemas.CalendarConnectionOut(url=TEST_CALDAV_URL, user=TEST_CALDAV_USER)]
 
         @staticmethod
-        def create_event(self, event, attendee, organizer, organizer_email):
+        def save_event(self, event, attendee, organizer, organizer_email):
+            return event
+
+        @staticmethod
+        def delete_event(self, uid):
             return True
 
         @staticmethod
-        def delete_event(self, start):
+        def delete_events(self, start):
             return True
 
         @staticmethod
@@ -68,8 +72,9 @@ def _patch_caldav_connector(monkeypatch):
 
     monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
     monkeypatch.setattr(CalDavConnector, 'list_calendars', MockCaldavConnector.list_calendars)
-    monkeypatch.setattr(CalDavConnector, 'create_event', MockCaldavConnector.create_event)
-    monkeypatch.setattr(CalDavConnector, 'delete_events', MockCaldavConnector.delete_event)
+    monkeypatch.setattr(CalDavConnector, 'save_event', MockCaldavConnector.save_event)
+    monkeypatch.setattr(CalDavConnector, 'delete_event', MockCaldavConnector.delete_event)
+    monkeypatch.setattr(CalDavConnector, 'delete_events', MockCaldavConnector.delete_events)
     monkeypatch.setattr(CalDavConnector, 'test_connection', MockCaldavConnector.test_connection)
 
 
@@ -197,7 +202,7 @@ def with_l10n():
     Only supports English for now!
     """
     l10n_plugin = L10n()
-    l10n_fn = l10n_plugin.get_fluent('en')
+    l10n_fn = l10n_plugin.get_fluent_with_header('en')
 
     with request_cycle_context({'l10n': l10n_fn}):
         yield

@@ -17,8 +17,6 @@ from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 
-from .secrets import normalize_secrets
-
 from google.auth.exceptions import RefreshError, DefaultCredentialsError
 from .exceptions.google_api import APIGoogleRefreshError
 import os
@@ -39,6 +37,8 @@ from slowapi.errors import RateLimitExceeded
 
 
 import sentry_sdk
+
+from .utils import normalize_secrets
 
 
 def _common_setup():
@@ -65,6 +65,10 @@ def _common_setup():
 
     logging.basicConfig(**log_config)
 
+    # Adjust caldav
+    caldav_logger = logging.getLogger('caldav')
+    caldav_logger.setLevel(logging.CRITICAL)
+
     logging.debug('Logger started!')
 
     if os.getenv('SENTRY_DSN') != '' and os.getenv('SENTRY_DSN') is not None:
@@ -81,7 +85,7 @@ def _common_setup():
             profile_traces_max = 0.25
             sample_rate = 1.0
         elif environment == APP_ENV_PROD:
-            profile_traces_max = 0.50
+            profile_traces_max = 0.66
             sample_rate = 1.0
 
         def traces_sampler(sampling_context):
@@ -106,6 +110,7 @@ def _common_setup():
             ],
             profiles_sampler=traces_sampler,
             traces_sampler=traces_sampler,
+            attach_stacktrace=True,
         )
 
 

@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
-    NewBookingMail, Attachment
+    NewBookingMail, PendingRequestMail, Attachment
 from appointment.database import schemas
 
 
@@ -33,7 +33,7 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test')
+        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test', lang='en')
         assert mailer.html()
         assert mailer.text()
 
@@ -49,7 +49,7 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', to=fake_email)
+        mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', lang='en', to=fake_email)
         assert mailer.html()
         assert mailer.text()
 
@@ -57,6 +57,19 @@ class TestMailer:
             fault = 'text' if idx == 0 else 'html'
             assert attendee.name in content, fault
             assert attendee.email in content, fault
+
+    def test_pending(self, faker, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        now = datetime.datetime.now()
+        fake_email = 'to@example.org'
+
+        mailer = PendingRequestMail(owner_name=subscriber.name, date=now, to=fake_email)
+        assert mailer.html()
+        assert mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
+            assert subscriber.name in content, fault
 
     def test_reject(self, faker, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()

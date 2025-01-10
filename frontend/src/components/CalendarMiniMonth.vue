@@ -1,13 +1,13 @@
 <template>
   <div class="select-none">
     <div v-if="nav" class="flex-center mb-2 select-none gap-2">
-      <div @click="dateNav(false)" class="btn-back group cursor-pointer" :title="t('label.goBack')">
+      <div @click="dateNav(false)" class="btn-back group cursor-pointer" :title="t('label.goBack')" data-testid="booking-mini-month-back-btn">
         <icon-chevron-left class="size-6 fill-transparent stroke-slate-400 stroke-2 group-hover:stroke-teal-500" />
       </div>
       <div class="text-lg font-semibold text-teal-500">
         {{ navDate.format('MMMM YYYY')}}
       </div>
-      <div @click="dateNav(true)" class="btn-forward group cursor-pointer" :title="t('label.goForward')">
+      <div @click="dateNav(true)" class="btn-forward group cursor-pointer" :title="t('label.goForward')" data-testid="booking-mini-month-fw-btn">
         <icon-chevron-right class="size-6 fill-transparent stroke-slate-400 stroke-2 group-hover:stroke-teal-500" />
       </div>
     </div>

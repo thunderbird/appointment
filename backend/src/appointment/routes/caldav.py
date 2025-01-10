@@ -2,6 +2,7 @@ import json
 from typing import Optional
 from urllib.parse import urlparse
 
+import sentry_sdk
 from fastapi import APIRouter, Depends
 from redis import Redis
 from sqlalchemy.orm import Session
@@ -11,7 +12,10 @@ from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
+from appointment.exceptions.calendar import TestConnectionFailed
+from appointment.exceptions.misc import UnexpectedBehaviourWarning
 from appointment.exceptions.validation import RemoteCalendarConnectionError
+from appointment.l10n import l10n
 
 router = APIRouter()
 
@@ -33,28 +37,56 @@ def caldav_autodiscover_auth(
 
     dns_lookup_cache_key = f'dns:{utils.encrypt(connection.url)}'
 
+    lookup_branch = None
     lookup_url = None
     if redis_client:
         lookup_url = redis_client.get(dns_lookup_cache_key)
 
+    if lookup_url and 'http' not in lookup_url:
+        debug_obj = {
+            'url': lookup_url,
+            'branch': 'CACHE'
+        }
+        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
+        try:
+            raise UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
+        except UnexpectedBehaviourWarning as ex:
+            sentry_sdk.capture_exception(ex)
+        # Ignore cached result and look it up again
+        lookup_url = None
+
     # Do a dns lookup first
     if lookup_url is None:
+        lookup_branch = 'DNS'
         parsed_url = urlparse(connection.url)
         lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname, secure=secure_protocol)
         # set the cached lookup for the remainder of the dns ttl
         if redis_client and lookup_url:
             redis_client.set(dns_lookup_cache_key, utils.encrypt(lookup_url), ex=ttl)
     else:
+        lookup_branch = 'CACHED'
         # Extract the cached value
         lookup_url = utils.decrypt(lookup_url)
 
     # Check for well-known
     if lookup_url is None:
+        lookup_branch = 'WELL-KNOWN'
         lookup_url = Tools.well_known_caldav_lookup(connection.url)
 
     # If we have a lookup_url then apply it
     if lookup_url:
         connection.url = lookup_url
+
+    if not lookup_url or 'http' not in connection.url:
+        debug_obj = {
+            'url': lookup_url,
+            'branch': lookup_branch
+        }
+        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
+        try:
+            raise UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
+        except UnexpectedBehaviourWarning as ex:
+            sentry_sdk.capture_exception(ex)
 
     # Finally perform any final fixups needed
     connection.url = Tools.fix_caldav_urls(connection.url)
@@ -69,8 +101,13 @@ def caldav_autodiscover_auth(
         calendar_id=None,
     )
 
-    if not con.test_connection():
-        raise RemoteCalendarConnectionError()
+    # If it returns False it doesn't support VEVENT (aka caldav)
+    # If it raises an exception there's a connection problem
+    try:
+        if not con.test_connection():
+            raise RemoteCalendarConnectionError(reason=l10n('remote-calendar-reason-doesnt-support-caldav'))
+    except TestConnectionFailed as ex:
+        raise RemoteCalendarConnectionError(reason=ex.reason)
 
     caldav_id = json.dumps([connection.url, connection.user])
     external_connection = repo.external_connection.get_by_type(

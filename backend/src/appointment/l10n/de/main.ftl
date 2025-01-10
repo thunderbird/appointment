@@ -19,6 +19,7 @@ health-bad = Zustand schlecht
 ## General Exceptions
 
 unknown-error = Ein unbekannter Fehler ist aufgetreten. Bitte später noch einmal versuchen.
+unknown-error-short = Unbekannter Fehler
 
 appointment-not-found = Der Termin konnte nicht gefunden werden.
 calendar-not-found = Der Kalender konnte nicht gefunden werden.
@@ -45,9 +46,18 @@ not-in-allow-list = Deine E-Mail-Adresse ist nicht in der Liste erlaubter Adress
 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 
-remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden. Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
+remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden: {$reason}.
+remote-calendar-connection-error = The remote calendar could not be reached due to {$reason}.
+
+        Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
+
+# Possible entries for $reason,
+remote-calendar-reason-doesnt-support-caldav = Der Kalender bietet keine CalDAV-Unterstützung
+remote-calendar-reason-doesnt-support-auth = Der Kalender unterstützt keine Authentifizierung
+remote-calendar-reason-unauthorized = Es gibt ein Problem mit Benutzername oder Passwort
 
 event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
+event-could-not-be-deleted = Es ist ein Fehler beim Entfernen des vorläufigen Termins aufgetreten. Bitte später noch einmal versuchen.
 
 failed-to-create-subscriber = Es gab einen Fehler beim Anlegen der Person. Bitte später erneut versuchen.
 subscriber-already-exists = Eine Person mit dieser E-Mail-Adresse existiert bereits.
@@ -74,7 +84,7 @@ zoom-connect-to-continue = Bitte ein Zoom-Konto verbinden, einen benutzerdefinie
 ## Google Exceptions
 
 google-connection-error = Fehler bei der Verbindung mit Google API, bitte Verbindung erneut herstellen.
-google-scope-changed = Der Zugriff auf Kalender und Ereignisse muss aktiviert sein, um Thunderbird Appointment verwenden zu können.
+google-scope-changed = Der Zugriff auf Kalender und Termine muss aktiviert sein, um Thunderbird Appointment verwenden zu können.
 google-invalid-creds = Die Anmeldedaten für die Google-Authentifizierung sind nicht gültig.
 google-auth-fail = Google-Authentifizierung fehlgeschlagen.
 google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte erneut versuchen.
@@ -84,8 +94,10 @@ google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto ver
 
 ## Frontend Facing Strings
 
+event-title-template = { $prefix }Termin - { $name1 } und { $name2 }
+event-hold-prefix = UNBESTÄTIGT:
 # If the calendar event does not have a title this will be used instead
-event-summary-not-found = Ereignis nicht gefunden!
+event-summary-default = Termin ohne Titel
 
 ## Event File Strings
 

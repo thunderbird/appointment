@@ -228,6 +228,7 @@ const actuallyDeleteAccount = async () => {
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
             :required="true"
+            data-testid="settings-account-user-name-input"
           />
           <div v-if="errorUsername" class="text-sm text-red-500">
             {{ errorUsername }}
@@ -245,7 +246,7 @@ const actuallyDeleteAccount = async () => {
             </span>
         </span>
         </div>
-        <select v-model="activePreferredEmail" class="w-full rounded-md">
+        <select v-model="activePreferredEmail" class="w-full rounded-md" data-testid="settings-account-email-select">
           <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
         </select>
       </label>
@@ -257,6 +258,7 @@ const actuallyDeleteAccount = async () => {
             type="text"
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorDisplayName }"
+            data-testid="settings-account-display-name-input"
           />
           <div v-if="errorDisplayName" class="text-sm text-red-500">
             {{ errorDisplayName }}
@@ -272,6 +274,7 @@ const actuallyDeleteAccount = async () => {
               type="text"
               class="mr-2 w-full rounded-md pr-7"
               readonly
+              data-testid="settings-account-mylink-input"
             />
             <a
               :href="user.myLink"
@@ -287,6 +290,7 @@ const actuallyDeleteAccount = async () => {
             :tooltip="t('label.copyLink')"
             :copy="user.myLink"
             :title="t('label.copy')"
+            data-testid="settings-account-copy-link-btn"
           />
         </div>
       </label>
@@ -296,12 +300,14 @@ const actuallyDeleteAccount = async () => {
           class="btn-refresh !text-teal-500"
           @click="refreshLink"
           :title="t('label.refresh')"
+          data-testid="settings-account-refresh-link-btn"
         />
         <secondary-button
           :label="t('label.saveChanges')"
           class="btn-save !text-teal-500"
           @click="updateUserCheckForConfirmation"
           :title="t('label.save')"
+          data-testid="settings-account-save-changes-btn"
         />
       </div>
     </form>
@@ -322,6 +328,7 @@ const actuallyDeleteAccount = async () => {
           class="btn-download"
           @click="downloadData"
           :title="t('label.download')"
+          data-testid="settings-account-download-data-btn"
         />
       </div>
     </div>
@@ -333,6 +340,7 @@ const actuallyDeleteAccount = async () => {
           class="btn-delete"
           @click="deleteAccount"
           :title="t('label.delete')"
+          data-testid="settings-account-delete-btn"
         />
       </div>
     </div>

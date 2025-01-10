@@ -15,6 +15,7 @@ const AppointmentsView = defineAsyncComponent(() => import('@/views/Appointments
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
+const DocsView = defineAsyncComponent(() => import('@/views/DocsView.vue'));
 const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
@@ -150,6 +151,14 @@ const routes: RouteRecordRaw[] = [
     path: '/terms',
     name: 'terms',
     component: LegalView,
+    meta: {
+      isPublic: true,
+    },
+  },
+  {
+    path: '/docs/using-zoom',
+    name: 'using-zoom-docs',
+    component: DocsView,
     meta: {
       isPublic: true,
     },

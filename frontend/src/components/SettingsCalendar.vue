@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { CalendarManagementType, CalendarProviders, MetricEvents } from '@/definitions';
-import { IconArrowRight } from '@tabler/icons-vue';
-import {
-  ref, reactive, inject, onMounted, computed,
-} from 'vue';
+import { CalendarManagementType, CalendarProviders, MetricEvents, ColorPalette, AlertSchemes } from '@/definitions';
+import { ref, reactive, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { callKey, refreshKey } from '@/keys';
-import {
-  Calendar, CalendarResponse, CalendarListResponse, Exception, ExceptionDetail,
-} from '@/models';
+import { CalendarResponse, CalendarListResponse, Exception, ExceptionDetail, PydanticException } from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import CalendarManagement from '@/components/CalendarManagement.vue';
 import CautionButton from '@/elements/CautionButton.vue';
@@ -19,6 +14,7 @@ import GoogleCalendarButton from '@/elements/GoogleCalendarButton.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 import { posthog, usePosthog } from '@/composables/posthog';
+import { clearFormErrors, handleFormError } from '@/utils';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -27,6 +23,8 @@ const refresh = inject(refreshKey);
 const calendarStore = useCalendarStore();
 
 const calendarConnectError = ref('');
+const caldavDiscoveryError = ref('');
+const caldavDiscoverySuccess = ref('');
 
 const deleteCalendarModalOpen = ref(false);
 const deleteCalendarModalTarget = ref<number>(null);
@@ -37,12 +35,14 @@ const loading = ref(false);
 // handle calendar user input to add or edit calendar connections
 enum InputModes {
   Hidden,
+  Discovery,
   Add,
   Edit,
 }
 const inputMode = ref(InputModes.Hidden);
 const addMode = computed(() => inputMode.value === InputModes.Add);
 const editMode = computed(() => inputMode.value === InputModes.Edit);
+const discoveryMode = computed(() => inputMode.value === InputModes.Discovery);
 
 // supported calendar providers
 const defaultCalendarInput = {
@@ -91,10 +91,14 @@ const sendMetrics = (event, properties = {}) => {
   }
 };
 
-// set input mode for adding or editing
-const addCalendar = (provider: number) => {
+// set input mode for discovering, adding or editing
+const discoverCaldavCalendars = () => {
+  inputMode.value = InputModes.Discovery;
+  calendarInput.data.provider = CalendarProviders.Caldav;
+};
+const discoverGoogleCalendars = () => {
   inputMode.value = InputModes.Add;
-  calendarInput.data.provider = provider;
+  calendarInput.data.provider = CalendarProviders.Google;
 };
 const connectCalendar = async (id: number) => {
   loading.value = true;
@@ -187,43 +191,51 @@ const saveCalendar = async () => {
   resetInput();
 };
 
-// discover calendars by principal
+// Get remote CalDAV calendars by principal
+const caldavFormRef = ref();
 const principal = reactive({
   url: '',
   user: '',
   password: '',
 });
+const resetPrincipal = () => {
+  inputMode.value = InputModes.Hidden;
+  principal.url = '';
+  principal.user = '';
+  principal.password = '';
+  caldavDiscoveryError.value = '';
+  caldavDiscoverySuccess.value = '';
+};
 const processPrincipal = ref(false);
-const searchResultCalendars = ref<Calendar[]>([]);
-const getRemoteCalendars = async () => {
+
+const getRemoteCaldavCalendars = async () => {
+  caldavDiscoveryError.value = '';
+  caldavDiscoverySuccess.value = '';
+
+  clearFormErrors(caldavFormRef);
+  if (!caldavFormRef.value.checkValidity()) {
+    caldavFormRef.value.reportValidity();
+    return;
+  }
+
   processPrincipal.value = true;
-  const { error, data }: CalendarListResponse = await call('rmt/calendars').post(principal).json();
-  searchResultCalendars.value = !error.value ? data.value : [];
+
+  const { error, data }: CalendarListResponse = await call('caldav/auth').post(principal).json();
+
   processPrincipal.value = false;
-};
 
-// fill input form with data from principal discovery
-const assignCalendar = (title: string, url: string) => {
-  inputMode.value = InputModes.Add;
-  calendarInput.data.title = title;
-  calendarInput.data.url = url;
-  calendarInput.data.user = principal.user;
-  calendarInput.data.password = principal.password;
-};
+  if (error.value) {
+    // Show error message
+    caldavDiscoveryError.value = handleFormError(t, caldavFormRef, data?.value as PydanticException);
+    return;
+  }
 
-// preset of available calendar colors
-const colors = [
-  '#ff7b91',
-  '#fe64b6',
-  '#c276c5',
-  '#b865ff',
-  '#8fa5ff',
-  '#64c2d0',
-  '#64bead',
-  '#73c690',
-  '#e0ad6a',
-  '#ff8b67',
-];
+  caldavDiscoverySuccess.value = t('calDAVForm.successfullyConnected');
+
+  await syncCalendars();
+
+  resetPrincipal();
+};
 
 // initially load data when component gets remounted
 onMounted(async () => {
@@ -274,75 +286,106 @@ onMounted(async () => {
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.google') })"
         class="btn-add text-sm !text-teal-500"
-        @click="addCalendar(CalendarProviders.Google)"
+        @click="discoverGoogleCalendars"
         :disabled="inputMode"
         :title="t('label.addCalendar', { provider: t('label.google') })"
       />
       <secondary-button
         :label="t('label.addCalendar', { provider: t('label.caldav') })"
         class="btn-add text-sm !text-teal-500"
-        @click="addCalendar(CalendarProviders.Caldav)"
+        @click="discoverCaldavCalendars"
         :disabled="inputMode"
         :title="t('label.addCalendar', { provider: t('label.caldav') })"
       />
     </div>
 
     <!-- CalDAV calendar discovery -->
-    <div class="hidden flex-col gap-6">
-      <div class="text-lg">Discover CalDAV Calendars</div>
-      <div class="flex max-w-2xl flex-col gap-4 pl-6">
-        <label class="mt-4 flex items-center pl-4">
-          <div class="w-full max-w-2xs">principal</div>
-          <input
-            v-model="principal.url"
-            type="text"
-            class="w-full max-w-sm rounded-md"
+    <div v-if="discoveryMode" class="flex max-w-2xl flex-col gap-4 pl-6">
+      <div class="text-lg">{{ t('heading.discoverCaldavcalendars') }}</div>
+      <alert-box
+        v-if="caldavDiscoverySuccess"
+        :scheme="AlertSchemes.Success"
+        title="CalDAV discovery success"
+        @close="caldavDiscoverySuccess = ''"
+      >{{ caldavDiscoverySuccess }}</alert-box>
+      <alert-box
+        v-if="caldavDiscoveryError"
+        title="CalDAV discovery Error"
+        @close="caldavDiscoveryError = ''"
+      >{{ caldavDiscoveryError }}</alert-box>
+      <div class="flex flex-col gap-4">
+        <form
+          class="flex max-w-2xl flex-col gap-4 pl-6"
+          ref="caldavFormRef"
+          @submit.prevent
+          @keyup.enter="() => getRemoteCaldavCalendars()"
+        >
+          <label class="mt-4 flex items-center gap-2 pl-4">
+            <div class="w-full max-w-2xs">
+              {{ t('label.principal') }}
+              <div class="text-xs text-gray-500">{{ t('calDAVForm.help.location') }}</div>
+            </div>
+            <input
+              v-model="principal.url"
+              type="url"
+              class="w-full max-w-sm rounded-md"
+              :disabled="processPrincipal"
+              required
+              data-testid="settings-calendar-caldav-url-input"
+            />
+          </label>
+          <label class="flex items-center gap-2 pl-4">
+            <div class="w-full max-w-2xs">
+              {{ t('label.username') }}
+              <div class="text-xs text-gray-500">{{ t('calDAVForm.help.user') }}</div>
+            </div>
+            <input
+              v-model="principal.user"
+              type="text"
+              class="w-full max-w-sm rounded-md"
+              :disabled="processPrincipal"
+              required
+              data-testid="settings-calendar-caldav-user-input"
+            />
+          </label>
+          <label class="flex items-center gap-2 pl-4">
+            <div class="w-full max-w-2xs">
+              {{ t('label.password') }}
+              <div class="text-xs text-gray-500">{{ t('calDAVForm.help.password') }}</div>
+            </div>
+            <input
+              v-model="principal.password"
+              type="password"
+              class="w-full max-w-sm rounded-md"
+              :disabled="processPrincipal"
+              required
+              data-testid="settings-calendar-caldav-password-input"
+            />
+          </label>
+        </form>
+        <div class="flex justify-end gap-4">
+          <secondary-button
+            :label="t('label.cancel')"
+            class="btn-cancel text-sm !text-teal-500"
+            @click="resetInput"
+            :title="t('label.cancel')"
+            :disabled="processPrincipal"
+            data-testid="settings-calendar-caldav-cancel-button"
           />
-        </label>
-        <label class="flex items-center pl-4">
-          <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
-          <input
-            v-model="principal.user"
-            type="text"
-            class="w-full max-w-sm rounded-md"
+          <primary-button
+            :label="'Search for calendars'"
+            class="btn-search text-sm"
+            :waiting="processPrincipal"
+            @click="getRemoteCaldavCalendars"
+            :title="t('label.search')"
+            data-testid="settings-calendar-caldav-process-principal-button"
           />
-        </label>
-        <label class="flex items-center pl-4">
-          <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
-          <input
-            v-model="principal.password"
-            type="password"
-            class="w-full max-w-sm rounded-md"
-          />
-        </label>
-      </div>
-      <div>
-        <secondary-button
-          :label="'Search for calendars'"
-          class="btn-search text-sm !text-teal-500"
-          :waiting="processPrincipal"
-          @click="getRemoteCalendars"
-          :title="t('label.search')"
-        />
-      </div>
-      <div v-if="searchResultCalendars.length" class="flex max-w-2xl flex-col gap-2 pl-6">
-        <div v-for="cal in searchResultCalendars" :key="cal.url" class="flex items-center gap-2">
-          <div>{{ cal.title }}</div>
-          <div>{{ cal.url }}</div>
-          <button
-            @click="assignCalendar(cal.title, cal.url)"
-            class="btn-assign ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1 text-xs text-white"
-            :title="t('label.assign')"
-          >
-            <icon-arrow-right class="size-3.5 fill-transparent stroke-white stroke-2" />
-            {{ 'Select calendar' }}
-          </button>
         </div>
       </div>
     </div>
 
     <!-- set calendar connection data -->
-    <div v-if="inputMode" class="flex max-w-2xl flex-col gap-4 pl-6">
+    <div v-else-if="inputMode" class="flex max-w-2xl flex-col gap-4 pl-6">
       <div class="text-lg">
         <span v-if="isCalDav">{{ t('label.caldav') }}</span>
         <span v-if="isGoogle">{{ t('label.google') }}</span>
@@ -376,7 +419,7 @@ onMounted(async () => {
         <div class="w-full max-w-2xs">{{ t('label.color') }}</div>
         <div class="flex w-full max-w-sm items-center gap-4">
           <select v-if="addMode" v-model="calendarInput.data.color" class="w-full rounded-md">
-            <option v-for="color in colors" :key="color" :value="color" :style="{ backgroundColor: color }">
+            <option v-for="color in ColorPalette" :key="color" :value="color" :style="{ backgroundColor: color }">
               {{ color }}
             </option>
           </select>
@@ -410,36 +453,36 @@ onMounted(async () => {
       </label>
       <div class="flex justify-between gap-4">
         <div class="flex">
-        <caution-button
-          v-if="editMode"
-          :label="t('label.disconnect')"
-          class="btn-disconnect text-sm"
-          @click="() => disconnectCalendar(calendarInput.id)"
-          :title="t('label.disconnect')"
-        />
+          <caution-button
+            v-if="editMode"
+            :label="t('label.disconnect')"
+            class="btn-disconnect text-sm"
+            @click="() => disconnectCalendar(calendarInput.id)"
+            :title="t('label.disconnect')"
+          />
         </div>
         <div class="flex gap-4 self-end">
-        <secondary-button
-          :label="t('label.cancel')"
-          class="btn-cancel text-sm !text-teal-500"
-          @click="resetInput"
-          :title="t('label.cancel')"
-        />
-        <primary-button
-          v-if="isCalDav || editMode"
-          :label="addMode ? t('label.connectCalendar') : t('label.saveChanges')"
-          class="btn-save text-sm"
-          @click="saveCalendar"
-          :title="t('label.save')"
-        />
-        <!-- Google Button -->
-        <google-calendar-button
-          v-if="isGoogle && addMode"
-          class="btn-connect cursor-pointer"
-          :title="t('label.signInWithGoogle')"
-          :label="t('label.connectGoogleCalendar')"
-          @click="saveCalendar"
-        />
+          <secondary-button
+            :label="t('label.cancel')"
+            class="btn-cancel text-sm !text-teal-500"
+            @click="resetInput"
+            :title="t('label.cancel')"
+          />
+          <primary-button
+            v-if="isCalDav || editMode"
+            :label="addMode ? t('label.connectCalendar') : t('label.saveChanges')"
+            class="btn-save text-sm"
+            @click="saveCalendar"
+            :title="t('label.save')"
+          />
+          <!-- Google Button -->
+          <google-calendar-button
+            v-if="isGoogle && addMode"
+            class="btn-connect cursor-pointer"
+            :title="t('label.signInWithGoogle')"
+            :label="t('label.connectGoogleCalendar')"
+            @click="saveCalendar"
+          />
         </div>
       </div>
     </div>

@@ -21,6 +21,8 @@ from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
+from zoneinfo import ZoneInfo
+from enum import Enum
 
 from sqlalchemy.orm import Session
 
@@ -31,10 +33,15 @@ from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
+from ..exceptions.calendar import TestConnectionFailed
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
-from ..tasks.emails import send_invite_email
+from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email
 
+class RemoteEventState(Enum):
+    CANCELLED = 'CANCELLED'
+    TENTATIVE = 'TENTATIVE'
+    CONFIRMED = 'CONFIRMED'
 
 class BaseConnector:
     redis_instance: Redis | RedisCluster | None
@@ -249,13 +256,13 @@ class GoogleConnector(BaseConnector):
 
         return events
 
-    def create_event(
+    def save_event(
         self,
         event: schemas.Event,
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
         organizer_email: str,
-    ):
+    ) -> schemas.Event:
         """add a new event to the connected calendar"""
 
         description = [event.description]
@@ -283,11 +290,21 @@ class GoogleConnector(BaseConnector):
                 'email': self.remote_calendar_id,
             },
         }
-        self.google_client.create_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
+
+        new_event = self.google_client.save_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
+
+        # Fill in the external_id so we can delete events later!
+        event.external_id = new_event.get('id')
 
         self.bust_cached_events()
 
         return event
+
+    def delete_event(self, uid: str):
+        """Delete remote event of given external_id
+        """
+        self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
+        self.bust_cached_events()
 
     def delete_events(self, start):
         """delete all events in given date range from the server
@@ -354,16 +371,39 @@ class CalDavConnector(BaseConnector):
                 # If one supports it, then that's good enough!
                 if supports_vevent:
                     break
-        except IndexError as ex:  # Library has an issue with top level urls, probably due to caldav spec?
+        except IndexError as ex:
+            # Library has an issue with top level urls, probably due to caldav spec?
             logging.error(f'IE: Error testing connection {ex}')
-            return False
+            raise TestConnectionFailed(reason=None)
         except KeyError as ex:
             logging.error(f'KE: Error testing connection {ex}')
-            return False
-        except requests.exceptions.RequestException as ex:  # Max retries exceeded, bad connection, missing schema, etc...
-            return False
-        except caldav.lib.error.NotFoundError as ex:  # Good server, bad url.
-            return False
+            raise TestConnectionFailed(reason=None)
+        except requests.exceptions.RequestException:
+            raise TestConnectionFailed(reason=None)
+        except NotImplementedError:
+            # Doesn't support authorization by digest, bearer, or basic header values
+            raise TestConnectionFailed(reason=l10n('remote-calendar-reason-doesnt-support-auth'))
+        except (
+            caldav.lib.error.NotFoundError,
+            caldav.lib.error.PropfindError,
+            caldav.lib.error.AuthorizationError
+        ) as ex:
+            """
+            NotFoundError: Good server, bad url.
+            PropfindError: Some properties could not be retrieved.
+            AuthorizationError: Credentials are not accepted.
+            """
+            logging.error(f'Test Connection Error: {ex}')
+
+            # Don't use the default "no reason" error message if we encounter it.
+            if ex.reason == caldav.lib.error.DAVError.reason:
+                ex.reason = None
+            if ex.reason == 'Unauthorized':
+                # ex.reason seems to be pulling from status codes for some errors?
+                # Let's replace this with our own.
+                ex.reason = l10n('remote-calendar-reason-unauthorized')
+
+            raise TestConnectionFailed(reason=ex.reason)
 
         # They need at least VEVENT support for appointment to work.
         return supports_vevent
@@ -441,11 +481,23 @@ class CalDavConnector(BaseConnector):
             if status == 'cancelled' or transparency == 'transparent':
                 continue
 
+            vevent = e.vobject_instance.vevent
+            if not vevent:
+                continue
+
+            event_components = vevent.components()
+
+            # Ignore events with missing datetime data
+            if 'dtstart' not in event_components or (
+                'dtend' not in event_components and 'duration' not in event_components
+            ):
+                continue
+
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = e.vobject_instance.vevent.summary.value
-            start = e.vobject_instance.vevent.dtstart.value
+            title = vevent.summary.value if 'summary' in event_components else l10n('event-summary-default')
+            start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
             # if start doesn't hold time information (no datetime), it's a whole day
@@ -466,7 +518,7 @@ class CalDavConnector(BaseConnector):
 
         return events
 
-    def create_event(
+    def save_event(
         self, event: schemas.Event, attendee: schemas.AttendeeBase, organizer: schemas.Subscriber, organizer_email: str
     ):
         """add a new event to the connected calendar"""
@@ -488,6 +540,13 @@ class CalDavConnector(BaseConnector):
         self.bust_cached_events()
 
         return event
+
+    def delete_event(self, uid: str):
+        """Delete remote event of given uid
+        """
+        event = self.client.calendar(url=self.url).event_by_uid(uid)
+        event.delete()
+        self.bust_cached_events()
 
     def delete_events(self, start):
         """delete all events in given date range from the server
@@ -512,11 +571,13 @@ class Tools:
         appointment: schemas.Appointment,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
+        event_status = RemoteEventState.CONFIRMED.value,
     ):
         """create an event in ical format for .ics file creation"""
         cal = Calendar()
         cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
         cal.add('version', '2.0')
+        cal.add('method', 'CANCEL' if event_status == RemoteEventState.CANCELLED.value else 'REQUEST')
         org = vCalAddress('MAILTO:' + organizer.preferred_email)
         org.params['cn'] = vText(organizer.preferred_email)
         org.params['role'] = vText('CHAIR')
@@ -529,7 +590,7 @@ class Tools:
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
         event.add('dtstamp', datetime.now(UTC))
-        event.add('status', 'CONFIRMED')
+        event.add('status', event_status)
         event['description'] = appointment.details
         event['organizer'] = org
 
@@ -542,7 +603,8 @@ class Tools:
         cal.add_component(event)
         return cal.to_ical()
 
-    def send_vevent(
+
+    def send_invitation_vevent(
         self,
         background_tasks: BackgroundTasks,
         appointment: models.Appointment,
@@ -551,25 +613,77 @@ class Tools:
         attendee: schemas.AttendeeBase,
     ):
         """send a booking confirmation email to attendee with .ics file attached"""
-        ics = self.create_vevent(appointment, slot, organizer)
-        invite = Attachment(
+        ics_file = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
-            data=ics,
+            data=self.create_vevent(appointment, slot, organizer),
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(attendee.timezone))
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+        # Send mail
         background_tasks.add_task(
             send_invite_email,
             organizer.name,
-            organizer.
-            email,
+            organizer.email,
             date=date,
             duration=slot.duration,
             to=attendee.email,
-            attachment=invite
+            attachment=ics_file
         )
+
+    def send_hold_vevent(
+        self,
+        background_tasks: BackgroundTasks,
+        appointment: models.Appointment,
+        slot: schemas.Slot,
+        organizer: schemas.Subscriber,
+        attendee: schemas.AttendeeBase,
+    ):
+        """send a hold booking email to attendee with .ics file attached"""
+        ics_file = Attachment(
+            mime=('text', 'calendar'),
+            filename='AppointmentInvite.ics',
+            data=self.create_vevent(appointment, slot, organizer, RemoteEventState.TENTATIVE.value),
+        )
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+        # Send mail
+        background_tasks.add_task(
+            send_pending_email,
+            organizer.name,
+            date=date,
+            to=attendee.email,
+            attachment=ics_file
+        )
+
+    def send_cancel_vevent(
+        self,
+        background_tasks: BackgroundTasks,
+        appointment: models.Appointment,
+        slot: schemas.Slot,
+        organizer: schemas.Subscriber,
+        attendee: schemas.AttendeeBase,
+    ):
+        """send a hold booking email to attendee with .ics file attached"""
+        ics_file = Attachment(
+            mime=('text', 'calendar'),
+            filename='AppointmentInvite.ics',
+            data=self.create_vevent(appointment, slot, organizer, RemoteEventState.CANCELLED.value),
+        )
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+        # Send mail
+        background_tasks.add_task(
+            send_rejection_email,
+            organizer.name,
+            date=date,
+            to=attendee.email,
+            attachment=ics_file
+        )
+
 
     @staticmethod
     def available_slots_from_schedule(schedule: models.Schedule) -> list[schemas.SlotBase]:
@@ -897,3 +1011,12 @@ class Tools:
             url = 'https://api.googlecontent.com/caldav/v2/'
 
         return url
+
+    @staticmethod
+    def default_event_title(slot: schemas.Slot, owner: schemas.Subscriber, prefix='') -> str:
+        """Builds a default event title for scheduled bookings
+           The prefix can be used e.g. for "HOLD: " events
+        """
+        attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
+        owner_name = owner.name if owner.name is not None else owner.email
+        return l10n('event-title-template', { 'prefix': prefix, 'name1': owner_name, 'name2': attendee_name })

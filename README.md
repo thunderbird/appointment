@@ -1,6 +1,7 @@
 # Thunderbird Appointment
 
-**Note: Thunderbird Appointment is in a beta state, so be prepared to encounter bugs**
+> [!IMPORTANT]  
+> Thunderbird Appointment is in a beta state, so be prepared to encounter bugs
 
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
@@ -40,6 +41,7 @@ Check out the project's respective readmes:
 
 * [Backend Readme](backend/README.md)
 * [Frontend Readme](frontend/README.md)
+* [E2E Tests Readme](test/e2e/README.md)
 
 ### Localization
 

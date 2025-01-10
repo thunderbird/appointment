@@ -21,6 +21,36 @@ def get_api_path(request: Request):
     return f'/api/v1{request.url.path}'
 
 
+@router.post('/get-id')
+async def get_id(
+    request: Request,
+    data: schemas.PageLoadIn,
+    posthog: Posthog | None = Depends(get_posthog),
+    subscriber: Subscriber | None = Depends(get_subscriber_or_none),
+):
+    if posthog is None:
+        return False
+
+    if not subscriber:
+        anon_id = '-'.join([request.client.host, data.browser_version, data.os_version])
+
+        hash_instance = hashlib.sha256()
+        hash_instance.update(anon_id.encode('utf-8'))
+        distinct_id = f'anon-{hash_instance.hexdigest()}'
+    else:
+        distinct_id = subscriber.unique_hash
+
+    # Set a display id
+    posthog.set(distinct_id=distinct_id, properties={
+        'display_id': distinct_id
+    })
+    posthog.set_once(distinct_id=distinct_id, properties={
+        'initial_service': APP_NAME_SHORT
+    })
+
+    return {'id': distinct_id}
+
+
 @router.post('/page-load')
 def page_load(
     request: Request,

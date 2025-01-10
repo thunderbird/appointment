@@ -12,6 +12,7 @@ class TestFxaClient:
 
             test_email = 'cooltestguy@example.org'
 
+            # No allow list exists so everyone is allowed
             assert fxa_client.is_in_allow_list(db, test_email)
 
             # Domain is in allow list

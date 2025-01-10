@@ -9,7 +9,7 @@ from alembic import context
 from appointment.defines import APP_ENV_DEV
 
 # This is ran from src/ so ignore the errors
-from appointment.secrets import normalize_secrets
+from appointment.utils import normalize_secrets
 
 import sentry_sdk
 
@@ -23,7 +23,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

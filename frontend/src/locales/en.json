@@ -10,6 +10,7 @@
       "password": "This is usually not your email address password, but an 'App Password'.",
       "user": "This is usually an email address."
     },
+    "successfullyConnected": "Successfully connected to CalDAV server. Waiting for calendar retrieval.",
     "switchToCalDAV": "Switch to CalDAV",
     "switchToGoogleCalendar": "Switch to Google Calendar"
   },
@@ -86,6 +87,7 @@
     "contactRequest": "Contact Request",
     "createNewAppointment": "Create new appointment",
     "dateAndTimeFormatting": "Date and Time Format",
+    "discoverCaldavcalendars": "Discover CalDAV Calendars",
     "displayInformation": "Display information",
     "eventBooked": "Event booked!",
     "externalConnections": "Connections",
@@ -273,6 +275,7 @@
     "pending": "Pending",
     "preferredEmail": "Preferred Email",
     "primaryTimeZone": "Primary time zone",
+    "principal": "Basic URL (CalDAV)",
     "privacy": "Privacy",
     "quickLink": "Quick link",
     "refresh": "Refresh",
@@ -353,6 +356,15 @@
     },
     "login": {
       "title": "Sign in or create an account"
+    },
+    "remoteError": {
+      "email-mismatch": "The email you've signed up and logged in with must be the same as your Mozilla Account.",
+      "invite-not-valid": "The invite code you've entered is not valid.",
+      "unknown-error": "An unknown error occurred.",
+      "disabled-account": "This account is disabled.",
+      "invalid-credentials": "There was a problem with your credentials.",
+      "invalid-state": "The login session has expired. Please try again.",
+      "email-not-in-session": "There was a problem with the login session. Please try again."
     },
     "signUp": {
       "title": "Have an invite code? Enter it here"

@@ -181,6 +181,18 @@ const onPageLoad = async () => {
   const { data } = response;
   return data.value?.id ?? false;
    */
+
+  // Only used for non-subscribers
+  const parser = new UAParser(navigator.userAgent);
+  const browser = parser.getBrowser();
+  const os = parser.getOS();
+
+  const response = await call('metrics/get-id').post({
+    browser_version: `${browser.name}:${browser.version}`,
+    os_version: `${os.name}:${os.version}`,
+  }).json();
+  const { data } = response;
+  return data.value?.id ?? false;
 };
 
 // provide refresh functions for components
@@ -233,8 +245,12 @@ onMounted(async () => {
           // Easiest just to string replace all instances!
           let json = JSON.stringify(properties);
           // replaceAll that typescript won't complain about...
-          json = json.replace(new RegExp(properties.$current_url, 'gi'), properties.$current_url.replace(oldPath, vuePath));
-          json = json.replace(new RegExp(properties.$pathname, 'gi'), vuePath);
+          if (properties?.$current_url) {
+            json = json.replace(new RegExp(properties.$current_url, 'gi'), properties.$current_url.replace(oldPath, vuePath));
+          }
+          if (properties?.$pathname) {
+            json = json.replace(new RegExp(properties.$pathname, 'gi'), vuePath);
+          }
 
           properties = JSON.parse(json);
         }
@@ -272,9 +288,12 @@ onMounted(async () => {
       service: 'apmt',
     });
 
+    const id = await onPageLoad();
     if (isAuthenticated.value) {
       const profile = useUserStore();
       posthog.identify(profile.data.uniqueHash);
+    } else if (id) {
+      posthog.identify(id);
     }
   }
 });

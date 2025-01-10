@@ -94,6 +94,7 @@ onMounted(() => {
         "
         :class="{ '!bg-teal-500 !text-white': view === activeView }"
         @click="show(key)"
+        :data-testid="'settings-' + key + '-settings-btn'"
       >
         <span>{{ t('label.' + key) }}</span>
         <icon-chevron-right

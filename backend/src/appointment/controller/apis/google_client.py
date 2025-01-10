@@ -12,7 +12,7 @@ from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
 from ...defines import DATETIMEFMT
-from ...exceptions.calendar import EventNotCreatedException, FreeBusyTimeException
+from ...exceptions.calendar import EventNotCreatedException, EventNotDeletedException, FreeBusyTimeException
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
@@ -163,6 +163,8 @@ class GoogleClient:
         # Limit the fields we request
         fields = ','.join(
             (
+                'items/id',
+                'items/iCalUID',
                 'items/status',
                 'items/summary',
                 'items/description',
@@ -201,19 +203,27 @@ class GoogleClient:
 
         return items
 
-    def create_event(self, calendar_id, body, token):
+    def save_event(self, calendar_id, body, token):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
                 response = service.events().import_(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
-                logging.warning(f'[google_client.create_event] Request Error: {e.status_code}/{e.error_details}')
+                logging.warning(f'[google_client.save_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotCreatedException()
 
         return response
 
     def delete_event(self, calendar_id, event_id, token):
-        pass
+        response = None
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                response = service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.delete_event] Request Error: {e.status_code}/{e.error_details}')
+                raise EventNotDeletedException()
+
+        return response
 
     def sync_calendars(self, db, subscriber_id: int, token):
         # Grab all the Google calendars

@@ -9,7 +9,7 @@ from .. import models, schemas, repo
 
 def create(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase] = []):
     """create new appointment with slots for calendar"""
-    db_appointment = models.Appointment(**appointment.dict())
+    db_appointment = models.Appointment(**appointment.model_dump())
     db.add(db_appointment)
     db.commit()
     db.refresh(db_appointment)
@@ -89,3 +89,32 @@ def update_status(db: Session, appointment_id: int, status: models.AppointmentSt
 
     appointment.status = status
     db.commit()
+
+
+def update_title(db: Session, appointment_id: int, title: str):
+    db_appointment = get(db, appointment_id)
+    if not db_appointment:
+        return False
+
+    db_appointment.title = title
+    db.commit()
+    db.refresh(db_appointment)
+    return db_appointment
+
+
+def update_external_id(db: Session, appointment: models.Appointment, external_id: str):
+    """Update appointment's external id field
+    Note: This requires a full appointment model to prevent a needless db lookup"""
+    db.add(appointment)
+
+    appointment.external_id = external_id
+    db.commit()
+    db.refresh(appointment)
+    return appointment
+
+
+def update_external_id_by_id(db: Session, appointment_id: int, external_id: str):
+    appointment = get(db, appointment_id)
+    if not appointment:
+        return False
+    return update_external_id(db, appointment, external_id)

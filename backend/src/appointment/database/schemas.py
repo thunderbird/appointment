@@ -9,10 +9,10 @@ from uuid import UUID
 from datetime import datetime, date, time, timezone, timedelta
 from typing import Annotated, Optional, Self
 
-from pydantic import BaseModel, Field, EmailStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, model_validator
 from pydantic_core import PydanticCustomError
 
-from ..defines import DEFAULT_CALENDAR_COLOUR
+from ..defines import DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
 from ..l10n import l10n
 
 
@@ -41,10 +41,9 @@ class AttendeeBase(BaseModel):
 
 
 class Attendee(AttendeeBase):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int
 
 
 """ SLOT model schemas
@@ -63,14 +62,13 @@ class SlotBase(BaseModel):
 
 
 class Slot(SlotBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     appointment_id: int
     subscriber_id: int | None = None
     time_updated: datetime | None = None
     attendee: Attendee | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class SlotOut(SlotBase):
@@ -113,14 +111,13 @@ class AppointmentFull(AppointmentBase):
 
 
 class Appointment(AppointmentFull):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     uuid: UUID
     time_created: datetime | None = None
     time_updated: datetime | None = None
     slots: list[Slot] = []
-
-    class Config:
-        from_attributes = True
 
 
 class AppointmentWithCalendarOut(Appointment):
@@ -152,15 +149,16 @@ class AvailabilityBase(BaseModel):
 
 
 class Availability(AvailabilityBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
 
-    class Config:
-        from_attributes = True
-
 
 class ScheduleBase(BaseModel):
+    model_config = ConfigDict(json_encoders = { time: lambda t: t.strftime('%H:%M') })
+
     active: bool | None = True
     name: str = Field(min_length=1, max_length=128)
     slug: Optional[str] = None
@@ -180,21 +178,15 @@ class ScheduleBase(BaseModel):
     booking_confirmation: bool = True
     timezone: Optional[str] = None
 
-    class Config:
-        json_encoders = {
-            time: lambda t: t.strftime('%H:%M'),
-        }
-
 
 class Schedule(ScheduleBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
     availabilities: list[Availability] = []
     calendar: 'CalendarBase'
-
-    class Config:
-        from_attributes = True
 
 
 class ScheduleValidationIn(ScheduleBase):
@@ -220,16 +212,16 @@ class ScheduleValidationIn(ScheduleBase):
         start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
         end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
 
-        start_time = (start_time + timedelta(minutes=self.slot_duration)).time()
-        end_time = end_time.time()
+        start_time = (start_time + timedelta(minutes=self.slot_duration))
+        end_time = end_time
         # Compare time objects!
-        if start_time > end_time:
+        if start_time.time() > end_time.time():
             msg = l10n('error-minimum-value')
 
             # These can't be field or value because that will auto-format the msg? Weird feature but okay.
             raise PydanticCustomError(defines.END_TIME_BEFORE_START_TIME_ERR, msg, {
                 'err_field': 'end_time',
-                'err_value': start_time
+                'err_value': start_time.astimezone(timezone.utc).time()
             })
 
         return self
@@ -266,13 +258,12 @@ class CalendarConnectionIn(CalendarConnection):
 
 
 class Calendar(CalendarConnection):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     owner_id: int
     appointments: list[Appointment] = []
     schedules: list[Schedule] = []
-
-    class Config:
-        from_attributes = True
 
 
 class CalendarOut(CalendarBase):
@@ -307,6 +298,7 @@ class SubscriberIn(BaseModel):
     name: Optional[str] = Field(min_length=1, max_length=128, default=None)
     avatar_url: str | None = None
     secondary_email: str | None = None
+    language: str | None = FALLBACK_LOCALE
 
 
 class SubscriberBase(SubscriberIn):
@@ -321,13 +313,12 @@ class SubscriberAuth(SubscriberBase):
 
 
 class Subscriber(SubscriberAuth):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     calendars: list[Calendar] = []
     slots: list[Slot] = []
-    ftue_level: Optional[int] = Field(gte=0)
-
-    class Config:
-        from_attributes = True
+    ftue_level: Optional[int] = Field(json_schema_extra={'gte': 0})
 
 
 class SubscriberMeOut(SubscriberBase):
@@ -336,12 +327,11 @@ class SubscriberMeOut(SubscriberBase):
 
 
 class SubscriberAdminOut(Subscriber):
+    model_config = ConfigDict(from_attributes=True)
+
     invite: Invite | None = None
     time_created: datetime
     time_deleted: datetime | None
-
-    class Config:
-        from_attributes = True
 
 
 """ other schemas used for requests or data migration
@@ -380,6 +370,7 @@ class Event(BaseModel):
     calendar_color: str | None = None
     location: EventLocation | None = None
     uuid: UUID | None = None
+    external_id: str | None = None
 
     """Ideally this would just be a mixin, but I'm having issues figuring out a good
     static constructor that will work for anything."""
@@ -468,6 +459,8 @@ class WaitingListInviteAdminOut(BaseModel):
 
 
 class WaitingListAdminOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: str
     email_verified: bool
@@ -477,25 +470,21 @@ class WaitingListAdminOut(BaseModel):
 
     invite: Invite | None = None
 
-    class Config:
-        from_attributes = True
-
 
 class PageLoadIn(BaseModel):
-    browser: Optional[str]
-    browser_version: Optional[str]
-    os: Optional[str]
-    os_version: Optional[str]
-    device: Optional[str]
-    device_model: Optional[str]
-    resolution: Optional[str]
-    effective_resolution: Optional[str]
-    user_agent: Optional[str]
-    locale: Optional[str]
-    theme: Optional[str]
+    browser: Optional[str] = None
+    browser_version: Optional[str] = None
+    os: Optional[str] = None
+    os_version: Optional[str] = None
+    device: Optional[str] = None
+    device_model: Optional[str] = None
+    resolution: Optional[str] = None
+    effective_resolution: Optional[str] = None
+    user_agent: Optional[str] = None
+    locale: Optional[str] = None
+    theme: Optional[str] = None
 
 
 class FTUEStepIn(BaseModel):
     step_level: int
     step_name: str
-

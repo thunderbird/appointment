@@ -1,0 +1,23 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "prod-sanity-test": "npx playwright test --grep prod-sanity --project=firefox",
+    "prod-sanity-test-ui": "npx playwright test --grep prod-sanity --project=firefox --headed",
+    "prod-sanity-test-debug": "npx playwright test --grep prod-sanity --project=firefox --headed --ui",
+    "prod-sanity-test-browserstack": "npx browserstack-node-sdk playwright test --grep prod-sanity --browserstack.buildName 'Production Sanity Test'",
+    "prod-sanity-test-browserstack-gha": "npx browserstack-node-sdk playwright test --grep prod-sanity",
+    "postinstall": "npm update browserstack-node-sdk"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.1",
+    "browserstack-node-sdk": "^1.34.29",
+    "dotenv": "^16.3.1"
+  }
+}

@@ -16,6 +16,7 @@ from sqlalchemy_utils import StringEncryptedType, ChoiceType, UUIDType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship, as_declarative, declared_attr, Mapped
 from sqlalchemy.sql import func
+from appointment.defines import FALLBACK_LOCALE
 
 
 def secret():
@@ -133,6 +134,7 @@ class Subscriber(HasSoftDelete, Base):
 
     name = Column(encrypted_type(String), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
+    language = Column(encrypted_type(String), nullable=False, default=FALLBACK_LOCALE, index=True)
     timezone = Column(encrypted_type(String), index=True)
     avatar_url = Column(encrypted_type(String, length=2048), index=False)
 
@@ -218,6 +220,7 @@ class Appointment(Base):
     slug = Column(encrypted_type(String), unique=True, index=True)
     keep_open = Column(Boolean)
     status: AppointmentStatus = Column(Enum(AppointmentStatus), default=AppointmentStatus.draft)
+    external_id = Column(encrypted_type(String), index=True, nullable=True)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider = Column(
@@ -281,8 +284,8 @@ class Schedule(Base):
     details: str = Column(encrypted_type(String))
     start_date: datetime.date = Column(encrypted_type(Date), index=True)
     end_date: datetime.date = Column(encrypted_type(Date), index=True)
-    start_time: datetime.time = Column(encrypted_type(Time), index=True)
-    end_time: datetime.time = Column(encrypted_type(Time), index=True)
+    start_time: datetime.time = Column(encrypted_type(Time), index=True)  # in utc
+    end_time: datetime.time = Column(encrypted_type(Time), index=True)  # in utc
     earliest_booking: int = Column(Integer, default=1440)  # in minutes, defaults to 24 hours
     farthest_booking: int = Column(Integer, default=20160)  # in minutes, defaults to 2 weeks
     weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7

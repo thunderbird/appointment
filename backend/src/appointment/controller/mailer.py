@@ -56,6 +56,8 @@ class Mailer:
         html: str = '',
         plain: str = '',
         attachments: list[Attachment] = [],
+        method: str = 'REQUEST',
+        lang: str = None
     ):
         self.sender = sender
         self.to = to
@@ -64,6 +66,8 @@ class Mailer:
         self.body_html = html
         self.body_plain = plain
         self.attachments = attachments
+        self.method = method
+        self.lang = lang
 
     def html(self):
         """provide email body as html per default"""
@@ -94,14 +98,28 @@ class Mailer:
 
         # add attachment(s) as multimedia parts
         for a in self._attachments():
-            # Attach it to the html payload
-            message.get_payload()[1].add_related(
-                a.data,
-                a.mime_main,
-                a.mime_sub,
-                cid=f'<{a.filename}>',
-                filename=a.filename,
-            )
+            # Handle ics files differently than inline images
+            if a.mime_main == 'text' and a.mime_sub == 'calendar':
+                message.add_attachment(
+                    a.data,
+                    maintype=a.mime_main,
+                    subtype=a.mime_sub,
+                    filename=a.filename
+                )
+                # Fix the header of the attachment
+                message.get_payload()[-1].replace_header(
+                    'Content-Type',
+                    f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method={self.method}'
+                )
+            else:
+                # Attach it to the html payload
+                message.get_payload()[1].add_related(
+                    a.data,
+                    a.mime_main,
+                    a.mime_sub,
+                    cid=f'<{a.filename}>',
+                    filename=a.filename,
+                )
 
         return message
 
@@ -148,7 +166,9 @@ class Mailer:
 
 class BaseBookingMail(Mailer):
     def __init__(self, name, email, date, duration, *args, **kwargs):
-        """Base class for emails with name, email, and event information"""
+        """Base class for emails with name, email, and event information
+           Can have a different locale by providing a lang argument
+        """
         self.name = name
         self.email = email
         self.date = date
@@ -158,8 +178,8 @@ class BaseBookingMail(Mailer):
         super().__init__(*args, **kwargs)
 
         # Localize date and time range format
-        self.time_format = l10n('time-format')
-        self.date_format = l10n('date-format')
+        self.time_format = l10n('time-format', lang=self.lang)
+        self.date_format = l10n('date-format', lang=self.lang)
 
         # If value is key then there's no localization available, set a default.
         if self.time_format == 'time-format':
@@ -201,12 +221,16 @@ class BaseBookingMail(Mailer):
 
 class InvitationMail(BaseBookingMail):
     def __init__(self, *args, **kwargs):
-        """init Mailer with invitation specific defaults"""
+        """Init Mailer with invitation/booking-accepted specific defaults
+           To: Bookee
+           Reply-To: Event owner
+        """
         default_kwargs = {
             'subject': l10n('invite-mail-subject'),
             'plain': l10n('invite-mail-plain'),
         }
         super().__init__(*args, **default_kwargs, **kwargs)
+        self.reply_to = self.email
 
     def html(self):
         return get_template('invite.jinja2').render(
@@ -219,14 +243,14 @@ class InvitationMail(BaseBookingMail):
             # Icon cids
             calendar_icon_cid=self._attachments()[0].filename,
             clock_icon_cid=self._attachments()[1].filename,
-            # Calendar ics cid
-            #invite_cid=self._attachments()[2].filename,
         )
 
 
 class ZoomMeetingFailedMail(Mailer):
     def __init__(self, appointment_title, *args, **kwargs):
-        """init Mailer with invitation specific defaults"""
+        """Init Mailer with zoom-meeting-failed specific defaults
+           To: Event owner
+        """
         default_kwargs = {'subject': l10n('zoom-invite-failed-subject')}
         super(ZoomMeetingFailedMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -241,11 +265,13 @@ class ZoomMeetingFailedMail(Mailer):
 
 class ConfirmationMail(BaseBookingMail):
     def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
-        """init Mailer with confirmation specific defaults"""
+        """Init Mailer with action-required:confirm/deny specific defaults
+           To: Event owner
+        """
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
         self.schedule_name = schedule_name
-        default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name})}
+        default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, kwargs['lang'])}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
 
 
@@ -275,6 +301,7 @@ class ConfirmationMail(BaseBookingMail):
             confirm=self.confirmUrl,
             deny=self.denyUrl,
             schedule_name=self.schedule_name,
+            lang=self.lang,
             # Icon cids
             calendar_icon_cid=self._attachments()[0].filename,
             clock_icon_cid=self._attachments()[1].filename,
@@ -283,11 +310,15 @@ class ConfirmationMail(BaseBookingMail):
 
 class RejectionMail(Mailer):
     def __init__(self, owner_name, date, *args, **kwargs):
-        """init Mailer with rejection specific defaults"""
+        """Init Mailer with rejection specific defaults
+           To: Bookee
+           Reply-To: Event owner
+        """
         self.owner_name = owner_name
         self.date = date
         default_kwargs = {'subject': l10n('reject-mail-subject')}
         super(RejectionMail, self).__init__(*args, **default_kwargs, **kwargs)
+        self.method = 'CANCEL'
 
     def text(self):
         return l10n('reject-mail-plain', {'owner_name': self.owner_name, 'date': self.date})
@@ -298,7 +329,9 @@ class RejectionMail(Mailer):
 
 class PendingRequestMail(Mailer):
     def __init__(self, owner_name, date, *args, **kwargs):
-        """init Mailer with pending specific defaults"""
+        """Init Mailer with pending-request specific defaults
+           To: Bookee
+        """
         self.owner_name = owner_name
         self.date = date
         default_kwargs = {'subject': l10n('pending-mail-subject')}
@@ -313,10 +346,15 @@ class PendingRequestMail(Mailer):
 
 class NewBookingMail(BaseBookingMail):
     def __init__(self, name, email, date, duration, schedule_name, *args, **kwargs):
-        """init Mailer with confirmation specific defaults"""
+        """Init Mailer with new-booking specific defaults
+           To: Event owner
+           Reply-To: Bookee
+        """
         self.schedule_name = schedule_name
-        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name})}
-        super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+        lang = kwargs['lang'] if 'lang' in kwargs else None
+        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang)}
+        super(NewBookingMail, self).__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+        self.reply_to = email
 
     def text(self):
         return l10n(
@@ -345,13 +383,17 @@ class NewBookingMail(BaseBookingMail):
 
 class SupportRequestMail(Mailer):
     def __init__(self, requestee_name, requestee_email, topic, details, *args, **kwargs):
-        """init Mailer with support specific defaults"""
+        """Init Mailer with support specific defaults
+           To: Support
+           Reply-To: Requestee
+        """
         self.requestee_name = requestee_name
         self.requestee_email = requestee_email
         self.topic = topic
         self.details = details
         default_kwargs = {'subject': l10n('support-mail-subject', {'topic': topic})}
         super(SupportRequestMail, self).__init__(os.getenv('SUPPORT_EMAIL', 'help@tb.net'), *args, **default_kwargs, **kwargs)
+        self.reply_to = requestee_email
 
     def text(self):
         return l10n(
