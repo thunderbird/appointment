@@ -67,8 +67,7 @@ browserstackLocal: false # <boolean> (Default false)
 # ===================
 debug: false # <boolean> # Set to true if you need screenshots for every selenium command ran
 networkLogs: false # <boolean> Set to true to enable HAR logs capturing; off as may contain sensitive info like login API requests
-consoleLogs: info # <string> Remote browser's console debug levels to be printed (Default: errors)
-# Available options are `disable`, `errors`, `warnings`, `info`, `verbose` (Default: errors)
+consoleLogs: info # <string> Remote browser's console debug levels to be printed (`disable`, `errors`, `warnings`, `info`, or `verbose`)
 framework: playwright
 browserstack.playwrightLogs: false # disable playwright logs appearing on browserstack builds as may contain sensitive info like credentials
 # CUSTOM_TAG_<INT>: # <string> (Default: parent folder name of the test file) Custom tag for your test suite

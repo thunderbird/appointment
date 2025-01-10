@@ -27,13 +27,9 @@ npx playwright install
 
 The E2E tests require credentials for an existing Appointment (FxA) account and reads these from your local env vars.
 This includes the existing Appointment account's email address, password, user's display name and share link.
-<br><br>
 The display name is found in Appointment => Settings => Account => Display name.
-<br><br>
 The share link is found in Appointment => Settings => Account => My Link.
-<br><br>
 The tests also require an email address to be used when actually requesting bookings. This is the email address entered on the `Book selection` dialog (after an appoitment slot was selected on the booking share link page). Note that real Appointment emails will be sent to this email address.
-<br><br>
 First copy over the provided `.example.env` to a local `.env`:
 
 ```bash
