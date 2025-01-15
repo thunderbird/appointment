@@ -207,7 +207,7 @@ class RemoteCalendarConnectionError(APIException):
     status_code = 400
     reason = None
 
-    def __init__(self, reason: str|None, **kwargs):
+    def __init__(self, reason: str|None = None, **kwargs):
         if reason:
             self.reason = reason
         super().__init__(**kwargs)
