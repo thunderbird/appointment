@@ -32,6 +32,8 @@ class TestGeneral:
     def test_access_without_authentication_token(self, with_client):
         # response = client.get("/login")
         # assert response.status_code == 401
+        response = with_client.get('/me')
+        assert response.status_code == 401        
         response = with_client.put('/me')
         assert response.status_code == 401
         response = with_client.get('/me/calendars')
@@ -52,17 +54,51 @@ class TestGeneral:
         assert response.status_code == 401
         response = with_client.delete('/cal/1')
         assert response.status_code == 401
+        response = with_client.post('/caldav/auth')
+        assert response.status_code == 401
+        response = with_client.post('/caldav/disconnect')
+        assert response.status_code == 401
         response = with_client.post('/rmt/calendars')
         assert response.status_code == 401
         response = with_client.get('/rmt/cal/1/' + DAY1 + '/' + DAY5)
         assert response.status_code == 401
         response = with_client.post('/rmt/sync')
         assert response.status_code == 401
+        response = with_client.get('/account/available-emails')
+        assert response.status_code == 401
         response = with_client.get('/account/download')
+        assert response.status_code == 401
+        response = with_client.get('/account/external-connections/')
         assert response.status_code == 401
         response = with_client.delete('/account/delete')
         assert response.status_code == 401
         response = with_client.get('/google/auth')
+        assert response.status_code == 401
+        response = with_client.post('/google/disconnect')
+        assert response.status_code == 401
+        response = with_client.post('/schedule')
+        assert response.status_code == 401
+        response = with_client.get('/schedule')
+        assert response.status_code == 401
+        response = with_client.get('/schedule/0')
+        assert response.status_code == 401
+        response = with_client.put('/schedule/0')
+        assert response.status_code == 401        
+        response = with_client.get('/invite')
+        assert response.status_code == 401
+        response = with_client.post('/invite/generate/1')
+        assert response.status_code == 401
+        response = with_client.put('/invite/revoke/1')
+        assert response.status_code == 401
+        response = with_client.get('/subscriber')
+        assert response.status_code == 401
+        response = with_client.put('/subscriber/enable/someemail@email.com')
+        assert response.status_code == 401
+        response = with_client.put('/subscriber/disable/someemail@email.com')
+        assert response.status_code == 401
+        response = with_client.post('/subscriber/setup')
+        assert response.status_code == 401
+        response = with_client.post('/waiting-list/invite')
         assert response.status_code == 401
 
     def test_send_feedback(self, with_client):
@@ -70,3 +106,13 @@ class TestGeneral:
             '/support', json={'topic': 'Hello World', 'details': 'Hello World but longer'}, headers=auth_headers
         )
         assert response.status_code == 200
+
+    def test_send_feedback_no_email_configured(self, with_client):
+        """Attempt to send feedback with no support email configured; expect error"""
+        saved_email = os.environ['SUPPORT_EMAIL']
+        os.environ['SUPPORT_EMAIL'] = ''
+        response = with_client.post(
+            '/support', json={'topic': 'Hello World', 'details': 'Hello World but longer'}, headers=auth_headers
+        )
+        os.environ['SUPPORT_EMAIL'] = saved_email
+        assert response.status_code == 500

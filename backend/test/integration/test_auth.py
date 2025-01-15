@@ -131,6 +131,23 @@ class TestPassword:
         )
         assert response.status_code == 403, response.text
 
+    def test_token_fails_due_to_invalid_auth_scheme(self, with_db, with_client, make_pro_subscriber):
+        """Test that our username/password authentication fails when auth scheme is fxa"""
+        saved_scheme = os.environ['AUTH_SCHEME']
+        os.environ['AUTH_SCHEME'] = 'fxa'
+        password = 'test'
+        bad_password = 'test2'
+
+        subscriber = make_pro_subscriber(password=password)
+
+        # Test good credentials
+        response = with_client.post(
+            '/token',
+            data={'username': subscriber.email, 'password': password},
+        )
+        os.environ['AUTH_SCHEME'] = saved_scheme
+        assert response.status_code == 405, response.text
+
 
 class TestFXA:
     def test_fxa_login(self, with_client):
@@ -226,6 +243,18 @@ class TestFXA:
         data = response.json()
         assert 'url' in data
         assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
+
+    def test_fxa_login_fail_with_invalid_auth_scheme(self, with_client):
+        saved_scheme = os.environ['AUTH_SCHEME']
+        os.environ['AUTH_SCHEME'] = 'NOT-fxa'
+        response = with_client.get(
+            '/fxa_login',
+            params={
+                'email': FXA_CLIENT_PATCH.get('subscriber_email'),
+            },
+        )
+        os.environ['AUTH_SCHEME'] = saved_scheme
+        assert response.status_code == 405, response.text
 
     def test_fxa_callback_with_invite(self, with_db, with_client, monkeypatch, make_invite):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""
@@ -460,6 +489,29 @@ class TestFXA:
 
         assert response.status_code == 401, response.text
 
+    def test_fxa_token_failed_due_to_invalid_auth_scheme(self, with_client, make_basic_subscriber):
+        saved_scheme = os.environ['AUTH_SCHEME']
+        os.environ['AUTH_SCHEME'] = 'NOT-fxa'
+
+        # Clear get_subscriber dep, so we can retrieve the real subscriber info later
+        del with_client.app.dependency_overrides[auth.get_subscriber]
+
+        subscriber = make_basic_subscriber(email='apple@example.org')
+        access_token_expires = timedelta(minutes=float(10))
+        one_time_access_token = create_access_token(data={
+            'sub': f'uid-{subscriber.id}',
+            'jti': secrets.token_urlsafe(16)
+        }, expires_delta=access_token_expires)
+
+        # Exchange the one-time token with a long-living token
+        response = with_client.post(
+            '/fxa-token', headers={
+                'Authorization': f'Bearer {one_time_access_token}'
+            }
+        )
+        os.environ['AUTH_SCHEME'] = saved_scheme
+        assert response.status_code == 405, response.text
+
 
 class TestCalDAV:
     def test_auth(self, with_db, with_client):
@@ -506,6 +558,29 @@ class TestCalDAV:
 
         with with_db() as db:
             ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id)
+            assert len(ecs) == 0
+
+            calendar = repo.calendar.get(db, calendar.id)
+            assert calendar is None
+
+
+class TestGoogle:
+    def test_disconnect(self, with_db, with_client, make_external_connections, make_google_calendar):
+        """Ensure we remove the external google connection and any related calendars"""
+        username = 'username'
+        type_id = json.dumps(['url', username])
+        ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+
+        response = with_client.post(
+            '/google/disconnect', json={'type_id': ec.type_id},
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200, response.content
+
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id)
             assert len(ecs) == 0
 
             calendar = repo.calendar.get(db, calendar.id)

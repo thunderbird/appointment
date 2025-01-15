@@ -52,3 +52,18 @@ class TestProfile:
         assert response.status_code == 200, response.text
         url_new = response.json()['url']
         assert url_old != url_new
+
+    def test_update_me_username_taken(self, with_db, with_client, make_pro_subscriber):
+        """Attempt to update current subscriber's profile with already existing username"""
+        other_subscriber = make_pro_subscriber(username='thunderbird1')
+
+        response = with_client.put(
+            '/me',
+            json={
+                'username': 'thunderbird1',
+                'name': 'Changed Name',
+                'secondary_email': 'adifferentone@example.org',
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 403, response.text
