@@ -2,6 +2,7 @@
 import App from '@/App.vue';
 import { createApp } from 'vue';
 import { apiUrlKey, bookingUrlKey } from '@/keys';
+import { defaultLocale } from '@/utils';
 
 // pinia state management
 import { createPinia } from 'pinia';
@@ -71,9 +72,8 @@ const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide(apiUrlKey, apiUrl);
 app.provide(bookingUrlKey, `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
 
-const loc = localStorage?.getItem('locale') ?? navigator.language.split('-')[0];
 app.use(i18ninstance);
-useDayJS(app, loc);
+useDayJS(app, defaultLocale());
 
 // ready? let's go!
 app.mount('#app');

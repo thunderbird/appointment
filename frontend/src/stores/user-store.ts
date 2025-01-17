@@ -111,7 +111,9 @@ export const useUserStore = defineStore('user', () => {
         return ColorSchemes.Light;
       case 'system':
       default:
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? ColorSchemes.Dark
+          : ColorSchemes.Light;
     }
   });
 

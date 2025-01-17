@@ -84,6 +84,15 @@ export const timeFormat = (): string => {
   return format === 24 ? 'HH:mm' : 'hh:mm A';
 };
 
+// Check if we already have a local user preferred language
+// Otherwise just use the navigators language.
+// This functions works independent from Pinia stores so that
+// it can be called even if stores are not initialized yet.
+export const defaultLocale = () => {
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
+  return user?.settings?.language ?? navigator.language.split('-')[0];
+}
+
 // event popup handling
 export const initialEventPopupData: EventPopup = {
   event: null,
@@ -176,6 +185,7 @@ export default {
   initials,
   download,
   timeFormat,
+  defaultLocale,
   initialEventPopupData,
   showEventPopup,
   getAccessibleColor,

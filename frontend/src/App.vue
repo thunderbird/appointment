@@ -8,6 +8,7 @@ import { storeToRefs } from 'pinia';
 import {
   apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, hasProfanityKey,
 } from '@/keys';
+import { defaultLocale } from '@/utils';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import UAParser from 'ua-parser-js';
@@ -33,7 +34,7 @@ const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
-const lang = localStorage?.getItem('locale') ?? navigator.language.split('-')[0];
+const lang = defaultLocale();
 
 const siteNotificationStore = useSiteNotificationStore();
 const {
