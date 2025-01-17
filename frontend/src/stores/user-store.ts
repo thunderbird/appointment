@@ -107,7 +107,26 @@ export const useUserStore = defineStore('user', () => {
     return link?.slice(link.lastIndexOf('/') + 1);
   });
 
+  /**
+   * Return the user color scheme
+   */
+  const myColorScheme = computed((): ColorSchemes => {
+    switch (data.value.settings.colorScheme) {
+      case 'dark':
+        return ColorSchemes.Dark;
+      case 'light':
+        return ColorSchemes.Light;
+      case 'system':
+      default:
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
+    }
+  });
+
+  /**
+   * True if user has a valid access token
+   */
   const authenticated = computed((): boolean => data.value.accessToken !== null);
+
   /**
    * @deprecated - Use authenticated
    * @see this.authenticated
@@ -122,8 +141,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   const updateProfile = (subscriber: Subscriber) => {
-    console.log(subscriber);
-    
     data.value = {
       // Include the previous values first
       ...data.value,
@@ -291,6 +308,7 @@ export const useUserStore = defineStore('user', () => {
     logout,
     myLink,
     mySlug,
+    myColorScheme,
     updateUser,
     finishFTUE,
   };

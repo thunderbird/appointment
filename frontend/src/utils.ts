@@ -112,47 +112,9 @@ export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, posit
 };
 
 /**
- * Returns the stored locale setting or null if none is set.
- * TODO: This should be moved to a settings store
- */
-export const getLocale = (): string|null => {
-  const locale = localStorage?.getItem('locale');
-  if (!locale) {
-    return null;
-  }
-  return locale;
-};
-
-/**
- * Returns the stored theme value. If the stored value does not exist, it will guess based on prefers-color-scheme.
- * TODO: This should be moved to a settings store
- * @returns {ColorSchemes} - Colour theme value
- */
-export const getPreferredTheme = (): string => {
-  const theme = localStorage?.getItem('theme');
-  if (!theme) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
-  }
-
-  switch (theme) {
-    case 'dark':
-      return ColorSchemes.Dark;
-    case 'light':
-      return ColorSchemes.Light;
-    default:
-      // This would be ColorSchemes.System, but I feel like we need a definitive answer here.
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
-  }
-};
-
-/**
  * via: https://stackoverflow.com/a/11868398
  */
 export const getAccessibleColor = (hexcolor: string): string => {
-  const defaultColor = getPreferredTheme() === ColorSchemes.Dark ? 'white' : 'black';
-  if (!hexcolor) {
-    return defaultColor;
-  }
   const r = parseInt(hexcolor.substring(1, 3), 16);
   const g = parseInt(hexcolor.substring(3, 5), 16);
   const b = parseInt(hexcolor.substring(5, 7), 16);
@@ -217,6 +179,5 @@ export default {
   initialEventPopupData,
   showEventPopup,
   getAccessibleColor,
-  getLocale,
   handleFormError,
 };

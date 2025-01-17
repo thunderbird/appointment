@@ -5,7 +5,6 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { getPreferredTheme } from '@/utils';
 import {
   apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, hasProfanityKey,
 } from '@/keys';
@@ -175,7 +174,6 @@ const onPageLoad = async () => {
     effective_resolution: effectiveDeviceRes,
     user_agent: navigator.userAgent,
     locale: lang,
-    theme: getPreferredTheme(),
   }).json();
 
   const { data } = response;

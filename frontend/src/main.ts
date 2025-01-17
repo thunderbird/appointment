@@ -1,7 +1,6 @@
 // init app
 import App from '@/App.vue';
 import { createApp } from 'vue';
-import { getPreferredTheme } from '@/utils';
 import { apiUrlKey, bookingUrlKey } from '@/keys';
 
 // pinia state management

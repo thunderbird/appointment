@@ -10,14 +10,16 @@ import {
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
 } from '@/definitions';
-import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
+import { timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
 import { dayjsKey } from '@/keys';
+import { useUserStore } from '@/stores/user-store';
 
 // component constants
 const dj = inject(dayjsKey);
 const router = useRouter();
 const route = useRoute();
+const user = useUserStore();
 
 // component properties
 const props = defineProps({
@@ -63,7 +65,6 @@ const displayFormat = timeFormat();
 const calendarColors = ref({});
 const selectedDate = ref(null);
 const calendarMode = ref(isValidMode(route.hash) ? route.hash.slice(1) : 'month');
-const preferredTheme = getPreferredTheme();
 
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
@@ -301,7 +302,7 @@ const dayBoundary = computed(() => {
 });
 
 // For now we only support English and German
-const locale = getLocale();
+const locale = user.data.settings.language;
 
 /**
  * Calendar Config Object
@@ -380,8 +381,8 @@ watch(route, () => {
 </script>
 <template>
   <div
-    :style="{'color-scheme': preferredTheme === ColorSchemes.Dark ? 'dark' : null}"
-    :class="{'is-light-mode': preferredTheme === ColorSchemes.Light}"
+    :style="{'color-scheme': user.myColorScheme === ColorSchemes.Dark ? 'dark' : null}"
+    :class="{'is-light-mode': user.myColorScheme === ColorSchemes.Light}"
   >
     <qalendar
       :events="calendarEvents"

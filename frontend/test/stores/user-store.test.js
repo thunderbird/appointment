@@ -155,6 +155,9 @@ describe('User Store', () => {
     expect(user.data.name).toBeTruthy();
     expect(user.data.level).toBeTruthy();
     expect(user.data.settings.timezone).toBeTruthy();
+    expect(user.data.settings.language).toBeTruthy();
+    expect(user.data.settings.timeFormat).toBeTruthy();
+    expect(user.data.settings.colorScheme).toBeTruthy();
     expect(user.data.signedUrl).toBeTruthy();
   });
 });
