@@ -29,7 +29,7 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 const formRef = ref<HTMLFormElement>();
 const fullName = ref(user.data?.name ?? '');
 const username = ref(user.data?.username ?? '');
-const timezone = ref(user.data.timezone ?? dj.tz.guess());
+const timezone = ref(user.data.settings.timezone ?? dj.tz.guess());
 const isLoading = ref(false);
 
 // Form validation

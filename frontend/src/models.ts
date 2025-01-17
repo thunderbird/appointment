@@ -220,7 +220,7 @@ export type User = {
   preferredEmail: string;
   level: number;
   name: string;
-  timezone: string;
+  settings: UserConfig;
   username: string;
   signedUrl: string;
   avatarUrl: string;
@@ -228,6 +228,17 @@ export type User = {
   scheduleLinks: string[];
   isSetup: boolean,
   uniqueHash: string;
+};
+
+/**
+ * User settings to customize the application
+ * Used to store language, theme, time format and such.
+ */
+export type UserConfig = {
+  language: string,
+  colorScheme: string,
+  timeFormat: number,
+  timezone: string;
 };
 
 /**
@@ -241,15 +252,18 @@ export type UserActivity = {
 export type Subscriber = {
   id?: number;
   username: string;
-  name: string;
-  email: string;
-  preferred_email: string;
-  level: number;
-  timezone: string;
-  avatar_url: string;
-  is_setup: boolean;
-  unique_hash: string;
-  schedule_links: string[];
+  name?: string;
+  email?: string;
+  preferred_email?: string;
+  level?: number;
+  language?: string;
+  timezone?: string;
+  color_scheme?: string;
+  time_mode?: number;
+  avatar_url?: string;
+  is_setup?: boolean;
+  unique_hash?: string;
+  schedule_links?: string[];
   secondary_email?: string;
   invite?: Invite;
   time_created?: string;

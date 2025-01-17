@@ -52,7 +52,7 @@ const editProfile = async () => {
         {{ keyByValue(SubscriberLevels, user.data.level, true) }}
       </div>
       <div class="flex gap-1 text-gray-500">
-        {{ user.data.timezone }}
+        {{ user.data.settings.timezone }}
         <router-link :to="{ name: 'settings' }" class="cursor-pointer pt-0.5">
           <icon-pencil class="stroke-1.5 size-4" />
         </router-link>

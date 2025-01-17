@@ -46,7 +46,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       connected: true,
     },
     time_updated: '1970-01-01T00:00:00',
-  };
+  } as Schedule;
 
   // State
   const isLoaded = ref(false);
@@ -187,7 +187,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     const user = useUserStore();
     return dj(`${dj().format(dateFormat)}T${time}:00`)
-      .tz(user.data.timezone ?? dj.tz.guess(), true)
+      .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
       .utc()
       .format('HH:mm');
   };
@@ -203,7 +203,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     return dj(`${dj(baseTime).format(dateFormat)}T${time}:00`)
       .utc(true)
-      .tz(user.data.timezone ?? dj.tz.guess())
+      .tz(user.data.settings.timezone ?? dj.tz.guess())
       .format('HH:mm');
   };
 

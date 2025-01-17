@@ -1,44 +1,32 @@
 <script setup lang="ts">
 import { ColorSchemes } from '@/definitions';
-import {
-  ref, reactive, inject, watch,
-} from 'vue';
+import { ref, inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey } from '@/keys';
-import { SubscriberResponse } from '@/models';
+import { callKey } from '@/keys';
 
 // component constants
-const user = useUserStore();
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
-const dj = inject(dayjsKey);
+const user = useUserStore();
+user.init(call);
 
 // handle ui languages
-// TODO: move to settings store
 watch(locale, (newValue) => {
-  localStorage?.setItem('locale', newValue);
-  window.location.reload();
+  user.data.settings.language = newValue;
+  // window.location.reload();
 });
 
 // handle theme mode
-// TODO: move to settings store
-const initialTheme = localStorage?.getItem('theme')
-  ? localStorage.getItem('theme')
-  : ColorSchemes.System;
-const theme = ref(initialTheme);
-watch(theme, (newValue) => {
+watch(() => user.data.settings.colorScheme, (newValue) => {
   switch (newValue) {
     case ColorSchemes.Dark:
-      localStorage?.setItem('theme', 'dark');
       document.documentElement.classList.add('dark');
       break;
     case ColorSchemes.Light:
-      localStorage?.setItem('theme', 'light');
       document.documentElement.classList.remove('dark');
       break;
     case ColorSchemes.System:
-      localStorage?.removeItem('theme');
       if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.remove('dark');
       } else {
@@ -50,37 +38,10 @@ watch(theme, (newValue) => {
   }
 });
 
-// handle time format
-// TODO: move to settings store
-const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? '24' : '12';
-const initialTimeFormat = localStorage?.getItem('timeFormat') ?? detectedTimeFormat;
-const timeFormat = ref(initialTimeFormat);
-watch(timeFormat, (newValue) => {
-  localStorage?.setItem('timeFormat', newValue);
-});
-
-// timezones
-const activeTimezone = reactive({
-  primary: user.data.timezone ?? dj.tz.guess(),
-  secondary: dj.tz.guess(),
-});
 // @ts-ignore
 // See https://github.com/microsoft/TypeScript/issues/49231
 const timezones = Intl.supportedValuesOf('timeZone');
 
-// save timezone config
-const updateTimezone = async () => {
-  const obj = {
-    username: user.data.username,
-    timezone: activeTimezone.primary,
-  };
-  const { error }: SubscriberResponse = await call('me').put(obj).json();
-  if (!error.value) {
-    // update user in store
-    user.data.timezone = activeTimezone.primary;
-    // TODO show some confirmation
-  }
-};
 </script>
 
 <template>
@@ -103,7 +64,7 @@ const updateTimezone = async () => {
       <div class="text-lg">{{ t('label.appearance') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
-        <select v-model="theme" class="w-full max-w-sm rounded-md" data-testid="settings-general-theme-select">
+        <select v-model="user.data.settings.colorScheme" class="w-full max-w-sm rounded-md" data-testid="settings-general-theme-select">
           <option v-for="value in Object.values(ColorSchemes)" :key="value" :value="value">
             {{ t('label.' + value) }}
           </option>
@@ -124,7 +85,7 @@ const updateTimezone = async () => {
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
       <div class="text-lg"><!--{{ t('label.dateFormat') }}--></div>
       <label class="flex cursor-pointer items-center gap-4 pl-4">
-        <input type="radio" name="timeFormat" :value="12" v-model="timeFormat" class="text-teal-500" />
+        <input type="radio" name="timeFormat" :value="12" v-model="user.data.settings.timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.12hAmPm') }}</div>
       </label>
       <label class="flex cursor-pointer items-center gap-4 pl-4">
@@ -132,7 +93,7 @@ const updateTimezone = async () => {
         <div class="w-full max-w-2xs">{{ t('label.DDMMYYYY') }}</div> -->
       </label>
       <label class="flex cursor-pointer items-center gap-4 pl-4">
-        <input type="radio" name="timeFormat" :value="24" v-model="timeFormat" class="text-teal-500" />
+        <input type="radio" name="timeFormat" :value="24" v-model="user.data.settings.timeFormat" class="text-teal-500" />
         <div class="w-full max-w-2xs">{{ t('label.24h') }}</div>
       </label>
       <label class="flex cursor-pointer items-center gap-4 pl-4">
@@ -145,9 +106,8 @@ const updateTimezone = async () => {
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
         <select
-          v-model="activeTimezone.primary"
+          v-model="user.data.settings.timezone"
           class="w-full max-w-sm rounded-md"
-          @change="updateTimezone"
           data-testid="settings-general-timezone-select"
         >
           <option v-for="tz in timezones" :key="tz" :value="tz">

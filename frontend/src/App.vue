@@ -29,7 +29,7 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 
 // component constants
-const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
+const currentUser = useUserStore();
 const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
