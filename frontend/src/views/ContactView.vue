@@ -48,7 +48,7 @@ const send = async () => {
 
 <template>
   <!-- page title area -->
-  <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-4">
+  <div v-if="user.authenticated" class="flex flex-col items-center justify-center gap-4">
     <div class="text-4xl font-light">{{ t('heading.contactRequest') }}</div>
     <div class="w-full max-w-lg">{{ t('text.contactRequestForm') }}</div>
     <alert-box

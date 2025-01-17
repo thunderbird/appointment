@@ -127,12 +127,6 @@ export const useUserStore = defineStore('user', () => {
    */
   const authenticated = computed((): boolean => data.value.accessToken !== null);
 
-  /**
-   * @deprecated - Use authenticated
-   * @see this.authenticated
-   */
-  const exists = () => data.value.accessToken !== null;
-
   const $reset = () => {
     if (usePosthog) {
       posthog.reset();
@@ -298,7 +292,6 @@ export const useUserStore = defineStore('user', () => {
     data,
     init,
     authenticated,
-    exists,
     $reset,
     updateSignedUrl,
     profile,

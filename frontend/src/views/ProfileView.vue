@@ -45,7 +45,7 @@ const editProfile = async () => {
 
 <template>
   <!-- page title area -->
-  <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-2">
+  <div v-if="user.authenticated" class="flex flex-col items-center justify-center gap-2">
     <div class="text-4xl font-light">{{ user.data.name }}</div>
     <div class="flex items-center gap-4">
       <div class="rounded-full border border-gray-500 px-2 text-xs uppercase text-gray-500">

@@ -67,7 +67,7 @@ const bookIt = () => {
 };
 
 onMounted(() => {
-  if (user.exists()) {
+  if (user.authenticated) {
     attendee.name = user.data.name;
     attendee.email = user.data.preferredEmail;
     if (user.data.settings.timezone !== null) {

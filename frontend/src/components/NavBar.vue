@@ -59,7 +59,7 @@ const isNavEntryActive = (item: string) => {
         :placeholder="t('label.search')"
       />
     </label> -->
-    <nav v-if="user.exists()" class="flex items-stretch gap-4">
+    <nav v-if="user.authenticated" class="flex items-stretch gap-4">
       <div class="flex justify-end gap-8">
         <nav-bar-item
           v-for="item in navItems"

@@ -58,7 +58,7 @@ const hasProfanity = (input: string) => profanity.exists(input);
 provide(hasProfanityKey, hasProfanity);
 
 // handle auth and fetch
-const isAuthenticated = computed(() => currentUser?.exists());
+const isAuthenticated = computed(() => currentUser?.authenticated);
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
@@ -140,7 +140,7 @@ const routeHasModal = computed(
 
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
-  if (currentUser?.exists()) {
+  if (currentUser?.authenticated) {
     await Promise.all([
       userStore.profile(call),
       calendarStore.fetch(call),
