@@ -82,7 +82,9 @@ def update_me(
         is_setup=me.is_setup,
         avatar_url=me.avatar_url,
         schedule_links=schedule_links_by_subscriber(db, subscriber),
-        unique_hash=me.unique_hash
+        unique_hash=me.unique_hash,
+        color_scheme=me.color_scheme,
+        time_mode=me.time_mode,
     )
 
 

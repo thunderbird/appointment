@@ -27,6 +27,8 @@ from .models import (
     ExternalConnectionType,
     MeetingLinkProviderType,
     InviteStatus,
+    ColorScheme,
+    TimeMode,
 )
 from .. import utils, defines
 
@@ -299,6 +301,8 @@ class SubscriberIn(BaseModel):
     avatar_url: str | None = None
     secondary_email: str | None = None
     language: str | None = FALLBACK_LOCALE
+    color_scheme: ColorScheme = ColorScheme.system
+    time_mode: TimeMode = TimeMode.h24
 
 
 class SubscriberBase(SubscriberIn):
