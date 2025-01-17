@@ -7,14 +7,14 @@ import { useRouter } from 'vue-router';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 // component constants
-const user = useUserStore();
-const router = useRouter();
-
 const call = inject(callKey);
+const router = useRouter();
+const user = useUserStore();
+user.init(call);
 
 // do log out
 const logout = async () => {
-  await user.logout(call);
+  await user.logout();
   await router.push('/');
 };
 

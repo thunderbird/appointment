@@ -18,6 +18,7 @@ const ftueStore = useFTUEStore();
 const { hasNextStep } = storeToRefs(ftueStore);
 const { nextStep } = ftueStore;
 const user = useUserStore();
+user.init(call);
 
 // @ts-ignore
 // See https://github.com/microsoft/TypeScript/issues/49231
@@ -57,7 +58,7 @@ const onSubmit = async () => {
     return;
   }
 
-  const response = await user.updateUser(call, {
+  const response = await user.updateUser({
     name: fullName.value,
     username: username.value,
     timezone: timezone.value,

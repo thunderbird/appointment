@@ -40,7 +40,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * Initialize store with data required at runtime
    * 
-   * @param fetch Function to perform API calls
+   * @param fetch preconfigured function to perform API calls
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
@@ -58,13 +58,6 @@ export const useUserStore = defineStore('user', () => {
       timezone: dj.tz.guess(),
     };
   }
-
-  // Make sure settings are saved directly when changed
-  watch(
-    () => data.value.settings,
-    () => updateSettings(),
-    { deep: true }
-  );
 
   /**
    * Update user settings only
@@ -95,7 +88,7 @@ export const useUserStore = defineStore('user', () => {
       return scheduleLinks[0];
     }
 
-    console.warn('Signed urls are deprecated here!');
+    // TODO: Signed urls are deprecated here!
     return data.value.signedUrl;
   });
 
@@ -159,10 +152,9 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Retrieve the current signed url and update store
-   * @param call preconfigured API fetch function
    */
-  const updateSignedUrl = async (call: Fetch): Promise<Error> => {
-    const { error, data: sigData }: SignatureResponse = await call('me/signature').get().json();
+  const updateSignedUrl = async (): Promise<Error> => {
+    const { error, data: sigData }: SignatureResponse = await call.value('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
       return { error: sigData.value ?? error.value };
@@ -175,16 +167,15 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Retrieve the current signed url and update store
-   * @param call preconfigured API fetch function
    * @param inputData Subscriber data to throw into the db
    */
-  const updateUser = async (call: Fetch, inputData: Subscriber) => {
-    const { error, data: userData }: SubscriberResponse = await call('me').put(inputData).json();
+  const updateUser = async (inputData: Subscriber) => {
+    const { error, data: userData }: SubscriberResponse = await call.value('me').put(inputData).json();
   
     if (!error.value) {
       // update user in store
       updateProfile(userData.value);
-      await updateSignedUrl(call);
+      await updateSignedUrl();
 
       return { error: false };
     }
@@ -194,16 +185,14 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Retrieve the current signed url and update store
-   * @param call preconfigured API fetch function
    */
-  const finishFTUE = async (call: Fetch) => call('subscriber/setup').post().json();
+  const finishFTUE = async () => call.value('subscriber/setup').post().json();
 
   /**
    * Update store with profile data from db
-   * @param call preconfigured API fetch function
    */
-  const profile = async (call: Fetch): Promise<Error> => {
-    const { error, data: userData }: SubscriberResponse = await call('me').get().json();
+  const profile = async (): Promise<Error> => {
+    const { error, data: userData }: SubscriberResponse = await call.value('me').get().json();
 
     // Type error means they refreshed midway through the request. Don't log them out for this!
     if (error.value instanceof TypeError) {
@@ -218,30 +207,28 @@ export const useUserStore = defineStore('user', () => {
 
     updateProfile(userData.value);
 
-    return updateSignedUrl(call);
+    return updateSignedUrl();
   };
 
   /**
    * Invalidate the current signed url and replace it with a new one
-   * @param call preconfigured API fetch function
    */
-  const changeSignedUrl = async (call: Fetch): Promise<Error> => {
-    const { error, data: sigData }: BooleanResponse = await call('me/signature').post().json();
+  const changeSignedUrl = async (): Promise<Error> => {
+    const { error, data: sigData }: BooleanResponse = await call.value('me/signature').post().json();
 
     if (error.value) {
       return { error: sigData.value ?? error.value };
     }
 
-    return updateSignedUrl(call);
+    return updateSignedUrl();
   };
 
   /**
    * Request subscriber login
-   * @param call preconfigured API fetch function
    * @param username
    * @param password or null if fxa authentication
    */
-  const login = async (call: Fetch, username: string, password: string|null): Promise<Error> => {
+  const login = async (username: string, password: string|null): Promise<Error> => {
     $reset();
 
     if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
@@ -249,7 +236,7 @@ export const useUserStore = defineStore('user', () => {
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
       formData.set('password', password);
-      const { error, data: tokenData }: TokenResponse = await call('token').post(formData).json();
+      const { error, data: tokenData }: TokenResponse = await call.value('token').post(formData).json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };
@@ -259,7 +246,7 @@ export const useUserStore = defineStore('user', () => {
     } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
       // We get a one-time token back from the api, use it to fetch the real access token
       data.value.accessToken = username;
-      const { error, data: tokenData }: TokenResponse = await call('fxa-token').post().json();
+      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };
@@ -270,15 +257,14 @@ export const useUserStore = defineStore('user', () => {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
-    return profile(call);
+    return profile();
   };
 
   /**
    * Do subscriber logout and reset store
-   * @param call preconfigured API fetch function
    */
-  const logout = async (call: Fetch) => {
-    const { error }: BooleanResponse = await call('logout').get().json();
+  const logout = async () => {
+    const { error }: BooleanResponse = await call.value('logout').get().json();
 
     if (error.value) {
       // TODO: show error message
@@ -287,6 +273,17 @@ export const useUserStore = defineStore('user', () => {
 
     $reset();
   };
+
+  // Make sure settings are saved directly when changed
+  watch(
+    () => data.value.settings,
+    () => {
+      if (authenticated.value) {
+        updateSettings();
+      }
+    },
+    { deep: true }
+  );
 
   return {
     data,

@@ -32,9 +32,10 @@ const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const hasProfanity = inject(hasProfanityKey);
 const router = useRouter();
-const user = useUserStore();
 const schedule = useScheduleStore();
 const externalConnectionsStore = useExternalConnectionsStore();
+const user = useUserStore();
+user.init(call);
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -65,7 +66,7 @@ const getAvailableEmails = async () => {
 };
 
 const refreshData = async () => Promise.all([
-  user.profile(call),
+  user.profile(),
   schedule.fetch(call, true),
   externalConnectionsStore.fetch(call),
   getAvailableEmails(),
@@ -87,7 +88,7 @@ const updateUser = async () => {
   if (!error.value) {
     // update user in store
     user.updateProfile(data.value);
-    await user.updateSignedUrl(call);
+    await user.updateSignedUrl();
     errorUsername.value = null;
     errorDisplayName.value = null;
     // TODO show some confirmation
@@ -166,7 +167,7 @@ const refreshLink = async () => {
 };
 
 const refreshLinkConfirm = async () => {
-  await user.changeSignedUrl(call);
+  await user.changeSignedUrl();
   await refreshData();
   closeModals();
 

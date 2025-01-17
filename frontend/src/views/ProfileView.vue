@@ -18,10 +18,7 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 
 // component constants
-const user = useUserStore();
 const router = useRouter();
-
-// component constants
 const { t } = useI18n();
 const call = inject(callKey);
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
@@ -29,12 +26,15 @@ const isFxaAuth = inject(isFxaAuthKey);
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
+const user = useUserStore();
+user.init(call);
+
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);
 
 // do log out
 const logout = async () => {
-  await user.logout(call);
+  await user.logout();
   await router.push('/');
 };
 

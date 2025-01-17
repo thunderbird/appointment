@@ -14,6 +14,7 @@ const call = inject(callKey);
 
 const scheduleStore = useScheduleStore();
 const userStore = useUserStore();
+userStore.init(call);
 const ftueStore = useFTUEStore();
 const { nextStep } = ftueStore;
 
@@ -25,7 +26,7 @@ const myLinkShow = ref(false);
 onMounted(async () => {
   await Promise.all([
     scheduleStore.fetch(call),
-    userStore.profile(call),
+    userStore.profile(),
   ]);
   myLink.value = userStore.myLink;
 });
@@ -34,8 +35,8 @@ const onSubmit = async () => {
   isLoading.value = true;
 
   // Can't run async together!
-  await userStore.finishFTUE(call);
-  await userStore.profile(call);
+  await userStore.finishFTUE();
+  await userStore.profile();
 
   // Clear the FTUE flow
   window.localStorage?.removeItem('tba/ftue');
