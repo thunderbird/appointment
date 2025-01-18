@@ -85,6 +85,7 @@ describe('User Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
   });
+
   // Start server before all tests
   beforeAll(() => server.listen());
 
@@ -99,11 +100,13 @@ describe('User Store', () => {
     user.data.accessToken = 'abc';
     expect(user.authenticated).toBe(true);
   });
+
   test('does not exist', () => {
     const user = useUserStore();
     user.$reset();
     expect(user.authenticated).toBe(false);
   });
+
   test('reset', () => {
     const user = useUserStore();
 
@@ -128,24 +131,28 @@ describe('User Store', () => {
     expect(user.data.email).toBeNull();
     expect(user.data.signedUrl).toBeNull();
   });
+
   test('login fails', async () => {
     const user = useUserStore();
-
-    const response = await user.login(createFetch({
+    user.init(createFetch({
       baseUrl: API_URL,
-    }), TEST_USERNAME, `${TEST_PASSWORD}_thispasswordisnolongerokay`);
+    }));
+
+    const response = await user.login(TEST_USERNAME, `${TEST_PASSWORD}_thispasswordisnolongerokay`);
     expect(response === false);
   });
+
   test('login successful', async () => {
     // This will call profile() as well!
     const user = useUserStore();
-
-    const response = await user.login(createFetch({
+    user.init(createFetch({
       baseUrl: API_URL,
       options: {
         beforeFetch: async ({ options }) => beforeFetch(options, user),
       },
-    }), TEST_USERNAME, `${TEST_PASSWORD}`);
+    }));
+
+    const response = await user.login(TEST_USERNAME, `${TEST_PASSWORD}`);
 
     expect(response.error).toBe(false);
     expect(user.authenticated).toBe(true);
