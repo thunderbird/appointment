@@ -56,7 +56,10 @@ const restHandlers = [
       email: 'test@example.org',
       level: 1,
       timezone: 'America/Vancouver',
-      avatarUrl: null,
+      language: 'de',
+      time_mode: 12,
+      color_scheme: 'dark',
+      avatar_url: null,
     });
   }),
   http.get(`${API_URL}/me/signature`, async (request) => {
