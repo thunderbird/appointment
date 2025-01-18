@@ -327,7 +327,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
   // We retrieve the slugs from the user store
   // ...we should adjust this, but for now just refresh the profile.
-  await user.profile(call);
+  await user.profile();
 
   savingInProgress.value = false;
   emit('created');

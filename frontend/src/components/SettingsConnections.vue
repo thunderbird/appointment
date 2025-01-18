@@ -54,7 +54,7 @@ const refreshData = async () => {
     externalConnectionsStore.fetch(call, true),
     calendarStore.fetch(call),
     // Need to update userStore in case they used an attached email
-    userStore.profile(call),
+    userStore.profile(),
   ]);
 };
 

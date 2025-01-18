@@ -38,6 +38,21 @@ watch(() => user.data.settings.colorScheme, (newValue) => {
   }
 });
 
+// Make sure settings are saved directly when changed
+watch(
+  () => [
+    user.data.settings.language,
+    user.data.settings.timezone,
+    user.data.settings.colorScheme,
+    user.data.settings.timeFormat,
+  ],
+  () => {
+    if (user.authenticated) {
+      user.updateSettings();
+    }
+  },
+);
+
 // @ts-ignore
 // See https://github.com/microsoft/TypeScript/issues/49231
 const timezones = Intl.supportedValuesOf('timeZone');

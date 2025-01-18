@@ -77,10 +77,13 @@ export const download = (data: BlobPart, filename: string, contenttype: string =
 };
 
 // handle time format, return dayjs format string
-// can be either set by the user (local storage) or detected from system
+// can be either set by the user (local storage) or detected from system.
+// This functions works independent from Pinia stores so that
+// it can be called even if stores are not initialized yet.
 export const timeFormat = (): string => {
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
   const is12HourTime = Intl.DateTimeFormat().resolvedOptions().hour12 ? 12 : 24;
-  const format = Number(localStorage?.getItem('timeFormat')) ?? is12HourTime;
+  const format = Number(user?.setttings?.timeFormat ?? is12HourTime);
   return format === 24 ? 'HH:mm' : 'hh:mm A';
 };
 

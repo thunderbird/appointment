@@ -388,6 +388,9 @@ def me(
         is_setup=subscriber.is_setup,
         schedule_links=schedule_links_by_subscriber(db, subscriber),
         unique_hash=hash,
+        language=subscriber.language,
+        color_scheme=subscriber.color_scheme,
+        time_mode=subscriber.time_mode,
     )
 
 

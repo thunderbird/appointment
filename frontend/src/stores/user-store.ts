@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
-import { computed, inject, watch, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import {
   Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
   UserConfig,
@@ -276,21 +276,11 @@ export const useUserStore = defineStore('user', () => {
     $reset();
   };
 
-  // Make sure settings are saved directly when changed
-  watch(
-    () => data.value.settings,
-    () => {
-      if (authenticated.value) {
-        updateSettings();
-      }
-    },
-    { deep: true }
-  );
-
   return {
     data,
     init,
     authenticated,
+    updateSettings,
     $reset,
     updateSignedUrl,
     profile,
