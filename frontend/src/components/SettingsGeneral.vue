@@ -12,9 +12,9 @@ const user = useUserStore();
 user.init(call);
 
 // handle ui languages
-watch(locale, (newValue) => {
+watch(locale, (newValue: string) => {
   user.data.settings.language = newValue;
-  // window.location.reload();
+  window.location.reload(); // This is needed to reload locale for dayjs instance
 });
 
 // handle theme mode
