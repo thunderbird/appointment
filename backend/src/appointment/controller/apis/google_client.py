@@ -1,12 +1,18 @@
 import logging
+import os
+from datetime import datetime
 
+import sentry_sdk
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+from ... import utils
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
-from ...exceptions.calendar import EventNotCreatedException, EventNotDeletedException
+from ...defines import DATETIMEFMT
+from ...exceptions.calendar import EventNotCreatedException, EventNotDeletedException, FreeBusyTimeException
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
@@ -93,6 +99,60 @@ class GoogleClient:
                     logging.warning(f'[google_client.list_calendars] Request Error: {e.status_code}/{e.error_details}')
 
                 request = service.calendarList().list_next(request, response)
+
+        return items
+
+    def get_free_busy(self, calendar_ids, time_min, time_max, token):
+        """Query the free busy api
+        Ref: https://developers.google.com/calendar/api/v3/reference/freebusy/query"""
+        response = {}
+        items = []
+
+        import time
+
+        perf_start = time.perf_counter_ns()
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            request = service.freebusy().query(
+                body=dict(timeMin=time_min, timeMax=time_max, items=[{'id': calendar_id} for calendar_id in calendar_ids])
+            )
+
+            while request is not None:
+                try:
+                    response = request.execute()
+                    errors = [calendar.get('errors') for calendar in response.get('calendars', {}).values()]
+
+                    # Log errors and throw 'em in sentry
+                    if any(errors):
+                        reasons = [
+                            {
+                                'domain': utils.setup_encryption_engine().encrypt(error.get('domain')),
+                                'reason': error.get('reason')
+                            } for error in errors
+                        ]
+                        if os.getenv('SENTRY_DSN'):
+                            ex = FreeBusyTimeException(reasons)
+                            sentry_sdk.capture_exception(ex)
+                        logging.warning(f'[google_client.get_free_time] FreeBusy API Error: {ex}')
+
+                    calendar_items = [calendar.get('busy', []) for calendar in response.get('calendars', {}).values()]
+                    for busy in calendar_items:
+                        # Transform to datetimes to match caldav's behaviour
+                        items += [
+                            {
+                                'start': datetime.strptime(entry.get('start'), DATETIMEFMT),
+                                'end': datetime.strptime(entry.get('end'), DATETIMEFMT)
+                            } for entry in busy
+                        ]
+                except HttpError as e:
+                    logging.warning(f'[google_client.get_free_time] Request Error: {e.status_code}/{e.error_details}')
+
+                request = service.calendarList().list_next(request, response)
+        perf_end = time.perf_counter_ns()
+
+        # Capture the metric if sentry is enabled
+        print(f"Google FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds")
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.set_measurement('google_free_busy_time_response', perf_end - perf_start, 'nanosecond')
 
         return items
 

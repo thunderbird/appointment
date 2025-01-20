@@ -91,8 +91,6 @@ class TestSchedule:
         assert data.get('detail')[0]['ctx']['err_field'] == 'end_time'
         assert data.get('detail')[0]['ctx']['err_value'] == '17:30:00'
 
-
-
     def test_create_schedule_on_unconnected_calendar(
         self, with_client, make_caldav_calendar, make_schedule, schedule_input
     ):
@@ -297,11 +295,11 @@ class TestSchedule:
                 pass
 
             @staticmethod
-            def list_events(self, start, end):
+            def get_busy_time(self, remote_calendar_ids, start, end):
                 return []
 
         monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
-        monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
 
         start_date = date(2024, 3, 1)
         start_time = time(16, tzinfo=UTC)
@@ -413,18 +411,14 @@ class TestSchedule:
                 pass
 
             @staticmethod
-            def list_events(self, start, end):
+            def get_busy_time(self, calendar_ids, start, end):
                 return [
-                    schemas.Event(
-                        title='A blocker!',
-                        start=start_end_datetimes[0],
-                        end=start_end_datetimes[1],
-                    )
+                    {'start': start_end_datetimes[0], 'end': start_end_datetimes[1]}
                     for start_end_datetimes in blocker_times
                 ]
 
         monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
-        monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -532,22 +526,20 @@ class TestRequestScheduleAvailability:
 
         class MockCaldavConnector:
             @staticmethod
-            def list_events(self, start, end):
+            def get_busy_time(self, calendar_ids, start, end):
                 return [
-                    schemas.Event(
-                        title='A blocker!',
-                        start=start_datetime,
-                        end=datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=10),
-                    ),
-                    schemas.Event(
-                        title='A second blocker!',
-                        start=start_datetime + timedelta(minutes=10),
-                        end=datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=20),
-                    ),
+                    {
+                        'start': start_datetime,
+                        'end': datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=10),
+                    },
+                    {
+                        'start': start_datetime + timedelta(minutes=10),
+                        'end': datetime.combine(start_date, start_time, tzinfo=timezone.utc) + timedelta(minutes=20),
+                    },
                 ]
 
         # Override the fixture's list_events
-        monkeypatch.setattr(CalDavConnector, 'list_events', MockCaldavConnector.list_events)
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
@@ -626,6 +618,14 @@ class TestRequestScheduleAvailability:
         start_time = time(9, tzinfo=UTC)
         start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
         end_time = time(10, tzinfo=UTC)
+
+        class MockCaldavConnector:
+            @staticmethod
+            def get_busy_time(self, calendar_ids, start, end):
+                return []
+
+        # Override the fixture's list_events
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
