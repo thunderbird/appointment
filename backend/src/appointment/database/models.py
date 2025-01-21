@@ -85,7 +85,7 @@ class InviteStatus(enum.Enum):
     revoked = 2  # The code is no longer valid and cannot be used for sign up anymore
 
 
-class ColorScheme(enum.Enum):
+class ColourScheme(enum.Enum):
     system = 'system'
     dark = 'dark'
     light = 'light'
