@@ -29,5 +29,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column('subscribers', 'color_scheme')
+    op.drop_column('subscribers', 'colour_scheme')
     op.drop_column('subscribers', 'time_mode')
