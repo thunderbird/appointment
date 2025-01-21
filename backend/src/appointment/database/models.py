@@ -151,7 +151,7 @@ class Subscriber(HasSoftDelete, Base):
     # General settings
     language = Column(encrypted_type(String), nullable=False, default=FALLBACK_LOCALE, index=True)
     timezone = Column(encrypted_type(String), index=True)
-    color_scheme = Column(Enum(ColorScheme), default=ColorScheme.system, nullable=False, index=True)
+    colour_scheme = Column(Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True)
     time_mode = Column(Enum(TimeMode), default=TimeMode.h24, nullable=False, index=True)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
