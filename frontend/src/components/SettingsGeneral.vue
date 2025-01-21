@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ColorSchemes } from '@/definitions';
+import { ColourSchemes } from '@/definitions';
 import { ref, inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
@@ -20,13 +20,13 @@ watch(locale, (newValue: string) => {
 // handle theme mode
 watch(() => user.data.settings.colourScheme, (newValue) => {
   switch (newValue) {
-    case ColorSchemes.Dark:
+    case ColourSchemes.Dark:
       document.documentElement.classList.add('dark');
       break;
-    case ColorSchemes.Light:
+    case ColourSchemes.Light:
       document.documentElement.classList.remove('dark');
       break;
-    case ColorSchemes.System:
+    case ColourSchemes.System:
       if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.remove('dark');
       } else {
@@ -80,7 +80,7 @@ const timezones = Intl.supportedValuesOf('timeZone');
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
         <select v-model="user.data.settings.colourScheme" class="w-full max-w-sm rounded-md" data-testid="settings-general-theme-select">
-          <option v-for="value in Object.values(ColorSchemes)" :key="value" :value="value">
+          <option v-for="value in Object.values(ColourSchemes)" :key="value" :value="value">
             {{ t('label.' + value) }}
           </option>
         </select>

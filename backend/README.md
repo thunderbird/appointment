@@ -31,7 +31,7 @@ pip install ruff
 Commands
 
 ```bash
-ruff check 
+ruff check
 ```
 
 ### Authentication
@@ -58,6 +58,12 @@ To generate a database migration, bash into a running backend container and run:
 
 ```bash
 alembic revision -m "create ... table"
+```
+
+To roll back one migration, run:
+
+```bash
+alembic downgrade -1
 ```
 
 ## Commands

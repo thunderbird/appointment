@@ -8,7 +8,7 @@ import {
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
-import { ColorSchemes } from '@/definitions';
+import { ColourSchemes } from '@/definitions';
 
 const initialUserConfigObject = {
   language: null,
@@ -53,7 +53,7 @@ export const useUserStore = defineStore('user', () => {
 
     data.value.settings = {
       language: i18n.locale.value,
-      colourScheme: ColorSchemes.System,
+      colourScheme: ColourSchemes.System,
       timeFormat: detectedTimeFormat,
       timezone: dj.tz.guess(),
     };
@@ -103,17 +103,17 @@ export const useUserStore = defineStore('user', () => {
   /**
    * Return the user color scheme
    */
-  const myColorScheme = computed((): ColorSchemes => {
+  const myColourScheme = computed((): ColourSchemes => {
     switch (data.value.settings.colourScheme) {
       case 'dark':
-        return ColorSchemes.Dark;
+        return ColourSchemes.Dark;
       case 'light':
-        return ColorSchemes.Light;
+        return ColourSchemes.Light;
       case 'system':
       default:
         return window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? ColorSchemes.Dark
-          : ColorSchemes.Light;
+          ? ColourSchemes.Dark
+          : ColourSchemes.Light;
     }
   });
 
@@ -290,7 +290,7 @@ export const useUserStore = defineStore('user', () => {
     logout,
     myLink,
     mySlug,
-    myColorScheme,
+    myColourScheme,
     updateUser,
     finishFTUE,
   };

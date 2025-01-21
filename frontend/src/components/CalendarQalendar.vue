@@ -6,7 +6,7 @@ import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
-  ColorSchemes,
+  ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
 } from '@/definitions';
@@ -174,7 +174,7 @@ const dateSelected = (date) => {
  * @param calendarColor {string}
  * @returns {string} id for the colourScheme property
  */
-const processCalendarColorScheme = (calendarTitle, calendarColor) => {
+const processCalendarColourScheme = (calendarTitle, calendarColor) => {
   // TODO: Replace the replace pattern with some regex
   const slug = calendarTitle.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
   if (!calendarColors.value[slug]) {
@@ -206,7 +206,7 @@ const calendarEvents = computed(() => {
     return {
       id: event.title,
       title: event.title,
-      colourScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
+      colourScheme: processCalendarColourScheme(event.calendar_title, event.calendar_color),
       time: {
         start: event.all_day
           ? start.format(DateFormatStrings.QalendarFullDay)
@@ -245,7 +245,7 @@ const calendarEvents = computed(() => {
       title: !isBookingRoute.value
         ? appointment.title
         : `${start.format(displayFormat)} - ${end.format(displayFormat)}`,
-      colourScheme: processCalendarColorScheme(
+      colourScheme: processCalendarColourScheme(
         appointment?.calendar_title ?? 'booking',
         appointment?.calendar_color ?? 'rgb(20, 184, 166)',
       ),
@@ -381,8 +381,8 @@ watch(route, () => {
 </script>
 <template>
   <div
-    :style="{'color-scheme': user.myColorScheme === ColorSchemes.Dark ? 'dark' : null}"
-    :class="{'is-light-mode': user.myColorScheme === ColorSchemes.Light}"
+    :style="{'color-scheme': user.myColourScheme === ColourSchemes.Dark ? 'dark' : null}"
+    :class="{'is-light-mode': user.myColourScheme === ColourSchemes.Light}"
   >
     <qalendar
       :events="calendarEvents"
