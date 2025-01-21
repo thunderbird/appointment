@@ -1,5 +1,6 @@
 // init localization
 import { createI18n } from 'vue-i18n';
+import { defaultLocale } from '@/utils';
 
 // language source files
 import de from '@/locales/de.json';
@@ -9,11 +10,11 @@ const messages = {
   de, // German
   en, // English
 };
-const loc = localStorage?.getItem('locale') ?? navigator.language.split('-')[0];
+
 const instance = createI18n({
   legacy: false,
   globalInjection: true,
-  locale: loc,
+  locale: defaultLocale(),
   fallbackLocale: 'en',
   messages,
 });

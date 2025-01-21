@@ -67,11 +67,11 @@ const bookIt = () => {
 };
 
 onMounted(() => {
-  if (user.exists()) {
+  if (user.authenticated) {
     attendee.name = user.data.name;
     attendee.email = user.data.preferredEmail;
-    if (user.data.timezone !== null) {
-      attendee.timezone = user.data.timezone;
+    if (user.data.settings.timezone !== null) {
+      attendee.timezone = user.data.settings.timezone;
     }
   }
 });

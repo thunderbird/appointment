@@ -5,10 +5,10 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { getPreferredTheme } from '@/utils';
 import {
   apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, hasProfanityKey,
 } from '@/keys';
+import { defaultLocale } from '@/utils';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import UAParser from 'ua-parser-js';
@@ -29,12 +29,12 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 
 // component constants
-const currentUser = useUserStore(); // data: { username, email, name, level, timezone, id }
+const user = useUserStore();
 const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
-const lang = localStorage?.getItem('locale') ?? navigator.language.split('-')[0];
+const lang = defaultLocale();
 
 const siteNotificationStore = useSiteNotificationStore();
 const {
@@ -59,13 +59,12 @@ const hasProfanity = (input: string) => profanity.exists(input);
 provide(hasProfanityKey, hasProfanity);
 
 // handle auth and fetch
-const isAuthenticated = computed(() => currentUser?.exists());
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
     beforeFetch({ options }) {
-      if (isAuthenticated.value) {
-        const token = currentUser.data.accessToken;
+      if (user?.authenticated) {
+        const token = user.data.accessToken;
         // @ts-ignore
         options.headers.Authorization = `Bearer ${token}`;
       }
@@ -95,7 +94,7 @@ const call = createFetch({
         );
       } else if (response && response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
         // Clear current user data, and ship them to the login screen!
-        currentUser.$reset();
+        user.$reset();
         await router.push('/login');
         return context;
       }
@@ -109,6 +108,9 @@ const call = createFetch({
     credentials: 'include',
   },
 });
+
+// Initialize API calls for user store
+user.init(call);
 
 provide(callKey, call);
 provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === 'password');
@@ -126,7 +128,6 @@ const navItems = [
 const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
-const userStore = useUserStore();
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
@@ -141,9 +142,9 @@ const routeHasModal = computed(
 
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
-  if (currentUser?.exists()) {
+  if (user?.authenticated) {
     await Promise.all([
-      userStore.profile(call),
+      user.profile(),
       calendarStore.fetch(call),
       appointmentStore.fetch(call),
       scheduleStore.fetch(call),
@@ -175,7 +176,6 @@ const onPageLoad = async () => {
     effective_resolution: effectiveDeviceRes,
     user_agent: navigator.userAgent,
     locale: lang,
-    theme: getPreferredTheme(),
   }).json();
 
   const { data } = response;
@@ -289,9 +289,8 @@ onMounted(async () => {
     });
 
     const id = await onPageLoad();
-    if (isAuthenticated.value) {
-      const profile = useUserStore();
-      posthog.identify(profile.data.uniqueHash);
+    if (user?.authenticated) {
+      posthog.identify(user.data.uniqueHash);
     } else if (id) {
       posthog.identify(id);
     }
@@ -302,20 +301,20 @@ onMounted(async () => {
 
 <template>
   <!-- authenticated subscriber content -->
-  <template v-if="router.hasRoute(route.name) && (isAuthenticated || routeIsPublic)">
+  <template v-if="router.hasRoute(route.name) && (user?.authenticated || routeIsPublic)">
     <site-notification
-      v-if="isAuthenticated && visibleNotification"
+      v-if="user?.authenticated && visibleNotification"
       :title="notificationTitle"
       :action-url="notificationActionUrl"
     >
       {{ notificationMessage }}
     </site-notification>
-    <nav-bar v-if="isAuthenticated" :nav-items="navItems"/>
+    <nav-bar v-if="user?.authenticated" :nav-items="navItems"/>
     <title-bar v-if="routeIsPublic"/>
     <main
       :class="{
         'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
-        '!pt-24': routeIsHome || isAuthenticated,
+        '!pt-24': routeIsHome || user?.authenticated,
         'min-h-full': routeIsPublic && !routeHasModal,
       }"
     >

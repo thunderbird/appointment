@@ -85,6 +85,17 @@ class InviteStatus(enum.Enum):
     revoked = 2  # The code is no longer valid and cannot be used for sign up anymore
 
 
+class ColourScheme(enum.Enum):
+    system = 'system'
+    dark = 'dark'
+    light = 'light'
+
+
+class TimeMode(enum.Enum):
+    h12 = 12
+    h24 = 24
+
+
 def encrypted_type(column_type, length: int = 255, **kwargs) -> StringEncryptedType:
     """Helper to reduce visual noise when creating model columns"""
     return StringEncryptedType(column_type, secret, AesEngine, 'pkcs5', length=length, **kwargs)
@@ -134,11 +145,14 @@ class Subscriber(HasSoftDelete, Base):
 
     name = Column(encrypted_type(String), index=True)
     level = Column(Enum(SubscriberLevel), default=SubscriberLevel.basic, index=True)
+    avatar_url = Column(encrypted_type(String, length=2048), index=False)
+    short_link_hash = Column(encrypted_type(String), index=False)
+
+    # General settings
     language = Column(encrypted_type(String), nullable=False, default=FALLBACK_LOCALE, index=True)
     timezone = Column(encrypted_type(String), index=True)
-    avatar_url = Column(encrypted_type(String, length=2048), index=False)
-
-    short_link_hash = Column(encrypted_type(String), index=False)
+    colour_scheme = Column(Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True)
+    time_mode = Column(Enum(TimeMode), default=TimeMode.h24, nullable=False, index=True)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
     minimum_valid_iat_time = Column('minimum_valid_iat_time', encrypted_type(DateTime))

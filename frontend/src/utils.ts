@@ -1,5 +1,5 @@
 // get the first key of given object that points to given value
-import { ColorSchemes } from '@/definitions';
+import { ColourSchemes } from '@/definitions';
 import { Ref } from 'vue';
 import { i18nType } from '@/composables/i18n';
 import {
@@ -77,12 +77,24 @@ export const download = (data: BlobPart, filename: string, contenttype: string =
 };
 
 // handle time format, return dayjs format string
-// can be either set by the user (local storage) or detected from system
+// can be either set by the user (local storage) or detected from system.
+// This functions works independent from Pinia stores so that
+// it can be called even if stores are not initialized yet.
 export const timeFormat = (): string => {
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
   const is12HourTime = Intl.DateTimeFormat().resolvedOptions().hour12 ? 12 : 24;
-  const format = Number(localStorage?.getItem('timeFormat')) ?? is12HourTime;
+  const format = Number(user?.setttings?.timeFormat ?? is12HourTime);
   return format === 24 ? 'HH:mm' : 'hh:mm A';
 };
+
+// Check if we already have a local user preferred language
+// Otherwise just use the navigators language.
+// This functions works independent from Pinia stores so that
+// it can be called even if stores are not initialized yet.
+export const defaultLocale = () => {
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
+  return user?.settings?.language ?? navigator.language.split('-')[0];
+}
 
 // event popup handling
 export const initialEventPopupData: EventPopup = {
@@ -112,47 +124,9 @@ export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, posit
 };
 
 /**
- * Returns the stored locale setting or null if none is set.
- * TODO: This should be moved to a settings store
- */
-export const getLocale = (): string|null => {
-  const locale = localStorage?.getItem('locale');
-  if (!locale) {
-    return null;
-  }
-  return locale;
-};
-
-/**
- * Returns the stored theme value. If the stored value does not exist, it will guess based on prefers-color-scheme.
- * TODO: This should be moved to a settings store
- * @returns {ColorSchemes} - Colour theme value
- */
-export const getPreferredTheme = (): string => {
-  const theme = localStorage?.getItem('theme');
-  if (!theme) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
-  }
-
-  switch (theme) {
-    case 'dark':
-      return ColorSchemes.Dark;
-    case 'light':
-      return ColorSchemes.Light;
-    default:
-      // This would be ColorSchemes.System, but I feel like we need a definitive answer here.
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColorSchemes.Dark : ColorSchemes.Light;
-  }
-};
-
-/**
  * via: https://stackoverflow.com/a/11868398
  */
 export const getAccessibleColor = (hexcolor: string): string => {
-  const defaultColor = getPreferredTheme() === ColorSchemes.Dark ? 'white' : 'black';
-  if (!hexcolor) {
-    return defaultColor;
-  }
   const r = parseInt(hexcolor.substring(1, 3), 16);
   const g = parseInt(hexcolor.substring(3, 5), 16);
   const b = parseInt(hexcolor.substring(5, 7), 16);
@@ -214,9 +188,9 @@ export default {
   initials,
   download,
   timeFormat,
+  defaultLocale,
   initialEventPopupData,
   showEventPopup,
   getAccessibleColor,
-  getLocale,
   handleFormError,
 };

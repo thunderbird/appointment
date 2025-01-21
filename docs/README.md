@@ -69,16 +69,18 @@ erDiagram
     string email "FxA account email and email used for password auth"
     string name "Preferred display name"
     enum level "Subscription level [basic, plus, pro, admin]"
-    int timezone "User selected home timezone, UTC offset"
     string avatar_url "Public link to an avatar image"
     string short_link_hash "Hash for verifying user link"
+    string language "Lang code for subscribers preferred locale"
+    int timezone "User selected home timezone, UTC offset"
+    enum colour_scheme "Frontend theme [system, dark, light]"
+    enum time_mode "Format for displaying times [h12, h24]"
     string minimum_valid_iat_time "Minimum valid time to accept for JWT tokens"
     date time_created "UTC timestamp of subscriber creation"
     date time_updated "UTC timestamp of last subscriber modification"
     string secondary_email "Secondary email address"
     date time_deleted "UTC timestamp of deletion (soft delete)"
     int ftue_level "Version of the FTUE the user has completed"
-    string language "Lang code for subscribers preferred locale"
   }
   SUBSCRIBERS ||--o{ CALENDARS : own
   CALENDARS {

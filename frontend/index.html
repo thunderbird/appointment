@@ -6,10 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thunderbird Appointment</title>
     <script>
-      // handle theme color scheme
+      // Load initial theme color scheme from user settings
+      const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
+      const browserPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
       if (
-        (localStorage?.getItem('theme') === 'dark'
-        || (!localStorage?.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches))
+        (user?.settings?.colourScheme === 'dark'
+        || (user?.settings?.colourScheme === 'system' && browserPrefersDark)
+        || (!user?.settings?.colourScheme && browserPrefersDark))
       ) {
         document.documentElement.classList.add('dark');
       } else {

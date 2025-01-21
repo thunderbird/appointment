@@ -274,15 +274,15 @@ const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
   savingInProgress.value = true;
   // build data object for post request
-  const obj = { ...scheduleInput.value, timezone: user.data.timezone };
+  const obj = { ...scheduleInput.value, timezone: user.data.settings.timezone };
   // convert local input times to utc times
 
   obj.start_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.start_time}:00`)
-    .tz(user.data.timezone ?? dj.tz.guess(), true)
+    .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
     .utc()
     .format('HH:mm');
   obj.end_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.end_time}:00`)
-    .tz(user.data.timezone ?? dj.tz.guess(), true)
+    .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
     .utc()
     .format('HH:mm');
   // Update the start_date with the current date
@@ -327,7 +327,7 @@ const saveSchedule = async (withConfirmation = true) => {
 
   // We retrieve the slugs from the user store
   // ...we should adjust this, but for now just refresh the profile.
-  await user.profile(call);
+  await user.profile();
 
   savingInProgress.value = false;
   emit('created');
@@ -517,7 +517,7 @@ watch(
               {{ t("label.timeZone") }}
             </div>
             <div class="flex justify-between">
-              <div class="text-gray-600 dark:text-gray-200">{{ user.data.timezone ?? dj.tz.guess() }}</div>
+              <div class="text-gray-600 dark:text-gray-200">{{ user.data.settings.timezone ?? dj.tz.guess() }}</div>
               <link-button class="edit-link-btn" @click="router.push({ name: 'settings' })" :tooltip="t('label.editInSettings')" data-testid="dashboard-availability-edit-link-btn">
                 {{ t('label.edit') }}
               </link-button>

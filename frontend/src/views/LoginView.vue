@@ -23,9 +23,6 @@ import WordMark from '@/elements/WordMark.vue';
 import { handleFormError } from '@/utils';
 
 // component constants
-const user = useUserStore();
-
-// component constants
 const { t } = useI18n();
 const call = inject(callKey);
 const dj = inject(dayjsKey);
@@ -33,6 +30,9 @@ const route = useRoute();
 const router = useRouter();
 const isPasswordAuth = inject(isPasswordAuthKey);
 const isFxaAuth = inject(isFxaAuthKey);
+const user = useUserStore();
+user.init(call);
+
 // Don't show the invite code field, only the "Join the waiting list" part
 const hideInviteField = ref(false);
 const isLoading = ref(false);
@@ -166,7 +166,7 @@ const login = async () => {
     return;
   }
 
-  const { error }: Error = await user.login(call, email.value, password.value);
+  const { error }: Error = await user.login(email.value, password.value);
   if (error) {
     let errObj = error as PydanticException;
     if (typeof error === 'string') {

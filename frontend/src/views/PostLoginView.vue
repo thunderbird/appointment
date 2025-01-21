@@ -9,10 +9,9 @@ const route = useRoute();
 const router = useRouter();
 
 // component constants
-const user = useUserStore();
-
-// component constants
 const call = inject(callKey);
+const user = useUserStore();
+user.init(call);
 
 const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 
@@ -28,7 +27,7 @@ onMounted(async () => {
     return;
   }
 
-  await user.login(call, route.params.token as string, null);
+  await user.login(route.params.token as string, null);
 
   // If we don't have a redirectTo or it's to logout then push to dashboard!
   if (!redirectTo || redirectTo === '/logout') {

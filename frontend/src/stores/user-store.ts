@@ -1,18 +1,28 @@
 import { defineStore } from 'pinia';
 import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import {
   Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
+  UserConfig,
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
+import { dayjsKey } from '@/keys';
+import { ColourSchemes } from '@/definitions';
+
+const initialUserConfigObject = {
+  language: null,
+  colourScheme: null,
+  timeFormat: null,
+  timezone: null,
+} as UserConfig;
 
 const initialUserObject = {
   email: null,
   preferredEmail: null,
   level: null,
   name: null,
-  timezone: null,
+  settings: initialUserConfigObject,
   username: null,
   signedUrl: null,
   avatarUrl: null,
@@ -25,6 +35,50 @@ const initialUserObject = {
 export const useUserStore = defineStore('user', () => {
   const data = useLocalStorage('tba/user', structuredClone(initialUserObject));
 
+  const call = ref(null);
+
+  /**
+   * Initialize store with data required at runtime
+   *
+   * @param fetch preconfigured function to perform API calls
+   */
+  const init = (fetch: Fetch) => {
+    call.value = fetch;
+  }
+
+  // Init user config if not already available
+  if (!data.value?.settings) {
+    const dj = inject(dayjsKey);
+    const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
+
+    data.value.settings = {
+      language: i18n.locale.value,
+      colourScheme: ColourSchemes.System,
+      timeFormat: detectedTimeFormat,
+      timezone: dj.tz.guess(),
+    };
+  }
+
+  /**
+   * Update user settings only
+   */
+  const updateSettings = async () => {
+    const obj = {
+      username: data.value.username,
+      language: data.value.settings.language,
+      timezone: data.value.settings.timezone,
+      colour_scheme: data.value.settings.colourScheme,
+      time_mode: data.value.settings.timeFormat,
+    };
+
+    const { error }: SubscriberResponse = await call.value('me').put(obj).json();
+    if (!error.value) {
+      // TODO show some confirmation
+    } else {
+      // TODO show error message
+    }
+  };
+
   /**
    * Return the first schedule link or their signed url
    */
@@ -34,7 +88,7 @@ export const useUserStore = defineStore('user', () => {
       return scheduleLinks[0];
     }
 
-    console.warn('Signed urls are deprecated here!');
+    // TODO: Signed urls are deprecated here!
     return data.value.signedUrl;
   });
 
@@ -46,12 +100,28 @@ export const useUserStore = defineStore('user', () => {
     return link?.slice(link.lastIndexOf('/') + 1);
   });
 
-  const authenticated = computed((): boolean => data.value.accessToken !== null);
   /**
-   * @deprecated - Use authenticated
-   * @see this.authenticated
+   * Return the user color scheme
    */
-  const exists = () => data.value.accessToken !== null;
+  const myColourScheme = computed((): ColourSchemes => {
+    switch (data.value.settings.colourScheme) {
+      case 'dark':
+        return ColourSchemes.Dark;
+      case 'light':
+        return ColourSchemes.Light;
+      case 'system':
+      default:
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? ColourSchemes.Dark
+          : ColourSchemes.Light;
+    }
+  });
+
+  /**
+   * True if user has a valid access token
+   */
+  const authenticated = computed((): boolean => data.value.accessToken !== null);
+
   const $reset = () => {
     if (usePosthog) {
       posthog.reset();
@@ -69,7 +139,12 @@ export const useUserStore = defineStore('user', () => {
       email: subscriber.email,
       preferredEmail: subscriber?.preferred_email ?? subscriber.email,
       level: subscriber.level,
-      timezone: subscriber.timezone,
+      settings: {
+        language: subscriber.language,
+        colourScheme: subscriber.colour_scheme,
+        timeFormat: subscriber.time_mode,
+        timezone: subscriber.timezone,
+      },
       avatarUrl: subscriber.avatar_url,
       isSetup: subscriber.is_setup,
       scheduleLinks: subscriber.schedule_links,
@@ -79,10 +154,9 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Retrieve the current signed url and update store
-   * @param call preconfigured API fetch function
    */
-  const updateSignedUrl = async (call: Fetch): Promise<Error> => {
-    const { error, data: sigData }: SignatureResponse = await call('me/signature').get().json();
+  const updateSignedUrl = async (): Promise<Error> => {
+    const { error, data: sigData }: SignatureResponse = await call.value('me/signature').get().json();
 
     if (error.value || !sigData.value?.url) {
       return { error: sigData.value ?? error.value };
@@ -93,12 +167,17 @@ export const useUserStore = defineStore('user', () => {
     return { error: false };
   };
 
-  const updateUser = async (fetch, inputData) => {
-    const { data: userData, error } = await fetch('me').put(inputData).json();
+  /**
+   * Retrieve the current signed url and update store
+   * @param inputData Subscriber data to throw into the db
+   */
+  const updateUser = async (inputData: Subscriber) => {
+    const { error, data: userData }: SubscriberResponse = await call.value('me').put(inputData).json();
+
     if (!error.value) {
       // update user in store
       updateProfile(userData.value);
-      await updateSignedUrl(fetch);
+      await updateSignedUrl();
 
       return { error: false };
     }
@@ -106,14 +185,16 @@ export const useUserStore = defineStore('user', () => {
     return { error: data.value ?? error.value };
   };
 
-  const finishFTUE = async (fetch) => fetch('subscriber/setup').post().json();
+  /**
+   * Retrieve the current signed url and update store
+   */
+  const finishFTUE = async () => call.value('subscriber/setup').post().json();
 
   /**
    * Update store with profile data from db
-   * @param call preconfigured API fetch function
    */
-  const profile = async (call: Fetch): Promise<Error> => {
-    const { error, data: userData }: SubscriberResponse = await call('me').get().json();
+  const profile = async (): Promise<Error> => {
+    const { error, data: userData }: SubscriberResponse = await call.value('me').get().json();
 
     // Type error means they refreshed midway through the request. Don't log them out for this!
     if (error.value instanceof TypeError) {
@@ -128,30 +209,28 @@ export const useUserStore = defineStore('user', () => {
 
     updateProfile(userData.value);
 
-    return updateSignedUrl(call);
+    return updateSignedUrl();
   };
 
   /**
    * Invalidate the current signed url and replace it with a new one
-   * @param call preconfigured API fetch function
    */
-  const changeSignedUrl = async (call: Fetch): Promise<Error> => {
-    const { error, data: sigData }: BooleanResponse = await call('me/signature').post().json();
+  const changeSignedUrl = async (): Promise<Error> => {
+    const { error, data: sigData }: BooleanResponse = await call.value('me/signature').post().json();
 
     if (error.value) {
       return { error: sigData.value ?? error.value };
     }
 
-    return updateSignedUrl(call);
+    return updateSignedUrl();
   };
 
   /**
    * Request subscriber login
-   * @param call preconfigured API fetch function
    * @param username
    * @param password or null if fxa authentication
    */
-  const login = async (call: Fetch, username: string, password: string|null): Promise<Error> => {
+  const login = async (username: string, password: string|null): Promise<Error> => {
     $reset();
 
     if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
@@ -159,7 +238,7 @@ export const useUserStore = defineStore('user', () => {
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
       formData.set('password', password);
-      const { error, data: tokenData }: TokenResponse = await call('token').post(formData).json();
+      const { error, data: tokenData }: TokenResponse = await call.value('token').post(formData).json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };
@@ -169,7 +248,7 @@ export const useUserStore = defineStore('user', () => {
     } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
       // We get a one-time token back from the api, use it to fetch the real access token
       data.value.accessToken = username;
-      const { error, data: tokenData }: TokenResponse = await call('fxa-token').post().json();
+      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };
@@ -180,15 +259,14 @@ export const useUserStore = defineStore('user', () => {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
-    return profile(call);
+    return profile();
   };
 
   /**
    * Do subscriber logout and reset store
-   * @param call preconfigured API fetch function
    */
-  const logout = async (call: Fetch) => {
-    const { error }: BooleanResponse = await call('logout').get().json();
+  const logout = async () => {
+    const { error }: BooleanResponse = await call.value('logout').get().json();
 
     if (error.value) {
       // TODO: show error message
@@ -200,8 +278,9 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     data,
+    init,
     authenticated,
-    exists,
+    updateSettings,
     $reset,
     updateSignedUrl,
     profile,
@@ -211,6 +290,7 @@ export const useUserStore = defineStore('user', () => {
     logout,
     myLink,
     mySlug,
+    myColourScheme,
     updateUser,
     finishFTUE,
   };

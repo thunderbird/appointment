@@ -18,10 +18,7 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 
 // component constants
-const user = useUserStore();
 const router = useRouter();
-
-// component constants
 const { t } = useI18n();
 const call = inject(callKey);
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
@@ -29,12 +26,15 @@ const isFxaAuth = inject(isFxaAuthKey);
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
+const user = useUserStore();
+user.init(call);
+
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);
 
 // do log out
 const logout = async () => {
-  await user.logout(call);
+  await user.logout();
   await router.push('/');
 };
 
@@ -45,14 +45,14 @@ const editProfile = async () => {
 
 <template>
   <!-- page title area -->
-  <div v-if="user.exists()" class="flex flex-col items-center justify-center gap-2">
+  <div v-if="user.authenticated" class="flex flex-col items-center justify-center gap-2">
     <div class="text-4xl font-light">{{ user.data.name }}</div>
     <div class="flex items-center gap-4">
       <div class="rounded-full border border-gray-500 px-2 text-xs uppercase text-gray-500">
         {{ keyByValue(SubscriberLevels, user.data.level, true) }}
       </div>
       <div class="flex gap-1 text-gray-500">
-        {{ user.data.timezone }}
+        {{ user.data.settings.timezone }}
         <router-link :to="{ name: 'settings' }" class="cursor-pointer pt-0.5">
           <icon-pencil class="stroke-1.5 size-4" />
         </router-link>

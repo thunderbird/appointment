@@ -18,6 +18,7 @@ const ftueStore = useFTUEStore();
 const { hasNextStep } = storeToRefs(ftueStore);
 const { nextStep } = ftueStore;
 const user = useUserStore();
+user.init(call);
 
 // @ts-ignore
 // See https://github.com/microsoft/TypeScript/issues/49231
@@ -29,7 +30,7 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 const formRef = ref<HTMLFormElement>();
 const fullName = ref(user.data?.name ?? '');
 const username = ref(user.data?.username ?? '');
-const timezone = ref(user.data.timezone ?? dj.tz.guess());
+const timezone = ref(user.data.settings.timezone ?? dj.tz.guess());
 const isLoading = ref(false);
 
 // Form validation
@@ -57,7 +58,7 @@ const onSubmit = async () => {
     return;
   }
 
-  const response = await user.updateUser(call, {
+  const response = await user.updateUser({
     name: fullName.value,
     username: username.value,
     timezone: timezone.value,

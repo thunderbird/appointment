@@ -6,18 +6,20 @@ import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
 import CalendarEvent from '@/elements/calendar/CalendarEvent.vue';
 import {
-  ColorSchemes,
+  ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
 } from '@/definitions';
-import { getLocale, getPreferredTheme, timeFormat } from '@/utils';
+import { timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
 import { dayjsKey } from '@/keys';
+import { useUserStore } from '@/stores/user-store';
 
 // component constants
 const dj = inject(dayjsKey);
 const router = useRouter();
 const route = useRoute();
+const user = useUserStore();
 
 // component properties
 const props = defineProps({
@@ -63,7 +65,6 @@ const displayFormat = timeFormat();
 const calendarColors = ref({});
 const selectedDate = ref(null);
 const calendarMode = ref(isValidMode(route.hash) ? route.hash.slice(1) : 'month');
-const preferredTheme = getPreferredTheme();
 
 // component emits
 const emit = defineEmits(['daySelected', 'eventSelected', 'dateChange']);
@@ -171,9 +172,9 @@ const dateSelected = (date) => {
  * If that calendar hasn't been used before it's added to our colourScheme map for Qalendar
  * @param calendarTitle {string}
  * @param calendarColor {string}
- * @returns {string} id for the colorScheme property
+ * @returns {string} id for the colourScheme property
  */
-const processCalendarColorScheme = (calendarTitle, calendarColor) => {
+const processCalendarColourScheme = (calendarTitle, calendarColor) => {
   // TODO: Replace the replace pattern with some regex
   const slug = calendarTitle.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
   if (!calendarColors.value[slug]) {
@@ -205,7 +206,7 @@ const calendarEvents = computed(() => {
     return {
       id: event.title,
       title: event.title,
-      colorScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
+      colourScheme: processCalendarColourScheme(event.calendar_title, event.calendar_color),
       time: {
         start: event.all_day
           ? start.format(DateFormatStrings.QalendarFullDay)
@@ -244,7 +245,7 @@ const calendarEvents = computed(() => {
       title: !isBookingRoute.value
         ? appointment.title
         : `${start.format(displayFormat)} - ${end.format(displayFormat)}`,
-      colorScheme: processCalendarColorScheme(
+      colourScheme: processCalendarColourScheme(
         appointment?.calendar_title ?? 'booking',
         appointment?.calendar_color ?? 'rgb(20, 184, 166)',
       ),
@@ -301,7 +302,7 @@ const dayBoundary = computed(() => {
 });
 
 // For now we only support English and German
-const locale = getLocale();
+const locale = user.data.settings.language;
 
 /**
  * Calendar Config Object
@@ -325,7 +326,7 @@ const config = ref({
       '"Segoe UI Symbol"',
       '"Noto Color Emoji"',
     ].join(', '),
-    colorSchemes: calendarColors,
+    colourSchemes: calendarColors,
   },
   defaultMode: calendarMode.value, // mode happens to match up with our mode!
   dayIntervals: {
@@ -380,8 +381,8 @@ watch(route, () => {
 </script>
 <template>
   <div
-    :style="{'color-scheme': preferredTheme === ColorSchemes.Dark ? 'dark' : null}"
-    :class="{'is-light-mode': preferredTheme === ColorSchemes.Light}"
+    :style="{'color-scheme': user.myColourScheme === ColourSchemes.Dark ? 'dark' : null}"
+    :class="{'is-light-mode': user.myColourScheme === ColourSchemes.Light}"
   >
     <qalendar
       :events="calendarEvents"

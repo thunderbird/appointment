@@ -18,7 +18,7 @@ const TEST_USERNAME = 'test';
 const TEST_PASSWORD = 'password';
 
 const beforeFetch = async (options, user) => {
-  if (user.exists()) {
+  if (user.authenticated) {
     const token = await user.data.accessToken;
     options.headers.Authorization = `Bearer ${token}`;
   }
@@ -56,7 +56,10 @@ const restHandlers = [
       email: 'test@example.org',
       level: 1,
       timezone: 'America/Vancouver',
-      avatarUrl: null,
+      language: 'de',
+      time_mode: 12,
+      colour_scheme: 'dark',
+      avatar_url: null,
     });
   }),
   http.get(`${API_URL}/me/signature`, async (request) => {
@@ -85,6 +88,7 @@ describe('User Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
   });
+
   // Start server before all tests
   beforeAll(() => server.listen());
 
@@ -97,13 +101,15 @@ describe('User Store', () => {
   test('exists', () => {
     const user = useUserStore();
     user.data.accessToken = 'abc';
-    expect(user.exists()).toBe(true);
+    expect(user.authenticated).toBe(true);
   });
+
   test('does not exist', () => {
     const user = useUserStore();
     user.$reset();
-    expect(user.exists()).toBe(false);
+    expect(user.authenticated).toBe(false);
   });
+
   test('reset', () => {
     const user = useUserStore();
 
@@ -117,44 +123,51 @@ describe('User Store', () => {
     });
 
     // Check if the user exists (because we have an access token)
-    expect(user.exists() === true);
+    expect(user.authenticated === true);
 
     // Reset the user which should null all user data.
     user.$reset();
 
     // Ensure our data is null/don't exist
-    expect(user.exists()).toBe(false);
+    expect(user.authenticated).toBe(false);
     expect(user.data.name).toBeNull();
     expect(user.data.email).toBeNull();
     expect(user.data.signedUrl).toBeNull();
   });
+
   test('login fails', async () => {
     const user = useUserStore();
-
-    const response = await user.login(createFetch({
+    user.init(createFetch({
       baseUrl: API_URL,
-    }), TEST_USERNAME, `${TEST_PASSWORD}_thispasswordisnolongerokay`);
+    }));
+
+    const response = await user.login(TEST_USERNAME, `${TEST_PASSWORD}_thispasswordisnolongerokay`);
     expect(response === false);
   });
+
   test('login successful', async () => {
     // This will call profile() as well!
     const user = useUserStore();
-
-    const response = await user.login(createFetch({
+    user.init(createFetch({
       baseUrl: API_URL,
       options: {
         beforeFetch: async ({ options }) => beforeFetch(options, user),
       },
-    }), TEST_USERNAME, `${TEST_PASSWORD}`);
+    }));
+
+    const response = await user.login(TEST_USERNAME, `${TEST_PASSWORD}`);
 
     expect(response.error).toBe(false);
-    expect(user.exists()).toBe(true);
+    expect(user.authenticated).toBe(true);
     expect(user.data.accessToken).toBeTruthy();
     expect(user.data.username).toBeTruthy();
     expect(user.data.email).toBeTruthy();
     expect(user.data.name).toBeTruthy();
     expect(user.data.level).toBeTruthy();
-    expect(user.data.timezone).toBeTruthy();
+    expect(user.data.settings.timezone).toBeTruthy();
+    expect(user.data.settings.language).toBeTruthy();
+    expect(user.data.settings.timeFormat).toBeTruthy();
+    expect(user.data.settings.colourScheme).toBeTruthy();
     expect(user.data.signedUrl).toBeTruthy();
   });
 });

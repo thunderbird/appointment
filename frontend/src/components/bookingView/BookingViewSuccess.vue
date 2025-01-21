@@ -49,7 +49,7 @@ defineProps<Props>();
       </div>
     </div>
     <primary-button
-      v-if="!user.exists()"
+      v-if="!user.authenticated"
       class="btn-start mt-12 p-7"
       :label="t('label.startUsingTba')"
       @click="router.push({ name: 'home' })"
