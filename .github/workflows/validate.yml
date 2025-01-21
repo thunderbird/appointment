@@ -137,19 +137,30 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
 
       - name: Install dependencies
         run: |
           cd ./backend
           python -m pip install --upgrade pip
-          python -m pip install .'[test]'
+          python -m pip install -e .'[test]'
 
       - name: Test with pytest
+        working-directory: ./backend
         run: |
-          cd ./backend && python -m pytest
-  
+          pwd
+          current_dir=$(pwd)
+          echo $current_dir
+          coverage run --data-file $current_dir/.coverage -m pytest --disable-warnings -s
+
+      - name: Generate code coverage report
+        working-directory: ./backend
+        continue-on-error: true
+        run: |
+          coverage report
+
+
   validate-frontend:
     needs: detect-changes
     runs-on: ubuntu-latest
