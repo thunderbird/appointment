@@ -73,7 +73,7 @@ erDiagram
     string short_link_hash "Hash for verifying user link"
     string language "Lang code for subscribers preferred locale"
     int timezone "User selected home timezone, UTC offset"
-    enum color_scheme "Frontend theme [system, dark, light]"
+    enum colour_scheme "Frontend theme [system, dark, light]"
     enum time_mode "Format for displaying times [h12, h24]"
     string minimum_valid_iat_time "Minimum valid time to accept for JWT tokens"
     date time_created "UTC timestamp of subscriber creation"
