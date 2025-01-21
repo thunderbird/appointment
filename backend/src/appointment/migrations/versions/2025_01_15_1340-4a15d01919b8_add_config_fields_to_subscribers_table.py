@@ -24,7 +24,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('color_scheme', sa.Enum(ColorScheme), default=ColorScheme.system, nullable=False, index=True))
+    op.add_column('subscribers', sa.Column('colour_scheme', sa.Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True))
     op.add_column('subscribers', sa.Column('time_mode', sa.Enum(TimeMode), default=TimeMode.h24, nullable=False, index=True))
 
 
