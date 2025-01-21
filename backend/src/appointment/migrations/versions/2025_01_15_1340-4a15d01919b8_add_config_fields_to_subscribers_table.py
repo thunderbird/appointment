@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
-from appointment.database.models import ColorScheme, TimeMode
+from appointment.database.models import ColourScheme, TimeMode
 
 
 def secret():

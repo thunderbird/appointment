@@ -12,7 +12,7 @@ import { ColorSchemes } from '@/definitions';
 
 const initialUserConfigObject = {
   language: null,
-  colorScheme: null,
+  colourScheme: null,
   timeFormat: null,
   timezone: null,
 } as UserConfig;
@@ -39,7 +39,7 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Initialize store with data required at runtime
-   * 
+   *
    * @param fetch preconfigured function to perform API calls
    */
   const init = (fetch: Fetch) => {
@@ -49,11 +49,11 @@ export const useUserStore = defineStore('user', () => {
   // Init user config if not already available
   if (!data.value?.settings) {
     const dj = inject(dayjsKey);
-    const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;    
+    const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
 
     data.value.settings = {
       language: i18n.locale.value,
-      colorScheme: ColorSchemes.System,
+      colourScheme: ColorSchemes.System,
       timeFormat: detectedTimeFormat,
       timezone: dj.tz.guess(),
     };
@@ -67,7 +67,7 @@ export const useUserStore = defineStore('user', () => {
       username: data.value.username,
       language: data.value.settings.language,
       timezone: data.value.settings.timezone,
-      color_scheme: data.value.settings.colorScheme,
+      colour_scheme: data.value.settings.colourScheme,
       time_mode: data.value.settings.timeFormat,
     };
 
@@ -104,7 +104,7 @@ export const useUserStore = defineStore('user', () => {
    * Return the user color scheme
    */
   const myColorScheme = computed((): ColorSchemes => {
-    switch (data.value.settings.colorScheme) {
+    switch (data.value.settings.colourScheme) {
       case 'dark':
         return ColorSchemes.Dark;
       case 'light':
@@ -141,7 +141,7 @@ export const useUserStore = defineStore('user', () => {
       level: subscriber.level,
       settings: {
         language: subscriber.language,
-        colorScheme: subscriber.color_scheme,
+        colourScheme: subscriber.colour_scheme,
         timeFormat: subscriber.time_mode,
         timezone: subscriber.timezone,
       },
@@ -173,7 +173,7 @@ export const useUserStore = defineStore('user', () => {
    */
   const updateUser = async (inputData: Subscriber) => {
     const { error, data: userData }: SubscriberResponse = await call.value('me').put(inputData).json();
-  
+
     if (!error.value) {
       // update user in store
       updateProfile(userData.value);

@@ -172,7 +172,7 @@ const dateSelected = (date) => {
  * If that calendar hasn't been used before it's added to our colourScheme map for Qalendar
  * @param calendarTitle {string}
  * @param calendarColor {string}
- * @returns {string} id for the colorScheme property
+ * @returns {string} id for the colourScheme property
  */
 const processCalendarColorScheme = (calendarTitle, calendarColor) => {
   // TODO: Replace the replace pattern with some regex
@@ -206,7 +206,7 @@ const calendarEvents = computed(() => {
     return {
       id: event.title,
       title: event.title,
-      colorScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
+      colourScheme: processCalendarColorScheme(event.calendar_title, event.calendar_color),
       time: {
         start: event.all_day
           ? start.format(DateFormatStrings.QalendarFullDay)
@@ -245,7 +245,7 @@ const calendarEvents = computed(() => {
       title: !isBookingRoute.value
         ? appointment.title
         : `${start.format(displayFormat)} - ${end.format(displayFormat)}`,
-      colorScheme: processCalendarColorScheme(
+      colourScheme: processCalendarColorScheme(
         appointment?.calendar_title ?? 'booking',
         appointment?.calendar_color ?? 'rgb(20, 184, 166)',
       ),
@@ -326,7 +326,7 @@ const config = ref({
       '"Segoe UI Symbol"',
       '"Noto Color Emoji"',
     ].join(', '),
-    colorSchemes: calendarColors,
+    colourSchemes: calendarColors,
   },
   defaultMode: calendarMode.value, // mode happens to match up with our mode!
   dayIntervals: {

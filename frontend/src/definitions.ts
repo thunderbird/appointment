@@ -136,7 +136,7 @@ export enum SettingsSections {
 /**
  * Available color schemes for theme
  */
-export enum ColorSchemes {
+export enum ColourSchemes {
   System = 'system',
   Dark = 'dark',
   Light = 'light',
@@ -307,7 +307,7 @@ export default {
   CalendarManagementType,
   CalendarProviders,
   ColorPalette,
-  ColorSchemes,
+  ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
   Dismissibles,

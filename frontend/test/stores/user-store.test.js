@@ -58,7 +58,7 @@ const restHandlers = [
       timezone: 'America/Vancouver',
       language: 'de',
       time_mode: 12,
-      color_scheme: 'dark',
+      colour_scheme: 'dark',
       avatar_url: null,
     });
   }),
@@ -167,7 +167,7 @@ describe('User Store', () => {
     expect(user.data.settings.timezone).toBeTruthy();
     expect(user.data.settings.language).toBeTruthy();
     expect(user.data.settings.timeFormat).toBeTruthy();
-    expect(user.data.settings.colorScheme).toBeTruthy();
+    expect(user.data.settings.colourScheme).toBeTruthy();
     expect(user.data.signedUrl).toBeTruthy();
   });
 });

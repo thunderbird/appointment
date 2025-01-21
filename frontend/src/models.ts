@@ -98,7 +98,7 @@ export type CustomEventData = {
 export type CalendarEvent = {
   id: number|string;
   title: string;
-  colorScheme: string;
+  colourScheme: string;
   time?: TimeFormatted;
   description: string;
   with: string;
@@ -236,7 +236,7 @@ export type User = {
  */
 export type UserConfig = {
   language: string,
-  colorScheme: string,
+  colourScheme: string,
   timeFormat: number,
   timezone: string;
 };
@@ -258,7 +258,7 @@ export type Subscriber = {
   level?: number;
   language?: string;
   timezone?: string;
-  color_scheme?: string;
+  colour_scheme?: string;
   time_mode?: number;
   avatar_url?: string;
   is_setup?: boolean;

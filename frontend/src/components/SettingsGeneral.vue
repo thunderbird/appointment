@@ -18,7 +18,7 @@ watch(locale, (newValue: string) => {
 });
 
 // handle theme mode
-watch(() => user.data.settings.colorScheme, (newValue) => {
+watch(() => user.data.settings.colourScheme, (newValue) => {
   switch (newValue) {
     case ColorSchemes.Dark:
       document.documentElement.classList.add('dark');
@@ -43,7 +43,7 @@ watch(
   () => [
     user.data.settings.language,
     user.data.settings.timezone,
-    user.data.settings.colorScheme,
+    user.data.settings.colourScheme,
     user.data.settings.timeFormat,
   ],
   () => {
@@ -79,7 +79,7 @@ const timezones = Intl.supportedValuesOf('timeZone');
       <div class="text-lg">{{ t('label.appearance') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
-        <select v-model="user.data.settings.colorScheme" class="w-full max-w-sm rounded-md" data-testid="settings-general-theme-select">
+        <select v-model="user.data.settings.colourScheme" class="w-full max-w-sm rounded-md" data-testid="settings-general-theme-select">
           <option v-for="value in Object.values(ColorSchemes)" :key="value" :value="value">
             {{ t('label.' + value) }}
           </option>

@@ -27,7 +27,7 @@ from .models import (
     ExternalConnectionType,
     MeetingLinkProviderType,
     InviteStatus,
-    ColorScheme,
+    ColourScheme,
     TimeMode,
 )
 from .. import utils, defines
