@@ -84,7 +84,7 @@ def update_me(
         schedule_links=schedule_links_by_subscriber(db, subscriber),
         unique_hash=me.unique_hash,
         language=me.language,
-        color_scheme=me.color_scheme,
+        colour_scheme=me.colour_scheme,
         time_mode=me.time_mode,
     )
 
