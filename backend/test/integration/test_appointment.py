@@ -20,7 +20,6 @@ class TestAppointment:
             end = dateutil.parser.parse(end)
             from appointment.database import schemas
 
-            print('list events!')
             return [
                 schemas.Event(
                     title=generated_appointment.title,
@@ -36,7 +35,6 @@ class TestAppointment:
         monkeypatch.setattr(CalDavConnector, 'list_events', list_events)
 
         path = f'/rmt/cal/{generated_appointment.calendar_id}/' + DAY1 + '/' + DAY3
-        print(f'>>> {path}')
         response = with_client.get(path, headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
@@ -44,6 +42,15 @@ class TestAppointment:
         assert data[0]['title'] == generated_appointment.title
         assert data[0]['start'] == generated_appointment.slots[0].start.isoformat()
         assert data[0]['end'] == dateutil.parser.parse(DAY3).isoformat()
+
+    def test_get_remote_caldav_events_inavlid_calendar(self, with_client, make_appointment):
+        generated_appointment = make_appointment()
+
+        path = f'/rmt/cal/{generated_appointment.calendar_id + 999}/' + DAY1 + '/' + DAY3
+        response = with_client.get(path, headers=auth_headers)
+        assert response.status_code == 404, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'CALENDAR_NOT_FOUND'
 
     def test_get_invitation_ics_file(self, with_client, make_appointment):
         generated_appointment = make_appointment()

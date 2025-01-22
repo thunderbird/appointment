@@ -285,6 +285,21 @@ class TestSchedule:
         )
         assert response.status_code == 403, response.text
 
+    def test_update_schedule_unconnected_calendar(
+        self, with_client, make_caldav_calendar, make_schedule, schedule_input
+    ):
+        generated_calendar = make_caldav_calendar(connected=False)
+        generated_schedule = make_schedule(calendar_id=generated_calendar.id)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={'calendar_id': generated_schedule.calendar_id, **schedule_input},
+            headers=auth_headers,
+        )
+        assert response.status_code == 403, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'CALENDAR_NOT_CONNECTED'
+
     def test_public_availability(
         self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
     ):
@@ -462,6 +477,20 @@ class TestSchedule:
                     if expected_assert
                     else models.BookingStatus.booked.value
                 )
+
+    def test_public_availability_sched_not_active(self, with_client, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        # Check availability at the start of the schedule
+        response = with_client.post(
+            '/schedule/public/availability',
+            json={'url': signed_url},
+            headers=auth_headers,
+        )
+        assert response.status_code == 404, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'SCHEDULE_NOT_ACTIVE'
 
 
 class TestRequestScheduleAvailability:

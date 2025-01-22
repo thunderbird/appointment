@@ -192,6 +192,21 @@ class TestWaitingListActionConfirm:
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
 
+    def test_action_failed(self, with_db, with_client, make_waiting_list):
+        email = 'hello@example.org'
+
+        waiting_list = make_waiting_list(email='hellokitty@example.org')
+
+        serializer = URLSafeSerializer(os.getenv('SIGNED_SECRET'), 'waiting-list')
+        confirm_token = serializer.dumps({'email': email, 'action': WaitingListAction.CONFIRM_EMAIL.value})
+
+        response = with_client.post('/waiting-list/action', json={'token': confirm_token})
+
+        # expect the waiting list confirm email action to fail as email not on the list
+        assert response.status_code == 400, response.json()
+        data = response.json()
+        assert data['detail']['id'] == 'WAITING_LIST_FAIL'
+
 
 class TestWaitingListActionLeave:
     def assert_waiting_list_exists(self, db, waiting_list, success=True):

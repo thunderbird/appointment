@@ -197,6 +197,14 @@ class TestCalendar:
         )
         assert response.status_code == 403, response.text
 
+    def test_update_invalid_calendar_id(self, with_client, request):
+        response = with_client.put(
+            f'/cal/{9999}',
+            json={'title': 'b', 'url': 'b', 'user': 'b', 'password': 'b'},
+            headers=auth_headers,
+        )
+        assert response.status_code == 404, response.text
+
     @pytest.mark.parametrize('provider,factory_name', get_calendar_factory())
     def test_connect_calendar(self, with_client, provider, factory_name, request):
         generated_calendar = request.getfixturevalue(factory_name)()
@@ -321,6 +329,34 @@ class TestCalendar:
         response = with_client.post(f'/cal/{cal[2].id}/connect', headers=auth_headers)
         assert response.status_code == 403, response.text
 
+    def test_create_connection_failure(self, with_client, make_google_calendar, request):
+        """Attempt to create google calendar connection without having external connection, expect failure"""
+        response = with_client.post(
+            '/cal',
+            json={
+                'title': 'A google calendar',
+                'color': '#123456',
+                'provider': CalendarProvider.google.value,
+                'url': 'test',
+                'user': 'test',
+                'password': 'test',
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
+
+    @pytest.mark.parametrize('provider,factory_name', get_calendar_factory())
+    def test_disconnect_calendar(self, with_client, provider, factory_name, request):
+        new_calendar = request.getfixturevalue(factory_name)(connected=True)
+
+        response = with_client.post(f'/cal/{new_calendar.id}/disconnect', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data['title'] == new_calendar.title
+        assert data['color'] == new_calendar.color
+        assert data['id'] == new_calendar.id
+        assert not data['connected']
+
 
 class TestCaldav:
     """Tests for caldav specific functionality"""
@@ -414,3 +450,49 @@ class TestCaldav:
         assert cal.url == os.getenv('CALDAV_TEST_CALENDAR_URL')
         assert cal.user == os.getenv('CALDAV_TEST_USER')
         assert cal.password == ''
+
+
+class TestGoogle:
+    """Tests for google specific functionality"""
+    def test_read_remote_google_calendar_connection_error(
+        self,
+        monkeypatch,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+    ):
+        """ Attempt to read remote google calendar without having external connection first; expect error """
+        # Patch up the caldav constructor, and list_calendars (this test is for google only)
+        class MockGoogleConnector:
+            @staticmethod
+            def __init__(
+                self,
+                subscriber_id,
+                calendar_id,
+                redis_instance,
+                db,
+                remote_calendar_id,
+                google_client,
+                google_tkn: str = None,
+            ):
+                pass
+
+        monkeypatch.setattr(GoogleConnector, '__init__', MockGoogleConnector.__init__)
+
+        test_url = 'https://caldav.thunderbird.net/'
+        test_user = 'thunderbird'
+
+        response = with_client.post(
+            '/rmt/calendars',
+            json={
+                'provider': CalendarProvider.google.value,
+                'url': test_url,
+                'user': test_user,
+                'password': 'caw',
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'REMOTE_CALENDAR_CONNECTION_ERROR'
