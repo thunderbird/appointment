@@ -1,4 +1,5 @@
 import json, os
+from uuid import uuid4
 from appointment.database.models import ExternalConnectionType
 from defines import auth_headers, TEST_USER_ID
 
@@ -6,8 +7,7 @@ from defines import auth_headers, TEST_USER_ID
 class TestAccount:
     def test_account_get_external_connections(self, with_client, make_external_connections):
         # add a couple of external connections to our test user
-        username = 'username'
-        type_id = json.dumps(['url', username])
+        type_id = str(uuid4())
         zoom_ec = make_external_connections(TEST_USER_ID, type=ExternalConnectionType.zoom, type_id=type_id)
         assert zoom_ec.type_id == type_id
         google_ec = make_external_connections(TEST_USER_ID, type=ExternalConnectionType.google, type_id=type_id)
@@ -44,7 +44,7 @@ class TestAccount:
         assert email_list_ret == user_email_list
 
         # now add another email/name via a google connection
-        type_id = json.dumps(['url', test_user_email])
+        type_id = str(uuid4())
         google_ec = make_external_connections(TEST_USER_ID, type=ExternalConnectionType.google, type_id=type_id)
         user_email_list.append(google_ec.name)
 

@@ -20,7 +20,6 @@ class TestAppointment:
             end = dateutil.parser.parse(end)
             from appointment.database import schemas
 
-            print('list events!')
             return [
                 schemas.Event(
                     title=generated_appointment.title,
@@ -36,7 +35,6 @@ class TestAppointment:
         monkeypatch.setattr(CalDavConnector, 'list_events', list_events)
 
         path = f'/rmt/cal/{generated_appointment.calendar_id}/' + DAY1 + '/' + DAY3
-        print(f'>>> {path}')
         response = with_client.get(path, headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
@@ -49,7 +47,6 @@ class TestAppointment:
         generated_appointment = make_appointment()
 
         path = f'/rmt/cal/{generated_appointment.calendar_id + 999}/' + DAY1 + '/' + DAY3
-        print(f'>>> {path}')
         response = with_client.get(path, headers=auth_headers)
         assert response.status_code == 404, response.text
         data = response.json()

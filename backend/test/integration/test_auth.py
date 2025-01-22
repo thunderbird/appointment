@@ -1,7 +1,6 @@
-import json
-import os
-import secrets
+import os, json, secrets
 from datetime import timedelta
+from uuid import uuid4
 from unittest.mock import patch
 
 from appointment.dependencies import auth
@@ -567,8 +566,7 @@ class TestCalDAV:
 class TestGoogle:
     def test_disconnect(self, with_db, with_client, make_external_connections, make_google_calendar):
         """Ensure we remove the external google connection and any related calendars"""
-        username = 'username'
-        type_id = json.dumps(['url', username])
+        type_id = str(uuid4())
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id)
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
 

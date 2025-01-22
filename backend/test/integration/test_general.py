@@ -1,4 +1,4 @@
-import os
+import os, pytest
 from defines import DAY1, DAY5, auth_headers
 
 
@@ -29,76 +29,51 @@ class TestGeneral:
         assert response.status_code == 200
         assert response.json() == 'Zustand in Ordnung'
 
-    def test_access_without_authentication_token(self, with_client):
-        # response = client.get("/login")
-        # assert response.status_code == 401
-        response = with_client.get('/me')
-        assert response.status_code == 401        
-        response = with_client.put('/me')
-        assert response.status_code == 401
-        response = with_client.get('/me/calendars')
-        assert response.status_code == 401
-        response = with_client.get('/me/appointments')
-        assert response.status_code == 401
-        response = with_client.get('/me/signature')
-        assert response.status_code == 401
-        response = with_client.post('/me/signature')
-        assert response.status_code == 401
-        response = with_client.post('/cal')
-        assert response.status_code == 401
-        response = with_client.get('/cal/1')
-        assert response.status_code == 401
-        response = with_client.put('/cal/1')
-        assert response.status_code == 401
-        response = with_client.post('/cal/1/connect')
-        assert response.status_code == 401
-        response = with_client.delete('/cal/1')
-        assert response.status_code == 401
-        response = with_client.post('/caldav/auth')
-        assert response.status_code == 401
-        response = with_client.post('/caldav/disconnect')
-        assert response.status_code == 401
-        response = with_client.post('/rmt/calendars')
-        assert response.status_code == 401
-        response = with_client.get('/rmt/cal/1/' + DAY1 + '/' + DAY5)
-        assert response.status_code == 401
-        response = with_client.post('/rmt/sync')
-        assert response.status_code == 401
-        response = with_client.get('/account/available-emails')
-        assert response.status_code == 401
-        response = with_client.get('/account/download')
-        assert response.status_code == 401
-        response = with_client.get('/account/external-connections/')
-        assert response.status_code == 401
-        response = with_client.delete('/account/delete')
-        assert response.status_code == 401
-        response = with_client.get('/google/auth')
-        assert response.status_code == 401
-        response = with_client.post('/google/disconnect')
-        assert response.status_code == 401
-        response = with_client.post('/schedule')
-        assert response.status_code == 401
-        response = with_client.get('/schedule')
-        assert response.status_code == 401
-        response = with_client.get('/schedule/0')
-        assert response.status_code == 401
-        response = with_client.put('/schedule/0')
-        assert response.status_code == 401        
-        response = with_client.get('/invite')
-        assert response.status_code == 401
-        response = with_client.post('/invite/generate/1')
-        assert response.status_code == 401
-        response = with_client.put('/invite/revoke/1')
-        assert response.status_code == 401
-        response = with_client.get('/subscriber')
-        assert response.status_code == 401
-        response = with_client.put('/subscriber/enable/someemail@email.com')
-        assert response.status_code == 401
-        response = with_client.put('/subscriber/disable/someemail@email.com')
-        assert response.status_code == 401
-        response = with_client.post('/subscriber/setup')
-        assert response.status_code == 401
-        response = with_client.post('/waiting-list/invite')
+    @pytest.mark.parametrize('api_method, api_route', [
+        ('get', '/me'),
+        ('put', '/me'),
+        ('get', '/me/calendars'),
+        ('get', '/me/appointments'),
+        ('get', '/me/signature'),
+        ('post', '/me/signature'),
+        ('post', '/cal'),
+        ('get', '/cal/1'),
+        ('put', '/cal/1'),
+        ('post', '/cal/1/connect'),
+        ('delete', '/cal/1'),
+        ('post', '/caldav/auth'),
+        ('post', '/caldav/disconnect'),
+        ('post', '/rmt/calendars'),
+        ('get', '/rmt/cal/1/' + DAY1 + '/' + DAY5),
+        ('post', '/rmt/sync'),
+        ('get', '/account/available-emails'),
+        ('get', '/account/download'),
+        ('get', '/account/external-connections/'),
+        ('delete', '/account/delete'),
+        ('get', '/google/auth'),
+        ('post', '/google/disconnect'),
+        ('post', '/schedule'),
+        ('get', '/schedule'),
+        ('get', '/schedule/0'),
+        ('put', '/schedule/0'),
+        ('get', '/invite'),
+        ('post', '/invite/generate/1'),
+        ('put', '/invite/revoke/1'),
+        ('get', '/subscriber'),
+        ('put', '/subscriber/enable/someemail@email.com'),
+        ('put', '/subscriber/disable/someemail@email.com'),
+        ('post', '/subscriber/setup'),
+        ('post', '/waiting-list/invite'),
+    ])
+    def test_access_without_authentication_token(self, with_client, api_method, api_route):
+        if api_method == 'post':
+            response = with_client.post(f'{api_route}')
+        elif api_method == 'get':
+            response = with_client.get(f'{api_route}')
+        elif api_method == 'put':
+            response = with_client.put(f'{api_route}')
+        else:
+            response = with_client.delete(f'{api_route}')
         assert response.status_code == 401
 
     def test_send_feedback(self, with_client):

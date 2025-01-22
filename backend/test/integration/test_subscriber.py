@@ -91,8 +91,10 @@ class TestSubscriber:
         data = response.json()
         subscriber_ret = data[len(data) -1]
         assert subscriber_ret['time_deleted'] is not None
-        today = datetime.today().strftime('%Y-%m-%d')
-        assert today in subscriber_ret['time_deleted']
+
+        today = today = datetime.today().date()
+        date_deleted = datetime.fromisoformat(subscriber_ret['time_deleted']).date()
+        assert date_deleted == today
 
         # attempt to disable same subscriber again, expect fail
         response = with_client.put(

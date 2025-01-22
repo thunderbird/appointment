@@ -5,6 +5,8 @@ from appointment.database import repo
 from appointment.database.models import InviteStatus
 
 class TestInvite:
+    today = today = datetime.today().date()
+
     def test_send_invite_email_requires_admin(self, with_db, with_client):
         """Ensures send_invite_email requires an admin user"""
 
@@ -109,12 +111,13 @@ class TestInvite:
         assert response.status_code == 200, response.text
         invite_list = response.json()
         assert len(invite_list) == 2
-        today = datetime.today().strftime('%Y-%m-%d')
+        assert invite_list[0]['code'] != invite_list[1]['code']
+
         for next_invite in invite_list:
             assert next_invite['owner_id'] == TEST_USER_ID
-            assert today in next_invite['time_created']
             assert next_invite['code'] is not None
-        assert invite_list[0]['code'] != invite_list[1]['code']
+            date_created = datetime.fromisoformat(next_invite['time_created']).date()
+            assert date_created == self.today
 
     def test_generate_invites(self, with_client):
         """Ensures we can generate new invites"""
@@ -125,11 +128,12 @@ class TestInvite:
         assert response.status_code == 200, response.text
         invite_list = response.json()
         assert len(invite_list) == 5
-        today = datetime.today().strftime('%Y-%m-%d')
+
         for next_invite in invite_list:
-            assert today in next_invite['time_created']
             assert next_invite['status'] == InviteStatus.active.value
             assert next_invite['code'] is not None
+            date_created = datetime.fromisoformat(next_invite['time_created']).date()
+            assert date_created == self.today
 
         response = with_client.get(
             '/invite',
