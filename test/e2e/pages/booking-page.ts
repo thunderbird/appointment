@@ -1,7 +1,6 @@
 import { expect } from '@playwright/test';
 import { type Page, type Locator } from '@playwright/test';
 import { APPT_PROD_MY_SHARE_LINK, APPT_PROD_SHORT_SHARE_LINK_PREFIX, APPT_PROD_LONG_SHARE_LINK_PREFIX } from '../const/constants';
-import { DashboardPage } from './dashboard-page';
 
 export class BookingPage {
   readonly page: Page;
@@ -17,7 +16,6 @@ export class BookingPage {
   readonly bookSelectionBookBtn: Locator;
   readonly requestSentTitleText: Locator;
   readonly requestSentAvailabilityText: Locator;
-  readonly requestSentBookingSlot: Locator;
   readonly requestSentCloseBtn: Locator;
 
   constructor(page: Page) {
@@ -34,7 +32,6 @@ export class BookingPage {
     this.bookSelectionBookBtn = this.page.getByRole('button', { name: 'Book' });
     this.requestSentTitleText = this.page.getByText('Booking request sent');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
-    this.requestSentBookingSlot = this.page.locator('.todo');
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
   }
 
