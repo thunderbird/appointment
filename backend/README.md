@@ -43,14 +43,64 @@ This project is deployed with Mozilla Accounts (known as fxa in the code.) Since
 To run tests in the backend, simply install the package in editing mode:
 
 ```bash
-cd backend && pip install -e .
+cd backend && pip install -e .['test']
 ```
 
-After this you can run tests with:
+After this you can run all of the tests with:
 
 ```bash
 cd backend && python -m pytest
 ```
+
+To run a subset of the test only, provide the test path, for example:
+
+```bash
+cd backend && python -m pytest test/integration/
+```
+
+And to run a single tests only, for example:
+
+```bash
+cd backend && python -m pytest test/integration/test_schedule.py
+```
+
+To run the tests with the pytest warnings turned off:
+
+```bash
+cd backend && python -m pytest --disable-warnings
+```
+
+If you are debugging tests and have print statements inside them, run with this option so the output appears:
+
+```bash
+cd backend && python -m pytest -s
+```
+
+## Code Coverage
+
+We are using the python `coverage` package to generate code coverage (ie. calculate how much of the source code is exercised during test execution). We are using line (statement) code covearge analysis.
+
+To run the tests with code coverage enabled you simply invoke `coverage run` and then the `pytest` command as normal. For example to run all of the unit and integration tests with code coverage enabled you would run:
+
+```bash
+cd backend && coverage run -m pytest --disable-warnings
+```
+
+Then after the tests finish you generate the code coverage console report (still in `/backend`):
+
+```bash
+coverage report
+```
+
+When running locally and looking into code coverage further you may wish to generate an HTML report (still in `/backend`):
+
+```bash
+coverage html
+```
+Then open the resulting `backend/htmlcov/index.html` file in your browser and you can click down into individual source files to see which statements were (and were not) executed during the test session.
+
+Note that the code coverage report will contain the coverage generated for all the tests that were ran in your pytest session; so if you want to measure the code coverage for a subset of tests just provide the test path on the `coverage run -m pytest` command as you normally would, then generate the coverage report(s).
+
 
 ## Database Migrations
 

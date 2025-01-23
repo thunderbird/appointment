@@ -1,4 +1,7 @@
 [run]
+data_file = .coverage
+source = src/
+relative_files = True
 omit =
     # omit some folders we don't want coverage results for
     scripts/*
@@ -11,3 +14,4 @@ omit =
     scripts/*
     src/appointment/migrations/*
     test/*
+fail_under = 70
