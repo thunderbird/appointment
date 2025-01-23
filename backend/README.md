@@ -70,7 +70,7 @@ To run the tests with the pytest warnings turned off:
 cd backend && python -m pytest --disable-warnings
 ```
 
-If you are debugging tests and have print staements inside them, run with this option so the output appears:
+If you are debugging tests and have print statements inside them, run with this option so the output appears:
 
 ```bash
 cd backend && python -m pytest -s
