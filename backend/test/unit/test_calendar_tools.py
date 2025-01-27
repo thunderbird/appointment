@@ -59,7 +59,14 @@ class TestTools:
 
 
 class TestVCreate:
-    def test_meeting_url_in_location(self, with_db, make_google_calendar, make_appointment, make_appointment_slot, make_pro_subscriber):
+    def test_meeting_url_in_location(
+        self,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_appointment_slot,
+        make_pro_subscriber
+    ):
         subscriber = make_pro_subscriber()
         calendar = make_google_calendar(subscriber_id=subscriber.id)
         appointment = make_appointment(calendar_id=calendar.id)

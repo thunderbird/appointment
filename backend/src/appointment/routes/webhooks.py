@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from ..controller import auth, data, zoom
 from ..controller.apis.fxa_client import FxaClient
 from ..database import repo, models, schemas
-from ..database.models import ExternalConnectionType
 from ..dependencies.database import get_db
 from ..dependencies.fxa import get_webhook_auth as get_webhook_auth_fxa, get_fxa_client
 from ..dependencies.zoom import get_webhook_auth as get_webhook_auth_zoom

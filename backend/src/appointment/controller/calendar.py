@@ -8,7 +8,6 @@ import logging
 import time
 import zoneinfo
 import os
-from socket import getaddrinfo
 from urllib.parse import urlparse, urljoin
 
 import caldav.lib.error
@@ -27,8 +26,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..database.schemas import CalendarConnection
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, DATETIMEFMT
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -82,7 +80,12 @@ class BaseConnector:
 
         return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
 
-    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)):
+    def put_cached_events(
+        self,
+        key_scope,
+        events: list[schemas.Event],
+        expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)
+    ):
         """Sets the passed cached events with an option to set a custom expiry time."""
         if self.redis_instance is None:
             return False
@@ -291,7 +294,11 @@ class GoogleConnector(BaseConnector):
             },
         }
 
-        new_event = self.google_client.save_event(calendar_id=self.remote_calendar_id, body=body, token=self.google_token)
+        new_event = self.google_client.save_event(
+            calendar_id=self.remote_calendar_id,
+            body=body,
+            token=self.google_token
+        )
 
         # Fill in the external_id so we can delete events later!
         event.external_id = new_event.get('id')
@@ -314,7 +321,16 @@ class GoogleConnector(BaseConnector):
 
 
 class CalDavConnector(BaseConnector):
-    def __init__(self, db: Session, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str):
+    def __init__(
+        self,
+        db: Session,
+        subscriber_id: int,
+        calendar_id: int,
+        redis_instance,
+        url: str,
+        user: str,
+        password: str
+    ):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
         self.db = db
@@ -343,8 +359,8 @@ class CalDavConnector(BaseConnector):
 
         items = []
 
-        # This is sort of dumb, freebusy object isn't exposed in the icalendar instance except through a list of tuple props
-        # Luckily the value is a vPeriod which is a tuple of date times/timedelta (0 = Start, 1 = End)
+        # This is sort of dumb, freebusy object isn't exposed in the icalendar instance except through a list of tuple
+        # props; luckily the value is a vPeriod which is a tuple of date times/timedelta (0 = Start, 1 = End)
         for prop in response.icalendar_instance.property_items():
             if prop[0].lower() != 'freebusy':
                 continue
@@ -904,7 +920,11 @@ class Tools:
                     start=busy.get('start'),
                     end=busy.get('end'),
                     title='Busy'
-                ) for busy in con.get_busy_time([calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT))
+                ) for busy in con.get_busy_time(
+                    [calendar.user for calendar in google_calendars],
+                    start.strftime(DATEFMT),
+                    end.strftime(DATEFMT)
+                )
             ])
 
         # handle already requested time slots

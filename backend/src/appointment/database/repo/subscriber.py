@@ -3,10 +3,8 @@
 Repository providing CRUD functions for subscriber database models. 
 """
 
-import re
 import datetime
 import secrets
-import urllib.parse
 
 from sqlalchemy.orm import Session
 from .. import models, schemas

@@ -56,6 +56,7 @@ class TestProfile:
     def test_update_me_username_taken(self, with_db, with_client, make_pro_subscriber):
         """Attempt to update current subscriber's profile with already existing username"""
         other_subscriber = make_pro_subscriber(username='thunderbird1')
+        assert other_subscriber is not None
 
         response = with_client.put(
             '/me',

@@ -6,7 +6,7 @@ from typing import Dict
 from requests_oauthlib import OAuth2Session
 import requests
 from ...database import models, repo
-from ...exceptions.fxa_api import NotInAllowListException, MissingRefreshTokenException
+from ...exceptions.fxa_api import MissingRefreshTokenException
 
 
 class FxaConfig:

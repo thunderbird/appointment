@@ -211,8 +211,17 @@ class ScheduleValidationIn(ScheduleBase):
         # Fallback to utc...
         tz = self.timezone or 'UTC'
 
-        start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
-        end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz))
+        start_time = datetime.combine(
+            self.start_date,
+            self.start_time,
+            tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz)
+        )
+
+        end_time = datetime.combine(
+            self.start_date,
+            self.end_time,
+            tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz)
+        )
 
         start_time = (start_time + timedelta(minutes=self.slot_duration))
         end_time = end_time

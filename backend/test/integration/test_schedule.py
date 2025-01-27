@@ -739,7 +739,7 @@ class TestRequestScheduleAvailability:
             assert mock.call_count == 0
 
     def test_fail_slot_duration_mismatch(self, with_client, mock_connector, setup_schedule):
-        """Ensure we fail validation because we submitted a 60 minute when the schedule only supports 30 minute slots."""
+        """Ensure we fail validation because we submitted a 60 min when the schedule only supports 30 minute slots"""
         booking_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc)
 
         slot_availability = schemas.AvailabilitySlotAttendee(

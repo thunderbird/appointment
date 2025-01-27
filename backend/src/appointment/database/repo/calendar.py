@@ -66,7 +66,11 @@ def create(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int
     return db_calendar
 
 
-def update_by_calendar(db: Session, calendar: schemas.CalendarConnection, db_calendar: models.Calendar) -> models.Calendar|None:
+def update_by_calendar(
+    db: Session,
+    calendar: schemas.CalendarConnection,
+    db_calendar: models.Calendar
+) -> models.Calendar|None:
     """Update a calendar from the database with calendar data."""
 
     # list of all attributes that must never be updated
@@ -142,7 +146,12 @@ def delete_by_subscriber(db: Session, subscriber_id: int):
     return True
 
 
-def delete_by_subscriber_and_provider(db: Session, subscriber_id: int, provider: models.CalendarProvider, user: Optional[str] = None):
+def delete_by_subscriber_and_provider(
+    db: Session,
+    subscriber_id: int,
+    provider: models.CalendarProvider,
+    user: Optional[str] = None
+):
     """Delete all subscriber's calendar by a provider"""
     calendars = get_by_subscriber(db, subscriber_id=subscriber_id)
     for calendar in calendars:

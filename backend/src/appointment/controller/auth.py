@@ -73,4 +73,7 @@ def schedule_links_by_subscriber(db, subscriber: models.Subscriber):
     url_safe_username = urllib.parse.quote_plus(subscriber.username)
 
     # Empty space at join is for trailing slash!
-    return list(map(lambda sch: '/'.join([short_url, url_safe_username, urllib.parse.quote_plus(sch.slug), '']), schedules))
+    return list(map(
+        lambda sch: '/'.join([short_url, url_safe_username, urllib.parse.quote_plus(sch.slug), '']),
+        schedules)
+    )

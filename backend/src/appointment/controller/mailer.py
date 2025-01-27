@@ -352,7 +352,15 @@ class NewBookingMail(BaseBookingMail):
         self.schedule_name = schedule_name
         lang = kwargs['lang'] if 'lang' in kwargs else None
         default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang)}
-        super(NewBookingMail, self).__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+        super(NewBookingMail, self).__init__(
+            name=name,
+            email=email,
+            date=date,
+            duration=duration,
+            *args,
+            **default_kwargs,
+            **kwargs
+        )
         self.reply_to = email
 
     def text(self):
@@ -391,7 +399,12 @@ class SupportRequestMail(Mailer):
         self.topic = topic
         self.details = details
         default_kwargs = {'subject': l10n('support-mail-subject', {'topic': topic})}
-        super(SupportRequestMail, self).__init__(os.getenv('SUPPORT_EMAIL', 'help@tb.net'), *args, **default_kwargs, **kwargs)
+        super(SupportRequestMail, self).__init__(
+            os.getenv('SUPPORT_EMAIL', 'help@tb.net'),
+            *args,
+            **default_kwargs,
+            **kwargs
+        )
         self.reply_to = requestee_email
 
     def text(self):

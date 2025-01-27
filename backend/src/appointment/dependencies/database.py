@@ -46,7 +46,8 @@ def boot_redis_cluster():
     host = os.getenv('REDIS_URL')
     port = int(os.getenv('REDIS_PORT'))
     password = os.getenv('REDIS_PASSWORD')
-    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1') else False
+    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or \
+        os.getenv('REDIS_USE_SSL').lower() == '1') else False
     timer_boot = time.perf_counter_ns()
 
     # Retry strategy
@@ -86,7 +87,8 @@ def get_redis() -> Redis | RedisCluster | None:
     port = int(os.getenv('REDIS_PORT'))
     db = os.getenv('REDIS_DB')
     password = os.getenv('REDIS_PASSWORD')
-    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1') else False
+    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or \
+        os.getenv('REDIS_USE_SSL').lower() == '1') else False
 
     timer_boot = time.perf_counter_ns()
 

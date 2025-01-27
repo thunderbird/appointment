@@ -27,8 +27,8 @@ class TestSubscriber:
         assert test_subscriber['short_link_hash'] == 'abc1234'
         assert test_subscriber['id'] == TEST_USER_ID
         assert test_subscriber['language'] == 'en'
-        assert test_subscriber['timezone'] == None
-        assert test_subscriber['is_setup'] == False
+        assert test_subscriber['timezone'] is None
+        assert test_subscriber['is_setup'] is False
         assert test_subscriber['ftue_level'] == 0
         assert test_subscriber['level'] == SubscriberLevel.pro.value
 

@@ -1,7 +1,5 @@
 import datetime
 
-import pytest
-
 from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
     NewBookingMail, PendingRequestMail, Attachment
 from appointment.database import schemas
@@ -33,7 +31,17 @@ class TestMailer:
         now = datetime.datetime.now()
         attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
 
-        mailer = ConfirmationMail(confirm_url, deny_url, attendee.name, attendee.email, now, to=fake_email, duration=30, schedule_name='test', lang='en')
+        mailer = ConfirmationMail(
+            confirm_url,
+            deny_url,
+            attendee.name,
+            attendee.email,
+            now,
+            to=fake_email,
+            duration=30,
+            schedule_name='test',
+            lang='en'
+        )
         assert mailer.html()
         assert mailer.text()
 

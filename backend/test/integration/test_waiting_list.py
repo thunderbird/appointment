@@ -9,7 +9,7 @@ from unittest.mock import patch
 from appointment.exceptions.validation import APIRateLimitExceeded
 from appointment.routes import waiting_list
 from appointment.routes.waiting_list import WaitingListAction
-from appointment.tasks.emails import send_confirm_email, send_invite_account_email
+from appointment.tasks.emails import send_invite_account_email
 from defines import auth_headers
 
 
@@ -196,6 +196,7 @@ class TestWaitingListActionConfirm:
         email = 'hello@example.org'
 
         waiting_list = make_waiting_list(email='hellokitty@example.org')
+        assert waiting_list is not None
 
         serializer = URLSafeSerializer(os.getenv('SIGNED_SECRET'), 'waiting-list')
         confirm_token = serializer.dumps({'email': email, 'action': WaitingListAction.CONFIRM_EMAIL.value})
@@ -270,7 +271,11 @@ class TestWaitingListActionLeave:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() == { "action": WaitingListAction.LEAVE.value, "success": False, "redirectToSettings": True }
+        assert response.json() == {
+            "action": WaitingListAction.LEAVE.value,
+            "success": False,
+            "redirectToSettings": True
+        }
 
 
 class TestWaitingListAdminView:
@@ -376,7 +381,14 @@ class TestWaitingListAdminInvite:
                     assert mock.call_args_list[i][0][0] == send_invite_account_email
                     assert mock.call_args_list[i].kwargs == {'to': waiting_list_user.email}
 
-    def test_invite_existing_subscriber(self, with_client, with_db, with_l10n, make_waiting_list, make_basic_subscriber):
+    def test_invite_existing_subscriber(
+        self,
+        with_client,
+        with_db,
+        with_l10n,
+        make_waiting_list,
+        make_basic_subscriber
+    ):
         os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
 
         sub = make_basic_subscriber()
@@ -400,7 +412,14 @@ class TestWaitingListAdminInvite:
 
             mock.assert_not_called()
 
-    def test_invite_many_users_with_one_existing_subscriber(self, with_client, with_db, with_l10n, make_waiting_list, make_basic_subscriber):
+    def test_invite_many_users_with_one_existing_subscriber(
+        self,
+        with_client,
+        with_db,
+        with_l10n,
+        make_waiting_list,
+        make_basic_subscriber
+    ):
         os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
 
         sub = make_basic_subscriber()

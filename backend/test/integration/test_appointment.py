@@ -1,6 +1,6 @@
 import dateutil.parser
 
-from defines import DAY1, DAY2, DAY3, auth_headers, TEST_USER_ID
+from defines import DAY1, DAY3, auth_headers, TEST_USER_ID
 
 
 class TestAppointment:
@@ -98,7 +98,13 @@ class TestMyAppointments:
         for index, appointment in enumerate(appointments):
             assert appointment.id == data[index]['id']
 
-    def test_dont_show_other_subscribers_appointments(self, with_client, make_basic_subscriber, make_appointment, make_google_calendar):
+    def test_dont_show_other_subscribers_appointments(
+        self,
+        with_client,
+        make_basic_subscriber,
+        make_appointment,
+        make_google_calendar
+    ):
         """Only show my appointments in the /me/appointments route"""
         # The other subscriber / appointment
         other = make_basic_subscriber()

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from ..controller import zoom
 from ..controller.apis.zoom_client import ZoomClient
 from ..controller.auth import sign_url
-from ..database import repo, schemas, models
+from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db

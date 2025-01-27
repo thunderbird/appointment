@@ -25,8 +25,7 @@ from ..database.models import (
     ExternalConnectionType,
 )
 from ..database.schemas import ExternalConnection
-from ..dependencies.auth import get_subscriber, get_subscriber_from_signed_url, \
-    get_subscriber_from_schedule_or_signed_url
+from ..dependencies.auth import get_subscriber, get_subscriber_from_schedule_or_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
@@ -38,9 +37,7 @@ from ..exceptions.calendar import EventNotCreatedException, EventNotDeletedExcep
 from ..exceptions.misc import UnexpectedBehaviourWarning
 from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeAccepted, EventCouldNotBeDeleted
 from ..tasks.emails import (
-    send_pending_email,
     send_confirmation_email,
-    send_rejection_email,
     send_zoom_meeting_failed_email, send_new_booking_email,
 )
 from ..l10n import l10n
@@ -293,7 +290,9 @@ def request_schedule_availability_slot(
 
     # We need to verify that the time is actually available on the remote calendar
     if calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google))
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -566,14 +565,22 @@ def handle_schedule_availability_decision(
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
+            background_tasks.add_task(
+                send_zoom_meeting_failed_email,
+                to=subscriber.preferred_email,
+                appointment_title=schedule.name
+            )
         except OAuth2Error as err:
             logging.error('OAuth flow error during zoom meeting creation: ', err)
             if os.getenv('SENTRY_DSN') != '':
                 capture_exception(err)
 
             # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name)
+            background_tasks.add_task(
+                send_zoom_meeting_failed_email,
+                to=subscriber.preferred_email,
+                appointment_title=schedule.name
+            )
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error('Failed to save the zoom meeting link to the appointment: ', err)
             if os.getenv('SENTRY_DSN') != '':
@@ -652,7 +659,12 @@ def save_remote_event(event, calendar, subscriber, slot, db, redis, google_clien
     con, organizer_email = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
-        return con.save_event(event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email)
+        return con.save_event(
+            event=event,
+            attendee=slot.attendee,
+            organizer=subscriber,
+            organizer_email=organizer_email
+        )
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
 

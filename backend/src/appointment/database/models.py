@@ -164,8 +164,20 @@ class Subscriber(HasSoftDelete, Base):
     external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
 
     # FIXME: Invite will be deleted if either the owner or the invited subscriber is deleted.
-    invite: Mapped['Invite'] = relationship('Invite', cascade='all,delete', back_populates='subscriber', uselist=False, foreign_keys='Invite.subscriber_id')
-    owned_invites: Mapped[list['Invite']] = relationship('Invite', cascade='all,delete', back_populates='owner', foreign_keys='[Invite.owner_id]')
+    invite: Mapped['Invite'] = relationship(
+        'Invite',
+        cascade='all,delete',
+        back_populates='subscriber',
+        uselist=False,
+        foreign_keys='Invite.subscriber_id'
+    )
+
+    owned_invites: Mapped[list['Invite']] = relationship(
+        'Invite',
+        cascade='all,delete',
+        back_populates='owner',
+        foreign_keys='[Invite.owner_id]'
+    )
 
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
@@ -242,7 +254,12 @@ class Appointment(Base):
     )
 
     calendar: Mapped[Calendar] = relationship('Calendar', back_populates='appointments')
-    slots: Mapped[list['Slot']] = relationship('Slot', cascade='all,delete', back_populates='appointment', lazy='joined')
+    slots: Mapped[list['Slot']] = relationship(
+        'Slot',
+        cascade='all,delete',
+        back_populates='appointment',
+        lazy='joined'
+    )
 
 
 class Attendee(Base):
@@ -305,7 +322,7 @@ class Schedule(Base):
     weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
     booking_confirmation: bool = Column(Boolean, index=True, nullable=False, default=True)
-    timezone: str = Column(encrypted_type(String), index=True, nullable=True)  # Not used right now but will be in the future
+    timezone: str = Column(encrypted_type(String), index=True, nullable=True)  # Not used now but will be in the future
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(
@@ -385,9 +402,26 @@ class Invite(Base):
     code = Column(encrypted_type(String), index=False)
     status = Column(Enum(InviteStatus), index=True)
 
-    owner: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True, foreign_keys=[owner_id])
-    subscriber: Mapped['Subscriber'] = relationship('Subscriber', back_populates='invite', single_parent=True, foreign_keys=[subscriber_id])
-    waiting_list: Mapped['WaitingList'] = relationship('WaitingList', cascade='all,delete', back_populates='invite', uselist=False)
+    owner: Mapped['Subscriber'] = relationship(
+        'Subscriber',
+        back_populates='invite',
+        single_parent=True,
+        foreign_keys=[owner_id]
+    )
+
+    subscriber: Mapped['Subscriber'] = relationship(
+        'Subscriber',
+        back_populates='invite',
+        single_parent=True,
+        foreign_keys=[subscriber_id]
+    )
+
+    waiting_list: Mapped['WaitingList'] = relationship(
+        'WaitingList',
+        cascade='all,delete',
+        back_populates='invite',
+        uselist=False
+    )
 
     @property
     def is_used(self) -> bool:
