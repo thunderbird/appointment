@@ -136,8 +136,9 @@ def invite_waiting_list_users(
 
     for id in data.id_list:
         # Look the user up!
-        waiting_list_user: models.WaitingList|None = \
+        waiting_list_user: models.WaitingList|None = (
             db.query(models.WaitingList).filter(models.WaitingList.id == id).first()
+        )
         # If the user doesn't exist, or if they're already invited ignore them
         if not waiting_list_user or waiting_list_user.invite:
             continue
