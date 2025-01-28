@@ -1,32 +1,24 @@
-import datetime
 import json
 import logging
 import os
 import secrets
-import uuid
-from urllib.parse import urlparse
-
 import requests.exceptions
 import sentry_sdk
-import tzlocal
-from sentry_sdk import metrics
 from redis import Redis, RedisCluster
 
 # database
 from sqlalchemy.orm import Session
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import JSONResponse
 
 from .. import utils
-from ..controller.mailer import Attachment
 from ..database import repo, schemas
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_links_by_subscriber
-from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType, ExternalConnectionType, \
-    InviteStatus
+from ..database.models import Subscriber, CalendarProvider, InviteStatus
 from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..dependencies.google import get_google_client
 from ..dependencies.auth import get_subscriber

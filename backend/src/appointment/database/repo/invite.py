@@ -15,7 +15,12 @@ def get_by_subscriber(db: Session, subscriber_id: int) -> models.Invite:
     return db.query(models.Invite).filter(models.Invite.subscriber_id == subscriber_id).first()
 
 
-def get_by_owner(db: Session, subscriber_id: int, status: Optional[InviteStatus] = None, only_unused: bool = False) -> list[models.Invite]:
+def get_by_owner(
+    db: Session,
+    subscriber_id: int,
+    status: Optional[InviteStatus] = None,
+    only_unused: bool = False
+) -> list[models.Invite]:
     """Retrieve invites by the invite owner. Optionally filter by status, or unused."""
     query = db.query(models.Invite)
     filters = [models.Invite.owner_id == subscriber_id]

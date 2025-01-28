@@ -113,7 +113,11 @@ class GoogleClient:
         perf_start = time.perf_counter_ns()
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             request = service.freebusy().query(
-                body=dict(timeMin=time_min, timeMax=time_max, items=[{'id': calendar_id} for calendar_id in calendar_ids])
+                body=dict(
+                    timeMin=time_min,
+                    timeMax=time_max,
+                    items=[{'id': calendar_id} for calendar_id in calendar_ids]
+                )
             )
 
             while request is not None:

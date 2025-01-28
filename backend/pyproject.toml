@@ -34,7 +34,6 @@ dependencies = { file = ["requirements.txt"] }
 # Ruff
 [tool.ruff]
 line-length = 120
-
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
@@ -57,6 +56,7 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
+    "src/appointment/migrations"
 ]
 
 # Always generate Python 3.12-compatible code.

@@ -1,4 +1,4 @@
-import json, os
+import os
 from uuid import uuid4
 from appointment.database.models import ExternalConnectionType
 from defines import auth_headers, TEST_USER_ID

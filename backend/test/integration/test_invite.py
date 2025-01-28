@@ -103,6 +103,7 @@ class TestInvite:
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
 
         invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(2)]
+        assert invites is not None
 
         response = with_client.get(
             '/invite',

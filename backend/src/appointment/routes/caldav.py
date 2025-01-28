@@ -142,7 +142,12 @@ def disconnect_account(
 ):
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     ec = utils.list_first(
-        repo.external_connection.get_by_type(db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id)
+        repo.external_connection.get_by_type(
+            db,
+            subscriber_id=subscriber.id,
+            type=models.ExternalConnectionType.caldav,
+            type_id=type_id
+        )
     )
 
     if ec is None:
@@ -152,7 +157,12 @@ def disconnect_account(
     _, user = json.loads(ec.type_id)
 
     # Remove all the caldav calendars associated with this user
-    repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.caldav, user=user)
+    repo.calendar.delete_by_subscriber_and_provider(
+        db,
+        subscriber.id,
+        provider=models.CalendarProvider.caldav,
+        user=user
+    )
 
     # Remove their account details
     repo.external_connection.delete_by_type(db, subscriber.id, ec.type, ec.type_id)

@@ -1,4 +1,6 @@
-import os, json, secrets
+import os
+import json
+import secrets
 from datetime import timedelta
 from uuid import uuid4
 from unittest.mock import patch
@@ -135,7 +137,6 @@ class TestPassword:
         saved_scheme = os.environ['AUTH_SCHEME']
         os.environ['AUTH_SCHEME'] = 'fxa'
         password = 'test'
-        bad_password = 'test2'
 
         subscriber = make_pro_subscriber(password=password)
 
@@ -206,7 +207,13 @@ class TestFXA:
         data = response.json()
         assert data.get('detail') == l10n('invite-code-not-valid')
 
-    def test_fxa_with_allowlist_and_with_used_invite_code(self, with_client, with_l10n, make_invite, make_pro_subscriber):
+    def test_fxa_with_allowlist_and_with_used_invite_code(
+        self,
+        with_client,
+        with_l10n,
+        make_invite,
+        make_pro_subscriber
+    ):
         os.environ['AUTH_SCHEME'] = 'fxa'
         os.environ['FXA_ALLOW_LIST'] = '@example.org'
 
@@ -529,7 +536,11 @@ class TestCalDAV:
                 sync_mock.return_value = None
 
                 response = with_client.post(
-                    '/caldav/auth', json={'user': 'test@example.com', 'url': 'example.com', 'password': 'test'}, headers=auth_headers
+                    '/caldav/auth',
+                    json={'user': 'test@example.com',
+                    'url': 'example.com',
+                    'password': 'test'},
+                    headers=auth_headers
                 )
 
                 mock.assert_called()
@@ -556,7 +567,12 @@ class TestCalDAV:
         assert response.status_code == 200, response.content
 
         with with_db() as db:
-            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id)
+            ecs = repo.external_connection.get_by_type(
+                db,
+                TEST_USER_ID,
+                models.ExternalConnectionType.caldav,
+                type_id=type_id
+            )
             assert len(ecs) == 0
 
             calendar = repo.calendar.get(db, calendar.id)
@@ -578,7 +594,12 @@ class TestGoogle:
         assert response.status_code == 200, response.content
 
         with with_db() as db:
-            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id)
+            ecs = repo.external_connection.get_by_type(
+                db,
+                TEST_USER_ID,
+                models.ExternalConnectionType.google,
+                type_id=type_id
+            )
             assert len(ecs) == 0
 
             calendar = repo.calendar.get(db, calendar.id)

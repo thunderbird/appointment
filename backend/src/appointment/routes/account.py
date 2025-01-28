@@ -51,7 +51,11 @@ def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depend
 
 
 @router.delete('/delete')
-def delete_account(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), posthog: Posthog = Depends(get_posthog)):
+def delete_account(
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+    posthog: Posthog = Depends(get_posthog)
+):
     """Delete your account and all the data associated with it forever!"""
     try:
         return data.delete_account(db, subscriber)

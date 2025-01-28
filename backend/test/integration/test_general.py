@@ -1,4 +1,5 @@
-import os, pytest
+import os
+import pytest
 from defines import DAY1, DAY5, auth_headers
 
 
