@@ -17,7 +17,8 @@ export class SplashscreenPage {
   }
 
   async gotoProd() {
-    await this.page.goto(String(APPT_PROD_URL));
+    await this.page.goto(APPT_PROD_URL);
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async clickLoginBtn() {
