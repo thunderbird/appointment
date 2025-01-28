@@ -114,18 +114,6 @@ const updateUserCheckForConfirmation = async () => {
     return;
   }
 
-  // Profanity validation
-  // if (activeUsername.value === '') {
-  //   errorUsername.value = t('error.fieldIsRequired', { field: t('label.username') });
-  // }
-  if (hasProfanity(activeUsername.value)) {
-    errorUsername.value = t('error.fieldContainsProfanity', { field: t('label.username') });
-  }
-  // Validate display name
-  if (hasProfanity(activeDisplayName.value)) {
-    errorDisplayName.value = t('error.fieldContainsProfanity', { field: t('label.displayName') });
-  }
-
   if (errorUsername.value || errorDisplayName.value) {
     return;
   }

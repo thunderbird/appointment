@@ -79,12 +79,6 @@ const onSubmit = async () => {
     return;
   }
 
-  if (hasProfanity(schedule.value.name)) {
-    errorScheduleName.value = t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
-    isLoading.value = false;
-    return;
-  }
-
   const scheduleData = {
     ...schedules?.value[0] ?? {},
     active: true,

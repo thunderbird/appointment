@@ -261,10 +261,6 @@ const scheduleValidationError = (schedule: Schedule): string|null => {
   if (schedule.name === '') {
     return t('error.fieldIsRequired', { field: t('ftue.scheduleName') });
   }
-  // Schedule name contains profanity
-  if (hasProfanity(schedule.name)) {
-    return t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
-  }
   // All good
   return null;
 };

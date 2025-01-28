@@ -47,12 +47,6 @@ const onSubmit = async () => {
     return;
   }
 
-  if (hasProfanity(fullName.value)) {
-    errorFullName.value = t('error.fieldContainsProfanity', { field: t('ftue.fullName') });
-  }
-  if (hasProfanity(username.value)) {
-    errorUsername.value = t('error.fieldContainsProfanity', { field: t('label.username') });
-  }
   if (errorFullName.value || errorUsername.value) {
     isLoading.value = false;
     return;
