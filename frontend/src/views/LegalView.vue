@@ -3,6 +3,7 @@ import {
   computed, onMounted, ref,
 } from 'vue';
 import { useRoute } from 'vue-router';
+/* eslint import/no-unresolved: [2, { ignore: ['\\.html'] }] */
 import privacy from '@/assets/legal/en/privacy.html?raw';
 import terms from '@/assets/legal/en/terms.html?raw';
 

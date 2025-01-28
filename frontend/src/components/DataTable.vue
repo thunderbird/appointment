@@ -4,7 +4,7 @@
  */
 import { useI18n } from 'vue-i18n';
 import { computed, ref, toRefs } from 'vue';
-import { TableDataButtonType, TableDataType, TooltipPosition } from '@/definitions';
+import { TableDataButtonType, TableDataType } from '@/definitions';
 import {
   TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent,
 } from '@/models';
@@ -181,7 +181,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(datum, i) in paginatedDataList" :key="datum[dataKey] as unknown as string">
+          <tr v-for="(datum) in paginatedDataList" :key="datum[dataKey] as unknown as string">
             <td v-if="allowMultiSelect">
               <input :checked="selectedRows.includes(datum)" type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
             </td>

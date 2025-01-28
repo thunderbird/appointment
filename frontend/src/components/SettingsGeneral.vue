@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ColourSchemes } from '@/definitions';
-import { ref, inject, watch } from 'vue';
+import { inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
@@ -53,7 +53,7 @@ watch(
   },
 );
 
-// @ts-ignore
+// @ts-expect-error ignore type err
 // See https://github.com/microsoft/TypeScript/issues/49231
 const timezones = Intl.supportedValuesOf('timeZone');
 
