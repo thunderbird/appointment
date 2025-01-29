@@ -25,6 +25,7 @@ test = [
     "pytest==8.2.2",
     "freezegun==1.5.1",
     "coverage==7.6.1",
+    "ruff==0.9.3",
 ]
 deploy = ['appointment[cli]', 'appointment[db]']
 

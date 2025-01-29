@@ -158,6 +158,10 @@ jobs:
         run: |
           coverage report
 
+      - name: Backend lint check
+        run: |
+          cd ./backend && ruff check
+
 
   validate-frontend:
     needs: detect-changes
@@ -177,7 +181,15 @@ jobs:
         run: |
           cd ./frontend
           npm install
-          
+
+      - name: Build frontend
+        run: |
+          cd ./frontend && npm run build
+
       - name: Test with vitest
         run: |
           cd ./frontend && npm run test -- --run
+
+      - name: Frontend lint check
+        run: |
+          cd ./frontend && npm run lint
