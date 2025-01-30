@@ -48,7 +48,6 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_',
       },
     ],
-    'vue/multi-word-component-names': 'off',
   },
   settings: {
     'import/resolver': {
