@@ -14,7 +14,7 @@ user.init(call);
 // handle ui languages
 watch(locale, (newValue: string) => {
   user.data.settings.language = newValue;
-  window.location.reload(); // This is needed to reload locale for dayjs instance
+  // This is needs a window.location.reload(); to reload locale for dayjs instance
 });
 
 // handle theme mode

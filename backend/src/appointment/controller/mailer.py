@@ -79,8 +79,18 @@ class Mailer:
         return self.body_plain if self.body_plain != '' else escape(self.body_html)
 
     def _attachments(self):
-        """provide all attachments as list"""
-        return self.attachments
+        """provide all attachments as list, add tbpro logo to every mail"""
+        with open('src/appointment/templates/assets/img/tbpro_logo.png', 'rb') as fh:
+            tbpro_logo = fh.read()
+
+        return [
+            Attachment(
+                mime=('image', 'png'),
+                filename='tbpro_logo.png',
+                data=tbpro_logo,
+            ),
+            *self.attachments,
+        ]
 
     def build(self):
         """build email header, body and attachments"""
@@ -204,6 +214,7 @@ class BaseBookingMail(Mailer):
             clock_icon = fh.read()
 
         return [
+            *self.attachments,
             Attachment(
                 mime=('image', 'png'),
                 filename='calendar.png',
@@ -214,7 +225,6 @@ class BaseBookingMail(Mailer):
                 filename='clock.png',
                 data=clock_icon,
             ),
-            *self.attachments,
         ]
 
 
@@ -239,9 +249,10 @@ class InvitationMail(BaseBookingMail):
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
-            # Icon cids
-            calendar_icon_cid=self._attachments()[0].filename,
-            clock_icon_cid=self._attachments()[1].filename,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            calendar_icon_cid=self._attachments()[1].filename,
+            clock_icon_cid=self._attachments()[2].filename,
         )
 
 
@@ -256,7 +267,10 @@ class ZoomMeetingFailedMail(Mailer):
         self.appointment_title = appointment_title
 
     def html(self):
-        return get_template('errors/zoom_invite_failed.jinja2').render(title=self.appointment_title)
+        return get_template('errors/zoom_invite_failed.jinja2').render(
+            title=self.appointment_title,
+            tbpro_logo_cid=self._attachments()[0].filename,
+        )
 
     def text(self):
         return l10n('zoom-invite-failed-plain', {'title': self.appointment_title})
@@ -301,9 +315,10 @@ class ConfirmationMail(BaseBookingMail):
             deny=self.denyUrl,
             schedule_name=self.schedule_name,
             lang=self.lang,
-            # Icon cids
-            calendar_icon_cid=self._attachments()[0].filename,
-            clock_icon_cid=self._attachments()[1].filename,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            calendar_icon_cid=self._attachments()[1].filename,
+            clock_icon_cid=self._attachments()[2].filename,
         )
 
 
@@ -323,7 +338,11 @@ class RejectionMail(Mailer):
         return l10n('reject-mail-plain', {'owner_name': self.owner_name, 'date': self.date})
 
     def html(self):
-        return get_template('rejected.jinja2').render(owner_name=self.owner_name, date=self.date)
+        return get_template('rejected.jinja2').render(
+            owner_name=self.owner_name,
+            date=self.date,
+            tbpro_logo_cid=self._attachments()[0].filename,
+        )
 
 
 class PendingRequestMail(Mailer):
@@ -340,7 +359,11 @@ class PendingRequestMail(Mailer):
         return l10n('pending-mail-plain', {'owner_name': self.owner_name, 'date': self.date})
 
     def html(self):
-        return get_template('pending.jinja2').render(owner_name=self.owner_name, date=self.date)
+        return get_template('pending.jinja2').render(
+            owner_name=self.owner_name,
+            date=self.date,
+            tbpro_logo_cid=self._attachments()[0].filename,
+        )
 
 
 class NewBookingMail(BaseBookingMail):
@@ -374,9 +397,10 @@ class NewBookingMail(BaseBookingMail):
             day=self.day,
             duration=self.duration,
             schedule_name=self.schedule_name,
-            # Icon cids
-            calendar_icon_cid=self._attachments()[0].filename,
-            clock_icon_cid=self._attachments()[1].filename,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            calendar_icon_cid=self._attachments()[1].filename,
+            clock_icon_cid=self._attachments()[2].filename,
         )
 
 
@@ -411,11 +435,13 @@ class SupportRequestMail(Mailer):
             requestee_email=self.requestee_email,
             topic=self.topic,
             details=self.details,
+            tbpro_logo_cid=self._attachments()[0].filename,
         )
 
 
 class InviteAccountMail(Mailer):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, date, *args, **kwargs):
+        self.date = date
         default_kwargs = {'subject': l10n('new-account-mail-subject')}
         super(InviteAccountMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -428,7 +454,11 @@ class InviteAccountMail(Mailer):
         )
 
     def html(self):
-        return get_template('new_account.jinja2').render(homepage_url=os.getenv('FRONTEND_URL'))
+        return get_template('new_account.jinja2').render(
+            date=self.date,
+            homepage_url=os.getenv('FRONTEND_URL'),
+            tbpro_logo_cid=self._attachments()[0].filename,
+        )
 
 
 class ConfirmYourEmailMail(Mailer):
@@ -450,5 +480,6 @@ class ConfirmYourEmailMail(Mailer):
     def html(self):
         return get_template('confirm_email.jinja2').render(
             confirm_email_url=self.confirm_url,
-            decline_email_url=self.decline_url
+            decline_email_url=self.decline_url,
+            tbpro_logo_cid=self._attachments()[0].filename,
         )

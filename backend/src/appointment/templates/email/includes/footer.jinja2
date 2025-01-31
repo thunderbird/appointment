@@ -1,10 +1,18 @@
-{% set colour_text_muted = '#737584' %}
+{% set colour_text_secondary = '#4C4D58' %}
+{% set colour_tbpro_apmt_primary = '#008080' %}
 {% set copy_list = l10n('mail-brand-footer', lang=lang if lang else None).split("\n") %}
-<div style="color: {{ colour_text_muted }}; font-size: 9px; line-height: 11px; font-weight: 700; text-align: center;">
-{% for copy in copy_list %}
-  <p style="margin: 0;">
-    {{ copy }}
-    {% if loop.last %}<a href="{{ homepage_url }}">{{ homepage_url|replace('https://', '')|replace('http://', '') }}</a>.{% endif %}
+<div style="color: {{ colour_text_secondary }}; font-size: 10px; line-height: 12px; font-weight: 400; text-align: center;">
+  <p style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
+    <a href="{{ homepage_url }}/privacy" style="color:{{ colour_tbpro_apmt_primary }};">
+      {{ l10n('mail-brand-footer-privacy', lang=lang if lang else None) }}
+    </a>
+    <a href="{{ homepage_url }}/terms" style="color:{{ colour_tbpro_apmt_primary }};">
+      {{ l10n('mail-brand-footer-legal', lang=lang if lang else None) }}
+    </a>
   </p>
-{% endfor %}
+  {% for copy in copy_list %}
+    <p style="margin: 0;">
+      {{ copy }}
+    </p>
+  {% endfor %}
 </div>
