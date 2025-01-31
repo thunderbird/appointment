@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import {
   inject, ref,
 } from 'vue';
@@ -14,7 +13,6 @@ const {
   errorMessage,
 } = storeToRefs(ftueStore);
 const { previousStep, nextStep } = ftueStore;
-const { t } = useI18n();
 const call = inject(callKey);
 const provider = ref('google');
 

@@ -20,7 +20,7 @@ const { nextStep } = ftueStore;
 const user = useUserStore();
 user.init(call);
 
-// @ts-ignore
+// @ts-expect-error ignore type err
 // See https://github.com/microsoft/TypeScript/issues/49231
 const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string) => ({
   label: timezone.replaceAll('_', ' '),

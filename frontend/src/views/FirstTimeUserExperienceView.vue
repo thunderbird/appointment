@@ -11,7 +11,7 @@ import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
 import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
-import Finish from '@/components/FTUE/Finish.vue';
+import Finish from '@/components/FTUE/StepFinish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import ScheduleView from '@/views/ScheduleView.vue';

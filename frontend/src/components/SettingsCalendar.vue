@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { CalendarManagementType, CalendarProviders, MetricEvents, ColorPalette, AlertSchemes } from '@/definitions';
-import { ref, reactive, inject, onMounted, computed } from 'vue';
+import {
+  CalendarManagementType, CalendarProviders, MetricEvents, ColorPalette, AlertSchemes,
+} from '@/definitions';
+import {
+  ref, reactive, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { callKey, refreshKey } from '@/keys';
-import { CalendarResponse, CalendarListResponse, Exception, ExceptionDetail, PydanticException } from '@/models';
+import {
+  CalendarResponse, CalendarListResponse, Exception, ExceptionDetail, PydanticException,
+} from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import CalendarManagement from '@/components/CalendarManagement.vue';
 import CautionButton from '@/elements/CautionButton.vue';
@@ -33,6 +39,7 @@ const deleteCalendarModalTarget = ref<number>(null);
 const loading = ref(false);
 
 // handle calendar user input to add or edit calendar connections
+// eslint-disable-next-line no-shadow
 enum InputModes {
   Hidden,
   Discovery,

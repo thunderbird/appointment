@@ -31,9 +31,8 @@ const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
 const {
-  hasNextStep, hasPreviousStep, errorMessage,
+  hasNextStep, errorMessage,
 } = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
 
 const calendarStore = useCalendarStore();
 const externalConnectionStore = useExternalConnectionsStore();

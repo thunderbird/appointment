@@ -65,7 +65,7 @@ const call = createFetch({
     beforeFetch({ options }) {
       if (user?.authenticated) {
         const token = user.data.accessToken;
-        // @ts-ignore
+        // @ts-expect-error ignore headers type error
         options.headers.Authorization = `Bearer ${token}`;
       }
       return { options };
@@ -205,10 +205,13 @@ onMounted(async () => {
 
     // Hack to clear $set_once until we get confirmation that this can be filtered.
     // Move the function reference so we can patch it and still retrieve the results before we sanitize it.
+
+    /* eslint no-underscore-dangle: ["error", { "allow": ["_calculate_set_once_properties"] }] */
+
     if (posthog['_original_calculate_set_once_properties'] === undefined) {
       posthog['_original_calculate_set_once_properties'] = posthog._calculate_set_once_properties;
     }
-    posthog._calculate_set_once_properties = function (dataSetOnce?) {
+    posthog._calculate_set_once_properties = function patch(dataSetOnce?) {
       dataSetOnce = posthog['_original_calculate_set_once_properties'](dataSetOnce);
 
       if (dataSetOnce?.$initial_current_url || dataSetOnce?.$initial_pathname) {

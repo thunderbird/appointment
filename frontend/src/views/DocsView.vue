@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import {
-  computed, onMounted, ref,
+  onMounted, ref,
 } from 'vue';
-import { useRoute } from 'vue-router';
+/* eslint import/no-unresolved: [2, { ignore: ['\\.html'] }] */
 import usingZoom from '@/assets/docs/en/using-zoom.html?raw';
-
-const route = useRoute();
 
 const pageContents = ref('');
 

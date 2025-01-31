@@ -1,6 +1,6 @@
 <script setup>
 import {
-  ref, computed, inject, toRefs, watch, onMounted
+  ref, computed, inject, toRefs, watch,
 } from 'vue';
 import { Qalendar } from 'qalendar';
 import 'qalendar/dist/style.css';
@@ -335,13 +335,13 @@ const config = ref({
   },
   dayBoundaries: {
     start: dayBoundary.value.start,
-    end: dayBoundary.value.end
+    end: dayBoundary.value.end,
   },
   eventDialog: {
     // We roll our own
     isDisabled: true,
   },
-  locale: locale === 'de' ? 'de-DE' : 'en-US'
+  locale: locale === 'de' ? 'de-DE' : 'en-US',
 });
 
 /**

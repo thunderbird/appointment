@@ -307,6 +307,7 @@ const saveSchedule = async (withConfirmation = true) => {
     ? await scheduleStore.updateSchedule(call, props.schedule.id, obj)
     : await scheduleStore.createSchedule(call, obj);
 
+  // eslint-disable-next-line no-prototype-builtins
   if (response.hasOwnProperty('error')) {
     // error message is in data
     scheduleCreationError.value = (response as Error).message;

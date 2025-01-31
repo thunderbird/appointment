@@ -40,7 +40,7 @@ watch(
   () => props.active,
   () => {
     state.value = props.active;
-  }
+  },
 );
 </script>
 
@@ -66,7 +66,7 @@ watch(
   --colour-inactive: #FEFFFF;
   --colour-highlight: #FEFFFF;
   --colour-border-intense: #777580;
-  
+
   html.dark & {
     --colour-base: #737584;
     --colour-active: #A3ECE3;
@@ -92,7 +92,7 @@ watch(
   font-size: var(--txt-input);
   line-height: var(--line-height-input);
   width: 100%;
-  font-weight: 500;  
+  font-weight: 500;
 }
 
 .toggle-container {

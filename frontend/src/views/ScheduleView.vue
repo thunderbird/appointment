@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Dismissibles } from '@/definitions';
-import { ref, inject, onMounted, computed } from 'vue';
+import {
+  ref, inject, onMounted, computed,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';

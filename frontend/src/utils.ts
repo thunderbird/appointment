@@ -1,5 +1,4 @@
 // get the first key of given object that points to given value
-import { ColourSchemes } from '@/definitions';
 import { Ref } from 'vue';
 import { i18nType } from '@/composables/i18n';
 import {
