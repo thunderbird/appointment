@@ -14,12 +14,35 @@ const verifyBookingPageLoaded = async () => {
   await expect(bookingPage.invitingText).toBeVisible();
   await expect(bookingPage.invitingText).toContainText(PROD_DISPLAY_NAME);
   await expect(bookingPage.bookingCalendar).toBeVisible();
-  // calendar header should contain current MMM YYYY
+
+  // verify calendar header
   const today: Date = new Date();
   const curMonth: string = today.toLocaleString('default', { month: 'short' });
   const curYear: string = String(today.getFullYear());
-  await expect(bookingPage.calendarHeader).toHaveText(`${curMonth} ${curYear}`);
-  // confirm button is disabled by default until a slot is selected
+
+  // by default you can only book slots 1-14 days in the future; if it's near the end of the
+  // month then there's a chance there are no slots availble to be booked; the booking request
+  // page always shows the month that has the first available time slot; so the month displayed
+  // may be the current month or one month in the future (and perhaps next year if January)
+
+  // the header may contain either the current month or the next month
+  today.setMonth(today.getMonth() + 1, 1);
+  const nextMonth = today.toLocaleString('default', { month: 'short' });
+  const monthRegex = new RegExp(String.raw`${curMonth}|${nextMonth}`);
+  await expect(bookingPage.calendarHeader).toContainText(monthRegex);
+
+  // if the current month is Dec then the displayed month might be Jan, which means in that case
+  // the year value might be this year or next year; for other months it's safe to check for
+  // the current year only because the test may book appointments in current or +1 month only
+  if (curMonth == 'Dec') {
+    const nextYear = curYear + 1;
+    var yearRegex = new RegExp(String.raw`... ${curYear}|${nextYear}`);
+  } else {
+    var yearRegex = new RegExp(String.raw`... ${curYear}`);
+  }
+  await expect(bookingPage.calendarHeader).toContainText(yearRegex);
+
+  // also the confirm button is disabled by default until a slot is selected
   await expect(bookingPage.confirmBtn).toBeDisabled();
 }
 
@@ -85,7 +108,9 @@ test.describe('book an appointment', {
     // navigate to and sign into appointment (host account whom we requested a booking with/owns the share link)
     await navigateToAppointmentProdAndSignIn(page);
 
-    // now verify a 'hold' now exists on the host calendar at the time slot that was requested
-    await dashboardPage.verifyHoldEventCreated(selectedSlot, PROD_DISPLAY_NAME, APPT_BOOKING_REQUESTER_NAME);
+    // now verify a corresponding pending booking was created on the host account's list of pending bookings
+    // (drop the day of the week from our time slot string as this function just needs the month, day, and year)
+    const expMonthDayYear = expDateStr.substring(expDateStr.indexOf(',') + 2);
+    await dashboardPage.verifyHoldEventCreated(PROD_DISPLAY_NAME, APPT_BOOKING_REQUESTER_NAME, expMonthDayYear, expTimeStr);
   });
 });
