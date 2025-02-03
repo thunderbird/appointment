@@ -74,6 +74,6 @@ def send_invite_email(
     db.add(invite_code)
     db.commit()
 
-    background_tasks.add_task(send_invite_account_email, to=email)
+    background_tasks.add_task(send_invite_account_email, to=email, lang=subscriber.language)
 
     return invite_code

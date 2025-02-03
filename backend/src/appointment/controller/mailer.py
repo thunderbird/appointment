@@ -442,7 +442,8 @@ class SupportRequestMail(Mailer):
 class InviteAccountMail(Mailer):
     def __init__(self, date, *args, **kwargs):
         self.date = date
-        default_kwargs = {'subject': l10n('new-account-mail-subject')}
+        lang = kwargs['lang'] if 'lang' in kwargs else None
+        default_kwargs = {'subject': l10n('new-account-mail-subject', lang=lang)}
         super(InviteAccountMail, self).__init__(*args, **default_kwargs, **kwargs)
 
     def text(self):
@@ -456,6 +457,7 @@ class InviteAccountMail(Mailer):
     def html(self):
         return get_template('new_account.jinja2').render(
             date=self.date,
+            lang=self.lang,
             homepage_url=os.getenv('FRONTEND_URL'),
             tbpro_logo_cid=self._attachments()[0].filename,
         )

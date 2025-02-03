@@ -170,7 +170,12 @@ def invite_waiting_list_users(
         db.add(invite_code)
         db.commit()
 
-        background_tasks.add_task(send_invite_account_email, date=waiting_list_user.time_created, to=subscriber.email)
+        background_tasks.add_task(
+            send_invite_account_email,
+            date=waiting_list_user.time_created,
+            to=subscriber.email,
+            lang=subscriber.language
+        )
         accepted.append(waiting_list_user.id)
 
     if posthog:

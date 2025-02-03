@@ -113,9 +113,9 @@ def send_support_email(requestee_name, requestee_email, topic, details):
             sentry_sdk.capture_exception(e)
 
 
-def send_invite_account_email(date, to):
+def send_invite_account_email(date, to, lang):
     try:
-        mail = InviteAccountMail(date=date, to=to)
+        mail = InviteAccountMail(date=date, to=to, lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
