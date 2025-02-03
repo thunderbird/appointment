@@ -214,7 +214,7 @@ class BaseBookingMail(Mailer):
             clock_icon = fh.read()
 
         return [
-            *self.attachments,
+            *super()._attachments(),
             Attachment(
                 mime=('image', 'png'),
                 filename='calendar.png',
