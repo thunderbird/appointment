@@ -20,7 +20,7 @@ mail-brand-footer = You are receiving this email because you signed up on our we
 
                     Copyright © 2025 MZLA Technologies. All rights reserved.
                     MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
-mail-brand-footer-privacy = Prvacy
+mail-brand-footer-privacy = Privacy
 mail-brand-footer-legal = Legal
 
 ## Invitation
@@ -173,13 +173,15 @@ new-account-mail-html-heading = Thank you for signing up to be one of the earlie
                                 We’re excited to have you on board!
 new-account-mail-html-body = You added your email to our beta wait-list on { $date }.
 new-account-mail-html-body-2 = Sign in and start using Appointment by clicking the button below or pasting this link into your browser:
-                               { $link }
+
 # Variables:
 # $homepage_url (String) - URL to Thunderbird Appointment
-new-account-mail-plain = You've been invited to Thunderbird Appointment.
-                    Login with this email address to continue.
-                    { $homepage_url }
-                    {-brand-footer}
+new-account-mail-plain = Thank you for signing up to be one of the earliest testers of Thunderbird Appointment Beta.
+                         We’re excited to have you on board!
+                         You added your email to our beta wait-list on { $date }.
+                         Sign in and start using Appointment by clicking the button below or pasting this link into your browser:
+                         { $homepage_url }
+                         {-brand-footer}
 
 ## Confirm Email for waiting list
 confirm-email-mail-subject = Confirm your email to join the waiting list!

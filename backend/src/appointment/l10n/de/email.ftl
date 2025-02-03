@@ -169,15 +169,17 @@ new-account-mail-subject = Du wurdest zu Thunderbird Appointment eingeladen
 new-account-mail-action = Registrieren
 new-account-mail-html-heading = Vielen Dank, dass Du dich als einer der ersten Tester von Thunderbird Appointment Beta registrierst.
                                 Wir freuen uns, dass Du dabei bist!
-new-account-mail-html-body = Du hast Deine E-Mail-Adresse am { $date } auf unsere Beta-Warteliste gesetzt.
+new-account-mail-html-body = Deine E-Mail-Adresse wurde am { $date } auf unsere Beta-Warteliste gesetzt.
 new-account-mail-html-body-2 = Melde Dich an und beginne mit der Nutzung von Appointment, indem Du auf die Schaltfläche unten klickst oder diesen Link in Deinen Browser einfügst:
-                               { $link }
+
 # Variables:
 # $homepage_url (String) - URL to Thunderbird Appointment
-new-account-mail-plain = Du wurdest zu Thunderbird Appointment eingeladen.
-                    Logge dich mit dieser E-Mail-Adresse ein um fortzufahren.
-                    { $homepage_url }
-                    {-brand-footer}
+new-account-mail-plain = Vielen Dank, dass Du dich als einer der ersten Tester von Thunderbird Appointment Beta registrierst.
+                         Wir freuen uns, dass Du dabei bist!
+                         Deine E-Mail-Adresse wurde am { $date } auf unsere Beta-Warteliste gesetzt.
+                         Melde Dich an und beginne mit der Nutzung von Appointment, indem Du auf die Schaltfläche unten klickst oder diesen Link in Deinen Browser einfügst:
+                         { $homepage_url }
+                         {-brand-footer}
 
 ## Confirm Email for waiting list
 confirm-email-mail-subject = Bestätige deine E-Mail-Adresse um der Warteliste beizutreten!
