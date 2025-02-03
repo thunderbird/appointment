@@ -1,17 +1,21 @@
 {% extends "includes/base.jinja2" %}
-{# Code begins! #}
+{% set heading = '<br>'.join(l10n('new-account-mail-html-heading', lang=lang if lang else None).split("\n")) %}
+
 {% block information %}
   <div style="color: {{ colour_text_base }}; text-align: center;">
     <p style="color: {{ colour_tbpro_apmt_primary_hover }}; font-weight: 600; font-size: 16px; line-height: 19px;">
-      {{ l10n('new-account-mail-html-heading') }}
+      {{ heading|safe }}
     </p>
     <p style="font-weight: 400; font-size: 10px; line-height: 12px;">
-      {{ l10n('new-account-mail-html-body', {'date': date}) }}
+      {{ l10n('new-account-mail-html-body', {'date': date}, lang=lang if lang else None) }}
     </p>
     <p style="font-weight: 400; font-size: 13px; line-height: 16px;">
-      {{ l10n('new-account-mail-html-body-2', {'link': homepage_url}) }}
+      {{ l10n('new-account-mail-html-body-2', lang=lang if lang else None) }}<br />
+      <a href="{{ homepage_url }}" style="color: {{ colour_tbpro_apmt_primary }};">
+        {{ homepage_url }}
+      </a>
     </p>
-    <p style="margin-bottom: 16px">
+    <p style="margin-bottom: 16px; margin-top: 32px;">
       <a
         href="{{ homepage_url }}"
         style="
@@ -27,10 +31,10 @@
           text-decoration:none;
           white-space: nowrap;
         "
-      >{{ l10n('new-account-mail-action') }}</a>
+      >{{ l10n('new-account-mail-action', lang=lang if lang else None) }}</a>
     </p>
     <p style="color: {{ colour_icon_secondary }}; font-weight: 400; font-size: 10px; line-height: 12px; margin: 0;">
-      {{ l10n('mail-brand-reply-hint') }}
+      {{ l10n('mail-brand-reply-hint', lang=lang if lang else None) }}
     </p>
   </div>
 {% endblock %}

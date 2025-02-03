@@ -31,13 +31,14 @@
 {% endif %}
 {% if self.information()|trim %}
 <div style="
+  box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 16px;
   max-width: 576px;
   border: 1px solid {{ colour_tbpro_apmt_primary }};
   border-radius: 12px;
-  padding: 16px;
+  padding: 16px 46px;
   background-color: {{ colour_tbpro_apmt_soft }}
 ">
   {% block information %}{% endblock %}
