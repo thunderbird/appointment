@@ -6,13 +6,12 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import {
-  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey, hasProfanityKey,
+  apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
 } from '@/keys';
 import { defaultLocale } from '@/utils';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import UAParser from 'ua-parser-js';
-import { Profanity } from '@2toad/profanity';
 
 import NavBar from '@/components/NavBar.vue';
 import TitleBar from '@/components/TitleBar.vue';
@@ -49,14 +48,6 @@ const {
   show: showNotification,
   lock: lockNotification,
 } = siteNotificationStore;
-
-// Handle input filters
-// The library will error if we supply it with an unsupported language
-const supportedLanguages = ['en', 'de'];
-const languageList = supportedLanguages.indexOf(lang) !== -1 && lang !== 'en' ? [lang, 'en'] : ['en'];
-const profanity = new Profanity({ languages: languageList });
-const hasProfanity = (input: string) => profanity.exists(input);
-provide(hasProfanityKey, hasProfanity);
 
 // handle auth and fetch
 const call = createFetch({

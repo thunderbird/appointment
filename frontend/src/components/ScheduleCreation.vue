@@ -13,7 +13,7 @@ import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
-  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+  dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
@@ -48,7 +48,6 @@ const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
-const hasProfanity = inject(hasProfanityKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
 
@@ -260,10 +259,6 @@ const scheduleValidationError = (schedule: Schedule): string|null => {
   // Schedule name is empty
   if (schedule.name === '') {
     return t('error.fieldIsRequired', { field: t('ftue.scheduleName') });
-  }
-  // Schedule name contains profanity
-  if (hasProfanity(schedule.name)) {
-    return t('error.fieldContainsProfanity', { field: t('ftue.scheduleName') });
   }
   // All good
   return null;

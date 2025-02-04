@@ -42,7 +42,3 @@ export const paintBackgroundKey = Symbol('paintBackground') as InjectionKey<Pain
 // Provide duration data in human friendly form
 type DurationHumanizedType = (minutes: number) => string;
 export const durationHumanizedKey = Symbol('durationHumanized') as InjectionKey<DurationHumanizedType>;
-
-// Profice profanity filter
-type HasProfanityType = (url: string) => boolean;
-export const hasProfanityKey = Symbol('hasProfanity') as InjectionKey<HasProfanityType>;
