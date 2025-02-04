@@ -333,7 +333,11 @@ class TestWaitingListAdminInvite:
             mock.assert_called_once()
             # Triple access D:, one for ArgList, one for Call<Function, Args...>), and then the function is in a tuple?!
             assert mock.call_args_list[0][0][0] == send_invite_account_email
-            assert mock.call_args_list[0].kwargs == {'to': waiting_list_user.email}
+            assert mock.call_args_list[0].kwargs == {
+                'date': waiting_list_user.time_created,
+                'lang': 'en',
+                'to': waiting_list_user.email,
+            }
 
         with with_db() as db:
             db.add(waiting_list_user)
@@ -379,7 +383,11 @@ class TestWaitingListAdminInvite:
                     assert waiting_list_user.invite.subscriber.email == waiting_list_user.email
 
                     assert mock.call_args_list[i][0][0] == send_invite_account_email
-                    assert mock.call_args_list[i].kwargs == {'to': waiting_list_user.email}
+                    assert mock.call_args_list[i].kwargs == {
+                        'date': waiting_list_user.time_created,
+                        'lang': 'en',
+                        'to': waiting_list_user.email,
+                    }
 
     def test_invite_existing_subscriber(
         self,
@@ -455,5 +463,8 @@ class TestWaitingListAdminInvite:
 
                         assert waiting_list_user
                         assert mock.call_args_list[i][0][0] == send_invite_account_email
-                        assert mock.call_args_list[i].kwargs == {'to': waiting_list_user.email}
-
+                        assert mock.call_args_list[i].kwargs == {
+                            'date': waiting_list_user.time_created,
+                            'lang': 'en',
+                            'to': waiting_list_user.email
+                        }

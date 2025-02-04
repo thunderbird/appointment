@@ -6,18 +6,22 @@
 -brand-slogan = Plan less, do more.
 -brand-sign-up-with-url = Sign up on appointment.day
 -brand-sign-up-with-no-url = Sign up on
--brand-footer = This message was sent from:
-                {-brand-name}
-                {-brand-slogan} {-brand-sign-up-with-url}
+-brand-footer = You are receiving this email because you signed up on our website for the Thunderbird Appointment Beta.
+
+                Copyright © 2025 MZLA Technologies. All rights reserved.
+                MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
 
 mail-brand-contact-form = contact form
-mail-brand-support-hint = Got questions? We're here to help. Fill out our { $contact_form_link }, or simply reply to this email for support.
+mail-brand-support-hint = Got questions? We're here to help. Simply reply to this email for support.
 mail-brand-reply-hint = Got questions? We're here to help, you can reach us via our { $contact_form_link }.
 mail-brand-reply-hint-attendee-info = Need to get in touch with { $name }? Simply reply to this email.
 
-mail-brand-footer = This message was sent from:
-                    {-brand-name}
-                    {-brand-slogan} {-brand-sign-up-with-no-url}
+mail-brand-footer = You are receiving this email because you signed up on our website for the Thunderbird Appointment Beta.
+
+                    Copyright © 2025 MZLA Technologies. All rights reserved.
+                    MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
+mail-brand-footer-privacy = Privacy
+mail-brand-footer-legal = Legal
 
 ## Invitation
 
@@ -164,15 +168,20 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) sent the followi
 
 ## New/Invited Account Email
 new-account-mail-subject = You've been invited to Thunderbird Appointment
-new-account-mail-action = Log In
-new-account-mail-html-heading = You've been invited to Thunderbird Appointment.
-new-account-mail-html-body = Login with this email address to continue.
+new-account-mail-action = Sign Up
+new-account-mail-html-heading = Thank you for signing up to be one of the earliest testers of Thunderbird Appointment Beta.
+                                We’re excited to have you on board!
+new-account-mail-html-body = You added your email to our beta wait-list on { $date }.
+new-account-mail-html-body-2 = Sign in and start using Appointment by clicking the button below or pasting this link into your browser:
+
 # Variables:
 # $homepage_url (String) - URL to Thunderbird Appointment
-new-account-mail-plain = You've been invited to Thunderbird Appointment.
-                    Login with this email address to continue.
-                    { $homepage_url }
-                    {-brand-footer}
+new-account-mail-plain = Thank you for signing up to be one of the earliest testers of Thunderbird Appointment Beta.
+                         We’re excited to have you on board!
+                         You added your email to our beta wait-list on { $date }.
+                         Sign in and start using Appointment by clicking the button below or pasting this link into your browser:
+                         { $homepage_url }
+                         {-brand-footer}
 
 ## Confirm Email for waiting list
 confirm-email-mail-subject = Confirm your email to join the waiting list!
