@@ -13,7 +13,7 @@ import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
-  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+  dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
@@ -48,7 +48,6 @@ const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
-const hasProfanity = inject(hasProfanityKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
 

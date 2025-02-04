@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
-import { dayjsKey, callKey, hasProfanityKey } from '@/keys';
+import { dayjsKey, callKey } from '@/keys';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -12,7 +12,6 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
-const hasProfanity = inject(hasProfanityKey);
 
 const ftueStore = useFTUEStore();
 const { hasNextStep } = storeToRefs(ftueStore);

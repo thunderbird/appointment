@@ -10,7 +10,7 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import {
-  dayjsKey, callKey, isoWeekdaysKey, hasProfanityKey,
+  dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
 import { Error, SelectOption } from '@/models';
 import TextInput from '@/tbpro/elements/TextInput.vue';
@@ -23,7 +23,6 @@ const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
-const hasProfanity = inject(hasProfanityKey);
 
 const ftueStore = useFTUEStore();
 const {

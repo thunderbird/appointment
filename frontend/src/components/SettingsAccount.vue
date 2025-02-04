@@ -5,7 +5,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import { callKey, hasProfanityKey } from '@/keys';
+import { callKey } from '@/keys';
 import {
   StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
 } from '@/models';
@@ -30,7 +30,6 @@ import UserInviteTable from '@/components/UserInviteTable.vue';
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
-const hasProfanity = inject(hasProfanityKey);
 const router = useRouter();
 const schedule = useScheduleStore();
 const externalConnectionsStore = useExternalConnectionsStore();
