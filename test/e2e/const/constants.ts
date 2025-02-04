@@ -3,6 +3,7 @@ export const APPT_PROD_URL = String(process.env.APPT_PROD_URL);
 export const APPT_PROD_MY_SHARE_LINK = String(process.env.APPT_PROD_MY_SHARE_LINK);
 export const APPT_PROD_SHORT_SHARE_LINK_PREFIX = String(process.env.APPT_PROD_SHORT_SHARE_LINK_PREFIX);
 export const APPT_PROD_LONG_SHARE_LINK_PREFIX = String(process.env.APPT_PROD_LONG_SHARE_LINK_PREFIX);
+export const APPT_PROD_PENDING_BOOKINGS_PAGE = `${process.env.APPT_PROD_URL}bookings/pending`;
 
 // page titles
 export const APPT_PAGE_TITLE = 'Thunderbird Appointment';
