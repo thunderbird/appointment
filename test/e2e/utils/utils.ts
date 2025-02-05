@@ -3,14 +3,14 @@ import { SplashscreenPage } from "../pages/splashscreen-page";
 import { FxAPage } from "../pages/fxa-page";
 import { DashboardPage } from "../pages/dashboard-page";
 import { expect, type Page } from '@playwright/test';
-import { APPT_PROD_URL, APPT_PAGE_TITLE } from "../const/constants";
+import { APPT_URL, APPT_PAGE_TITLE } from "../const/constants";
 
 /**
  * Navigate to and sign into the Appointment application using the production URL and
  * production credentials provided in the .env file.
  */
 export const navigateToAppointmentProdAndSignIn = async (page: Page) => {
-    console.log(`navigating to appointment production (${APPT_PROD_URL}) and signing in`);
+    console.log(`navigating to appointment production (${APPT_URL}) and signing in`);
     const homePage = new SplashscreenPage(page);
     const signInPage = new FxAPage(page);
     const dashboardPage = new DashboardPage(page);

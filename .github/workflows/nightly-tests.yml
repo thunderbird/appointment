@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      APPT_PROD_LOGIN_EMAIL: ${{ secrets.E2E_APPT_PROD_LOGIN_EMAIL }}
-      APPT_PROD_LOGIN_PWORD: ${{ secrets.E2E_APPT_PROD_LOGIN_PASSWORD }}
-      APPT_PROD_DISPLAY_NAME: ${{ secrets.E2E_APPT_PROD_DISPLAY_NAME }}
-      APPT_PROD_MY_SHARE_LINK: ${{ secrets.E2E_APPT_PROD_MY_SHARE_LINK }}
+      APPT_LOGIN_EMAIL: ${{ secrets.E2E_APPT_PROD_LOGIN_EMAIL }}
+      APPT_LOGIN_PWORD: ${{ secrets.E2E_APPT_PROD_LOGIN_PASSWORD }}
+      APPT_DISPLAY_NAME: ${{ secrets.E2E_APPT_PROD_DISPLAY_NAME }}
+      APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_PROD_MY_SHARE_LINK }}
       APPT_BOOKING_REQUESTER_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKING_REQUESTER_EMAIL }}
     steps:
       - uses: actions/checkout@v4
@@ -50,5 +50,5 @@ jobs:
       - name: Run Playwright Tests on Browserstack
         run: |
           cd ./test/e2e
-          cp .env.example .env
+          cp .env.prod.example .env
           npm run prod-sanity-test-browserstack-gha

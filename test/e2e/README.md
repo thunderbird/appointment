@@ -30,19 +30,19 @@ This includes the existing Appointment account's email address, password, user's
 The display name is found in Appointment => Settings => Account => Display name.
 The share link is found in Appointment => Settings => Account => My Link.
 The tests also require an email address to be used when actually requesting bookings. This is the email address entered on the `Book selection` dialog (after an appoitment slot was selected on the booking share link page). Note that real Appointment emails will be sent to this email address.
-First copy over the provided `.example.env` to a local `.env`:
+First copy over the provided `.env.prod.example` to a local `.env`:
 
 ```bash
 cd test/e2e
-cp .env.example .env
+cp .env.prod.example .env
 ```
 
 Then edit your local `.env` file and provide the following values:
 ```dotenv
-APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
-APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
-APPT_PROD_DISPLAY_NAME=<appointment-user-display-name>
-APPT_PROD_MY_SHARE_LINK=<apointment-user-share-link>
+APPT_LOGIN_EMAIL=<existing-test-FxA-user-email>
+APPT_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_DISPLAY_NAME=<appointment-user-display-name>
+APPT_MY_SHARE_LINK=<apointment-user-share-link>
 APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
 ```
 
@@ -73,10 +73,10 @@ You can run the E2E tests from your local machine but against browsers provided 
 Once you have credentials for an existing Appointemnt test account, edit your local `.env` file and add these details (more information found above):
 
 ```dotenv
-APPT_PROD_LOGIN_EMAIL=<existing-test-FxA-user-email>
-APPT_PROD_LOGIN_PWORD=<exisiting-test-FxA-user-password>
-APPT_PROD_DISPLAY_NAME=<appointment-user-display-name>
-APPT_PROD_MY_SHARE_LINK=<apointment-user-share-link>
+APPT_LOGIN_EMAIL=<existing-test-FxA-user-email>
+APPT_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_DISPLAY_NAME=<appointment-user-display-name>
+APPT_MY_SHARE_LINK=<apointment-user-share-link>
 APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
 ```
 

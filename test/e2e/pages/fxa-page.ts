@@ -17,7 +17,7 @@ export class FxAPage {
   }
 
   async signIn() {
-    expect(PROD_LOGIN_PWORD, 'getting APPT_PROD_LOGIN_PWORD env var').toBeTruthy();
+    expect(PROD_LOGIN_PWORD, 'getting APPT_LOGIN_PWORD env var').toBeTruthy();
     await this.passwordInput.fill(String(PROD_LOGIN_PWORD));
     await this.signInButton.click();
   }
