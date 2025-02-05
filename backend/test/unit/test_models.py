@@ -1,6 +1,32 @@
 import pytest
 from sqlalchemy.exc import IntegrityError
 from appointment.database import models, repo, schemas
+from appointment.database.models import calculate_encrypted_length
+from appointment.utils import encrypt
+
+
+class TestMisc:
+    def test_calculate_encrypted_length(self, faker):
+        """Ensures an encrypted string is equal to our length calc method.
+        We have a list of clear_strs which are random bits of text with variable length.
+        We encrypt it (same method used for db fields) and run it through our calculate method,
+        and assert they are the same length"""
+        clear_strs = [
+            'a',
+            faker.text(max_nb_chars=7),
+            faker.text(max_nb_chars=32),
+            faker.text(max_nb_chars=64),
+            faker.text(max_nb_chars=82),
+            faker.text(max_nb_chars=128),
+            faker.text(max_nb_chars=250),
+            faker.text(max_nb_chars=256),
+            faker.text(max_nb_chars=300),
+            faker.text(max_nb_chars=512),
+            faker.text(max_nb_chars=1024),
+            faker.text(max_nb_chars=2048),
+        ]
+        for i, clear_str in enumerate(clear_strs):
+            assert len(encrypt(clear_str)) == calculate_encrypted_length(len(clear_str))
 
 
 class TestAppointment:
