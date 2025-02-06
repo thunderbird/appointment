@@ -97,10 +97,10 @@ When running locally and looking into code coverage further you may wish to gene
 ```bash
 coverage html
 ```
+
 Then open the resulting `backend/htmlcov/index.html` file in your browser and you can click down into individual source files to see which statements were (and were not) executed during the test session.
 
 Note that the code coverage report will contain the coverage generated for all the tests that were ran in your pytest session; so if you want to measure the code coverage for a subset of tests just provide the test path on the `coverage run -m pytest` command as you normally would, then generate the coverage report(s).
-
 
 ## Database Migrations
 
