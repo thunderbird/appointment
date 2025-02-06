@@ -251,8 +251,8 @@ class InvitationMail(BaseBookingMail):
             duration=self.duration,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
-            calendar_icon_cid=self._attachments()[1].filename,
-            clock_icon_cid=self._attachments()[2].filename,
+            calendar_icon_cid=self._attachments()[2].filename,
+            clock_icon_cid=self._attachments()[3].filename,
         )
 
 
