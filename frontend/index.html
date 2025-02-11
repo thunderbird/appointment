@@ -11,9 +11,9 @@
       const browserPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
       if (
-        (user?.settings?.colourScheme === 'dark'
-        || (user?.settings?.colourScheme === 'system' && browserPrefersDark)
-        || (!user?.settings?.colourScheme && browserPrefersDark))
+        (user.settings?.colourScheme === 'dark'
+        || (user.settings?.colourScheme === 'system' && browserPrefersDark)
+        || (!user.settings?.colourScheme && browserPrefersDark))
       ) {
         document.documentElement.classList.add('dark');
       } else {

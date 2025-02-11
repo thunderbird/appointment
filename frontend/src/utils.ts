@@ -92,7 +92,7 @@ export const timeFormat = (): string => {
 // This functions works independent from Pinia stores so that
 // it can be called even if stores are not initialized yet.
 export const defaultLocale = () => {
-  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
   return user?.settings?.language ?? navigator.language.split('-')[0];
 }
 
