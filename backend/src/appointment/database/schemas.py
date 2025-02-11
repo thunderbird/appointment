@@ -311,7 +311,7 @@ class SubscriberIn(BaseModel):
     secondary_email: str | None = None
     language: str | None = FALLBACK_LOCALE
     colour_scheme: ColourScheme = ColourScheme.system
-    time_mode: TimeMode = TimeMode.h24
+    time_mode: TimeMode = TimeMode.h12
 
 
 class SubscriberBase(SubscriberIn):

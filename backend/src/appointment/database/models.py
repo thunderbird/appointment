@@ -160,7 +160,7 @@ class Subscriber(HasSoftDelete, Base):
     language = Column(encrypted_type(String), nullable=False, default=FALLBACK_LOCALE, index=True)
     timezone = Column(encrypted_type(String), index=True)
     colour_scheme = Column(Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True)
-    time_mode = Column(Enum(TimeMode), default=TimeMode.h24, nullable=False, index=True)
+    time_mode = Column(Enum(TimeMode), default=TimeMode.h12, nullable=False, index=True)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
     minimum_valid_iat_time = Column('minimum_valid_iat_time', encrypted_type(DateTime))
