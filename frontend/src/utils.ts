@@ -3,7 +3,8 @@ import { Ref } from 'vue';
 import { i18nType } from '@/composables/i18n';
 import {
   CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent, PydanticException,
-} from './models';
+  User,
+} from '@/models';
 
 /**
 * Lowercases the first character of a string
@@ -80,9 +81,9 @@ export const download = (data: BlobPart, filename: string, contenttype: string =
 // This functions works independent from Pinia stores so that
 // it can be called even if stores are not initialized yet.
 export const timeFormat = (): string => {
-  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
-  const is12HourTime = Intl.DateTimeFormat().resolvedOptions().hour12 ? 12 : 24;
-  const format = Number(user?.setttings?.timeFormat ?? is12HourTime);
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
+  const detected = Intl.DateTimeFormat().resolvedOptions().hour12 ? 12 : 24;
+  const format = Number(user.settings?.timeFormat ?? detected);
   return format === 24 ? 'HH:mm' : 'hh:mm A';
 };
 
