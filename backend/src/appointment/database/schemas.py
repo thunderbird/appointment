@@ -166,8 +166,8 @@ class ScheduleBase(BaseModel):
     slug: Optional[str] = None
     calendar_id: int
     location_type: LocationType | None = LocationType.inperson
-    location_url: str | None = None
-    details: str | None = None
+    location_url: Annotated[str | None, Field(max_length=2048)] = None
+    details: Annotated[str | None, Field(max_length=250)] = None
     start_date: date | None = None
     end_date: date | None = None
     start_time: time | None = None

@@ -96,9 +96,17 @@ class TimeMode(enum.Enum):
     h24 = 24
 
 
+def calculate_encrypted_length(length: int):
+    """Calculate the length of the string after it's been encrypted and encoded."""
+    cipher_length = length + 16 - (length % 16)  # Fixed block size of 16 for Aes
+    return int((cipher_length + 2) / 3) << 2  # Base64 with padding
+
+
 def encrypted_type(column_type, length: int = 255, **kwargs) -> StringEncryptedType:
     """Helper to reduce visual noise when creating model columns"""
-    return StringEncryptedType(column_type, secret, AesEngine, 'pkcs5', length=length, **kwargs)
+    return StringEncryptedType(
+        column_type, secret, AesEngine, 'pkcs5', length=calculate_encrypted_length(length), **kwargs
+    )
 
 
 @as_declarative()
@@ -441,6 +449,7 @@ class Invite(Base):
 
 class WaitingList(Base):
     """Holds a list of hopefully future-Appointment users"""
+
     __tablename__ = 'waiting_list'
 
     id = Column(Integer, primary_key=True, index=True)
