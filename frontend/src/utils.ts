@@ -83,11 +83,17 @@ export const download = (data: BlobPart, filename: string, contenttype: string =
 export const timeFormat = (): string => {
   const fallbackFormat = import.meta.env?.VITE_DEFAULT_HOUR_FORMAT ?? 12;
   const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
-  const use12HourTime = Intl.DateTimeFormat().resolvedOptions()?.hour12;
 
-  // `.hour12` is an optional value and can be undefined. So default to our env value, and if not undefined use it.
+  let use12HourTime = null;
+  try {
+    use12HourTime = Intl.DateTimeFormat(window.navigator.language, { hour: 'numeric' }).resolvedOptions()?.hour12 ?? null;
+  } catch (e: RangeError|any) {
+    // Catch any range error raised by invalid language/locale codes and pass
+  }
+
+  // `.hour12` is an optional value and can be undefined (we cast it as null.) So default to our env value, and if not null use it.
   let detected = fallbackFormat;
-  if (typeof use12HourTime !== 'undefined') {
+  if (use12HourTime !== null) {
     detected = use12HourTime ? 12 : 24;
   }
 
