@@ -81,8 +81,22 @@ export const download = (data: BlobPart, filename: string, contenttype: string =
 // This functions works independent from Pinia stores so that
 // it can be called even if stores are not initialized yet.
 export const timeFormat = (): string => {
+  const fallbackFormat = import.meta.env?.VITE_DEFAULT_HOUR_FORMAT ?? 12;
   const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
-  const detected = Intl.DateTimeFormat().resolvedOptions().hour12 ? 12 : 24;
+
+  let use12HourTime = null;
+  try {
+    use12HourTime = Intl.DateTimeFormat(window.navigator.language, { hour: 'numeric' }).resolvedOptions()?.hour12 ?? null;
+  } catch (e: RangeError|any) {
+    // Catch any range error raised by invalid language/locale codes and pass
+  }
+
+  // `.hour12` is an optional value and can be undefined (we cast it as null.) So default to our env value, and if not null use it.
+  let detected = fallbackFormat;
+  if (use12HourTime !== null) {
+    detected = use12HourTime ? 12 : 24;
+  }
+
   const format = Number(user.settings?.timeFormat ?? detected);
   return format === 24 ? 'HH:mm' : 'hh:mm A';
 };
