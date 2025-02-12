@@ -32,14 +32,14 @@ defineProps<Props>();
       <span v-if="requested">{{ t('info.bookingSuccessfullyRequested') }}</span>
       <span v-else>{{ t('info.bookingSuccessfullyConfirmed') }}</span>
     </div>
-    <div class="flex w-full max-w-sm flex-col gap-1 rounded-lg shadow-lg">
+    <div class="flex w-full max-w-sm flex-col gap-1 rounded-lg shadow-lg dark:bg-gray-800">
       <div class="flex h-14 items-center justify-around rounded-t-md bg-teal-500">
-        <div v-for="i in 2" :key="i" class="size-4 rounded-full bg-white"></div>
+        <div v-for="i in 2" :key="i" class="size-4 rounded-full bg-white dark:bg-gray-600"></div>
       </div>
-      <div class="m-2 text-center text-2xl font-bold text-gray-500">
+      <div class="m-2 text-center text-2xl font-bold text-gray-500 dark:text-gray-300">
         {{ selectedEvent.title }}
       </div>
-      <div class="m-2 flex flex-col gap-0.5 rounded-md bg-gray-100 py-2 text-center text-gray-500">
+      <div class="m-2 flex flex-col gap-0.5 rounded-md bg-gray-100 py-2 text-center text-gray-500 dark:bg-gray-700 dark:text-gray-300">
         <div class="text-sm font-semibold text-teal-500">{{ dj(selectedEvent.start).format('dddd') }}</div>
         <div class="text-lg">{{ dj(selectedEvent.start).format('LL') }}</div>
         <div class="flex-center gap-2 text-sm uppercase">
