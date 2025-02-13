@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { type Page, type Locator } from '@playwright/test';
-import { APPT_PROD_MY_SHARE_LINK, APPT_PROD_SHORT_SHARE_LINK_PREFIX, APPT_PROD_LONG_SHARE_LINK_PREFIX } from '../const/constants';
+import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX } from '../const/constants';
 
 export class BookingPage {
   readonly page: Page;
@@ -40,7 +40,7 @@ export class BookingPage {
    */
   async gotoBookingPageShortUrl() {
     // the default share link is a short URL
-    await this.page.goto(APPT_PROD_MY_SHARE_LINK);
+    await this.page.goto(APPT_MY_SHARE_LINK);
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -49,8 +49,8 @@ export class BookingPage {
    */
   async gotoBookingPageLongUrl() {
     // the share link is short by default; build the corresponding long link first
-    const prodShareLinkUser: string = APPT_PROD_MY_SHARE_LINK.split(APPT_PROD_SHORT_SHARE_LINK_PREFIX)[1];
-    const longLink: string = `${APPT_PROD_LONG_SHARE_LINK_PREFIX}${prodShareLinkUser}`;
+    const prodShareLinkUser: string = APPT_MY_SHARE_LINK.split(APPT_SHORT_SHARE_LINK_PREFIX)[1];
+    const longLink: string = `${APPT_LONG_SHARE_LINK_PREFIX}${prodShareLinkUser}`;
     await this.page.goto(longLink);
     await this.page.waitForLoadState('domcontentloaded');
   }
@@ -59,7 +59,7 @@ export class BookingPage {
    * Go to the booking page week view (via the booking share link)
    */
   async gotoBookingPageWeekView() {
-    const weekLink: string = `${APPT_PROD_MY_SHARE_LINK}#week`;
+    const weekLink: string = `${APPT_MY_SHARE_LINK}#week`;
     await this.page.goto(weekLink);
     await this.page.waitForLoadState('domcontentloaded');
     await expect(this.confirmBtn).toBeVisible({ timeout: 30_000 });
