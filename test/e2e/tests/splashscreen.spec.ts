@@ -7,12 +7,12 @@ let splashscreenPage: SplashscreenPage;
 test.beforeEach(async ({ page }) => {
   // navigate to the main appointment page (splashscreen)
   splashscreenPage = new SplashscreenPage(page);
-  await splashscreenPage.gotoProd();
+  await splashscreenPage.gotoDashboard();
 });
 
 // verify main appointment splash screen appears correctly
 test.describe('splash screen', {
-  tag: '@prod-sanity'
+  tag: ['@prod-sanity', '@e2e-suite'],
 }, () => {
   test('appears correctly', async ({ page }) => {
     await expect(page).toHaveTitle(APPT_PAGE_TITLE);
