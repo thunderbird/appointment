@@ -357,13 +357,13 @@
       "title": "Log dich ein oder erstelle ein Benutzerkonto"
     },
     "remoteError": {
-      "email-mismatch": "Die E-Mail, mit der Du dich angemeldet hast, muss mit Deinem Mozilla-Konto übereinstimmen.",
-      "invite-not-valid": "Der eingegebene Einladungscode ist ungültig.",
-      "unknown-error": "Ein unbekannter Fehler ist aufgetreten.",
       "disabled-account": "Dieses Konto ist deaktiviert.",
+      "email-mismatch": "Die E-Mail, mit der Du dich angemeldet hast, muss mit Deinem Mozilla-Konto übereinstimmen.",
+      "email-not-in-session": "Es gab ein Problem mit der Anmeldesitzung. Bitte versuch es erneut.",
       "invalid-credentials": "Es gab ein Problem mit Deinen Anmeldedaten.",
       "invalid-state": "Die Anmeldesitzung ist abgelaufen. Bitte versuch es erneut.",
-      "email-not-in-session": "Es gab ein Problem mit der Anmeldesitzung. Bitte versuch es erneut."
+      "invite-not-valid": "Der eingegebene Einladungscode ist ungültig.",
+      "unknown-error": "Ein unbekannter Fehler ist aufgetreten."
     },
     "signUp": {
       "title": "Du hast einen Einladungscode? Gib ihn hier ein"
@@ -448,6 +448,7 @@
     "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, müssen Buchungen dieses Zeitplans bestätigt oder ablehnt werden. Wenn diese Option deaktiviert ist, werden alle Zeiten automatisch bestätigt.",
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
+    "redirectedNotice": "Du wirst weitergeleitet nach {url}.",
     "refreshLinkNotice": "Dadurch wird dein Link erneuert. Deine alten Links werden nicht länger funktionieren.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
     "scheduleSettings": {

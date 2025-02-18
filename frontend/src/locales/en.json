@@ -357,13 +357,13 @@
       "title": "Sign in or create an account"
     },
     "remoteError": {
-      "email-mismatch": "The email you've signed up and logged in with must be the same as your Mozilla Account.",
-      "invite-not-valid": "The invite code you've entered is not valid.",
-      "unknown-error": "An unknown error occurred.",
       "disabled-account": "This account is disabled.",
+      "email-mismatch": "The email you've signed up and logged in with must be the same as your Mozilla Account.",
+      "email-not-in-session": "There was a problem with the login session. Please try again.",
       "invalid-credentials": "There was a problem with your credentials.",
       "invalid-state": "The login session has expired. Please try again.",
-      "email-not-in-session": "There was a problem with the login session. Please try again."
+      "invite-not-valid": "The invite code you've entered is not valid.",
+      "unknown-error": "An unknown error occurred."
     },
     "signUp": {
       "title": "Have an invite code? Enter it here"
@@ -448,6 +448,7 @@
     "ownerNeedsToConfirmBooking": "When this option is active, you will be required to confirm or decline times booked on your schedule. When this option is deactivated, all times will automatically be confirmed.",
     "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
+    "redirectedNotice": "You are being redirected to {url}.",
     "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
     "scheduleSettings": {
