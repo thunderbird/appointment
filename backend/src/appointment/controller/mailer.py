@@ -51,7 +51,7 @@ class Mailer:
         self,
         to: str,
         sender: str = os.getenv('SERVICE_EMAIL'),
-        reply_to: str = os.getenv('SUPPORT_EMAIL'),
+        reply_to: str = None,
         subject: str = '',
         html: str = '',
         plain: str = '',
@@ -100,7 +100,8 @@ class Mailer:
         message['Subject'] = self.subject
         message['From'] = self.sender
         message['To'] = self.to
-        message['Reply-To'] = self.reply_to
+        if self.reply_to:
+            message['Reply-To'] = self.reply_to
 
         # add body as html and text parts
         message.set_content(self.text())
