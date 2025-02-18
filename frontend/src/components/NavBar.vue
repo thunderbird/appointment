@@ -12,6 +12,7 @@ import { IconExternalLink } from '@tabler/icons-vue';
 const user = useUserStore();
 const route = useRoute();
 const { t } = useI18n();
+const supportFormUrl = import.meta.env.VITE_SUPPORT_URL;
 
 // component properties
 interface Props {
@@ -90,8 +91,8 @@ const isNavEntryActive = (item: string) => {
             <router-link :to="{ name: 'report-bug' }" class="flex items-center justify-between gap-1 p-2" data-testid="user-nav-report-bug-menu">
               {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
             </router-link>
-            <router-link :to="{ name: 'contact' }" class="p-2" data-testid="user-nav-contact-menu">
-              {{ t('label.contact') }}
+            <router-link :to="{ name: 'contact' }" class="flex items-center justify-between gap-1 p-2" data-testid="user-nav-contact-menu">
+              {{ t('label.contact') }} <icon-external-link class="size-4"/>
             </router-link>
             <hr class="border-teal-500" />
             <router-link :to="{ name: 'logout' }" class="p-2" data-testid="user-nav-logout-menu">

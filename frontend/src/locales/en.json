@@ -448,6 +448,7 @@
     "ownerNeedsToConfirmBooking": "When this option is active, you will be required to confirm or decline times booked on your schedule. When this option is deactivated, all times will automatically be confirmed.",
     "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
+    "redirectedNotice": "You are being redirected to {url}.",
     "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
     "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
     "scheduleSettings": {
