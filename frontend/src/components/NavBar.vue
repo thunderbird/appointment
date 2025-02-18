@@ -12,7 +12,6 @@ import { IconExternalLink } from '@tabler/icons-vue';
 const user = useUserStore();
 const route = useRoute();
 const { t } = useI18n();
-const supportFormUrl = import.meta.env.VITE_SUPPORT_URL;
 
 // component properties
 interface Props {
