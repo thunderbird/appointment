@@ -133,6 +133,9 @@ const routes: RouteRecordRaw[] = [
     path: '/contact',
     name: 'contact',
     component: ContactView,
+    meta: {
+      isPublic: true,
+    },
   },
   {
     path: '/report-bug',

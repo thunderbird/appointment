@@ -54,9 +54,12 @@
   {{ l10n('mail-brand-reply-hint-attendee-info', { 'name': name }, lang if lang else None)|safe }}
   <br/><br/>
 {% endif %}
+{# Negative because it's on every email except for one. #}
+{% if not hide_contact_form_url_hint %}
 {% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
   {{ l10n('mail-brand-reply-hint', {'contact_form_link': link}, lang if lang else None)|safe }}
 </div>
+{% endif %}
 {% include './includes/footer.jinja2' %}
 </body>
 </html>
