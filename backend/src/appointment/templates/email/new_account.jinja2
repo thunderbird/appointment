@@ -35,7 +35,7 @@
       >{{ l10n('new-account-mail-action', lang=lang if lang else None) }}</a>
     </p>
     {% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
-    <p style="color: {{ colour_icon_secondary }}; font-weight: 400; font-size: 10px; line-height: 12px; margin: 0;">
+    <p style="color: {{ colour_tbpro_apmt_primary }}; font-weight: 400; font-size: 10px; line-height: 12px; margin: 0;">
       {{ l10n('mail-brand-reply-hint', {'contact_form_link': link}, lang if lang else None)|safe }}
     </p>
   </div>
