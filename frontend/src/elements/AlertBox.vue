@@ -35,7 +35,7 @@ const hasDetails = props.details !== null;
 const open = ref(false);
 const toggleDetails = () => {
   open.value = !open.value;
-}
+};
 </script>
 
 <template>
@@ -70,7 +70,6 @@ const toggleDetails = () => {
     </span>
   </div>
 </template>
-
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
