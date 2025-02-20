@@ -24,7 +24,7 @@ interface Props {
   dataList: TableDataRow[], // List of data to be displayed
   filters?: TableFilter[], // List of filters to be displayed
   loading: boolean, // Displays a loading spinner
-  showPagination: boolean;
+  showPagination?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
