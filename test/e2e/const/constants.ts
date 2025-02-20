@@ -21,5 +21,5 @@ export const APPT_LOGIN_PWORD = String(process.env.APPT_LOGIN_PWORD);
 export const APPT_DISPLAY_NAME = String(process.env.APPT_DISPLAY_NAME);
 
 // appointment requester's name and email address
-export const APPT_BOOKING_REQUESTER_NAME = String(process.env.APPT_BOOKING_REQUESTER_NAME);
-export const APPT_BOOKING_REQUESTER_EMAIL = String(process.env.APPT_BOOKING_REQUESTER_EMAIL);
+export const APPT_BOOKEE_NAME = String(process.env.APPT_BOOKEE_NAME);
+export const APPT_BOOKEE_EMAIL = String(process.env.APPT_BOOKEE_EMAIL);

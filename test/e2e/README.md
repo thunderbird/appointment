@@ -23,7 +23,7 @@ The E2E tests require an existing Appointment (and corresponding FxA account) an
 - The account user's display name and share link:
     - The display name is found in Appointment => Settings => Account => Display name.
     - The share link is found in Appointment => Settings => Account => My Link.
-- The tests also require an email address to be used as the appointment requestor's email address when actually requesting bookings. This is the email address entered on the `Book selection` dialog (after an appoitment slot was selected on the booking share link page). Note that real Appointment emails will be sent to this email address.
+- The tests also require an email address to be used as the appointment bookee's email address when actually requesting bookings. This is the email address entered on the `Book selection` dialog (after an appoitment slot was selected on the booking share link page). Note that real Appointment emails will be sent to this email address.
 
 The tests expect that default Appointment application settings exist for the provided test user; for example the user scheduling availability hasn't been changed from the default settings; and the default calendar view is the current month view. This is important so that the tests can find an available booking slot, etc.
 
@@ -44,7 +44,7 @@ APPT_LOGIN_EMAIL=<existing-dev-FxA-user-email>
 APPT_LOGIN_PWORD=<exisiting-dev-FxA-user-password>
 APPT_DISPLAY_NAME=<appointment-dev-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-dev-user-share-link>
-APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
+APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
 To run the E2E tests headless (still in `test/e2e`):
@@ -80,7 +80,7 @@ APPT_LOGIN_EMAIL=<existing-stage-FxA-user-email>
 APPT_LOGIN_PWORD=<exisiting-stage-FxA-user-password>
 APPT_DISPLAY_NAME=<appointment-stage-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-stage-user-share-link>
-APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
+APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
 To run the E2E tests headless (still in `test/e2e`):
@@ -116,7 +116,7 @@ APPT_LOGIN_EMAIL=<existing-prod-FxA-user-email>
 APPT_LOGIN_PWORD=<exisiting-prod-FxA-user-password>
 APPT_DISPLAY_NAME=<appointment-prod-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-prod-user-share-link>
-APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
+APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
 To run the production sanity test headless (still in `test/e2e`):
@@ -150,7 +150,7 @@ APPT_LOGIN_EMAIL=<existing-test-FxA-user-email>
 APPT_LOGIN_PWORD=<exisiting-test-FxA-user-password>
 APPT_DISPLAY_NAME=<appointment-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-user-share-link>
-APPT_BOOKING_REQUESTER_EMAIL=<booking-requesters-email>
+APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
 Also in order to run on BrowserStack you need to provide your BrowserStack credentials. Sign into your BrowserStack account and navigate to your `User Profile` and find your auth username and access key. In your local terminal export the following env vars to set the BrowserStack credentials that the tests will use:

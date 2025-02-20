@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { BookingPage } from '../pages/booking-page';
 import { DashboardPage } from '../pages/dashboard-page';
 import { navigateToAppointmentAndSignIn } from '../utils/utils';
-import { APPT_TARGET_ENV, APPT_DISPLAY_NAME, APPT_BOOKING_REQUESTER_NAME, APPT_BOOKING_REQUESTER_EMAIL } from '../const/constants';
+import { APPT_TARGET_ENV, APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, APPT_BOOKEE_EMAIL } from '../const/constants';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;
@@ -82,7 +82,7 @@ test.describe('book an appointment', () => {
     await bookingPage.confirmBtn.click();
 
     // now fill out the book selection dialog with booking requester's info and book it
-    await bookingPage.finishBooking(APPT_BOOKING_REQUESTER_NAME, APPT_BOOKING_REQUESTER_EMAIL);
+    await bookingPage.finishBooking(APPT_BOOKEE_NAME, APPT_BOOKEE_EMAIL);
 
     if (APPT_TARGET_ENV == 'dev') {
       // when running against local dev environment after a slot is booked it doesn't require
@@ -123,6 +123,6 @@ test.describe('book an appointment', () => {
     // now verify a corresponding pending booking was created on the host account's list of pending bookings
     // (drop the day of the week from our time slot string as this function just needs the month, day, and year)
     const expMonthDayYear = expDateStr.substring(expDateStr.indexOf(',') + 2);
-    await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKING_REQUESTER_NAME, expMonthDayYear, expTimeStr);
+    await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, expMonthDayYear, expTimeStr);
   });
 });
