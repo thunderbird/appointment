@@ -17,6 +17,7 @@ export class BookingPage {
   readonly requestSentTitleText: Locator;
   readonly requestSentAvailabilityText: Locator;
   readonly requestSentCloseBtn: Locator;
+  readonly eventBookedTitleText: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -33,6 +34,7 @@ export class BookingPage {
     this.requestSentTitleText = this.page.getByText('Booking request sent');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
+    this.eventBookedTitleText = this.page.getByText('Event booked!');
   }
 
   /**
