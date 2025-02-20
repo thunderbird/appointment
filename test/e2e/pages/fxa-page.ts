@@ -1,5 +1,5 @@
 import { expect, type Page, type Locator } from '@playwright/test';
-import { PROD_LOGIN_PWORD } from '../const/constants';
+import { APPT_LOGIN_PWORD } from '../const/constants';
 
 export class FxAPage {
   readonly page: Page;
@@ -17,8 +17,8 @@ export class FxAPage {
   }
 
   async signIn() {
-    expect(PROD_LOGIN_PWORD, 'getting APPT_LOGIN_PWORD env var').toBeTruthy();
-    await this.passwordInput.fill(String(PROD_LOGIN_PWORD));
+    expect(APPT_LOGIN_PWORD, 'getting APPT_LOGIN_PWORD env var').toBeTruthy();
+    await this.passwordInput.fill(String(APPT_LOGIN_PWORD));
     await this.signInButton.click();
   }
 }
