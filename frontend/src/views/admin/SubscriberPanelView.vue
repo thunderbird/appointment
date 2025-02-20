@@ -224,18 +224,16 @@ onMounted(async () => {
 <template>
   <div class="flex w-full justify-center">
     <alert-box
-      @close="pageNotification = ''"
       v-if="pageNotification"
+      :title="pageNotification"
       :scheme="AlertSchemes.Success"
-    >
-      {{ pageNotification }}
-    </alert-box>
+      @close="pageNotification = ''"
+    />
     <alert-box
-      @close="pageError = ''"
       v-if="pageError"
-    >
-      {{ pageError }}
-    </alert-box>
+      :title="pageError"
+      @close="pageError = ''"
+    />
   </div>
   <admin-nav/>
   <div v-if="displayPage">

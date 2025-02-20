@@ -264,10 +264,11 @@ onMounted(async () => {
   <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.calendarSettings') }}</div>
   <div class="flex flex-col gap-6 pl-6">
     <alert-box
-      @close="calendarConnectError = ''"
-      title="Calendar Connect Error"
       v-if="calendarConnectError"
-    >{{calendarConnectError}}</alert-box>
+      title="Calendar Connect Error"
+      :details="calendarConnectError"
+      @close="calendarConnectError = ''"
+    />
 
     <!-- list of possible calendars to connect -->
     <calendar-management
@@ -311,15 +312,17 @@ onMounted(async () => {
       <div class="text-lg">{{ t('heading.discoverCaldavcalendars') }}</div>
       <alert-box
         v-if="caldavDiscoverySuccess"
-        :scheme="AlertSchemes.Success"
         title="CalDAV discovery success"
+        :details="caldavDiscoverySuccess"
+        :scheme="AlertSchemes.Success"
         @close="caldavDiscoverySuccess = ''"
-      >{{ caldavDiscoverySuccess }}</alert-box>
+      />
       <alert-box
         v-if="caldavDiscoveryError"
         title="CalDAV discovery Error"
+        :details="caldavDiscoveryError"
         @close="caldavDiscoveryError = ''"
-      >{{ caldavDiscoveryError }}</alert-box>
+      />
       <div class="flex flex-col gap-4">
         <form
           class="flex max-w-2xl flex-col gap-4 pl-6"
