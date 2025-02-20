@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SplashscreenPage } from '../pages/splashscreen-page';
-import { APPT_PAGE_TITLE } from '../const/constants';
+import { APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE } from '../const/constants';
 
 let splashscreenPage: SplashscreenPage;
 
@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 
 // verify main appointment splash screen appears correctly
 test.describe('splash screen', {
-  tag: ['@prod-sanity', '@e2e-suite'],
+  tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE],
 }, () => {
   test('appears correctly', async ({ page }) => {
     await expect(page).toHaveTitle(APPT_PAGE_TITLE);

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SplashscreenPage } from '../pages/splashscreen-page';
 import { FxAPage } from '../pages/fxa-page';
-import { APPT_TARGET_ENV, APPT_PAGE_TITLE } from '../const/constants';
+import { APPT_TARGET_ENV, APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE } from '../const/constants';
 import { DashboardPage } from '../pages/dashboard-page';
 
 let splashscreenPage: SplashscreenPage;
@@ -18,7 +18,7 @@ test.beforeEach(async ({ page }) => {
 
 // verify we are able to sign-in
 test.describe('sign-in', {
-  tag: ['@prod-sanity', '@e2e-suite'],
+  tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE],
 }, () => {
   test('able to sign-in', async ({ page }) => {
     // prod and stage use fxa to sign in; when running on local dev env we sign in to appt directly

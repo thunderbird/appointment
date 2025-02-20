@@ -55,17 +55,19 @@ export class DashboardPage {
  
   /**
    * Given a requested booking's time slot reference, verify that a corresponding event exists
-   * in the host account's list of bookings. When running on prod or stage the created appt
-   * will be pending (HOLD) as they need to be confirmed; but when running on the local dev
-   * environment the created appt is automaticaly confirmed and booked.
+   * in the host account's list of bookings. If the host user's `Booking Confirmation` setting
+   * is enabled (which is the default), then the created appointment will be pending (HOLD) as
+   * it needs to be confirmed; but if the `Booking Confirmation` option is turned off then the
+   * created appt is automaticaly confirmed and booked, so the event text won't contain 'HOLD'.
    * @param hostUserDisplayName String containing the host account's user display name
    * @param requsterName String containing the name of the requester (provided at booking request)
    * @param slotDate String containing date of the requested slot (format e.g: 'February 7, 2025')
    * @param slotTime String containg the time of the requested slot (format e.g: '03:30 PM')
+   * @param confirmBooking Boolean whether the requested appt booking requires confirmation
    */
-  async verifyEventCreated(hostUserDisplayName: string, requsterName: string, slotDate: string, slotTime: string) {
+  async verifyEventCreated(hostUserDisplayName: string, requsterName: string, slotDate: string, slotTime: string, confirmBooking: boolean = true) {
     // depending on environment switch to the bookings page and verify the appt was created
-    if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
+    if (confirmBooking) {
       await this.gotoPendingBookings();
       var eventFilter = `HOLD: Appointment - ${hostUserDisplayName} and ${requsterName}`;
     } else {

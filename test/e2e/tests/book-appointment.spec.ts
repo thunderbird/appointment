@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import { BookingPage } from '../pages/booking-page';
 import { DashboardPage } from '../pages/dashboard-page';
 import { navigateToAppointmentAndSignIn } from '../utils/utils';
-import { APPT_TARGET_ENV, APPT_DISPLAY_NAME, APPT_BOOKING_REQUESTER_NAME, APPT_BOOKING_REQUESTER_EMAIL } from '../const/constants';
+import { APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, APPT_BOOKEE_EMAIL,
+  PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE } from '../const/constants';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;
@@ -54,21 +55,21 @@ test.beforeEach(async ({ page }) => {
 // verify we are able to book an appointment using existing user's share link
 test.describe('book an appointment', () => {
   test('able to access booking page via short link', {
-    tag: '@prod-sanity',
+    tag: PLAYWRIGHT_TAG_PROD_SANITY,
   }, async ({ page }) => {
     await bookingPage.gotoBookingPageShortUrl();
     await verifyBookingPageLoaded();
   });
 
   test('able to access booking page via long link', {
-    tag: '@prod-sanity',
+    tag: PLAYWRIGHT_TAG_PROD_SANITY,
   }, async ({ page }) => {
     await bookingPage.gotoBookingPageLongUrl();
     await verifyBookingPageLoaded();
   });
 
   test('able to request a booking', {
-    tag: ['@prod-sanity', '@e2e-suite'],
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE],
   }, async ({ page }) => {
     // in order to ensure we find an available slot we can click on, first switch to week view URL
     await bookingPage.gotoBookingPageWeekView();
@@ -82,19 +83,12 @@ test.describe('book an appointment', () => {
     await bookingPage.confirmBtn.click();
 
     // now fill out the book selection dialog with booking requester's info and book it
-    await bookingPage.finishBooking(APPT_BOOKING_REQUESTER_NAME, APPT_BOOKING_REQUESTER_EMAIL);
+    await bookingPage.finishBooking(APPT_BOOKEE_NAME, APPT_BOOKEE_EMAIL);
 
-    if (APPT_TARGET_ENV == 'dev') {
-      // when running against local dev environment after a slot is booked it doesn't require
-      // confirmation by the host user, so the event is automatically booked and the title text
-      // will be different to reflect that the appointment is booked (not pending/requested)
-      await expect(bookingPage.eventBookedTitleText).toBeVisible({ timeout: 60_000 });
-    } else {
-      // in production and stage after a slot is booked it requires confirmation from the host user first
-      // 'boooking request sent' text appears twice, once in the pop-up and once in underlying page
-      await expect(bookingPage.requestSentTitleText.first()).toBeVisible({ timeout: 60_000 });
-      await expect(bookingPage.requestSentTitleText.nth(1)).toBeVisible();
-    }
+    // by default after a slot is booked it requires confirmation from the host user first
+    // 'boooking request sent' text appears twice, once in the pop-up and once in underlying page
+    await expect(bookingPage.requestSentTitleText.first()).toBeVisible({ timeout: 60_000 });
+    await expect(bookingPage.requestSentTitleText.nth(1)).toBeVisible();
 
     // booking request sent dialog availability text contains correct user name
     // this text also appears twice, once in the pop-up and once in underlying page
@@ -123,6 +117,6 @@ test.describe('book an appointment', () => {
     // now verify a corresponding pending booking was created on the host account's list of pending bookings
     // (drop the day of the week from our time slot string as this function just needs the month, day, and year)
     const expMonthDayYear = expDateStr.substring(expDateStr.indexOf(',') + 2);
-    await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKING_REQUESTER_NAME, expMonthDayYear, expTimeStr);
+    await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, expMonthDayYear, expTimeStr);
   });
 });
