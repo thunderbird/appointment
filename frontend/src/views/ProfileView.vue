@@ -43,9 +43,9 @@ const editProfile = async () => {
 };
 
 // Load calendar and bookings information
-onMounted(async () => {
-  await calendarStore.fetch(call);
-  await appointmentStore.fetch(call);
+onMounted(() => {
+  calendarStore.fetch(call);
+  appointmentStore.fetch(call);
 });
 </script>
 
