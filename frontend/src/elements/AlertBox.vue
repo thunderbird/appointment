@@ -19,8 +19,8 @@ interface Props {
   scheme?: AlertSchemes; // Type of the alert
 }
 const props = withDefaults(defineProps<Props>(), {
-  canClose: true,
   details: null,
+  canClose: true,
   scheme: AlertSchemes.Error,
 });
 

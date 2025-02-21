@@ -48,14 +48,14 @@ onMounted(async () => {
   if (route.query.error || noCalendarsError) {
     localStorage?.removeItem(initFlowKey);
     if (noCalendarsError) {
-      errorMessage.value = t('error.externalAccountHasNoCalendars', { external: 'Google' });
+      errorMessage.value.title = t('error.externalAccountHasNoCalendars', { external: 'Google' });
 
       // Also remove the google calendar
       if (externalConnectionStore.google.length > 0) {
         await externalConnectionStore.disconnect(call, ExternalConnectionProviders.Google);
       }
     } else {
-      errorMessage.value = route.query.error as string;
+      errorMessage.value.title = route.query.error as string;
     }
     await router.replace(route.path);
   }
@@ -66,7 +66,7 @@ onMounted(async () => {
     const { data, error }: BooleanResponse = await call('google/ftue-status').get().json();
     // Did they hit back?
     if (error?.value) {
-      errorMessage.value = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
+      errorMessage.value.title = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
       return;
     }
 

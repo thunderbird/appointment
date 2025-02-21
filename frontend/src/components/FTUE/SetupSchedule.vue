@@ -99,7 +99,7 @@ const onSubmit = async () => {
     : await scheduleStore.createSchedule(call, scheduleData);
 
   if ((data as Error)?.error) {
-    errorMessage.value = (data as Error)?.message;
+    errorMessage.value.title = (data as Error)?.message;
     isLoading.value = false;
     return;
   }
@@ -109,7 +109,7 @@ const onSubmit = async () => {
 
 onMounted(async () => {
   isLoading.value = true;
-  infoMessage.value = t('ftue.setupScheduleInfo');
+  infoMessage.value.title = t('ftue.setupScheduleInfo');
 
   await Promise.all([
     calendarStore.fetch(call, true),

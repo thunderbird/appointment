@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import {
-  computed,
-  inject, ref,
+  computed, inject, ref,
 } from 'vue';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { Alert, CalendarListResponse, FormExceptionDetail, PydanticException } from '@/models';
+import {
+  Alert, CalendarListResponse, FormExceptionDetail, PydanticException
+} from '@/models';
 import { clearFormErrors, handleFormError } from '@/utils';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 
