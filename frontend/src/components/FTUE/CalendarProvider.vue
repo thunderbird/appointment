@@ -5,6 +5,7 @@ import {
 import { callKey } from '@/keys';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
+import { Alert } from '@/models';
 import GoogleOauthProvider from '@/components/FTUE/GoogleOauthProvider.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 
@@ -32,8 +33,8 @@ const onSwitch = () => {
   }
 };
 
-const onError = (err: string) => {
-  errorMessage.value = err;
+const onError = (alert: Alert) => {
+  errorMessage.value = alert;
 };
 
 </script>
@@ -41,8 +42,23 @@ const onError = (err: string) => {
 <template>
   <div class="content">
     <div class="provider-view">
-      <google-oauth-provider @next="onNext" @previous="onPrevious" @switch="onSwitch" :showPrevious="true" :showSwitch="true" v-if="provider === 'google'"></google-oauth-provider>
-      <cal-dav-provider @next="onNext" @previous="onPrevious" @switch="onSwitch" @error="onError" :showPrevious="true" :showSwitch="true" v-else-if="provider === 'caldav'"></cal-dav-provider>
+      <google-oauth-provider
+        v-if="provider === 'google'"
+        @next="onNext"
+        @previous="onPrevious"
+        @switch="onSwitch"
+        :showPrevious="true"
+        :showSwitch="true"
+      />
+      <cal-dav-provider
+        v-else-if="provider === 'caldav'"
+        @next="onNext"
+        @previous="onPrevious"
+        @switch="onSwitch"
+        @error="onError"
+        :showPrevious="true"
+        :showSwitch="true"
+      />
     </div>
   </div>
 </template>

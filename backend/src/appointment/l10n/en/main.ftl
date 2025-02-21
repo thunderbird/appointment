@@ -46,14 +46,12 @@ not-in-allow-list = Your email is not in the allow list.
 
 schedule-not-active = The schedule has been turned off. Please contact the schedule owner for more information.
 
-remote-calendar-connection-error = The remote calendar could not be reached due to {$reason}.
+remote-calendar-connection-error = We couldn't connect to your calendar.
 
-        Please verify your connection information and try again.
-
-# Possible entries for $reason,
-remote-calendar-reason-doesnt-support-caldav = the remote calendar does not support CalDAV
-remote-calendar-reason-doesnt-support-auth = the remote calendar does not support authentication
-remote-calendar-reason-unauthorized = an issue with your username or password
+# Possible error reasons
+remote-calendar-reason-doesnt-support-caldav = The remote calendar does not support CalDAV.
+remote-calendar-reason-doesnt-support-auth = The server does not support any of the available authentication methods.
+remote-calendar-reason-unauthorized = Please check your username and password, then try again.
 
 event-could-not-be-accepted = There was an error accepting the booking details. Please try again later.
 event-could-not-be-deleted = There was an error removing the hold event. Please try again later.

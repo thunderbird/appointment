@@ -3,17 +3,18 @@ import {
   onMounted, inject, toRefs, onUnmounted,
 } from 'vue';
 import { refreshKey } from '@/keys';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import { useI18n } from 'vue-i18n';
+import { Alert } from '@/models';
+import { AlertSchemes } from '@/definitions';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 const { t } = useI18n();
 
 // component properties
 interface Props {
-  infoMessage?: string;
-  warningMessage?: string;
-  errorMessage?: string;
+  infoMessage?: Alert;
+  warningMessage?: Alert;
+  errorMessage?: Alert;
   closable?: boolean,
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -48,15 +49,27 @@ onUnmounted(() => {
       </link-button>
       <div class="modal-header">
         <slot name="header"></slot>
-        <notice-bar type="error" v-if="errorMessage">
-          {{ errorMessage }}
-        </notice-bar>
-        <notice-bar type="warning" v-else-if="warningMessage">
-          {{ warningMessage }}
-        </notice-bar>
-        <notice-bar v-else-if="infoMessage">
-          {{ infoMessage }}
-        </notice-bar>
+        <alert-box
+          v-if="errorMessage"
+          :title="errorMessage.title"
+          :details="errorMessage.details"
+          :scheme="AlertSchemes.Error"
+          @close="errorMessage = null"
+        />
+        <alert-box
+          v-else-if="warningMessage"
+          :title="warningMessage.title"
+          :details="warningMessage.details"
+          :scheme="AlertSchemes.Warning"
+          @close="warningMessage = null"
+        />
+        <alert-box
+          v-else-if="infoMessage"
+          :title="infoMessage.title"
+          :details="infoMessage.details"
+          :scheme="AlertSchemes.Info"
+          @close="infoMessage = null"
+        />
         <div class="pls-keep-height" v-else/>
       </div>
       <div class="modal-body">

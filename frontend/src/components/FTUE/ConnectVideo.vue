@@ -45,7 +45,7 @@ onMounted(async () => {
     const { data, error }: BooleanResponse = await call('zoom/ftue-status').get().json();
     // Did they hit back?
     if (error?.value) {
-      errorMessage.value = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
+      errorMessage.value.title = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
       return;
     }
 
@@ -62,7 +62,7 @@ const onSubmit = async () => {
   });
 
   if ((data as Error)?.error) {
-    errorMessage.value = (data as Error)?.message;
+    errorMessage.value.title = (data as Error)?.message;
     isLoading.value = false;
     return;
   }

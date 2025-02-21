@@ -17,6 +17,7 @@ import { useExternalConnectionsStore } from '@/stores/external-connections-store
 import { useCalendarStore } from '@/stores/calendar-store';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+import { Alert } from '@/models';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -195,7 +196,7 @@ const editProfile = async () => {
         {{ t('heading.settings.connectedAccounts.caldav') }}
       </h2>
     </template>
-    <cal-dav-provider @next="connectCalDAV()" @error="(err) => calDavErrorMessage = err"></cal-dav-provider>
+    <cal-dav-provider @next="connectCalDAV()" @error="(alert: Alert) => calDavErrorMessage = alert.title"></cal-dav-provider>
   </generic-modal>
 </template>
 <style scoped>

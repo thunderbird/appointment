@@ -33,7 +33,8 @@
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
-    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
+    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar.",
+    "weCouldntConnect": "Es konnte keine Verbindung hergestellt werden."
   },
   "fields": {
     "slot_duration": "Dauer",
@@ -123,6 +124,7 @@
     "bookingSuccessfullyConfirmed": "Buchung erfolgreich bestätigt!",
     "bookingSuccessfullyDenied": "Buchung erfolgreich abgelehnt!",
     "bookingSuccessfullyRequested": "Buchung erfolgreich angefragt!",
+    "connectionEstablished": "Verbindung hergestellt",
     "copiedToClipboard": "In Zwischenablage kopiert",
     "eventWasCreated": "Das Event wurde in deinem Kalender erstellt.",
     "invitationGenerated": "Die Einladungscodes wurden erfolgreich generiert.",

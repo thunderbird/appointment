@@ -437,9 +437,11 @@ watch(
           data-testid="dashboard-set-availability-toggle"
         />
       </div>
-      <alert-box @close="scheduleCreationError = ''" v-if="scheduleCreationError">
-        {{ scheduleCreationError }}
-      </alert-box>
+      <alert-box
+        v-if="scheduleCreationError"
+        :title="scheduleCreationError"
+        @close="scheduleCreationError = ''"
+      />
 
       <div class="mb-1 px-4">
         <label for="scheduleName" class="flex-column flex">
