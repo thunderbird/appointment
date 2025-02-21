@@ -44,7 +44,7 @@ const toggleDetails = () => {
     info: isInfo,
     warning: isWarning,
     success: isSuccess
-  }" class="notice notice-bar">
+  }" class="alert">
     <span class="icon">
       <notice-info-icon v-if="isInfo"/>
       <notice-success-icon v-if="isSuccess"/>
@@ -74,12 +74,19 @@ const toggleDetails = () => {
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-.notice {
+.alert {
   position: relative;
   border-radius: 0.1875rem;
   gap: 0.625rem;
   border: 0.0625rem solid;
   padding: 0.5625rem 0.5625rem 0.5625rem 2.125rem;
+
+  &:has(.btn-close) .title {
+    padding-right: 1.625rem;
+  }
+  &:has(.btn-toggle) .title {
+    padding-right: 7.5rem;
+  }
 }
 .info {
   background-color: var(--colour-service-soft);

@@ -7,7 +7,7 @@ import {
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { CalendarListResponse, PydanticException } from '@/models';
+import { Alert, CalendarListResponse, FormExceptionDetail, PydanticException } from '@/models';
 import { clearFormErrors, handleFormError } from '@/utils';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 
@@ -70,10 +70,16 @@ const onSubmit = async () => {
   if (!error.value) {
     emits('next');
   } else {
-    const err = handleFormError(t, formRef, data?.value as PydanticException);
-    if (err) {
+    const err = data?.value as PydanticException;
+    const errorMessage = handleFormError(t, formRef, err);
+    if (errorMessage) {
       // Emit a form-level error event if there's a problem here
-      emits('error', err);
+      // If there was a reason given, provide that too
+      const errorAlert: Alert = {
+        title: errorMessage,
+        details: (err.detail as FormExceptionDetail).reason,
+      };
+      emits('error', errorAlert);
     }
   }
 };

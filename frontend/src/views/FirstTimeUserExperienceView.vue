@@ -3,9 +3,10 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
 import { onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { FtueStep } from '@/definitions';
+import { AlertSchemes, FtueStep } from '@/definitions';
 import { refreshKey } from '@/keys';
 import WordMark from '@/elements/WordMark.vue';
+import AlertBox from '@/elements/AlertBox.vue';
 import GooglePermissions from '@/components/FTUE/CalendarProvider.vue';
 import SetupProfile from '@/components/FTUE/SetupProfile.vue';
 import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
@@ -13,7 +14,6 @@ import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
 import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/StepFinish.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import ScheduleView from '@/views/ScheduleView.vue';
 
 const ftueStore = useFTUEStore();
@@ -39,15 +39,27 @@ onMounted(async () => {
           <h2 id="ftue-title">
             {{ t(stepTitle) }}
           </h2>
-          <notice-bar type="error" v-if="errorMessage">
-            {{ errorMessage }}
-          </notice-bar>
-          <notice-bar type="warning" v-else-if="warningMessage">
-            {{ warningMessage }}
-          </notice-bar>
-          <notice-bar v-else-if="infoMessage">
-            {{ infoMessage }}
-          </notice-bar>
+          <alert-box
+            v-if="errorMessage"
+            :title="errorMessage.title"
+            :details="errorMessage.details"
+            :scheme="AlertSchemes.Error"
+            @close="errorMessage = null"
+          />
+          <alert-box
+            v-else-if="warningMessage"
+            :title="warningMessage.title"
+            :details="warningMessage.details"
+            :scheme="AlertSchemes.Warning"
+            @close="warningMessage = null"
+          />
+          <alert-box
+            v-else-if="infoMessage"
+            :title="infoMessage.title"
+            :details="infoMessage.details"
+            :scheme="AlertSchemes.Info"
+            @close="infoMessage = null"
+          />
           <div class="pls-keep-height" v-else/>
         </div>
         <div class="modal-body flex w-full flex-col items-center justify-center">

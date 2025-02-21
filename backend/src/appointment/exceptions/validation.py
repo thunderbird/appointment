@@ -10,16 +10,21 @@ class APIException(HTTPException):
     id_code = 'UNKNOWN'
     status_code = 500
     message_key = None
+    reason = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, reason: str|None = None, **kwargs):
         message_key = kwargs.pop('message_key', False)
         if message_key is not False:
             self.message_key = message_key
+
+        if reason:
+            self.reason = reason
 
         super().__init__(
             status_code=self.status_code,
             detail={
                 'id': self.id_code,
+                'reason': self.reason,
                 'message': self.get_msg(),
                 'status': self.status_code,
             },
@@ -205,19 +210,9 @@ class ZoomNotConnectedException(APIException):
 class RemoteCalendarConnectionError(APIException):
     id_code = 'REMOTE_CALENDAR_CONNECTION_ERROR'
     status_code = 400
-    reason = None
-
-    def __init__(self, reason: str|None = None, **kwargs):
-        if reason:
-            self.reason = reason
-        super().__init__(**kwargs)
 
     def get_msg(self):
-        reason = self.reason
-        if not self.reason:
-            reason = l10n('unknown-error-short')
-
-        return l10n('remote-calendar-connection-error', {'reason': reason})
+        return l10n('remote-calendar-connection-error')
 
 
 class EventCouldNotBeAccepted(APIException):

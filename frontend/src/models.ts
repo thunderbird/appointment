@@ -295,7 +295,11 @@ export type Signature = {
   url: string;
 };
 
-// Types for authentication and error handling
+// Types for authentication, messages and error handling
+export type Alert = {
+  title: string;
+  details?: string;
+};
 export type Error = {
   error: boolean|string|null;
   message?: string;
@@ -315,6 +319,7 @@ export type PydanticExceptionDetail = {
 export type FormExceptionDetail = {
   id: string,
   message: string,
+  reason: string,
   status: number
 }
 export type PydanticException = {

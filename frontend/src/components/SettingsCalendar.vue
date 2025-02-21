@@ -312,14 +312,14 @@ onMounted(async () => {
       <div class="text-lg">{{ t('heading.discoverCaldavcalendars') }}</div>
       <alert-box
         v-if="caldavDiscoverySuccess"
-        title="CalDAV discovery success"
+        :title="t('info.connectionEstablished')"
         :details="caldavDiscoverySuccess"
         :scheme="AlertSchemes.Success"
         @close="caldavDiscoverySuccess = ''"
       />
       <alert-box
         v-if="caldavDiscoveryError"
-        title="CalDAV discovery Error"
+        :title="t('error.weCouldntConnect')"
         :details="caldavDiscoveryError"
         @close="caldavDiscoveryError = ''"
       />
