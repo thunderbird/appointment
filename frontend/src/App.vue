@@ -33,7 +33,6 @@ const apiUrl = inject(apiUrlKey);
 const route = useRoute();
 const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
-// const lang = defaultLocale();
 
 const siteNotificationStore = useSiteNotificationStore();
 const {
@@ -166,7 +165,7 @@ const onPageLoad = async () => {
     resolution: deviceRes,
     effective_resolution: effectiveDeviceRes,
     user_agent: navigator.userAgent,
-    locale: lang,
+    locale: defaultLocale(),
   }).json();
 
   const { data } = response;
