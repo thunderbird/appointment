@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import { inject, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
 import { callKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
@@ -41,6 +41,12 @@ const logout = async () => {
 const editProfile = async () => {
   window.location.href = fxaEditProfileUrl;
 };
+
+// Load calendar and bookings information
+onMounted(() => {
+  calendarStore.fetch(call);
+  appointmentStore.fetch(call);
+});
 </script>
 
 <template>
