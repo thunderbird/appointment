@@ -143,9 +143,14 @@ account-data-readme = ============================================
                       Note: If a file is empty or blank then we don't have that type of data on record for you.
 
                       The following files are included:
-                       - appointments.csv : A list of Appointments from our database
-                       - attendees.csv : A list of Appointment Slot Attendees from our database
-                       - calendars.csv : A list of Calendars from our database
-                       - slots.csv : A list of Appointment Slots from our database.
-                       - subscriber.csv : The personal information we store about you from our database.
+                       - appointments.csv : A list of your Appointments
+                       - attendees.csv : A list of your Appointment Slot Attendees
+                       - availability.csv : Schedule availability data
+                       - calendars.csv : A list of your Appointment Calendars
+                       - external_connections.csv : A list of your Appointment external connections
+                       - invite.csv : Data pertaining to your Appointment invite and invite codes
+                       - schedules.csv : The information we store pertaining to your Appointment schedule
+                       - slots.csv : A list of your Appointment meeting slots
+                       - subscriber.csv : The personal information we store about you
+                       - waiting_list.csv : Information we store regarding the Appointment waiting list
                        - readme.txt : This file!

@@ -143,9 +143,14 @@ account-data-readme = ===============================================
                       Hinweis: Wenn eine Datei leer ist, ist diese Art von Daten nicht vorhanden.
 
                       Die folgenden Dateien sind enthalten:
-                       - appointments.csv : Eine Liste von Terminen aus unserer Datenbank
-                       - attendees.csv : Eine Liste von Termin-Teilnehmern aus unserer Datenbank
-                       - calendars.csv : Eine Liste von Kalendern aus unserer Datenbank
-                       - slots.csv : Eine Liste von Zeitfenstern aus unserer Datenbank.
-                       - subscriber.csv : Die persönlichen Informationen, die wir von Benutzern in unserer Datenbank speichern.
+                       - appointments.csv : Eine Liste Deiner vereinbarten Termine
+                       - attendees.csv : Eine Liste von Teilnehmern Deiner Termine
+                       - availability.csv : Daten zu Verfügbarkeiten
+                       - calendars.csv : Eine Liste Deiner Kalender
+                       - external_connections.csv : Eine Liste eingerichteter Verbindungen zu externen Diensten
+                       - invite.csv : Daten zu Termineinladungen und Einladungscodes
+                       - schedules.csv : Die von uns gespeicherten Informationen Deines Zeitplans
+                       - slots.csv : Eine Liste generierter Zeitfenster Deines Zeitplans
+                       - subscriber.csv : Deine Profil- und Kontoinformationen
+                       - waiting_list.csv : Von uns gespeicherte Informationen zur Warteliste für Termine
                        - readme.txt : Diese Datei

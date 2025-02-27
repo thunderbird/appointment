@@ -71,10 +71,10 @@ def download(db, subscriber: Subscriber):
     with ZipFile(zip_buffer, 'w') as data_zip:
         data_zip.writestr('attendees.csv', attendee_buffer.getvalue())
         data_zip.writestr('appointments.csv', appointment_buffer.getvalue())
-        data_zip.writestr('calendar.csv', calendar_buffer.getvalue())
+        data_zip.writestr('calendars.csv', calendar_buffer.getvalue())
         data_zip.writestr('subscriber.csv', subscriber_buffer.getvalue())
-        data_zip.writestr('slot.csv', slot_buffer.getvalue())
-        data_zip.writestr('external_connection.csv', external_connections_buffer.getvalue())
+        data_zip.writestr('slots.csv', slot_buffer.getvalue())
+        data_zip.writestr('external_connections.csv', external_connections_buffer.getvalue())
         data_zip.writestr('schedules.csv', schedules_buffer.getvalue())
         data_zip.writestr('availability.csv', availability_buffer)
         data_zip.writestr('invite.csv', invite_buffer.getvalue())
