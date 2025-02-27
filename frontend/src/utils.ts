@@ -160,7 +160,8 @@ export const handleFormError = (i18n: i18nType, formRef: Ref, errObj: PydanticEx
     return { title: unknownError };
   }
 
-  const fields = formRef.value.elements;
+  const fields = formRef.value.elements as HTMLFormControlsCollection;
+
   const { detail } = errObj;
 
   if (Array.isArray(detail)) {

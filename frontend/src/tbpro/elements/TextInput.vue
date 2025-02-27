@@ -64,7 +64,10 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
  * the user does something worth invalidating
  */
 const onChange = () => {
+  inputRef.value.setCustomValidity('');
+  isInvalid.value = false;
   isDirty.value = true;
+  validationMessage.value = '';
 };
 </script>
 
@@ -87,7 +90,7 @@ const onChange = () => {
         :placeholder="placeholder"
         :required="required"
         :maxLength="maxLength"
-        @invalid="onInvalid"
+        @invalid.prevent="onInvalid"
         @change="onChange"
         ref="inputRef"
         :style="{ paddingLeft: inputPaddingLeft }"
