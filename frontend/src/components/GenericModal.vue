@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n';
 import { Alert } from '@/models';
 import { AlertSchemes } from '@/definitions';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import AlertBox from '@/elements/AlertBox.vue';
 
 const { t } = useI18n();
 
