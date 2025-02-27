@@ -16,7 +16,6 @@ from appointment.exceptions.calendar import TestConnectionFailed
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 from appointment.exceptions.validation import RemoteCalendarConnectionError, GoogleCaldavNotSupported
 from appointment.l10n import l10n
-from urllib.parse import urlparse
 
 router = APIRouter()
 
