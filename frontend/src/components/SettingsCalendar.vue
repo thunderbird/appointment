@@ -176,7 +176,7 @@ const saveCalendar = async () => {
     const { error, data }: CalendarResponse = await call('cal').post(calendarInput.data).json();
     if (error.value) {
       calendarConnectError.value = {
-        title: ((data.value as Exception)?.detail as ExceptionDetail)?.message
+        title: ((data.value as Exception)?.detail as ExceptionDetail)?.message,
       };
       loading.value = false;
       // Show them the error message because I haven't thought this ux process through.
