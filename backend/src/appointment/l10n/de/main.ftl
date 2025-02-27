@@ -64,6 +64,7 @@ subscriber-self-delete = Die Löschung des eigenen Benutzerkontos ist hier nicht
 
 rate-limit-exceeded = Zu viele Anfragen in zu kurzem Zeitraum. Bitte später noch einmal versuchen.
 
+# This is for the frontend, don't variable-ify!
 error-minimum-value = {field} sollte wenigstens {value} sein.
 
 ## Authentication Exceptions
@@ -88,6 +89,8 @@ google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte
 google-sync-fail = Bei der Synchronisierung von Kalendern ist ein Fehler aufgetreten. Bitte später noch einmal versuchen.
 google-only-one = Es kann nur ein einziges Google-Konto verbunden sein.
 google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto verbunden werden.
+google-caldav-not-supported = Google CalDAV wird nicht unterstützt.
+google-caldav-not-supported-details = Bitte 'Google Kalender verbinden' benutzen.
 
 ## Frontend Facing Strings
 

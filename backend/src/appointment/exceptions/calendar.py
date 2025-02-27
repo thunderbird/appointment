@@ -12,6 +12,7 @@ class EventNotDeletedException(Exception):
 
 class FreeBusyTimeException(Exception):
     """Generic error with the free busy time api"""
+
     pass
 
 
@@ -20,4 +21,3 @@ class TestConnectionFailed(Exception):
 
     def __init__(self, reason: str | None = None):
         self.reason = reason
-

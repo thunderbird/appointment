@@ -24,7 +24,7 @@ class APIException(HTTPException):
             status_code=self.status_code,
             detail={
                 'id': self.id_code,
-                'reason': self.reason,
+                'reason': self.get_reason(),
                 'message': self.get_msg(),
                 'status': self.status_code,
             },
@@ -37,6 +37,8 @@ class APIException(HTTPException):
 
         return l10n('unknown-error')
 
+    def get_reason(self):
+        return self.reason
 
 class InvalidPermissionLevelException(APIException):
     """Raise when the subscribers permission level is too low for the action"""
@@ -327,3 +329,16 @@ class APIRateLimitExceeded(APIException):
 
     def get_msg(self):
         return l10n('rate-limit-exceeded')
+
+
+class GoogleCaldavNotSupported(APIException):
+    """Is raised when an attempt to access the Google CalDAV API was detected"""
+
+    id_code = 'GOOGLE_CALDAV_NOT_SUPPORTED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('google-caldav-not-supported')
+
+    def get_reason(self):
+        return l10n('google-caldav-not-supported-details')
