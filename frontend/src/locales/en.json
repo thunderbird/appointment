@@ -453,7 +453,7 @@
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
     "redirectedNotice": "You are being redirected to {url}.",
     "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
-    "requestInformationSentToOwner": "An information about this booking request has been emailed to the owner.",
+    "requestInformationSentToOwner": "Information about this booking request has been emailed to the owner.",
     "scheduleSettings": {
       "clickHereToConnect": "Click here to connect a calendar!",
       "create": "Select a calendar under Scheduling details and click save to get started!",
