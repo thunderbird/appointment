@@ -17,6 +17,7 @@
   "error": {
     "actionNeeded": "Action needed",
     "authenticationRequired": "Sorry, this page requires you to be logged in.",
+    "calendarConnectError": "There was a problem with the calendar connection.",
     "credentialsIncomplete": "Please provide login credentials.",
     "dataSourceIsEmpty": "No {name} could be found.",
     "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",

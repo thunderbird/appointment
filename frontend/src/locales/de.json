@@ -17,6 +17,7 @@
   "error": {
     "actionNeeded": "Aktion erforderlich!",
     "authenticationRequired": "Entschuldigung, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
+    "calendarConnectError": "Es gab ein Problem mit der Kalender-Verbindung.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",

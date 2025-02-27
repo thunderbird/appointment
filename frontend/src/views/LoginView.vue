@@ -7,11 +7,7 @@ import {
   dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey,
 } from '@/keys';
 import {
-  BooleanResponse,
-  AuthUrlResponse,
-  AuthUrl,
-  Error,
-  PydanticException,
+  BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
 } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
@@ -50,13 +46,13 @@ const email = ref('');
 const password = ref('');
 const inviteCode = ref('');
 const loginStep = ref(LoginSteps.Login);
-const loginError = ref<string>(null);
+const loginError = ref<Alert>(null);
 
 onMounted(async () => {
   // Error should be a string value, so don't worry about any obj deconstruction.
   if (route.query.error) {
     const queryError = route.query.error as string;
-    loginError.value = t(`login.remoteError.${queryError}`);
+    loginError.value = { title: t(`login.remoteError.${queryError}`) };
     await router.replace(route.path);
   }
 
@@ -75,7 +71,7 @@ const signUp = async () => {
   }
 
   isLoading.value = true;
-  loginError.value = '';
+  loginError.value = null;
   const { data, error }: BooleanResponse = await call('waiting-list/join').post({
     email: email.value,
   }).json();
@@ -88,7 +84,7 @@ const signUp = async () => {
   }
 
   if (!data.value) {
-    loginError.value = t('waitingList.signUpAlreadyExists');
+    loginError.value = { title: t('waitingList.signUpAlreadyExists') };
 
     if (usePosthog) {
       posthog.capture(MetricEvents.SignUpAlreadyExists, {

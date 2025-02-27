@@ -75,12 +75,7 @@ const onSubmit = async () => {
     const errorMessage = handleFormError(t, formRef, err);
     if (errorMessage) {
       // Emit a form-level error event if there's a problem here
-      // If there was a reason given, provide that too
-      const errorAlert: Alert = {
-        title: errorMessage,
-        details: (err.detail as FormExceptionDetail).reason,
-      };
-      emits('error', errorAlert);
+      emits('error', errorMessage);
     }
   }
 };
