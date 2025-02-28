@@ -243,10 +243,6 @@ const savedConfirmation = reactive({
   show: false,
   title: '',
 });
-const closeModals = () => {
-  savedConfirmation.show = false;
-  refreshSlugModalOpen.value = false;
-};
 
 // Revert the Schedule creation form to its initial values
 const revertForm = (resetData = true) => {
@@ -348,6 +344,11 @@ const refreshSlug = () => {
 const toggleActive = async (newValue: boolean) => {
   scheduleInput.value.active = newValue;
   await saveSchedule(false);
+};
+
+const closeModals = () => {
+  savedConfirmation.show = false;
+  refreshSlugModalOpen.value = false;
 };
 
 // Work-around for v-model and value not working for some reason...
