@@ -574,6 +574,11 @@ This was a fancy layer class, but @apply in sfc with custom layer classes is a n
   @apply opacity-50 shadow-none
 }
 
+/* Fix date selection width on week view */
+.calendar-root-wrapper .date-picker__week-picker {
+  min-width: min-content;
+}
+
 /*
 Loading bar, mostly works but needs some work and maybe a div relocation
 .calendar-root-wrapper .calendar-root .top-bar-loader {
