@@ -127,7 +127,7 @@ const dismiss = () => {
   <!-- page content -->
   <div class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4">
     <!-- schedule creation dialog -->
-    <div class="mx-auto mb-10 w-3/4 min-w-80 sm:w-1/4 md:mb-0 xl:w-1/6">
+    <div class="mx-auto mb-10 w-3/4 min-w-80 sm:w-1/4 md:mb-0 xl:w-1/6 z-10">
       <schedule-creation
         v-if="schedulesReady"
         :calendars="connectedCalendars"
