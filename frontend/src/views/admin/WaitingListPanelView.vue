@@ -244,13 +244,13 @@ onMounted(async () => {
   <div class="flex w-full justify-center">
     <alert-box
       v-if="pageNotification"
-      :title="pageNotification.title"
+      :alert="pageNotification"
       :scheme="AlertSchemes.Success"
       @close="pageNotification = null"
     />
     <alert-box
       v-if="pageError"
-      :title="pageError.title"
+      :alert="pageError"
       @close="pageError = null"
     />
   </div>

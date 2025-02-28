@@ -274,8 +274,7 @@ onMounted(async () => {
   <div class="flex flex-col gap-6 pl-6">
     <alert-box
       v-if="calendarConnectError"
-      :title="calendarConnectError.title"
-      :details="calendarConnectError.details"
+      :alert="calendarConnectError"
       @close="calendarConnectError = null"
     />
 
@@ -321,15 +320,13 @@ onMounted(async () => {
       <div class="text-lg">{{ t('heading.discoverCaldavcalendars') }}</div>
       <alert-box
         v-if="caldavDiscoverySuccess"
-        :title="caldavDiscoverySuccess.title"
-        :details="caldavDiscoverySuccess.details"
+        :alert="caldavDiscoverySuccess"
         :scheme="AlertSchemes.Success"
         @close="caldavDiscoverySuccess = null"
       />
       <alert-box
         v-if="caldavDiscoveryError"
-        :title="caldavDiscoveryError.title"
-        :details="caldavDiscoveryError.details"
+        :alert="caldavDiscoveryError"
         @close="caldavDiscoveryError = null"
       />
       <div class="flex flex-col gap-4">

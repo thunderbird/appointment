@@ -41,22 +41,19 @@ onMounted(async () => {
           </h2>
           <alert-box
             v-if="errorMessage"
-            :title="errorMessage.title"
-            :details="errorMessage.details"
+            :alert="errorMessage"
             :scheme="AlertSchemes.Error"
             @close="errorMessage = null"
           />
           <alert-box
             v-else-if="warningMessage"
-            :title="warningMessage.title"
-            :details="warningMessage.details"
+            :alert="warningMessage"
             :scheme="AlertSchemes.Warning"
             @close="warningMessage = null"
           />
           <alert-box
             v-else-if="infoMessage"
-            :title="infoMessage.title"
-            :details="infoMessage.details"
+            :alert="infoMessage"
             :scheme="AlertSchemes.Info"
             @close="infoMessage = null"
           />

@@ -439,7 +439,7 @@ watch(
       </div>
       <alert-box
         v-if="scheduleCreationError"
-        :title="scheduleCreationError.title"
+        :alert="scheduleCreationError"
         @close="scheduleCreationError = null"
       />
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Alert } from '@/models';
 import { AlertSchemes } from '@/definitions';
 import { IconX } from '@tabler/icons-vue';
 import { ref } from 'vue';
@@ -13,13 +14,11 @@ const { t } = useI18n();
 
 // component properties
 interface Props {
-  title: string; // Heading for the alert
-  details?: string; // Optional more verbose description for the alert. Togglable.
+  alert: Alert; // Heading and optional description for the alert. If exists, the description is togglable.
   canClose?: boolean; // True if the alert can be closed / removed
   scheme?: AlertSchemes; // Type of the alert
 }
 const props = withDefaults(defineProps<Props>(), {
-  details: null,
   canClose: true,
   scheme: AlertSchemes.Error,
 });
@@ -30,7 +29,7 @@ const isInfo = props.scheme === AlertSchemes.Info;
 const isSuccess = props.scheme === AlertSchemes.Success;
 const isWarning = props.scheme === AlertSchemes.Warning;
 const isError = props.scheme === AlertSchemes.Error;
-const hasDetails = props.details !== null;
+const hasDetails = props.alert.details !== null;
 
 const open = ref(false);
 const toggleDetails = () => {
@@ -53,10 +52,10 @@ const toggleDetails = () => {
     </span>
     <span class="body">
       <span class="title">
-        {{ title }}
+        {{ alert.title }}
       </span>
       <span v-if="hasDetails && open">
-        {{ details }}
+        {{ alert.details }}
       </span>
     </span>
     <span class="controls">
