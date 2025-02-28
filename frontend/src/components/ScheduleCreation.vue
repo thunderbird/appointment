@@ -335,6 +335,12 @@ const refreshSlugModalOpen = ref(false);
 const showRefreshSlugConfirmation = async () => {
   refreshSlugModalOpen.value = true;
 };
+
+const closeModals = () => {
+  savedConfirmation.show = false;
+  refreshSlugModalOpen.value = false;
+};
+
 const refreshSlug = () => {
   scheduleInput.value.slug = window.crypto.randomUUID().substring(0, 8);
   closeModals();
@@ -344,11 +350,6 @@ const refreshSlug = () => {
 const toggleActive = async (newValue: boolean) => {
   scheduleInput.value.active = newValue;
   await saveSchedule(false);
-};
-
-const closeModals = () => {
-  savedConfirmation.show = false;
-  refreshSlugModalOpen.value = false;
 };
 
 // Work-around for v-model and value not working for some reason...
