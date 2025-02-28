@@ -387,15 +387,11 @@ class TestCaldav:
 
     def test_create_google_caldav_calendar(self, with_client):
         response = with_client.post(
-            '/cal',
+            '/caldav/auth',
             json={
-                'title': 'Google CalDAV calendar',
-                'color': '#123456',
-                'provider': CalendarProvider.caldav.value,
                 'url': 'https://' + GOOGLE_CALDAV_DOMAINS[0],
                 'user': os.getenv('CALDAV_TEST_USER'),
                 'password': os.getenv('CALDAV_TEST_PASS'),
-                'connected': False,
             },
             headers=auth_headers,
         )
