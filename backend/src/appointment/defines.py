@@ -22,3 +22,6 @@ END_TIME_BEFORE_START_TIME_ERR = 'end_time_before_start_time'
 
 # CalDAV doesn't provide colours afaik
 DEFAULT_CALENDAR_COLOUR = '#c276c5'
+
+# List of Google CalDAV domains
+GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
