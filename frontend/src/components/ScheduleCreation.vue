@@ -17,6 +17,7 @@ import {
 } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
@@ -242,8 +243,9 @@ const savedConfirmation = reactive({
   show: false,
   title: '',
 });
-const closeCreatedModal = () => {
+const closeModals = () => {
   savedConfirmation.show = false;
+  refreshSlugModalOpen.value = false;
 };
 
 // Revert the Schedule creation form to its initial values
@@ -333,8 +335,13 @@ const saveSchedule = async (withConfirmation = true) => {
 };
 
 // Update slug with a random 8 character string
+const refreshSlugModalOpen = ref(false);
+const showRefreshSlugConfirmation = async () => {
+  refreshSlugModalOpen.value = true;
+};
 const refreshSlug = () => {
   scheduleInput.value.slug = window.crypto.randomUUID().substring(0, 8);
+  closeModals();
 };
 
 // handle schedule activation / deactivation
@@ -717,7 +724,7 @@ watch(
               </text-input>
               <link-button
                 class="p-0.5"
-                @click="scheduleInput.active ? refreshSlug() : null"
+                @click="scheduleInput.active ? showRefreshSlugConfirmation() : null"
                 :disabled="!scheduleInput.active"
                 data-testid="dashboard-booking-settings-link-refresh-btn"
               >
@@ -829,8 +836,18 @@ watch(
     :is-schedule="true"
     :title="savedConfirmation.title"
     :public-link="user.data.signedUrl"
-    @close="closeCreatedModal"
+    @close="closeModals"
   />
+  <!-- Refresh link confirmation modal -->
+  <confirmation-modal
+    :open="refreshSlugModalOpen"
+    :title="t('label.refreshLink')"
+    :message="t('text.refreshLinkNotice')"
+    :confirm-label="t('label.refresh')"
+    :cancel-label="t('label.cancel')"
+    @confirm="() => refreshSlug()"
+    @close="closeModals"
+  ></confirmation-modal>
 </template>
 
 <style scoped>
