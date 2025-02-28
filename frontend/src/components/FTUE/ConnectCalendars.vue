@@ -32,7 +32,7 @@ const continueTitle = computed(() => (selectedCount.value ? t('label.continue') 
 
 watch(selectedCount, (val) => {
   if (val === 0) {
-    warningMessage.value = t('ftue.oneCalendarRequired');
+    warningMessage.value.title = t('ftue.oneCalendarRequired');
   } else {
     warningMessage.value = null;
   }
@@ -41,7 +41,7 @@ watch(selectedCount, (val) => {
 onMounted(async () => {
   isLoading.value = true;
 
-  infoMessage.value = t('ftue.connectCalendarInfo');
+  infoMessage.value.title = t('ftue.connectCalendarInfo');
 
   await calendarStore.fetch(call, true);
   calendars.value = calendarStore.calendars.map((calendar) => ({
@@ -85,7 +85,8 @@ const onSubmit = async () => {
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="previousStep()"
-    >{{ t('label.back') }}
+    >
+      {{ t('label.back') }}
     </secondary-button>
     <primary-button
       class="btn-continue"

@@ -17,6 +17,7 @@
   "error": {
     "actionNeeded": "Aktion erforderlich!",
     "authenticationRequired": "Entschuldigung, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
+    "calendarConnectError": "Es gab ein Problem mit der Kalender-Verbindung.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",
@@ -33,7 +34,8 @@
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "unknownAppointmentError": "Es gab ein Problem beim Erstellen des Termins. Bitte nochmal versuchen.",
     "unknownScheduleError": "Es gab ein Problem beim Erstellen des Zeitplans.",
-    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar."
+    "usernameIsNotAvailable": "Dieser Benutzername ist nicht verfügbar.",
+    "weCouldntConnect": "Es konnte keine Verbindung hergestellt werden."
   },
   "fields": {
     "slot_duration": "Dauer",
@@ -123,6 +125,7 @@
     "bookingSuccessfullyConfirmed": "Buchung erfolgreich bestätigt!",
     "bookingSuccessfullyDenied": "Buchung erfolgreich abgelehnt!",
     "bookingSuccessfullyRequested": "Buchung erfolgreich angefragt!",
+    "connectionEstablished": "Verbindung hergestellt",
     "copiedToClipboard": "In Zwischenablage kopiert",
     "eventWasCreated": "Das Event wurde in deinem Kalender erstellt.",
     "invitationGenerated": "Die Einladungscodes wurden erfolgreich generiert.",

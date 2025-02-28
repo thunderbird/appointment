@@ -4,7 +4,7 @@ import {
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
 import {
-  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption,
+  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert,
 } from '@/models';
 import {
   ref, reactive, computed, inject, watch, onMounted, Ref,
@@ -141,7 +141,7 @@ onMounted(() => {
   referenceSchedule.value = { ...scheduleInput.value };
 });
 
-const scheduleCreationError = ref<string>(null);
+const scheduleCreationError = ref<Alert>(null);
 const scheduledRangeMinutes = computed(() => {
   const start = dj(`${dj().format(dateFormat)}T${scheduleInput.value.start_time}:00`);
   const end = dj(`${dj().format(dateFormat)}T${scheduleInput.value.end_time}:00`);
@@ -291,7 +291,7 @@ const saveSchedule = async (withConfirmation = true) => {
   // validate schedule data
   const validationError = scheduleValidationError(obj);
   if (validationError) {
-    scheduleCreationError.value = validationError;
+    scheduleCreationError.value = { title: validationError };
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
@@ -305,7 +305,7 @@ const saveSchedule = async (withConfirmation = true) => {
   // eslint-disable-next-line no-prototype-builtins
   if (response.hasOwnProperty('error')) {
     // error message is in data
-    scheduleCreationError.value = (response as Error).message;
+    scheduleCreationError.value = { title: (response as Error).message };
     // go back to the start
     savingInProgress.value = false;
     window.scrollTo(0, 0);
@@ -437,9 +437,11 @@ watch(
           data-testid="dashboard-set-availability-toggle"
         />
       </div>
-      <alert-box @close="scheduleCreationError = ''" v-if="scheduleCreationError">
-        {{ scheduleCreationError }}
-      </alert-box>
+      <alert-box
+        v-if="scheduleCreationError"
+        :alert="scheduleCreationError"
+        @close="scheduleCreationError = null"
+      />
 
       <div class="mb-1 px-4">
         <label for="scheduleName" class="flex-column flex">

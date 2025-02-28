@@ -9,7 +9,7 @@ import {
 import { useRouter } from 'vue-router';
 import { IconSend } from '@tabler/icons-vue';
 import {
-  Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter,
+  Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
 } from '@/models';
 import { dayjsKey, callKey } from '@/keys';
 import DataTable from '@/components/DataTable.vue';
@@ -28,8 +28,8 @@ const invites = ref<Invite[]>([]);
 const displayPage = ref(false);
 const generateCodeAmount = ref(null);
 const loading = ref(true);
-const pageError = ref('');
-const pageNotification = ref('');
+const pageError = ref<Alert>(null);
+const pageNotification = ref<Alert>(null);
 
 const filteredInvites = computed(() => invites.value.map((invite) => ({
   code: {
@@ -177,8 +177,8 @@ const revokeInvite = async (code: string) => {
 
 const generateInvites = async () => {
   loading.value = true;
-  pageError.value = '';
-  pageNotification.value = '';
+  pageError.value = null;
+  pageNotification.value = null;
 
   const response: InviteListResponse = await call(`invite/generate/${generateCodeAmount.value}`).post().json();
 
@@ -188,14 +188,14 @@ const generateInvites = async () => {
     const errorObj = (data.value as Exception)?.detail;
 
     if (!errorObj) {
-      pageError.value = t('error.somethingWentWrong');
+      pageError.value = { title: t('error.somethingWentWrong') };
     } else if (errorObj instanceof Array) {
-      pageError.value = errorObj.map((err) => err.msg).join('\n');
+      pageError.value = { title: errorObj.map((err) => err.msg).join('\n') };
     } else {
-      pageError.value = errorObj?.message;
+      pageError.value = { title: errorObj?.message };
     }
   } else {
-    pageNotification.value = t('info.invitationGenerated');
+    pageNotification.value = { title: t('info.invitationGenerated') };
     generateCodeAmount.value = null;
     await refresh();
   }
@@ -224,12 +224,17 @@ onMounted(async () => {
 
 <template>
   <div class="flex w-full justify-center">
-    <alert-box v-if="pageNotification" @close="pageNotification = ''" :scheme="AlertSchemes.Success">
-      {{ pageNotification }}
-    </alert-box>
-    <alert-box v-if="pageError" @close="pageError = ''">
-      {{ pageError }}
-    </alert-box>
+    <alert-box
+      v-if="pageNotification"
+      :alert="pageNotification"
+      :scheme="AlertSchemes.Success"
+      @close="pageNotification = null"
+    />
+    <alert-box
+      v-if="pageError"
+      :alert="pageError"
+      @close="pageError = null"
+    />
   </div>
   <admin-nav/>
   <div v-if="displayPage">

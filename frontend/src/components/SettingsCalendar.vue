@@ -11,6 +11,7 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { callKey, refreshKey } from '@/keys';
 import {
   CalendarResponse, CalendarListResponse, Exception, ExceptionDetail, PydanticException,
+  Alert,
 } from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import CalendarManagement from '@/components/CalendarManagement.vue';
@@ -28,9 +29,9 @@ const call = inject(callKey);
 const refresh = inject(refreshKey);
 const calendarStore = useCalendarStore();
 
-const calendarConnectError = ref('');
-const caldavDiscoveryError = ref('');
-const caldavDiscoverySuccess = ref('');
+const calendarConnectError = ref<Alert>();
+const caldavDiscoveryError = ref<Alert>();
+const caldavDiscoverySuccess = ref<Alert>();
 
 const deleteCalendarModalOpen = ref(false);
 const deleteCalendarModalTarget = ref<number>(null);
@@ -174,7 +175,9 @@ const saveCalendar = async () => {
   if (isCalDav.value && inputMode.value === InputModes.Add) {
     const { error, data }: CalendarResponse = await call('cal').post(calendarInput.data).json();
     if (error.value) {
-      calendarConnectError.value = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
+      calendarConnectError.value = {
+        title: ((data.value as Exception)?.detail as ExceptionDetail)?.message,
+      };
       loading.value = false;
       // Show them the error message because I haven't thought this ux process through.
       window.scrollTo(0, 0);
@@ -210,14 +213,14 @@ const resetPrincipal = () => {
   principal.url = '';
   principal.user = '';
   principal.password = '';
-  caldavDiscoveryError.value = '';
-  caldavDiscoverySuccess.value = '';
+  caldavDiscoveryError.value = null;
+  caldavDiscoverySuccess.value = null;
 };
 const processPrincipal = ref(false);
 
 const getRemoteCaldavCalendars = async () => {
-  caldavDiscoveryError.value = '';
-  caldavDiscoverySuccess.value = '';
+  caldavDiscoveryError.value = null;
+  caldavDiscoverySuccess.value = null;
 
   clearFormErrors(caldavFormRef);
   if (!caldavFormRef.value.checkValidity()) {
@@ -237,7 +240,10 @@ const getRemoteCaldavCalendars = async () => {
     return;
   }
 
-  caldavDiscoverySuccess.value = t('calDAVForm.successfullyConnected');
+  caldavDiscoverySuccess.value = {
+    title: t('info.connectionEstablished'),
+    details: t('calDAVForm.successfullyConnected'),
+  };
 
   await syncCalendars();
 
@@ -251,7 +257,10 @@ onMounted(async () => {
 
   // Error should be a string value, so don't worry about any obj deconstruction.
   if (route.query.error) {
-    calendarConnectError.value = route.query.error as string;
+    calendarConnectError.value = {
+      title: t('error.calendarConnectError'),
+      details: route.query.error as string,
+    };
     await router.replace(route.path);
   }
 
@@ -264,10 +273,10 @@ onMounted(async () => {
   <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.calendarSettings') }}</div>
   <div class="flex flex-col gap-6 pl-6">
     <alert-box
-      @close="calendarConnectError = ''"
-      title="Calendar Connect Error"
       v-if="calendarConnectError"
-    >{{calendarConnectError}}</alert-box>
+      :alert="calendarConnectError"
+      @close="calendarConnectError = null"
+    />
 
     <!-- list of possible calendars to connect -->
     <calendar-management
@@ -311,15 +320,15 @@ onMounted(async () => {
       <div class="text-lg">{{ t('heading.discoverCaldavcalendars') }}</div>
       <alert-box
         v-if="caldavDiscoverySuccess"
+        :alert="caldavDiscoverySuccess"
         :scheme="AlertSchemes.Success"
-        title="CalDAV discovery success"
-        @close="caldavDiscoverySuccess = ''"
-      >{{ caldavDiscoverySuccess }}</alert-box>
+        @close="caldavDiscoverySuccess = null"
+      />
       <alert-box
         v-if="caldavDiscoveryError"
-        title="CalDAV discovery Error"
-        @close="caldavDiscoveryError = ''"
-      >{{ caldavDiscoveryError }}</alert-box>
+        :alert="caldavDiscoveryError"
+        @close="caldavDiscoveryError = null"
+      />
       <div class="flex flex-col gap-4">
         <form
           class="flex max-w-2xl flex-col gap-4 pl-6"

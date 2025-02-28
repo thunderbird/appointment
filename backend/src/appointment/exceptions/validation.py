@@ -10,16 +10,21 @@ class APIException(HTTPException):
     id_code = 'UNKNOWN'
     status_code = 500
     message_key = None
+    reason = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, reason: str|None = None, **kwargs):
         message_key = kwargs.pop('message_key', False)
         if message_key is not False:
             self.message_key = message_key
+
+        if reason:
+            self.reason = reason
 
         super().__init__(
             status_code=self.status_code,
             detail={
                 'id': self.id_code,
+                'reason': self.get_reason(),
                 'message': self.get_msg(),
                 'status': self.status_code,
             },
@@ -32,6 +37,8 @@ class APIException(HTTPException):
 
         return l10n('unknown-error')
 
+    def get_reason(self):
+        return self.reason
 
 class InvalidPermissionLevelException(APIException):
     """Raise when the subscribers permission level is too low for the action"""
@@ -205,19 +212,9 @@ class ZoomNotConnectedException(APIException):
 class RemoteCalendarConnectionError(APIException):
     id_code = 'REMOTE_CALENDAR_CONNECTION_ERROR'
     status_code = 400
-    reason = None
-
-    def __init__(self, reason: str|None = None, **kwargs):
-        if reason:
-            self.reason = reason
-        super().__init__(**kwargs)
 
     def get_msg(self):
-        reason = self.reason
-        if not self.reason:
-            reason = l10n('unknown-error-short')
-
-        return l10n('remote-calendar-connection-error', {'reason': reason})
+        return l10n('remote-calendar-connection-error')
 
 
 class EventCouldNotBeAccepted(APIException):
@@ -332,3 +329,16 @@ class APIRateLimitExceeded(APIException):
 
     def get_msg(self):
         return l10n('rate-limit-exceeded')
+
+
+class GoogleCaldavNotSupported(APIException):
+    """Is raised when an attempt to access the Google CalDAV API was detected"""
+
+    id_code = 'GOOGLE_CALDAV_NOT_SUPPORTED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('google-caldav-not-supported')
+
+    def get_reason(self):
+        return l10n('google-caldav-not-supported-details')

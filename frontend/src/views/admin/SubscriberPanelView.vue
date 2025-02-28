@@ -8,7 +8,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import {
-  Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter,
+  Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
 } from '@/models';
 import { dayjsKey, callKey } from '@/keys';
 import AdminNav from '@/elements/admin/AdminNav.vue';
@@ -29,8 +29,8 @@ const subscribers = ref<Subscriber[]>([]);
 const displayPage = ref(false);
 const inviteEmail = ref('');
 const loading = ref(true);
-const pageError = ref('');
-const pageNotification = ref('');
+const pageError = ref<Alert>(null);
+const pageNotification = ref<Alert>(null);
 
 const filteredSubscribers = computed(() => subscribers.value.map((subscriber) => ({
   id: {
@@ -174,8 +174,8 @@ const toggleSubscriberState = async (email: string, currentState: boolean) => {
  */
 const sendInvite = async () => {
   loading.value = true;
-  pageError.value = '';
-  pageNotification.value = '';
+  pageError.value = null;
+  pageNotification.value = null;
 
   const response = await call('invite/send').post({
     email: inviteEmail.value,
@@ -187,14 +187,14 @@ const sendInvite = async () => {
     const errorObj = (data.value as Exception)?.detail;
 
     if (!errorObj) {
-      pageError.value = t('error.somethingWentWrong');
+      pageError.value = { title: t('error.somethingWentWrong') };
     } else if (errorObj instanceof Array) {
-      pageError.value = errorObj.map((err) => err.msg).join('\n');
+      pageError.value = { title: errorObj.map((err) => err.msg).join('\n') };
     } else {
-      pageError.value = data.value?.detail?.message;
+      pageError.value = { title: data.value?.detail?.message };
     }
   } else {
-    pageNotification.value = t('info.invitationWasSentContext', { email: inviteEmail.value });
+    pageNotification.value = { title: t('info.invitationWasSentContext', { email: inviteEmail.value }) };
     inviteEmail.value = '';
     await refresh();
   }
@@ -224,18 +224,16 @@ onMounted(async () => {
 <template>
   <div class="flex w-full justify-center">
     <alert-box
-      @close="pageNotification = ''"
       v-if="pageNotification"
+      :alert="pageNotification"
       :scheme="AlertSchemes.Success"
-    >
-      {{ pageNotification }}
-    </alert-box>
+      @close="pageNotification = null"
+    />
     <alert-box
-      @close="pageError = ''"
       v-if="pageError"
-    >
-      {{ pageError }}
-    </alert-box>
+      :alert="pageError"
+      @close="pageError = null"
+    />
   </div>
   <admin-nav/>
   <div v-if="displayPage">

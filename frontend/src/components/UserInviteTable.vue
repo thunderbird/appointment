@@ -6,7 +6,7 @@ import {
   AlertSchemes, TableDataType, InviteStatus,
 } from '@/definitions';
 import {
-  Invite, InviteListResponse, TableDataRow, TableDataColumn,
+  Invite, InviteListResponse, TableDataRow, TableDataColumn, Alert,
 } from '@/models';
 import { callKey } from '@/keys';
 import DataTable from '@/components/DataTable.vue';
@@ -16,8 +16,8 @@ const call = inject(callKey);
 
 const invites = ref<Invite[]>([]);
 const loading = ref(true);
-const pageError = ref('');
-const pageNotification = ref('');
+const pageError = ref<Alert>(null);
+const pageNotification = ref<Alert>(null);
 
 const filteredInvites = computed(() => invites.value.map((invite) => ({
   code: {
@@ -59,12 +59,17 @@ onMounted(async () => {
 
 <template>
   <div class="flex w-full justify-center">
-    <alert-box v-if="pageNotification" @close="pageNotification = ''" :scheme="AlertSchemes.Success">
-      {{ pageNotification }}
-    </alert-box>
-    <alert-box v-if="pageError" @close="pageError = ''">
-      {{ pageError }}
-    </alert-box>
+    <alert-box
+      v-if="pageNotification"
+      :alert="pageNotification"
+      :scheme="AlertSchemes.Success"
+      @close="pageNotification = null"
+    />
+    <alert-box
+      v-if="pageError"
+      :alert="pageError"
+      @close="pageError = null"
+    />
   </div>
   <div>
     <data-table

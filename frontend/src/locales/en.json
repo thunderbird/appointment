@@ -17,6 +17,7 @@
   "error": {
     "actionNeeded": "Action needed",
     "authenticationRequired": "Sorry, this page requires you to be logged in.",
+    "calendarConnectError": "There was a problem with the calendar connection.",
     "credentialsIncomplete": "Please provide login credentials.",
     "dataSourceIsEmpty": "No {name} could be found.",
     "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
@@ -33,7 +34,8 @@
     "somethingWentWrong": "Something went wrong",
     "unknownAppointmentError": "There was an issue creating your booking. Please try again.",
     "unknownScheduleError": "There was an issue creating your schedule. Please try again.",
-    "usernameIsNotAvailable": "Username not available. Please choose another."
+    "usernameIsNotAvailable": "Username not available. Please choose another.",
+    "weCouldntConnect": "We couldn't connect to your calendar."
   },
   "fields": {
     "slot_duration": "Slot Duration",
@@ -123,6 +125,7 @@
     "bookingSuccessfullyConfirmed": "Booking confirmed",
     "bookingSuccessfullyDenied": "Booking rejected. Reach out to the booker to recommend an alternative.",
     "bookingSuccessfullyRequested": "Booking request sent",
+    "connectionEstablished": "Connection established",
     "copiedToClipboard": "Copied to clipboard",
     "eventWasCreated": "Event created in your calendar.",
     "invitationGenerated": "The invite codes were generated successfully.",

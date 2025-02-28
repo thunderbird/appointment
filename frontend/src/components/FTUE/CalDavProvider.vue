@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import {
-  computed,
-  inject, ref,
+  computed, inject, ref,
 } from 'vue';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { CalendarListResponse, PydanticException } from '@/models';
+import {
+  CalendarListResponse, PydanticException,
+} from '@/models';
 import { clearFormErrors, handleFormError } from '@/utils';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 
@@ -70,10 +71,11 @@ const onSubmit = async () => {
   if (!error.value) {
     emits('next');
   } else {
-    const err = handleFormError(t, formRef, data?.value as PydanticException);
-    if (err) {
+    const err = data?.value as PydanticException;
+    const errorMessage = handleFormError(t, formRef, err);
+    if (errorMessage) {
       // Emit a form-level error event if there's a problem here
-      emits('error', err);
+      emits('error', errorMessage);
     }
   }
 };

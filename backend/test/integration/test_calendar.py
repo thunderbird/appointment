@@ -5,6 +5,7 @@ import pytest
 from appointment.database.models import CalendarProvider
 from appointment.controller.calendar import CalDavConnector, GoogleConnector
 from appointment.database import schemas, models
+from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
 from sqlalchemy import select
 
@@ -383,6 +384,20 @@ class TestCaldav:
         assert 'url' not in data
         assert 'user' not in data
         assert 'password' not in data
+
+    def test_create_google_caldav_calendar(self, with_client):
+        response = with_client.post(
+            '/caldav/auth',
+            json={
+                'url': 'https://' + GOOGLE_CALDAV_DOMAINS[0],
+                'user': os.getenv('CALDAV_TEST_USER'),
+                'password': os.getenv('CALDAV_TEST_PASS'),
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'GOOGLE_CALDAV_NOT_SUPPORTED'
 
     def test_update_existing_caldav_calendar_with_password(self, with_client, with_db, make_caldav_calendar):
         generated_calendar = make_caldav_calendar()

@@ -14,8 +14,9 @@ from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
 from appointment.exceptions.calendar import TestConnectionFailed
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
-from appointment.exceptions.validation import RemoteCalendarConnectionError
+from appointment.exceptions.validation import RemoteCalendarConnectionError, GoogleCaldavNotSupported
 from appointment.l10n import l10n
+from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
 router = APIRouter()
 
@@ -36,6 +37,12 @@ def caldav_autodiscover_auth(
     secure_protocol = 'https://' in connection.url
 
     dns_lookup_cache_key = f'dns:{utils.encrypt(connection.url)}'
+
+    # Check for an attempt to use Google CalDAV API
+    # which we don't support because we use their API directly
+    basename = urlparse(connection.url).netloc
+    if (any([(g in basename) for g in GOOGLE_CALDAV_DOMAINS])):
+        raise GoogleCaldavNotSupported()
 
     lookup_branch = None
     lookup_url = None

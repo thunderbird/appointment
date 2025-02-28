@@ -46,15 +46,12 @@ not-in-allow-list = Deine E-Mail-Adresse ist nicht in der Liste erlaubter Adress
 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 
-remote-calendar-connection-error = Der angebundene Kalender konnte nicht erreicht werden: {$reason}.
-remote-calendar-connection-error = The remote calendar could not be reached due to {$reason}.
+remote-calendar-connection-error = Es konnte keine Verbindung hergestellt werden.
 
-        Bitte die Verbindungsinformationen überprüfen und noch einmal versuchen.
-
-# Possible entries for $reason,
-remote-calendar-reason-doesnt-support-caldav = Der Kalender bietet keine CalDAV-Unterstützung
-remote-calendar-reason-doesnt-support-auth = Der Kalender unterstützt keine Authentifizierung
-remote-calendar-reason-unauthorized = Es gibt ein Problem mit Benutzername oder Passwort
+# Possible error reasons
+remote-calendar-reason-doesnt-support-caldav = Der Kalender bietet keine CalDAV-Unterstützung.
+remote-calendar-reason-doesnt-support-auth = Der Kalender unterstützt keine der verfügbaren Authentifizierungsmethoden
+remote-calendar-reason-unauthorized = Bitte überprüfe Benutzername und Passwort und versuche es nochmal.
 
 event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
 event-could-not-be-deleted = Es ist ein Fehler beim Entfernen des vorläufigen Termins aufgetreten. Bitte später noch einmal versuchen.
@@ -67,6 +64,7 @@ subscriber-self-delete = Die Löschung des eigenen Benutzerkontos ist hier nicht
 
 rate-limit-exceeded = Zu viele Anfragen in zu kurzem Zeitraum. Bitte später noch einmal versuchen.
 
+# This is for the frontend, don't variable-ify!
 error-minimum-value = {field} sollte wenigstens {value} sein.
 
 ## Authentication Exceptions
@@ -91,6 +89,8 @@ google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte
 google-sync-fail = Bei der Synchronisierung von Kalendern ist ein Fehler aufgetreten. Bitte später noch einmal versuchen.
 google-only-one = Es kann nur ein einziges Google-Konto verbunden sein.
 google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto verbunden werden.
+google-caldav-not-supported = Google CalDAV wird nicht unterstützt.
+google-caldav-not-supported-details = Bitte 'Google Kalender verbinden' benutzen.
 
 ## Frontend Facing Strings
 
