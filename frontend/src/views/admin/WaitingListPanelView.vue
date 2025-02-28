@@ -16,6 +16,7 @@ import {
   WaitingListInviteResponse,
   Exception,
   ExceptionDetail,
+  Alert,
 } from '@/models';
 import { dayjsKey, callKey } from '@/keys';
 import { IconSend } from '@tabler/icons-vue';
@@ -34,8 +35,8 @@ const dj = inject(dayjsKey);
 const waitingListUsers = ref<WaitingListEntry[]>([]);
 const displayPage = ref(false);
 const loading = ref(true);
-const pageError = ref('');
-const pageNotification = ref('');
+const pageError = ref<Alert>(null);
+const pageNotification = ref<Alert>(null);
 const selectedFields = ref([]);
 const dataTableRef = ref(null);
 
@@ -204,17 +205,19 @@ const sendInvites = async () => {
   const { data, error } = response;
 
   if (error.value) {
-    pageError.value = ((data?.value as Exception)?.detail as ExceptionDetail)?.message ?? t('error.somethingWentWrong');
+    pageError.value = {
+      title: ((data?.value as Exception)?.detail as ExceptionDetail)?.message ?? t('error.somethingWentWrong'),
+    };
     loading.value = false;
     return;
   }
 
   const { accepted, errors } = data.value as WaitingListInvite;
 
-  pageNotification.value = t('label.sentCountInvitesSuccessfully', { count: accepted.length });
+  pageNotification.value = { title: t('label.sentCountInvitesSuccessfully', { count: accepted.length }) };
 
   if (errors.length) {
-    pageError.value = errors.join('\n');
+    pageError.value = { title: errors.join('\n') };
   }
 
   // Unselect everything!
@@ -241,14 +244,14 @@ onMounted(async () => {
   <div class="flex w-full justify-center">
     <alert-box
       v-if="pageNotification"
-      :title="pageNotification"
+      :title="pageNotification.title"
       :scheme="AlertSchemes.Success"
-      @close="pageNotification = ''"
+      @close="pageNotification = null"
     />
     <alert-box
       v-if="pageError"
-      :title="pageError"
-      @close="pageError = ''"
+      :title="pageError.title"
+      @close="pageError = null"
     />
   </div>
   <admin-nav/>
