@@ -8,7 +8,6 @@ import { storeToRefs } from 'pinia';
 import {
   apiUrlKey, callKey, refreshKey, isPasswordAuthKey, isFxaAuthKey, fxaEditProfileUrlKey,
 } from '@/keys';
-import { defaultLocale } from '@/utils';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import UAParser from 'ua-parser-js';
@@ -165,7 +164,7 @@ const onPageLoad = async () => {
     resolution: deviceRes,
     effective_resolution: effectiveDeviceRes,
     user_agent: navigator.userAgent,
-    locale: defaultLocale(),
+    locale: defaultLocale(), // needs to import defaultLocale from utils
   }).json();
 
   const { data } = response;
