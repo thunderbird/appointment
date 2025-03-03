@@ -36,6 +36,7 @@ const filteredCalendars = computed(() => props.calendars.filter((calendar: Calen
         :disabled="loading"
         @click="emit('sync')"
         :title="t('label.sync')"
+        data-testid="calendar-settings-sync-calendars-button"
       >
         <span class="mr-2 inline-block">
           {{ t('label.syncCalendars') }}

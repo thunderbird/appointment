@@ -135,6 +135,7 @@ const editProfile = async () => {
           v-if="!connection[0]"
           :label="t('label.connect')"
           class="btn-connect"
+          :data-testid="'connected-accounts-settings-' + t(provider) + '-connect-btn'"
           @click="() => connectAccount(providers[provider])"
           :title="t('label.connect')"
         />
@@ -142,6 +143,7 @@ const editProfile = async () => {
           v-if="connection[0]"
           :label="t('label.disconnect')"
           class="btn-disconnect"
+          :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn'"
           @click="() => displayModal(providers[provider], connection[0].type_id)"
           :title="t('label.disconnect')"
         />

@@ -3,7 +3,7 @@ import { SplashscreenPage } from "../pages/splashscreen-page";
 import { FxAPage } from "../pages/fxa-page";
 import { DashboardPage } from "../pages/dashboard-page";
 import { expect, type Page } from '@playwright/test';
-import { APPT_TARGET_ENV, APPT_URL, APPT_PAGE_TITLE } from "../const/constants";
+import { APPT_TARGET_ENV, APPT_URL, APPT_PAGE_TITLE, TIMEOUT_30_SECONDS } from "../const/constants";
 
 /**
  * Navigate to and sign into the Appointment application target environment, using the URL and
@@ -29,7 +29,6 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     }
 
     // now that we're signed into the appointment dashboard give it time to load
-    await page.waitForLoadState('domcontentloaded');
-    await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: 30_000 }); // give generous time
-    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: 30_000 });
+    await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_30_SECONDS }); // give generous time
+    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 }

@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { type Page, type Locator } from '@playwright/test';
-import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX } from '../const/constants';
+import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX, TIMEOUT_30_SECONDS } from '../const/constants';
 
 export class BookingPage {
   readonly page: Page;
@@ -43,7 +43,6 @@ export class BookingPage {
   async gotoBookingPageShortUrl() {
     // the default share link is a short URL
     await this.page.goto(APPT_MY_SHARE_LINK);
-    await this.page.waitForLoadState('domcontentloaded');
   }
 
   /**
@@ -54,7 +53,6 @@ export class BookingPage {
     const prodShareLinkUser: string = APPT_MY_SHARE_LINK.split(APPT_SHORT_SHARE_LINK_PREFIX)[1];
     const longLink: string = `${APPT_LONG_SHARE_LINK_PREFIX}${prodShareLinkUser}`;
     await this.page.goto(longLink);
-    await this.page.waitForLoadState('domcontentloaded');
   }
 
   /**
@@ -63,8 +61,7 @@ export class BookingPage {
   async gotoBookingPageWeekView() {
     const weekLink: string = `${APPT_MY_SHARE_LINK}#week`;
     await this.page.goto(weekLink);
-    await this.page.waitForLoadState('domcontentloaded');
-    await expect(this.confirmBtn).toBeVisible({ timeout: 30_000 });
+    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
@@ -72,8 +69,7 @@ export class BookingPage {
    */
   async goForwardOneWeek() {
     await this.nextMonthArrow.click();
-    await this.page.waitForLoadState('domcontentloaded');
-    await expect(this.confirmBtn).toBeVisible({ timeout: 30_000 });
+    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
