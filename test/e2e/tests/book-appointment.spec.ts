@@ -2,8 +2,14 @@ import { test, expect } from '@playwright/test';
 import { BookingPage } from '../pages/booking-page';
 import { DashboardPage } from '../pages/dashboard-page';
 import { navigateToAppointmentAndSignIn } from '../utils/utils';
-import { APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, APPT_BOOKEE_EMAIL,
-  PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE } from '../const/constants';
+
+import {
+  APPT_DISPLAY_NAME,
+  APPT_BOOKEE_NAME,
+  APPT_BOOKEE_EMAIL,
+  PLAYWRIGHT_TAG_PROD_SANITY,
+  PLAYWRIGHT_TAG_E2E_SUITE
+} from '../const/constants';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;
