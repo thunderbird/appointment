@@ -103,7 +103,7 @@ const editProfile = async () => {
 
 <template>
   <div class="flex flex-col gap-8">
-    <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.connectedAccounts') }}</div>
+    <div class="text-3xl font-thin text-gray-500 dark:text-gray-200">{{ t('heading.connectedAccountsSettings') }}</div>
     <div class="max-w-3xl pl-6" v-for="(connection, provider) in connections" v-bind:key="provider">
       <h2 class="mb-4 text-xl font-medium">{{ t(`heading.settings.connectedAccounts.${provider}`) }}</h2>
       <p>{{ t(`text.settings.connectedAccounts.connect.${provider}`) }}</p>

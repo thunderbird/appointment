@@ -85,6 +85,7 @@
     "calendarsConnected": "Verbundene Kalender",
     "calendarsUnconnected": "Verfügbare Kalender",
     "connectedAccounts": "Verbundene Konten",
+    "connectedAccountsSettings": "Verbundene Konten Einstellungen",
     "contactRequest": "Kontaktanfrage",
     "createNewAppointment": "Neuen Termin erstellen",
     "dateAndTimeFormatting": "Datums- und Zeitformat",
@@ -137,8 +138,8 @@
     "slotIsAvailableAgain": "Das Zeitfenster ist jetzt wieder buchbar."
   },
   "label": {
-    "12hAmPm": "12h AM/PM",
-    "24h": "24h",
+    "12hAmPm": "12-hour AM/PM",
+    "24h": "24-hour",
     "DDMMYYYY": "TT/MM/YYYY",
     "MMDDYYYY": "MM/TT/YYYY",
     "account": "Konto",
@@ -341,7 +342,7 @@
   },
   "locales": {
     "de": "Deutsch",
-    "en": "Englisch"
+    "en": "English"
   },
   "login": {
     "confirm": {
