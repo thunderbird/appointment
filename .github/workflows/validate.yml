@@ -24,6 +24,7 @@ jobs:
       validate-iac: ${{ steps.check.outputs.validate-iac }}
       validate-backend: ${{ steps.check.outputs.validate-backend }}
       validate-frontend: ${{ steps.check.outputs.validate-frontend }}
+      validate-e2e: ${{ steps.check.outputs.validate-e2e }}
     steps:
     - uses: actions/checkout@v4
 
@@ -39,6 +40,9 @@ jobs:
             - '.github/workflows/validate.yml'
           validate-frontend:
             - 'frontend/**'
+            - '.github/workflows/validate.yml'
+          validate-e2e:
+            - 'test/e2e/**'
             - '.github/workflows/validate.yml'
 
   validate-iac:
@@ -196,7 +200,7 @@ jobs:
   e2e-tests-browserstack:
     name: e2e-tests-browserstack
     needs: detect-changes
-    if: needs.detect-changes.outputs.validate-frontend == 'true' || needs.detect-changes.outputs.validate-backend == 'true'
+    if: needs.detect-changes.outputs.validate-frontend == 'true' || needs.detect-changes.outputs.validate-backend == 'true' || needs.detect-changes.outputs.validate-e2e == 'true'
     runs-on: ubuntu-latest
     environment: staging
     env:
