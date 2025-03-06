@@ -43,7 +43,7 @@ This project is deployed with Mozilla Accounts (known as fxa in the code.) Since
 To run tests in the backend, simply install the package in editing mode:
 
 ```bash
-cd backend && pip install -e .['test']
+cd backend && pip install -e .'[test]'
 ```
 
 After this you can run all of the tests with:
