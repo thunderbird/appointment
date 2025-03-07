@@ -109,7 +109,8 @@ class TestFXAWebhooks:
         make_external_connections(subscriber_id, type=models.ExternalConnectionType.fxa, type_id=FXA_USER_ID)
 
         assert subscriber.minimum_valid_iat_time is None
-        assert subscriber.email == OLD_EMAIL
+        assert subscriber.email != OLD_EMAIL
+        assert subscriber.email == OLD_EMAIL.lower()
         assert subscriber.avatar_url != FXA_CLIENT_PATCH.get('subscriber_avatar_url')
         assert subscriber.name != FXA_CLIENT_PATCH.get('subscriber_display_name')
 

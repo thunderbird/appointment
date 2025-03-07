@@ -70,7 +70,7 @@ def can_login(data: schemas.CheckEmail, db: Session = Depends(get_db), fxa_clien
     """Determines if a user can go through the login flow"""
     if os.getenv('AUTH_SCHEME') == 'fxa':
         # This checks if a subscriber exists, or is in allowed list
-        return fxa_client.is_in_allow_list(db, data.email)
+        return fxa_client.is_in_allow_list(db, data.email.lower())
 
     # There's no waiting list setting on password login
     return True
@@ -158,7 +158,7 @@ def fxa_callback(
             f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-not-in-session']}"
         )
 
-    email = request.session['fxa_user_email']
+    email = request.session['fxa_user_email'].lower()
     # We only use timezone during subscriber creation, or if their timezone is None
     timezone = request.session['fxa_user_timezone']
     invite_code = request.session.get('fxa_user_invite_code')
@@ -176,7 +176,7 @@ def fxa_callback(
     creds = fxa_client.get_credentials(code)
     profile = fxa_client.get_profile()
 
-    if profile['email'] != email:
+    if email == '' or profile.get('email', '').lower() != email:
         fxa_client.logout()
         return RedirectResponse(
             f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-mismatch']}"

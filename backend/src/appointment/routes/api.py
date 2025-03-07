@@ -66,7 +66,7 @@ def update_me(
     me = repo.subscriber.update(db=db, data=data, subscriber_id=subscriber.id)
     return schemas.SubscriberMeOut(
         username=me.username,
-        email=me.email,
+        email=me.email.lower(),
         preferred_email=me.preferred_email,
         name=me.name,
         level=me.level,

@@ -35,18 +35,19 @@ def join_the_waiting_list(
     db: Session = Depends(get_db)
 ):
     """Join the waiting list!"""
-    added = repo.invite.add_to_waiting_list(db, data.email)
+    email = data.email.lower()
+    added = repo.invite.add_to_waiting_list(db, email)
 
     # TODO: Replace our signed functionality with this
     # Not timed since we don't have a mechanism to re-send these...
     serializer = URLSafeSerializer(os.getenv('SIGNED_SECRET'), 'waiting-list')
-    confirm_token = serializer.dumps({'email': data.email, 'action': WaitingListAction.CONFIRM_EMAIL.value})
-    decline_token = serializer.dumps({'email': data.email, 'action': WaitingListAction.LEAVE.value})
+    confirm_token = serializer.dumps({'email': email, 'action': WaitingListAction.CONFIRM_EMAIL.value})
+    decline_token = serializer.dumps({'email': email, 'action': WaitingListAction.LEAVE.value})
 
     # If they were added, send the email
     if added:
         background_tasks.add_task(
-            send_confirm_email, to=data.email, confirm_token=confirm_token, decline_token=decline_token
+            send_confirm_email, to=email, confirm_token=confirm_token, decline_token=decline_token
         )
 
     return added
@@ -67,6 +68,8 @@ def act_on_waiting_list(data: schemas.TokenForWaitingList, db: Session = Depends
 
     if action is None or email is None:
         raise validation.InvalidLinkException()
+
+    email = email.lower()
 
     if action == WaitingListAction.CONFIRM_EMAIL.value:
         success = repo.invite.confirm_waiting_list_email(db, email)

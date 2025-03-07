@@ -47,6 +47,8 @@ def google_auth(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Starts the google oauth process"""
+    if email:
+        email = email.lower()
     url, state = google_client.get_redirect_url(email)
 
     request.session[SESSION_OAUTH_STATE] = state
@@ -168,7 +170,7 @@ def disconnect_account(
     repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google)
 
     # Unassociated any secondary emails if they're attached to their google connection
-    if subscriber.secondary_email == google_connection.name:
+    if subscriber.secondary_email == google_connection.name.lower():
         subscriber.secondary_email = None
         db.add(subscriber)
         db.commit()
