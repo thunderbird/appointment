@@ -32,7 +32,7 @@ class TestAuth:
 
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data == True
+        assert data is True
 
     def test_me(self, with_db, with_client):
         response = with_client.get('/me', headers=auth_headers)
