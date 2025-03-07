@@ -14,8 +14,32 @@ from defines import auth_headers
 
 
 class TestJoinWaitingList:
+    def test_case_sensitivity(self, with_db, with_client):
+        """If they sign up with a non-lowercase email it should be saved as a lowercase email."""
+        waiting_list.limiter.reset()
+        email = 'Hello@example.org'
+        with with_db() as db:
+            assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            response = with_client.post('/waiting-list/join', json={'email': email})
+
+            # Ensure the response was okay!
+            assert response.status_code == 200, response.json()
+            assert response.json() is True
+
+            # Ensure our email was inserted as lowercase
+            with with_db() as db:
+                assert db.query(models.WaitingList).filter(models.WaitingList.email == email).first() is None
+                assert db.query(models.WaitingList).filter(models.WaitingList.email == email.lower()).first() is not None
+
+            # Ensure we sent out an email
+            mock.assert_called_once()
+
     def test_success(self, with_db, with_client):
+        waiting_list.limiter.reset()
         email = 'hello@example.org'
+
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
 
@@ -34,6 +58,7 @@ class TestJoinWaitingList:
             mock.assert_called_once()
 
     def test_already_in_list(self, with_db, with_client, make_waiting_list):
+        waiting_list.limiter.reset()
         email = 'hello@example.org'
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()

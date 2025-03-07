@@ -53,7 +53,7 @@ def fxa_process(
             case 'https://schemas.accounts.firefox.com/event/profile-change':
                 if event_data.get('email') is not None:
                     # Update the subscriber's email, we do this first in case there's a problem with get_profile()
-                    subscriber.email = event_data.get('email')
+                    subscriber.email = event_data.get('email').lower()
                     db.add(subscriber)
                     db.commit()
 
