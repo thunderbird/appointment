@@ -354,7 +354,7 @@ class TestSchedule:
             # Based off the farthest_booking our latest slot is 4:30pm
             # Note: This should be in PDT (Pacific Daylight Time)
             # Note2: The schedule ends at 0 UTC (or 16-07:00) so the last slot is 30 mins before that.
-            assert slots[-1]['start'] == '2024-03-15T15:30:00-07:00'
+            assert slots[-1]['start'] == '2024-03-15T16:30:00-07:00'
 
         # Check availability over a year from now
         with freeze_time(date(2025, 6, 1)):
@@ -367,8 +367,8 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-02T08:00:00-07:00'
-            assert slots[-1]['start'] == '2025-06-13T15:30:00-07:00'
+            assert slots[0]['start'] == '2025-06-02T09:00:00-07:00'
+            assert slots[-1]['start'] == '2025-06-13T16:30:00-07:00'
 
         # Check availability with a start date day greater than the farthest_booking day
         with freeze_time(date(2025, 6, 27)):
@@ -381,8 +381,8 @@ class TestSchedule:
             data = response.json()
             slots = data['slots']
 
-            assert slots[0]['start'] == '2025-06-30T08:00:00-07:00'
-            assert slots[-1]['start'] == '2025-07-11T15:30:00-07:00'
+            assert slots[0]['start'] == '2025-06-30T09:00:00-07:00'
+            assert slots[-1]['start'] == '2025-07-11T16:30:00-07:00'
 
     def test_public_availability_with_blockers(
         self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
