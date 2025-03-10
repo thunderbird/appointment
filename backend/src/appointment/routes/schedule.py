@@ -36,7 +36,8 @@ from ..exceptions.misc import UnexpectedBehaviourWarning
 from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeAccepted, EventCouldNotBeDeleted
 from ..tasks.emails import (
     send_confirmation_email,
-    send_zoom_meeting_failed_email, send_new_booking_email,
+    send_zoom_meeting_failed_email,
+    send_new_booking_email,
 )
 from ..l10n import l10n
 from slowapi import Limiter
@@ -45,7 +46,6 @@ from fastapi import APIRouter, Depends, BackgroundTasks, Request
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
-
 
 
 def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schemas.SlotBase) -> bool:
@@ -79,7 +79,11 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
 
     # We need to compare in local time
     start_datetime = datetime.combine(today, schedule.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
-    end_datetime = datetime.combine(today, schedule.end_time, tzinfo=schedule_tzinfo) + timedelta(days=add_day) + schedule.timezone_offset
+    end_datetime = (
+        datetime.combine(today, schedule.end_time, tzinfo=schedule_tzinfo)
+        + timedelta(days=add_day)
+        + schedule.timezone_offset
+    )
     booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
     too_early = booking_slot_start < start_datetime
@@ -170,7 +174,7 @@ def update_schedule(
 
 
 @router.post('/public/availability', response_model=schemas.AppointmentOut)
-@limiter.limit("20/minute")
+@limiter.limit('20/minute')
 def read_schedule_availabilities(
     request: Request,
     subscriber: Subscriber = Depends(get_subscriber_from_schedule_or_signed_url),
@@ -178,8 +182,7 @@ def read_schedule_availabilities(
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
-    """Returns the calculated availability for the first schedule from a subscribers public profile link
-    """
+    """Returns the calculated availability for the first schedule from a subscribers public profile link"""
     # Raise a schedule not found exception if the schedule owner does not have a timezone set.
     if subscriber.timezone is None:
         raise validation.ScheduleNotFoundException()
@@ -221,12 +224,12 @@ def read_schedule_availabilities(
         owner_name=subscriber.name,
         slots=actual_slots,
         slot_duration=schedule.slot_duration,
-        booking_confirmation=schedule.booking_confirmation
+        booking_confirmation=schedule.booking_confirmation,
     )
 
 
 @router.put('/public/availability/request')
-@limiter.limit("20/minute")
+@limiter.limit('20/minute')
 def request_schedule_availability_slot(
     request: Request,
     s_a: schemas.AvailabilitySlotAttendee,
@@ -236,8 +239,7 @@ def request_schedule_availability_slot(
     redis=Depends(get_redis),
     google_client=Depends(get_google_client),
 ):
-    """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner if set
-    """
+    """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner if set"""
 
     # Raise a schedule not found exception if the schedule owner does not have a timezone set.
     if subscriber.timezone is None:
@@ -274,7 +276,7 @@ def request_schedule_availability_slot(
                 'start_date': schedule.start_date,
                 'end_date': schedule.end_date,
                 'earliest_booking': schedule.earliest_booking,
-                'farthest_booking': schedule.farthest_booking
+                'farthest_booking': schedule.farthest_booking,
             },
             'slot': s_a.slot,
             'submitter_timezone': s_a.attendee.timezone,
@@ -388,7 +390,7 @@ def request_schedule_availability_slot(
             duration=slot.duration,
             schedule_name=schedule.name,
             to=subscriber.preferred_email,
-            lang=subscriber.language
+            lang=subscriber.language,
         )
 
         # Create remote HOLD event
@@ -429,7 +431,7 @@ def request_schedule_availability_slot(
             duration=slot.duration,
             schedule_name=schedule.name,
             to=subscriber.preferred_email,
-            lang=subscriber.language
+            lang=subscriber.language,
         )
 
     # Mini version of slot, so we can grab the newly created slot id for tests
@@ -449,8 +451,7 @@ def decide_on_schedule_availability_slot(
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
-    """endpoint to react to owners decision to a request of a time slot of his public link
-    """
+    """endpoint to react to owners decision to a request of a time slot of his public link"""
     subscriber = repo.subscriber.verify_link(db, data.owner_url)
     if not subscriber:
         raise validation.InvalidLinkException()
@@ -498,15 +499,7 @@ def decide_on_schedule_availability_slot(
 
 
 def handle_schedule_availability_decision(
-    confirmed: bool,
-    calendar,
-    schedule,
-    subscriber,
-    slot,
-    db,
-    redis,
-    google_client,
-    background_tasks
+    confirmed: bool, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
 ):
     """Actual handling of the availability decision
     if confirmed: create an event in remote calendar and send invitation mail
@@ -572,9 +565,7 @@ def handle_schedule_availability_decision(
 
             # Notify the organizer that the meeting link could not be created!
             background_tasks.add_task(
-                send_zoom_meeting_failed_email,
-                to=subscriber.preferred_email,
-                appointment_title=schedule.name
+                send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name
             )
         except OAuth2Error as err:
             logging.error('OAuth flow error during zoom meeting creation: ', err)
@@ -583,9 +574,7 @@ def handle_schedule_availability_decision(
 
             # Notify the organizer that the meeting link could not be created!
             background_tasks.add_task(
-                send_zoom_meeting_failed_email,
-                to=subscriber.preferred_email,
-                appointment_title=schedule.name
+                send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name
             )
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error('Failed to save the zoom meeting link to the appointment: ', err)
@@ -655,21 +644,17 @@ def get_remote_connection(calendar, subscriber, db, redis, google_client):
             user=calendar.user,
             password=calendar.password,
         )
-    
+
     return (con, organizer_email)
 
 
 def save_remote_event(event, calendar, subscriber, slot, db, redis, google_client):
-    """Create or update a remote event
-    """
+    """Create or update a remote event"""
     con, organizer_email = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
         return con.save_event(
-            event=event,
-            attendee=slot.attendee,
-            organizer=subscriber,
-            organizer_email=organizer_email
+            event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email
         )
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
