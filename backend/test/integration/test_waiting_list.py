@@ -14,8 +14,34 @@ from defines import auth_headers
 
 
 class TestJoinWaitingList:
+    def test_case_sensitivity(self, with_db, with_client):
+        """If they sign up with a non-lowercase email it should be saved as a lowercase email."""
+        waiting_list.limiter.reset()
+        email = 'Hello@example.org'
+        with with_db() as db:
+            assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            response = with_client.post('/waiting-list/join', json={'email': email})
+
+            # Ensure the response was okay!
+            assert response.status_code == 200, response.json()
+            assert response.json() is True
+
+            # Ensure our email was inserted as lowercase
+            with with_db() as db:
+                assert db.query(models.WaitingList).filter(models.WaitingList.email == email).first() is None
+                assert (
+                    db.query(models.WaitingList).filter(models.WaitingList.email == email.lower()).first() is not None
+                )
+
+            # Ensure we sent out an email
+            mock.assert_called_once()
+
     def test_success(self, with_db, with_client):
+        waiting_list.limiter.reset()
         email = 'hello@example.org'
+
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
 
@@ -34,6 +60,7 @@ class TestJoinWaitingList:
             mock.assert_called_once()
 
     def test_already_in_list(self, with_db, with_client, make_waiting_list):
+        waiting_list.limiter.reset()
         email = 'hello@example.org'
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
@@ -121,7 +148,7 @@ class TestWaitingListActionConfirm:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() == { "action": WaitingListAction.CONFIRM_EMAIL.value, "success": True }
+        assert response.json() == {'action': WaitingListAction.CONFIRM_EMAIL.value, 'success': True}
 
         with with_db() as db:
             self.assert_email_verified(db, waiting_list, success=True)
@@ -236,7 +263,7 @@ class TestWaitingListActionLeave:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() == {"action": WaitingListAction.LEAVE.value, "success": True}
+        assert response.json() == {'action': WaitingListAction.LEAVE.value, 'success': True}
 
         with with_db() as db:
             self.assert_waiting_list_exists(db, waiting_list, success=True)
@@ -251,7 +278,7 @@ class TestWaitingListActionLeave:
 
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
-        assert response.json() == { "action": WaitingListAction.LEAVE.value, "success": True }
+        assert response.json() == {'action': WaitingListAction.LEAVE.value, 'success': True}
 
         with with_db() as db:
             assert not db.query(models.WaitingList).filter(models.WaitingList.email == email).first()
@@ -272,9 +299,9 @@ class TestWaitingListActionLeave:
         # Ensure the response was okay!
         assert response.status_code == 200, response.json()
         assert response.json() == {
-            "action": WaitingListAction.LEAVE.value,
-            "success": False,
-            "redirectToSettings": True
+            'action': WaitingListAction.LEAVE.value,
+            'success': False,
+            'redirectToSettings': True,
         }
 
 
@@ -315,11 +342,9 @@ class TestWaitingListAdminInvite:
         waiting_list_user = make_waiting_list()
 
         with patch('fastapi.BackgroundTasks.add_task') as mock:
-            response = with_client.post('/waiting-list/invite',
-                                        json={
-                                            'id_list': [waiting_list_user.id]
-                                        },
-                                        headers=auth_headers)
+            response = with_client.post(
+                '/waiting-list/invite', json={'id_list': [waiting_list_user.id]}, headers=auth_headers
+            )
 
             # Ensure the response was okay!
             data = response.json()
@@ -351,14 +376,12 @@ class TestWaitingListAdminInvite:
         """Test a successful invite of many users"""
         os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
 
-        waiting_list_users = [ make_waiting_list().id for i in range(0, 10) ]
+        waiting_list_users = [make_waiting_list().id for i in range(0, 10)]
 
         with patch('fastapi.BackgroundTasks.add_task') as mock:
-            response = with_client.post('/waiting-list/invite',
-                                        json={
-                                            'id_list': waiting_list_users
-                                        },
-                                        headers=auth_headers)
+            response = with_client.post(
+                '/waiting-list/invite', json={'id_list': waiting_list_users}, headers=auth_headers
+            )
 
             # Ensure the response was okay!
             data = response.json()
@@ -390,12 +413,7 @@ class TestWaitingListAdminInvite:
                     }
 
     def test_invite_existing_subscriber(
-        self,
-        with_client,
-        with_db,
-        with_l10n,
-        make_waiting_list,
-        make_basic_subscriber
+        self, with_client, with_db, with_l10n, make_waiting_list, make_basic_subscriber
     ):
         os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
 
@@ -403,11 +421,9 @@ class TestWaitingListAdminInvite:
         waiting_list_user = make_waiting_list(email=sub.email)
 
         with patch('fastapi.BackgroundTasks.add_task') as mock:
-            response = with_client.post('/waiting-list/invite',
-                                        json={
-                                            'id_list': [waiting_list_user.id]
-                                        },
-                                        headers=auth_headers)
+            response = with_client.post(
+                '/waiting-list/invite', json={'id_list': [waiting_list_user.id]}, headers=auth_headers
+            )
 
             # Ensure the response was okay!
             data = response.json()
@@ -421,26 +437,18 @@ class TestWaitingListAdminInvite:
             mock.assert_not_called()
 
     def test_invite_many_users_with_one_existing_subscriber(
-        self,
-        with_client,
-        with_db,
-        with_l10n,
-        make_waiting_list,
-        make_basic_subscriber
+        self, with_client, with_db, with_l10n, make_waiting_list, make_basic_subscriber
     ):
         os.environ['APP_ADMIN_ALLOW_LIST'] = os.getenv('TEST_USER_EMAIL')
 
         sub = make_basic_subscriber()
-        waiting_list_users = [ make_waiting_list().id for i in range(0, 10) ]
+        waiting_list_users = [make_waiting_list().id for i in range(0, 10)]
         waiting_list_users.append(make_waiting_list(email=sub.email).id)
 
         with patch('fastapi.BackgroundTasks.add_task') as mock:
-
-            response = with_client.post('/waiting-list/invite',
-                                        json={
-                                            'id_list': waiting_list_users
-                                        },
-                                        headers=auth_headers)
+            response = with_client.post(
+                '/waiting-list/invite', json={'id_list': waiting_list_users}, headers=auth_headers
+            )
 
             # Ensure the response was okay!
             data = response.json()
@@ -466,5 +474,5 @@ class TestWaitingListAdminInvite:
                         assert mock.call_args_list[i].kwargs == {
                             'date': waiting_list_user.time_created,
                             'lang': 'en',
-                            'to': waiting_list_user.email
+                            'to': waiting_list_user.email,
                         }

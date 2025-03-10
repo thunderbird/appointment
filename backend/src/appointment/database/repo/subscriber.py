@@ -19,7 +19,7 @@ def get(db: Session, subscriber_id: int) -> models.Subscriber | None:
 
 def get_by_email(db: Session, email: str) -> models.Subscriber | None:
     """retrieve subscriber by email"""
-    return db.query(models.Subscriber).filter(models.Subscriber.email == email).first()
+    return db.query(models.Subscriber).filter(models.Subscriber.email == email.lower()).first()
 
 
 def get_by_username(db: Session, username: str):
@@ -51,6 +51,10 @@ def create(db: Session, subscriber: schemas.SubscriberBase):
     """create new subscriber"""
     data = subscriber.model_dump()
 
+    data['email'] = data.get('email').lower()
+    if data.get('secondary_email'):
+        data['secondary_email'] = data.secondary_email.lower()
+
     # Filter incoming data to just the available model columns
     columns = models.Subscriber().get_columns()
     data = {k: v for k, v in data.items() if k in columns}
@@ -68,6 +72,9 @@ def update(db: Session, data: schemas.SubscriberIn, subscriber_id: int):
     """update all subscriber attributes, they can edit themselves"""
     db_subscriber = get(db, subscriber_id)
     for key, value in data:
+        if (key == 'email' or key == 'secondary_email') and value is not None:
+            value = value.lower()
+
         if value is not None:
             setattr(db_subscriber, key, value)
     db.commit()

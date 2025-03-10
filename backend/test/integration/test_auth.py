@@ -13,6 +13,27 @@ from appointment.database import repo, models
 
 
 class TestAuth:
+    def test_can_login(self, with_db, with_client, make_pro_subscriber, faker):
+        # Request can-login with a capitalized email
+        capital_email = faker.email().capitalize()
+        subscriber = make_pro_subscriber(email=capital_email)
+
+        assert subscriber.email != capital_email
+        assert subscriber.email == capital_email.lower()
+
+        with with_db() as db:
+            # Check we've saved the email as lowercase
+            subscriber_check = repo.subscriber.get_by_email(db, capital_email.lower())
+            assert subscriber_check is not None
+            assert subscriber_check.email != capital_email
+            assert subscriber_check.email == capital_email.lower()
+
+        response = with_client.post('/can-login', json={'email': subscriber.email})
+
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data is True
+
     def test_me(self, with_db, with_client):
         response = with_client.get('/me', headers=auth_headers)
         assert response.status_code == 200, response.text
@@ -198,21 +219,14 @@ class TestFXA:
         email = 'not-in-allow-list@bad-example.org'
         response = with_client.get(
             '/fxa_login',
-            params={
-                'email': email,
-                'invite_code': 'absolute nonsense!'
-            },
+            params={'email': email, 'invite_code': 'absolute nonsense!'},
         )
         assert response.status_code == 404, response.text
         data = response.json()
         assert data.get('detail') == l10n('invite-code-not-valid')
 
     def test_fxa_with_allowlist_and_with_used_invite_code(
-        self,
-        with_client,
-        with_l10n,
-        make_invite,
-        make_pro_subscriber
+        self, with_client, with_l10n, make_invite, make_pro_subscriber
     ):
         os.environ['AUTH_SCHEME'] = 'fxa'
         os.environ['FXA_ALLOW_LIST'] = '@example.org'
@@ -223,10 +237,7 @@ class TestFXA:
         email = 'not-in-allow-list@bad-example.org'
         response = with_client.get(
             '/fxa_login',
-            params={
-                'email': email,
-                'invite_code': invite.code
-            },
+            params={'email': email, 'invite_code': invite.code},
         )
         assert response.status_code == 403, response.text
         data = response.json()
@@ -433,17 +444,12 @@ class TestFXA:
 
         subscriber = make_basic_subscriber(email='apple@example.org')
         access_token_expires = timedelta(minutes=float(10))
-        one_time_access_token = create_access_token(data={
-            'sub': f'uid-{subscriber.id}',
-            'jti': secrets.token_urlsafe(16)
-        }, expires_delta=access_token_expires)
+        one_time_access_token = create_access_token(
+            data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
+        )
 
         # Exchange the one-time token with a long-living token
-        response = with_client.post(
-            '/fxa-token', headers={
-                'Authorization': f'Bearer {one_time_access_token}'
-            }
-        )
+        response = with_client.post('/fxa-token', headers={'Authorization': f'Bearer {one_time_access_token}'})
 
         assert response.status_code == 200, response.text
 
@@ -454,11 +460,7 @@ class TestFXA:
         assert data.get('token_type') == 'bearer'
 
         # Test it out!
-        response = with_client.get(
-            '/me', headers={
-                'Authorization': f'Bearer {access_token}'
-            }
-        )
+        response = with_client.get('/me', headers={'Authorization': f'Bearer {access_token}'})
 
         assert response.status_code == 200, response.text
         assert response.json().get('email') == subscriber.email
@@ -471,15 +473,14 @@ class TestFXA:
 
         subscriber = make_basic_subscriber(email='apple@example.org')
         access_token_expires = timedelta(minutes=float(10))
-        regular_access_token = create_access_token(data={
-            'sub': f'uid-{subscriber.id}',
-        }, expires_delta=access_token_expires)
-
-        response = with_client.post(
-            '/fxa-token', headers={
-                'Authorization': f'Bearer {regular_access_token}'
-            }
+        regular_access_token = create_access_token(
+            data={
+                'sub': f'uid-{subscriber.id}',
+            },
+            expires_delta=access_token_expires,
         )
+
+        response = with_client.post('/fxa-token', headers={'Authorization': f'Bearer {regular_access_token}'})
 
         assert response.status_code == 401, response.text
 
@@ -489,9 +490,7 @@ class TestFXA:
 
         del with_client.app.dependency_overrides[auth.get_subscriber]
 
-        response = with_client.post(
-            '/fxa-token'
-        )
+        response = with_client.post('/fxa-token')
 
         assert response.status_code == 401, response.text
 
@@ -504,17 +503,12 @@ class TestFXA:
 
         subscriber = make_basic_subscriber(email='apple@example.org')
         access_token_expires = timedelta(minutes=float(10))
-        one_time_access_token = create_access_token(data={
-            'sub': f'uid-{subscriber.id}',
-            'jti': secrets.token_urlsafe(16)
-        }, expires_delta=access_token_expires)
+        one_time_access_token = create_access_token(
+            data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
+        )
 
         # Exchange the one-time token with a long-living token
-        response = with_client.post(
-            '/fxa-token', headers={
-                'Authorization': f'Bearer {one_time_access_token}'
-            }
-        )
+        response = with_client.post('/fxa-token', headers={'Authorization': f'Bearer {one_time_access_token}'})
         os.environ['AUTH_SCHEME'] = saved_scheme
         assert response.status_code == 405, response.text
 
@@ -530,17 +524,15 @@ class TestCalDAV:
             assert len(ecs) == 0
 
         with patch('appointment.controller.calendar.Tools.dns_caldav_lookup') as mock:
-            mock.return_value = "https://example.com", 300
+            mock.return_value = 'https://example.com', 300
 
             with patch('appointment.controller.calendar.CalDavConnector.sync_calendars') as sync_mock:
                 sync_mock.return_value = None
 
                 response = with_client.post(
                     '/caldav/auth',
-                    json={'user': 'test@example.com',
-                    'url': 'example.com',
-                    'password': 'test'},
-                    headers=auth_headers
+                    json={'user': 'test@example.com', 'url': 'example.com', 'password': 'test'},
+                    headers=auth_headers,
                 )
 
                 mock.assert_called()
@@ -559,19 +551,13 @@ class TestCalDAV:
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.caldav, type_id=type_id)
         calendar = make_caldav_calendar(subscriber_id=TEST_USER_ID, user=username)
 
-        response = with_client.post(
-            '/caldav/disconnect', json={'type_id': ec.type_id},
-            headers=auth_headers
-        )
+        response = with_client.post('/caldav/disconnect', json={'type_id': ec.type_id}, headers=auth_headers)
 
         assert response.status_code == 200, response.content
 
         with with_db() as db:
             ecs = repo.external_connection.get_by_type(
-                db,
-                TEST_USER_ID,
-                models.ExternalConnectionType.caldav,
-                type_id=type_id
+                db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id
             )
             assert len(ecs) == 0
 
@@ -586,19 +572,13 @@ class TestGoogle:
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id)
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
 
-        response = with_client.post(
-            '/google/disconnect', json={'type_id': ec.type_id},
-            headers=auth_headers
-        )
+        response = with_client.post('/google/disconnect', json={'type_id': ec.type_id}, headers=auth_headers)
 
         assert response.status_code == 200, response.content
 
         with with_db() as db:
             ecs = repo.external_connection.get_by_type(
-                db,
-                TEST_USER_ID,
-                models.ExternalConnectionType.google,
-                type_id=type_id
+                db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id
             )
             assert len(ecs) == 0
 
