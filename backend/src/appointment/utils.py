@@ -26,6 +26,10 @@ def list_first(items: list, default=None):
     return next(iter(items), default)
 
 
+def is_valid_hostname(hostname: str, domain: str) -> bool:
+    return hostname == domain or hostname.endswith(f'.{domain}')
+
+
 def is_json(jsonstring: str):
     """Return true if given string is valid JSON."""
     try:
@@ -161,4 +165,3 @@ def normalize_secrets():
         # Need to stuff these somewhere
         os.environ['POSTHOG_PROJECT_KEY'] = secrets.get('posthog_project_key')
         os.environ['POSTHOG_HOST'] = secrets.get('posthog_host')
-
