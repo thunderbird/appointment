@@ -1018,7 +1018,7 @@ class Tools:
             return url
 
         # Handle any fastmail issues
-        if parsed_url.hostname.endswith('fastmail.com'):
+        if utils.is_valid_hostname(parsed_url.hostname, 'fastmail.com'):
             if not parsed_url.path.startswith('/dav'):
                 url = f'{url}/dav/'
 
@@ -1028,12 +1028,12 @@ class Tools:
 
         # Google is weird - We also don't support them right now.
         elif (
-            parsed_url.hostname.endswith('api.googlecontent.com')
-            or parsed_url.hostname.endswith('apidata.googleusercontent.com')
+            utils.is_valid_hostname(parsed_url.hostname, 'api.googlecontent.com')
+            or utils.is_valid_hostname(parsed_url.hostname, 'apidata.googleusercontent.com')
         ):
             if len(parsed_url.path) == 0:
                 url += '/caldav/v2/'
-        elif parsed_url.hostname.endswith('.calendar.google.com'):
+        elif utils.is_valid_hostname(parsed_url.hostname, 'calendar.google.com'):
             # Use the caldav url instead
             url = 'https://api.googlecontent.com/caldav/v2/'
 
