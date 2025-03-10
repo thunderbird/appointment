@@ -1012,8 +1012,13 @@ class Tools:
         """Fix up some common url issues with some caldav providers"""
         parsed_url = urlparse(url)
 
+        # If for some reason we don't have a hostname, there's nothing to fix
+        # and we just throw back that weird url
+        if not parsed_url.hostname:
+            return url
+
         # Handle any fastmail issues
-        if 'fastmail.com' in parsed_url.hostname:
+        if parsed_url.hostname.endswith('fastmail.com'):
             if not parsed_url.path.startswith('/dav'):
                 url = f'{url}/dav/'
 
@@ -1022,11 +1027,13 @@ class Tools:
                 url += '/'
 
         # Google is weird - We also don't support them right now.
-        elif ('api.googlecontent.com' in parsed_url.hostname
-              or 'apidata.googleusercontent.com' in parsed_url.hostname):
+        elif (
+            parsed_url.hostname.endswith('api.googlecontent.com')
+            or parsed_url.hostname.endswith('apidata.googleusercontent.com')
+        ):
             if len(parsed_url.path) == 0:
                 url += '/caldav/v2/'
-        elif 'calendar.google.com' in parsed_url.hostname or '':
+        elif parsed_url.hostname.endswith('.calendar.google.com'):
             # Use the caldav url instead
             url = 'https://api.googlecontent.com/caldav/v2/'
 
