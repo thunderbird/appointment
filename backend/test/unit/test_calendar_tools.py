@@ -65,8 +65,8 @@ class TestTools:
         url_google = 'https://api.googlecontent.com'
         url_google_calendar = 'https://calendar.google.com'
 
-        assert Tools.fix_caldav_urls(url_fastmail) == 'https://api.fastmail.com/dav/test/'
-        assert Tools.fix_caldav_urls(url_longfastmail) == 'https://api.fastmail.com/dav/'
+        assert Tools.fix_caldav_urls(url_fastmail) == 'https://api.fastmail.com/dav/'
+        assert Tools.fix_caldav_urls(url_longfastmail) == 'https://api.fastmail.com/dav/test/'
         assert Tools.fix_caldav_urls(url_notfastmail) == 'https://notactuallyfastmail.com'
         assert Tools.fix_caldav_urls(url_google) == 'https://api.googlecontent.com/caldav/v2/'
         assert Tools.fix_caldav_urls(url_google_calendar) == 'https://api.googlecontent.com/caldav/v2/'
