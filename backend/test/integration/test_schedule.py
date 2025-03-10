@@ -349,8 +349,8 @@ class TestSchedule:
             slots = data['slots']
 
             # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
-            # Note: this should be in PST (Pacific Standard Time)
-            assert slots[0]['start'] == '2024-03-04T08:00:00-08:00'
+            # Note: this should be in PDT (Pacific Daylight Time)
+            assert slots[0]['start'] == '2024-03-04T09:00:00-08:00'
             # Based off the farthest_booking our latest slot is 4:30pm
             # Note: This should be in PDT (Pacific Daylight Time)
             # Note2: The schedule ends at 0 UTC (or 16-07:00) so the last slot is 30 mins before that.

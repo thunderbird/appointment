@@ -1,9 +1,7 @@
-import zoneinfo
-
 import sentry_sdk
-from fastapi import APIRouter, Depends, BackgroundTasks, Request
 import logging
 import os
+import zoneinfo
 
 from oauthlib.oauth2 import OAuth2Error
 from requests import HTTPError
@@ -43,6 +41,7 @@ from ..tasks.emails import (
 from ..l10n import l10n
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from fastapi import APIRouter, Depends, BackgroundTasks, Request
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
@@ -50,7 +49,8 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schemas.SlotBase) -> bool:
-    """Checks for timezone correctness, weekday and start/end time validity."""
+    """Checks for timezone correctness, weekday and start/end time validity.
+    Booking slots are calculated for today utc, while schedule's time may be in the another tz offset"""
     # For now lets only accept utc bookings as that's what our frontend supplies us.
     if booking_slot.start.tzname() != 'UTC':
         logging.error(f'Non-UTC timezone requested: {booking_slot.start}.')
@@ -62,24 +62,29 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
     if booking_slot.duration != schedule.slot_duration:
         return False
 
+    schedule_tzinfo = zoneinfo.ZoneInfo(schedule.timezone)
+
     # Is the time requested on a day of the week they have disabled?
     # This should be based on the schedule timezone
-    start_date_tz = booking_slot.start.astimezone(zoneinfo.ZoneInfo(schedule.timezone))
-    iso_weekday = int(start_date_tz.strftime('%u'))
+    booking_slot_start = booking_slot.start.astimezone(schedule_tzinfo)
+    iso_weekday = int(booking_slot_start.strftime('%u'))
     if iso_weekday not in schedule.weekdays:
         return False
 
     # Is the time requested within our booking times?
     today = booking_slot.start.date()
+
     # If our end time is below start time, then it's the next day.
     add_day = 1 if schedule.end_time <= schedule.start_time else 0
 
-    booking_slot_end = booking_slot.start + timedelta(minutes=schedule.slot_duration)
+    # We need to compare in local time
+    start_datetime = datetime.combine(today, schedule.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
+    end_datetime = datetime.combine(today, schedule.end_time, tzinfo=schedule_tzinfo) + timedelta(days=add_day) + schedule.timezone_offset
+    booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
-    too_early = booking_slot.start < datetime.combine(today, schedule.start_time, tzinfo=timezone.utc)
-    too_late = booking_slot_end > (
-      datetime.combine(today, schedule.end_time, tzinfo=timezone.utc) + timedelta(days=add_day)
-    )
+    too_early = booking_slot_start < start_datetime
+    too_late = booking_slot_end > end_datetime
+
     if too_early or too_late:
         return False
 
