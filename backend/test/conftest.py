@@ -148,6 +148,7 @@ def with_db():
             name='Test Account',
             level=models.SubscriberLevel.pro,
             short_link_hash='abc1234',
+            timezone='America/Vancouver',
         )
         db.add(subscriber)
         db.commit()

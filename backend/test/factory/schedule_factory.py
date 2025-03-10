@@ -30,7 +30,7 @@ def make_schedule(with_db, make_caldav_calendar):
         time_updated=None,
     ):
         with with_db() as db:
-            return repo.schedule.create(
+            schedule = repo.schedule.create(
                 db,
                 schemas.ScheduleBase(
                     active=active,
@@ -55,8 +55,14 @@ def make_schedule(with_db, make_caldav_calendar):
                     if factory_has_value(calendar_id)
                     else make_caldav_calendar(connected=True).id,
                     timezone=timezone,
-                    time_updated=time_updated,
                 ),
             )
+            if time_updated:
+                schedule.time_updated = time_updated
+                db.add(schedule)
+                db.commit()
+                # Re-bind the session, since commit closes it
+                db.refresh(schedule)
+            return schedule
 
     return _make_schedule
