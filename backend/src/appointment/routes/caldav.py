@@ -56,6 +56,7 @@ def caldav_autodiscover_auth(
         }
         # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
         try:
+            sentry_sdk.set_extra('debug_object', debug_obj)
             raise UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
         except UnexpectedBehaviourWarning as ex:
             sentry_sdk.capture_exception(ex)
@@ -91,6 +92,7 @@ def caldav_autodiscover_auth(
         }
         # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
         try:
+            sentry_sdk.set_extra('debug_object', debug_obj)
             raise UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
         except UnexpectedBehaviourWarning as ex:
             sentry_sdk.capture_exception(ex)

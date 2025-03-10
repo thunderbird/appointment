@@ -277,6 +277,7 @@ def request_schedule_availability_slot(
         }
         # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
         try:
+            sentry_sdk.set_extra('debug_object', debug_obj)
             raise UnexpectedBehaviourWarning(message='Invalid booking time warning!', info=debug_obj)
         except UnexpectedBehaviourWarning as ex:
             sentry_sdk.capture_exception(ex)
