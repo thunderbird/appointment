@@ -229,7 +229,7 @@ class Calendar(Base):
     connected = Column(Boolean, index=True, default=False)
     connected_at = Column(DateTime)
 
-    owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='calendars')
+    owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='calendars', lazy=False)
     appointments: Mapped[list['Appointment']] = relationship(
         'Appointment', cascade='all,delete', back_populates='calendar'
     )
@@ -311,6 +311,20 @@ class Slot(Base):
 
 
 class Schedule(Base):
+    """A schedule that will dynamically create bookings against a user's availability
+
+    Note: Start and End times are stored in UTC. And since UTC does not store the current users timezone offset.
+    Because daylight savings and other timezone heckery exists, we cannot use this to compare against incoming booking
+    time slots even if they are in UTC.
+
+    So we'll need convert both times to local time to get the actual intended start time. For that we have
+    start_time_local and end_time_local properties, which takes the schedule's time_updated and replaces the
+    time components and returns the converted time.
+
+    This works because time_updated has the date of which the start_time and end_time fields are correct, so if we
+    re-create that date we'll get the correct utc offset. Since the *_local properties return a Time object and not
+    Date/DateTime we can safely ignore any unintended date matching.
+    """
     __tablename__ = 'schedules'
 
     id: int = Column(Integer, primary_key=True, index=True)
@@ -330,18 +344,23 @@ class Schedule(Base):
     weekdays: str | dict = Column(JSON, default='[1,2,3,4,5]')  # list of ISO weekdays, Mo-Su => 1-7
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
     booking_confirmation: bool = Column(Boolean, index=True, nullable=False, default=True)
-    timezone: str = Column(encrypted_type(String), index=True, nullable=True)  # Not used now but will be in the future
+    timezone: str = Column(encrypted_type(String), index=True, nullable=True)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(
         encrypted_type(ChoiceType(MeetingLinkProviderType)), default=MeetingLinkProviderType.none, index=False
     )
 
-    calendar: Mapped[Calendar] = relationship('Calendar', back_populates='schedules')
+    calendar: Mapped[Calendar] = relationship('Calendar', back_populates='schedules', lazy=False)
     availabilities: Mapped[list['Availability']] = relationship(
         'Availability', cascade='all,delete', back_populates='schedule'
     )
     slots: Mapped[list[Slot]] = relationship('Slot', cascade='all,delete', back_populates='schedule')
+
+    @property
+    def timezone_offset(self):
+        """A timedelta of the UTC offset from the time the schedule was saved in."""
+        return self.time_updated.replace(tzinfo=zoneinfo.ZoneInfo(self.timezone)).utcoffset()
 
     @property
     def start_time_local(self) -> datetime.time:
