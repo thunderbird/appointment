@@ -226,6 +226,8 @@ const onEnter = () => {
           class="form"
           ref="formRef"
           autocomplete="off"
+          @submit.prevent
+          @keyup.enter="() => onEnter()"
         >
           <text-input
             name="email"
