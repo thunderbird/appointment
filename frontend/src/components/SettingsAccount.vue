@@ -226,13 +226,17 @@ const actuallyDeleteAccount = async () => {
       <label class="tooltip-label mt-4 flex items-center pl-4">
         <div class="flex w-full max-w-2xs gap-2">{{ t('label.preferredEmail') }}
           <span class="relative cursor-help" role="tooltip" aria-labelledby="preferred-email-help-tooltip">
-          <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
+            <icon-info-circle class="tooltip-icon w-4" aria-hidden="true"/>
             <span class="tooltip hidden">
               <transition>
-                  <tool-tip id="preferred-email-help-tooltip" class="tooltip left-[-8.5rem]  w-72" :content="t('text.preferredEmailHelp')"/>
+                <tool-tip
+                  id="preferred-email-help-tooltip"
+                  class="tooltip left-[-8.5rem] w-72"
+                  :content="t('text.preferredEmailHelp')"
+                />
               </transition>
             </span>
-        </span>
+          </span>
         </div>
         <select v-model="activePreferredEmail" class="w-full rounded-md" data-testid="settings-account-email-select">
           <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
@@ -375,3 +379,16 @@ const actuallyDeleteAccount = async () => {
     @close="closeModals"
   ></confirmation-modal>
 </template>
+
+<style scoped>
+/* If the device does not support hover (i.e. mobile) then make it activate on focus within */
+@media (hover: none) {
+  .tooltip-label:focus-within .tooltip {
+    display: block;
+  }
+}
+
+.tooltip-icon:hover ~ .tooltip {
+  display: block;
+}
+</style>
