@@ -1,6 +1,5 @@
 import math
 import os
-import pprint
 
 import sentry_sdk
 from slowapi import Limiter
