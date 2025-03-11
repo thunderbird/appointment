@@ -364,3 +364,46 @@ jobs:
             ecr_tag.zip
             frontend.zip
             iac.zip
+
+  e2e-tests-browserstack-stage:
+    name: e2e-tests-browserstack-stage
+    needs:
+      - deploy-stage-backend
+      - build-and-deploy-stage-frontend
+    if: |
+      needs.deploy-stage-backend.result == 'success' || needs.build-and-deploy-stage-frontend.result == 'success'
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      APPT_LOGIN_EMAIL: ${{ secrets.E2E_APPT_STAGE_LOGIN_EMAIL }}
+      APPT_LOGIN_PWORD: ${{ secrets.E2E_APPT_STAGE_LOGIN_PASSWORD }}
+      APPT_DISPLAY_NAME: ${{ secrets.E2E_APPT_STAGE_DISPLAY_NAME }}
+      APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_STAGE_MY_SHARE_LINK }}
+      APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_STAGE_BOOKEE_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'test/e2e/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd ./test/e2e
+          npm install
+
+      - name: BrowserStack Env Setup
+        uses: browserstack/github-actions/setup-env@master
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          project-name: 'Thunderbird Appointment'
+          build-name: 'E2E Tests: BUILD_INFO'
+
+      - name: Run E2E Tests on stage via Browserstack
+        run: |
+          cd ./test/e2e
+          cp .env.stage.example .env
+          npm run e2e-test-browserstack-gha
