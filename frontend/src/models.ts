@@ -337,6 +337,12 @@ export type Token = {
 export type AuthUrl = {
   url: string;
 };
+export type PageMeta = {
+  page: number,
+  total_pages: number
+  per_page: number,
+  count: number,
+}
 
 // Types and aliases used for our custom createFetch API calls and return types
 export type AuthUrlResponse = UseFetchReturn<AuthUrl|Exception>;
@@ -358,12 +364,15 @@ export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot|Exception>;
 export type StringResponse = UseFetchReturn<string|Exception>;
 export type StringListResponse = UseFetchReturn<string[]>;
-export type SubscriberListResponse = UseFetchReturn<Subscriber[]|Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
 export type WaitingListInviteResponse = UseFetchReturn<WaitingListInvite|Exception>
 export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
 export type WaitingListActionResponse = UseFetchReturn<WaitingListStatus>;
+export type ListResponse = UseFetchReturn<{
+  page_meta: PageMeta,
+  items: any[]
+}>;
 
 // Table types
 export type TableDataField = {
@@ -372,6 +381,7 @@ export type TableDataField = {
   link?: string;
   buttonType?: TableDataButtonType;
   disabled?: boolean;
+  tooltip?: string;
 };
 export type TableDataRow = {
   [key:string]: TableDataField

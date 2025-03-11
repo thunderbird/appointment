@@ -90,7 +90,7 @@ class TestInvite:
 
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
 
-        response = with_client.get(
+        response = with_client.post(
             '/invite',
             headers=auth_headers,
         )
@@ -105,12 +105,13 @@ class TestInvite:
         invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(2)]
         assert invites is not None
 
-        response = with_client.get(
+        response = with_client.post(
             '/invite',
+            json={'page': 1},
             headers=auth_headers,
         )
         assert response.status_code == 200, response.text
-        invite_list = response.json()
+        invite_list = response.json()['items']
         assert len(invite_list) == 2
         assert invite_list[0]['code'] != invite_list[1]['code']
 
@@ -136,12 +137,13 @@ class TestInvite:
             date_created = datetime.fromisoformat(next_invite['time_created']).date()
             assert date_created == self.today
 
-        response = with_client.get(
+        response = with_client.post(
             '/invite',
+            json={'page': 1},
             headers=auth_headers,
         )
         assert response.status_code == 200, response.text
-        data = response.json()
+        data = response.json()['items']
         assert len(data) == 5
 
     def test_revoke_invite(self, with_db, with_client, make_invite):
@@ -158,13 +160,14 @@ class TestInvite:
         assert response.status_code == 200, response.text
 
         # verify our invite now has a status of revoked
-        response = with_client.get(
+        response = with_client.post(
             '/invite',
+            json={'page': 1},
             headers=auth_headers,
         )
 
         assert response.status_code == 200, response.text
-        invite_list = response.json()
+        invite_list = response.json()['items']
         assert len(invite_list) == 1
         assert invite_list[0]['status'] == InviteStatus.revoked.value
 

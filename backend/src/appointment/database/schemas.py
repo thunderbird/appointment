@@ -159,7 +159,7 @@ class Availability(AvailabilityBase):
 
 
 class ScheduleBase(BaseModel):
-    model_config = ConfigDict(json_encoders = { time: lambda t: t.strftime('%H:%M') })
+    model_config = ConfigDict(json_encoders={time: lambda t: t.strftime('%H:%M')})
 
     active: bool | None = True
     name: str = Field(min_length=1, max_length=128)
@@ -195,7 +195,7 @@ class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
 
     # Regex to exclude any character can be mess with a url
-    slug: Annotated[Optional[str], Field(min_length=2, max_length=16, pattern=r"^[^\;\/\?\:\@\&\=\+\$\,\#]*$")] = None
+    slug: Annotated[Optional[str], Field(min_length=2, max_length=16, pattern=r'^[^\;\/\?\:\@\&\=\+\$\,\#]*$')] = None
     slot_duration: Annotated[int, Field(ge=10, default=30)]
     # Require these fields
     start_date: date
@@ -211,29 +211,26 @@ class ScheduleValidationIn(ScheduleBase):
         # Fallback to utc...
         tz = self.timezone or 'UTC'
 
-        start_time = datetime.combine(
-            self.start_date,
-            self.start_time,
-            tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz)
+        start_time = datetime.combine(self.start_date, self.start_time, tzinfo=timezone.utc).astimezone(
+            zoneinfo.ZoneInfo(tz)
         )
 
-        end_time = datetime.combine(
-            self.start_date,
-            self.end_time,
-            tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo(tz)
+        end_time = datetime.combine(self.start_date, self.end_time, tzinfo=timezone.utc).astimezone(
+            zoneinfo.ZoneInfo(tz)
         )
 
-        start_time = (start_time + timedelta(minutes=self.slot_duration))
+        start_time = start_time + timedelta(minutes=self.slot_duration)
         end_time = end_time
         # Compare time objects!
         if start_time.time() > end_time.time():
             msg = l10n('error-minimum-value')
 
             # These can't be field or value because that will auto-format the msg? Weird feature but okay.
-            raise PydanticCustomError(defines.END_TIME_BEFORE_START_TIME_ERR, msg, {
-                'err_field': 'end_time',
-                'err_value': start_time.astimezone(timezone.utc).time()
-            })
+            raise PydanticCustomError(
+                defines.END_TIME_BEFORE_START_TIME_ERR,
+                msg,
+                {'err_field': 'end_time', 'err_value': start_time.astimezone(timezone.utc).time()},
+            )
 
         return self
 
@@ -286,6 +283,8 @@ class CalendarOut(CalendarBase):
 
 
 class Invite(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     subscriber_id: int | None = None
     owner_id: Optional[int] = None
     code: str
@@ -339,13 +338,37 @@ class SubscriberMeOut(SubscriberBase):
     schedule_links: list[str] = []
 
 
-class SubscriberAdminOut(Subscriber):
+class SubscriberAdminItem(Subscriber):
     model_config = ConfigDict(from_attributes=True)
 
     invite: Invite | None = None
     time_created: datetime
     time_deleted: datetime | None
 
+
+class Paginator(BaseModel):
+    page: int
+    total_pages: int
+    count: int
+    per_page: int
+
+
+class ListResponse(BaseModel):
+    items: list
+    page_meta: Paginator
+
+
+class SubscriberAdminOut(ListResponse):
+    items: list[SubscriberAdminItem]
+
+
+class ListResponseIn(BaseModel):
+    page: int = 1
+    per_page: int = 50
+
+
+class InviteAdminOut(ListResponse):
+    items: list[Invite]
 
 """ other schemas used for requests or data migration
 """
@@ -471,7 +494,7 @@ class WaitingListInviteAdminOut(BaseModel):
     errors: list[str]
 
 
-class WaitingListAdminOut(BaseModel):
+class WaitingListAdminOutItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -482,6 +505,10 @@ class WaitingListAdminOut(BaseModel):
     time_updated: datetime
 
     invite: Invite | None = None
+
+
+class WaitingListAdminOut(ListResponse):
+    items: list[WaitingListAdminOutItem]
 
 
 class PageLoadIn(BaseModel):

@@ -2,7 +2,15 @@
 import { Ref } from 'vue';
 import { i18nType } from '@/composables/i18n';
 import {
-  CustomEventData, Coloring, EventPopup, HTMLElementEvent, CalendarEvent, PydanticException, User, Alert,
+  CustomEventData,
+  Coloring,
+  EventPopup,
+  HTMLElementEvent,
+  CalendarEvent,
+  PydanticException,
+  User,
+  Alert,
+  SubscriberListResponse, Subscriber, ListResponse,
 } from '@/models';
 
 /**
@@ -107,7 +115,7 @@ export const timeFormat = (): string => {
 export const defaultLocale = () => {
   const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
   return user?.settings?.language ?? navigator.language.split('-')[0];
-}
+};
 
 // event popup handling
 export const initialEventPopupData: EventPopup = {
@@ -199,6 +207,65 @@ export const clearFormErrors = (formRef: Ref) => {
   }
 };
 
+export const sleep = async (timeMs: number) => new Promise((resolve) => { window.setTimeout(resolve, timeMs); });
+
+/**
+ * Retrieve all the items from a ListResponse route staggered by 250ms per page.
+ * @param requestFn
+ * @param perPage
+ * @param pageError
+ */
+export const staggerRetrieve = async (requestFn: any, perPage: number, pageError?: ref<Alert>) => {
+  // Load the first page to get the total amount of pages
+  const response: ListResponse = await requestFn({
+    page: 1,
+    per_page: perPage,
+  });
+  const { data } = response;
+
+  if (!data.value?.page_meta) {
+    pageError.value = {
+      title: 'Remote request error',
+      details: 'There was a problem loading the list. Please try again.',
+    };
+    return null;
+  }
+
+  const { page, total_pages: totalPages } = data.value.page_meta;
+  const { items } = data.value;
+  let itemList = [...items];
+
+  const promises = [];
+  // Queue up the remainder of the pages as promises
+  for (let i = page + 1; i < totalPages + 1; i += 1) {
+    promises.push((async () => {
+      // Stagger calls to avoid overloading the db
+      await sleep(250 * i);
+      return requestFn({
+        page: i,
+        per_page: perPage,
+      });
+    })());
+  }
+
+  // Execute them all at once
+  const promiseResponses = await Promise.all(promises);
+  promiseResponses.forEach((_response) => {
+    const { data: _data } = _response;
+    // We don't have page info in this context, so just display a generic error...
+    if (!_data.value?.items) {
+      pageError.value = {
+        title: 'Remote request error',
+        details: 'There was a problem loading some items. Please refresh and try again.',
+      };
+      return;
+    }
+    itemList = itemList.concat(_data.value?.items ?? []);
+  });
+
+  return itemList;
+};
+
 export default {
   keyByValue,
   eventColor,
@@ -210,4 +277,5 @@ export default {
   showEventPopup,
   getAccessibleColor,
   handleFormError,
+  sleep,
 };

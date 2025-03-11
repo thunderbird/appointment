@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, Request
+import math
 
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
+
+from sqlalchemy.orm import Session, joinedload
 
 from ..database import repo, schemas, models
 from ..database.models import Subscriber
@@ -15,11 +17,34 @@ router = APIRouter()
 These require get_admin_subscriber!
 """
 
-@router.get('/', response_model=list[schemas.SubscriberAdminOut])
-def get_all_subscriber(request: Request, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)):
+
+@router.post('/', response_model=schemas.SubscriberAdminOut)
+def get_all_subscriber(
+    data: schemas.ListResponseIn, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)
+):
     """List all existing invites, needs admin permissions"""
-    response = db.query(models.Subscriber).all()
-    return response
+    page = data.page - 1
+    per_page = data.per_page
+
+    total_count = db.query(models.Subscriber).count()
+    subscribers = (
+        db.query(models.Subscriber)
+        .options(joinedload(models.Subscriber.invite))
+        .order_by('time_created')
+        .offset(page * per_page)
+        .limit(per_page)
+        .all()
+    )
+
+    return schemas.SubscriberAdminOut(
+        items=subscribers,
+        page_meta=schemas.Paginator(
+            page=data.page,
+            per_page=per_page,
+            count=len(subscribers),
+            total_pages=math.ceil(total_count / per_page)
+        ),
+    )
 
 
 @router.put('/disable/{email}')
@@ -50,6 +75,23 @@ def enable_subscriber(email: str, db: Session = Depends(get_db), _: Subscriber =
 
     # Set active flag to true on the subscribers model.
     return repo.subscriber.enable(db, subscriber_to_enable)
+
+
+@router.put('/hard-delete/{id}')
+def hard_delete_subscriber(
+    id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)
+):
+    """endpoint to hard-delete a subscriber by email, needs admin permissions"""
+    subscriber_to_delete = repo.subscriber.get(db, int(id))
+    if not subscriber_to_delete:
+        raise validation.SubscriberNotFoundException()
+    if not subscriber_to_delete.is_deleted:
+        raise validation.SubscriberNotDisabledException()
+    if subscriber.email == subscriber_to_delete.email:
+        raise validation.SubscriberSelfDeleteException()
+
+    # Nuke their account
+    return repo.subscriber.hard_delete(db, subscriber_to_delete)
 
 
 """ NON-ADMIN ROUTES """

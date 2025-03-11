@@ -1,4 +1,6 @@
+import math
 import os
+import pprint
 
 import sentry_sdk
 from slowapi import Limiter
@@ -27,12 +29,9 @@ class WaitingListAction(Enum):
 
 
 @router.post('/join')
-@limiter.limit("2/minute")
+@limiter.limit('2/minute')
 def join_the_waiting_list(
-    request: Request,
-    data: schemas.JoinTheWaitingList,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db)
+    request: Request, data: schemas.JoinTheWaitingList, background_tasks: BackgroundTasks, db: Session = Depends(get_db)
 ):
     """Join the waiting list!"""
     email = data.email.lower()
@@ -78,11 +77,7 @@ def act_on_waiting_list(data: schemas.TokenForWaitingList, db: Session = Depends
         waiting_list_entry = repo.invite.get_waiting_list_entry_by_email(db, email)
 
         if waiting_list_entry and waiting_list_entry.invite_id and waiting_list_entry.invite.subscriber_id:
-            return {
-                'action': action,
-                'success': False,
-                'redirectToSettings': True
-            }
+            return {'action': action, 'success': False, 'redirectToSettings': True}
 
         success = repo.invite.remove_waiting_list_email(db, email)
     else:
@@ -108,11 +103,28 @@ These require get_admin_subscriber!
 """
 
 
-@router.get('/', response_model=list[schemas.WaitingListAdminOut])
-def get_all_waiting_list_users(db: Session = Depends(get_db), _: models.Subscriber = Depends(get_admin_subscriber)):
+@router.post('/', response_model=schemas.WaitingListAdminOut)
+def get_all_waiting_list_users(
+    data: schemas.ListResponseIn, db: Session = Depends(get_db), _: models.Subscriber = Depends(get_admin_subscriber)
+):
     """List all existing waiting list users, needs admin permissions"""
-    response = db.query(models.WaitingList).all()
-    return response
+    page = data.page - 1
+    per_page = data.per_page
+
+    total_count = db.query(models.WaitingList).count()
+    waiting_list_items = (
+        db.query(models.WaitingList).order_by('time_created').offset(page * per_page).limit(per_page).all()
+    )
+
+    return schemas.WaitingListAdminOut(
+        items=waiting_list_items,
+        page_meta=schemas.Paginator(
+            page=data.page,
+            per_page=per_page,
+            count=len(waiting_list_items),
+            total_pages=math.ceil(total_count / per_page),
+        ),
+    )
 
 
 @router.post('/invite', response_model=schemas.WaitingListInviteAdminOut)
@@ -139,7 +151,7 @@ def invite_waiting_list_users(
 
     for id in data.id_list:
         # Look the user up!
-        waiting_list_user: models.WaitingList|None = (
+        waiting_list_user: models.WaitingList | None = (
             db.query(models.WaitingList).filter(models.WaitingList.id == id).first()
         )
         # If the user doesn't exist, or if they're already invited ignore them
@@ -179,17 +191,21 @@ def invite_waiting_list_users(
             send_invite_account_email,
             date=waiting_list_user.time_created,
             to=subscriber.email,
-            lang=subscriber.language
+            lang=subscriber.language,
         )
         accepted.append(waiting_list_user.id)
 
     if posthog:
-        posthog.capture(distinct_id=admin.unique_hash, event='apmt.admin.invited', properties={
-            'from': 'waitingList',
-            'waiting-list-ids': accepted,
-            'errors-encountered': len(errors),
-            'service': 'apmt'
-        })
+        posthog.capture(
+            distinct_id=admin.unique_hash,
+            event='apmt.admin.invited',
+            properties={
+                'from': 'waitingList',
+                'waiting-list-ids': accepted,
+                'errors-encountered': len(errors),
+                'service': 'apmt',
+            },
+        )
 
     return schemas.WaitingListInviteAdminOut(
         accepted=accepted,

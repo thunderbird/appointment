@@ -311,10 +311,10 @@ class TestWaitingListAdminView:
 
         waiting_list_user = make_waiting_list()
 
-        response = with_client.get('/waiting-list/', headers=auth_headers)
+        response = with_client.post('/waiting-list/', json={'page': 1}, headers=auth_headers)
 
         # Ensure the response was okay!
-        data = response.json()
+        data = response.json()['items']
 
         assert response.status_code == 200, data
         assert len(data) > 0
@@ -326,7 +326,7 @@ class TestWaitingListAdminView:
 
         make_waiting_list()
 
-        response = with_client.get('/waiting-list/', headers=auth_headers)
+        response = with_client.post('/waiting-list/', json={'page': 1}, headers=auth_headers)
 
         # Ensure the response was okay!
         data = response.json()

@@ -1,3 +1,5 @@
+import math
+
 from fastapi import APIRouter, Depends, BackgroundTasks
 
 from sqlalchemy.orm import Session
@@ -20,10 +22,30 @@ ADMIN ROUTES
 """
 
 
-@router.get('/', response_model=list[schemas.Invite])
-def get_all_invites(db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
+@router.post('/', response_model=schemas.InviteAdminOut)
+def get_all_invites(data: schemas.ListResponseIn, db: Session = Depends(get_db), _admin: Subscriber = Depends(get_admin_subscriber)):
     """List all existing invites, needs admin permissions"""
-    return db.query(models.Invite).all()
+    page = data.page - 1
+    per_page = data.per_page
+
+    total_count = db.query(models.Subscriber).count()
+    invites = (
+        db.query(models.Invite)
+        .order_by('time_created')
+        .offset(page * per_page)
+        .limit(per_page)
+        .all()
+    )
+
+    return schemas.InviteAdminOut(
+        items=invites,
+        page_meta=schemas.Paginator(
+            page=data.page,
+            per_page=per_page,
+            count=len(invites),
+            total_pages=math.ceil(total_count / per_page)
+        ),
+    )
 
 
 @router.post('/generate/{n}', response_model=list[schemas.Invite])
