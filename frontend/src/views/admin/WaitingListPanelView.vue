@@ -42,7 +42,7 @@ const dataTableRef = ref(null);
 const emailFilter = ref<string>(null);
 const waitingListUsersList = computed(() => {
   if (emailFilter.value) {
-    return waitingListUsers.value.filter((wl) => wl.email.match(new RegExp(emailFilter.value, 'gi')));
+    return waitingListUsers.value.filter((wl) => wl.email.match(new RegExp(RegExp.escape(emailFilter.value), 'gi')));
   }
   return waitingListUsers.value;
 });
