@@ -3,14 +3,14 @@ import { useI18n } from 'vue-i18n';
 import {
   onMounted, inject, ref, computed, watch,
 } from 'vue';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
 import { storeToRefs } from 'pinia';
-import { callKey } from '@/keys';
-import { CalendarItem } from '@/models';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
+import { useFTUEStore } from '@/stores/ftue-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { callKey } from '@/keys';
+import { CalendarItem } from '@/models';
 
 const { t } = useI18n();
 
@@ -32,7 +32,10 @@ const continueTitle = computed(() => (selectedCount.value ? t('label.continue') 
 
 watch(selectedCount, (val) => {
   if (val === 0) {
-    warningMessage.value.title = t('ftue.oneCalendarRequired');
+    warningMessage.value = {
+      title: t('ftue.oneCalendarRequired'),
+      details: null,
+    };
   } else {
     warningMessage.value = null;
   }
@@ -41,7 +44,10 @@ watch(selectedCount, (val) => {
 onMounted(async () => {
   isLoading.value = true;
 
-  infoMessage.value.title = t('ftue.connectCalendarInfo');
+  infoMessage.value = {
+    title: t('ftue.connectCalendarInfo'),
+    details: null,
+  };
 
   await calendarStore.fetch(call, true);
   calendars.value = calendarStore.calendars.map((calendar) => ({

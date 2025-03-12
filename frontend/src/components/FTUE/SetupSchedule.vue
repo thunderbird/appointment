@@ -3,8 +3,13 @@ import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { useI18n } from 'vue-i18n';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
+import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -12,12 +17,9 @@ import { useScheduleStore } from '@/stores/schedule-store';
 import {
   dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
-import { Error, SelectOption } from '@/models';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
+import {
+  Error, Exception, ExceptionDetail, SelectOption,
+} from '@/models';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -99,7 +101,10 @@ const onSubmit = async () => {
     : await scheduleStore.createSchedule(call, scheduleData);
 
   if ((data as Error)?.error) {
-    errorMessage.value.title = (data as Error)?.message;
+    errorMessage.value = {
+      title: (data as Error)?.message,
+      details: null,
+    };
     isLoading.value = false;
     return;
   }
@@ -109,7 +114,10 @@ const onSubmit = async () => {
 
 onMounted(async () => {
   isLoading.value = true;
-  infoMessage.value.title = t('ftue.setupScheduleInfo');
+  infoMessage.value = {
+    title: t('ftue.setupScheduleInfo'),
+    details: null,
+  };
 
   await Promise.all([
     calendarStore.fetch(call, true),
