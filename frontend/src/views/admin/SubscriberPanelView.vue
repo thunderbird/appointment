@@ -177,16 +177,16 @@ const refresh = async () => {
 
 /**
  * Disables a subscriber
- * @param email
+ * @param id
  * @param currentState True if currently enabled (= not deleted)
  */
-const toggleSubscriberState = async (email: string, currentState: boolean) => {
-  if (!email) {
+const toggleSubscriberState = async (id: string, currentState: boolean) => {
+  if (!id) {
     return;
   }
 
   const action = currentState ? 'disable' : 'enable';
-  const response: BooleanResponse = await call(`subscriber/${action}/${email}`).put().json();
+  const response: BooleanResponse = await call(`subscriber/${action}/${id}`).put().json();
   const { data } = response;
 
   if (data.value) {
@@ -255,7 +255,7 @@ const hardDeleteConfirm = async () => {
 
 const onFieldClick = (_key: string, field: any) => {
   if (_key === 'disable') {
-    toggleSubscriberState(field.email.value, field.timeDeleted.value === '');
+    toggleSubscriberState(field.id.value, field.timeDeleted.value === '');
   } else if (_key === 'hardDelete') {
     hardDeleteModalOpen.value = true;
     hardDeleteModalContext.value = field.id.value;
