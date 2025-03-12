@@ -179,7 +179,7 @@ new-account-mail-html-body-2 = Sign in and start using Appointment by clicking t
 new-account-mail-plain = Thank you for signing up to be one of the earliest testers of Thunderbird Appointment Beta.
                          We’re excited to have you on board!
                          You added your email to our beta wait-list on { $date }.
-                         Sign in and start using Appointment by clicking the button below or pasting this link into your browser:
+                         Sign in using this email address, and start using Appointment by clicking the button below or pasting this link into your browser:
                          { $homepage_url }
                          {-brand-footer}
 
