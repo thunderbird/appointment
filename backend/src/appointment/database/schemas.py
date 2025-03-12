@@ -338,9 +338,10 @@ class SubscriberMeOut(SubscriberBase):
     schedule_links: list[str] = []
 
 
-class SubscriberAdminItem(Subscriber):
+class SubscriberAdminItem(SubscriberAuth):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
     invite: Invite | None = None
     time_created: datetime
     time_deleted: datetime | None
