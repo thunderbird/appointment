@@ -34,7 +34,7 @@ const pageNotification = ref<Alert>(null);
 const codeFilter = ref<string>(null);
 const inviteList = computed(() => {
   if (codeFilter.value) {
-    return invites.value.filter((invite) => invite.code.match(codeFilter.value));
+    return invites.value.filter((invite) => invite.code.match(new RegExp(codeFilter.value, 'gi')));
   }
   return invites.value;
 });
