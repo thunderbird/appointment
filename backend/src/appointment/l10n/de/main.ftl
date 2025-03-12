@@ -61,6 +61,7 @@ subscriber-already-exists = Eine Person mit dieser E-Mail-Adresse existiert bere
 subscriber-already-deleted = Die Person ist bereits gelöscht.
 subscriber-already-enabled = Die Person ist bereits aktiv.
 subscriber-self-delete = Die Löschung des eigenen Benutzerkontos ist hier nicht möglich.
+subscriber-not-disabled = Die Person muss deaktiviert sein, bevor sie gänzlich gelöscht werden kann.
 
 rate-limit-exceeded = Zu viele Anfragen in zu kurzem Zeitraum. Bitte später noch einmal versuchen.
 
