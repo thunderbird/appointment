@@ -189,7 +189,7 @@ class TestSubscriber:
         assert new_subscriber.time_deleted is None
 
         # disable our new subscriber and verify
-        response = with_client.put(f'/subscriber/disable/{new_subscriber.email}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/disable/{new_subscriber.id}', headers=auth_headers)
 
         assert response.status_code == 200, response.text
         response = with_client.post('/subscriber', json={'page': 1}, headers=auth_headers)
@@ -204,14 +204,14 @@ class TestSubscriber:
         assert date_deleted == today
 
         # attempt to disable same subscriber again, expect fail
-        response = with_client.put(f'/subscriber/disable/{new_subscriber.email}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/disable/{new_subscriber.id}', headers=auth_headers)
 
         assert response.status_code == 400, response.text
         data = response.json()
         assert data['detail']['id'] == 'SUBSCRIBER_ALREADY_DELETED'
 
         # now enable the deleted subscriber and verify
-        response = with_client.put(f'/subscriber/enable/{new_subscriber.email}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/enable/{new_subscriber.id}', headers=auth_headers)
 
         assert response.status_code == 200, response.text
         response = with_client.post('/subscriber', json={'page': 1}, headers=auth_headers)
@@ -222,7 +222,7 @@ class TestSubscriber:
         assert subscriber_ret['time_deleted'] is None
 
         # attempt to enable the same subscriber again, expect fail
-        response = with_client.put(f'/subscriber/enable/{new_subscriber.email}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/enable/{new_subscriber.id}', headers=auth_headers)
 
         assert response.status_code == 400, response.text
         data = response.json()
@@ -233,7 +233,7 @@ class TestSubscriber:
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
 
         # disable our current subscriber and verify
-        response = with_client.put(f'/subscriber/disable/{os.getenv('TEST_USER_EMAIL')}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/disable/{TEST_USER_ID}', headers=auth_headers)
 
         assert response.status_code == 403, response.text
         data = response.json()
@@ -244,7 +244,7 @@ class TestSubscriber:
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
 
         # disable a subscriber that doesn't exist
-        response = with_client.put('/subscriber/disable/this-user-does-not-exist@someemail.com', headers=auth_headers)
+        response = with_client.put('/subscriber/disable/999999999999', headers=auth_headers)
 
         assert response.status_code == 404, response.text
         data = response.json()
@@ -254,7 +254,7 @@ class TestSubscriber:
         # ensure our current subscriber is not admin
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
 
-        response = with_client.put(f'/subscriber/disable/{os.getenv('TEST_USER_EMAIL')}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/disable/{TEST_USER_ID}', headers=auth_headers)
 
         assert response.status_code == 401, response.text
         data = response.json()
@@ -265,7 +265,7 @@ class TestSubscriber:
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
 
         # disable a subscriber that doesn't exist
-        response = with_client.put('/subscriber/enable/this-user-does-not-exist@someemail.com', headers=auth_headers)
+        response = with_client.put('/subscriber/enable/8888888888888888888', headers=auth_headers)
 
         assert response.status_code == 404, response.text
         data = response.json()
@@ -275,7 +275,7 @@ class TestSubscriber:
         # ensure our current subscriber is not admin
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@notexample.org'
 
-        response = with_client.put(f'/subscriber/enable/{os.getenv('TEST_USER_EMAIL')}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/enable/{TEST_USER_ID}', headers=auth_headers)
 
         assert response.status_code == 401, response.text
         data = response.json()
@@ -324,7 +324,7 @@ class TestSubscriber:
         steves_schedule = make_schedule(calendar_id=steves_calendar.id)
 
         # disable steves account
-        response = with_client.put(f'/subscriber/disable/{steve.email}', headers=auth_headers)
+        response = with_client.put(f'/subscriber/disable/{steve.id}', headers=auth_headers)
 
         assert response.status_code == 200, response.json()
 
