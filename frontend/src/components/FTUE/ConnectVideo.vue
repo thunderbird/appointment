@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
 import {
   AuthUrl, AuthUrlResponse, BooleanResponse, Error, Exception, ExceptionDetail,
 } from '@/models';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
 import { useScheduleStore } from '@/stores/schedule-store';
 
 const { t } = useI18n();
@@ -45,7 +45,10 @@ onMounted(async () => {
     const { data, error }: BooleanResponse = await call('zoom/ftue-status').get().json();
     // Did they hit back?
     if (error?.value) {
-      errorMessage.value.title = ((data.value as Exception)?.detail as ExceptionDetail)?.message;
+      errorMessage.value = {
+        title: ((data.value as Exception)?.detail as ExceptionDetail)?.message,
+        details: null,
+      };
       return;
     }
 
@@ -62,7 +65,7 @@ const onSubmit = async () => {
   });
 
   if ((data as Error)?.error) {
-    errorMessage.value.title = (data as Error)?.message;
+    errorMessage.value = { title: (data as Error)?.message, details: null };
     isLoading.value = false;
     return;
   }
