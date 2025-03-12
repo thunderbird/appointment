@@ -345,6 +345,7 @@ class SubscriberAdminItem(SubscriberAuth):
     invite: Invite | None = None
     time_created: datetime
     time_deleted: datetime | None
+    ftue_level: Optional[int] = Field(json_schema_extra={'gte': 0})
 
 
 class Paginator(BaseModel):
