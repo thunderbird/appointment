@@ -25,6 +25,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { staggerRetrieve } from '@/utils';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -174,10 +175,13 @@ const onFieldSelect = async (rows: TableDataRow[]) => {
  * Retrieve waiting list entries
  */
 const getInvites = async () => {
-  const response: WaitingListResponse = await call('waiting-list/').get().json();
-  const { data } = response;
+  pageError.value = null;
 
-  waitingListUsers.value = data.value as WaitingListEntry[];
+  waitingListUsers.value = await staggerRetrieve(
+    (payload: object) => call('waiting-list/').post(payload).json(),
+    50,
+    pageError,
+  );
 };
 
 /**

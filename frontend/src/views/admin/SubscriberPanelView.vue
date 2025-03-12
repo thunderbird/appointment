@@ -16,6 +16,8 @@ import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { sleep, staggerRetrieve } from '@/utils';
 
 const user = useUserStore();
 
@@ -31,6 +33,8 @@ const inviteEmail = ref('');
 const loading = ref(true);
 const pageError = ref<Alert>(null);
 const pageNotification = ref<Alert>(null);
+const hardDeleteModalOpen = ref<boolean>(false);
+const hardDeleteModalContext = ref<Subscriber>(null);
 
 const filteredSubscribers = computed(() => subscribers.value.map((subscriber) => ({
   id: {
@@ -67,6 +71,13 @@ const filteredSubscribers = computed(() => subscribers.value.map((subscriber) =>
     value: subscriber.time_deleted ? 'Enable' : 'Disable',
     disabled: !subscriber.time_deleted && subscriber.email === user.data.email,
   },
+  hardDelete: {
+    type: TableDataType.Button,
+    buttonType: TableDataButtonType.Caution,
+    value: 'Hard Delete',
+    disabled: !subscriber.time_deleted || subscriber.email === user.data.email,
+    tooltip: 'Completely remove the user from the database. This is the same as deleting someones account!! You must disable the account first.',
+  },
 } as TableDataRow)));
 const columns = [
   {
@@ -99,6 +110,10 @@ const columns = [
   },
   {
     key: 'disable',
+    name: '',
+  },
+  {
+    key: 'hard delete',
     name: '',
   },
 ] as TableDataColumn[];
@@ -135,10 +150,13 @@ const filters = [
  * Retrieve list of all existing subscribers
  */
 const getSubscribers = async () => {
-  const response: SubscriberListResponse = await call('subscriber/').get().json();
-  const { data } = response;
+  pageError.value = null;
 
-  subscribers.value = data.value as Subscriber[];
+  subscribers.value = await staggerRetrieve(
+    (payload: object) => call('subscriber/').post(payload).json(),
+    50,
+    pageError,
+  );
 };
 
 /**
@@ -209,6 +227,34 @@ const amIAdmin = async () => {
   return !error.value;
 };
 
+const hardDeleteConfirm = async () => {
+  if (!hardDeleteModalContext.value) {
+    hardDeleteModalOpen.value = false;
+    hardDeleteModalContext.value = null;
+    return;
+  }
+
+  // Use ids here
+  const response: BooleanResponse = await call(`subscriber/hard-delete/${hardDeleteModalContext.value}`).put().json();
+  const { data } = response;
+
+  if (data.value) {
+    await refresh();
+  }
+
+  hardDeleteModalOpen.value = false;
+  hardDeleteModalContext.value = null;
+};
+
+const onFieldClick = (_key: string, field: any) => {
+  if (_key === 'disable') {
+    toggleSubscriberState(field.email.value, field.timeDeleted.value === '');
+  } else if (_key === 'hardDelete') {
+    hardDeleteModalOpen.value = true;
+    hardDeleteModalContext.value = field.id.value;
+  }
+};
+
 onMounted(async () => {
   const okToContinue = await amIAdmin();
   if (!okToContinue) {
@@ -245,7 +291,7 @@ onMounted(async () => {
       :columns="columns"
       :filters="filters"
       :loading="loading"
-      @field-click="(_key, field) => toggleSubscriberState(field.email.value, field.timeDeleted.value === '')"
+      @field-click="onFieldClick"
     >
       <template v-slot:footer>
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
@@ -273,4 +319,15 @@ onMounted(async () => {
   <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
     <loading-spinner/>
   </div>
+  <!-- Refresh link confirmation modal -->
+  <confirmation-modal
+    :open="hardDeleteModalOpen"
+    title="WARNING"
+    message="This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to."
+    confirm-label="Delete"
+    :cancel-label="t('label.cancel')"
+    :use-caution-button="true"
+    @confirm="() => hardDeleteConfirm()"
+    @close="hardDeleteModalOpen = false"
+  ></confirmation-modal>
 </template>

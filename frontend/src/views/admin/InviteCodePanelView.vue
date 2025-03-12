@@ -17,6 +17,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
+import { staggerRetrieve } from '@/utils';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -143,10 +144,13 @@ const filters = [
  * Retrieve list of all existing invites
  */
 const getInvites = async () => {
-  const response: InviteListResponse = await call('invite/').get().json();
-  const { data } = response;
+  pageError.value = null;
 
-  invites.value = data.value as Invite[];
+  invites.value = await staggerRetrieve(
+    (payload: object) => call('invite/').post(payload).json(),
+    50,
+    pageError,
+  );
 };
 
 /**

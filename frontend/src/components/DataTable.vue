@@ -204,6 +204,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
                 <primary-button
                   v-if="fieldData.buttonType === TableDataButtonType.Primary"
                   :disabled="fieldData.disabled"
+                  :title="fieldData?.tooltip"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}
@@ -211,6 +212,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
                 <secondary-button
                   v-else-if="fieldData.buttonType === TableDataButtonType.Secondary"
                   :disabled="fieldData.disabled"
+                  :title="fieldData?.tooltip"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}
@@ -218,6 +220,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
                 <caution-button
                   v-else-if="fieldData.buttonType === TableDataButtonType.Caution"
                   :disabled="fieldData.disabled"
+                  :title="fieldData?.tooltip"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}

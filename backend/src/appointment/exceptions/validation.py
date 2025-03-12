@@ -283,6 +283,16 @@ class SubscriberAlreadyDeletedException(APIException):
         return l10n('subscriber-already-deleted')
 
 
+class SubscriberNotDisabledException(APIException):
+    """Raise when a subscriber is not disabled before being hard deleted."""
+
+    id_code = 'SUBSCRIBER_NOT_DISABLED'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('subscriber-not-disabled')
+
+
 class SubscriberAlreadyEnabledException(APIException):
     """Raise when a subscriber failed to be marked undeleted because they already are"""
 

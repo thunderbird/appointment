@@ -61,6 +61,7 @@ subscriber-already-exists = A subscriber with this email address already exists.
 subscriber-already-deleted = The subscriber is already deleted.
 subscriber-already-enabled = The subscriber is already enabled.
 subscriber-self-delete = You are not allowed to delete yourself here.
+subscriber-not-disabled = You must disable a subscriber before you can hard-delete their account.
 
 rate-limit-exceeded = Too many requests in a short period. Please try again later.
 
