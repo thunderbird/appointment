@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
 import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { IconSend } from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-import {
-  Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
-} from '@/models';
-import { dayjsKey, callKey } from '@/keys';
 import AdminNav from '@/elements/admin/AdminNav.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { dayjsKey, callKey } from '@/keys';
+import {
+  Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
+} from '@/models';
+import { useUserStore } from '@/stores/user-store';
+import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
 import { sleep, staggerRetrieve } from '@/utils';
 
 const user = useUserStore();
@@ -35,8 +35,15 @@ const pageError = ref<Alert>(null);
 const pageNotification = ref<Alert>(null);
 const hardDeleteModalOpen = ref<boolean>(false);
 const hardDeleteModalContext = ref<Subscriber>(null);
+const emailFilter = ref<string>(null);
+const subscriberList = computed(() => {
+  if (emailFilter.value) {
+    return subscribers.value.filter((sub) => sub.email.match(emailFilter.value));
+  }
+  return subscribers.value;
+});
 
-const filteredSubscribers = computed(() => subscribers.value.map((subscriber) => ({
+const filteredSubscribers = computed(() => subscriberList.value.map((subscriber) => ({
   id: {
     type: TableDataType.Text,
     value: subscriber.id,
@@ -154,7 +161,7 @@ const getSubscribers = async () => {
 
   subscribers.value = await staggerRetrieve(
     (payload: object) => call('subscriber/').post(payload).json(),
-    50,
+    250,
     pageError,
   );
 };
@@ -294,23 +301,37 @@ onMounted(async () => {
       @field-click="onFieldClick"
     >
       <template v-slot:footer>
-        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
-          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
-            <span>{{ t('label.enterEmailToInvite') }}</span>
-            <input
-              class="mx-4 w-60 rounded-md text-sm"
-              type="email"
-              placeholder="e.g. test@example.org"
-              v-model="inviteEmail"
-              :disabled="loading"
-              enterkeyhint="send"
-              @keyup.enter="sendInvite"
-            />
-          </label>
-          <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
-            <icon-send />
-            {{ t('label.send') }}
-          </primary-button>
+        <div class="flex w-full justify-between">
+          <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
+            <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+              <span>{{ t('label.enterEmailToInvite') }}</span>
+              <input
+                class="mx-4 w-60 rounded-md text-sm"
+                type="email"
+                placeholder="e.g. test@example.org"
+                v-model="inviteEmail"
+                :disabled="loading"
+                enterkeyhint="send"
+                @keyup.enter="sendInvite"
+              />
+            </label>
+            <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
+              <icon-send/>
+              {{ t('label.send') }}
+            </primary-button>
+          </div>
+          <div class="flex flex-col items-end gap-4">
+            <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+              <span>{{ t('label.search') }}</span>
+              <input
+                class="mx-4 w-60 rounded-md text-sm"
+                type="text"
+                v-model="emailFilter"
+                :disabled="loading"
+                enterkeyhint="search"
+              />
+            </label>
+          </div>
         </div>
       </template>
 
