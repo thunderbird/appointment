@@ -3,20 +3,20 @@ import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  AlertSchemes, TableDataButtonType, TableDataType, InviteStatus,
-} from '@/definitions';
 import { useRouter } from 'vue-router';
 import { IconSend } from '@tabler/icons-vue';
-import {
-  Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
-} from '@/models';
-import { dayjsKey, callKey } from '@/keys';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import AdminNav from '@/elements/admin/AdminNav.vue';
+import { dayjsKey, callKey } from '@/keys';
+import {
+  Invite, InviteListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
+} from '@/models';
+import {
+  AlertSchemes, TableDataButtonType, TableDataType, InviteStatus,
+} from '@/definitions';
 import { staggerRetrieve } from '@/utils';
 
 const router = useRouter();
@@ -31,8 +31,15 @@ const generateCodeAmount = ref(null);
 const loading = ref(true);
 const pageError = ref<Alert>(null);
 const pageNotification = ref<Alert>(null);
+const codeFilter = ref<string>(null);
+const inviteList = computed(() => {
+  if (codeFilter.value) {
+    return invites.value.filter((invite) => invite.code.match(new RegExp(codeFilter.value, 'gi')));
+  }
+  return invites.value;
+});
 
-const filteredInvites = computed(() => invites.value.map((invite) => ({
+const filteredInvites = computed(() => inviteList.value.map((invite) => ({
   code: {
     type: TableDataType.Code,
     value: invite.code,
@@ -148,7 +155,7 @@ const getInvites = async () => {
 
   invites.value = await staggerRetrieve(
     (payload: object) => call('invite/').post(payload).json(),
-    50,
+    250,
     pageError,
   );
 };
@@ -253,27 +260,41 @@ onMounted(async () => {
       @field-click="(_key, field) => revokeInvite(field.code.value)"
     >
       <template v-slot:footer>
-        <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
-          <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
-            <span>{{ t('label.amountOfCodes') }}</span>
-            <input
-              class="mx-4 w-60 rounded-md text-sm"
-              type="number"
-              v-model="generateCodeAmount"
+        <div class="flex w-full justify-between">
+          <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
+            <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+              <span>{{ t('label.amountOfCodes') }}</span>
+              <input
+                class="mx-4 w-60 rounded-md text-sm"
+                type="number"
+                v-model="generateCodeAmount"
+                :disabled="loading"
+                enterkeyhint="done"
+                @keyup.enter="generateInvites"
+              />
+            </label>
+            <primary-button
+              class="btn-generate"
               :disabled="loading"
-              enterkeyhint="done"
-              @keyup.enter="generateInvites"
-            />
-          </label>
-          <primary-button
-            class="btn-generate"
-            :disabled="loading"
-            @click="generateInvites"
-            :title="t('label.generate')"
-          >
-            <icon-send/>
-            {{ t('label.generate') }}
-          </primary-button>
+              @click="generateInvites"
+              :title="t('label.generate')"
+            >
+              <icon-send/>
+              {{ t('label.generate') }}
+            </primary-button>
+          </div>
+          <div class="flex flex-col items-end gap-4">
+            <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+              <span>{{ t('label.search') }}</span>
+              <input
+                class="mx-4 w-60 rounded-md text-sm"
+                type="text"
+                v-model="codeFilter"
+                :disabled="loading"
+                enterkeyhint="search"
+              />
+            </label>
+          </div>
         </div>
       </template>
 

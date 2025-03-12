@@ -3,12 +3,17 @@ import {
   computed, inject, onMounted, ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AlertSchemes, TableDataType } from '@/definitions';
 import { useRouter } from 'vue-router';
+import { IconSend } from '@tabler/icons-vue';
+import DataTable from '@/components/DataTable.vue';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+import AlertBox from '@/elements/AlertBox.vue';
+import AdminNav from '@/elements/admin/AdminNav.vue';
+import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { dayjsKey, callKey } from '@/keys';
 import {
   WaitingListEntry,
   WaitingListInvite,
-  WaitingListResponse,
   BooleanResponse,
   TableDataRow,
   TableDataColumn,
@@ -18,13 +23,7 @@ import {
   ExceptionDetail,
   Alert,
 } from '@/models';
-import { dayjsKey, callKey } from '@/keys';
-import { IconSend } from '@tabler/icons-vue';
-import DataTable from '@/components/DataTable.vue';
-import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import AlertBox from '@/elements/AlertBox.vue';
-import AdminNav from '@/elements/admin/AdminNav.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { AlertSchemes, TableDataType } from '@/definitions';
 import { staggerRetrieve } from '@/utils';
 
 const router = useRouter();
@@ -40,8 +39,15 @@ const pageError = ref<Alert>(null);
 const pageNotification = ref<Alert>(null);
 const selectedFields = ref([]);
 const dataTableRef = ref(null);
+const emailFilter = ref<string>(null);
+const waitingListUsersList = computed(() => {
+  if (emailFilter.value) {
+    return waitingListUsers.value.filter((wl) => wl.email.match(new RegExp(emailFilter.value, 'gi')));
+  }
+  return waitingListUsers.value;
+});
 
-const filteredUsers = computed(() => waitingListUsers.value.map((user) => ({
+const filteredUsers = computed(() => waitingListUsersList.value.map((user) => ({
   id: {
     type: TableDataType.Text,
     value: user.id,
@@ -179,7 +185,7 @@ const getInvites = async () => {
 
   waitingListUsers.value = await staggerRetrieve(
     (payload: object) => call('waiting-list/').post(payload).json(),
-    50,
+    250,
     pageError,
   );
 };
@@ -272,6 +278,7 @@ onMounted(async () => {
       @fieldSelect="onFieldSelect"
     >
       <template v-slot:footer>
+        <div class="flex w-full">
         <div class="flex w-1/3 flex-col gap-4 text-center md:w-full md:flex-row md:text-left">
           <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
             <span>{{ t('label.sendInviteToWaitingList', {count: selectedFields.length}) }}</span>
@@ -280,6 +287,19 @@ onMounted(async () => {
             <icon-send />
             {{ t('label.send') }}
           </primary-button>
+        </div>
+          <div class="flex flex-col items-end gap-4">
+            <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
+              <span>{{ t('label.search') }}</span>
+              <input
+                class="mx-4 w-60 rounded-md text-sm"
+                type="text"
+                v-model="emailFilter"
+                :disabled="loading"
+                enterkeyhint="search"
+              />
+            </label>
+          </div>
         </div>
         <div>
           {{ t('waitingList.adminInviteNotice')}}
