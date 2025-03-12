@@ -14,7 +14,6 @@ import { dayjsKey, callKey } from '@/keys';
 import {
   WaitingListEntry,
   WaitingListInvite,
-  WaitingListResponse,
   BooleanResponse,
   TableDataRow,
   TableDataColumn,

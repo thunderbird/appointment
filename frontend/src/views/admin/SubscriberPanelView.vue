@@ -13,11 +13,11 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { dayjsKey, callKey } from '@/keys';
 import {
-  Subscriber, SubscriberListResponse, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
+  Subscriber, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
 } from '@/models';
 import { useUserStore } from '@/stores/user-store';
 import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
-import { sleep, staggerRetrieve } from '@/utils';
+import { staggerRetrieve } from '@/utils';
 
 const user = useUserStore();
 
