@@ -11,7 +11,7 @@ import { useExternalConnectionsStore } from '@/stores/external-connections-store
 import { callKey } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
 import {
-  BooleanResponse, Error, Exception, ExceptionDetail,
+  BooleanResponse, Exception, ExceptionDetail,
 } from '@/models';
 
 const { t } = useI18n();
