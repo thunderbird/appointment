@@ -72,26 +72,30 @@ describe('Appointment Store', () => {
 
   test('fetch', async () => {
     const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    apmt.init(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
     expect(apmt.appointments.length).toBe(2);
     expect(apmt.appointments[0].slots.length).toBe(1);
   });
 
   test('pending', async () => {
     const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    apmt.init(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
     expect(apmt.pendingAppointments.length).toBe(1);
   });
 
   test('timezone', async () => {
     const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    apmt.init(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
     expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T01:00:00.000Z');
   });
 
   test('reset', async () => {
     const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    apmt.init(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
 
     // Check if appointments exist
     expect(apmt.isLoaded).toBe(true);
