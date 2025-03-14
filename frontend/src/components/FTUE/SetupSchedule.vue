@@ -39,6 +39,8 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
+calendarStore.init(call);
+
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
   value: calendar.id,
@@ -120,7 +122,7 @@ onMounted(async () => {
   };
 
   await Promise.all([
-    calendarStore.fetch(call, true),
+    calendarStore.fetch(true),
     scheduleStore.fetch(call, true),
   ]);
 

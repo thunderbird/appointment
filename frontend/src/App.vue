@@ -118,6 +118,7 @@ const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
 
+calendarStore.init(call);
 appointmentStore.init(call);
 
 // true if route can be accessed without authentication
@@ -136,7 +137,7 @@ const getDbData = async () => {
   if (user?.authenticated) {
     await Promise.all([
       user.profile(),
-      calendarStore.fetch(call),
+      calendarStore.fetch(),
       appointmentStore.fetch(),
       scheduleStore.fetch(call),
     ]);
