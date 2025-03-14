@@ -32,17 +32,17 @@ const emits = defineEmits(['next', 'previous', 'switch']);
 const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
-const {
-  hasNextStep, errorMessage,
-} = storeToRefs(ftueStore);
+const { hasNextStep, errorMessage } = storeToRefs(ftueStore);
 
 const calendarStore = useCalendarStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
 
+calendarStore.init(call);
+
 onMounted(async () => {
-  await calendarStore.fetch(call, true);
+  await calendarStore.fetch(true);
   const hasFlowKey = localStorage?.getItem(initFlowKey);
   const noCalendarsError = hasFlowKey && calendars.value.length === 0;
 
@@ -92,7 +92,7 @@ const onSubmit = async () => {
 
   // Create key so we can move to the next page after we come back
   localStorage?.setItem(initFlowKey, 'true');
-  await calendarStore.connectGoogleCalendar(call, user.data.email);
+  await calendarStore.connectGoogleCalendar(user.data.email);
 };
 
 </script>

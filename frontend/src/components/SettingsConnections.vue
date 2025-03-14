@@ -30,6 +30,9 @@ const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
 
+calendarStore.init(call);
+userStore.init(call);
+
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 
 const connectCalDavModalOpen = ref(false);
@@ -53,7 +56,7 @@ const refreshData = async () => {
   calendarStore.$reset();
   await Promise.all([
     externalConnectionsStore.fetch(call, true),
-    calendarStore.fetch(call),
+    calendarStore.fetch(),
     // Need to update userStore in case they used an attached email
     userStore.profile(),
   ]);

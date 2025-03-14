@@ -27,6 +27,8 @@ const isFxaAuth = inject(isFxaAuthKey);
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
 const user = useUserStore();
+appointmentStore.init(call);
+calendarStore.init(call);
 user.init(call);
 
 const { pendingAppointments } = storeToRefs(appointmentStore);
@@ -44,8 +46,8 @@ const editProfile = async () => {
 
 // Load calendar and bookings information
 onMounted(() => {
-  calendarStore.fetch(call);
-  appointmentStore.fetch(call);
+  calendarStore.fetch();
+  appointmentStore.fetch();
 });
 </script>
 

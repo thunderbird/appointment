@@ -59,25 +59,29 @@ describe('Calendar Store', () => {
 
   test('fetch', async () => {
     const calStore = useCalendarStore();
-    await calStore.fetch(createFetch({ baseUrl: API_URL }));
+    calStore.init(createFetch({ baseUrl: API_URL }));
+    await calStore.fetch();
     expect(calStore.calendars.length).toBe(2);
   });
 
   test('unconnected', async () => {
     const calStore = useCalendarStore();
-    await calStore.fetch(createFetch({ baseUrl: API_URL }));
+    calStore.init(createFetch({ baseUrl: API_URL }));
+    await calStore.fetch();
     expect(calStore.unconnectedCalendars.length).toBe(1);
   });
 
   test('connected', async () => {
     const calStore = useCalendarStore();
-    await calStore.fetch(createFetch({ baseUrl: API_URL }));
+    calStore.init(createFetch({ baseUrl: API_URL }));
+    await calStore.fetch();
     expect(calStore.connectedCalendars.length).toBe(1);
   });
 
   test('reset', async () => {
     const calStore = useCalendarStore();
-    await calStore.fetch(createFetch({ baseUrl: API_URL }));
+    calStore.init(createFetch({ baseUrl: API_URL }));
+    await calStore.fetch();
 
     // Check if calendars exist
     expect(calStore.isLoaded).toBe(true);

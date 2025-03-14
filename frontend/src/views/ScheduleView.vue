@@ -34,6 +34,8 @@ const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
+calendarStore.init(call);
+
 // current selected date, defaults to now
 const activeDate = ref(dj());
 const activeDateRange = computed(() => ({
@@ -65,7 +67,7 @@ const onDateChange = async (dateObj: TimeFormatted) => {
     !dj(activeDateRange.value.end).isSame(dj(end), 'month')
     || !dj(activeDateRange.value.start).isSame(dj(start), 'month')
   ) {
-    await calendarStore.getRemoteEvents(call, activeDate.value);
+    await calendarStore.getRemoteEvents(activeDate.value);
   }
 };
 
@@ -81,7 +83,7 @@ onMounted(async () => {
   await refresh();
   scheduleStore.fetch(call);
   schedulesReady.value = true;
-  await calendarStore.getRemoteEvents(call, activeDate.value);
+  await calendarStore.getRemoteEvents(activeDate.value);
 });
 
 const dismiss = () => {

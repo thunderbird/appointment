@@ -30,6 +30,8 @@ const calendars = ref<CalendarItem[]>([]);
 const selectedCount = computed(() => calendars.value.filter((item) => item.checked).length);
 const continueTitle = computed(() => (selectedCount.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
 
+calendarStore.init(call);
+
 watch(selectedCount, (val) => {
   if (val === 0) {
     warningMessage.value = {
@@ -49,7 +51,7 @@ onMounted(async () => {
     details: null,
   };
 
-  await calendarStore.fetch(call, true);
+  await calendarStore.fetch(true);
   calendars.value = calendarStore.calendars.map((calendar) => ({
     key: calendar.id,
     label: calendar.title,
@@ -64,8 +66,8 @@ const onSubmit = async () => {
   // FIXME: This is just lazy, we should be checking for checkbox dirty state but no one really should have a calendar connected here!
   const calendarKeysConnect = calendars.value.filter((calendar) => calendar.checked).map((calendar) => calendar.key);
   const calendarKeysDisconnect = calendars.value.filter((calendar) => !calendar.checked).map((calendar) => calendar.key);
-  await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(call, id)));
-  await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(call, id)));
+  await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(id)));
+  await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(id)));
 
   await nextStep(call);
 };
