@@ -10,7 +10,7 @@ import {
   PydanticException,
   User,
   Alert,
-  SubscriberListResponse, Subscriber, ListResponse,
+  ListResponse,
 } from '@/models';
 
 /**
@@ -215,7 +215,7 @@ export const sleep = async (timeMs: number) => new Promise((resolve) => { window
  * @param perPage
  * @param pageError
  */
-export const staggerRetrieve = async (requestFn: any, perPage: number, pageError?: ref<Alert>) => {
+export const staggerRetrieve = async (requestFn: any, perPage: number, pageError?: Ref<Alert>) => {
   // Load the first page to get the total amount of pages
   const response: ListResponse = await requestFn({
     page: 1,
