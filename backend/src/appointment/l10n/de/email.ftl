@@ -177,7 +177,7 @@ new-account-mail-html-body-2 = Melde Dich an und beginne mit der Nutzung von App
 new-account-mail-plain = Vielen Dank, dass Du dich als einer der ersten Tester von Thunderbird Appointment Beta registrierst.
                          Wir freuen uns, dass Du dabei bist!
                          Deine E-Mail-Adresse wurde am { $date } auf unsere Beta-Warteliste gesetzt.
-                         Melde Dich an und beginne mit der Nutzung von Appointment, indem Du auf die Schaltfläche unten klickst oder diesen Link in Deinen Browser einfügst:
+                         Melde Dich mit dieser E-Mail-Adresse an und starte mit Appointment, indem Du auf die Schaltfläche unten klickst oder diesen Link in Deinen Browser einfügst:
                          { $homepage_url }
                          {-brand-footer}
 
