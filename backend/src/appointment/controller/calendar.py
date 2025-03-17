@@ -994,7 +994,7 @@ class Tools:
         parsed_url = urlparse(url)
 
         # Do they have a well-known?
-        if parsed_url.path == '' and parsed_url.hostname != '':
+        if any([parsed_url.path == '', parsed_url.path == '/']) and parsed_url.hostname != '':
             try:
                 response = requests.get(urljoin(url, '/.well-known/caldav'), allow_redirects=False)
                 if response.is_redirect:
@@ -1006,38 +1006,6 @@ class Tools:
                 # Ignore connection errors here
                 pass
         return None
-
-    @staticmethod
-    def fix_caldav_urls(url: str) -> str:
-        """Fix up some common url issues with some caldav providers"""
-        parsed_url = urlparse(url)
-
-        # If for some reason we don't have a hostname, there's nothing to fix
-        # and we just throw back that weird url
-        if not parsed_url.hostname:
-            return url
-
-        # Handle any fastmail issues
-        if utils.is_valid_hostname(parsed_url.hostname, 'fastmail.com'):
-            if not parsed_url.path.startswith('/dav'):
-                url = f'{url}/dav/'
-
-            # Url needs to end with slash
-            if not url.endswith('/'):
-                url += '/'
-
-        # Google is weird - We also don't support them right now.
-        elif (
-            utils.is_valid_hostname(parsed_url.hostname, 'api.googlecontent.com')
-            or utils.is_valid_hostname(parsed_url.hostname, 'apidata.googleusercontent.com')
-        ):
-            if len(parsed_url.path) == 0:
-                url += '/caldav/v2/'
-        elif utils.is_valid_hostname(parsed_url.hostname, 'calendar.google.com'):
-            # Use the caldav url instead
-            url = 'https://api.googlecontent.com/caldav/v2/'
-
-        return url
 
     @staticmethod
     def default_event_title(slot: schemas.Slot, owner: schemas.Subscriber, prefix='') -> str:
