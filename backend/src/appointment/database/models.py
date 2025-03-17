@@ -503,4 +503,4 @@ class WaitingList(Base):
     invite: Mapped['Invite'] = relationship('Invite', back_populates='waiting_list', single_parent=True)
 
     def __str__(self):
-        return f'WaitingList: {self.id}'
+        return f'Waiting List: {self.id}'
