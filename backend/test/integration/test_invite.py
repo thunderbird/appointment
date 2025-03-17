@@ -101,18 +101,19 @@ class TestInvite:
     def test_get_all_invites(self, with_db, with_client, make_invite):
         """Ensures we can get all invites"""
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
+        total_count = 30
 
-        invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(2)]
+        invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(total_count)]
         assert invites is not None
 
         response = with_client.post(
             '/invite',
-            json={'page': 1},
+            json={'page': 1, 'per_page': 50},
             headers=auth_headers,
         )
         assert response.status_code == 200, response.text
         invite_list = response.json()['items']
-        assert len(invite_list) == 2
+        assert len(invite_list) == total_count
         assert invite_list[0]['code'] != invite_list[1]['code']
 
         for next_invite in invite_list:
