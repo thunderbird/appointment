@@ -1,3 +1,4 @@
+import math
 import os
 from datetime import datetime
 from defines import auth_headers, TEST_USER_ID
@@ -101,18 +102,19 @@ class TestInvite:
     def test_get_all_invites(self, with_db, with_client, make_invite):
         """Ensures we can get all invites"""
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
+        total_count = 30
 
-        invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(2)]
+        invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(total_count)]
         assert invites is not None
 
         response = with_client.post(
             '/invite',
-            json={'page': 1},
+            json={'page': 1, 'per_page': total_count},
             headers=auth_headers,
         )
         assert response.status_code == 200, response.text
         invite_list = response.json()['items']
-        assert len(invite_list) == 2
+        assert len(invite_list) == total_count
         assert invite_list[0]['code'] != invite_list[1]['code']
 
         for next_invite in invite_list:
@@ -120,6 +122,38 @@ class TestInvite:
             assert next_invite['code'] is not None
             date_created = datetime.fromisoformat(next_invite['time_created']).date()
             assert date_created == self.today
+
+    def test_get_all_invites_2_pages(self, with_db, with_client, make_invite):
+        """Ensures we can get all invites"""
+        os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
+        total_count = 30
+        per_page = 20
+        total_estimated_pages = math.ceil(total_count / per_page)  # fyi: it's 2
+
+        invites = [make_invite(owner_id=TEST_USER_ID) for _ in range(total_count)]
+        assert invites is not None
+
+        invites_per_page = len(invites)
+
+        for page in range(1, total_estimated_pages+1):
+            response = with_client.post(
+                '/invite',
+                json={'page': page, 'per_page': per_page},
+                headers=auth_headers,
+            )
+            assert response.status_code == 200, response.text
+            invite_list = response.json()['items']
+            assert len(invite_list) == min(invites_per_page, per_page)
+            assert invite_list[0]['code'] != invite_list[1]['code']
+
+            for next_invite in invite_list:
+                assert next_invite['owner_id'] == TEST_USER_ID
+                assert next_invite['code'] is not None
+                date_created = datetime.fromisoformat(next_invite['time_created']).date()
+                assert date_created == self.today
+
+            # Reduce the total invite count
+            invites_per_page -= per_page
 
     def test_generate_invites(self, with_client):
         """Ensures we can generate new invites"""
