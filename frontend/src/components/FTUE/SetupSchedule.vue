@@ -17,9 +17,7 @@ import { useScheduleStore } from '@/stores/schedule-store';
 import {
   dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
-import {
-  Error, Exception, ExceptionDetail, SelectOption,
-} from '@/models';
+import { Error, SelectOption } from '@/models';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
