@@ -40,6 +40,7 @@ const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
 
 calendarStore.init(call);
+externalConnectionStore.init(call);
 
 onMounted(async () => {
   await calendarStore.fetch(true);
@@ -57,7 +58,7 @@ onMounted(async () => {
 
       // Also remove the google calendar
       if (externalConnectionStore.google.length > 0) {
-        await externalConnectionStore.disconnect(call, ExternalConnectionProviders.Google);
+        await externalConnectionStore.disconnect(ExternalConnectionProviders.Google);
       }
     } else {
       errorMessage.value = {

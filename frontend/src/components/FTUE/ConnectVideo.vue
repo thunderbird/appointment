@@ -33,9 +33,11 @@ const customMeetingLinkRef = ref<typeof TextInput>();
 
 const initFlowKey = 'tba/startedMeetingConnect';
 
+externalConnectionStore.init(call)
+
 onMounted(async () => {
   isLoading.value = true;
-  await externalConnectionStore.fetch(call);
+  await externalConnectionStore.fetch();
   isLoading.value = false;
 
   const isBackFromConnectFlow = localStorage?.getItem(initFlowKey);

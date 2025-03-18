@@ -52,6 +52,8 @@ const isoWeekdays = inject(isoWeekdaysKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
 
+externalConnectionStore.init(call);
+
 // component emits
 const emit = defineEmits(['created', 'updated']);
 
@@ -117,7 +119,7 @@ const generateZoomLink = ref(scheduleInput.value.meeting_link_provider === Meeti
 
 onMounted(() => {
   // Retrieve the current external connections
-  externalConnectionStore.fetch(call);
+  externalConnectionStore.fetch();
 
   if (props.schedule) {
     scheduleInput.value = { ...props.schedule };

@@ -23,17 +23,27 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     caldav: caldav.value,
   }));
 
+  const call = ref(null);
+
+  /**
+   * Initialize store with data required at runtime
+   *
+   * @param fetch preconfigured function to perform API calls
+   */
+  const init = (fetch: Fetch) => {
+    call.value = fetch;
+  }
+
   /**
    * Get all external connections for current user
-   * @param call preconfigured API fetch function
    * @param force
    */
-  const fetch = async (call: Fetch, force = false) => {
+  const fetch = async (force = false) => {
     if (isLoaded.value && !force) {
       return;
     }
 
-    const { data }: ExternalConnectionCollectionResponse = await call('account/external-connections').get().json();
+    const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections').get().json();
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
     google.value = data.value?.google ?? [];
@@ -52,9 +62,9 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     isLoaded.value = false;
   };
 
-  const connect = async (call: Fetch, provider: ExternalConnectionProviders, router: any) => {
+  const connect = async (provider: ExternalConnectionProviders, router: any) => {
     if (provider === ExternalConnectionProviders.Zoom) {
-      const { data } = await call('zoom/auth').get().json();
+      const { data } = await call.value('zoom/auth').get().json();
       // Ship them to the auth link
       window.location.href = data.value.url;
     } else if (provider === ExternalConnectionProviders.Google) {
@@ -63,13 +73,15 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     // CalDAV is handled in the modal
   };
 
-  const disconnect = async (call: Fetch, provider: ExternalConnectionProviders, typeId: string|null = null) => {
+  const disconnect = async (provider: ExternalConnectionProviders, typeId: string|null = null) => {
     if (provider === ExternalConnectionProviders.Zoom) {
-      return call('zoom/disconnect').post();
-    } if (provider === ExternalConnectionProviders.Google) {
-      return call('google/disconnect').post();
-    } if (provider === ExternalConnectionProviders.Caldav) {
-      return call('caldav/disconnect').post({
+      return call.value('zoom/disconnect').post();
+    }
+    if (provider === ExternalConnectionProviders.Google) {
+      return call.value('google/disconnect').post();
+    }
+    if (provider === ExternalConnectionProviders.Caldav) {
+      return call.value('caldav/disconnect').post({
         type_id: typeId,
       });
     }
@@ -78,6 +90,6 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   };
 
   return {
-    connections, isLoaded, fxa, zoom, google, fetch, $reset, connect, disconnect,
+    connections, isLoaded, fxa, zoom, google, init, fetch, $reset, connect, disconnect,
   };
 });

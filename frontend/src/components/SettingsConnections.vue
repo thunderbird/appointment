@@ -30,6 +30,7 @@ const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
 
+externalConnectionsStore.init(call);
 calendarStore.init(call);
 userStore.init(call);
 
@@ -55,7 +56,7 @@ const refreshData = async () => {
   // Need to reset calendar store first!
   calendarStore.$reset();
   await Promise.all([
-    externalConnectionsStore.fetch(call, true),
+    externalConnectionsStore.fetch(true),
     calendarStore.fetch(),
     // Need to update userStore in case they used an attached email
     userStore.profile(),
@@ -83,7 +84,7 @@ const connectAccount = async (provider: ExternalConnectionProviders) => {
     connectCalDavModalOpen.value = true;
     return;
   }
-  await externalConnectionsStore.connect(call, provider, router);
+  await externalConnectionsStore.connect(provider, router);
 };
 
 const connectCalDAV = async () => {
@@ -92,7 +93,7 @@ const connectCalDAV = async () => {
 };
 
 const disconnectAccount = async (provider: ExternalConnectionProviders, typeId: string|null = null) => {
-  await externalConnectionsStore.disconnect(call, provider, typeId);
+  await externalConnectionsStore.disconnect(provider, typeId);
   resetConnections();
   await refreshData();
   closeModals();

@@ -34,6 +34,7 @@ const router = useRouter();
 const schedule = useScheduleStore();
 const externalConnectionsStore = useExternalConnectionsStore();
 const user = useUserStore();
+externalConnectionsStore.init(call);
 user.init(call);
 
 const activeUsername = ref(user.data.username);
@@ -67,7 +68,7 @@ const getAvailableEmails = async () => {
 const refreshData = async () => Promise.all([
   user.profile(),
   schedule.fetch(call, true),
-  externalConnectionsStore.fetch(call),
+  externalConnectionsStore.fetch(),
   getAvailableEmails(),
 ]);
 
