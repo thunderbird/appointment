@@ -64,7 +64,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
 
   const connect = async (provider: ExternalConnectionProviders, router: any) => {
     if (provider === ExternalConnectionProviders.Zoom) {
-      const { data } = await call.value('zoom/auth').get().json();
+      const { data } = await call.value('zoom/auth').get().json(); // FIXME: Add type
       // Ship them to the auth link
       window.location.href = data.value.url;
     } else if (provider === ExternalConnectionProviders.Google) {
@@ -73,7 +73,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     // CalDAV is handled in the modal
   };
 
-  const disconnect = async (provider: ExternalConnectionProviders, typeId: string|null = null) => {
+  const disconnect = async (provider: ExternalConnectionProviders, typeId: string | null = null) => {
     if (provider === ExternalConnectionProviders.Zoom) {
       return call.value('zoom/disconnect').post();
     }
