@@ -34,6 +34,7 @@ const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
+scheduleStore.init(call);
 calendarStore.init(call);
 
 // current selected date, defaults to now
@@ -81,7 +82,7 @@ onMounted(async () => {
     return;
   }
   await refresh();
-  scheduleStore.fetch(call);
+  scheduleStore.fetch();
   schedulesReady.value = true;
   await calendarStore.getRemoteEvents(activeDate.value);
 });
@@ -135,7 +136,7 @@ const dismiss = () => {
         :calendars="connectedCalendars"
         :schedule="firstSchedule"
         :active-date="activeDate"
-        @created="scheduleStore.fetch(call, true)"
+        @created="scheduleStore.fetch(true)"
         @updated="schedulePreview"
       />
     </div>

@@ -53,6 +53,7 @@ const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
 
 externalConnectionStore.init(call);
+scheduleStore.init(call);
 
 // component emits
 const emit = defineEmits(['created', 'updated']);
@@ -299,8 +300,8 @@ const saveSchedule = async (withConfirmation = true) => {
 
   // save schedule data
   const response = props.schedule
-    ? await scheduleStore.updateSchedule(call, props.schedule.id, obj)
-    : await scheduleStore.createSchedule(call, obj);
+    ? await scheduleStore.updateSchedule(props.schedule.id, obj)
+    : await scheduleStore.createSchedule(obj);
 
   // eslint-disable-next-line no-prototype-builtins
   if (response.hasOwnProperty('error')) {

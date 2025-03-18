@@ -33,7 +33,8 @@ const customMeetingLinkRef = ref<typeof TextInput>();
 
 const initFlowKey = 'tba/startedMeetingConnect';
 
-externalConnectionStore.init(call)
+scheduleStore.init(call);
+externalConnectionStore.init(call);
 
 onMounted(async () => {
   isLoading.value = true;
@@ -61,7 +62,7 @@ onMounted(async () => {
 const onSubmit = async () => {
   isLoading.value = true;
 
-  const data = await scheduleStore.updateSchedule(call, schedules.value[0].id, {
+  const data = await scheduleStore.updateSchedule(schedules.value[0].id, {
     ...schedules.value[0],
     location_url: customMeetingLink.value,
   });

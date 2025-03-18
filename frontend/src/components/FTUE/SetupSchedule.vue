@@ -40,6 +40,7 @@ const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
 calendarStore.init(call);
+scheduleStore.init(call);
 
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
@@ -99,8 +100,8 @@ const onSubmit = async () => {
   };
 
   const data = schedules.value.length > 0
-    ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData)
-    : await scheduleStore.createSchedule(call, scheduleData);
+    ? await scheduleStore.updateSchedule(schedules.value[0].id, scheduleData)
+    : await scheduleStore.createSchedule(scheduleData);
 
   if ((data as Error)?.error) {
     errorMessage.value = {
@@ -123,7 +124,7 @@ onMounted(async () => {
 
   await Promise.all([
     calendarStore.fetch(true),
-    scheduleStore.fetch(call, true),
+    scheduleStore.fetch(true),
   ]);
 
   schedule.value.calendar = connectedCalendars.value[0].id;

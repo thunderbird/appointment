@@ -14,9 +14,11 @@ const call = inject(callKey);
 
 const scheduleStore = useScheduleStore();
 const userStore = useUserStore();
-userStore.init(call);
 const ftueStore = useFTUEStore();
 const { nextStep } = ftueStore;
+
+scheduleStore.init(call);
+userStore.init(call);
 
 const isLoading = ref(false);
 const myLink = ref('');
@@ -25,7 +27,7 @@ const myLinkShow = ref(false);
 
 onMounted(async () => {
   await Promise.all([
-    scheduleStore.fetch(call),
+    scheduleStore.fetch(),
     userStore.profile(),
   ]);
   myLink.value = userStore.myLink;
