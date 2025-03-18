@@ -41,7 +41,7 @@ def caldav_autodiscover_auth(
     # Check for an attempt to use Google CalDAV API
     # which we don't support because we use their API directly
     basename = urlparse(connection.url).netloc
-    if (any([(g in basename) for g in GOOGLE_CALDAV_DOMAINS])):
+    if any([(g in basename) for g in GOOGLE_CALDAV_DOMAINS]):
         raise GoogleCaldavNotSupported()
 
     lookup_branch = None
@@ -60,6 +60,10 @@ def caldav_autodiscover_auth(
             raise UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
         except UnexpectedBehaviourWarning as ex:
             sentry_sdk.capture_exception(ex)
+
+        # Clear cache for that key
+        redis_client.delete(dns_lookup_cache_key)
+
         # Ignore cached result and look it up again
         lookup_url = None
 
@@ -96,9 +100,6 @@ def caldav_autodiscover_auth(
             raise UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
         except UnexpectedBehaviourWarning as ex:
             sentry_sdk.capture_exception(ex)
-
-    # Finally perform any final fixups needed
-    connection.url = Tools.fix_caldav_urls(connection.url)
 
     con = CalDavConnector(
         db=db,
