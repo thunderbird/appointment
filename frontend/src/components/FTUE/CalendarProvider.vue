@@ -10,19 +10,18 @@ import GoogleOauthProvider from '@/components/FTUE/GoogleOauthProvider.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 
 const ftueStore = useFTUEStore();
-const {
-  errorMessage,
-} = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
+const { errorMessage } = storeToRefs(ftueStore);
 const call = inject(callKey);
 const provider = ref('google');
 
+ftueStore.init(call);
+
 const onNext = async () => {
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 const onPrevious = () => {
-  previousStep();
+  ftueStore.previousStep();
 };
 
 const onSwitch = () => {

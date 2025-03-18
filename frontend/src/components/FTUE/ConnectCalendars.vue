@@ -23,13 +23,12 @@ const {
   hasNextStep, hasPreviousStep, infoMessage, warningMessage,
 } = storeToRefs(ftueStore);
 
-const { previousStep, nextStep } = ftueStore;
-
 const calendarStore = useCalendarStore();
 const calendars = ref<CalendarItem[]>([]);
 const selectedCount = computed(() => calendars.value.filter((item) => item.checked).length);
 const continueTitle = computed(() => (selectedCount.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
 
+ftueStore.init(call);
 calendarStore.init(call);
 
 watch(selectedCount, (val) => {
@@ -69,7 +68,7 @@ const onSubmit = async () => {
   await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(id)));
   await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(id)));
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 </script>
@@ -92,7 +91,7 @@ const onSubmit = async () => {
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="ftueStore.previousStep()"
     >
       {{ t('label.back') }}
     </secondary-button>

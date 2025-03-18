@@ -17,6 +17,17 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const errorMessage = ref<Alert>(null);
   const warningMessage = ref<Alert>(null);
 
+  const call = ref(null);
+
+  /**
+   * Initialize store with data required at runtime
+   *
+   * @param fetch preconfigured function to perform API calls
+   */
+  const init = (fetch: Fetch) => {
+    call.value = fetch;
+  }
+
   /**
    * State information for navigating the First Time User Experience
    */
@@ -63,12 +74,12 @@ export const useFTUEStore = defineStore('FTUE', () => {
     warningMessage.value = null;
   };
 
-  const nextStep = async (call: Fetch) => {
+  const nextStep = async () => {
     if (hasNextStep.value) {
       clearMessages();
       data.value.step = stepList[data.value.step].next;
 
-      call('metrics/ftue-step').post({
+      call.value('metrics/ftue-step').post({
         step_level: data.value.step,
         step_name: stepList[data.value.step].title.replace('ftue.steps.', ''),
       });
@@ -90,6 +101,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
 
   return {
     data,
+    init,
     nextStep,
     previousStep,
     currentStep,

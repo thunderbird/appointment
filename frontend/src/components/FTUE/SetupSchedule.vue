@@ -30,7 +30,6 @@ const ftueStore = useFTUEStore();
 const {
   hasNextStep, hasPreviousStep,
 } = storeToRefs(ftueStore);
-const { nextStep, previousStep } = ftueStore;
 const { errorMessage, infoMessage } = storeToRefs(ftueStore);
 const user = useUserStore();
 const calendarStore = useCalendarStore();
@@ -39,6 +38,7 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
+ftueStore.init(call);
 calendarStore.init(call);
 scheduleStore.init(call);
 
@@ -112,7 +112,7 @@ const onSubmit = async () => {
     return;
   }
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 onMounted(async () => {
@@ -190,7 +190,7 @@ onMounted(async () => {
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="ftueStore.previousStep()"
     >
       {{ t('label.back') }}
     </secondary-button>

@@ -15,10 +15,10 @@ const call = inject(callKey);
 const scheduleStore = useScheduleStore();
 const userStore = useUserStore();
 const ftueStore = useFTUEStore();
-const { nextStep } = ftueStore;
 
 scheduleStore.init(call);
 userStore.init(call);
+ftueStore.init(call);
 
 const isLoading = ref(false);
 const myLink = ref('');
@@ -43,7 +43,7 @@ const onSubmit = async () => {
   // Clear the FTUE flow
   window.localStorage?.removeItem('tba/ftue');
 
-  await nextStep(call);
+  await ftueStore.nextStep();
   // Yeet them to calendar!
   window.location.href = '/calendar';
 };

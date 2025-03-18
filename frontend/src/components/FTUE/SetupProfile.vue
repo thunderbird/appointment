@@ -15,8 +15,9 @@ const call = inject(callKey);
 
 const ftueStore = useFTUEStore();
 const { hasNextStep } = storeToRefs(ftueStore);
-const { nextStep } = ftueStore;
 const user = useUserStore();
+
+ftueStore.init(call);
 user.init(call);
 
 // @ts-expect-error ignore type err
@@ -62,7 +63,7 @@ const onSubmit = async () => {
     return;
   }
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 </script>

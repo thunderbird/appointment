@@ -24,7 +24,6 @@ const scheduleStore = useScheduleStore();
 const {
   hasNextStep, hasPreviousStep, errorMessage,
 } = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
 const { schedules } = storeToRefs(scheduleStore);
 
 const externalConnectionStore = useExternalConnectionsStore();
@@ -33,6 +32,7 @@ const customMeetingLinkRef = ref<typeof TextInput>();
 
 const initFlowKey = 'tba/startedMeetingConnect';
 
+ftueStore.init(call);
 scheduleStore.init(call);
 externalConnectionStore.init(call);
 
@@ -55,7 +55,7 @@ onMounted(async () => {
       return;
     }
 
-    await nextStep(call);
+    await ftueStore.nextStep();
   }
 });
 
@@ -73,18 +73,18 @@ const onSubmit = async () => {
     return;
   }
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 const onSkip = async () => {
   isLoading.value = true;
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 const connectZoom = async () => {
   // If they have zoom attached, just skip for now.
   if (externalConnectionStore.zoom.length > 0) {
-    await nextStep(call);
+    await ftueStore.nextStep();
     return;
   }
 
@@ -132,7 +132,7 @@ const connectZoom = async () => {
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="ftueStore.previousStep()"
     >{{ t('label.back') }}
     </secondary-button>
     <primary-button
