@@ -214,9 +214,6 @@ class RemoteCalendarConnectionError(APIException):
     status_code = 400
 
     def get_msg(self):
-        if self.reason:
-            return self.reason
-
         return l10n('remote-calendar-connection-error')
 
 
