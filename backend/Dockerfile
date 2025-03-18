@@ -21,8 +21,8 @@ RUN chmod 0644 /etc/cron.d/appointment-cron
 RUN crontab /etc/cron.d/appointment-cron
 
 # Dev only
-RUN echo '!! If the next step fails, copy .env.example to .env in the backend folder !!'
-COPY .env .
+#RUN echo '!! If the next step fails, copy .env.example to .env in the backend folder !!'
+#COPY .env .
 
 RUN pip install --upgrade pip
 RUN pip install .'[deploy]'
