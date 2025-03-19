@@ -13,7 +13,7 @@ import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from 
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 import {
   dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
@@ -33,14 +33,13 @@ const {
 const { errorMessage, infoMessage } = storeToRefs(ftueStore);
 const user = useUserStore();
 const calendarStore = useCalendarStore();
-const scheduleStore = useScheduleStore();
+const scheduleStore = createScheduleStore(call);
 const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
 ftueStore.init(call);
 calendarStore.init(call);
-scheduleStore.init(call);
 
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,

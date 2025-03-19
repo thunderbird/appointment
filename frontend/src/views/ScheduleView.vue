@@ -14,7 +14,7 @@ import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 // stores
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
@@ -25,7 +25,7 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const refresh = inject(refreshKey);
 
-const scheduleStore = useScheduleStore();
+const scheduleStore = createScheduleStore(call);
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
 const userActivityStore = useUserActivityStore();
@@ -34,7 +34,6 @@ const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
-scheduleStore.init(call);
 calendarStore.init(call);
 
 // current selected date, defaults to now

@@ -21,7 +21,7 @@ import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -31,11 +31,10 @@ import UserInviteTable from '@/components/UserInviteTable.vue';
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const router = useRouter();
-const schedule = useScheduleStore();
+const schedule = createScheduleStore(call);
 const externalConnectionsStore = useExternalConnectionsStore();
 const user = createUserStore(call);
 
-schedule.init(call);
 externalConnectionsStore.init(call);
 
 const activeUsername = ref(user.data.username);

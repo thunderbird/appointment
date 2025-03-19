@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -12,11 +12,10 @@ import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
 const { t } = useI18n();
 const call = inject(callKey);
 
-const scheduleStore = useScheduleStore();
+const scheduleStore = createScheduleStore(call);
 const userStore = createUserStore(call);
 const ftueStore = useFTUEStore();
 
-scheduleStore.init(call);
 ftueStore.init(call);
 
 const isLoading = ref(false);

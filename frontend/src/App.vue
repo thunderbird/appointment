@@ -24,7 +24,7 @@ import { useSiteNotificationStore } from '@/stores/alert-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
 // component constants
 const user = useUserStore();
@@ -116,11 +116,10 @@ const navItems = [
 // db tables
 const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
-const scheduleStore = useScheduleStore();
+const scheduleStore = createScheduleStore(call);
 
 calendarStore.init(call);
 appointmentStore.init(call);
-scheduleStore.init(call);
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(

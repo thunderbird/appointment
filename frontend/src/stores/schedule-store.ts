@@ -234,3 +234,9 @@ export const useScheduleStore = defineStore('schedules', () => {
     timeToFrontendTime,
   };
 });
+
+export const createScheduleStore = (call: Fetch) => {
+  const store = useScheduleStore();
+  store.init(call);
+  return store;
+};

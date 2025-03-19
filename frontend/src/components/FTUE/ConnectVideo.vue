@@ -11,7 +11,7 @@ import { callKey } from '@/keys';
 import {
   AuthUrl, AuthUrlResponse, BooleanResponse, Error, Exception, ExceptionDetail,
 } from '@/models';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
 const { t } = useI18n();
 
@@ -19,7 +19,7 @@ const call = inject(callKey);
 const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
-const scheduleStore = useScheduleStore();
+const scheduleStore = createScheduleStore(call);
 
 const {
   hasNextStep, hasPreviousStep, errorMessage,
@@ -33,7 +33,6 @@ const customMeetingLinkRef = ref<typeof TextInput>();
 const initFlowKey = 'tba/startedMeetingConnect';
 
 ftueStore.init(call);
-scheduleStore.init(call);
 externalConnectionStore.init(call);
 
 onMounted(async () => {

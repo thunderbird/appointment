@@ -7,7 +7,7 @@ import {
   afterAll,
   afterEach,
 } from 'vitest';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { useScheduleStore, createScheduleStore } from '@/stores/schedule-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
@@ -76,38 +76,33 @@ describe('Schedule Store', () => {
   });
 
   test('fetch', async () => {
-    const store = useScheduleStore();
-    store.init(createFetch({ baseUrl: API_URL }));
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     await store.fetch();
     expect(store.schedules.length).toBe(1);
     expect(store.schedules[0].calendar.id).toBe(1);
   });
 
   test('first', async () => {
-    const store = useScheduleStore();
-    store.init(createFetch({ baseUrl: API_URL }));
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     expect(store.firstSchedule).toBeNull();
     await store.fetch();
     expect(store.firstSchedule.earliest_booking).toBe(1440);
   });
 
   test('inactive', async () => {
-    const store = useScheduleStore();
-    store.init(createFetch({ baseUrl: API_URL }));
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     await store.fetch();
     expect(store.inactiveSchedules.length).toBe(1);
   });
 
   test('active', async () => {
-    const store = useScheduleStore();
-    store.init(createFetch({ baseUrl: API_URL }));
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     await store.fetch();
     expect(store.activeSchedules.length).toBe(0);
   });
 
   test('reset', async () => {
-    const store = useScheduleStore();
-    store.init(createFetch({ baseUrl: API_URL }));
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     await store.fetch();
 
     // Check if schedules exist
