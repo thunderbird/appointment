@@ -116,3 +116,9 @@ export const useFTUEStore = defineStore('FTUE', () => {
     warningMessage,
   };
 });
+
+export const createFTUEStore = (call: Fetch) => {
+  const store = useFTUEStore();
+  store.init(call);
+  return store;
+};

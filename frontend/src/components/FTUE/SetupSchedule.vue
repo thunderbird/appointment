@@ -10,7 +10,7 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { createScheduleStore } from '@/stores/schedule-store';
@@ -26,7 +26,7 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 
-const ftueStore = useFTUEStore();
+const ftueStore = createFTUEStore(call);
 const {
   hasNextStep, hasPreviousStep,
 } = storeToRefs(ftueStore);
@@ -38,7 +38,6 @@ const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
-ftueStore.init(call);
 calendarStore.init(call);
 
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({

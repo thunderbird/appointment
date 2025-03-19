@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
@@ -14,9 +14,7 @@ const call = inject(callKey);
 
 const scheduleStore = createScheduleStore(call);
 const userStore = createUserStore(call);
-const ftueStore = useFTUEStore();
-
-ftueStore.init(call);
+const ftueStore = createFTUEStore(call);
 
 const isLoading = ref(false);
 const myLink = ref('');

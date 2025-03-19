@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { callKey } from '@/keys';
 import { CalendarItem } from '@/models';
@@ -18,7 +18,7 @@ const call = inject(callKey);
 
 const isLoading = ref(false);
 
-const ftueStore = useFTUEStore();
+const ftueStore = createFTUEStore(call);
 const {
   hasNextStep, hasPreviousStep, infoMessage, warningMessage,
 } = storeToRefs(ftueStore);
@@ -28,7 +28,6 @@ const calendars = ref<CalendarItem[]>([]);
 const selectedCount = computed(() => calendars.value.filter((item) => item.checked).length);
 const continueTitle = computed(() => (selectedCount.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
 
-ftueStore.init(call);
 calendarStore.init(call);
 
 watch(selectedCount, (val) => {

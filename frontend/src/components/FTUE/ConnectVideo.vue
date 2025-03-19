@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import {
@@ -18,21 +18,20 @@ const { t } = useI18n();
 const call = inject(callKey);
 const isLoading = ref(false);
 
-const ftueStore = useFTUEStore();
+const ftueStore = createFTUEStore(call);
 const scheduleStore = createScheduleStore(call);
+const externalConnectionStore = useExternalConnectionsStore();
 
 const {
   hasNextStep, hasPreviousStep, errorMessage,
 } = storeToRefs(ftueStore);
 const { schedules } = storeToRefs(scheduleStore);
 
-const externalConnectionStore = useExternalConnectionsStore();
 const customMeetingLink = ref('');
 const customMeetingLinkRef = ref<typeof TextInput>();
 
 const initFlowKey = 'tba/startedMeetingConnect';
 
-ftueStore.init(call);
 externalConnectionStore.init(call);
 
 onMounted(async () => {
