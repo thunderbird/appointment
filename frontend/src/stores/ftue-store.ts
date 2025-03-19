@@ -79,10 +79,12 @@ export const useFTUEStore = defineStore('FTUE', () => {
       clearMessages();
       data.value.step = stepList[data.value.step].next;
 
-      call.value('metrics/ftue-step').post({
-        step_level: data.value.step,
-        step_name: stepList[data.value.step].title.replace('ftue.steps.', ''),
-      });
+      if (call.value) {
+        call.value('metrics/ftue-step').post({
+          step_level: data.value.step,
+          step_name: stepList[data.value.step].title.replace('ftue.steps.', ''),
+        });
+      }
     }
   };
 
