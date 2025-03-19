@@ -16,7 +16,7 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 // stores
 import { createScheduleStore } from '@/stores/schedule-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
 
 const { t } = useI18n();
@@ -27,14 +27,12 @@ const refresh = inject(refreshKey);
 
 const scheduleStore = createScheduleStore(call);
 const appointmentStore = useAppointmentStore();
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const userActivityStore = useUserActivityStore();
 const { schedules, firstSchedule } = storeToRefs(scheduleStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
-
-calendarStore.init(call);
 
 // current selected date, defaults to now
 const activeDate = ref(dj());

@@ -7,7 +7,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { callKey, refreshKey } from '@/keys';
 import {
   CalendarResponse, CalendarListResponse, Exception, ExceptionDetail, PydanticException,
@@ -27,8 +27,7 @@ import { clearFormErrors, handleFormError } from '@/utils';
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const refresh = inject(refreshKey);
-const calendarStore = useCalendarStore();
-calendarStore.init(call);
+const calendarStore = createCalendarStore(call);
 
 const calendarConnectError = ref<Alert>();
 const caldavDiscoveryError = ref<Alert>();

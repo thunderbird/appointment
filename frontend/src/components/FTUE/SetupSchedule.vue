@@ -12,7 +12,7 @@ import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import {
   dayjsKey, callKey, isoWeekdaysKey,
@@ -32,13 +32,11 @@ const {
 } = storeToRefs(ftueStore);
 const { errorMessage, infoMessage } = storeToRefs(ftueStore);
 const user = useUserStore();
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const scheduleStore = createScheduleStore(call);
 const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
-
-calendarStore.init(call);
 
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,

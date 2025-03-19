@@ -8,7 +8,7 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
 import { createFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { callKey } from '@/keys';
 import { CalendarItem } from '@/models';
 
@@ -23,12 +23,10 @@ const {
   hasNextStep, hasPreviousStep, infoMessage, warningMessage,
 } = storeToRefs(ftueStore);
 
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const calendars = ref<CalendarItem[]>([]);
 const selectedCount = computed(() => calendars.value.filter((item) => item.checked).length);
 const continueTitle = computed(() => (selectedCount.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
-
-calendarStore.init(call);
 
 watch(selectedCount, (val) => {
   if (val === 0) {

@@ -14,7 +14,7 @@ import SecondaryButton from '@/elements/SecondaryButton.vue';
 // stores
 import { createUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 import { Alert } from '@/models';
@@ -24,13 +24,11 @@ const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const router = useRouter();
 const externalConnectionsStore = createExternalConnectionsStore(call);
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const userStore = createUserStore(call);
 const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
-
-calendarStore.init(call);
 
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 

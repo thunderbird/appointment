@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
@@ -34,12 +34,10 @@ const isLoading = ref(false);
 const ftueStore = useFTUEStore();
 const { hasNextStep, errorMessage } = storeToRefs(ftueStore);
 
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const externalConnectionStore = createExternalConnectionsStore(call);
 const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
-
-calendarStore.init(call);
 
 onMounted(async () => {
   await calendarStore.fetch(true);

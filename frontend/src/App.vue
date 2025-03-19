@@ -22,7 +22,7 @@ import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 // stores
 import { useSiteNotificationStore } from '@/stores/alert-store';
 import { useUserStore } from '@/stores/user-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 
@@ -114,11 +114,10 @@ const navItems = [
 ];
 
 // db tables
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const appointmentStore = useAppointmentStore();
 const scheduleStore = createScheduleStore(call);
 
-calendarStore.init(call);
 appointmentStore.init(call);
 
 // true if route can be accessed without authentication

@@ -14,7 +14,7 @@ import { IconPencil } from '@tabler/icons-vue';
 import { useRouter } from 'vue-router';
 
 // Stores
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 
 // component constants
@@ -25,10 +25,9 @@ const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 const isFxaAuth = inject(isFxaAuthKey);
 
 const appointmentStore = useAppointmentStore();
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const user = createUserStore(call);
 appointmentStore.init(call);
-calendarStore.init(call);
 
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);

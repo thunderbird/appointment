@@ -7,7 +7,7 @@ import {
   afterAll,
   afterEach,
 } from 'vitest';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { useCalendarStore, createCalendarStore } from '@/stores/calendar-store';
 import { createPinia, setActivePinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
@@ -58,29 +58,25 @@ describe('Calendar Store', () => {
   });
 
   test('fetch', async () => {
-    const calStore = useCalendarStore();
-    calStore.init(createFetch({ baseUrl: API_URL }));
+    const calStore = createCalendarStore(createFetch({ baseUrl: API_URL }));
     await calStore.fetch();
     expect(calStore.calendars.length).toBe(2);
   });
 
   test('unconnected', async () => {
-    const calStore = useCalendarStore();
-    calStore.init(createFetch({ baseUrl: API_URL }));
+    const calStore = createCalendarStore(createFetch({ baseUrl: API_URL }));
     await calStore.fetch();
     expect(calStore.unconnectedCalendars.length).toBe(1);
   });
 
   test('connected', async () => {
-    const calStore = useCalendarStore();
-    calStore.init(createFetch({ baseUrl: API_URL }));
+    const calStore = createCalendarStore(createFetch({ baseUrl: API_URL }));
     await calStore.fetch();
     expect(calStore.connectedCalendars.length).toBe(1);
   });
 
   test('reset', async () => {
-    const calStore = useCalendarStore();
-    calStore.init(createFetch({ baseUrl: API_URL }));
+    const calStore = createCalendarStore(createFetch({ baseUrl: API_URL }));
     await calStore.fetch();
 
     // Check if calendars exist

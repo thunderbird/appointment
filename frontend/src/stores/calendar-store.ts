@@ -145,3 +145,9 @@ export const useCalendarStore = defineStore('calendars', () => {
     getRemoteEvents,
   };
 });
+
+export const createCalendarStore = (call: Fetch) => {
+  const store = useCalendarStore();
+  store.init(call);
+  return store;
+};

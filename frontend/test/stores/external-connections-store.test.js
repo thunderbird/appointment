@@ -7,7 +7,7 @@ import {
   afterAll,
   afterEach,
 } from 'vitest';
-import { useExternalConnectionsStore, createExternalConnectionsStore} from '@/stores/external-connections-store';
+import { useExternalConnectionsStore, createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
