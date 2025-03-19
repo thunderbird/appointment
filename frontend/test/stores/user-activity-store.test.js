@@ -18,7 +18,7 @@ describe('User Activity Store', () => {
 
   test('dismiss', () => {
     const store = useUserActivityStore();
-    store.dismiss(Dismissibles.BetaWarning)
+    store.dismiss(Dismissibles.BetaWarning);
     expect(store.data.dismissedBetaWarning).toBe(true);
   });
 });
