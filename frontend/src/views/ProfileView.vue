@@ -15,7 +15,7 @@ import { useRouter } from 'vue-router';
 
 // Stores
 import { createCalendarStore } from '@/stores/calendar-store';
-import { useAppointmentStore } from '@/stores/appointment-store';
+import { createAppointmentStore } from '@/stores/appointment-store';
 
 // component constants
 const router = useRouter();
@@ -24,10 +24,9 @@ const call = inject(callKey);
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 const isFxaAuth = inject(isFxaAuthKey);
 
-const appointmentStore = useAppointmentStore();
+const appointmentStore = createAppointmentStore(call);
 const calendarStore = createCalendarStore(call);
 const user = createUserStore(call);
-appointmentStore.init(call);
 
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);

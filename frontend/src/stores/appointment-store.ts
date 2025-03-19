@@ -76,3 +76,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
     isLoaded, appointments, pendingAppointments, pendingFutureAppointments, init, postFetchProcess, fetch, $reset,
   };
 });
+
+export const createAppointmentStore = (call: Fetch) => {
+  const store = useAppointmentStore();
+  store.init(call);
+  return store;
+};
