@@ -2,7 +2,7 @@
 import { inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
 import { dayjsKey, callKey } from '@/keys';
 import TextInput from '@/tbpro/elements/TextInput.vue';
@@ -15,10 +15,9 @@ const call = inject(callKey);
 
 const ftueStore = useFTUEStore();
 const { hasNextStep } = storeToRefs(ftueStore);
-const user = useUserStore();
+const user = createUserStore(call);
 
 ftueStore.init(call);
-user.init(call);
 
 // @ts-expect-error ignore type err
 // See https://github.com/microsoft/TypeScript/issues/49231

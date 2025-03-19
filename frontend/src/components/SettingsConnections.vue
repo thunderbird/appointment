@@ -12,7 +12,7 @@ import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
 
 // stores
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import GenericModal from '@/components/GenericModal.vue';
@@ -25,14 +25,13 @@ const call = inject(callKey);
 const router = useRouter();
 const externalConnectionsStore = useExternalConnectionsStore();
 const calendarStore = useCalendarStore();
-const userStore = useUserStore();
+const userStore = createUserStore(call);
 const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
 
 externalConnectionsStore.init(call);
 calendarStore.init(call);
-userStore.init(call);
 
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 

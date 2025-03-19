@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import {
   StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
@@ -33,11 +33,10 @@ const call = inject(callKey);
 const router = useRouter();
 const schedule = useScheduleStore();
 const externalConnectionsStore = useExternalConnectionsStore();
-const user = useUserStore();
+const user = createUserStore(call);
 
 schedule.init(call);
 externalConnectionsStore.init(call);
-user.init(call);
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);

@@ -98,7 +98,7 @@ const call = createFetch({
   },
 });
 
-// Initialize API calls for user store
+// Now that we created the call function, we can initialize API calls for the user store
 user.init(call);
 
 provide(callKey, call);

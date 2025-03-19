@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
@@ -13,11 +13,10 @@ const { t } = useI18n();
 const call = inject(callKey);
 
 const scheduleStore = useScheduleStore();
-const userStore = useUserStore();
+const userStore = createUserStore(call);
 const ftueStore = useFTUEStore();
 
 scheduleStore.init(call);
-userStore.init(call);
 ftueStore.init(call);
 
 const isLoading = ref(false);

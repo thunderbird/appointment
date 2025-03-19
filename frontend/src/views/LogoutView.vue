@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, onMounted } from 'vue';
 import { callKey } from '@/keys';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 
 import { useRouter } from 'vue-router';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
@@ -9,8 +9,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 // component constants
 const call = inject(callKey);
 const router = useRouter();
-const user = useUserStore();
-user.init(call);
+const user = createUserStore(call);
 
 // do log out
 const logout = async () => {

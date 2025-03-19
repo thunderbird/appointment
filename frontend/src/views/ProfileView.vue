@@ -4,7 +4,7 @@ import { keyByValue } from '@/utils';
 import { callKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { SubscriberLevels } from '@/definitions';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
@@ -26,10 +26,9 @@ const isFxaAuth = inject(isFxaAuthKey);
 
 const appointmentStore = useAppointmentStore();
 const calendarStore = useCalendarStore();
-const user = useUserStore();
+const user = createUserStore(call);
 appointmentStore.init(call);
 calendarStore.init(call);
-user.init(call);
 
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);
