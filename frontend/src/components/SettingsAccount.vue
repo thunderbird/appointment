@@ -20,7 +20,7 @@ import ToolTip from '@/elements/ToolTip.vue';
 import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents } from '@/definitions';
@@ -32,10 +32,8 @@ const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const router = useRouter();
 const schedule = createScheduleStore(call);
-const externalConnectionsStore = useExternalConnectionsStore();
+const externalConnectionsStore = createExternalConnectionsStore(call);
 const user = createUserStore(call);
-
-externalConnectionsStore.init(call);
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);

@@ -7,7 +7,7 @@ import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
 import {
@@ -35,12 +35,11 @@ const ftueStore = useFTUEStore();
 const { hasNextStep, errorMessage } = storeToRefs(ftueStore);
 
 const calendarStore = useCalendarStore();
-const externalConnectionStore = useExternalConnectionsStore();
+const externalConnectionStore = createExternalConnectionsStore(call);
 const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
 
 calendarStore.init(call);
-externalConnectionStore.init(call);
 
 onMounted(async () => {
   await calendarStore.fetch(true);

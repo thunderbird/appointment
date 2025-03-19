@@ -6,7 +6,7 @@ import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import { createFTUEStore } from '@/stores/ftue-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import {
   AuthUrl, AuthUrlResponse, BooleanResponse, Error, Exception, ExceptionDetail,
@@ -20,7 +20,7 @@ const isLoading = ref(false);
 
 const ftueStore = createFTUEStore(call);
 const scheduleStore = createScheduleStore(call);
-const externalConnectionStore = useExternalConnectionsStore();
+const externalConnectionStore = createExternalConnectionsStore(call);
 
 const {
   hasNextStep, hasPreviousStep, errorMessage,
@@ -31,8 +31,6 @@ const customMeetingLink = ref('');
 const customMeetingLinkRef = ref<typeof TextInput>();
 
 const initFlowKey = 'tba/startedMeetingConnect';
-
-externalConnectionStore.init(call);
 
 onMounted(async () => {
   isLoading.value = true;

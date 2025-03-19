@@ -36,7 +36,7 @@ import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
 import { useCalendarStore } from '@/stores/calendar-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import router from '@/router';
 
@@ -44,15 +44,13 @@ import router from '@/router';
 const call = inject(callKey);
 const user = useUserStore();
 const calendarStore = useCalendarStore();
-const externalConnectionStore = useExternalConnectionsStore();
+const externalConnectionStore = createExternalConnectionsStore(call);
 const scheduleStore = createScheduleStore(call);
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
-
-externalConnectionStore.init(call);
 
 // component emits
 const emit = defineEmits(['created', 'updated']);

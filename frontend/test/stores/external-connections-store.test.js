@@ -7,7 +7,7 @@ import {
   afterAll,
   afterEach,
 } from 'vitest';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { useExternalConnectionsStore, createExternalConnectionsStore} from '@/stores/external-connections-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
@@ -82,8 +82,7 @@ describe('External Connections Store', () => {
   });
 
   test('fetch', async () => {
-    const ec = useExternalConnectionsStore();
-    ec.init(createFetch({ baseUrl: API_URL }));
+    const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
     await ec.fetch();
     expect(ec.isLoaded).toBe(true);
     expect(ec.connections.fxa.length).toBe(1);
@@ -97,15 +96,13 @@ describe('External Connections Store', () => {
   });
 
   test('connect zoom', async () => {
-    const ec = useExternalConnectionsStore();
-    ec.init(createFetch({ baseUrl: API_URL }));
+    const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
     await ec.connect(ExternalConnectionProviders.Zoom);
     // TODO: expect location change
   });
 
   test('reset', async () => {
-    const ec = useExternalConnectionsStore();
-    ec.init(createFetch({ baseUrl: API_URL }));
+    const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
     await ec.fetch();
 
     // Check if appointments exist

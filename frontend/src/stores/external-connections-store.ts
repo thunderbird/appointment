@@ -93,3 +93,10 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     connections, isLoaded, fxa, zoom, google, init, fetch, $reset, connect, disconnect,
   };
 });
+
+
+export const createExternalConnectionsStore = (call: Fetch) => {
+  const store = useExternalConnectionsStore();
+  store.init(call);
+  return store;
+};
