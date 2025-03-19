@@ -214,6 +214,9 @@ class Subscriber(HasSoftDelete, Base):
         hash_instance.update(str(id).encode('utf-8'))
         return hash_instance.hexdigest()
 
+    def __str__(self):
+        return f'Subscriber: {self.id}'
+
 
 class Calendar(Base):
     __tablename__ = 'calendars'
@@ -234,6 +237,9 @@ class Calendar(Base):
         'Appointment', cascade='all,delete', back_populates='calendar'
     )
     schedules: Mapped[list['Schedule']] = relationship('Schedule', cascade='all,delete', back_populates='calendar')
+
+    def __str__(self):
+        return f'Calendar: {self.id}'
 
 
 class Appointment(Base):
@@ -268,6 +274,9 @@ class Appointment(Base):
         back_populates='appointment',
         lazy='joined'
     )
+
+    def __str__(self):
+        return f'Appointment: {self.id}'
 
 
 class Attendee(Base):
@@ -308,6 +317,9 @@ class Slot(Base):
 
     attendee: Mapped[Attendee] = relationship('Attendee', cascade='all,delete', back_populates='slots', lazy='joined')
     subscriber: Mapped[Subscriber] = relationship('Subscriber', back_populates='slots')
+
+    def __str__(self):
+        return f'Slot: {self.id}'
 
 
 class Schedule(Base):
@@ -384,6 +396,9 @@ class Schedule(Base):
             return None
         return self.calendar.owner
 
+    def __str__(self):
+        return f'Schedule: {self.id}'
+
 
 class Availability(Base):
     """This table will be used as soon as the application provides custom availability
@@ -403,6 +418,9 @@ class Availability(Base):
 
     schedule: Mapped[Schedule] = relationship('Schedule', back_populates='availabilities')
 
+    def __str__(self):
+        return f'Availability: {self.id}'
+
 
 class ExternalConnections(Base):
     """This table holds all external service connections to a subscriber."""
@@ -416,6 +434,9 @@ class ExternalConnections(Base):
     type_id = Column(encrypted_type(String), index=True)
     token = Column(encrypted_type(String, length=2048), index=False)
     owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='external_connections')
+
+    def __str__(self):
+        return f'External Connection: {self.id}'
 
 
 class Invite(Base):
@@ -465,6 +486,9 @@ class Invite(Base):
         """True if the invite code is not assigned nor revoked"""
         return self.subscriber_id is None and self.status == InviteStatus.active
 
+    def __str__(self):
+        return f'Invite {self.id}'
+
 
 class WaitingList(Base):
     """Holds a list of hopefully future-Appointment users"""
@@ -477,3 +501,6 @@ class WaitingList(Base):
     invite_id = Column(Integer, ForeignKey('invites.id'), nullable=True, index=True)
 
     invite: Mapped['Invite'] = relationship('Invite', back_populates='waiting_list', single_parent=True)
+
+    def __str__(self):
+        return f'Waiting List: {self.id}'

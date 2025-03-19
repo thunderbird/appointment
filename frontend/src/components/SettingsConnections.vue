@@ -3,20 +3,21 @@ import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { callKey, fxaEditProfileUrlKey } from '@/keys';
-import { ExternalConnectionProviders } from '@/definitions';
-import { enumToObject } from '@/utils';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
+import GenericModal from '@/components/GenericModal.vue';
+import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+import { callKey, fxaEditProfileUrlKey } from '@/keys';
+import { ExternalConnectionProviders } from '@/definitions';
+import { enumToObject } from '@/utils';
 
 // stores
 import { createUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createCalendarStore } from '@/stores/calendar-store';
-import GenericModal from '@/components/GenericModal.vue';
-import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+
 import { Alert } from '@/models';
 
 // component constants
@@ -196,7 +197,7 @@ const editProfile = async () => {
         {{ t('heading.settings.connectedAccounts.caldav') }}
       </h2>
     </template>
-    <cal-dav-provider @next="connectCalDAV()" @error="(alert: Alert) => calDavErrorMessage = alert.title"></cal-dav-provider>
+    <cal-dav-provider @next="connectCalDAV()" @error="(alert: Alert) => calDavErrorMessage = alert"></cal-dav-provider>
   </generic-modal>
 </template>
 <style scoped>

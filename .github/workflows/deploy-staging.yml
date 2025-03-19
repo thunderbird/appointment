@@ -367,11 +367,7 @@ jobs:
 
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
-    needs:
-      - deploy-stage-backend
-      - build-and-deploy-stage-frontend
-    if: |
-      needs.deploy-stage-backend.result == 'success' || needs.build-and-deploy-stage-frontend.result == 'success'
+    needs: create-release
     runs-on: ubuntu-latest
     environment: staging
     env:

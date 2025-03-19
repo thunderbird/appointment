@@ -30,7 +30,7 @@ def get_all_invites(
     page = data.page - 1
     per_page = data.per_page
 
-    total_count = db.query(models.Subscriber).count()
+    total_count = db.query(models.Invite).count()
     invites = db.query(models.Invite).order_by('time_created').offset(page * per_page).limit(per_page).all()
 
     return schemas.InviteAdminOut(
