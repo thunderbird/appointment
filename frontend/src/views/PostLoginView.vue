@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import { callKey } from '@/keys';
 
@@ -10,8 +10,7 @@ const router = useRouter();
 
 // component constants
 const call = inject(callKey);
-const user = useUserStore();
-user.init(call);
+const user = createUserStore(call);
 
 const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
 

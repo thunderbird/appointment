@@ -14,18 +14,19 @@ import { ExternalConnectionProviders } from '@/definitions';
 import { enumToObject } from '@/utils';
 
 // stores
-import { useUserStore } from '@/stores/user-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createUserStore } from '@/stores/user-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createCalendarStore } from '@/stores/calendar-store';
+
 import { Alert } from '@/models';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const router = useRouter();
-const externalConnectionsStore = useExternalConnectionsStore();
-const calendarStore = useCalendarStore();
-const userStore = useUserStore();
+const externalConnectionsStore = createExternalConnectionsStore(call);
+const calendarStore = createCalendarStore(call);
+const userStore = createUserStore(call);
 const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
@@ -52,8 +53,8 @@ const refreshData = async () => {
   // Need to reset calendar store first!
   calendarStore.$reset();
   await Promise.all([
-    externalConnectionsStore.fetch(call, true),
-    calendarStore.fetch(call),
+    externalConnectionsStore.fetch(true),
+    calendarStore.fetch(),
     // Need to update userStore in case they used an attached email
     userStore.profile(),
   ]);
@@ -80,7 +81,7 @@ const connectAccount = async (provider: ExternalConnectionProviders) => {
     connectCalDavModalOpen.value = true;
     return;
   }
-  await externalConnectionsStore.connect(call, provider, router);
+  await externalConnectionsStore.connect(provider, router);
 };
 
 const connectCalDAV = async () => {
@@ -89,7 +90,7 @@ const connectCalDAV = async () => {
 };
 
 const disconnectAccount = async (provider: ExternalConnectionProviders, typeId: string|null = null) => {
-  await externalConnectionsStore.disconnect(call, provider, typeId);
+  await externalConnectionsStore.disconnect(provider, typeId);
   resetConnections();
   await refreshData();
   closeModals();

@@ -295,3 +295,9 @@ export const useUserStore = defineStore('user', () => {
     finishFTUE,
   };
 });
+
+export const createUserStore = (call: Fetch) => {
+  const store = useUserStore();
+  store.init(call);
+  return store;
+};

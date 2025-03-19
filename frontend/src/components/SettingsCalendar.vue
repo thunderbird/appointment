@@ -7,7 +7,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { callKey, refreshKey } from '@/keys';
 import {
   CalendarResponse, CalendarListResponse, Exception, ExceptionDetail, PydanticException,
@@ -27,7 +27,7 @@ import { clearFormErrors, handleFormError } from '@/utils';
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const refresh = inject(refreshKey);
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 
 const calendarConnectError = ref<Alert>();
 const caldavDiscoveryError = ref<Alert>();
@@ -111,7 +111,7 @@ const discoverGoogleCalendars = () => {
 const connectCalendar = async (id: number) => {
   loading.value = true;
 
-  await calendarStore.connectCalendar(call, id);
+  await calendarStore.connectCalendar(id);
   await refreshData();
   resetInput();
   sendMetrics(MetricEvents.ConnectCalendar, { provider: calendarStore.calendarById(id)?.provider });
@@ -119,7 +119,7 @@ const connectCalendar = async (id: number) => {
 const disconnectCalendar = async (id: number) => {
   loading.value = true;
 
-  await calendarStore.disconnectCalendar(call, id);
+  await calendarStore.disconnectCalendar(id);
   await refreshData();
   resetInput();
   sendMetrics(MetricEvents.DisconnectCalendar, { provider: calendarStore.calendarById(id)?.provider });
@@ -129,7 +129,7 @@ const syncCalendars = async () => {
 
   const oldCount = calendarStore?.calendars?.length ?? 0;
 
-  await calendarStore.syncCalendars(call);
+  await calendarStore.syncCalendars();
   await refreshData();
 
   const newCount = calendarStore?.calendars?.length ?? 0;
@@ -186,7 +186,7 @@ const saveCalendar = async () => {
   }
   // add all google calendars connected to given gmail address
   if (isGoogle.value && inputMode.value === InputModes.Add) {
-    await calendarStore.connectGoogleCalendar(call, calendarInput.data.user);
+    await calendarStore.connectGoogleCalendar(calendarInput.data.user);
     return;
   }
 

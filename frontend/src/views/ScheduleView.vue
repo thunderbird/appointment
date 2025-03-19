@@ -14,9 +14,9 @@ import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 // stores
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
 
 const { t } = useI18n();
@@ -25,9 +25,9 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const refresh = inject(refreshKey);
 
-const scheduleStore = useScheduleStore();
+const scheduleStore = createScheduleStore(call);
 const appointmentStore = useAppointmentStore();
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const userActivityStore = useUserActivityStore();
 const { schedules, firstSchedule } = storeToRefs(scheduleStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
@@ -65,7 +65,7 @@ const onDateChange = async (dateObj: TimeFormatted) => {
     !dj(activeDateRange.value.end).isSame(dj(end), 'month')
     || !dj(activeDateRange.value.start).isSame(dj(start), 'month')
   ) {
-    await calendarStore.getRemoteEvents(call, activeDate.value);
+    await calendarStore.getRemoteEvents(activeDate.value);
   }
 };
 
@@ -79,9 +79,9 @@ onMounted(async () => {
     return;
   }
   await refresh();
-  scheduleStore.fetch(call);
+  scheduleStore.fetch();
   schedulesReady.value = true;
-  await calendarStore.getRemoteEvents(call, activeDate.value);
+  await calendarStore.getRemoteEvents(activeDate.value);
 });
 
 const dismiss = () => {
@@ -133,7 +133,7 @@ const dismiss = () => {
         :calendars="connectedCalendars"
         :schedule="firstSchedule"
         :active-date="activeDate"
-        @created="scheduleStore.fetch(call, true)"
+        @created="scheduleStore.fetch(true)"
         @updated="schedulePreview"
       />
     </div>

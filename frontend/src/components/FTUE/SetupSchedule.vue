@@ -10,10 +10,10 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createCalendarStore } from '@/stores/calendar-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 import {
   dayjsKey, callKey, isoWeekdaysKey,
 } from '@/keys';
@@ -24,15 +24,14 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 
-const ftueStore = useFTUEStore();
+const ftueStore = createFTUEStore(call);
 const {
   hasNextStep, hasPreviousStep,
 } = storeToRefs(ftueStore);
-const { nextStep, previousStep } = ftueStore;
 const { errorMessage, infoMessage } = storeToRefs(ftueStore);
 const user = useUserStore();
-const calendarStore = useCalendarStore();
-const scheduleStore = useScheduleStore();
+const calendarStore = createCalendarStore(call);
+const scheduleStore = createScheduleStore(call);
 const { connectedCalendars } = storeToRefs(calendarStore);
 const { schedules } = storeToRefs(scheduleStore);
 const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
@@ -95,8 +94,8 @@ const onSubmit = async () => {
   };
 
   const data = schedules.value.length > 0
-    ? await scheduleStore.updateSchedule(call, schedules.value[0].id, scheduleData)
-    : await scheduleStore.createSchedule(call, scheduleData);
+    ? await scheduleStore.updateSchedule(schedules.value[0].id, scheduleData)
+    : await scheduleStore.createSchedule(scheduleData);
 
   if ((data as Error)?.error) {
     errorMessage.value = {
@@ -107,7 +106,7 @@ const onSubmit = async () => {
     return;
   }
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 onMounted(async () => {
@@ -118,8 +117,8 @@ onMounted(async () => {
   };
 
   await Promise.all([
-    calendarStore.fetch(call, true),
-    scheduleStore.fetch(call, true),
+    calendarStore.fetch(true),
+    scheduleStore.fetch(true),
   ]);
 
   schedule.value.calendar = connectedCalendars.value[0].id;
@@ -185,7 +184,7 @@ onMounted(async () => {
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="ftueStore.previousStep()"
     >
       {{ t('label.back') }}
     </secondary-button>

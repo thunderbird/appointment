@@ -4,7 +4,7 @@ import { keyByValue } from '@/utils';
 import { callKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { SubscriberLevels } from '@/definitions';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
@@ -14,8 +14,8 @@ import { IconPencil } from '@tabler/icons-vue';
 import { useRouter } from 'vue-router';
 
 // Stores
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useAppointmentStore } from '@/stores/appointment-store';
+import { createCalendarStore } from '@/stores/calendar-store';
+import { createAppointmentStore } from '@/stores/appointment-store';
 
 // component constants
 const router = useRouter();
@@ -24,10 +24,9 @@ const call = inject(callKey);
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
 const isFxaAuth = inject(isFxaAuthKey);
 
-const appointmentStore = useAppointmentStore();
-const calendarStore = useCalendarStore();
-const user = useUserStore();
-user.init(call);
+const appointmentStore = createAppointmentStore(call);
+const calendarStore = createCalendarStore(call);
+const user = createUserStore(call);
 
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);
@@ -44,8 +43,8 @@ const editProfile = async () => {
 
 // Load calendar and bookings information
 onMounted(() => {
-  calendarStore.fetch(call);
-  appointmentStore.fetch(call);
+  calendarStore.fetch();
+  appointmentStore.fetch();
 });
 </script>
 

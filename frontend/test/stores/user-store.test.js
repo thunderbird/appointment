@@ -7,7 +7,7 @@ import {
   afterAll,
   afterEach,
 } from 'vitest';
-import { useUserStore } from '@/stores/user-store';
+import { useUserStore, createUserStore } from '@/stores/user-store';
 import { createPinia, setActivePinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
@@ -136,8 +136,7 @@ describe('User Store', () => {
   });
 
   test('login fails', async () => {
-    const user = useUserStore();
-    user.init(createFetch({
+    const user = createUserStore(createFetch({
       baseUrl: API_URL,
     }));
 
@@ -147,8 +146,7 @@ describe('User Store', () => {
 
   test('login successful', async () => {
     // This will call profile() as well!
-    const user = useUserStore();
-    user.init(createFetch({
+    const user = createUserStore(createFetch({
       baseUrl: API_URL,
       options: {
         beforeFetch: async ({ options }) => beforeFetch(options, user),

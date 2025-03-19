@@ -8,6 +8,7 @@ import { DateFormatStrings } from '@/definitions';
 // eslint-disable-next-line import/prefer-default-export
 export const useCalendarStore = defineStore('calendars', () => {
   const dj = inject(dayjsKey);
+  const call = ref(null);
 
   // State
   const isLoaded = ref(false);
@@ -23,9 +24,18 @@ export const useCalendarStore = defineStore('calendars', () => {
   // List of month batches already called.
   const remoteMonthsRetrieved = ref<string[]>([]);
 
-  const connectGoogleCalendar = async (call: Fetch, email: string) => {
+  /**
+   * Initialize store with data required at runtime
+   *
+   * @param fetch preconfigured function to perform API calls
+   */
+  const init = (fetch: Fetch) => {
+    call.value = fetch;
+  }
+
+  const connectGoogleCalendar = async (email: string) => {
     const urlFriendlyEmail = encodeURIComponent(email);
-    const googleUrl = await call(`google/auth?email=${urlFriendlyEmail}`).get();
+    const googleUrl = await call.value(`google/auth?email=${urlFriendlyEmail}`).get();
     window.location.href = googleUrl.data.value.slice(1, -1);
   };
 
@@ -37,15 +47,14 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   /**
    * Get all calendars for current user
-   * @param call preconfigured API fetch function
    * @param force force a refetch
    */
-  const fetch = async (call: Fetch, force = false) => {
+  const fetch = async (force = false) => {
     if (isLoaded.value && !force) {
       return;
     }
 
-    const { data, error }: CalendarListResponse = await call('me/calendars?only_connected=false').get().json();
+    const { data, error }: CalendarListResponse = await call.value('me/calendars?only_connected=false').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
       calendars.value = data.value;
@@ -55,18 +64,17 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   /**
    * Get all cremote events from connected calendars for given time span
-   * @param call preconfigured API fetch function
    * @param activeDate Dayjs object defining the current month
    * @param force force a refetch
    */
-  const getRemoteEvents = async (call: Fetch, activeDate: Dayjs, force = false) => {
+  const getRemoteEvents = async (activeDate: Dayjs, force = false) => {
     // Get month identifier to remember this month's events are already retrieved
     const month = activeDate.format(DateFormatStrings.UniqueMonth);
-    
+
     // Most calendar impl are non-inclusive of the last day, so just add one day to the end.
     const from = activeDate.startOf('month').format(DateFormatStrings.QalendarFullDay);
     const to = activeDate.endOf('month').add(1, 'day').format(DateFormatStrings.QalendarFullDay);
-  
+
     // If retrieval is forced, delete cache and start with zero events again
     if (force) {
       remoteMonthsRetrieved.value = [];
@@ -81,7 +89,7 @@ export const useCalendarStore = defineStore('calendars', () => {
 
     // Only retrieve remote events if we don't have this month already cached
     await Promise.all(connectedCalendars.value.map(async (calendar) => {
-      const { data }: RemoteEventListResponse = await call(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
+      const { data }: RemoteEventListResponse = await call.value(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
       if (Array.isArray(data.value)) {
         calendarEvents.push(
           ...data.value.map((event) => ({
@@ -94,7 +102,7 @@ export const useCalendarStore = defineStore('calendars', () => {
 
     // Remember month
     remoteMonthsRetrieved.value.push(month);
-    
+
     // Update remote event list
     remoteEvents.value = calendarEvents;
   };
@@ -107,16 +115,16 @@ export const useCalendarStore = defineStore('calendars', () => {
     isLoaded.value = false;
   };
 
-  const connectCalendar = async (call: Fetch, id: number) => {
-    await call(`cal/${id}/connect`).post();
+  const connectCalendar = async (id: number) => {
+    await call.value(`cal/${id}/connect`).post();
   };
 
-  const disconnectCalendar = async (call: Fetch, id: number) => {
-    await call(`cal/${id}/disconnect`).post();
+  const disconnectCalendar = async (id: number) => {
+    await call.value(`cal/${id}/disconnect`).post();
   };
 
-  const syncCalendars = async (call: Fetch) => {
-    await call('rmt/sync').post();
+  const syncCalendars = async () => {
+    await call.value('rmt/sync').post();
   };
 
   return {
@@ -126,6 +134,7 @@ export const useCalendarStore = defineStore('calendars', () => {
     unconnectedCalendars,
     connectedCalendars,
     remoteEvents,
+    init,
     fetch,
     $reset,
     connectGoogleCalendar,
@@ -136,3 +145,9 @@ export const useCalendarStore = defineStore('calendars', () => {
     getRemoteEvents,
   };
 });
+
+export const createCalendarStore = (call: Fetch) => {
+  const store = useCalendarStore();
+  store.init(call);
+  return store;
+};

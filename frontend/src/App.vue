@@ -22,9 +22,9 @@ import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 // stores
 import { useSiteNotificationStore } from '@/stores/alert-store';
 import { useUserStore } from '@/stores/user-store';
-import { useCalendarStore } from '@/stores/calendar-store';
-import { useAppointmentStore } from '@/stores/appointment-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createCalendarStore } from '@/stores/calendar-store';
+import { createAppointmentStore } from '@/stores/appointment-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
 // component constants
 const user = useUserStore();
@@ -98,7 +98,7 @@ const call = createFetch({
   },
 });
 
-// Initialize API calls for user store
+// Now that we created the call function, we can initialize API calls for the user store
 user.init(call);
 
 provide(callKey, call);
@@ -114,9 +114,9 @@ const navItems = [
 ];
 
 // db tables
-const calendarStore = useCalendarStore();
-const appointmentStore = useAppointmentStore();
-const scheduleStore = useScheduleStore();
+const calendarStore = createCalendarStore(call);
+const appointmentStore = createAppointmentStore(call);
+const scheduleStore = createScheduleStore(call);
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
@@ -134,9 +134,9 @@ const getDbData = async () => {
   if (user?.authenticated) {
     await Promise.all([
       user.profile(),
-      calendarStore.fetch(call),
-      appointmentStore.fetch(call),
-      scheduleStore.fetch(call),
+      calendarStore.fetch(),
+      appointmentStore.fetch(),
+      scheduleStore.fetch(),
     ]);
   }
 };

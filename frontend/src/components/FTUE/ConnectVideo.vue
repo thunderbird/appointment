@@ -5,29 +5,28 @@ import { storeToRefs } from 'pinia';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createFTUEStore } from '@/stores/ftue-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import {
   AuthUrl, AuthUrlResponse, BooleanResponse, Error, Exception, ExceptionDetail,
 } from '@/models';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
 const { t } = useI18n();
 
 const call = inject(callKey);
 const isLoading = ref(false);
 
-const ftueStore = useFTUEStore();
-const scheduleStore = useScheduleStore();
+const ftueStore = createFTUEStore(call);
+const scheduleStore = createScheduleStore(call);
+const externalConnectionStore = createExternalConnectionsStore(call);
 
 const {
   hasNextStep, hasPreviousStep, errorMessage,
 } = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
 const { schedules } = storeToRefs(scheduleStore);
 
-const externalConnectionStore = useExternalConnectionsStore();
 const customMeetingLink = ref('');
 const customMeetingLinkRef = ref<typeof TextInput>();
 
@@ -35,7 +34,7 @@ const initFlowKey = 'tba/startedMeetingConnect';
 
 onMounted(async () => {
   isLoading.value = true;
-  await externalConnectionStore.fetch(call);
+  await externalConnectionStore.fetch();
   isLoading.value = false;
 
   const isBackFromConnectFlow = localStorage?.getItem(initFlowKey);
@@ -52,14 +51,14 @@ onMounted(async () => {
       return;
     }
 
-    await nextStep(call);
+    await ftueStore.nextStep();
   }
 });
 
 const onSubmit = async () => {
   isLoading.value = true;
 
-  const data = await scheduleStore.updateSchedule(call, schedules.value[0].id, {
+  const data = await scheduleStore.updateSchedule(schedules.value[0].id, {
     ...schedules.value[0],
     location_url: customMeetingLink.value,
   });
@@ -70,18 +69,18 @@ const onSubmit = async () => {
     return;
   }
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 const onSkip = async () => {
   isLoading.value = true;
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 const connectZoom = async () => {
   // If they have zoom attached, just skip for now.
   if (externalConnectionStore.zoom.length > 0) {
-    await nextStep(call);
+    await ftueStore.nextStep();
     return;
   }
 
@@ -129,7 +128,7 @@ const connectZoom = async () => {
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="ftueStore.previousStep()"
     >{{ t('label.back') }}
     </secondary-button>
     <primary-button

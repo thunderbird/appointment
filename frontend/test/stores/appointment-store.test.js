@@ -7,7 +7,7 @@ import {
   afterAll,
   afterEach,
 } from 'vitest';
-import { useAppointmentStore } from '@/stores/appointment-store';
+import { useAppointmentStore, createAppointmentStore } from '@/stores/appointment-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
@@ -71,27 +71,27 @@ describe('Appointment Store', () => {
   });
 
   test('fetch', async () => {
-    const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
     expect(apmt.appointments.length).toBe(2);
     expect(apmt.appointments[0].slots.length).toBe(1);
   });
 
   test('pending', async () => {
-    const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
     expect(apmt.pendingAppointments.length).toBe(1);
   });
 
   test('timezone', async () => {
-    const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
     expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T01:00:00.000Z');
   });
 
   test('reset', async () => {
-    const apmt = useAppointmentStore();
-    await apmt.fetch(createFetch({ baseUrl: API_URL }));
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
 
     // Check if appointments exist
     expect(apmt.isLoaded).toBe(true);

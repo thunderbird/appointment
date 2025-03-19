@@ -12,6 +12,7 @@ import { dayjsKey, tzGuessKey } from '@/keys';
 export const useAppointmentStore = defineStore('appointments', () => {
   const dj = inject(dayjsKey);
   const tzGuess = inject(tzGuessKey);
+  const call = ref(null);
 
   // State
   const isLoaded = ref(false);
@@ -24,6 +25,15 @@ export const useAppointmentStore = defineStore('appointments', () => {
   const pendingFutureAppointments = computed(
     (): Appointment[] => pendingAppointments.value.filter((a) => a?.slots[0]?.start > dj()),
   );
+
+  /**
+   * Initialize store with data required at runtime
+   *
+   * @param fetch preconfigured function to perform API calls
+   */
+    const init = (fetch: Fetch) => {
+      call.value = fetch;
+    }
 
   /**
    * Append additional data to retrieved appointments
@@ -42,10 +52,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
 
   /**
    * Get all appointments for current user
-   * @param call preconfigured API fetch function
    */
-  const fetch = async (call: Fetch) => {
-    const { data, error }: AppointmentListResponse = await call('me/appointments').get().json();
+  const fetch = async () => {
+    const { data, error }: AppointmentListResponse = await call.value('me/appointments').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
       appointments.value = data.value;
@@ -64,6 +73,12 @@ export const useAppointmentStore = defineStore('appointments', () => {
   };
 
   return {
-    isLoaded, appointments, pendingAppointments, pendingFutureAppointments, postFetchProcess, fetch, $reset,
+    isLoaded, appointments, pendingAppointments, pendingFutureAppointments, init, postFetchProcess, fetch, $reset,
   };
 });
+
+export const createAppointmentStore = (call: Fetch) => {
+  const store = useAppointmentStore();
+  store.init(call);
+  return store;
+};

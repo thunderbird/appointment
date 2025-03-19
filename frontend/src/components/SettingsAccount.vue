@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import {
   StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
@@ -20,8 +20,8 @@ import ToolTip from '@/elements/ToolTip.vue';
 import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -31,10 +31,9 @@ import UserInviteTable from '@/components/UserInviteTable.vue';
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const router = useRouter();
-const schedule = useScheduleStore();
-const externalConnectionsStore = useExternalConnectionsStore();
-const user = useUserStore();
-user.init(call);
+const schedule = createScheduleStore(call);
+const externalConnectionsStore = createExternalConnectionsStore(call);
+const user = createUserStore(call);
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
@@ -66,8 +65,8 @@ const getAvailableEmails = async () => {
 
 const refreshData = async () => Promise.all([
   user.profile(),
-  schedule.fetch(call, true),
-  externalConnectionsStore.fetch(call),
+  schedule.fetch(true),
+  externalConnectionsStore.fetch(),
   getAvailableEmails(),
 ]);
 

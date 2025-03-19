@@ -7,8 +7,8 @@ import { storeToRefs } from 'pinia';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import SyncCard from '@/tbpro/elements/SyncCard.vue';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createFTUEStore } from '@/stores/ftue-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { callKey } from '@/keys';
 import { CalendarItem } from '@/models';
 
@@ -18,14 +18,12 @@ const call = inject(callKey);
 
 const isLoading = ref(false);
 
-const ftueStore = useFTUEStore();
+const ftueStore = createFTUEStore(call);
 const {
   hasNextStep, hasPreviousStep, infoMessage, warningMessage,
 } = storeToRefs(ftueStore);
 
-const { previousStep, nextStep } = ftueStore;
-
-const calendarStore = useCalendarStore();
+const calendarStore = createCalendarStore(call);
 const calendars = ref<CalendarItem[]>([]);
 const selectedCount = computed(() => calendars.value.filter((item) => item.checked).length);
 const continueTitle = computed(() => (selectedCount.value ? t('label.continue') : t('ftue.oneCalendarRequired')));
@@ -49,7 +47,7 @@ onMounted(async () => {
     details: null,
   };
 
-  await calendarStore.fetch(call, true);
+  await calendarStore.fetch(true);
   calendars.value = calendarStore.calendars.map((calendar) => ({
     key: calendar.id,
     label: calendar.title,
@@ -64,10 +62,10 @@ const onSubmit = async () => {
   // FIXME: This is just lazy, we should be checking for checkbox dirty state but no one really should have a calendar connected here!
   const calendarKeysConnect = calendars.value.filter((calendar) => calendar.checked).map((calendar) => calendar.key);
   const calendarKeysDisconnect = calendars.value.filter((calendar) => !calendar.checked).map((calendar) => calendar.key);
-  await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(call, id)));
-  await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(call, id)));
+  await Promise.all(calendarKeysDisconnect.map((id) => calendarStore.disconnectCalendar(id)));
+  await Promise.all(calendarKeysConnect.map((id) => calendarStore.connectCalendar(id)));
 
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 </script>
@@ -90,7 +88,7 @@ const onSubmit = async () => {
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
-      @click="previousStep()"
+      @click="ftueStore.previousStep()"
     >
       {{ t('label.back') }}
     </secondary-button>

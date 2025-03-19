@@ -2,14 +2,13 @@
 import { ColourSchemes } from '@/definitions';
 import { inject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 
 // component constants
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
-const user = useUserStore();
-user.init(call);
+const user = createUserStore(call);
 
 // handle ui languages
 watch(locale, (newValue: string) => {

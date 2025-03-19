@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
-import { useFTUEStore } from '@/stores/ftue-store';
-import { useScheduleStore } from '@/stores/schedule-store';
-import { useUserStore } from '@/stores/user-store';
+import { createFTUEStore } from '@/stores/ftue-store';
+import { createScheduleStore } from '@/stores/schedule-store';
+import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
@@ -12,11 +12,9 @@ import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
 const { t } = useI18n();
 const call = inject(callKey);
 
-const scheduleStore = useScheduleStore();
-const userStore = useUserStore();
-userStore.init(call);
-const ftueStore = useFTUEStore();
-const { nextStep } = ftueStore;
+const scheduleStore = createScheduleStore(call);
+const userStore = createUserStore(call);
+const ftueStore = createFTUEStore(call);
 
 const isLoading = ref(false);
 const myLink = ref('');
@@ -25,7 +23,7 @@ const myLinkShow = ref(false);
 
 onMounted(async () => {
   await Promise.all([
-    scheduleStore.fetch(call),
+    scheduleStore.fetch(),
     userStore.profile(),
   ]);
   myLink.value = userStore.myLink;
@@ -41,7 +39,7 @@ const onSubmit = async () => {
   // Clear the FTUE flow
   window.localStorage?.removeItem('tba/ftue');
 
-  await nextStep(call);
+  await ftueStore.nextStep();
   // Yeet them to calendar!
   window.location.href = '/calendar';
 };

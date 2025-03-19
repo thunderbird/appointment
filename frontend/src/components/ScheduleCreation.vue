@@ -36,18 +36,18 @@ import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
 import { useCalendarStore } from '@/stores/calendar-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { useScheduleStore } from '@/stores/schedule-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 import router from '@/router';
 
 // component constants
+const call = inject(callKey);
 const user = useUserStore();
 const calendarStore = useCalendarStore();
-const externalConnectionStore = useExternalConnectionsStore();
-const scheduleStore = useScheduleStore();
+const externalConnectionStore = createExternalConnectionsStore(call);
+const scheduleStore = createScheduleStore(call);
 const { t } = useI18n();
 const dj = inject(dayjsKey);
-const call = inject(callKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
 const firstStep = ScheduleCreationState.Availability;
@@ -117,7 +117,7 @@ const generateZoomLink = ref(scheduleInput.value.meeting_link_provider === Meeti
 
 onMounted(() => {
   // Retrieve the current external connections
-  externalConnectionStore.fetch(call);
+  externalConnectionStore.fetch();
 
   if (props.schedule) {
     scheduleInput.value = { ...props.schedule };
@@ -297,8 +297,8 @@ const saveSchedule = async (withConfirmation = true) => {
 
   // save schedule data
   const response = props.schedule
-    ? await scheduleStore.updateSchedule(call, props.schedule.id, obj)
-    : await scheduleStore.createSchedule(call, obj);
+    ? await scheduleStore.updateSchedule(props.schedule.id, obj)
+    : await scheduleStore.createSchedule(obj);
 
   // eslint-disable-next-line no-prototype-builtins
   if (response.hasOwnProperty('error')) {

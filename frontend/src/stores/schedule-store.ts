@@ -57,17 +57,28 @@ export const useScheduleStore = defineStore('schedules', () => {
   const inactiveSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => !schedule.active));
   const activeSchedules = computed((): Schedule[] => schedules.value.filter((schedule) => schedule.active));
 
+  const call = ref(null);
+
+  /**
+   * Initialize store with data required at runtime
+   *
+   * @param fetch preconfigured function to perform API calls
+   */
+  const init = (fetch: Fetch) => {
+    call.value = fetch;
+  }
+
   /**
    * Get all schedules for current user
    * @param call preconfigured API fetch function
    * @param force Force a fetch even if we already have data
    */
-  const fetch = async (call: Fetch, force: boolean = false) => {
+  const fetch = async (force: boolean = false) => {
     if (isLoaded.value && !force) {
       return;
     }
 
-    const { data, error }: ScheduleListResponse = await call('schedule/').get().json();
+    const { data, error }: ScheduleListResponse = await call.value('schedule/').get().json();
 
     if (error.value || data.value === null || typeof data.value === 'undefined') {
       return;
@@ -136,9 +147,9 @@ export const useScheduleStore = defineStore('schedules', () => {
     return i18n.t('error.unknownScheduleError');
   };
 
-  const createSchedule = async (call: Fetch, scheduleData: object) => {
+  const createSchedule = async (scheduleData: object) => {
     // save schedule data
-    const { data, error }: ScheduleResponse = await call('schedule/').post(scheduleData).json();
+    const { data, error }: ScheduleResponse = await call.value('schedule/').post(scheduleData).json();
 
     if (error.value) {
       return {
@@ -148,7 +159,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     }
 
     // Update the schedule
-    await fetch(call, true);
+    await fetch(true);
 
     if (usePosthog) {
       posthog.capture(MetricEvents.ScheduleCreated);
@@ -157,9 +168,9 @@ export const useScheduleStore = defineStore('schedules', () => {
     return data;
   };
 
-  const updateSchedule = async (call: Fetch, id: number, scheduleData: object) => {
+  const updateSchedule = async (id: number, scheduleData: object) => {
     // save schedule data
-    const { data, error }: ScheduleResponse = await call(`schedule/${id}`).put(scheduleData).json();
+    const { data, error }: ScheduleResponse = await call.value(`schedule/${id}`).put(scheduleData).json();
 
     if (error.value) {
       return {
@@ -169,7 +180,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     }
 
     // Update the schedule
-    await fetch(call, true);
+    await fetch(true);
 
     if (usePosthog) {
       posthog.capture(MetricEvents.ScheduleUpdated);
@@ -214,6 +225,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     firstSchedule,
     inactiveSchedules,
     activeSchedules,
+    init,
     fetch,
     $reset,
     createSchedule,
@@ -222,3 +234,9 @@ export const useScheduleStore = defineStore('schedules', () => {
     timeToFrontendTime,
   };
 });
+
+export const createScheduleStore = (call: Fetch) => {
+  const store = useScheduleStore();
+  store.init(call);
+  return store;
+};

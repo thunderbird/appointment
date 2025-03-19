@@ -2,7 +2,7 @@
 import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
+import { createUserStore } from '@/stores/user-store';
 import {
   dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey,
 } from '@/keys';
@@ -26,8 +26,7 @@ const route = useRoute();
 const router = useRouter();
 const isPasswordAuth = inject(isPasswordAuthKey);
 const isFxaAuth = inject(isFxaAuthKey);
-const user = useUserStore();
-user.init(call);
+const user = createUserStore(call);
 
 // Don't show the invite code field, only the "Join the waiting list" part
 const hideInviteField = ref(false);

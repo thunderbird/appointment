@@ -3,26 +3,23 @@ import {
   inject, ref,
 } from 'vue';
 import { callKey } from '@/keys';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { storeToRefs } from 'pinia';
 import { Alert } from '@/models';
 import GoogleOauthProvider from '@/components/FTUE/GoogleOauthProvider.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 
-const ftueStore = useFTUEStore();
-const {
-  errorMessage,
-} = storeToRefs(ftueStore);
-const { previousStep, nextStep } = ftueStore;
 const call = inject(callKey);
+const ftueStore = createFTUEStore(call);
+const { errorMessage } = storeToRefs(ftueStore);
 const provider = ref('google');
 
 const onNext = async () => {
-  await nextStep(call);
+  await ftueStore.nextStep();
 };
 
 const onPrevious = () => {
-  previousStep();
+  ftueStore.previousStep();
 };
 
 const onSwitch = () => {

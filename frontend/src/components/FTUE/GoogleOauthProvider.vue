@@ -5,9 +5,9 @@ import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import { useFTUEStore } from '@/stores/ftue-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
-import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
 import {
@@ -32,17 +32,15 @@ const emits = defineEmits(['next', 'previous', 'switch']);
 const isLoading = ref(false);
 
 const ftueStore = useFTUEStore();
-const {
-  hasNextStep, errorMessage,
-} = storeToRefs(ftueStore);
+const { hasNextStep, errorMessage } = storeToRefs(ftueStore);
 
-const calendarStore = useCalendarStore();
-const externalConnectionStore = useExternalConnectionsStore();
+const calendarStore = createCalendarStore(call);
+const externalConnectionStore = createExternalConnectionsStore(call);
 const { calendars } = storeToRefs(calendarStore);
 const initFlowKey = 'tba/startedCalConnect';
 
 onMounted(async () => {
-  await calendarStore.fetch(call, true);
+  await calendarStore.fetch(true);
   const hasFlowKey = localStorage?.getItem(initFlowKey);
   const noCalendarsError = hasFlowKey && calendars.value.length === 0;
 
@@ -57,7 +55,7 @@ onMounted(async () => {
 
       // Also remove the google calendar
       if (externalConnectionStore.google.length > 0) {
-        await externalConnectionStore.disconnect(call, ExternalConnectionProviders.Google);
+        await externalConnectionStore.disconnect(ExternalConnectionProviders.Google);
       }
     } else {
       errorMessage.value = {
@@ -92,7 +90,7 @@ const onSubmit = async () => {
 
   // Create key so we can move to the next page after we come back
   localStorage?.setItem(initFlowKey, 'true');
-  await calendarStore.connectGoogleCalendar(call, user.data.email);
+  await calendarStore.connectGoogleCalendar(user.data.email);
 };
 
 </script>
