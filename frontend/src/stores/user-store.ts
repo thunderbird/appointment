@@ -44,7 +44,7 @@ export const useUserStore = defineStore('user', () => {
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   // Init user config if not already available
   if (!data.value?.settings) {
@@ -256,15 +256,10 @@ export const useUserStore = defineStore('user', () => {
 
       data.value.accessToken = tokenData.value.access_token;
     } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Accounts) {
-      // We get a one-time token back from the api, use it to fetch the real access token
+      // We rely on user session checks via the backend for auth
+      // But for authentication we need a value in accessToken, if someone tries to fake this
+      // it will just error out on the server side, so no big deal.
       data.value.accessToken = username;
-      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
-
-      if (error.value || !tokenData.value.access_token) {
-        return { error: tokenData.value ?? error.value };
-      }
-
-      data.value.accessToken = tokenData.value.access_token;
     } else {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }

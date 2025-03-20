@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from typing import Annotated
 
@@ -9,13 +10,32 @@ import jwt
 
 from sqlalchemy.orm import Session
 
+from .database import get_shared_redis
 from ..controller.apis.accounts_client import AccountsClient
 from ..database import repo, models
+from ..defines import AuthScheme
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
+
+
+def get_user_from_accounts_session(request, db):
+    user_session_id = request.session.get('accounts_session')
+    if not user_session_id:
+        return None
+
+    shared_redis_cache = get_shared_redis()
+    user_profile = shared_redis_cache.get(f':1:tb_accounts_user_session.{user_session_id}')
+    if not user_profile:
+        return None
+
+    user_profile = json.loads(user_profile)
+    print("Found profile: ", user_profile)
+
+    # Look up the account data
+    return repo.external_connection.get_subscriber_by_accounts_uuid(db, user_profile.get('uuid'))
 
 
 def get_user_from_token(db, token: str, require_jti=False):
@@ -59,12 +79,17 @@ def get_user_from_token(db, token: str, require_jti=False):
     return subscriber
 
 
-def get_subscriber(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), require_jti=False):
+def get_subscriber(
+    request: Request, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), require_jti=False
+):
     """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
 
-    user = get_user_from_token(db, token, require_jti)
+    if AuthScheme.is_accounts():
+        user = get_user_from_accounts_session(request, db)
+    else:
+        user = get_user_from_token(db, token, require_jti)
 
     if user is None:
         raise InvalidTokenException()

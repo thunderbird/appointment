@@ -27,7 +27,11 @@ onMounted(async () => {
     return;
   }
 
-  await user.login(route.params.token as string, null);
+  if (isAccountsAuth) {
+    await user.login('true', null);
+  } else {
+    await user.login(route.params.token as string, null);
+  }
 
   // If we don't have a redirectTo or it's to logout then push to dashboard!
   if (!redirectTo || redirectTo === '/logout') {

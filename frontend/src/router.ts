@@ -65,7 +65,7 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/post-login/:token',
+    path: '/post-login/:token?',
     name: 'post-login',
     component: PostLoginView,
     meta: {
