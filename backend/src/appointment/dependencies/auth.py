@@ -111,7 +111,7 @@ async def get_subscriber_from_onetime_token(
 ):
     """Retrieve the subscriber via a one-time token only!"""
     token: str = await oauth2_scheme(request)
-    return get_subscriber(token, db, require_jti=True)
+    return get_subscriber(request, token, db, require_jti=True)
 
 
 async def get_subscriber_or_none(
@@ -121,7 +121,7 @@ async def get_subscriber_or_none(
     """Retrieve the subscriber or return None. This does not automatically error out like the other deps"""
     try:
         token: str = await oauth2_scheme(request)
-        subscriber = get_subscriber(token, db)
+        subscriber = get_subscriber(request, token, db)
     except InvalidTokenException:
         return None
     except HTTPException:
