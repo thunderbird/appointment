@@ -5,10 +5,17 @@ import dotenv
 import secrets
 
 
+def setup_accounts():
+    if os.getenv('AUTH_SCHEME') != 'accounts':
+        return
+
+    print('Setting up accounts!')
+
+
 def setup_env():
     """Goes through line-by-line and sets any empty values to the values in new_envs
     Also adds any keys that are in new_envs that are missing from .env"""
-    print("Setting up env!")
+    print('Setting up env!')
 
     # Our new values!
     new_envs = {
@@ -63,13 +70,13 @@ def setup_env():
 
 
 def run():
-    print("Checking if we need to run first time setup...")
+    print('Checking if we need to run first time setup...')
     env = dotenv.find_dotenv('.env')
 
     if not env:
         exists = os.path.isfile('.env.example')
         if not exists:
-            print("Err: Could not setup env, no example env?")
+            print('Err: Could not setup env, no example env?')
             return
 
         shutil.copy('.env.example', '.env')
@@ -78,13 +85,14 @@ def run():
     dotenv.load_dotenv(env)
 
     if os.getenv('APP_SETUP'):
-        print("App has previously been setup, skipping.")
+        print('App has previously been setup, skipping.')
         return
 
     env = setup_env()
+    setup_accounts()
 
     if not env:
-        print("Err: Could not setup env, permission issue?")
+        print('Err: Could not setup env, permission issue?')
         return
 
-    print("Finished running first time setup!")
+    print('Finished running first time setup!')

@@ -1,4 +1,13 @@
 /**
+ * Possible values for VITE_AUTH_SCHEME
+ */
+export enum AuthSchemes {
+  Password = 'password',
+  Fxa = 'fxa',
+  Accounts = 'accounts'
+}
+
+/**
  * Available date format strings
  */
 export enum DateFormatStrings {
@@ -298,6 +307,7 @@ export enum Dismissibles {
 
 export default {
   AlertSchemes,
+  AuthSchemes,
   BookingCalendarView,
   BookingsTableColumns,
   BookingsTableFilterOptions,

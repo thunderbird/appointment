@@ -22,6 +22,19 @@ git clone https://github.com/thunderbird/appointment
 cp appointment/backend/.env.example appointment/backend/.env
 cp appointment/frontend/.env.example appointment/frontend/.env
 cd appointment
+```
+
+Next we need to pull Thunderbird Accounts. If you have a dev copy you can just symlink the folder to accounts. 
+
+Other-wise run:
+
+```bash
+git clone https://github.com/thunderbird/thunderbird-accounts.git accounts
+```
+
+And finally we can run the service in docker:
+
+```bash
 docker-compose up -d --build
 ```
 
