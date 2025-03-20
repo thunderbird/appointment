@@ -32,7 +32,7 @@ def get_user_from_accounts_session(request, db):
         return None
 
     user_profile = json.loads(user_profile)
-    print("Found profile: ", user_profile)
+    print('Found profile: ', user_profile)
 
     # Look up the account data
     return repo.external_connection.get_subscriber_by_accounts_uuid(db, user_profile.get('uuid'))
