@@ -21,7 +21,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : 1, // actualy don't run in parallel locally either, for now
-  // Tests will timeout if still running after this time (ms)
+  // Individual test timeout - each test will time out if it is still running after this time (ms)
   timeout: 2 * 60 * 1000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['list']],

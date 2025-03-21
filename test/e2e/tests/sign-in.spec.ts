@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SplashscreenPage } from '../pages/splashscreen-page';
 import { FxAPage } from '../pages/fxa-page';
-import { APPT_TARGET_ENV, APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE } from '../const/constants';
+import { APPT_TARGET_ENV, APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, TIMEOUT_30_SECONDS } from '../const/constants';
 import { DashboardPage } from '../pages/dashboard-page';
 
 let splashscreenPage: SplashscreenPage;
@@ -24,19 +24,17 @@ test.describe('sign-in', {
     // prod and stage use fxa to sign in; when running on local dev env we sign in to appt directly
     if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
       await splashscreenPage.getToFxA();
-      await expect(signInPage.signInHeaderText).toBeVisible({ timeout: 30_000 }); // generous time for fxa to appear
-      await expect(signInPage.userAvatar).toBeVisible({ timeout: 30_000});
+      await expect(signInPage.signInHeaderText).toBeVisible({ timeout: TIMEOUT_30_SECONDS }); // generous time for fxa to appear
+      await expect(signInPage.userAvatar).toBeVisible({ timeout: TIMEOUT_30_SECONDS});
       await expect(signInPage.signInButton).toBeVisible();
       await signInPage.signIn();
     } else {
       await splashscreenPage.localApptSignIn();
     }
 
-    await page.waitForLoadState('domcontentloaded');
-
-    await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: 30_000 }); // give generous time for sign-in
-    await expect(dashboardPage.userMenuAvatar).toBeVisible({ timeout: 30_000 });
-    await expect(dashboardPage.navBarDashboardBtn).toBeVisible({ timeout: 30_000 });
-    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: 30_000 });
+    await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_30_SECONDS }); // give generous time for sign-in
+    await expect(dashboardPage.userMenuAvatar).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(dashboardPage.navBarDashboardBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   });
 });

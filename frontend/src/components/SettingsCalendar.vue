@@ -429,6 +429,7 @@ onMounted(async () => {
           v-model="calendarInput.data.title"
           type="text"
           class="w-full max-w-sm rounded-md"
+          data-testid="settings-calendar-title-input"
         />
       </label>
       <label v-if="isCalDav || editMode" class="flex items-center pl-4">
@@ -439,7 +440,7 @@ onMounted(async () => {
               {{ color }}
             </option>
           </select>
-          <input v-else type="text" v-model="calendarInput.data.color" class="w-full rounded-md" />
+          <input v-else type="text" data-testid="settings-calendar-color-input" v-model="calendarInput.data.color" class="w-full rounded-md" />
           <div class="size-8 shrink-0 rounded-full" :style="{ backgroundColor: calendarInput.data.color }"></div>
         </div>
       </label>
