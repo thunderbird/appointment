@@ -5,6 +5,14 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import UAParser from 'ua-parser-js';
+import NavBar from '@/components/NavBar.vue';
+import TitleBar from '@/components/TitleBar.vue';
+import FooterBar from '@/components/FooterBar.vue';
+import SiteNotification from '@/elements/SiteNotification.vue';
+import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
+import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
+import { cookieStore } from 'msw/lib/core/utils/cookieStore';
 import {
   apiUrlKey,
   callKey,
@@ -16,14 +24,6 @@ import {
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
-import UAParser from 'ua-parser-js';
-
-import NavBar from '@/components/NavBar.vue';
-import TitleBar from '@/components/TitleBar.vue';
-import FooterBar from '@/components/FooterBar.vue';
-import SiteNotification from '@/elements/SiteNotification.vue';
-import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
-import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 
 // stores
 import { useSiteNotificationStore } from '@/stores/alert-store';
@@ -54,11 +54,28 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
+const isAccountsAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Accounts;
+
+provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
+provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
+provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
+provide(isAccountsAuthKey, isAccountsAuth());
+
 // handle auth and fetch
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
     beforeFetch({ options }) {
+      if (isAccountsAuth) {
+        // Cookies are somehow still stored as a giant `;` separated string, so do a bunch of array nonsense to retrieve our token
+        const csrf = window.document.cookie?.split('; csrftoken=')?.pop()?.split(';')?.shift()
+          ?.trim() ?? null;
+        // If you change csrf safe_methods parameter, change this too!
+        if (!['GET', 'OPTIONS', 'HEAD', 'TRACE'].includes(options?.method ?? 'GET') && csrf) {
+          options.headers['X-CSRFToken'] = csrf;
+        }
+      }
+
       if (user?.authenticated) {
         const token = user.data.accessToken;
         // @ts-expect-error ignore headers type error
@@ -109,10 +126,6 @@ const call = createFetch({
 user.init(call);
 
 provide(callKey, call);
-provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
-provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
-provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
-provide(isAccountsAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Accounts);
 
 // menu items for main navigation
 const navItems = [
@@ -196,6 +209,9 @@ const onPageLoad = async () => {
 provide(refreshKey, getDbData);
 
 onMounted(async () => {
+  // Ensure we have a cookie available for POST/PUT/DELETEs
+  await call('session-info').get();
+
   if (usePosthog) {
     const REMOVED_PROPERTY = '<removed>';
     const UNKNOWN_PROPERTY = '<unknown>';
