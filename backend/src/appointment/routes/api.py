@@ -44,7 +44,7 @@ def health(db: Session = Depends(get_db)):
         try:
             redis_instance: Redis | RedisCluster | None = get_redis()
             if not redis_instance:
-                raise RuntimeError("Redis is not available despite being configured. Check settings!")
+                raise RuntimeError('Redis is not available despite being configured. Check settings!')
             redis_instance.ping()
         except Exception as ex:
             sentry_sdk.capture_exception(ex)
@@ -53,11 +53,16 @@ def health(db: Session = Depends(get_db)):
     return JSONResponse(l10n('health-ok'), status_code=200)
 
 
+@router.get('/session-info')
+def session_info():
+    """We can put any first-time page load information in here.
+    But for now we just need it to ensure that the end-user has a cookie."""
+    return True
+
+
 @router.put('/me', response_model=schemas.SubscriberMeOut)
 def update_me(
-    data: schemas.SubscriberIn,
-    db: Session = Depends(get_db),
-    subscriber: Subscriber = Depends(get_subscriber)
+    data: schemas.SubscriberIn, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
 ):
     """endpoint to update data of authenticated subscriber"""
     if subscriber.username != data.username and repo.subscriber.get_by_username(db, data.username):
@@ -130,7 +135,7 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
         schedule.slug = None
         slug = repo.schedule.generate_slug(db, schedule.id)
         if not slug:
-            logging.warning("Could not generate unique slug!")
+            logging.warning('Could not generate unique slug!')
 
     return True
 
@@ -325,10 +330,7 @@ def sync_remote_calendars(
     caldav_ecs = repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.caldav)
 
     # Filter out any nulls
-    ecs = list(filter(lambda ec: ec, [
-        google_ec,
-        *caldav_ecs
-    ]))
+    ecs = list(filter(lambda ec: ec, [google_ec, *caldav_ecs]))
 
     if len(ecs) == 0:
         raise RemoteCalendarConnectionError()
@@ -451,7 +453,7 @@ def send_feedback(
     if not os.getenv('SUPPORT_EMAIL'):
         # Ensure sentry at least captures it!
         if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_message("No SUPPORT_EMAIL is set, support messages are being ignored!")
+            sentry_sdk.capture_message('No SUPPORT_EMAIL is set, support messages are being ignored!')
             sentry_sdk.capture_message(f"""
             Support Email Alert!
             FROM: {subscriber.name} <{subscriber.preferred_email}>

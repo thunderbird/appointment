@@ -3,15 +3,18 @@
 Boot application, init database, authenticate user and provide all API endpoints.
 
 """
+
 from contextlib import asynccontextmanager
+from urllib.parse import urlparse
 
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 from starlette.middleware.sessions import SessionMiddleware
 from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
+from starlette_csrf import CSRFMiddleware
 
-from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD
+from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD, AuthScheme
 from .exceptions.validation import APIRateLimitExceeded
 from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
@@ -172,12 +175,24 @@ def server():
         response = await call_next(request)
         return response
 
+
     app.add_middleware(RawContextMiddleware, plugins=(L10n(),))
 
     # strip html tags from input requests
     app.add_middleware(SanitizeMiddleware)
 
     app.add_middleware(SessionMiddleware, secret_key=os.getenv('SESSION_SECRET'))
+
+    if AuthScheme.is_accounts():
+        cookie_secure = True if os.getenv('FRONTEND_URL', '').startswith('https://') else False
+        cookie_domain = None
+        frontend_url = os.getenv('FRONTEND_URL', None)
+        if frontend_url:
+            frontend_url = urlparse(frontend_url)
+        if frontend_url and frontend_url.hostname and frontend_url.hostname != '':
+            cookie_domain = frontend_url.hostname
+
+        app.add_middleware(CSRFMiddleware, secret=os.getenv('CSRF_SECRET'), cookie_domain=cookie_domain, cookie_secure=cookie_secure, header_name='X-CSRFToken')
 
     # allow requests from own frontend running on a different port
     app.add_middleware(

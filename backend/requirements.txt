@@ -35,3 +35,4 @@ hiredis==2.3.2
 posthog==3.7.0
 slowapi==0.1.9
 dnspython==2.7.0
+starlette-csrf==3.0.0
