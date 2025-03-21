@@ -175,7 +175,6 @@ def server():
         response = await call_next(request)
         return response
 
-
     app.add_middleware(RawContextMiddleware, plugins=(L10n(),))
 
     # strip html tags from input requests
@@ -183,6 +182,7 @@ def server():
 
     app.add_middleware(SessionMiddleware, secret_key=os.getenv('SESSION_SECRET'))
 
+    # This needs to be below SessionMiddleware
     if AuthScheme.is_accounts():
         cookie_secure = True if os.getenv('FRONTEND_URL', '').startswith('https://') else False
         cookie_domain = None
@@ -192,7 +192,13 @@ def server():
         if frontend_url and frontend_url.hostname and frontend_url.hostname != '':
             cookie_domain = frontend_url.hostname
 
-        app.add_middleware(CSRFMiddleware, secret=os.getenv('CSRF_SECRET'), cookie_domain=cookie_domain, cookie_secure=cookie_secure, header_name='X-CSRFToken')
+        app.add_middleware(
+            CSRFMiddleware,
+            secret=os.getenv('CSRF_SECRET'),
+            cookie_domain=cookie_domain,
+            cookie_secure=cookie_secure,
+            header_name='X-CSRFToken',
+        )
 
     # allow requests from own frontend running on a different port
     app.add_middleware(

@@ -21,7 +21,7 @@ from ..controller.apis.accounts_client import AccountsClient
 from ..controller.auth import schedule_links_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
-from ..defines import INVITES_TO_GIVE_OUT, AuthScheme
+from ..defines import INVITES_TO_GIVE_OUT, AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 
 from ..dependencies.database import get_db, get_shared_redis
 from ..dependencies.auth import (
@@ -146,19 +146,19 @@ def accounts_callback(
 ):
     """Auth callback from accounts. It's a bit of a journey:
     - We first ensure the state has not changed during the authentication process.
-    - We setup a fxa_client, and retrieve credentials and profile information on the user.
-    - After which we do a lookup on our fxa external connections for a match on profile's uid field.
-        - If not match is made, we create a new subscriber with the given email.
-        - Otherwise we just grab the external connection's owner.
-    - We update the external connection with any new details
-    - We also update (an initial set if the subscriber is new) the profile data for the subscriber.
-    - And finally generate a jwt token for the frontend, and redirect them to a special frontend route with that token.
+    - We setup the accounts client connection.
+    - We retrieve the profile from the user session id returned to us in this flow.
+        - That pings a shared redis cache, if the user information isn't there the user never logged in to accounts.
+    - We attempt to retrieve the user by uuid, and by email.
+        - If both fail then we create a new user.
+    - We then create or update an external connection for the accounts connection details.
+    - We give set the accounts session key in the user's session (cookie) so they can use it for authentication.
+    - And finally we send them back to the frontend.
     """
     if not AuthScheme.is_accounts():
         raise HTTPException(status_code=405)
 
     if 'tb_accounts_state' not in request.session or request.session['tb_accounts_state'] != state:
-        print('STATE CHECK:', request.session['tb_accounts_state'], 'vs', state)
         raise HTTPException(400, 'Invalid state.')
     if 'tb_accounts_user_email' not in request.session or request.session['tb_accounts_user_email'] == '':
         raise HTTPException(400, 'Email could not be retrieved.')
@@ -181,7 +181,7 @@ def accounts_callback(
     accounts_client.setup()
 
     # Retrieve credentials and user profile
-    profile = shared_redis_client.get(f':1:tb_accounts_user_session.{user_session_id}')
+    profile = shared_redis_client.get(f'{REDIS_USER_SESSION_PROFILE_KEY}.{user_session_id}')
 
     if not profile:
         accounts_client.logout()

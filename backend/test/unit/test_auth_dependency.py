@@ -10,6 +10,7 @@ from starlette.requests import Request
 
 from appointment.controller.auth import signed_url_by_subscriber
 from appointment.database import repo, models
+from appointment.defines import REDIS_USER_SESSION_PROFILE_KEY
 from appointment.dependencies.auth import (
     get_user_from_token,
     get_subscriber,
@@ -40,7 +41,7 @@ class TestAuthDependency:
 
         class MockGetSharedRedis:
             def get(self, key):
-                assert key == f':1:tb_accounts_user_session.{session_id}'
+                assert key == f'{REDIS_USER_SESSION_PROFILE_KEY}.{session_id}'
                 return json.dumps(
                     {
                         '_version': 1,

@@ -32,6 +32,8 @@ Other-wise run:
 git clone https://github.com/thunderbird/thunderbird-accounts.git accounts
 ```
 
+If you're starting fresh with thunderbird-accounts, please review the documentations at that repo about setting it up.
+
 And finally we can run the service in docker:
 
 ```bash

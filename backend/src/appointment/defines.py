@@ -9,6 +9,7 @@ DATETIMEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
 # list of redis keys
 REDIS_REMOTE_EVENTS_KEY = 'rmt_events'
+REDIS_USER_SESSION_PROFILE_KEY = ':1:tb_accounts_user_session'  # Used with shared redis cache
 
 APP_ENV_DEV = 'dev'
 APP_ENV_TEST = 'test'

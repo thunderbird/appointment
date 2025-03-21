@@ -119,4 +119,6 @@ def get_redis(db=None) -> Redis | RedisCluster | None:
 
 
 def get_shared_redis() -> Redis | RedisCluster | None:
+    """Retrieve a connection to the redis instance that is shared between services. Currently used for obtaining profile
+    information via a session key."""
     return get_redis(os.getenv('TB_ACCOUNTS_REDIS_DB'))

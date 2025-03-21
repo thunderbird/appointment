@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from .database import get_shared_redis
 from ..controller.apis.accounts_client import AccountsClient
 from ..database import repo, models
-from ..defines import AuthScheme
+from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
@@ -27,12 +27,11 @@ def get_user_from_accounts_session(request, db):
         return None
 
     shared_redis_cache = get_shared_redis()
-    user_profile = shared_redis_cache.get(f':1:tb_accounts_user_session.{user_session_id}')
+    user_profile = shared_redis_cache.get(f'{REDIS_USER_SESSION_PROFILE_KEY}.{user_session_id}')
     if not user_profile:
         return None
 
     user_profile = json.loads(user_profile)
-    print('Found profile: ', user_profile)
 
     # Look up the account data
     return repo.external_connection.get_subscriber_by_accounts_uuid(db, user_profile.get('uuid'))
