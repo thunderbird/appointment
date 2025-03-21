@@ -4,11 +4,6 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { createUserStore } from '@/stores/user-store';
-import { callKey } from '@/keys';
-import {
-  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
-} from '@/models';
 import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -20,12 +15,17 @@ import ToolTip from '@/elements/ToolTip.vue';
 import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
+import UserInviteTable from '@/components/UserInviteTable.vue';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
-import UserInviteTable from '@/components/UserInviteTable.vue';
+import {
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
+} from '@/models';
+import { callKey } from '@/keys';
+import { createUserStore } from '@/stores/user-store';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -164,7 +164,7 @@ const refreshLinkConfirm = async () => {
  * Request a data download, and prompt the user to download the data.
  */
 const actuallyDownloadData = async () => {
-  const { data }: BlobResponse = await call('account/download').get().blob();
+  const { data }: BlobResponse = await call('account/download').post().blob();
   if (!data || !data.value) {
     // TODO: show error
     // console.error('Failed to download blob!!');
