@@ -12,7 +12,6 @@ import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification.vue';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-import { cookieStore } from 'msw/lib/core/utils/cookieStore';
 import {
   apiUrlKey,
   callKey,
