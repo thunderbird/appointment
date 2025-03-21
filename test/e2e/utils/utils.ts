@@ -32,3 +32,12 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_30_SECONDS }); // give generous time
     await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 }
+
+/**
+ * Read and return the appointment user settings from the local browser store
+ */
+export const getUserSettingsFromLocalStore = async (page: Page) => {
+    const localUserStoreData = JSON.parse(await page.evaluate("localStorage.getItem('tba/user')"));
+    console.log(`User settings from local browser store: ${JSON.stringify(localUserStoreData['settings'])}`);
+    return localUserStoreData['settings'];
+}

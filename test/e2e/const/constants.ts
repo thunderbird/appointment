@@ -42,6 +42,14 @@ export const APPT_THEME_SETTING_DARK = 'Dark';
 export const APPT_TIMEZONE_SETTING_TORONTO = 'America/Toronto';
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax';
 
+// local browser store values
+export const APPT_BROWSER_STORE_LANGUAGE_EN = 'en';
+export const APPT_BROWSER_STORE_LANGUAGE_DE = 'de';
+export const APPT_BROWSER_STORE_THEME_LIGHT = 'light';
+export const APPT_BROWSER_STORE_THEME_DARK = 'dark';
+export const APPT_BROWSER_STORE_12HR_TIME = 12;
+export const APPT_BROWSER_STORE_24HR_TIME = 24;
+
 // html class attribute value when dark mode is enabled
 export const APPT_HTML_DARK_MODE_CLASS = 'dark';
 

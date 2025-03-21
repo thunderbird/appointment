@@ -90,7 +90,7 @@ export class SettingsPage {
     this.connectedSettingsHeader = this.page.getByText('Connected Accounts Settings', { exact: true });
     this.languageSelect = this.page.getByTestId('settings-general-locale-select');
     this.themeSelect = this.page.getByTestId('settings-general-theme-select');
-    this.htmlAttribLocator = this.page.locator("html");
+    this.htmlAttribLocator = this.page.locator('html');
     this.settings12hrRadio = this.page.getByText('12-hour AM/PM', { exact: true });
     this.settings24hrRadio = this.page.getByText('24-hour', { exact: true });
     this.timeZoneSelect = this.page.getByTestId('settings-general-timezone-select');
@@ -181,6 +181,7 @@ export class SettingsPage {
    */
   async changeLanguageSetting(language: string) {
     await this.languageSelect.selectOption(language, { timeout: TIMEOUT_30_SECONDS });
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -188,6 +189,7 @@ export class SettingsPage {
    */
   async changeThemeSetting(theme: string) {
     await this.themeSelect.selectOption(theme, { timeout: TIMEOUT_30_SECONDS });
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -196,12 +198,7 @@ export class SettingsPage {
   async isDarkModeEnabled(page: Page): Promise<boolean> {
     const htmlTag = page.locator("html");
     const htmlClass = await htmlTag.getAttribute("class");
-
-    if (htmlClass == APPT_HTML_DARK_MODE_CLASS) {
-      return true;
-    } else {
-      return false;
-    }
+    return htmlClass === APPT_HTML_DARK_MODE_CLASS;
   }
 
   /**
@@ -210,7 +207,7 @@ export class SettingsPage {
   async set12hrFormat() {
     // give a few seconds to be applied as sometimes the test runs so fast
     // it switches back to the dashboard tab before the time format is applied
-    await this.settings12hrRadio.click( { timeout: TIMEOUT_30_SECONDS });
+    await this.settings12hrRadio.click({ timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
   }
 

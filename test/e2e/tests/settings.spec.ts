@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { navigateToAppointmentAndSignIn } from '../utils/utils';
+import { navigateToAppointmentAndSignIn, getUserSettingsFromLocalStore } from '../utils/utils';
 import { SettingsPage } from '../pages/settings-page';
 import { DashboardPage } from '../pages/dashboard-page';
 
@@ -17,6 +17,12 @@ import {
   APPT_TIMEZONE_SETTING_HALIFAX,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
+  APPT_BROWSER_STORE_LANGUAGE_EN,
+  APPT_BROWSER_STORE_LANGUAGE_DE,
+  APPT_BROWSER_STORE_THEME_LIGHT,
+  APPT_BROWSER_STORE_THEME_DARK,
+  APPT_BROWSER_STORE_12HR_TIME,
+  APPT_BROWSER_STORE_24HR_TIME,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
@@ -80,10 +86,18 @@ test.describe('general settings', {
     await expect.soft(settingsPage.settingsHeaderDE).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await expect.soft(settingsPage.generalSettingsHeaderDE).toBeVisible();
 
+    // verify setting saved in browser local storage
+    let localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['language']).toBe(APPT_BROWSER_STORE_LANGUAGE_DE);
+
     // change language settings back to EN and verify
     await settingsPage.changeLanguageSetting(APPT_LANGUAGE_SETTING_EN);
     await expect(settingsPage.settingsHeaderEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await expect(settingsPage.generalSettingsHeaderEN).toBeVisible();
+
+    // verify setting saved in browser local storage
+    localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['language']).toBe(APPT_BROWSER_STORE_LANGUAGE_EN);
   });
 
   test('able to change theme', async ({ page }) => {
@@ -91,9 +105,17 @@ test.describe('general settings', {
     await settingsPage.changeThemeSetting(APPT_THEME_SETTING_DARK);
     expect.soft(await settingsPage.isDarkModeEnabled(page)).toBeTruthy();
 
+    // verify setting saved in browser local storage
+    let localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_DARK);
+
     // change theme setting back to light mode and verify
     await settingsPage.changeThemeSetting(APPT_THEME_SETTING_LIGHT);
     expect(await settingsPage.isDarkModeEnabled(page)).toBeFalsy();
+  
+    // verify setting saved in browser local storage
+    localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_LIGHT);
   });
 
   test('able to change time format', async ({ page }) => {
@@ -103,10 +125,18 @@ test.describe('general settings', {
     await expect.soft(dashboardPage.calendarEvent24hrFormat).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.gotoGeneralSettingsPage();
 
+    // verify setting saved in browser local storage
+    let localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['timeFormat']).toBe(APPT_BROWSER_STORE_24HR_TIME);
+
     // change time format setting back to 12-hour format and verify on dashboard calendar
     await settingsPage.set12hrFormat();
     await dashboardPage.gotoToDashboardMonthView();
     await expect(dashboardPage.calendarEvent24hrFormat).not.toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+
+    // verify setting saved in browser local storage
+    localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['timeFormat']).toBe(APPT_BROWSER_STORE_12HR_TIME); 
   });
 
   test('able to change timezone', async ({ page }) => {
@@ -115,11 +145,19 @@ test.describe('general settings', {
     await dashboardPage.gotoToDashboardMonthView();
     await expect.soft(dashboardPage.timezoneDisplayTextHalifax).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
+    // verify setting saved in browser local storage
+    let localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_HALIFAX);
+
     // change time format setting back and verify on dashboard calendar
     await settingsPage.gotoGeneralSettingsPage();
     await settingsPage.changeTimezoneSetting(APPT_TIMEZONE_SETTING_TORONTO);
     await dashboardPage.gotoToDashboardMonthView();
     await expect(dashboardPage.timezoneDisplayTextToronto).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+
+    // verify setting saved in browser local storage
+    localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_TORONTO);
   });
 });
 
@@ -278,8 +316,9 @@ test.describe('connected accounts settings', {
 
   test('edit profile button', async ({ page }) => {
     // verify that clicking the `edit profile` button redirects to the Mozilla Account profile page
+    // note that on dev env this relies on having VITE_FXA_EDIT_PROFILE= set to point to stage FxA
     await settingsPage.editProfileBtn.click();
-    // on dev env the button doesn't do anything (as expected) but on stage redirects to fxa profile
+    // skip this on dev env because stage FxA use may or may not be setup to use with local dev
     if (APPT_TARGET_ENV !== 'dev') {
       await expect(settingsPage.mozProfilePageLogo).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
       await expect(settingsPage.mozProfileSettingsSection).toBeVisible();
