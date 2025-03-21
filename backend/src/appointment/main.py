@@ -152,7 +152,7 @@ def server():
     # init app
     app = FastAPI(openapi_url=openapi_url, lifespan=lifespan)
 
-    @app.middleware("http")
+    @app.middleware('http')
     async def apply_x_forwarded_headers_to_client(request: Request, call_next):
         """Apply the x-forwarded-for to the client host if available"""
         ip_list = request.headers.get('x-forwarded-for')
@@ -220,8 +220,6 @@ def server():
             elif app_env == APP_ENV_TEST:
                 # Stale test runtime error
                 raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
-                # Just log for this PR, we'll fix it another PR.
-                logging.error(f"Test uses deprecated route: `{request.scope['route'].path}`!")
         return response
 
     @app.exception_handler(DefaultCredentialsError)
