@@ -81,11 +81,13 @@ def can_login(
     accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
     """Determines if a user can go through the login flow"""
+    email = data.email.lower()
+
     if AuthScheme.is_fxa():
         # This checks if a subscriber exists, or is in allowed list
-        return fxa_client.is_in_allow_list(db, data.email.lower())
+        return fxa_client.is_in_allow_list(db, email)
     elif AuthScheme.is_accounts():
-        return accounts_client.is_in_allow_list(db, data.email)
+        return accounts_client.is_in_allow_list(db, email)
 
     # There's no waiting list setting on password login
     return True

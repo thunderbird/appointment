@@ -5,16 +5,10 @@ services:
     extends:
       file: accounts/docker-compose.yml
       service: backend
+    environment:
+      - REDIS_INTERNAL_DB=1  # Force accounts to use a different redis db
     ports:
       - "8087:8087"
-    environment:
-      - DEFAULT_CLIENT=Appointment
-      - DEFAULT_CONTACT_NAME=Thunderbird
-      - DEFAULT_CONTACT_EMAIL=no-reply@example.org
-      - DEFAULT_CONTACT_WEBSITE=https://appointment.day
-      - DEFAULT_ENV_REDIRECT_URL=http://localhost:5173/auth/accounts/callback
-      - DEFAULT_ENV_ALLOWED_HOSTNAMES='["localhost:8080", "accounts:8087"]'
-      - DEFAULT_ENV_ACCESS_TOKEN=0xdeadbeef
 
   postgres:
     volumes:
@@ -35,7 +29,6 @@ services:
       - ./backend/src/appointment:/app/appointment
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
-      - TB_ACCOUNTS_SECRET=0xdeadbeef
     depends_on:
       mysql:
         condition: service_healthy
