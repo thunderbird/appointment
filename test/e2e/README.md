@@ -25,11 +25,11 @@ The E2E tests require an existing Appointment (and corresponding FxA account) an
     - The share link is found in Appointment => Settings => Account => My Link.
 - The tests also require an email address to be used as the appointment bookee's email address when actually requesting bookings. This is the email address entered on the `Book selection` dialog (after an appointment slot was selected on the booking share link page). Note that real Appointment emails will be sent to this email address.
 
-The tests expect that the default Appointment application settings haven't been changed for the provided test user:
+The tests expect the following Appointment application settings:
 - The user scheduling availability hasn't been changed from the default settings;
 - In the dashboard the default calendar view is the current month view; this is important so that the tests can find an available booking slot, etc.
 - In `Booking Settings`, the `Booking Confirmation` option is enabled, so that requested appointments generate HOLD appointments that need to be confirmed
-- The timezone is set to the default of `America/Toronto`
+- The timezone is set to `America/Toronto`
 
 ## Running the E2E tests against your local dev environment
 
