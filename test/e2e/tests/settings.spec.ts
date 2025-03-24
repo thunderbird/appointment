@@ -285,12 +285,10 @@ test.describe('account settings', {
     const downloadPromise = page.waitForEvent('download');
     // click the account settings => download your data button and confirm
     await settingsPage.downloadAccountData();
-    // now verify the browser download did happen successfully
+    // now verify the browser download event was triggered and downloaded without error
     const download = await downloadPromise;
-    const downloadedPath = await download.path(); // waits for download to finish
-    console.log(`account data file downloaded to ${downloadedPath}`);
-    expect(downloadedPath).toBeTruthy();
-    expect(await download.failure()).toBeFalsy();
+    const downloadErr = await download.failure(); // waits for download to finish and checks for error
+    expect(downloadErr).toBeFalsy();
   });
 
   test('delete account button', async ({ page }) => {

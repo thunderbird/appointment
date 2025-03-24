@@ -12,6 +12,7 @@ import {
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
+  APPT_TIMEZONE_SETTING_TORONTO,
 } from '../const/constants';
 
 var bookingPage: BookingPage;
@@ -59,6 +60,14 @@ const verifyBookingPageLoaded = async () => {
 test.beforeEach(async ({ page }) => {
   bookingPage = new BookingPage(page);
   dashboardPage = new DashboardPage(page);
+});
+
+// the share link (request a booking page) will display in the local browser context timezone but the main
+// appointment account settings could be a different timezone (if so the test will fail to find the booked
+// appointment since the time slot value will not match); set the browser context to always be in
+// `America/Toronto` so the share link will be in the same timezone as the main account settings
+test.use({
+  timezoneId: APPT_TIMEZONE_SETTING_TORONTO,
 });
 
 // verify we are able to book an appointment using existing user's share link
