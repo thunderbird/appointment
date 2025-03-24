@@ -58,11 +58,11 @@ const filteredUsers = computed(() => waitingListUsersList.value.map((user) => ({
   },
   email_verified: {
     type: TableDataType.Text,
-    value: user.email_verified ? 'Verified' : 'Not Verified',
+    value: user.email_verified ? t('label.verified') : t('label.notVerified'),
   },
   invite_id: {
     type: TableDataType.Text,
-    value: user.invite_id ?? 'Awaiting Access',
+    value: user.invite_id ?? t('label.awaitingAccess'),
   },
   timeCreated: {
     type: TableDataType.Text,
@@ -76,43 +76,43 @@ const filteredUsers = computed(() => waitingListUsersList.value.map((user) => ({
 const columns = [
   {
     key: 'id',
-    name: 'Id',
+    name: t('label.id'),
   },
   {
     key: 'email',
-    name: 'Email',
+    name: t('label.email'),
   },
   {
     key: 'email_verified',
-    name: 'Verified Email',
+    name: t('label.verifiedEmail'),
   },
   {
     key: 'invite_id',
-    name: 'Invite ID',
+    name: t('label.inviteId'),
   },
   {
     key: 'createdAt',
-    name: 'Time Created',
+    name: t('label.timeCreated'),
   },
   {
     key: 'updatedAt',
-    name: 'Time Updated',
+    name: t('label.timeUpdated'),
   },
 ] as TableDataColumn[];
 const filters = [
   {
-    name: 'Invite Status',
+    name: t('label.inviteStatus'),
     options: [
       {
-        name: 'All',
+        name: t('label.all'),
         key: 'all',
       },
       {
-        name: 'Accepted',
+        name: t('label.accepted'),
         key: 'accepted',
       },
       {
-        name: 'Awaiting Access',
+        name: t('label.awaitingAccess'),
         key: 'awaiting_access',
       },
     ],
@@ -124,9 +124,9 @@ const filters = [
         case 'all':
           return null;
         case 'accepted':
-          return mutableDataList.filter((data) => (data.invite_id.value !== 'Awaiting Access'));
+          return mutableDataList.filter((data) => (data.invite_id.value !== t('label.awaitingAccess')));
         case 'awaiting_access':
-          return mutableDataList.filter((data) => (data.invite_id.value === 'Awaiting Access'));
+          return mutableDataList.filter((data) => (data.invite_id.value === t('label.awaitingAccess')));
         default:
           break;
       }
@@ -134,18 +134,18 @@ const filters = [
     },
   },
   {
-    name: 'Email Verified Status',
+    name: t('label.emailVerifiedStatus'),
     options: [
       {
-        name: 'All',
+        name: t('label.all'),
         key: 'all',
       },
       {
-        name: 'Verified',
+        name: t('label.verified'),
         key: 'verified',
       },
       {
-        name: 'Not Verified',
+        name: t('label.notVerified'),
         key: 'not_verified',
       },
     ],
@@ -157,9 +157,9 @@ const filters = [
         case 'all':
           return null;
         case 'verified':
-          return mutableDataList.filter((data) => (data.email_verified.value === 'Verified'));
+          return mutableDataList.filter((data) => (data.email_verified.value === t('label.verified')));
         case 'not_verified':
-          return mutableDataList.filter((data) => (data.email_verified.value === 'Not Verified'));
+          return mutableDataList.filter((data) => (data.email_verified.value === t('label.notVerified')));
         default:
           break;
       }
@@ -268,7 +268,7 @@ onMounted(async () => {
   <div v-if="displayPage">
     <data-table
       ref="dataTableRef"
-      data-name="Waiting List Users"
+      :data-name="t('label.waitingListUser', filteredUsers?.length)"
       data-key="id"
       :allow-multi-select="true"
       :data-list="filteredUsers"
@@ -283,7 +283,12 @@ onMounted(async () => {
           <label class="flex flex-col gap-4 md:flex-row md:items-center md:gap-0">
             <span>{{ t('label.sendInviteToWaitingList', {count: selectedFields.length}) }}</span>
           </label>
-          <primary-button class="btn-send" :disabled="loading || selectedFields.length === 0" @click="sendInvites" :title="t('label.send')">
+          <primary-button
+            class="btn-send"
+            :disabled="loading || selectedFields.length === 0"
+            @click="sendInvites"
+            :title="t('label.send')"
+          >
             <icon-send />
             {{ t('label.send') }}
           </primary-button>

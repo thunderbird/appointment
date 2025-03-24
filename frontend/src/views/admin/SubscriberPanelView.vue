@@ -83,7 +83,7 @@ const filteredSubscribers = computed(() => subscriberList.value.map((subscriber)
     buttonType: TableDataButtonType.Caution,
     value: t('label.hardDelete'),
     disabled: !subscriber.time_deleted || subscriber.email === user.data.email,
-    tooltip: t('text.admin.completelyRemoveUser') + ' ' + t('text.admin.disableAccountFirst'),
+    tooltip: `${t('text.admin.completelyRemoveUser')} ${t('text.admin.disableAccountFirst')}`,
   },
 } as TableDataRow)));
 const columns = [
