@@ -248,7 +248,7 @@ const onEnter = () => {
             v-model="inviteCode"
             :help="t('login.form.no-invite-code')"
             data-testid="login-invite-code-input"
-          >{{ t('label.inviteCode') }}</text-input>
+          >{{ t('label.inviteCode', { 'count': 1 }) }}</text-input>
         </form>
       </div>
       <template v-slot:actions>

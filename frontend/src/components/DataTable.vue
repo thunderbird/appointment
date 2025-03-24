@@ -194,8 +194,8 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
                 <text-button :uid="fieldKey as string" class="btn-copy" :copy="String(fieldData.value)" :title="t('label.copy')" />
               </span>
               <span v-else-if="fieldData.type === TableDataType.Bool">
-                <span v-if="fieldData.value">Yes</span>
-                <span v-else>No</span>
+                <span v-if="fieldData.value">{{ t('label.yes') }}</span>
+                <span v-else>{{ t('label.no') }}</span>
               </span>
               <span v-else-if="fieldData.type === TableDataType.Link">
                 <a :href="fieldData.link" target="_blank">{{ fieldData.value }}</a>
@@ -231,7 +231,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
           <tr v-if="loading">
             <td :colspan="columnSpan">
               <div class="flex w-full justify-center">
-              <loading-spinner/>
+                <loading-spinner/>
               </div>
             </td>
           </tr>

@@ -66,7 +66,7 @@ const filteredSubscribers = computed(() => subscriberList.value.map((subscriber)
   },
   timezone: {
     type: TableDataType.Text,
-    value: subscriber.timezone ?? 'Unset',
+    value: subscriber.timezone ?? t('label.unset'),
   },
   wasInvited: {
     type: TableDataType.Bool,
@@ -75,15 +75,15 @@ const filteredSubscribers = computed(() => subscriberList.value.map((subscriber)
   disable: {
     type: TableDataType.Button,
     buttonType: subscriber.time_deleted ? TableDataButtonType.Primary : TableDataButtonType.Caution,
-    value: subscriber.time_deleted ? 'Enable' : 'Disable',
+    value: subscriber.time_deleted ? t('label.enable') : t('label.disable'),
     disabled: !subscriber.time_deleted && subscriber.email === user.data.email,
   },
   hardDelete: {
     type: TableDataType.Button,
     buttonType: TableDataButtonType.Caution,
-    value: 'Hard Delete',
+    value: t('label.hardDelete'),
     disabled: !subscriber.time_deleted || subscriber.email === user.data.email,
-    tooltip: 'Completely remove the user from the database. This is the same as deleting someones account!! You must disable the account first.',
+    tooltip: `${t('text.admin.completelyRemoveUser')} ${t('text.admin.disableAccountFirst')}`,
   },
 } as TableDataRow)));
 const columns = [
@@ -93,27 +93,27 @@ const columns = [
   },
   {
     key: 'username',
-    name: 'Username',
+    name: t('label.username'),
   },
   {
     key: 'email',
-    name: 'Email',
+    name: t('label.email'),
   },
   {
     key: 'createdAt',
-    name: 'Time Created',
+    name: t('label.timeCreated'),
   },
   {
     key: 'deletedAt',
-    name: 'Time Deleted',
+    name: t('label.timeDeleted'),
   },
   {
     key: 'timezone',
-    name: 'Timezone',
+    name: t('label.timeZone'),
   },
   {
     key: 'wasInvited',
-    name: 'Was Invited?',
+    name: t('label.wasInvited'),
   },
   {
     key: 'disable',
@@ -126,18 +126,18 @@ const columns = [
 ] as TableDataColumn[];
 const filters = [
   {
-    name: 'Was Invited',
+    name: t('label.wasInvited'),
     options: [
       {
-        name: 'All',
+        name: t('label.all'),
         key: 'all',
       },
       {
-        name: 'Yes',
+        name: t('label.yes'),
         key: 'true',
       },
       {
-        name: 'No',
+        name: t('label.no'),
         key: 'false',
       },
     ],
@@ -291,7 +291,7 @@ onMounted(async () => {
   <admin-nav/>
   <div v-if="displayPage">
     <data-table
-      data-name="Subscribers"
+      :data-name="t('label.admin-subscriber-panel')"
       data-key="id"
       :allow-multi-select="false"
       :data-list="filteredSubscribers"
@@ -308,7 +308,7 @@ onMounted(async () => {
               <input
                 class="mx-4 w-60 rounded-md text-sm"
                 type="email"
-                placeholder="e.g. test@example.org"
+                :placeholder="t('placeholder.emailAddress')"
                 v-model="inviteEmail"
                 :disabled="loading"
                 enterkeyhint="send"
@@ -343,9 +343,9 @@ onMounted(async () => {
   <!-- Refresh link confirmation modal -->
   <confirmation-modal
     :open="hardDeleteModalOpen"
-    title="WARNING"
-    message="This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to."
-    confirm-label="Delete"
+    :title="t('label.warning').toUpperCase()"
+    :message="t('text.admin.completelyRemoveUser')"
+    :confirm-label="t('label.delete')"
     :cancel-label="t('label.cancel')"
     :use-caution-button="true"
     @confirm="() => hardDeleteConfirm()"

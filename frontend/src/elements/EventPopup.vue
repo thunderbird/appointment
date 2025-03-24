@@ -73,7 +73,7 @@ const eventDateTime = computed(
       </div>
       <div v-if="event?.customData?.attendee" class="flex items-center gap-1.5 text-xs">
         <icon-users class="size-4 fill-transparent stroke-teal-500 stroke-2" />
-        {{ t('label.guest' , { 'count': 1 }) }}
+        {{ t('label.guest', { 'count': 1 }) }}
       </div>
     </div>
   </div>

@@ -46,11 +46,11 @@ const filteredInvites = computed(() => inviteList.value.map((invite) => ({
   },
   status: {
     type: TableDataType.Text,
-    value: invite.status === InviteStatus.Active ? 'Available' : 'Revoked',
+    value: invite.status === InviteStatus.Active ? t('label.available') : t('label.revoked'),
   },
   subscriber_id: {
     type: TableDataType.Text,
-    value: invite.subscriber_id ?? 'Unused',
+    value: invite.subscriber_id ?? t('label.unused'),
   },
   timeCreated: {
     type: TableDataType.Text,
@@ -63,30 +63,30 @@ const filteredInvites = computed(() => inviteList.value.map((invite) => ({
   revoke: {
     type: TableDataType.Button,
     buttonType: TableDataButtonType.Secondary,
-    value: 'Revoke',
+    value: t('label.revoke'),
     disabled: invite.subscriber_id || invite.status === InviteStatus.Revoked,
   },
 } as TableDataRow)));
 const columns = [
   {
     key: 'code',
-    name: 'Code',
+    name: t('label.code'),
   },
   {
     key: 'status',
-    name: 'Status',
+    name: t('label.status'),
   },
   {
     key: 'subscriber_id',
-    name: 'Invited Subscriber ID',
+    name: t('label.invitedSubscriberId'),
   },
   {
     key: 'createdAt',
-    name: 'Time Created',
+    name: t('label.timeCreated'),
   },
   {
     key: 'updatedAt',
-    name: 'Time Updated',
+    name: t('label.timeUpdated'),
   },
   {
     key: 'revoke',
@@ -95,22 +95,22 @@ const columns = [
 ] as TableDataColumn[];
 const filters = [
   {
-    name: 'Invite Status',
+    name: t('label.inviteStatus'),
     options: [
       {
-        name: 'All',
+        name: t('label.all'),
         key: 'all',
       },
       {
-        name: 'Used',
+        name: t('label.used'),
         key: 'used',
       },
       {
-        name: 'Unused',
+        name: t('label.unused'),
         key: 'unused',
       },
       {
-        name: 'Revoked',
+        name: t('label.revoked'),
         key: 'revoked',
       },
     ],
@@ -122,22 +122,22 @@ const filters = [
         case 'all':
           return null;
         case 'revoked':
-          return mutableDataList.filter((data) => (data.status.value === 'Revoked'));
+          return mutableDataList.filter((data) => (data.status.value === t('label.revoked')));
         case 'used':
           return mutableDataList.filter((data) => {
-            if (data.status.value === 'Revoked') {
+            if (data.status.value === t('label.revoked')) {
               return false;
             }
 
-            return data.subscriber_id.value !== 'Unused';
+            return data.subscriber_id.value !== t('label.unused');
           });
         case 'unused':
           return mutableDataList.filter((data) => {
-            if (data.status.value === 'Revoked') {
+            if (data.status.value === t('label.revoked')) {
               return false;
             }
 
-            return data.subscriber_id.value === 'Unused';
+            return data.subscriber_id.value === t('label.unused');
           });
         default:
           break;
@@ -251,7 +251,7 @@ onMounted(async () => {
   <div v-if="displayPage">
     <data-table
       data-key="code"
-      data-name="Invite Codes"
+      :data-name="t('label.inviteCode', filteredInvites?.length)"
       :allow-multi-select="false"
       :data-list="filteredInvites"
       :columns="columns"
