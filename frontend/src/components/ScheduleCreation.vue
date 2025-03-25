@@ -187,6 +187,9 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
 const isFormDirty = computed(
   () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value),
 );
+const isSlugDirty = computed(
+  () => scheduleInput.value.slug !== referenceSchedule.value.slug,
+);
 
 // handle notes char limit
 const charLimit = 250;
@@ -262,6 +265,17 @@ const scheduleValidationError = (schedule: Schedule): string|null => {
   return null;
 };
 
+// Update slug with a random 8 character string
+const refreshSlugModalOpen = ref(false);
+const showRefreshSlugConfirmation = async () => {
+  refreshSlugModalOpen.value = true;
+};
+
+const closeModals = () => {
+  savedConfirmation.show = false;
+  refreshSlugModalOpen.value = false;
+};
+
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -328,17 +342,7 @@ const saveSchedule = async (withConfirmation = true) => {
   // Update our reference schedule!
   referenceSchedule.value = { ...scheduleInput.value };
   revertForm(false);
-};
-
-// Update slug with a random 8 character string
-const refreshSlugModalOpen = ref(false);
-const showRefreshSlugConfirmation = async () => {
-  refreshSlugModalOpen.value = true;
-};
-
-const closeModals = () => {
-  savedConfirmation.show = false;
-  refreshSlugModalOpen.value = false;
+  closeModals();
 };
 
 const refreshSlug = () => {
@@ -728,7 +732,7 @@ watch(
               </text-input>
               <link-button
                 class="p-0.5"
-                @click="scheduleInput.active ? showRefreshSlugConfirmation() : null"
+                @click="scheduleInput.active ? refreshSlug() : null"
                 :disabled="!scheduleInput.active"
                 data-testid="dashboard-booking-settings-link-refresh-btn"
               >
@@ -802,7 +806,7 @@ watch(
     >
       <primary-button
         class="btn-save w-full"
-        @click="saveSchedule(!existing)"
+        @click="isSlugDirty ? showRefreshSlugConfirmation() : saveSchedule(!existing)"
         :disabled="!scheduleInput.active || savingInProgress"
         data-testid="dashboard-save-changes-btn"
       >
@@ -847,9 +851,9 @@ watch(
     :open="refreshSlugModalOpen"
     :title="t('label.refreshLink')"
     :message="t('text.refreshLinkNotice')"
-    :confirm-label="t('label.refresh')"
+    :confirm-label="t('label.save')"
     :cancel-label="t('label.cancel')"
-    @confirm="() => refreshSlug()"
+    @confirm="saveSchedule(!existing)"
     @close="closeModals"
   ></confirmation-modal>
 </template>

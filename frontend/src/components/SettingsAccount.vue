@@ -341,7 +341,7 @@ const actuallyDeleteAccount = async () => {
     :open="refreshLinkModalOpen"
     :title="t('label.refreshLink')"
     :message="t('text.refreshLinkNotice')"
-    :confirm-label="t('label.refresh')"
+    :confirm-label="t('label.save')"
     :cancel-label="t('label.cancel')"
     @confirm="() => refreshLinkConfirm()"
     @close="closeModals"

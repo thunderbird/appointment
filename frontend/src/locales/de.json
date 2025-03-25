@@ -296,7 +296,7 @@
     "privacy": "Datenschutz",
     "quickLink": "Kurzlink",
     "refresh": "Erneuern",
-    "refreshLink": "Link erneuern",
+    "refreshLink": "Link ändern",
     "remove": "Entfernen",
     "replies": "Antworten",
     "requested": "Angefragt",
@@ -485,7 +485,7 @@
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
     "redirectedNotice": "Du wirst weitergeleitet nach {url}.",
-    "refreshLinkNotice": "Dadurch wird dein Link erneuert. Deine alten Links werden nicht länger funktionieren.",
+    "refreshLinkNotice": "Dadurch wird dein Link geändert. Der vorherige Link wird dann nicht länger funktionieren.",
     "requestInformationSentToOwner": "Der Kalenderbesitzer wurde per E-Mail über deine Buchungsanfrage informiert.",
     "scheduleSettings": {
       "clickHereToConnect": "Hier einen Kalender verbinden",

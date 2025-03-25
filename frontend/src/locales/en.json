@@ -485,7 +485,7 @@
     "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
     "redirectedNotice": "You are being redirected to {url}.",
-    "refreshLinkNotice": "This refreshes your link. Your old links will no longer work.",
+    "refreshLinkNotice": "Saving will change your schedule's link. Any old links will no longer work.",
     "requestInformationSentToOwner": "Information about this booking request has been emailed to the owner.",
     "scheduleSettings": {
       "clickHereToConnect": "Click here to connect a calendar!",
