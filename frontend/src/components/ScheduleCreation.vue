@@ -265,6 +265,17 @@ const scheduleValidationError = (schedule: Schedule): string|null => {
   return null;
 };
 
+// Update slug with a random 8 character string
+const refreshSlugModalOpen = ref(false);
+const showRefreshSlugConfirmation = async () => {
+  refreshSlugModalOpen.value = true;
+};
+
+const closeModals = () => {
+  savedConfirmation.show = false;
+  refreshSlugModalOpen.value = false;
+};
+
 // handle actual schedule creation/update
 const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
@@ -332,17 +343,6 @@ const saveSchedule = async (withConfirmation = true) => {
   referenceSchedule.value = { ...scheduleInput.value };
   revertForm(false);
   closeModals();
-};
-
-// Update slug with a random 8 character string
-const refreshSlugModalOpen = ref(false);
-const showRefreshSlugConfirmation = async () => {
-  refreshSlugModalOpen.value = true;
-};
-
-const closeModals = () => {
-  savedConfirmation.show = false;
-  refreshSlugModalOpen.value = false;
 };
 
 const refreshSlug = () => {
