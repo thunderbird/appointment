@@ -64,7 +64,7 @@ def get_by_type(
 
 
 def get_subscriber_by_accounts_uuid(db: Session, uuid: str):
-    """Return a subscriber from a fxa profile uid"""
+    """Return a subscriber from an accounts uuid"""
     query = (
         db.query(models.ExternalConnections)
         .filter(models.ExternalConnections.type == models.ExternalConnectionType.accounts)

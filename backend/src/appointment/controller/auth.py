@@ -1,6 +1,6 @@
 """Module: auth
 
-Handle authentication with FxA and get subscription data.
+Handle authentication with Thunderbird Accounts or FxA and get subscription data.
 """
 
 import os
