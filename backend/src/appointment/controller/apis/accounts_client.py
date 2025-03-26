@@ -98,7 +98,6 @@ class AccountsClient:
             response.raise_for_status()
 
             profile_response = response.json()
-            print('>', profile_response)
             return profile_response
         except requests.HTTPError as e:
             # Not great, but we can still continue along..

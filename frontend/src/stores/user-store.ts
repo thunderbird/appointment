@@ -248,7 +248,7 @@ export const useUserStore = defineStore('user', () => {
     } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
       // We get a one-time token back from the api, use it to fetch the real access token
       data.value.accessToken = username;
-      const { error, data: tokenData }: TokenResponse = await call('fxa-token').post().json();
+      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };

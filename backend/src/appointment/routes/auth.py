@@ -288,7 +288,6 @@ def accounts_callback(
 
     request.session['accounts_session'] = user_session_id
 
-    print("Sending to frontend")
     return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/")
 
 
