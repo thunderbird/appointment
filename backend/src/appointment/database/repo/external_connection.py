@@ -63,6 +63,22 @@ def get_by_type(
     return result
 
 
+def get_subscriber_by_accounts_uuid(db: Session, uuid: str):
+    """Return a subscriber from an accounts uuid"""
+    query = (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.type == models.ExternalConnectionType.accounts)
+        .filter(models.ExternalConnections.type_id == uuid)
+    )
+
+    result = query.first()
+
+    if result is not None:
+        return result.owner
+
+    return None
+
+
 def get_subscriber_by_fxa_uid(db: Session, type_id: str):
     """Return a subscriber from a fxa profile uid"""
     query = (

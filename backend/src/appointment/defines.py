@@ -1,3 +1,6 @@
+import os
+from enum import StrEnum
+
 SUPPORTED_LOCALES = ['en', 'de']
 FALLBACK_LOCALE = 'en'
 
@@ -6,6 +9,7 @@ DATETIMEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
 # list of redis keys
 REDIS_REMOTE_EVENTS_KEY = 'rmt_events'
+REDIS_USER_SESSION_PROFILE_KEY = ':1:tb_accounts_user_session'  # Used with shared redis cache
 
 APP_ENV_DEV = 'dev'
 APP_ENV_TEST = 'test'
@@ -25,3 +29,23 @@ DEFAULT_CALENDAR_COLOUR = '#c276c5'
 
 # List of Google CalDAV domains
 GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
+
+
+class AuthScheme(StrEnum):
+    """Enum for authentication scheme"""
+
+    PASSWORD = 'password'
+    FXA = 'fxa'
+    ACCOUNTS = 'accounts'
+
+    @staticmethod
+    def is_fxa():
+        return os.getenv('AUTH_SCHEME') == AuthScheme.FXA
+
+    @staticmethod
+    def is_password():
+        return os.getenv('AUTH_SCHEME') == AuthScheme.PASSWORD
+
+    @staticmethod
+    def is_accounts():
+        return os.getenv('AUTH_SCHEME') == AuthScheme.ACCOUNTS

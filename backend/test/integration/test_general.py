@@ -48,7 +48,7 @@ class TestGeneral:
         ('get', '/rmt/cal/1/' + DAY1 + '/' + DAY5),
         ('post', '/rmt/sync'),
         ('get', '/account/available-emails'),
-        ('get', '/account/download'),
+        ('post', '/account/download'),
         ('get', '/account/external-connections/'),
         ('delete', '/account/delete'),
         ('get', '/google/auth'),

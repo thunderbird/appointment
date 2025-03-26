@@ -11,7 +11,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-_redis_instance : Optional[RedisCluster] = None
+_redis_instance: Optional[RedisCluster] = None
+
 
 def get_engine_and_session():
     database_url = os.getenv('DATABASE_URL')
@@ -46,25 +47,29 @@ def boot_redis_cluster():
     host = os.getenv('REDIS_URL')
     port = int(os.getenv('REDIS_PORT'))
     password = os.getenv('REDIS_PASSWORD')
-    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or \
-        os.getenv('REDIS_USE_SSL').lower() == '1') else False
+    ssl = (
+        True
+        if os.getenv('REDIS_USE_SSL')
+        and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1')
+        else False
+    )
     timer_boot = time.perf_counter_ns()
 
     # Retry strategy
     retry = Retry(ExponentialBackoff(), 3)
 
     _redis_instance = RedisCluster(
-            host=host,
-            port=port,
-            password=password,
-            ssl=ssl,
-            decode_responses=True,
-            skip_full_coverage_check=True,
-            retry=retry,
-            cluster_error_retry_attempts=1
-        )
+        host=host,
+        port=port,
+        password=password,
+        ssl=ssl,
+        decode_responses=True,
+        skip_full_coverage_check=True,
+        retry=retry,
+        cluster_error_retry_attempts=1,
+    )
     sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
-    logging.info("Connected to redis cluster")
+    logging.info('Connected to redis cluster')
 
 
 def close_redis_cluster():
@@ -74,10 +79,10 @@ def close_redis_cluster():
         return None
 
     _redis_instance.close()
-    logging.info("Closed connection to redis cluster")
+    logging.info('Closed connection to redis cluster')
 
 
-def get_redis() -> Redis | RedisCluster | None:
+def get_redis(db=None) -> Redis | RedisCluster | None:
     """Retrieves a redis instance or None if redis isn't available."""
     # TODO: Create pool and simply grab instance?
     if os.getenv('REDIS_URL') is None:
@@ -85,10 +90,15 @@ def get_redis() -> Redis | RedisCluster | None:
 
     host = os.getenv('REDIS_URL')
     port = int(os.getenv('REDIS_PORT'))
-    db = os.getenv('REDIS_DB')
+    if db is None:
+        db = os.getenv('REDIS_DB')
     password = os.getenv('REDIS_PASSWORD')
-    ssl = True if os.getenv('REDIS_USE_SSL') and (os.getenv('REDIS_USE_SSL').lower() == 'true' or \
-        os.getenv('REDIS_USE_SSL').lower() == '1') else False
+    ssl = (
+        True
+        if os.getenv('REDIS_USE_SSL')
+        and (os.getenv('REDIS_USE_SSL').lower() == 'true' or os.getenv('REDIS_USE_SSL').lower() == '1')
+        else False
+    )
 
     timer_boot = time.perf_counter_ns()
 
@@ -106,3 +116,9 @@ def get_redis() -> Redis | RedisCluster | None:
 
     sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
     return redis
+
+
+def get_shared_redis() -> Redis | RedisCluster | None:
+    """Retrieve a connection to the redis instance that is shared between services. Currently used for obtaining profile
+    information via a session key."""
+    return get_redis(os.getenv('TB_ACCOUNTS_REDIS_DB'))

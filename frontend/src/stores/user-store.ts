@@ -8,7 +8,7 @@ import {
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
-import { ColourSchemes } from '@/definitions';
+import { ColourSchemes, AuthSchemes } from '@/definitions';
 
 const initialUserConfigObject = {
   language: null,
@@ -44,7 +44,7 @@ export const useUserStore = defineStore('user', () => {
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   // Init user config if not already available
   if (!data.value?.settings) {
@@ -233,7 +233,7 @@ export const useUserStore = defineStore('user', () => {
   const login = async (username: string, password: string|null): Promise<Error> => {
     $reset();
 
-    if (import.meta.env.VITE_AUTH_SCHEME === 'password') {
+    if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
       // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
@@ -245,7 +245,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       data.value.accessToken = tokenData.value.access_token;
-    } else if (import.meta.env.VITE_AUTH_SCHEME === 'fxa') {
+    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
       // We get a one-time token back from the api, use it to fetch the real access token
       data.value.accessToken = username;
       const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
@@ -255,6 +255,11 @@ export const useUserStore = defineStore('user', () => {
       }
 
       data.value.accessToken = tokenData.value.access_token;
+    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Accounts) {
+      // We rely on user session checks via the backend for auth
+      // But for authentication we need a value in accessToken, if someone tries to fake this
+      // it will just error out on the server side, so no big deal.
+      data.value.accessToken = username;
     } else {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }

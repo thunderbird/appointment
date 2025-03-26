@@ -39,7 +39,7 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
     return external_connections
 
 
-@router.get('/download')
+@router.post('/download')
 def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """Download your account data in zip format! Returns a streaming response with the zip buffer."""
     zip_buffer = data.download(db, subscriber)

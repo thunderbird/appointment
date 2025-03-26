@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import secrets
@@ -8,6 +9,7 @@ from typing import Annotated
 import argon2.exceptions
 import jwt
 from fastapi.security import OAuth2PasswordRequestForm
+from redis import Redis
 from sentry_sdk import capture_exception
 from sqlalchemy.orm import Session
 
@@ -15,13 +17,19 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
 from .. import utils
+from ..controller.apis.accounts_client import AccountsClient
 from ..controller.auth import schedule_links_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
-from ..defines import INVITES_TO_GIVE_OUT
+from ..defines import INVITES_TO_GIVE_OUT, AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 
-from ..dependencies.database import get_db
-from ..dependencies.auth import get_subscriber, get_admin_subscriber, get_subscriber_from_onetime_token
+from ..dependencies.database import get_db, get_shared_redis
+from ..dependencies.auth import (
+    get_subscriber,
+    get_admin_subscriber,
+    get_subscriber_from_onetime_token,
+    get_accounts_client,
+)
 
 from ..controller import auth
 from ..controller.apis.fxa_client import FxaClient
@@ -66,14 +74,221 @@ def create_subscriber(db, email, password, timezone):
 
 
 @router.post('/can-login')
-def can_login(data: schemas.CheckEmail, db: Session = Depends(get_db), fxa_client: FxaClient = Depends(get_fxa_client)):
+def can_login(
+    data: schemas.CheckEmail,
+    db: Session = Depends(get_db),
+    fxa_client: FxaClient = Depends(get_fxa_client),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
+):
     """Determines if a user can go through the login flow"""
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    email = data.email.lower()
+
+    if AuthScheme.is_fxa():
         # This checks if a subscriber exists, or is in allowed list
-        return fxa_client.is_in_allow_list(db, data.email.lower())
+        return fxa_client.is_in_allow_list(db, email)
+    elif AuthScheme.is_accounts():
+        return accounts_client.is_in_allow_list(db, email)
 
     # There's no waiting list setting on password login
     return True
+
+
+@router.get('/auth/accounts')
+def accounts_login(
+    request: Request,
+    email: str,
+    timezone: str | None = None,
+    invite_code: str | None = None,
+    db: Session = Depends(get_db),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
+):
+    """Request an authorization url from accounts"""
+    if not AuthScheme.is_accounts():
+        raise HTTPException(status_code=405)
+
+    accounts_client.setup()
+
+    # Normalize email address to lower case
+    email = email.lower()
+
+    # Check if they're in the allowed list, but only if they didn't provide an invite code
+    # This checks to see if they're already a user (bypasses allow list) or in the allow list.
+    is_in_allow_list = accounts_client.is_in_allow_list(db, email)
+
+    if not is_in_allow_list and not invite_code:
+        raise HTTPException(status_code=403, detail=l10n('not-in-allow-list'))
+    elif not is_in_allow_list and invite_code:
+        # For slightly nicer error handling do the invite code check now.
+        # Only if they're not in the allow list and have an invite code.
+        if not repo.invite.code_exists(db, invite_code):
+            raise HTTPException(404, l10n('invite-code-not-valid'))
+        if not repo.invite.code_is_available(db, invite_code):
+            raise HTTPException(403, l10n('invite-code-not-valid'))
+
+    url, state = accounts_client.get_redirect_url(token_urlsafe(32))
+
+    request.session['tb_accounts_state'] = state
+    request.session['tb_accounts_user_email'] = email
+    request.session['tb_accounts_user_timezone'] = timezone
+    request.session['tb_accounts_user_invite_code'] = invite_code
+
+    return {'url': url}
+
+
+@router.get('/auth/accounts/callback')
+def accounts_callback(
+    request: Request,
+    user_session_id: str,
+    state: str,
+    db: Session = Depends(get_db),
+    shared_redis_client: Redis = Depends(get_shared_redis),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
+):
+    """Auth callback from accounts. It's a bit of a journey:
+    - We first ensure the state has not changed during the authentication process.
+    - We setup the accounts client connection.
+    - We retrieve the profile from the user session id returned to us in this flow.
+        - That pings a shared redis cache, if the user information isn't there the user never logged in to accounts.
+    - We attempt to retrieve the user by uuid, and by email.
+        - If both fail then we create a new user.
+    - We then create or update an external connection for the accounts connection details.
+    - We give set the accounts session key in the user's session (cookie) so they can use it for authentication.
+    - And finally we send them back to the frontend.
+    """
+    if not AuthScheme.is_accounts():
+        raise HTTPException(status_code=405)
+
+    if 'tb_accounts_state' not in request.session or request.session['tb_accounts_state'] != state:
+        raise HTTPException(400, 'Invalid state.')
+    if 'tb_accounts_user_email' not in request.session or request.session['tb_accounts_user_email'] == '':
+        raise HTTPException(400, 'Email could not be retrieved.')
+
+    # Decode the user session
+    user_session_id = base64.b64decode(user_session_id).decode()
+
+    email = request.session['tb_accounts_user_email']
+    # We only use timezone during subscriber creation, or if their timezone is None
+    timezone = request.session['tb_accounts_user_timezone']
+    invite_code = request.session.get('tb_accounts_user_invite_code')
+
+    # Clear session keys
+    request.session.pop('tb_accounts_state')
+    request.session.pop('tb_accounts_user_email')
+    request.session.pop('tb_accounts_user_timezone')
+    if invite_code:
+        request.session.pop('tb_accounts_user_invite_code')
+
+    accounts_client.setup()
+
+    # Retrieve credentials and user profile
+    profile = shared_redis_client.get(f'{REDIS_USER_SESSION_PROFILE_KEY}.{user_session_id}')
+
+    if not profile:
+        accounts_client.logout()
+        raise HTTPException(400, l10n('email-mismatch'))
+
+    profile = json.loads(profile)
+
+    if profile['email'] != email:
+        accounts_client.logout()
+        raise HTTPException(400, l10n('email-mismatch'))
+
+    accounts_subscriber = repo.external_connection.get_subscriber_by_accounts_uuid(db, profile.get('uuid'))
+    # Also look up the subscriber (in case we have an existing account that's not tied to a given uuid)
+    subscriber = repo.subscriber.get_by_email(db, email)
+
+    new_subscriber_flow = not accounts_subscriber and not subscriber
+
+    if new_subscriber_flow:
+        # Double check:
+        # Ensure the invite code exists and is available
+        # Use some inline-errors for now. We don't have a good error flow!
+        is_in_allow_list = accounts_client.is_in_allow_list(db, email)
+
+        if not is_in_allow_list:
+            if not repo.invite.code_exists(db, invite_code):
+                raise HTTPException(404, l10n('invite-code-not-valid'))
+            if not repo.invite.code_is_available(db, invite_code):
+                raise HTTPException(403, l10n('invite-code-not-valid'))
+
+        subscriber = repo.subscriber.create(
+            db,
+            schemas.SubscriberBase(
+                email=email,
+                username=email,
+                timezone=timezone,
+            ),
+        )
+
+        # Give them 10 invites
+        repo.invite.generate_codes(db, INVITES_TO_GIVE_OUT, subscriber.id)
+
+        if not is_in_allow_list:
+            # Use the invite code after we've created the new subscriber
+            used = repo.invite.use_code(db, invite_code, subscriber.id)
+
+            # This shouldn't happen, but just in case!
+            if not used:
+                repo.subscriber.hard_delete(db, subscriber)
+                raise HTTPException(500, l10n('unknown-error'))
+
+    elif not subscriber:
+        subscriber = accounts_subscriber
+
+    # Only proceed if user account is enabled (which is the default case for new users)
+    if subscriber.is_deleted:
+        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
+
+    accounts_connection = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.accounts)
+
+    # If we have accounts_connection, ensure the incoming one matches our known one.
+    # This shouldn't occur, but it's a safety check in-case we missed a webhook push.
+    if any([profile['uuid'] != ec.type_id for ec in accounts_connection]):
+        # Ensure sentry captures the error too!
+        if os.getenv('SENTRY_DSN') != '':
+            e = Exception('Invalid Credentials, incoming profile uid does not match existing profile uid')
+            capture_exception(e)
+
+        raise HTTPException(403, l10n('invalid-credentials'))
+
+    external_connection_schema = schemas.ExternalConnection(
+        name=profile['email'],
+        type=ExternalConnectionType.accounts,
+        type_id=profile['uuid'],
+        owner_id=subscriber.id,
+        token=json.dumps({'access': user_session_id}),
+    )
+
+    if not accounts_subscriber:
+        repo.external_connection.create(db, external_connection_schema)
+    else:
+        repo.external_connection.update_token(
+            db,
+            json.dumps({'access': user_session_id}),
+            subscriber.id,
+            external_connection_schema.type,
+            external_connection_schema.type_id,
+        )
+
+    # Update profile with fxa info
+    data = schemas.SubscriberIn(
+        avatar_url=profile['avatar_url'],
+        name=subscriber.name,
+        username=subscriber.username,
+        email=profile['email'],
+        timezone=timezone if subscriber.timezone is None else None,
+    )
+
+    # If they're a new subscriber we should fill in some defaults!
+    if new_subscriber_flow:
+        data.name = profile['display_name'] if 'display_name' in profile else profile['email'].split('@')[0]
+        data.username = profile['email']
+
+    repo.subscriber.update(db, data, subscriber.id)
+
+    request.session['accounts_session'] = user_session_id
+
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/")
 
 
 @router.get('/fxa_login')
@@ -86,7 +301,7 @@ def fxa_login(
     fxa_client: FxaClient = Depends(get_fxa_client),
 ):
     """Request an authorization url from fxa"""
-    if os.getenv('AUTH_SCHEME') != 'fxa':
+    if not AuthScheme.is_fxa():
         raise HTTPException(status_code=405)
 
     fxa_client.setup()
@@ -148,7 +363,7 @@ def fxa_callback(
         'email-not-in-session': 'email-not-in-session',
     }
 
-    if os.getenv('AUTH_SCHEME') != 'fxa':
+    if not AuthScheme.is_fxa():
         raise HTTPException(status_code=405)
 
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
@@ -294,7 +509,7 @@ def fxa_callback(
 @router.post('/fxa-token')
 def fxa_token(subscriber=Depends(get_subscriber_from_onetime_token)):
     """Generate a access token from a one time token retrieved after login"""
-    if os.getenv('AUTH_SCHEME') != 'fxa':
+    if not AuthScheme.is_fxa() and not AuthScheme.is_accounts():
         raise HTTPException(status_code=405)
 
     # Generate our jwt token, we only store the username on the token
@@ -314,7 +529,7 @@ def token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ):
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if not AuthScheme.is_password():
         raise HTTPException(status_code=405)
 
     has_subscribers = db.query(Subscriber).count()
@@ -356,14 +571,23 @@ def logout(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     fxa_client: FxaClient = Depends(get_fxa_client),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
     """Logout a given subscriber session"""
+    auth_client = None
 
-    if os.getenv('AUTH_SCHEME') == 'fxa':
+    if AuthScheme.is_fxa():
         fxa_client.setup(subscriber.id, subscriber.get_external_connection(ExternalConnectionType.fxa).token)
+        auth_client = fxa_client
+    elif AuthScheme.is_accounts():
+        blob = subscriber.get_external_connection(ExternalConnectionType.accounts).token
+        token = json.loads(blob)
+        if token:
+            accounts_client.setup(subscriber.id, token.get('access'))
+            auth_client = accounts_client
 
     # Don't set a minimum_valid_iat_time here.
-    auth.logout(db, subscriber, fxa_client, deny_previous_tokens=False)
+    auth.logout(db, subscriber, auth_client, deny_previous_tokens=False)
 
     return True
 

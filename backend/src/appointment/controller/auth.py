@@ -1,6 +1,6 @@
 """Module: auth
 
-Handle authentification with FxA and get subscription data.
+Handle authentication with Thunderbird Accounts or FxA and get subscription data.
 """
 
 import os
@@ -11,19 +11,25 @@ import urllib.parse
 
 from sqlalchemy.orm import Session
 
+from .apis.accounts_client import AccountsClient
 from .apis.fxa_client import FxaClient
 from ..database import schemas, models, repo
 
 
-def logout(db: Session, subscriber: models.Subscriber, fxa_client: FxaClient | None, deny_previous_tokens=True):
+def logout(
+    db: Session,
+    subscriber: models.Subscriber,
+    auth_client: FxaClient | AccountsClient | None,
+    deny_previous_tokens=True,
+):
     """Sets a minimum valid issued at time (time). This prevents access tokens issued earlier from working."""
     if deny_previous_tokens:
         subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
         db.add(subscriber)
         db.commit()
 
-    if os.getenv('AUTH_SCHEME') == 'fxa':
-        fxa_client.logout()
+    if auth_client:
+        auth_client.logout()
 
 
 def sign_url(url: str):
@@ -73,7 +79,6 @@ def schedule_links_by_subscriber(db, subscriber: models.Subscriber):
     url_safe_username = urllib.parse.quote_plus(subscriber.username)
 
     # Empty space at join is for trailing slash!
-    return list(map(
-        lambda sch: '/'.join([short_url, url_safe_username, urllib.parse.quote_plus(sch.slug), '']),
-        schedules)
+    return list(
+        map(lambda sch: '/'.join([short_url, url_safe_username, urllib.parse.quote_plus(sch.slug), '']), schedules)
     )
