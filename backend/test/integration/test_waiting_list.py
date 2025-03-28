@@ -408,8 +408,8 @@ class TestWaitingListAdminInvite:
                     assert mock.call_args_list[i][0][0] == send_invite_account_email
                     assert mock.call_args_list[i].kwargs == {
                         'date': waiting_list_user.time_created,
-                        'lang': 'en',
                         'to': waiting_list_user.email,
+                        'lang': 'en',
                     }
 
     def test_invite_existing_subscriber(
@@ -473,6 +473,6 @@ class TestWaitingListAdminInvite:
                         assert mock.call_args_list[i][0][0] == send_invite_account_email
                         assert mock.call_args_list[i].kwargs == {
                             'date': waiting_list_user.time_created,
-                            'lang': 'en',
                             'to': waiting_list_user.email,
+                            'lang': 'en',
                         }

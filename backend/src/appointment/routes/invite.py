@@ -62,7 +62,7 @@ def send_invite_email(
     data: SendInviteEmailIn,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    # Note admin must be here to for permission reasons
+    # Note admin must be here for permission reasons
     _admin: Subscriber = Depends(get_admin_subscriber),
 ):
     """With a given email address, generate a subscriber and email them, welcoming them to Thunderbird Appointment."""
@@ -89,6 +89,9 @@ def send_invite_email(
     db.add(invite_code)
     db.commit()
 
-    background_tasks.add_task(send_invite_account_email, to=email, lang=subscriber.language)
+    waiting_list_entry = repo.invite.get_waiting_list_entry_by_email(email)
+    date = waiting_list_entry.time_created if waiting_list_entry else ''
+
+    background_tasks.add_task(send_invite_account_email, date=date, to=email, lang=subscriber.language)
 
     return invite_code
