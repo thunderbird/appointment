@@ -89,7 +89,7 @@ def send_invite_email(
     db.add(invite_code)
     db.commit()
 
-    waiting_list_entry = repo.invite.get_waiting_list_entry_by_email(email)
+    waiting_list_entry = repo.invite.get_waiting_list_entry_by_email(db, email)
     date = waiting_list_entry.time_created if waiting_list_entry else ''
 
     background_tasks.add_task(send_invite_account_email, date=date, to=email, lang=subscriber.language)
