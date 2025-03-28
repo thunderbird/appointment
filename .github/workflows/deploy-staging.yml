@@ -368,6 +368,7 @@ jobs:
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
     needs: create-release
+    if: always() && ${{ !failure() }} && ${{ !canceled() }}
     runs-on: ubuntu-latest
     environment: staging
     env:
