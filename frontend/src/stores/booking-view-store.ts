@@ -7,7 +7,7 @@ import { dayjsKey } from '@/keys';
 /**
  * Store for BookingView and its tightly coupled components.
  */
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useBookingViewStore = defineStore('bookingView', () => {
   const dj = inject(dayjsKey);
 

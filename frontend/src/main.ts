@@ -18,7 +18,7 @@ import i18ninstance from '@/composables/i18n';
 import '@/assets/styles/main.css';
 
 // init sentry
-// eslint-disable-next-line import/no-extraneous-dependencies
+ 
 import * as Sentry from '@sentry/vue';
 
 const app = createApp(App);

@@ -5,7 +5,7 @@ import { ExternalConnectionProviders } from '@/definitions';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useExternalConnectionsStore = defineStore('externalConnections', () => {
   // State
   const isLoaded = ref(false);

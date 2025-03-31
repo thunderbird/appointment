@@ -34,7 +34,7 @@ const hideInviteField = ref(false);
 const isLoading = ref(false);
 const formRef = ref();
 
-// eslint-disable-next-line no-shadow
+ 
 enum LoginSteps {
   Login = 1,
   SignUp = 2,

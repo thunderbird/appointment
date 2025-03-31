@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useSiteNotificationStore = defineStore('siteNotification', () => {
   // State
   const isVisible = ref(false);

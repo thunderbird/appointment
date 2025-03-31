@@ -5,7 +5,7 @@ import { dayjsKey } from '@/keys';
 import { Dayjs } from 'dayjs';
 import { DateFormatStrings } from '@/definitions';
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useCalendarStore = defineStore('calendars', () => {
   const dj = inject(dayjsKey);
   const call = ref(null);

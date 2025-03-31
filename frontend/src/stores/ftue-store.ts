@@ -9,7 +9,7 @@ const initialObject = {
   step: FtueStep.SetupProfile,
 };
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useFTUEStore = defineStore('FTUE', () => {
   // State
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));
