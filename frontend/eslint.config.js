@@ -3,6 +3,7 @@ import tsLint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 import vueLint from 'eslint-plugin-vue';
 import vueTsEslintConfig from '@vue/eslint-config-typescript';
+import globals from "globals";
 
 export default [
   jsLint.configs.recommended,
@@ -25,6 +26,10 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        global: 'readonly',
+      },
     },
     rules: {
       'import/extensions': ['error', 'ignorePackages', {
@@ -41,6 +46,7 @@ export default [
       // Disable full warning, and customize the typescript one
       // Warn about unused vars unless they start with an underscore
       'no-unused-vars': 'off',
+      '@typescript-eslint/no-require-imports': 'off', // can be removed when we got rid of Tailwind or updated to v4
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -59,10 +65,11 @@ export default [
   },
   {
     ignores: [
-      'src/assets',
-      'src/elements/arts',
-      'src/locales',
-      'node_modules',
+      '**/.*',
+      'src/assets/*',
+      'src/elements/arts/*',
+      'src/locales/*',
+      'node_modules/*',
     ],
   }
 ];

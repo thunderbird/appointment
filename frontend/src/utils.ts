@@ -25,14 +25,14 @@ export const lcFirst = (s: string): string => {
 };
 
 // Convert a numeric enum to an object for key-value iteration
-export const enumToObject = (e: Object): { [key in string]: number } => {
+export const enumToObject = (e: object): { [key in string]: number } => {
   const o = {};
   Object.keys(e).filter((v) => isNaN(Number(v))).forEach((k) => o[lcFirst(k)] = e[k]);
   return o;
 };
 
 // find a key by a given value and return it
-export const keyByValue = (o: Object, v: number|string, isEnum = false): number|string => {
+export const keyByValue = (o: object, v: number|string, isEnum = false): number|string => {
   const e = isEnum ? enumToObject(o) : o;
   return Object.keys(e).find((k) => e[k] === v);
 };
@@ -94,7 +94,7 @@ export const timeFormat = (): string => {
   let use12HourTime = null;
   try {
     use12HourTime = Intl.DateTimeFormat(window.navigator.language, { hour: 'numeric' }).resolvedOptions()?.hour12 ?? null;
-  } catch (e: RangeError|any) {
+  } catch (_e: RangeError|any) {
     // Catch any range error raised by invalid language/locale codes and pass
   }
 

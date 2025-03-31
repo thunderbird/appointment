@@ -1,4 +1,3 @@
-import { Dayjs, ConfigType } from 'dayjs';
 import { defineStore } from 'pinia';
 import { ref, inject } from 'vue';
 import { BookingCalendarView } from '@/definitions';
