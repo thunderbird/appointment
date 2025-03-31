@@ -5,7 +5,7 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
 import NavBar from '@/components/NavBar.vue';
 import TitleBar from '@/components/TitleBar.vue';
 import FooterBar from '@/components/FooterBar.vue';
