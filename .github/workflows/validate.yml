@@ -146,10 +146,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .'[test]'
 
-      - name: Backend lint check
-        run: |
-          cd ./backend && ruff check
-
       - name: Test with pytest
         working-directory: ./backend
         run: |
@@ -161,6 +157,10 @@ jobs:
         continue-on-error: true
         run: |
           coverage report
+
+      - name: Backend lint check
+        run: |
+          cd ./backend && ruff check
 
   validate-frontend:
     needs: detect-changes
