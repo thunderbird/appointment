@@ -9,6 +9,7 @@ from argon2 import PasswordHasher
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from appointment.database.models import secret
+from appointment.exceptions.misc import UnexpectedBehaviourWarning
 
 ph = PasswordHasher()
 
@@ -165,3 +166,14 @@ def normalize_secrets():
         # Need to stuff these somewhere
         os.environ['POSTHOG_PROJECT_KEY'] = secrets.get('posthog_project_key')
         os.environ['POSTHOG_HOST'] = secrets.get('posthog_host')
+
+
+def flag_code(reason, debug_obj):
+    """Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry"""
+    import sentry_sdk
+
+    try:
+        sentry_sdk.set_extra('debug_object', debug_obj)
+        raise UnexpectedBehaviourWarning(message=reason, info=debug_obj)
+    except UnexpectedBehaviourWarning as ex:
+        sentry_sdk.capture_exception(ex)

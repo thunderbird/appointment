@@ -18,6 +18,7 @@ from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.misc import UnexpectedBehaviourWarning
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
+from ..utils import flag_code
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
@@ -38,15 +39,6 @@ def get_user_from_accounts_session(request, db):
     return repo.external_connection.get_subscriber_by_accounts_uuid(db, user_profile.get('uuid'))
 
 
-def flag_code(reason, debug_obj):
-    # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
-    try:
-        sentry_sdk.set_extra('debug_object', debug_obj)
-        raise UnexpectedBehaviourWarning(message=reason, info=debug_obj)
-    except UnexpectedBehaviourWarning as ex:
-        sentry_sdk.capture_exception(ex)
-
-
 def get_user_from_token(db, token: str, require_jti=False):
     sub = None
     iat = None
@@ -61,7 +53,7 @@ def get_user_from_token(db, token: str, require_jti=False):
     except jwt.exceptions.InvalidTokenError as ex:
         flag_code(
             'Invalid Token Error - Exception',
-            debug_obj={'exception': ex, 'subscriber': sub, 'issued_at': iat, 'token_id': jti},
+            debug_obj={'exception': ex, 'subscriber': sub, 'issued_at': iat, 'jti': jti},
         )
         raise InvalidTokenException()
 
@@ -70,7 +62,7 @@ def get_user_from_token(db, token: str, require_jti=False):
 
     # Check this first as any doesn't short-circuit
     if subscriber is None:
-        flag_code('Invalid Token Error - No Sub', debug_obj={'subscriber': sub, 'issued_at': iat, 'token_id': jti})
+        flag_code('Invalid Token Error - No Sub', debug_obj={'subscriber': sub, 'issued_at': iat, 'jti': jti})
         raise InvalidTokenException()
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
@@ -91,8 +83,8 @@ def get_user_from_token(db, token: str, require_jti=False):
                 'minimum_issued_at_timestamp': int(subscriber.minimum_valid_iat_time.timestamp()),
                 'subscriber': sub,
                 'issued_at': iat,
-                'require_token_id': require_jti,
-                'token_id': jti,
+                'require_jti': require_jti,
+                'jti': jti,
             },
         )
         raise InvalidTokenException()
