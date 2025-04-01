@@ -93,7 +93,15 @@ def get_user_from_token(db, token: str, require_jti=False):
     # If we're a one-time token, set the minimum valid iat time to now!
     # Beats having to store them multiple times, and it's only used in post-login.
     if jti:
-        subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.UTC)
+        subscriber.minimum_valid_iat_time = now
+        # Flag this code for continued debugging
+        flag_code(
+            'One Time Access Token Set',
+            {
+                'now': now,
+            },
+        )
         db.add(subscriber)
         db.commit()
 

@@ -31,11 +31,14 @@ def logout(
         subscriber.minimum_valid_iat_time = now - datetime.timedelta(minutes=1)
 
         # Flag this code for continued debugging
-        flag_code('Logging out', {
-            'minimum_valid_iat_time': subscriber.minimum_valid_iat_time,
-            'now': now,
-        })
-        
+        flag_code(
+            'Logging out',
+            {
+                'minimum_valid_iat_time': subscriber.minimum_valid_iat_time,
+                'now': now,
+            },
+        )
+
         db.add(subscriber)
         db.commit()
 

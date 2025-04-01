@@ -36,18 +36,30 @@ from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
 from ..exceptions import validation
 from ..l10n import l10n
-from ..utils import get_password_hash
+from ..utils import get_password_hash, flag_code
 
 router = APIRouter()
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
+    now = datetime.now(UTC)
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=15)
-    to_encode.update({'exp': expire, 'iat': int(datetime.now(UTC).timestamp())})
+    to_encode.update({'exp': expire, 'iat': int(now.timestamp())})
+
+    # Flag this code for continued debugging
+    flag_code(
+        'Creating Access Token',
+        {
+            'expire': expire,
+            'now': now,
+            'now_timestamp': int(now.timestamp()),
+        },
+    )
+
     encoded_jwt = jwt.encode(to_encode, os.getenv('JWT_SECRET'), algorithm=os.getenv('JWT_ALGO'))
     return encoded_jwt
 
@@ -367,7 +379,9 @@ def fxa_callback(
         raise HTTPException(status_code=405)
 
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
-        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-state']}")
+        return RedirectResponse(
+            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-state']}"
+        )
     if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
         return RedirectResponse(
             f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-not-in-session']}"
