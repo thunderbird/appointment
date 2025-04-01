@@ -36,7 +36,7 @@ from ..controller.apis.fxa_client import FxaClient
 from ..dependencies.fxa import get_fxa_client
 from ..exceptions import validation
 from ..l10n import l10n
-from ..utils import get_password_hash, flag_code
+from ..utils import get_password_hash
 
 router = APIRouter()
 
@@ -49,16 +49,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.now(UTC) + timedelta(minutes=15)
     to_encode.update({'exp': expire, 'iat': int(now.timestamp())})
-
-    # Flag this code for continued debugging
-    flag_code(
-        'Creating Access Token',
-        {
-            'expire': expire,
-            'now': now,
-            'now_timestamp': int(now.timestamp()),
-        },
-    )
 
     encoded_jwt = jwt.encode(to_encode, os.getenv('JWT_SECRET'), algorithm=os.getenv('JWT_ALGO'))
     return encoded_jwt

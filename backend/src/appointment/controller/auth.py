@@ -14,7 +14,6 @@ from sqlalchemy.orm import Session
 from .apis.accounts_client import AccountsClient
 from .apis.fxa_client import FxaClient
 from ..database import schemas, models, repo
-from ..utils import flag_code
 
 
 def logout(
@@ -29,15 +28,6 @@ def logout(
         # Reduce the parry-window for webhooks. This will hopefully prevent the login immediately logged out issue.
         now = datetime.datetime.now(datetime.UTC)
         subscriber.minimum_valid_iat_time = now - datetime.timedelta(minutes=1)
-
-        # Flag this code for continued debugging
-        flag_code(
-            'Logging out',
-            {
-                'minimum_valid_iat_time': subscriber.minimum_valid_iat_time,
-                'now': now,
-            },
-        )
 
         db.add(subscriber)
         db.commit()

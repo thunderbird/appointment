@@ -17,7 +17,6 @@ from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
-from ..utils import flag_code
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
@@ -49,11 +48,7 @@ def get_user_from_token(db, token: str, require_jti=False):
         jti = payload.get('jti')
         if sub is None:
             raise InvalidTokenException()
-    except jwt.exceptions.InvalidTokenError as ex:
-        flag_code(
-            'Invalid Token Error - Exception',
-            debug_obj={'exception': ex, 'subscriber': sub, 'issued_at': iat, 'jti': jti},
-        )
+    except jwt.exceptions.InvalidTokenError:
         raise InvalidTokenException()
 
     sub_id = sub.replace('uid-', '')
@@ -61,7 +56,6 @@ def get_user_from_token(db, token: str, require_jti=False):
 
     # Check this first as any doesn't short-circuit
     if subscriber is None:
-        flag_code('Invalid Token Error - No Sub', debug_obj={'subscriber': sub, 'issued_at': iat, 'jti': jti})
         raise InvalidTokenException()
 
     # Token has been expired by us - temp measure to avoid spinning a refresh system, or a deny list for this issue
@@ -75,19 +69,6 @@ def get_user_from_token(db, token: str, require_jti=False):
             require_jti and not jti,
         ]
     ):
-        flag_code(
-            'Invalid Token Error - Expired',
-            debug_obj={
-                'minimum_issued_at': subscriber.minimum_valid_iat_time,
-                'minimum_issued_at_timestamp': int(subscriber.minimum_valid_iat_time.timestamp())
-                if subscriber.minimum_valid_iat_time
-                else None,
-                'subscriber': sub,
-                'issued_at': iat,
-                'require_jti': require_jti,
-                'jti': jti,
-            },
-        )
         raise InvalidTokenException()
 
     # If we're a one-time token, set the minimum valid iat time to now!
@@ -95,13 +76,6 @@ def get_user_from_token(db, token: str, require_jti=False):
     if jti:
         now = datetime.datetime.now(datetime.UTC)
         subscriber.minimum_valid_iat_time = now
-        # Flag this code for continued debugging
-        flag_code(
-            'One Time Access Token Set',
-            {
-                'now': now,
-            },
-        )
         db.add(subscriber)
         db.commit()
 
