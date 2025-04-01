@@ -1,8 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { SplashscreenPage } from '../pages/splashscreen-page';
 import { FxAPage } from '../pages/fxa-page';
-import { APPT_TARGET_ENV, APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, TIMEOUT_30_SECONDS } from '../const/constants';
 import { DashboardPage } from '../pages/dashboard-page';
+
+import {
+  APPT_TARGET_ENV,
+  APPT_PAGE_TITLE,
+  PLAYWRIGHT_TAG_PROD_SANITY,
+  PLAYWRIGHT_TAG_E2E_SUITE,
+  PLAYWRIGHT_TAG_PROD_NIGHTLY,
+  TIMEOUT_30_SECONDS
+} from '../const/constants';
 
 let splashscreenPage: SplashscreenPage;
 let signInPage: FxAPage;

@@ -8,6 +8,7 @@ import {
   APPT_BOOKEE_NAME,
   APPT_BOOKEE_EMAIL,
   PLAYWRIGHT_TAG_PROD_SANITY,
+  PLAYWRIGHT_TAG_PROD_NIGHTLY,
   PLAYWRIGHT_TAG_E2E_SUITE,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
@@ -70,24 +71,23 @@ test.use({
   timezoneId: APPT_TIMEZONE_SETTING_TORONTO,
 });
 
-// verify we are able to book an appointment using existing user's share link
 test.describe('book an appointment', () => {
   test('able to access booking page via short link', {
-    tag: PLAYWRIGHT_TAG_PROD_SANITY,
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY],
   }, async ({ page }) => {
     await bookingPage.gotoBookingPageShortUrl();
     await verifyBookingPageLoaded();
   });
 
   test('able to access booking page via long link', {
-    tag: PLAYWRIGHT_TAG_PROD_SANITY,
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY]
   }, async ({ page }) => {
     await bookingPage.gotoBookingPageLongUrl();
     await verifyBookingPageLoaded();
   });
 
   test('able to request a booking', {
-    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE],
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
   }, async ({ page }) => {
     // in order to ensure we find an available slot we can click on, first switch to week view URL
     await bookingPage.gotoBookingPageWeekView();

@@ -5,6 +5,7 @@ import { DashboardPage } from '../pages/dashboard-page';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
+  PLAYWRIGHT_TAG_PROD_NIGHTLY,
   APPT_LOGIN_EMAIL,
   APPT_DISPLAY_NAME,
   APPT_MY_SHARE_LINK,
@@ -30,7 +31,7 @@ let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
 test.describe('settings navigation', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
@@ -68,7 +69,7 @@ test.describe('settings navigation', {
 });
 
 test.describe('general settings', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
@@ -163,7 +164,7 @@ test.describe('general settings', {
 });
 
 test.describe('calendar settings', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
@@ -216,7 +217,7 @@ test.describe('calendar settings', {
 });
 
 test.describe('account settings', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
@@ -304,7 +305,7 @@ test.describe('account settings', {
 });
 
 test.describe('connected accounts settings', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
