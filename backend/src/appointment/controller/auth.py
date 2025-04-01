@@ -24,7 +24,9 @@ def logout(
 ):
     """Sets a minimum valid issued at time (time). This prevents access tokens issued earlier from working."""
     if deny_previous_tokens:
-        subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC)
+        # TODO: This will be removed in the future
+        # Reduce the parry-window for webhooks. This will hopefully prevent the login immediately logged out issue.
+        subscriber.minimum_valid_iat_time = datetime.datetime.now(datetime.UTC) - datetime.timedelta(minutes=1)
         db.add(subscriber)
         db.commit()
 
