@@ -79,7 +79,9 @@ def get_user_from_token(db, token: str, require_jti=False):
             'Invalid Token Error - Expired',
             debug_obj={
                 'minimum_issued_at': subscriber.minimum_valid_iat_time,
-                'minimum_issued_at_timestamp': int(subscriber.minimum_valid_iat_time.timestamp()) if subscriber.minimum_valid_iat_time else None,
+                'minimum_issued_at_timestamp': int(subscriber.minimum_valid_iat_time.timestamp())
+                if subscriber.minimum_valid_iat_time
+                else None,
                 'subscriber': sub,
                 'issued_at': iat,
                 'require_jti': require_jti,
