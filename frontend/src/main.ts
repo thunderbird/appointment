@@ -58,6 +58,7 @@ if (useSentry) {
     replaysOnErrorSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
     tracePropagationTargets: ['localhost', 'https://stage.appointment.day', 'https://appointment.day', 'https://apmt.day'],
+    sendDefaultPii: false,
   });
 }
 
