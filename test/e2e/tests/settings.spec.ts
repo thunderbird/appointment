@@ -15,6 +15,7 @@ import {
   APPT_THEME_SETTING_LIGHT,
   APPT_TIMEZONE_SETTING_TORONTO,
   APPT_TIMEZONE_SETTING_HALIFAX,
+  TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
   APPT_BROWSER_STORE_LANGUAGE_EN,
@@ -187,11 +188,12 @@ test.describe('calendar settings', {
     await expect(settingsPage.editCalendarBtn).toBeEnabled();
     await expect(settingsPage.connectedCalendarTitle).toBeVisible();
 
-    // edit the connected calendar and click save button (without making changes)
+    // edit the connected calendar and cancel out
     await settingsPage.editCalendarBtn.click();
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
     await expect(settingsPage.editCalendarTitleInput).toBeEnabled();
     await expect(settingsPage.editCalendarColorInput).toBeEnabled();
-    await settingsPage.editCalendarSaveBtn.click();
+    await settingsPage.editCalendarCancelBtn.click();
   });
 
   test('add google calendar button', async ({ page }) => {
@@ -296,6 +298,7 @@ test.describe('account settings', {
     // we won't actually delete the account :) as that would break the other E2E tests
     await expect(settingsPage.deleteAcctBtn).toBeEnabled();
     await settingsPage.deleteAcctBtn.click();
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
     await settingsPage.confirmDeleteAcctBtn.click();
   });
 });
