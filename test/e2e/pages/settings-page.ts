@@ -49,7 +49,6 @@ export class SettingsPage {
   readonly connectedCalendarsHeader: Locator;
   readonly editCalendarBtn: Locator;
   readonly connectedCalendarTitle: Locator;
-  readonly editCalendarSaveBtn: Locator;
   readonly editCalendarTitleInput: Locator;
   readonly editCalendarColorInput: Locator;
   readonly syncCalendarsBtn: Locator;
@@ -116,7 +115,6 @@ export class SettingsPage {
     this.connectedCalendarsHeader = this.page.getByText('Connected Calendars', { exact: true });
     this.editCalendarBtn = this.page.getByTestId('settings-calendar-edit-calendar-btn');
     this.connectedCalendarTitle = this.page.getByText(APPT_LOGIN_EMAIL, { exact: true });
-    this.editCalendarSaveBtn = this.page.getByRole('button', { name: 'Save' });
     this.editCalendarTitleInput = this.page.getByTestId('settings-calendar-title-input');
     this.editCalendarColorInput = this.page.getByTestId('settings-calendar-color-input');
     this.syncCalendarsBtn = this.page.getByRole('button', { name: 'Sync Calendars' });
