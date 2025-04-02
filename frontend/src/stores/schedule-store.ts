@@ -18,7 +18,7 @@ import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { timeFormat } from '@/utils';
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useScheduleStore = defineStore('schedules', () => {
   const dj = inject(dayjsKey);
 

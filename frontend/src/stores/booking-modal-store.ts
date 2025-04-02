@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { ModalStates } from '@/definitions';
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useBookingModalStore = defineStore('bookingModal', () => {
   const open = ref(false);
   const state = ref(ModalStates.Open);

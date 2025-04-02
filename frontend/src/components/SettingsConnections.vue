@@ -42,14 +42,14 @@ const isAccountsAuth = inject(isAccountsAuthKey);
 const filteredConnections = computed(() => {
   const newConnections = {};
   const keys = Object.keys(connections.value);
-  // eslint-disable-next-line no-restricted-syntax
+   
   for (const connection of keys) {
     if (connection === 'fxa' && !isFxaAuth) {
-      // eslint-disable-next-line no-continue
+       
       continue;
     }
     if (connection === 'accounts' && !isAccountsAuth) {
-      // eslint-disable-next-line no-continue
+       
       continue;
     }
     newConnections[connection] = connections.value[connection];

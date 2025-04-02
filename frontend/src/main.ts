@@ -18,7 +18,7 @@ import i18ninstance from '@/composables/i18n';
 import '@/assets/styles/main.css';
 
 // init sentry
-// eslint-disable-next-line import/no-extraneous-dependencies
+ 
 import * as Sentry from '@sentry/vue';
 
 const app = createApp(App);
@@ -58,6 +58,7 @@ if (useSentry) {
     replaysOnErrorSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
     tracePropagationTargets: ['localhost', 'https://stage.appointment.day', 'https://appointment.day', 'https://apmt.day'],
+    sendDefaultPii: false,
   });
 }
 

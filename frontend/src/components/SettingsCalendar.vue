@@ -40,7 +40,7 @@ const deleteCalendarModalTarget = ref<number>(null);
 const loading = ref(false);
 
 // handle calendar user input to add or edit calendar connections
-// eslint-disable-next-line no-shadow
+ 
 enum InputModes {
   Hidden,
   Discovery,

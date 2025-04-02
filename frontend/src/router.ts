@@ -1,4 +1,4 @@
-import { defineAsyncComponent, inject } from 'vue';
+import { defineAsyncComponent } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
@@ -213,7 +213,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from) => {
+router.beforeEach((to, _from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
 
   if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'logout', 'undefined'].includes(String(to.name))) {

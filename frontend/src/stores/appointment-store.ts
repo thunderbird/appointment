@@ -1,4 +1,3 @@
-import { Dayjs, ConfigType } from 'dayjs';
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
 import { BookingStatus } from '@/definitions';
@@ -8,7 +7,7 @@ import {
 } from '@/models';
 import { dayjsKey, tzGuessKey } from '@/keys';
 
-// eslint-disable-next-line import/prefer-default-export
+ 
 export const useAppointmentStore = defineStore('appointments', () => {
   const dj = inject(dayjsKey);
   const tzGuess = inject(tzGuessKey);

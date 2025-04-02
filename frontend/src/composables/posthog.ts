@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-named-default,import/no-extraneous-dependencies
+ 
 import { default as ph } from 'posthog-js';
 
 /**

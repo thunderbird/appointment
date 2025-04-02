@@ -41,11 +41,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   ref, computed, inject, watch,
 } from 'vue';
-import CalendarMiniMonthDay from '@/elements/calendar/CalendarMiniMonthDay';
+import CalendarMiniMonthDay from '@/elements/calendar/CalendarMiniMonthDay.vue';
 import { useI18n } from 'vue-i18n';
 
 // icons
