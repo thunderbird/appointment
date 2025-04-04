@@ -8,10 +8,11 @@ import {
   afterEach,
 } from 'vitest';
 import { useUserStore, createUserStore } from '@/stores/user-store';
-import { createPinia, setActivePinia } from 'pinia';
+import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
+import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
 const TEST_USERNAME = 'test';
@@ -59,6 +60,7 @@ const restHandlers = [
       language: 'de',
       time_mode: 12,
       colour_scheme: 'dark',
+      start_of_week: 7,
       avatar_url: null,
     });
   }),
@@ -84,9 +86,12 @@ const server = setupServer(...restHandlers);
 }); */
 
 describe('User Store', () => {
+  let app = null;
+
   // Create a pinia instance before each test
   beforeEach(() => {
-    setActivePinia(createPinia());
+    app = withSetup();
+    app.use(createPinia());
   });
 
   // Start server before all tests
@@ -166,6 +171,7 @@ describe('User Store', () => {
     expect(user.data.settings.language).toBeTruthy();
     expect(user.data.settings.timeFormat).toBeTruthy();
     expect(user.data.settings.colourScheme).toBeTruthy();
+    expect(user.data.settings.startOfWeek).toBeTruthy();
     expect(user.data.signedUrl).toBeTruthy();
   });
 });
