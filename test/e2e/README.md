@@ -180,3 +180,52 @@ npm run prod-sanity-test-browserstack
 ```
 
 After the tests finish in your local console you'll see a link to the BrowserStack test session; when signed into your BrowserStack account you'll be able to use that link to see the test session results including video playback.
+
+## Debugging E2E Test Failures
+
+Here is some advice for how to investigate E2E test failures.
+
+### E2E Tests Failing on your Local Dev Environment
+If you are running the E2E tests on your local machine against your local development environment and the tests are failing, you can:
+- Run the tests again this time in debug (UI) mode (see above)
+    - In the debug mode browser expand each test that was ran, and review each test step to trace the test progress and failure
+    - Look at the corresponding screenshots to get a visual of where and when the tests actually failed
+    - Try to correlate the test failure with any local code changes
+
+### E2E Tests Failing in CI on your PR Check
+If you pushed to a branch or PR and the resulting Github pull request E2E test job check is failing, you can:
+
+- In your PR scroll down to the 'Checks' section and click on the failed E2E test job
+- In the console view, expand the E2E tests step and read the test failure details
+- Check if a playwright report artifact exists:
+    - In the console view click on `Summary` (top left)
+    - This shows the GHA summary, at the bottom of the page look for an `Artifacts` section and click on `playwright-report` and download the ZIP
+    - Open the ZIP file, expand it, and open the `index.html` file in your browser
+
+### E2E Tests Failing in CI after a Deployment to Stage or Production
+If you did a stage or production deployment and the resulting E2E tests job failed, you can:
+
+- Go into the Github repo, and
+    - Choose `Actions` at the top
+    - On the list of Actions on the left side choose the one matching your stage or production deployment
+    - In the corresponding list of completed action jobs, click on the failing one
+    - Then click on the failed E2E test step to open the console view
+    - In the console view, expand the E2E tests job and read the test failure details
+    - The tests run in BrowserStack which records a video playback of all of the tests
+        - In the console view search the logs for the string `View build on BrowserStack dashboard` and retrieve the associated BrowserStack session link
+        - Click on the link and sign into BrowserStack with your credentials and view the video replay of the failing test
+
+### Nightly E2E Tests CI Job Failing
+If you notice an email from Github actions indicating that the Nightly E2E Tests job failed, you can:
+
+- Open the failing Github nightly-tests action job:
+    - Click on the `View workflow run` link in the email - or -
+    - Go into the Github repo, and
+        - Choose `Actions` at the top
+        - On the list of Actions on the left side choose `nightly-tests`
+        - In the corresponding list of completed nightly test action jobs, click on the failing one
+    - Then click on the failed E2E test step to open the console view
+    - In the console view, expand the E2E tests job and read the test failure details
+    - The nightly tests run in BrowserStack which records a video playback of all of the tests
+        - In the console view search the logs for the string `View build on BrowserStack dashboard` and retrieve the associated BrowserStack session link
+        - Click on the link and sign into BrowserStack with your credentials and view the video replay of the failing test

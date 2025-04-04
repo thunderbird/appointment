@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SplashscreenPage } from '../pages/splashscreen-page';
-import { APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE } from '../const/constants';
+import { APPT_PAGE_TITLE, PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY } from '../const/constants';
 
 let splashscreenPage: SplashscreenPage;
 

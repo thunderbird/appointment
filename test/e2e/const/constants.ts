@@ -33,6 +33,7 @@ export const APPT_BOOKEE_EMAIL = String(process.env.APPT_BOOKEE_EMAIL);
 // playwright test tags
 export const PLAYWRIGHT_TAG_PROD_SANITY = '@prod-sanity';
 export const PLAYWRIGHT_TAG_E2E_SUITE = '@e2e-suite';
+export const PLAYWRIGHT_TAG_PROD_NIGHTLY = '@prod-nightly';
 
 // general settings options
 export const APPT_LANGUAGE_SETTING_EN = 'EN — English';
