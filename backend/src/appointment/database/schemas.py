@@ -29,6 +29,7 @@ from .models import (
     InviteStatus,
     ColourScheme,
     TimeMode,
+    IsoWeekdays
 )
 from .. import utils, defines
 
@@ -311,6 +312,7 @@ class SubscriberIn(BaseModel):
     language: str | None = FALLBACK_LOCALE
     colour_scheme: ColourScheme = ColourScheme.system
     time_mode: TimeMode = TimeMode.h12
+    start_of_week: IsoWeekdays = IsoWeekdays.sunday
 
 
 class SubscriberBase(SubscriberIn):

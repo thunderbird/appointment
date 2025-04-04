@@ -619,6 +619,7 @@ def me(
         language=subscriber.language,
         colour_scheme=subscriber.colour_scheme,
         time_mode=subscriber.time_mode,
+        start_of_week=subscriber.start_of_week,
     )
 
 

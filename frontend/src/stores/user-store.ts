@@ -15,6 +15,7 @@ const initialUserConfigObject = {
   colourScheme: null,
   timeFormat: null,
   timezone: null,
+  startOfWeek: null,
 } as UserConfig;
 
 const initialUserObject = {
@@ -47,16 +48,26 @@ export const useUserStore = defineStore('user', () => {
   };
 
   // Init user config if not already available
-  if (!data.value?.settings) {
-    const dj = inject(dayjsKey);
-    const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
+  const dj = inject(dayjsKey);
+  const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
+  const defaultSettings = {
+    language: i18n.locale.value,
+    colourScheme: ColourSchemes.System,
+    timeFormat: detectedTimeFormat,
+    timezone: dj.tz.guess(),
+    startOfWeek: 7,
+  };
 
-    data.value.settings = {
-      language: i18n.locale.value,
-      colourScheme: ColourSchemes.System,
-      timeFormat: detectedTimeFormat,
-      timezone: dj.tz.guess(),
-    };
+  if (!data.value?.settings) {
+    // No settings at all? Initialize whole settings to default
+    data.value.settings = structuredClone(defaultSettings);
+  } else {
+    // We have a settings object? See if all keys exists and update only the missing ones
+    
+    Object.keys(defaultSettings).forEach(key => {
+      console.log(key);
+      data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
+    });
   }
 
   /**
@@ -69,6 +80,7 @@ export const useUserStore = defineStore('user', () => {
       timezone: data.value.settings.timezone,
       colour_scheme: data.value.settings.colourScheme,
       time_mode: data.value.settings.timeFormat,
+      start_of_week: data.value.settings.startOfWeek,
     };
 
     const { error }: SubscriberResponse = await call.value('me').put(obj).json();
@@ -144,6 +156,7 @@ export const useUserStore = defineStore('user', () => {
         colourScheme: subscriber.colour_scheme,
         timeFormat: subscriber.time_mode,
         timezone: subscriber.timezone,
+        startOfWeek: subscriber.start_of_week,
       },
       avatarUrl: subscriber.avatar_url,
       isSetup: subscriber.is_setup,
