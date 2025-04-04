@@ -51,8 +51,9 @@ export default function useDayJS(app: App<Element>, locale: string) {
     : dayjs.duration(minutes / 60, 'hours').humanize());
   app.provide(durationHumanizedKey, durationHumanized);
 
-  // locale aware first day of week
-  const firstDayOfWeek = dayjs.localeData().firstDayOfWeek();
+  // User settings or locale aware first day of week
+  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
+  const firstDayOfWeek = user.settings?.startOfWeek ?? dayjs.localeData().firstDayOfWeek();
   const isoFirstDayOfWeek = firstDayOfWeek === 0 ? 7 : firstDayOfWeek;
   app.provide(isoFirstDayOfWeekKey, isoFirstDayOfWeek);
 

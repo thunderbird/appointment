@@ -97,6 +97,16 @@ class TimeMode(enum.Enum):
     h24 = 24
 
 
+class IsoWeekdays(enum.Enum):
+    monday = 1
+    tuesday = 2
+    wednesday = 3
+    thursday = 4
+    friday = 5
+    saturday = 6
+    sunday = 7
+
+
 def calculate_encrypted_length(length: int):
     """Calculate the length of the string after it's been encrypted and encoded."""
     cipher_length = length + 16 - (length % 16)  # Fixed block size of 16 for Aes
@@ -162,6 +172,7 @@ class Subscriber(HasSoftDelete, Base):
     timezone = Column(encrypted_type(String), index=True)
     colour_scheme = Column(Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True)
     time_mode = Column(Enum(TimeMode), default=TimeMode.h12, nullable=False, index=True)
+    start_of_week = Column(Enum(IsoWeekdays), default=IsoWeekdays.sunday, nullable=False, index=True)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
     minimum_valid_iat_time = Column('minimum_valid_iat_time', encrypted_type(DateTime))

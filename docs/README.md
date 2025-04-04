@@ -75,6 +75,7 @@ erDiagram
     int timezone "User selected home timezone, UTC offset"
     enum colour_scheme "Frontend theme [system, dark, light]"
     enum time_mode "Format for displaying times [h12, h24]"
+    enum start_of_week "First day of week [monday, tuesday, ...]"
     string minimum_valid_iat_time "Minimum valid time to accept for JWT tokens"
     date time_created "UTC timestamp of subscriber creation"
     date time_updated "UTC timestamp of last subscriber modification"

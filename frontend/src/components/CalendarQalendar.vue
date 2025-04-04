@@ -12,7 +12,7 @@ import {
 } from '@/definitions';
 import { timeFormat } from '@/utils';
 import { useRoute, useRouter } from 'vue-router';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, isoWeekdaysKey } from '@/keys';
 import { useUserStore } from '@/stores/user-store';
 
 // component constants
@@ -20,6 +20,7 @@ const dj = inject(dayjsKey);
 const router = useRouter();
 const route = useRoute();
 const user = useUserStore();
+const isoWeekdays = inject(isoWeekdaysKey);
 
 // component properties
 const props = defineProps({
@@ -312,7 +313,7 @@ const config = ref({
     showEventsOnMobileView: false,
   },
   week: {
-    startsOn: locale === 'de' ? 'monday' : 'sunday',
+    startsOn: isoWeekdays.find((w) => w.iso === user.data.settings.startOfWeek).long.toLowerCase(),
   },
   style: {
     // Just the pre-calculated list from tailwind, could use some fine-tuning.

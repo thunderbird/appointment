@@ -107,7 +107,7 @@ onMounted(() => {
       </div>
     </div>
     <!-- content -->
-    <div class="w-full pt-2 lg:w-4/5 lg:pt-14">
+    <div class="w-full pt-2 lg:w-4/5">
       <settings-general v-if="activeView === SettingsSections.General" />
       <settings-calendar v-if="activeView === SettingsSections.Calendar" />
       <settings-account v-if="activeView === SettingsSections.Account" />

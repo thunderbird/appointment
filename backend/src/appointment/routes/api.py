@@ -83,6 +83,7 @@ def update_me(
         language=me.language,
         colour_scheme=me.colour_scheme,
         time_mode=me.time_mode,
+        start_of_week=me.start_of_week,
     )
 
 
