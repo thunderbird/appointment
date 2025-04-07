@@ -106,7 +106,7 @@ const timezones = Intl.supportedValuesOf('timeZone');
         <select
           v-model="user.data.settings.startOfWeek"
           class="w-full max-w-sm rounded-md"
-          data-testid="settings-general-star-of-week-select"
+          data-testid="settings-general-start-of-week-select"
         >
           <option v-for="day in availableStartOfTheWeekOptions" :key="day.iso" :value="day.iso">
             {{ day.long }}
