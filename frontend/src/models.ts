@@ -240,6 +240,7 @@ export type UserConfig = {
   colourScheme: string,
   timeFormat: number,
   timezone: string;
+  startOfWeek: number;
 };
 
 /**
@@ -261,6 +262,7 @@ export type Subscriber = {
   timezone?: string;
   colour_scheme?: string;
   time_mode?: number;
+  start_of_week?: number;
   avatar_url?: string;
   is_setup?: boolean;
   unique_hash?: string;

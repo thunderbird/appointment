@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { ColourSchemes } from '@/definitions';
-import { inject, watch } from 'vue';
+import { inject, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { createUserStore } from '@/stores/user-store';
-import { callKey } from '@/keys';
+import { callKey, isoWeekdaysKey } from '@/keys';
 
 // component constants
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const user = createUserStore(call);
+const isoWeekdays = inject(isoWeekdaysKey);
+// As long as we use Qalendar, we can only support Sunday and Monday as start of week
+const availableStartOfTheWeekOptions = computed(() => isoWeekdays.filter((day) => [7,1].includes(day.iso)));
 
 // handle ui languages
 watch(locale, (newValue: string) => {
@@ -44,6 +47,7 @@ watch(
     user.data.settings.timezone,
     user.data.settings.colourScheme,
     user.data.settings.timeFormat,
+    user.data.settings.startOfWeek,
   ],
   () => {
     if (user.authenticated) {
@@ -95,6 +99,21 @@ const timezones = Intl.supportedValuesOf('timeZone');
   </div>
   <div class="pl-6">
     <div class="text-xl">{{ t('heading.dateAndTimeFormatting') }}</div>
+    <div class="mt-6 pl-6">
+      <div class="text-lg">{{ t('label.startOfTheWeek') }}</div>
+      <label class="mt-4 flex items-center pl-4">
+        <div class="w-full max-w-2xs">{{ t('label.startOfTheWeek') }}</div>
+        <select
+          v-model="user.data.settings.startOfWeek"
+          class="w-full max-w-sm rounded-md"
+          data-testid="settings-general-start-of-week-select"
+        >
+          <option v-for="day in availableStartOfTheWeekOptions" :key="day.iso" :value="day.iso">
+            {{ day.long }}
+          </option>
+        </select>
+      </label>
+    </div>
     <div class="mt-6 inline-grid grid-cols-2 gap-x-16 gap-y-8 pl-6">
       <div class="text-lg">{{ t('label.timeFormat') }}</div>
       <div class="text-lg"><!--{{ t('label.dateFormat') }}--></div>
