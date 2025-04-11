@@ -188,7 +188,7 @@ const isFormDirty = computed(
 
 // handle notes char limit
 const charLimit = 250;
-const charCount = computed(() => scheduleInput.value.details.length);
+const charCount = computed(() => scheduleInput.value.details?.length ?? 0);
 
 // Weekday options
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
