@@ -355,7 +355,7 @@
     "topic": "Topic",
     "unset": "Unset",
     "unused": "Unused",
-    "updateUsername": "Update username",
+    "updateLink": "Update link",
     "used": "Used",
     "username": "Username",
     "userProfile": "User profile",
@@ -537,7 +537,7 @@
       "link": "Account settings",
       "text": "To update your username, go to {link}. "
     },
-    "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work.",
+    "updateLinkNotice": "Changing your username or slug will change your link. Your old link will no longer work.",
     "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created.",
     "yourQuickLinkIs": "Your quick link is:\n{url}"
   },

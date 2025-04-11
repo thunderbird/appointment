@@ -105,9 +105,6 @@ const onChange = () => {
     <span v-else-if="help" class="help-label">
       {{ help }}
     </span>
-    <span v-else class="help-label">
-      <!-- Empty space -->
-    </span>
   </label>
 </template>
 
@@ -139,7 +136,6 @@ const onChange = () => {
   color: var(--colour-ti-base);
 
   width: 100%;
-  min-height: 0.9375rem;
   font-size: 0.625rem;
   line-height: 0.9375rem;
   padding: 0.1875rem;

@@ -355,7 +355,7 @@
     "topic": "Thema",
     "unset": "Nicht gesetzt",
     "unused": "Ungenutzt",
-    "updateUsername": "Benutzername aktualisieren",
+    "updateLink": "Link aktualisieren",
     "used": "Benutzt",
     "username": "Benutzername",
     "userProfile": "Benutzerprofil",
@@ -537,7 +537,7 @@
       "link": "Kontoeinstellungen",
       "text": "Der Nutzername kann unter {link} angepasst werden. "
     },
-    "updateUsernameNotice": "Ein Ändern des Benutzernamens aktualisiert auch deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
+    "updateLinkNotice": "Ein Ändern des Benutzernamens oder des Teillinks aktualisiert deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
     "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt.",
     "yourQuickLinkIs": "Dein Kurzlink ist:\n{url}"
   },
