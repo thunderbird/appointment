@@ -12,8 +12,8 @@
                 MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
 
 mail-brand-contact-form = Kontaktformular
-mail-brand-support-hint = Du hast Fragen? Wir helfen gern. Antworte einfach auf diese E-Mail für Support.
-mail-brand-reply-hint = Du hast Fragen? Wir helfen gern, Du erreichst uns über unser { $contact_form_link }.
+mail-brand-support-hint = Du hast Fragen? Wir helfen gern! Antworte einfach auf diese E-Mail für Support.
+mail-brand-reply-hint = Du hast Fragen? Wir helfen gern! Du erreichst uns über unser { $contact_form_link }.
 mail-brand-reply-hint-attendee-info = Du möchtest { $name } kontaktieren? Antworte einfach auf diese E-Mail.
 
 mail-brand-footer = Du erhälst diese E-Mail, weil Du dich auf unserer Website für Thunderbird Appointment Beta angemeldet hast.
@@ -23,7 +23,7 @@ mail-brand-footer = Du erhälst diese E-Mail, weil Du dich auf unserer Website f
 
 ## Invitation
 
-invite-mail-subject = Einladung gesendet von {-brand-name}
+invite-mail-subject = Buchung bestätigt von {-brand-name}
 invite-mail-plain = {-brand-footer}
 
 invite-mail-html-heading-name = { $name }
