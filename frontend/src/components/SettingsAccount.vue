@@ -91,6 +91,7 @@ const updateUser = async () => {
   // First update the slug if it was changed
   if (activeSlug.value !== user.mySlug) {
     const response = await schedule.updateFirstSlug(activeSlug.value);
+    // eslint-disable-next-line no-prototype-builtins
     if (response.hasOwnProperty('error')) {
       // TODO: error message is in data
     }
