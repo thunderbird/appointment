@@ -313,7 +313,7 @@
     "scheduleDetails": "Zeitplan Details",
     "scheduleSettings": {
       "availabilitySubHeading": "Lege deine Verfügbarkeit fest",
-      "bookingSettingsSubHeading": "Kurzlink bearbeiten und Sonstiges",
+      "bookingSettingsSubHeading": "Buchungsbestätigung und Sonstiges",
       "meetingDetailsSubHeading": "Videos und/oder Notizen den Events hinzufügen",
       "schedulingDetailsSubHeading": "Buchungsintervalle und Dauer festlegen"
     },

@@ -17,7 +17,6 @@ import {
 } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
@@ -28,7 +27,6 @@ import TextInput from '@/tbpro/elements/TextInput.vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
 import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
 
 // icons
@@ -187,9 +185,6 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
 const isFormDirty = computed(
   () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value),
 );
-const isSlugDirty = computed(
-  () => scheduleInput.value.slug !== referenceSchedule.value.slug,
-);
 
 // handle notes char limit
 const charLimit = 250;
@@ -265,15 +260,8 @@ const scheduleValidationError = (schedule: Schedule): string|null => {
   return null;
 };
 
-// Update slug with a random 8 character string
-const refreshSlugModalOpen = ref(false);
-const showRefreshSlugConfirmation = async () => {
-  refreshSlugModalOpen.value = true;
-};
-
 const closeModals = () => {
   savedConfirmation.show = false;
-  refreshSlugModalOpen.value = false;
 };
 
 // handle actual schedule creation/update
@@ -342,11 +330,6 @@ const saveSchedule = async (withConfirmation = true) => {
   // Update our reference schedule!
   referenceSchedule.value = { ...scheduleInput.value };
   revertForm(false);
-  closeModals();
-};
-
-const refreshSlug = () => {
-  scheduleInput.value.slug = window.crypto.randomUUID().substring(0, 8);
   closeModals();
 };
 
@@ -715,31 +698,6 @@ watch(
         </div>
         <div v-show="activeStep4" class="flex flex-col gap-2">
           <hr/>
-          <!-- custom quick link -->
-          <label class="relative flex flex-col gap-1">
-            <div class="flex items-center gap-2">
-              <text-input
-                type="text"
-                name="slug"
-                :prefix="`/${user.data.username}/`"
-                v-model="scheduleInput.slug"
-                class="w-full rounded-md disabled:cursor-not-allowed"
-                :small-text="true"
-                maxLength="16"
-                :disabled="!scheduleInput.active"
-              >
-                {{ t("label.quickLink") }}
-              </text-input>
-              <link-button
-                class="p-0.5"
-                @click="scheduleInput.active ? refreshSlug() : null"
-                :disabled="!scheduleInput.active"
-                data-testid="dashboard-booking-settings-link-refresh-btn"
-              >
-                <refresh-icon />
-              </link-button>
-            </div>
-          </label>
           <!-- option to deactivate confirmation -->
           <div class="flex flex-col gap-3">
             <switch-toggle
@@ -806,7 +764,7 @@ watch(
     >
       <primary-button
         class="btn-save w-full"
-        @click="isSlugDirty ? showRefreshSlugConfirmation() : saveSchedule(!existing)"
+        @click="saveSchedule(!existing)"
         :disabled="!scheduleInput.active || savingInProgress"
         data-testid="dashboard-save-changes-btn"
       >
@@ -846,16 +804,6 @@ watch(
     :public-link="user.data.signedUrl"
     @close="closeModals"
   />
-  <!-- Refresh link confirmation modal -->
-  <confirmation-modal
-    :open="refreshSlugModalOpen"
-    :title="t('label.refreshLink')"
-    :message="t('text.refreshLinkNotice')"
-    :confirm-label="t('label.save')"
-    :cancel-label="t('label.cancel')"
-    @confirm="saveSchedule(!existing)"
-    @close="closeModals"
-  ></confirmation-modal>
 </template>
 
 <style scoped>
