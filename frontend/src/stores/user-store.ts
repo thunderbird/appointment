@@ -65,7 +65,6 @@ export const useUserStore = defineStore('user', () => {
     // We have a settings object? See if all keys exists and update only the missing ones
     
     Object.keys(defaultSettings).forEach(key => {
-      console.log(key);
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
   }

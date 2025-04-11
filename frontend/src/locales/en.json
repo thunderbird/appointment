@@ -313,7 +313,7 @@
     "scheduleDetails": "Scheduling details",
     "scheduleSettings": {
       "availabilitySubHeading": "Set your availability days and time",
-      "bookingSettingsSubHeading": "Edit your quick link and more",
+      "bookingSettingsSubHeading": "Handle booking confirmation and more",
       "meetingDetailsSubHeading": "Add video and/or notes to events",
       "schedulingDetailsSubHeading": "Set booking intervals and duration"
     },
