@@ -420,7 +420,7 @@ export type TimeFormatted = Time<string>;
 
 export type SelectOption = {
   label: string;
-  value: number;
+  value: number|string;
 };
 
 export type Coloring = {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, inject, onMounted,
+  ref, inject, onMounted, computed,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -8,6 +8,8 @@ import CautionButton from '@/elements/CautionButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import SecondaryButton from '@/elements/SecondaryButton.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 
@@ -22,7 +24,7 @@ import { createScheduleStore } from '@/stores/schedule-store';
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
 import {
-  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,  SelectOption,
 } from '@/models';
 import { callKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
@@ -37,21 +39,31 @@ const user = createUserStore(call);
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
+const activeSlug = ref(user.mySlug);
 const downloadAccountModalOpen = ref(false);
 const deleteAccountFirstModalOpen = ref(false);
 const deleteAccountSecondModalOpen = ref(false);
 const refreshLinkModalOpen = ref(false);
-const updateUsernameModalOpen = ref(false);
+const updateLinkModalOpen = ref(false);
 const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
 const formRef = ref<HTMLFormElement>();
+
+// Preferred email options
+const emailOptions = computed<SelectOption[]>(() => availableEmails.value.map((email) => ({
+  label: email,
+  value: email,
+})));
+
+// True if there are changes affecting the quick link
+const dirtyLink = computed(() => activeUsername.value !== user.data.username || activeSlug.value !== user.mySlug);
 
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
   deleteAccountFirstModalOpen.value = false;
   deleteAccountSecondModalOpen.value = false;
   refreshLinkModalOpen.value = false;
-  updateUsernameModalOpen.value = false;
+  updateLinkModalOpen.value = false;
 };
 
 const getAvailableEmails = async () => {
@@ -76,6 +88,15 @@ const errorDisplayName = ref<string>(null);
 
 // Save user data
 const updateUser = async () => {
+  // First update the slug if it was changed
+  if (activeSlug.value !== user.mySlug) {
+    const response = await schedule.updateFirstSlug(activeSlug.value);
+    if (response.hasOwnProperty('error')) {
+      // TODO: error message is in data
+    }
+  }
+
+  // Now update the user data
   const inputData = {
     username: activeUsername.value,
     name: activeDisplayName.value,
@@ -116,9 +137,9 @@ const updateUserCheckForConfirmation = async () => {
     return;
   }
 
-  // Check for username change
-  if (activeUsername.value !== user.data.username) {
-    updateUsernameModalOpen.value = true;
+  // Check for username or slug change
+  if (dirtyLink.value) {
+    updateLinkModalOpen.value = true;
     return;
   }
 
@@ -209,9 +230,10 @@ const actuallyDeleteAccount = async () => {
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
         <div class="w-full">
-          <input
+          <text-input
             v-model="activeUsername"
             type="text"
+            name="username"
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
             :required="true"
@@ -237,16 +259,21 @@ const actuallyDeleteAccount = async () => {
             </span>
           </span>
         </div>
-        <select v-model="activePreferredEmail" class="w-full rounded-md" data-testid="settings-account-email-select">
-          <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
-        </select>
+        <select-input
+          v-model="activePreferredEmail"
+          name="preferredEmail"
+          class="w-full"
+          :options="emailOptions"
+          data-testid="settings-account-email-select"
+        />
       </label>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
         <div class="w-full">
-          <input
+          <text-input
             v-model="activeDisplayName"
             type="text"
+            name="displayName"
             class="w-full rounded-md"
             :class="{ '!border-red-500': errorDisplayName }"
             data-testid="settings-account-display-name-input"
@@ -256,24 +283,20 @@ const actuallyDeleteAccount = async () => {
           </div>
         </div>
       </label>
+      <!-- Custom quick link -->
       <label class="mt-6 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
         <div class="flex w-full items-center justify-between gap-4">
           <div class="relative w-full">
-            <input
-              :value="user.myLink"
+            <text-input
               type="text"
-              class="mr-2 w-full rounded-md pr-7"
-              readonly
-              data-testid="settings-account-mylink-input"
+              name="slug"
+              :prefix="`/${user.data.username}/`"
+              v-model="activeSlug"
+              class="w-full rounded-md disabled:cursor-not-allowed"
+              :small-text="true"
+              maxLength="16"
             />
-            <a
-              :href="user.myLink"
-              target="_blank"
-              class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              <icon-external-link class="size-5"/>
-            </a>
           </div>
           <text-button
             uid="myLink"
@@ -348,9 +371,9 @@ const actuallyDeleteAccount = async () => {
   ></confirmation-modal>
   <!-- Update username confirmation modal -->
   <confirmation-modal
-    :open="updateUsernameModalOpen"
-    :title="t('label.updateUsername')"
-    :message="t('text.updateUsernameNotice')"
+    :open="updateLinkModalOpen"
+    :title="t('label.updateLink')"
+    :message="t('text.updateLinkNotice')"
     :confirm-label="t('label.saveChanges')"
     :cancel-label="t('label.cancel')"
     @confirm="() => updateUser()"

@@ -75,7 +75,6 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
   color: var(--colour-ti-critical);
 
   width: 100%;
-  min-height: 0.9375rem;
   font-size: 0.625rem;
   line-height: 0.9375rem;
 }

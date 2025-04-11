@@ -190,6 +190,37 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   /**
+   * Update the slug of the first schedule
+   * 
+   * @param slug new slug
+   */
+  const updateFirstSlug = async (slug: string) => {
+    const id = firstSchedule.value.id;
+    const updateData = {
+      ...firstSchedule.value,
+      slug: slug,
+    };
+    // save schedule data
+    const { data, error }: ScheduleResponse = await call.value(`schedule/${id}`).put(updateData).json();
+
+    if (error.value) {
+      return {
+        error: true,
+        message: handleErrorResponse(data as Ref<Exception>),
+      } as Error;
+    }
+
+    // Update the schedule
+    await fetch(true);
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.ScheduleUpdated);
+    }
+
+    return data;
+  };
+
+  /**
    * Converts a time (startTime or endTime) to a timezone that the backend expects
    * @param {string} time
    */
@@ -230,6 +261,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     $reset,
     createSchedule,
     updateSchedule,
+    updateFirstSlug,
     timeToBackendTime,
     timeToFrontendTime,
   };
