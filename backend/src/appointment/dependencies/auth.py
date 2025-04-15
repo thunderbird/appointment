@@ -17,7 +17,6 @@ from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
-from ..utils import flag_code
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
