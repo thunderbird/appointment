@@ -240,7 +240,7 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Request subscriber login
-   * @param username
+   * @param username an auth string, could be username, one time token, or session id
    * @param password or null if fxa authentication
    */
   const login = async (username: string, password: string|null): Promise<Error> => {
@@ -260,8 +260,11 @@ export const useUserStore = defineStore('user', () => {
       data.value.accessToken = tokenData.value.access_token;
     } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
       // We get a one-time token back from the api, use it to fetch the real access token
-      data.value.accessToken = username;
-      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token').post().json();
+      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token', {
+        headers: {
+          Authorization: `Bearer ${username}`,
+        }
+      }).post().json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };
