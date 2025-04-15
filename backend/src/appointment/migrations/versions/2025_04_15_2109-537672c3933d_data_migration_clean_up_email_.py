@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session
 from appointment.database import models
 
 # revision identifiers, used by Alembic.
-revision = '537672c3933d'
-down_revision = '330fdd8cd0f8'
+revision = '537672c3933e'
+down_revision = 'a3fc3cc13f56'
 branch_labels = None
 depends_on = None
 
