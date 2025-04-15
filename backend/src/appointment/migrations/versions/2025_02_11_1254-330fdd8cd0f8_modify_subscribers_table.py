@@ -1,7 +1,7 @@
 """modify subscribers table
 
 Revision ID: 330fdd8cd0f8
-Revises: 4a15d01919b8
+Revises: 16c0299eff23
 Create Date: 2025-02-11 12:54:51.256163
 
 """
