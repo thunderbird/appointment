@@ -17,6 +17,7 @@ from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
+from ..utils import flag_code
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
@@ -69,6 +70,13 @@ def get_user_from_token(db, token: str, require_jti=False):
             require_jti and not jti,
         ]
     ):
+        flag_code('Invalid JWT Access Token', {
+            'minimum_valid_iat_time': subscriber.minimum_valid_iat_time,
+            'minimum_valid_iat_time.timestamp()': int(subscriber.minimum_valid_iat_time.timestamp()),
+            'iat': int(iat),
+            'has_jti': bool(jti),
+            'require_jti': require_jti,
+        })
         raise InvalidTokenException()
 
     # If we're a one-time token, set the minimum valid iat time to now!
