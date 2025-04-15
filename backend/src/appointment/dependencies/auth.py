@@ -17,7 +17,6 @@ from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
-from ..utils import flag_code
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
@@ -68,6 +67,8 @@ def get_user_from_token(db, token: str, require_jti=False):
             subscriber.minimum_valid_iat_time and int(subscriber.minimum_valid_iat_time.timestamp()) > int(iat),
             # If we require this token to be a one time token, then require the claim
             require_jti and not jti,
+            # If don't require this token to be a one time token, and it is...well we don't want it, go away.
+            not require_jti and jti,
         ]
     ):
         raise InvalidTokenException()

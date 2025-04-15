@@ -484,6 +484,22 @@ class TestFXA:
 
         assert response.status_code == 401, response.text
 
+    def test_non_one_time_token_authed_route_failed_due_to_one_time_token(self, make_basic_subscriber, with_client):
+        """Ensure a one time token (jti claim) does not work on any other route"""
+        os.environ['AUTH_SCHEME'] = 'fxa'
+
+        del with_client.app.dependency_overrides[auth.get_subscriber]
+
+        subscriber = make_basic_subscriber(email='apple@example.org')
+        access_token_expires = timedelta(minutes=float(10))
+        one_time_access_token = create_access_token(
+            data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
+        )
+
+        response = with_client.get('/me', headers={'Authorization': f'Bearer {one_time_access_token}'})
+
+        assert response.status_code == 401, response.text
+
     def test_fxa_token_failed_due_to_empty_auth(self, make_basic_subscriber, with_client):
         """Ensure fxa-token only works with access tokens that have a jti claim"""
         os.environ['AUTH_SCHEME'] = 'fxa'
