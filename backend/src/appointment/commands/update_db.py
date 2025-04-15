@@ -35,6 +35,8 @@ def run():
             print('Initializing database, and setting it to the latest revision')
             models.Base.metadata.create_all(bind=engine)
             fresh_db = True
+        else:
+            print(f'Current head = {revisions[-1]}')
 
     # If it's a fresh db set our revision number to the latest revision. Otherwise run any new migrations
     if fresh_db:

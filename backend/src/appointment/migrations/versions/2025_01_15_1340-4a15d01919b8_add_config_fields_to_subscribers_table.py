@@ -16,6 +16,7 @@ from appointment.database.models import ColourScheme, TimeMode
 def secret():
     return os.getenv('DB_SECRET')
 
+
 # revision identifiers, used by Alembic.
 revision = '4a15d01919b8'
 down_revision = '0c99f6a02f3b'
