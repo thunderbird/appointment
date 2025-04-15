@@ -76,6 +76,7 @@ def get_user_from_token(db, token: str, require_jti=False):
             'iat': int(iat),
             'has_jti': bool(jti),
             'require_jti': require_jti,
+            'sub_id': sub
         })
         raise InvalidTokenException()
 
@@ -83,6 +84,19 @@ def get_user_from_token(db, token: str, require_jti=False):
     # Beats having to store them multiple times, and it's only used in post-login.
     if jti:
         now = datetime.datetime.now(datetime.UTC)
+        flag_code(
+            'Min IAT Set',
+            {
+                'old_minimum_valid_iat_time': subscriber.minimum_valid_iat_time,
+                'old_minimum_valid_iat_time.timestamp()': int(subscriber.minimum_valid_iat_time.timestamp()),
+                'new_minimum_valid_iat_time': now,
+                'new_minimum_valid_iat_time.timestamp()': int(now.timestamp()),
+                'iat': int(iat),
+                'has_jti': bool(jti),
+                'require_jti': require_jti,
+                'sub_id': sub,
+            },
+        )
         subscriber.minimum_valid_iat_time = now
         db.add(subscriber)
         db.commit()

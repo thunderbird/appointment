@@ -1,6 +1,6 @@
 """data migration clean up email case
 
-Revision ID: 537672c3933e
+Revision ID: 537672c3933d
 Revises: 330fdd8cd0f8
 Create Date: 2025-03-07 21:09:16.541016
 
