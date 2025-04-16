@@ -14,6 +14,7 @@ import {
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
   APPT_TIMEZONE_SETTING_TORONTO,
+  APPT_TARGET_ENV,
 } from '../const/constants';
 
 var bookingPage: BookingPage;
@@ -82,8 +83,11 @@ test.describe('book an appointment', () => {
   test('able to access booking page via long link', {
     tag: [PLAYWRIGHT_TAG_PROD_SANITY]
   }, async ({ page }) => {
-    await bookingPage.gotoBookingPageLongUrl();
-    await verifyBookingPageLoaded();
+    // not supported on local dev env
+    if (APPT_TARGET_ENV != 'dev') {
+      await bookingPage.gotoBookingPageLongUrl();
+      await verifyBookingPageLoaded();
+    }
   });
 
   test('able to request a booking', {
