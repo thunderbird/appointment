@@ -196,7 +196,7 @@ class ScheduleValidationIn(ScheduleBase):
     """ScheduleBase but with specific fields overridden to add validation."""
 
     # Regex to exclude any character can be mess with a url
-    slug: Annotated[Optional[str], Field(min_length=2, max_length=16, pattern=r'^[^\;\/\?\:\@\&\=\+\$\,\#]*$')] = None
+    slug: Annotated[Optional[str], Field(max_length=16, pattern=r'^[^\;\/\?\:\@\&\=\+\$\,\#]*$')] = None
     slot_duration: Annotated[int, Field(ge=10, default=30)]
     # Require these fields
     start_date: date
