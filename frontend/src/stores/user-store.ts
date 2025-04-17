@@ -107,7 +107,7 @@ export const useUserStore = defineStore('user', () => {
    * Return the last unique URL part of the users link
    */
   const mySlug = computed((): string => {
-    const link = myLink?.value?.replace(/\/+$/, '') ?? '';
+    const link = myLink.value?.replace(/\/+$/, '') ?? '';
     return link.slice(link.indexOf(data.value.username) + data.value.username.length + 1);
   });
 
