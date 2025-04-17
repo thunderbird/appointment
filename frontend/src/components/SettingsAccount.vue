@@ -4,10 +4,10 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import CautionButton from '@/elements/CautionButton.vue';
+import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import TextButton from '@/elements/TextButton.vue';
@@ -50,8 +50,8 @@ const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
 const formRef = ref<HTMLFormElement>();
 
-// Custom quick link
-const quickLink = computed(() => shortUrl.substring(shortUrl.indexOf('//')+2) + `/${user.data.username}/`);
+// Custom quick link prefix
+const quickLinkPrefix = computed(() => shortUrl.substring(shortUrl.indexOf('//')+2) + `/${user.data.username}/`);
 
 // Preferred email options
 const emailOptions = computed<SelectOption[]>(() => availableEmails.value.map((email) => ({
@@ -240,7 +240,6 @@ const actuallyDeleteAccount = async () => {
             v-model="activeUsername"
             type="text"
             name="username"
-            class="w-full rounded-md"
             :class="{ '!border-red-500': errorUsername }"
             :required="true"
             data-testid="settings-account-user-name-input"
@@ -280,7 +279,6 @@ const actuallyDeleteAccount = async () => {
             v-model="activeDisplayName"
             type="text"
             name="displayName"
-            class="w-full rounded-md"
             :class="{ '!border-red-500': errorDisplayName }"
             data-testid="settings-account-display-name-input"
           />
@@ -297,9 +295,8 @@ const actuallyDeleteAccount = async () => {
             <text-input
               type="text"
               name="slug"
-              :prefix="quickLink"
+              :prefix="quickLinkPrefix"
               v-model="activeSlug"
-              class="w-full rounded-md disabled:cursor-not-allowed"
               :small-text="true"
               maxLength="16"
             />
@@ -316,19 +313,21 @@ const actuallyDeleteAccount = async () => {
       </label>
       <div class="mt-6 flex gap-4 self-end">
         <secondary-button
-          :label="t('label.refreshLink')"
-          class="btn-refresh !text-teal-500"
+          class="btn-refresh"
           @click="refreshLink"
           :title="t('label.refresh')"
           data-testid="settings-account-refresh-link-btn"
-        />
+        >
+          {{ t('label.refreshLink') }}
+        </secondary-button>
         <secondary-button
-          :label="t('label.saveChanges')"
-          class="btn-save !text-teal-500"
+          class="btn-save"
           @click="updateUserCheckForConfirmation"
           :title="t('label.save')"
           data-testid="settings-account-save-changes-btn"
-        />
+        >
+          {{ t('label.saveChanges') }}
+        </secondary-button>
       </div>
     </form>
     <div class="pl-6" id="invites">
@@ -344,24 +343,26 @@ const actuallyDeleteAccount = async () => {
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="mt-4 pl-4">
         <primary-button
-          :label="t('label.downloadYourData')"
           class="btn-download"
           @click="downloadData"
           :title="t('label.download')"
           data-testid="settings-account-download-data-btn"
-        />
+        >
+          {{ t('label.downloadYourData') }}
+        </primary-button>
       </div>
     </div>
     <div class="pl-6" id="delete-your-account">
       <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
       <div class="mt-4 pl-4">
-        <caution-button
-          :label="t('label.deleteYourAccount')"
+        <danger-button
           class="btn-delete"
           @click="deleteAccount"
           :title="t('label.delete')"
           data-testid="settings-account-delete-btn"
-        />
+        >
+          {{ t('label.deleteYourAccount') }}
+        </danger-button>
       </div>
     </div>
   </div>

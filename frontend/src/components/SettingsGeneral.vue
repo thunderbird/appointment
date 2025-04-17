@@ -4,14 +4,38 @@ import { inject, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { createUserStore } from '@/stores/user-store';
 import { callKey, isoWeekdaysKey } from '@/keys';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
 
 // component constants
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
 const user = createUserStore(call);
 const isoWeekdays = inject(isoWeekdaysKey);
+
+const localeOptions = availableLocales.map((l) => ({
+  label: l.toUpperCase() + ' — ' + t('locales.' + l),
+  value: l,
+}));
+
+const colourSchemeOptions = Object.values(ColourSchemes).map((c) => ({
+  label: t('label.' + c),
+  value: c,
+}));
+
 // As long as we use Qalendar, we can only support Sunday and Monday as start of week
-const availableStartOfTheWeekOptions = computed(() => isoWeekdays.filter((day) => [7,1].includes(day.iso)));
+const availableStartOfTheWeekOptions = computed(
+  () => isoWeekdays.filter((day) => [7,1].includes(day.iso)).map((e) => ({
+    label: e.long,
+    value: e.iso,
+  }))
+);
+
+// @ts-expect-error ignore type err
+// See https://github.com/microsoft/TypeScript/issues/49231
+const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string) => ({
+  label: timezone.replaceAll('_', ' '),
+  value: timezone,
+}));
 
 // handle ui languages
 watch(locale, (newValue: string) => {
@@ -71,22 +95,26 @@ const timezones = Intl.supportedValuesOf('timeZone');
       <div class="text-lg">{{ t('label.language') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
-        <select v-model="locale" class="w-full max-w-sm rounded-md" data-testid="settings-general-locale-select">
-          <option v-for="l in availableLocales" :key="l" :value="l">
-            {{ l.toUpperCase() + ' &mdash; ' + t('locales.' + l) }}
-          </option>
-        </select>
+        <select-input
+          name="timezone"
+          :options="localeOptions"
+          v-model="locale"
+          class="w-full max-w-sm"
+          data-testid="settings-general-locale-select"
+        />
       </label>
     </div>
     <div class="mt-6 pl-6">
       <div class="text-lg">{{ t('label.appearance') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
-        <select v-model="user.data.settings.colourScheme" class="w-full max-w-sm rounded-md" data-testid="settings-general-theme-select">
-          <option v-for="value in Object.values(ColourSchemes)" :key="value" :value="value">
-            {{ t('label.' + value) }}
-          </option>
-        </select>
+        <select-input
+          name="timezone"
+          :options="colourSchemeOptions"
+          v-model="user.data.settings.colourScheme"
+          class="w-full max-w-sm"
+          data-testid="settings-general-theme-select"
+        />
       </label>
       <!-- <label class="pl-4 mt-4 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.defaultFont') }}</div>
@@ -103,15 +131,13 @@ const timezones = Intl.supportedValuesOf('timeZone');
       <div class="text-lg">{{ t('label.startOfTheWeek') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.startOfTheWeek') }}</div>
-        <select
+        <select-input
+          name="timezone"
+          :options="availableStartOfTheWeekOptions"
           v-model="user.data.settings.startOfWeek"
-          class="w-full max-w-sm rounded-md"
+          class="w-full max-w-sm"
           data-testid="settings-general-start-of-week-select"
-        >
-          <option v-for="day in availableStartOfTheWeekOptions" :key="day.iso" :value="day.iso">
-            {{ day.long }}
-          </option>
-        </select>
+        />
       </label>
     </div>
     <div class="mt-6 inline-grid grid-cols-2 gap-x-16 gap-y-8 pl-6">
@@ -138,15 +164,13 @@ const timezones = Intl.supportedValuesOf('timeZone');
       <div class="text-lg">{{ t('label.timeZone') }}</div>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.primaryTimeZone') }}</div>
-        <select
+        <select-input
+          name="timezone"
+          :options="timezoneOptions"
           v-model="user.data.settings.timezone"
-          class="w-full max-w-sm rounded-md"
+          class="w-full max-w-sm"
           data-testid="settings-general-timezone-select"
-        >
-          <option v-for="tz in timezones" :key="tz" :value="tz">
-            {{ tz }}
-          </option>
-        </select>
+        />
       </label>
       <!-- <label class="pl-4 mt-6 flex items-center">
         <div class="w-full max-w-2xs">{{ t('label.showSecondaryTimeZone') }}</div>
