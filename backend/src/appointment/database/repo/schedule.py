@@ -125,9 +125,10 @@ def verify_link(db: Session, url: str) -> models.Subscriber | None:
     if not subscriber:
         return None
 
-    schedule = get_by_slug(db, slug, subscriber.id)
+    if slug:
+        schedule = get_by_slug(db, slug, subscriber.id)
 
-    if not schedule:
-        return None
+        if not schedule:
+            return None
 
     return subscriber
