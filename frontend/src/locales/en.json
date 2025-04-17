@@ -71,6 +71,7 @@
       "setupProfile": "Create your profile",
       "setupSchedule": "Set up your appointment availability"
     },
+    "usernameHelp": "This will become your quick link",
     "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
     "videoMeetingLink": "Video meeting link"
   },
