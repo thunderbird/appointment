@@ -63,15 +63,15 @@ def retrieve_user_url_data(url):
     """URL Decodes, and retrieves username, slug/signature, and main url from /<username>/<slug/signature?>/"""
     parsed_url = parse.urlparse(url)
     split_path = [x for x in parsed_url.path.split('/') if x]
-
+    
+    # Check for general validity of the path
     if split_path is None or len(split_path) == 0:
         return False
-    # If we have only two entries, we got only a username without a slug/signature
-    elif len(split_path) == 2:
-        split_path = split_path[-1:]
-    # If we have more than two entries, grab the last two (username and slug/signature)
-    elif len(split_path) > 2:
-        split_path = split_path[-2:]
+
+    # Normalize short and long urls to only username and slug/signature (remove the /user/ segment)
+    # FIXME: Handle edge case: A user with username='user' might make trouble here
+    if len(split_path) > 1 and split_path[0] == 'user':
+        split_path.pop(0)
 
     clean_url = url
     username = urllib.parse.unquote_plus(split_path[0])
