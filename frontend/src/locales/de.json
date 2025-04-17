@@ -71,6 +71,7 @@
       "setupProfile": "Dein Profil erstellen",
       "setupSchedule": "Terminverfügbarkeit einstellen"
     },
+    "usernameHelp": "So wird Dein Link aussehen",
     "videoConnectionRequired": "Zoom-Konto verbinden und einen benutzerdefinierten Meeting-Link angeben um fortzufahren.",
     "videoMeetingLink": "Videokonferenz-Link"
   },
