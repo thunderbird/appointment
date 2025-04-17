@@ -112,6 +112,7 @@ def create_calendar_schedule(
     db_schedule = repo.schedule.create(db=db, schedule=schedule)
 
     # If slug isn't provided, give them the last 8 characters from a uuid4
+    # TODO: We might want to set initial slug to None if the user should start with an username only url
     slug = repo.schedule.generate_slug(db, db_schedule.id)
     if not slug:
         # A little extra, but things are a little out of place right now..
@@ -163,12 +164,9 @@ def update_schedule(
     ):
         raise validation.ZoomNotConnectedException()
 
-    if schedule.slug is None:
-        # If slug isn't provided, give them the last 8 characters from a uuid4
-        schedule.slug = repo.schedule.generate_slug(db, id)
-        if not schedule.slug:
-            # A little extra, but things are a little out of place right now..
-            raise validation.ScheduleCreationException()
+    # If slug isn't provided, make it null in db
+    if not schedule.slug:
+        schedule.slug = None
 
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
