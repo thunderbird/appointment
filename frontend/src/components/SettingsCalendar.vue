@@ -15,11 +15,12 @@ import {
 } from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import CalendarManagement from '@/components/CalendarManagement.vue';
-import CautionButton from '@/elements/CautionButton.vue';
+import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import GoogleCalendarButton from '@/elements/GoogleCalendarButton.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { clearFormErrors, handleFormError } from '@/utils';
 
@@ -300,19 +301,21 @@ onMounted(async () => {
 
     <div class="flex gap-4">
       <secondary-button
-        :label="t('label.addCalendar', { provider: t('label.google') })"
-        class="btn-add text-sm !text-teal-500"
+        class="btn-add"
         @click="discoverGoogleCalendars"
         :disabled="inputMode"
         :title="t('label.addCalendar', { provider: t('label.google') })"
-      />
+      >
+        {{ t('label.addCalendar', { provider: t('label.google') }) }}
+      </secondary-button>
       <secondary-button
-        :label="t('label.addCalendar', { provider: t('label.caldav') })"
-        class="btn-add text-sm !text-teal-500"
+        class="btn-add"
         @click="discoverCaldavCalendars"
         :disabled="inputMode"
         :title="t('label.addCalendar', { provider: t('label.caldav') })"
-      />
+      >
+        {{ t('label.addCalendar', { provider: t('label.caldav') }) }}
+      </secondary-button>
     </div>
 
     <!-- CalDAV calendar discovery -->
@@ -341,8 +344,9 @@ onMounted(async () => {
               {{ t('label.principal') }}
               <div class="text-xs text-gray-500">{{ t('calDAVForm.help.location') }}</div>
             </div>
-            <input
+            <text-input
               v-model="principal.url"
+              name="url"
               type="url"
               class="w-full max-w-sm rounded-md"
               :disabled="processPrincipal"
@@ -355,8 +359,9 @@ onMounted(async () => {
               {{ t('label.username') }}
               <div class="text-xs text-gray-500">{{ t('calDAVForm.help.user') }}</div>
             </div>
-            <input
+            <text-input
               v-model="principal.user"
+              name="user"
               type="text"
               class="w-full max-w-sm rounded-md"
               :disabled="processPrincipal"
@@ -369,8 +374,9 @@ onMounted(async () => {
               {{ t('label.password') }}
               <div class="text-xs text-gray-500">{{ t('calDAVForm.help.password') }}</div>
             </div>
-            <input
+            <text-input
               v-model="principal.password"
+              name="password"
               type="password"
               class="w-full max-w-sm rounded-md"
               :disabled="processPrincipal"
@@ -381,21 +387,23 @@ onMounted(async () => {
         </form>
         <div class="flex justify-end gap-4">
           <secondary-button
-            :label="t('label.cancel')"
-            class="btn-cancel text-sm !text-teal-500"
+            class="btn-cancel"
             @click="resetInput"
             :title="t('label.cancel')"
             :disabled="processPrincipal"
             data-testid="settings-calendar-caldav-cancel-button"
-          />
+          >
+            {{ t('label.cancel') }}
+          </secondary-button>
           <primary-button
-            :label="'Search for calendars'"
-            class="btn-search text-sm"
+            class="btn-search"
             :waiting="processPrincipal"
             @click="getRemoteCaldavCalendars"
             :title="t('label.search')"
             data-testid="settings-calendar-caldav-process-principal-button"
-          />
+          >
+            {{ t('label.searchForCalendars') }}
+          </primary-button>
         </div>
       </div>
     </div>
@@ -425,10 +433,11 @@ onMounted(async () => {
       </div>
       <label v-if="isCalDav || editMode" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.title') }}</div>
-        <input
+        <text-input
           v-model="calendarInput.data.title"
+          name="title"
           type="text"
-          class="w-full max-w-sm rounded-md"
+          class="w-full"
           data-testid="settings-calendar-title-input"
         />
       </label>
@@ -440,58 +449,62 @@ onMounted(async () => {
               {{ color }}
             </option>
           </select>
-          <input v-else type="text" data-testid="settings-calendar-color-input" v-model="calendarInput.data.color" class="w-full rounded-md" />
+          <text-input
+            v-else
+            name="color"
+            type="text"
+            data-testid="settings-calendar-color-input"
+            v-model="calendarInput.data.color"
+            class="w-full"
+          />
           <div class="size-8 shrink-0 rounded-full" :style="{ backgroundColor: calendarInput.data.color }"></div>
         </div>
       </label>
       <label v-if="isCalDav" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.calendarUrl') }}</div>
-        <input
+        <text-input
           v-model="calendarInput.data.url"
+          name="url"
           type="url"
           class="w-full max-w-sm rounded-md"
         />
       </label>
       <label v-if="isCalDav" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
-        <input
+        <text-input
           v-model="calendarInput.data.user"
+          name="user"
           type="text"
           class="w-full max-w-sm rounded-md"
         />
       </label>
       <label v-if="isCalDav" class="flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.password') }}</div>
-        <input
+        <text-input
           v-model="calendarInput.data.password"
+          name="password"
           type="password"
           class="w-full max-w-sm rounded-md"
         />
       </label>
       <div class="flex justify-between gap-4">
         <div class="flex">
-          <caution-button
+          <danger-button
             v-if="editMode"
-            :label="t('label.disconnect')"
-            class="btn-disconnect text-sm"
+            class="btn-disconnect"
             @click="() => disconnectCalendar(calendarInput.id)"
             :title="t('label.disconnect')"
-          />
+          >
+            {{ t('label.disconnect') }}
+          </danger-button>
         </div>
         <div class="flex gap-4 self-end">
-          <secondary-button
-            :label="t('label.cancel')"
-            class="btn-cancel text-sm !text-teal-500"
-            @click="resetInput"
-            :title="t('label.cancel')"
-          />
-          <primary-button
-            v-if="isCalDav || editMode"
-            :label="addMode ? t('label.connectCalendar') : t('label.saveChanges')"
-            class="btn-save text-sm"
-            @click="saveCalendar"
-            :title="t('label.save')"
-          />
+          <secondary-button class="btn-cancel" @click="resetInput" :title="t('label.cancel')">
+            {{ t('label.cancel') }}
+          </secondary-button>
+          <primary-button v-if="isCalDav || editMode" class="btn-save" @click="saveCalendar" :title="t('label.save')">
+            {{ addMode ? t('label.connectCalendar') : t('label.saveChanges') }}
+          </primary-button>
           <!-- Google Button -->
           <google-calendar-button
             v-if="isGoogle && addMode"
