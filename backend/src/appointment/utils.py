@@ -65,7 +65,7 @@ def retrieve_user_url_data(url):
     split_path = [x for x in parsed_url.path.split('/') if x]
     
     # Check for general validity of the path
-    if split_path is None or len(split_path) == 0:
+    if split_path is None or len(split_path) == 0 or len(split_path) > 3:
         return False
 
     # Normalize short and long urls to only username and slug/signature (remove the /user/ segment)
