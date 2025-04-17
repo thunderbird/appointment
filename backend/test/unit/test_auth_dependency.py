@@ -190,7 +190,7 @@ class TestAuthDependency:
         assert retrieved_subscriber.id == subscriber.id
         assert retrieved_subscriber.email == subscriber.email
 
-    def test_get_subscriber_from_schedule_or_signed_url_with_schedule_slug(
+    def test_get_subscriber_from_schedule_or_signed_url_with_schedule_slug_using_short_url(
         self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
     ):
         subscriber = make_pro_subscriber()
@@ -204,7 +204,7 @@ class TestAuthDependency:
         assert retrieved_subscriber.id == subscriber.id
         assert retrieved_subscriber.email == subscriber.email
 
-    def test_get_subscriber_from_schedule_or_signed_url_without_schedule_slug(
+    def test_get_subscriber_from_schedule_or_signed_url_without_schedule_slug_using_short_url(
         self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
     ):
         subscriber = make_pro_subscriber()
@@ -213,6 +213,34 @@ class TestAuthDependency:
 
         with with_db() as db:
             url = f'https://apmt.day/{subscriber.username}/'
+            retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+        assert retrieved_subscriber.id == subscriber.id
+        assert retrieved_subscriber.email == subscriber.email
+
+    def test_get_subscriber_from_schedule_or_signed_url_with_schedule_slug(
+        self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
+    ):
+        subscriber = make_pro_subscriber()
+        calendar = make_caldav_calendar(subscriber_id=subscriber.id)
+        schedule = make_schedule(calendar_id=calendar.id)
+
+        with with_db() as db:
+            url = f'https://apmt.day/user/{subscriber.username}/{schedule.slug}/'
+            retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+        assert retrieved_subscriber.id == subscriber.id
+        assert retrieved_subscriber.email == subscriber.email
+
+    def test_get_subscriber_from_schedule_or_signed_url_without_schedule_slug(
+        self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
+    ):
+        subscriber = make_pro_subscriber()
+        calendar = make_caldav_calendar(subscriber_id=subscriber.id)
+        make_schedule(calendar_id=calendar.id)
+
+        with with_db() as db:
+            url = f'https://apmt.day/user/{subscriber.username}/'
             retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
 
         assert retrieved_subscriber.id == subscriber.id
