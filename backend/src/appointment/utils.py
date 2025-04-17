@@ -66,7 +66,7 @@ def retrieve_user_url_data(url):
 
     if split_path is None or len(split_path) == 0:
         return False
-    # If we have only one entry, we got only a username without a slug/signature
+    # If we have only two entries, we got only a username without a slug/signature
     elif len(split_path) == 2:
         split_path = split_path[-1:]
     # If we have more than two entries, grab the last two (username and slug/signature)
