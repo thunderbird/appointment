@@ -319,9 +319,9 @@ test.describe('connected accounts settings', {
   test('edit profile button', async ({ page }) => {
     // verify that clicking the `edit profile` button redirects to the Mozilla Account profile page
     // note that on dev env this relies on having VITE_FXA_EDIT_PROFILE= set to point to stage FxA
-    await settingsPage.editProfileBtn.click();
     // skip this on dev env because stage FxA use may or may not be setup to use with local dev
     if (APPT_TARGET_ENV !== 'dev') {
+      await settingsPage.editProfileBtn.click();
       await expect(settingsPage.mozProfilePageLogo).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
       await expect(settingsPage.mozProfileSettingsSection).toBeVisible();
     }
