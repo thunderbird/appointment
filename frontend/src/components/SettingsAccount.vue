@@ -26,12 +26,13 @@ import { usePosthog, posthog } from '@/composables/posthog';
 import {
   StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,  SelectOption,
 } from '@/models';
-import { callKey } from '@/keys';
+import { callKey, shortUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
 const call = inject(callKey);
+const shortUrl = inject(shortUrlKey);
 const router = useRouter();
 const schedule = createScheduleStore(call);
 const externalConnectionsStore = createExternalConnectionsStore(call);
@@ -48,6 +49,9 @@ const updateLinkModalOpen = ref(false);
 const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
 const formRef = ref<HTMLFormElement>();
+
+// Custom quick link
+const quickLink = computed(() => shortUrl.substring(shortUrl.indexOf('//')+2) + `/${user.data.username}/`);
 
 // Preferred email options
 const emailOptions = computed<SelectOption[]>(() => availableEmails.value.map((email) => ({
@@ -293,7 +297,7 @@ const actuallyDeleteAccount = async () => {
             <text-input
               type="text"
               name="slug"
-              :prefix="`/${user.data.username}/`"
+              :prefix="quickLink"
               v-model="activeSlug"
               class="w-full rounded-md disabled:cursor-not-allowed"
               :small-text="true"
