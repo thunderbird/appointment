@@ -14,7 +14,7 @@ import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 
 // icons
-import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
+import { IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
 import UserInviteTable from '@/components/UserInviteTable.vue';
@@ -177,6 +177,7 @@ const refreshLink = async () => {
 const refreshLinkConfirm = async () => {
   await user.changeSignedUrl();
   await refreshData();
+  activeSlug.value = user.mySlug;
   closeModals();
 
   sendMetrics(MetricEvents.RefreshLink);
