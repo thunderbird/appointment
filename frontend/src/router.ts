@@ -74,7 +74,7 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/user/:username/:signatureOrSlug',
+    path: '/user/:username/:signatureOrSlug?',
     name: 'availability',
     component: BookingView,
     meta: {

@@ -75,7 +75,7 @@ const onChange = () => {
   <label class="wrapper" :for="name">
     <span class="label">
       <slot/>
-      <span v-if="required && model?.length === 0" class="required">*</span>
+      <span v-if="required && $slots.default && model?.length === 0" class="required">*</span>
     </span>
     <span class="tbpro-input" :class="{'small-text': props.smallText}" >
       <span v-if="prefix" ref="inputPrefix" class="tbpro-input-prefix">{{ prefix }}</span>
@@ -104,9 +104,6 @@ const onChange = () => {
     </span>
     <span v-else-if="help" class="help-label">
       {{ help }}
-    </span>
-    <span v-else class="help-label">
-      <!-- Empty space -->
     </span>
   </label>
 </template>
@@ -139,7 +136,6 @@ const onChange = () => {
   color: var(--colour-ti-base);
 
   width: 100%;
-  min-height: 0.9375rem;
   font-size: 0.625rem;
   line-height: 0.9375rem;
   padding: 0.1875rem;

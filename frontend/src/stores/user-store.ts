@@ -65,7 +65,6 @@ export const useUserStore = defineStore('user', () => {
     // We have a settings object? See if all keys exists and update only the missing ones
     
     Object.keys(defaultSettings).forEach(key => {
-      console.log(key);
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
   }
@@ -108,8 +107,8 @@ export const useUserStore = defineStore('user', () => {
    * Return the last unique URL part of the users link
    */
   const mySlug = computed((): string => {
-    const link = myLink?.value?.replace(/\/+$/, '');
-    return link?.slice(link.lastIndexOf('/') + 1);
+    const link = myLink.value?.replace(/\/+$/, '') ?? '';
+    return link.slice(link.indexOf(data.value.username) + data.value.username.length + 1);
   });
 
   /**

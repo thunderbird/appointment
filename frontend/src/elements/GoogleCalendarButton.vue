@@ -9,7 +9,7 @@ defineProps<Props>();
 <template>
   <button
     class="
-      relative flex h-10 items-center justify-center gap-4 whitespace-nowrap rounded-full
+      relative flex h-10 items-center justify-center gap-4 whitespace-nowrap rounded
       border border-gray-500 bg-white px-4 font-roboto text-base text-gray-600
       transition-all ease-in-out hover:scale-102 hover:shadow-md
       active:scale-98 disabled:scale-100 disabled:opacity-50 disabled:shadow-none dark:bg-gray-800 dark:text-gray-400

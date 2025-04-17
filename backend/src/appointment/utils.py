@@ -60,28 +60,33 @@ def decrypt(value):
 
 
 def retrieve_user_url_data(url):
-    """URL Decodes, and retrieves username, signature, and main url from /<username>/<signature>/"""
+    """URL Decodes, and retrieves username, slug/signature, and main url from /<username>/<slug/signature?>/"""
     parsed_url = parse.urlparse(url)
     split_path = [x for x in parsed_url.path.split('/') if x]
-
-    if split_path is None or len(split_path) == 0:
+    
+    # Check for general validity of the path
+    if split_path is None or len(split_path) == 0 or len(split_path) > 3:
         return False
-    # If we have more than two entries, grab the last two
-    elif len(split_path) > 2:
-        split_path = split_path[-2:]
+
+    # Normalize short and long urls to only username and slug/signature (remove the /user/ segment)
+    # FIXME: Handle edge case: A user with username='user' might make trouble here
+    if len(split_path) > 1 and split_path[0] == 'user':
+        split_path.pop(0)
 
     clean_url = url
-    username = split_path[0]
-    signature = None
+    username = urllib.parse.unquote_plus(split_path[0])
+    slug = None
     if len(split_path) > 1:
-        signature = split_path[1]
+        slug = split_path[1]
         # Strip any tailing slashes
-        clean_url = clean_url.replace(signature, "").rstrip('/')
+        clean_url = clean_url.replace(slug, "").rstrip('/')
         # Re-add just the last one
         clean_url = f'{clean_url}/'
+        # Decode slug/signature
+        slug = urllib.parse.unquote_plus(slug)
 
-    # Return the username and signature decoded, but ensure the clean_url is encoded.
-    return urllib.parse.unquote_plus(username), urllib.parse.unquote_plus(signature), clean_url
+    # Return the username and slug/signature decoded, but ensure the clean_url is encoded.
+    return username, slug, clean_url
 
 
 def chunk_list(to_chunk: list, chunk_by: int):

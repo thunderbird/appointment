@@ -1,7 +1,7 @@
 // init app
 import App from '@/App.vue';
 import { createApp } from 'vue';
-import { apiUrlKey, bookingUrlKey } from '@/keys';
+import { apiUrlKey, bookingUrlKey, shortUrlKey } from '@/keys';
 import { defaultLocale } from '@/utils';
 
 // pinia state management
@@ -72,6 +72,7 @@ const port = import.meta.env.VITE_API_PORT !== undefined ? `:${import.meta.env.V
 const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
 app.provide(apiUrlKey, apiUrl);
 app.provide(bookingUrlKey, `${protocol}://${import.meta.env.VITE_BASE_URL}/appointments/all/`);
+app.provide(shortUrlKey, `${protocol}://${import.meta.env.VITE_SHORT_BASE_URL}`);
 
 app.use(i18ninstance);
 useDayJS(app, defaultLocale());
