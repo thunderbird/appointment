@@ -82,7 +82,10 @@ class ZoomClient:
         pass
 
     def get_redirect_url(self, state):
+        # Ensure we pass "None" to scope, as zoom doesn't accept scopes here...for some reason?
+        self.client.scope = None
         url, state = self.client.authorization_url(self.OAUTH_AUTHORIZATION_URL, state=state)
+        self.client.scope = self.scopes
 
         return url, state
 
