@@ -1,10 +1,12 @@
 import json
+import logging
 import os
 import time
 
 import sentry_sdk
 from requests_oauthlib import OAuth2Session
 from ...database import models, repo
+from ...exceptions.zoom_api import ZoomScopeChanged
 
 
 class ZoomClient:
@@ -14,8 +16,7 @@ class ZoomClient:
     OAUTH_DEVICE_VERIFY_URL = 'https://zoom.us/oauth_device'
     OAUTH_REQUEST_URL = 'https://api.zoom.us/v2'
 
-    SCOPES = ['user:read', 'user_info:read', 'meeting:write']
-    NEW_SCOPES = [
+    SCOPES = [
         'meeting:read:meeting',
         'meeting:write:meeting',
         'meeting:update:meeting',
@@ -34,13 +35,10 @@ class ZoomClient:
         self.callback_url = callback_url
         self.subscriber_id = None
         self.client = None
-        self.use_new_scopes = os.getenv('ZOOM_API_NEW_APP', False) == 'True'
 
     @property
     def scopes(self):
         """Returns the appropriate scopes"""
-        if self.use_new_scopes:
-            return self.NEW_SCOPES
         return self.SCOPES
 
     def check_expiry(self, token: dict | None):
@@ -90,9 +88,16 @@ class ZoomClient:
         return url, state
 
     def get_credentials(self, code: str):
-        return self.client.fetch_token(
-            self.OAUTH_TOKEN_URL, code, client_secret=self.client_secret, include_client_id=True
-        )
+        try:
+            creds = self.client.fetch_token(
+                self.OAUTH_TOKEN_URL, code, client_secret=self.client_secret, include_client_id=True
+            )
+        except Warning as e:
+            # This usually is the "Scope has changed" error.
+            logging.error(f'[zoom_client.get_credentials] Zoom Warning: {str(e)}')
+            raise ZoomScopeChanged()
+
+        return creds
 
     def token_saver(self, token):
         """requests-oauth automagically calls this function when it has a new refresh token for us.
