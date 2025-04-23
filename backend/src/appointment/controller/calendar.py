@@ -339,6 +339,11 @@ class CalDavConnector(BaseConnector):
         self.password = password
         self.user = user
 
+        # Tag the caldav hostname in case any errors come up
+        parsed_url = urlparse(url)
+        if parsed_url.hostname:
+            sentry_sdk.set_tag('caldav_host', parsed_url.hostname)
+
         # connect to the CalDAV server
         self.client = DAVClient(url=self.url, username=self.user, password=self.password)
 
