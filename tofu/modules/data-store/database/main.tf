@@ -18,7 +18,7 @@ module "db" {
   identifier = var.name_prefix
 
   engine            = "mysql"
-  engine_version    = "8.0.35"
+  engine_version    = "8.0.40"
   instance_class    = "db.t3.medium"
   allocated_storage = 20
 
