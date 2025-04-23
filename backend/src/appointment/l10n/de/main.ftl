@@ -79,6 +79,7 @@ oauth-error = Es ist ein Fehler bei der Authentifizierung aufgetreten. Bitte ern
 
 zoom-not-connected = Es wird ein Zoom-Konto benötigt, um einen Meeting-Link zu erstellen.
 zoom-connect-to-continue = Bitte ein Zoom-Konto verbinden, einen benutzerdefinierten Meeting-Link eingeben oder auf "Videoverbindung überspringen" klicken, um fortzufahren.
+zoom-unknown-error = Es gab einen unerwarteten Fehler beim Verbinden des Zoom-Kontos. Bitte später noch einmal versuchen.
 
 ## Google Exceptions
 
