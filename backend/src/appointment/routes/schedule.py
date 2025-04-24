@@ -113,7 +113,7 @@ def create_calendar_schedule(
 
     # The first schedule currently is initialized without a slug to provide a username only availability link.
     # If we already have at least one schedule and slug isn't provided, give them the last 8 characters from a uuid4.
-    if len(repo.schedule.get_by_subscriber(db, subscriber.id) > 0) and not schedule.slug:
+    if len(repo.schedule.get_by_subscriber(db, subscriber.id)) > 0 and not schedule.slug:
         slug = repo.schedule.generate_slug(db, db_schedule.id)
         if not slug:
             # A little extra, but things are a little out of place right now..
