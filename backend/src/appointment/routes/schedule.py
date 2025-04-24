@@ -111,13 +111,14 @@ def create_calendar_schedule(
 
     db_schedule = repo.schedule.create(db=db, schedule=schedule)
 
-    # If slug isn't provided, give them the last 8 characters from a uuid4
-    # TODO: We might want to set initial slug to None if the user should start with an username only url
-    slug = repo.schedule.generate_slug(db, db_schedule.id)
-    if not slug:
-        # A little extra, but things are a little out of place right now..
-        repo.schedule.hard_delete(db, db_schedule.id)
-        raise validation.ScheduleCreationException()
+    # The first schedule currently is initialized without a slug to provide a username only availability link.
+    # If we already have at least one schedule and slug isn't provided, give them the last 8 characters from a uuid4.
+    if len(repo.schedule.get_by_subscriber(db, subscriber.id) > 0) and not schedule.slug:
+        slug = repo.schedule.generate_slug(db, db_schedule.id)
+        if not slug:
+            # A little extra, but things are a little out of place right now..
+            repo.schedule.hard_delete(db, db_schedule.id)
+            raise validation.ScheduleCreationException()
 
     return db_schedule
 
