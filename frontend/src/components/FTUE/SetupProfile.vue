@@ -75,7 +75,7 @@ const onSubmit = async () => {
       </text-input>
       <text-input
         name="username"
-        :prefix="quickLink"
+        :outer-prefix="quickLink"
         v-model="username"
         :required="true"
         :error="errorUsername"

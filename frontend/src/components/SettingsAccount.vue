@@ -295,7 +295,7 @@ const actuallyDeleteAccount = async () => {
             <text-input
               type="text"
               name="slug"
-              :prefix="quickLinkPrefix"
+              :outer-prefix="quickLinkPrefix"
               v-model="activeSlug"
               :small-text="true"
               maxLength="16"

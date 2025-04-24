@@ -79,11 +79,6 @@ watch(
     }
   },
 );
-
-// @ts-expect-error ignore type err
-// See https://github.com/microsoft/TypeScript/issues/49231
-const timezones = Intl.supportedValuesOf('timeZone');
-
 </script>
 
 <template>
