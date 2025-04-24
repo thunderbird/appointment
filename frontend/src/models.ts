@@ -197,7 +197,7 @@ export type Schedule = {
   end_time: string;
   earliest_booking: number;
   farthest_booking: number;
-  weekdays: number[];
+  weekdays: string[];
   slot_duration: number;
   meeting_link_provider: string;
   id?: number;
@@ -226,7 +226,8 @@ export type User = {
   signedUrl: string;
   avatarUrl: string;
   accessToken: string;
-  scheduleLinks: string[];
+  userLink: string;
+  scheduleSlugs: object;
   isSetup: boolean,
   uniqueHash: string;
 };
@@ -266,7 +267,8 @@ export type Subscriber = {
   avatar_url?: string;
   is_setup?: boolean;
   unique_hash?: string;
-  schedule_links?: string[];
+  user_link?: string;
+  schedule_slugs?: object;
   secondary_email?: string;
   invite?: Invite;
   time_created?: string;
@@ -420,7 +422,7 @@ export type TimeFormatted = Time<string>;
 
 export type SelectOption = {
   label: string;
-  value: string;
+  value: string|int;
 };
 
 export type Coloring = {

@@ -102,7 +102,7 @@ const defaultSchedule: Schedule = {
   end_time: '17:00',
   earliest_booking: 1440,
   farthest_booking: 20160,
-  weekdays: [1, 2, 3, 4, 5],
+  weekdays: ['1', '2', '3', '4', '5'],
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
@@ -193,7 +193,7 @@ const charCount = computed(() => scheduleInput.value.details?.length ?? 0);
 // Weekday options
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso.toString(),
+  value: day.iso, // Important: For now this needs to be ints, as that's what the values from the api as.
 }));
 
 // Connected calendar options

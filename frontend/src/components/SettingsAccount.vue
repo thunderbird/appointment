@@ -2,8 +2,8 @@
 import {
   ref, inject, onMounted, computed,
 } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import {useI18n} from 'vue-i18n';
+import {useRouter} from 'vue-router';
 import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -14,23 +14,23 @@ import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 
 // icons
-import { IconInfoCircle } from '@tabler/icons-vue';
+import {IconInfoCircle} from '@tabler/icons-vue';
 
 // stores
 import UserInviteTable from '@/components/UserInviteTable.vue';
-import { createExternalConnectionsStore } from '@/stores/external-connections-store';
-import { createScheduleStore } from '@/stores/schedule-store';
+import {createExternalConnectionsStore} from '@/stores/external-connections-store';
+import {createScheduleStore} from '@/stores/schedule-store';
 
-import { MetricEvents } from '@/definitions';
-import { usePosthog, posthog } from '@/composables/posthog';
+import {MetricEvents} from '@/definitions';
+import {usePosthog, posthog} from '@/composables/posthog';
 import {
-  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,  SelectOption, Error,
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse, SelectOption, Error,
 } from '@/models';
-import { callKey, shortUrlKey } from '@/keys';
-import { createUserStore } from '@/stores/user-store';
+import {callKey, shortUrlKey} from '@/keys';
+import {createUserStore} from '@/stores/user-store';
 
 // component constants
-const { t } = useI18n({ useScope: 'global' });
+const {t} = useI18n({useScope: 'global'});
 const call = inject(callKey);
 const shortUrl = inject(shortUrlKey);
 const router = useRouter();
@@ -50,8 +50,19 @@ const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
 const formRef = ref<HTMLFormElement>();
 
-// Custom quick link prefix
-const quickLinkPrefix = computed(() => shortUrl.substring(shortUrl.indexOf('//')+2) + `/${user.data.username}/`);
+/**
+ * We trim the middle of a username if it's over 8 characters long
+ */
+const usernameShort = computed(() => {
+  const username = user?.data?.username ?? '';
+  if (username.length > 8) {
+    const len = username.length;
+    return `${username.substring(0, 4)}…${username.substring(len - 4)}`;
+  }
+  return username;
+})
+const quickLinkFull = computed(() => `${shortUrl}/${user.data.username}/${activeSlug.value}`)
+const quickLinkPrefix = computed(() => shortUrl.substring(shortUrl.indexOf('//') + 2) + `/${usernameShort.value}/`);
 
 // Preferred email options
 const emailOptions = computed<SelectOption[]>(() => availableEmails.value.map((email) => ({
@@ -71,7 +82,7 @@ const closeModals = () => {
 };
 
 const getAvailableEmails = async () => {
-  const { data }: StringListResponse = await call('account/available-emails').get().json();
+  const {data}: StringListResponse = await call('account/available-emails').get().json();
   if (!data || !data.value) {
     availableEmails.value = [];
   }
@@ -115,7 +126,7 @@ const updateUser = async () => {
     secondary_email: activePreferredEmail.value,
   };
 
-  const { data, error }: SubscriberResponse = await call('me').put(inputData).json();
+  const {data, error}: SubscriberResponse = await call('me').put(inputData).json();
   if (!error.value) {
     // update user in store
     user.updateProfile(data.value);
@@ -198,7 +209,7 @@ const refreshLinkConfirm = async () => {
  * Request a data download, and prompt the user to download the data.
  */
 const actuallyDownloadData = async () => {
-  const { data }: BlobResponse = await call('account/download').post().blob();
+  const {data}: BlobResponse = await call('account/download').post().blob();
   if (!data || !data.value) {
     // TODO: show error
     // console.error('Failed to download blob!!');
@@ -218,7 +229,7 @@ const actuallyDownloadData = async () => {
 const actuallyDeleteAccount = async () => {
   deleteAccountSecondModalOpen.value = false;
 
-  const { error }: BooleanResponse = await call('account/delete').delete();
+  const {error}: BooleanResponse = await call('account/delete').delete();
 
   sendMetrics(MetricEvents.DeleteAccount);
 
@@ -302,10 +313,13 @@ const actuallyDeleteAccount = async () => {
             <text-input
               type="text"
               name="slug"
+              :placeholder="t('label.optionalPasscode')"
               :outer-prefix="quickLinkPrefix"
               v-model="activeSlug"
               :small-text="true"
               maxLength="16"
+              :title="quickLinkFull"
+              data-testid="settings-account-mylink-input"
             />
             <div v-if="errorSlug" class="text-sm text-red-500">
               {{ errorSlug }}
@@ -315,7 +329,7 @@ const actuallyDeleteAccount = async () => {
             uid="myLink"
             class="btn-copy"
             :tooltip="t('label.copyLink')"
-            :copy="user.myLink"
+            :copy="quickLinkFull"
             :title="t('label.copy')"
             data-testid="settings-account-copy-link-btn"
           />
@@ -346,7 +360,7 @@ const actuallyDeleteAccount = async () => {
         {{ t('settings.invite.brief') }}
       </p>
       <div class="mt-4 pl-4">
-      <user-invite-table></user-invite-table>
+        <user-invite-table></user-invite-table>
       </div>
     </div>
     <div class="pl-6" id="download-your-data">
@@ -429,5 +443,9 @@ const actuallyDeleteAccount = async () => {
 
 .tooltip-icon:hover ~ .tooltip {
   display: block;
+}
+
+.link-input {
+  min-width: 8rem;
 }
 </style>

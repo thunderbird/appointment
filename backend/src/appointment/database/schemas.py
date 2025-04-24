@@ -337,7 +337,8 @@ class Subscriber(SubscriberAuth):
 
 class SubscriberMeOut(SubscriberBase):
     unique_hash: Optional[str] = None
-    schedule_links: list[str] = []
+    user_link: Optional[str] = None
+    schedule_slugs: dict = {}
 
 
 class SubscriberAdminItem(SubscriberAuth):
