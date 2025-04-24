@@ -13,12 +13,12 @@ const user = createUserStore(call);
 const isoWeekdays = inject(isoWeekdaysKey);
 
 const localeOptions = availableLocales.map((l) => ({
-  label: l.toUpperCase() + ' — ' + t('locales.' + l),
+  label: `${l.toUpperCase()} — ${t(`locales.${l}`)}`,
   value: l,
 }));
 
 const colourSchemeOptions = Object.values(ColourSchemes).map((c) => ({
-  label: t('label.' + c),
+  label: t(`label.${c}`),
   value: c,
 }));
 
