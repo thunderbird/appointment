@@ -111,7 +111,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 }
 .dark {
   .tbpro-select {
-    background-color: var(--colour-neutral-lower);
+    background-color: var(--colour-neutral-base);
   }
 }
 </style>

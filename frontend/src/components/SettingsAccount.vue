@@ -24,7 +24,7 @@ import { createScheduleStore } from '@/stores/schedule-store';
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
 import {
-  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,  SelectOption,
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,  SelectOption, Error,
 } from '@/models';
 import { callKey, shortUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
@@ -89,6 +89,7 @@ const refreshData = async () => Promise.all([
 // Form validation
 const errorUsername = ref<string>(null);
 const errorDisplayName = ref<string>(null);
+const errorSlug = ref<string>(null);
 
 // Save user data
 const updateUser = async () => {
@@ -100,7 +101,10 @@ const updateUser = async () => {
     const response = await schedule.updateFirstSlug(activeSlug.value);
     // eslint-disable-next-line no-prototype-builtins
     if (response.hasOwnProperty('error')) {
-      // TODO: error message is in data
+      // Error message is in data
+      errorSlug.value = (response as Error).message;
+    } else {
+      errorSlug.value = null;
     }
   }
 
@@ -303,6 +307,9 @@ const actuallyDeleteAccount = async () => {
               :small-text="true"
               maxLength="16"
             />
+            <div v-if="errorSlug" class="text-sm text-red-500">
+              {{ errorSlug }}
+            </div>
           </div>
           <text-button
             uid="myLink"
