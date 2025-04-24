@@ -82,12 +82,12 @@ def schedule_links_by_subscriber(db, subscriber: models.Subscriber):
 
     url_safe_username = urllib.parse.quote_plus(subscriber.username)
 
-    # Empty space at join is for trailing slash!
-    return list(
-        map(
-            lambda sch:
-                '/'.join([short_url, url_safe_username, urllib.parse.quote_plus(sch.slug), '']) if sch.slug
-                else '/'.join([short_url, url_safe_username, '']),
-            schedules
-        )
-    )
+    return list(map(lambda sch: schedule_link(sch, short_url, url_safe_username), schedules))
+
+
+def schedule_link(schedule: models.Schedule, base: str, username: str):
+    """helper to generate a schedule link depending on the existence of a schedule slug"""
+    if schedule.slug:
+        return f"{base}/{username}/{urllib.parse.quote_plus(schedule.slug)}/"
+    else:
+        return f"{base}/{username}/"
