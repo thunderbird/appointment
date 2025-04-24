@@ -92,6 +92,9 @@ const errorDisplayName = ref<string>(null);
 
 // Save user data
 const updateUser = async () => {
+  // Prepare slug processing
+  activeSlug.value = activeSlug.value.trim();
+
   // First update the slug if it was changed
   if (activeSlug.value !== user.mySlug) {
     const response = await schedule.updateFirstSlug(activeSlug.value);
