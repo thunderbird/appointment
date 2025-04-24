@@ -38,6 +38,7 @@ const hardDeleteModalContext = ref<Subscriber>(null);
 const emailFilter = ref<string>(null);
 const subscriberList = computed(() => {
   if (emailFilter.value) {
+    /** @ts-expect-error escape has no baseline support yet */
     return subscribers.value.filter((sub) => sub.email.match(new RegExp(RegExp.escape(emailFilter.value), 'gi')));
   }
   return subscribers.value;

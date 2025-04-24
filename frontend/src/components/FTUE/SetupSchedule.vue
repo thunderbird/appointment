@@ -38,15 +38,15 @@ const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
-  value: calendar.id,
+  value: calendar.id.toString(),
 })));
 const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((min) => ({
   label: `${min} min`,
-  value: min,
+  value: min.toString(),
 }));
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso,
+  value: day.iso.toString(),
 }));
 
 const formRef = ref<HTMLFormElement>();
@@ -57,7 +57,7 @@ const schedule = ref({
   startTime: '09:00',
   endTime: '17:00',
   duration: DEFAULT_SLOT_DURATION,
-  days: [1, 2, 3, 4, 5],
+  days: ['1', '2', '3', '4', '5'],
   details: '',
 });
 
@@ -132,7 +132,7 @@ onMounted(async () => {
       startTime: timeToFrontendTime(dbSchedule.start_time, dbSchedule.time_updated),
       endTime: timeToFrontendTime(dbSchedule.end_time, dbSchedule.time_updated),
       duration: dbSchedule.slot_duration,
-      days: dbSchedule.weekdays,
+      days: dbSchedule.weekdays.map(String),
     };
   }
 

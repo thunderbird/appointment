@@ -13,7 +13,7 @@ withDefaults(defineProps<Props>(), {
   disabled: false,
 });
 
-const model = defineModel<number[]>({ default: [] });
+const model = defineModel<(string | number)[]>({ default: [] });
 
 /**
  * Adds or removes the option value from the model.

@@ -26,7 +26,7 @@ const colourSchemeOptions = Object.values(ColourSchemes).map((c) => ({
 const availableStartOfTheWeekOptions = computed(
   () => isoWeekdays.filter((day) => [7,1].includes(day.iso)).map((e) => ({
     label: e.long,
-    value: e.iso,
+    value: e.iso.toString(),
   }))
 );
 

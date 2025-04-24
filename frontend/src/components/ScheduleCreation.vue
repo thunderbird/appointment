@@ -193,13 +193,13 @@ const charCount = computed(() => scheduleInput.value.details?.length ?? 0);
 // Weekday options
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso,
+  value: day.iso.toString(),
 }));
 
 // Connected calendar options
 const calendarOptions = computed<SelectOption[]>(() => props.calendars.map((calendar) => ({
   label: calendar.title,
-  value: calendar.id,
+  value: calendar.id.toString(),
 })));
 
 // Earliest booking options
@@ -208,25 +208,25 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
   if (d === 0) {
     return {
       label: t('label.immediately'),
-      value: 0,
+      value: '0',
     };
   }
   return {
     label: dj.duration(d, 'days').humanize(),
-    value: d * 60 * 24,
+    value: (d * 60 * 24).toString(),
   };
 });
 
 // Farthest booking options
 const farthestOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   label: dj.duration(d, 'weeks').humanize(),
-  value: d * 60 * 24 * 7,
+  value: (d * 60 * 24 * 7).toString(),
 }));
 
 // Appointment duration options
 const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((duration) => ({
   label: t('units.minutes', { value: duration }),
-  value: duration,
+  value: duration.toString(),
 }));
 
 // humanize selected durations

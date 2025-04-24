@@ -22,7 +22,7 @@ import { createUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 
-import { Alert } from '@/models';
+import { Alert, ExternalConnection } from '@/models';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -40,16 +40,14 @@ const isAccountsAuth = inject(isAccountsAuthKey);
  * Temp until we remove local fxa
  */
 const filteredConnections = computed(() => {
-  const newConnections = {};
+  const newConnections = {} as { [key: string]: ExternalConnection[] };
   const keys = Object.keys(connections.value);
    
   for (const connection of keys) {
     if (connection === 'fxa' && !isFxaAuth) {
-       
       continue;
     }
     if (connection === 'accounts' && !isAccountsAuth) {
-       
       continue;
     }
     newConnections[connection] = connections.value[connection];
@@ -156,7 +154,7 @@ const editProfile = async () => {
           <p v-if="connection[0]">{{ t('label.connectedAs', {name: connection[0].name}) }}</p>
           <p v-if="!connection[0]">{{ t('label.notConnected') }}</p>
         </div>
-        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.accounts">
+        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
           <primary-button
             v-if="!connection[0]"
             class="btn-connect"

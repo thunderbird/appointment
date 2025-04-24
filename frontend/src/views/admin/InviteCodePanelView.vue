@@ -34,6 +34,7 @@ const pageNotification = ref<Alert>(null);
 const codeFilter = ref<string>(null);
 const inviteList = computed(() => {
   if (codeFilter.value) {
+    /** @ts-expect-error escape has no baseline support yet */
     return invites.value.filter((invite) => invite.code.match(new RegExp(RegExp.escape(codeFilter.value), 'gi')));
   }
   return invites.value;
