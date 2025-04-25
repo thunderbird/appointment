@@ -75,7 +75,6 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
   color: var(--colour-ti-critical);
 
   width: 100%;
-  min-height: 0.9375rem;
   font-size: 0.625rem;
   line-height: 0.9375rem;
 }
@@ -112,7 +111,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
 }
 .dark {
   .tbpro-select {
-    background-color: var(--colour-neutral-lower);
+    background-color: var(--colour-neutral-base);
   }
 }
 </style>

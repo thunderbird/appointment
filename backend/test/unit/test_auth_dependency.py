@@ -18,7 +18,8 @@ from appointment.dependencies.auth import (
     get_subscriber_from_schedule_or_signed_url,
     get_user_from_accounts_session,
 )
-from appointment.exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
+from appointment.exceptions.validation import InvalidTokenException, InvalidPermissionLevelException, \
+    InvalidLinkException
 from appointment.routes.auth import create_access_token
 
 
@@ -190,7 +191,7 @@ class TestAuthDependency:
         assert retrieved_subscriber.id == subscriber.id
         assert retrieved_subscriber.email == subscriber.email
 
-    def test_get_subscriber_from_schedule_or_signed_url_with_schedule_slug(
+    def test_get_subscriber_from_schedule_or_signed_url_with_schedule_slug_using_short_url(
         self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
     ):
         subscriber = make_pro_subscriber()
@@ -200,6 +201,69 @@ class TestAuthDependency:
         with with_db() as db:
             url = f'https://apmt.day/{subscriber.username}/{schedule.slug}/'
             retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+        assert retrieved_subscriber.id == subscriber.id
+        assert retrieved_subscriber.email == subscriber.email
+
+    def test_get_subscriber_from_schedule_or_signed_url_without_schedule_slug_using_short_url(
+        self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
+    ):
+        subscriber = make_pro_subscriber()
+        calendar = make_caldav_calendar(subscriber_id=subscriber.id)
+        schedule = make_schedule(calendar_id=calendar.id, slug='the-schedule')
+
+        with with_db() as db:
+            url = f'https://apmt.day/{subscriber.username}/'
+
+            # Since we have a schedule slug this will error out
+            with pytest.raises(InvalidLinkException):
+                retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+            schedule.slug = None
+            db.add(schedule)
+            db.commit()
+
+            # Now that we don't have a schedule slug, this will succeed.
+            retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+        assert retrieved_subscriber.id == subscriber.id
+        assert retrieved_subscriber.email == subscriber.email
+
+    def test_get_subscriber_from_schedule_or_signed_url_with_schedule_slug(
+        self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
+    ):
+        subscriber = make_pro_subscriber()
+        calendar = make_caldav_calendar(subscriber_id=subscriber.id)
+        schedule = make_schedule(calendar_id=calendar.id)
+
+        with with_db() as db:
+            url = f'https://apmt.day/user/{subscriber.username}/{schedule.slug}/'
+            retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+        assert retrieved_subscriber.id == subscriber.id
+        assert retrieved_subscriber.email == subscriber.email
+
+    def test_get_subscriber_from_schedule_or_signed_url_without_schedule_slug(
+        self, with_db, with_l10n, make_pro_subscriber, make_schedule, make_caldav_calendar
+    ):
+        subscriber = make_pro_subscriber()
+        calendar = make_caldav_calendar(subscriber_id=subscriber.id)
+        schedule = make_schedule(calendar_id=calendar.id, slug='the-schedule-2')
+
+        with with_db() as db:
+            url = f'https://apmt.day/user/{subscriber.username}/'
+
+            # Since we have a schedule slug this will error out
+            with pytest.raises(InvalidLinkException):
+                retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
+            schedule.slug = None
+            db.add(schedule)
+            db.commit()
+
+            # Now that we don't have a schedule slug, this will succeed.
+            retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
+
 
         assert retrieved_subscriber.id == subscriber.id
         assert retrieved_subscriber.email == subscriber.email

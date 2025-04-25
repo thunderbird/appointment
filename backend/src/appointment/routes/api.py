@@ -17,7 +17,7 @@ from ..database import repo, schemas
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
-from ..controller.auth import signed_url_by_subscriber, schedule_links_by_subscriber
+from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_link_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, InviteStatus
 from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..dependencies.google import get_google_client
@@ -78,7 +78,8 @@ def update_me(
         timezone=me.timezone,
         is_setup=me.is_setup,
         avatar_url=me.avatar_url,
-        schedule_links=schedule_links_by_subscriber(db, subscriber),
+        user_link=user_link_by_subscriber(subscriber),
+        schedule_slugs=schedule_slugs_by_subscriber(db, subscriber),
         unique_hash=me.unique_hash,
         language=me.language,
         colour_scheme=me.colour_scheme,

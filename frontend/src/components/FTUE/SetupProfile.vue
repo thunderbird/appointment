@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { createUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
-import { dayjsKey, callKey } from '@/keys';
+import { dayjsKey, callKey, shortUrlKey } from '@/keys';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -12,10 +12,12 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
+const shortUrl = inject(shortUrlKey);
 
 const ftueStore = createFTUEStore(call);
 const { hasNextStep } = storeToRefs(ftueStore);
 const user = createUserStore(call);
+const quickLink = shortUrl.substring(shortUrl.indexOf('//')+2) + '/';
 
 // @ts-expect-error ignore type err
 // See https://github.com/microsoft/TypeScript/issues/49231
@@ -71,7 +73,14 @@ const onSubmit = async () => {
       <text-input name="full-name" v-model="fullName" :required="true" :error="errorFullName">
         {{ t('ftue.fullName') }}
       </text-input>
-      <text-input name="username" v-model="username" :required="true" :error="errorUsername">
+      <text-input
+        name="username"
+        :outer-prefix="quickLink"
+        v-model="username"
+        :required="true"
+        :error="errorUsername"
+        :help="t('ftue.usernameHelp')"
+      >
         {{ t('label.username') }}
       </text-input>
       <select-input

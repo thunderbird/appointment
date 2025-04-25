@@ -175,6 +175,7 @@ export enum ExternalConnectionProviders {
   Google = 2,
   Zoom = 3,
   Caldav = 4,
+  Accounts = 5,
 }
 
 /**

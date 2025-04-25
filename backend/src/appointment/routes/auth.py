@@ -18,7 +18,7 @@ from fastapi.responses import RedirectResponse
 
 from .. import utils
 from ..controller.apis.accounts_client import AccountsClient
-from ..controller.auth import schedule_links_by_subscriber
+from ..controller.auth import schedule_slugs_by_subscriber, user_link_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 from ..defines import INVITES_TO_GIVE_OUT, AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
@@ -614,7 +614,8 @@ def me(
         timezone=subscriber.timezone,
         avatar_url=subscriber.avatar_url,
         is_setup=subscriber.is_setup,
-        schedule_links=schedule_links_by_subscriber(db, subscriber),
+        user_link=user_link_by_subscriber(subscriber),
+        schedule_slugs=schedule_slugs_by_subscriber(db, subscriber),
         unique_hash=hash,
         language=subscriber.language,
         colour_scheme=subscriber.colour_scheme,

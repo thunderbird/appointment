@@ -23,6 +23,7 @@ export const isoFirstDayOfWeekKey = Symbol('isoFirstDayOfWeek') as InjectionKey<
 // Provide urls for API and booking
 export const apiUrlKey = Symbol('apiUrl') as InjectionKey<string>;
 export const bookingUrlKey = Symbol('bookingUrl') as InjectionKey<string>;
+export const shortUrlKey = Symbol('shortUrl') as InjectionKey<string>;
 
 // Provide environment and authentication keys
 export const isPasswordAuthKey = Symbol('isPasswordAuth') as InjectionKey<boolean>;

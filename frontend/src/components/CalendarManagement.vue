@@ -6,7 +6,8 @@ import {
 import { useI18n } from 'vue-i18n';
 import { CalendarManagementType } from '@/definitions';
 import { Calendar } from '@/models';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 
 const { t } = useI18n({ useScope: 'global' });
 const emit = defineEmits(['modify', 'remove', 'sync']);
@@ -32,16 +33,18 @@ const filteredCalendars = computed(() => props.calendars.filter((calendar: Calen
     <div class="text-xl">{{ title }}</div>
     <div class="mx-auto mr-0 inline-flex" v-if="type === CalendarManagementType.Connect">
       <secondary-button
-        class="btn-sync text-sm !text-teal-500 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
+        class="btn-sync"
         :disabled="loading"
         @click="emit('sync')"
         :title="t('label.sync')"
         data-testid="calendar-settings-sync-calendars-button"
       >
+        <template v-slot:icon>
+          <icon-refresh class="size-4 stroke-2" :class="{ 'animate-spin': loading }" />
+        </template>
         <span class="mr-2 inline-block">
           {{ t('label.syncCalendars') }}
         </span>
-        <icon-refresh class="inline-block size-4 stroke-2" :class="{ 'animate-spin': loading }" />
       </secondary-button>
     </div>
   </div>
@@ -53,34 +56,34 @@ const filteredCalendars = computed(() => props.calendars.filter((calendar: Calen
       <span class="calendar-title">
       {{ cal.title }}
       </span>
-      <button
+      <primary-button
         v-if="type === CalendarManagementType.Connect"
         @click="emit('modify', cal.id)"
         :disabled="loading"
-        class="
-          btn-conntect ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1
-          text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
-        "
+        class="btn-conntect ml-auto"
+        size="small"
         :title="t('label.connect')"
         data-testid="settings-calendar-connect-calendar-btn"
       >
-        <icon-arrow-right class="size-3 stroke-3"/>
+        <template v-slot:icon>
+          <icon-arrow-right class="size-3 stroke-3"/>
+        </template>
         {{ t('label.connectCalendar') }}
-      </button>
-      <button
+      </primary-button>
+      <primary-button
         v-if="type === CalendarManagementType.Edit"
         @click="emit('modify', cal.id)"
         :disabled="loading"
-        class="
-          btn-edit ml-auto flex items-center gap-0.5 rounded-full bg-teal-500 px-2 py-1
-          text-xs text-white disabled:scale-100 disabled:opacity-50 disabled:shadow-none
-        "
+        class="btn-edit ml-auto"
+        size="small"
         :title="t('label.edit')"
         data-testid="settings-calendar-edit-calendar-btn"
       >
-        <icon-pencil class="size-3 stroke-3"/>
+        <template v-slot:icon>
+          <icon-pencil class="size-3 stroke-3"/>
+        </template>
         {{ t('label.editCalendar') }}
-      </button>
+      </primary-button>
       <button
         v-if="!cal.connected"
         class="btn-remove bg-transparent p-0.5 disabled:scale-100 disabled:opacity-50 disabled:shadow-none"

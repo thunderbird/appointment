@@ -28,7 +28,8 @@ const initialUserObject = {
   signedUrl: null,
   avatarUrl: null,
   accessToken: null,
-  scheduleLinks: [],
+  userLink: null,
+  scheduleSlugs: {},
   isSetup: false,
   uniqueHash: null,
 } as User;
@@ -65,7 +66,6 @@ export const useUserStore = defineStore('user', () => {
     // We have a settings object? See if all keys exists and update only the missing ones
     
     Object.keys(defaultSettings).forEach(key => {
-      console.log(key);
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
   }
@@ -92,24 +92,42 @@ export const useUserStore = defineStore('user', () => {
   };
 
   /**
-   * Return the first schedule link or their signed url
+   * Return the first slug key, or null if they don't have one.
    */
-  const myLink = computed((): string => {
-    const scheduleLinks = data?.value?.scheduleLinks ?? [];
-    if (scheduleLinks.length > 0) {
-      return scheduleLinks[0];
+  const mySlug = computed((): string|null => {
+    const slugs = data?.value?.scheduleSlugs ?? {};
+    const slugKeys = Object.keys(slugs);
+    if (slugKeys.length == 0) {
+      return null;
     }
 
-    // TODO: Signed urls are deprecated here!
-    return data.value.signedUrl;
+    return slugs[slugKeys[0]];
   });
 
   /**
-   * Return the last unique URL part of the users link
+   * Returns their bare userlink without any slugs
    */
-  const mySlug = computed((): string => {
-    const link = myLink?.value?.replace(/\/+$/, '');
-    return link?.slice(link.lastIndexOf('/') + 1);
+  const myBaseLink = computed((): string => {
+    const userLink = data?.value?.userLink;
+    if (userLink) {
+      return userLink;
+    }
+
+    return null;
+  });
+
+  /**
+   * Return the first schedule link or their signed url
+   */
+  const myLink = computed((): string => {
+    const userLink = data?.value?.userLink;
+    const slug = mySlug?.value;
+
+    if (userLink) {
+      return slug ? `${userLink}${slug}/` : userLink;
+    }
+
+    return null;
   });
 
   /**
@@ -160,7 +178,8 @@ export const useUserStore = defineStore('user', () => {
       },
       avatarUrl: subscriber.avatar_url,
       isSetup: subscriber.is_setup,
-      scheduleLinks: subscriber.schedule_links,
+      userLink: subscriber.user_link,
+      scheduleSlugs: subscriber.schedule_slugs,
       uniqueHash: subscriber.unique_hash,
     };
   };
@@ -309,6 +328,7 @@ export const useUserStore = defineStore('user', () => {
     changeSignedUrl,
     login,
     logout,
+    myBaseLink,
     myLink,
     mySlug,
     myColourScheme,

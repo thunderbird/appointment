@@ -71,6 +71,7 @@
       "setupProfile": "Create your profile",
       "setupSchedule": "Set up your appointment availability"
     },
+    "usernameHelp": "This will become your quick link",
     "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
     "videoMeetingLink": "Video meeting link"
   },
@@ -288,6 +289,7 @@
     "online": "Online",
     "open": "Open",
     "openMyPage": "Open my page",
+    "optionalPasscode": "Optional passcode",
     "password": "Password",
     "past": "Past",
     "pending": "Pending",
@@ -313,12 +315,13 @@
     "scheduleDetails": "Scheduling details",
     "scheduleSettings": {
       "availabilitySubHeading": "Set your availability days and time",
-      "bookingSettingsSubHeading": "Edit your quick link and more",
+      "bookingSettingsSubHeading": "Handle booking confirmation and more",
       "meetingDetailsSubHeading": "Add video and/or notes to events",
       "schedulingDetailsSubHeading": "Set booking intervals and duration"
     },
     "search": "Search",
     "searchAppointments": "Search bookings",
+    "searchForCalendars": "Search for calendars",
     "secondaryTimeZone": "Secondary time zone",
     "selectCalendar": "Select calendar",
     "send": "Send",
@@ -355,7 +358,7 @@
     "topic": "Topic",
     "unset": "Unset",
     "unused": "Unused",
-    "updateUsername": "Update username",
+    "updateLink": "Update link",
     "used": "Used",
     "username": "Username",
     "userProfile": "User profile",
@@ -537,7 +540,7 @@
       "link": "Account settings",
       "text": "To update your username, go to {link}. "
     },
-    "updateUsernameNotice": "Changing your username will also change your link. Your old link will no longer work.",
+    "updateLinkNotice": "Changing your username or slug will change your link. Your old link will no longer work.",
     "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created.",
     "yourQuickLinkIs": "Your quick link is:\n{url}"
   },

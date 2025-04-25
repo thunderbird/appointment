@@ -51,11 +51,7 @@ class TestRetrieveUserUrlData:
         original_clean_url = f'https://appointment.local/user/{original_username}/'
         url = f'{original_clean_url}/{original_signature}/other-junk/'
 
-        username, signature, clean_url = retrieve_user_url_data(url)
-
-        assert original_username != username
-        assert original_signature != signature
-        assert original_clean_url != clean_url
+        assert not retrieve_user_url_data(url)
 
 
 class TestIsAValidBookingTime:

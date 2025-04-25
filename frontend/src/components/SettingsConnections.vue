@@ -5,10 +5,10 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import CautionButton from '@/elements/CautionButton.vue';
+import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 import {
@@ -22,7 +22,7 @@ import { createUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 
-import { Alert } from '@/models';
+import { Alert, ExternalConnection } from '@/models';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -40,16 +40,14 @@ const isAccountsAuth = inject(isAccountsAuthKey);
  * Temp until we remove local fxa
  */
 const filteredConnections = computed(() => {
-  const newConnections = {};
+  const newConnections = {} as { [key: string]: ExternalConnection[] };
   const keys = Object.keys(connections.value);
    
   for (const connection of keys) {
     if (connection === 'fxa' && !isFxaAuth) {
-       
       continue;
     }
     if (connection === 'accounts' && !isAccountsAuth) {
-       
       continue;
     }
     newConnections[connection] = connections.value[connection];
@@ -156,31 +154,34 @@ const editProfile = async () => {
           <p v-if="connection[0]">{{ t('label.connectedAs', {name: connection[0].name}) }}</p>
           <p v-if="!connection[0]">{{ t('label.notConnected') }}</p>
         </div>
-        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.accounts">
+        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
           <primary-button
-          v-if="!connection[0]"
-          :label="t('label.connect')"
-          class="btn-connect"
-          :data-testid="'connected-accounts-settings-' + t(provider) + '-connect-btn'"
-          @click="() => connectAccount(providers[provider])"
-          :title="t('label.connect')"
-        />
-        <caution-button
-          v-if="connection[0]"
-          :label="t('label.disconnect')"
-          class="btn-disconnect"
-          :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn'"
-          @click="() => displayModal(providers[provider], connection[0].type_id)"
-          :title="t('label.disconnect')"
-        />
+            v-if="!connection[0]"
+            class="btn-connect"
+            :data-testid="'connected-accounts-settings-' + t(provider) + '-connect-btn'"
+            @click="() => connectAccount(providers[provider])"
+            :title="t('label.connect')"
+          >
+            {{ t('label.connect') }}
+          </primary-button>
+          <danger-button
+            v-if="connection[0]"
+            class="btn-disconnect"
+            :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn'"
+            @click="() => displayModal(providers[provider], connection[0].type_id)"
+            :title="t('label.disconnect')"
+          >
+            {{ t('label.disconnect') }}
+          </danger-button>
         </div>
         <div class="mx-auto mr-0" v-else>
           <secondary-button
-            :label="t('label.editProfile')"
             class="btn-edit"
             @click="editProfile"
             :title="t('label.edit')"
-          />
+          >
+            {{ t('label.editProfile') }}
+          </secondary-button>
         </div>
       </div>
     </div>

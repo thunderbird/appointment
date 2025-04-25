@@ -19,8 +19,8 @@ def make_subscriber(with_db):
                 db,
                 schemas.SubscriberAuth(
                     name=name if factory_has_value(name) else fake.name(),
-                    username=username if factory_has_value(username) else fake.name().replace(' ', '_'),
-                    email=email if factory_has_value(email) else fake.email(),
+                    username=username if factory_has_value(username) else fake.unique.name().replace(' ', '_'),
+                    email=email if factory_has_value(email) else fake.unique.email(),
                     level=level,
                     timezone='America/Vancouver',
                     short_link_hash=secrets.token_hex(32)

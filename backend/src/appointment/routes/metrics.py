@@ -120,9 +120,10 @@ def ftue_step(
         'apmt.ftue.step.level': data.step_level,
         '$current_url': current_url
     }
-    posthog.set(distinct_id=subscriber.unique_hash, properties=payload)
-    posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.ftue.step', properties={
-        'step_name': data.step_name,
-        'step_level': data.step_level,
-        'service': APP_NAME_SHORT,
-    })
+    if posthog and subscriber:
+        posthog.set(distinct_id=subscriber.unique_hash, properties=payload)
+        posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.ftue.step', properties={
+            'step_name': data.step_name,
+            'step_level': data.step_level,
+            'service': APP_NAME_SHORT,
+        })

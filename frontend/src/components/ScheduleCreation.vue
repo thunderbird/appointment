@@ -17,7 +17,6 @@ import {
 } from '@/keys';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
@@ -28,7 +27,6 @@ import TextInput from '@/tbpro/elements/TextInput.vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import RefreshIcon from '@/tbpro/icons/RefreshIcon.vue';
 import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
 
 // icons
@@ -104,7 +102,7 @@ const defaultSchedule: Schedule = {
   end_time: '17:00',
   earliest_booking: 1440,
   farthest_booking: 20160,
-  weekdays: [1, 2, 3, 4, 5],
+  weekdays: ['1', '2', '3', '4', '5'],
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
@@ -187,24 +185,21 @@ const getScheduleAppointment = (): ScheduleAppointment => ({
 const isFormDirty = computed(
   () => JSON.stringify(scheduleInput.value) !== JSON.stringify(referenceSchedule.value),
 );
-const isSlugDirty = computed(
-  () => scheduleInput.value.slug !== referenceSchedule.value.slug,
-);
 
 // handle notes char limit
 const charLimit = 250;
-const charCount = computed(() => scheduleInput.value.details.length);
+const charCount = computed(() => scheduleInput.value.details?.length ?? 0);
 
 // Weekday options
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso,
+  value: day.iso, // Important: For now this needs to be ints, as that's what the values from the api as.
 }));
 
 // Connected calendar options
 const calendarOptions = computed<SelectOption[]>(() => props.calendars.map((calendar) => ({
   label: calendar.title,
-  value: calendar.id,
+  value: calendar.id.toString(),
 })));
 
 // Earliest booking options
@@ -213,25 +208,25 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
   if (d === 0) {
     return {
       label: t('label.immediately'),
-      value: 0,
+      value: '0',
     };
   }
   return {
     label: dj.duration(d, 'days').humanize(),
-    value: d * 60 * 24,
+    value: (d * 60 * 24).toString(),
   };
 });
 
 // Farthest booking options
 const farthestOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   label: dj.duration(d, 'weeks').humanize(),
-  value: d * 60 * 24 * 7,
+  value: (d * 60 * 24 * 7).toString(),
 }));
 
 // Appointment duration options
 const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((duration) => ({
   label: t('units.minutes', { value: duration }),
-  value: duration,
+  value: duration.toString(),
 }));
 
 // humanize selected durations
@@ -265,15 +260,8 @@ const scheduleValidationError = (schedule: Schedule): string|null => {
   return null;
 };
 
-// Update slug with a random 8 character string
-const refreshSlugModalOpen = ref(false);
-const showRefreshSlugConfirmation = async () => {
-  refreshSlugModalOpen.value = true;
-};
-
 const closeModals = () => {
   savedConfirmation.show = false;
-  refreshSlugModalOpen.value = false;
 };
 
 // handle actual schedule creation/update
@@ -342,11 +330,6 @@ const saveSchedule = async (withConfirmation = true) => {
   // Update our reference schedule!
   referenceSchedule.value = { ...scheduleInput.value };
   revertForm(false);
-  closeModals();
-};
-
-const refreshSlug = () => {
-  scheduleInput.value.slug = window.crypto.randomUUID().substring(0, 8);
   closeModals();
 };
 
@@ -715,31 +698,6 @@ watch(
         </div>
         <div v-show="activeStep4" class="flex flex-col gap-2">
           <hr/>
-          <!-- custom quick link -->
-          <label class="relative flex flex-col gap-1">
-            <div class="flex items-center gap-2">
-              <text-input
-                type="text"
-                name="slug"
-                :prefix="`/${user.data.username}/`"
-                v-model="scheduleInput.slug"
-                class="w-full rounded-md disabled:cursor-not-allowed"
-                :small-text="true"
-                maxLength="16"
-                :disabled="!scheduleInput.active"
-              >
-                {{ t("label.quickLink") }}
-              </text-input>
-              <link-button
-                class="p-0.5"
-                @click="scheduleInput.active ? refreshSlug() : null"
-                :disabled="!scheduleInput.active"
-                data-testid="dashboard-booking-settings-link-refresh-btn"
-              >
-                <refresh-icon />
-              </link-button>
-            </div>
-          </label>
           <!-- option to deactivate confirmation -->
           <div class="flex flex-col gap-3">
             <switch-toggle
@@ -806,7 +764,7 @@ watch(
     >
       <primary-button
         class="btn-save w-full"
-        @click="isSlugDirty ? showRefreshSlugConfirmation() : saveSchedule(!existing)"
+        @click="saveSchedule(!existing)"
         :disabled="!scheduleInput.active || savingInProgress"
         data-testid="dashboard-save-changes-btn"
       >
@@ -846,16 +804,6 @@ watch(
     :public-link="user.data.signedUrl"
     @close="closeModals"
   />
-  <!-- Refresh link confirmation modal -->
-  <confirmation-modal
-    :open="refreshSlugModalOpen"
-    :title="t('label.refreshLink')"
-    :message="t('text.refreshLinkNotice')"
-    :confirm-label="t('label.save')"
-    :cancel-label="t('label.cancel')"
-    @confirm="saveSchedule(!existing)"
-    @close="closeModals"
-  ></confirmation-modal>
 </template>
 
 <style scoped>

@@ -42,6 +42,7 @@ const dataTableRef = ref(null);
 const emailFilter = ref<string>(null);
 const waitingListUsersList = computed(() => {
   if (emailFilter.value) {
+    /** @ts-expect-error escape has no baseline support yet */
     return waitingListUsers.value.filter((wl) => wl.email.match(new RegExp(RegExp.escape(emailFilter.value), 'gi')));
   }
   return waitingListUsers.value;

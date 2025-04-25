@@ -49,8 +49,9 @@ def sign_url(url: str):
     return signature
 
 
-def signed_url_by_subscriber(subscriber: schemas.Subscriber):
-    """helper to generated signed url for given subscriber"""
+def user_link_by_subscriber(subscriber: models.Subscriber):
+    """Returns a user link based off the subscriber's username
+    Note that this contains a trailing slash"""
     short_url = os.getenv('SHORT_BASE_URL')
     base_url = f"{os.getenv('FRONTEND_URL')}/user"
 
@@ -60,29 +61,29 @@ def signed_url_by_subscriber(subscriber: schemas.Subscriber):
 
     url_safe_username = urllib.parse.quote_plus(subscriber.username)
 
+    return f'{short_url}/{url_safe_username}/'
+
+
+def signed_url_by_subscriber(subscriber: schemas.Subscriber):
+    """helper to generated signed url for given subscriber"""
+    base_url = user_link_by_subscriber(subscriber)
+
     # We sign with a different hash that the end-user doesn't have access to
     # We also need to use the default url, as short urls are currently setup as a redirect
-    url = f'{base_url}/{url_safe_username}/{subscriber.short_link_hash}'
+    url = ''.join([base_url, subscriber.short_link_hash])
 
     signature = sign_url(url)
 
     # We return with the signed url signature
-    return f'{short_url}/{url_safe_username}/{signature}'
+    return ''.join([base_url, signature])
 
 
-def schedule_links_by_subscriber(db, subscriber: models.Subscriber):
+def schedule_slugs_by_subscriber(db, subscriber: models.Subscriber) -> dict:
     # Generate some schedule links
     schedules = repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
-    short_url = os.getenv('SHORT_BASE_URL')
-    base_url = f"{os.getenv('FRONTEND_URL')}/user"
 
-    # If we don't have a short url, then use the default url with /user added to it
-    if not short_url:
-        short_url = base_url
+    slugs = {}
+    for schedule in schedules:
+        slugs[schedule.id] = urllib.parse.quote_plus(schedule.slug) if schedule.slug else None
 
-    url_safe_username = urllib.parse.quote_plus(subscriber.username)
-
-    # Empty space at join is for trailing slash!
-    return list(
-        map(lambda sch: '/'.join([short_url, url_safe_username, urllib.parse.quote_plus(sch.slug), '']), schedules)
-    )
+    return slugs

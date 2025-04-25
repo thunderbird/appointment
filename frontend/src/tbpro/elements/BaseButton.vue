@@ -82,6 +82,23 @@ button:hover > .tooltip,
   }
 }
 
+.danger {
+  background-color: var(--colour-danger-default);
+  @mixin faded-border var(--colour-danger-hover);
+  color: var(--colour-neutral-base);
+
+  &:hover:enabled {
+    background-color: var(--colour-danger-hover);
+    border-color: var(--colour-success-pressed);
+  }
+
+  &:active:enabled {
+    background-color: var(--colour-danger-pressed);
+    border-color: var(--colour-danger-pressed);
+    box-shadow: none;
+  }
+}
+
 .link {
   background-color: transparent;
   color: var(--colour-service-primary);
@@ -104,6 +121,7 @@ button {
 
   justify-content: center;
   align-items: center;
+  gap: .75rem;
 
   border-radius: var(--border-radius);
   @mixin faded-border var(--colour-btn-border);
@@ -148,7 +166,7 @@ button {
   align-items: center;
   height: 100%;
 
-  padding-left: 1.5rem;
+  padding-left: .75rem;
   margin-right: -0.75rem;
 }
 

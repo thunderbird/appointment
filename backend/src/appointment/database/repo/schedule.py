@@ -7,6 +7,7 @@ import uuid
 from sqlalchemy.orm import Session
 from .. import models, schemas, repo
 from ... import utils
+from ...controller.auth import signed_url_by_subscriber
 
 
 def create(db: Session, schedule: schemas.ScheduleBase):
@@ -125,9 +126,23 @@ def verify_link(db: Session, url: str) -> models.Subscriber | None:
     if not subscriber:
         return None
 
-    schedule = get_by_slug(db, slug, subscriber.id)
+    # If we're a signed url, then early exit here to avoid slug checks
+    is_signed_url = signed_url_by_subscriber(subscriber) == url
+    if is_signed_url:
+        return subscriber
 
-    if not schedule:
-        return None
+    if slug:
+        schedule = get_by_slug(db, slug, subscriber.id)
+
+        if not schedule:
+            return None
+    elif not slug:
+        schedules = get_by_subscriber(db, subscriber.id)
+
+        # If there's no schedules (we can't display anything)
+        # or if there's a slug in the first schedule, but it's not provided (upper condition)
+        # then error out!
+        if not schedules or schedules[0].slug:
+            return None
 
     return subscriber

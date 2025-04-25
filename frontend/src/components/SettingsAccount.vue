@@ -1,35 +1,38 @@
 <script setup lang="ts">
 import {
-  ref, inject, onMounted,
+  ref, inject, onMounted, computed,
 } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import CautionButton from '@/elements/CautionButton.vue';
+import {useI18n} from 'vue-i18n';
+import {useRouter} from 'vue-router';
+import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 
 // icons
-import { IconExternalLink, IconInfoCircle } from '@tabler/icons-vue';
+import {IconInfoCircle} from '@tabler/icons-vue';
 
 // stores
 import UserInviteTable from '@/components/UserInviteTable.vue';
-import { createExternalConnectionsStore } from '@/stores/external-connections-store';
-import { createScheduleStore } from '@/stores/schedule-store';
+import {createExternalConnectionsStore} from '@/stores/external-connections-store';
+import {createScheduleStore} from '@/stores/schedule-store';
 
-import { MetricEvents } from '@/definitions';
-import { usePosthog, posthog } from '@/composables/posthog';
+import {MetricEvents} from '@/definitions';
+import {usePosthog, posthog} from '@/composables/posthog';
 import {
-  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse,
+  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse, SelectOption, Error,
 } from '@/models';
-import { callKey } from '@/keys';
-import { createUserStore } from '@/stores/user-store';
+import {callKey, shortUrlKey} from '@/keys';
+import {createUserStore} from '@/stores/user-store';
 
 // component constants
-const { t } = useI18n({ useScope: 'global' });
+const {t} = useI18n({useScope: 'global'});
 const call = inject(callKey);
+const shortUrl = inject(shortUrlKey);
 const router = useRouter();
 const schedule = createScheduleStore(call);
 const externalConnectionsStore = createExternalConnectionsStore(call);
@@ -37,25 +40,59 @@ const user = createUserStore(call);
 
 const activeUsername = ref(user.data.username);
 const activeDisplayName = ref(user.data.name);
+const activeSlug = ref(user.mySlug);
 const downloadAccountModalOpen = ref(false);
 const deleteAccountFirstModalOpen = ref(false);
 const deleteAccountSecondModalOpen = ref(false);
 const refreshLinkModalOpen = ref(false);
-const updateUsernameModalOpen = ref(false);
+const updateLinkModalOpen = ref(false);
 const availableEmails = ref([user.data.preferredEmail]);
 const activePreferredEmail = ref(user.data.preferredEmail);
 const formRef = ref<HTMLFormElement>();
+
+/**
+ * We trim the middle of a username if it's over 8 characters long
+ */
+const usernameShort = computed(() => {
+  const username = user?.data?.username ?? '';
+  if (username.length > 8) {
+    const len = username.length;
+    return `${username.substring(0, 4)}…${username.substring(len - 4)}`;
+  }
+  return username;
+})
+
+/**
+ * Used for hover tooltips, and the copy button
+ */
+const quickLinkFull = computed(() => user.mySlug
+  ? `${shortUrl}/${user.data.username}/${user.mySlug}/`
+  : `${shortUrl}/${user.data.username}/`);
+
+/**
+ * Used to show the link up until the passcode portion of the url (aka the label before the textbox.)
+ */
+const quickLinkPrefix = computed(() => shortUrl.substring(shortUrl.indexOf('//') + 2) + `/${usernameShort.value}/`);
+
+// Preferred email options
+const emailOptions = computed<SelectOption[]>(() => availableEmails.value.map((email) => ({
+  label: email,
+  value: email,
+})));
+
+// True if there are changes affecting the quick link
+const dirtyLink = computed(() => activeUsername.value !== user.data.username || activeSlug.value !== user.mySlug);
 
 const closeModals = () => {
   downloadAccountModalOpen.value = false;
   deleteAccountFirstModalOpen.value = false;
   deleteAccountSecondModalOpen.value = false;
   refreshLinkModalOpen.value = false;
-  updateUsernameModalOpen.value = false;
+  updateLinkModalOpen.value = false;
 };
 
 const getAvailableEmails = async () => {
-  const { data }: StringListResponse = await call('account/available-emails').get().json();
+  const {data}: StringListResponse = await call('account/available-emails').get().json();
   if (!data || !data.value) {
     availableEmails.value = [];
   }
@@ -73,16 +110,33 @@ const refreshData = async () => Promise.all([
 // Form validation
 const errorUsername = ref<string>(null);
 const errorDisplayName = ref<string>(null);
+const errorSlug = ref<string>(null);
 
 // Save user data
 const updateUser = async () => {
+  // Prepare slug processing
+  activeSlug.value = activeSlug.value.trim();
+
+  // First update the slug if it was changed
+  if (activeSlug.value !== user.mySlug) {
+    const response = await schedule.updateFirstSlug(activeSlug.value);
+    // eslint-disable-next-line no-prototype-builtins
+    if (response.hasOwnProperty('error')) {
+      // Error message is in data
+      errorSlug.value = (response as Error).message;
+    } else {
+      errorSlug.value = null;
+    }
+  }
+
+  // Now update the user data
   const inputData = {
     username: activeUsername.value,
     name: activeDisplayName.value,
     secondary_email: activePreferredEmail.value,
   };
 
-  const { data, error }: SubscriberResponse = await call('me').put(inputData).json();
+  const {data, error}: SubscriberResponse = await call('me').put(inputData).json();
   if (!error.value) {
     // update user in store
     user.updateProfile(data.value);
@@ -116,9 +170,9 @@ const updateUserCheckForConfirmation = async () => {
     return;
   }
 
-  // Check for username change
-  if (activeUsername.value !== user.data.username) {
-    updateUsernameModalOpen.value = true;
+  // Check for username or slug change
+  if (dirtyLink.value) {
+    updateLinkModalOpen.value = true;
     return;
   }
 
@@ -155,6 +209,7 @@ const refreshLink = async () => {
 const refreshLinkConfirm = async () => {
   await user.changeSignedUrl();
   await refreshData();
+  activeSlug.value = user.mySlug;
   closeModals();
 
   sendMetrics(MetricEvents.RefreshLink);
@@ -164,7 +219,7 @@ const refreshLinkConfirm = async () => {
  * Request a data download, and prompt the user to download the data.
  */
 const actuallyDownloadData = async () => {
-  const { data }: BlobResponse = await call('account/download').post().blob();
+  const {data}: BlobResponse = await call('account/download').post().blob();
   if (!data || !data.value) {
     // TODO: show error
     // console.error('Failed to download blob!!');
@@ -184,7 +239,7 @@ const actuallyDownloadData = async () => {
 const actuallyDeleteAccount = async () => {
   deleteAccountSecondModalOpen.value = false;
 
-  const { error }: BooleanResponse = await call('account/delete').delete();
+  const {error}: BooleanResponse = await call('account/delete').delete();
 
   sendMetrics(MetricEvents.DeleteAccount);
 
@@ -209,10 +264,10 @@ const actuallyDeleteAccount = async () => {
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.username') }}</div>
         <div class="w-full">
-          <input
+          <text-input
             v-model="activeUsername"
             type="text"
-            class="w-full rounded-md"
+            name="username"
             :class="{ '!border-red-500': errorUsername }"
             :required="true"
             data-testid="settings-account-user-name-input"
@@ -237,17 +292,21 @@ const actuallyDeleteAccount = async () => {
             </span>
           </span>
         </div>
-        <select v-model="activePreferredEmail" class="w-full rounded-md" data-testid="settings-account-email-select">
-          <option v-for="email in availableEmails" :key="email" :value="email">{{ email }}</option>
-        </select>
+        <select-input
+          v-model="activePreferredEmail"
+          name="preferredEmail"
+          class="w-full"
+          :options="emailOptions"
+          data-testid="settings-account-email-select"
+        />
       </label>
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
         <div class="w-full">
-          <input
+          <text-input
             v-model="activeDisplayName"
             type="text"
-            class="w-full rounded-md"
+            name="displayName"
             :class="{ '!border-red-500': errorDisplayName }"
             data-testid="settings-account-display-name-input"
           />
@@ -256,30 +315,31 @@ const actuallyDeleteAccount = async () => {
           </div>
         </div>
       </label>
+      <!-- Custom quick link -->
       <label class="mt-6 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
         <div class="flex w-full items-center justify-between gap-4">
           <div class="relative w-full">
-            <input
-              :value="user.myLink"
+            <text-input
               type="text"
-              class="mr-2 w-full rounded-md pr-7"
-              readonly
+              name="slug"
+              :placeholder="t('label.optionalPasscode')"
+              :outer-prefix="quickLinkPrefix"
+              v-model="activeSlug"
+              :small-text="true"
+              maxLength="16"
+              :title="quickLinkFull"
               data-testid="settings-account-mylink-input"
             />
-            <a
-              :href="user.myLink"
-              target="_blank"
-              class="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500"
-            >
-              <icon-external-link class="size-5"/>
-            </a>
+            <div v-if="errorSlug" class="text-sm text-red-500">
+              {{ errorSlug }}
+            </div>
           </div>
           <text-button
             uid="myLink"
             class="btn-copy"
             :tooltip="t('label.copyLink')"
-            :copy="user.myLink"
+            :copy="quickLinkFull"
             :title="t('label.copy')"
             data-testid="settings-account-copy-link-btn"
           />
@@ -287,19 +347,21 @@ const actuallyDeleteAccount = async () => {
       </label>
       <div class="mt-6 flex gap-4 self-end">
         <secondary-button
-          :label="t('label.refreshLink')"
-          class="btn-refresh !text-teal-500"
+          class="btn-refresh"
           @click="refreshLink"
           :title="t('label.refresh')"
           data-testid="settings-account-refresh-link-btn"
-        />
+        >
+          {{ t('label.refreshLink') }}
+        </secondary-button>
         <secondary-button
-          :label="t('label.saveChanges')"
-          class="btn-save !text-teal-500"
+          class="btn-save"
           @click="updateUserCheckForConfirmation"
           :title="t('label.save')"
           data-testid="settings-account-save-changes-btn"
-        />
+        >
+          {{ t('label.saveChanges') }}
+        </secondary-button>
       </div>
     </form>
     <div class="pl-6" id="invites">
@@ -308,31 +370,33 @@ const actuallyDeleteAccount = async () => {
         {{ t('settings.invite.brief') }}
       </p>
       <div class="mt-4 pl-4">
-      <user-invite-table></user-invite-table>
+        <user-invite-table></user-invite-table>
       </div>
     </div>
     <div class="pl-6" id="download-your-data">
       <div class="text-xl">{{ t('heading.accountData') }}</div>
       <div class="mt-4 pl-4">
         <primary-button
-          :label="t('label.downloadYourData')"
           class="btn-download"
           @click="downloadData"
           :title="t('label.download')"
           data-testid="settings-account-download-data-btn"
-        />
+        >
+          {{ t('label.downloadYourData') }}
+        </primary-button>
       </div>
     </div>
     <div class="pl-6" id="delete-your-account">
       <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
       <div class="mt-4 pl-4">
-        <caution-button
-          :label="t('label.deleteYourAccount')"
+        <danger-button
           class="btn-delete"
           @click="deleteAccount"
           :title="t('label.delete')"
           data-testid="settings-account-delete-btn"
-        />
+        >
+          {{ t('label.deleteYourAccount') }}
+        </danger-button>
       </div>
     </div>
   </div>
@@ -348,9 +412,9 @@ const actuallyDeleteAccount = async () => {
   ></confirmation-modal>
   <!-- Update username confirmation modal -->
   <confirmation-modal
-    :open="updateUsernameModalOpen"
-    :title="t('label.updateUsername')"
-    :message="t('text.updateUsernameNotice')"
+    :open="updateLinkModalOpen"
+    :title="t('label.updateLink')"
+    :message="t('text.updateLinkNotice')"
     :confirm-label="t('label.saveChanges')"
     :cancel-label="t('label.cancel')"
     @confirm="() => updateUser()"
@@ -389,5 +453,9 @@ const actuallyDeleteAccount = async () => {
 
 .tooltip-icon:hover ~ .tooltip {
   display: block;
+}
+
+.link-input {
+  min-width: 8rem;
 }
 </style>
