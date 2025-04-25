@@ -14,6 +14,7 @@ from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions.validation import OAuthFlowNotFinished
+from ..exceptions.zoom_api import ZoomScopeChanged
 from ..l10n import l10n
 
 router = APIRouter()
@@ -22,11 +23,17 @@ SESSION_OAUTH_STATE = 'zoom_state'
 SESSION_OAUTH_SUBSCRIBER_ID = 'zoom_user_id'
 
 
+def zoom_callback_error(is_setup: bool, error: str):
+    """Call if you encounter an unrecoverable error with the Zoom callback function"""
+    # Redirect non-setup subscribers back to the setup page
+    if not is_setup:
+        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+
+    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/connectedAccounts?error={error}")
+
+
 @router.get('/ftue-status')
-def zoom_auth_status(
-    request: Request,
-    subscriber: Subscriber = Depends(get_subscriber)
-):
+def zoom_auth_status(request: Request, subscriber: Subscriber = Depends(get_subscriber)):
     """Checks if oauth flow has started but not finished, if so raises an error."""
     same_subscriber = subscriber.id == request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
     in_progress = request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
@@ -77,7 +84,11 @@ def zoom_callback(
     # This can't be set as a dep injection since subscriber is based on session.
     zoom_client: ZoomClient = get_zoom_client(subscriber)
 
-    creds = zoom_client.get_credentials(code)
+    try:
+        creds = zoom_client.get_credentials(code)
+    except ZoomScopeChanged:
+        # Use unknown error as we'll collect the information in sentry
+        return zoom_callback_error(not subscriber.is_setup, l10n('zoom-unknown-error'))
 
     # Get the zoom user info, so we can associate their id with their appointment subscriber
     zoom_user_info = zoom_client.get_me()
