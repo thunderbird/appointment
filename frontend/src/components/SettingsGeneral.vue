@@ -91,7 +91,7 @@ watch(
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.language') }}</div>
         <select-input
-          name="timezone"
+          name="locale"
           :options="localeOptions"
           v-model="locale"
           class="w-full max-w-sm"
@@ -104,7 +104,7 @@ watch(
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.theme') }}</div>
         <select-input
-          name="timezone"
+          name="theme"
           :options="colourSchemeOptions"
           v-model="user.data.settings.colourScheme"
           class="w-full max-w-sm"
@@ -127,7 +127,7 @@ watch(
       <label class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.startOfTheWeek') }}</div>
         <select-input
-          name="timezone"
+          name="start-of-week"
           :options="availableStartOfTheWeekOptions"
           v-model="user.data.settings.startOfWeek"
           class="w-full max-w-sm"

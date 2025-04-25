@@ -34,7 +34,7 @@ export class SettingsPage {
   readonly profileUsernameInput: Locator;
   readonly profilePreferredEmailSelect: Locator;
   readonly profileDisplayNameInput: Locator;
-  readonly profileMyLinkInput: Locator;
+  readonly profileMyLinkOptionalInput: Locator;
   readonly profileSaveChangesBtn: Locator;
   readonly refreshLinkBtn: Locator;
   readonly confirmRefreshCancelBtn: Locator;
@@ -98,7 +98,7 @@ export class SettingsPage {
     this.profileUsernameInput = this.page.getByTestId('settings-account-user-name-input');
     this.profilePreferredEmailSelect = this.page.getByTestId('settings-account-email-select');
     this.profileDisplayNameInput = this.page.getByTestId('settings-account-display-name-input');
-    this.profileMyLinkInput = this.page.getByTestId('settings-account-mylink-input');
+    this.profileMyLinkOptionalInput = this.page.getByTestId('settings-account-mylink-input');
     this.profileSaveChangesBtn = this.page.getByTestId('settings-account-save-changes-btn');
     this.refreshLinkBtn = this.page.getByTestId('settings-account-refresh-link-btn');
     this.confirmRefreshCancelBtn = this.page.getByRole('button', { name: 'Cancel' });
@@ -255,13 +255,6 @@ export class SettingsPage {
     await this.profileDisplayNameInput.fill(newDisplayName);
     await this.profileSaveChangesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
-  }
-
-  /**
-   * Get the account settings profile my link value
-   */
-  async getAccountProfileMyLink(): Promise<string> {
-    return await this.profileMyLinkInput.inputValue();
   }
 
   /**
