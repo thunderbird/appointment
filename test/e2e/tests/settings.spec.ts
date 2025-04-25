@@ -229,11 +229,23 @@ test.describe('account settings', {
   });
 
   test('verify profile details', async ({ page }) => {
-    // verify user name, preferred email, display name, and share link are all correct
+    // verify user name, preferred email, display name
     expect(await settingsPage.getAccountProfileUsername()).toBe(APPT_LOGIN_EMAIL);
     expect(await settingsPage.getAccountProfilePreferredEmail()).toBe(APPT_LOGIN_EMAIL);
     expect(await settingsPage.getAccountProfileDisplayName()).toBe(APPT_DISPLAY_NAME);
-    expect(await settingsPage.getAccountProfileMyLink()).toBe(APPT_MY_SHARE_LINK);
+
+    // verify the displayed share link; there are two parts to the share link, a label that contains
+    // the root URL (host and username), and an input field that contains an optional slug; note that
+    // the label may not display the entire root URL as it is limited in size. Our test/e2e/.env
+    // contains the full share link in APPT_MY_SHARE_LINK. Just verify that the first N chars of the
+    // URL displayed in the share link label, and the optional input field value / slug are both
+    // inside APPT_MY_SHARE_LINK.
+    let shareLinkLabel = await settingsPage.profileMyLinkOptionalInput.innerText();
+    expect(APPT_MY_SHARE_LINK).toContain(shareLinkLabel.substring(0, 15));
+    let shareLinkOptionalSlug: string = await settingsPage.profileMyLinkOptionalInput.inputValue();
+    if (shareLinkOptionalSlug.length) {
+      expect(APPT_MY_SHARE_LINK).toContain(shareLinkOptionalSlug);
+    }
   });
 
   test('able to change display name', async ({ page }) => {
