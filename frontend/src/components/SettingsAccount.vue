@@ -61,7 +61,17 @@ const usernameShort = computed(() => {
   }
   return username;
 })
-const quickLinkFull = computed(() => `${shortUrl}/${user.data.username}/${activeSlug.value}`)
+
+/**
+ * Used for hover tooltips, and the copy button
+ */
+const quickLinkFull = computed(() => user.mySlug
+  ? `${shortUrl}/${user.data.username}/${user.mySlug}/`
+  : `${shortUrl}/${user.data.username}/`);
+
+/**
+ * Used to show the link up until the passcode portion of the url (aka the label before the textbox.)
+ */
 const quickLinkPrefix = computed(() => shortUrl.substring(shortUrl.indexOf('//') + 2) + `/${usernameShort.value}/`);
 
 // Preferred email options
