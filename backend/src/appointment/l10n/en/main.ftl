@@ -79,6 +79,7 @@ oauth-error = There was an error with the authentication flow. Please try again.
 
 zoom-not-connected = You need a connected Zoom account in order to create a meeting link.
 zoom-connect-to-continue = You must connect a Zoom account, enter a custom meeting link, or click "Skip Connect Video" to continue.
+zoom-unknown-error = There was an unexpected error while connecting your Zoom account. Please try again later.
 
 ## Google Exceptions
 
