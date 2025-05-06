@@ -93,7 +93,7 @@ export class DashboardPage {
     // now we have a list of future pending appointments for our host and requster; now ensure one
     // of them matches the slot that was selected by the test
     const apptLocator = this.page.getByRole('cell', { name: `${slotDate}` }).locator('div', { hasText: `${slotTime} to`});
-    await expect(apptLocator).toBeVisible( { timeout: TIMEOUT_60_SECONDS });
+    await expect(apptLocator).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
   }
 
   /**
@@ -107,6 +107,6 @@ export class DashboardPage {
    * Get the availability panel header text (i.e. '<display name>'s Availability')
    */
   async getAvailabilityPanelHeader(): Promise<string> {
-    return await this.availabilityPanelHeader.inputValue();
+    return await this.availabilityPanelHeader.inputValue({ timeout: TIMEOUT_60_SECONDS });
   }
 }
