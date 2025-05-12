@@ -422,7 +422,7 @@ export type TimeFormatted = Time<string>;
 
 export type SelectOption = {
   label: string;
-  value: string|int;
+  value: string | number;
 };
 
 export type Coloring = {

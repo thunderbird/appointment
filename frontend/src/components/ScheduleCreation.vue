@@ -157,7 +157,7 @@ const getSlotPreviews = () => {
   // Substract one week from the start to display slots in displayed previous month days too
   let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month').subtract(1, 'week'));
   while (pointerDate <= end) {
-    if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
+    if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday().toString())) {
       slots.push({
         start: `${pointerDate.format(dateFormat)}T${scheduleInput.value.start_time}:00`,
         duration: scheduledRangeMinutes.value ?? 30,
