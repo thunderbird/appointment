@@ -35,7 +35,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     end_time: '17:00',
     earliest_booking: 1440,
     farthest_booking: 20160,
-    weekdays: ['1', '2', '3', '4', '5'],
+    weekdays: [1, 2, 3, 4, 5],
     slot_duration: DEFAULT_SLOT_DURATION,
     meeting_link_provider: MeetingLinkProviderType.None,
     booking_confirmation: true,

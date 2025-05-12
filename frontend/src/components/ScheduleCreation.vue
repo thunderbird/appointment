@@ -102,7 +102,7 @@ const defaultSchedule: Schedule = {
   end_time: '17:00',
   earliest_booking: 1440,
   farthest_booking: 20160,
-  weekdays: ['1', '2', '3', '4', '5'],
+  weekdays: [1, 2, 3, 4, 5],
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
@@ -157,7 +157,7 @@ const getSlotPreviews = () => {
   // Substract one week from the start to display slots in displayed previous month days too
   let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month').subtract(1, 'week'));
   while (pointerDate <= end) {
-    if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday().toString())) {
+    if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
         start: `${pointerDate.format(dateFormat)}T${scheduleInput.value.start_time}:00`,
         duration: scheduledRangeMinutes.value ?? 30,
