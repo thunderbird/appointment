@@ -38,15 +38,15 @@ const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
 const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
   label: calendar.title,
-  value: calendar.id.toString(),
+  value: calendar.id,
 })));
 const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((min) => ({
   label: `${min} min`,
-  value: min.toString(),
+  value: min,
 }));
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso.toString(),
+  value: day.iso,
 }));
 
 const formRef = ref<HTMLFormElement>();

@@ -102,7 +102,7 @@ const defaultSchedule: Schedule = {
   end_time: '17:00',
   earliest_booking: 1440,
   farthest_booking: 20160,
-  weekdays: ['1', '2', '3', '4', '5'],
+  weekdays: [1, 2, 3, 4, 5],
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
@@ -193,13 +193,13 @@ const charCount = computed(() => scheduleInput.value.details?.length ?? 0);
 // Weekday options
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso, // Important: For now this needs to be ints, as that's what the values from the api as.
+  value: day.iso,
 }));
 
 // Connected calendar options
 const calendarOptions = computed<SelectOption[]>(() => props.calendars.map((calendar) => ({
   label: calendar.title,
-  value: calendar.id.toString(),
+  value: calendar.id,
 })));
 
 // Earliest booking options
@@ -208,25 +208,25 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
   if (d === 0) {
     return {
       label: t('label.immediately'),
-      value: '0',
+      value: 0,
     };
   }
   return {
     label: dj.duration(d, 'days').humanize(),
-    value: (d * 60 * 24).toString(),
+    value: (d * 60 * 24),
   };
 });
 
 // Farthest booking options
 const farthestOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   label: dj.duration(d, 'weeks').humanize(),
-  value: (d * 60 * 24 * 7).toString(),
+  value: (d * 60 * 24 * 7),
 }));
 
 // Appointment duration options
 const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((duration) => ({
   label: t('units.minutes', { value: duration }),
-  value: duration.toString(),
+  value: duration,
 }));
 
 // humanize selected durations

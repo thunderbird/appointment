@@ -197,7 +197,7 @@ export type Schedule = {
   end_time: string;
   earliest_booking: number;
   farthest_booking: number;
-  weekdays: string[];
+  weekdays: number[];
   slot_duration: number;
   meeting_link_provider: string;
   id?: number;
@@ -422,7 +422,7 @@ export type TimeFormatted = Time<string>;
 
 export type SelectOption = {
   label: string;
-  value: string|int;
+  value: string | number;
 };
 
 export type Coloring = {
