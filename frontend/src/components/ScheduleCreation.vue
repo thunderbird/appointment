@@ -208,25 +208,25 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
   if (d === 0) {
     return {
       label: t('label.immediately'),
-      value: '0',
+      value: 0,
     };
   }
   return {
     label: dj.duration(d, 'days').humanize(),
-    value: (d * 60 * 24).toString(),
+    value: (d * 60 * 24),
   };
 });
 
 // Farthest booking options
 const farthestOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   label: dj.duration(d, 'weeks').humanize(),
-  value: (d * 60 * 24 * 7).toString(),
+  value: (d * 60 * 24 * 7),
 }));
 
 // Appointment duration options
 const durationOptions: SelectOption[] = SLOT_DURATION_OPTIONS.map((duration) => ({
   label: t('units.minutes', { value: duration }),
-  value: duration.toString(),
+  value: duration,
 }));
 
 // humanize selected durations
