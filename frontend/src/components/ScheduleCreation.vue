@@ -193,13 +193,13 @@ const charCount = computed(() => scheduleInput.value.details?.length ?? 0);
 // Weekday options
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
-  value: day.iso, // Important: For now this needs to be ints, as that's what the values from the api as.
+  value: day.iso,
 }));
 
 // Connected calendar options
 const calendarOptions = computed<SelectOption[]>(() => props.calendars.map((calendar) => ({
   label: calendar.title,
-  value: calendar.id.toString(),
+  value: calendar.id,
 })));
 
 // Earliest booking options
