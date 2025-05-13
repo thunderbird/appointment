@@ -41,7 +41,7 @@ const isNavEntryActive = (item: string) => {
   >
     <router-link
       class="shrink-0 border-r border-gray-300 py-4 pl-4 pr-8 dark:border-gray-600"
-      :to="{ name: 'dashboard' }"
+      :to="{ name: user?.authenticated ? 'dashboard' : 'home' }"
     >
       <img class="h-8" src="@/assets/svg/appointment_logo_beta.svg" alt="Appointment Logo" />
     </router-link>
