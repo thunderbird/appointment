@@ -14,7 +14,7 @@ import {
   BooleanResponse, Exception, ExceptionDetail,
 } from '@/models';
 
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 const call = inject(callKey);

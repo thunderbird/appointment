@@ -45,7 +45,7 @@ const user = useUserStore();
 const calendarStore = useCalendarStore();
 const externalConnectionStore = createExternalConnectionsStore(call);
 const scheduleStore = createScheduleStore(call);
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const dj = inject(dayjsKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
@@ -739,7 +739,7 @@ watch(
             <div class="whitespace-pre-line rounded-lg pb-3 text-xs text-gray-500">
               <div>
                 {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
-                <i18n-t keypath="text.toUpdateYourUsername.text" tag="span">
+                <i18n-t keypath="text.toUpdateYourUsername.text" tag="span" scope="global">
                   <template v-slot:link>
                     <router-link class="underline" :to="{ name: 'settings' }" target="_blank">
                       {{ t('text.toUpdateYourUsername.link') }}
