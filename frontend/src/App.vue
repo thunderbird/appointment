@@ -7,7 +7,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { UAParser } from 'ua-parser-js';
 import NavBar from '@/components/NavBar.vue';
-import TitleBar from '@/components/TitleBar.vue';
 import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification.vue';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
@@ -36,7 +35,6 @@ import { AuthSchemes } from '@/definitions';
 const user = useUserStore();
 const apiUrl = inject(apiUrlKey);
 const route = useRoute();
-const routeName = typeof route.name === 'string' ? route.name : '';
 const router = useRouter();
 
 const siteNotificationStore = useSiteNotificationStore();
@@ -143,10 +141,10 @@ const routeIsPublic = computed(
   () => route.meta?.isPublic,
 );
 const routeIsHome = computed(
-  () => ['home'].includes(routeName),
+  () => ['home'].includes(typeof route.name === 'string' ? route.name : ''),
 );
 const routeHasModal = computed(
-  () => ['login'].includes(routeName),
+  () => ['login'].includes(typeof route.name === 'string' ? route.name : ''),
 );
 
 // retrieve calendars and appointments after checking login and persisting user to db
@@ -324,12 +322,11 @@ onMounted(async () => {
     >
       {{ notificationMessage }}
     </site-notification>
-    <nav-bar v-if="user?.authenticated" :nav-items="navItems"/>
-    <title-bar v-if="routeIsPublic"/>
+    <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems" />
     <main
+      class="pt-24"
       :class="{
         'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
-        '!pt-24': routeIsHome || user?.authenticated,
         'min-h-full': routeIsPublic && !routeHasModal,
       }"
     >
