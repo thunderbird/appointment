@@ -20,6 +20,7 @@ import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
+import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
 import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
@@ -107,11 +108,15 @@ const defaultSchedule: Schedule = {
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
   booking_confirmation: true,
+  availabilities: [],
 };
 const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
 const referenceSchedule = ref({ ...defaultSchedule });
 const generateZoomLink = ref(scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom);
+
+// Custom availabilities
+const customizePerDay = ref(false);
 
 onMounted(() => {
   // Retrieve the current external connections
@@ -155,7 +160,10 @@ const getSlotPreviews = () => {
     ? dj.min(dj(scheduleInput.value.end_date), dj(props.activeDate).endOf('month').add(1, 'week'))
     : dj(props.activeDate).endOf('month').add(1, 'week');
   // Substract one week from the start to display slots in displayed previous month days too
-  let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month').subtract(1, 'week'));
+  let pointerDate = dj.max(
+    dj(scheduleInput.value.start_date).add(scheduleInput.value.earliest_booking, 'minutes'),
+    dj(props.activeDate).startOf('month').subtract(1, 'week')
+  );
   while (pointerDate <= end) {
     if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
@@ -169,6 +177,7 @@ const getSlotPreviews = () => {
   }
   return slots;
 };
+
 // generate an appointment object with slots from current schedule data
 const getScheduleAppointment = (): ScheduleAppointment => ({
   title: scheduleInput.value.name,
@@ -403,6 +412,7 @@ watch(
     scheduleInput.value.end_date,
     scheduleInput.value.start_time,
     scheduleInput.value.end_time,
+    scheduleInput.value.earliest_booking,
     scheduleInput.value.weekdays,
     scheduleInput.value.booking_confirmation,
     props.activeDate,
@@ -475,36 +485,52 @@ watch(
         </div>
         <div v-show="activeStep1" class="flex flex-col gap-3">
           <hr/>
-          <div class="flex w-full gap-2 lg:gap-4">
-            <text-input
-              type="time"
-              name="start_time"
-              class="w-full"
-              v-model="scheduleInput.start_time"
-              :disabled="!scheduleInput.active"
-            >
-              {{ t("label.startTime") }}
-            </text-input>
-            <text-input
-              type="time"
-              name="end_time"
-              class="w-full"
-              v-model="scheduleInput.end_time"
-              :disabled="!scheduleInput.active"
-            >
-              {{ t("label.endTime") }}
-            </text-input>
-          </div>
-          <div>
+          <checkbox-input name="customizePerDay" :label="t('label.customizePerDay')" v-model="customizePerDay" />
+          <!-- Availability with customization -->
+          <div v-if="customizePerDay" class="flex flex-col gap-3">
             <div class="input-label">
-              {{ t("label.availableDays") }}
+              {{ t("label.selectDays") }}
             </div>
-            <bubble-select
+            <availability-select
               :options="scheduleDayOptions"
               v-model="scheduleInput.weekdays"
               :required="true"
               :disabled="!scheduleInput.active"
             />
+          </div>
+          <!-- Availability without customization -->
+          <div v-if="!customizePerDay" class="flex flex-col gap-3">
+            <div class="flex w-full gap-2 lg:gap-4">
+              <text-input
+                type="time"
+                name="start_time"
+                class="w-full"
+                v-model="scheduleInput.start_time"
+                :disabled="!scheduleInput.active"
+              >
+                {{ t("label.startTime") }}
+              </text-input>
+              <text-input
+                type="time"
+                name="end_time"
+                class="w-full"
+                v-model="scheduleInput.end_time"
+                :disabled="!scheduleInput.active"
+              >
+                {{ t("label.endTime") }}
+              </text-input>
+            </div>
+            <div>
+              <div class="input-label">
+                {{ t("label.selectDays") }}
+              </div>
+              <bubble-select
+                :options="scheduleDayOptions"
+                v-model="scheduleInput.weekdays"
+                :required="true"
+                :disabled="!scheduleInput.active"
+              />
+            </div>
           </div>
           <div>
             <div class="input-label">
