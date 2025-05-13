@@ -20,7 +20,6 @@ from .models import (
     AppointmentStatus,
     BookingStatus,
     CalendarProvider,
-    DayOfWeek,
     LocationType,
     random_slug,
     SubscriberLevel,
@@ -29,7 +28,7 @@ from .models import (
     InviteStatus,
     ColourScheme,
     TimeMode,
-    IsoWeekdays
+    IsoWeekday
 )
 from .. import utils, defines
 
@@ -144,7 +143,7 @@ class AppointmentOut(AppointmentBase):
 
 class AvailabilityBase(BaseModel):
     schedule_id: int
-    day_of_week: DayOfWeek
+    day_of_week: IsoWeekday
     start_time: datetime | None = None
     end_time: datetime | None = None
     min_time_before_meeting: int
@@ -312,7 +311,7 @@ class SubscriberIn(BaseModel):
     language: str | None = FALLBACK_LOCALE
     colour_scheme: ColourScheme = ColourScheme.system
     time_mode: TimeMode = TimeMode.h12
-    start_of_week: IsoWeekdays = IsoWeekdays.sunday
+    start_of_week: IsoWeekday = IsoWeekday.sunday
 
 
 class SubscriberBase(SubscriberIn):

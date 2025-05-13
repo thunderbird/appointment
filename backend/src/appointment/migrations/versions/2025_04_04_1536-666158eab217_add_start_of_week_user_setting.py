@@ -7,7 +7,7 @@ Create Date: 2025-04-04 15:36:08.853611
 """
 from alembic import op
 import sqlalchemy as sa
-from appointment.database.models import IsoWeekdays
+from appointment.database.models import IsoWeekday
 
 # revision identifiers, used by Alembic.
 revision = '666158eab217'
@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('start_of_week', sa.Enum(IsoWeekdays), default=IsoWeekdays.sunday, nullable=False, index=True))
+    op.add_column('subscribers', sa.Column('start_of_week', sa.Enum(IsoWeekday), default=IsoWeekday.sunday, nullable=False, index=True))
 
 
 def downgrade() -> None:
