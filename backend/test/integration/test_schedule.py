@@ -533,6 +533,7 @@ class TestRequestScheduleAvailability:
             farthest_booking=20160,
             slot_duration=30,
             booking_confirmation=False,
+            use_custom_availabilities=True,
             weekdays=[1, 2, 3, 4, 5],
         )
         self.signed_url = signed_url_by_subscriber(self.subscriber)
@@ -669,6 +670,7 @@ class TestRequestScheduleAvailability:
             farthest_booking=20160,
             slot_duration=30,
             booking_confirmation=False,
+            use_custom_availabilities=True,
         )
 
         signed_url = signed_url_by_subscriber(subscriber)

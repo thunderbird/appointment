@@ -359,6 +359,7 @@ class Schedule(Base):
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
     booking_confirmation: bool = Column(Boolean, index=True, nullable=False, default=True)
     timezone: str = Column(encrypted_type(String), index=True, nullable=True)
+    use_custom_availabilities: bool = Column(Boolean, index=True, nullable=False, default=False)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(

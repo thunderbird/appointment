@@ -224,6 +224,8 @@ def read_schedule_availabilities(
         slots=actual_slots,
         slot_duration=schedule.slot_duration,
         booking_confirmation=schedule.booking_confirmation,
+        use_custom_availabilities=schedule.use_custom_availabilities,
+        # TODO: read custom availabilities
     )
 
 

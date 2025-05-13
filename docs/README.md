@@ -172,6 +172,7 @@ erDiagram
     string slug "Random or customized url part"
     bool booking_confirmation "True if booking requests need to be confirmed by owner"
     string timezone "Configured timezone name (e.g. America/Vancouver, Europe/Berlin, etc)"
+    bool use_custom_availabilities "True if customized availability is used instead of general one"
   }
   SCHEDULES ||--|{ AVAILABILITIES : hold_custom
   SCHEDULES ||--|{ SLOTS : provide_on_request

@@ -109,6 +109,7 @@ const defaultSchedule: Schedule = {
   slug: user.mySlug,
   booking_confirmation: true,
   availabilities: [],
+  use_custom_availabilities: false,
 };
 const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.

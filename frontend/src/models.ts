@@ -177,10 +177,13 @@ export type ExternalConnectionCollection = {
   caldav?: ExternalConnection[];
 };
 
-// The type `Availability` will be used later if we provide custom availabilities
-// in addition to general availability too
 export type Availability = {
   id?: number;
+  schedule_id: number;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  slot_duration: number;
 };
 
 export type Schedule = {
@@ -206,6 +209,7 @@ export type Schedule = {
   availabilities?: Availability[];
   calendar?: Calendar;
   booking_confirmation: boolean;
+  use_custom_availabilities: boolean;
 };
 
 export type Invite = {

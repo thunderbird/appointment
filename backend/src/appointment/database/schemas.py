@@ -179,6 +179,7 @@ class ScheduleBase(BaseModel):
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
     booking_confirmation: bool = True
     timezone: Optional[str] = None
+    use_custom_availabilities: bool = False
 
 
 class Schedule(ScheduleBase):
