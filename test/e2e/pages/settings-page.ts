@@ -8,6 +8,7 @@ import {
   APPT_CALENDAR_SETTINGS_PAGE,
   APPT_CONNECTED_SETTINGS_PAGE,
   APPT_HTML_DARK_MODE_CLASS,
+  TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
 } from '../const/constants';
@@ -205,6 +206,8 @@ export class SettingsPage {
   async set12hrFormat() {
     // give a few seconds to be applied as sometimes the test runs so fast
     // it switches back to the dashboard tab before the time format is applied
+    await this.settings12hrRadio.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.settings12hrRadio.click({ timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
   }
@@ -213,6 +216,8 @@ export class SettingsPage {
    * Change time format settings to 24-hour format
    */
   async set24hrFormat() {
+    await this.settings24hrRadio.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.settings24hrRadio.click({ timeout: TIMEOUT_30_SECONDS });
     // give a few seconds to be applied as sometimes the test runs so fast
     // it switches back to the dashboard tab before the time format is applied
@@ -223,8 +228,10 @@ export class SettingsPage {
    * Change the general setting's time zone setting
    */
   async changeTimezoneSetting(timezone: string) {
+    await this.timeZoneSelect.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.timeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND); // give a few seconds to be applied
   }
 
   /**
@@ -252,7 +259,9 @@ export class SettingsPage {
    * Set the account settings profile display name value
    */
   async setAccountProfileDisplayName(newDisplayName: string) {
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.profileDisplayNameInput.fill(newDisplayName);
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.profileSaveChangesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
   }
