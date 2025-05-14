@@ -3,7 +3,20 @@ import { SplashscreenPage } from "../pages/splashscreen-page";
 import { FxAPage } from "../pages/fxa-page";
 import { DashboardPage } from "../pages/dashboard-page";
 import { expect, type Page } from '@playwright/test';
-import { APPT_TARGET_ENV, APPT_URL, APPT_PAGE_TITLE, TIMEOUT_30_SECONDS } from "../const/constants";
+
+import {
+    APPT_TARGET_ENV,
+    APPT_URL,
+    APPT_PAGE_TITLE,
+    TIMEOUT_1_SECOND,
+    TIMEOUT_30_SECONDS,
+    APPT_DISPLAY_NAME,
+    APPT_BROWSER_STORE_LANGUAGE_EN,
+    APPT_BROWSER_STORE_THEME_LIGHT,
+    APPT_BROWSER_STORE_12HR_TIME,
+    APPT_TIMEZONE_SETTING_TORONTO,
+    APPT_BROWSER_STORE_START_WEEK_SUN,
+} from "../const/constants";
 
 /**
  * Navigate to and sign into the Appointment application target environment, using the URL and
@@ -40,4 +53,33 @@ export const getUserSettingsFromLocalStore = async (page: Page) => {
     const localUserStoreData = JSON.parse(await page.evaluate("localStorage.getItem('tba/user')"));
     console.log(`User settings from local browser store: ${JSON.stringify(localUserStoreData['settings'])}`);
     return localUserStoreData['settings'];
+}
+
+/**
+ * Set the appointment user settings in the local browser store to default values required by the tests
+ */
+export const setDefaultUserSettingsLocalStore = async (page: Page) => {
+    console.log('setting user settings to default values in browser local store')
+    var localUserStoreData = JSON.parse(await page.evaluate("localStorage.getItem('tba/user')"));
+
+    console.log(`original user settings from local browser store: ${JSON.stringify(localUserStoreData['settings'])}`);
+
+    // now set them
+    localUserStoreData['name'] = APPT_DISPLAY_NAME;
+    localUserStoreData['settings'] = {
+        "language": APPT_BROWSER_STORE_LANGUAGE_EN,
+        "colourScheme": APPT_BROWSER_STORE_THEME_LIGHT,
+        "timeFormat": APPT_BROWSER_STORE_12HR_TIME,
+        "timezone": APPT_TIMEZONE_SETTING_TORONTO,
+        "startOfWeek": APPT_BROWSER_STORE_START_WEEK_SUN,
+    }
+
+    await page.evaluate(`localStorage.setItem('tba/user', '${JSON.stringify(localUserStoreData)}')`);
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+
+    // get them again and verify were set
+    var updatedLocalUserStoreData = JSON.parse(await page.evaluate("localStorage.getItem('tba/user')"));
+
+    console.log(`updated user settings from local browser store: ${JSON.stringify(updatedLocalUserStoreData['settings'])}`);
+    expect(updatedLocalUserStoreData['settings']).toStrictEqual(localUserStoreData['settings']);
 }

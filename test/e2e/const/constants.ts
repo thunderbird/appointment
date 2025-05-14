@@ -50,11 +50,13 @@ export const APPT_BROWSER_STORE_THEME_LIGHT = 'light';
 export const APPT_BROWSER_STORE_THEME_DARK = 'dark';
 export const APPT_BROWSER_STORE_12HR_TIME = 12;
 export const APPT_BROWSER_STORE_24HR_TIME = 24;
+export const APPT_BROWSER_STORE_START_WEEK_SUN = 7;
 
 // html class attribute value when dark mode is enabled
 export const APPT_HTML_DARK_MODE_CLASS = 'dark';
 
 // timeouts
+export const TIMEOUT_1_SECOND = 1_000;
 export const TIMEOUT_2_SECONDS = 2_000;
 export const TIMEOUT_3_SECONDS = 3_000;
 export const TIMEOUT_30_SECONDS = 30_000;
