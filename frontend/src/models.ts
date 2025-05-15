@@ -179,12 +179,16 @@ export type ExternalConnectionCollection = {
 
 export type Availability = {
   id?: number;
-  schedule_id: number;
+  schedule_id?: number;
   day_of_week: number;
   start_time: string;
   end_time: string;
-  slot_duration: number;
+  slot_duration?: number;
 };
+
+export type AvailabilitySet = {
+  [key:number]: Availability[];
+}
 
 export type Schedule = {
   active: boolean;

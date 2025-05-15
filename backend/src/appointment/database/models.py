@@ -412,9 +412,9 @@ class Availability(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     schedule_id = Column(Integer, ForeignKey('schedules.id'))
-    day_of_week = Column(encrypted_type(String), index=True)
-    start_time = Column(encrypted_type(String), index=True)
-    end_time = Column(encrypted_type(String), index=True)
+    day_of_week = Column(Enum(IsoWeekday), nullable=False, index=True)
+    start_time: datetime.time = Column(encrypted_type(Time), index=True)
+    end_time: datetime.time = Column(encrypted_type(Time), index=True)
     # Can't book if it's less than X minutes before start time:
     min_time_before_meeting = Column(encrypted_type(String), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.

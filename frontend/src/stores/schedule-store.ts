@@ -170,6 +170,8 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   const updateSchedule = async (id: number, scheduleData: object) => {
+    console.log(scheduleData);
+    
     // save schedule data
     const { data, error }: ScheduleResponse = await call.value(`schedule/${id}`).put(scheduleData).json();
 

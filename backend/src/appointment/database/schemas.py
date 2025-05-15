@@ -142,11 +142,13 @@ class AppointmentOut(AppointmentBase):
 
 
 class AvailabilityBase(BaseModel):
+    model_config = ConfigDict(json_encoders={time: lambda t: t.strftime('%H:%M')})
+
     schedule_id: int
     day_of_week: IsoWeekday
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-    min_time_before_meeting: int
+    start_time: time | None = None
+    end_time: time | None = None
+    min_time_before_meeting: int | None = None
     slot_duration: int | None = None
 
 
@@ -156,6 +158,12 @@ class Availability(AvailabilityBase):
     id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
+
+
+class AvailabilityValidationIn(AvailabilityBase):
+    # Require these fields
+    start_time: time
+    end_time: time
 
 
 class ScheduleBase(BaseModel):
@@ -198,6 +206,7 @@ class ScheduleValidationIn(ScheduleBase):
     # Regex to exclude any character can be mess with a url
     slug: Annotated[Optional[str], Field(max_length=16, pattern=r'^[^\;\/\?\:\@\&\=\+\$\,\#]*$')] = None
     slot_duration: Annotated[int, Field(ge=10, default=30)]
+    availabilities: list[AvailabilityValidationIn] = Field(default=[])
     # Require these fields
     start_date: date
     start_time: time

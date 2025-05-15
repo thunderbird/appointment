@@ -1,23 +1,40 @@
 <script setup lang="ts">
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { SelectOption } from '@/models';
+import { Availability, AvailabilitySet, SelectOption } from '@/models';
 import TextInput from '@/tbpro/elements/TextInput.vue';
+import { isoWeekdaysKey } from '@/keys';
 
 const { t } = useI18n();
+const isoWeekdays = inject(isoWeekdaysKey);
 
 // component properties
 interface Props {
   options: SelectOption[];
+  availabilities: Availability[];
   required: boolean;
   disabled?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   required: false,
   disabled: false,
 });
 
+const emit = defineEmits(['update']);
+
+// Model for weekday selection
 const model = defineModel<(string | number)[]>({ default: [] });
+
+// We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
+// and that existing availabilities are prefilled for the corresponding day.
+const defaultAvailabilities = Object.fromEntries(isoWeekdays.map((d) => {
+  const existingAvailability = props.availabilities.find((a) => a.day_of_week === d.iso);
+  return [d.iso, [existingAvailability ?? { day_of_week: d.iso, start_time: '', end_time: '' } as Availability]];
+})) as AvailabilitySet;
+
+// Model for availability data
+const customAvailabilities = ref(defaultAvailabilities);
 
 /**
  * True if the given option is currently selected/active
@@ -49,6 +66,10 @@ const toggleBubble = (option: SelectOption) => {
   // Sort for niceness
   model.value.sort();
 };
+
+const update = () => {
+  emit('update', customAvailabilities.value);
+};
 </script>
 
 <template>
@@ -78,13 +99,17 @@ const toggleBubble = (option: SelectOption) => {
           <text-input
             type="time"
             :name="`start_time_${option.value}`"
+            v-model="customAvailabilities[option.value][0].start_time"
             :disabled="disabled"
+            @blur="update"
           />
           <span>&ndash;</span>
           <text-input
             type="time"
             :name="`end_time_${option.value}`"
+            v-model="customAvailabilities[option.value][0].end_time"
             :disabled="disabled"
+            @blur="update"
           />
         </div>
         <div v-else>{{ t('label.unavailable') }}</div>

@@ -4,7 +4,7 @@ import {
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
 import {
-  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert,
+  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert, AvailabilitySet,
 } from '@/models';
 import {
   ref, reactive, computed, inject, watch, onMounted, Ref,
@@ -38,6 +38,7 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import router from '@/router';
+import { a } from 'vitest/dist/chunks/suite.d.FvehnV49';
 
 // component constants
 const call = inject(callKey);
@@ -115,9 +116,6 @@ const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
 const referenceSchedule = ref({ ...defaultSchedule });
 const generateZoomLink = ref(scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom);
-
-// Custom availabilities
-const customizePerDay = ref(false);
 
 onMounted(() => {
   // Retrieve the current external connections
@@ -293,7 +291,6 @@ const saveSchedule = async (withConfirmation = true) => {
   // Update the start_date with the current date
   obj.start_date = dj().format(dateFormat);
   // remove unwanted properties
-  delete obj.availabilities;
   delete obj.time_created;
   delete obj.time_updated;
   delete obj.id;
@@ -364,6 +361,14 @@ const toggleBookingConfirmation = (newValue: boolean) => {
   scheduleInput.value.booking_confirmation = newValue;
 };
 
+// Handle availability changes
+const updateAvailabilities = (availabilities: AvailabilitySet) => {
+  // Create a single array of availabilities from the list grouped by day of week
+  // Only take valid availabilities and filter placeholder availabilities out
+  scheduleInput.value.availabilities = Object.values(availabilities).flat().filter((a) => a.start_time && a.end_time)
+    .map((a) => ({ ...a, schedule_id: props.schedule.id }));
+};
+
 // Link copy
 const myLinkTooltip = ref(t('label.copyLink'));
 const myLinkShow = ref(false);
@@ -384,7 +389,7 @@ const copyLink = async () => {
   }, 4000);
 };
 
-// track if steps were already visited
+// track schedule activation toggle changes
 watch(
   () => scheduleInput.value.active,
   (newValue) => {
@@ -486,21 +491,27 @@ watch(
         </div>
         <div v-show="activeStep1" class="flex flex-col gap-3">
           <hr/>
-          <checkbox-input name="customizePerDay" :label="t('label.customizePerDay')" v-model="customizePerDay" />
+          <checkbox-input
+            name="customizePerDay"
+            :label="t('label.customizePerDay')"
+            v-model="scheduleInput.use_custom_availabilities"
+          />
           <!-- Availability with customization -->
-          <div v-if="customizePerDay" class="flex flex-col gap-3">
+          <div v-if="scheduleInput.use_custom_availabilities" class="flex flex-col gap-3">
             <div class="input-label">
               {{ t("label.selectDays") }}
             </div>
             <availability-select
               :options="scheduleDayOptions"
+              :availabilities="scheduleInput.availabilities"
               v-model="scheduleInput.weekdays"
               :required="true"
               :disabled="!scheduleInput.active"
+              @update="updateAvailabilities"
             />
           </div>
           <!-- Availability without customization -->
-          <div v-if="!customizePerDay" class="flex flex-col gap-3">
+          <div v-if="!scheduleInput.use_custom_availabilities" class="flex flex-col gap-3">
             <div class="flex w-full gap-2 lg:gap-4">
               <text-input
                 type="time"
