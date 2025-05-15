@@ -16,6 +16,7 @@ import {
     APPT_BROWSER_STORE_12HR_TIME,
     APPT_TIMEZONE_SETTING_TORONTO,
     APPT_BROWSER_STORE_START_WEEK_SUN,
+    TIMEOUT_3_SECONDS,
 } from "../const/constants";
 
 /**
@@ -34,8 +35,18 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     await homePage.gotoDashboard();
 
     if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
-        await homePage.getToFxA();
-        await fxaSignInPage.signIn();
+        // when running on mobile on BrowserStack the cookies are saved for the entire session, so if a previous
+        // test ran in the same session then the browser is already be signed in; in which case just the Appointment
+        // 'continue' button may be displayed instead of the 'log in' button. Check for the 'continue' button first
+        // and if it's there we can just click that and be signed in, and skip the rest
+        if (await homePage.homeContinueBtn.isVisible() &&  await homePage.homeContinueBtn.isEnabled()) {
+            console.log("already signed in; just need to click the Appointment home page 'continue' button");
+            await homePage.homeContinueBtn.click();
+            await page.waitForTimeout(TIMEOUT_3_SECONDS);
+        } else {
+            await homePage.getToFxA();
+            await fxaSignInPage.signIn();
+        }
     } else {
         // local dev env doesn't use fxa; just signs into appt using username and pword
         await homePage.localApptSignIn();

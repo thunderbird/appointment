@@ -4,6 +4,7 @@ import {
   APPT_PENDING_BOOKINGS_PAGE,
   APPT_BOOKED_BOOKINGS_PAGE,
   APPT_DASHBOARD_MONTH_PAGE,
+  APPT_DASHBOARD_DAY_PAGE,
   APPT_TIMEZONE_SETTING_TORONTO,
   APPT_TIMEZONE_SETTING_HALIFAX,
   TIMEOUT_60_SECONDS
@@ -21,10 +22,12 @@ export class DashboardPage {
   readonly pendingBookingsFilterSelect: Locator;
   readonly allFutureBookingsOptionText: string = 'All future bookings';
   readonly apptsFilterInput: Locator;
-  readonly calendarEvent24hrFormat: Locator;
+  readonly timezoneLabel: Locator;
   readonly timezoneDisplayTextToronto: Locator;
   readonly timezoneDisplayTextHalifax: Locator;
   readonly availabilityPanelHeader: Locator;
+  readonly dayView24HrAvailabilityText: Locator;
+  readonly dayView12HrAvailabilityText: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -36,10 +39,12 @@ export class DashboardPage {
     this.pendingBookingsPageHeader = this.page.getByText('Bookings');
     this.pendingBookingsFilterSelect = this.page.getByTestId('bookings-filter-select');
     this.apptsFilterInput = this.page.getByPlaceholder('Search bookings');
-    this.calendarEvent24hrFormat = this.page.locator('[class="calendar-month_events"]', { hasText: ':00 - 17:00' }).first();
+    this.timezoneLabel = this.page.getByText('Time Zone');
     this.timezoneDisplayTextToronto = this.page.getByText(APPT_TIMEZONE_SETTING_TORONTO, { exact: true });
     this.timezoneDisplayTextHalifax = this.page.getByText(APPT_TIMEZONE_SETTING_HALIFAX, { exact: true });
     this.availabilityPanelHeader = this.page.getByPlaceholder('My Schedule');
+    this.dayView24HrAvailabilityText = this.page.getByText('17:00');
+    this.dayView12HrAvailabilityText = this.page.getByText('5:00 PM');
   }
 
   /**
@@ -101,6 +106,13 @@ export class DashboardPage {
    */
   async gotoToDashboardMonthView() {
     await this.page.goto(APPT_DASHBOARD_MONTH_PAGE);
+  }
+
+  /**
+   * Navigate to the dashboard day view
+   */
+  async gotoToDashboardDayView() {
+    await this.page.goto(APPT_DASHBOARD_DAY_PAGE);
   }
 
   /**

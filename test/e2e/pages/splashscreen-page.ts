@@ -4,18 +4,20 @@ import { APPT_URL, APPT_LOGIN_EMAIL, FXA_PAGE_TITLE, APPT_LOGIN_PWORD, TIMEOUT_6
 export class SplashscreenPage {
   readonly page: Page;
   readonly loginBtn: Locator;
+  readonly homeContinueBtn: Locator;
   readonly signUpBetaBtn: Locator;
   readonly loginEmailInput: Locator;
   readonly passwordInput: Locator;
-  readonly loginContinueBtn: Locator;
+  readonly loginDialogContinueBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.loginBtn = this.page.getByTestId('home-login-btn');
+    this.homeContinueBtn = this.page.getByTestId('home-continue-btn');
     this.signUpBetaBtn = this.page.getByTestId('home-sign-up-beta-btn');
     this.loginEmailInput = this.page.getByLabel('Email address');
     this.passwordInput = this.page.getByLabel('Password');
-    this.loginContinueBtn = this.page.getByTitle('Continue');
+    this.loginDialogContinueBtn = this.page.getByTitle('Continue');
   }
 
   async gotoDashboard() {
@@ -35,14 +37,14 @@ export class SplashscreenPage {
   }
 
   async clickLoginContinueBtn() {
-    await this.loginContinueBtn.click();
+    await this.loginDialogContinueBtn.click();
   }
 
   async getToFxA() {
     await expect(this.loginBtn).toBeVisible();
     await this.clickLoginBtn();
     await expect(this.loginEmailInput).toBeVisible();
-    await expect(this.loginContinueBtn).toBeVisible();
+    await expect(this.loginDialogContinueBtn).toBeVisible();
     expect(APPT_LOGIN_EMAIL, 'getting APPT_LOGIN_EMAIL env var').toBeTruthy();
     await this.enterLoginEmail(APPT_LOGIN_EMAIL);
     await this.clickLoginContinueBtn();
@@ -53,7 +55,7 @@ export class SplashscreenPage {
     await expect(this.loginBtn).toBeVisible();
     await this.clickLoginBtn();
     await expect(this.loginEmailInput).toBeVisible();
-    await expect(this.loginContinueBtn).toBeVisible();
+    await expect(this.loginDialogContinueBtn).toBeVisible();
     expect(APPT_LOGIN_EMAIL, 'getting APPT_LOGIN_EMAIL env var').toBeTruthy();
     await this.enterLoginEmail(APPT_LOGIN_EMAIL);
     await this.enterPassword(APPT_LOGIN_PWORD);

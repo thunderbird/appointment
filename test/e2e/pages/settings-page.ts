@@ -179,6 +179,8 @@ export class SettingsPage {
    * Change the general setting's page language setting
    */
   async changeLanguageSetting(language: string) {
+    await this.languageSelect.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.languageSelect.selectOption(language, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
@@ -187,6 +189,8 @@ export class SettingsPage {
    * Change the general setting's page theme setting
    */
   async changeThemeSetting(theme: string) {
+    await this.themeSelect.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.themeSelect.selectOption(theme, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }

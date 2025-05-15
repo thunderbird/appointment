@@ -14,6 +14,7 @@ export const APPT_CALENDAR_SETTINGS_PAGE = String(`${process.env.APPT_URL}settin
 export const APPT_ACCOUNT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/account`);
 export const APPT_CONNECTED_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/connectedAccounts`);
 export const APPT_DASHBOARD_MONTH_PAGE = String(`${process.env.APPT_URL}dashboard#month`);
+export const APPT_DASHBOARD_DAY_PAGE = String(`${process.env.APPT_URL}dashboard#day`);
 
 // page titles
 export const APPT_PAGE_TITLE = 'Thunderbird Appointment';
@@ -34,6 +35,7 @@ export const APPT_BOOKEE_EMAIL = String(process.env.APPT_BOOKEE_EMAIL);
 export const PLAYWRIGHT_TAG_PROD_SANITY = '@prod-sanity';
 export const PLAYWRIGHT_TAG_E2E_SUITE = '@e2e-suite';
 export const PLAYWRIGHT_TAG_PROD_NIGHTLY = '@prod-nightly';
+export const PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE = '@prod-nightly-mobile';
 
 // general settings options
 export const APPT_LANGUAGE_SETTING_EN = 'EN — English';
