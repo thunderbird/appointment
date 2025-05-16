@@ -504,6 +504,8 @@ watch(
             <availability-select
               :options="scheduleDayOptions"
               :availabilities="scheduleInput.availabilities"
+              :start-time="scheduleInput.start_time"
+              :end-time="scheduleInput.end_time"
               v-model="scheduleInput.weekdays"
               :required="true"
               :disabled="!scheduleInput.active"

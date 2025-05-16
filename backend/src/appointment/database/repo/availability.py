@@ -59,7 +59,7 @@ def sync_multiple(db: Session, availabilities: list[schemas.AvailabilityBase], s
     for record in db_schedule.availabilities:
         # TODO: We currently only have one availability per day. Later we might want to extend this condition for the
         # actual times on that day.
-        if not record.day_of_week in [a.day_of_week for a in availabilities]:
+        if record.day_of_week not in [a.day_of_week for a in availabilities]:
             delete(db, record.id)
 
 

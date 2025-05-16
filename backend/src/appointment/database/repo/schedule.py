@@ -66,8 +66,8 @@ def update(db: Session, schedule: schemas.ScheduleBase, schedule_id: int):
     """update existing schedule by id"""
     db_schedule = get(db, schedule_id)
     for key, value in schedule:
-        if (key == 'availabilities' and schedule.use_custom_availabilities):
-            # If we have custom availabilities, save them
+        if key == 'availabilities':
+            # If we have custom availabilities and they are activated, save them
             repo.availability.sync_multiple(db, schedule.availabilities, schedule_id)
             continue
         setattr(db_schedule, key, value)

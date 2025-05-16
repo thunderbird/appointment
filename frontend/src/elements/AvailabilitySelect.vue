@@ -12,6 +12,8 @@ const isoWeekdays = inject(isoWeekdaysKey);
 interface Props {
   options: SelectOption[];
   availabilities: Availability[];
+  startTime: string;
+  endTime: string;
   required: boolean;
   disabled?: boolean;
 }
@@ -27,30 +29,33 @@ const emit = defineEmits(['update']);
 const model = defineModel<(string | number)[]>({ default: [] });
 
 // Model for availability data
-const defaultAvailabilitySet = Object.fromEntries(
-  isoWeekdays.map((d) => [d.iso, [{ day_of_week: d.iso, start_time: '', end_time: '' } as Availability]]
+const defaultAvailability = (dayOfWeek: number) => (
+  { day_of_week: dayOfWeek, start_time: props.startTime, end_time: props.endTime } as Availability
+);
+const initialAvailabilitySet = Object.fromEntries(
+  isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]
 ));
-const customAvailabilities = ref<AvailabilitySet>(defaultAvailabilitySet);
+const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
 
 /**
  * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
  * and that existing availabilities are prefilled for the corresponding day.
  */
-const defaultAvailabilities = () => Object.fromEntries(isoWeekdays.map((d) => {
+const defaultAvailabilitySet = () => Object.fromEntries(isoWeekdays.map((d) => {
   const existingAvailability = props.availabilities.find((a) => a.day_of_week === d.iso);
-  return [d.iso, [existingAvailability ?? { day_of_week: d.iso, start_time: '', end_time: '' } as Availability]];
+  return [d.iso, [existingAvailability ?? defaultAvailability(d.iso)]];
 })) as AvailabilitySet;
 
 // Prefill existing availabilities from schedule
 onMounted(() => {
-  customAvailabilities.value = defaultAvailabilities();
+  availabilitySet.value = defaultAvailabilitySet();
 });
 
 // Track schedule reset
 watch(
   () => props.availabilities,
   () => {
-    customAvailabilities.value = defaultAvailabilities();
+    availabilitySet.value = defaultAvailabilitySet();
   },
 );
 
@@ -58,7 +63,7 @@ watch(
  * Send a list of valid availabilities from our input AvailabilitySet
  */
 const update = () => {
-  const list = Object.values(customAvailabilities.value).flat().filter((a) => model.value.includes(a.day_of_week));
+  const list = Object.values(availabilitySet.value).flat().filter((a) => model.value.includes(a.day_of_week));
   emit('update', list);
 };
 
@@ -124,7 +129,7 @@ const toggleBubble = (option: SelectOption) => {
           <text-input
             type="time"
             :name="`start_time_${option.value}`"
-            v-model="customAvailabilities[option.value][0].start_time"
+            v-model="availabilitySet[option.value][0].start_time"
             :disabled="disabled"
             @blur="update"
           />
@@ -132,7 +137,7 @@ const toggleBubble = (option: SelectOption) => {
           <text-input
             type="time"
             :name="`end_time_${option.value}`"
-            v-model="customAvailabilities[option.value][0].end_time"
+            v-model="availabilitySet[option.value][0].end_time"
             :disabled="disabled"
             @blur="update"
           />
