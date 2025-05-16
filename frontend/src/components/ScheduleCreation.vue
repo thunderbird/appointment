@@ -125,6 +125,10 @@ onMounted(() => {
     // calculate utc back to user timezone
     scheduleInput.value.start_time = scheduleStore.timeToFrontendTime(scheduleInput.value.start_time, scheduleInput.value.time_updated);
     scheduleInput.value.end_time = scheduleStore.timeToFrontendTime(scheduleInput.value.end_time, scheduleInput.value.time_updated);
+    props.schedule.availabilities?.forEach((a, i) => {
+      scheduleInput.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, scheduleInput.value.time_updated);
+      scheduleInput.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, scheduleInput.value.time_updated);
+    })
 
     // Adjust the default calendar if the one attached is not connected.
     const { calendar_id: calendarId } = scheduleInput.value;
@@ -278,17 +282,16 @@ const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
   savingInProgress.value = true;
   // build data object for post request
-  const obj = { ...scheduleInput.value, timezone: user.data.settings.timezone };
-  // convert local input times to utc times
+  const obj = JSON.parse(JSON.stringify({ ...scheduleInput.value, timezone: user.data.settings.timezone }));
 
-  obj.start_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.start_time}:00`)
-    .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
-    .utc()
-    .format('HH:mm');
-  obj.end_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.end_time}:00`)
-    .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
-    .utc()
-    .format('HH:mm');
+  // convert local input times to utc times
+  obj.start_time = scheduleStore.timeToBackendTime(obj.start_time);
+  obj.end_time = scheduleStore.timeToBackendTime(obj.end_time);
+  obj.availabilities?.forEach((a: Availability, i: number) => {
+    obj.availabilities[i].start_time = scheduleStore.timeToBackendTime(a.start_time);
+    obj.availabilities[i].end_time = scheduleStore.timeToBackendTime(a.end_time);
+  });
+
   // Update the start_date with the current date
   obj.start_date = dj().format(dateFormat);
   // remove unwanted properties

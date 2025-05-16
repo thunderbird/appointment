@@ -421,6 +421,22 @@ class Availability(Base):
 
     schedule: Mapped[Schedule] = relationship('Schedule', back_populates='availabilities')
 
+    @property
+    def start_time_local(self) -> datetime.time:
+        """Start Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(
+            hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.schedule.calendar.owner.timezone)).time()
+
+    @property
+    def end_time_local(self) -> datetime.time:
+        """End Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(
+            hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.schedule.calendar.owner.timezone)).time()
+
     def __str__(self):
         return f'Availability: {self.id}'
 

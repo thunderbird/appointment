@@ -11,9 +11,9 @@ const isoWeekdays = inject(isoWeekdaysKey);
 // component properties
 interface Props {
   options: SelectOption[];
-  availabilities: Availability[];
-  startTime: string;
-  endTime: string;
+  availabilities: Availability[]; // Existing availability entries to prefill
+  startTime: string; // Default start time for new availability
+  endTime: string; // Default end time for new availability
   required: boolean;
   disabled?: boolean;
 }

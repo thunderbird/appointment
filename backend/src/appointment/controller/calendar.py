@@ -715,6 +715,8 @@ class Tools:
 
         subscriber = schedule.calendar.owner
         timezone = zoneinfo.ZoneInfo(subscriber.timezone)
+        availabilities = schedule.availabilities
+        custom_times = schedule.use_custom_availabilities
 
         now_tz = datetime.now(tz=timezone)
         not_tz_midnight = now_tz.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -737,26 +739,36 @@ class Tools:
             else farthest_booking
         )
 
-        start_time = datetime.combine(now.min, start_time_local) - datetime.min
-        end_time = datetime.combine(now.min, end_time_local) - datetime.min
-
-        # Thanks to timezone conversion end_time can wrap around to the next day
-        if start_time > end_time:
-            end_time += timedelta(days=1)
-
         # All user defined weekdays, falls back to working week if invalid
         weekdays = schedule.weekdays if isinstance(schedule.weekdays, list) else json.loads(schedule.weekdays)
         if not weekdays or len(weekdays) == 0:
             weekdays = [1, 2, 3, 4, 5]
 
-        # Difference of the start and end time.
-        # Since our times are localized we start at 0, and go until we hit the diff.
-        total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
-
         slot_duration_seconds = schedule.slot_duration * 60
 
         # Between the available booking time
         for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
+            date = datetime.fromordinal(ordinal)
+
+            # Prepare time calculation based on the configured availability for the current weekday
+            customAvailability = next(
+                (x for x in availabilities if date.isoweekday() == x.day_of_week.value),
+                None
+            )
+            start_local = customAvailability.start_time_local if custom_times and customAvailability else start_time_local
+            end_local = customAvailability.end_time_local if custom_times and customAvailability else end_time_local
+
+            start_time = datetime.combine(now.min, start_local) - datetime.min
+            end_time = datetime.combine(now.min, end_local) - datetime.min
+
+            # Thanks to timezone conversion end_time can wrap around to the next day
+            if start_time > end_time:
+                end_time += timedelta(days=1)
+
+            # Difference of the start and end time.
+            # Since our times are localized we start at 0, and go until we hit the diff.
+            total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
+
             time_start = 0
 
             # If it's today and now is greater than our normal start time...
@@ -771,15 +783,15 @@ class Tools:
                 time_start -= time_start % slot_duration_seconds
                 time_start += slot_duration_seconds
 
-            date = datetime.fromordinal(ordinal)
             current_datetime = datetime(
                 year=date.year,
                 month=date.month,
                 day=date.day,
-                hour=start_time_local.hour,
-                minute=start_time_local.minute,
+                hour=start_local.hour,
+                minute=start_local.minute,
                 tzinfo=timezone,
             )
+
             # Check if this weekday is within our schedule
             if current_datetime.isoweekday() in weekdays:
                 # Generate each timeslot based on the selected duration
