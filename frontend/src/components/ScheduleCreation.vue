@@ -4,7 +4,7 @@ import {
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
 import {
-  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert, AvailabilitySet,
+  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert, Availability,
 } from '@/models';
 import {
   ref, reactive, computed, inject, watch, onMounted, Ref,
@@ -38,7 +38,6 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import router from '@/router';
-import { a } from 'vitest/dist/chunks/suite.d.FvehnV49';
 
 // component constants
 const call = inject(callKey);
@@ -141,7 +140,9 @@ onMounted(() => {
   generateZoomLink.value = scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom;
 
   // Set a new reference
-  referenceSchedule.value = { ...scheduleInput.value };
+  // Sidenote: I'm too dumb to properly clone this Object without referencing the same availability array. So for now
+  // this is the good ol' JSON workaround (structuredClone, Object assign or spread won't work here)
+  referenceSchedule.value = JSON.parse(JSON.stringify(scheduleInput.value));
 });
 
 const scheduleCreationError = ref<Alert>(null);
@@ -254,7 +255,7 @@ const savedConfirmation = reactive({
 const revertForm = (resetData = true) => {
   scheduleCreationError.value = null;
   if (resetData) {
-    scheduleInput.value = { ...referenceSchedule.value };
+    scheduleInput.value = JSON.parse(JSON.stringify(referenceSchedule.value));
   }
 };
 
@@ -362,11 +363,10 @@ const toggleBookingConfirmation = (newValue: boolean) => {
 };
 
 // Handle availability changes
-const updateAvailabilities = (availabilities: AvailabilitySet) => {
+const updateAvailabilities = (availabilities: Availability[]) => {
   // Create a single array of availabilities from the list grouped by day of week
   // Only take valid availabilities and filter placeholder availabilities out
-  scheduleInput.value.availabilities = Object.values(availabilities).flat().filter((a) => a.start_time && a.end_time)
-    .map((a) => ({ ...a, schedule_id: props.schedule.id }));
+  scheduleInput.value.availabilities = availabilities.map((a) => ({ ...a, schedule_id: props.schedule.id }));
 };
 
 // Link copy

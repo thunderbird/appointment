@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, ref, onMounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Availability, AvailabilitySet, SelectOption } from '@/models';
 import TextInput from '@/tbpro/elements/TextInput.vue';
@@ -26,15 +26,41 @@ const emit = defineEmits(['update']);
 // Model for weekday selection
 const model = defineModel<(string | number)[]>({ default: [] });
 
-// We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
-// and that existing availabilities are prefilled for the corresponding day.
-const defaultAvailabilities = Object.fromEntries(isoWeekdays.map((d) => {
+// Model for availability data
+const defaultAvailabilitySet = Object.fromEntries(
+  isoWeekdays.map((d) => [d.iso, [{ day_of_week: d.iso, start_time: '', end_time: '' } as Availability]]
+));
+const customAvailabilities = ref<AvailabilitySet>(defaultAvailabilitySet);
+
+/**
+ * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
+ * and that existing availabilities are prefilled for the corresponding day.
+ */
+const defaultAvailabilities = () => Object.fromEntries(isoWeekdays.map((d) => {
   const existingAvailability = props.availabilities.find((a) => a.day_of_week === d.iso);
   return [d.iso, [existingAvailability ?? { day_of_week: d.iso, start_time: '', end_time: '' } as Availability]];
 })) as AvailabilitySet;
 
-// Model for availability data
-const customAvailabilities = ref(defaultAvailabilities);
+// Prefill existing availabilities from schedule
+onMounted(() => {
+  customAvailabilities.value = defaultAvailabilities();
+});
+
+// Track schedule reset
+watch(
+  () => props.availabilities,
+  () => {
+    customAvailabilities.value = defaultAvailabilities();
+  },
+);
+
+/**
+ * Send a list of valid availabilities from our input AvailabilitySet
+ */
+const update = () => {
+  const list = Object.values(customAvailabilities.value).flat().filter((a) => model.value.includes(a.day_of_week));
+  emit('update', list);
+};
 
 /**
  * True if the given option is currently selected/active
@@ -65,10 +91,9 @@ const toggleBubble = (option: SelectOption) => {
 
   // Sort for niceness
   model.value.sort();
-};
 
-const update = () => {
-  emit('update', customAvailabilities.value);
+  // Send availability update
+  nextTick(() => update());
 };
 </script>
 
