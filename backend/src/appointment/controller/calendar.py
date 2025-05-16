@@ -751,11 +751,10 @@ class Tools:
             date = datetime.fromordinal(ordinal)
 
             # Prepare time calculation based on the configured availability for the current weekday
-            customAvailability = next(
-                (x for x in availabilities if date.isoweekday() == x.day_of_week.value),
-                None
+            customAvailability = next((x for x in availabilities if date.isoweekday() == x.day_of_week.value), None)
+            start_local = (
+                customAvailability.start_time_local if custom_times and customAvailability else start_time_local
             )
-            start_local = customAvailability.start_time_local if custom_times and customAvailability else start_time_local
             end_local = customAvailability.end_time_local if custom_times and customAvailability else end_time_local
 
             start_time = datetime.combine(now.min, start_local) - datetime.min
