@@ -11,7 +11,7 @@
 # Set 'projectName' to the name of your project. Example, Marketing Website
 projectName: Thunderbird Appointment
 # Set `buildName` as the name of the job / testsuite being run
-buildName: Build
+buildName: Appointment E2E Tests (Mobile)
 # `buildIdentifier` is a unique id to differentiate every execution that gets appended to
 # buildName. Choose your buildIdentifier format from the available expressions:
 # ${BUILD_NUMBER} (Default): Generates an incremental counter with every execution
@@ -25,18 +25,13 @@ buildIdentifier: '${DATE_TIME}'
 # Platforms object contains all the browser / device combinations you want to test on.
 # Entire list available here -> (https://www.browserstack.com/list-of-browsers-and-platforms/automate)
 platforms:
-  - os: OS X
-    osVersion: Sequoia
-    browserName: playwright-firefox
+  - deviceName: Google Pixel 5
+    osVersion: 12.0
+    browserName: playwright-chrome
     browserVersion: latest
+    deviceOrientation: portrait
     playwrightConfigOptions:
-      name: Firefox-OSX
-  - os: OS X
-    osVersion: Sequoia
-    browserName: playwright-chromium
-    browserVersion: latest
-    playwrightConfigOptions:
-      name: Chromium-OSX
+      name: Google-Pixel-5-Chrome
 
 # =======================
 # Parallels per Platform

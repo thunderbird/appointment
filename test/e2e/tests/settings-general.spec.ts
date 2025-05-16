@@ -6,12 +6,14 @@ import { DashboardPage } from '../pages/dashboard-page';
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
+  PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE,
   APPT_LANGUAGE_SETTING_DE,
   APPT_LANGUAGE_SETTING_EN,
   APPT_THEME_SETTING_DARK,
   APPT_THEME_SETTING_LIGHT,
   APPT_TIMEZONE_SETTING_TORONTO,
   APPT_TIMEZONE_SETTING_HALIFAX,
+  TIMEOUT_1_SECOND,
   TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
@@ -21,13 +23,14 @@ import {
   APPT_BROWSER_STORE_THEME_DARK,
   APPT_BROWSER_STORE_12HR_TIME,
   APPT_BROWSER_STORE_24HR_TIME,
+  APPT_DASHBOARD_DAY_PAGE,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
 test.describe('settings navigation', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY, PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
@@ -69,7 +72,7 @@ test.describe('settings navigation', {
 });
 
 test.describe('general settings', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY, PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE],
 }, () => {
   test.beforeEach(async ({ page }) => {
     // navigate to and sign into appointment
@@ -128,24 +131,30 @@ test.describe('general settings', {
   });
 
   test('able to change time format', async ({ page }) => {
-    // change time format setting to 24-hour format and verify on dashboard calendar
+    // change time format setting to 24-hour format and verify
     await settingsPage.set24hrFormat();
-    await dashboardPage.gotoToDashboardMonthView();
-    await expect.soft(dashboardPage.calendarEvent24hrFormat).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    await settingsPage.gotoGeneralSettingsPage();
 
     // verify setting saved in browser local storage
+    await settingsPage.gotoGeneralSettingsPage();
     let localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['timeFormat']).toBe(APPT_BROWSER_STORE_24HR_TIME);
 
+    // to verify go to the day view (any day is fine) and you'll see the availabiliy text
+    // in 24 hour format i.e. 09:00 - 17:00; this works on both desktop and mobile browsers
+    await dashboardPage.gotoToDashboardDayView();
+    await expect(dashboardPage.dayView24HrAvailabilityText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+
     // change time format setting back to 12-hour format and verify on dashboard calendar
+    await settingsPage.gotoGeneralSettingsPage();
     await settingsPage.set12hrFormat();
-    await dashboardPage.gotoToDashboardMonthView();
-    await expect(dashboardPage.calendarEvent24hrFormat).not.toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
     // verify setting saved in browser local storage
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['timeFormat']).toBe(APPT_BROWSER_STORE_12HR_TIME); 
+
+    // verify day view page shows availability in 12 hour format again
+    await dashboardPage.gotoToDashboardDayView();
+    await expect(dashboardPage.dayView12HrAvailabilityText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   });
 
   test('able to change timezone', async ({ page }) => {
@@ -160,6 +169,8 @@ test.describe('general settings', {
 
     // verify new time zone shows on dashboard
     await dashboardPage.gotoToDashboardMonthView();
+    await dashboardPage.timezoneLabel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect.soft(dashboardPage.timezoneDisplayTextHalifax).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
     // change time format setting back
@@ -174,6 +185,8 @@ test.describe('general settings', {
 
     // verify timezone changed on dashboard
     await dashboardPage.gotoToDashboardMonthView();
+    await dashboardPage.timezoneLabel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(dashboardPage.timezoneDisplayTextToronto).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   });
 });
