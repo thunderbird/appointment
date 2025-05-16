@@ -30,7 +30,7 @@
     </div>
     <div class="flex-center mb-0 mt-8 text-center text-gray-300">
       <p class="md:w-1/2">
-        <i18n-t keypath="text.homepage.copywrite">
+        <i18n-t keypath="text.homepage.copywrite" scope="global">
           <template v-slot:mzlaLink>
             <a class="underline underline-offset-2"
                href="https://blog.thunderbird.net/2020/01/thunderbirds-new-home/"

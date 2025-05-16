@@ -56,17 +56,6 @@ class CalendarProvider(enum.Enum):
     google = 2  # calendar provider is Google via its own Rest API
 
 
-# Use ISO 8601 format to specify day of week
-class DayOfWeek(enum.Enum):
-    Monday = 1
-    Tuesday = 2
-    Wednesday = 3
-    Thursday = 4
-    Friday = 5
-    Saturday = 6
-    Sunday = 7
-
-
 class ExternalConnectionType(enum.Enum):
     zoom = 1
     google = 2
@@ -97,7 +86,8 @@ class TimeMode(enum.Enum):
     h24 = 24
 
 
-class IsoWeekdays(enum.Enum):
+# Use ISO 8601 format to specify day of week
+class IsoWeekday(enum.Enum):
     monday = 1
     tuesday = 2
     wednesday = 3
@@ -172,7 +162,7 @@ class Subscriber(HasSoftDelete, Base):
     timezone = Column(encrypted_type(String), index=True)
     colour_scheme = Column(Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True)
     time_mode = Column(Enum(TimeMode), default=TimeMode.h12, nullable=False, index=True)
-    start_of_week = Column(Enum(IsoWeekdays), default=IsoWeekdays.sunday, nullable=False, index=True)
+    start_of_week = Column(Enum(IsoWeekday), default=IsoWeekday.sunday, nullable=False, index=True)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
     minimum_valid_iat_time = Column('minimum_valid_iat_time', encrypted_type(DateTime))
@@ -369,6 +359,7 @@ class Schedule(Base):
     slot_duration: int = Column(Integer, default=30)  # defaults to 30 minutes
     booking_confirmation: bool = Column(Boolean, index=True, nullable=False, default=True)
     timezone: str = Column(encrypted_type(String), index=True, nullable=True)
+    use_custom_availabilities: bool = Column(Boolean, index=True, nullable=False, default=False)
 
     # What (if any) meeting link will we generate once the meeting is booked
     meeting_link_provider: MeetingLinkProviderType = Column(
@@ -421,14 +412,30 @@ class Availability(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     schedule_id = Column(Integer, ForeignKey('schedules.id'))
-    day_of_week = Column(encrypted_type(String), index=True)
-    start_time = Column(encrypted_type(String), index=True)
-    end_time = Column(encrypted_type(String), index=True)
+    day_of_week = Column(Enum(IsoWeekday), nullable=False, index=True)
+    start_time: datetime.time = Column(encrypted_type(Time), index=True)
+    end_time: datetime.time = Column(encrypted_type(Time), index=True)
     # Can't book if it's less than X minutes before start time:
     min_time_before_meeting = Column(encrypted_type(String), index=True)
     slot_duration = Column(Integer)  # Size of the Slot that can be booked.
 
     schedule: Mapped[Schedule] = relationship('Schedule', back_populates='availabilities')
+
+    @property
+    def start_time_local(self) -> datetime.time:
+        """Start Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(
+            hour=self.start_time.hour, minute=self.start_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.schedule.calendar.owner.timezone)).time()
+
+    @property
+    def end_time_local(self) -> datetime.time:
+        """End Time in the Schedule's Calendar's Owner's timezone"""
+        time_of_save = self.time_updated.replace(
+            hour=self.end_time.hour, minute=self.end_time.minute, second=0, tzinfo=datetime.timezone.utc
+        )
+        return time_of_save.astimezone(zoneinfo.ZoneInfo(self.schedule.calendar.owner.timezone)).time()
 
     def __str__(self):
         return f'Availability: {self.id}'

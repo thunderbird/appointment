@@ -123,7 +123,6 @@ const toggleDetails = () => {
   .title {
     font-weight: 700;
     line-height: 1.5;
-    white-space: pre;
   }
 }
 

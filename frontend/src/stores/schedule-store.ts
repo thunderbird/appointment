@@ -39,6 +39,8 @@ export const useScheduleStore = defineStore('schedules', () => {
     slot_duration: DEFAULT_SLOT_DURATION,
     meeting_link_provider: MeetingLinkProviderType.None,
     booking_confirmation: true,
+    availabilities: [],
+    use_custom_availabilities: false,
     calendar: {
       id: 0,
       title: '',

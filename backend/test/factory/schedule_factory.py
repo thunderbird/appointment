@@ -27,6 +27,7 @@ def make_schedule(with_db, make_caldav_calendar):
         slug=FAKER_RANDOM_VALUE,
         booking_confirmation=True,
         timezone='UTC',
+        use_custom_availabilities=False,
         time_updated=None,
     ):
         with with_db() as db:
@@ -51,6 +52,7 @@ def make_schedule(with_db, make_caldav_calendar):
                     meeting_link_provider=meeting_link_provider,
                     slug=slug if factory_has_value(slug) else fake.uuid4(),
                     booking_confirmation=booking_confirmation,
+                    use_custom_availabilities=use_custom_availabilities,
                     calendar_id=calendar_id
                     if factory_has_value(calendar_id)
                     else make_caldav_calendar(connected=True).id,

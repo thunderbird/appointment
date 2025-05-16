@@ -20,7 +20,6 @@ from .models import (
     AppointmentStatus,
     BookingStatus,
     CalendarProvider,
-    DayOfWeek,
     LocationType,
     random_slug,
     SubscriberLevel,
@@ -29,7 +28,7 @@ from .models import (
     InviteStatus,
     ColourScheme,
     TimeMode,
-    IsoWeekdays
+    IsoWeekday
 )
 from .. import utils, defines
 
@@ -143,11 +142,13 @@ class AppointmentOut(AppointmentBase):
 
 
 class AvailabilityBase(BaseModel):
+    model_config = ConfigDict(json_encoders={time: lambda t: t.strftime('%H:%M')})
+
     schedule_id: int
-    day_of_week: DayOfWeek
-    start_time: datetime | None = None
-    end_time: datetime | None = None
-    min_time_before_meeting: int
+    day_of_week: IsoWeekday
+    start_time: time | None = None
+    end_time: time | None = None
+    min_time_before_meeting: int | None = None
     slot_duration: int | None = None
 
 
@@ -157,6 +158,12 @@ class Availability(AvailabilityBase):
     id: int
     time_created: datetime | None = None
     time_updated: datetime | None = None
+
+
+class AvailabilityValidationIn(AvailabilityBase):
+    # Require these fields
+    start_time: time
+    end_time: time
 
 
 class ScheduleBase(BaseModel):
@@ -180,6 +187,7 @@ class ScheduleBase(BaseModel):
     meeting_link_provider: MeetingLinkProviderType | None = MeetingLinkProviderType.none
     booking_confirmation: bool = True
     timezone: Optional[str] = None
+    use_custom_availabilities: bool = False
 
 
 class Schedule(ScheduleBase):
@@ -198,6 +206,7 @@ class ScheduleValidationIn(ScheduleBase):
     # Regex to exclude any character can be mess with a url
     slug: Annotated[Optional[str], Field(max_length=16, pattern=r'^[^\;\/\?\:\@\&\=\+\$\,\#]*$')] = None
     slot_duration: Annotated[int, Field(ge=10, default=30)]
+    availabilities: list[AvailabilityValidationIn] = []
     # Require these fields
     start_date: date
     start_time: time
@@ -312,7 +321,7 @@ class SubscriberIn(BaseModel):
     language: str | None = FALLBACK_LOCALE
     colour_scheme: ColourScheme = ColourScheme.system
     time_mode: TimeMode = TimeMode.h12
-    start_of_week: IsoWeekdays = IsoWeekdays.sunday
+    start_of_week: IsoWeekday = IsoWeekday.sunday
 
 
 class SubscriberBase(SubscriberIn):
