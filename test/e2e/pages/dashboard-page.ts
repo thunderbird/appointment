@@ -4,7 +4,6 @@ import {
   APPT_PENDING_BOOKINGS_PAGE,
   APPT_BOOKED_BOOKINGS_PAGE,
   APPT_DASHBOARD_MONTH_PAGE,
-  APPT_DASHBOARD_DAY_PAGE,
   APPT_TIMEZONE_SETTING_TORONTO,
   APPT_TIMEZONE_SETTING_HALIFAX,
   TIMEOUT_60_SECONDS
@@ -106,13 +105,6 @@ export class DashboardPage {
    */
   async gotoToDashboardMonthView() {
     await this.page.goto(APPT_DASHBOARD_MONTH_PAGE);
-  }
-
-  /**
-   * Navigate to the dashboard day view
-   */
-  async gotoToDashboardDayView() {
-    await this.page.goto(APPT_DASHBOARD_DAY_PAGE);
   }
 
   /**
