@@ -14,7 +14,6 @@ export const APPT_CALENDAR_SETTINGS_PAGE = String(`${process.env.APPT_URL}settin
 export const APPT_ACCOUNT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/account`);
 export const APPT_CONNECTED_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/connectedAccounts`);
 export const APPT_DASHBOARD_MONTH_PAGE = String(`${process.env.APPT_URL}dashboard#month`);
-export const APPT_DASHBOARD_DAY_PAGE = String(`${process.env.APPT_URL}dashboard#day`);
 
 // page titles
 export const APPT_PAGE_TITLE = 'Thunderbird Appointment';

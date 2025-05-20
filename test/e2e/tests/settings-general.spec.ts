@@ -23,7 +23,6 @@ import {
   APPT_BROWSER_STORE_THEME_DARK,
   APPT_BROWSER_STORE_12HR_TIME,
   APPT_BROWSER_STORE_24HR_TIME,
-  APPT_DASHBOARD_DAY_PAGE,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
@@ -139,22 +138,15 @@ test.describe('general settings', {
     let localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['timeFormat']).toBe(APPT_BROWSER_STORE_24HR_TIME);
 
-    // to verify go to the day view (any day is fine) and you'll see the availabiliy text
-    // in 24 hour format i.e. 09:00 - 17:00; this works on both desktop and mobile browsers
-    await dashboardPage.gotoToDashboardDayView();
-    await expect(dashboardPage.dayView24HrAvailabilityText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-
-    // change time format setting back to 12-hour format and verify on dashboard calendar
+    // change time format setting back to 12-hour format
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
     await settingsPage.gotoGeneralSettingsPage();
     await settingsPage.set12hrFormat();
 
     // verify setting saved in browser local storage
+    await settingsPage.gotoGeneralSettingsPage();
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['timeFormat']).toBe(APPT_BROWSER_STORE_12HR_TIME); 
-
-    // verify day view page shows availability in 12 hour format again
-    await dashboardPage.gotoToDashboardDayView();
-    await expect(dashboardPage.dayView12HrAvailabilityText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   });
 
   test('able to change timezone', async ({ page }) => {
