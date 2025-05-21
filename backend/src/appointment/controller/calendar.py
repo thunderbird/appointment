@@ -8,6 +8,7 @@ import logging
 import time
 import zoneinfo
 import os
+from functools import cache
 from urllib.parse import urlparse, urljoin
 
 import caldav.lib.error
@@ -361,7 +362,6 @@ class CalDavConnector(BaseConnector):
         perf_end = time.perf_counter_ns()
         print(f"CALDAV FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds")
 
-
         items = []
 
         # This is sort of dumb, freebusy object isn't exposed in the icalendar instance except through a list of tuple
@@ -379,18 +379,21 @@ class CalDavConnector(BaseConnector):
 
         return items
 
+    @staticmethod
+    @cache
+    def _is_supported(calendar):
+        """Is this calendar supported? Checks for VEVENT support, if an empty list is provided by the server that means"""
+        supported_comps = calendar.get_supported_components()
+        return len(supported_comps) == 0 or 'VEVENT' in supported_comps or None in supported_comps
+
     def test_connection(self) -> bool:
         """Ensure the connection information is correct and the calendar connection works"""
-
         supports_vevent = False
-
         try:
             cals = self.client.principal()
             for cal in cals.calendars():
-                supported_comps = cal.get_supported_components()
-                supports_vevent = 'VEVENT' in supported_comps
-                # If one supports it, then that's good enough!
-                if supports_vevent:
+                if self._is_supported(cal):
+                    supports_vevent = True
                     break
         except IndexError as ex:
             # Library has an issue with top level urls, probably due to caldav spec?
@@ -407,7 +410,7 @@ class CalDavConnector(BaseConnector):
         except (
             caldav.lib.error.NotFoundError,
             caldav.lib.error.PropfindError,
-            caldav.lib.error.AuthorizationError
+            caldav.lib.error.AuthorizationError,
         ) as ex:
             """
             NotFoundError: Good server, bad url.
@@ -435,9 +438,7 @@ class CalDavConnector(BaseConnector):
         principal = self.client.principal()
         for cal in principal.calendars():
             # Does this calendar support vevents?
-            supported_comps = cal.get_supported_components()
-
-            if 'VEVENT' not in supported_comps:
+            if not self._is_supported(cal):
                 continue
 
             calendar = schemas.CalendarConnection(
