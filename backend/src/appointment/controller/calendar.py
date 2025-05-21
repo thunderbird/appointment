@@ -37,10 +37,12 @@ from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email
 
+
 class RemoteEventState(Enum):
     CANCELLED = 'CANCELLED'
     TENTATIVE = 'TENTATIVE'
     CONFIRMED = 'CONFIRMED'
+
 
 class BaseConnector:
     redis_instance: Redis | RedisCluster | None
@@ -82,10 +84,7 @@ class BaseConnector:
         return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
 
     def put_cached_events(
-        self,
-        key_scope,
-        events: list[schemas.Event],
-        expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)
+        self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)
     ):
         """Sets the passed cached events with an option to set a custom expiry time."""
         if self.redis_instance is None:
@@ -296,9 +295,7 @@ class GoogleConnector(BaseConnector):
         }
 
         new_event = self.google_client.save_event(
-            calendar_id=self.remote_calendar_id,
-            body=body,
-            token=self.google_token
+            calendar_id=self.remote_calendar_id, body=body, token=self.google_token
         )
 
         # Fill in the external_id so we can delete events later!
@@ -309,8 +306,7 @@ class GoogleConnector(BaseConnector):
         return event
 
     def delete_event(self, uid: str):
-        """Delete remote event of given external_id
-        """
+        """Delete remote event of given external_id"""
         self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
         self.bust_cached_events()
 
@@ -323,14 +319,7 @@ class GoogleConnector(BaseConnector):
 
 class CalDavConnector(BaseConnector):
     def __init__(
-        self,
-        db: Session,
-        subscriber_id: int,
-        calendar_id: int,
-        redis_instance,
-        url: str,
-        user: str,
-        password: str
+        self, db: Session, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str
     ):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
@@ -360,7 +349,7 @@ class CalDavConnector(BaseConnector):
         response = calendar.freebusy_request(time_min, time_max)
 
         perf_end = time.perf_counter_ns()
-        print(f"CALDAV FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds")
+        print(f'CALDAV FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds')
 
         items = []
 
@@ -372,17 +361,17 @@ class CalDavConnector(BaseConnector):
 
             # Tuple of start datetime and end datetime (or timedelta!)
             period = prop[1].dt
-            items.append({
-                'start': period[0],
-                'end': period[1] if isinstance(period[1], datetime) else period[0] + period[1]
-            })
+            items.append(
+                {'start': period[0], 'end': period[1] if isinstance(period[1], datetime) else period[0] + period[1]}
+            )
 
         return items
 
     @staticmethod
     @cache
     def _is_supported(calendar):
-        """Is this calendar supported? Checks for VEVENT support, if an empty list is provided by the server that means"""
+        """Is this calendar supported? Checks for VEVENT support,
+        if an empty list is provided by the server that means"""
         supported_comps = calendar.get_supported_components()
         return len(supported_comps) == 0 or 'VEVENT' in supported_comps or None in supported_comps
 
@@ -447,7 +436,7 @@ class CalDavConnector(BaseConnector):
                 user=self.user,
                 password=self.password,
                 provider=CalendarProvider.caldav,
-                color=DEFAULT_CALENDAR_COLOUR  # Pick a default colour for now!
+                color=DEFAULT_CALENDAR_COLOUR,  # Pick a default colour for now!
             )
 
             # add calendar
@@ -456,9 +445,7 @@ class CalDavConnector(BaseConnector):
                     db=self.db, calendar=calendar, calendar_url=calendar.url, subscriber_id=self.subscriber_id
                 )
             except Exception as err:
-                logging.warning(
-                    f'[calendar.sync_calendars] Error occurred while creating calendar. Error: {str(err)}'
-                )
+                logging.warning(f'[calendar.sync_calendars] Error occurred while creating calendar. Error: {str(err)}')
                 error_occurred = True
 
         if not error_occurred:
@@ -564,8 +551,7 @@ class CalDavConnector(BaseConnector):
         return event
 
     def delete_event(self, uid: str):
-        """Delete remote event of given uid
-        """
+        """Delete remote event of given uid"""
         event = self.client.calendar(url=self.url).event_by_uid(uid)
         event.delete()
         self.bust_cached_events()
@@ -593,7 +579,7 @@ class Tools:
         appointment: schemas.Appointment,
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
-        event_status = RemoteEventState.CONFIRMED.value,
+        event_status=RemoteEventState.CONFIRMED.value,
     ):
         """create an event in ical format for .ics file creation"""
         cal = Calendar()
@@ -625,7 +611,6 @@ class Tools:
         cal.add_component(event)
         return cal.to_ical()
 
-
     def send_invitation_vevent(
         self,
         background_tasks: BackgroundTasks,
@@ -651,7 +636,7 @@ class Tools:
             date=date,
             duration=slot.duration,
             to=attendee.email,
-            attachment=ics_file
+            attachment=ics_file,
         )
 
     def send_hold_vevent(
@@ -672,13 +657,7 @@ class Tools:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
         # Send mail
-        background_tasks.add_task(
-            send_pending_email,
-            organizer.name,
-            date=date,
-            to=attendee.email,
-            attachment=ics_file
-        )
+        background_tasks.add_task(send_pending_email, organizer.name, date=date, to=attendee.email, attachment=ics_file)
 
     def send_cancel_vevent(
         self,
@@ -699,13 +678,8 @@ class Tools:
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
         # Send mail
         background_tasks.add_task(
-            send_rejection_email,
-            organizer.name,
-            date=date,
-            to=attendee.email,
-            attachment=ics_file
+            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file
         )
-
 
     @staticmethod
     def available_slots_from_schedule(schedule: models.Schedule) -> list[schemas.SlotBase]:
@@ -882,19 +856,19 @@ class Tools:
                 )
 
                 try:
-                    existing_events.extend([
-                        schemas.Event(
-                            start=busy.get('start'),
-                            end=busy.get('end'),
-                            title='Busy'
-                        ) for busy in
-                        con.get_busy_time([calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT))
-                    ])
+                    existing_events.extend(
+                        [
+                            schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
+                            for busy in con.get_busy_time(
+                                [calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT)
+                            )
+                        ]
+                    )
 
                     # We're good here, continue along the loop
                     continue
                 except caldav.lib.error.ReportError:
-                    logging.debug("[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.")
+                    logging.debug('[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.')
                     pass
 
                 # Okay maybe this server doesn't support freebusy, try the old way
@@ -921,17 +895,14 @@ class Tools:
                 subscriber_id=subscriber.id,
                 google_tkn=external_connection.token,
             )
-            existing_events.extend([
-                schemas.Event(
-                    start=busy.get('start'),
-                    end=busy.get('end'),
-                    title='Busy'
-                ) for busy in con.get_busy_time(
-                    [calendar.user for calendar in google_calendars],
-                    start.strftime(DATEFMT),
-                    end.strftime(DATEFMT)
-                )
-            ])
+            existing_events.extend(
+                [
+                    schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
+                    for busy in con.get_busy_time(
+                        [calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT)
+                    )
+                ]
+            )
 
         # handle already requested time slots
         for slot in schedule.slots:
@@ -983,7 +954,7 @@ class Tools:
             caldav_host = str(records[0].target)[:-1]
 
             # Service not provided
-            if caldav_host == ".":
+            if caldav_host == '.':
                 return None, None
 
         if '://' in caldav_host:
@@ -996,7 +967,7 @@ class Tools:
         return caldav_host, ttl
 
     @staticmethod
-    def well_known_caldav_lookup(url: str) -> str|None:
+    def well_known_caldav_lookup(url: str) -> str | None:
         parsed_url = urlparse(url)
 
         # Do they have a well-known?
@@ -1016,8 +987,8 @@ class Tools:
     @staticmethod
     def default_event_title(slot: schemas.Slot, owner: schemas.Subscriber, prefix='') -> str:
         """Builds a default event title for scheduled bookings
-           The prefix can be used e.g. for "HOLD: " events
+        The prefix can be used e.g. for "HOLD: " events
         """
         attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
         owner_name = owner.name if owner.name is not None else owner.email
-        return l10n('event-title-template', { 'prefix': prefix, 'name1': owner_name, 'name2': attendee_name })
+        return l10n('event-title-template', {'prefix': prefix, 'name1': owner_name, 'name2': attendee_name})

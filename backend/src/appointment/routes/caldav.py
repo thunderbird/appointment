@@ -27,7 +27,7 @@ def caldav_autodiscover_auth(
     connection: schemas.CalendarConnectionIn,
     db: Session = Depends(get_db),
     subscriber: models.Subscriber = Depends(get_subscriber),
-    redis_client: Redis = Depends(get_redis)
+    redis_client: Redis = Depends(get_redis),
 ):
     """Connects a principal caldav server"""
 
@@ -50,10 +50,7 @@ def caldav_autodiscover_auth(
         lookup_url = redis_client.get(dns_lookup_cache_key)
 
     if lookup_url and 'http' not in lookup_url:
-        debug_obj = {
-            'url': lookup_url,
-            'branch': 'CACHE'
-        }
+        debug_obj = {'url': lookup_url, 'branch': 'CACHE'}
         # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
         try:
             sentry_sdk.set_extra('debug_object', debug_obj)
@@ -140,10 +137,7 @@ def disconnect_account(
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     ec = utils.list_first(
         repo.external_connection.get_by_type(
-            db,
-            subscriber_id=subscriber.id,
-            type=models.ExternalConnectionType.caldav,
-            type_id=type_id
+            db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id
         )
     )
 
@@ -155,10 +149,7 @@ def disconnect_account(
 
     # Remove all the caldav calendars associated with this user
     repo.calendar.delete_by_subscriber_and_provider(
-        db,
-        subscriber.id,
-        provider=models.CalendarProvider.caldav,
-        user=user
+        db, subscriber.id, provider=models.CalendarProvider.caldav, user=user
     )
 
     # Remove their account details
