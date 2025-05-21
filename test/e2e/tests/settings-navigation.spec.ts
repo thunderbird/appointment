@@ -5,7 +5,6 @@ import { DashboardPage } from '../pages/dashboard-page';
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE,
   TIMEOUT_30_SECONDS,
  } from '../const/constants';
 

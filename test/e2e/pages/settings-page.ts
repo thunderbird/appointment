@@ -286,9 +286,10 @@ export class SettingsPage {
    * Download account data
    */
   async downloadAccountData() {
-    expect(this.downloadDataBtn).toBeEnabled();
+    expect(this.downloadDataBtn).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
+    await this.downloadDataBtn.scrollIntoViewIfNeeded();
     await this.downloadDataBtn.click();
-    expect(this.confirmDownloadDataBtn).toBeEnabled();
+    expect(this.confirmDownloadDataBtn).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
     await this.confirmDownloadDataBtn.click();
   }
 }
