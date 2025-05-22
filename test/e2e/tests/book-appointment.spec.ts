@@ -69,6 +69,7 @@ test.beforeEach(async ({ page }) => {
 // appointment account settings could be a different timezone (if so the test will fail to find the booked
 // appointment since the time slot value will not match); set the browser context to always be in
 // `America/Toronto` so the share link will be in the same timezone as the main account settings
+// This only works on desktop browsers unfortunately.
 test.use({
   timezoneId: APPT_TIMEZONE_SETTING_TORONTO,
 });
@@ -92,7 +93,7 @@ test.describe('book an appointment', () => {
   });
 
   test('able to request a booking', {
-    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY, PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE],
   }, async ({ page }) => {
     // in order to ensure we find an available slot we can click on, first switch to week view URL
     await bookingPage.gotoBookingPageWeekView();

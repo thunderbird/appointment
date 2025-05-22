@@ -19,19 +19,26 @@ buildName: Appointment E2E Tests (Mobile)
 # Read more about buildIdentifiers here -> https://www.browserstack.com/docs/automate/selenium/organize-tests
 buildIdentifier: '${DATE_TIME}'
 
+# set device timezone to America/Toronto (tests expect this)
+timezone: Toronto
+locale: CA
+language: EN
+
 # =======================================
 # Platforms (Browsers / Devices to test)
 # =======================================
 # Platforms object contains all the browser / device combinations you want to test on.
 # Entire list available here -> (https://www.browserstack.com/list-of-browsers-and-platforms/automate)
 platforms:
-  - deviceName: Google Pixel 5
-    osVersion: 12.0
-    browserName: playwright-chrome
+  - deviceName: Google Pixel 9
+    osVersion: 15.0
+    browserName: playwright-chromium
     browserVersion: latest
     deviceOrientation: portrait
     playwrightConfigOptions:
-      name: Google-Pixel-5-Chrome
+      name: Google-Pixel-9-Chrome
+
+# todo: add more devices and Firefox, Safari
 
 # =======================
 # Parallels per Platform
@@ -71,3 +78,4 @@ browserstack.maskCommands: sendType, sendPress, setHTTPCredentials, setStorageSt
 # Test Observability is an intelligent test reporting & debugging product. It collects data using the SDK. Read more about what data is collected at https://www.browserstack.com/docs/test-observability/references/terms-and-conditions
 # Visit observability.browserstack.com to see your test reports and insights. To disable test observability, specify `testObservability: false` in the key below.
 testObservability: false
+browserstack.playwrightVersion: 1.49.0
