@@ -1,4 +1,5 @@
 import json
+import urllib
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -26,7 +27,7 @@ def caldav_autodiscover_auth(
     connection: schemas.CalendarConnectionIn,
     db: Session = Depends(get_db),
     subscriber: models.Subscriber = Depends(get_subscriber),
-    redis_client: Redis = Depends(get_redis)
+    redis_client: Redis = Depends(get_redis),
 ):
     """Connects a principal caldav server"""
 
@@ -44,16 +45,12 @@ def caldav_autodiscover_auth(
     if any([(g in basename) for g in GOOGLE_CALDAV_DOMAINS]):
         raise GoogleCaldavNotSupported()
 
-    lookup_branch = None
     lookup_url = None
     if redis_client:
         lookup_url = redis_client.get(dns_lookup_cache_key)
 
     if lookup_url and 'http' not in lookup_url:
-        debug_obj = {
-            'url': lookup_url,
-            'branch': 'CACHE'
-        }
+        debug_obj = {'url': lookup_url, 'branch': 'CACHE'}
         # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
         try:
             sentry_sdk.set_extra('debug_object', debug_obj)
@@ -69,37 +66,24 @@ def caldav_autodiscover_auth(
 
     # Do a dns lookup first
     if lookup_url is None:
-        lookup_branch = 'DNS'
         parsed_url = urlparse(connection.url)
         lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname, secure=secure_protocol)
         # set the cached lookup for the remainder of the dns ttl
         if redis_client and lookup_url:
             redis_client.set(dns_lookup_cache_key, utils.encrypt(lookup_url), ex=ttl)
     else:
-        lookup_branch = 'CACHED'
         # Extract the cached value
         lookup_url = utils.decrypt(lookup_url)
 
     # Check for well-known
     if lookup_url is None:
-        lookup_branch = 'WELL-KNOWN'
         lookup_url = Tools.well_known_caldav_lookup(connection.url)
 
     # If we have a lookup_url then apply it
-    if lookup_url:
+    if lookup_url and 'http' not in lookup_url:
+        connection.url = urllib.parse.urljoin(connection.url, lookup_url)
+    elif lookup_url:
         connection.url = lookup_url
-
-    if not lookup_url or 'http' not in connection.url:
-        debug_obj = {
-            'url': lookup_url,
-            'branch': lookup_branch
-        }
-        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
-        try:
-            sentry_sdk.set_extra('debug_object', debug_obj)
-            raise UnexpectedBehaviourWarning(message='Invalid caldav url', info=debug_obj)
-        except UnexpectedBehaviourWarning as ex:
-            sentry_sdk.capture_exception(ex)
 
     con = CalDavConnector(
         db=db,
@@ -153,10 +137,7 @@ def disconnect_account(
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     ec = utils.list_first(
         repo.external_connection.get_by_type(
-            db,
-            subscriber_id=subscriber.id,
-            type=models.ExternalConnectionType.caldav,
-            type_id=type_id
+            db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id
         )
     )
 
@@ -168,10 +149,7 @@ def disconnect_account(
 
     # Remove all the caldav calendars associated with this user
     repo.calendar.delete_by_subscriber_and_provider(
-        db,
-        subscriber.id,
-        provider=models.CalendarProvider.caldav,
-        user=user
+        db, subscriber.id, provider=models.CalendarProvider.caldav, user=user
     )
 
     # Remove their account details
