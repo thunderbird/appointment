@@ -151,7 +151,7 @@ const editProfile = async () => {
       </div>
       <div class="mt-4 flex items-center pl-4">
         <div class="w-full max-w-md">
-          <p v-if="connection[0]">{{ t('label.connectedAs', {name: connection[0].name}) }}</p>
+          <p v-if="connection[0]">{{ t('label.connectedAs', { name: connection[0].name }) }}</p>
           <p v-if="!connection[0]">{{ t('label.notConnected') }}</p>
         </div>
         <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
@@ -196,7 +196,7 @@ const editProfile = async () => {
     :use-caution-button="true"
     @confirm="() => disconnectAccount(ExternalConnectionProviders.Google)"
     @close="closeModals"
-  ></confirmation-modal>
+  />
   <!-- Disconnect CalDav Modal -->
   <confirmation-modal
     :open="disconnectCalDavModalOpen"
@@ -207,7 +207,7 @@ const editProfile = async () => {
     :use-caution-button="true"
     @confirm="() => disconnectAccount(ExternalConnectionProviders.Caldav, disconnectTypeId)"
     @close="closeModals"
-  ></confirmation-modal>
+  />
   <!-- Disconnect Zoom Modal -->
   <confirmation-modal
     :open="disconnectZoomModalOpen"
@@ -218,7 +218,7 @@ const editProfile = async () => {
     :use-caution-button="true"
     @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom)"
     @close="closeModals"
-  ></confirmation-modal>
+  />
   <!-- Bit of a hack until we figure out this ux flow -->
   <generic-modal v-if="connectCalDavModalOpen" @close="closeModals()" :error-message="calDavErrorMessage">
     <template v-slot:header>

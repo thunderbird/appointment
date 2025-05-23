@@ -48,7 +48,7 @@ const props = withDefaults(defineProps<Props>(), {
   maxLength: null,
 });
 
-defineEmits(['submit']);
+const emit = defineEmits(['submit', 'blur']);
 defineExpose({ focus });
 
 // Calculate padding left for the actual input considering prefix width and existing padding
@@ -59,6 +59,7 @@ const onInvalid = (evt: HTMLInputElementEvent) => {
   isDirty.value = true;
   validationMessage.value = evt.target.validationMessage;
 };
+
 /**
  * On any change we mark the element as dirty
  * this is so we can delay :invalid until
@@ -85,7 +86,7 @@ const onChange = () => {
         <input
           class="tbpro-input-element"
           v-model="model"
-          :class="{ 'dirty': isDirty }"
+          :class="{ 'dirty': isDirty, 'error': error !== null }"
           :type="type"
           :id="name"
           :name="name"
@@ -95,6 +96,7 @@ const onChange = () => {
           :maxLength="maxLength"
           @invalid.prevent="onInvalid"
           @change="onChange"
+          @blur="emit('blur')"
           ref="inputRef"
           :style="{ paddingLeft: inputPaddingLeft }"
         />
@@ -204,7 +206,8 @@ const onChange = () => {
         border-radius: 0.125rem;
       }
   
-      &.dirty:invalid {
+      &.dirty:invalid,
+      &.error {
         --colour-btn-border: var(--colour-ti-critical);
       }
   

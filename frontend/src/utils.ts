@@ -266,6 +266,22 @@ export const staggerRetrieve = async (requestFn: any, perPage: number, pageError
   return itemList;
 };
 
+/**
+ * Calculate number of minutes from formatted time string.
+ * @param formattedTime A string of format HH:MM
+ */
+export const hhmmToMinutes = (formattedTime: string): number => {
+  const [hours, minutes] = formattedTime.split(':');
+  return (Number(hours) * 60 + Number(minutes));
+};
+
+/**
+ * Kill all references to arrays or objects within the given entity and return a deep clone
+ */
+export const deepClone = (entity: any): any => {
+  return JSON.parse(JSON.stringify(entity));
+};
+
 export default {
   keyByValue,
   eventColor,
@@ -278,4 +294,6 @@ export default {
   getAccessibleColor,
   handleFormError,
   sleep,
+  hhmmToMinutes,
+  deepClone,
 };
