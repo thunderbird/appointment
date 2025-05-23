@@ -63,7 +63,7 @@ def retrieve_user_url_data(url):
     """URL Decodes, and retrieves username, slug/signature, and main url from /<username>/<slug/signature?>/"""
     parsed_url = parse.urlparse(url)
     split_path = [x for x in parsed_url.path.split('/') if x]
-    
+
     # Check for general validity of the path
     if split_path is None or len(split_path) == 0 or len(split_path) > 3:
         return False
@@ -79,7 +79,7 @@ def retrieve_user_url_data(url):
     if len(split_path) > 1:
         slug = split_path[1]
         # Strip any tailing slashes
-        clean_url = clean_url.replace(slug, "").rstrip('/')
+        clean_url = clean_url.replace(slug, '').rstrip('/')
         # Re-add just the last one
         clean_url = f'{clean_url}/'
         # Decode slug/signature
@@ -92,7 +92,7 @@ def retrieve_user_url_data(url):
 def chunk_list(to_chunk: list, chunk_by: int):
     """Chunk a to_chunk list by chunk_by"""
     for i in range(0, len(to_chunk), chunk_by):
-        yield to_chunk[i:i+chunk_by]
+        yield to_chunk[i : i + chunk_by]
 
 
 def normalize_secrets():
