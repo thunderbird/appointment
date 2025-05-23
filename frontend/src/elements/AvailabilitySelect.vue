@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { inject, ref, onMounted, watch, nextTick } from 'vue';
+import { inject, ref, onMounted, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Availability, AvailabilitySet, SelectOption } from '@/models';
+import { Alert, Availability, AvailabilitySet, SelectOption } from '@/models';
+import { isoWeekdaysKey, dayjsKey } from '@/keys';
+import { hhmmToMinutes } from '@/utils';
+import { DEFAULT_SLOT_DURATION } from '@/definitions';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import { isoWeekdaysKey } from '@/keys';
+import AlertBox from '@/elements/AlertBox.vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
+const dj = inject(dayjsKey);
 
 // component properties
 interface Props {
@@ -14,11 +18,13 @@ interface Props {
   availabilities: Availability[]; // Existing availability entries to prefill
   startTime: string; // Default start time for new availability
   endTime: string; // Default end time for new availability
+  slotDuration: number;
   required: boolean;
   disabled?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  slotDuration: DEFAULT_SLOT_DURATION,
   required: false,
   disabled: false,
 });
@@ -36,7 +42,10 @@ const initialAvailabilitySet = Object.fromEntries(
   isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]
 ));
 const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
-
+const validationErrors = ref<string[]>(Array.from({length: props.options.length}, () => null));
+const validationErrorsExist = computed(() => validationErrors.value.some(e => e === ''));
+const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
+const validationAlert = { title: t('error.endAfterStartTime', { value: durationHumanized.value }) } as Alert;
 /**
  * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
  * and that existing availabilities are prefilled for the corresponding day.
@@ -60,11 +69,36 @@ watch(
 );
 
 /**
+ * Returns true, if validation was successful.
+ */
+const validateInput = () => {
+  const input = Object.values(availabilitySet.value).flat();
+  let success = true;
+  input.forEach((a, i) => {
+    if (model.value.includes(a.day_of_week)) {
+      const diff = hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time);
+      if (diff < props.slotDuration) {
+        // We just use an empty string here to indicate an error on the input field
+        // without adding an error message beneath it.
+        validationErrors.value[i] = '';
+        success = false;
+      } else {
+        validationErrors.value[i] = null;
+      }
+    }
+  });
+  return success;
+};
+
+/**
  * Send a list of valid availabilities from our input AvailabilitySet
+ * Update is only emitted if input data is successfully validated
  */
 const update = () => {
-  const list = Object.values(availabilitySet.value).flat().filter((a) => model.value.includes(a.day_of_week));
-  emit('update', list);
+  if (validateInput()) {
+    const list = Object.values(availabilitySet.value).flat().filter((a) => model.value.includes(a.day_of_week));
+    emit('update', list);
+  }
 };
 
 /**
@@ -104,14 +138,9 @@ const toggleBubble = (option: SelectOption) => {
 
 <template>
   <div class="wrapper">
-    <label>
-      <span class="label">
-        <slot/>
-        <span v-if="required && model?.length === 0" class="required">*</span>
-      </span>
-    </label>
+    <alert-box v-if="validationErrorsExist" :alert="validationAlert" :can-close="false" />
     <div class="bubble-list">
-      <template v-for="option in options" :key="option.value">
+      <template v-for="(option, i) in options" :key="option.value">
         <button
           class="tbpro-bubble"
           :aria-pressed="isSelectedOption(option)"
@@ -130,6 +159,7 @@ const toggleBubble = (option: SelectOption) => {
             type="time"
             :name="`start_time_${option.value}`"
             v-model="availabilitySet[option.value][0].start_time"
+            :error="validationErrors[i]"
             :disabled="disabled"
             @blur="update"
           />
@@ -138,6 +168,7 @@ const toggleBubble = (option: SelectOption) => {
             type="time"
             :name="`end_time_${option.value}`"
             v-model="availabilitySet[option.value][0].end_time"
+            :error="validationErrors[i]"
             :disabled="disabled"
             @blur="update"
           />
@@ -157,6 +188,10 @@ const toggleBubble = (option: SelectOption) => {
   font-size: var(--txt-input);
   line-height: var(--line-height-input);
   font-weight: 400;
+}
+
+.alert {
+  margin-bottom: .5rem;
 }
 
 .bubble-list {

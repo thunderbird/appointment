@@ -20,6 +20,7 @@
     "calendarConnectError": "Es gab ein Problem mit der Kalender-Verbindung.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
+    "endAfterStartTime": "Das Ende muss mindestens {value} nach dem Start sein.",
     "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",
     "fieldIsRequired": "{field} darf nicht leer sein.",
     "generalBookingError": "Beim Abrufen des Zeitplans ist ein Problem aufgetreten. Bitte später nochmal versuchen.",

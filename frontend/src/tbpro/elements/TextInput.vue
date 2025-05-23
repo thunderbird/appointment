@@ -86,7 +86,7 @@ const onChange = () => {
         <input
           class="tbpro-input-element"
           v-model="model"
-          :class="{ 'dirty': isDirty }"
+          :class="{ 'dirty': isDirty, 'error': error !== null }"
           :type="type"
           :id="name"
           :name="name"
@@ -206,7 +206,8 @@ const onChange = () => {
         border-radius: 0.125rem;
       }
   
-      &.dirty:invalid {
+      &.dirty:invalid,
+      &.error {
         --colour-btn-border: var(--colour-ti-critical);
       }
   

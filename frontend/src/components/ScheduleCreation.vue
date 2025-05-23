@@ -12,9 +12,8 @@ import {
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import {
-  dayjsKey, callKey, isoWeekdaysKey,
-} from '@/keys';
+import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+import { deepClone } from '@/utils';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
@@ -125,7 +124,7 @@ onMounted(() => {
     // calculate utc back to user timezone
     scheduleInput.value.start_time = scheduleStore.timeToFrontendTime(scheduleInput.value.start_time, scheduleInput.value.time_updated);
     scheduleInput.value.end_time = scheduleStore.timeToFrontendTime(scheduleInput.value.end_time, scheduleInput.value.time_updated);
-    props.schedule.availabilities?.forEach((a, i) => {
+    scheduleInput.value.availabilities?.forEach((a, i) => {
       scheduleInput.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, scheduleInput.value.time_updated);
       scheduleInput.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, scheduleInput.value.time_updated);
     })
@@ -143,10 +142,8 @@ onMounted(() => {
 
   generateZoomLink.value = scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom;
 
-  // Set a new reference
-  // Sidenote: I'm too dumb to properly clone this Object without referencing the same availability array. So for now
-  // this is the good ol' JSON workaround (structuredClone, Object assign or spread won't work here)
-  referenceSchedule.value = JSON.parse(JSON.stringify(scheduleInput.value));
+  // Set a new reference. We need a deep clone here to prevent references to the availability array.
+  referenceSchedule.value = deepClone(scheduleInput.value);
 });
 
 const scheduleCreationError = ref<Alert>(null);
@@ -259,7 +256,7 @@ const savedConfirmation = reactive({
 const revertForm = (resetData = true) => {
   scheduleCreationError.value = null;
   if (resetData) {
-    scheduleInput.value = JSON.parse(JSON.stringify(referenceSchedule.value));
+    scheduleInput.value = deepClone(referenceSchedule.value);
   }
 };
 
@@ -282,7 +279,7 @@ const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
   savingInProgress.value = true;
   // build data object for post request
-  const obj = JSON.parse(JSON.stringify({ ...scheduleInput.value, timezone: user.data.settings.timezone }));
+  const obj = deepClone({ ...scheduleInput.value, timezone: user.data.settings.timezone });
 
   // convert local input times to utc times
   obj.start_time = scheduleStore.timeToBackendTime(obj.start_time);
@@ -506,9 +503,10 @@ watch(
             </div>
             <availability-select
               :options="scheduleDayOptions"
-              :availabilities="scheduleInput.availabilities"
+              :availabilities="deepClone(scheduleInput.availabilities)"
               :start-time="scheduleInput.start_time"
               :end-time="scheduleInput.end_time"
+              :slot-duration="scheduleInput.slot_duration"
               v-model="scheduleInput.weekdays"
               :required="true"
               :disabled="!scheduleInput.active"
