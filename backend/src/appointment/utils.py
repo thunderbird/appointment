@@ -2,6 +2,7 @@ import json
 import os
 import urllib.parse
 from urllib import parse
+from datetime import time, datetime, timedelta
 
 from functools import cache
 
@@ -38,6 +39,12 @@ def is_json(jsonstring: str):
     except ValueError:
         return False
     return True
+
+
+def is_valid_time_range(start: time, end: time, gap: int = 0):
+    """Return true if given start time is before end time and both have at least the given time gap in minutes."""
+    start_datetime = datetime.strptime(start.strftime('%H:%M:%S'), '%H:%M:%S') + timedelta(minutes=gap)
+    return start_datetime.time() <= end
 
 
 @cache

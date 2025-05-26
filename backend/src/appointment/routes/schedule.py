@@ -152,7 +152,7 @@ def update_schedule(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
-    """endpoint to update an existing calendar connection for authenticated subscriber"""
+    """endpoint to update an existing schedule for authenticated subscriber"""
     if not repo.schedule.exists(db, schedule_id=id):
         raise validation.ScheduleNotFoundException()
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
@@ -168,6 +168,13 @@ def update_schedule(
     # If slug isn't provided, make it null in db
     if not schedule.slug:
         schedule.slug = None
+    
+    # Check valid custom availability
+    if (len(schedule.availabilities) and
+            any(not utils.is_valid_time_range(a.start_time, a.end_time, schedule.slot_duration)
+                for a in schedule.availabilities)):
+        raise validation.InvalidAvailabilityException()
+        
 
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 

@@ -169,6 +169,15 @@ class ScheduleCreationException(APIException):
         return l10n('unknown-error')
 
 
+class InvalidAvailabilityException(APIException):
+    """Raise when any custom availability is invalid, e.g. start time after end time."""
+    id_code = 'INVALID_AVAILABILITY_EXCEPTION'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('schedule-availability-invalid')
+
+
 class SlotNotFoundException(APIException):
     """Raise when a timeslot is not found during route validation"""
 

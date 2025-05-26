@@ -43,6 +43,7 @@ slot-already-taken = Das gewählte Zeitfenster ist nicht mehr verfügbar. Bitte 
 slot-invalid-email = Die angegebene E-Mail-Adresse war nicht gültig. Bitte erneut versuchen.
 invite-code-not-valid = Der Einladungscode ist leider nicht gültig.
 not-in-allow-list = Deine E-Mail-Adresse ist nicht in der Liste erlaubter Adressen enthalten.
+schedule-availability-invalid = Die benutzerdefinierte Verfügbarkeit ist nicht gültig. Bitte alle eingegebenen Zeiten prüfen. 
 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 

@@ -43,6 +43,7 @@ slot-already-taken = The time slot you have selected is no longer available. Ple
 slot-invalid-email = The email you have provided was not valid. Please try again.
 invite-code-not-valid = The invite code you used is not valid.
 not-in-allow-list = Your email is not in the allow list.
+schedule-availability-invalid = The custom availability is not valid. Please check all time values. 
 
 schedule-not-active = The schedule has been turned off. Please contact the schedule owner for more information.
 
