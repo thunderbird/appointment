@@ -27,6 +27,7 @@ export class DashboardPage {
   readonly availabilityPanelHeader: Locator;
   readonly dayView24HrAvailabilityText: Locator;
   readonly dayView12HrAvailabilityText: Locator;
+  readonly firstDayOfWeekMonthView: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -44,6 +45,7 @@ export class DashboardPage {
     this.availabilityPanelHeader = this.page.getByPlaceholder('My Schedule');
     this.dayView24HrAvailabilityText = this.page.getByText('17:00');
     this.dayView12HrAvailabilityText = this.page.getByText('5:00 PM');
+    this.firstDayOfWeekMonthView = this.page.locator('.calendar-month__week-day-name').first();
   }
 
   /**
