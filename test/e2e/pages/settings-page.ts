@@ -70,6 +70,7 @@ export class SettingsPage {
   readonly addCaldavConnectionLocationInput: Locator;
   readonly addCaldavConnectionPasswordInput: Locator;
   readonly addCaldavConnectionCloseModalBtn: Locator;
+  readonly startOfWeekSelect: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -94,6 +95,7 @@ export class SettingsPage {
     this.settings12hrRadio = this.page.getByText('12-hour AM/PM', { exact: true });
     this.settings24hrRadio = this.page.getByText('24-hour', { exact: true });
     this.timeZoneSelect = this.page.getByTestId('settings-general-timezone-select');
+    this.startOfWeekSelect = this.page.getByTestId('settings-general-start-of-week-select');
 
     // account settings
     this.profileUsernameInput = this.page.getByTestId('settings-account-user-name-input');
@@ -236,6 +238,16 @@ export class SettingsPage {
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.timeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_1_SECOND); // give a few seconds to be applied
+  }
+
+  /**
+   * Change the general setting's start of week setting
+   */
+  async changeStartOfWeekSetting(startOfWeek: string) {
+    await this.startOfWeekSelect.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.startOfWeekSelect.selectOption(startOfWeek, { timeout: TIMEOUT_30_SECONDS });
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**

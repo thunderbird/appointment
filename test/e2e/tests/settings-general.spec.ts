@@ -23,6 +23,10 @@ import {
   APPT_BROWSER_STORE_THEME_DARK,
   APPT_BROWSER_STORE_12HR_TIME,
   APPT_BROWSER_STORE_24HR_TIME,
+  APPT_BROWSER_STORE_START_WEEK_MON,
+  APPT_BROWSER_STORE_START_WEEK_SUN,
+  APPT_START_OF_WEEK_MON,
+  APPT_START_OF_WEEK_SUN,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
@@ -180,5 +184,25 @@ test.describe('general settings', {
     await dashboardPage.timezoneLabel.scrollIntoViewIfNeeded();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(dashboardPage.timezoneDisplayTextToronto).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+  });
+
+  test('able to change start of week', async ({ page }) => {
+    // change start of week to Monday and verify
+    await settingsPage.changeStartOfWeekSetting(APPT_START_OF_WEEK_MON);
+
+    // verify setting saved in browser local storage
+    await settingsPage.gotoGeneralSettingsPage();
+    let localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
+
+    // change start of week back to Sunday and verify
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await settingsPage.gotoGeneralSettingsPage();
+    await settingsPage.changeStartOfWeekSetting(APPT_START_OF_WEEK_SUN);
+
+    // verify setting saved in browser local storage
+    await settingsPage.gotoGeneralSettingsPage();
+    localStore = await getUserSettingsFromLocalStore(page);
+    expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_SUN);
   });
 });
