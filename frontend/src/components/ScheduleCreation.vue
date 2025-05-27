@@ -120,14 +120,14 @@ onMounted(() => {
   externalConnectionStore.fetch();
 
   if (props.schedule) {
-    scheduleInput.value = { ...props.schedule };
+    scheduleInput.value = deepClone({ ...props.schedule});
     // calculate utc back to user timezone
     scheduleInput.value.start_time = scheduleStore.timeToFrontendTime(scheduleInput.value.start_time, scheduleInput.value.time_updated);
     scheduleInput.value.end_time = scheduleStore.timeToFrontendTime(scheduleInput.value.end_time, scheduleInput.value.time_updated);
     scheduleInput.value.availabilities?.forEach((a, i) => {
       scheduleInput.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, scheduleInput.value.time_updated);
       scheduleInput.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, scheduleInput.value.time_updated);
-    })
+    });
 
     // Adjust the default calendar if the one attached is not connected.
     const { calendar_id: calendarId } = scheduleInput.value;
