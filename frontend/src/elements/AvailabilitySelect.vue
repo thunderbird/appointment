@@ -74,16 +74,16 @@ watch(
 const validateInput = () => {
   const input = Object.values(availabilitySet.value).flat();
   let success = true;
-  input.forEach((a, i) => {
+  input.forEach((a) => {
     if (model.value.includes(a.day_of_week)) {
       const diff = hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time);
       if (diff < props.slotDuration) {
         // We just use an empty string here to indicate an error on the input field
         // without adding an error message beneath it.
-        validationErrors.value[i] = '';
+        validationErrors.value[a.day_of_week] = '';
         success = false;
       } else {
-        validationErrors.value[i] = null;
+        validationErrors.value[a.day_of_week] = null;
       }
     }
   });
@@ -140,7 +140,7 @@ const toggleBubble = (option: SelectOption) => {
   <div class="wrapper">
     <alert-box v-if="validationErrorsExist" :alert="validationAlert" :can-close="false" />
     <div class="bubble-list">
-      <template v-for="(option, i) in options" :key="option.value">
+      <template v-for="option in options" :key="option.value">
         <button
           class="tbpro-bubble"
           :aria-pressed="isSelectedOption(option)"
@@ -159,7 +159,7 @@ const toggleBubble = (option: SelectOption) => {
             type="time"
             :name="`start_time_${option.value}`"
             v-model="availabilitySet[option.value][0].start_time"
-            :error="validationErrors[i]"
+            :error="validationErrors[option.value]"
             :disabled="disabled"
             @blur="update"
           />
@@ -168,7 +168,7 @@ const toggleBubble = (option: SelectOption) => {
             type="time"
             :name="`end_time_${option.value}`"
             v-model="availabilitySet[option.value][0].end_time"
-            :error="validationErrors[i]"
+            :error="validationErrors[option.value]"
             :disabled="disabled"
             @blur="update"
           />
