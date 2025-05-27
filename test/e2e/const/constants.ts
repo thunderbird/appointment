@@ -45,6 +45,8 @@ export const APPT_TIMEZONE_SETTING_TORONTO = 'America/Toronto';
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax';
 export const APPT_START_OF_WEEK_SUN = 'Sunday';
 export const APPT_START_OF_WEEK_MON = 'Monday';
+export const APPT_START_OF_WEEK_DASHBOARD_SUN = 'Sun';
+export const APPT_START_OF_WEEK_DASHBOARD_MON = 'Mon';
 
 // local browser store values
 export const APPT_BROWSER_STORE_LANGUAGE_EN = 'en';

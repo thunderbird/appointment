@@ -27,6 +27,8 @@ import {
   APPT_BROWSER_STORE_START_WEEK_SUN,
   APPT_START_OF_WEEK_MON,
   APPT_START_OF_WEEK_SUN,
+  APPT_START_OF_WEEK_DASHBOARD_MON,
+  APPT_START_OF_WEEK_DASHBOARD_SUN,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
@@ -195,6 +197,11 @@ test.describe('general settings', {
     let localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
 
+    // verify on dashboard
+    await dashboardPage.gotoToDashboardMonthView();
+    var firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
+    expect(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_MON);
+
     // change start of week back to Sunday and verify
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
     await settingsPage.gotoGeneralSettingsPage();
@@ -204,5 +211,10 @@ test.describe('general settings', {
     await settingsPage.gotoGeneralSettingsPage();
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_SUN);
+
+    // verify on dashboard
+    await dashboardPage.gotoToDashboardMonthView();
+    firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
+    expect(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_SUN);
   });
 });
