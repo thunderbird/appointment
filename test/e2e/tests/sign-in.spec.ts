@@ -26,7 +26,7 @@ test.beforeEach(async ({ page }) => {
 
 // verify we are able to sign-in
 test.describe('sign-in', {
-  tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_PROD_SANITY],
 }, () => {
   test('able to sign-in', async ({ page }) => {
     // prod and stage use fxa to sign in; when running on local dev env we sign in to appt directly

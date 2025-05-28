@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 
 // verify main appointment splash screen appears correctly
 test.describe('splash screen', {
-  tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE],
+  tag: [PLAYWRIGHT_TAG_PROD_SANITY],
 }, () => {
   test('appears correctly', async ({ page }) => {
     await expect(page).toHaveTitle(APPT_PAGE_TITLE);

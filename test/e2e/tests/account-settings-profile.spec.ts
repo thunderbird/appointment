@@ -9,17 +9,12 @@ import {
   APPT_LOGIN_EMAIL,
   APPT_DISPLAY_NAME,
   APPT_MY_SHARE_LINK,
-  APPT_TARGET_ENV,
-  TIMEOUT_1_SECOND,
-  TIMEOUT_2_SECONDS,
-  TIMEOUT_3_SECONDS,
-  TIMEOUT_30_SECONDS,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
-test.describe('account settings', {
+test.describe('account settings - profile', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
@@ -86,82 +81,5 @@ test.describe('account settings', {
     await expect(settingsPage.refreshLinkBtn).toBeEnabled();
     await settingsPage.refreshLinkBtn.click();
     await settingsPage.confirmRefreshCancelBtn.click();
-  });
-
-  test('invite codes available', async ({ page }) => {
-    await expect(settingsPage.inviteCodesHeader).toBeVisible({ timeout: TIMEOUT_30_SECONDS }); // generous time in case a large list
-    // verify invite codes are available; note on local dev environment they won't be any; we need a pause here because
-    // sometimes even when invite codes header is visible, loading the list of actual invite codes takes a few seconds
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
-    if (APPT_TARGET_ENV == 'dev') {
-      await expect(settingsPage.noInviteCodesCell).toBeVisible();
-    } else {
-      await expect(settingsPage.noInviteCodesCell).not.toBeVisible();
-      // read the first invite code in the list
-      const firstCode = await settingsPage.firstInviteCode.textContent();
-      expect(firstCode).toHaveLength(36); // uuid is 36 char str including hyphens
-    }
-  });
-
-  test('able to download account data', async ({ page }) => {
-    // setup listener for browser download event
-    const downloadPromise = page.waitForEvent('download', { timeout: TIMEOUT_30_SECONDS });
-    // click the account settings => download your data button and confirm
-    await settingsPage.downloadAccountData();
-    // now verify the browser download event was triggered and downloaded without error
-    const download = await downloadPromise;
-    const downloadErr = await download.failure(); // waits for download to finish and checks for error
-    expect(downloadErr).toBeFalsy();
-  });
-
-  test('delete account button', async ({ page }) => {
-    // verify that clicking the delete account button results in a delete account confirm dialog
-    // we won't actually delete the account :) as that would break the other E2E tests
-    await settingsPage.deleteAcctBtn.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(settingsPage.deleteAcctBtn).toBeEnabled();
-    await settingsPage.deleteAcctBtn.click();
-    await page.waitForTimeout(TIMEOUT_2_SECONDS);
-    await settingsPage.confirmDeleteAcctBtn.click();
-  });
-});
-
-test.describe('connected accounts settings', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
-}, () => {
-  test.beforeEach(async ({ page }) => {
-    // navigate to and sign into appointment
-    await navigateToAppointmentAndSignIn(page);
-    settingsPage = new SettingsPage(page);
-    dashboardPage = new DashboardPage(page);
-    // navigate to the connected accounts settings page
-    await settingsPage.gotoConnectedAccountsSettingsPage();
-  });
-
-  test('edit profile button', async ({ page }) => {
-    // verify that clicking the `edit profile` button redirects to the Mozilla Account profile page
-    // note that on dev env this relies on having VITE_FXA_EDIT_PROFILE= set to point to stage FxA
-    // skip this on dev env because stage FxA use may or may not be setup to use with local dev
-    if (APPT_TARGET_ENV !== 'dev') {
-      await settingsPage.editProfileBtn.click();
-      await expect(settingsPage.mozProfilePageLogo).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
-      await expect(settingsPage.mozProfileSettingsSection).toBeVisible();
-    }
-  });
-
-  test('disconnect calendar button', async ({ page }) => {
-    // verify that clicking the google calendar `disconnect` button brings up a confirmation dialog
-    // just cancel out; we don't want to actually disconnect the calendar and break the tests
-    await settingsPage.disconnectGoogleCalendarBtn.click();
-    await settingsPage.disconnectGoogleCalendarBackBtn.click();
-  });
-
-  test('connect caldav connection dialog', async ({ page }) => {
-    // verify that clicking the caldav connection `connect` button brings up the caldav connection dialog
-    await settingsPage.connectCaldavBtn.click();
-    await expect(settingsPage.addCaldavConnectionUsernameInput).toBeEditable();
-    await expect(settingsPage.addCaldavConnectionLocationInput).toBeEditable();
-    await expect(settingsPage.addCaldavConnectionPasswordInput).toBeEditable();
-    await settingsPage.addCaldavConnectionCloseModalBtn.click();
   });
 });
