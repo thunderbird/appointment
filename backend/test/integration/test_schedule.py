@@ -241,6 +241,57 @@ class TestSchedule:
         assert weekdays == [2, 4, 6]
         assert data['slot_duration'] == 60
 
+    def test_update_schedule_availabilities(self, with_client, make_schedule):
+        generated_schedule = make_schedule(use_custom_availabilities=True)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [2, 4, 6],
+                'availabilities': [
+                    {
+                        'day_of_week': 2,
+                        'start_time': '09:00',
+                        'end_time': '15:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                    {
+                        'day_of_week': 4,
+                        'start_time': '11:00',
+                        'end_time': '15:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                    {
+                        'day_of_week': 6,
+                        'start_time': '13:00',
+                        'end_time': '15:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                ],
+                'slot_duration': 60,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data['weekdays'] is not None
+        assert len(data['weekdays']) == 3
+        assert data['weekdays'] == [2, 4, 6]
+        assert data['availabilities'] is not None
+        assert len(data['availabilities']) == 3
+        assert data['availabilities'][2]['day_of_week'] == 6
+
     def test_update_existing_schedule_with_html(self, with_client, make_schedule):
         generated_schedule = make_schedule()
 
@@ -533,6 +584,7 @@ class TestRequestScheduleAvailability:
             farthest_booking=20160,
             slot_duration=30,
             booking_confirmation=False,
+            use_custom_availabilities=False,
             weekdays=[1, 2, 3, 4, 5],
         )
         self.signed_url = signed_url_by_subscriber(self.subscriber)
@@ -669,6 +721,7 @@ class TestRequestScheduleAvailability:
             farthest_booking=20160,
             slot_duration=30,
             booking_confirmation=False,
+            use_custom_availabilities=False,
         )
 
         signed_url = signed_url_by_subscriber(subscriber)
@@ -855,6 +908,83 @@ class TestRequestScheduleAvailability:
             # Ensure we haven't sent out any emails
             assert mock.call_count == 0
 
+    def test_success_with_custom_availability(
+        self,
+        monkeypatch,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        mock_connector,
+    ):
+        """Test that a user can request a booking from a schedule with custom availability slots"""
+        start_date = date(2024, 4, 1)
+        start_time = time(9, tzinfo=UTC)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
+        end_time = time(10, tzinfo=UTC)
+
+        class MockCaldavConnector:
+            @staticmethod
+            def get_busy_time(self, calendar_ids, start, end):
+                return []
+
+        # Override the fixture's list_events
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
+
+        subscriber = make_pro_subscriber()
+        generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+        make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=start_date,
+            start_time=start_time,
+            end_time=end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+            booking_confirmation=False,
+            use_custom_availabilities=True,
+        )
+
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=start_datetime, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task') as mock:
+            # Check availability at the start of the schedule
+            # This should work
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': signed_url,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 200, response.text
+            data = response.json()
+
+            assert data.get('id')
+
+            slot_id = data.get('id')
+
+            # Look up the slot
+            with with_db() as db:
+                slot = repo.slot.get(db, slot_id)
+                assert slot.appointment_id
+
+            # Ensure we sent out an invite email and a new booking email
+            assert mock.call_count == 2
+            send_invite_email_call, send_new_booking_email_call = mock.call_args_list
+
+            # Functions are stored in a tuple as the first item on the call
+            assert email_tasks.send_invite_email in send_invite_email_call[0]
+            assert email_tasks.send_new_booking_email in send_new_booking_email_call[0]
 
 class TestDecideScheduleAvailabilitySlot:
     start_date = datetime.now() - timedelta(days=4)

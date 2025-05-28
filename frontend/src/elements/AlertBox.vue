@@ -29,7 +29,7 @@ const isInfo = props.scheme === AlertSchemes.Info;
 const isSuccess = props.scheme === AlertSchemes.Success;
 const isWarning = props.scheme === AlertSchemes.Warning;
 const isError = props.scheme === AlertSchemes.Error;
-const hasDetails = props.alert.details !== null;
+const hasDetails = Boolean(props.alert.details);
 
 const open = ref(false);
 const toggleDetails = () => {
@@ -123,7 +123,6 @@ const toggleDetails = () => {
   .title {
     font-weight: 700;
     line-height: 1.5;
-    white-space: pre;
   }
 }
 

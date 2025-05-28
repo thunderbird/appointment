@@ -27,6 +27,7 @@ def make_schedule(with_db, make_caldav_calendar):
         slug=FAKER_RANDOM_VALUE,
         booking_confirmation=True,
         timezone='UTC',
+        use_custom_availabilities=False,
         time_updated=None,
     ):
         with with_db() as db:
@@ -37,8 +38,8 @@ def make_schedule(with_db, make_caldav_calendar):
                     name=name if factory_has_value(name) else fake.name(),
                     location_url=location_url if factory_has_value(location_url) else fake.url(),
                     location_type=location_type
-                    if factory_has_value(location_type)
-                    else fake.random_element((models.LocationType.inperson, models.LocationType.online)),
+                        if factory_has_value(location_type)
+                        else fake.random_element((models.LocationType.inperson, models.LocationType.online)),
                     details=details if factory_has_value(details) else fake.sentence(),
                     start_date=start_date if factory_has_value(start_date) else fake.date_object(),
                     end_date=end_date if factory_has_value(end_date) else fake.date_object(),
@@ -51,18 +52,32 @@ def make_schedule(with_db, make_caldav_calendar):
                     meeting_link_provider=meeting_link_provider,
                     slug=slug if factory_has_value(slug) else fake.uuid4(),
                     booking_confirmation=booking_confirmation,
+                    use_custom_availabilities=use_custom_availabilities,
+                    availabilities=[],
                     calendar_id=calendar_id
-                    if factory_has_value(calendar_id)
-                    else make_caldav_calendar(connected=True).id,
+                        if factory_has_value(calendar_id)
+                        else make_caldav_calendar(connected=True).id,
                     timezone=timezone,
                 ),
             )
+
             if time_updated:
                 schedule.time_updated = time_updated
                 db.add(schedule)
                 db.commit()
                 # Re-bind the session, since commit closes it
                 db.refresh(schedule)
+
+            if use_custom_availabilities:
+                a_list = [schemas.AvailabilityBase(
+                    day_of_week=d,
+                    start_time=start_time if factory_has_value(start_time) else fake.time_object(),
+                    end_time=end_time if factory_has_value(end_time) else fake.time_object(),
+                    schedule_id=schedule.id,
+                ) for d in weekdays]
+                repo.availability.sync_multiple(db, a_list, schedule.id)
+                schedule.availabilities = [time_updated]
+
             return schedule
 
     return _make_schedule

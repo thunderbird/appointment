@@ -57,7 +57,7 @@ const schedule = ref({
   startTime: '09:00',
   endTime: '17:00',
   duration: DEFAULT_SLOT_DURATION,
-  days: ['1', '2', '3', '4', '5'],
+  days: [1, 2, 3, 4, 5],
   details: '',
 });
 
@@ -132,7 +132,7 @@ onMounted(async () => {
       startTime: timeToFrontendTime(dbSchedule.start_time, dbSchedule.time_updated),
       endTime: timeToFrontendTime(dbSchedule.end_time, dbSchedule.time_updated),
       duration: dbSchedule.slot_duration,
-      days: dbSchedule.weekdays.map(String),
+      days: dbSchedule.weekdays,
     };
   }
 
@@ -157,7 +157,7 @@ onMounted(async () => {
         </text-input>
         </div>
         <bubble-select class="bubbleSelect" :options="scheduleDayOptions" v-model="schedule.days" :required="true">
-          {{ t('label.availableDays') }}
+          {{ t('label.selectDays') }}
         </bubble-select>
       </div>
       <div class="column">

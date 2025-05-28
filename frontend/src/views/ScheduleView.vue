@@ -19,7 +19,7 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
 
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const dj = inject(dayjsKey);
 const call = inject(callKey);

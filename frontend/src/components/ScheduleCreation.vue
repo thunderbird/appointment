@@ -4,7 +4,7 @@ import {
   DateFormatStrings, EventLocationType, MeetingLinkProviderType, ScheduleCreationState,
 } from '@/definitions';
 import {
-  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert,
+  Calendar, Schedule, Slot, ScheduleAppointment, Error, SelectOption, Alert, Availability,
 } from '@/models';
 import {
   ref, reactive, computed, inject, watch, onMounted, Ref,
@@ -12,14 +12,14 @@ import {
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import {
-  dayjsKey, callKey, isoWeekdaysKey,
-} from '@/keys';
+import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
+import { deepClone } from '@/utils';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
+import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
 import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
 import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
@@ -44,7 +44,7 @@ const user = useUserStore();
 const calendarStore = useCalendarStore();
 const externalConnectionStore = createExternalConnectionsStore(call);
 const scheduleStore = createScheduleStore(call);
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const dj = inject(dayjsKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 const dateFormat = DateFormatStrings.QalendarFullDay;
@@ -107,6 +107,8 @@ const defaultSchedule: Schedule = {
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
   booking_confirmation: true,
+  availabilities: [],
+  use_custom_availabilities: false,
 };
 const scheduleInput = ref({ ...defaultSchedule });
 // For comparing changes, and resetting to default.
@@ -118,10 +120,14 @@ onMounted(() => {
   externalConnectionStore.fetch();
 
   if (props.schedule) {
-    scheduleInput.value = { ...props.schedule };
+    scheduleInput.value = deepClone({ ...props.schedule});
     // calculate utc back to user timezone
     scheduleInput.value.start_time = scheduleStore.timeToFrontendTime(scheduleInput.value.start_time, scheduleInput.value.time_updated);
     scheduleInput.value.end_time = scheduleStore.timeToFrontendTime(scheduleInput.value.end_time, scheduleInput.value.time_updated);
+    scheduleInput.value.availabilities?.forEach((a, i) => {
+      scheduleInput.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, scheduleInput.value.time_updated);
+      scheduleInput.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, scheduleInput.value.time_updated);
+    });
 
     // Adjust the default calendar if the one attached is not connected.
     const { calendar_id: calendarId } = scheduleInput.value;
@@ -136,8 +142,8 @@ onMounted(() => {
 
   generateZoomLink.value = scheduleInput.value.meeting_link_provider === MeetingLinkProviderType.Zoom;
 
-  // Set a new reference
-  referenceSchedule.value = { ...scheduleInput.value };
+  // Set a new reference. We need a deep clone here to prevent references to the availability array.
+  referenceSchedule.value = deepClone(scheduleInput.value);
 });
 
 const scheduleCreationError = ref<Alert>(null);
@@ -155,7 +161,10 @@ const getSlotPreviews = () => {
     ? dj.min(dj(scheduleInput.value.end_date), dj(props.activeDate).endOf('month').add(1, 'week'))
     : dj(props.activeDate).endOf('month').add(1, 'week');
   // Substract one week from the start to display slots in displayed previous month days too
-  let pointerDate = dj.max(dj(scheduleInput.value.start_date), dj(props.activeDate).startOf('month').subtract(1, 'week'));
+  let pointerDate = dj.max(
+    dj(scheduleInput.value.start_date).add(scheduleInput.value.earliest_booking, 'minutes'),
+    dj(props.activeDate).startOf('month').subtract(1, 'week')
+  );
   while (pointerDate <= end) {
     if (scheduleInput.value.weekdays?.includes(pointerDate.isoWeekday())) {
       slots.push({
@@ -169,6 +178,7 @@ const getSlotPreviews = () => {
   }
   return slots;
 };
+
 // generate an appointment object with slots from current schedule data
 const getScheduleAppointment = (): ScheduleAppointment => ({
   title: scheduleInput.value.name,
@@ -246,7 +256,7 @@ const savedConfirmation = reactive({
 const revertForm = (resetData = true) => {
   scheduleCreationError.value = null;
   if (resetData) {
-    scheduleInput.value = { ...referenceSchedule.value };
+    scheduleInput.value = deepClone(referenceSchedule.value);
   }
 };
 
@@ -269,21 +279,19 @@ const savingInProgress = ref(false);
 const saveSchedule = async (withConfirmation = true) => {
   savingInProgress.value = true;
   // build data object for post request
-  const obj = { ...scheduleInput.value, timezone: user.data.settings.timezone };
-  // convert local input times to utc times
+  const obj = deepClone({ ...scheduleInput.value, timezone: user.data.settings.timezone });
 
-  obj.start_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.start_time}:00`)
-    .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
-    .utc()
-    .format('HH:mm');
-  obj.end_time = dj(`${dj().format('YYYY-MM-DD')}T${obj.end_time}:00`)
-    .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
-    .utc()
-    .format('HH:mm');
+  // convert local input times to utc times
+  obj.start_time = scheduleStore.timeToBackendTime(obj.start_time);
+  obj.end_time = scheduleStore.timeToBackendTime(obj.end_time);
+  obj.availabilities?.forEach((a: Availability, i: number) => {
+    obj.availabilities[i].start_time = scheduleStore.timeToBackendTime(a.start_time);
+    obj.availabilities[i].end_time = scheduleStore.timeToBackendTime(a.end_time);
+  });
+
   // Update the start_date with the current date
   obj.start_date = dj().format(dateFormat);
   // remove unwanted properties
-  delete obj.availabilities;
   delete obj.time_created;
   delete obj.time_updated;
   delete obj.id;
@@ -354,6 +362,13 @@ const toggleBookingConfirmation = (newValue: boolean) => {
   scheduleInput.value.booking_confirmation = newValue;
 };
 
+// Handle availability changes
+const updateAvailabilities = (availabilities: Availability[]) => {
+  // Create a single array of availabilities from the list grouped by day of week
+  // Only take valid availabilities and filter placeholder availabilities out
+  scheduleInput.value.availabilities = availabilities.map((a) => ({ ...a, schedule_id: props.schedule.id }));
+};
+
 // Link copy
 const myLinkTooltip = ref(t('label.copyLink'));
 const myLinkShow = ref(false);
@@ -374,7 +389,7 @@ const copyLink = async () => {
   }, 4000);
 };
 
-// track if steps were already visited
+// track schedule activation toggle changes
 watch(
   () => scheduleInput.value.active,
   (newValue) => {
@@ -403,6 +418,7 @@ watch(
     scheduleInput.value.end_date,
     scheduleInput.value.start_time,
     scheduleInput.value.end_time,
+    scheduleInput.value.earliest_booking,
     scheduleInput.value.weekdays,
     scheduleInput.value.booking_confirmation,
     props.activeDate,
@@ -475,36 +491,61 @@ watch(
         </div>
         <div v-show="activeStep1" class="flex flex-col gap-3">
           <hr/>
-          <div class="flex w-full gap-2 lg:gap-4">
-            <text-input
-              type="time"
-              name="start_time"
-              class="w-full"
-              v-model="scheduleInput.start_time"
-              :disabled="!scheduleInput.active"
-            >
-              {{ t("label.startTime") }}
-            </text-input>
-            <text-input
-              type="time"
-              name="end_time"
-              class="w-full"
-              v-model="scheduleInput.end_time"
-              :disabled="!scheduleInput.active"
-            >
-              {{ t("label.endTime") }}
-            </text-input>
-          </div>
-          <div>
+          <checkbox-input
+            name="customizePerDay"
+            :label="t('label.customizePerDay')"
+            v-model="scheduleInput.use_custom_availabilities"
+          />
+          <!-- Availability with customization -->
+          <div v-if="scheduleInput.use_custom_availabilities" class="flex flex-col gap-3">
             <div class="input-label">
-              {{ t("label.availableDays") }}
+              {{ t("label.selectDays") }}
             </div>
-            <bubble-select
+            <availability-select
               :options="scheduleDayOptions"
+              :availabilities="deepClone(scheduleInput.availabilities)"
+              :start-time="scheduleInput.start_time"
+              :end-time="scheduleInput.end_time"
+              :slot-duration="scheduleInput.slot_duration"
               v-model="scheduleInput.weekdays"
               :required="true"
               :disabled="!scheduleInput.active"
+              @update="updateAvailabilities"
             />
+          </div>
+          <!-- Availability without customization -->
+          <div v-if="!scheduleInput.use_custom_availabilities" class="flex flex-col gap-3">
+            <div class="flex w-full gap-2 lg:gap-4">
+              <text-input
+                type="time"
+                name="start_time"
+                class="w-full"
+                v-model="scheduleInput.start_time"
+                :disabled="!scheduleInput.active"
+              >
+                {{ t("label.startTime") }}
+              </text-input>
+              <text-input
+                type="time"
+                name="end_time"
+                class="w-full"
+                v-model="scheduleInput.end_time"
+                :disabled="!scheduleInput.active"
+              >
+                {{ t("label.endTime") }}
+              </text-input>
+            </div>
+            <div>
+              <div class="input-label">
+                {{ t("label.selectDays") }}
+              </div>
+              <bubble-select
+                :options="scheduleDayOptions"
+                v-model="scheduleInput.weekdays"
+                :required="true"
+                :disabled="!scheduleInput.active"
+              />
+            </div>
           </div>
           <div>
             <div class="input-label">
@@ -712,7 +753,7 @@ watch(
             <div class="whitespace-pre-line rounded-lg pb-3 text-xs text-gray-500">
               <div>
                 {{ t('text.yourQuickLinkIs', { url: user.myLink }) }}<br />
-                <i18n-t keypath="text.toUpdateYourUsername.text" tag="span">
+                <i18n-t keypath="text.toUpdateYourUsername.text" tag="span" scope="global">
                   <template v-slot:link>
                     <router-link class="underline" :to="{ name: 'settings' }" target="_blank">
                       {{ t('text.toUpdateYourUsername.link') }}
