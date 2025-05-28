@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../utils/utils';
 import { SettingsPage } from '../pages/settings-page';
 import { DashboardPage } from '../pages/dashboard-page';
 
@@ -20,14 +19,9 @@ test.describe('account settings - other', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // navigate to and sign into appointment
-    await navigateToAppointmentAndSignIn(page);
+    // note: we are already signed into Appointment with our default settings (via our auth-setup)
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
-
-    // ensure our settings are set to what the tests expect as default (in case a
-    // previous test run failed and left the settings in an incorrect state)
-    await setDefaultUserSettingsLocalStore(page);
 
     // navigate to the account settings page
     await settingsPage.gotoAccountSettingsPage();

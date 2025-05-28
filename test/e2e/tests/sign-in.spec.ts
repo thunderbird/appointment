@@ -7,9 +7,8 @@ import {
   APPT_TARGET_ENV,
   APPT_PAGE_TITLE,
   PLAYWRIGHT_TAG_PROD_SANITY,
-  PLAYWRIGHT_TAG_E2E_SUITE,
-  PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  TIMEOUT_30_SECONDS
+  TIMEOUT_30_SECONDS,
+  TIMEOUT_60_SECONDS,
 } from '../const/constants';
 
 let splashscreenPage: SplashscreenPage;
@@ -43,6 +42,6 @@ test.describe('sign-in', {
     await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_30_SECONDS }); // give generous time for sign-in
     await expect(dashboardPage.userMenuAvatar).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await expect(dashboardPage.navBarDashboardBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
   });
 });

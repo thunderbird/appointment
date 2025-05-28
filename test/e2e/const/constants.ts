@@ -13,6 +13,7 @@ export const APPT_GENERAL_SETTINGS_PAGE = String(`${process.env.APPT_URL}setting
 export const APPT_CALENDAR_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/calendar`);
 export const APPT_ACCOUNT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/account`);
 export const APPT_CONNECTED_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/connectedAccounts`);
+export const APPT_DASHBOARD_HOME_PAGE = String(`${process.env.APPT_URL}dashboard`);
 export const APPT_DASHBOARD_MONTH_PAGE = String(`${process.env.APPT_URL}dashboard#month`);
 
 // page titles
@@ -65,5 +66,7 @@ export const APPT_HTML_DARK_MODE_CLASS = 'dark';
 export const TIMEOUT_1_SECOND = 1_000;
 export const TIMEOUT_2_SECONDS = 2_000;
 export const TIMEOUT_3_SECONDS = 3_000;
+export const TIMEOUT_10_SECONDS = 10_000;
 export const TIMEOUT_30_SECONDS = 30_000;
 export const TIMEOUT_60_SECONDS = 60_000;
+export const TIMEOUT_90_SECONDS = 90_000;

@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { navigateToAppointmentAndSignIn } from '../utils/utils';
 import { SettingsPage } from '../pages/settings-page';
 import { DashboardPage } from '../pages/dashboard-page';
 
@@ -17,8 +16,7 @@ test.describe('connected accounts settings', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // navigate to and sign into appointment
-    await navigateToAppointmentAndSignIn(page);
+    // note: we are already signed into Appointment with our default settings (via our auth-setup)
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
     // navigate to the connected accounts settings page

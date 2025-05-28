@@ -1,5 +1,5 @@
 import { expect, type Page, type Locator } from '@playwright/test';
-import { APPT_LOGIN_PWORD } from '../const/constants';
+import { APPT_LOGIN_PWORD, TIMEOUT_10_SECONDS, TIMEOUT_1_SECOND } from '../const/constants';
 
 export class FxAPage {
   readonly page: Page;
@@ -19,6 +19,8 @@ export class FxAPage {
   async signIn() {
     expect(APPT_LOGIN_PWORD, 'getting APPT_LOGIN_PWORD env var').toBeTruthy();
     await this.passwordInput.fill(String(APPT_LOGIN_PWORD));
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.signInButton.click();
+    await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
   }
 }

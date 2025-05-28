@@ -6,7 +6,8 @@ import {
   APPT_DASHBOARD_MONTH_PAGE,
   APPT_TIMEZONE_SETTING_TORONTO,
   APPT_TIMEZONE_SETTING_HALIFAX,
-  TIMEOUT_60_SECONDS
+  TIMEOUT_3_SECONDS,
+  TIMEOUT_60_SECONDS,
 } from '../const/constants';
 
 
@@ -98,6 +99,7 @@ export class DashboardPage {
 
     // now we have a list of future pending appointments for our host and requster; now ensure one
     // of them matches the slot that was selected by the test
+    await this.page.evaluate(() => window.scrollBy(0, document.body.scrollHeight));
     const apptLocator = this.page.getByRole('cell', { name: `${slotDate}` }).locator('div', { hasText: `${slotTime} to`});
     await expect(apptLocator).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
   }
@@ -107,6 +109,7 @@ export class DashboardPage {
    */
   async gotoToDashboardMonthView() {
     await this.page.goto(APPT_DASHBOARD_MONTH_PAGE);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
