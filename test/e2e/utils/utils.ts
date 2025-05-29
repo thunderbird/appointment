@@ -9,7 +9,6 @@ import {
     APPT_URL,
     APPT_PAGE_TITLE,
     TIMEOUT_1_SECOND,
-    TIMEOUT_30_SECONDS,
     APPT_DISPLAY_NAME,
     APPT_BROWSER_STORE_LANGUAGE_EN,
     APPT_BROWSER_STORE_THEME_LIGHT,
@@ -17,6 +16,7 @@ import {
     APPT_TIMEZONE_SETTING_TORONTO,
     APPT_BROWSER_STORE_START_WEEK_SUN,
     TIMEOUT_3_SECONDS,
+    TIMEOUT_60_SECONDS,
 } from "../const/constants";
 
 /**
@@ -53,8 +53,8 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     }
 
     // now that we're signed into the appointment dashboard give it time to load
-    await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_30_SECONDS }); // give generous time
-    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_60_SECONDS }); // give generous time
+    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
 }
 
 /**

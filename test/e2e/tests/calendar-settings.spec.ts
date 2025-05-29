@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../utils/utils';
 import { SettingsPage } from '../pages/settings-page';
 import { DashboardPage } from '../pages/dashboard-page';
 
@@ -18,14 +17,9 @@ test.describe('calendar settings', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // navigate to and sign into appointment
-    await navigateToAppointmentAndSignIn(page);
+    // note: we are already signed into Appointment with our default settings (via our auth-setup)
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
-
-    // ensure our settings are set to what the tests expect as default (in case a
-    // previous test run failed and left the settings in an incorrect state)
-    await setDefaultUserSettingsLocalStore(page);
 
     // navigate to the calendar settings page
     await settingsPage.gotoCalendarSettingsPage();
@@ -63,9 +57,10 @@ test.describe('calendar settings', {
 
   test('add caldav calendar button', async ({ page }) => {
     // just verify the discover caldav calendar fields appear then cancel out
-    await expect(settingsPage.addCaldavCalendarBtn).toBeEnabled();
+    await expect(settingsPage.addCaldavCalendarBtn).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.addCaldavCalendarBtn.click();
-    await expect(settingsPage.addCaldavUrlInput).toBeEnabled();
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
+    await expect(settingsPage.addCaldavUrlInput).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
     await expect(settingsPage.addCaldavUserInput).toBeEnabled();
     await expect(settingsPage.addCaldavPasswordInput).toBeEnabled();
     await settingsPage.editCalendarCancelBtn.click();

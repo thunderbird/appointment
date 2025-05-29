@@ -41,7 +41,7 @@ export class SettingsPage {
   readonly confirmRefreshCancelBtn: Locator;
   readonly inviteCodesHeader: Locator;
   readonly noInviteCodesCell: Locator;
-  readonly firstInviteCode: Locator;
+  readonly inviteCode: Locator;
   readonly deleteAcctBtn: Locator;
   readonly confirmDeleteAcctBtn: Locator;
   readonly downloadDataBtn: Locator;
@@ -107,7 +107,7 @@ export class SettingsPage {
     this.confirmRefreshCancelBtn = this.page.getByRole('button', { name: 'Cancel' });
     this.noInviteCodesCell = this.page.getByRole('cell', { name: 'No Invite Codes could be' });
     this.inviteCodesHeader = this.page.getByText('Invites', { exact: true });
-    this.firstInviteCode = this.page.getByRole('code').first();
+    this.inviteCode = this.page.getByRole('code');
     this.deleteAcctBtn = this.page.getByTestId('settings-account-delete-btn');
     this.confirmDeleteAcctBtn = this.page.getByRole('button', { name: 'Cancel' });
     this.downloadDataBtn = this.page.getByTestId('settings-account-download-data-btn');

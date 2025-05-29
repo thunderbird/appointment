@@ -24,7 +24,7 @@ export default defineConfig({
   // Global timeout: Playwright will timeout if the entire session (includes all test runs) exceeds this.
   // Must take into account running on mulitple browsers (and BrowserStack is much slower too!). Odds are the
   // tests will time out at the locator/test level first anyway; but there is no default so best to specify
-  globalTimeout: 15 * 60 * 1000,
+  globalTimeout: 12 * 60 * 1000,
   // Individual test timeout - a single test will time out if it is still running after this time (ms)
   timeout: 90 * 1000, // 1.5 minutes
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -49,14 +49,26 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // Setup project - signs into Appointment once for all the tests
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Use prepared auth state
+        storageState: 'test-results/.auth/user.json',
+       },
+      dependencies: ['setup'],
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        // Use prepared auth state
+        storageState: 'test-results/.auth/user.json',
+       },
+      dependencies: ['setup'],
     },
 
     //{

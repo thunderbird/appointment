@@ -1,5 +1,13 @@
 import { expect, type Page, type Locator } from '@playwright/test';
-import { APPT_URL, APPT_LOGIN_EMAIL, FXA_PAGE_TITLE, APPT_LOGIN_PWORD, TIMEOUT_60_SECONDS } from '../const/constants';
+import {
+  APPT_URL,
+  APPT_LOGIN_EMAIL,
+  FXA_PAGE_TITLE,
+  APPT_LOGIN_PWORD, 
+  TIMEOUT_1_SECOND,
+  TIMEOUT_30_SECONDS,
+  TIMEOUT_90_SECONDS,
+ } from '../const/constants';
 
 export class SplashscreenPage {
   readonly page: Page;
@@ -41,14 +49,15 @@ export class SplashscreenPage {
   }
 
   async getToFxA() {
-    await expect(this.loginBtn).toBeVisible();
+    await expect(this.loginBtn).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
     await this.clickLoginBtn();
-    await expect(this.loginEmailInput).toBeVisible();
+    await expect(this.loginEmailInput).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
     await expect(this.loginDialogContinueBtn).toBeVisible();
     expect(APPT_LOGIN_EMAIL, 'getting APPT_LOGIN_EMAIL env var').toBeTruthy();
     await this.enterLoginEmail(APPT_LOGIN_EMAIL);
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.clickLoginContinueBtn();
-    await expect(this.page).toHaveTitle(FXA_PAGE_TITLE, { timeout: TIMEOUT_60_SECONDS }); // be generous in case FxA is slow to load
+    await expect(this.page).toHaveTitle(FXA_PAGE_TITLE, { timeout: TIMEOUT_90_SECONDS }); // be generous in case FxA is slow to load
   }
 
   async localApptSignIn() {

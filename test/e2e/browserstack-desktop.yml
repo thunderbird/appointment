@@ -31,12 +31,23 @@ platforms:
     browserVersion: latest
     playwrightConfigOptions:
       name: Firefox-OSX
+      setup: 
+      - name: 'setup_firefox'
+        testMatch: 'auth.setup.ts'
+      use:
+        storageState: 'test-results/.auth/user.json'
+
   - os: OS X
     osVersion: Sequoia
     browserName: playwright-chromium
     browserVersion: latest
     playwrightConfigOptions:
       name: Chromium-OSX
+      setup: 
+      - name: 'setup_chromium'
+        testMatch: 'auth.setup.ts'
+      use:
+        storageState: 'test-results/.auth/user.json'
 
 # =======================
 # Parallels per Platform
