@@ -10,6 +10,7 @@ import {
   TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
+  APPT_ACCT_SETTINGS_MAX_INVITE_CODE_COUNT,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
@@ -36,8 +37,12 @@ test.describe('account settings - other', {
       await expect(settingsPage.noInviteCodesCell).toBeVisible();
     } else {
       await expect(settingsPage.noInviteCodesCell).not.toBeVisible();
+      // there should be a maximum of 10 invite codes available
+      const inviteCodeCount = await settingsPage.inviteCode.count();
+      console.log(`found ${inviteCodeCount} invite code(s)`);
+      expect(inviteCodeCount).toBeLessThanOrEqual(APPT_ACCT_SETTINGS_MAX_INVITE_CODE_COUNT);
       // read the first invite code in the list
-      const firstCode = await settingsPage.firstInviteCode.textContent();
+      const firstCode = await settingsPage.inviteCode.first().textContent();
       expect(firstCode).toHaveLength(36); // uuid is 36 char str including hyphens
     }
   });

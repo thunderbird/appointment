@@ -15,15 +15,16 @@ const directoryPath = path.join(__dirname, '../test-results/.auth');
 fs.mkdir(directoryPath, (err: any) => {
   if (err) {
     console.error('error creating auth storage directory:', err);
-  } else {
-    console.log('created auth storage directory');
-    // when use storageState in browserstack yml, browserstack requires the file to exist already even on the
-    // first time the auth-setup step is run; so must create an emtpy user.json file here
-    const filepath = path.join(directoryPath, 'user.json');
-    const emptyJsonObject = {};
-    const jsonString = JSON.stringify(emptyJsonObject, null, 2); // The '2' adds indentation for readability
-    fs.writeFileSync(filepath, jsonString);
+    return
   }
+
+  console.log('created auth storage directory');
+  // when use storageState in browserstack yml, browserstack requires the file to exist already even on the
+  // first time the auth-setup step is run; so must create an emtpy user.json file here
+  const filepath = path.join(directoryPath, 'user.json');
+  const emptyJsonObject = {};
+  const jsonString = JSON.stringify(emptyJsonObject, null, 2); // The '2' adds indentation for readability
+  fs.writeFileSync(filepath, jsonString);
 });
 
 // We write it here so it is blown away and re-created at the start of every test run; and is in .gitignore

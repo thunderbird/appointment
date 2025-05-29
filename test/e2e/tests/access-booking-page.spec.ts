@@ -7,8 +7,8 @@ import {
   PLAYWRIGHT_TAG_PROD_SANITY,
   PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE,
   TIMEOUT_60_SECONDS,
-  APPT_TIMEZONE_SETTING_TORONTO,
   APPT_TARGET_ENV,
+  APPT_TIMEZONE_SETTING_PRIMARY,
 } from '../const/constants';
 
 var bookingPage: BookingPage;
@@ -63,7 +63,7 @@ test.beforeEach(async ({ page }) => {
 // appointment since the time slot value will not match); set the browser context to always be in
 // `America/Toronto` so the share link will be in the same timezone as the main account settings
 test.use({
-  timezoneId: APPT_TIMEZONE_SETTING_TORONTO,
+  timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
 
 test.describe('access booking page', () => {

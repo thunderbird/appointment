@@ -12,7 +12,7 @@ import {
   TIMEOUT_10_SECONDS,
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
-  APPT_TIMEZONE_SETTING_TORONTO,
+  APPT_TIMEZONE_SETTING_PRIMARY,
 } from '../const/constants';
 
 var bookingPage: BookingPage;
@@ -28,7 +28,7 @@ test.beforeEach(async ({ page }) => {
 // appointment since the time slot value will not match); set the browser context to always be in
 // `America/Toronto` so the share link will be in the same timezone as the main account settings
 test.use({
-  timezoneId: APPT_TIMEZONE_SETTING_TORONTO,
+  timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
 
 test.describe('book an appointment', () => {

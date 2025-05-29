@@ -42,12 +42,16 @@ export const APPT_LANGUAGE_SETTING_EN = 'EN — English';
 export const APPT_LANGUAGE_SETTING_DE = 'DE — German';
 export const APPT_THEME_SETTING_LIGHT = 'Light';
 export const APPT_THEME_SETTING_DARK = 'Dark';
+export const APPT_TIMEZONE_SETTING_PRIMARY = 'America/Toronto';
 export const APPT_TIMEZONE_SETTING_TORONTO = 'America/Toronto';
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax';
 export const APPT_START_OF_WEEK_SUN = 'Sunday';
 export const APPT_START_OF_WEEK_MON = 'Monday';
 export const APPT_START_OF_WEEK_DASHBOARD_SUN = 'Sun';
 export const APPT_START_OF_WEEK_DASHBOARD_MON = 'Mon';
+
+// account settings
+export const APPT_ACCT_SETTINGS_MAX_INVITE_CODE_COUNT = 10;
 
 // local browser store values
 export const APPT_BROWSER_STORE_LANGUAGE_EN = 'en';
