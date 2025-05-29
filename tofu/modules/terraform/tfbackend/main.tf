@@ -45,3 +45,4 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
   tags = var.tags
 }
+
