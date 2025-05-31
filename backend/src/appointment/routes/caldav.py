@@ -135,6 +135,8 @@ def disconnect_account(
     subscriber: models.Subscriber = Depends(get_subscriber),
 ):
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
+    # HERE: will need to update this, as it assumes that we can only
+    # have a single google calendar connected.
     ec = utils.list_first(
         repo.external_connection.get_by_type(
             db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id

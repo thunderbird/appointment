@@ -105,22 +105,19 @@ def google_callback(
     if google_id is None:
         return google_callback_error(is_setup, l10n('google-auth-fail'))
 
+    # QUESTION
+    # Will I need to get by type and by name (aka google_email)
+    # or is the google_id enough to differentiate?
     external_connection = repo.external_connection.get_by_type(
         db, subscriber.id, ExternalConnectionType.google, google_id
     )
 
-    # Create an artificial limit of one google account per account, mainly because we didn't plan for multiple accounts!
-    remainder = list(
-        filter(
-            lambda ec: ec.type_id != google_id,
-            repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google),
-        )
-    )
+    print(f'''
 
-    if len(remainder) > 0:
-        return google_callback_error(is_setup, l10n('google-only-one'))
+Just got repo.external_connection.get_by_type for google_id {google_id}
 
-    # Create or update the external connection
+''')
+
     if not external_connection:
         external_connection_schema = schemas.ExternalConnection(
             name=google_email,

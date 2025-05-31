@@ -853,7 +853,29 @@ class Tools:
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
+                # CHECK: won't I have the external_connection
+                # via the convenience prop?
                 google_calendars.append(calendar)
+                print(f'''
+                      found a google calendar.
+                      but it's not a pydantic model.
+                      it's a sqlalchemy model.
+                      even though the declared type is a `schemas.Calendar`
+                      how does that make sense?
+                ''')
+                values = {c.name: getattr(calendar, c.name) for c in calendar.__table__.columns}
+                print(values)
+                print('those were the values for the calendar model')
+                # CHECK: if calendar is a model, then I could just grab
+                # the external connection from the fk property
+                external_connection = repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+                print('here is the external connection')
+                for ext in external_connection:
+                    values = {c.name: getattr(ext, c.name) for c in ext.__table__.columns}
+                    print(values)
+                    print('those were the values for the model')
+                print('that was the external connection')
+
             else:
                 # Caldav - We don't have a smart way to batch these right now so just call them 1 by 1
                 con = CalDavConnector(

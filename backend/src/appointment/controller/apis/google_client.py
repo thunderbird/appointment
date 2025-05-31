@@ -234,6 +234,12 @@ class GoogleClient:
         calendars = self.list_calendars(token)
         error_occurred = False
         for calendar in calendars:
+            print(f'''
+                  we're in sync_calendars, looking at a specific calendar
+                  we seem to care a lot about calendar.get('id')
+                  which is {calendar.get('id')}
+
+''')
             cal = CalendarConnection(
                 title=calendar.get('summary'),
                 color=calendar.get('backgroundColor'),
@@ -245,6 +251,7 @@ class GoogleClient:
 
             # add calendar
             try:
+                # HERE: add the id of ExternalConnections record for the fk
                 repo.calendar.update_or_create(
                     db=db, calendar=cal, calendar_url=calendar.get('id'), subscriber_id=subscriber_id
                 )

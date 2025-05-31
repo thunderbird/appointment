@@ -20,6 +20,7 @@ def create(db: Session, external_connection: ExternalConnection):
     return db_external_connection
 
 
+# HERE: if the type is google, then throw an error if type_id is None
 def update_token(
     db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
 ):

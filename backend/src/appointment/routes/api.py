@@ -87,7 +87,8 @@ def update_me(
         start_of_week=me.start_of_week,
     )
 
-
+# HERE: this is how the frontend gets its calendars
+# I may not need to change anything...
 @router.get('/me/calendars', response_model=list[schemas.CalendarOut])
 def read_my_calendars(
     db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber), only_connected: bool = True
@@ -156,6 +157,9 @@ def create_my_calendar(
 ):
     """endpoint to add a new calendar connection for authenticated subscriber"""
 
+    # HERE: will need to update this, as it assumes that we can only
+    # have a single google calendar connected.
+    # the frontend will probably need to specify the external connection id
     # Test the connection first
     if calendar.provider == CalendarProvider.google:
         external_connection = utils.list_first(
@@ -281,6 +285,10 @@ def read_remote_calendars(
     db: Session = Depends(get_db),
 ):
     """endpoint to get calendars from a remote CalDAV server"""
+
+    # HERE: will need to update this, as it assumes that we can only
+    # have a single google calendar connected.
+    # the frontend will probably need to specify the external connection
     if connection.provider == CalendarProvider.google:
         external_connection = utils.list_first(
             repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
@@ -326,12 +334,17 @@ def sync_remote_calendars(
 ):
     """endpoint to sync calendars from a remote server"""
     # Create a list of connections and loop through them with sync
+    # HERE: will need to update this, as it assumes that we can only
+    # have a single google calendar connected.
+    # You'll get *all* the external connections so you can loop through each of them
+    # oh, and pluralize this variable
     google_ec = utils.list_first(
         repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
     )
     caldav_ecs = repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.caldav)
 
     # Filter out any nulls
+    # HERE: I think you'll want to add a * to google_ec
     ecs = list(filter(lambda ec: ec, [google_ec, *caldav_ecs]))
 
     if len(ecs) == 0:
@@ -384,6 +397,10 @@ def read_remote_events(
         raise validation.CalendarNotFoundException()
 
     if db_calendar.provider == CalendarProvider.google:
+        # HERE: will need to update this, as it assumes that we can only
+        # have a single google calendar connected.
+        # You'll want to use db_calendar.external_connection_id
+        # or...just db_calendar.external_connection? can't i just use it as a property instead of fetching?
         external_connection = utils.list_first(
             repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
         )

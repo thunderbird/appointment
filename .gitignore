@@ -15,6 +15,7 @@ venv
 .coverage
 htmlcov
 caldav
+node_modules
 
 # Mac noise
 **/.DS_Store

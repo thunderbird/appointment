@@ -240,6 +240,9 @@ class Calendar(Base):
     )
     schedules: Mapped[list['Schedule']] = relationship('Schedule', cascade='all,delete', back_populates='calendar')
 
+    external_connection_id = Column(Integer, ForeignKey('external_connections.id'), nullable=True)
+    external_connection: Mapped['ExternalConnections'] = relationship('ExternalConnections', back_populates='calendars', lazy='joined')
+
     def __str__(self):
         return f'Calendar: {self.id}'
 
@@ -453,6 +456,8 @@ class ExternalConnections(Base):
     type_id = Column(encrypted_type(String), index=True)
     token = Column(encrypted_type(String, length=2048), index=False)
     owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='external_connections')
+
+    calendars: Mapped[list[Calendar]] = relationship('Calendar', back_populates='external_connection')
 
     def __str__(self):
         return f'External Connection: {self.id}'
