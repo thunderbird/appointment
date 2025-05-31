@@ -189,9 +189,12 @@ class Subscriber(HasSoftDelete, Base):
         foreign_keys='[Invite.owner_id]'
     )
 
+    # HERE: rename to get_external_connections_by_type
     def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
         """Retrieves the first found external connection by type or returns None if not found"""
         return next(filter(lambda ec: ec.type == type, self.external_connections), None)
+    # HERE: add a method get_external_connection_by_id(id: int)
+
 
     @property
     def preferred_email(self):

@@ -51,6 +51,7 @@ def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool
     return query.all()
 
 
+# CHECK: do I need to associate this with an external connection?
 def create(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int):
     """create new calendar for owner, if not already existing"""
     db_calendar = models.Calendar(**calendar.model_dump(), owner_id=subscriber_id)
