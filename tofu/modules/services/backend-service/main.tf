@@ -158,6 +158,9 @@ resource "aws_ecs_service" "backend_service" {
     security_groups = [var.security_group]
     subnets         = var.subnets
   }
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 
   health_check_grace_period_seconds = 180
   task_definition                   = aws_ecs_task_definition.backend.arn
