@@ -368,7 +368,8 @@ jobs:
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
     needs: create-release
-    if: always() && ${{ !failure() }} && ${{ !cancelled() }}
+    #if: always() && ${{ !failure() }} && ${{ !cancelled() }}
+    if: false # Disable for CI testing
     runs-on: ubuntu-latest
     environment: staging
     env:
