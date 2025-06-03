@@ -102,6 +102,10 @@ resource "aws_ecs_task_definition" "backend" {
         {
           "name": "REDIS_USE_CLUSTER",
           "value": "True"
+        },
+        {
+          "name": "DEPLOY_TRICK",
+          "value": "1"
         }
       ],
       secrets = [
@@ -142,10 +146,6 @@ resource "aws_ecs_task_definition" "backend" {
   ])
 }
 
-data "aws_ecs_task_definition" "backend" {
-  task_definition = aws_ecs_task_definition.backend.family
-}
-
 resource "aws_ecs_service" "backend_service" {
   name    = "${var.name_prefix}-backend"
   cluster = var.ecs_cluster
@@ -165,7 +165,7 @@ resource "aws_ecs_service" "backend_service" {
 
   depends_on = [aws_ecs_task_definition.backend]
   health_check_grace_period_seconds = 180
-  task_definition                   = data.aws_ecs_task_definition.backend.arn
+  task_definition                   = aws_ecs_task_definition.backend.arn
   desired_count                     = 2
   tags                              = var.tags
 }
