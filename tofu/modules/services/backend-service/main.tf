@@ -102,10 +102,6 @@ resource "aws_ecs_task_definition" "backend" {
         {
           "name": "REDIS_USE_CLUSTER",
           "value": "True"
-        },
-        {
-          "name": "DEPLOY_TRICK",
-          "value": "1"
         }
       ],
       secrets = [
