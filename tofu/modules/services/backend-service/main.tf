@@ -1,26 +1,3 @@
-resource "aws_ecs_service" "backend_service" {
-  name    = "${var.name_prefix}-backend"
-  cluster = var.ecs_cluster
-
-  launch_type = "FARGATE"
-
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = "backend"
-    container_port   = 5000
-  }
-
-  network_configuration {
-    security_groups = [var.security_group]
-    subnets         = var.subnets
-  }
-
-  health_check_grace_period_seconds = 180
-  task_definition                   = aws_ecs_task_definition.backend.arn
-  desired_count                     = 2
-  tags                              = var.tags
-}
-
 resource "aws_ecs_task_definition" "backend" {
   family                   = "appointment-definition"
   execution_role_arn       = var.task_execution_role
@@ -163,4 +140,27 @@ resource "aws_ecs_task_definition" "backend" {
       }
     }
   ])
+}
+
+resource "aws_ecs_service" "backend_service" {
+  name    = "${var.name_prefix}-backend"
+  cluster = var.ecs_cluster
+
+  launch_type = "FARGATE"
+
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = "backend"
+    container_port   = 5000
+  }
+
+  network_configuration {
+    security_groups = [var.security_group]
+    subnets         = var.subnets
+  }
+
+  health_check_grace_period_seconds = 180
+  task_definition                   = aws_ecs_task_definition.backend.arn
+  desired_count                     = 2
+  tags                              = var.tags
 }
