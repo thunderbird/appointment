@@ -5,7 +5,6 @@ import { DashboardPage } from '../pages/dashboard-page';
 import {
   APPT_DISPLAY_NAME,
   PLAYWRIGHT_TAG_PROD_SANITY,
-  PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE,
   TIMEOUT_60_SECONDS,
   APPT_TARGET_ENV,
   APPT_TIMEZONE_SETTING_PRIMARY,
@@ -68,7 +67,7 @@ test.use({
 
 test.describe('access booking page', () => {
   test('able to access booking page via short link', {
-    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE],
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY],
   }, async ({ page }) => {
     await bookingPage.gotoBookingPageShortUrl();
     await verifyBookingPageLoaded();

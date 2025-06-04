@@ -8,12 +8,17 @@ import {
   APPT_BOOKEE_EMAIL,
   PLAYWRIGHT_TAG_PROD_SANITY,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
+  PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE,
   PLAYWRIGHT_TAG_E2E_SUITE,
   TIMEOUT_10_SECONDS,
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
   APPT_TIMEZONE_SETTING_PRIMARY,
 } from '../const/constants';
+
+
+// just temp for mobile until storage works on mobile browser
+import { navigateToAppointmentAndSignIn } from '../utils/utils';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;
@@ -27,6 +32,7 @@ test.beforeEach(async ({ page }) => {
 // appointment account settings could be a different timezone (if so the test will fail to find the booked
 // appointment since the time slot value will not match); set the browser context to always be in
 // `America/Toronto` so the share link will be in the same timezone as the main account settings
+// This only works on desktop browsers unfortunately.
 test.use({
   timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
@@ -34,8 +40,9 @@ test.use({
 test.describe('book an appointment', () => {
 
   test('able to request a booking', {
-    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY, PLAYWRIGHT_TAG_PROD_NIGHTLY_MOBILE],
   }, async ({ page }) => {
+
     // in order to ensure we find an available slot we can click on, first switch to week view URL
     await bookingPage.gotoBookingPageWeekView();
     await expect(bookingPage.titleText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
@@ -77,6 +84,9 @@ test.describe('book an appointment', () => {
     await bookingPage.requestSentCloseBtn.click();
 
     // note: we are already signed into Appointment (via our auth-setup)
+
+    // just temp for mobile until auth storage works; DO not check in
+    await navigateToAppointmentAndSignIn(page);
 
     // now verify a corresponding pending booking was created on the host account's list of pending bookings
     // (drop the day of the week from our time slot string as this function just needs the month, day, and year)
