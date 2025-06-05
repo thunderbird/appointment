@@ -1,10 +1,9 @@
 """Module: repo.subscriber
 
-Repository providing CRUD functions for subscriber database models. 
+Repository providing CRUD functions for subscriber database models.
 """
 
 import datetime
-import logging
 import secrets
 
 from sqlalchemy.orm import Session
@@ -138,7 +137,7 @@ def verify_link(db: Session, url: str):
     if not subscriber:
         return False
 
-    clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
+    clean_url_with_short_link = clean_url + f'{subscriber.short_link_hash}'
     signed_signature = sign_url(clean_url_with_short_link)
 
     # Verify the signature matches the incoming one
