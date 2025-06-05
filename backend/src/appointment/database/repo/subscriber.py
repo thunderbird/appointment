@@ -143,7 +143,6 @@ def verify_link(db: Session, url: str):
     clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
     signed_signature = sign_url(clean_url_with_short_link)
 
-
     logging.info(f'!! Username [{username}]')
     logging.info(f'!! Signed [{signed_signature}] vs signature [{signature}]')
     logging.info(f'!! Clean url [{clean_url}]')
