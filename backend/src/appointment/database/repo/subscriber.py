@@ -133,6 +133,7 @@ def verify_link(db: Session, url: str):
     """Check if a given url is a valid signed subscriber profile link
     Return subscriber if valid.
     """
+    logging.info(f'!! -------')
     username, signature, clean_url = utils.retrieve_user_url_data(url)
     subscriber = get_by_username(db, username)
     if not subscriber:
@@ -142,7 +143,11 @@ def verify_link(db: Session, url: str):
     clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
     signed_signature = sign_url(clean_url_with_short_link)
 
+
+    logging.info(f'!! Username [{username}]')
     logging.info(f'!! Signed [{signed_signature}] vs signature [{signature}]')
+    logging.info(f'!! Clean url [{clean_url}]')
+    logging.info(f'!! Short link hash [{subscriber.short_link_hash}]')
 
     # Verify the signature matches the incoming one
     if signed_signature == signature:
