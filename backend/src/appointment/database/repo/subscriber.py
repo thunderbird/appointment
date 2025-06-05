@@ -4,6 +4,7 @@ Repository providing CRUD functions for subscriber database models.
 """
 
 import datetime
+import logging
 import secrets
 
 from sqlalchemy.orm import Session
@@ -135,10 +136,13 @@ def verify_link(db: Session, url: str):
     username, signature, clean_url = utils.retrieve_user_url_data(url)
     subscriber = get_by_username(db, username)
     if not subscriber:
+        logging.info(f'!! Could not find username {username}')
         return False
 
     clean_url_with_short_link = clean_url + f"{subscriber.short_link_hash}"
     signed_signature = sign_url(clean_url_with_short_link)
+
+    logging.info(f'!! Signed [{signed_signature}] vs signature [{signature}]')
 
     # Verify the signature matches the incoming one
     if signed_signature == signature:
