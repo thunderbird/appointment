@@ -1,29 +1,11 @@
 services:
-
-  # Thunderbird Accounts
-  accounts:
-    extends:
-      file: accounts/docker-compose.yml
-      service: backend
-    environment:
-      - REDIS_INTERNAL_DB=1  # Force accounts to use a different redis db
-    ports:
-      - "8087:8087"
-
-  postgres:
-    volumes:
-      - accounts_db:/var/lib/postgresql/data
-    extends:
-      file: accounts/docker-compose.yml
-      service: postgres
-
-  # Thunderbird Appointment
+  # Thunderbird Appointment without external services
   backend:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
     ports:
-      - "5173:5173"
+      - 5173:5173
     volumes:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
@@ -39,7 +21,7 @@ services:
       - './frontend:/app'
       - '/app/node_modules'
     ports:
-      - "8080:8080"
+      - 8080:8080
     environment:
       - WATCHPACK_POLLING=true
 
@@ -48,7 +30,7 @@ services:
     volumes:
       - db:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - 3306:3306
     environment:
       - MYSQL_DATABASE=appointment
       - MYSQL_USER=tba
@@ -66,16 +48,16 @@ services:
     volumes:
       - cache:/data
     ports:
-      - "6379:6379" # Redis exposed on port 6379
-      - "8070:8001" # Insights exposed on port 8070
+      - 6379:6379 # Redis exposed on port 6379
+      - 8070:8001 # Insights exposed on port 8070
 
   mailpit:
     image: axllent/mailpit
     environment:
       - MP_SMTP_AUTH_ALLOW_INSECURE=true
     ports:
-      - "8025:8025" # Web UI
-      - "1025:1024" # SMTP
+      - 8025:8025 # Web UI
+      - 1025:1024 # SMTP
 
 volumes:
   accounts_db: {}
