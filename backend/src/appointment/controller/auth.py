@@ -2,7 +2,7 @@
 
 Handle authentication with Thunderbird Accounts or FxA and get subscription data.
 """
-import logging
+
 import os
 import hashlib
 import hmac
@@ -72,9 +72,6 @@ def signed_url_by_subscriber(subscriber: schemas.Subscriber):
     # We also need to use the default url, as short urls are currently setup as a redirect
     url = ''.join([base_url, subscriber.short_link_hash])
 
-    logging.info('@@ -----')
-    logging.info(f'@@ Username {subscriber.username}')
-    logging.info(f'@@ Signing url [{base_url}] and [{subscriber.short_link_hash}]')
 
     signature = sign_url(url)
 
