@@ -2,7 +2,7 @@ alembic==1.15.2
 argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
 Babel==2.17.0
-caldav==1.4.0
+caldav==1.6.0
 cryptography==44.0.2
 fastapi[standard]==0.115.12
 fluent.runtime==0.4.0
