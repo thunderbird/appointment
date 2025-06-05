@@ -54,7 +54,7 @@ def user_links_by_subscriber(subscriber: models.Subscriber):
     Note1 that this contains a trailing slash
     Note2 if short url isn't supported then both return links will be the same"""
     short_url = os.getenv('SHORT_BASE_URL')
-    base_url = f"{os.getenv('FRONTEND_URL')}/user"
+    base_url = f'{os.getenv('FRONTEND_URL')}/user'
 
     # If we don't have a short url, then use the default url with /user added to it
     if not short_url:
@@ -76,7 +76,7 @@ def signed_url_by_subscriber(subscriber: schemas.Subscriber):
     signature = sign_url(url)
 
     # We return with the signed url signature
-    return ''.join([base_url, signature])
+    return ''.join([short_url, signature])
 
 
 def schedule_slugs_by_subscriber(db, subscriber: models.Subscriber) -> dict:
