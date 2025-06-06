@@ -49,11 +49,12 @@ def sign_url(url: str):
     return signature
 
 
-def user_link_by_subscriber(subscriber: models.Subscriber):
-    """Returns a user link based off the subscriber's username
-    Note that this contains a trailing slash"""
+def user_links_by_subscriber(subscriber: models.Subscriber):
+    """Returns a short link and a long link for the user's booking page.
+    Note1 that this contains a trailing slash
+    Note2 if short url isn't supported then both return links will be the same"""
     short_url = os.getenv('SHORT_BASE_URL')
-    base_url = f"{os.getenv('FRONTEND_URL')}/user"
+    base_url = f'{os.getenv('FRONTEND_URL')}/user'
 
     # If we don't have a short url, then use the default url with /user added to it
     if not short_url:
@@ -61,22 +62,21 @@ def user_link_by_subscriber(subscriber: models.Subscriber):
 
     url_safe_username = urllib.parse.quote_plus(subscriber.username)
 
-    return f'{short_url}/{url_safe_username}/'
+    return f'{short_url}/{url_safe_username}/', f'{base_url}/{url_safe_username}/'
 
 
 def signed_url_by_subscriber(subscriber: schemas.Subscriber):
     """helper to generated signed url for given subscriber"""
-    base_url = user_link_by_subscriber(subscriber)
+    short_url, base_url = user_links_by_subscriber(subscriber)
 
     # We sign with a different hash that the end-user doesn't have access to
-    # We also need to use the default url, as short urls are currently setup as a redirect
+    # We only sign with the long user link
     url = ''.join([base_url, subscriber.short_link_hash])
-
 
     signature = sign_url(url)
 
     # We return with the signed url signature
-    return ''.join([base_url, signature])
+    return ''.join([short_url, signature])
 
 
 def schedule_slugs_by_subscriber(db, subscriber: models.Subscriber) -> dict:
