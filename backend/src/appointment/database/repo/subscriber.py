@@ -4,7 +4,6 @@ Repository providing CRUD functions for subscriber database models.
 """
 
 import datetime
-import logging
 import secrets
 
 from sqlalchemy.orm import Session
