@@ -7,6 +7,11 @@ from sqlalchemy.orm import Session
 from .. import models, schemas, repo
 
 
+def exists(db: Session, appointment_id: int):
+    """true if appointment of given id exists"""
+    return True if db.get(models.Appointment, appointment_id) is not None else False
+
+
 def create(db: Session, appointment: schemas.AppointmentFull, slots: list[schemas.SlotBase] = []):
     """create new appointment with slots for calendar"""
     db_appointment = models.Appointment(**appointment.model_dump())

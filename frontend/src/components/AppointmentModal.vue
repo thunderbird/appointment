@@ -15,12 +15,17 @@ import {
   IconVideo,
   IconX,
 } from '@tabler/icons-vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import CautionButton from '@/elements/CautionButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import { useUserStore } from '@/stores/user-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
 
 const user = useUserStore();
+const apmtStore = useAppointmentStore();
+
+// component emits
+const emit = defineEmits(['close']);
 
 // component constants
 const { t } = useI18n();
@@ -42,13 +47,21 @@ const initials = (name: string) => name.split(' ').map((p) => p[0]).join('');
 const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
 const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
 
+const status = computed(() => props.appointment?.slots[0].booking_status);
+const isExpired = computed(() => {
+  return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
+});
+
+// Handle decision
 const answer = (isConfirmed: boolean) => {
   window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
 };
 
-// component emits
-const emit = defineEmits(['close']);
-
+// Handle deletion
+const deleteAppointment = () => {
+  apmtStore.deleteAppointment(props.appointment?.id);
+  emit('close');
+};
 </script>
 
 <template>
@@ -163,19 +176,27 @@ const emit = defineEmits(['close']);
         </div>
         <div class="rounded-lg border border-gray-400 p-4 dark:border-gray-600">{{ appointment.details }}</div>
       </div>
-      <div class="p-6" v-if="appointment?.slots[0].booking_status === BookingStatus.Requested">
+      <div class="p-6" v-if="status === BookingStatus.Booked">
+        <p>This booking is confirmed.</p>
+      </div>
+      <div class="p-6" v-else-if="isExpired">
+        <p>This booking is expired.</p>
+        <div class="mt-4 flex justify-center gap-4">
+          <danger-button class="btn-deny" @click="deleteAppointment()" :title="t('label.delete')">
+            {{ t('label.deleteBooking') }}
+          </danger-button>
+        </div>
+      </div>
+      <div class="p-6" v-else-if="status === BookingStatus.Requested">
         <p>{{ attendeesSlots.map((s) => s.attendee.email).join(', ') }} have requested a booking at this time.</p>
         <div class="mt-4 flex justify-center gap-4">
           <primary-button class="btn-confirm" @click="answer(true)" :title="t('label.confirm')">
             {{ t('label.confirmBooking') }}
           </primary-button>
-          <caution-button class="btn-deny" @click="answer(false)" :title="t('label.deny')">
+          <danger-button class="btn-deny" @click="answer(false)" :title="t('label.deny')">
             {{ t('label.denyBooking') }}
-          </caution-button>
+          </danger-button>
         </div>
-      </div>
-      <div class="p-6" v-if="appointment?.slots[0].booking_status === BookingStatus.Booked">
-        <p>This booking is confirmed.</p>
       </div>
     </div>
   </transition>
