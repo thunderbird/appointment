@@ -71,8 +71,24 @@ export const useAppointmentStore = defineStore('appointments', () => {
     isLoaded.value = false;
   };
 
+  /**
+   * Remove an appointment and all assigned time slots
+   */
+  const deleteAppointment = async (id: number) => {
+    await call.value(`apmt/${id}`).delete();
+    await fetch();
+  };
+
   return {
-    isLoaded, appointments, pendingAppointments, pendingFutureAppointments, init, postFetchProcess, fetch, $reset,
+    isLoaded,
+    appointments,
+    pendingAppointments,
+    pendingFutureAppointments,
+    init,
+    postFetchProcess,
+    fetch,
+    $reset,
+    deleteAppointment,
   };
 });
 

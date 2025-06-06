@@ -668,8 +668,8 @@ def save_remote_event(event, calendar, subscriber, slot, db, redis, google_clien
 
 
 def delete_remote_event(uid: str, calendar, subscriber, db, redis, google_client):
-    """Create or update a remote event
-    if is_hold: create an event in remote calendar and send invitation mail
+    """Delete a remote event
+    if is_hold: remove an event from remote calendar
     """
     con, _ = get_remote_connection(calendar, subscriber, db, redis, google_client)
 

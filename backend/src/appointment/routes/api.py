@@ -444,6 +444,17 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
         data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode('utf-8'),
     )
 
+@router.delete('/apmt/{id}')
+def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """endpoint to remove a appointment from db"""
+    if not repo.appointment.exists(db, appointment_id=id):
+        raise validation.AppointmentNotFoundException()
+    if not repo.appointment.is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
+        raise validation.AppointmentNotAuthorizedException()
+
+    repo.appointment.delete(db=db, appointment_id=id)
+    return True
+
 
 @router.post('/support')
 def send_feedback(
