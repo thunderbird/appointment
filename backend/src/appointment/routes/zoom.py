@@ -88,7 +88,7 @@ def zoom_callback(
         creds = zoom_client.get_credentials(code)
     except ZoomScopeChanged:
         # Use unknown error as we'll collect the information in sentry
-        return zoom_callback_error(not subscriber.is_setup, l10n('zoom-unknown-error'))
+        return zoom_callback_error(subscriber.is_setup, l10n('zoom-unknown-error'))
 
     # Get the zoom user info, so we can associate their id with their appointment subscriber
     zoom_user_info = zoom_client.get_me()
