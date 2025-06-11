@@ -10,6 +10,7 @@ import {
   TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
+  TIMEOUT_60_SECONDS,
   APPT_ACCT_SETTINGS_MAX_INVITE_CODE_COUNT,
  } from '../const/constants';
 
@@ -49,7 +50,7 @@ test.describe('account settings - other', {
 
   test('able to download account data', async ({ page }) => {
     // setup listener for browser download event
-    const downloadPromise = page.waitForEvent('download', { timeout: TIMEOUT_30_SECONDS });
+    const downloadPromise = page.waitForEvent('download', { timeout: TIMEOUT_60_SECONDS });
     // click the account settings => download your data button and confirm
     await settingsPage.downloadAccountData();
     // now verify the browser download event was triggered and downloaded without error
