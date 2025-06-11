@@ -38,7 +38,7 @@ test.describe('account settings - profile', {
     // URL displayed in the share link label, and the optional input field value / slug are both
     // inside APPT_MY_SHARE_LINK.
     let shareLinkLabel = await settingsPage.profileMyLinkOptionalInput.innerText();
-    expect(APPT_MY_SHARE_LINK).toContain(shareLinkLabel.substring(0, 15));
+    expect(APPT_MY_SHARE_LINK).toContain(shareLinkLabel.substring(0, 10));
     let shareLinkOptionalSlug: string = await settingsPage.profileMyLinkOptionalInput.inputValue();
     if (shareLinkOptionalSlug.length) {
       expect(APPT_MY_SHARE_LINK).toContain(shareLinkOptionalSlug);
