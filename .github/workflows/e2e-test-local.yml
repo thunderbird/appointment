@@ -1,0 +1,105 @@
+name: e2e-test-local
+
+concurrency:
+  group: e2e-test-local
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!main'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  run-e2e-tests-local:
+    runs-on: ubuntu-latest
+    environment: development
+    env:
+      APPT_LOGIN_EMAIL: ${{ secrets.E2E_APPT_DEV_LOGIN_EMAIL }}
+      APPT_LOGIN_PWORD: ${{ secrets.E2E_APPT_DEV_LOGIN_PASSWORD }}
+      APPT_DISPLAY_NAME: ${{ secrets.E2E_APPT_DEV_DISPLAY_NAME }}
+      APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_DEV_MY_SHARE_LINK }}
+      APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_DEV_BOOKEE_EMAIL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install backend dependencies
+        run: |
+          cd ./backend
+          python -m pip install --upgrade pip
+          python -m pip install -e .'[test]'
+
+      - name: Set up local backend environment
+        run: |
+          cd ./backend
+          cp .env.example .env
+          echo "APP_ALLOW_FIRST_TIME_REGISTER=True" >> .env
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install frontend dependencies
+        run: |
+          cd ./frontend
+          npm install
+
+      - name: Set up local frontend environment
+        run: |
+          cd ./frontend
+          cp .env.example .env
+
+      - name: Build frontend
+        run: |
+          cd ./frontend && npm run build
+
+      - name: Start local stack via docker
+        run: docker compose up -d --build
+
+      - name: Wait for 10 seconds while containers just started
+        run: sleep 10s
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'test/e2e/package-lock.json'
+
+      - name: Install E2E test dependencies
+        # Playwright install-deps is dependencies needed to install browsers (playwright install)
+        run: |
+          cd ./test/e2e
+          npm install
+          npx playwright install-deps
+          npx playwright install
+
+      - name: Run E2E tests against local stack
+        id: e2e
+        # TEMP don't send failure email while testing this out
+        continue-on-error: true
+        run: |
+          cd ./test/e2e
+          cp .env.dev.example .env
+          npm run e2e-test
+
+      - uses: actions/upload-artifact@v4
+        if: always() && ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: test/e2e/playwright-report/
+          retention-days: 7

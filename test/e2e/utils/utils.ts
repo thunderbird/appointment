@@ -19,6 +19,7 @@ import {
     TIMEOUT_60_SECONDS,
 } from "../const/constants";
 
+
 /**
  * Navigate to and sign into the Appointment application target environment, using the URL and
  * credentials provided in the .env file. When signing into Appointment on production or stage
@@ -50,6 +51,13 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     } else {
         // local dev env doesn't use fxa; just signs into appt using username and pword
         await homePage.localApptSignIn();
+
+        // when running in CI on a PR the appt stack is started fresh each time; so the FTUE will appear
+        // go through the first time user setup so that the appt acct is ready before heading to dashboard
+        const on_create_profile = await homePage.createProfileHeader.isVisible();
+        if (on_create_profile) {
+            await homePage.firstTimeUserSetup();
+        }
     }
 
     // now that we're signed into the appointment dashboard give it time to load

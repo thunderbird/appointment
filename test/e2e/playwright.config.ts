@@ -28,8 +28,7 @@ export default defineConfig({
   // Individual test timeout - a single test will time out if it is still running after this time (ms)
   timeout: 90 * 1000, // 1.5 minutes
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  // When running in CI we don't use the html report as we use BrowserStack's reporting
-  reporter: process.env.CI ? [['list']] : [['html']] ,
+  reporter: [['html']],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
