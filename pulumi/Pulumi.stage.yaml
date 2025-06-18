@@ -1,0 +1,4 @@
+config:
+  aws:region: eu-central-1
+  appointment:database-connection:
+    secure: AAABALZe3L2PLYGqlwESCBVD/SIwe9al6arsR3zQJUs8SW/mFN9GtnQvtnYbgONcFJyZP5yWjoJtNq7sCfbIE1kNNY00un4zoZrntnile0rvBs4d0DQIG0iyEFlKfopBXXabHNHGAdUnCvp9LEbCPG1W9PhkQk1X/nRGSbOaWKM7nLNxzK4apljCihe3LLes07DLVDgWyWbHtc+fIEWV70T+mb4hHyxKTYOJy+KcHzNFUF5DNbW0Vpd8DQXTuG9eVIpt2Wyv/vb90W7KVeFaxUx+q4Ip/ftxffKm5P7+BhoIbVg4E3sw

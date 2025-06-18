@@ -1,0 +1,118 @@
+---
+resources:
+  tb:network:MultiCidrVpc:
+    appointment:
+      cidr_block: 10.21.0.0/16
+      subnets:
+        eu-central-1a:
+          - 10.21.0.0/17
+        eu-central-1b:
+          - 10.21.128.0/17
+  
+  # The __main.py__ here is very specific in the following way:
+  # For each ECS cluster you eventually define, you **must** have one entry by the same exact name in the
+  # `load_balancers` and `containers` sections below. If the cluster does not expose a service (f/ex, uses
+  # `build_load_balancer: False`), you may set the `load_balancers` entry to `null`.
+  tb:network:SecurityGroupWithRules:
+    load_balancers:
+      backend:
+        rules:
+          ingress:
+            - description: TLS traffic to the load balancer from the world
+              cidr_blocks:
+                - 0.0.0.0/0
+              protocol: tcp
+              from_port: 443
+              to_port: 443
+          egress:
+            - description: Allow outbound traffic to anywhere
+              protocol: tcp
+              from_port: 0
+              to_port: 65535
+              cidr_blocks:
+                - 0.0.0.0/0
+        
+    containers:
+      backend:
+        rules:
+          ingress:
+            - description: Allow traffic from the load balancer to the container
+              # Sources are set in code
+              protocol: tcp
+              from_port: 5173
+              to_port: 5173
+          egress:
+            - description: Allow traffic from the container out to the Internet
+              protocol: tcp
+              from_port: 0
+              to_port: 65535
+              cidr_blocks:
+                - 0.0.0.0/0
+  
+  tb:secrets:PulumiSecretsManager:
+    pulumi:
+      recovery_window_in_days: 0
+      secret_names:
+        - database-connection
+  
+  tb:ec2:SshableInstance: {}
+  # Fill out this template to build an SSH bastion
+  # tb:ec2:SshableInstance:
+  #   bastion:
+  #     ssh_keypair_name: your-ec2-keypair
+  #     source_cidrs:
+  #       - your.ip.addr.ess/32
+
+  tb:elasticache:ElastiCacheReplicationGroup:
+    backend:
+      description: Appointment backend (stage)
+      engine: redis
+      engine_version: "7.1"
+      node_type: cache.t3.micro
+      num_cache_nodes: 1
+      parameter_group_family: redis7
+      parameter_group_params: []
+      port: 6379
+
+  tb:fargate:FargateClusterWithLogging:
+    backend:
+      assign_public_ip: True
+      desired_count: 1
+      health_check_grace_period_seconds: 30 # Time before the LB checks for health of a new backend
+      internal: False
+      services:
+        backend:
+          listener_port: 443
+          listener_proto: HTTPS
+          listener_cert_arn: 
+          container_port: 5137
+          container_name: backend
+          # "name" field is arbitrary, but must be unique and no longer than 32 chars
+          name: appointment-backend-stage
+          health_check:
+            healthy_threshold: 2
+            unhealthy_threshold: 5
+            interval: 30
+            path: /health/ready
+            port: 9000
+      task_definition:
+        network_mode: awsvpc
+        cpu: 512
+        memory: 2048
+        requires_compatibilities:
+          - FARGATE
+        container_definitions:
+          accounts:
+            image: 768512802988.dkr.ecr.us-east-1.amazonaws.com/appointment:backend-82af7fd87268812ac42bfd0e4e542d6f234e14ac
+            portMappings:
+              - name: backend
+                containerPort: 5173
+                hostPort: 5173
+                protocol: tcp
+                appProtocol: http
+            linuxParameters:
+              initProcessEnabled: True
+            secrets:
+              - name: DATABASE_SECRETS
+                valueFrom: 768512802988.dkr.ecr.us-east-1.amazonaws.com/appointment:backend-82af7fd87268812ac42bfd0e4e542d6f234e14ac
+            environment:
