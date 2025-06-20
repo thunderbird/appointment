@@ -775,8 +775,10 @@ class Tools:
                     # Generate each timeslot based on the selected duration. We just loop through the difference of the
                     # start and end time and step by slot duration in seconds.
                     slots += [
-                        schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration)
-                        for time in range(time_start, total_time, slot_duration_seconds)
+                        schemas.SlotBase(
+                            start=current_datetime + timedelta(seconds=time),
+                            duration=schedule.slot_duration
+                        ) for time in range(time_start, total_time, slot_duration_seconds)
                     ]
 
         return slots
