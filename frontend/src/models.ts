@@ -428,9 +428,9 @@ export type Time<T> = {
 export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
 
-export type SelectOption = {
+export type SelectOption<T = number> = {
   label: string;
-  value: string | number;
+  value: T;
 };
 
 export type Coloring = {

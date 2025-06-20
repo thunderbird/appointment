@@ -57,9 +57,9 @@ def sync_multiple(db: Session, availabilities: list[schemas.AvailabilityBase], s
     # Delete all records that were removed from the availability set
     db_schedule = repo.schedule.get(db, schedule_id)
     for record in db_schedule.availabilities:
-        # TODO: We currently only have one availability per day. Later we might want to extend this condition for the
-        # actual times on that day.
-        if record.day_of_week not in [a.day_of_week for a in availabilities]:
+        if (record.day_of_week not in [a.day_of_week for a in availabilities] or len(
+            [a for a in availabilities if (a.day_of_week == record.day_of_week and a.start_time == record.start_time)]
+        ) == 0):
             delete(db, record.id)
 
 
@@ -69,9 +69,7 @@ def find_on_schedule(db: Session, availability: schemas.AvailabilityBase, schedu
         db.query(models.Availability)
         .filter(models.Availability.schedule_id == schedule_id)
         .filter(models.Availability.day_of_week == availability.day_of_week)
-        # TODO: This might be needed later if we implement multiple time slots per day
-        # .filter(models.Availability.start_time == availability.start_time)
-        # .filter(models.Availability.end_time == availability.end_time)
+        .filter(models.Availability.start_time == availability.start_time)
         .first()
     )
     return db_availability

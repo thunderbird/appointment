@@ -5,7 +5,7 @@ import { HTMLInputElementEvent, SelectOption } from '@/models';
 // component properties
 interface Props {
   name: string;
-  options: SelectOption[];
+  options: SelectOption<number | string>[];
   required?: boolean;
   disabled?: boolean;
 }
@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), {
 });
 
 defineEmits(['submit']);
-const model = defineModel<number|string>();
+const model = defineModel<number | string>();
 const isInvalid = ref(false);
 const validationMessage = ref('');
 

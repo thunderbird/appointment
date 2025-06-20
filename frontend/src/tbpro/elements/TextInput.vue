@@ -34,6 +34,7 @@ interface Props {
   required?: boolean;
   disabled?: boolean;
   smallText?: boolean;
+  smallInput?: boolean;
   maxLength?: number|string;
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -45,6 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
   required: false,
   disabled: false,
   smallText: false,
+  smallInput: false,
   maxLength: null,
 });
 
@@ -52,7 +54,7 @@ const emit = defineEmits(['submit', 'blur']);
 defineExpose({ focus });
 
 // Calculate padding left for the actual input considering prefix width and existing padding
-const inputPaddingLeft = computed(() => (props.prefix ? `${inputPrefixWidth.value + 12}px` : '12px'));
+const inputPaddingLeft = computed(() => (props.prefix ? `${inputPrefixWidth.value + 12}px` : null));
 
 const onInvalid = (evt: HTMLInputElementEvent) => {
   isInvalid.value = true;
@@ -84,9 +86,13 @@ const onChange = () => {
       <span class="tbpro-input-wrapper">
         <span v-if="prefix" ref="inputPrefix" class="tbpro-input-prefix">{{ prefix }}</span>
         <input
-          class="tbpro-input-element"
           v-model="model"
-          :class="{ 'dirty': isDirty, 'error': error !== null }"
+          class="tbpro-input-element"
+          :class="{
+            'small-input': props.smallInput,
+            'dirty': isDirty,
+            'error': error !== null,
+          }"
           :type="type"
           :id="name"
           :name="name"
@@ -193,6 +199,11 @@ const onChange = () => {
       background-color: var(--colour-neutral-base);
       border-radius: var(--border-radius);
       @mixin faded-border var(--colour-btn-border);
+
+      &.small-input {
+        padding: .125rem;
+        font-size: .75rem;
+      }
   
       &:hover:enabled {
         --colour-btn-border: var(--colour-neutral-border-intense);

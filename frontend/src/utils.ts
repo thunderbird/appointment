@@ -11,6 +11,7 @@ import {
   User,
   Alert,
   ListResponse,
+  Availability,
 } from '@/models';
 
 /**
@@ -276,6 +277,13 @@ export const hhmmToMinutes = (formattedTime: string): number => {
 };
 
 /**
+ * Compare two availabilities by their start time
+ */
+export const compareAvailabilityStart = (a: Availability, b: Availability) => {
+  return hhmmToMinutes(a.start_time) - hhmmToMinutes(b.start_time)
+};
+
+/**
  * Kill all references to arrays or objects within the given entity and return a deep clone
  */
 export const deepClone = (entity: any): any => {
@@ -295,5 +303,6 @@ export default {
   handleFormError,
   sleep,
   hhmmToMinutes,
+  compareAvailabilityStart,
   deepClone,
 };

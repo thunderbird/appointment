@@ -113,6 +113,9 @@ button:hover > .tooltip,
     font-weight: 600;
     line-height: 1;
   }
+  &.small .text {
+    padding: 0;
+  }
 }
 
 button {
