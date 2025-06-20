@@ -7,6 +7,10 @@ import { hhmmToMinutes } from '@/utils';
 import { DEFAULT_SLOT_DURATION } from '@/definitions';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
+
+// icons
+import { IconPlus } from '@tabler/icons-vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
@@ -143,13 +147,10 @@ const toggleBubble = (option: SelectOption) => {
       <template v-for="option in options" :key="option.value">
         <button
           class="tbpro-bubble"
-          :aria-pressed="isSelectedOption(option)"
-          :class="{
-            'selected': isSelectedOption(option),
-            disabled,
-          }"
-          :title="option.label ?? String(option.value)"
           type="button"
+          :aria-pressed="isSelectedOption(option)"
+          :class="{ 'selected': isSelectedOption(option), disabled }"
+          :title="option.label ?? String(option.value)"
           @click="() => !disabled ? toggleBubble(option) : null"
         >
           {{ option.label }}
@@ -161,6 +162,7 @@ const toggleBubble = (option: SelectOption) => {
             v-model="availabilitySet[option.value][0].start_time"
             :error="validationErrors[option.value]"
             :disabled="disabled"
+            :small-input="true"
             @blur="update"
           />
           <span>&ndash;</span>
@@ -170,8 +172,12 @@ const toggleBubble = (option: SelectOption) => {
             v-model="availabilitySet[option.value][0].end_time"
             :error="validationErrors[option.value]"
             :disabled="disabled"
+            :small-input="true"
             @blur="update"
           />
+          <link-button size="small" class="action-button" @click="">
+            <icon-plus class="w-3" aria-hidden="true"/>
+          </link-button>
         </div>
         <div v-else>{{ t('label.unavailable') }}</div>
       </template>
@@ -244,8 +250,12 @@ const toggleBubble = (option: SelectOption) => {
 
 .bubble-content {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto 1fr auto;
   align-items: center;
   gap: .5rem;
+
+  .action-button {
+    padding: .25rem .125rem;
+  }
 }
 </style>
