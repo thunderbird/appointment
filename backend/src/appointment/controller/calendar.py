@@ -725,55 +725,59 @@ class Tools:
         for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
             date = datetime.fromordinal(ordinal)
 
+            # We only have one part of available time per default.
+            parts = [(start_time_local, end_time_local)]
+
+            # We have multiple parts if fine-tune availability was set up.
             # Prepare time calculation based on the configured availability for the current weekday
-            customAvailability = next((x for x in availabilities if date.isoweekday() == x.day_of_week.value), None)
-            start_local = (
-                customAvailability.start_time_local if custom_times and customAvailability else start_time_local
-            )
-            end_local = customAvailability.end_time_local if custom_times and customAvailability else end_time_local
+            customAvailabilities = [x for x in availabilities if date.isoweekday() == x.day_of_week.value]
+            if custom_times and len(customAvailabilities) > 0:
+                parts = [(x.start_time_local, x.end_time_local) for x in customAvailabilities]
 
-            start_time = datetime.combine(now.min, start_local) - datetime.min
-            end_time = datetime.combine(now.min, end_local) - datetime.min
+            # Now we cut every part of availability time to available time slots
+            for (start_local, end_local) in parts:
+                start_time = datetime.combine(now.min, start_local) - datetime.min
+                end_time = datetime.combine(now.min, end_local) - datetime.min
 
-            # Thanks to timezone conversion end_time can wrap around to the next day
-            if start_time > end_time:
-                end_time += timedelta(days=1)
+                # Thanks to timezone conversion end_time can wrap around to the next day
+                if start_time > end_time:
+                    end_time += timedelta(days=1)
 
-            # Difference of the start and end time.
-            # Since our times are localized we start at 0, and go until we hit the diff.
-            total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
+                # Difference of the start and end time.
+                # Since our times are localized we start at 0, and go until we hit the diff.
+                total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
 
-            time_start = 0
+                time_start = 0
 
-            # If it's today and now is greater than our normal start time...
-            if now_tz.toordinal() == ordinal and now_tz_total_seconds > start_time.total_seconds():
-                # Note: This is in seconds!
-                # Get the offset from now to 0:00:00, and adjust it so 0 aligns with our start_time.
-                # (So if the date is today it's 9am, and our start time is also 9am then time_start should be 0)
-                time_start = int(now_tz_total_seconds - start_time.total_seconds())
+                # If it's today and now is greater than our normal start time...
+                if now_tz.toordinal() == ordinal and now_tz_total_seconds > start_time.total_seconds():
+                    # Note: This is in seconds!
+                    # Get the offset from now to 0:00:00, and adjust it so 0 aligns with our start_time.
+                    # (So if the date is today it's 9am, and our start time is also 9am then time_start should be 0)
+                    time_start = int(now_tz_total_seconds - start_time.total_seconds())
 
-                # Round up to the nearest slot duration, I'm bad at math...
-                # Get the remainder of the slow, subtract that from our time_start, then add the slot duration back in.
-                time_start -= time_start % slot_duration_seconds
-                time_start += slot_duration_seconds
+                    # Round up to the nearest slot duration. Get the remainder of the slow, subtract that from our
+                    # time_start, then add the slot duration back in.
+                    time_start -= time_start % slot_duration_seconds
+                    time_start += slot_duration_seconds
 
-            current_datetime = datetime(
-                year=date.year,
-                month=date.month,
-                day=date.day,
-                hour=start_local.hour,
-                minute=start_local.minute,
-                tzinfo=timezone,
-            )
+                current_datetime = datetime(
+                    year=date.year,
+                    month=date.month,
+                    day=date.day,
+                    hour=start_local.hour,
+                    minute=start_local.minute,
+                    tzinfo=timezone,
+                )
 
-            # Check if this weekday is within our schedule
-            if current_datetime.isoweekday() in weekdays:
-                # Generate each timeslot based on the selected duration
-                # We just loop through the difference of the start and end time and step by slot duration in seconds.
-                slots += [
-                    schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration)
-                    for time in range(time_start, total_time, slot_duration_seconds)
-                ]
+                # Check if this weekday is within our schedule
+                if current_datetime.isoweekday() in weekdays:
+                    # Generate each timeslot based on the selected duration. We just loop through the difference of the
+                    # start and end time and step by slot duration in seconds.
+                    slots += [
+                        schemas.SlotBase(start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration)
+                        for time in range(time_start, total_time, slot_duration_seconds)
+                    ]
 
         return slots
 
