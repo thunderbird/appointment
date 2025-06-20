@@ -191,7 +191,7 @@ const addAvailability = (option: SelectOption) => {
             />
             <span>
               <link-button v-if="i === 0" size="small" class="action-button" @click="addAvailability(option)">
-                <icon-plus class="w-3" aria-hidden="true"/>
+                <icon-plus class="w-4" aria-hidden="true"/>
               </link-button>
             </span>
           </template>
