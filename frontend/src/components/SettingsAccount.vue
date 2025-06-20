@@ -75,7 +75,7 @@ const quickLinkFull = computed(() => user.mySlug
 const quickLinkPrefix = computed(() => shortUrl.substring(shortUrl.indexOf('//') + 2) + `/${usernameShort.value}/`);
 
 // Preferred email options
-const emailOptions = computed<SelectOption[]>(() => availableEmails.value.map((email) => ({
+const emailOptions = computed<SelectOption<string>[]>(() => availableEmails.value.map((email) => ({
   label: email,
   value: email,
 })));
