@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import pulumi
+import pulumi_cloudflare as cloudflare
 import tb_pulumi
 import tb_pulumi.cloudfront
 import tb_pulumi.elasticache
@@ -13,10 +14,10 @@ MSG_LB_MATCHING_CONTAINER = 'In this stack, container security groups must have 
 MSG_LB_MATCHING_CLUSTER = 'In this stack, Fargate clusters must have matching load balancer security groups.'
 MSG_CONTAINER_MATCHING_CLUSTER = 'In this stack, Fargate clusters must have matching container security groups.'
 
+# Set up the project and easy access to a couple things
 project = tb_pulumi.ThunderbirdPulumiProject()
-
-# Pull the "resources" config mapping
 resources = project.config.get('resources')
+cloudflare_zone_id = project.pulumi_config.require_secret('cloudflare_zone_id')
 
 # Create some private network space
 vpc_opts = resources['tb:network:MultiCidrVpc'].get('appointment', {})
@@ -87,7 +88,39 @@ caches['backend'] = tb_pulumi.elasticache.ElastiCacheReplicationGroup(
     **resources.get('tb:elasticache:ElastiCacheReplicationGroup', {}).get('backend', {}),
 )
 
+redis_dns = cloudflare.DnsRecord(
+    f'{project.name_prefix}-dns-redis',
+    name=resources.get('domains', {}).get('redis', None),
+    ttl=60,
+    type='CNAME',
+    zone_id=cloudflare_zone_id,
+    content=caches['backend'].resources['replication_group'].primary_endpoint_address,
+    proxied=False,
+)
+
 # Fargate Service
+fargate_clusters = {}
+for service, opts in resources['tb:fargate:FargateClusterWithLogging'].items():
+    if service not in lb_sgs:
+        raise ValueError(f'{MSG_LB_MATCHING_CLUSTER} Create a matching load_balancers entry for "{service}".')
+    if service not in container_sgs:
+        raise ValueError(f'{MSG_CONTAINER_MATCHING_CLUSTER} Create a matching load_balancers entry for "{service}".')
+    lb_sg_ids = [lb_sgs[service].resources['sg'].id] if lb_sgs[service] else []
+    depends_on = [
+        container_sgs[service].resources['sg'],
+        *vpc.resources['subnets'],
+    ]
+    if lb_sgs[service]:
+        depends_on.append(lb_sgs[service].resources['sg'])
+    fargate_clusters[service] = tb_pulumi.fargate.FargateClusterWithLogging(
+        name=f'{project.name_prefix}-fargate-{service}',
+        project=project,
+        subnets=vpc.resources['subnets'],
+        container_security_groups=[container_sgs[service].resources['sg'].id],
+        load_balancer_security_groups=lb_sg_ids,
+        opts=pulumi.ResourceOptions(depends_on=depends_on),
+        **opts,
+    )
 
 # CloudFrontS3Service
 

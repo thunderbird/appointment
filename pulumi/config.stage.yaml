@@ -1,5 +1,9 @@
 ---
 resources:
+
+  domains:
+    redis: cache.appointment-stage.tb.pro
+
   tb:network:MultiCidrVpc:
     appointment:
       cidr_block: 10.21.0.0/16
@@ -8,6 +12,14 @@ resources:
           - 10.21.0.0/17
         eu-central-1b:
           - 10.21.128.0/17
+      enable_internet_gateway: True
+      egress_via_internet_gateway: True
+      enable_dns_hostnames: True
+      endpoint_interfaces:
+        - ecr.api
+        - ecr.dkr
+        - logs
+        - secretsmanager
   
   # The __main.py__ here is very specific in the following way:
   # For each ECS cluster you eventually define, you **must** have one entry by the same exact name in the
@@ -54,6 +66,11 @@ resources:
       recovery_window_in_days: 0
       secret_names:
         - database-connection
+        - database-encryption
+        - fxa-secrets
+        - google-oauth
+        - smtp-connection
+        - zoom-secrets
   
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
@@ -84,7 +101,7 @@ resources:
         backend:
           listener_port: 443
           listener_proto: HTTPS
-          listener_cert_arn: 
+          listener_cert_arn: arn:aws:acm:eu-central-1:768512802988:certificate/d345f230-258b-4f4f-ae74-6211fd7c234e
           container_port: 5137
           container_name: backend
           # "name" field is arbitrary, but must be unique and no longer than 32 chars
@@ -93,8 +110,8 @@ resources:
             healthy_threshold: 2
             unhealthy_threshold: 5
             interval: 30
-            path: /health/ready
-            port: 9000
+            path: /
+            port: 5137
       task_definition:
         network_mode: awsvpc
         cpu: 512
@@ -102,17 +119,67 @@ resources:
         requires_compatibilities:
           - FARGATE
         container_definitions:
-          accounts:
+          backend:
             image: 768512802988.dkr.ecr.us-east-1.amazonaws.com/appointment:backend-82af7fd87268812ac42bfd0e4e542d6f234e14ac
             portMappings:
               - name: backend
-                containerPort: 5173
-                hostPort: 5173
+                containerPort: 5137
+                hostPort: 5137
                 protocol: tcp
                 appProtocol: http
             linuxParameters:
               initProcessEnabled: True
             secrets:
               - name: DATABASE_SECRETS
-                valueFrom: 768512802988.dkr.ecr.us-east-1.amazonaws.com/appointment:backend-82af7fd87268812ac42bfd0e4e542d6f234e14ac
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-connection-cugbJu
+              - name: DB_ENC_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-encryption-fY5K5W
+              - name: FXA_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-secrets-2i62be
+              - name: GOOGLE_OAUTH_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-oauth-8S9Vvx
+              - name: SMTP_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-connection-5FT5yU
+              - name: ZOOM_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
             environment:
+              - name: FRONTEND_URL
+                value: https://appointment-stage.tb.pro
+              - name: SHORT_BASE_URL
+                value: https://apmt-stage.tb.pro
+              - name: TIER_BASIC_CALENDAR_LIMIT
+                value: "3"
+              - name: TIER_PLUS_CALENDAR_LIMIT
+                value: "5"
+              - name: TIER_PRO_CALENDAR_LIMIT
+                value: "10"
+              - name: LOG_USE_STREAM
+                value: "True"
+              - name: LOG_LEVEL
+                value: INFO
+              - name: APP_ENV
+                value: stage
+              - name: SENTRY_DSN
+                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
+              - name: ZOOM_API_ENABLED
+                value: "True"
+              - name: ZOOM_AUTH_CALLBACK
+                value: https://appointment-stage.tb.pro/api/v1/zoom/callback
+              - name: SERVICE_EMAIL
+                value: no-reply@appointment-stage.tb.pro
+              - name: AUTH_SCHEME
+                value: "fxa"
+              - name: JWT_ALGO
+                value: "HS256"
+              - name: JWT_EXPIRE_IN_MINS
+                value: "10000"
+              - name: REDIS_URL
+                value: cache.appointment-stage.tb.pro
+              - name: REDIS_PORT
+                value: "6379"
+              - name: REDIS_DB
+                value: "0"
+              - name: REDIS_USE_SSL
+                value: "True"
+              - name: REDIS_USE_CLUSTER
+                value: "True"
