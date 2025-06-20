@@ -181,15 +181,6 @@ npm run prod-sanity-test-browserstack
 
 After the tests finish in your local console you'll see a link to the BrowserStack test session; when signed into your BrowserStack account you'll be able to use that link to see the test session results including video playback.
 
-## Running the E2E tests on mobile browsers
-The E2E tests can also be run on mobile browsers (against production Appointment) but only on BrowserStack (NOT on local mobile devices). There is a separate `nigtly-tests-mobile` GitHub Actions job that runs nighlty but can also be triggered manually via the GitHub actions tab, against whichever branch you choose.
-
-You can also run the E2E tests on a mobile browser (against production Appointment) on BrowserStack from your local machine; this is handy if you're making changes to the actual E2E tests themselves on your local stack. To do that follow the `Running on BrowserStack` steps above, but use this command line to start the tests:
-
-```bash
-npm run prod-nightly-tests-mobile-browserstack-gha
-```
-
 ## Debugging E2E Test Failures
 
 Here is some advice for how to investigate E2E test failures.
@@ -231,7 +222,7 @@ If you notice an email from Github actions indicating that the Nightly E2E Tests
     - Click on the `View workflow run` link in the email - or -
     - Go into the Github repo, and
         - Choose `Actions` at the top
-        - Depending on what platform is failing, on the list of Actions on the left side choose `nightly-tests-desktop` or `nightly-tests-mobile`
+        - On the list of Actions on the left side choose `nightly-tests-desktop`
         - In the corresponding list of completed nightly test action jobs, click on the failing one
     - Then click on the failed E2E test step to open the console view
     - In the console view, expand the E2E tests job and read the test failure details
