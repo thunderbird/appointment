@@ -445,6 +445,7 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
         data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode('utf-8'),
     )
 
+
 @router.delete('/apmt/{id}')
 def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to remove a appointment from db"""
@@ -458,7 +459,13 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
 
 
 @router.post('/apmt/{id}/cancel')
-def cancel_my_appointment(id: int, background_tasks: BackgroundTasks, payload: schemas.AppointmentCancelRequest, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+def cancel_my_appointment(
+    id: int,
+    background_tasks: BackgroundTasks,
+    payload: schemas.AppointmentCancelRequest,
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
     """endpoint to cancel an appointment from db"""
     if not repo.appointment.exists(db, appointment_id=id):
         raise validation.AppointmentNotFoundException()
