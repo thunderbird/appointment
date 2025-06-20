@@ -3,7 +3,7 @@ import { inject, ref, onMounted, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Alert, Availability, AvailabilitySet, SelectOption } from '@/models';
 import { isoWeekdaysKey, dayjsKey } from '@/keys';
-import { hhmmToMinutes } from '@/utils';
+import { compareAvailabilityStart, hhmmToMinutes } from '@/utils';
 import { DEFAULT_SLOT_DURATION } from '@/definitions';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import AlertBox from '@/elements/AlertBox.vue';
@@ -56,7 +56,7 @@ const validationAlert = { title: t('error.endAfterStartTime', { value: durationH
  */
 const defaultAvailabilitySet = () => Object.fromEntries(isoWeekdays.map((d) => {
   const existing = props.availabilities.filter((a) => a.day_of_week === d.iso);
-  return [d.iso, existing.length ? existing : [defaultAvailability(d.iso)]];
+  return [d.iso, existing.length ? existing.sort(compareAvailabilityStart) : [defaultAvailability(d.iso)]];
 })) as AvailabilitySet;
 
 // Prefill existing availabilities from schedule
