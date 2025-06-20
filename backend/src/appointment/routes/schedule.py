@@ -368,6 +368,7 @@ def request_schedule_availability_slot(
             status=status,
             location_type=schedule.location_type,
             location_url=schedule.location_url,
+            meeting_link_provider=schedule.meeting_link_provider,
         ),
     )
 
