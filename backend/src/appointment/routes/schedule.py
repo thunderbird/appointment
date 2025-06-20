@@ -524,7 +524,7 @@ def handle_schedule_availability_decision(
     # check if request was denied
     if confirmed is False:
         # send rejection information to bookee
-        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
         repo.slot.delete(db, slot.id)
 
         if slot.appointment_id:

@@ -35,11 +35,12 @@ from ..controller.mailer import Attachment
 from ..exceptions.calendar import TestConnectionFailed
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
-from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email
+from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email, send_cancel_email
 
 
 class RemoteEventState(Enum):
     CANCELLED = 'CANCELLED'
+    REJECTED = 'REJECTED'
     TENTATIVE = 'TENTATIVE'
     CONFIRMED = 'CONFIRMED'
 
@@ -659,7 +660,7 @@ class Tools:
         # Send mail
         background_tasks.add_task(send_pending_email, organizer.name, date=date, to=attendee.email, attachment=ics_file)
 
-    def send_cancel_vevent(
+    def send_reject_vevent(
         self,
         background_tasks: BackgroundTasks,
         appointment: models.Appointment,
@@ -667,7 +668,30 @@ class Tools:
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
     ):
-        """send a hold booking email to attendee with .ics file attached"""
+        """send a booking rejection email to attendee with .ics file attached"""
+        ics_file = Attachment(
+            mime=('text', 'calendar'),
+            filename='AppointmentInvite.ics',
+            data=self.create_vevent(appointment, slot, organizer, RemoteEventState.REJECTED.value),
+        )
+        if attendee.timezone is None:
+            attendee.timezone = 'UTC'
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+        # Send mail
+        background_tasks.add_task(
+            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file
+        )
+
+    def send_cancel_vevent(
+        self,
+        background_tasks: BackgroundTasks,
+        appointment: models.Appointment,
+        slot: schemas.Slot,
+        organizer: schemas.Subscriber,
+        attendee: schemas.AttendeeBase,
+        reason: str | None = None,
+    ):
+        """send a booking cancellation email to attendee with .ics file attached"""
         ics_file = Attachment(
             mime=('text', 'calendar'),
             filename='AppointmentInvite.ics',
@@ -678,7 +702,7 @@ class Tools:
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
         # Send mail
         background_tasks.add_task(
-            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file
+            send_cancel_email, organizer.name, date=date, to=attendee.email, attachment=ics_file, reason=reason
         )
 
     @staticmethod

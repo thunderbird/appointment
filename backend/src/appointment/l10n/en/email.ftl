@@ -103,6 +103,21 @@ confirm-mail-html-confirm-action = Confirm
 confirm-mail-html-deny-text = Or here if you want to deny it:
 confirm-mail-html-deny-action = Decline
 
+## Cancelled Appointment
+
+cancel-mail-subject = Booking request declined
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+# $reason (String - optional) - Reason for cancelling the appointment
+cancel-mail-html-heading = { $owner_name } denied your booking request for this time slot: { $date }. <#if $reason>Reason: { $reason }</#if>
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+# $reason (String - optional) - Reason for cancelling the appointment
+cancel-mail-plain = { $owner_name } denied your booking request for this time slot: { $date }. <#if $reason>Reason: { $reason }</#if>
+                    {-brand-footer}
+
 ## Rejected Appointment
 
 reject-mail-subject = Booking request declined
