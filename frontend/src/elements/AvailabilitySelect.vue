@@ -36,7 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['update']);
 
 // Model for weekday selection
-const model = defineModel<(string | number)[]>({ default: [] });
+const model = defineModel<number[]>({ default: [] });
 
 // Model for availability data
 const defaultAvailability = (dayOfWeek: number) => (
@@ -55,8 +55,8 @@ const validationAlert = { title: t('error.endAfterStartTime', { value: durationH
  * and that existing availabilities are prefilled for the corresponding day.
  */
 const defaultAvailabilitySet = () => Object.fromEntries(isoWeekdays.map((d) => {
-  const existingAvailability = props.availabilities.find((a) => a.day_of_week === d.iso);
-  return [d.iso, [existingAvailability ?? defaultAvailability(d.iso)]];
+  const existing = props.availabilities.filter((a) => a.day_of_week === d.iso);
+  return [d.iso, existing.length ? existing : [defaultAvailability(d.iso)]];
 })) as AvailabilitySet;
 
 // Prefill existing availabilities from schedule
@@ -76,20 +76,23 @@ watch(
  * Returns true, if validation was successful.
  */
 const validateInput = () => {
-  const input = Object.values(availabilitySet.value).flat();
   let success = true;
-  input.forEach((a) => {
-    if (model.value.includes(a.day_of_week)) {
-      const diff = hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time);
-      if (diff < props.slotDuration) {
-        // We just use an empty string here to indicate an error on the input field
-        // without adding an error message beneath it.
-        validationErrors.value[a.day_of_week] = '';
-        success = false;
-      } else {
-        validationErrors.value[a.day_of_week] = null;
+  Object.values(availabilitySet.value).forEach((s) => {
+    // Validate each availability entry on each set
+    s.forEach((a) => {
+      // Only validate active weekdays
+      if (model.value.includes(a.day_of_week)) {
+        const diff = hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time);
+        if (diff < props.slotDuration) {
+          // We just use an empty string here to indicate an error on the input field
+          // without adding an error message beneath it.
+          validationErrors.value[a.day_of_week] = '';
+          success = false;
+        } else {
+          validationErrors.value[a.day_of_week] = null;
+        }
       }
-    }
+    });
   });
   return success;
 };
@@ -138,6 +141,16 @@ const toggleBubble = (option: SelectOption) => {
   // Send availability update
   nextTick(() => update());
 };
+
+/**
+ * Initializes a new availability entry on given day of week
+ * @param option
+ */
+const addAvailability = (option: SelectOption) => {
+  availabilitySet.value[option.value].push(defaultAvailability(option.value));
+};
+
+
 </script>
 
 <template>
@@ -156,28 +169,32 @@ const toggleBubble = (option: SelectOption) => {
           {{ option.label }}
         </button>
         <div v-if="isSelectedOption(option)" class="bubble-content">
-          <text-input
-            type="time"
-            :name="`start_time_${option.value}`"
-            v-model="availabilitySet[option.value][0].start_time"
-            :error="validationErrors[option.value]"
-            :disabled="disabled"
-            :small-input="true"
-            @blur="update"
-          />
-          <span>&ndash;</span>
-          <text-input
-            type="time"
-            :name="`end_time_${option.value}`"
-            v-model="availabilitySet[option.value][0].end_time"
-            :error="validationErrors[option.value]"
-            :disabled="disabled"
-            :small-input="true"
-            @blur="update"
-          />
-          <link-button size="small" class="action-button" @click="">
-            <icon-plus class="w-3" aria-hidden="true"/>
-          </link-button>
+          <template v-for="(availability, i) in availabilitySet[option.value]" :key="availability.start_time">
+            <text-input
+              type="time"
+              :name="`start_time_${option.value}`"
+              v-model="availability.start_time"
+              :error="validationErrors[option.value]"
+              :disabled="disabled"
+              :small-input="true"
+              @blur="update"
+            />
+            <span>&ndash;</span>
+            <text-input
+              type="time"
+              :name="`end_time_${option.value}`"
+              v-model="availability.end_time"
+              :error="validationErrors[option.value]"
+              :disabled="disabled"
+              :small-input="true"
+              @blur="update"
+            />
+            <span>
+              <link-button v-if="i === 0" size="small" class="action-button" @click="addAvailability(option)">
+                <icon-plus class="w-3" aria-hidden="true"/>
+              </link-button>
+            </span>
+          </template>
         </div>
         <div v-else>{{ t('label.unavailable') }}</div>
       </template>
