@@ -10,7 +10,7 @@ import AlertBox from '@/elements/AlertBox.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 // icons
-import { IconPlus } from '@tabler/icons-vue';
+import { IconPlus, IconX } from '@tabler/icons-vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
@@ -144,10 +144,27 @@ const toggleBubble = (option: SelectOption) => {
 
 /**
  * Initializes a new availability entry on given day of week
- * @param option
+ * @param option The weekday the availability should be added to
  */
 const addAvailability = (option: SelectOption) => {
   availabilitySet.value[option.value].push(defaultAvailability(option.value));
+  update();
+};
+
+/**
+ * Initializes a new availability entry on given day of week
+ * @param option The weekday the availability should be added to
+ * @param index The index of the availability on that weekday
+ */
+const removeAvailability = (option: SelectOption, index: number) => {
+  if (availabilitySet.value[option.value].length <= 1) {
+    // There is only one entry left, so disable the whole day
+    toggleBubble(option);
+  } else {
+    // We have more than one entry, so just remove the element at the given index
+    availabilitySet.value[option.value].splice(index, 1);
+    update();
+  }
 };
 
 
@@ -169,7 +186,7 @@ const addAvailability = (option: SelectOption) => {
           {{ option.label }}
         </button>
         <div v-if="isSelectedOption(option)" class="bubble-content">
-          <template v-for="(availability, i) in availabilitySet[option.value]" :key="availability.start_time">
+          <div v-for="(availability, i) in availabilitySet[option.value]" :key="availability.start_time">
             <text-input
               type="time"
               :name="`start_time_${option.value}`"
@@ -194,7 +211,12 @@ const addAvailability = (option: SelectOption) => {
                 <icon-plus class="w-4" aria-hidden="true"/>
               </link-button>
             </span>
-          </template>
+            <span>
+              <link-button size="small" class="action-button action-remove" @click="removeAvailability(option, i)">
+                <icon-x class="w-4" aria-hidden="true"/>
+              </link-button>
+            </span>
+          </div>
         </div>
         <div v-else>{{ t('label.unavailable') }}</div>
       </template>
@@ -266,13 +288,27 @@ const addAvailability = (option: SelectOption) => {
 }
 
 .bubble-content {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
-  align-items: center;
-  gap: .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
 
-  .action-button {
-    padding: .25rem .125rem;
+  & > div {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr 20px 20px;
+    align-items: center;
+    gap: .5rem;
+  
+    .action-button {
+      padding: .25rem .125rem;
+    }
+    .action-remove {
+      opacity: 0;
+      color: var(--colour-danger-default);
+      transition: var(--transition-opacity);
+    }
+    &:hover .action-remove {
+      opacity: 1;
+    }
   }
 }
 </style>
