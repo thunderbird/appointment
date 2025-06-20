@@ -18,9 +18,10 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
-from ..database.models import Subscriber, CalendarProvider, InviteStatus
+from ..database.models import Subscriber, CalendarProvider, InviteStatus, MeetingLinkProviderType
 from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..dependencies.google import get_google_client
+from ..dependencies.zoom import get_zoom_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
@@ -454,6 +455,39 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
 
     repo.appointment.delete(db=db, appointment_id=id)
     return True
+
+
+@router.post('/apmt/{id}/cancel')
+def cancel_my_appointment(id: int, background_tasks: BackgroundTasks, payload: schemas.AppointmentCancelRequest, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    """endpoint to cancel an appointment from db"""
+    if not repo.appointment.exists(db, appointment_id=id):
+        raise validation.AppointmentNotFoundException()
+    if not repo.appointment.is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
+        raise validation.AppointmentNotAuthorizedException()
+
+    appointment = repo.appointment.get(db, id)
+    zoom_client = None
+
+    # If needed, get a hold of the Zoom client
+    if appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
+        try:
+            zoom_client = get_zoom_client(subscriber)
+        except Exception as ex:
+            sentry_sdk.capture_exception(ex)
+
+    # Send cancel information to all slots' bookees
+    for slot in appointment.slots:
+        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee, payload.reason)
+
+        # If needed, delete appointment's Zoom meeting through Zoom client
+        if zoom_client:
+            try:
+                zoom_client.delete_meeting(slot.meeting_link_id)
+            except Exception as ex:
+                sentry_sdk.capture_exception(ex)
+
+        # Delete the appointment, this will also delete the slot
+        repo.appointment.delete(db, slot.appointment_id)
 
 
 @router.post('/support')
