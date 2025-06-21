@@ -185,20 +185,20 @@ const cancelAppointment = () => {
         </div>
         <div class="rounded-lg border border-gray-400 p-4 dark:border-gray-600">{{ appointment.details }}</div>
       </div>
-      <div class="p-6" v-if="status === BookingStatus.Booked">
+      <div class="px-4" v-if="status === BookingStatus.Booked">
         <p class="mb-8">This booking is confirmed.</p>
-        <form class="gap-4 mx-auto" @submit.prevent>
+        <form class="gap-4" @submit.prevent>
           <label for="cancelReason">
             {{ t("label.cancelReason") }}
             <textarea
                 name="cancelReason"
                 v-model="cancelReason"
                 :placeholder="t('placeholder.writeHere')"
-                class="w-full h-24 rounded-md resize-none mt-2 mb-4"
+                class="w-full h-24 rounded-md resize-none mt-2 mb-8"
                 data-testid="appointment-modal-reason-input"
               ></textarea>
           </label>
-          <danger-button data-testid="appointment-modal-cancel-btn" @click="cancelAppointment()" :title="t('label.cancel')">
+          <danger-button data-testid="appointment-modal-cancel-btn" @click="cancelAppointment()" :title="t('label.cancel')" class="mx-auto">
             {{ t('label.cancelBooking') }}
           </danger-button>
         </form>
