@@ -702,7 +702,12 @@ class Tools:
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
         # Send mail
         background_tasks.add_task(
-            send_cancel_email, organizer.name, date=date, to=attendee.email, attachment=ics_file, reason=reason
+            send_cancel_email,
+            owner_name=organizer.name,
+            date=date,
+            reason=reason,
+            to=attendee.email,
+            attachment=ics_file,
         )
 
     @staticmethod
