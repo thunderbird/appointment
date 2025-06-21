@@ -144,3 +144,8 @@ class ZoomClient:
         response = self.client.get(f'{self.OAUTH_REQUEST_URL}/meetings/{meeting_id}')
         response.raise_for_status()
         return response.json()
+
+    def delete_meeting(self, meeting_id):
+        response = self.client.delete(f'{self.OAUTH_REQUEST_URL}/meetings/{meeting_id}')
+        response.raise_for_status()
+        return response.json()

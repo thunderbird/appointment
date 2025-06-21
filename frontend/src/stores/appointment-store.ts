@@ -79,6 +79,16 @@ export const useAppointmentStore = defineStore('appointments', () => {
     await fetch();
   };
 
+  /**
+   * Cancel an appointment with an optional reason
+  */
+  const cancelAppointment = async (id: number, reason?: string) => {
+    await call.value(`apmt/${id}/cancel`).post({
+      reason
+    });
+    await fetch();
+  };
+
   return {
     isLoaded,
     appointments,
@@ -89,6 +99,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
     fetch,
     $reset,
     deleteAppointment,
+    cancelAppointment
   };
 });
 

@@ -368,6 +368,7 @@ def request_schedule_availability_slot(
             status=status,
             location_type=schedule.location_type,
             location_url=schedule.location_url,
+            meeting_link_provider=schedule.meeting_link_provider,
         ),
     )
 
@@ -524,7 +525,7 @@ def handle_schedule_availability_decision(
     # check if request was denied
     if confirmed is False:
         # send rejection information to bookee
-        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
         repo.slot.delete(db, slot.id)
 
         if slot.appointment_id:

@@ -194,6 +194,8 @@
     "calendarDeletion": "Remove Calendar",
     "calendarUrl": "Calendar URL",
     "cancel": "Cancel",
+    "cancelBooking": "Cancel booking",
+    "cancelReason": "Reason for cancelling",
     "checkAvailableSlots": "Check available slots",
     "chooseYourAvailability": "Availability",
     "clearForm": "Clear form",

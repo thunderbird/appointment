@@ -1,7 +1,15 @@
 import datetime
 
-from appointment.controller.mailer import ConfirmationMail, RejectionMail, ZoomMeetingFailedMail, InvitationMail, \
-    NewBookingMail, PendingRequestMail, Attachment
+from appointment.controller.mailer import (
+    CancelMail,
+    ConfirmationMail,
+    RejectionMail,
+    ZoomMeetingFailedMail,
+    InvitationMail,
+    NewBookingMail,
+    PendingRequestMail,
+    Attachment,
+)
 from appointment.database import schemas
 
 
@@ -91,6 +99,32 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
+
+    def test_cancel(self, faker, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        now = datetime.datetime.now()
+        fake_email = 'to@example.org'
+        reason = 'Change of plans'
+
+        # With reason
+        mailer = CancelMail(owner_name=subscriber.name, date=now, reason=reason, to=fake_email)
+        assert mailer.html()
+        assert mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
+            assert subscriber.name in content, fault
+            assert reason in content, fault
+
+        # Without reason
+        mailer = CancelMail(owner_name=subscriber.name, date=now, reason=None, to=fake_email)
+        assert mailer.html()
+        assert mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
+            assert subscriber.name in content, fault
+            assert reason not in content, fault
 
     def test_zoom_invite_failed(self, faker, with_l10n):
         fake_title = faker.name()
