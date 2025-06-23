@@ -5,7 +5,7 @@ import { dayjsKey } from '@/keys';
 import { Dayjs } from 'dayjs';
 import { DateFormatStrings } from '@/definitions';
 
- 
+
 export const useCalendarStore = defineStore('calendars', () => {
   const dj = inject(dayjsKey);
   const call = ref(null);
@@ -123,6 +123,7 @@ export const useCalendarStore = defineStore('calendars', () => {
     await call.value(`cal/${id}/disconnect`).post();
   };
 
+  // # HERE: need to test this
   const syncCalendars = async () => {
     await call.value('rmt/sync').post();
   };

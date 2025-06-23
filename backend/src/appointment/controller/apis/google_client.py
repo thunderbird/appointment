@@ -229,7 +229,9 @@ class GoogleClient:
 
         return response
 
-    def sync_calendars(self, db, subscriber_id: int, token):
+    # HERE: add an argument for the external_connection_id
+    # because we need to pass it down to repo.calendar.update_or_create
+    def sync_calendars(self, db, subscriber_id: int, token, external_connection_id: int):
         # Grab all the Google calendars
         calendars = self.list_calendars(token)
         error_occurred = False
@@ -251,7 +253,7 @@ class GoogleClient:
 
             # add calendar
             try:
-                # HERE: add the id of ExternalConnections record for the fk
+                # HERE: pass in the id of ExternalConnections record for the fk
                 repo.calendar.update_or_create(
                     db=db, calendar=cal, calendar_url=calendar.get('id'), subscriber_id=subscriber_id
                 )

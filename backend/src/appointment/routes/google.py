@@ -127,12 +127,15 @@ Just got repo.external_connection.get_by_type for google_id {google_id}
             token=creds.to_json(),
         )
 
-        repo.external_connection.create(db, external_connection_schema)
+        external_connection = repo.external_connection.create(db, external_connection_schema)
     else:
         repo.external_connection.update_token(
             db, creds.to_json(), subscriber.id, ExternalConnectionType.google, google_id
         )
 
+    current_external_connection_id = external_connection.id
+
+    # HERE: add an argument for the external_connection_id
     error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds)
 
     # And then redirect back to frontend
@@ -163,6 +166,7 @@ def disconnect_account(
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     google_connection = subscriber.get_external_connection(ExternalConnectionType.google)
 
+    # HERE:
     # Remove all of their google calendars (We only support one connection so this should be good for now)
     repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google)
 

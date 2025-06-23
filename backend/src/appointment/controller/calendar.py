@@ -850,6 +850,7 @@ class Tools:
             else farthest_booking
         )
 
+        # HERE: (maybe)
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
