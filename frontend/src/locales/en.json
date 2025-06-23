@@ -462,6 +462,10 @@
     "defineDaysAndTimeSlots": "Choose the days and time this event can be booked.",
     "denialSentToAddress": "We've let the booker ({address}) know you can't make this event.",
     "disclaimerGABooking": "Your booking will be confirmed by the calendar owner.",
+    "generateZoomMeetingHelpDisabled": {
+      "link": "connect a Zoom account",
+      "text": "Zoom is not connected. Please {link} to use this feature."
+    },
     "googlePermissionCalendarName": "See and download your calendars using Google Calendar",
     "googlePermissionCalendarReason": "Thunderbird Appointment requires this permission to display a list of calendars you can connect with.",
     "googlePermissionDisclaimer": "Thunderbird Appointment requires the following permissions from Google Calendar for optimal functionality.",

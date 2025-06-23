@@ -150,5 +150,9 @@ const onChange = () => {
     border-color: var(--colour-highlight);
     color: var(--colour-neutral-raised);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
 }
 </style>

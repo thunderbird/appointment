@@ -389,6 +389,9 @@ const copyLink = async () => {
   }, 4000);
 };
 
+// controls the generate zoom link checkbox
+const isZoomEnabled = computed(() => scheduleInput.value.active && hasZoomAccount.value);
+
 // track schedule activation toggle changes
 watch(
   () => scheduleInput.value.active,
@@ -688,9 +691,16 @@ watch(
             name="generateZoomLink"
             :label="t('label.generateZoomLink')"
             v-model="generateZoomLink"
-            :disabled="!scheduleInput.active || !hasZoomAccount"
+            :disabled="!isZoomEnabled"
             @change="toggleZoomLinkCreation"
           />
+          <i18n-t v-if="!isZoomEnabled" keypath="text.generateZoomMeetingHelpDisabled.text" tag="span" scope="global" class="text-xs">
+            <template v-slot:link>
+              <router-link class="underline" to="settings/connectedAccounts">
+                {{ t('text.generateZoomMeetingHelpDisabled.link') }}
+              </router-link>
+            </template>
+          </i18n-t>
           <label class="relative flex flex-col gap-1">
             <div class="input-label ">
               {{ t("label.notes") }}
