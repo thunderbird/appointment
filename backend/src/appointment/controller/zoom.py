@@ -5,7 +5,7 @@ from appointment.database.models import ExternalConnectionType
 
 
 def update_schedules_meeting_link_provider(db: Session, subscriber_id: int) -> bool:
-    """Updates existing schedules' meeling link provider to be zoom"""
+    """Updates existing schedules' meeting link provider to be zoom"""
     schedules = repo.schedule.get_by_subscriber(db, subscriber_id)
     for schedule in schedules:
         schedule.meeting_link_provider = models.MeetingLinkProviderType.zoom
