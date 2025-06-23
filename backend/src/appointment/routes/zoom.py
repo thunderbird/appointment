@@ -111,6 +111,9 @@ def zoom_callback(
     ):
         repo.external_connection.create(db, external_connection_schema)
 
+    # Update existing schedules' so that the zoom link generation setting is set
+    zoom.update_schedules_meeting_link_provider(db, subscriber.id)
+
     # Redirect non-setup subscribers back to the setup page
     if not subscriber.is_setup:
         return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
