@@ -446,3 +446,7 @@ export type HTMLInputElementEvent = Event & {
   target: HTMLInputElement;
   currentTarget: HTMLInputElement;
 };
+
+export type CopyTemplate = {
+  [key:number]: boolean;
+}

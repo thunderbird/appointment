@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { inject, ref, onMounted, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Alert, Availability, AvailabilitySet, SelectOption } from '@/models';
+import { Alert, Availability, AvailabilitySet, CopyTemplate, SelectOption } from '@/models';
 import { isoWeekdaysKey, dayjsKey } from '@/keys';
-import { compareAvailabilityStart, hhmmToMinutes } from '@/utils';
+import { compareAvailabilityStart, deepClone, hhmmToMinutes } from '@/utils';
 import { DEFAULT_SLOT_DURATION } from '@/definitions';
-import TextInput from '@/tbpro/elements/TextInput.vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import AvailabilityCopyDropdown from '@/elements/AvailabilityCopyDropdown.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 // icons
@@ -152,6 +153,32 @@ const addAvailability = (option: SelectOption) => {
 };
 
 /**
+ * Copies all availability entries on given day of week to selected days
+ * @param option The weekday's availability that should be used as copy source
+ * @param template The weekdays that should receive the copied availability
+ */
+const copyAvailability = (option: SelectOption, template: CopyTemplate) => {
+  const sourceAvailabilities = availabilitySet.value[option.value];
+  const targetWeekdays = Object.entries(template).reduce((p, c) => {
+    if (c[1]) p.push(Number(c[0]));
+    return p;
+  }, [] as number[]);
+  
+  targetWeekdays.forEach((d) => {
+    const targetAvailabilities = [] as Availability[];
+    sourceAvailabilities.forEach((sa) => {
+      const ta = deepClone(sa) as Availability;
+      ta.day_of_week = d;
+      delete ta.id;
+      targetAvailabilities.push(ta);
+    });
+    
+    availabilitySet.value[d] = targetAvailabilities;
+  });
+  update();
+};
+
+/**
  * Initializes a new availability entry on given day of week
  * @param option The weekday the availability should be added to
  * @param index The index of the availability on that weekday
@@ -207,12 +234,19 @@ const removeAvailability = (option: SelectOption, index: number) => {
               @blur="update"
             />
             <span>
-              <link-button v-if="i === 0" size="small" class="action-button" @click="addAvailability(option)">
-                <icon-plus class="w-4" aria-hidden="true"/>
+              <link-button v-if="i === 0" size="small" class="action-btn" @click="addAvailability(option)">
+                <icon-plus class="w-5" aria-hidden="true"/>
               </link-button>
             </span>
             <span>
-              <link-button size="small" class="action-button action-remove" @click="removeAvailability(option, i)">
+              <availability-copy-dropdown
+                v-if="i === 0"
+                :disabled-weekdays="[option.value]"
+                @copy="event => copyAvailability(option, event)"
+              />
+            </span>
+            <span>
+              <link-button size="small" class="action-btn action-remove" @click="removeAvailability(option, i)">
                 <icon-x class="w-4" aria-hidden="true"/>
               </link-button>
             </span>
@@ -294,11 +328,11 @@ const removeAvailability = (option: SelectOption, index: number) => {
 
   & > div {
     display: grid;
-    grid-template-columns: 1fr auto 1fr 20px 20px;
+    grid-template-columns: 1fr auto 1fr repeat(3, 20px);
     align-items: center;
     gap: .5rem;
   
-    .action-button {
+    .action-btn {
       padding: .25rem .125rem;
     }
     .action-remove {

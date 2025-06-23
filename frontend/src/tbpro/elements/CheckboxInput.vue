@@ -150,5 +150,14 @@ const onChange = () => {
     border-color: var(--colour-highlight);
     color: var(--colour-neutral-raised);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+
+    & ~ span {
+      color: var(--colour-ti-muted);
+    }
+  }
 }
 </style>
