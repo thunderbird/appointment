@@ -153,6 +153,11 @@ const onChange = () => {
 
   &:disabled {
     cursor: not-allowed;
+    opacity: .5;
+
+    & ~ span {
+      color: var(--colour-ti-muted);
+    }
   }
 }
 </style>
