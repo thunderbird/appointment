@@ -194,6 +194,8 @@
     "calendarDeletion": "Kalenderverbindung entfernen",
     "calendarUrl": "Kalender URL",
     "cancel": "Abbrechen",
+    "cancelBooking": "Buchung absagen",
+    "cancelReason": "Grund für die Absage",
     "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
     "chooseYourAvailability": "Wähle deine Verfügbarkeit",
     "clearForm": "Zurücksetzen",
