@@ -50,6 +50,7 @@ const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
 const validationErrors = ref<string[][]>(Array.from({length: props.options.length}, () => []));
 const validationErrorsExist = computed(() => validationErrors.value.some(e => e.filter(d => d == '').length));
 const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
+const disabledWeekdays = computed(() => isoWeekdays.map(d => d.iso).filter(d => !model.value.includes(d)));
 const validationAlert = { title: t('error.invalidTimeConfiguration', { value: durationHumanized.value }) } as Alert;
 
 /**
@@ -261,7 +262,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
             <span>
               <availability-copy-dropdown
                 v-if="i === 0"
-                :disabled-weekdays="[option.value]"
+                :disabled-weekdays="[option.value, ...disabledWeekdays]"
                 @copy="event => copyAvailability(option, event)"
               />
             </span>
