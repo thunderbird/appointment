@@ -196,7 +196,7 @@ const cancelAppointment = () => {
                 v-model="cancelReason"
                 :placeholder="t('placeholder.writeHere')"
                 class="w-full h-24 rounded-md resize-none mt-2 mb-8"
-                data-testid="appointment-modal-reason-input"
+                data-testid="appointment-modal-cancel-reason-input"
               ></textarea>
           </label>
           <danger-button data-testid="appointment-modal-cancel-btn" @click="cancelAppointment()" :title="t('label.cancel')" class="mx-auto">
