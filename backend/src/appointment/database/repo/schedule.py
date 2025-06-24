@@ -87,7 +87,7 @@ def has_slot(db: Session, schedule_id: int, slot_id: int):
     return db_slot and db_slot.schedule_id == schedule_id
 
 
-def has_valid_availability(schedule: schemas.ScheduleValidationIn):
+def all_availability_is_valid(schedule: schemas.ScheduleValidationIn):
     """check if availability is valid"""
     size = len(schedule.availabilities)
     if size > 0:

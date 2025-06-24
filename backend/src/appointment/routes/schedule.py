@@ -170,7 +170,7 @@ def update_schedule(
         schedule.slug = None
     
     # Check valid custom availability
-    if schedule.use_custom_availabilities and not repo.schedule.has_valid_availability(schedule):
+    if schedule.use_custom_availabilities and not repo.schedule.all_availability_is_valid(schedule):
         raise validation.InvalidAvailabilityException()
 
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
