@@ -53,6 +53,7 @@ const status = computed(() => props.appointment?.slots[0].booking_status);
 const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
+const isPast = computed(() => props.appointment?.slots[0].start < dj());
 
 // Handle decision
 const answer = (isConfirmed: boolean) => {
@@ -187,7 +188,7 @@ const cancelAppointment = () => {
       </div>
       <div class="px-4" v-if="status === BookingStatus.Booked">
         <p class="mb-8">This booking is confirmed.</p>
-        <form class="gap-4" @submit.prevent>
+        <form v-if="!isPast" class="gap-4" @submit.prevent>
           <label for="cancelReason">
             {{ t('label.cancelReason') }}
             <textarea
