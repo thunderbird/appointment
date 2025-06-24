@@ -19,13 +19,15 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, InviteStatus, MeetingLinkProviderType
+from ..database.schemas import ExternalConnection
 from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..dependencies.google import get_google_client
 from ..dependencies.zoom import get_zoom_client
 from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
-from ..exceptions.validation import RemoteCalendarConnectionError, APIException
+from ..exceptions.calendar import EventNotDeletedException
+from ..exceptions.validation import RemoteCalendarConnectionError, APIException, EventCouldNotBeDeleted
 from ..l10n import l10n
 from ..tasks.emails import send_support_email
 
@@ -465,6 +467,8 @@ def cancel_my_appointment(
     payload: schemas.AppointmentCancelRequest,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    redis=Depends(get_redis),
+    google_client=Depends(get_google_client),
 ):
     """endpoint to cancel an appointment from db"""
     if not repo.appointment.exists(db, appointment_id=id):
@@ -474,6 +478,7 @@ def cancel_my_appointment(
 
     appointment = repo.appointment.get(db, id)
     zoom_client = None
+    remote_calendar_connection = None
 
     # If needed, get a hold of the Zoom client
     if appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
@@ -481,6 +486,35 @@ def cancel_my_appointment(
             zoom_client = get_zoom_client(subscriber)
         except Exception as ex:
             sentry_sdk.capture_exception(ex)
+
+    # Get remote calendar connection
+    if appointment.calendar.provider == CalendarProvider.google:
+        external_connection: ExternalConnection | None = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        remote_calendar_connection = GoogleConnector(
+            db=db,
+            redis_instance=redis,
+            google_client=google_client,
+            remote_calendar_id=appointment.calendar.user,
+            subscriber_id=subscriber.id,
+            calendar_id=appointment.calendar.id,
+            google_tkn=external_connection.token,
+        )
+    else:
+        remote_calendar_connection = CalDavConnector(
+            db=db,
+            redis_instance=redis,
+            subscriber_id=subscriber.id,
+            calendar_id=appointment.calendar.id,
+            url=appointment.calendar.url,
+            user=appointment.calendar.user,
+            password=appointment.calendar.password,
+        )
 
     # Send cancel information to all slots' bookees
     for slot in appointment.slots:
@@ -493,8 +527,16 @@ def cancel_my_appointment(
             except Exception as ex:
                 sentry_sdk.capture_exception(ex)
 
-        # Delete the appointment, this will also delete the slot
-        repo.appointment.delete(db, slot.appointment_id)
+    # Delete the remote calendar event
+    uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)
+
+    try:
+        remote_calendar_connection.delete_event(uid=uuid)
+    except EventNotDeletedException:            
+        raise EventCouldNotBeDeleted
+
+    # Delete the appointment, this will also delete the slot
+    repo.appointment.delete(db, appointment.id)
 
 
 @router.post('/support')

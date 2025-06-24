@@ -142,9 +142,8 @@ class TestCancelAppointment:
             assert response.status_code == 200
             assert mock_tools().send_cancel_vevent.call_count == len(appointment.slots)
 
-        db = with_db()
-        assert appointment_repo.get(db, appointment.id) is None
-        db.close()
+        with with_db() as db:
+            assert appointment_repo.get(db, appointment.id) is None
 
     def test_cancel_appointment_not_found(self, with_client):
         payload = {'reason': 'Test cancellation'}
@@ -169,6 +168,7 @@ class TestCancelAppointment:
 
     def test_cancel_appointment_with_zoom_meeting(
         self,
+        monkeypatch,
         with_client,
         make_appointment,
         make_external_connections,
@@ -179,6 +179,17 @@ class TestCancelAppointment:
         make_external_connections(
             subscriber_id=TEST_USER_ID,
             type=ExternalConnectionType.zoom,
+        )
+
+        # Patch GoogleConnector to track delete_event calls
+        from appointment.controller.calendar import GoogleConnector
+        mock_delete_event = MagicMock()
+        monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+        monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
+
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
         )
 
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
@@ -207,8 +218,22 @@ class TestCancelAppointment:
             assert response.status_code == 200
             mock_get_zoom_client.assert_called_once()
             mock_zoom_client.delete_meeting.assert_called_with('12345')
+            mock_delete_event.assert_called_once()
 
-    def test_cancel_appointment_sends_email(self, with_client, make_google_calendar, make_appointment):
+    def test_cancel_appointment_with_google_sends_email(
+        self, monkeypatch, with_client, make_google_calendar, make_appointment, make_external_connections
+    ):
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
+        )
+
+        # Patch GoogleConnector to track delete_event calls
+        from appointment.controller.calendar import GoogleConnector
+        mock_delete_event = MagicMock()
+        monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+        monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
+
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
         appointment = make_appointment(calendar_id=calendar.id)
         payload = {'reason': 'Test cancellation'}
@@ -218,3 +243,29 @@ class TestCancelAppointment:
 
             assert response.status_code == 200
             assert mock_send_cancel.call_count == len(appointment.slots)
+            mock_delete_event.assert_called_once()
+
+    def test_cancel_appointment_with_caldav_sends_email(
+        self, monkeypatch, with_client, make_caldav_calendar, make_appointment, make_external_connections
+    ):
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.caldav,
+        )
+
+        # Patch CalDavConnector to track delete_event calls
+        from appointment.controller.calendar import CalDavConnector
+        mock_delete_event = MagicMock()
+        monkeypatch.setattr(CalDavConnector, 'delete_event', mock_delete_event)
+
+        calendar = make_caldav_calendar(subscriber_id=TEST_USER_ID)
+        appointment = make_appointment(calendar_id=calendar.id)
+        payload = {'reason': 'Test cancellation'}
+
+        with patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel:
+            response = with_client.post(f'/apmt/{appointment.id}/cancel', headers=auth_headers, json=payload)
+
+            assert response.status_code == 200
+            assert mock_send_cancel.call_count == len(appointment.slots)
+            assert mock_delete_event.call_count == len(appointment.slots)
+        
