@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
 import { isoWeekdaysKey } from '@/keys';
+import { CopyTemplate } from '@/models';
+import { IconAsterisk } from '@tabler/icons-vue';
 import DropDown from '@/elements/DropDown.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import ContainerBox from '@/tbpro/elements/ContainerBox.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import { IconAsterisk } from '@tabler/icons-vue';
-import { CopyTemplate } from '@/models';
 
 const isoWeekdays = inject(isoWeekdaysKey);
 const defaultSelection = Object.fromEntries(isoWeekdays.map((day) => [day.iso, false])) as CopyTemplate;

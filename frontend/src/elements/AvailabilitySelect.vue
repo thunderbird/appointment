@@ -47,10 +47,11 @@ const initialAvailabilitySet = Object.fromEntries(
   isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]
 ));
 const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
-const validationErrors = ref<string[]>(Array.from({length: props.options.length}, () => null));
-const validationErrorsExist = computed(() => validationErrors.value.some(e => e === ''));
+const validationErrors = ref<string[][]>(Array.from({length: props.options.length}, () => []));
+const validationErrorsExist = computed(() => validationErrors.value.some(e => e.filter(d => d == '').length));
 const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
 const validationAlert = { title: t('error.endAfterStartTime', { value: durationHumanized.value }) } as Alert;
+
 /**
  * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
  * and that existing availabilities are prefilled for the corresponding day.
@@ -70,6 +71,7 @@ watch(
   () => props.availabilities,
   () => {
     availabilitySet.value = defaultAvailabilitySet();
+    validationErrors.value = Array.from({length: props.options.length}, () => []);
   },
 );
 
@@ -79,22 +81,29 @@ watch(
 const validateInput = () => {
   let success = true;
   Object.values(availabilitySet.value).forEach((s) => {
-    // Validate each availability entry on each set
-    s.forEach((a) => {
+    // Validate each availability entry on each weekday
+    s.sort(compareAvailabilityStart).forEach((a, i) => {
       // Only validate active weekdays
       if (model.value.includes(a.day_of_week)) {
-        const diff = hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time);
-        if (diff < props.slotDuration) {
-          // We just use an empty string here to indicate an error on the input field
-          // without adding an error message beneath it.
-          validationErrors.value[a.day_of_week] = '';
+        if (
+          // 1. Validate correct order of start and end and ensure the minimum duration
+          ((hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time)) < props.slotDuration)
+          // 2. Validate continuous availability times (start time after previous end time and end time before next
+          // start time)
+          || (i > 0 && hhmmToMinutes(a.start_time) < hhmmToMinutes(s[i-1].end_time))
+          || (i < s.length-1 && hhmmToMinutes(a.end_time) > hhmmToMinutes(s[i+1].start_time))
+        ) {
+          // We just use an empty string here to indicate an error on the input field without adding an error message
+          // beneath it.
+          validationErrors.value[a.day_of_week][i] = '';
           success = false;
         } else {
-          validationErrors.value[a.day_of_week] = null;
+          delete validationErrors.value[a.day_of_week][i];
         }
       }
     });
   });
+
   return success;
 };
 
@@ -216,22 +225,22 @@ const removeAvailability = (option: SelectOption, index: number) => {
           <div v-for="(availability, i) in availabilitySet[option.value]" :key="availability.start_time">
             <text-input
               type="time"
-              :name="`start_time_${option.value}`"
+              :name="`start_time_${option.value}_${i}`"
               v-model="availability.start_time"
-              :error="validationErrors[option.value]"
+              :error="validationErrors[option.value][i]"
               :disabled="disabled"
               :small-input="true"
-              @blur="update"
+              @change="update()"
             />
             <span>&ndash;</span>
             <text-input
               type="time"
-              :name="`end_time_${option.value}`"
+              :name="`end_time_${option.value}_${i}`"
               v-model="availability.end_time"
-              :error="validationErrors[option.value]"
+              :error="validationErrors[option.value][i]"
               :disabled="disabled"
               :small-input="true"
-              @blur="update"
+              @change="update()"
             />
             <span>
               <link-button v-if="i === 0" size="small" class="action-btn" @click="addAvailability(option)">
