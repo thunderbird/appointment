@@ -23,7 +23,7 @@ interface Props {
   availabilities: Availability[]; // Existing availability entries to prefill
   startTime: string; // Default start time for new availability
   endTime: string; // Default end time for new availability
-  slotDuration: number;
+  slotDuration: number; // Schedule slot duration in minutes
   required: boolean;
   disabled?: boolean;
 }
@@ -50,7 +50,7 @@ const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
 const validationErrors = ref<string[][]>(Array.from({length: props.options.length}, () => []));
 const validationErrorsExist = computed(() => validationErrors.value.some(e => e.filter(d => d == '').length));
 const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
-const validationAlert = { title: t('error.endAfterStartTime', { value: durationHumanized.value }) } as Alert;
+const validationAlert = { title: t('error.invalidTimeConfiguration', { value: durationHumanized.value }) } as Alert;
 
 /**
  * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
@@ -157,7 +157,18 @@ const toggleBubble = (option: SelectOption) => {
  * @param option The weekday the availability should be added to
  */
 const addAvailability = (option: SelectOption) => {
-  availabilitySet.value[option.value].push(defaultAvailability(option.value));
+  // The start is the latest time that is currently set as availability
+  const start = Math.max(...availabilitySet.value[option.value].map(a => hhmmToMinutes(a.end_time)));
+  const end = start + props.slotDuration;
+  const newEntry = {
+    day_of_week: option.value,
+    start_time: dj.duration(start, 'minutes').format('HH:mm'),
+    end_time: dj.duration(end, 'minutes').format('HH:mm'),
+  } as Availability
+  // If the next computed availability flows into the next day, use the default setting (which most likely produces
+  // a validation error, since it overlaps with existing entries)
+  // TODO: Define UX flow for this
+  availabilitySet.value[option.value].push(end < 1440 ? newEntry : defaultAvailability(option.value));
   update();
 };
 
