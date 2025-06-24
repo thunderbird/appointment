@@ -38,7 +38,7 @@ interface Props {
 }
 const props = defineProps<Props>();
 
-const cancelReason = ref<string>("");
+const cancelReason = ref<string>('');
 
 // attendees list
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
@@ -68,7 +68,7 @@ const deleteAppointment = () => {
 // Handle cancel
 const cancelAppointment = () => {
   apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
-  cancelReason.value = "";
+  cancelReason.value = '';
   emit('close');
 };
 </script>
@@ -189,7 +189,7 @@ const cancelAppointment = () => {
         <p class="mb-8">This booking is confirmed.</p>
         <form class="gap-4" @submit.prevent>
           <label for="cancelReason">
-            {{ t("label.cancelReason") }}
+            {{ t('label.cancelReason') }}
             <textarea
                 name="cancelReason"
                 v-model="cancelReason"
