@@ -229,6 +229,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
           :aria-pressed="isSelectedOption(option)"
           :class="{ 'selected': isSelectedOption(option), disabled }"
           :title="option.label ?? String(option.value)"
+          :data-testid="`dashboard-availability-weekday-${option.value}-selection`"
           @click="() => !disabled ? toggleBubble(option) : null"
         >
           {{ option.label }}
@@ -242,6 +243,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
               :error="validationErrors[option.value][i]"
               :disabled="disabled"
               :small-input="true"
+              :data-testid="`dashboard-availability-start-time-${option.value}-${i}-input`"
               @change="update()"
             />
             <span>&ndash;</span>
@@ -252,6 +254,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
               :error="validationErrors[option.value][i]"
               :disabled="disabled"
               :small-input="true"
+              :data-testid="`dashboard-availability-end-time-${option.value}-${i}-input`"
               @change="update()"
             />
             <span>

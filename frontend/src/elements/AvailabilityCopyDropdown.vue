@@ -63,6 +63,7 @@ watch(
           :name="d.short.toLowerCase()"
           :label="d.long"
           :disabled="disabledWeekdays.includes(d.iso)"
+          :data-testid="`dashboard-availability-copy-to-${d.long.toLowerCase()}-input`"
         />
         <hr>
         <primary-button @click="copy">Apply</primary-button>

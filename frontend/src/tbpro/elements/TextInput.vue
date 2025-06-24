@@ -36,6 +36,7 @@ interface Props {
   smallText?: boolean;
   smallInput?: boolean;
   maxLength?: number|string;
+  dataTestid?: string;
 }
 const props = withDefaults(defineProps<Props>(), {
   type: 'text',
@@ -48,6 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
   smallText: false,
   smallInput: false,
   maxLength: null,
+  dataTestid: 'text-input'
 });
 
 const emit = defineEmits(['submit', 'blur']);
@@ -100,6 +102,7 @@ const onChange = () => {
           :placeholder="placeholder"
           :required="required"
           :maxLength="maxLength"
+          :data-testid="dataTestid"
           @invalid.prevent="onInvalid"
           @change="onChange"
           @blur="emit('blur')"
