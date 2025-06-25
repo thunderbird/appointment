@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { BookingStatus } from '@/definitions';
 import { timeFormat } from '@/utils';
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 
@@ -38,6 +38,8 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+const cancelReason = ref<string>('');
+
 // attendees list
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 
@@ -51,6 +53,7 @@ const status = computed(() => props.appointment?.slots[0].booking_status);
 const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
+const isPast = computed(() => props.appointment?.slots[0].start < dj());
 
 // Handle decision
 const answer = (isConfirmed: boolean) => {
@@ -60,6 +63,13 @@ const answer = (isConfirmed: boolean) => {
 // Handle deletion
 const deleteAppointment = () => {
   apmtStore.deleteAppointment(props.appointment?.id);
+  emit('close');
+};
+
+// Handle cancel
+const cancelAppointment = () => {
+  apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
+  cancelReason.value = '';
   emit('close');
 };
 </script>
@@ -176,8 +186,23 @@ const deleteAppointment = () => {
         </div>
         <div class="rounded-lg border border-gray-400 p-4 dark:border-gray-600">{{ appointment.details }}</div>
       </div>
-      <div class="p-6" v-if="status === BookingStatus.Booked">
-        <p>This booking is confirmed.</p>
+      <div class="px-4" v-if="status === BookingStatus.Booked">
+        <p class="mb-8">This booking is confirmed.</p>
+        <form v-if="!isPast" class="gap-4" @submit.prevent>
+          <label for="cancelReason">
+            {{ t('label.cancelReason') }}
+            <textarea
+                name="cancelReason"
+                v-model="cancelReason"
+                :placeholder="t('placeholder.writeHere')"
+                class="w-full h-24 rounded-md resize-none mt-2 mb-8"
+                data-testid="appointment-modal-cancel-reason-input"
+              ></textarea>
+          </label>
+          <danger-button data-testid="appointment-modal-cancel-btn" @click="cancelAppointment()" :title="t('label.cancel')" class="mx-auto">
+            {{ t('label.cancelBooking') }}
+          </danger-button>
+        </form>
       </div>
       <div class="p-6" v-else-if="isExpired">
         <p>This booking is expired.</p>

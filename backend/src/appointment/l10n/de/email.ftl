@@ -20,6 +20,8 @@ mail-brand-footer = Du erhälst diese E-Mail, weil Du dich auf unserer Website f
 
                     Copyright © 2025 MZLA Technologies. All rights reserved.
                     MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
+mail-brand-footer-privacy = Datenschutz
+mail-brand-footer-legal = Impressum
 
 ## Invitation
 
@@ -100,6 +102,22 @@ confirm-mail-html-confirm-text = Dieser Link führt zur Bestätigung der Buchung
 confirm-mail-html-confirm-action = Buchung bestätigen
 confirm-mail-html-deny-text = Dieser Link führt zur Ablehnung der Buchungsanfrage:
 confirm-mail-html-deny-action = Buchung ablehnen
+
+## Cancelled Appointment
+
+cancel-mail-subject = Buchungsanfrage abgesagt
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+# $reason_line (String) - Reason for cancelling the appointment
+cancel-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgesagt: { $date }. { $reason_line }
+cancel-mail-reason-label = Grund:
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $date (String) - Date of the requested appointment
+# $reason_line (String) - Reason for cancelling the appointment
+cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgesagt: { $date }. { $reason_line }
+{-brand-footer}
 
 ## Rejected Appointment
 
