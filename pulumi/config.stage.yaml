@@ -142,7 +142,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:rjung010
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:mel_a1
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -179,8 +179,6 @@ resources:
                 value: "10"
               - name: LOG_USE_STREAM
                 value: "True"
-              - name: LOG_LEVEL
-                value: INFO
               - name: APP_ENV
                 value: stage
               - name: SENTRY_DSN

@@ -14,7 +14,7 @@ if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
     service cron start
 fi
 
-ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000"
+ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000 --log-level trace"
 
 if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
     ARGS="$ARGS --reload"
