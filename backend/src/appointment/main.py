@@ -122,6 +122,10 @@ def server():
     Main function for the fast api server
     """
 
+    # TODO: Remove this debug shit
+    import logging
+    log = logging.getLogger(__name__)
+    log.info("Starting server...")
     # Run common setup first
     _common_setup()
 

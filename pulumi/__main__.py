@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import pulumi
+import pulumi_aws as aws
 import pulumi_cloudflare as cloudflare
 import tb_pulumi
 import tb_pulumi.cloudfront
@@ -78,15 +79,27 @@ instances = {
     for name, config in resources.get('tb:ec2:SshableInstance').items()
 }
 
-# Create a memory cache for the backend containers to use
-caches = {}
-caches['backend'] = tb_pulumi.elasticache.ElastiCacheReplicationGroup(
-    name=f'{project.name_prefix}-cache',
+# Build a security group to allow traffic from containers into Redis
+backend_cache_sg_opts = resources.get('tb:network:SecurityGroupWithRules', {}).get('other', {}).get('backend_cache', {})
+backend_cache_sg_ingress_rules = backend_cache_sg_opts.get('rules', {}).get('ingress', {})
+for rule in backend_cache_sg_ingress_rules:
+    rule['source_security_group_id'] = container_sgs.get('backend').resources.get('sg').id
+backend_cache_sg = tb_pulumi.network.SecurityGroupWithRules(
+    name=f'{project.name_prefix}-sg-cache-backend',
     project=project,
-    subnets=vpc.resources.get('subnets', []),
-    source_sgids=[container_sgs['backend'].resources['sg'].id],
-    **resources.get('tb:elasticache:ElastiCacheReplicationGroup', {}).get('backend', {}),
+    vpc_id=vpc.resources['vpc'].id,
+    opts=pulumi.ResourceOptions(depends_on=depends_on),
+    **backend_cache_sg_opts,
 )
+
+# Create the memory cache
+backend_cache = aws.elasticache.ServerlessCache(
+    f'{project.name_prefix}-cache-backend',
+    security_group_ids=[],
+    **resources.get('aws:elasticache:ServerlessCache', {}).get('backend', {}),
+)
+backend_cache_primary_endpoint = backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
+backend_cache_reader_endpoint = backend_cache.reader_endpoints.apply(lambda endpoints: endpoints[0]['address'])
 
 redis_dns = cloudflare.DnsRecord(
     f'{project.name_prefix}-dns-redis',
@@ -94,7 +107,7 @@ redis_dns = cloudflare.DnsRecord(
     ttl=60,
     type='CNAME',
     zone_id=cloudflare_zone_id,
-    content=caches['backend'].resources['replication_group'].primary_endpoint_address,
+    content=backend_cache_primary_endpoint,
     proxied=False,
 )
 
@@ -125,3 +138,7 @@ for service, opts in resources['tb:fargate:FargateClusterWithLogging'].items():
 # CloudFrontS3Service
 
 # CF Function to rewrite requests
+
+# Monitoring
+
+# CI

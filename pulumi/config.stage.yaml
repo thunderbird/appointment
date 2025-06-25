@@ -51,10 +51,32 @@ resources:
             - description: Allow traffic from the load balancer to the container
               # Sources are set in code
               protocol: tcp
-              from_port: 5173
-              to_port: 5173
+              from_port: 5000
+              to_port: 5000
           egress:
             - description: Allow traffic from the container out to the Internet
+              protocol: tcp
+              from_port: 0
+              to_port: 65535
+              cidr_blocks:
+                - 0.0.0.0/0
+    
+    other:
+      backend_cache:
+        rules:
+          ingress:
+            - description: Primary Redis traffic
+              # source_sgs set in code
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+            - description: Replica Redis traffic
+              # source_sgs set in code
+              protocol: tcp
+              from_port: 6380
+              to_port: 6380
+          egress:
+            - description: Allow outbound traffic to anywhere
               protocol: tcp
               from_port: 0
               to_port: 65535
@@ -69,10 +91,15 @@ resources:
         - database-encryption
         - fxa-secrets
         - google-oauth
+        - neon-database-connection
         - smtp-connection
         - zoom-secrets
-  
-  tb:ec2:SshableInstance: {}
+
+  tb:ec2:SshableInstance:
+    bastion:
+      ssh_keypair_name: rjung-burrito
+      source_cidrs:
+        - 38.15.46.29/32
   # Fill out this template to build an SSH bastion
   # tb:ec2:SshableInstance:
   #   bastion:
@@ -80,16 +107,11 @@ resources:
   #     source_cidrs:
   #       - your.ip.addr.ess/32
 
-  tb:elasticache:ElastiCacheReplicationGroup:
+  aws:elasticache:ServerlessCache:
     backend:
       description: Appointment backend (stage)
       engine: redis
-      engine_version: "7.1"
-      node_type: cache.t3.micro
-      num_cache_nodes: 1
-      parameter_group_family: redis7
-      parameter_group_params: []
-      port: 6379
+      major_engine_version: "7"
 
   tb:fargate:FargateClusterWithLogging:
     backend:
@@ -102,7 +124,7 @@ resources:
           listener_port: 443
           listener_proto: HTTPS
           listener_cert_arn: arn:aws:acm:eu-central-1:768512802988:certificate/d345f230-258b-4f4f-ae74-6211fd7c234e
-          container_port: 5137
+          container_port: 5000
           container_name: backend
           # "name" field is arbitrary, but must be unique and no longer than 32 chars
           name: appointment-backend-stage
@@ -111,20 +133,20 @@ resources:
             unhealthy_threshold: 5
             interval: 30
             path: /
-            port: 5137
+            port: 5000
       task_definition:
         network_mode: awsvpc
-        cpu: 512
-        memory: 2048
+        cpu: 1024
+        memory: 4096
         requires_compatibilities:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.us-east-1.amazonaws.com/appointment:backend-82af7fd87268812ac42bfd0e4e542d6f234e14ac
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:rjung008
             portMappings:
               - name: backend
-                containerPort: 5137
-                hostPort: 5137
+                containerPort: 5000
+                hostPort: 5000
                 protocol: tcp
                 appProtocol: http
             linuxParameters:

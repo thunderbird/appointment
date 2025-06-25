@@ -5,12 +5,14 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     ports:
-      - 5173:5173
+      - 5000:5000
     volumes:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
+      - IS_LOCAL_DEV=yes
+      - RELEASE_VERSION=localdev
     depends_on:
       mysql:
         condition: service_healthy
