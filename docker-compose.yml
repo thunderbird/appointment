@@ -11,6 +11,7 @@ services:
       - ./backend/src/appointment:/app/appointment
     environment:
       - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
+      - LOG_LEVEL=DEBUG
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
     depends_on:

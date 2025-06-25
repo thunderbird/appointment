@@ -165,10 +165,12 @@ resources:
               - name: ZOOM_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
             environment:
+              - name: LOG_LEVEL
+                value: DEBUG
               - name: FRONTEND_URL
                 value: https://appointment-stage.tb.pro
               - name: SHORT_BASE_URL
-                value: https://apmt-stage.tb.pro
+                value: https://apt.mt/
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT

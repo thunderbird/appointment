@@ -125,11 +125,6 @@ def server():
     # Run common setup first
     _common_setup()
 
-    # TODO: Remove this debug shit
-    import logging
-    log = logging.getLogger(__name__)
-    log.info("Starting server...")
-
     # extra routes
     from .routes import api
     from .routes import auth
@@ -258,7 +253,6 @@ def server():
     if os.getenv('ZOOM_API_ENABLED'):
         app.include_router(zoom.router, prefix='/zoom')
 
-    log.info('rjung - the server is configured!')
     return app
 
 
