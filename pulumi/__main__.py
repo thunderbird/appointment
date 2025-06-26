@@ -95,7 +95,8 @@ backend_cache_sg = tb_pulumi.network.SecurityGroupWithRules(
 # Create the memory cache
 backend_cache = aws.elasticache.ServerlessCache(
     f'{project.name_prefix}-cache-backend',
-    security_group_ids=[],
+    security_group_ids=[backend_cache_sg.resources.get('sg').id],
+    subnet_ids=[subnet.id for subnet in vpc.resources.get('subnets', {})],
     **resources.get('aws:elasticache:ServerlessCache', {}).get('backend', {}),
 )
 backend_cache_primary_endpoint = backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
