@@ -346,7 +346,7 @@ class TestSchedule:
         assert data['availabilities'][2]['day_of_week'] == 4
 
     def test_update_multiple_invalid_schedule_availabilities_per_weekday(self, with_client, make_schedule):
-        # First test invalid adjacent times
+        # Test invalid adjacent time slots
         generated_schedule = make_schedule(use_custom_availabilities=True)
 
         response = with_client.put(
@@ -385,7 +385,40 @@ class TestSchedule:
         )
         assert response.status_code == 400, response.text
 
-        # Second test invalid start / end times
+        # Test invalid start / end times
+        generated_schedule = make_schedule(use_custom_availabilities=True)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [4],
+                "use_custom_availabilities": True,
+                'availabilities': [
+                    {
+                        'day_of_week': 4,
+                        'start_time': '13:00',
+                        'end_time': '12:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                ],
+                'slot_duration': 60,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
+
+        # Test duration of a slot is to small (won't fit into the configured slot_duration)
         generated_schedule = make_schedule(use_custom_availabilities=True)
 
         response = with_client.put(
@@ -414,7 +447,7 @@ class TestSchedule:
                     {
                         'day_of_week': 4,
                         'start_time': '13:00',
-                        'end_time': '12:00',
+                        'end_time': '13:30',
                         'schedule_id': generated_schedule.id,
                     },
                 ],
