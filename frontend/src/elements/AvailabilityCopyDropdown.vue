@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { inject, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { isoWeekdaysKey } from '@/keys';
 import { CopyTemplate } from '@/models';
 import { IconAsterisk } from '@tabler/icons-vue';
@@ -9,6 +10,7 @@ import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import ContainerBox from '@/tbpro/elements/ContainerBox.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
+const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
 const defaultSelection = Object.fromEntries(isoWeekdays.map((day) => [day.iso, false])) as CopyTemplate;
 
@@ -46,14 +48,14 @@ watch(
 <template>
   <drop-down class="self-center" ref="copyDropdown">
     <template #trigger>
-      <link-button size="small" class="action-btn action-copy">
+      <link-button size="small" class="action-btn action-copy" :title="t('label.copyAvailability')">
         <icon-asterisk class="w-4" aria-hidden="true"/>
       </link-button>
     </template>
     <template #default>
       <container-box class="flex flex-col gap-2">
-        Copy to:
-        <checkbox-input name="all" label="Select all" v-model="allDaysSelected" />
+        {{ t('label.copyTo') }}
+        <checkbox-input name="all" :label="t('ftue.selectAll')" v-model="allDaysSelected" />
         <hr>
         <checkbox-input
           v-for="d in isoWeekdays"
@@ -66,7 +68,9 @@ watch(
           :data-testid="`dashboard-availability-copy-to-${d.long.toLowerCase()}-input`"
         />
         <hr>
-        <primary-button @click="copy">Apply</primary-button>
+        <primary-button @click="copy" :title="t('label.copyAvailability')">
+          {{ t('label.apply') }}
+        </primary-button>
       </container-box>
     </template>
   </drop-down>

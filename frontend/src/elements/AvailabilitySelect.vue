@@ -258,7 +258,13 @@ const removeAvailability = (option: SelectOption, index: number) => {
               @change="update()"
             />
             <span>
-              <link-button v-if="i === 0" size="small" class="action-btn" @click="addAvailability(option)">
+              <link-button
+                v-if="i === 0"
+                size="small"
+                class="action-btn"
+                @click="addAvailability(option)"
+                :title="t('label.addSlot')"
+              >
                 <icon-plus class="w-5" aria-hidden="true"/>
               </link-button>
             </span>
@@ -270,7 +276,12 @@ const removeAvailability = (option: SelectOption, index: number) => {
               />
             </span>
             <span>
-              <link-button size="small" class="action-btn action-remove" @click="removeAvailability(option, i)">
+              <link-button
+                size="small"
+                class="action-btn action-remove"
+                @click="removeAvailability(option, i)"
+                :title="t('label.removeSlot')"
+              >
                 <icon-x class="w-4" aria-hidden="true"/>
               </link-button>
             </span>
