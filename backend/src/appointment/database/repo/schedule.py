@@ -90,7 +90,8 @@ def has_slot(db: Session, schedule_id: int, slot_id: int):
 def all_availability_is_valid(schedule: schemas.ScheduleValidationIn):
     """check if availability is valid"""
     size = len(schedule.availabilities)
-    if size > 0:
+    if size <= 0:
+        return True
         # Make sure, that the availabilities are sorted by weekday AND by start time. This is important for checking
         # validity of times of adjacent availabilities at the same day
         for i, a in enumerate(sorted(schedule.availabilities, key = lambda x: (x.day_of_week.value, x.start_time))):
