@@ -92,20 +92,22 @@ def all_availability_is_valid(schedule: schemas.ScheduleValidationIn):
     size = len(schedule.availabilities)
     if size <= 0:
         return True
-        # Make sure, that the availabilities are sorted by weekday AND by start time. This is important for checking
-        # validity of times of adjacent availabilities at the same day
-        for i, a in enumerate(sorted(schedule.availabilities, key = lambda x: (x.day_of_week.value, x.start_time))):
-            # Check valid times and duration of a single availability entry
-            if not utils.is_valid_time_range(a.start_time, a.end_time, schedule.slot_duration):
-                return False
-            # Check valid predecessor
-            if (i > 0 and a.day_of_week == schedule.availabilities[i-1].day_of_week
-                and not utils.is_valid_time_range(schedule.availabilities[i-1].end_time, a.start_time)):
-                return False
-            # Check valid successor
-            if (i < size-1 and a.day_of_week == schedule.availabilities[i+1].day_of_week
-                and not utils.is_valid_time_range(a.end_time, schedule.availabilities[i+1].start_time)):
-                return False
+
+    # Make sure, that the availabilities are sorted by weekday AND by start time. This is important for checking
+    # validity of times of adjacent availabilities at the same day
+    for i, a in enumerate(sorted(schedule.availabilities, key = lambda x: (x.day_of_week.value, x.start_time))):
+        # Check valid times and duration of a single availability entry
+        if not utils.is_valid_time_range(a.start_time, a.end_time, schedule.slot_duration):
+            return False
+        # Check valid predecessor
+        if (i > 0 and a.day_of_week == schedule.availabilities[i-1].day_of_week
+            and not utils.is_valid_time_range(schedule.availabilities[i-1].end_time, a.start_time)):
+            return False
+        # Check valid successor
+        if (i < size-1 and a.day_of_week == schedule.availabilities[i+1].day_of_week
+            and not utils.is_valid_time_range(a.end_time, schedule.availabilities[i+1].start_time)):
+            return False
+
     return True
 
 
