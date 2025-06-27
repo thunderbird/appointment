@@ -134,7 +134,7 @@ def disconnect_account(
     db: Session = Depends(get_db),
     subscriber: models.Subscriber = Depends(get_subscriber),
 ):
-    """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
+    """Disconnects a caldav account. Removes associated data from our services and deletes the connection details."""
     ec = utils.list_first(
         repo.external_connection.get_by_type(
             db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id

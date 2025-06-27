@@ -109,17 +109,6 @@ def google_callback(
         db, subscriber.id, ExternalConnectionType.google, google_id
     )
 
-    # Create an artificial limit of one google account per account, mainly because we didn't plan for multiple accounts!
-    remainder = list(
-        filter(
-            lambda ec: ec.type_id != google_id,
-            repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.google),
-        )
-    )
-
-    if len(remainder) > 0:
-        return google_callback_error(is_setup, l10n('google-only-one'))
-
     # Create or update the external connection
     if not external_connection:
         external_connection_schema = schemas.ExternalConnection(

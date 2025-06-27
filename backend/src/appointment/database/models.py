@@ -189,8 +189,11 @@ class Subscriber(HasSoftDelete, Base):
         foreign_keys='[Invite.owner_id]'
     )
 
-    def get_external_connection(self, type: ExternalConnectionType) -> 'ExternalConnections':
-        """Retrieves the first found external connection by type or returns None if not found"""
+    def get_external_connection(self, type: ExternalConnectionType, type_id: str | None = None) -> 'ExternalConnections':
+        """Retrieves the first found external connection by type and type_id (if provided) or returns None if not found"""
+        if type_id:
+            return next(filter(lambda ec: ec.type == type and ec.type_id == type_id, self.external_connections), None)
+
         return next(filter(lambda ec: ec.type == type, self.external_connections), None)
 
     @property
