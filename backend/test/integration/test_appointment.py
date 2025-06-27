@@ -187,12 +187,12 @@ class TestCancelAppointment:
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
 
-        make_external_connections(
+        ec = make_external_connections(
             subscriber_id=TEST_USER_ID,
             type=ExternalConnectionType.google,
         )
 
-        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec.id)
         attendee = make_attendee()
         appointment = make_appointment(
             calendar.id, status=AppointmentStatus.closed, meeting_link_provider=MeetingLinkProviderType.zoom, slots=[]
@@ -223,7 +223,7 @@ class TestCancelAppointment:
     def test_cancel_appointment_with_google_sends_email(
         self, monkeypatch, with_client, make_google_calendar, make_appointment, make_external_connections
     ):
-        make_external_connections(
+        ec = make_external_connections(
             subscriber_id=TEST_USER_ID,
             type=ExternalConnectionType.google,
         )
@@ -234,7 +234,7 @@ class TestCancelAppointment:
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
 
-        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec.id)
         appointment = make_appointment(calendar_id=calendar.id)
         payload = {'reason': 'Test cancellation'}
 

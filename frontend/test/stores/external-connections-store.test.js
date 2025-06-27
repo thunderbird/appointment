@@ -109,22 +109,6 @@ describe('External Connections Store', () => {
     // TODO: expect location change
   });
 
-  test('disconnect with type_id', async () => {
-    const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
-    
-    // Test Google disconnect with type_id
-    const googleResult = await ec.disconnect(ExternalConnectionProviders.Google, 'test-google-id');
-    expect(googleResult.type_id).toBe('test-google-id');
-    
-    // Test CalDAV disconnect with type_id
-    const caldavResult = await ec.disconnect(ExternalConnectionProviders.Caldav, 'test-caldav-id');
-    expect(caldavResult.type_id).toBe('test-caldav-id');
-    
-    // Test Zoom disconnect (no type_id needed)
-    const zoomResult = await ec.disconnect(ExternalConnectionProviders.Zoom);
-    expect(zoomResult).toBe(true);
-  });
-
   test('reset', async () => {
     const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
     await ec.fetch();

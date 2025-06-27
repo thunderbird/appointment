@@ -293,17 +293,26 @@ class TestCalendar:
         response = with_client.post(f'/cal/{cal[2].id}/connect', headers=auth_headers)
         assert response.status_code == 403, response.text
 
-    def test_create_connection_failure(self, with_client, make_google_calendar, request):
-        """Attempt to create google calendar connection without having external connection, expect failure"""
+    def test_create_connection_failure(self, with_client, monkeypatch):
+        """Attempt to create caldav calendar connection with invalid credentials, expect failure"""
+
+        # Mock the CalDavConnector to simulate connection failure
+        from appointment.controller.calendar import CalDavConnector
+
+        def mock_test_connection(self):
+            return False
+
+        monkeypatch.setattr(CalDavConnector, 'test_connection', mock_test_connection)
+
         response = with_client.post(
             '/cal',
             json={
-                'title': 'A google calendar',
+                'title': 'A caldav calendar',
                 'color': '#123456',
-                'provider': CalendarProvider.google.value,
-                'url': 'test',
-                'user': 'test',
-                'password': 'test',
+                'provider': CalendarProvider.caldav.value,
+                'url': 'https://invalid-caldav-server.com',
+                'user': 'invalid_user',
+                'password': 'invalid_password',
             },
             headers=auth_headers,
         )

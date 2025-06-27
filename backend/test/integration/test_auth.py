@@ -586,7 +586,7 @@ class TestGoogle:
         """Ensure we remove the external google connection and any related calendars"""
         type_id = str(uuid4())
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id)
-        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec.id)
 
         response = with_client.post('/google/disconnect', json={'type_id': ec.type_id}, headers=auth_headers)
 
