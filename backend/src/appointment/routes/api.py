@@ -10,7 +10,6 @@ from redis import Redis, RedisCluster
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from .. import utils
 from ..database import repo, schemas
 
 # authentication

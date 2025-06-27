@@ -128,7 +128,9 @@ def google_callback(
             db, creds.to_json(), subscriber.id, ExternalConnectionType.google, google_id
         )
 
-    error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds, external_connection_id=external_connection.id)
+    error_occurred = google_client.sync_calendars(
+        db, subscriber_id=subscriber.id, token=creds, external_connection_id=external_connection.id
+    )
 
     # And then redirect back to frontend
     if error_occurred:
@@ -160,7 +162,9 @@ def disconnect_account(
     google_connection = subscriber.get_external_connection(ExternalConnectionType.google, request_body.type_id)
 
     # Remove all of the google calendars on their given google connection
-    repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google, external_connection_id=google_connection.id)
+    repo.calendar.delete_by_subscriber_and_provider(
+        db, subscriber.id, provider=models.CalendarProvider.google, external_connection_id=google_connection.id
+    )
 
     # Unassociated any secondary emails if they're attached to their google connection
     if subscriber.secondary_email == google_connection.name.lower():

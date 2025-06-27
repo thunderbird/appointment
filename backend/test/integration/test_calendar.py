@@ -9,7 +9,7 @@ from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
 from sqlalchemy import select
 
-from defines import auth_headers, TEST_USER_ID
+from defines import auth_headers
 
 
 def get_calendar_factory():
