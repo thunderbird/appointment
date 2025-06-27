@@ -119,13 +119,16 @@ def google_callback(
             token=creds.to_json(),
         )
 
-        repo.external_connection.create(db, external_connection_schema)
+        external_connection = repo.external_connection.create(db, external_connection_schema)
     else:
+        # get_by_type returns a list, but when type_id is provided, there should only be one
+        external_connection = external_connection[0]
+
         repo.external_connection.update_token(
             db, creds.to_json(), subscriber.id, ExternalConnectionType.google, google_id
         )
 
-    error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds)
+    error_occurred = google_client.sync_calendars(db, subscriber_id=subscriber.id, token=creds, external_connection_id=external_connection.id)
 
     # And then redirect back to frontend
     if error_occurred:
@@ -149,14 +152,15 @@ def google_callback_error(is_setup: bool, error: str):
 
 @router.post('/disconnect')
 def disconnect_account(
+    request_body: schemas.DisconnectGoogleAccountRequest,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
-    google_connection = subscriber.get_external_connection(ExternalConnectionType.google)
+    google_connection = subscriber.get_external_connection(ExternalConnectionType.google, request_body.type_id)
 
-    # Remove all of their google calendars (We only support one connection so this should be good for now)
-    repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google)
+    # Remove all of the google calendars on their given google connection
+    repo.calendar.delete_by_subscriber_and_provider(db, subscriber.id, provider=models.CalendarProvider.google, external_connection_id=google_connection.id)
 
     # Unassociated any secondary emails if they're attached to their google connection
     if subscriber.secondary_email == google_connection.name.lower():

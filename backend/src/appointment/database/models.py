@@ -189,8 +189,12 @@ class Subscriber(HasSoftDelete, Base):
         foreign_keys='[Invite.owner_id]'
     )
 
-    def get_external_connection(self, type: ExternalConnectionType, type_id: str | None = None) -> 'ExternalConnections':
-        """Retrieves the first found external connection by type and type_id (if provided) or returns None if not found"""
+    def get_external_connection(
+        self, type: ExternalConnectionType, type_id: str | None = None
+    ) -> 'ExternalConnections':
+        """Retrieves the first found external connection by type and type_id (if provided)
+           or returns None if not found"""
+
         if type_id:
             return next(filter(lambda ec: ec.type == type and ec.type_id == type_id, self.external_connections), None)
 
@@ -228,6 +232,7 @@ class Calendar(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey('subscribers.id'))
+    external_connection_id = Column(Integer, ForeignKey('external_connections.id'), nullable=True)
     provider = Column(Enum(CalendarProvider), default=CalendarProvider.caldav)
     title = Column(encrypted_type(String), index=True)
     color = Column(encrypted_type(String, length=32), index=True)
@@ -238,6 +243,7 @@ class Calendar(Base):
     connected_at = Column(DateTime)
 
     owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='calendars', lazy=False)
+    external_connection: Mapped['ExternalConnections'] = relationship('ExternalConnections', lazy=False)
     appointments: Mapped[list['Appointment']] = relationship(
         'Appointment', cascade='all,delete', back_populates='calendar'
     )
