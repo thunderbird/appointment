@@ -47,7 +47,15 @@ const restHandlers = [
   http.get(`${API_URL}/zoom/auth`, async () => HttpResponse.json({
     url: 'https://example.org',
   })),
-  http.get(`${API_URL}/'zoom/disconnect`, async () => true),
+  http.post(`${API_URL}/zoom/disconnect`, async () => true),
+  http.post(`${API_URL}/google/disconnect`, async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ type_id: body.type_id });
+  }),
+  http.post(`${API_URL}/caldav/disconnect`, async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ type_id: body.type_id });
+  }),
 ];
 
 const server = setupServer(...restHandlers);
@@ -99,6 +107,22 @@ describe('External Connections Store', () => {
     const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
     await ec.connect(ExternalConnectionProviders.Zoom);
     // TODO: expect location change
+  });
+
+  test('disconnect with type_id', async () => {
+    const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
+    
+    // Test Google disconnect with type_id
+    const googleResult = await ec.disconnect(ExternalConnectionProviders.Google, 'test-google-id');
+    expect(googleResult.type_id).toBe('test-google-id');
+    
+    // Test CalDAV disconnect with type_id
+    const caldavResult = await ec.disconnect(ExternalConnectionProviders.Caldav, 'test-caldav-id');
+    expect(caldavResult.type_id).toBe('test-caldav-id');
+    
+    // Test Zoom disconnect (no type_id needed)
+    const zoomResult = await ec.disconnect(ExternalConnectionProviders.Zoom);
+    expect(zoomResult).toBe(true);
   });
 
   test('reset', async () => {

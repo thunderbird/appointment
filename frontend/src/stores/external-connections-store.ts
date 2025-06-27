@@ -82,7 +82,9 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
       return call.value('zoom/disconnect').post();
     }
     if (provider === ExternalConnectionProviders.Google) {
-      return call.value('google/disconnect').post();
+      return call.value('google/disconnect').post({
+        type_id: typeId,
+      });
     }
     if (provider === ExternalConnectionProviders.Caldav) {
       return call.value('caldav/disconnect').post({
