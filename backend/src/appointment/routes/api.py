@@ -155,39 +155,19 @@ def create_my_calendar(
     calendar: schemas.CalendarConnection,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
-    google_client: GoogleClient = Depends(get_google_client),
 ):
-    """endpoint to add a new calendar connection for authenticated subscriber"""
+    """endpoint to add a new CalDav calendar for authenticated subscriber"""
 
     # Test the connection first
-    if calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-        )
-
-        if external_connection is None or external_connection.token is None:
-            raise RemoteCalendarConnectionError()
-
-        # I don't believe google cal touches this route, but just in case!
-        con = GoogleConnector(
-            db=db,
-            redis_instance=None,
-            google_client=google_client,
-            remote_calendar_id=calendar.user,
-            calendar_id=None,
-            subscriber_id=subscriber.id,
-            google_tkn=external_connection.token,
-        )
-    else:
-        con = CalDavConnector(
-            db=db,
-            redis_instance=None,
-            url=calendar.url,
-            user=calendar.user,
-            password=calendar.password,
-            subscriber_id=subscriber.id,
-            calendar_id=None,
-        )
+    con = CalDavConnector(
+        db=db,
+        redis_instance=None,
+        url=calendar.url,
+        user=calendar.user,
+        password=calendar.password,
+        subscriber_id=subscriber.id,
+        calendar_id=None,
+    )
 
     # Make sure we can connect to the calendar before we save it
     if not con.test_connection():
@@ -276,50 +256,6 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subsc
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
-@router.post('/rmt/calendars', response_model=list[schemas.CalendarConnectionOut])
-def read_remote_calendars(
-    connection: schemas.CalendarConnection,
-    google_client: GoogleClient = Depends(get_google_client),
-    subscriber: Subscriber = Depends(get_subscriber),
-    db: Session = Depends(get_db),
-):
-    """endpoint to get calendars from a remote CalDAV server"""
-    if connection.provider == CalendarProvider.google:
-        external_connection = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-        )
-
-        if external_connection is None or external_connection.token is None:
-            raise RemoteCalendarConnectionError()
-
-        con = GoogleConnector(
-            db=None,
-            redis_instance=None,
-            google_client=google_client,
-            remote_calendar_id=connection.user,
-            subscriber_id=subscriber.id,
-            calendar_id=None,
-            google_tkn=external_connection.token,
-        )
-    else:
-        con = CalDavConnector(
-            db=None,
-            redis_instance=None,
-            url=connection.url,
-            user=connection.user,
-            password=connection.password,
-            subscriber_id=subscriber.id,
-            calendar_id=None,
-        )
-
-    try:
-        calendars = con.list_calendars()
-    except requests.exceptions.RequestException:
-        raise RemoteCalendarConnectionError()
-
-    return calendars
-
-
 @router.post('/rmt/sync')
 def sync_remote_calendars(
     db: Session = Depends(get_db),
@@ -329,13 +265,11 @@ def sync_remote_calendars(
 ):
     """endpoint to sync calendars from a remote server"""
     # Create a list of connections and loop through them with sync
-    google_ec = utils.list_first(
-        repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-    )
+    google_ecs = repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
     caldav_ecs = repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.caldav)
 
     # Filter out any nulls
-    ecs = list(filter(lambda ec: ec, [google_ec, *caldav_ecs]))
+    ecs = list(filter(lambda ec: ec, [*google_ecs, *caldav_ecs]))
 
     if len(ecs) == 0:
         raise RemoteCalendarConnectionError()
@@ -387,9 +321,7 @@ def read_remote_events(
         raise validation.CalendarNotFoundException()
 
     if db_calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-        )
+        external_connection = repo.external_connection.get_by_id(db, subscriber.id, db_calendar.external_connection_id)
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -489,8 +421,8 @@ def cancel_my_appointment(
 
     # Get remote calendar connection
     if appointment.calendar.provider == CalendarProvider.google:
-        external_connection: ExternalConnection | None = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        external_connection: ExternalConnection | None = repo.external_connection.get_by_id(
+            db, subscriber.id, appointment.calendar.external_connection_id
         )
 
         if external_connection is None or external_connection.token is None:

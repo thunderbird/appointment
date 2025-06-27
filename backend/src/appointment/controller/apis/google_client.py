@@ -229,7 +229,7 @@ class GoogleClient:
 
         return response
 
-    def sync_calendars(self, db, subscriber_id: int, token, external_connection_id: int):
+    def sync_calendars(self, db, subscriber_id: int, token, external_connection_id: int | None = None):
         # Grab all the Google calendars
         calendars = self.list_calendars(token)
         error_occurred = False
@@ -246,7 +246,11 @@ class GoogleClient:
             # add calendar
             try:
                 repo.calendar.update_or_create(
-                    db=db, calendar=cal, calendar_url=calendar.get('id'), subscriber_id=subscriber_id, external_connection_id=external_connection_id
+                    db=db,
+                    calendar=cal,
+                    calendar_url=calendar.get('id'),
+                    subscriber_id=subscriber_id,
+                    external_connection_id=external_connection_id,
                 )
             except Exception as err:
                 logging.warning(

@@ -120,7 +120,13 @@ def update_connection(db: Session, is_connected: bool, calendar_id: int):
     return db_calendar
 
 
-def update_or_create(db: Session, calendar: schemas.CalendarConnection, calendar_url: str, subscriber_id: int, external_connection_id: int | None = None):
+def update_or_create(
+    db: Session,
+    calendar: schemas.CalendarConnection,
+    calendar_url: str,
+    subscriber_id: int,
+    external_connection_id: int | None = None,
+):
     """update or create a subscriber calendar"""
     subscriber_calendar = get_by_url(db, calendar_url)
 

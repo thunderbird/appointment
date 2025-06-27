@@ -623,8 +623,8 @@ def get_remote_connection(calendar, subscriber, db, redis, google_client):
     organizer_email = subscriber.email
 
     if calendar.provider == CalendarProvider.google:
-        external_connection: ExternalConnection | None = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        external_connection: ExternalConnection | None = repo.external_connection.get_by_id(
+            db, subscriber.id, calendar.external_connection_id
         )
 
         if external_connection is None or external_connection.token is None:

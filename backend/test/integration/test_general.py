@@ -44,7 +44,6 @@ class TestGeneral:
         ('delete', '/cal/1'),
         ('post', '/caldav/auth'),
         ('post', '/caldav/disconnect'),
-        ('post', '/rmt/calendars'),
         ('get', '/rmt/cal/1/' + DAY1 + '/' + DAY5),
         ('post', '/rmt/sync'),
         ('get', '/account/available-emails'),

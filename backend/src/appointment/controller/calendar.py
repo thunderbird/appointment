@@ -865,7 +865,6 @@ class Tools:
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range"""
         existing_events = []
-        google_calendars = []
 
         now = datetime.now()
 
@@ -882,7 +881,30 @@ class Tools:
         # handle calendar events
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
-                google_calendars.append(calendar)
+                # Get the specific external connection for this calendar
+                external_connection = repo.external_connection.get_by_id(
+                    db, subscriber.id, calendar.external_connection_id
+                )
+                if external_connection is None or external_connection.token is None:
+                    raise RemoteCalendarConnectionError()
+
+                con = GoogleConnector(
+                    db=db,
+                    redis_instance=redis,
+                    google_client=google_client,
+                    remote_calendar_id=calendar.user,  # This isn't used for get_busy_time but is still needed.
+                    calendar_id=calendar.id,  # This isn't used for get_busy_time but is still needed.
+                    subscriber_id=subscriber.id,
+                    google_tkn=external_connection.token,
+                )
+                existing_events.extend(
+                    [
+                        schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
+                        for busy in con.get_busy_time(
+                            [calendar.user], start.strftime(DATEFMT), end.strftime(DATEFMT)
+                        )
+                    ]
+                )
             else:
                 # Caldav - We don't have a smart way to batch these right now so just call them 1 by 1
                 con = CalDavConnector(
@@ -917,32 +939,6 @@ class Tools:
                 except requests.exceptions.ConnectionError:
                     # Connection error with remote caldav calendar, don't crash this route.
                     pass
-
-        # Batch up google calendar calls since we can only have one google calendar connected
-        if len(google_calendars) > 0 and google_calendars[0].provider == CalendarProvider.google:
-            external_connection = utils.list_first(
-                repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-            )
-            if external_connection is None or external_connection.token is None:
-                raise RemoteCalendarConnectionError()
-
-            con = GoogleConnector(
-                db=db,
-                redis_instance=redis,
-                google_client=google_client,
-                remote_calendar_id=google_calendars[0].user,  # This isn't used for get_busy_time but is still needed.
-                calendar_id=google_calendars[0].id,  # This isn't used for get_busy_time but is still needed.
-                subscriber_id=subscriber.id,
-                google_tkn=external_connection.token,
-            )
-            existing_events.extend(
-                [
-                    schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
-                    for busy in con.get_busy_time(
-                        [calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT)
-                    )
-                ]
-            )
 
         # handle already requested time slots
         for slot in schedule.slots:

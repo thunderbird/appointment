@@ -23,6 +23,9 @@ def create(db: Session, external_connection: ExternalConnection):
 def update_token(
     db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
 ):
+    if type == models.ExternalConnectionType.google and type_id is None:
+        raise ValueError("Google external connection requires type_id to be provided")
+
     db_results = get_by_type(db, subscriber_id, type, type_id)
     if db_results is None or len(db_results) == 0:
         return None
@@ -43,6 +46,16 @@ def delete_by_type(db: Session, subscriber_id: int, type: models.ExternalConnect
     db.commit()
 
     return True
+
+
+def get_by_id(db: Session, subscriber_id: int, id: int) -> models.ExternalConnections | None:
+    """Return an external connection by id and subscriber id"""
+    return (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.owner_id == subscriber_id)
+        .filter(models.ExternalConnections.id == id)
+        .first()
+    )
 
 
 def get_by_type(
