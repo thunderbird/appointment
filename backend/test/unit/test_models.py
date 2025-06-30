@@ -261,56 +261,6 @@ class TestSubscriber:
 
 
 class TestExternalConnection:
-    def test_get_by_id_success(self, with_db, make_basic_subscriber, make_external_connections):
-        """Test that get_by_id returns the correct external connection"""
-        with with_db() as db:
-            subscriber = make_basic_subscriber()
-            db.add(subscriber)
-
-            # Create an external connection
-            connection = make_external_connections(
-                subscriber_id=subscriber.id,
-                type=models.ExternalConnectionType.fxa,
-                type_id='test_fxa_id'
-            )
-
-            # Test successful retrieval
-            result = repo.external_connection.get_by_id(db, subscriber.id, connection.id)
-            assert result is not None
-            assert result.id == connection.id
-            assert result.owner_id == subscriber.id
-            assert result.type == models.ExternalConnectionType.fxa
-            assert result.type_id == 'test_fxa_id'
-
-    def test_get_by_id_not_found(self, with_db, make_basic_subscriber):
-        """Test that get_by_id returns None for non-existent connection"""
-        with with_db() as db:
-            subscriber = make_basic_subscriber()
-            db.add(subscriber)
-
-            # Test with non-existent id
-            result = repo.external_connection.get_by_id(db, subscriber.id, 999)
-            assert result is None
-
-    def test_get_by_id_wrong_subscriber(self, with_db, make_basic_subscriber, make_external_connections):
-        """Test that get_by_id returns None when connection belongs to different subscriber"""
-        with with_db() as db:
-            subscriber1 = make_basic_subscriber()
-            subscriber2 = make_basic_subscriber()
-            db.add(subscriber1)
-            db.add(subscriber2)
-
-            # Create connection for subscriber1
-            connection = make_external_connections(
-                subscriber_id=subscriber1.id,
-                type=models.ExternalConnectionType.fxa,
-                type_id='test_fxa_id'
-            )
-
-            # Try to get connection using subscriber2's id
-            result = repo.external_connection.get_by_id(db, subscriber2.id, connection.id)
-            assert result is None
-
     def test_update_token_google_with_type_id(self, with_db, make_basic_subscriber, make_external_connections):
         """Test that update_token works for Google connections with type_id"""
         with with_db() as db:

@@ -882,9 +882,8 @@ class Tools:
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
                 # Get the specific external connection for this calendar
-                external_connection = repo.external_connection.get_by_id(
-                    db, subscriber.id, calendar.external_connection_id
-                )
+                external_connection = calendar.external_connection
+
                 if external_connection is None or external_connection.token is None:
                     raise RemoteCalendarConnectionError()
 

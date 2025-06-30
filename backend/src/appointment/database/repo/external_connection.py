@@ -48,16 +48,6 @@ def delete_by_type(db: Session, subscriber_id: int, type: models.ExternalConnect
     return True
 
 
-def get_by_id(db: Session, subscriber_id: int, id: int) -> models.ExternalConnections | None:
-    """Return an external connection by id and subscriber id"""
-    return (
-        db.query(models.ExternalConnections)
-        .filter(models.ExternalConnections.owner_id == subscriber_id)
-        .filter(models.ExternalConnections.id == id)
-        .first()
-    )
-
-
 def get_by_type(
     db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
 ) -> list[models.ExternalConnections] | None:

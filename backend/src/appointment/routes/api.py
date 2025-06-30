@@ -365,7 +365,7 @@ def read_remote_events(
         raise validation.CalendarNotFoundException()
 
     if db_calendar.provider == CalendarProvider.google:
-        external_connection = repo.external_connection.get_by_id(db, subscriber.id, db_calendar.external_connection_id)
+        external_connection = db_calendar.external_connection
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -465,9 +465,7 @@ def cancel_my_appointment(
 
     # Get remote calendar connection
     if appointment.calendar.provider == CalendarProvider.google:
-        external_connection: ExternalConnection | None = repo.external_connection.get_by_id(
-            db, subscriber.id, appointment.calendar.external_connection_id
-        )
+        external_connection: ExternalConnection | None = appointment.calendar.external_connection
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
