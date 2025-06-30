@@ -172,3 +172,177 @@ class TestInvite:
             assert not invite
             waiting_list = db.query(models.WaitingList).filter(models.WaitingList.id == waiting_list.id).first()
             assert not waiting_list
+
+
+class TestSubscriber:
+    def test_get_external_connection_by_type_only(self, with_db, make_basic_subscriber, make_external_connections):
+        """Test that get_external_connection returns the first connection of
+           the specified type when no type_id is provided"""
+
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            # Create multiple external connections of the same type
+            make_external_connections(
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_1'
+            )
+            make_external_connections(
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_2'
+            )
+            make_external_connections(
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.google, type_id='google_id_1'
+            )
+
+            db.refresh(subscriber)
+
+            # Should return the first FXA connection found
+            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
+            assert result is not None
+            assert result.type == models.ExternalConnectionType.fxa
+            assert result.type_id == 'fxa_id_1'
+
+            # Should return the Google connection
+            result = subscriber.get_external_connection(models.ExternalConnectionType.google)
+            assert result is not None
+            assert result.type == models.ExternalConnectionType.google
+            assert result.type_id == 'google_id_1'
+
+            # Should return None for non-existent type
+            result = subscriber.get_external_connection(models.ExternalConnectionType.zoom)
+            assert result is None
+
+    def test_get_external_connection_by_type_and_type_id(
+        self, with_db, make_basic_subscriber, make_external_connections
+    ):
+        """Test that get_external_connection returns the specific connection when both type and type_id are provided"""
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            # Create multiple external connections of the same type with different type_ids
+            make_external_connections(
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_1'
+            )
+            make_external_connections(
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_2'
+            )
+
+            db.refresh(subscriber)
+
+            # Should return the specific connection with matching type_id
+            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='fxa_id_1')
+            assert result is not None
+            assert result.type == models.ExternalConnectionType.fxa
+            assert result.type_id == 'fxa_id_1'
+
+            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='fxa_id_2')
+            assert result is not None
+            assert result.type == models.ExternalConnectionType.fxa
+            assert result.type_id == 'fxa_id_2'
+
+            # Should return None for non-existent type_id
+            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='non_existent_id')
+            assert result is None
+
+    def test_get_external_connection_no_connections(self, with_db, make_basic_subscriber):
+        """Test that get_external_connection returns None when subscriber has no external connections"""
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+            db.refresh(subscriber)
+
+            # Should return None when no connections exist
+            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
+            assert result is None
+
+            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='any_id')
+            assert result is None
+
+
+class TestExternalConnection:
+    def test_get_by_id_success(self, with_db, make_basic_subscriber, make_external_connections):
+        """Test that get_by_id returns the correct external connection"""
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            # Create an external connection
+            connection = make_external_connections(
+                subscriber_id=subscriber.id,
+                type=models.ExternalConnectionType.fxa,
+                type_id='test_fxa_id'
+            )
+
+            # Test successful retrieval
+            result = repo.external_connection.get_by_id(db, subscriber.id, connection.id)
+            assert result is not None
+            assert result.id == connection.id
+            assert result.owner_id == subscriber.id
+            assert result.type == models.ExternalConnectionType.fxa
+            assert result.type_id == 'test_fxa_id'
+
+    def test_get_by_id_not_found(self, with_db, make_basic_subscriber):
+        """Test that get_by_id returns None for non-existent connection"""
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            # Test with non-existent id
+            result = repo.external_connection.get_by_id(db, subscriber.id, 999)
+            assert result is None
+
+    def test_get_by_id_wrong_subscriber(self, with_db, make_basic_subscriber, make_external_connections):
+        """Test that get_by_id returns None when connection belongs to different subscriber"""
+        with with_db() as db:
+            subscriber1 = make_basic_subscriber()
+            subscriber2 = make_basic_subscriber()
+            db.add(subscriber1)
+            db.add(subscriber2)
+
+            # Create connection for subscriber1
+            connection = make_external_connections(
+                subscriber_id=subscriber1.id,
+                type=models.ExternalConnectionType.fxa,
+                type_id='test_fxa_id'
+            )
+
+            # Try to get connection using subscriber2's id
+            result = repo.external_connection.get_by_id(db, subscriber2.id, connection.id)
+            assert result is None
+
+    def test_update_token_google_with_type_id(self, with_db, make_basic_subscriber, make_external_connections):
+        """Test that update_token works for Google connections with type_id"""
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            # Create a Google external connection
+            connection = make_external_connections(
+                subscriber_id=subscriber.id,
+                type=models.ExternalConnectionType.google,
+                type_id='test_google_id',
+                token='old_token'
+            )
+
+            # Update the token
+            new_token = 'new_google_token'
+            result = repo.external_connection.update_token(
+                db, new_token, subscriber.id, models.ExternalConnectionType.google, 'test_google_id'
+            )
+
+            assert result is not None
+            assert result.token == new_token
+            assert result.id == connection.id
+
+    def test_update_token_google_without_type_id_raises_error(self, with_db, make_basic_subscriber):
+        """Test that update_token raises ValueError for Google connections without type_id"""
+        with with_db() as db:
+            subscriber = make_basic_subscriber()
+            db.add(subscriber)
+
+            # Should raise ValueError for Google connection without type_id
+            with pytest.raises(ValueError, match="Google external connection requires type_id to be provided"):
+                repo.external_connection.update_token(
+                    db, 'new_token', subscriber.id, models.ExternalConnectionType.google
+                )
