@@ -5,6 +5,8 @@ import { vOnClickOutside } from '@vueuse/components';
 const open = ref(false);
 const toggle = () => { open.value = !open.value; };
 const close = () => { open.value = false; };
+
+defineExpose({ close });
 </script>
 
 <template>
@@ -13,7 +15,7 @@ const close = () => { open.value = false; };
       <slot name="trigger"></slot>
     </div>
     <transition>
-      <div v-show="open" class="absolute right-0" @click="close">
+      <div v-show="open" class="absolute right-0">
         <slot></slot>
       </div>
     </transition>

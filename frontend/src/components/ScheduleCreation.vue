@@ -556,7 +556,12 @@ watch(
             </div>
             <div class="flex justify-between">
               <div class="text-gray-600 dark:text-gray-200">{{ user.data.settings.timezone ?? dj.tz.guess() }}</div>
-              <link-button class="edit-link-btn" @click="router.push({ name: 'settings' })" :tooltip="t('label.editInSettings')" data-testid="dashboard-availability-edit-link-btn">
+              <link-button
+                class="edit-link-btn"
+                @click="router.push({ name: 'settings' })"
+                :tooltip="t('label.editInSettings')"
+                data-testid="dashboard-availability-edit-link-btn"
+              >
                 {{ t('label.edit') }}
               </link-button>
             </div>
@@ -568,7 +573,8 @@ watch(
       <div id="schedule-settings" class="schedule-creation-step" :class="{ 'active': activeStep2 }">
         <div
           @click="state = ScheduleCreationState.Settings"
-          class="btn-step-2 flex cursor-pointer items-center justify-between" data-testid="dashboard-scheduling-details-panel-btn"
+          class="btn-step-2 flex cursor-pointer items-center justify-between"
+          data-testid="dashboard-scheduling-details-panel-btn"
         >
           <div class="flex flex-col">
             <h2>

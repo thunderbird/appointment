@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -18,6 +19,8 @@ interface Props {
   navItems: string[], // list of route names that are also lang keys (format: label.<key>), used as nav items
 }
 defineProps<Props>();
+
+const profileDropdown = ref();
 
 /**
  * Is this nav entry active?
@@ -69,12 +72,15 @@ const isNavEntryActive = (item: string) => {
           :link-name="item"
         />
       </div>
-      <drop-down class="self-center">
+      <drop-down class="self-center" ref="profileDropdown">
         <template #trigger>
           <user-avatar />
         </template>
         <template #default>
-          <div class="fixed left-0 top-16 flex w-full flex-col gap-2 rounded-md bg-white p-4 shadow-md dark:bg-gray-700 md:static md:left-auto md:top-auto md:w-48">
+          <div
+            @click="profileDropdown.close()"
+            class="fixed left-0 top-16 flex w-full flex-col gap-2 rounded-md bg-white p-4 shadow-md dark:bg-gray-700 md:static md:left-auto md:top-auto md:w-48"
+          >
             <router-link :to="{ name: 'profile' }" class="p-2">
               {{ t('label.userProfile') }}
             </router-link>

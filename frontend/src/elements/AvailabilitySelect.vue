@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { inject, ref, onMounted, watch, nextTick, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Alert, Availability, AvailabilitySet, SelectOption } from '@/models';
+import { Alert, Availability, AvailabilitySet, CopyTemplate, SelectOption } from '@/models';
 import { isoWeekdaysKey, dayjsKey } from '@/keys';
-import { hhmmToMinutes } from '@/utils';
+import { compareAvailabilityStart, deepClone, hhmmToMinutes } from '@/utils';
 import { DEFAULT_SLOT_DURATION } from '@/definitions';
-import TextInput from '@/tbpro/elements/TextInput.vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import AvailabilityCopyDropdown from '@/elements/AvailabilityCopyDropdown.vue';
+import TextInput from '@/tbpro/elements/TextInput.vue';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
+
+// icons
+import { IconPlus, IconX } from '@tabler/icons-vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
@@ -18,7 +23,7 @@ interface Props {
   availabilities: Availability[]; // Existing availability entries to prefill
   startTime: string; // Default start time for new availability
   endTime: string; // Default end time for new availability
-  slotDuration: number;
+  slotDuration: number; // Schedule slot duration in minutes
   required: boolean;
   disabled?: boolean;
 }
@@ -32,7 +37,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits(['update']);
 
 // Model for weekday selection
-const model = defineModel<(string | number)[]>({ default: [] });
+const model = defineModel<number[]>({ default: [] });
 
 // Model for availability data
 const defaultAvailability = (dayOfWeek: number) => (
@@ -42,17 +47,19 @@ const initialAvailabilitySet = Object.fromEntries(
   isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]
 ));
 const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
-const validationErrors = ref<string[]>(Array.from({length: props.options.length}, () => null));
-const validationErrorsExist = computed(() => validationErrors.value.some(e => e === ''));
+const validationErrors = ref<string[][]>(Array.from({length: props.options.length}, () => []));
+const validationErrorsExist = computed(() => validationErrors.value.some(e => e.filter(d => d == '').length));
 const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
-const validationAlert = { title: t('error.endAfterStartTime', { value: durationHumanized.value }) } as Alert;
+const disabledWeekdays = computed(() => isoWeekdays.map(d => d.iso).filter(d => !model.value.includes(d)));
+const validationAlert = { title: t('error.invalidTimeConfiguration', { value: durationHumanized.value }) } as Alert;
+
 /**
  * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
  * and that existing availabilities are prefilled for the corresponding day.
  */
 const defaultAvailabilitySet = () => Object.fromEntries(isoWeekdays.map((d) => {
-  const existingAvailability = props.availabilities.find((a) => a.day_of_week === d.iso);
-  return [d.iso, [existingAvailability ?? defaultAvailability(d.iso)]];
+  const existing = props.availabilities.filter((a) => a.day_of_week === d.iso);
+  return [d.iso, existing.length ? existing.sort(compareAvailabilityStart) : [defaultAvailability(d.iso)]];
 })) as AvailabilitySet;
 
 // Prefill existing availabilities from schedule
@@ -65,6 +72,7 @@ watch(
   () => props.availabilities,
   () => {
     availabilitySet.value = defaultAvailabilitySet();
+    validationErrors.value = Array.from({length: props.options.length}, () => []);
   },
 );
 
@@ -72,21 +80,31 @@ watch(
  * Returns true, if validation was successful.
  */
 const validateInput = () => {
-  const input = Object.values(availabilitySet.value).flat();
   let success = true;
-  input.forEach((a) => {
-    if (model.value.includes(a.day_of_week)) {
-      const diff = hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time);
-      if (diff < props.slotDuration) {
-        // We just use an empty string here to indicate an error on the input field
-        // without adding an error message beneath it.
-        validationErrors.value[a.day_of_week] = '';
-        success = false;
-      } else {
-        validationErrors.value[a.day_of_week] = null;
+  Object.values(availabilitySet.value).forEach((s) => {
+    // Validate each availability entry on each weekday
+    s.sort(compareAvailabilityStart).forEach((a, i) => {
+      // Only validate active weekdays
+      if (model.value.includes(a.day_of_week)) {
+        if (
+          // 1. Validate correct order of start and end and ensure the minimum duration
+          ((hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time)) < props.slotDuration)
+          // 2. Validate continuous availability times (start time after previous end time and end time before next
+          // start time)
+          || (i > 0 && hhmmToMinutes(a.start_time) < hhmmToMinutes(s[i-1].end_time))
+          || (i < s.length-1 && hhmmToMinutes(a.end_time) > hhmmToMinutes(s[i+1].start_time))
+        ) {
+          // We just use an empty string here to indicate an error on the input field without adding an error message
+          // beneath it.
+          validationErrors.value[a.day_of_week][i] = '';
+          success = false;
+        } else {
+          delete validationErrors.value[a.day_of_week][i];
+        }
       }
-    }
+    });
   });
+
   return success;
 };
 
@@ -134,6 +152,70 @@ const toggleBubble = (option: SelectOption) => {
   // Send availability update
   nextTick(() => update());
 };
+
+/**
+ * Initializes a new availability entry on given day of week
+ * @param option The weekday the availability should be added to
+ */
+const addAvailability = (option: SelectOption) => {
+  // The start is the latest time that is currently set as availability
+  const start = Math.max(...availabilitySet.value[option.value].map(a => hhmmToMinutes(a.end_time)));
+  const end = start + props.slotDuration;
+  const newEntry = {
+    day_of_week: option.value,
+    start_time: dj.duration(start, 'minutes').format('HH:mm'),
+    end_time: dj.duration(end, 'minutes').format('HH:mm'),
+  } as Availability
+  // If the next computed availability flows into the next day, use the default setting (which most likely produces
+  // a validation error, since it overlaps with existing entries)
+  // TODO: Define UX flow for this
+  availabilitySet.value[option.value].push(end < 1440 ? newEntry : defaultAvailability(option.value));
+  update();
+};
+
+/**
+ * Copies all availability entries on given day of week to selected days
+ * @param option The weekday's availability that should be used as copy source
+ * @param template The weekdays that should receive the copied availability
+ */
+const copyAvailability = (option: SelectOption, template: CopyTemplate) => {
+  const sourceAvailabilities = availabilitySet.value[option.value];
+  const targetWeekdays = Object.entries(template).reduce((p, c) => {
+    if (c[1]) p.push(Number(c[0]));
+    return p;
+  }, [] as number[]);
+  
+  targetWeekdays.forEach((d) => {
+    const targetAvailabilities = [] as Availability[];
+    sourceAvailabilities.forEach((sa) => {
+      const ta = deepClone(sa) as Availability;
+      ta.day_of_week = d;
+      delete ta.id;
+      targetAvailabilities.push(ta);
+    });
+    
+    availabilitySet.value[d] = targetAvailabilities;
+  });
+  update();
+};
+
+/**
+ * Initializes a new availability entry on given day of week
+ * @param option The weekday the availability should be added to
+ * @param index The index of the availability on that weekday
+ */
+const removeAvailability = (option: SelectOption, index: number) => {
+  if (availabilitySet.value[option.value].length <= 1) {
+    // There is only one entry left, so disable the whole day
+    toggleBubble(option);
+  } else {
+    // We have more than one entry, so just remove the element at the given index
+    availabilitySet.value[option.value].splice(index, 1);
+    update();
+  }
+};
+
+
 </script>
 
 <template>
@@ -143,35 +225,67 @@ const toggleBubble = (option: SelectOption) => {
       <template v-for="option in options" :key="option.value">
         <button
           class="tbpro-bubble"
-          :aria-pressed="isSelectedOption(option)"
-          :class="{
-            'selected': isSelectedOption(option),
-            disabled,
-          }"
-          :title="option.label ?? String(option.value)"
           type="button"
+          :aria-pressed="isSelectedOption(option)"
+          :class="{ 'selected': isSelectedOption(option), disabled }"
+          :title="option.label ?? String(option.value)"
+          :data-testid="`dashboard-availability-weekday-${option.value}-selection`"
           @click="() => !disabled ? toggleBubble(option) : null"
         >
           {{ option.label }}
         </button>
         <div v-if="isSelectedOption(option)" class="bubble-content">
-          <text-input
-            type="time"
-            :name="`start_time_${option.value}`"
-            v-model="availabilitySet[option.value][0].start_time"
-            :error="validationErrors[option.value]"
-            :disabled="disabled"
-            @blur="update"
-          />
-          <span>&ndash;</span>
-          <text-input
-            type="time"
-            :name="`end_time_${option.value}`"
-            v-model="availabilitySet[option.value][0].end_time"
-            :error="validationErrors[option.value]"
-            :disabled="disabled"
-            @blur="update"
-          />
+          <div v-for="(availability, i) in availabilitySet[option.value]" :key="availability.start_time">
+            <text-input
+              type="time"
+              :name="`start_time_${option.value}_${i}`"
+              v-model="availability.start_time"
+              :error="validationErrors[option.value][i]"
+              :disabled="disabled"
+              :small-input="true"
+              :data-testid="`dashboard-availability-start-time-${option.value}-${i}-input`"
+              @change="update()"
+            />
+            <span>&ndash;</span>
+            <text-input
+              type="time"
+              :name="`end_time_${option.value}_${i}`"
+              v-model="availability.end_time"
+              :error="validationErrors[option.value][i]"
+              :disabled="disabled"
+              :small-input="true"
+              :data-testid="`dashboard-availability-end-time-${option.value}-${i}-input`"
+              @change="update()"
+            />
+            <span>
+              <link-button
+                v-if="i === 0"
+                size="small"
+                class="action-btn"
+                @click="addAvailability(option)"
+                :title="t('label.addSlot')"
+              >
+                <icon-plus class="w-5" aria-hidden="true"/>
+              </link-button>
+            </span>
+            <span>
+              <availability-copy-dropdown
+                v-if="i === 0"
+                :disabled-weekdays="[option.value, ...disabledWeekdays]"
+                @copy="event => copyAvailability(option, event)"
+              />
+            </span>
+            <span>
+              <link-button
+                size="small"
+                class="action-btn action-remove"
+                @click="removeAvailability(option, i)"
+                :title="t('label.removeSlot')"
+              >
+                <icon-x class="w-4" aria-hidden="true"/>
+              </link-button>
+            </span>
+          </div>
         </div>
         <div v-else>{{ t('label.unavailable') }}</div>
       </template>
@@ -243,9 +357,27 @@ const toggleBubble = (option: SelectOption) => {
 }
 
 .bubble-content {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+
+  & > div {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr repeat(3, 20px);
+    align-items: center;
+    gap: .5rem;
+  
+    .action-btn {
+      padding: .25rem .125rem;
+    }
+    .action-remove {
+      opacity: 0;
+      color: var(--colour-danger-default);
+      transition: var(--transition-opacity);
+    }
+    &:hover .action-remove {
+      opacity: 1;
+    }
+  }
 }
 </style>
