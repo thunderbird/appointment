@@ -10,6 +10,7 @@ from redis import Redis, RedisCluster
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
+from .. import utils
 from ..database import repo, schemas
 
 # authentication
@@ -253,6 +254,50 @@ def delete_my_calendar(id: int, db: Session = Depends(get_db), subscriber: Subsc
 
     cal = repo.calendar.delete(db=db, calendar_id=id)
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
+
+
+@router.post('/rmt/calendars', response_model=list[schemas.CalendarConnectionOut], deprecated=True)
+def read_remote_calendars(
+    connection: schemas.CalendarConnection,
+    google_client: GoogleClient = Depends(get_google_client),
+    subscriber: Subscriber = Depends(get_subscriber),
+    db: Session = Depends(get_db),
+):
+    """endpoint to get calendars from a remote CalDAV server"""
+    if connection.provider == CalendarProvider.google:
+        external_connection = utils.list_first(
+            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
+        )
+
+        if external_connection is None or external_connection.token is None:
+            raise RemoteCalendarConnectionError()
+
+        con = GoogleConnector(
+            db=None,
+            redis_instance=None,
+            google_client=google_client,
+            remote_calendar_id=connection.user,
+            subscriber_id=subscriber.id,
+            calendar_id=None,
+            google_tkn=external_connection.token,
+        )
+    else:
+        con = CalDavConnector(
+            db=None,
+            redis_instance=None,
+            url=connection.url,
+            user=connection.user,
+            password=connection.password,
+            subscriber_id=subscriber.id,
+            calendar_id=None,
+        )
+
+    try:
+        calendars = con.list_calendars()
+    except requests.exceptions.RequestException:
+        raise RemoteCalendarConnectionError()
+
+    return calendars
 
 
 @router.post('/rmt/sync')
