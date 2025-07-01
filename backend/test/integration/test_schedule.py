@@ -1,6 +1,6 @@
 import zoneinfo
 from datetime import date, time, datetime, timedelta, timezone, UTC
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 from freezegun import freeze_time
@@ -259,6 +259,7 @@ class TestSchedule:
                 'earliest_booking': 1000,
                 'farthest_booking': 20000,
                 'weekdays': [2, 4, 6],
+                "use_custom_availabilities": True,
                 'availabilities': [
                     {
                         'day_of_week': 2,
@@ -291,6 +292,170 @@ class TestSchedule:
         assert data['availabilities'] is not None
         assert len(data['availabilities']) == 3
         assert data['availabilities'][2]['day_of_week'] == 6
+
+    def test_update_multiple_valid_schedule_availabilities_per_weekday(self, with_client, make_schedule):
+        generated_schedule = make_schedule(use_custom_availabilities=True)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [4],
+                "use_custom_availabilities": True,
+                'availabilities': [
+                    {
+                        'day_of_week': 4,
+                        'start_time': '09:00',
+                        'end_time': '10:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                    {
+                        'day_of_week': 4,
+                        'start_time': '11:00',
+                        'end_time': '13:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                    {
+                        'day_of_week': 4,
+                        'start_time': '14:00',
+                        'end_time': '16:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                ],
+                'slot_duration': 60,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data['weekdays'] is not None
+        assert len(data['weekdays']) == 1
+        assert data['weekdays'] == [4]
+        assert data['availabilities'] is not None
+        assert len(data['availabilities']) == 3
+        assert data['availabilities'][2]['day_of_week'] == 4
+
+    def test_update_multiple_invalid_schedule_availabilities_per_weekday(self, with_client, make_schedule):
+        # Test invalid adjacent time slots
+        generated_schedule = make_schedule(use_custom_availabilities=True)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [4],
+                "use_custom_availabilities": True,
+                'availabilities': [
+                    {
+                        'day_of_week': 4,
+                        'start_time': '09:00',
+                        'end_time': '10:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                    {
+                        'day_of_week': 4,
+                        'start_time': '09:00',
+                        'end_time': '11:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                ],
+                'slot_duration': 60,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
+
+        # Test invalid start / end times
+        generated_schedule = make_schedule(use_custom_availabilities=True)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [4],
+                "use_custom_availabilities": True,
+                'availabilities': [
+                    {
+                        'day_of_week': 4,
+                        'start_time': '13:00',
+                        'end_time': '12:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                ],
+                'slot_duration': 60,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
+
+        # Test duration of a slot is to small (won't fit into the configured slot_duration)
+        generated_schedule = make_schedule(use_custom_availabilities=True)
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [4],
+                "use_custom_availabilities": True,
+                'availabilities': [
+                    {
+                        'day_of_week': 4,
+                        'start_time': '09:00',
+                        'end_time': '10:00',
+                        'schedule_id': generated_schedule.id,
+                    },
+                    {
+                        'day_of_week': 4,
+                        'start_time': '13:00',
+                        'end_time': '13:30',
+                        'schedule_id': generated_schedule.id,
+                    },
+                ],
+                'slot_duration': 60,
+            },
+            headers=auth_headers,
+        )
+        assert response.status_code == 400, response.text
 
     def test_update_existing_schedule_with_html(self, with_client, make_schedule):
         generated_schedule = make_schedule()
@@ -542,6 +707,94 @@ class TestSchedule:
         assert response.status_code == 404, response.text
         data = response.json()
         assert data['detail']['id'] == 'SCHEDULE_NOT_ACTIVE'
+
+    def test_meeting_link_provider_is_in_sync(
+        self,
+        monkeypatch,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+    ):
+        """Test that a an appointment's meeting_link_provider is in sync with the schedule"""
+
+        class MockCaldavConnector:
+            @staticmethod
+            def __init__(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
+                """We don't want to initialize a client"""
+                pass
+
+            @staticmethod
+            def get_busy_time(self, calendar_ids, start, end):
+                return []
+            
+            @staticmethod
+            def bust_cached_events(self, all_calendars=False):
+                pass
+
+        monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
+        monkeypatch.setattr(CalDavConnector, 'bust_cached_events', MockCaldavConnector.bust_cached_events)
+
+        start_date = date(2024, 4, 1)
+        start_time = time(9, tzinfo=UTC)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
+        end_time = time(10, tzinfo=UTC)
+
+        subscriber = make_pro_subscriber()
+        generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+        schedule = make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=start_date,
+            start_time=start_time,
+            end_time=end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+            booking_confirmation=False,
+            use_custom_availabilities=False,
+            meeting_link_provider=models.MeetingLinkProviderType.zoom,
+        )
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=start_datetime, duration=30),
+            attendee=schemas.AttendeeBase(email='hello@example.org', name='Greg', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        # Zoom mocks so the schedule calls' to Zoom client successfully pass the try block
+        mock_zoom_client = Mock()
+        mock_zoom_client.create_meeting.return_value = {'id': 'mock_meeting_id'}
+        mock_zoom_client.get_meeting.return_value = {'join_url': 'https://mock.zoom.us/j/12345'}
+
+        def mock_get_zoom_client(*args, **kwargs):
+            return mock_zoom_client
+
+        monkeypatch.setattr('appointment.routes.schedule.get_zoom_client', mock_get_zoom_client)
+
+        response = with_client.put(
+            '/schedule/public/availability/request',
+            json={
+                's_a': slot_availability,
+                'url': signed_url,
+            },
+        )
+
+        assert response.status_code == 200, response.text
+        data = response.json()
+        slot_id = data['id']
+
+        with with_db() as db:
+            slot = repo.slot.get(db, slot_id)
+            assert slot is not None
+            assert isinstance(slot.appointment_id, int)
+            appointment = repo.appointment.get(db, slot.appointment_id)
+            assert appointment is not None
+            assert appointment.meeting_link_provider == schedule.meeting_link_provider
 
 
 class TestRequestScheduleAvailability:

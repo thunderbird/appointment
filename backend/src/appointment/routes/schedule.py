@@ -170,11 +170,8 @@ def update_schedule(
         schedule.slug = None
     
     # Check valid custom availability
-    if (len(schedule.availabilities) and
-            any(not utils.is_valid_time_range(a.start_time, a.end_time, schedule.slot_duration)
-                for a in schedule.availabilities)):
+    if schedule.use_custom_availabilities and not repo.schedule.all_availability_is_valid(schedule):
         raise validation.InvalidAvailabilityException()
-        
 
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
@@ -368,6 +365,7 @@ def request_schedule_availability_slot(
             status=status,
             location_type=schedule.location_type,
             location_url=schedule.location_url,
+            meeting_link_provider=schedule.meeting_link_provider,
         ),
     )
 
@@ -524,7 +522,7 @@ def handle_schedule_availability_decision(
     # check if request was denied
     if confirmed is False:
         # send rejection information to bookee
-        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
         repo.slot.delete(db, slot.id)
 
         if slot.appointment_id:

@@ -35,10 +35,7 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     await homePage.gotoDashboard();
 
     if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
-        // when running on mobile on BrowserStack the cookies are saved for the entire session, so if a previous
-        // test ran in the same session then the browser is already be signed in; in which case just the Appointment
-        // 'continue' button may be displayed instead of the 'log in' button. Check for the 'continue' button first
-        // and if it's there we can just click that and be signed in, and skip the rest
+        // check for the 'continue' button first in case sign-in was saved in local cookies
         if (await homePage.homeContinueBtn.isVisible() &&  await homePage.homeContinueBtn.isEnabled()) {
             console.log("already signed in; just need to click the Appointment home page 'continue' button");
             await homePage.homeContinueBtn.click();

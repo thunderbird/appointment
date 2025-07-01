@@ -1,6 +1,15 @@
 import dateutil.parser
+from unittest.mock import patch, MagicMock
 
 from defines import DAY1, DAY3, auth_headers, TEST_USER_ID
+from appointment.database.repo import appointment as appointment_repo
+from appointment.database.models import (
+    MeetingLinkProviderType,
+    ExternalConnectionType,
+    AppointmentStatus,
+    Slot,
+    BookingStatus,
+)
 
 
 class TestAppointment:
@@ -99,11 +108,7 @@ class TestMyAppointments:
             assert appointment.id == data[index]['id']
 
     def test_dont_show_other_subscribers_appointments(
-        self,
-        with_client,
-        make_basic_subscriber,
-        make_appointment,
-        make_google_calendar
+        self, with_client, make_basic_subscriber, make_appointment, make_google_calendar
     ):
         """Only show my appointments in the /me/appointments route"""
         # The other subscriber / appointment
@@ -124,3 +129,143 @@ class TestMyAppointments:
         assert len(data) == 1
         assert other_appointment.id != data[0]['id']
         assert appointment.id == data[0]['id']
+
+
+class TestCancelAppointment:
+    def test_cancel_appointment(self, with_client, make_appointment, with_db):
+        appointment = make_appointment()
+        payload = {'reason': 'Test cancellation'}
+
+        with patch('appointment.routes.api.Tools') as mock_tools:
+            response = with_client.post(f'/apmt/{appointment.id}/cancel', headers=auth_headers, json=payload)
+
+            assert response.status_code == 200
+            assert mock_tools().send_cancel_vevent.call_count == len(appointment.slots)
+
+        with with_db() as db:
+            assert appointment_repo.get(db, appointment.id) is None
+
+    def test_cancel_appointment_not_found(self, with_client):
+        payload = {'reason': 'Test cancellation'}
+        response = with_client.post('/apmt/9999/cancel', headers=auth_headers, json=payload)
+        assert response.status_code == 404
+        assert response.json()['detail']['id'] == 'APPOINTMENT_NOT_FOUND'
+
+    def test_cancel_appointment_not_authorized(
+        self, with_client, make_appointment, make_basic_subscriber, make_google_calendar
+    ):
+        # The other subscriber / appointment
+        other = make_basic_subscriber()
+        other_calendar = make_google_calendar(subscriber_id=other.id)
+        other_appointment = make_appointment(calendar_id=other_calendar.id)
+
+        payload = {'reason': 'Test cancellation'}
+
+        response = with_client.post(f'/apmt/{other_appointment.id}/cancel', headers=auth_headers, json=payload)
+
+        assert response.status_code == 403
+        assert response.json()['detail']['id'] == 'APPOINTMENT_NOT_AUTH'
+
+    def test_cancel_appointment_with_zoom_meeting(
+        self,
+        monkeypatch,
+        with_client,
+        make_appointment,
+        make_external_connections,
+        make_google_calendar,
+        make_attendee,
+        make_appointment_slot,
+    ):
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.zoom,
+        )
+
+        # Patch GoogleConnector to track delete_event calls
+        from appointment.controller.calendar import GoogleConnector
+        mock_delete_event = MagicMock()
+        monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+        monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
+
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
+        )
+
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        attendee = make_attendee()
+        appointment = make_appointment(
+            calendar.id, status=AppointmentStatus.closed, meeting_link_provider=MeetingLinkProviderType.zoom, slots=[]
+        )
+
+        slot: Slot = make_appointment_slot(
+            appointment_id=appointment.id,
+            attendee_id=attendee.id,
+            booking_status=BookingStatus.booked,
+            booking_tkn='abcd',
+            meeting_link_id='12345',
+        )[0]
+
+        appointment.slots = [slot]
+        payload = {'reason': 'Test cancellation'}
+
+        with patch('appointment.routes.api.get_zoom_client') as mock_get_zoom_client:
+            mock_zoom_client = MagicMock()
+            mock_get_zoom_client.return_value = mock_zoom_client
+
+            response = with_client.post(f'/apmt/{appointment.id}/cancel', headers=auth_headers, json=payload)
+
+            assert response.status_code == 200
+            mock_get_zoom_client.assert_called_once()
+            mock_zoom_client.delete_meeting.assert_called_with('12345')
+            mock_delete_event.assert_called_once()
+
+    def test_cancel_appointment_with_google_sends_email(
+        self, monkeypatch, with_client, make_google_calendar, make_appointment, make_external_connections
+    ):
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
+        )
+
+        # Patch GoogleConnector to track delete_event calls
+        from appointment.controller.calendar import GoogleConnector
+        mock_delete_event = MagicMock()
+        monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+        monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
+
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        appointment = make_appointment(calendar_id=calendar.id)
+        payload = {'reason': 'Test cancellation'}
+
+        with patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel:
+            response = with_client.post(f'/apmt/{appointment.id}/cancel', headers=auth_headers, json=payload)
+
+            assert response.status_code == 200
+            assert mock_send_cancel.call_count == len(appointment.slots)
+            mock_delete_event.assert_called_once()
+
+    def test_cancel_appointment_with_caldav_sends_email(
+        self, monkeypatch, with_client, make_caldav_calendar, make_appointment, make_external_connections
+    ):
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.caldav,
+        )
+
+        # Patch CalDavConnector to track delete_event calls
+        from appointment.controller.calendar import CalDavConnector
+        mock_delete_event = MagicMock()
+        monkeypatch.setattr(CalDavConnector, 'delete_event', mock_delete_event)
+
+        calendar = make_caldav_calendar(subscriber_id=TEST_USER_ID)
+        appointment = make_appointment(calendar_id=calendar.id)
+        payload = {'reason': 'Test cancellation'}
+
+        with patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel:
+            response = with_client.post(f'/apmt/{appointment.id}/cancel', headers=auth_headers, json=payload)
+
+            assert response.status_code == 200
+            assert mock_send_cancel.call_count == len(appointment.slots)
+            assert mock_delete_event.call_count == len(appointment.slots)
+        

@@ -11,6 +11,7 @@ interface Props {
   checked?: boolean;
   required?: boolean;
   disabled?: boolean;
+  dataTestid?: string;
 }
 withDefaults(defineProps<Props>(), {
   label: null,
@@ -19,6 +20,7 @@ withDefaults(defineProps<Props>(), {
   checked: false,
   required: false,
   disabled: false,
+  dataTestid: 'checkbox-input'
 });
 
 const model = defineModel<boolean>();
@@ -70,6 +72,7 @@ const onChange = () => {
         :checked="checked"
         :disabled="disabled"
         :required="required"
+        :data-testid="dataTestid"
         @invalid="onInvalid"
         @change="onChange"
         ref="inputRef"
@@ -149,6 +152,15 @@ const onChange = () => {
     background-color: var(--colour-highlight);
     border-color: var(--colour-highlight);
     color: var(--colour-neutral-raised);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+
+    & ~ span {
+      color: var(--colour-ti-muted);
+    }
   }
 }
 </style>

@@ -394,6 +394,7 @@ watch(route, () => {
       @updated-period="dateChange"
       @updated-mode="modeChange"
       ref="qalendarRef"
+      class="h-auto"
     >
       <template #weekDayEvent="eventProps">
         <calendar-event

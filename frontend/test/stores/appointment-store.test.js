@@ -6,6 +6,7 @@ import {
   beforeAll,
   afterAll,
   afterEach,
+  vi,
 } from 'vitest';
 import { useAppointmentStore, createAppointmentStore } from '@/stores/appointment-store';
 import { createPinia } from 'pinia';
@@ -20,6 +21,7 @@ const API_URL = 'http://localhost';
 const restHandlers = [
   http.get(`${API_URL}/me/appointments`, async () => HttpResponse.json([
     {
+      id: 1,
       calendar_id: 1,
       title: 'title',
       duration: 180,
@@ -29,6 +31,7 @@ const restHandlers = [
       ],
     },
     {
+      id: 2,
       calendar_id: 1,
       title: 'title',
       duration: 180,
@@ -40,6 +43,7 @@ const restHandlers = [
       ],
     },
   ])),
+  http.post(`${API_URL}/apmt/:id/cancel`, async () => {}),
 ];
 
 const server = setupServer(...restHandlers);
@@ -103,5 +107,27 @@ describe('Appointment Store', () => {
     // Ensure our data is null/don't exist
     expect(apmt.isLoaded).toBe(false);
     expect(apmt.appointments.length).toBe(0);
+  });
+
+  test('cancel', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch');
+
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
+
+    // Cancel the first appointment
+    const reason = 'Test reason';
+    await apmt.cancelAppointment(apmt.appointments[0].id, reason);
+
+    // Assert fetch was called with the correct endpoint and payload
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining(`/apmt/${apmt.appointments[0].id}/cancel`),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
+
+    fetchSpy.mockRestore();
   });
 });
