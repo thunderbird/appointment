@@ -531,8 +531,8 @@
           "google": {
             "cancel": "Abbrechen",
             "confirm": "Trennen",
-            "message": "Beim Trennen der Verbindung zu Google-Kalendern werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis er auf einen neuen Kalender umgestellt wurde.",
-            "title": "Google Kalender trennen"
+            "message": "Beim Trennen der Verbindung des Google-Kontos {googleAccountName} werden alle verfügbaren Google-Kalender und die zugehörigen Daten vom Thunderbird Appointment Konto entfernt. Wenn ein Terminplan mit einem Google-Kalender eingerichtet ist, wird er deaktiviert, bis er auf einen neuen Kalender umgestellt wurde.",
+            "title": "Google Account trennen"
           },
           "zoom": {
             "cancel": "Abbrechen",
