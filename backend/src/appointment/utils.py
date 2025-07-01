@@ -133,7 +133,6 @@ def normalize_secrets():
         os.environ['DATABASE_URL'] = (
             f"{proto}://{secrets['username']}:{secrets['password']}@{hostname}/{secrets['dbname']}"
         )
-        log.info(f'Database url: {proto}://{secrets['username']}:****@{hostname}/{secrets['dbname']}')
 
     database_enc_secret = os.getenv('DB_ENC_SECRET')
 
