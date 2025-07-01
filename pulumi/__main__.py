@@ -167,47 +167,52 @@ backend_domain_name = fargate_clusters['backend'].resources['fargate_service_alb
 backend_origin_id = f'{project.name_prefix}-backend'
 frontend_opts = resources.get('tb:cloudfront:CloudFrontS3Service', {}).get('frontend', {})
 default_cache_behavior = {
-        'allowed_methods': ['GET', 'HEAD'],
-        'cached_methods': ['GET', 'HEAD'],
-        'target_origin_id': f's3-{frontend_opts["service_bucket_name"]}',
-        'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_OPTIMIZED,
-        'function_associations': [{'event_type': 'viewer-request', 'function_arn': cf_func.arn}],
-        'viewer_protocol_policy': 'redirect-to-https',
-    }
+    'allowed_methods': ['GET', 'HEAD'],
+    'cached_methods': ['GET', 'HEAD'],
+    'target_origin_id': f's3-{frontend_opts["service_bucket_name"]}',
+    'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_OPTIMIZED,
+    'function_associations': [{'event_type': 'viewer-request', 'function_arn': cf_func.arn}],
+    'viewer_protocol_policy': 'redirect-to-https',
+}
 ordered_cache_behaviors = [
+    {
+        'path_pattern': '/api/*',
+        'allowed_methods': ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH'],
+        'cached_methods': ['GET', 'HEAD', 'OPTIONS'],
+        'target_origin_id': backend_origin_id,
+        'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_DISABLED,
+        'origin_request_policy_id': CLOUDFRONT_ORIGIN_REQUEST_POLICY_ID_ALLVIEWER,
+        'function_associations': [
             {
-                'path_pattern': '/api/*',
-                'allowed_methods': ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH'],
-                'cached_methods': ['GET', 'HEAD', 'OPTIONS'],
-                'target_origin_id': backend_origin_id,
-                'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_DISABLED,
-                'origin_request_policy_id': CLOUDFRONT_ORIGIN_REQUEST_POLICY_ID_ALLVIEWER,
-                'function_associations': [{
-                    'event_type': 'viewer-request',
-                    'function_arn': cf_func.arn,
-                }],
-                'viewer_protocol_policy': 'redirect-to-https',
-            }, {
-                'path_pattern': '/fxa',
-                'allowed_methods': ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH'],
-                'cached_methods': ['GET', 'HEAD', 'OPTIONS'],
-                'target_origin_id': backend_origin_id,
-                'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_DISABLED,
-                'origin_request_policy_id': CLOUDFRONT_ORIGIN_REQUEST_POLICY_ID_ALLVIEWER,
-                'function_associations': [{
-                    'event_type': 'viewer-request',
-                    'function_arn': cf_func.arn,
-                }],
-                'viewer_protocol_policy': 'redirect-to-https',
-            },
-        ]
+                'event_type': 'viewer-request',
+                'function_arn': cf_func.arn,
+            }
+        ],
+        'viewer_protocol_policy': 'redirect-to-https',
+    },
+    {
+        'path_pattern': '/fxa',
+        'allowed_methods': ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH'],
+        'cached_methods': ['GET', 'HEAD', 'OPTIONS'],
+        'target_origin_id': backend_origin_id,
+        'cache_policy_id': CLOUDFRONT_CACHE_POLICY_ID_DISABLED,
+        'origin_request_policy_id': CLOUDFRONT_ORIGIN_REQUEST_POLICY_ID_ALLVIEWER,
+        'function_associations': [
+            {
+                'event_type': 'viewer-request',
+                'function_arn': cf_func.arn,
+            }
+        ],
+        'viewer_protocol_policy': 'redirect-to-https',
+    },
+]
 if 'distribution' in frontend_opts:
     frontend_opts['distribution']['default_cache_behavior'] = default_cache_behavior
     frontend_opts['distribution']['ordered_cache_behaviors'] = ordered_cache_behaviors
 else:
     frontend_opts['distribution'] = {
         'default_cache_behavior': default_cache_behavior,
-        'ordered_cache_behaviors': ordered_cache_behaviors
+        'ordered_cache_behaviors': ordered_cache_behaviors,
     }
 
 frontend = tb_pulumi.cloudfront.CloudFrontS3Service(
