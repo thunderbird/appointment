@@ -170,7 +170,7 @@ resources:
               - name: FRONTEND_URL
                 value: https://appointment-stage.tb.pro
               - name: SHORT_BASE_URL
-                value: https://apt-stage.mt/
+                value: https://stage.apt.mt/
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT
