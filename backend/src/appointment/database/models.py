@@ -11,7 +11,7 @@ import uuid
 import zoneinfo
 from functools import cached_property
 
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time, UUID
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time, Uuid
 from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship, as_declarative, declared_attr, Mapped
@@ -248,7 +248,7 @@ class Appointment(Base):
     __tablename__ = 'appointments'
 
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(UUID(as_uuid=True), default=uuid.uuid4, index=True, unique=True)
+    uuid = Column(Uuid(as_uuid=True), default=uuid.uuid4, index=True, unique=True)
     calendar_id = Column(Integer, ForeignKey('calendars.id'))
     duration = Column(Integer)
     title = Column(encrypted_type(String))
