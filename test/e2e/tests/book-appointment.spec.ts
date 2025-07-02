@@ -9,7 +9,7 @@ import {
   PLAYWRIGHT_TAG_PROD_SANITY,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   PLAYWRIGHT_TAG_E2E_SUITE,
-  TIMEOUT_10_SECONDS,
+  TIMEOUT_15_SECONDS,
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
   APPT_TIMEZONE_SETTING_PRIMARY,
@@ -81,9 +81,9 @@ test.describe('book an appointment', () => {
     // now verify a corresponding pending booking was created on the host account's list of pending bookings
     // (drop the day of the week from our time slot string as this function just needs the month, day, and year)
     const expMonthDayYear = expDateStr.substring(expDateStr.indexOf(',') + 2);
-    // wait a few seconds for the appointment dashboard to update, sometimes the test is so fast when it
+    // wait N seconds for the appointment dashboard to update, sometimes the test is so fast when it
     // switches back to the dashboard the new pending appointment hasn't been added/displayed yet
-    await page.waitForTimeout(TIMEOUT_10_SECONDS);
+    await page.waitForTimeout(TIMEOUT_15_SECONDS);
     await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, expMonthDayYear, expTimeStr);
   });
 });

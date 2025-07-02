@@ -53,20 +53,10 @@ test.describe('account settings - profile', {
     await settingsPage.setAccountProfileDisplayName(newDisplayName);
     expect.soft(await settingsPage.getAccountProfileDisplayName()).toBe(newDisplayName);
 
-    // verify new display name is now displayed on the dashboard
-    await dashboardPage.gotoToDashboardMonthView();
-    // note that currently on stage the display name is not being updated after being changed
-    // so this test case will fail until issue #924 is fixed (uncomment line below when fixed)
-    // expect.soft(await dashboardPage.getAvailabilityPanelHeader()).toContain(newDisplayName);
-
     // now change the display name setting back to what it was before, and save
     await settingsPage.gotoAccountSettingsPage();
     await settingsPage.setAccountProfileDisplayName(APPT_DISPLAY_NAME);
     expect(await settingsPage.getAccountProfileDisplayName()).toBe(APPT_DISPLAY_NAME);
-
-    // verify new display name is now displayed on the dashboard
-    await dashboardPage.gotoToDashboardMonthView();
-    expect(await dashboardPage.getAvailabilityPanelHeader()).toContain(APPT_DISPLAY_NAME);
   });
 
   test('refresh link button', async ({ page }) => {

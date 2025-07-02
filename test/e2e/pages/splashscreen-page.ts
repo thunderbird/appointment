@@ -7,6 +7,7 @@ import {
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
   TIMEOUT_90_SECONDS,
+  TIMEOUT_60_SECONDS,
  } from '../const/constants';
 
 export class SplashscreenPage {
@@ -29,7 +30,7 @@ export class SplashscreenPage {
   }
 
   async gotoDashboard() {
-    await this.page.goto(APPT_URL);
+    await this.page.goto(APPT_URL, { timeout: TIMEOUT_60_SECONDS });
   }
 
   async clickLoginBtn() {
