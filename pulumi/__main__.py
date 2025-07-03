@@ -225,7 +225,7 @@ frontend = tb_pulumi.cloudfront.CloudFrontS3Service(
             'origin_id': backend_origin_id,
             'custom_origin_config': {
                 'http_port': 80,
-                'https_port': 5000,
+                'https_port': 443,
                 'origin_protocol_policy': 'https-only',
                 'origin_ssl_protocols': ['TLSv1.2'],
             },
