@@ -305,7 +305,7 @@ class TestCalendar:
         monkeypatch.setattr(CalDavConnector, 'test_connection', mock_test_connection)
 
         response = with_client.post(
-            '/cal',
+            '/caldav',
             json={
                 'title': 'A caldav calendar',
                 'color': '#123456',
@@ -336,7 +336,7 @@ class TestCaldav:
 
     def test_create_first_caldav_calendar(self, with_client):
         response = with_client.post(
-            '/cal',
+            '/caldav',
             json={
                 'title': 'First CalDAV calendar',
                 'color': '#123456',
