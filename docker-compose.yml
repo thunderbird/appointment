@@ -19,10 +19,12 @@ services:
       
       # The use of DATABASE_URL is problematic and deprecated
       # - DATABASE_URL=mysql+mysqldb://tba:abcd%efgh@mysql:3306/appointment
+      # - DATABASE_URL=postgresql+psycopg://tba:abcd%efgh@postgres:5432/appointment
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
+
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
   frontend:
@@ -35,23 +37,23 @@ services:
     environment:
       - WATCHPACK_POLLING=true
 
-  mysql:
-    image: mysql:8
+  postgres:
+    image: postgres:17
     volumes:
-      - apmt_db:/var/lib/mysql
+      - apmt_db:/var/lib/postgresql/data
     ports:
-      - 3306:3306
+      - 5433:5432
     environment:
-      - MYSQL_DATABASE=appointment
-      - MYSQL_USER=tba
-      - MYSQL_PASSWORD=abcd%efgh
-      - MYSQL_RANDOM_ROOT_PASSWORD=true
+      - POSTGRES_DB=appointment
+      - POSTGRES_USER=tba
+      - POSTGRES_PASSWORD=abcd%efgh
+      - PGDATA=/var/lib/postgresql/data
     healthcheck:
-      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
-      start_period: 5s
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 5s
       timeout: 5s
       retries: 55
+    shm_size: 128mb
 
   redis:
     image: redis/redis-stack
