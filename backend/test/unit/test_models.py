@@ -285,14 +285,14 @@ class TestExternalConnection:
             assert result.token == new_token
             assert result.id == connection.id
 
-    def test_update_token_google_without_type_id_raises_error(self, with_db, make_basic_subscriber):
-        """Test that update_token raises ValueError for Google connections without type_id"""
+    def test_update_token_google_without_type_id_returns_none(self, with_db, make_basic_subscriber):
+        """Test that update_token returns None for Google connections without type_id"""
         with with_db() as db:
             subscriber = make_basic_subscriber()
             db.add(subscriber)
 
-            # Should raise ValueError for Google connection without type_id
-            with pytest.raises(ValueError, match="Google external connection requires type_id to be provided"):
-                repo.external_connection.update_token(
-                    db, 'new_token', subscriber.id, models.ExternalConnectionType.google
-                )
+            result = repo.external_connection.update_token(
+                db, 'new_token', subscriber.id, models.ExternalConnectionType.google
+            )
+
+            assert result is None

@@ -3,6 +3,9 @@
 Repository providing CRUD functions for external_connection database models.
 """
 
+import logging
+import os
+import sentry_sdk
 from sqlalchemy.orm import Session
 from .. import models
 from ..schemas import ExternalConnection
@@ -24,7 +27,10 @@ def update_token(
     db: Session, token: str, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
 ):
     if type == models.ExternalConnectionType.google and type_id is None:
-        raise ValueError("Google external connection requires type_id to be provided")
+        logging.error('Google external connection requires type_id to be provided')
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_message('Google external connection requires type_id to be provided')
+        return None
 
     db_results = get_by_type(db, subscriber_id, type, type_id)
     if db_results is None or len(db_results) == 0:
