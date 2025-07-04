@@ -18,7 +18,6 @@ class ZoomClient:
     SCOPES = [
         'meeting:read:meeting',
         'meeting:write:meeting',
-        'meeting:update:meeting',
         'meeting:delete:meeting',
         'meeting:write:invite_links',
         'user:read:email',
