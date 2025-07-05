@@ -30,12 +30,6 @@ COPY scripts/dummy_setup.py /app/appointment/commands/setup.py
 RUN pip install --upgrade pip
 RUN pip install .'[deploy]'
 
-# install removes the src file and installs the application as /app/appointment
-# that's fine, but uhh let's add this hack to line it up with our dev environment.
-# I'll buy whoever fixes this a coffee.
-RUN mkdir src
-RUN ln -s /app/appointment src/appointment
-
 ARG RELEASE_VERSION
 ENV RELEASE_VERSION=$RELEASE_VERSION
 
