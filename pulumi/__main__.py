@@ -4,6 +4,7 @@ import pulumi
 import pulumi_aws as aws
 import pulumi_cloudflare as cloudflare
 import tb_pulumi
+import tb_pulumi.ci
 import tb_pulumi.cloudfront
 import tb_pulumi.cloudwatch
 import tb_pulumi.elasticache
@@ -163,7 +164,7 @@ cf_func = aws.cloudfront.Function(
 )
 project.resources['cf_rewrite_function'] = cf_func
 
-# Craft all the things we need for our CloudFront Distribution
+# Craft all the things we need for our CloudFront Distribution, which has a more complex config than this module likes
 backend_domain_name = fargate_clusters['backend'].resources['fargate_service_alb'].resources['albs']['backend'].dns_name
 backend_origin_id = f'{project.name_prefix}-backend'
 frontend_opts = resources.get('tb:cloudfront:CloudFrontS3Service', {}).get('frontend', {})
@@ -244,3 +245,11 @@ monitoring = tb_pulumi.cloudwatch.CloudWatchMonitoringGroup(
 )
 
 # CI
+ci_opts = resources.get('tb:ci:AwsAutomationUser')
+if ci_opts:
+    automaton_opts = ci_opts.get('automaton')
+    automaton = tb_pulumi.ci.AwsAutomationUser(
+        name=f'{project.name_prefix}-automaton',
+        project=project,
+        **automaton_opts,
+    )
