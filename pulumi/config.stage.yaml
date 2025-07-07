@@ -220,3 +220,10 @@ resources:
         # Do not define ordered cache behaviors here; they are programmatically overridden
         logging_config:
           include_cookies: True
+
+  tb:cloudwatch:CloudWatchMonitoringGroup:
+    cloudwatch:
+      notify_emails:
+        - thunderbird-services-monitoring@thunderbird.net
+      config:
+        alarms: {}

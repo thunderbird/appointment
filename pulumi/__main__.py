@@ -5,6 +5,7 @@ import pulumi_aws as aws
 import pulumi_cloudflare as cloudflare
 import tb_pulumi
 import tb_pulumi.cloudfront
+import tb_pulumi.cloudwatch
 import tb_pulumi.elasticache
 import tb_pulumi.fargate
 import tb_pulumi.network
@@ -237,5 +238,9 @@ frontend = tb_pulumi.cloudfront.CloudFrontS3Service(
 
 
 # Monitoring
+monitoring_opts = resources.get('tb:cloudwatch:CloudWatchMonitoringGroup', {}).get('cloudwatch', {})
+monitoring = tb_pulumi.cloudwatch.CloudWatchMonitoringGroup(
+    name=f'{project.name_prefix}-monitoring', project=project, **monitoring_opts
+)
 
 # CI
