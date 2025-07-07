@@ -537,8 +537,8 @@
           "google": {
             "cancel": "Back",
             "confirm": "Disconnect",
-            "message": "Disconnecting your Google Calendars will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
-            "title": "Disconnect Google Calendar"
+            "message": "Disconnecting your Google account {googleAccountName} will remove all available Google Calendars and associated data from your Thunderbird Appointment account. If your schedule is setup with a Google Calendar then it will be turned off until you set it to a new calendar.",
+            "title": "Disconnect Google account"
           },
           "zoom": {
             "cancel": "Back",

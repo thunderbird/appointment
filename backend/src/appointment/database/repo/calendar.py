@@ -51,9 +51,13 @@ def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool
     return query.all()
 
 
-def create(db: Session, calendar: schemas.CalendarConnection, subscriber_id: int):
+def create(
+    db: Session, calendar: schemas.CalendarConnection, subscriber_id: int, external_connection_id: int | None = None
+):
     """create new calendar for owner, if not already existing"""
-    db_calendar = models.Calendar(**calendar.model_dump(), owner_id=subscriber_id)
+    db_calendar = models.Calendar(
+        **calendar.model_dump(), owner_id=subscriber_id, external_connection_id=external_connection_id
+    )
     subscriber_calendars = get_by_subscriber(db, subscriber_id)
     subscriber_calendar_urls = [c.url for c in subscriber_calendars]
     # check if subscriber already holds this calendar by url
@@ -120,12 +124,18 @@ def update_connection(db: Session, is_connected: bool, calendar_id: int):
     return db_calendar
 
 
-def update_or_create(db: Session, calendar: schemas.CalendarConnection, calendar_url: str, subscriber_id: int):
+def update_or_create(
+    db: Session,
+    calendar: schemas.CalendarConnection,
+    calendar_url: str,
+    subscriber_id: int,
+    external_connection_id: int | None = None,
+):
     """update or create a subscriber calendar"""
     subscriber_calendar = get_by_url(db, calendar_url)
 
     if subscriber_calendar is None:
-        return create(db, calendar, subscriber_id)
+        return create(db, calendar, subscriber_id, external_connection_id)
 
     return update_by_calendar(db, calendar, subscriber_calendar)
 
@@ -150,7 +160,8 @@ def delete_by_subscriber_and_provider(
     db: Session,
     subscriber_id: int,
     provider: models.CalendarProvider,
-    user: Optional[str] = None
+    user: Optional[str] = None,
+    external_connection_id: Optional[int] = None
 ):
     """Delete all subscriber's calendar by a provider"""
     calendars = get_by_subscriber(db, subscriber_id=subscriber_id)
@@ -159,6 +170,12 @@ def delete_by_subscriber_and_provider(
             # If user is provided and it's not the same as the calendar user then we can skip
             if user and user != calendar.user:
                 continue
+
+            """If external_connection_id is provided and it's not the same as the calendar external_connection_id
+               then we can skip"""
+            if external_connection_id and external_connection_id != calendar.external_connection_id:
+                continue
+
             delete(db, calendar_id=calendar.id)
 
     return True

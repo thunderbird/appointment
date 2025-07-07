@@ -47,7 +47,15 @@ const restHandlers = [
   http.get(`${API_URL}/zoom/auth`, async () => HttpResponse.json({
     url: 'https://example.org',
   })),
-  http.get(`${API_URL}/'zoom/disconnect`, async () => true),
+  http.post(`${API_URL}/zoom/disconnect`, async () => true),
+  http.post(`${API_URL}/google/disconnect`, async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ type_id: body.type_id });
+  }),
+  http.post(`${API_URL}/caldav/disconnect`, async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ type_id: body.type_id });
+  }),
 ];
 
 const server = setupServer(...restHandlers);

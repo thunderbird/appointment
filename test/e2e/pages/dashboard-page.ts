@@ -4,10 +4,10 @@ import {
   APPT_PENDING_BOOKINGS_PAGE,
   APPT_BOOKED_BOOKINGS_PAGE,
   APPT_DASHBOARD_MONTH_PAGE,
-  APPT_TIMEZONE_SETTING_TORONTO,
-  APPT_TIMEZONE_SETTING_HALIFAX,
+  TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   TIMEOUT_60_SECONDS,
+  TIMEOUT_30_SECONDS,
 } from '../const/constants';
 
 
@@ -22,13 +22,20 @@ export class DashboardPage {
   readonly pendingBookingsFilterSelect: Locator;
   readonly allFutureBookingsOptionText: string = 'All future bookings';
   readonly apptsFilterInput: Locator;
-  readonly timezoneLabel: Locator;
-  readonly timezoneDisplayTextToronto: Locator;
-  readonly timezoneDisplayTextHalifax: Locator;
   readonly availabilityPanelHeader: Locator;
-  readonly dayView24HrAvailabilityText: Locator;
-  readonly dayView12HrAvailabilityText: Locator;
   readonly firstDayOfWeekMonthView: Locator;
+  readonly setAvailabilityText: Locator;
+  readonly customizePerDayCheckBox: Locator;
+  readonly allStartTimeInput: Locator;
+  readonly allEndTimeInput: Locator;
+  readonly customStartTime1Input: Locator;
+  readonly customStartTime2Input: Locator;
+  readonly customStartTime3Input: Locator;
+  readonly customStartTime4Input: Locator;
+  readonly customStartTime5Input: Locator;
+  readonly editLinkBtn: Locator;
+  readonly saveChangesBtn: Locator;
+  readonly revertChangesBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -40,13 +47,20 @@ export class DashboardPage {
     this.pendingBookingsPageHeader = this.page.getByText('Bookings');
     this.pendingBookingsFilterSelect = this.page.getByTestId('bookings-filter-select');
     this.apptsFilterInput = this.page.getByPlaceholder('Search bookings');
-    this.timezoneLabel = this.page.getByText('Time Zone');
-    this.timezoneDisplayTextToronto = this.page.getByText(APPT_TIMEZONE_SETTING_TORONTO, { exact: true });
-    this.timezoneDisplayTextHalifax = this.page.getByText(APPT_TIMEZONE_SETTING_HALIFAX, { exact: true });
     this.availabilityPanelHeader = this.page.getByPlaceholder('My Schedule');
-    this.dayView24HrAvailabilityText = this.page.getByText('17:00');
-    this.dayView12HrAvailabilityText = this.page.getByText('5:00 PM');
     this.firstDayOfWeekMonthView = this.page.locator('.calendar-month__week-day-name').first();
+    this.setAvailabilityText = this.page.getByText('Set your availability days and time');
+    this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Customize per day'});
+    this.allStartTimeInput = this.page.locator('#start_time');
+    this.allEndTimeInput = this.page.locator('#end_time');
+    this.customStartTime1Input = this.page.getByTestId('dashboard-availability-start-time-1-0-input');
+    this.customStartTime2Input = this.page.getByTestId('dashboard-availability-start-time-2-0-input');
+    this.customStartTime3Input = this.page.getByTestId('dashboard-availability-start-time-3-0-input');
+    this.customStartTime4Input = this.page.getByTestId('dashboard-availability-start-time-4-0-input');
+    this.customStartTime5Input = this.page.getByTestId('dashboard-availability-start-time-5-0-input');
+    this.editLinkBtn = this.page.getByTestId('dashboard-availability-edit-link-btn');
+    this.saveChangesBtn = this.page.getByTestId('dashboard-save-changes-btn');
+    this.revertChangesBtn = this.page.getByRole('button', { name: 'Revert changes' });
   }
 
   /**
@@ -71,7 +85,9 @@ export class DashboardPage {
    * With pending bookings list displayed, enter a filter string to narrow down the list
    */
   async filterPendingBookings(filterString: string) {
+    await expect(this.apptsFilterInput).toBeVisible({ timeout: TIMEOUT_30_SECONDS});
     await this.apptsFilterInput.fill(filterString);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
  
   /**
@@ -87,21 +103,29 @@ export class DashboardPage {
    * @param confirmBooking Boolean whether the requested appt booking requires confirmation
    */
   async verifyEventCreated(hostUserDisplayName: string, requsterName: string, slotDate: string, slotTime: string, confirmBooking: boolean = true) {
-    // depending on environment switch to the bookings page and verify the appt was created
-    if (confirmBooking) {
-      await this.gotoPendingBookings();
-      var eventFilter = `HOLD: Appointment - ${hostUserDisplayName} and ${requsterName}`;
-    } else {
-      await this.gotoBookedBookings();
-      var eventFilter = `Appointment - ${hostUserDisplayName} and ${requsterName}`;
-    }
-    await this.filterPendingBookings(eventFilter);
+    // now wait a max of 2 minutes for the newly request appt to appear in the dashboard pending appts list
+    await expect(async () => {
+      // depending on environment switch to the bookings page and verify the appt was created
+      if (confirmBooking) {
+        await this.gotoPendingBookings();
+        var eventFilter = `HOLD: Appointment - ${hostUserDisplayName} and ${requsterName}`;
+      } else {
+        await this.gotoBookedBookings();
+        var eventFilter = `Appointment - ${hostUserDisplayName} and ${requsterName}`;
+      }
 
-    // now we have a list of future pending appointments for our host and requster; now ensure one
-    // of them matches the slot that was selected by the test
-    await this.page.evaluate(() => window.scrollBy(0, document.body.scrollHeight));
-    const apptLocator = this.page.getByRole('cell', { name: `${slotDate}` }).locator('div', { hasText: `${slotTime} to`});
-    await expect(apptLocator).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
+      await this.filterPendingBookings(eventFilter);
+      await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+      await this.page.evaluate(() => window.scrollBy(0, document.body.scrollHeight));
+
+      const apptLocator = this.page.getByRole('cell', { name: `${slotDate}` }).locator('div', { hasText: `${slotTime} to`});
+      await expect(apptLocator).toBeVisible();
+    }).toPass({
+      // Probe, wait 1s, probe, wait 2s, probe, wait 10s, probe, wait 10s, probe
+      // ... Defaults to [100, 250, 500, 1000].
+      intervals: [15_000, 10_000, 5_000],
+      timeout: 120_000
+    });
   }
 
   /**
@@ -117,5 +141,42 @@ export class DashboardPage {
    */
   async getAvailabilityPanelHeader(): Promise<string> {
     return await this.availabilityPanelHeader.inputValue({ timeout: TIMEOUT_60_SECONDS });
+  }
+
+  /**
+   * Turn on the 'customize per day' availaiblity option and verify the daily time slots appear.
+   */
+  async turnOnCustomizePerDayAndVerify() {
+    await this.customizePerDayCheckBox.scrollIntoViewIfNeeded(); 
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.customizePerDayCheckBox.check();
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await expect(this.customStartTime1Input).toBeVisible();
+    await expect(this.customStartTime1Input).toBeEnabled();
+    await expect(this.customStartTime2Input).toBeVisible();
+    await expect(this.customStartTime2Input).toBeEnabled();
+    await expect(this.customStartTime3Input).toBeVisible();
+    await expect(this.customStartTime3Input).toBeEnabled();
+    await expect(this.customStartTime4Input).toBeVisible();
+    await expect(this.customStartTime4Input).toBeEnabled();
+    await expect(this.customStartTime5Input).toBeVisible();
+    await this.customStartTime5Input.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect(this.customStartTime5Input).toBeEnabled();
+  }
+
+  /**
+   * Turn off the 'customize per day' availaiblity option and verify the daily time slots are gone.
+   */
+  async turnOffCustomizePerDayAndVerify() {
+    await this.customizePerDayCheckBox.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.customizePerDayCheckBox.uncheck();
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await expect(this.customStartTime1Input).toBeHidden();
+    await expect(this.customStartTime2Input).toBeHidden();
+    await expect(this.customStartTime3Input).toBeHidden();
+    await expect(this.customStartTime4Input).toBeHidden();
+    await expect(this.customStartTime5Input).toBeHidden();
   }
 }

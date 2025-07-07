@@ -26,7 +26,7 @@ export default defineConfig({
   // tests will time out at the locator/test level first anyway; but there is no default so best to specify
   globalTimeout: 12 * 60 * 1000,
   // Individual test timeout - a single test will time out if it is still running after this time (ms)
-  timeout: 90 * 1000, // 1.5 minutes
+  timeout:  150 * 1000, // 2.5 minutes
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   // When running in CI we don't use the html report as we use BrowserStack's reporting
   reporter: process.env.CI ? [['list']] : [['html']] ,

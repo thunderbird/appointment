@@ -404,6 +404,10 @@ class AvailabilitySlotConfirmation(BaseModel):
     confirmed: bool | None = False
 
 
+class DisconnectGoogleAccountRequest(BaseModel):
+    type_id: str
+
+
 class EventLocation(BaseModel):
     type: LocationType | None = LocationType.inperson
     suggestions: str | None = None

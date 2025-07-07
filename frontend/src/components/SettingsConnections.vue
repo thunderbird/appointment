@@ -62,6 +62,7 @@ const disconnectCalDavModalOpen = ref(false);
 const disconnectZoomModalOpen = ref(false);
 const disconnectGoogleModalOpen = ref(false);
 const disconnectTypeId = ref(null);
+const disconnectConnectionName = ref(null);
 
 const calDavErrorMessage = ref();
 
@@ -71,6 +72,7 @@ const closeModals = () => {
   disconnectGoogleModalOpen.value = false;
   disconnectCalDavModalOpen.value = false;
   disconnectTypeId.value = null;
+  disconnectConnectionName.value = null;
 };
 
 const refreshData = async () => {
@@ -88,8 +90,9 @@ onMounted(async () => {
   await refreshData();
 });
 
-const displayModal = async (provider: ExternalConnectionProviders, typeId: string | null = null) => {
+const displayModal = async (provider: ExternalConnectionProviders, typeId: string | null = null, connectionName: string | null = null) => {
   disconnectTypeId.value = typeId;
+  disconnectConnectionName.value = connectionName;
 
   if (provider === ExternalConnectionProviders.Zoom) {
     disconnectZoomModalOpen.value = true;
@@ -150,13 +153,28 @@ const editProfile = async () => {
         </p>
       </div>
       <div class="mt-4 flex items-center pl-4">
-        <div class="w-full max-w-md">
-          <p v-if="connection[0]">{{ t('label.connectedAs', { name: connection[0].name }) }}</p>
-          <p v-if="!connection[0]">{{ t('label.notConnected') }}</p>
+        <div class="w-full">
+          <!-- Show all connections for providers that can have multiple connections -->
+          <div v-if="connection.length > 0">
+            <div v-for="conn in connection" :key="conn.type_id" class="mb-2 flex items-center justify-between">
+              <p>{{ t('label.connectedAs', { name: conn.name }) }}</p>
+              <div v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
+                <danger-button
+                  class="btn-disconnect"
+                  :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn-' + conn.type_id"
+                  @click="() => displayModal(providers[provider], conn.type_id, conn.name)"
+                  :title="t('label.disconnect')"
+                >
+                  {{ t('label.disconnect') }}
+                </danger-button>
+              </div>
+            </div>
+          </div>
+          <p v-if="connection.length === 0">{{ t('label.notConnected') }}</p>
         </div>
         <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
           <primary-button
-            v-if="!connection[0]"
+            v-if="connection.length === 0"
             class="btn-connect"
             :data-testid="'connected-accounts-settings-' + t(provider) + '-connect-btn'"
             @click="() => connectAccount(providers[provider])"
@@ -164,15 +182,6 @@ const editProfile = async () => {
           >
             {{ t('label.connect') }}
           </primary-button>
-          <danger-button
-            v-if="connection[0]"
-            class="btn-disconnect"
-            :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn'"
-            @click="() => displayModal(providers[provider], connection[0].type_id)"
-            :title="t('label.disconnect')"
-          >
-            {{ t('label.disconnect') }}
-          </danger-button>
         </div>
         <div class="mx-auto mr-0" v-else>
           <secondary-button
@@ -190,11 +199,11 @@ const editProfile = async () => {
   <confirmation-modal
     :open="disconnectGoogleModalOpen"
     :title="t('text.settings.connectedAccounts.disconnect.google.title')"
-    :message="t('text.settings.connectedAccounts.disconnect.google.message')"
+    :message="t('text.settings.connectedAccounts.disconnect.google.message', { googleAccountName: disconnectConnectionName })"
     :confirm-label="t('text.settings.connectedAccounts.disconnect.google.confirm')"
     :cancel-label="t('text.settings.connectedAccounts.disconnect.google.cancel')"
     :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google)"
+    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google, disconnectTypeId)"
     @close="closeModals"
   />
   <!-- Disconnect CalDav Modal -->

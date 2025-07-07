@@ -586,7 +586,7 @@ class TestGoogle:
         """Ensure we remove the external google connection and any related calendars"""
         type_id = str(uuid4())
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id)
-        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec.id)
 
         response = with_client.post('/google/disconnect', json={'type_id': ec.type_id}, headers=auth_headers)
 
@@ -600,3 +600,266 @@ class TestGoogle:
 
             calendar = repo.calendar.get(db, calendar.id)
             assert calendar is None
+
+    def test_disconnect_with_multiple_accounts(
+        self, with_db, with_client, make_external_connections, make_google_calendar
+    ):
+        """Ensure that disconnecting one google account doesn't affect other google account connections"""
+
+        # Create two different Google account connections
+        type_id_1 = str(uuid4())
+        type_id_2 = str(uuid4())
+
+        ec1 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id_1)
+        ec2 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id_2)
+
+        # Create calendars for both connections
+        calendar1 = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec1.id)
+        calendar2 = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec2.id)
+
+        # Verify both connections exist initially
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.google)
+            assert len(ecs) == 2
+
+            # Verify both calendars exist
+            calendars = repo.calendar.get_by_subscriber(db, TEST_USER_ID)
+            assert len(calendars) == 2
+
+        # Disconnect only the first account
+        response = with_client.post('/google/disconnect', json={'type_id': ec1.type_id}, headers=auth_headers)
+        assert response.status_code == 200, response.content
+
+        with with_db() as db:
+            # Verify the first connection and its calendar are removed
+            ecs_1 = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id_1
+            )
+            assert len(ecs_1) == 0
+
+            calendar1_check = repo.calendar.get(db, calendar1.id)
+            assert calendar1_check is None
+
+            # Verify the second connection and its calendar still exist
+            ecs_2 = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id_2
+            )
+            assert len(ecs_2) == 1
+            assert ecs_2[0].type_id == type_id_2
+
+            calendar2_check = repo.calendar.get(db, calendar2.id)
+            assert calendar2_check is not None
+            assert calendar2_check.external_connection_id == ec2.id
+
+            # Verify total count of Google connections is now 1
+            all_ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.google)
+            assert len(all_ecs) == 1
+
+    def test_sync_calendars(self, with_db, with_client, make_external_connections, monkeypatch):
+        """Test that sync_calendars creates calendars from Google API response"""
+        from appointment.controller.apis.google_client import GoogleClient
+
+        mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
+        mock_token = 'mock_google_token'
+        mock_calendars = [
+            {
+                'id': 'primary',
+                'summary': 'Primary Calendar',
+                'backgroundColor': '#4285f4'
+            },
+            {
+                'id': 'work@example.com',
+                'summary': 'Work Calendar',
+                'backgroundColor': '#ea4335'
+            }
+        ]
+
+        ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google)
+
+        def mock_list_calendars(token):
+            return mock_calendars
+
+        monkeypatch.setattr(mock_google_client, 'list_calendars', mock_list_calendars)
+
+        with with_db() as db:
+            # Initially no calendars should exist
+            calendars = repo.calendar.get_by_subscriber(db, TEST_USER_ID)
+            assert len(calendars) == 0
+
+            # Call sync_calendars
+            error_occurred = mock_google_client.sync_calendars(
+                db=db,
+                subscriber_id=TEST_USER_ID,
+                token=mock_token,
+                external_connection_id=ec.id
+            )
+
+            assert error_occurred is False
+
+            # Verify calendars were created
+            calendars = repo.calendar.get_by_subscriber(db, TEST_USER_ID)
+            assert len(calendars) == 2
+
+            # Getting the calendars by url
+            primary_cal = None
+            work_cal = None
+            for cal in calendars:
+                if cal.url == 'primary':
+                    primary_cal = cal
+                elif cal.url == 'work@example.com':
+                    work_cal = cal
+
+            assert primary_cal is not None
+            assert primary_cal.title == 'Primary Calendar'
+            assert primary_cal.color == '#4285f4'
+            assert primary_cal.provider == models.CalendarProvider.google
+            assert primary_cal.external_connection_id == ec.id
+
+            assert work_cal is not None
+            assert work_cal.title == 'Work Calendar'
+            assert work_cal.color == '#ea4335'
+            assert work_cal.provider == models.CalendarProvider.google
+            assert work_cal.external_connection_id == ec.id
+
+    def test_sync_calendars_with_error(self, with_db, with_client, make_external_connections, monkeypatch):
+        """Test that sync_calendars handles errors gracefully and returns True when errors occur"""
+        from appointment.controller.apis.google_client import GoogleClient
+
+        mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
+        mock_token = 'mock_google_token'
+        mock_calendars = [
+            {
+                'id': 'primary',
+                'summary': 'Primary Calendar',
+                'backgroundColor': '#4285f4'
+            }
+        ]
+
+        ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google)
+
+        def mock_list_calendars(token):
+            return mock_calendars
+
+        monkeypatch.setattr(mock_google_client, 'list_calendars', mock_list_calendars)
+
+        with with_db() as db:
+            # Mock repo.calendar.update_or_create to raise an exception
+            original_update_or_create = repo.calendar.update_or_create
+
+            def mock_update_or_create(*args, **kwargs):
+                raise Exception("Database error")
+
+            monkeypatch.setattr(repo.calendar, 'update_or_create', mock_update_or_create)
+
+            error_occurred = mock_google_client.sync_calendars(
+                db=db,
+                subscriber_id=TEST_USER_ID,
+                token=mock_token,
+                external_connection_id=ec.id
+            )
+
+            # Error should be reported
+            assert error_occurred is True
+
+            # Restore original method
+            monkeypatch.setattr(repo.calendar, 'update_or_create', original_update_or_create)
+
+    def test_google_callback_with_multiple_external_connections(
+        self, with_db, with_client, monkeypatch, make_external_connections, make_basic_subscriber
+    ):
+        """Test that google_callback can handle multiple external connections for the same subscriber"""
+        from appointment.controller.apis.google_client import GoogleClient
+        from appointment.dependencies.google import get_google_client
+
+        subscriber = make_basic_subscriber()
+
+        # Create first Google external connection
+        first_google_id = 'google_user_123'
+        first_google_email = 'user1@gmail.com'
+        make_external_connections(
+            subscriber.id,
+            type=models.ExternalConnectionType.google,
+            type_id=first_google_id,
+            name=first_google_email
+        )
+
+        # Mock Google client methods
+        mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
+
+        # Mock credentials that would be returned from Google OAuth
+        class MockCredentials:
+            def to_json(self):
+                return '{"access_token": "mock_token_1", "refresh_token": "mock_refresh_1"}'
+
+        mock_creds = MockCredentials()
+
+        # Mock profile data for second Google account
+        second_google_id = 'google_user_456'
+        second_google_email = 'user2@gmail.com'
+        mock_profile = {
+            'email': second_google_email,
+            'id': second_google_id
+        }
+
+        def mock_get_credentials(code):
+            return mock_creds
+
+        def mock_get_profile(token):
+            return mock_profile
+
+        def mock_sync_calendars(db, subscriber_id, token, external_connection_id):
+            return False  # No error occurred
+
+        monkeypatch.setattr(mock_google_client, 'get_credentials', mock_get_credentials)
+        monkeypatch.setattr(mock_google_client, 'get_profile', mock_get_profile)
+        monkeypatch.setattr(mock_google_client, 'sync_calendars', mock_sync_calendars)
+
+        # Mock the session data
+        state = 'test_state_123'
+        monkeypatch.setattr(
+            'starlette.requests.HTTPConnection.session',
+            {
+                'google_oauth_state': state,
+                'google_oauth_subscriber_id': subscriber.id,
+            },
+        )
+
+        # Override the get_google_client dependency to return our mock
+        with_client.app.dependency_overrides[get_google_client] = lambda: mock_google_client
+
+        # Call the google_callback endpoint
+        response = with_client.get(
+            '/google/callback',
+            params={'code': 'mock_auth_code', 'state': state},
+            follow_redirects=False
+        )
+
+        # Should redirect successfully
+        assert response.status_code == 307, response.text
+
+        with with_db() as db:
+            # Verify both external connections exist
+            all_google_connections = repo.external_connection.get_by_type(
+                db, subscriber.id, models.ExternalConnectionType.google
+            )
+            assert all_google_connections is not None
+            assert len(all_google_connections) == 2
+
+            # Verify the first connection still exists
+            first_connection = repo.external_connection.get_by_type(
+                db, subscriber.id, models.ExternalConnectionType.google, first_google_id
+            )
+            assert first_connection is not None
+            assert len(first_connection) == 1
+            assert first_connection[0].type_id == first_google_id
+            assert first_connection[0].name == first_google_email
+
+            # Verify the second connection was created
+            second_connection = repo.external_connection.get_by_type(
+                db, subscriber.id, models.ExternalConnectionType.google, second_google_id
+            )
+            assert second_connection is not None
+            assert len(second_connection) == 1
+            assert second_connection[0].type_id == second_google_id
+            assert second_connection[0].name == second_google_email
+            assert second_connection[0].owner_id == subscriber.id

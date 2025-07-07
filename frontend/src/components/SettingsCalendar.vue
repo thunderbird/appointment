@@ -174,7 +174,7 @@ const saveCalendar = async () => {
 
   // add new caldav calendar
   if (isCalDav.value && inputMode.value === InputModes.Add) {
-    const { error, data }: CalendarResponse = await call('cal').post(calendarInput.data).json();
+    const { error, data }: CalendarResponse = await call('caldav').post(calendarInput.data).json();
     if (error.value) {
       calendarConnectError.value = {
         title: ((data.value as Exception)?.detail as ExceptionDetail)?.message,

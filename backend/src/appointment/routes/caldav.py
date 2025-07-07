@@ -4,7 +4,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 import sentry_sdk
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from redis import Redis
 from sqlalchemy.orm import Session
 
@@ -128,13 +128,44 @@ def caldav_autodiscover_auth(
     return True
 
 
+@router.post('/', response_model=schemas.CalendarOut)
+def create_my_calendar(
+    calendar: schemas.CalendarConnection,
+    db: Session = Depends(get_db),
+    subscriber: models.Subscriber = Depends(get_subscriber),
+):
+    """endpoint to add a new CalDav calendar for authenticated subscriber"""
+
+    # Test the connection first
+    con = CalDavConnector(
+        db=db,
+        redis_instance=None,
+        url=calendar.url,
+        user=calendar.user,
+        password=calendar.password,
+        subscriber_id=subscriber.id,
+        calendar_id=None,
+    )
+
+    # Make sure we can connect to the calendar before we save it
+    if not con.test_connection():
+        raise RemoteCalendarConnectionError()
+
+    # create calendar
+    try:
+        cal = repo.calendar.create(db=db, calendar=calendar, subscriber_id=subscriber.id)
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
+
+
 @router.post('/disconnect')
 def disconnect_account(
     type_id: Optional[str] = None,
     db: Session = Depends(get_db),
     subscriber: models.Subscriber = Depends(get_subscriber),
 ):
-    """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
+    """Disconnects a caldav account. Removes associated data from our services and deletes the connection details."""
     ec = utils.list_first(
         repo.external_connection.get_by_type(
             db, subscriber_id=subscriber.id, type=models.ExternalConnectionType.caldav, type_id=type_id

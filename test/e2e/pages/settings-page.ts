@@ -1,4 +1,4 @@
-import { expect, type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 
 import {
   APPT_LOGIN_EMAIL,
@@ -11,7 +11,7 @@ import {
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
-} from '../const/constants';
+  } from '../const/constants';
 
 export class SettingsPage {
   readonly page: Page;
@@ -28,25 +28,14 @@ export class SettingsPage {
   readonly connectedSettingsHeader: Locator;
   readonly languageSelect: Locator;
   readonly themeSelect: Locator;
-  readonly htmlAttribLocator: Locator;
-  readonly settings12hrRadio: Locator;
-  readonly settings24hrRadio: Locator;
   readonly timeZoneSelect: Locator;
   readonly profileUsernameInput: Locator;
   readonly profilePreferredEmailSelect: Locator;
   readonly profileDisplayNameInput: Locator;
-  readonly profileMyLinkOptionalInput: Locator;
   readonly profileSaveChangesBtn: Locator;
+  readonly profileMyLinkOptionalInput: Locator;
   readonly refreshLinkBtn: Locator;
   readonly confirmRefreshCancelBtn: Locator;
-  readonly inviteCodesHeader: Locator;
-  readonly noInviteCodesCell: Locator;
-  readonly inviteCode: Locator;
-  readonly deleteAcctBtn: Locator;
-  readonly confirmDeleteAcctBtn: Locator;
-  readonly downloadDataBtn: Locator;
-  readonly confirmDownloadDataBtn: Locator;
-  readonly availableCalendarsHeader: Locator;
   readonly connectedCalendarsHeader: Locator;
   readonly editCalendarBtn: Locator;
   readonly connectedCalendarTitle: Locator;
@@ -91,9 +80,6 @@ export class SettingsPage {
     this.connectedSettingsHeader = this.page.getByText('Connected Accounts Settings', { exact: true });
     this.languageSelect = this.page.getByTestId('settings-general-locale-select');
     this.themeSelect = this.page.getByTestId('settings-general-theme-select');
-    this.htmlAttribLocator = this.page.locator('html');
-    this.settings12hrRadio = this.page.getByText('12-hour AM/PM', { exact: true });
-    this.settings24hrRadio = this.page.getByText('24-hour', { exact: true });
     this.timeZoneSelect = this.page.getByTestId('settings-general-timezone-select');
     this.startOfWeekSelect = this.page.getByTestId('settings-general-start-of-week-select');
 
@@ -105,16 +91,8 @@ export class SettingsPage {
     this.profileSaveChangesBtn = this.page.getByTestId('settings-account-save-changes-btn');
     this.refreshLinkBtn = this.page.getByTestId('settings-account-refresh-link-btn');
     this.confirmRefreshCancelBtn = this.page.getByRole('button', { name: 'Cancel' });
-    this.noInviteCodesCell = this.page.getByRole('cell', { name: 'No Invite Codes could be' });
-    this.inviteCodesHeader = this.page.getByText('Invites', { exact: true });
-    this.inviteCode = this.page.getByRole('code');
-    this.deleteAcctBtn = this.page.getByTestId('settings-account-delete-btn');
-    this.confirmDeleteAcctBtn = this.page.getByRole('button', { name: 'Cancel' });
-    this.downloadDataBtn = this.page.getByTestId('settings-account-download-data-btn');
-    this.confirmDownloadDataBtn = this.page.getByRole('button', { name: 'Continue' });
 
     // calendar settings
-    this.availableCalendarsHeader = this.page.getByText('Available Calendars', { exact: true });
     this.connectedCalendarsHeader = this.page.getByText('Connected Calendars', { exact: true });
     this.editCalendarBtn = this.page.getByTestId('settings-calendar-edit-calendar-btn');
     this.connectedCalendarTitle = this.page.getByText(APPT_LOGIN_EMAIL, { exact: true });
@@ -147,6 +125,9 @@ export class SettingsPage {
    */
   async gotoMainSettingsPage() {
     await this.page.goto(APPT_MAIN_SETTINGS_PAGE);
+    // when going directly to this page, if the dashboard page wasn't loaded first this
+    // page may take some time to load; so give it some extra timehere
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -154,6 +135,7 @@ export class SettingsPage {
    */
   async gotoGeneralSettingsPage() {
     await this.page.goto(APPT_GENERAL_SETTINGS_PAGE);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -161,6 +143,7 @@ export class SettingsPage {
    */
   async gotoCalendarSettingsPage() {
     await this.page.goto(APPT_CALENDAR_SETTINGS_PAGE);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -168,6 +151,7 @@ export class SettingsPage {
    */
   async gotoAccountSettingsPage() {
     await this.page.goto(APPT_ACCOUNT_SETTINGS_PAGE);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -175,6 +159,17 @@ export class SettingsPage {
    */
   async gotoConnectedAccountsSettingsPage() {
     await this.page.goto(APPT_CONNECTED_SETTINGS_PAGE);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+  }
+
+  /**
+   * Change the general setting's time zone setting
+   */
+  async changeTimezoneSetting(timezone: string) {
+    await this.timeZoneSelect.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.timeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
   }
 
   /**
@@ -207,44 +202,21 @@ export class SettingsPage {
   }
 
   /**
-   * Change time format settings to 12-hour format
+   * Set the account settings profile display name value
    */
-  async set12hrFormat() {
-    // give a few seconds to be applied as sometimes the test runs so fast
-    // it switches back to the dashboard tab before the time format is applied
-    await this.settings12hrRadio.scrollIntoViewIfNeeded();
+  async setAccountProfileDisplayName(newDisplayName: string) {
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.settings12hrRadio.click({ timeout: TIMEOUT_30_SECONDS });
+    await this.profileDisplayNameInput.fill(newDisplayName);
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.profileSaveChangesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
-  }
-
-  /**
-   * Change time format settings to 24-hour format
-   */
-  async set24hrFormat() {
-    await this.settings24hrRadio.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.settings24hrRadio.click({ timeout: TIMEOUT_30_SECONDS });
-    // give a few seconds to be applied as sometimes the test runs so fast
-    // it switches back to the dashboard tab before the time format is applied
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-  }
-
-  /**
-   * Change the general setting's time zone setting
-   */
-  async changeTimezoneSetting(timezone: string) {
-    await this.timeZoneSelect.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.timeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND); // give a few seconds to be applied
   }
 
   /**
    * Change the general setting's start of week setting
    */
   async changeStartOfWeekSetting(startOfWeek: string) {
-    await this.startOfWeekSelect.scrollIntoViewIfNeeded();
+    await this.startOfWeekSelect.scrollIntoViewIfNeeded({ timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.startOfWeekSelect.selectOption(startOfWeek, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
@@ -269,27 +241,5 @@ export class SettingsPage {
    */
   async getAccountProfileDisplayName(): Promise<string> {
     return await this.profileDisplayNameInput.inputValue();
-  }
-
-  /**
-   * Set the account settings profile display name value
-   */
-  async setAccountProfileDisplayName(newDisplayName: string) {
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.profileDisplayNameInput.fill(newDisplayName);
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.profileSaveChangesBtn.click();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
-  }
-
-  /**
-   * Download account data
-   */
-  async downloadAccountData() {
-    expect(this.downloadDataBtn).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
-    await this.downloadDataBtn.scrollIntoViewIfNeeded();
-    await this.downloadDataBtn.click();
-    expect(this.confirmDownloadDataBtn).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
-    await this.confirmDownloadDataBtn.click();
   }
 }

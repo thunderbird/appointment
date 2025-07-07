@@ -187,12 +187,12 @@ class TestCancelAppointment:
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
 
-        make_external_connections(
+        ec = make_external_connections(
             subscriber_id=TEST_USER_ID,
             type=ExternalConnectionType.google,
         )
 
-        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec.id)
         attendee = make_attendee()
         appointment = make_appointment(
             calendar.id, status=AppointmentStatus.closed, meeting_link_provider=MeetingLinkProviderType.zoom, slots=[]
@@ -223,7 +223,7 @@ class TestCancelAppointment:
     def test_cancel_appointment_with_google_sends_email(
         self, monkeypatch, with_client, make_google_calendar, make_appointment, make_external_connections
     ):
-        make_external_connections(
+        ec = make_external_connections(
             subscriber_id=TEST_USER_ID,
             type=ExternalConnectionType.google,
         )
@@ -234,7 +234,7 @@ class TestCancelAppointment:
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
 
-        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, external_connection_id=ec.id)
         appointment = make_appointment(calendar_id=calendar.id)
         payload = {'reason': 'Test cancellation'}
 
@@ -269,3 +269,67 @@ class TestCancelAppointment:
             assert mock_send_cancel.call_count == len(appointment.slots)
             assert mock_delete_event.call_count == len(appointment.slots)
         
+
+class TestSyncRemoteCalendars:
+    def test_sync_remote_calendars_with_multiple_google_connections(
+        self, monkeypatch, with_client, make_external_connections
+    ):
+        """Test that sync_remote_calendars calls sync_calendars() for each Google external connection"""
+
+        # Create two Google external connections
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
+        )
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
+        )
+
+        # Patch GoogleConnector to track sync_calendars calls
+        from appointment.controller.calendar import GoogleConnector
+        mock_sync_calendars = MagicMock(return_value=False)
+        monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+        monkeypatch.setattr(GoogleConnector, 'sync_calendars', mock_sync_calendars)
+
+        response = with_client.post('/rmt/sync', headers=auth_headers)
+
+        assert response.status_code == 200
+
+        # Verify sync_calendars was called twice (once for each external connection)
+        assert mock_sync_calendars.call_count == 2
+
+    def test_sync_remote_calendars_with_mixed_connections(
+        self, monkeypatch, with_client, make_external_connections
+    ):
+        """Test that sync_remote_calendars handles both Google and CalDAV connections"""
+
+        # Create one Google and one CalDAV external connection
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.google,
+        )
+        make_external_connections(
+            subscriber_id=TEST_USER_ID,
+            type=ExternalConnectionType.caldav,
+            type_id='["https://caldav.example.com", "user1"]',
+        )
+
+        # Patch both connectors to track sync_calendars calls
+        from appointment.controller.calendar import GoogleConnector, CalDavConnector
+
+        mock_google_sync = MagicMock(return_value=False)
+        mock_caldav_sync = MagicMock(return_value=False)
+
+        monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+        monkeypatch.setattr(GoogleConnector, 'sync_calendars', mock_google_sync)
+        monkeypatch.setattr(CalDavConnector, 'sync_calendars', mock_caldav_sync)
+
+        response = with_client.post('/rmt/sync', headers=auth_headers)
+
+        assert response.status_code == 200
+
+        # Verify both sync_calendars methods were called once
+        assert mock_google_sync.call_count == 1
+        assert mock_caldav_sync.call_count == 1
+

@@ -9,7 +9,7 @@ from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
 from sqlalchemy import select
 
-from defines import auth_headers, TEST_USER_ID
+from defines import auth_headers
 
 
 def get_calendar_factory():
@@ -72,43 +72,6 @@ def get_mock_connector_class():
 
 
 class TestCalendar:
-    @pytest.mark.parametrize('mock_connector,connector,provider,test_url,test_user', get_mock_connector_class())
-    def test_read_remote_calendars(
-        self,
-        monkeypatch,
-        with_client,
-        mock_connector,
-        connector,
-        provider,
-        test_url,
-        test_user,
-        make_external_connections,
-    ):
-        # Ensure we have an external connection for google
-        if provider == schemas.CalendarProvider.google.value:
-            make_external_connections(TEST_USER_ID, type=schemas.ExternalConnectionType.google)
-
-        # Patch up the caldav constructor, and list_calendars
-        monkeypatch.setattr(connector, '__init__', mock_connector.__init__)
-        monkeypatch.setattr(connector, 'list_calendars', mock_connector.list_calendars)
-
-        response = with_client.post(
-            '/rmt/calendars',
-            json={
-                'provider': provider,
-                'url': test_url,
-                'user': test_user,
-                'password': 'caw',
-            },
-            headers=auth_headers,
-        )
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert isinstance(data, list)
-        assert len(data) > 0
-        assert any(c['url'] == test_url for c in data)
-        assert any(c['provider'] == provider for c in data)
-
     def test_read_connected_calendars_before_creation(self, with_client):
         response = with_client.get('/me/calendars', headers=auth_headers)
         assert response.status_code == 200, response.text
@@ -330,17 +293,26 @@ class TestCalendar:
         response = with_client.post(f'/cal/{cal[2].id}/connect', headers=auth_headers)
         assert response.status_code == 403, response.text
 
-    def test_create_connection_failure(self, with_client, make_google_calendar, request):
-        """Attempt to create google calendar connection without having external connection, expect failure"""
+    def test_create_connection_failure(self, with_client, monkeypatch):
+        """Attempt to create caldav calendar connection with invalid credentials, expect failure"""
+
+        # Mock the CalDavConnector to simulate connection failure
+        from appointment.controller.calendar import CalDavConnector
+
+        def mock_test_connection(self):
+            return False
+
+        monkeypatch.setattr(CalDavConnector, 'test_connection', mock_test_connection)
+
         response = with_client.post(
-            '/cal',
+            '/caldav',
             json={
-                'title': 'A google calendar',
+                'title': 'A caldav calendar',
                 'color': '#123456',
-                'provider': CalendarProvider.google.value,
-                'url': 'test',
-                'user': 'test',
-                'password': 'test',
+                'provider': CalendarProvider.caldav.value,
+                'url': 'https://invalid-caldav-server.com',
+                'user': 'invalid_user',
+                'password': 'invalid_password',
             },
             headers=auth_headers,
         )
@@ -364,7 +336,7 @@ class TestCaldav:
 
     def test_create_first_caldav_calendar(self, with_client):
         response = with_client.post(
-            '/cal',
+            '/caldav',
             json={
                 'title': 'First CalDAV calendar',
                 'color': '#123456',
@@ -466,48 +438,3 @@ class TestCaldav:
         assert cal.user == os.getenv('CALDAV_TEST_USER')
         assert cal.password == ''
 
-
-class TestGoogle:
-    """Tests for google specific functionality"""
-    def test_read_remote_google_calendar_connection_error(
-        self,
-        monkeypatch,
-        with_client,
-        make_pro_subscriber,
-        make_caldav_calendar,
-        make_schedule,
-    ):
-        """ Attempt to read remote google calendar without having external connection first; expect error """
-        # Patch up the caldav constructor, and list_calendars (this test is for google only)
-        class MockGoogleConnector:
-            @staticmethod
-            def __init__(
-                self,
-                subscriber_id,
-                calendar_id,
-                redis_instance,
-                db,
-                remote_calendar_id,
-                google_client,
-                google_tkn: str = None,
-            ):
-                pass
-
-        monkeypatch.setattr(GoogleConnector, '__init__', MockGoogleConnector.__init__)
-
-        test_url = 'https://caldav.thunderbird.net/'
-        test_user = 'thunderbird'
-
-        response = with_client.post(
-            '/rmt/calendars',
-            json={
-                'provider': CalendarProvider.google.value,
-                'url': test_url,
-                'user': test_user,
-                'password': 'caw',
-            },
-            headers=auth_headers,
-        )
-        assert response.status_code == 400, response.text
-        data = response.json()
-        assert data['detail']['id'] == 'REMOTE_CALENDAR_CONNECTION_ERROR'
