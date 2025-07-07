@@ -215,7 +215,6 @@ resources:
         aliases:
           - appointment-stage.tb.pro
         comment: Appointment stage frontend
-        default_cache_behavior: {}
         # Do not define ordered cache behaviors here; they are programmatically overridden
         logging_config:
           include_cookies: True
