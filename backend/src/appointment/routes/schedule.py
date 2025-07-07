@@ -302,9 +302,7 @@ def request_schedule_availability_slot(
 
     # We need to verify that the time is actually available on the remote calendar
     if calendar.provider == CalendarProvider.google:
-        external_connection = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-        )
+        external_connection = calendar.external_connection
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()
@@ -620,9 +618,7 @@ def get_remote_connection(calendar, subscriber, db, redis, google_client):
     organizer_email = subscriber.email
 
     if calendar.provider == CalendarProvider.google:
-        external_connection: ExternalConnection | None = utils.list_first(
-            repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-        )
+        external_connection: ExternalConnection | None = calendar.external_connection
 
         if external_connection is None or external_connection.token is None:
             raise RemoteCalendarConnectionError()

@@ -46,7 +46,6 @@ setup('authenticate', async ({ page }) => {
   await page.goto(APPT_MAIN_SETTINGS_PAGE);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
   await setDefaultUserSettingsLocalStore(page);
-  await page.reload();
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
 
   // End of authentication steps.

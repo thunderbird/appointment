@@ -46,6 +46,7 @@ def make_google_calendar(with_db):
         color=FAKER_RANDOM_VALUE,
         id=FAKER_RANDOM_VALUE,
         connected=False,
+        external_connection_id=None,
     ):
         with with_db() as db:
             title = title if factory_has_value(title) else fake.name()
@@ -62,6 +63,7 @@ def make_google_calendar(with_db):
                     password='',
                 ),
                 subscriber_id,
+                external_connection_id=external_connection_id,
             )
 
     return _make_google_calendar

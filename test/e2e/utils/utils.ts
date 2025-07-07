@@ -13,10 +13,10 @@ import {
     APPT_BROWSER_STORE_LANGUAGE_EN,
     APPT_BROWSER_STORE_THEME_LIGHT,
     APPT_BROWSER_STORE_12HR_TIME,
-    APPT_TIMEZONE_SETTING_TORONTO,
     APPT_BROWSER_STORE_START_WEEK_SUN,
     TIMEOUT_3_SECONDS,
     TIMEOUT_60_SECONDS,
+    APPT_TIMEZONE_SETTING_PRIMARY,
 } from "../const/constants";
 
 /**
@@ -78,7 +78,7 @@ export const setDefaultUserSettingsLocalStore = async (page: Page) => {
         "language": APPT_BROWSER_STORE_LANGUAGE_EN,
         "colourScheme": APPT_BROWSER_STORE_THEME_LIGHT,
         "timeFormat": APPT_BROWSER_STORE_12HR_TIME,
-        "timezone": APPT_TIMEZONE_SETTING_TORONTO,
+        "timezone": APPT_TIMEZONE_SETTING_PRIMARY,
         "startOfWeek": APPT_BROWSER_STORE_START_WEEK_SUN,
     }
 

@@ -90,7 +90,6 @@ google-invalid-creds = Die Anmeldedaten für die Google-Authentifizierung sind n
 google-auth-fail = Google-Authentifizierung fehlgeschlagen.
 google-auth-expired = Die Google-Authentifizierungssitzung ist abgelaufen, bitte erneut versuchen.
 google-sync-fail = Bei der Synchronisierung von Kalendern ist ein Fehler aufgetreten. Bitte später noch einmal versuchen.
-google-only-one = Es kann nur ein einziges Google-Konto verbunden sein.
 google-connect-to-continue = Zum Fortfahren muss mindestens ein Google-Konto verbunden werden.
 google-caldav-not-supported = Google CalDAV wird nicht unterstützt.
 google-caldav-not-supported-details = Bitte 'Google Kalender verbinden' benutzen.

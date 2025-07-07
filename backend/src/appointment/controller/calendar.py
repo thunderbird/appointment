@@ -871,7 +871,6 @@ class Tools:
     ) -> list[schemas.Event]:
         """This helper retrieves all events existing in given calendars for the scheduled date range"""
         existing_events = []
-        google_calendars = []
 
         now = datetime.now()
 
@@ -885,53 +884,35 @@ class Tools:
             else farthest_booking
         )
 
-        # handle calendar events
+        # Group calendars by external connection ID for batching
+        google_calendars_by_connection = {}
+        caldav_calendars = []
+
         for calendar in calendars:
             if calendar.provider == CalendarProvider.google:
-                google_calendars.append(calendar)
+                external_connection_id = calendar.external_connection_id
+
+                if external_connection_id not in google_calendars_by_connection:
+                    google_calendars_by_connection[external_connection_id] = []
+
+                google_calendars_by_connection[external_connection_id].append(calendar)
             else:
-                # Caldav - We don't have a smart way to batch these right now so just call them 1 by 1
-                con = CalDavConnector(
-                    db=db,
-                    redis_instance=redis,
-                    url=calendar.url,
-                    user=calendar.user,
-                    password=calendar.password,
-                    subscriber_id=subscriber.id,
-                    calendar_id=calendar.id,
-                )
+                # CalDAV calendars are processed individually
+                caldav_calendars.append(calendar)
 
-                try:
-                    existing_events.extend(
-                        [
-                            schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
-                            for busy in con.get_busy_time(
-                                [calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT)
-                            )
-                        ]
-                    )
+        # Process Google calendars in batches per external connection
+        for external_connection_id, google_calendars in google_calendars_by_connection.items():
+            if not google_calendars:
+                continue
 
-                    # We're good here, continue along the loop
-                    continue
-                except caldav.lib.error.ReportError:
-                    logging.debug('[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.')
-                    pass
+            # Get the external connection from the first calendar in the batch
+            # All calendars in this batch should have the same external connection
+            external_connection = google_calendars[0].external_connection
 
-                # Okay maybe this server doesn't support freebusy, try the old way
-                try:
-                    existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
-                except requests.exceptions.ConnectionError:
-                    # Connection error with remote caldav calendar, don't crash this route.
-                    pass
-
-        # Batch up google calendar calls since we can only have one google calendar connected
-        if len(google_calendars) > 0 and google_calendars[0].provider == CalendarProvider.google:
-            external_connection = utils.list_first(
-                repo.external_connection.get_by_type(db, subscriber.id, schemas.ExternalConnectionType.google)
-            )
             if external_connection is None or external_connection.token is None:
                 raise RemoteCalendarConnectionError()
 
+            # Create a single connector for this batch of calendars
             con = GoogleConnector(
                 db=db,
                 redis_instance=redis,
@@ -941,14 +922,52 @@ class Tools:
                 subscriber_id=subscriber.id,
                 google_tkn=external_connection.token,
             )
+
+            # Batch all calendar IDs for this connection into a single API call
+            calendar_ids = [calendar.user for calendar in google_calendars]
             existing_events.extend(
                 [
                     schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
                     for busy in con.get_busy_time(
-                        [calendar.user for calendar in google_calendars], start.strftime(DATEFMT), end.strftime(DATEFMT)
+                        calendar_ids, start.strftime(DATEFMT), end.strftime(DATEFMT)
                     )
                 ]
             )
+
+        # Process CalDAV calendars individually (no batching support)
+        for calendar in caldav_calendars:
+            con = CalDavConnector(
+                db=db,
+                redis_instance=redis,
+                url=calendar.url,
+                user=calendar.user,
+                password=calendar.password,
+                subscriber_id=subscriber.id,
+                calendar_id=calendar.id,
+            )
+
+            try:
+                existing_events.extend(
+                    [
+                        schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
+                        for busy in con.get_busy_time(
+                            [calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT)
+                        )
+                    ]
+                )
+
+                # We're good here, continue along the loop
+                continue
+            except caldav.lib.error.ReportError:
+                logging.debug('[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.')
+                pass
+
+            # Okay maybe this server doesn't support freebusy, try the old way
+            try:
+                existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
+            except requests.exceptions.ConnectionError:
+                # Connection error with remote caldav calendar, don't crash this route.
+                pass
 
         # handle already requested time slots
         for slot in schedule.slots:
