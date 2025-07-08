@@ -47,9 +47,7 @@ def fargate(
         if service not in load_balancer_security_groups:
             raise ValueError(f'{MSG_LB_MATCHING_CLUSTER} Create a matching load_balancers entry for "{service}".')
         if service not in container_security_groups:
-            raise ValueError(
-                f'{MSG_CONTAINER_MATCHING_CLUSTER} Create a matching containers entry for "{service}".'
-            )
+            raise ValueError(f'{MSG_CONTAINER_MATCHING_CLUSTER} Create a matching containers entry for "{service}".')
         lb_sg_ids = (
             [load_balancer_security_groups[service].resources['sg'].id]
             if load_balancer_security_groups[service]
