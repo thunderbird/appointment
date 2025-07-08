@@ -7,7 +7,8 @@ import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import ToolTip from '@/tbpro/elements/ToolTip.vue';
+import { TooltipPosition } from '@/definitions';
 import { IconExternalLink, IconLink } from '@tabler/icons-vue';
 
 // component constants
@@ -85,10 +86,20 @@ const copyLink = async () => {
           :label="t(`label.${item}`)"
           :link-name="item"
         />
-        <div v-if="user.myLink" class="flex items-center justify-center pl-8 pr-12">
-          <link-button class="cursor-pointer" @click="copyLink" aria-labelledby="copy-meeting-link-button" :tooltip="myLinkTooltip">
+        <div v-if="user.myLink" class="flex items-center justify-center pl-8 pr-12 relative">
+          <button
+            class="cursor-pointer bg-transparent border-none font-semibold min-w-0 p-0 flex items-center relative group active:text-teal-500"
+            @click="copyLink"
+            aria-labelledby="copy-meeting-link-button"
+          >
             <icon-link id="copy-meeting-link-button"></icon-link>
-          </link-button>
+            <tool-tip
+              :position="TooltipPosition.Top"
+              class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 opacity-0 transition-opacity duration-250 ease-out group-hover:opacity-100 group-hover:pointer-events-auto whitespace-nowrap text-xs min-w-max"
+            >
+              {{ myLinkTooltip }}
+            </tool-tip>
+          </button>
         </div>
       </div>
 
