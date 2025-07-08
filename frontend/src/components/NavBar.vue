@@ -86,7 +86,7 @@ const copyLink = async () => {
           :label="t(`label.${item}`)"
           :link-name="item"
         />
-        <div v-if="user.myLink" class="flex items-center justify-center pl-8 pr-12 relative">
+        <div v-if="user.myLink" class="flex items-center justify-center px-4 relative">
           <button
             class="cursor-pointer bg-transparent border-none font-semibold min-w-0 p-0 flex items-center relative group active:text-teal-500"
             @click="copyLink"
@@ -105,7 +105,7 @@ const copyLink = async () => {
 
       <drop-down class="self-center" ref="profileDropdown">
         <template #trigger>
-          <div class="flex items-center gap-4 border rounded-md border-gray-300 px-3 py-1 bg-white">
+          <div class="flex items-center gap-4 border rounded-md border-gray-300 pl-3 pr-1 py-1 bg-white">
             <span class="text-sm text-gray-500">
               {{ user.data.email }}
             </span>
