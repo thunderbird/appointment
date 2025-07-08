@@ -55,7 +55,13 @@ secrets_managers = {
 backend_cache_sg, container_sgs, lb_sgs = security_groups(project=project, resources=resources, vpc=vpc)
 
 # Create the Redis memory cache
-backend_cache, cache_dns = redis_cache(project=project, security_group=backend_cache_sg, vpc=vpc, resources=resources)
+backend_cache, cache_dns = redis_cache(
+    cloudflare_zone_id=cloudflare_zone_id,
+    project=project,
+    security_group=backend_cache_sg,
+    vpc=vpc,
+    resources=resources,
+)
 
 # Fargate Service
 fargate_clusters = fargate(
@@ -68,6 +74,7 @@ fargate_clusters = fargate(
 
 # CloudFront function to handle request rewrites headed to the backend
 rewrite_function = cloudfront.rewrite_function(project=project)
+project.resources['cf_rewrite_function'] = rewrite_function
 
 # Distribution to serve the frontend
 frontend = cloudfront.frontend_distribution(
@@ -78,8 +85,19 @@ frontend = cloudfront.frontend_distribution(
 )
 
 # Distribution to proxy Posthog data through
-# posthog_proxy = cloudfront.posthog_proxy()
-
+posthog_cache_policy, posthog_proxy_distribution, posthog_dns = (
+    cloudfront.posthog_proxy(
+        alias='data.appointment.tb.pro',
+        certificate_arn='arn:aws:acm:us-east-1:768512802988:certificate/01e7e2af-6c37-4d8a-8453-55d5801a892d',
+        cloudflare_zone_id=cloudflare_zone_id,
+        project=project,
+    )
+    if project.stack in POSTHOG_PROXY_STACKS
+    else (None, None, None)
+)
+project.resources['posthog_cache_policy'] = posthog_cache_policy
+project.resources['posthog_proxy_distribution'] = posthog_proxy_distribution
+project.resources['posthog_dns_record'] = posthog_dns
 
 # Monitoring
 monitoring_opts = resources.get('tb:cloudwatch:CloudWatchMonitoringGroup', {}).get('cloudwatch', {})

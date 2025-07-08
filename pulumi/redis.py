@@ -6,6 +6,7 @@ from tb_pulumi.network import MultiCidrVpc, SecurityGroupWithRules
 
 
 def redis_cache(
+    cloudflare_zone_id: str,
     project: ThunderbirdPulumiProject,
     security_group: SecurityGroupWithRules,
     resources: dict,
@@ -31,7 +32,6 @@ def redis_cache(
         - The pulumi_cloudflare.DnsRecord resource pointing to the cache
     :rtype: _type_
     """
-    cloudflare_zone_id = project.pulumi_config.require_secret('cloudflare_zone_id')
     backend_cache = aws.elasticache.ServerlessCache(
         f'{project.name_prefix}-cache-backend',
         security_group_ids=[security_group.resources.get('sg').id],

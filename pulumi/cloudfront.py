@@ -1,5 +1,6 @@
 import pulumi
 import pulumi_aws as aws
+import pulumi_cloudflare as cloudflare
 import tb_pulumi.cloudfront
 
 from tb_pulumi import ThunderbirdPulumiProject
@@ -42,7 +43,6 @@ def rewrite_function(project: ThunderbirdPulumiProject) -> aws.cloudfront.Functi
         publish=True,
         runtime='cloudfront-js-2.0',
     )
-    project.resources['cf_rewrite_function'] = rewrite_function
 
     return rewrite_function
 
@@ -148,5 +148,87 @@ def frontend_distribution(
     return frontend
 
 
-def posthog_proxy():
-    pass
+def posthog_proxy(alias: str, certificate_arn: str, cloudflare_zone_id: str, project: ThunderbirdPulumiProject):
+    cache_policy = aws.cloudfront.CachePolicy(
+        f'{project.name_prefix}-posthog-cors-policy',
+        comment='CORS for Posthog reverse proxy',
+        name=f'{project.name_prefix}-posthog-cors',
+        parameters_in_cache_key_and_forwarded_to_origin={
+            'cookies_config': {'cookie_behavior': 'none'},
+            'headers_config': {'header_behavior': 'whitelist', 'headers': {'items': ['Authorization', 'Origin']}},
+            'query_strings_config': {'query_string_behavior': 'all'},
+        },
+    )
+    distribution = aws.cloudfront.Distribution(
+        f'{project.name_prefix}-posthog-cfdistro',
+        aliases=[alias],
+        comment=f'Appointment Posthog Proxy ({project.stack})',
+        default_cache_behavior={
+            'allowed_methods': ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
+            'cached_methods': ['GET', 'HEAD', 'OPTIONS'],
+            'target_origin_id': 'us.i.posthog.com',
+            'viewer_protocol_policy': 'allow-all',
+            'cache_policy_id': cache_policy.id,
+            # Keep these hardcoded until this issue is complete: https://github.com/thunderbird/pulumi/issues/178
+            'origin_request_policy_id': '59781a5b-3903-41f3-afcb-af62929ccde1',
+            'response_headers_policy_id': 'eaab4381-ed33-4a86-88ca-d9558dc6cd63',
+            'compress': True,
+            'smooth_streaming': False,
+        },
+        enabled=True,
+        ordered_cache_behaviors=[
+            {
+                'allowed_methods': ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
+                'cached_methods': ['GET', 'HEAD', 'OPTIONS'],
+                'path_pattern': '/static/*',
+                'target_origin_id': 'us-assets.i.posthog.com',
+                'viewer_protocol_policy': 'allow-all',
+                'cache_policy_id': cache_policy.id,
+                'compress': True,
+                # Keep these hardcoded until this issue is complete: https://github.com/thunderbird/pulumi/issues/178
+                'origin_request_policy_id': '59781a5b-3903-41f3-afcb-af62929ccde1',
+                'response_headers_policy_id': 'eaab4381-ed33-4a86-88ca-d9558dc6cd63',
+            }
+        ],
+        origins=[
+            {
+                'domain_name': 'us-assets.i.posthog.com',
+                'origin_id': 'us-assets.i.posthog.com',
+                'custom_origin_config': {
+                    'http_port': 80,
+                    'https_port': 443,
+                    'origin_protocol_policy': 'https-only',
+                    'origin_ssl_protocols': ['TLSv1.2'],
+                },
+            },
+            {
+                'domain_name': 'us.i.posthog.com',
+                'origin_id': 'us.i.posthog.com',
+                'custom_origin_config': {
+                    'http_port': 80,
+                    'https_port': 443,
+                    'origin_protocol_policy': 'https-only',
+                    'origin_ssl_protocols': ['TLSv1.2'],
+                },
+            },
+        ],
+        restrictions={'geo_restriction': {'restriction_type': 'none'}},
+        viewer_certificate={
+            'acm_certificate_arn': certificate_arn,
+            'cloudfront_default_certificate': False,
+            'minimum_protocol_version': 'TLSv1.2_2021',
+            'ssl_support_method': 'sni-only',
+        },
+        opts=pulumi.ResourceOptions(delete_before_replace=True)
+    )
+    dns_record = cloudflare.DnsRecord(
+        f'{project.name_prefix}-posthog-dns',
+        content=distribution.domain_name,
+        name='data.appointment.tb.pro',
+        proxied=False,
+        ttl=60,
+        type='CNAME',
+        zone_id=cloudflare_zone_id,
+    )
+
+    return (cache_policy, distribution, dns_record)
