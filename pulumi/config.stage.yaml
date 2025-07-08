@@ -96,11 +96,7 @@ resources:
         - x-allow-secret
         - zoom-secrets
 
-  tb:ec2:SshableInstance:
-    bastion:
-      ssh_keypair_name: rjung-burrito
-      source_cidrs:
-        - 38.15.46.29/32
+  tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
   # tb:ec2:SshableInstance:
   #   bastion:
@@ -167,7 +163,7 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
             environment:
               - name: LOG_LEVEL
-                value: DEBUG
+                value: ERROR
               - name: FRONTEND_URL
                 value: https://appointment-stage.tb.pro
               - name: SHORT_BASE_URL
@@ -212,7 +208,6 @@ resources:
       service_bucket_name: tb-appointment-stage-frontend
       # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront
       certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/616d9faf-61e0-4d2a-b82d-b1c3d2592052
-      # certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/616d9faf-61e0-4d2a-b82d-b1c3d2592052
       distribution:
         aliases:
           - appointment-stage.tb.pro
