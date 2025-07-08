@@ -7,7 +7,8 @@ import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
-import { IconExternalLink } from '@tabler/icons-vue';
+import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import { IconExternalLink, IconLink } from '@tabler/icons-vue';
 
 // component constants
 const user = useUserStore();
@@ -21,6 +22,7 @@ interface Props {
 defineProps<Props>();
 
 const profileDropdown = ref();
+const myLinkTooltip = ref(t('label.copyLink'));
 
 /**
  * Is this nav entry active?
@@ -33,6 +35,18 @@ const isNavEntryActive = (item: string) => {
   }
   return route.name === item;
 };
+
+// Link copy
+const copyLink = async () => {
+  await navigator.clipboard.writeText(user.myLink);
+
+  myLinkTooltip.value = t('info.copiedToClipboard');
+
+  setTimeout(() => {
+    myLinkTooltip.value = t('label.copyLink');
+  }, 2000);
+};
+
 </script>
 
 <template>
@@ -71,10 +85,22 @@ const isNavEntryActive = (item: string) => {
           :label="t(`label.${item}`)"
           :link-name="item"
         />
+        <div v-if="user.myLink" class="flex items-center justify-center pl-8 pr-12">
+          <link-button class="cursor-pointer" @click="copyLink" aria-labelledby="copy-meeting-link-button" :tooltip="myLinkTooltip">
+            <icon-link id="copy-meeting-link-button"></icon-link>
+          </link-button>
+        </div>
       </div>
+
       <drop-down class="self-center" ref="profileDropdown">
         <template #trigger>
-          <user-avatar />
+          <div class="flex items-center gap-4 border rounded-md border-gray-300 px-3 py-1 bg-white">
+            <span class="text-sm text-gray-500">
+              {{ user.data.email }}
+            </span>
+
+            <user-avatar />
+          </div>
         </template>
         <template #default>
           <div
