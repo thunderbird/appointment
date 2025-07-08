@@ -7,7 +7,7 @@ const user = useUserStore();
 
 <template>
 <div
-  class="flex-center mr-4 size-12 self-center rounded-full bg-white text-lg font-normal text-white"
+  class="flex-center size-8 self-center rounded-full bg-white text-sm font-semibold text-white"
   :class="{'!bg-teal-500': user.data.avatarUrl === null}"
   data-testid="user-menu-avatar"
 >

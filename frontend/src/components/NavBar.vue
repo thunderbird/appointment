@@ -7,7 +7,9 @@ import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
-import { IconExternalLink } from '@tabler/icons-vue';
+import ToolTip from '@/tbpro/elements/ToolTip.vue';
+import { TooltipPosition } from '@/definitions';
+import { IconExternalLink, IconLink } from '@tabler/icons-vue';
 
 // component constants
 const user = useUserStore();
@@ -21,6 +23,7 @@ interface Props {
 defineProps<Props>();
 
 const profileDropdown = ref();
+const myLinkTooltip = ref(t('label.copyLink'));
 
 /**
  * Is this nav entry active?
@@ -33,6 +36,18 @@ const isNavEntryActive = (item: string) => {
   }
   return route.name === item;
 };
+
+// Link copy
+const copyLink = async () => {
+  await navigator.clipboard.writeText(user.myLink);
+
+  myLinkTooltip.value = t('info.copiedToClipboard');
+
+  setTimeout(() => {
+    myLinkTooltip.value = t('label.copyLink');
+  }, 2000);
+};
+
 </script>
 
 <template>
@@ -71,10 +86,32 @@ const isNavEntryActive = (item: string) => {
           :label="t(`label.${item}`)"
           :link-name="item"
         />
+        <div v-if="user.myLink" class="flex items-center justify-center px-4 relative">
+          <button
+            class="cursor-pointer bg-transparent border-none font-semibold min-w-0 p-0 flex items-center relative group active:text-teal-500"
+            @click="copyLink"
+            aria-labelledby="copy-meeting-link-button"
+          >
+            <icon-link id="copy-meeting-link-button"></icon-link>
+            <tool-tip
+              :position="TooltipPosition.Top"
+              class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 opacity-0 transition-opacity duration-250 ease-out group-hover:opacity-100 group-hover:pointer-events-auto whitespace-nowrap text-xs min-w-max"
+            >
+              {{ myLinkTooltip }}
+            </tool-tip>
+          </button>
+        </div>
       </div>
+
       <drop-down class="self-center" ref="profileDropdown">
         <template #trigger>
-          <user-avatar />
+          <div class="flex items-center gap-4 border rounded-md border-gray-300 pl-3 pr-1 py-1 bg-white">
+            <span class="text-sm text-gray-500">
+              {{ user.data.email }}
+            </span>
+
+            <user-avatar />
+          </div>
         </template>
         <template #default>
           <div
