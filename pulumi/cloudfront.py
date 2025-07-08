@@ -219,7 +219,7 @@ def posthog_proxy(alias: str, certificate_arn: str, cloudflare_zone_id: str, pro
             'minimum_protocol_version': 'TLSv1.2_2021',
             'ssl_support_method': 'sni-only',
         },
-        opts=pulumi.ResourceOptions(delete_before_replace=True)
+        opts=pulumi.ResourceOptions(delete_before_replace=True),
     )
     dns_record = cloudflare.DnsRecord(
         f'{project.name_prefix}-posthog-dns',
