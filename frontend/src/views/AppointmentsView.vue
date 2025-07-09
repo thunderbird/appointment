@@ -15,7 +15,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
 import AppointmentGridItem from '@/elements/AppointmentGridItem.vue';
-import AppointmentModal from '@/components/AppointmentModal.vue';
+import AppointmentSlidingPanel from '@/components/AppointmentSlidingPanel.vue';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import TabBar from '@/components/TabBar.vue';
 
@@ -195,13 +195,14 @@ const filteredAppointments = computed(() => {
 
 // handle single appointment modal
 const showAppointment = ref(null);
-const showAppointmentModal = (appointment) => {
+const isPanelOpen = computed(() => showAppointment.value !== null);
+
+const showAppointmentSlidingPanel = (appointment) => {
   showAppointment.value = appointment;
   router.replace(`/appointments/${viewToParam(tabActive.value)}/${appointment.slug}`);
 };
-const closeAppointmentModal = () => {
+const closeAppointmentSlidingPanel = () => {
   showAppointment.value = null;
-
   // Shuffle them back to the appointments route.
   router.replace(`/appointments/${viewToParam(tabActive.value)}`);
 };
@@ -212,7 +213,7 @@ onMounted(async () => {
 
   // If we've got a slug
   if (route.params?.slug) {
-    showAppointmentModal(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
+    showAppointmentSlidingPanel(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
   }
 });
 
@@ -368,7 +369,7 @@ provide(paintBackgroundKey, paintBackground);
             class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
             @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
-            @click="showAppointmentModal(appointment)"
+            @click="showAppointmentSlidingPanel(appointment)"
           >
             <td class="align-middle">
               <div
@@ -405,7 +406,7 @@ provide(paintBackgroundKey, paintBackground);
           v-for="(appointment, i) in filteredAppointments"
           :key="i"
           :appointment="appointment"
-          @click="showAppointmentModal(appointment)"
+          @click="showAppointmentSlidingPanel(appointment)"
         />
       </div>
     </div>
@@ -423,9 +424,10 @@ provide(paintBackgroundKey, paintBackground);
       </div>
     </div>
   </div>
-  <appointment-modal
-    :open="showAppointment !== null"
+
+  <appointment-sliding-panel
     :appointment="showAppointment"
-    @close="closeAppointmentModal"
+    :open="isPanelOpen"
+    @close="closeAppointmentSlidingPanel"
   />
 </template>

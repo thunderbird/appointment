@@ -4,8 +4,7 @@ import { timeFormat } from '@/utils';
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
-
-// icons
+import SlidingPanel from '@/elements/SlidingPanel.vue';
 import {
   IconCalendar,
   IconCalendarEvent,
@@ -13,7 +12,6 @@ import {
   IconNotes,
   IconUsers,
   IconVideo,
-  IconX,
 } from '@tabler/icons-vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import DangerButton from '@/tbpro/elements/DangerButton.vue';
@@ -33,8 +31,8 @@ const dj = inject(dayjsKey);
 
 // component properties
 interface Props {
-  open: boolean, // modal state
-  appointment?: Appointment; // appointment data to display
+  appointment: Appointment | null; // appointment data to display
+  open: boolean; // panel visibility
 }
 const props = defineProps<Props>();
 
@@ -43,12 +41,21 @@ const cancelReason = ref<string>('');
 // attendees list
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 
+// Handle open state for v-model
+const isOpen = computed({
+  get: () => props.open && props.appointment !== null,
+  set: (value) => {
+    if (!value) {
+      emit('close');
+    }
+  }
+});
+
 // calculate initials
 const initials = (name: string) => name.split(' ').map((p) => p[0]).join('');
 
 const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
 const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
-
 const status = computed(() => props.appointment?.slots[0].booking_status);
 const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
@@ -60,13 +67,11 @@ const answer = (isConfirmed: boolean) => {
   window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
 };
 
-// Handle deletion
 const deleteAppointment = () => {
   apmtStore.deleteAppointment(props.appointment?.id);
   emit('close');
 };
 
-// Handle cancel
 const cancelAppointment = () => {
   apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
   cancelReason.value = '';
@@ -75,25 +80,17 @@ const cancelAppointment = () => {
 </script>
 
 <template>
-  <transition>
-    <div
-      v-show="open"
-      class="mdl-overlay-close fixed left-0 top-0 z-40 h-screen w-screen bg-gray-800/50"
-      @click="emit('close')"
-    ></div>
-  </transition>
-  <transition>
-    <div
-      v-if="open"
-      class="
-        position-center fixed z-50 w-full max-w-4xl rounded-xl bg-white
-        p-12 text-gray-500 dark:bg-gray-700 dark:text-gray-300
-      "
-    >
-      <div class="btn-close absolute right-8 top-8 cursor-pointer" @click="emit('close')" :title="t('label.close')">
-        <icon-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400"/>
-      </div>
-      <div class="mb-8 truncate text-xl">{{ appointment.title }}</div>
+  <sliding-panel
+    v-model:open="isOpen"
+    :title="appointment?.title"
+    @close="emit('close')"
+  >
+    <div v-if="appointment" class="appointment-content">
+      <!-- Appointment status -->
+      <p class="mb-8 font-semibold">
+        {{ status }}
+      </p>
+
       <div class="mb-8 grid w-max max-w-full grid-cols-4 gap-x-4 gap-y-2 pl-4 text-sm">
         <div class="flex items-center gap-2 font-semibold">
           <icon-calendar-event class="size-4 fill-transparent stroke-gray-500 stroke-2"/>
@@ -199,30 +196,69 @@ const cancelAppointment = () => {
                 data-testid="appointment-modal-cancel-reason-input"
               ></textarea>
           </label>
-          <danger-button data-testid="appointment-modal-cancel-btn" @click="cancelAppointment()" :title="t('label.cancel')" class="mx-auto">
-            {{ t('label.cancelBooking') }}
-          </danger-button>
         </form>
       </div>
       <div class="p-6" v-else-if="isExpired">
         <p>This booking is expired.</p>
-        <div class="mt-4 flex justify-center gap-4">
-          <danger-button class="btn-deny" @click="deleteAppointment()" :title="t('label.delete')">
-            {{ t('label.deleteBooking') }}
-          </danger-button>
-        </div>
       </div>
       <div class="p-6" v-else-if="status === BookingStatus.Requested">
         <p>{{ attendeesSlots.map((s) => s.attendee.email).join(', ') }} have requested a booking at this time.</p>
-        <div class="mt-4 flex justify-center gap-4">
-          <primary-button class="btn-confirm" @click="answer(true)" :title="t('label.confirm')">
-            {{ t('label.confirmBooking') }}
-          </primary-button>
-          <danger-button class="btn-deny" @click="answer(false)" :title="t('label.deny')">
-            {{ t('label.denyBooking') }}
-          </danger-button>
-        </div>
       </div>
     </div>
-  </transition>
+
+    <!-- CTA buttons in the panel's CTA slot -->
+    <template #cta>
+      <div v-if="status === BookingStatus.Booked && !isPast" class="flex justify-center">
+        <danger-button 
+          data-testid="appointment-modal-cancel-btn" 
+          @click="cancelAppointment()" 
+          :title="t('label.cancel')"
+        >
+          {{ t('label.cancelBooking') }}
+        </danger-button>
+      </div>
+      <div v-else-if="isExpired" class="flex justify-center">
+        <danger-button 
+          class="btn-deny" 
+          @click="deleteAppointment()" 
+          :title="t('label.delete')"
+        >
+          {{ t('label.deleteBooking') }}
+        </danger-button>
+      </div>
+      <div v-else-if="status === BookingStatus.Requested" class="flex justify-center gap-4">
+        <primary-button 
+          class="btn-confirm" 
+          @click="answer(true)" 
+          :title="t('label.confirm')"
+        >
+          {{ t('label.confirmBooking') }}
+        </primary-button>
+        <danger-button 
+          class="btn-deny" 
+          @click="answer(false)" 
+          :title="t('label.deny')"
+        >
+          {{ t('label.denyBooking') }}
+        </danger-button>
+      </div>
+    </template>
+  </sliding-panel>
 </template>
+
+<style scoped>
+.appointment-content {
+  color: #6b7280;
+}
+
+.appointment-content :deep(.dark) {
+  color: #d1d5db;
+}
+
+.position-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style> 
