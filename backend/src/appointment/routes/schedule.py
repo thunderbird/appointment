@@ -9,7 +9,6 @@ from sentry_sdk import capture_exception
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from .. import utils
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber
