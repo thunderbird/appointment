@@ -118,7 +118,7 @@ def normalize_secrets():
             hostname = f'{hostname}:{port}'
 
         os.environ['DATABASE_URL'] = (
-            f"mysql+mysqldb://{secrets['username']}:{secrets['password']}@{hostname}/appointment"
+            f"postgresql+psycopg://{secrets['username']}:{secrets['password']}@{hostname}/appointment"
         )
 
     database_enc_secret = os.getenv('DB_ENC_SECRET')

@@ -17,7 +17,7 @@ This are the general components, Thunderbird Appointment consists of.
 ```mermaid
 C4Component
 
-  ContainerDb(c4, "Database", "MySQL", "Subscribers, calendars,<br>appointments, attendees, ...")
+  ContainerDb(c4, "Database", "PostgreSQL", "Subscribers, calendars,<br>appointments, attendees, ...")
   Container(c1, "Frontend", "Vue3 / Tailwind", "Provides all Appointment<br>functionality to customers<br>via their web browser")
   Container_Boundary(b1, "Backend") {
     Component(c3, "Subscriber Area", "FastAPI, JWT auth", "Provides functionality related<br>to calendar connections,<br>appointments, general availability")
@@ -87,6 +87,7 @@ erDiagram
   CALENDARS {
     int id PK "Unique calendar key"
     int owner_id FK "Person who owns this calendar"
+    int external_connection_id FK "External connection for this calendar"
     enum provider "Calendar provider [Google, CalDAV]"
     string title "Calendar title to identify connection in lists"
     string color "Color to visually identify calendars"
@@ -147,7 +148,7 @@ erDiagram
     bool keep_open "If true appointment accepts selection of multiple slots (future feature)"
     enum status "Appointment state [draft, ready, close]"
     string meeting_link_provider "Name of the provider for meeting links (e.g. Zoom)"
-    uuid uuid "Binary field holding a universal unique identifier"
+    uuid uuid "Uuid field holding a universal unique identifier"
   }
   CALENDARS ||--|{ SCHEDULES : connected_to
   SCHEDULES {
