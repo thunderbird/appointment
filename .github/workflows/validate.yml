@@ -24,6 +24,7 @@ jobs:
       validate-iac: ${{ steps.check.outputs.validate-iac }}
       validate-backend: ${{ steps.check.outputs.validate-backend }}
       validate-frontend: ${{ steps.check.outputs.validate-frontend }}
+      validate-pulumi: ${{ steps.check.outputs.validate-pulumi }}
     steps:
     - uses: actions/checkout@v4
 
@@ -39,6 +40,9 @@ jobs:
             - '.github/workflows/validate.yml'
           validate-frontend:
             - 'frontend/**'
+            - '.github/workflows/validate.yml'
+          validate-pulumi:
+            - 'pulumi/**'
             - '.github/workflows/validate.yml'
 
   validate-iac:
@@ -192,3 +196,33 @@ jobs:
       - name: Test with vitest
         run: |
           cd ./frontend && npm run test -- --run
+
+  validate-pulumi:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    environment: staging
+    if: needs.detect-changes.outputs.validate-pulumi == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd ./pulumi
+          python -m pip install --upgrade pip
+          python -m pip install -e .'[dev]'
+      
+      - name: "Ruff: Format checks"
+        run: |
+          cd ./pulumi
+          ruff format
+      
+      - name: "Ruff: Style/sanity checks"
+        run: |
+          cd ./pulumi
+          ruff check
