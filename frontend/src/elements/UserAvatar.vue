@@ -8,14 +8,14 @@ const user = useUserStore();
 <template>
 <div
   class="user-avatar"
-  :class="{'user-avatar--fallback': user.data.avatarUrl === null}"
+  :class="{'fallback': user.data.avatarUrl === null}"
   data-testid="user-menu-avatar"
 >
   <span v-if="user.data.avatarUrl === null">
     {{ initials(user.data.name) }}
   </span>
   <span v-else>
-    <img class="user-avatar__image" :alt="initials(user.data.name)" :src="user.data.avatarUrl"/>
+    <img class="image" :alt="initials(user.data.name)" :src="user.data.avatarUrl"/>
   </span>
 </div>
 </template>
@@ -35,11 +35,11 @@ const user = useUserStore();
   color: var(--colour-neutral-base);
 }
 
-.user-avatar--fallback {
+.fallback {
   background-color: var(--colour-accent-teal);
 }
 
-.user-avatar__image {
+.image {
   border-radius: 50%;
 }
 </style>
