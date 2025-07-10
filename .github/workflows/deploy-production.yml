@@ -121,7 +121,7 @@ jobs:
           terragrunt init -upgrade
           output=$(terragrunt output cloudfront_id)
           echo cloudfront_id=$output >> $GITHUB_OUTPUT
-      
+
   deploy-prod-frontend:
     needs: deploy-prod-iac
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
@@ -157,6 +157,18 @@ jobs:
           aws-region: eu-central-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Clean up before Pulumi release
+        run: rm -rf dist
+
+      - name: Get Artifact from Release (Pulumi)
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: ${{ github.event.release.id }}
+          file: pulumifrontend.zip
+
+      - name: Unzip Artifact (Pulumi)
+        run: unzip pulumifrontend.zip
 
       - name: Deploy frontend to S3 (Pulumi)
         run: |

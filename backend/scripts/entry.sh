@@ -14,10 +14,10 @@ if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
     service cron start
 fi
 
-ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000 --log-level trace"
+ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000"
 
 if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
-    ARGS="$ARGS --reload"
+    ARGS="$ARGS --reload --log-level trace"
 fi
 
 echo "Running uvicorn with these arguments: '$ARGS'"

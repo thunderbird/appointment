@@ -117,7 +117,7 @@ jobs:
           terragrunt validate
           terragrunt plan -out tfplan
           terragrunt apply tfplan
-      
+
   build-and-deploy-stage-frontend:
     needs:
       - detect-changes
@@ -196,6 +196,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       
+      - name: Build stage frontend (Pulumi)
+        run: |
+          rm -rf frontent/dist  # Clean up from previous build
+          cp frontend/.env.pulumistage.example frontend/.env.stage
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+
       - name: Deploy frontend to S3 (Pulumi)
         run: |
           aws s3 sync frontend/dist s3://${{ secrets.FRONTEND_BUCKET_STAGE }}
@@ -437,6 +443,13 @@ jobs:
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
           zip -r ../frontend.zip dist
 
+      - name: Build prod frontend (Pulumi)
+        run: |
+          rm -rf frontend/dist  # Clean up from previous build
+          cp frontend/.env.pulumiprod.example frontend/.env.prod
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+          zip -r ../pulumifrontend.zip dist
+
       - name: Download ECR tag
         uses: actions/download-artifact@v4
         with:
@@ -474,6 +487,7 @@ jobs:
             ecr_tag.zip
             new_ecr_tag.zip
             frontend.zip
+            pulumifrontend.zip
             iac.zip
 
   e2e-tests-browserstack-stage:

@@ -4,12 +4,8 @@ import cloudfront
 import pulumi
 import tb_pulumi
 import tb_pulumi.ci
-import tb_pulumi.cloudfront
 import tb_pulumi.cloudwatch
-import tb_pulumi.elasticache
-import tb_pulumi.fargate
 import tb_pulumi.network
-import tb_pulumi.rds
 import tb_pulumi.secrets
 
 from fargate import fargate

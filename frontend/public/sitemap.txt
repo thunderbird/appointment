@@ -1,1 +1,2 @@
-https://appointment.tb.pro/
+https://appointment.day/
+# https://appointment.tb.pro/

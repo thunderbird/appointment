@@ -96,11 +96,7 @@ resources:
         - zoom-secrets
         # - neon-database-connection
 
-  tb:ec2:SshableInstance:
-    bastion:
-      ssh_keypair_name: rjung-burrito
-      source_cidrs:
-        - 38.15.46.29/32
+  tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
   # tb:ec2:SshableInstance:
   #   bastion:
@@ -152,19 +148,19 @@ resources:
                 appProtocol: http
             linuxParameters:
               initProcessEnabled: True
-            # secrets:
-            #   - name: DATABASE_SECRETS
-            #     valueFrom: 
-            #   - name: DB_ENC_SECRET
-            #     valueFrom: 
-            #   - name: FXA_SECRETS
-            #     valueFrom: 
-            #   - name: GOOGLE_OAUTH_SECRETS
-            #     valueFrom: 
-            #   - name: SMTP_SECRETS
-            #     valueFrom: 
-            #   - name: ZOOM_SECRETS
-            #     valueFrom: 
+            secrets:
+              - name: DATABASE_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-connection-4koh7Z
+              - name: DB_ENC_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-uS7JBM
+              - name: FXA_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-secrets-tbPt8s
+              - name: GOOGLE_OAUTH_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-oauth-aSrasg
+              - name: SMTP_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-connection-eW2HFf
+              - name: ZOOM_SECRETS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-secrets-btmho1
             environment:
               - name: LOG_LEVEL
                 value: ERROR
