@@ -41,6 +41,11 @@ const panelClasses = computed(() => [
   'sliding-panel',
   `sliding-panel--${props.side}-side`
 ])
+
+const headerClasses = computed(() => [
+  'header',
+  `header--${props.side}-side`
+])
 </script>
 
 <template>
@@ -55,7 +60,7 @@ const panelClasses = computed(() => [
     <Transition :name="`panel-${side}`">
       <div v-if="isOpen" :class="panelClasses" @click.stop>
         <!-- Header -->
-        <div class="header">
+        <div :class="headerClasses">
           <div class="title">
             <slot name="title">
               {{ title }}
@@ -153,10 +158,19 @@ const panelClasses = computed(() => [
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--colour-neutral-border);
   background-color: var(--colour-neutral-lower);
   flex-shrink: 0;
+}
+
+.header--right-side {
+  flex-direction: row;
+}
+
+.header--left-side {
+  flex-direction: row-reverse;
 }
 
 .title {
