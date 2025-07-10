@@ -11,7 +11,7 @@ import LogoutView from '@/views/LogoutView.vue';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
-const AppointmentsView = defineAsyncComponent(() => import('@/views/AppointmentsView.vue'));
+const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView.vue'));
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
@@ -114,7 +114,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/bookings/:view?/:slug?',
     name: 'bookings',
-    component: AppointmentsView,
+    component: BookingsView,
     meta: {
       maskForMetrics: true,
     },
