@@ -6,6 +6,7 @@ interface Props {
   open: boolean
   title?: string
   closeOnScrimClick?: boolean
+  side?: 'left' | 'right'
 }
 
 interface Emits {
@@ -14,7 +15,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  closeOnScrimClick: true
+  closeOnScrimClick: true,
+  side: 'right'
 })
 
 const emit = defineEmits<Emits>()
@@ -34,6 +36,11 @@ const handleScrimClick = () => {
     handleClose()
   }
 }
+
+const panelClasses = computed(() => [
+  'sliding-panel',
+  `sliding-panel--${props.side}-side`
+])
 </script>
 
 <template>
@@ -45,8 +52,8 @@ const handleScrimClick = () => {
         @click="handleScrimClick"
       />
     </Transition>
-    <Transition name="panel">
-      <div v-if="isOpen" class="sliding-panel" @click.stop>
+    <Transition :name="`panel-${side}`">
+      <div v-if="isOpen" :class="panelClasses" @click.stop>
         <!-- Header -->
         <div class="header">
           <div class="title">
@@ -91,9 +98,7 @@ const handleScrimClick = () => {
 .sliding-panel {
   position: fixed;
   top: 0;
-  right: 0;
   background-color: var(--colour-neutral-base);
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   width: 600px;
@@ -102,19 +107,45 @@ const handleScrimClick = () => {
   z-index: 1001;
 }
 
-/* Panel transition */
-.panel-enter-active,
-.panel-leave-active {
+.sliding-panel--right-side {
+  right: 0;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+.sliding-panel--left-side {
+  left: 0;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Right side panel transition */
+.panel-right-enter-active,
+.panel-right-leave-active {
   transition: transform 0.3s ease;
 }
 
-.panel-enter-from,
-.panel-leave-to {
+.panel-right-enter-from,
+.panel-right-leave-to {
   transform: translateX(100%);
 }
 
-.panel-enter-to,
-.panel-leave-from {
+.panel-right-enter-to,
+.panel-right-leave-from {
+  transform: translateX(0);
+}
+
+/* Left side panel transition */
+.panel-left-enter-active,
+.panel-left-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.panel-left-enter-from,
+.panel-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.panel-left-enter-to,
+.panel-left-leave-from {
   transform: translateX(0);
 }
 
