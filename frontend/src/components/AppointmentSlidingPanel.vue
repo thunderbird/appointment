@@ -22,15 +22,15 @@ const emit = defineEmits(['close']);
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 
-// component properties
 interface Props {
-  appointment: Appointment | null; // appointment data to display
-  open: boolean; // panel visibility
+  appointment: Appointment | null;
+  open: boolean;
 }
 const props = defineProps<Props>();
 
 const cancelReason = ref<string>('');
 
+// computed properties
 const isOpen = computed({
   get: () => props.open && props.appointment !== null,
   set: (value) => {
@@ -47,18 +47,28 @@ const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
 const isPast = computed(() => props.appointment?.slots[0].start < dj());
-const bookingStatusLabel = computed(() => {
+const bookingStatusInfo = computed(() => {
   if (status.value === BookingStatus.Booked && !isPast.value) {
-    return t('label.confirmed');
+    return {
+      label: t('label.confirmed'),
+      color: 'status-confirmed'
+    };
   }
 
   if (status.value === BookingStatus.Requested) {
-    return t('label.requested');
+    return {
+      label: t('label.requested'),
+      color: 'status-requested'
+    };
   }
 
-  return t('label.unconfirmed');
+  return {
+    label: t('label.unconfirmed'),
+    color: 'status-unconfirmed'
+  };
 });
 
+// methods
 const answer = (isConfirmed: boolean) => {
   window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
 };
@@ -83,39 +93,40 @@ const cancelAppointment = () => {
   >
     <div v-if="appointment" class="appointment-content">
       <!-- Appointment status -->
-      <p class="mb-6 font-semibold uppercase">
-        {{ bookingStatusLabel }}
+      <p :class="['status-label', bookingStatusInfo.color]">
+        {{ bookingStatusInfo.label }}
       </p>
 
-      <div class="mb-6 w-max max-w-full text-sm">
+      <div class="time-slots">
         <template v-for="s in appointment.slots" :key="s.start">
-          <div class="flex items-center gap-2 font-semibold">
-            <icon-calendar-event class="size-8 fill-transparent stroke-gray-500 stroke-2"/>
-            <div>
-              <p>{{ dj(s.start).format('LL') }}</p>
-              <div>
+          <div class="time-slot">
+            <icon-calendar-event class="time-icon"/>
+            <div class="time-details">
+              <p class="date">{{ dj(s.start).format('LL') }}</p>
+              <div class="time-range">
                 {{ dj(s.start).format(timeFormat()) }} - {{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }} ({{ dj.duration(s.duration, 'minutes').humanize() }})
               </div>
             </div>
           </div>
         </template>
       </div>
-      <div class="mb-6 w-max max-w-full text-sm">
-        <div class="mb-1">
-          <span class="font-semibold">
+
+      <div class="appointment-info">
+        <div class="info-row">
+          <span class="info-label">
             {{ t('label.calendar') }}:
           </span>
           {{ appointment.calendar_title }}
         </div>
-        <div>
-          <div class="mb-1">
-            <span class="font-semibold">
+        <div class="info-row">
+          <div class="info-row">
+            <span class="info-label">
               {{ t('label.videoLink') }}:
             </span>
             <a
               v-if="appointment.location_url"
               :href="appointment.location_url"
-              class="text-teal-500 underline underline-offset-2"
+              class="video-link"
               target="_blank"
             >
               {{ appointment.location_url }}
@@ -126,48 +137,48 @@ const cancelAppointment = () => {
           </div>
         </div>
       </div>
+
       <div
         v-if="attendeesSlots.length > 0"
-        class="mb-6 w-max max-w-full text-sm"
+        class="attendees-section"
       >
-        <div class="mb-1 flex items-center gap-2 font-semibold">
+        <div class="attendees-header">
           {{ t('label.attendees') }}:
         </div>
         <template v-for="s in attendeesSlots" :key="s.start">
-          <div class="flex items-center gap-2">
+          <div class="attendee-item">
             {{ s.attendee.email }}
           </div>
         </template>
       </div>
-      <div v-if="appointment.details" class="w-full pl-4 text-sm">
-        <div class="mb-1 flex items-center gap-2 font-semibold">
-          <icon-notes class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
+
+      <div v-if="appointment.details" class="notes-section">
+        <div class="notes-header">
+          <icon-notes class="notes-icon"/>
           {{ t('label.notes') }}
         </div>
-        <div class="rounded-lg border border-gray-400 p-4 dark:border-gray-600">{{ appointment.details }}</div>
+        <div class="notes-content">{{ appointment.details }}</div>
       </div>
+      
       <div v-if="status === BookingStatus.Booked">
-        <form v-if="!isPast" class="gap-4" @submit.prevent>
-          <label for="cancelReason">
+        <form v-if="!isPast" class="cancel-form" @submit.prevent>
+          <label for="cancelReason" class="cancel-label">
             {{ t('label.cancelReason') }}
             <textarea
                 name="cancelReason"
                 v-model="cancelReason"
                 :placeholder="t('placeholder.writeHere')"
-                class="w-full h-24 rounded-md resize-none mt-2 mb-8"
+                class="cancel-textarea"
                 data-testid="appointment-modal-cancel-reason-input"
               ></textarea>
           </label>
         </form>
       </div>
-      <div class="p-6" v-else-if="status === BookingStatus.Requested">
-        <p>{{ attendeesSlots.map((s) => s.attendee.email).join(', ') }} have requested a booking at this time.</p>
-      </div>
     </div>
 
     <!-- CTA buttons in the panel's CTA slot -->
     <template #cta>
-      <div v-if="status === BookingStatus.Booked && !isPast" class="flex justify-end">
+      <div v-if="status === BookingStatus.Booked && !isPast" class="cta-single">
         <danger-button 
           data-testid="appointment-modal-cancel-btn" 
           @click="cancelAppointment()" 
@@ -176,7 +187,7 @@ const cancelAppointment = () => {
           {{ t('label.cancelBooking') }}
         </danger-button>
       </div>
-      <div v-else-if="isExpired" class="flex justify-end">
+      <div v-else-if="isExpired" class="cta-single">
         <danger-button 
           class="btn-deny" 
           @click="deleteAppointment()" 
@@ -185,7 +196,7 @@ const cancelAppointment = () => {
           {{ t('label.deleteBooking') }}
         </danger-button>
       </div>
-      <div v-else-if="status === BookingStatus.Requested" class="flex justify-end gap-4">
+      <div v-else-if="status === BookingStatus.Requested" class="cta-dual">
         <primary-button 
           class="btn-confirm" 
           @click="answer(true)" 
@@ -219,5 +230,184 @@ const cancelAppointment = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+/* Status labels */
+.status-label {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-confirmed {
+  color: var(--colour-ti-success);
+}
+
+.status-requested {
+  color: var(--colour-ti-warning);
+}
+
+.status-unconfirmed {
+  color: var(--colour-ti-muted);
+}
+
+/* Time slots section */
+.time-slots {
+  margin-bottom: 1.5rem;
+  width: max-content;
+  max-width: 100%;
+  font-size: 0.875rem;
+}
+
+.time-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.time-icon {
+  width: 2rem;
+  height: 2rem;
+  fill: transparent;
+  stroke: var(--colour-ti-muted);
+  stroke-width: 2;
+}
+
+.time-details .date {
+  margin: 0;
+}
+
+.time-range {
+  margin-top: 0.25rem;
+}
+
+/* Appointment info section */
+.appointment-info {
+  margin-bottom: 1.5rem;
+  width: max-content;
+  max-width: 100%;
+  font-size: 0.875rem;
+}
+
+.info-row {
+  margin-bottom: 0.25rem;
+}
+
+.info-label {
+  font-weight: 600;
+}
+
+.video-link {
+  color: var(--colour-accent-teal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: var(--colour-apmt-primary);
+  }
+}
+
+/* Attendees section */
+.attendees-section {
+  margin-bottom: 1.5rem;
+  width: max-content;
+  max-width: 100%;
+  font-size: 0.875rem;
+}
+
+.attendees-header {
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.attendee-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Notes section */
+.notes-section {
+  width: 100%;
+  padding-left: 1rem;
+  font-size: 0.875rem;
+}
+
+.notes-header {
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.notes-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  fill: transparent;
+  stroke: var(--colour-ti-muted);
+  stroke-width: 2;
+}
+
+.notes-content {
+  border-radius: 0.5rem;
+  border: 1px solid var(--colour-neutral-border);
+  padding: 1rem;
+}
+
+.dark .notes-content {
+  border-color: var(--colour-neutral-border);
+}
+
+/* Cancel form */
+.cancel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cancel-label {
+  display: block;
+}
+
+.cancel-textarea {
+  width: 100%;
+  height: 6rem;
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  border-radius: 0.375rem;
+  resize: none;
+  border: 1px solid var(--colour-neutral-border);
+  padding: 0.5rem;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: var(--colour-primary-default);
+    box-shadow: 0 0 0 3px var(--colour-primary-soft);
+  }
+}
+
+.dark .cancel-textarea {
+  border-color: var(--colour-neutral-border);
+  background-color: var(--colour-neutral-lower);
+  color: var(--colour-ti-base);
+}
+
+/* CTA buttons */
+.cta-single {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cta-dual {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
 }
 </style> 

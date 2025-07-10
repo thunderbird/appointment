@@ -48,6 +48,7 @@ const handleScrimClick = () => {
           <div
             v-show="isOpen"
             class="sliding-panel"
+            @click.stop
           >
             <!-- Header -->
             <div class="header">
