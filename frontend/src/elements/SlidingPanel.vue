@@ -70,7 +70,7 @@ const handleScrimClick = () => {
               <slot />
             </div>
 
-            <!-- CTA Section -->
+            <!-- CTA Container -->
             <div v-if="$slots.cta" class="cta-container">
               <slot name="cta" />
             </div>

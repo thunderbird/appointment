@@ -5,14 +5,7 @@ import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import SlidingPanel from '@/elements/SlidingPanel.vue';
-import {
-  IconCalendar,
-  IconCalendarEvent,
-  IconClock,
-  IconNotes,
-  IconUsers,
-  IconVideo,
-} from '@tabler/icons-vue';
+import { IconCalendarEvent, IconNotes } from '@tabler/icons-vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import { useUserStore } from '@/stores/user-store';
@@ -38,10 +31,6 @@ const props = defineProps<Props>();
 
 const cancelReason = ref<string>('');
 
-// attendees list
-const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-
-// Handle open state for v-model
 const isOpen = computed({
   get: () => props.open && props.appointment !== null,
   set: (value) => {
@@ -50,10 +39,7 @@ const isOpen = computed({
     }
   }
 });
-
-// calculate initials
-const initials = (name: string) => name.split(' ').map((p) => p[0]).join('');
-
+const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
 const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
 const status = computed(() => props.appointment?.slots[0].booking_status);
@@ -61,8 +47,18 @@ const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
 const isPast = computed(() => props.appointment?.slots[0].start < dj());
+const bookingStatusLabel = computed(() => {
+  if (status.value === BookingStatus.Booked && !isPast.value) {
+    return t('label.confirmed');
+  }
 
-// Handle decision
+  if (status.value === BookingStatus.Requested) {
+    return t('label.requested');
+  }
+
+  return t('label.unconfirmed');
+});
+
 const answer = (isConfirmed: boolean) => {
   window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
 };
@@ -87,54 +83,35 @@ const cancelAppointment = () => {
   >
     <div v-if="appointment" class="appointment-content">
       <!-- Appointment status -->
-      <p class="mb-8 font-semibold">
-        {{ status }}
+      <p class="mb-6 font-semibold uppercase">
+        {{ bookingStatusLabel }}
       </p>
 
-      <div class="mb-8 grid w-max max-w-full grid-cols-4 gap-x-4 gap-y-2 pl-4 text-sm">
-        <div class="flex items-center gap-2 font-semibold">
-          <icon-calendar-event class="size-4 fill-transparent stroke-gray-500 stroke-2"/>
-          {{ t('label.availabilityDay') }}
-        </div>
-        <div class="flex items-center gap-2 font-semibold">
-          <icon-clock class="size-4 fill-transparent stroke-gray-500 stroke-2"/>
-          {{ t('label.startTime') }}
-        </div>
-        <div class="flex items-center gap-2 font-semibold">
-          <icon-clock class="size-4 fill-transparent stroke-gray-500 stroke-2"/>
-          {{ t('label.endTime') }}
-        </div>
-        <div class="flex items-center gap-2 font-semibold">
-          <icon-users class="size-4 fill-transparent stroke-gray-500 stroke-2"/>
-          {{ t('label.bookings') }}
-        </div>
+      <div class="mb-6 w-max max-w-full text-sm">
         <template v-for="s in appointment.slots" :key="s.start">
-          <div class="pl-6">{{ dj(s.start).format('LL') }}</div>
-          <div class="pl-6">{{ dj(s.start).format(timeFormat()) }}</div>
-          <div class="pl-6">{{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}</div>
-          <div class="pl-6">{{ s.attendee?.email ?? '&mdash;' }}</div>
+          <div class="flex items-center gap-2 font-semibold">
+            <icon-calendar-event class="size-8 fill-transparent stroke-gray-500 stroke-2"/>
+            <div>
+              <p>{{ dj(s.start).format('LL') }}</p>
+              <div>
+                {{ dj(s.start).format(timeFormat()) }} - {{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }} ({{ dj.duration(s.duration, 'minutes').humanize() }})
+              </div>
+            </div>
+          </div>
         </template>
       </div>
-      <div class="mb-8 grid w-max max-w-full grid-cols-3 gap-x-12 gap-y-8 pl-4 text-sm">
-        <div>
-          <div class="mb-1 flex items-center gap-2 font-semibold">
-            <icon-calendar class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
-            {{ t('label.calendar') }}
-          </div>
-          <div class="flex items-center gap-3 pl-6">
-            <div
-              class="size-4 shrink-0 rounded-full bg-sky-400"
-              :style="{ backgroundColor: appointment.calendar_color }"
-            ></div>
-            {{ appointment.calendar_title }}
-          </div>
+      <div class="mb-6 w-max max-w-full text-sm">
+        <div class="mb-1">
+          <span class="font-semibold">
+            {{ t('label.calendar') }}:
+          </span>
+          {{ appointment.calendar_title }}
         </div>
         <div>
-          <div class="mb-1 flex items-center gap-2 font-semibold">
-            <icon-video class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
-            {{ t('label.videoLink') }}
-          </div>
-          <div class="pl-6">
+          <div class="mb-1">
+            <span class="font-semibold">
+              {{ t('label.videoLink') }}:
+            </span>
             <a
               v-if="appointment.location_url"
               :href="appointment.location_url"
@@ -143,36 +120,22 @@ const cancelAppointment = () => {
             >
               {{ appointment.location_url }}
             </a>
-            <p v-else>
+            <span v-else>
               {{ t('label.notProvided') }}
-            </p>
+            </span>
           </div>
         </div>
       </div>
       <div
         v-if="attendeesSlots.length > 0"
-        class="mb-8 grid w-max max-w-full grid-cols-[auto_1fr] items-center gap-x-8 gap-y-2 pl-4 text-sm"
+        class="mb-6 w-max max-w-full text-sm"
       >
         <div class="mb-1 flex items-center gap-2 font-semibold">
-          <icon-users class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
-          {{ t('label.attendees') }}
-        </div>
-        <div class="mb-1 flex items-center gap-2 font-semibold">
-          <icon-calendar-event class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
-          {{ t('label.bookingSlot') }}
+          {{ t('label.attendees') }}:
         </div>
         <template v-for="s in attendeesSlots" :key="s.start">
-          <div class="flex items-center gap-2 pl-6">
-            <div class="relative size-6 rounded-full bg-teal-500">
-              <div class="position-center absolute text-xs text-white">{{ initials(s.attendee.name) }}</div>
-            </div>
+          <div class="flex items-center gap-2">
             {{ s.attendee.email }}
-          </div>
-          <div class="flex gap-4 pl-6">
-            <div>{{ dj(s.start).format('LL') }}</div>
-            <div>{{ dj(s.start).format(timeFormat()) }}</div>
-            <div>{{ t('label.to') }}</div>
-            <div>{{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}</div>
           </div>
         </template>
       </div>
@@ -183,8 +146,7 @@ const cancelAppointment = () => {
         </div>
         <div class="rounded-lg border border-gray-400 p-4 dark:border-gray-600">{{ appointment.details }}</div>
       </div>
-      <div class="px-4" v-if="status === BookingStatus.Booked">
-        <p class="mb-8">This booking is confirmed.</p>
+      <div v-if="status === BookingStatus.Booked">
         <form v-if="!isPast" class="gap-4" @submit.prevent>
           <label for="cancelReason">
             {{ t('label.cancelReason') }}
@@ -198,9 +160,6 @@ const cancelAppointment = () => {
           </label>
         </form>
       </div>
-      <div class="p-6" v-else-if="isExpired">
-        <p>This booking is expired.</p>
-      </div>
       <div class="p-6" v-else-if="status === BookingStatus.Requested">
         <p>{{ attendeesSlots.map((s) => s.attendee.email).join(', ') }} have requested a booking at this time.</p>
       </div>
@@ -208,7 +167,7 @@ const cancelAppointment = () => {
 
     <!-- CTA buttons in the panel's CTA slot -->
     <template #cta>
-      <div v-if="status === BookingStatus.Booked && !isPast" class="flex justify-center">
+      <div v-if="status === BookingStatus.Booked && !isPast" class="flex justify-end">
         <danger-button 
           data-testid="appointment-modal-cancel-btn" 
           @click="cancelAppointment()" 
@@ -217,7 +176,7 @@ const cancelAppointment = () => {
           {{ t('label.cancelBooking') }}
         </danger-button>
       </div>
-      <div v-else-if="isExpired" class="flex justify-center">
+      <div v-else-if="isExpired" class="flex justify-end">
         <danger-button 
           class="btn-deny" 
           @click="deleteAppointment()" 
@@ -226,7 +185,7 @@ const cancelAppointment = () => {
           {{ t('label.deleteBooking') }}
         </danger-button>
       </div>
-      <div v-else-if="status === BookingStatus.Requested" class="flex justify-center gap-4">
+      <div v-else-if="status === BookingStatus.Requested" class="flex justify-end gap-4">
         <primary-button 
           class="btn-confirm" 
           @click="answer(true)" 
