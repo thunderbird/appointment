@@ -118,3 +118,19 @@ def get_subscriber_by_zoom_user_id(db: Session, type_id: str):
         return result.owner
 
     return None
+
+
+def get_subscriber_by_oidc_id(db: Session, type_id: str):
+    """Return a subscriber from an oidc id"""
+    query = (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.type == models.ExternalConnectionType.oidc)
+        .filter(models.ExternalConnections.type_id == type_id)
+    )
+
+    result = query.first()
+
+    if result is not None:
+        return result.owner
+
+    return None

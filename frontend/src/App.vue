@@ -18,7 +18,7 @@ import {
   isPasswordAuthKey,
   isFxaAuthKey,
   fxaEditProfileUrlKey,
-  isAccountsAuthKey,
+  isAccountsAuthKey, isOIDCAuthKey, oidcUserManagerKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -30,6 +30,8 @@ import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { AuthSchemes } from '@/definitions';
+import { UserManager, UserManagerSettings } from "oidc-client-ts";
+import { userManager } from "@/composables/oidcUserManager";
 
 // component constants
 const user = useUserStore();
@@ -52,17 +54,19 @@ const {
 } = siteNotificationStore;
 
 const isAccountsAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Accounts;
+const isOIDCAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC;
 
 provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
 provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
 provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
 provide(isAccountsAuthKey, isAccountsAuth());
+provide(isOIDCAuthKey, isOIDCAuth())
 
 // handle auth and fetch
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
-    beforeFetch({ options }) {
+    beforeFetch: async ({ options }) => {
       if (isAccountsAuth) {
         // Cookies are somehow still stored as a giant `;` separated string, so do a bunch of array nonsense to retrieve our token
         const csrf = window.document.cookie?.split('; csrftoken=')?.pop()?.split(';')?.shift()
@@ -74,7 +78,7 @@ const call = createFetch({
       }
 
       if (user?.authenticated) {
-        const token = user.data.accessToken;
+        const token = user.data.accessToken ?? (await userManager.getUser())?.access_token;
         // @ts-expect-error ignore headers type error
         options.headers.Authorization = `Bearer ${token}`;
       }
@@ -322,7 +326,7 @@ onMounted(async () => {
     >
       {{ notificationMessage }}
     </site-notification>
-    <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems" />
+    <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
     <main
       class="pt-24"
       :class="{

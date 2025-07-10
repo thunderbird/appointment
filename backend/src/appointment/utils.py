@@ -9,6 +9,7 @@ from functools import cache
 from argon2 import PasswordHasher
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
+from appointment.database import repo
 from appointment.database.models import secret
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 
@@ -202,3 +203,19 @@ def flag_code(reason, debug_obj):
         raise UnexpectedBehaviourWarning(message=reason, info=debug_obj)
     except UnexpectedBehaviourWarning as ex:
         sentry_sdk.capture_exception(ex)
+
+
+def is_in_allow_list(db, email: str):
+    """Check this email against our allow list"""
+
+    # Allow existing subscribers to login even if they're not on an allow-list
+    subscriber = repo.subscriber.get_by_email(db, email)
+    if subscriber:
+        return True
+
+    allow_list = os.getenv('FXA_ALLOW_LIST')
+    # If we have no allow list, then we allow everyone
+    if not allow_list or allow_list == '':
+        return True
+
+    return email.endswith(tuple(allow_list.split(',')))

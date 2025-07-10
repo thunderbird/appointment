@@ -7,8 +7,9 @@ import {
   UserConfig,
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, isOIDCAuthKey } from '@/keys';
 import { ColourSchemes, AuthSchemes } from '@/definitions';
+import { userManager } from "@/composables/oidcUserManager";
 
 const initialUserConfigObject = {
   language: null,
@@ -150,7 +151,15 @@ export const useUserStore = defineStore('user', () => {
   /**
    * True if user has a valid access token
    */
-  const authenticated = computed((): boolean => data.value.accessToken !== null);
+  const authenticated = computed((): boolean => {
+    // FIXME: Move injected checks to a composable
+    if (import.meta.env?.VITE_AUTH_SCHEME !== AuthSchemes.OIDC) {
+      return data.value.accessToken !== null;
+    }
+
+    // OIDC auth is handled by an internal store, so just test the existence of the user obj
+    return !!userManager.getUser();
+  });
 
   const $reset = () => {
     if (usePosthog) {
@@ -265,7 +274,9 @@ export const useUserStore = defineStore('user', () => {
   const login = async (username: string, password: string|null): Promise<Error> => {
     $reset();
 
-    if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
+    if (import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC) {
+      return await profile();
+    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
       // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
@@ -299,7 +310,7 @@ export const useUserStore = defineStore('user', () => {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
-    return profile();
+    return await profile();
   };
 
   /**

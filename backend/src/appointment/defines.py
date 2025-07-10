@@ -37,6 +37,7 @@ class AuthScheme(StrEnum):
     PASSWORD = 'password'
     FXA = 'fxa'
     ACCOUNTS = 'accounts'
+    OIDC = 'oidc'
 
     @staticmethod
     def is_fxa():
@@ -49,3 +50,7 @@ class AuthScheme(StrEnum):
     @staticmethod
     def is_accounts():
         return os.getenv('AUTH_SCHEME') == AuthScheme.ACCOUNTS
+
+    @staticmethod
+    def is_oidc():
+        return os.getenv('AUTH_SCHEME') == AuthScheme.OIDC

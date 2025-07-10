@@ -1,5 +1,4 @@
 services:
-  # Thunderbird Appointment without external services
   backend:
     build:
       context: ./backend
@@ -30,7 +29,7 @@ services:
   mysql:
     image: mysql:8
     volumes:
-      - db:/var/lib/mysql
+      - apmt_db:/var/lib/mysql
     ports:
       - 3306:3306
     environment:
@@ -62,6 +61,6 @@ services:
       - 1025:1024 # SMTP
 
 volumes:
-  accounts_db: {}
-  db: {}
+  apmt_db: {}
   cache: {}
+  kcdb: {}

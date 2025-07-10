@@ -62,6 +62,7 @@ class ExternalConnectionType(enum.Enum):
     fxa = 3
     caldav = 4
     accounts = 5
+    oidc = 6
 
 
 class MeetingLinkProviderType(enum.StrEnum):

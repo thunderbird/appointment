@@ -28,7 +28,7 @@ from .models import (
     InviteStatus,
     ColourScheme,
     TimeMode,
-    IsoWeekday
+    IsoWeekday,
 )
 from .. import utils, defines
 
@@ -384,6 +384,7 @@ class ListResponseIn(BaseModel):
 class InviteAdminOut(ListResponse):
     items: list[Invite]
 
+
 """ other schemas used for requests or data migration
 """
 
@@ -550,3 +551,9 @@ class PageLoadIn(BaseModel):
 class FTUEStepIn(BaseModel):
     step_level: int
     step_name: str
+
+
+class OIDCLogin(BaseModel):
+    access_token: str
+    invite_code: str | None = None
+    timezone: str
