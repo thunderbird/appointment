@@ -635,12 +635,14 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     return True  # Covered by get_admin_subscriber
 
 
-@router.post('/oidc/login')
-def oidc_login(
+@router.post('/oidc/token')
+def oidc_token(
     data: OIDCLogin,
     db: Session = Depends(get_db),
-    accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
+    """OIDC Token
+    Verifies that an access token retrieved from the OIDC provider is valid (via token introspection),
+    and creates a new subscriber / updates an existing subscriber as required."""
     if not AuthScheme.is_oidc():
         raise HTTPException(status_code=405)
 

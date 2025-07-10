@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from typing import Annotated
 
@@ -6,29 +7,55 @@ import sentry_sdk
 from fastapi import Depends, Body, Request, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
+from redis import RedisCluster, Redis
 
 from sqlalchemy.orm import Session
 
 from ..controller.apis.accounts_client import AccountsClient
 from ..controller.apis.oidc_client import OIDCClient
 from ..database import repo, models
-from ..defines import AuthScheme
-from ..dependencies.database import get_db
+from ..defines import AuthScheme, REDIS_OIDC_TOKEN_KEY
+from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
+from ..utils import encrypt, decrypt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
 def get_user_from_oidc_token_introspection(token: str, db):
-    oidc_client = OIDCClient()
-    token_data = oidc_client.introspect_token(token)
+    redis_instance: Redis | RedisCluster | None = get_redis()
+
+    # Do we have the data cached?
+    encrypted_token = encrypt(token)
+    token_data = None
+
+    if redis_instance:
+        # Retrieve the cached token data
+        encrypted_token_data = redis_instance.get(f'{REDIS_OIDC_TOKEN_KEY}:{encrypted_token}')
+        if encrypted_token_data:
+            token_data = json.loads(decrypt(encrypted_token_data))
+
+    # If redis isn't setup, or we don't have any cached token data then do the introspection
+    if not token_data:
+        oidc_client = OIDCClient()
+        token_data = oidc_client.introspect_token(token)
+
+    # Still nothing? Error out.
     if not token_data:
         raise InvalidTokenException()
 
     subscriber = repo.external_connection.get_subscriber_by_oidc_id(db, token_data.get('sub'))
     if not subscriber:
         raise InvalidTokenException()
+
+    if redis_instance:
+        # Cache the token data for 300 seconds or the defined env var
+        redis_instance.set(
+            f'{REDIS_OIDC_TOKEN_KEY}:{encrypted_token}',
+            value=encrypt(json.dumps(token_data)),
+            ex=os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', 300),
+        )
 
     return subscriber
 
