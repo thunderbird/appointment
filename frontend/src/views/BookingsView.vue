@@ -34,12 +34,13 @@ const filterOptions = [
 // Default selected filters: Pending and Confirmed
 const selectedFilters = ref([BookingStatus.Requested, BookingStatus.Booked]);
 
+// Handle sorting by unconfirmed first
+const unconfirmedFirst = ref(false);
 
-
-// handle data view
+// Handle data view
 const view = ref(BookingsViewTypes.List);
 
-// handle filtered appointments list
+// Handle filtered appointments list
 const filteredAppointments = computed(() => {
   let list = appointments.value ? [...appointments.value] : [];
 
@@ -48,6 +49,19 @@ const filteredAppointments = computed(() => {
     list = list.filter((a) => {
       const status = a.slots[0].booking_status;
       return selectedFilters.value.includes(status);
+    });
+  }
+
+  // Sort by unconfirmed first if checkbox is checked
+  if (unconfirmedFirst.value) {
+    list.sort((a, b) => {
+      const aIsUnconfirmed = a.slots[0].booking_status === BookingStatus.Requested;
+      const bIsUnconfirmed = b.slots[0].booking_status === BookingStatus.Requested;
+
+      if (aIsUnconfirmed && !bIsUnconfirmed) return -1;
+      if (!aIsUnconfirmed && bIsUnconfirmed) return 1;
+
+      return 0;
     });
   }
 
@@ -82,9 +96,17 @@ onMounted(async () => {
   <!-- page title area -->
   <div class="flex select-none flex-col items-center justify-between text-center lg:flex-row">
     <div class="mb-8 text-4xl font-light lg:mb-0">{{ t('label.appointments') }}</div>
-    <div class="mx-auto flex flex-col items-center gap-8 lg:mx-0 lg:flex-row">
+    <div class="mx-auto flex flex-col items-center gap-4 lg:mx-0 lg:flex-row">
       <bookings-multi-select-filter :options="filterOptions" :selected="selectedFilters"
         @update:selected="selectedFilters = $event" />
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input 
+          type="checkbox" 
+          v-model="unconfirmedFirst"
+          class="sort-checkbox"
+        />
+        <span class="sort-label">{{ t('label.unconfirmedFirst') }}</span>
+      </label>
     </div>
   </div>
   <!-- page content -->
@@ -107,7 +129,7 @@ onMounted(async () => {
               </div>
             </th>
             <th class="group px-2 py-1 text-left font-normal">
-              <div class="border-r border-gray-300 py-1 dark:border-gray-500">
+              <div class="border-r border-gray-300 py-1 capitalize dark:border-gray-500">
                 {{ t("label.meetingTitle") }}
               </div>
             </th>
@@ -153,3 +175,33 @@ onMounted(async () => {
 
   <appointment-modal :open="showAppointment !== null" :appointment="showAppointment" @close="closeAppointmentModal" />
 </template>
+
+<style scoped>
+.sort-checkbox {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--colour-neutral-border);
+  background-color: var(--colour-neutral-base);
+  color: var(--colour-primary-default);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sort-checkbox:focus {
+  outline: 2px solid var(--colour-primary-default);
+  outline-offset: 2px;
+}
+
+.sort-checkbox:checked {
+  background-color: var(--colour-primary-default);
+  border-color: var(--colour-primary-default);
+}
+
+.sort-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-ti-base);
+  cursor: pointer;
+}
+</style>
