@@ -4,7 +4,8 @@
 export enum AuthSchemes {
   Password = 'password',
   Fxa = 'fxa',
-  Accounts = 'accounts'
+  Accounts = 'accounts',
+  OIDC = 'oidc',
 }
 
 /**

@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 from typing import Annotated
 
@@ -10,10 +9,10 @@ import jwt
 
 from sqlalchemy.orm import Session
 
-from .database import get_shared_redis
 from ..controller.apis.accounts_client import AccountsClient
+from ..controller.apis.oidc_client import OIDCClient
 from ..database import repo, models
-from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
+from ..defines import AuthScheme
 from ..dependencies.database import get_db
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
@@ -21,20 +20,17 @@ from ..exceptions.validation import InvalidTokenException, InvalidPermissionLeve
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
-def get_user_from_accounts_session(request, db):
-    user_session_id = request.session.get('accounts_session')
-    if not user_session_id:
-        return None
+def get_user_from_oidc_token_introspection(token: str, db):
+    oidc_client = OIDCClient()
+    token_data = oidc_client.introspect_token(token)
+    if not token_data:
+        raise InvalidTokenException()
 
-    shared_redis_cache = get_shared_redis()
-    user_profile = shared_redis_cache.get(f'{REDIS_USER_SESSION_PROFILE_KEY}.{user_session_id}')
-    if not user_profile:
-        return None
+    subscriber = repo.external_connection.get_subscriber_by_oidc_id(db, token_data.get('sub'))
+    if not subscriber:
+        raise InvalidTokenException()
 
-    user_profile = json.loads(user_profile)
-
-    # Look up the account data
-    return repo.external_connection.get_subscriber_by_accounts_uuid(db, user_profile.get('uuid'))
+    return subscriber
 
 
 def get_user_from_token(db, token: str, require_jti=False):
@@ -91,8 +87,8 @@ def get_subscriber(
     if token is None:
         raise InvalidTokenException()
 
-    if AuthScheme.is_accounts():
-        user = get_user_from_accounts_session(request, db)
+    if AuthScheme.is_oidc():
+        user = get_user_from_oidc_token_introspection(token, db)
     else:
         user = get_user_from_token(db, token, require_jti)
 

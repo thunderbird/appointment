@@ -23,6 +23,7 @@
     "@vueuse/core": "^13.0.0",
     "core-js": "^3.8.3",
     "dayjs": "^1.11.5",
+    "oidc-client-ts": "^3.3.0",
     "pinia": "^3.0.1",
     "posthog-js": "^1.174.3",
     "qalendar": "^3.7.0",

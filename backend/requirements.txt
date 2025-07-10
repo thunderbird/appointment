@@ -36,3 +36,4 @@ posthog==3.23.0
 slowapi==0.1.9
 dnspython==2.7.0
 starlette-csrf==3.0.0
+Authlib==1.6.0

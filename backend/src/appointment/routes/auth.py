@@ -15,12 +15,15 @@ from sqlalchemy.orm import Session
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from starlette.responses import JSONResponse
 
 from .. import utils
 from ..controller.apis.accounts_client import AccountsClient
+from ..controller.apis.oidc_client import OIDCClient
 from ..controller.auth import schedule_slugs_by_subscriber, user_links_by_subscriber
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
+from ..database.schemas import OIDCLogin
 from ..defines import INVITES_TO_GIVE_OUT, AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 
 from ..dependencies.database import get_db, get_shared_redis
@@ -630,3 +633,92 @@ def permission_check(subscriber: Subscriber = Depends(get_admin_subscriber)):
     if subscriber.is_deleted:
         raise validation.InvalidPermissionLevelException()
     return True  # Covered by get_admin_subscriber
+
+
+@router.post('/oidc/login')
+def oidc_login(
+    data: OIDCLogin,
+    db: Session = Depends(get_db),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
+):
+    if not AuthScheme.is_oidc():
+        raise HTTPException(status_code=405)
+
+    # Check the token
+    oidc_client = OIDCClient()
+    token_data = oidc_client.introspect_token(data.access_token)
+    if not token_data:
+        raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
+
+    oidc_id = token_data.get('sub')
+    email = token_data.get('email')
+    username = token_data.get('username')
+    name = token_data.get('name')
+
+    subscriber = repo.external_connection.get_subscriber_by_oidc_id(db, oidc_id)
+    if not subscriber:
+        is_in_allow_list = utils.is_in_allow_list(db, email)
+
+        if not is_in_allow_list:
+            if not repo.invite.code_exists(db, data.invite_code):
+                raise HTTPException(404, l10n('invite-code-not-valid'))
+            if not repo.invite.code_is_available(db, data.invite_code):
+                raise HTTPException(403, l10n('invite-code-not-valid'))
+
+        subscriber = repo.subscriber.create(
+            db,
+            schemas.SubscriberBase(
+                email=email,
+                name=name,
+                username=username,
+                timezone=data.timezone,
+            ),
+        )
+
+        # Give them 10 invites
+        repo.invite.generate_codes(db, INVITES_TO_GIVE_OUT, subscriber.id)
+
+        if not is_in_allow_list:
+            # Use the invite code after we've created the new subscriber
+            used = repo.invite.use_code(db, data.invite_code, subscriber.id)
+
+            # This shouldn't happen, but just in case!
+            if not used:
+                repo.subscriber.hard_delete(db, subscriber)
+                raise HTTPException(500, l10n('unknown-error'))
+
+    # FIXME: OIDC should handle this check
+    # Only proceed if user account is enabled (which is the default case for new users)
+    if subscriber.is_deleted:
+        raise HTTPException(status_code=403, detail=l10n('disabled-account'))
+
+    oidc_connection = repo.external_connection.get_by_type(db, oidc_id, ExternalConnectionType.oidc)
+
+    if any([oidc_id != ec.type_id for ec in oidc_connection]):
+        # Ensure sentry captures the error too!
+        if os.getenv('SENTRY_DSN') != '':
+            e = Exception('Invalid Credentials, incoming oidc id does not match existing oidc id')
+            capture_exception(e)
+
+        raise HTTPException(403, l10n('invalid-credentials'))
+
+    external_connection_schema = schemas.ExternalConnection(
+        name=token_data.get('email'),
+        type=ExternalConnectionType.oidc,
+        type_id=oidc_id,
+        owner_id=subscriber.id,
+        token='',  # We don't need token data here
+    )
+
+    if not oidc_connection:
+        repo.external_connection.create(db, external_connection_schema)
+    else:
+        repo.external_connection.update_token(
+            db,
+            '',
+            subscriber.id,
+            external_connection_schema.type,
+            external_connection_schema.type_id,
+        )
+
+    return JSONResponse(True)
