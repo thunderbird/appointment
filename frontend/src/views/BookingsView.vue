@@ -6,10 +6,9 @@ import { storeToRefs } from 'pinia';
 
 import {
   BookingStatus,
-  BookingsTableColumns,
   BookingsViewTypes,
 } from '@/definitions';
-import { timeFormat, enumToObject } from '@/utils';
+import { timeFormat } from '@/utils';
 import AppointmentModal from '@/components/AppointmentModal.vue';
 import BookingsMultiSelectFilter from '@/components/BookingsMultiSelectFilter.vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
@@ -20,7 +19,6 @@ const route = useRoute();
 const router = useRouter();
 const dj = inject(dayjsKey);
 const refresh = inject(refreshKey);
-const columns = enumToObject(BookingsTableColumns);
 
 const appointmentStore = useAppointmentStore();
 const { appointments } = storeToRefs(appointmentStore);
@@ -36,24 +34,10 @@ const filterOptions = [
 // Default selected filters: Pending and Confirmed
 const selectedFilters = ref([BookingStatus.Requested, BookingStatus.Booked]);
 
-// Helper function to get display label for booking status
-const getStatusLabel = (status: number) => {
-  switch (status) {
-    case BookingStatus.Requested:
-      return t('label.pending');
-    case BookingStatus.Booked:
-      return t('label.confirmed');
-    default:
-      return t('label.unknown');
-  }
-};
+
 
 // handle data view
 const view = ref(BookingsViewTypes.List);
-
-// handle view adjustments: column visibility
-const visibleColumns = ref(Object.values(columns));
-const columnVisible = (key: string) => visibleColumns.value.includes(columns[key]);
 
 // handle filtered appointments list
 const filteredAppointments = computed(() => {
@@ -112,41 +96,54 @@ onMounted(async () => {
         data-testid="bookings-appointments-list-table">
         <thead>
           <tr class="bg-gray-100 dark:bg-gray-600">
-            <th class="py-1"></th>
-            <template v-for="(_, key) in columns" :key="key">
-              <th v-if="columnVisible(key)" class="group px-2 py-1 text-left font-normal">
-                <div class="border-r border-gray-300 py-1 group-last:border-none dark:border-gray-500">
-                  {{ t("label." + key) }}
-                </div>
-              </th>
-            </template>
+            <th class="group px-2 py-1 text-left font-normal">
+              <div class="border-r border-gray-300 py-1 dark:border-gray-500">
+                {{ t("label.date") }}
+              </div>
+            </th>
+            <th class="group px-2 py-1 text-left font-normal">
+              <div class="border-r border-gray-300 py-1 dark:border-gray-500">
+                {{ t("label.time") }}
+              </div>
+            </th>
+            <th class="group px-2 py-1 text-left font-normal">
+              <div class="border-r border-gray-300 py-1 dark:border-gray-500">
+                {{ t("label.meetingTitle") }}
+              </div>
+            </th>
+            <th class="group px-2 py-1 text-left font-normal min-w-[120px]">
+              <div class="border-r border-gray-300 py-1 dark:border-gray-500">
+                &nbsp;
+              </div>
+            </th>
+            <th class="group px-2 py-1 text-left font-normal">
+              <div class="py-1">
+                {{ t("label.calendar") }}
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(appointment, i) in filteredAppointments" :key="i"
             class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg" @click="showAppointmentModal(appointment)">
-            <td class="align-middle">
-              <div class="mx-auto size-3 rounded-full bg-sky-400"
-                :style="{ backgroundColor: appointment.calendar_color }">
-              </div>
+            <td class="p-2 text-sm">
+              <span>{{ dj(appointment?.slots[0].start).format('LL') }}</span>
             </td>
-            <td v-if="columnVisible('title')" class="max-w-2xs truncate p-2">
-              <span>{{ appointment.title }}</span>
-            </td>
-            <td v-if="columnVisible('status')" class="p-2 text-sm">
-              <span>{{ getStatusLabel(appointment?.slots[0].booking_status) }}</span>
-            </td>
-            <td v-if="columnVisible('calendar')" class="p-2 text-sm">
-              <span>{{ appointment.calendar_title }}</span>
-            </td>
-            <td v-if="columnVisible('time')" class="p-2 text-sm">
-              <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
-              <div>
+            <td class="p-2 text-sm">
+              <span>
                 {{ dj(appointment?.slots[0].start).format(timeFormat()) }}
                 {{ t('label.to') }}
-                {{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat())
-                }}
-              </div>
+                {{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat()) }}
+              </span>
+            </td>
+            <td class="max-w-2xs truncate p-2">
+              <span>{{ appointment.title }}</span>
+            </td>
+            <td class="p-2 text-sm uppercase text-center min-w-[120px]">
+              <span v-if="appointment?.slots[0].booking_status === BookingStatus.Requested">{{ t('label.unconfirmed') }}</span>
+            </td>
+            <td class="p-2 text-sm">
+              <span>{{ appointment.calendar_title }}</span>
             </td>
           </tr>
         </tbody>

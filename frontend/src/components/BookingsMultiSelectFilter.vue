@@ -73,17 +73,12 @@ const displayText = computed(() => {
       enter-to-class="dropdown-enter-to" leave-active-class="dropdown-leave-active"
       leave-from-class="dropdown-leave-from" leave-to-class="dropdown-leave-to">
       <div v-show="isOpen" class="dropdown-menu">
-        <div class="dropdown-content">
-          <div class="filter-label">
-            {{ t('label.filter') }}
-          </div>
-          <div class="options-list">
-            <label v-for="option in options" :key="option.value" class="option-item">
-              <input type="checkbox" :checked="isSelected(option)" @change="toggleOption(option)"
-                class="option-checkbox" />
-              <span class="option-label">{{ option.label }}</span>
-            </label>
-          </div>
+        <div class="options-list">
+          <label v-for="option in options" :key="option.value" class="option-item">
+            <input type="checkbox" :checked="isSelected(option)" @change="toggleOption(option)"
+              class="option-checkbox" />
+            <span class="option-label">{{ option.label }}</span>
+          </label>
         </div>
       </div>
     </transition>
@@ -130,15 +125,11 @@ const displayText = computed(() => {
   top: 100%;
   z-index: 50;
   margin-top: 0.5rem;
-  min-width: 12rem;
+  min-width: 10rem;
   border-radius: 0.375rem;
   border: 1px solid var(--colour-neutral-border);
   background-color: var(--colour-neutral-raised);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.dropdown-content {
-  padding: 0.5rem;
 }
 
 .filter-label {
@@ -153,6 +144,7 @@ const displayText = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  padding: 0.5rem;
 }
 
 .option-item {
@@ -185,7 +177,6 @@ const displayText = computed(() => {
 }
 
 .option-label {
-  flex: 1;
   color: var(--colour-ti-base);
 }
 
