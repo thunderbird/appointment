@@ -87,7 +87,7 @@ const cancelAppointment = () => {
 
 <template>
   <sliding-panel
-    v-model:open="isOpen"
+    :open="isOpen"
     :title="appointment?.title"
     @close="emit('close')"
   >
