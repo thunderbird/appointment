@@ -96,10 +96,11 @@ export enum BookingsViews {
  * List columns for bookings page
  */
 export enum BookingsTableColumns {
-  Title = 1,
-  Status = 2,
-  Calendar = 3,
-  Time = 4,
+  Date = 1,
+  Time = 2,
+  MeetingTitle = 3,
+  ConfirmedUnconfirmed = 4,
+  Calendar = 5,
 }
 
 /**
