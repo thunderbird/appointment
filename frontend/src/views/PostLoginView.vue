@@ -30,7 +30,7 @@ onMounted(async () => {
   if (isOIDCAuth) {
     // Stored in an internal store
     const userData = await userManager.signinCallback(window.location.href);
-    const { error, data }: BooleanResponse = await call('oidc/login').post({
+    const { error, data }: BooleanResponse = await call('oidc/token').post({
       'access_token': userData.access_token,
       //'invite_code': inviteCode.value,
       'timezone': dj.tz.guess(),
