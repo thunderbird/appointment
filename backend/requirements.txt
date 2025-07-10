@@ -20,7 +20,7 @@ MarkupSafe==2.1.2
 nh3==0.2.21
 oauthlib==3.2.2
 posthog==3.23.0
-psycopg=2.9.10
+psycopg==2.9.10
 python-dotenv==1.1.0
 python-multipart==0.0.20
 PyJWT==2.10.1
