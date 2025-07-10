@@ -155,8 +155,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-central-1
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
 
       - name: Clean up before Pulumi release
         run: rm -rf dist
@@ -172,8 +172,8 @@ jobs:
 
       - name: Deploy frontend to S3 (Pulumi)
         run: |
-          aws s3 sync ./dist "s3://${{ secrets.FRONTEND_BUCKET_PROD }}"
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID_PROD }} --paths "/*"
+          aws s3 sync ./dist "s3://${{ secrets.FRONTEND_BUCKET }}"
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID }} --paths "/*"
 
   deploy-prod-backend:
     needs: deploy-prod-iac
@@ -275,8 +275,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-central-1
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
 
       - name: Login to Amazon ECR (Pulumi)
         id: login-ecr
@@ -326,7 +326,7 @@ jobs:
 
           # Use yq to merge the stump into the main config
           yq -i '. *= load("newimage.yaml")' config.prod.yaml
-          export PULUMI_CONFIG_PASSPHRASE='${{ secrets.PULUMI_PASSPHRASE_PROD }}'
+          export PULUMI_CONFIG_PASSPHRASE='${{ secrets.PULUMI_PASSPHRASE }}'
 
           # Set up the Pulumi environment and update the service
           source ./venv/bin/activate
