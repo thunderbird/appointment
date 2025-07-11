@@ -5,8 +5,7 @@ import { createUserStore } from '@/stores/user-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import { callKey, dayjsKey, isAccountsAuthKey, isOIDCAuthKey } from '@/keys';
 import { userManager } from "@/composables/oidcUserManager";
-import { BooleanResponse, PydanticException } from "@/models";
-import { handleFormError } from "@/utils";
+import { BooleanResponse } from "@/models";
 
 const route = useRoute();
 const router = useRouter();

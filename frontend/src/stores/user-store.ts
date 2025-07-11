@@ -7,7 +7,7 @@ import {
   UserConfig,
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
-import { dayjsKey, isOIDCAuthKey } from '@/keys';
+import { dayjsKey } from '@/keys';
 import { ColourSchemes, AuthSchemes } from '@/definitions';
 import { userManager } from "@/composables/oidcUserManager";
 
@@ -65,7 +65,7 @@ export const useUserStore = defineStore('user', () => {
     data.value.settings = structuredClone(defaultSettings);
   } else {
     // We have a settings object? See if all keys exists and update only the missing ones
-    
+
     Object.keys(defaultSettings).forEach(key => {
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
@@ -151,15 +151,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * True if user has a valid access token
    */
-  const authenticated = computed((): boolean => {
-    // FIXME: Move injected checks to a composable
-    if (import.meta.env?.VITE_AUTH_SCHEME !== AuthSchemes.OIDC) {
-      return data.value.accessToken !== null;
-    }
-
-    // OIDC auth is handled by an internal store, so just test the existence of the user obj
-    return !!userManager.getUser();
-  });
+  const authenticated = computed((): boolean => !!data.value.accessToken);
 
   const $reset = () => {
     if (usePosthog) {
@@ -275,6 +267,7 @@ export const useUserStore = defineStore('user', () => {
     $reset();
 
     if (import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC) {
+      data.value.accessToken = (await userManager.getUser())?.access_token ?? null;
       return await profile();
     } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
       // fastapi wants us to send this as formdata :|
