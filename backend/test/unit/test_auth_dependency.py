@@ -1,28 +1,64 @@
 import datetime
-import json
 import os
+import uuid
+from unittest.mock import patch
 
 import pytest
 from freezegun import freeze_time
 from unittest import mock
 
-from starlette.requests import Request
 
 from appointment.controller.auth import signed_url_by_subscriber
-from appointment.database import repo, models
-from appointment.defines import REDIS_USER_SESSION_PROFILE_KEY
+from appointment.database import repo
+from appointment.database.models import ExternalConnectionType
 from appointment.dependencies.auth import (
     get_user_from_token,
     get_subscriber,
     get_admin_subscriber,
     get_subscriber_from_schedule_or_signed_url,
+    get_user_from_oidc_token_introspection,
 )
-from appointment.exceptions.validation import InvalidTokenException, InvalidPermissionLevelException, \
-    InvalidLinkException
+from appointment.exceptions.validation import (
+    InvalidTokenException,
+    InvalidPermissionLevelException,
+    InvalidLinkException,
+)
 from appointment.routes.auth import create_access_token
 
 
 class TestAuthDependency:
+    def test_get_user_from_oidc_token_introspection(self, with_db, make_pro_subscriber, make_external_connections):
+        # uuid works well for a random string
+        oidc_id = uuid.uuid4().hex
+        access_token = uuid.uuid4().hex
+        subscriber = make_pro_subscriber()
+        make_external_connections(subscriber_id=subscriber.id, type_id=oidc_id, type=ExternalConnectionType.oidc)
+
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as introspect_token_mock:
+            # Test that invalid token raises if introspect_token returns None
+            introspect_token_mock.return_value = None
+
+            with with_db() as db:
+                with pytest.raises(InvalidTokenException):
+                    get_user_from_oidc_token_introspection(db, access_token)
+
+            # Reset call amount
+            introspect_token_mock.reset_mock()
+
+            # Return some fake token data
+            introspect_token_mock.return_value = {
+                'sub': oidc_id,
+                'username': subscriber.username,
+                'email': subscriber.email,
+            }
+
+            # Test a successful return
+            with with_db() as db:
+                token_subscriber = get_user_from_oidc_token_introspection(db, access_token)
+                introspect_token_mock.assert_called_once_with(access_token)
+                assert token_subscriber is not None
+                assert subscriber.id == token_subscriber.id
+
     def test_get_user_from_token(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
         access_token_expires = datetime.timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
@@ -217,7 +253,6 @@ class TestAuthDependency:
 
             # Now that we don't have a schedule slug, this will succeed.
             retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
-
 
         assert retrieved_subscriber.id == subscriber.id
         assert retrieved_subscriber.email == subscriber.email
