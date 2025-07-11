@@ -694,7 +694,7 @@ def oidc_token(
     if subscriber.is_deleted:
         raise HTTPException(status_code=403, detail=l10n('disabled-account'))
 
-    oidc_connection = repo.external_connection.get_by_type(db, oidc_id, ExternalConnectionType.oidc)
+    oidc_connection = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.oidc, oidc_id)
 
     if any([oidc_id != ec.type_id for ec in oidc_connection]):
         # Ensure sentry captures the error too!
@@ -704,23 +704,15 @@ def oidc_token(
 
         raise HTTPException(403, l10n('invalid-credentials'))
 
-    external_connection_schema = schemas.ExternalConnection(
-        name=token_data.get('email'),
-        type=ExternalConnectionType.oidc,
-        type_id=oidc_id,
-        owner_id=subscriber.id,
-        token='',  # We don't need token data here
-    )
-
     if not oidc_connection:
-        repo.external_connection.create(db, external_connection_schema)
-    else:
-        repo.external_connection.update_token(
-            db,
-            '',
-            subscriber.id,
-            external_connection_schema.type,
-            external_connection_schema.type_id,
+        external_connection_schema = schemas.ExternalConnection(
+            name=token_data.get('email'),
+            type=ExternalConnectionType.oidc,
+            type_id=oidc_id,
+            owner_id=subscriber.id,
+            token='',  # We don't need token data here
         )
+        print(external_connection_schema)
+        repo.external_connection.create(db, external_connection_schema)
 
     return JSONResponse(True)
