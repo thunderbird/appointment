@@ -3,7 +3,9 @@ import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
-import { callKey, isAccountsAuthKey } from '@/keys';
+import { callKey, dayjsKey, isOIDCAuthKey, isFxaAuthKey } from '@/keys';
+import { userManager } from "@/composables/oidcUserManager";
+import { BooleanResponse } from "@/models";
 
 const route = useRoute();
 const router = useRouter();
@@ -11,9 +13,10 @@ const router = useRouter();
 // component constants
 const call = inject(callKey);
 const user = createUserStore(call);
+const dj = inject(dayjsKey);
 
-const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
-const isAccountsAuth = inject(isAccountsAuthKey);
+const isFxaAuth = inject(isFxaAuthKey);
+const isOIDCAuth = inject(isOIDCAuthKey);
 
 onMounted(async () => {
   // Retrieve and remove temp login redirect location
@@ -22,12 +25,25 @@ onMounted(async () => {
   // Remove any ftue steps on new login
   window.localStorage?.removeItem('tba/ftue');
 
-  if (!isFxaAuth.value && !isAccountsAuth) {
+  if (isOIDCAuth) {
+    // Stored in an internal store
+    const userData = await userManager.signinCallback(window.location.href);
+    const { error, data }: BooleanResponse = await call('oidc/token').post({
+      'access_token': userData.access_token,
+      //'invite_code': inviteCode.value,
+      'timezone': dj.tz.guess(),
+    }).json();
+
+    if (error.value) {
+      console.error("WOAH", data.value);
+      return;
+    }
+  } else if (!isFxaAuth) {
     await router.push(redirectTo ?? '/');
     return;
   }
 
-  if (isAccountsAuth) {
+  if (isOIDCAuth) {
     await user.login('true', null);
   } else {
     await user.login(route.params.token as string, null);

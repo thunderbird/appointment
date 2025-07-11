@@ -9,6 +9,7 @@ import {
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
 import { ColourSchemes, AuthSchemes } from '@/definitions';
+import { userManager } from "@/composables/oidcUserManager";
 
 const initialUserConfigObject = {
   language: null,
@@ -64,7 +65,7 @@ export const useUserStore = defineStore('user', () => {
     data.value.settings = structuredClone(defaultSettings);
   } else {
     // We have a settings object? See if all keys exists and update only the missing ones
-    
+
     Object.keys(defaultSettings).forEach(key => {
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
@@ -150,7 +151,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * True if user has a valid access token
    */
-  const authenticated = computed((): boolean => data.value.accessToken !== null);
+  const authenticated = computed((): boolean => !!data.value.accessToken);
 
   const $reset = () => {
     if (usePosthog) {
@@ -265,7 +266,10 @@ export const useUserStore = defineStore('user', () => {
   const login = async (username: string, password: string|null): Promise<Error> => {
     $reset();
 
-    if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
+    if (import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC) {
+      data.value.accessToken = (await userManager.getUser())?.access_token ?? null;
+      return await profile();
+    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
       // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
@@ -279,27 +283,22 @@ export const useUserStore = defineStore('user', () => {
       data.value.accessToken = tokenData.value.access_token;
     } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
       // We get a one-time token back from the api, use it to fetch the real access token
-      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token', {
+      const {error, data: tokenData}: TokenResponse = await call.value('fxa-token', {
         headers: {
           Authorization: `Bearer ${username}`,
         }
       }).post().json();
 
       if (error.value || !tokenData.value.access_token) {
-        return { error: tokenData.value ?? error.value };
+        return {error: tokenData.value ?? error.value};
       }
 
       data.value.accessToken = tokenData.value.access_token;
-    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Accounts) {
-      // We rely on user session checks via the backend for auth
-      // But for authentication we need a value in accessToken, if someone tries to fake this
-      // it will just error out on the server side, so no big deal.
-      data.value.accessToken = username;
     } else {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
-    return profile();
+    return await profile();
   };
 
   /**

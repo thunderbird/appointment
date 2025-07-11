@@ -11,14 +11,14 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const isLoaded = ref(false);
 
   // Data
-  const accounts = ref<ExternalConnection[]>([]);
+  const oidc = ref<ExternalConnection[]>([]);
   const zoom = ref<ExternalConnection[]>([]);
   const fxa = ref<ExternalConnection[]>([]);
   const google = ref<ExternalConnection[]>([]);
   const caldav = ref<ExternalConnection[]>([]);
   const connections = computed((): ExternalConnectionCollection => ({
     // FXA should be at the top since it represents the Appointment subscriber.
-    accounts: accounts.value,
+    oidc: oidc.value,
     fxa: fxa.value,
     google: google.value,
     zoom: zoom.value,
@@ -46,7 +46,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     }
 
     const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections').get().json();
-    accounts.value = data.value?.accounts ?? [];
+    oidc.value = data.value?.oidc ?? [];
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
     google.value = data.value?.google ?? [];
@@ -58,7 +58,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
    * Restore default state, empty and unload connections
    */
   const $reset = () => {
-    accounts.value = [];
+    oidc.value = [];
     zoom.value = [];
     fxa.value = [];
     google.value = [];
@@ -96,7 +96,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   };
 
   return {
-    connections, isLoaded, accounts, fxa, zoom, google, init, fetch, $reset, connect, disconnect,
+    connections, isLoaded, oidc, fxa, zoom, google, init, fetch, $reset, connect, disconnect,
   };
 });
 
