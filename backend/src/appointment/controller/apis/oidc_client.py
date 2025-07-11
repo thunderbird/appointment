@@ -1,7 +1,10 @@
+import datetime
 import os
 
 from authlib.integrations.requests_client import OAuth2Session
 from requests import Response
+
+from appointment.utils import get_expiry_time_with_grace_period
 
 
 class OIDCClient:
@@ -18,6 +21,13 @@ class OIDCClient:
         )
 
         data = response.json()
+
+        expiry = data.get('exp')
+        if expiry:
+            # Grace period maxes out at 2 minutes (120 seconds)
+            expiry = get_expiry_time_with_grace_period(expiry)
+            if expiry < datetime.datetime.now(datetime.UTC).timestamp():
+                return None
 
         # Ensure the token is ok
         if data.get('active') is not True:
