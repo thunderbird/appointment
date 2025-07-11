@@ -23,7 +23,7 @@ from ..utils import encrypt, decrypt
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
-def get_user_from_oidc_token_introspection(token: str, db):
+def get_user_from_oidc_token_introspection(db, token: str):
     redis_instance: Redis | RedisCluster | None = get_redis()
 
     # Do we have the data cached?
@@ -115,7 +115,7 @@ def get_subscriber(
         raise InvalidTokenException()
 
     if AuthScheme.is_oidc():
-        user = get_user_from_oidc_token_introspection(token, db)
+        user = get_user_from_oidc_token_introspection(db, token)
     else:
         user = get_user_from_token(db, token, require_jti)
 
