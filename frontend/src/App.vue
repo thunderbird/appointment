@@ -18,7 +18,7 @@ import {
   isPasswordAuthKey,
   isFxaAuthKey,
   fxaEditProfileUrlKey,
-  isAccountsAuthKey, isOIDCAuthKey, oidcUserManagerKey,
+  isAccountsAuthKey, isOIDCAuthKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -30,7 +30,6 @@ import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { AuthSchemes } from '@/definitions';
-import { UserManager, UserManagerSettings } from "oidc-client-ts";
 import { userManager } from "@/composables/oidcUserManager";
 
 // component constants

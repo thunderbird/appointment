@@ -137,7 +137,7 @@ const login = async () => {
 
   if (isOIDCAuth) {
     await userManager.signinRedirect({
-      prompt: 'login',
+      //prompt: 'login',
       login_hint: email.value,
     });
     const userData = await userManager.getUser();
