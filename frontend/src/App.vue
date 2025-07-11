@@ -18,7 +18,7 @@ import {
   isPasswordAuthKey,
   isFxaAuthKey,
   fxaEditProfileUrlKey,
-  isAccountsAuthKey, isOIDCAuthKey,
+  isOIDCAuthKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -30,7 +30,6 @@ import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { AuthSchemes } from '@/definitions';
-import { userManager } from "@/composables/oidcUserManager";
 
 // component constants
 const user = useUserStore();
@@ -52,13 +51,11 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
-const isAccountsAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Accounts;
 const isOIDCAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC;
 
 provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
 provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
 provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
-provide(isAccountsAuthKey, isAccountsAuth());
 provide(isOIDCAuthKey, isOIDCAuth())
 
 // handle auth and fetch
@@ -66,18 +63,8 @@ const call = createFetch({
   baseUrl: apiUrl,
   options: {
     beforeFetch: async ({ options }) => {
-      if (isAccountsAuth) {
-        // Cookies are somehow still stored as a giant `;` separated string, so do a bunch of array nonsense to retrieve our token
-        const csrf = window.document.cookie?.split('; csrftoken=')?.pop()?.split(';')?.shift()
-          ?.trim() ?? null;
-        // If you change csrf safe_methods parameter, change this too!
-        if (!['GET', 'OPTIONS', 'HEAD', 'TRACE'].includes(options?.method ?? 'GET') && csrf) {
-          options.headers['X-CSRFToken'] = csrf;
-        }
-      }
-
       if (user?.authenticated) {
-        const token = user.data.accessToken ?? (await userManager.getUser())?.access_token;
+        const token = user.data.accessToken;
         // @ts-expect-error ignore headers type error
         options.headers.Authorization = `Bearer ${token}`;
       }

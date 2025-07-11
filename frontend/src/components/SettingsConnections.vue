@@ -12,7 +12,7 @@ import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 import {
-  callKey, fxaEditProfileUrlKey, isAccountsAuthKey, isFxaAuthKey,
+  callKey, fxaEditProfileUrlKey, isFxaAuthKey, isOIDCAuthKey
 } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
 import { enumToObject } from '@/utils';
@@ -35,7 +35,8 @@ const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
 const isFxaAuth = inject(isFxaAuthKey);
-const isAccountsAuth = inject(isAccountsAuthKey);
+const isOIDCAuth = inject(isOIDCAuthKey);
+
 /*
  * Temp until we remove local fxa
  */
@@ -47,7 +48,7 @@ const filteredConnections = computed(() => {
     if (connection === 'fxa' && !isFxaAuth) {
       continue;
     }
-    if (connection === 'accounts' && !isAccountsAuth) {
+    if (connection === 'oidc' && !isOIDCAuth) {
       continue;
     }
     newConnections[connection] = connections.value[connection];
@@ -158,7 +159,7 @@ const editProfile = async () => {
           <div v-if="connection.length > 0">
             <div v-for="conn in connection" :key="conn.type_id" class="mb-2 flex items-center justify-between">
               <p>{{ t('label.connectedAs', { name: conn.name }) }}</p>
-              <div v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
+              <div v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.OIDC">
                 <danger-button
                   class="btn-disconnect"
                   :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn-' + conn.type_id"
@@ -172,7 +173,7 @@ const editProfile = async () => {
           </div>
           <p v-if="connection.length === 0">{{ t('label.notConnected') }}</p>
         </div>
-        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Accounts">
+        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.OIDC">
           <primary-button
             v-if="connection.length === 0"
             class="btn-connect"

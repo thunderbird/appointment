@@ -30,11 +30,7 @@ export const shortUrlKey = Symbol('shortUrl') as InjectionKey<string>;
 export const isPasswordAuthKey = Symbol('isPasswordAuth') as InjectionKey<boolean>;
 export const isFxaAuthKey = Symbol('isFxaAuth') as InjectionKey<boolean>;
 export const fxaEditProfileUrlKey = Symbol('fxaEditProfileUrl') as InjectionKey<string>;
-export const isAccountsAuthKey = Symbol('isAccountsAuth') as InjectionKey<boolean>;
 export const isOIDCAuthKey = Symbol('isOIDCAuth') as InjectionKey<boolean>;
-
-// OIDC Auth Manager
-export const oidcUserManagerKey = Symbol('oidcUserManager') as InjectionKey<UserManager>;
 
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
