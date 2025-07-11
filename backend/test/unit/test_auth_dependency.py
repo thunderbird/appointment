@@ -16,7 +16,6 @@ from appointment.dependencies.auth import (
     get_subscriber,
     get_admin_subscriber,
     get_subscriber_from_schedule_or_signed_url,
-    get_user_from_accounts_session,
 )
 from appointment.exceptions.validation import InvalidTokenException, InvalidPermissionLevelException, \
     InvalidLinkException
@@ -24,51 +23,6 @@ from appointment.routes.auth import create_access_token
 
 
 class TestAuthDependency:
-    def test_get_user_from_session(self, with_db, with_l10n, make_pro_subscriber, make_external_connections):
-        subscriber = make_pro_subscriber()
-
-        # Create a connection to FXA and Accounts
-        fxa_id = 'fxa-123'
-        accounts_id = 'accounts-123'
-        make_external_connections(
-            subscriber.id, subscriber.email, models.ExternalConnectionType.fxa, fxa_id
-        )
-        make_external_connections(
-            subscriber.id, subscriber.email, models.ExternalConnectionType.accounts, accounts_id
-        )
-
-        session_id = 'abc123'
-        request = Request({'type': 'http', 'session': {'accounts_session': session_id}})
-
-        class MockGetSharedRedis:
-            def get(self, key):
-                assert key == f'{REDIS_USER_SESSION_PROFILE_KEY}.{session_id}'
-                return json.dumps(
-                    {
-                        '_version': 1,
-                        'uuid': accounts_id,
-                        'username': subscriber.username,
-                        'display_name': subscriber.name,
-                        'full_name': '',
-                        'email': subscriber.email,
-                        'fxa_id': fxa_id,
-                        'language': 'en',
-                        'avatar_url': None,
-                        'timezone': 'UTC',
-                        'access': ['appointment'],
-                        'date_joined': '2024-11-27T19:38:27.859768Z',
-                        'last_login': '2025-03-20T16:57:55.643637Z',
-                        'created_at': '2024-11-27T19:38:28.132151Z',
-                        'updated_at': '2025-03-20T16:57:55.635766Z',
-                    }
-                )
-
-        # Mock where it's imported
-        with mock.patch('appointment.dependencies.auth.get_shared_redis', MockGetSharedRedis):
-            with with_db() as db:
-                subscriber = get_user_from_accounts_session(request, db)
-                assert subscriber
-
     def test_get_user_from_token(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
         access_token_expires = datetime.timedelta(minutes=float(os.getenv('JWT_EXPIRE_IN_MINS')))
