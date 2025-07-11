@@ -18,7 +18,7 @@ from ..defines import AuthScheme, REDIS_OIDC_TOKEN_KEY
 from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
-from ..utils import encrypt, decrypt
+from ..utils import encrypt, decrypt, get_expiry_time_with_grace_period
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
@@ -29,6 +29,7 @@ def get_user_from_oidc_token_introspection(db, token: str):
     # Do we have the data cached?
     encrypted_token = encrypt(token)
     token_data = None
+    cache_hit = False
 
     if redis_instance:
         # Retrieve the cached token data
@@ -40,6 +41,8 @@ def get_user_from_oidc_token_introspection(db, token: str):
     if not token_data:
         oidc_client = OIDCClient()
         token_data = oidc_client.introspect_token(token)
+    else:
+        cache_hit = True
 
     # Still nothing? Error out.
     if not token_data:
@@ -49,12 +52,20 @@ def get_user_from_oidc_token_introspection(db, token: str):
     if not subscriber:
         raise InvalidTokenException()
 
-    if redis_instance:
+    if redis_instance and not cache_hit:
+        # If the token expires in less time than the default expiry time, use that.
+        expiry = (
+            get_expiry_time_with_grace_period(token_data.get('exp', 0))
+            - datetime.datetime.now(datetime.UTC).timestamp()
+        )
+        expiry = max(expiry, 0)
+        expiry = min(int(os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', 300)), expiry)
+
         # Cache the token data for 300 seconds or the defined env var
         redis_instance.set(
             f'{REDIS_OIDC_TOKEN_KEY}:{encrypted_token}',
             value=encrypt(json.dumps(token_data)),
-            ex=os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', 300),
+            ex=os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', expiry),
         )
 
     return subscriber
