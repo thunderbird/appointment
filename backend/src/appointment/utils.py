@@ -106,6 +106,9 @@ def normalize_secrets():
     """Normalizes AWS secrets for Appointment"""
     database_secrets = os.getenv('DATABASE_SECRETS')
 
+    import logging
+    log = logging.getLogger(__name__)
+    log.info('Normalizing secrets...')
     if database_secrets:
         secrets = json.loads(database_secrets)
 
@@ -117,8 +120,18 @@ def normalize_secrets():
         if f':{port}' not in host:
             hostname = f'{hostname}:{port}'
 
+        # Determine a "dialect+driver" scheme
+        dialect = secrets['engine']
+        if dialect == 'mysql':
+            driver = 'mysqldb'
+        elif dialect == 'postgresql':
+            driver = 'psycopg2'
+        else:
+            driver = None
+        proto = f'{dialect}+{driver}' if driver else dialect
+
         os.environ['DATABASE_URL'] = (
-            f"mysql+mysqldb://{secrets['username']}:{secrets['password']}@{hostname}/appointment"
+            f"{proto}://{secrets['username']}:{secrets['password']}@{hostname}/{secrets['dbname']}"
         )
 
     database_enc_secret = os.getenv('DB_ENC_SECRET')
