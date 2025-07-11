@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import {
-  dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey, isAccountsAuthKey, isOIDCAuthKey,
+  dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey, isOIDCAuthKey,
 } from '@/keys';
 import {
   BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
@@ -27,7 +27,6 @@ const route = useRoute();
 const router = useRouter();
 const isPasswordAuth = inject(isPasswordAuthKey);
 const isFxaAuth = inject(isFxaAuthKey);
-const isAccountsAuth = inject(isAccountsAuthKey);
 const isOIDCAuth = inject(isOIDCAuthKey);
 const user = createUserStore(call);
 
@@ -153,8 +152,8 @@ const login = async () => {
       isLoading.value = false;
       return;
     }
-  } else if (isFxaAuth || isAccountsAuth) {
-    const apiUrl = isFxaAuth ? 'fxa_login' : 'auth/accounts';
+  } else if (isFxaAuth) {
+    const apiUrl = 'fxa_login';
     const params = new URLSearchParams({
       email: email.value,
       timezone: dj.tz.guess(),

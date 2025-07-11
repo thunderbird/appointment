@@ -3,7 +3,7 @@ import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
-import { callKey, dayjsKey, isAccountsAuthKey, isOIDCAuthKey } from '@/keys';
+import { callKey, dayjsKey, isOIDCAuthKey, isFxaAuthKey } from '@/keys';
 import { userManager } from "@/composables/oidcUserManager";
 import { BooleanResponse } from "@/models";
 
@@ -15,8 +15,7 @@ const call = inject(callKey);
 const user = createUserStore(call);
 const dj = inject(dayjsKey);
 
-const isFxaAuth = computed(() => import.meta.env?.VITE_AUTH_SCHEME === 'fxa');
-const isAccountsAuth = inject(isAccountsAuthKey);
+const isFxaAuth = inject(isFxaAuthKey);
 const isOIDCAuth = inject(isOIDCAuthKey);
 
 onMounted(async () => {
@@ -39,7 +38,7 @@ onMounted(async () => {
       console.error("WOAH", data.value);
       return;
     }
-  } else if (!isFxaAuth.value && !isAccountsAuth) {
+  } else if (!isFxaAuth) {
     await router.push(redirectTo ?? '/');
     return;
   }
