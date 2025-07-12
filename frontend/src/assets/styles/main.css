@@ -206,6 +206,6 @@
 }
 
 /* Prevent scrolling of the body when a HTML dialog is open */
-body:has(dialog:open) {
+body:has(dialog[open]) {
   overflow: hidden;
 }

@@ -90,9 +90,9 @@ defineExpose({
 .sliding-panel {
   /* Override browser defaults */
   max-height: 100dvh;
-  max-width: 100dvw;
+  max-width: 100dvw;  
 
-  &:open {
+  &[open] {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -113,6 +113,54 @@ defineExpose({
     background-color: rgba(0, 0, 0, 0.7);
   }
 }
+
+/* @media (prefers-reduced-motion: no-preference) {
+  .sliding-panel {
+    animation: panel-slide-out 0.3s ease;
+
+    &:open {
+      animation: panel-slide-in 0.3s ease;
+    }
+
+    &:open::backdrop {
+      animation: backdrop-fade-in 0.7s ease-out forwards;
+    }
+  }
+} */
+
+/* @keyframes panel-slide-in {
+  0% {
+    display: none;
+    transform: translateX(100%);
+  }
+
+  100% {
+    display: flex;
+    transform: translateX(0);
+  }
+}
+
+@keyframes panel-slide-out {
+  0% {
+    display: flex;
+    transform: translateX(0);
+  }
+
+  100% {
+    display: none;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes backdrop-fade-in {
+  0% {
+    background-color: rgba(0, 0, 0, 0);
+  }
+
+  100% {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+} */
 
 .header {
   display: flex;
