@@ -101,7 +101,7 @@ defineExpose({
       <div class="time-slots">
         <template v-for="s in appointment.slots" :key="s.start">
           <div class="time-slot">
-            <icon-calendar-event class="time-icon"/>
+            <icon-calendar-event class="time-icon" :aria-label="t('label.timeOfTheEvent')" />
             <div class="time-details">
               <p class="date">{{ dj(s.start).format('LL') }}</p>
               <div class="time-range">
