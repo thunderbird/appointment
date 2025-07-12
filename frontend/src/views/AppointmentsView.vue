@@ -370,12 +370,20 @@ provide(paintBackgroundKey, paintBackground);
           <tr
             v-for="(appointment, i) in filteredAppointments"
             :key="i"
-            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
+            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg relative"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
             @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
             @click="showAppointmentSlidingPanel(appointment)"
           >
             <td class="align-middle">
+              <!-- Hidden link spanning the whole table row -->
+              <router-link
+                :to="`/appointments/${viewToParam(tabActive)}/${appointment.slug}`"
+                class="absolute inset-0 z-10 opacity-0"
+                aria-label="Open appointment in new tab"
+              ></router-link>
+
+              <!-- Calendar color indicator -->
               <div
                 class="mx-auto size-3 rounded-full bg-sky-400"
                 :style="{ backgroundColor: appointment.calendar_color }"
