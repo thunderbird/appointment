@@ -229,5 +229,17 @@ const headerClasses = computed(() => [
   opacity: 0;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .panel-right-enter-active,
+  .panel-right-leave-active,
+  .panel-left-enter-active,
+  .panel-left-leave-active {
+    transition-duration: 0.001ms;
+  }
 
+  .scrim-enter-active,
+  .scrim-leave-active {
+    transition-duration: 0.001ms;
+  }
+}
 </style>
