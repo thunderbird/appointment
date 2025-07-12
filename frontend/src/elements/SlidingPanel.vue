@@ -114,21 +114,21 @@ defineExpose({
   }
 }
 
-/* @media (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
   .sliding-panel {
     animation: panel-slide-out 0.3s ease;
 
-    &:open {
+    &[open] {
       animation: panel-slide-in 0.3s ease;
     }
 
-    &:open::backdrop {
-      animation: backdrop-fade-in 0.7s ease-out forwards;
+    &::backdrop {
+      animation: backdrop-fade-in 0.3s ease forwards;
     }
   }
-} */
+}
 
-/* @keyframes panel-slide-in {
+@keyframes panel-slide-in {
   0% {
     display: none;
     transform: translateX(100%);
@@ -158,9 +158,9 @@ defineExpose({
   }
 
   100% {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.7);
   }
-} */
+}
 
 .header {
   display: flex;
