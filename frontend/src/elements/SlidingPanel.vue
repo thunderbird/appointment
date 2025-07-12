@@ -116,8 +116,6 @@ defineExpose({
 
 @media (prefers-reduced-motion: no-preference) {
   .sliding-panel {
-    animation: panel-slide-out 0.3s ease;
-
     &[open] {
       animation: panel-slide-in 0.3s ease;
     }
@@ -140,18 +138,6 @@ defineExpose({
   }
 }
 
-@keyframes panel-slide-out {
-  0% {
-    display: flex;
-    transform: translateX(0);
-  }
-
-  100% {
-    display: none;
-    transform: translateX(100%);
-  }
-}
-
 @keyframes backdrop-fade-in {
   0% {
     background-color: rgba(0, 0, 0, 0);
@@ -169,7 +155,7 @@ defineExpose({
   gap: 1rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--colour-neutral-border);
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-raised);
   flex-shrink: 0;
 
   &.header--right-side {
@@ -222,7 +208,7 @@ defineExpose({
 .cta-container {
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--colour-neutral-border);
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-raised);
   flex-shrink: 0;
 }
 </style>
