@@ -101,6 +101,9 @@ const search = ref('');
 // handle data view
 const view = ref(BookingsViewTypes.List);
 
+// handle appointment sliding panel
+const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>()
+
 // handle view adjustments: column visibility
 const showAdjustments = ref(false);
 const visibleColumns = ref(Object.values(columns));
@@ -194,15 +197,16 @@ const filteredAppointments = computed(() => {
 });
 
 // handle single appointment modal
-const showAppointment = ref(null);
-const isPanelOpen = computed(() => showAppointment.value !== null);
+const selectedAppointment = ref(null);
 
 const showAppointmentSlidingPanel = (appointment) => {
-  showAppointment.value = appointment;
+  selectedAppointment.value = appointment;
+  appointmentSlidingPanelRef.value?.showPanel()
   router.replace(`/appointments/${viewToParam(tabActive.value)}/${appointment.slug}`);
 };
-const closeAppointmentSlidingPanel = () => {
-  showAppointment.value = null;
+
+const handleCloseAppointmentSlidingPanel = () => {
+  selectedAppointment.value = null;
   // Shuffle them back to the appointments route.
   router.replace(`/appointments/${viewToParam(tabActive.value)}`);
 };
@@ -426,8 +430,8 @@ provide(paintBackgroundKey, paintBackground);
   </div>
 
   <appointment-sliding-panel
-    :appointment="showAppointment"
-    :open="isPanelOpen"
-    @close="closeAppointmentSlidingPanel"
+    ref="appointmentSlidingPanelRef"
+    :appointment="selectedAppointment"
+    @close="handleCloseAppointmentSlidingPanel"
   />
 </template>

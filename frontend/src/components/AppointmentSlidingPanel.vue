@@ -24,21 +24,13 @@ const dj = inject(dayjsKey);
 
 interface Props {
   appointment: Appointment | null;
-  open: boolean;
 }
 const props = defineProps<Props>();
 
 const cancelReason = ref<string>('');
+const panelRef = ref<InstanceType<typeof SlidingPanel>>()
 
 // computed properties
-const isOpen = computed({
-  get: () => props.open && props.appointment !== null,
-  set: (value) => {
-    if (!value) {
-      emit('close');
-    }
-  }
-});
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
 const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
@@ -70,24 +62,33 @@ const bookingStatusInfo = computed(() => {
 
 // methods
 const answer = (isConfirmed: boolean) => {
+  panelRef.value?.closePanel();
   window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
 };
 
 const deleteAppointment = () => {
   apmtStore.deleteAppointment(props.appointment?.id);
+  panelRef.value?.closePanel();
   emit('close');
 };
 
 const cancelAppointment = () => {
   apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
   cancelReason.value = '';
+  panelRef.value?.closePanel();
   emit('close');
 };
+
+defineExpose({
+  showPanel: () => {
+    panelRef.value?.showPanel();
+  }
+})
 </script>
 
 <template>
   <sliding-panel
-    :open="isOpen"
+    ref="panelRef"
     :title="appointment?.title"
     @close="emit('close')"
   >
@@ -217,6 +218,8 @@ const cancelAppointment = () => {
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .appointment-content {
   color: #6b7280;
 }
@@ -403,11 +406,42 @@ const cancelAppointment = () => {
 .cta-single {
   display: flex;
   justify-content: flex-end;
+
+  .btn-confirm {
+    flex-grow: 1;
+  }
+
+  .btn-deny {
+    flex-grow: 1;
+  }
 }
 
 .cta-dual {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cta-single, .cta-dual {
+  .btn-confirm {
+    flex-grow: 1;
+  }
+
+  .btn-deny {
+    flex-grow: 1;
+  }
+}
+
+@media (--sm) {
+  .cta-dual, .cta-single {
+    .btn-confirm {
+      flex-grow: 0;
+    }
+
+    .btn-deny {
+      flex-grow: 0;
+    }
+  }
 }
 </style> 
