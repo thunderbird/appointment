@@ -4,7 +4,7 @@
 export enum AuthSchemes {
   Password = 'password',
   Fxa = 'fxa',
-  OIDC = 'oidc',
+  Oidc = 'oidc',
 }
 
 /**
@@ -176,7 +176,7 @@ export enum ExternalConnectionProviders {
   Zoom = 3,
   Caldav = 4,
   _DEPRECATED = 5,
-  OIDC = 6,
+  Oidc = 6,
 }
 
 /**

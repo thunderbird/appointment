@@ -3,9 +3,10 @@ import { inject, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
-import { callKey, dayjsKey, isOIDCAuthKey, isFxaAuthKey } from '@/keys';
+import { callKey, dayjsKey } from '@/keys';
 import { userManager } from "@/composables/oidcUserManager";
 import { BooleanResponse } from "@/models";
+import { isFxaAuth, isOidcAuth } from "@/composables/authSchemes";
 
 const route = useRoute();
 const router = useRouter();
@@ -15,9 +16,6 @@ const call = inject(callKey);
 const user = createUserStore(call);
 const dj = inject(dayjsKey);
 
-const isFxaAuth = inject(isFxaAuthKey);
-const isOIDCAuth = inject(isOIDCAuthKey);
-
 onMounted(async () => {
   // Retrieve and remove temp login redirect location
   const redirectTo = window.sessionStorage?.getItem(LOGIN_REDIRECT_KEY);
@@ -25,7 +23,7 @@ onMounted(async () => {
   // Remove any ftue steps on new login
   window.localStorage?.removeItem('tba/ftue');
 
-  if (isOIDCAuth) {
+  if (isOidcAuth) {
     // Stored in an internal store
     const userData = await userManager.signinCallback(window.location.href);
     const { error, data }: BooleanResponse = await call('oidc/token').post({
@@ -43,7 +41,7 @@ onMounted(async () => {
     return;
   }
 
-  if (isOIDCAuth) {
+  if (isOidcAuth) {
     await user.login('true', null);
   } else {
     await user.login(route.params.token as string, null);

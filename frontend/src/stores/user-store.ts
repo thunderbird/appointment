@@ -8,8 +8,9 @@ import {
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
-import { ColourSchemes, AuthSchemes } from '@/definitions';
+import { ColourSchemes } from '@/definitions';
 import { userManager } from "@/composables/oidcUserManager";
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
 
 const initialUserConfigObject = {
   language: null,
@@ -95,7 +96,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * Return the first slug key, or null if they don't have one.
    */
-  const mySlug = computed((): string|null => {
+  const mySlug = computed((): string | null => {
     const slugs = data?.value?.scheduleSlugs ?? {};
     const slugKeys = Object.keys(slugs);
     if (slugKeys.length == 0) {
@@ -263,13 +264,13 @@ export const useUserStore = defineStore('user', () => {
    * @param username an auth string, could be username, one time token, or session id
    * @param password or null if fxa authentication
    */
-  const login = async (username: string, password: string|null): Promise<Error> => {
+  const login = async (username: string, password: string | null): Promise<Error> => {
     $reset();
 
-    if (import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC) {
+    if (isOidcAuth) {
       data.value.accessToken = (await userManager.getUser())?.access_token ?? null;
       return await profile();
-    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
+    } else if (isPasswordAuth) {
       // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
@@ -281,16 +282,16 @@ export const useUserStore = defineStore('user', () => {
       }
 
       data.value.accessToken = tokenData.value.access_token;
-    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
+    } else if (isFxaAuth) {
       // We get a one-time token back from the api, use it to fetch the real access token
-      const {error, data: tokenData}: TokenResponse = await call.value('fxa-token', {
+      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token', {
         headers: {
           Authorization: `Bearer ${username}`,
         }
       }).post().json();
 
       if (error.value || !tokenData.value.access_token) {
-        return {error: tokenData.value ?? error.value};
+        return { error: tokenData.value ?? error.value };
       }
 
       data.value.accessToken = tokenData.value.access_token;
@@ -305,11 +306,13 @@ export const useUserStore = defineStore('user', () => {
    * Do subscriber logout and reset store
    */
   const logout = async () => {
-    const { error }: BooleanResponse = await call.value('logout').get().json();
+    if (isOidcAuth) {
+      const { error }: BooleanResponse = await call.value('logout').get().json();
 
-    if (error.value) {
-      // TODO: show error message
-      console.warn('Error logging out: ', error.value);
+      if (error.value) {
+        // TODO: show error message
+        console.warn('Error logging out: ', error.value);
+      }
     }
 
     $reset();

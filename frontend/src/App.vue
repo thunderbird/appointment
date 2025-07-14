@@ -15,10 +15,7 @@ import {
   apiUrlKey,
   callKey,
   refreshKey,
-  isPasswordAuthKey,
-  isFxaAuthKey,
   fxaEditProfileUrlKey,
-  isOIDCAuthKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -29,8 +26,8 @@ import { useUserStore } from '@/stores/user-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
-import { AuthSchemes } from '@/definitions';
 import {userManager} from "@/composables/oidcUserManager";
+import { isOidcAuth } from "@/composables/authSchemes";
 
 // component constants
 const user = useUserStore();
@@ -52,14 +49,9 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
-const isOIDCAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.OIDC;
-
-provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
-provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
 provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
-provide(isOIDCAuthKey, isOIDCAuth())
 
-if (isOIDCAuth()) {
+if (isOidcAuth) {
   /**
    * The user is reloaded after the access token is refreshed
    * So let's use this event to silently update our copy of the access token
@@ -68,7 +60,7 @@ if (isOIDCAuth()) {
     const newAccessToken = (await userManager.getUser())?.access_token;
     console.debug('[userManager] User Loaded Evt, is new token the same?', newAccessToken === user.data.accessToken)
     user.data.accessToken = newAccessToken;
-  })
+  });
 }
 
 // handle auth and fetch

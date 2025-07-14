@@ -12,7 +12,7 @@ import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 import {
-  callKey, fxaEditProfileUrlKey, isFxaAuthKey, isOIDCAuthKey
+  callKey, fxaEditProfileUrlKey
 } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
 import { enumToObject } from '@/utils';
@@ -23,6 +23,7 @@ import { createExternalConnectionsStore } from '@/stores/external-connections-st
 import { createCalendarStore } from '@/stores/calendar-store';
 
 import { Alert, ExternalConnection } from '@/models';
+import { isFxaAuth, isOidcAuth } from "@/composables/authSchemes";
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -34,8 +35,7 @@ const userStore = createUserStore(call);
 const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
-const isFxaAuth = inject(isFxaAuthKey);
-const isOIDCAuth = inject(isOIDCAuthKey);
+console.log(providers)
 
 /*
  * Temp until we remove local fxa
@@ -48,7 +48,7 @@ const filteredConnections = computed(() => {
     if (connection === 'fxa' && !isFxaAuth) {
       continue;
     }
-    if (connection === 'oidc' && !isOIDCAuth) {
+    if (connection === 'oidc' && !isOidcAuth) {
       continue;
     }
     newConnections[connection] = connections.value[connection];
@@ -159,7 +159,8 @@ const editProfile = async () => {
           <div v-if="connection.length > 0">
             <div v-for="conn in connection" :key="conn.type_id" class="mb-2 flex items-center justify-between">
               <p>{{ t('label.connectedAs', { name: conn.name }) }}</p>
-              <div v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.OIDC">
+              {{ provider }}  - {{providers[provider]}}
+              <div v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Oidc">
                 <danger-button
                   class="btn-disconnect"
                   :data-testid="'connected-accounts-settings-' + t(provider) + '-disconnect-btn-' + conn.type_id"
@@ -173,7 +174,7 @@ const editProfile = async () => {
           </div>
           <p v-if="connection.length === 0">{{ t('label.notConnected') }}</p>
         </div>
-        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.OIDC">
+        <div class="mx-auto mr-0" v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Oidc">
           <primary-button
             v-if="connection.length === 0"
             class="btn-connect"

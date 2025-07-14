@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import {
-  dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey, isOIDCAuthKey,
+  dayjsKey, callKey
 } from '@/keys';
 import {
   BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
@@ -18,6 +18,7 @@ import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import WordMark from '@/elements/WordMark.vue';
 import { handleFormError } from '@/utils';
 import { userManager } from "@/composables/oidcUserManager";
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
 
 // component constants
 const { t } = useI18n();
@@ -25,9 +26,6 @@ const call = inject(callKey);
 const dj = inject(dayjsKey);
 const route = useRoute();
 const router = useRouter();
-const isPasswordAuth = inject(isPasswordAuthKey);
-const isFxaAuth = inject(isFxaAuthKey);
-const isOIDCAuth = inject(isOIDCAuthKey);
 const user = createUserStore(call);
 
 // Don't show the invite code field, only the "Join the waiting list" part
@@ -134,7 +132,7 @@ const login = async () => {
   }
 
 
-  if (isOIDCAuth) {
+  if (isOidcAuth) {
     await userManager.signinRedirect({
       //prompt: 'login',
       login_hint: email.value,
