@@ -204,3 +204,8 @@
 .modal-active {
   overflow: hidden;
 }
+
+/* Prevent scrolling of the body when a HTML dialog is open */
+body:has(dialog[open]) {
+  overflow: hidden;
+}

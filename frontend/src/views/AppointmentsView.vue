@@ -15,7 +15,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { vOnClickOutside } from '@vueuse/components';
 import AppointmentGridItem from '@/elements/AppointmentGridItem.vue';
-import AppointmentModal from '@/components/AppointmentModal.vue';
+import AppointmentSlidingPanel from '@/components/AppointmentSlidingPanel.vue';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import TabBar from '@/components/TabBar.vue';
 
@@ -100,6 +100,9 @@ const search = ref('');
 
 // handle data view
 const view = ref(BookingsViewTypes.List);
+
+// handle appointment sliding panel
+const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>()
 
 // handle view adjustments: column visibility
 const showAdjustments = ref(false);
@@ -194,14 +197,16 @@ const filteredAppointments = computed(() => {
 });
 
 // handle single appointment modal
-const showAppointment = ref(null);
-const showAppointmentModal = (appointment) => {
-  showAppointment.value = appointment;
+const selectedAppointment = ref(null);
+
+const showAppointmentSlidingPanel = (appointment) => {
+  selectedAppointment.value = appointment;
+  appointmentSlidingPanelRef.value?.showPanel()
   router.replace(`/appointments/${viewToParam(tabActive.value)}/${appointment.slug}`);
 };
-const closeAppointmentModal = () => {
-  showAppointment.value = null;
 
+const handleCloseAppointmentSlidingPanel = () => {
+  selectedAppointment.value = null;
   // Shuffle them back to the appointments route.
   router.replace(`/appointments/${viewToParam(tabActive.value)}`);
 };
@@ -212,7 +217,7 @@ onMounted(async () => {
 
   // If we've got a slug
   if (route.params?.slug) {
-    showAppointmentModal(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
+    showAppointmentSlidingPanel(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
   }
 });
 
@@ -365,12 +370,20 @@ provide(paintBackgroundKey, paintBackground);
           <tr
             v-for="(appointment, i) in filteredAppointments"
             :key="i"
-            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg"
+            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg relative"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
             @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
-            @click="showAppointmentModal(appointment)"
+            @click.left.exact="showAppointmentSlidingPanel(appointment)"
           >
             <td class="align-middle">
+              <!-- Hidden link spanning the whole table row -->
+              <router-link
+                :to="`/appointments/${viewToParam(tabActive)}/${appointment.slug}`"
+                class="absolute inset-0 z-10 opacity-0"
+                aria-label="Open appointment in new tab"
+              ></router-link>
+
+              <!-- Calendar color indicator -->
               <div
                 class="mx-auto size-3 rounded-full bg-sky-400"
                 :style="{ backgroundColor: appointment.calendar_color }"
@@ -405,7 +418,7 @@ provide(paintBackgroundKey, paintBackground);
           v-for="(appointment, i) in filteredAppointments"
           :key="i"
           :appointment="appointment"
-          @click="showAppointmentModal(appointment)"
+          @click="showAppointmentSlidingPanel(appointment)"
         />
       </div>
     </div>
@@ -423,9 +436,10 @@ provide(paintBackgroundKey, paintBackground);
       </div>
     </div>
   </div>
-  <appointment-modal
-    :open="showAppointment !== null"
-    :appointment="showAppointment"
-    @close="closeAppointmentModal"
+
+  <appointment-sliding-panel
+    ref="appointmentSlidingPanelRef"
+    :appointment="selectedAppointment"
+    @close="handleCloseAppointmentSlidingPanel"
   />
 </template>
