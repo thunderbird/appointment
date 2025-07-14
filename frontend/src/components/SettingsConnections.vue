@@ -35,7 +35,6 @@ const userStore = createUserStore(call);
 const { connections } = storeToRefs(externalConnectionsStore);
 const { $reset: resetConnections } = externalConnectionsStore;
 const providers = enumToObject(ExternalConnectionProviders);
-console.log(providers)
 
 /*
  * Temp until we remove local fxa
@@ -159,7 +158,6 @@ const editProfile = async () => {
           <div v-if="connection.length > 0">
             <div v-for="conn in connection" :key="conn.type_id" class="mb-2 flex items-center justify-between">
               <p>{{ t('label.connectedAs', { name: conn.name }) }}</p>
-              {{ provider }}  - {{providers[provider]}}
               <div v-if="providers[provider] !== ExternalConnectionProviders.Fxa && providers[provider] !== ExternalConnectionProviders.Oidc">
                 <danger-button
                   class="btn-disconnect"

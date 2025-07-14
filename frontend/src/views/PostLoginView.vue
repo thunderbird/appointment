@@ -2,7 +2,7 @@
 import { inject, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
-import { LOGIN_REDIRECT_KEY } from '@/definitions';
+import { INVITE_CODE_KEY, LOGIN_REDIRECT_KEY } from '@/definitions';
 import { callKey, dayjsKey } from '@/keys';
 import { userManager } from "@/composables/oidcUserManager";
 import { BooleanResponse } from "@/models";
@@ -23,17 +23,20 @@ onMounted(async () => {
   // Remove any ftue steps on new login
   window.localStorage?.removeItem('tba/ftue');
 
+  const inviteCode = window.sessionStorage?.getItem(INVITE_CODE_KEY);
+  window.sessionStorage?.removeItem(INVITE_CODE_KEY);
+
   if (isOidcAuth) {
     // Stored in an internal store
     const userData = await userManager.signinCallback(window.location.href);
     const { error, data }: BooleanResponse = await call('oidc/token').post({
       'access_token': userData.access_token,
-      //'invite_code': inviteCode.value,
+      'invite_code': inviteCode,
       'timezone': dj.tz.guess(),
     }).json();
 
     if (error.value) {
-      console.error("WOAH", data.value);
+      console.error("Err", data.value);
       return;
     }
   } else if (!isFxaAuth) {

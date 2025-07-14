@@ -63,4 +63,3 @@ services:
 volumes:
   apmt_db: {}
   cache: {}
-  kcdb: {}

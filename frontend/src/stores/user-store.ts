@@ -306,7 +306,7 @@ export const useUserStore = defineStore('user', () => {
    * Do subscriber logout and reset store
    */
   const logout = async () => {
-    if (isOidcAuth) {
+    if (!isOidcAuth) {
       const { error }: BooleanResponse = await call.value('logout').get().json();
 
       if (error.value) {
@@ -316,6 +316,12 @@ export const useUserStore = defineStore('user', () => {
     }
 
     $reset();
+
+    if (isOidcAuth) {
+      await userManager.signoutRedirect({
+        post_logout_redirect_uri: window.location.origin,
+      });
+    }
   };
 
   return {

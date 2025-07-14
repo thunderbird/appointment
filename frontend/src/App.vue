@@ -49,7 +49,7 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
-provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
+provide(fxaEditProfileUrlKey, import.meta.env?.VITE_AUTH_EDIT_PROFILE);
 
 if (isOidcAuth) {
   /**

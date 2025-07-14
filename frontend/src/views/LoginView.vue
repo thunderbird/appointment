@@ -10,7 +10,7 @@ import {
   BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
 } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
-import { MetricEvents } from '@/definitions';
+import { INVITE_CODE_KEY, MetricEvents } from '@/definitions';
 import GenericModal from '@/components/GenericModal.vue';
 import HomeView from '@/views/HomeView.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
@@ -133,23 +133,14 @@ const login = async () => {
 
 
   if (isOidcAuth) {
+    // Set the invite code if we have it
+    if (inviteCode.value) {
+      window.sessionStorage?.setItem(INVITE_CODE_KEY, inviteCode.value.trim());
+    }
     await userManager.signinRedirect({
-      //prompt: 'login',
+      prompt: 'login',
       login_hint: email.value,
     });
-    const userData = await userManager.getUser();
-
-    const { error, data }: BooleanResponse = await call('auth/oidc/login').post({
-      'access_token': userData.access_token,
-      'invite_code': inviteCode.value,
-      'timezone': dj.tz.guess(),
-    }).json();
-
-    if (error.value) {
-      loginError.value = handleFormError(t, formRef, data.value as PydanticException);
-      isLoading.value = false;
-      return;
-    }
   } else if (isFxaAuth) {
     const apiUrl = 'fxa_login';
     const params = new URLSearchParams({

@@ -25,7 +25,7 @@ test.describe('connected accounts settings', {
 
   test('edit profile button', async ({ page }) => {
     // verify that clicking the `edit profile` button redirects to the Mozilla Account profile page
-    // note that on dev env this relies on having VITE_FXA_EDIT_PROFILE= set to point to stage FxA
+    // note that on dev env this relies on having VITE_AUTH_EDIT_PROFILE= set to point to stage FxA
     // skip this on dev env because stage FxA use may or may not be setup to use with local dev
     if (APPT_TARGET_ENV !== 'dev') {
       await expect(settingsPage.editProfileBtn).toBeEnabled({ timeout: TIMEOUT_30_SECONDS });
