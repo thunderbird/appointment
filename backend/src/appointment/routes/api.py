@@ -101,9 +101,20 @@ def read_my_calendars(
 
 
 @router.get('/me/appointments', response_model=list[schemas.AppointmentWithCalendarOut])
-def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+def read_my_appointments(
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+    skip: int = 0,
+    limit: int = 100
+):
     """get all appointments of authenticated subscriber"""
-    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id)
+    appointments = repo.appointment.get_by_subscriber(
+        db,
+        subscriber_id=subscriber.id,
+        skip=skip,
+        limit=limit
+    )
+
     # Mix in calendar title and color.
     # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
     appointments = map(
