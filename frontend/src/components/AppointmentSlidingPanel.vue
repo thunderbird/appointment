@@ -61,22 +61,27 @@ const bookingStatusInfo = computed(() => {
 });
 
 // methods
-const answer = (isConfirmed: boolean) => {
+const closePanel = () => {
   panelRef.value?.closePanel();
+  emit('close');
+}
+
+const answer = (isConfirmed: boolean) => {
+  // We don't want to emit('close') here as we are redirecting
+  panelRef.value?.closePanel();
+
   window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
 };
 
 const deleteAppointment = () => {
   apmtStore.deleteAppointment(props.appointment?.id);
-  panelRef.value?.closePanel();
-  emit('close');
+  closePanel();
 };
 
 const cancelAppointment = () => {
   apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
   cancelReason.value = '';
-  panelRef.value?.closePanel();
-  emit('close');
+  closePanel();
 };
 
 defineExpose({

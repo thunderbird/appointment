@@ -373,7 +373,7 @@ provide(paintBackgroundKey, paintBackground);
             class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg relative"
             @mouseover="(el) => paintBackground(el, appointment.calendar_color, '22')"
             @mouseout="(el) => paintBackground(el, appointment.calendar_color, undefined, true)"
-            @click="showAppointmentSlidingPanel(appointment)"
+            @click.left.exact="showAppointmentSlidingPanel(appointment)"
           >
             <td class="align-middle">
               <!-- Hidden link spanning the whole table row -->

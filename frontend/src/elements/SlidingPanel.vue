@@ -57,7 +57,7 @@ defineExpose({
 </script>
 
 <template>
-  <dialog ref="panel" :class="panelClasses" @click="handleDialogClick">
+  <dialog ref="panel" :class="panelClasses" @click="handleDialogClick" autofocus>
     <!-- Header -->
     <div :class="headerClasses">
       <div class="title">
@@ -82,7 +82,7 @@ defineExpose({
     <!-- CTA Container -->
     <div v-if="$slots.cta" class="cta-container">
       <slot name="cta" />
-    </div>
+    </div>    
   </dialog>
 </template>
 
