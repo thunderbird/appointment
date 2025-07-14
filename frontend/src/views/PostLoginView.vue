@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, computed, onMounted } from 'vue';
+import { inject, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';

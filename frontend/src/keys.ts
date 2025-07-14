@@ -3,7 +3,6 @@ import { CreateDurationType } from 'dayjs/plugin/duration';
 import { InjectionKey } from 'vue';
 import { Fetch, Refresh } from '@/models';
 import { IsoWeekday } from '@/composables/dayjs';
-import { UserManager } from "oidc-client-ts";
 
 /**
  * These are typed Symbols for use with inject/provide in VueJS
