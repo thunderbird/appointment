@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
-import { callKey, isFxaAuthKey, fxaEditProfileUrlKey } from '@/keys';
+import { callKey, fxaEditProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { SubscriberLevels } from '@/definitions';
 import { createUserStore } from '@/stores/user-store';
@@ -16,13 +16,13 @@ import { useRouter } from 'vue-router';
 // Stores
 import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
+import { isFxaAuth, isOidcAuth } from "@/composables/authSchemes";
 
 // component constants
 const router = useRouter();
 const { t } = useI18n();
 const call = inject(callKey);
 const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
-const isFxaAuth = inject(isFxaAuthKey);
 
 const appointmentStore = createAppointmentStore(call);
 const calendarStore = createCalendarStore(call);
@@ -76,7 +76,7 @@ onMounted(() => {
       </div>
     </div>
     <secondary-button
-      v-if="isFxaAuth"
+      v-if="isFxaAuth || isOidcAuth"
       class="btn-edit mb-8"
       :label="t('label.editProfile')"
       @click="editProfile"
