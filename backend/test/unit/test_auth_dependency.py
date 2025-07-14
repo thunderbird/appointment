@@ -27,7 +27,9 @@ from appointment.routes.auth import create_access_token
 
 
 class TestAuthDependency:
-    def test_get_user_from_oidc_token_introspection(self, with_db, make_pro_subscriber, make_external_connections):
+    def test_get_user_from_oidc_token_introspection(
+        self, with_db, make_pro_subscriber, make_external_connections, monkeypatch
+    ):
         # uuid works well for a random string
         oidc_id = uuid.uuid4().hex
         access_token = uuid.uuid4().hex
@@ -40,7 +42,7 @@ class TestAuthDependency:
 
             with with_db() as db:
                 with pytest.raises(InvalidTokenException):
-                    get_user_from_oidc_token_introspection(db, access_token)
+                    get_user_from_oidc_token_introspection(db, access_token, None)
 
             # Reset call amount
             introspect_token_mock.reset_mock()
@@ -50,11 +52,42 @@ class TestAuthDependency:
                 'sub': oidc_id,
                 'username': subscriber.username,
                 'email': subscriber.email,
+                'exp': (datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)).timestamp(),
             }
+
+            # Mock this redis request
+            def redis_mock_get(key, default=None):
+                return None
+
+            def redis_mock_set(key, ex, **kwargs):
+                assert str(ex) == os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS')
+
+            redis_mock = mock.MagicMock()
+            monkeypatch.setattr(redis_mock, 'get', redis_mock_get)
+            monkeypatch.setattr(redis_mock, 'set', redis_mock_set)
 
             # Test a successful return
             with with_db() as db:
-                token_subscriber = get_user_from_oidc_token_introspection(db, access_token)
+                token_subscriber = get_user_from_oidc_token_introspection(db, access_token, redis_mock)
+                introspect_token_mock.assert_called_once_with(access_token)
+                assert token_subscriber is not None
+                assert subscriber.id == token_subscriber.id
+
+            # Reset call amount
+            introspect_token_mock.reset_mock()
+
+            # Adjust the max ttl to 1 day
+            os.environ['REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS'] = '86400'
+
+            def redis_mock_set_new(key, ex, **kwargs):
+                # Since the token expires in less time than the max cache it should be about an hour instead of the day
+                # Exact value may differ due to execution time...
+                assert str(ex) < os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS')
+            monkeypatch.setattr(redis_mock, 'set', redis_mock_set_new)
+
+            # Test a successful return
+            with with_db() as db:
+                token_subscriber = get_user_from_oidc_token_introspection(db, access_token, redis_mock)
                 introspect_token_mock.assert_called_once_with(access_token)
                 assert token_subscriber is not None
                 assert subscriber.id == token_subscriber.id

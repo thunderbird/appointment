@@ -7,7 +7,6 @@ import sentry_sdk
 from fastapi import Depends, Body, Request, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import jwt
-from redis import RedisCluster, Redis
 
 from sqlalchemy.orm import Session
 
@@ -23,9 +22,7 @@ from ..utils import encrypt, decrypt, get_expiry_time_with_grace_period
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
-def get_user_from_oidc_token_introspection(db, token: str):
-    redis_instance: Redis | RedisCluster | None = get_redis()
-
+def get_user_from_oidc_token_introspection(db, token: str, redis_instance):
     # Do we have the data cached?
     encrypted_token = encrypt(token)
     token_data = None
@@ -58,14 +55,15 @@ def get_user_from_oidc_token_introspection(db, token: str):
             get_expiry_time_with_grace_period(token_data.get('exp', 0))
             - datetime.datetime.now(datetime.UTC).timestamp()
         )
-        expiry = max(expiry, 0)
+
+        expiry = max(expiry, 1)
         expiry = min(int(os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', 300)), expiry)
 
         # Cache the token data for 300 seconds or the defined env var
         redis_instance.set(
             f'{REDIS_OIDC_TOKEN_KEY}:{encrypted_token}',
             value=encrypt(json.dumps(token_data)),
-            ex=os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', expiry),
+            ex=int(expiry),
         )
 
     return subscriber
@@ -119,14 +117,18 @@ def get_user_from_token(db, token: str, require_jti=False):
 
 
 def get_subscriber(
-    request: Request, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), require_jti=False
+    request: Request,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Session = Depends(get_db),
+    redis_instance=Depends(get_redis),
+    require_jti=False,
 ):
     """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
 
     if AuthScheme.is_oidc():
-        user = get_user_from_oidc_token_introspection(db, token)
+        user = get_user_from_oidc_token_introspection(db, token, redis_instance)
     else:
         user = get_user_from_token(db, token, require_jti)
 

@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 DATEFMT = '%Y-%m-%d'
 
+REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_FALLBACK = 300
+
 now = datetime.today()
 DAY1 = now.strftime(DATEFMT)
 DAY2 = (now + timedelta(days=1)).strftime(DATEFMT)
