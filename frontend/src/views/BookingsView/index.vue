@@ -11,9 +11,9 @@ import {
 } from '@/definitions';
 import { timeFormat } from '@/utils';
 import AppointmentModal from '@/components/AppointmentModal.vue';
-import BookingsMultiSelectFilter from '@/components/BookingsMultiSelectFilter.vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey, refreshKey } from '@/keys';
+import BookingsMultiSelectFilter from './components/BookingsMultiSelectFilter.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -145,6 +145,12 @@ onMounted(async () => {
     showAppointmentModal(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
   }
 });
+</script>
+
+<script lang="ts">
+export default {
+  name: 'BookingsView'
+}
 </script>
 
 <template>

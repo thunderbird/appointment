@@ -11,7 +11,7 @@ import LogoutView from '@/views/LogoutView.vue';
 
 // lazy loaded components
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
-const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView.vue'));
+const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView/index.vue'));
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
