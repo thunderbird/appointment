@@ -368,7 +368,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install virtualenv
-          cd packages/send/pulumi
+          cd pulumi
           virtualenv ./venv
 
       - name: Unzip ECR tag (Pulumi)
@@ -383,6 +383,7 @@ jobs:
         shell: bash
         env:
           ECR_TAG: "${{ steps.get_ecr_tag_pulumi.outputs.new_ecr_tag }}"
+          PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
         run: |
           # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
           # to do with the GHA workflow "env" settings above.
@@ -407,7 +408,7 @@ jobs:
           # Set up the Pulumi environment and update the service
           export PULUMI_CONFIG_PASSPHRASE="${{ secrets.PULUMI_PASSPHRASE }}"
           source ./venv/bin/activate
-          pulumi login s3://tb-send-suite-pulumi
+          pulumi login
           pulumi stack select stage
           pulumi up -y --diff --target \
             'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef'

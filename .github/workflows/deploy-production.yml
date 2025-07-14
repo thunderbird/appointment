@@ -307,13 +307,15 @@ jobs:
 
       - name: Deploy to prod
         shell: bash
+        env:
+          PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
         run: |
           # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
           # to do with the GHA workflow "env" settings.
           export PATH="/home/runner/.pulumi/bin:$PATH"
 
           # Create a YAML config stump containing only the nested tree leading to the image tag update
-          cd packages/send/pulumi
+          cd pulumi
           cat << EOF > newimage.yaml
           resources:
             tb:fargate:FargateClusterWithLogging:
@@ -330,7 +332,7 @@ jobs:
 
           # Set up the Pulumi environment and update the service
           source ./venv/bin/activate
-          pulumi login s3://tb-send-suite-pulumi
+          pulumi login
           pulumi stack select prod
           TBPULUMI_DISABLE_PROTECTION=True \
             pulumi up -y --diff --target \
