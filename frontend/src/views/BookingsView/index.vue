@@ -10,10 +10,11 @@ import {
   BookingsViewTypes,
 } from '@/definitions';
 import { timeFormat } from '@/utils';
-import AppointmentModal from '@/components/AppointmentModal.vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey, refreshKey } from '@/keys';
-import BookingsMultiSelectFilter from './components/BookingsMultiSelectFilter.vue';
+
+import AppointmentMultiSelectFilter from './components/AppointmentMultiSelectFilter.vue';
+import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -44,6 +45,9 @@ const sortDirection = ref<'asc' | 'desc'>('asc');
 
 // Handle data view
 const view = ref(BookingsViewTypes.List);
+
+// handle appointment sliding panel
+const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>()
 
 // Handle filtered appointments list
 const filteredAppointments = computed(() => {
@@ -124,16 +128,18 @@ const getSortIndicator = (column: string) => {
 };
 
 // handle single appointment modal
-const showAppointment = ref(null);
-const showAppointmentModal = (appointment) => {
-  showAppointment.value = appointment;
-  router.replace(`/appointments/${appointment.slug}`);
-};
-const closeAppointmentModal = () => {
-  showAppointment.value = null;
+const selectedAppointment = ref(null);
 
+const showAppointmentSlidingPanel = (appointment) => {
+  selectedAppointment.value = appointment;
+  appointmentSlidingPanelRef.value?.showPanel()
+  router.replace(`/bookings/${appointment.slug}`);
+};
+
+const handleCloseAppointmentSlidingPanel = () => {
+  selectedAppointment.value = null;
   // Shuffle them back to the appointments route.
-  router.replace(`/appointments`);
+  router.replace('/bookings');
 };
 
 // initially load data when component gets remounted
@@ -142,7 +148,7 @@ onMounted(async () => {
 
   // If we've got a slug
   if (route.params?.slug) {
-    showAppointmentModal(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
+    showAppointmentSlidingPanel(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
   }
 });
 </script>
@@ -158,8 +164,11 @@ export default {
   <div class="page-title-area">
     <div class="page-title">{{ t('label.appointments') }}</div>
     <div class="page-controls">
-      <bookings-multi-select-filter :options="filterOptions" :selected="selectedFilters"
-        @update:selected="selectedFilters = $event" />
+      <appointment-multi-select-filter
+        :options="filterOptions"
+        :selected="selectedFilters"
+        @update:selected="selectedFilters = $event"
+      />
       <label class="sort-checkbox-label">
         <input type="checkbox" v-model="unconfirmedFirst" class="sort-checkbox" />
         <span class="sort-label">{{ t('label.unconfirmedFirst') }}</span>
@@ -208,9 +217,20 @@ export default {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(appointment, i) in filteredAppointments" :key="i" class="table-row"
-            @click="showAppointmentModal(appointment)">
+          <tr
+            v-for="(appointment, i) in filteredAppointments"
+            :key="i"
+            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg relative"
+            @click.left.exact="showAppointmentSlidingPanel(appointment)"
+          >
             <td class="table-cell">
+              <!-- Hidden link spanning the whole table row -->
+              <router-link
+                :to="`/bookings/${appointment.slug}`"
+                class="absolute inset-0 z-10 opacity-0"
+                aria-label="Open appointment in new tab"
+              ></router-link>
+
               <span>{{ dj(appointment?.slots[0].start).format('LL') }}</span>
             </td>
             <td class="table-cell">
@@ -237,7 +257,11 @@ export default {
     </div>
   </div>
 
-  <appointment-modal :open="showAppointment !== null" :appointment="showAppointment" @close="closeAppointmentModal" />
+  <appointment-sliding-panel
+    ref="appointmentSlidingPanelRef"
+    :appointment="selectedAppointment"
+    @close="handleCloseAppointmentSlidingPanel"
+  />
 </template>
 
 <style scoped>
