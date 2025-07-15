@@ -185,34 +185,66 @@ export default {
       <!-- appointments list -->
       <table v-show="view === BookingsViewTypes.List" class="appointments-table"
         data-testid="bookings-appointments-list-table">
+        <caption>
+          <span class="sr-only">
+            {{ t("label.columnHeadersSortable") }}
+          </span>
+        </caption>
         <thead>
           <tr class="table-header-row">
-            <th class="table-header">
+            <th
+              class="table-header"
+              :aria-sort="sortColumn === 'date' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+            >
               <button @click="handleColumnSort('date')" class="sortable-header sortable-header-with-border">
-                <component :is="getSortIndicator('date')" v-if="getSortIndicator('date')" class="sort-indicator" />
+                <component
+                  :is="getSortIndicator('date')"
+                  v-if="getSortIndicator('date')"
+                  class="sort-indicator"
+                  aria-hidden="true"
+                />
                 {{ t("label.date") }}
               </button>
             </th>
-            <th class="table-header">
+            <th
+              class="table-header"
+              :aria-sort="sortColumn === 'date' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+            >
               <button @click="handleColumnSort('date')" class="sortable-header sortable-header-with-border">
                 {{ t("label.time") }}
               </button>
             </th>
-            <th class="table-header">
+            <th
+              class="table-header"
+              :aria-sort="sortColumn === 'title' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+            >
               <button @click="handleColumnSort('title')" class="sortable-header sortable-header-with-border">
-                <component :is="getSortIndicator('title')" v-if="getSortIndicator('title')" class="sort-indicator" />
+                <component
+                  :is="getSortIndicator('title')"
+                  v-if="getSortIndicator('title')"
+                  class="sort-indicator"
+                  aria-hidden="true"
+                />
                 {{ t("label.meetingTitle") }}
               </button>
             </th>
             <th class="table-header status-header">
               <div class="status-header-content">
-                &nbsp;
+                <span aria-hidden="true">&nbsp;</span>
+                <span class="sr-only">{{ t("label.status") }}</span>
               </div>
             </th>
-            <th class="table-header">
+            <th
+              class="table-header"
+              :aria-sort="sortColumn === 'calendar' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+            >
               <button @click="handleColumnSort('calendar')" class="sortable-header">
-                <component :is="getSortIndicator('calendar')" v-if="getSortIndicator('calendar')"
-                  class="sort-indicator" />
+                <component
+                  :is="getSortIndicator('calendar')"
+                  v-if="getSortIndicator('calendar')"
+                  class="sort-indicator"
+                  aria-hidden="true"
+                />
                 {{ t("label.calendar") }}
               </button>
             </th>

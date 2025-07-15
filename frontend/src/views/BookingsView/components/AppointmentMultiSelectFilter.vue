@@ -121,7 +121,6 @@ onMounted(() => {
   color: var(--colour-ti-base);
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
 
   &:hover {
     background-color: var(--colour-neutral-border);
@@ -131,11 +130,10 @@ onMounted(() => {
 .chevron-icon {
   height: 1rem;
   width: 1rem;
-  transition: transform 0.2s;
-}
 
-.chevron-icon.rotated {
-  transform: rotate(180deg);
+  &.rotated {
+    transform: rotate(180deg);
+  }
 }
 
 .dropdown-menu {
@@ -171,10 +169,6 @@ onMounted(() => {
 }
 
 /* Transition classes */
-.dropdown-enter-active {
-  transition: all 0.2s ease-out;
-}
-
 .dropdown-enter-from {
   opacity: 0;
   transform: scale(0.95);
@@ -185,10 +179,6 @@ onMounted(() => {
   transform: scale(1);
 }
 
-.dropdown-leave-active {
-  transition: all 0.15s ease-in;
-}
-
 .dropdown-leave-from {
   opacity: 1;
   transform: scale(1);
@@ -197,5 +187,23 @@ onMounted(() => {
 .dropdown-leave-to {
   opacity: 0;
   transform: scale(0.95);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .filter-trigger {
+    transition: background-color 0.2s;
+  }
+
+  .chevron-icon {
+    transition: transform 0.2s;
+  }
+
+  .dropdown-enter-active {
+    transition: all 0.2s ease-out;
+  }
+
+  .dropdown-leave-active {
+    transition: all 0.15s ease-in;
+  }
 }
 </style>

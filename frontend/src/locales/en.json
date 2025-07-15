@@ -206,6 +206,7 @@
     "closed": "Closed",
     "code": "Code",
     "color": "Color",
+    "columnHeadersSortable": "Column headers with buttons are sortable",
     "confirm": "Confirm",
     "confirmed": "Confirmed",
     "confirmBooking": "Confirm booking",

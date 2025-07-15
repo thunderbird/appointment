@@ -206,6 +206,7 @@
     "closed": "Geschlossen",
     "code": "Code",
     "color": "Farbe",
+    "columnHeadersSortable": "Spaltenüberschriften mit Schaltflächen sind sortierbar",
     "confirm": "Bestätigen",
     "confirmed": "Bestätigt",
     "confirmBooking": "Buchung bestätigen",
