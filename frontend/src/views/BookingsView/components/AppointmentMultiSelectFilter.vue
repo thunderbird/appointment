@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
 import { IconChevronDown } from '@tabler/icons-vue';
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 
 interface FilterOption {
   value: string | number;
@@ -19,6 +20,18 @@ const props = defineProps<Props>();
 const emit = defineEmits(['update:selected']);
 
 const isOpen = ref(false);
+
+// Create a reactive object to track checkbox states
+const checkboxStates = ref<Record<string | number, boolean>>({});
+
+// Initialize checkbox states based on selected props
+const initializeCheckboxStates = () => {
+  const states: Record<string | number, boolean> = {};
+  props.options.forEach(option => {
+    states[option.value] = props.selected.includes(option.value);
+  });
+  checkboxStates.value = states;
+};
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
@@ -38,11 +51,10 @@ const toggleOption = (option: FilterOption) => {
     newSelected.push(option.value);
   }
 
-  emit('update:selected', newSelected);
-};
+  // Update the checkbox state to match
+  checkboxStates.value[option.value] = newSelected.includes(option.value);
 
-const isSelected = (option: FilterOption) => {
-  return props.selected.includes(option.value);
+  emit('update:selected', newSelected);
 };
 
 // Display text for the pill
@@ -57,6 +69,10 @@ const displayText = computed(() => {
   });
 
   return selectedLabels.join(', ');
+});
+
+onMounted(() => {
+  initializeCheckboxStates();
 });
 </script>
 
@@ -74,11 +90,14 @@ const displayText = computed(() => {
       leave-from-class="dropdown-leave-from" leave-to-class="dropdown-leave-to">
       <div v-show="isOpen" class="dropdown-menu">
         <div class="options-list">
-          <label v-for="option in options" :key="option.value" class="option-item">
-            <input type="checkbox" :checked="isSelected(option)" @change="toggleOption(option)"
-              class="option-checkbox" />
-            <span class="option-label">{{ option.label }}</span>
-          </label>
+          <div v-for="option in options" :key="option.value" class="option-item">
+            <checkbox-input
+              :name="`filter-${option.value}`"
+              :label="option.label"
+              v-model="checkboxStates[option.value]"
+              @change="toggleOption(option)"
+            />
+          </div>
         </div>
       </div>
     </transition>
@@ -148,36 +167,7 @@ const displayText = computed(() => {
 }
 
 .option-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: 0.25rem;
   padding: 0.375rem 0.5rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: var(--colour-neutral-subtle);
-  }
-}
-
-.option-checkbox {
-  height: 1rem;
-  width: 1rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--colour-neutral-border);
-  color: var(--colour-primary-default);
-  cursor: pointer;
-
-  &:focus {
-    outline: 2px solid var(--colour-primary-default);
-    outline-offset: 2px;
-  }
-}
-
-.option-label {
-  color: var(--colour-ti-base);
 }
 
 /* Transition classes */

@@ -46,7 +46,7 @@ def get_by_subscriber(db: Session, subscriber_id: int, skip: int | None = None, 
 
     if limit is not None:
         query = query.limit(limit)
-    
+
     return query.all()
 
 

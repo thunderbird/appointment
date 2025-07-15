@@ -47,13 +47,6 @@ const bookingStatusInfo = computed(() => {
     };
   }
 
-  if (status.value === BookingStatus.Requested) {
-    return {
-      label: t('label.requested'),
-      color: 'status-requested'
-    };
-  }
-
   return {
     label: t('label.unconfirmed'),
     color: 'status-unconfirmed'
@@ -252,7 +245,7 @@ defineExpose({
 }
 
 .status-unconfirmed {
-  color: var(--colour-ti-muted);
+  color: var(--colour-ti-critical);
 }
 
 /* Time slots section */

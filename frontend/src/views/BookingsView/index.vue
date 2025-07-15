@@ -15,6 +15,7 @@ import { dayjsKey, refreshKey } from '@/keys';
 
 import AppointmentMultiSelectFilter from './components/AppointmentMultiSelectFilter.vue';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -169,10 +170,11 @@ export default {
         :selected="selectedFilters"
         @update:selected="selectedFilters = $event"
       />
-      <label class="sort-checkbox-label">
-        <input type="checkbox" v-model="unconfirmedFirst" class="sort-checkbox" />
-        <span class="sort-label">{{ t('label.unconfirmedFirst') }}</span>
-      </label>
+      <checkbox-input
+        name="unconfirmed-first"
+        :label="t('label.unconfirmedFirst')"
+        v-model="unconfirmedFirst"
+      />
     </div>
   </div>
 
@@ -245,8 +247,11 @@ export default {
               <span>{{ appointment.title }}</span>
             </td>
             <td class="table-cell status-cell">
-              <span v-if="appointment?.slots[0].booking_status === BookingStatus.Requested">{{ t('label.unconfirmed')
-                }}</span>
+              <span
+                v-if="appointment?.slots[0].booking_status === BookingStatus.Requested"
+              >
+                {{ t('label.unconfirmed')}}
+              </span>
             </td>
             <td class="table-cell">
               <span>{{ appointment.calendar_title }}</span>
@@ -287,6 +292,10 @@ export default {
   flex-direction: row;
   align-items: center;
   gap: 1rem;
+
+  & .checkbox-input-wrapper {
+    width: auto;
+  }
 }
 
 .page-content {
@@ -360,6 +369,7 @@ export default {
   text-align: center;
   text-transform: uppercase;
   min-width: 120px;
+  color: var(--colour-ti-critical)
 }
 
 /* Sortable header styles */
@@ -397,41 +407,5 @@ export default {
   height: 1rem;
   margin-block-start: 0.2rem;
   color: var(--colour-ti-base);
-}
-
-/* Checkbox styles */
-.sort-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-.sort-checkbox {
-  height: 1rem;
-  width: 1rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--colour-neutral-border);
-  background-color: var(--colour-neutral-base);
-  color: var(--colour-primary-default);
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:focus {
-    outline: 2px solid var(--colour-primary-default);
-    outline-offset: 2px;
-  }
-
-  &:checked {
-    background-color: var(--colour-primary-default);
-    border-color: var(--colour-primary-default);
-  }
-}
-
-.sort-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--colour-ti-base);
-  cursor: pointer;
 }
 </style>
