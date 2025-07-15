@@ -203,6 +203,7 @@ defineExpose({
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
+  background-color: var(--colour-neutral-base);
 }
 
 .cta-container {

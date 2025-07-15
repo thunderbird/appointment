@@ -226,11 +226,7 @@ defineExpose({
 @import '@/assets/styles/custom-media.pcss';
 
 .appointment-content {
-  color: #6b7280;
-}
-
-.appointment-content :deep(.dark) {
-  color: #d1d5db;
+  color: var(--colour-ti-base);
 }
 
 .position-center {
