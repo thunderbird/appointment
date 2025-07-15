@@ -238,7 +238,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build --build-arg "RELEASE_VERSION=$RELEASE_VERSION" -t $ECR_TAG ./backend -f ./backend/deploy.dockerfile
+          docker build --build-arg "RELEASE_VERSION=$RELEASE_VERSION" -t $ECR_TAG ./backend -f ./backend/Dockerfile
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > ecr_tag.txt
