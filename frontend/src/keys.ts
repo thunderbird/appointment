@@ -9,7 +9,7 @@ import { IsoWeekday } from '@/composables/dayjs';
  */
 
 // Provides Dayjs class functionality as well as the timezone plugin, customParseFormat and related keys
-type DayjsType = ((_?:ConfigType) => Dayjs) & {
+type DayjsType = ((_?: ConfigType) => Dayjs) & {
   tz: DayjsTimezone,
   max: (...dayjs: Dayjs[]) => Dayjs | null,
   min: (...dayjs: Dayjs[]) => Dayjs | null,
@@ -26,10 +26,7 @@ export const bookingUrlKey = Symbol('bookingUrl') as InjectionKey<string>;
 export const shortUrlKey = Symbol('shortUrl') as InjectionKey<string>;
 
 // Provide environment and authentication keys
-export const isPasswordAuthKey = Symbol('isPasswordAuth') as InjectionKey<boolean>;
-export const isFxaAuthKey = Symbol('isFxaAuth') as InjectionKey<boolean>;
 export const fxaEditProfileUrlKey = Symbol('fxaEditProfileUrl') as InjectionKey<string>;
-export const isAccountsAuthKey = Symbol('isAccountsAuth') as InjectionKey<boolean>;
 
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;

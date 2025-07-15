@@ -10,6 +10,7 @@ DATETIMEFMT = '%Y-%m-%dT%H:%M:%SZ'
 # list of redis keys
 REDIS_REMOTE_EVENTS_KEY = 'rmt_events'
 REDIS_USER_SESSION_PROFILE_KEY = ':1:tb_accounts_user_session'  # Used with shared redis cache
+REDIS_OIDC_TOKEN_KEY = 'introspect_token'
 
 APP_ENV_DEV = 'dev'
 APP_ENV_TEST = 'test'
@@ -37,6 +38,7 @@ class AuthScheme(StrEnum):
     PASSWORD = 'password'
     FXA = 'fxa'
     ACCOUNTS = 'accounts'
+    OIDC = 'oidc'
 
     @staticmethod
     def is_fxa():
@@ -49,3 +51,7 @@ class AuthScheme(StrEnum):
     @staticmethod
     def is_accounts():
         return os.getenv('AUTH_SCHEME') == AuthScheme.ACCOUNTS
+
+    @staticmethod
+    def is_oidc():
+        return os.getenv('AUTH_SCHEME') == AuthScheme.OIDC

@@ -1,73 +1,96 @@
 import datetime
-import json
 import os
+import uuid
+from unittest.mock import patch
 
 import pytest
 from freezegun import freeze_time
 from unittest import mock
 
-from starlette.requests import Request
 
 from appointment.controller.auth import signed_url_by_subscriber
-from appointment.database import repo, models
-from appointment.defines import REDIS_USER_SESSION_PROFILE_KEY
+from appointment.database import repo
+from appointment.database.models import ExternalConnectionType
 from appointment.dependencies.auth import (
     get_user_from_token,
     get_subscriber,
     get_admin_subscriber,
     get_subscriber_from_schedule_or_signed_url,
-    get_user_from_accounts_session,
+    get_user_from_oidc_token_introspection,
 )
-from appointment.exceptions.validation import InvalidTokenException, InvalidPermissionLevelException, \
-    InvalidLinkException
+from appointment.exceptions.validation import (
+    InvalidTokenException,
+    InvalidPermissionLevelException,
+    InvalidLinkException,
+)
 from appointment.routes.auth import create_access_token
 
 
 class TestAuthDependency:
-    def test_get_user_from_session(self, with_db, with_l10n, make_pro_subscriber, make_external_connections):
+    def test_get_user_from_oidc_token_introspection(
+        self, with_db, make_pro_subscriber, make_external_connections, monkeypatch
+    ):
+        # uuid works well for a random string
+        oidc_id = uuid.uuid4().hex
+        access_token = uuid.uuid4().hex
         subscriber = make_pro_subscriber()
+        make_external_connections(subscriber_id=subscriber.id, type_id=oidc_id, type=ExternalConnectionType.oidc)
 
-        # Create a connection to FXA and Accounts
-        fxa_id = 'fxa-123'
-        accounts_id = 'accounts-123'
-        make_external_connections(
-            subscriber.id, subscriber.email, models.ExternalConnectionType.fxa, fxa_id
-        )
-        make_external_connections(
-            subscriber.id, subscriber.email, models.ExternalConnectionType.accounts, accounts_id
-        )
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as introspect_token_mock:
+            # Test that invalid token raises if introspect_token returns None
+            introspect_token_mock.return_value = None
 
-        session_id = 'abc123'
-        request = Request({'type': 'http', 'session': {'accounts_session': session_id}})
-
-        class MockGetSharedRedis:
-            def get(self, key):
-                assert key == f'{REDIS_USER_SESSION_PROFILE_KEY}.{session_id}'
-                return json.dumps(
-                    {
-                        '_version': 1,
-                        'uuid': accounts_id,
-                        'username': subscriber.username,
-                        'display_name': subscriber.name,
-                        'full_name': '',
-                        'email': subscriber.email,
-                        'fxa_id': fxa_id,
-                        'language': 'en',
-                        'avatar_url': None,
-                        'timezone': 'UTC',
-                        'access': ['appointment'],
-                        'date_joined': '2024-11-27T19:38:27.859768Z',
-                        'last_login': '2025-03-20T16:57:55.643637Z',
-                        'created_at': '2024-11-27T19:38:28.132151Z',
-                        'updated_at': '2025-03-20T16:57:55.635766Z',
-                    }
-                )
-
-        # Mock where it's imported
-        with mock.patch('appointment.dependencies.auth.get_shared_redis', MockGetSharedRedis):
             with with_db() as db:
-                subscriber = get_user_from_accounts_session(request, db)
-                assert subscriber
+                with pytest.raises(InvalidTokenException):
+                    get_user_from_oidc_token_introspection(db, access_token, None)
+
+            # Reset call amount
+            introspect_token_mock.reset_mock()
+
+            # Return some fake token data
+            introspect_token_mock.return_value = {
+                'sub': oidc_id,
+                'username': subscriber.username,
+                'email': subscriber.email,
+                'exp': (datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)).timestamp(),
+            }
+
+            # Mock this redis request
+            def redis_mock_get(key, default=None):
+                return None
+
+            def redis_mock_set(key, ex, **kwargs):
+                assert str(ex) == os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS')
+
+            redis_mock = mock.MagicMock()
+            monkeypatch.setattr(redis_mock, 'get', redis_mock_get)
+            monkeypatch.setattr(redis_mock, 'set', redis_mock_set)
+
+            # Test a successful return
+            with with_db() as db:
+                token_subscriber = get_user_from_oidc_token_introspection(db, access_token, redis_mock)
+                introspect_token_mock.assert_called_once_with(access_token)
+                assert token_subscriber is not None
+                assert subscriber.id == token_subscriber.id
+
+            # Reset call amount
+            introspect_token_mock.reset_mock()
+
+            # Adjust the max ttl to 1 day
+            os.environ['REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS'] = '86400'
+
+            def redis_mock_set_new(key, ex, **kwargs):
+                # Since the token expires in less time than the max cache it should be about an hour instead of the day
+                # Exact value may differ due to execution time...
+                assert str(ex) < os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS')
+            monkeypatch.setattr(redis_mock, 'set', redis_mock_set_new)
+
+            # Test a successful return
+            with with_db() as db:
+                token_subscriber = get_user_from_oidc_token_introspection(db, access_token, redis_mock)
+                introspect_token_mock.assert_called_once_with(access_token)
+                assert token_subscriber is not None
+                assert subscriber.id == token_subscriber.id
 
     def test_get_user_from_token(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
@@ -263,7 +286,6 @@ class TestAuthDependency:
 
             # Now that we don't have a schedule slug, this will succeed.
             retrieved_subscriber = get_subscriber_from_schedule_or_signed_url(url, db)
-
 
         assert retrieved_subscriber.id == subscriber.id
         assert retrieved_subscriber.email == subscriber.email

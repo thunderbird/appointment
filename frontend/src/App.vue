@@ -15,10 +15,7 @@ import {
   apiUrlKey,
   callKey,
   refreshKey,
-  isPasswordAuthKey,
-  isFxaAuthKey,
   fxaEditProfileUrlKey,
-  isAccountsAuthKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -29,7 +26,8 @@ import { useUserStore } from '@/stores/user-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
-import { AuthSchemes } from '@/definitions';
+import {userManager} from "@/composables/oidcUserManager";
+import { isOidcAuth } from "@/composables/authSchemes";
 
 // component constants
 const user = useUserStore();
@@ -51,28 +49,25 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
-const isAccountsAuth = () => import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Accounts;
+provide(fxaEditProfileUrlKey, import.meta.env?.VITE_AUTH_EDIT_PROFILE);
 
-provide(isPasswordAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password);
-provide(isFxaAuthKey, import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa);
-provide(fxaEditProfileUrlKey, import.meta.env?.VITE_FXA_EDIT_PROFILE);
-provide(isAccountsAuthKey, isAccountsAuth());
+if (isOidcAuth) {
+  /**
+   * The user is reloaded after the access token is refreshed
+   * So let's use this event to silently update our copy of the access token
+   */
+  userManager.events.addUserLoaded(async () => {
+    const newAccessToken = (await userManager.getUser())?.access_token;
+    console.debug('[userManager] User Loaded Evt, is new token the same?', newAccessToken === user.data.accessToken)
+    user.data.accessToken = newAccessToken;
+  });
+}
 
 // handle auth and fetch
 const call = createFetch({
   baseUrl: apiUrl,
   options: {
-    beforeFetch({ options }) {
-      if (isAccountsAuth) {
-        // Cookies are somehow still stored as a giant `;` separated string, so do a bunch of array nonsense to retrieve our token
-        const csrf = window.document.cookie?.split('; csrftoken=')?.pop()?.split(';')?.shift()
-          ?.trim() ?? null;
-        // If you change csrf safe_methods parameter, change this too!
-        if (!['GET', 'OPTIONS', 'HEAD', 'TRACE'].includes(options?.method ?? 'GET') && csrf) {
-          options.headers['X-CSRFToken'] = csrf;
-        }
-      }
-
+    beforeFetch: async ({ options }) => {
       if (user?.authenticated) {
         const token = user.data.accessToken;
         // @ts-expect-error ignore headers type error
@@ -322,7 +317,7 @@ onMounted(async () => {
     >
       {{ notificationMessage }}
     </site-notification>
-    <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems" />
+    <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
     <main
       class="pt-24"
       :class="{

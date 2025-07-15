@@ -4,7 +4,7 @@
 export enum AuthSchemes {
   Password = 'password',
   Fxa = 'fxa',
-  Accounts = 'accounts'
+  Oidc = 'oidc',
 }
 
 /**
@@ -175,7 +175,8 @@ export enum ExternalConnectionProviders {
   Google = 2,
   Zoom = 3,
   Caldav = 4,
-  Accounts = 5,
+  _DEPRECATED = 5,
+  Oidc = 6,
 }
 
 /**
@@ -211,7 +212,10 @@ export enum AlertSchemes {
  * Used as the session storage key for the location the user wanted to go to before logging in.
  */
 export const LOGIN_REDIRECT_KEY = 'loginRedirect';
-
+/**
+ * Used as the session storage key for the registration invite code.
+ */
+export const INVITE_CODE_KEY = 'inviteCode';
 /**
  * Data types for table row items
  */

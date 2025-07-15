@@ -4,19 +4,21 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
 import {
-  dayjsKey, callKey, isPasswordAuthKey, isFxaAuthKey, isAccountsAuthKey,
+  dayjsKey, callKey
 } from '@/keys';
 import {
   BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
 } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
-import { MetricEvents } from '@/definitions';
+import { INVITE_CODE_KEY, MetricEvents } from '@/definitions';
 import GenericModal from '@/components/GenericModal.vue';
 import HomeView from '@/views/HomeView.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import WordMark from '@/elements/WordMark.vue';
 import { handleFormError } from '@/utils';
+import { userManager } from "@/composables/oidcUserManager";
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
 
 // component constants
 const { t } = useI18n();
@@ -24,9 +26,6 @@ const call = inject(callKey);
 const dj = inject(dayjsKey);
 const route = useRoute();
 const router = useRouter();
-const isPasswordAuth = inject(isPasswordAuthKey);
-const isFxaAuth = inject(isFxaAuthKey);
-const isAccountsAuth = inject(isAccountsAuthKey);
 const user = createUserStore(call);
 
 // Don't show the invite code field, only the "Join the waiting list" part
@@ -34,7 +33,7 @@ const hideInviteField = ref(false);
 const isLoading = ref(false);
 const formRef = ref();
 
- 
+
 enum LoginSteps {
   Login = 1,
   SignUp = 2,
@@ -132,8 +131,18 @@ const login = async () => {
     }
   }
 
-  if (isFxaAuth || isAccountsAuth) {
-    const apiUrl = isFxaAuth ? 'fxa_login' : 'auth/accounts';
+
+  if (isOidcAuth) {
+    // Set the invite code if we have it
+    if (inviteCode.value) {
+      window.sessionStorage?.setItem(INVITE_CODE_KEY, inviteCode.value.trim());
+    }
+    await userManager.signinRedirect({
+      prompt: 'login',
+      login_hint: email.value,
+    });
+  } else if (isFxaAuth) {
+    const apiUrl = 'fxa_login';
     const params = new URLSearchParams({
       email: email.value,
       timezone: dj.tz.guess(),
@@ -235,7 +244,8 @@ const onEnter = () => {
             v-model="email"
             :required="true"
             data-testid="login-email-input"
-          >{{ t('login.form.email') }}</text-input>
+          >{{ t('login.form.email') }}
+          </text-input>
           <text-input
             v-if="isPasswordAuth"
             name="password"
@@ -243,14 +253,16 @@ const onEnter = () => {
             :required="true"
             type="password"
             data-testid="login-password-input"
-          >{{ t('label.password') }}</text-input>
+          >{{ t('label.password') }}
+          </text-input>
           <text-input
             v-if="loginStep === LoginSteps.SignUp && !hideInviteField"
             name="inviteCode"
             v-model="inviteCode"
             :help="t('login.form.no-invite-code')"
             data-testid="login-invite-code-input"
-          >{{ t('label.inviteCode', { 'count': 1 }) }}</text-input>
+          >{{ t('label.inviteCode', { 'count': 1 }) }}
+          </text-input>
         </form>
       </div>
       <template v-slot:actions>

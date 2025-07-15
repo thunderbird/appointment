@@ -10,31 +10,63 @@ import jwt
 
 from sqlalchemy.orm import Session
 
-from .database import get_shared_redis
 from ..controller.apis.accounts_client import AccountsClient
+from ..controller.apis.oidc_client import OIDCClient
 from ..database import repo, models
-from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
-from ..dependencies.database import get_db
+from ..defines import AuthScheme, REDIS_OIDC_TOKEN_KEY
+from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
+from ..utils import encrypt, decrypt, get_expiry_time_with_grace_period
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
 
 
-def get_user_from_accounts_session(request, db):
-    user_session_id = request.session.get('accounts_session')
-    if not user_session_id:
-        return None
+def get_user_from_oidc_token_introspection(db, token: str, redis_instance):
+    # Do we have the data cached?
+    encrypted_token = encrypt(token)
+    token_data = None
+    cache_hit = False
 
-    shared_redis_cache = get_shared_redis()
-    user_profile = shared_redis_cache.get(f'{REDIS_USER_SESSION_PROFILE_KEY}.{user_session_id}')
-    if not user_profile:
-        return None
+    if redis_instance:
+        # Retrieve the cached token data
+        encrypted_token_data = redis_instance.get(f'{REDIS_OIDC_TOKEN_KEY}:{encrypted_token}')
+        if encrypted_token_data:
+            token_data = json.loads(decrypt(encrypted_token_data))
 
-    user_profile = json.loads(user_profile)
+    # If redis isn't setup, or we don't have any cached token data then do the introspection
+    if not token_data:
+        oidc_client = OIDCClient()
+        token_data = oidc_client.introspect_token(token)
+    else:
+        cache_hit = True
 
-    # Look up the account data
-    return repo.external_connection.get_subscriber_by_accounts_uuid(db, user_profile.get('uuid'))
+    # Still nothing? Error out.
+    if not token_data:
+        raise InvalidTokenException()
+
+    subscriber = repo.external_connection.get_subscriber_by_oidc_id(db, token_data.get('sub'))
+    if not subscriber:
+        raise InvalidTokenException()
+
+    if redis_instance and not cache_hit:
+        # If the token expires in less time than the default expiry time, use that.
+        expiry = (
+            get_expiry_time_with_grace_period(token_data.get('exp', 0))
+            - datetime.datetime.now(datetime.UTC).timestamp()
+        )
+
+        expiry = max(expiry, 1)
+        expiry = min(int(os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS', 300)), expiry)
+
+        # Cache the token data for 300 seconds or the defined env var
+        redis_instance.set(
+            f'{REDIS_OIDC_TOKEN_KEY}:{encrypted_token}',
+            value=encrypt(json.dumps(token_data)),
+            ex=int(expiry),
+        )
+
+    return subscriber
 
 
 def get_user_from_token(db, token: str, require_jti=False):
@@ -85,14 +117,18 @@ def get_user_from_token(db, token: str, require_jti=False):
 
 
 def get_subscriber(
-    request: Request, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), require_jti=False
+    request: Request,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: Session = Depends(get_db),
+    redis_instance=Depends(get_redis),
+    require_jti=False,
 ):
     """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
 
-    if AuthScheme.is_accounts():
-        user = get_user_from_accounts_session(request, db)
+    if AuthScheme.is_oidc():
+        user = get_user_from_oidc_token_introspection(db, token, redis_instance)
     else:
         user = get_user_from_token(db, token, require_jti)
 

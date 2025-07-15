@@ -8,7 +8,9 @@ import {
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
-import { ColourSchemes, AuthSchemes } from '@/definitions';
+import { ColourSchemes } from '@/definitions';
+import { userManager } from "@/composables/oidcUserManager";
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
 
 const initialUserConfigObject = {
   language: null,
@@ -64,7 +66,7 @@ export const useUserStore = defineStore('user', () => {
     data.value.settings = structuredClone(defaultSettings);
   } else {
     // We have a settings object? See if all keys exists and update only the missing ones
-    
+
     Object.keys(defaultSettings).forEach(key => {
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
@@ -94,7 +96,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * Return the first slug key, or null if they don't have one.
    */
-  const mySlug = computed((): string|null => {
+  const mySlug = computed((): string | null => {
     const slugs = data?.value?.scheduleSlugs ?? {};
     const slugKeys = Object.keys(slugs);
     if (slugKeys.length == 0) {
@@ -150,7 +152,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * True if user has a valid access token
    */
-  const authenticated = computed((): boolean => data.value.accessToken !== null);
+  const authenticated = computed((): boolean => !!data.value.accessToken);
 
   const $reset = () => {
     if (usePosthog) {
@@ -262,10 +264,13 @@ export const useUserStore = defineStore('user', () => {
    * @param username an auth string, could be username, one time token, or session id
    * @param password or null if fxa authentication
    */
-  const login = async (username: string, password: string|null): Promise<Error> => {
+  const login = async (username: string, password: string | null): Promise<Error> => {
     $reset();
 
-    if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Password) {
+    if (isOidcAuth) {
+      data.value.accessToken = (await userManager.getUser())?.access_token ?? null;
+      return await profile();
+    } else if (isPasswordAuth) {
       // fastapi wants us to send this as formdata :|
       const formData = new FormData(document.createElement('form'));
       formData.set('username', username);
@@ -277,7 +282,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
       data.value.accessToken = tokenData.value.access_token;
-    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Fxa) {
+    } else if (isFxaAuth) {
       // We get a one-time token back from the api, use it to fetch the real access token
       const { error, data: tokenData }: TokenResponse = await call.value('fxa-token', {
         headers: {
@@ -290,30 +295,33 @@ export const useUserStore = defineStore('user', () => {
       }
 
       data.value.accessToken = tokenData.value.access_token;
-    } else if (import.meta.env.VITE_AUTH_SCHEME === AuthSchemes.Accounts) {
-      // We rely on user session checks via the backend for auth
-      // But for authentication we need a value in accessToken, if someone tries to fake this
-      // it will just error out on the server side, so no big deal.
-      data.value.accessToken = username;
     } else {
       return { error: i18n.t('error.loginMethodNotSupported') };
     }
 
-    return profile();
+    return await profile();
   };
 
   /**
    * Do subscriber logout and reset store
    */
   const logout = async () => {
-    const { error }: BooleanResponse = await call.value('logout').get().json();
+    if (!isOidcAuth) {
+      const { error }: BooleanResponse = await call.value('logout').get().json();
 
-    if (error.value) {
-      // TODO: show error message
-      console.warn('Error logging out: ', error.value);
+      if (error.value) {
+        // TODO: show error message
+        console.warn('Error logging out: ', error.value);
+      }
     }
 
     $reset();
+
+    if (isOidcAuth) {
+      await userManager.signoutRedirect({
+        post_logout_redirect_uri: window.location.origin,
+      });
+    }
   };
 
   return {
