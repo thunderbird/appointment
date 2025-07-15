@@ -1,3 +1,5 @@
+import sys
+
 from starlette_context.plugins import Plugin
 from fastapi import Request
 from fluent.runtime import FluentLocalization, FluentResourceLoader
@@ -12,7 +14,8 @@ def get_fluent(locales: list[str]):
     if FALLBACK_LOCALE not in locales:
         locales.append(FALLBACK_LOCALE)
 
-    base_url = 'src/appointment/l10n'
+    # Resolves to absolute appointment package path
+    base_url = f'{sys.modules["appointment"].__path__[0]}/l10n'
 
     loader = FluentResourceLoader(f'{base_url}/{{locale}}')
     fluent = FluentLocalization(locales, ['main.ftl', 'email.ftl', 'fields.ftl'], loader)
