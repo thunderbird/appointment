@@ -95,7 +95,6 @@ class TestMyAppointments:
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
         appointments = [make_appointment(calendar_id=calendar.id) for _ in range(appointment_count)]
 
-        # Without pagination params
         response = with_client.get('/me/appointments', headers=auth_headers)
 
         assert response.status_code == 200, response.text
@@ -104,43 +103,9 @@ class TestMyAppointments:
 
         assert len(data) == appointment_count
 
-        # Should be in order without pagination
+        # Should be in order
         for index, appointment in enumerate(appointments):
             assert appointment.id == data[index]['id']
-
-        # Just using limit
-        appointment_limit = 5
-
-        response = with_client.get(f'/me/appointments?limit={appointment_limit}', headers=auth_headers)
-
-        assert response.status_code == 200, response.text
-
-        data = response.json()
-
-        assert len(data) == appointment_limit
-
-        # Should be in order with just limit
-        for index, appointment in enumerate(appointments[:appointment_limit]):
-            assert appointment.id == data[index]['id']
-
-        # Using limit and skip
-        appointment_limit = 2
-        appointment_skip = 4
-
-        response = with_client.get(
-            f'/me/appointments?limit={appointment_limit}&skip={appointment_skip}', headers=auth_headers
-        )
-
-        assert response.status_code == 200, response.text
-
-        data = response.json()
-
-        assert len(data) == appointment_limit
-
-        # Should be in order with limit and skip
-        for index, appointment in enumerate(appointments[appointment_skip:appointment_limit]):
-            assert appointment.id == data[index]['id']
-
 
     def test_dont_show_other_subscribers_appointments(
         self, with_client, make_basic_subscriber, make_appointment, make_google_calendar

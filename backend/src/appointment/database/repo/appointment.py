@@ -37,17 +37,9 @@ def get_public(db: Session, slug: str):
     return None
 
 
-def get_by_subscriber(db: Session, subscriber_id: int, skip: int | None = None, limit: int | None = None):
-    """retrieve list of appointments by owner id with optional pagination"""
-    query = db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
-
-    if skip is not None:
-        query = query.offset(skip)
-
-    if limit is not None:
-        query = query.limit(limit)
-
-    return query.all()
+def get_by_subscriber(db: Session, subscriber_id: int):
+    """retrieve list of appointments by owner id"""
+    return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
 
 
 def is_owned(db: Session, appointment_id: int, subscriber_id: int):
