@@ -7,7 +7,6 @@ import logging
 import os
 import smtplib
 import ssl
-import sys
 from email.message import EmailMessage
 
 import jinja2
@@ -17,13 +16,12 @@ import validators
 from html import escape
 from fastapi.templating import Jinja2Templates
 
+from ..defines import BASE_PATH
 from ..l10n import l10n
 
-# Resolves to absolute appointment package path
-BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
 def get_jinja():
-    path = f'{BASE_PATH}/templates/email'
+    path = os.path.join(BASE_PATH, 'templates/email')
 
     templates = Jinja2Templates(path)
     # Add our l10n function
@@ -83,7 +81,9 @@ class Mailer:
 
     def _attachments(self):
         """provide all attachments as list, add tbpro logo to every mail"""
-        with open(f'{BASE_PATH}/templates/assets/img/tbpro_logo.png', 'rb') as fh:
+        path = os.path.join(BASE_PATH, 'templates/assets/img/tbpro_logo.png')
+
+        with open(path, 'rb') as fh:
             tbpro_logo = fh.read()
 
         return [
@@ -210,7 +210,7 @@ class BaseBookingMail(Mailer):
 
     def _attachments(self):
         """We need these little icons for the message body"""
-        path = f'{BASE_PATH}/templates/assets/img/icons'
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
 
         with open(f'{path}/calendar.png', 'rb') as fh:
             calendar_icon = fh.read()

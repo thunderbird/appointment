@@ -1,4 +1,5 @@
 import os
+import sys
 from enum import StrEnum
 
 SUPPORTED_LOCALES = ['en', 'de']
@@ -30,6 +31,8 @@ DEFAULT_CALENDAR_COLOUR = '#c276c5'
 # List of Google CalDAV domains
 GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
 
+# Resolves to absolute appointment package path
+BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
 class AuthScheme(StrEnum):
     """Enum for authentication scheme"""
