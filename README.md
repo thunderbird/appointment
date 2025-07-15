@@ -43,7 +43,7 @@ docker-compose up -d --build
 If you're using Thunderbird Accounts for authentication you'll additionally need to create a Client. You can do so by running the following command:
 
 ```bash
-docker-compose exec accounts uv run manage.py create_client 'Appointment' 'dev contact' 'noreply@example.org' 'https://example.org' --env_type dev --env_redirect_url 'http://localhost:5173/auth/accounts/callback' --env_allowed_hostnames 'localhost:8080,accounts:8087'
+docker-compose exec accounts uv run manage.py create_client 'Appointment' 'dev contact' 'noreply@example.org' 'https://example.org' --env_type dev --env_redirect_url 'http://localhost:5000/auth/accounts/callback' --env_allowed_hostnames 'localhost:8080,accounts:8087'
 ```
 
 You should see your Client ID and Client Secret within the output like:
@@ -63,8 +63,8 @@ Copy the Client ID and Client Secret values to your backend's .env file as `TB_A
 ---
 
 * Frontend can be accessed via: <http://localhost:8080>
-* Backend can be accessed via: <http://localhost:5173>
-* OpenAPI docs can be accessed via: <http://localhost:5173/docs> or <http://localhost:5173/redoc>
+* Backend can be accessed via: <http://localhost:5000>
+* OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
 
 A MySQL database will be accessible via `localhost:3306` with username and password set to: `tba`
 

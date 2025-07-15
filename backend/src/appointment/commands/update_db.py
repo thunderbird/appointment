@@ -4,6 +4,7 @@ from ..database import models
 from alembic.runtime import migration
 
 from ..dependencies.database import get_engine_and_session
+from ..utils import normalize_secrets
 
 
 def run():
@@ -18,6 +19,7 @@ def run():
     alembic_cfg = Config('./alembic.ini')
 
     # If we have our database url env variable set, use that instead!
+    normalize_secrets()
     if os.getenv('DATABASE_URL'):
         alembic_cfg.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
 

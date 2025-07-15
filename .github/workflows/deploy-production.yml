@@ -151,6 +151,30 @@ jobs:
       - name: Invalidate Cloudfront cache
         run: aws cloudfront create-invalidation --distribution-id ${{ needs.deploy-prod-iac.outputs.cloudfront_id }} --paths "/*"
 
+      - name: Configure AWS credentials (Pulumi)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+
+      - name: Clean up before Pulumi release
+        run: rm -rf dist
+
+      - name: Get Artifact from Release (Pulumi)
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: ${{ github.event.release.id }}
+          file: pulumifrontend.zip
+
+      - name: Unzip Artifact (Pulumi)
+        run: unzip pulumifrontend.zip
+
+      - name: Deploy frontend to S3 (Pulumi)
+        run: |
+          aws s3 sync ./dist "s3://${{ secrets.FRONTEND_BUCKET }}"
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID }} --paths "/*"
+
   deploy-prod-backend:
     needs: deploy-prod-iac
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
@@ -233,6 +257,87 @@ jobs:
           terragrunt validate
           terragrunt plan -var "image=${{ steps.get_ecr_tag.outputs.ecr_tag }}" -out tfplan
           terragrunt apply tfplan
+
+      # Pulumi steps below
+      - name: Download ECR tag artifact (Pulumi)
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: ${{ github.event.release.id }}
+          file: new_ecr_tag.zip
+      
+      - name: Extract ECR tag from artifact (Pulumi)
+        id: pulumi-tag-extract
+        run: |
+          unzip new_ecr_tag.zip
+          echo "pulumi_tag=$(cat new_ecr_tag.txt)" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials (Pulumi)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+
+      - name: Login to Amazon ECR (Pulumi)
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Set up virtual environment
+        shell: bash
+        run: |
+          python -m pip install virtualenv
+          cd pulumi
+          virtualenv ./venv
+
+      - name: Set up Pulumi environment
+        id: pulumi-env
+        shell: bash
+        run: |
+          cd pulumi
+          source ./venv/bin/activate
+          curl -fsSL https://get.pulumi.com | sh
+          pip install -Ur requirements.txt
+
+      - name: Deploy to prod
+        shell: bash
+        env:
+          PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
+        run: |
+          # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
+          # to do with the GHA workflow "env" settings.
+          export PATH="/home/runner/.pulumi/bin:$PATH"
+
+          # Create a YAML config stump containing only the nested tree leading to the image tag update
+          cd pulumi
+          cat << EOF > newimage.yaml
+          resources:
+            tb:fargate:FargateClusterWithLogging:
+              backend:
+                task_definition:
+                  container_definitions:
+                    backend:
+                      image: "${{ steps.pulumi-tag-extract.outputs.new_ecr_tag }}"
+          EOF
+
+          # Use yq to merge the stump into the main config
+          yq -i '. *= load("newimage.yaml")' config.prod.yaml
+          export PULUMI_CONFIG_PASSPHRASE='${{ secrets.PULUMI_PASSPHRASE }}'
+
+          # Set up the Pulumi environment and update the service
+          source ./venv/bin/activate
+          pulumi login
+          pulumi stack select prod
+          TBPULUMI_DISABLE_PROTECTION=True \
+            pulumi up -y --diff --target \
+            'urn:pulumi:prod::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-prod-fargate-backend-taskdef'
+            --target-dependents
 
   prod-sanity-browserstack:
     name: prod-sanity-browserstack

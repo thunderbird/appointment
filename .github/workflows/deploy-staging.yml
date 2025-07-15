@@ -188,6 +188,24 @@ jobs:
         run: |
           aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
           aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
+      
+      - name: Configure AWS credentials (Pulumi)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+      
+      - name: Build stage frontend (Pulumi)
+        run: |
+          rm -rf frontent/dist  # Clean up from previous build
+          cp frontend/.env.pulumistage.example frontend/.env.stage
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+
+      - name: Deploy frontend to S3 (Pulumi)
+        run: |
+          aws s3 sync frontend/dist s3://${{ secrets.FRONTEND_BUCKET }}
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID }} --paths '/*'
 
   build-backend-image:
     needs:
@@ -225,12 +243,36 @@ jobs:
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > ecr_tag.txt
           zip ecr_tag.zip ecr_tag.txt
-
+      
       - name: Archive ECR tag
         uses: actions/upload-artifact@v4
         with:
           name: ecr_tag
           path: ecr_tag.zip
+
+      - name: Configure AWS credentials (Pulumi)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+
+      - name: Tag image for ECR repo (Pulumi)
+        env:
+          OLD_ECR_TAG: '${{ steps.build-backend.outputs.image_backend }}'
+          NEW_ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/thunderbird/appointment:${{ github.sha }}'
+        run: |
+          docker tag $OLD_ECR_TAG $NEW_ECR_TAG
+          docker push $NEW_ECR_TAG
+          echo "new_ecr_tag=$NEW_ECR_TAG" >> $GITHUB_OUTPUT
+          echo $NEW_ECR_TAG > new_ecr_tag.txt
+          zip new_ecr_tag.zip new_ecr_tag.txt
+
+      - name: Archive ECR tag (Pulumi)
+        uses: actions/upload-artifact@v4
+        with:
+          name: new_ecr_tag
+          path: new_ecr_tag.zip
 
   deploy-stage-backend:
     needs:
@@ -303,6 +345,75 @@ jobs:
           terragrunt plan -var 'image=${{ steps.get_ecr_tag.outputs.ecr_tag }}' -out tfplan
           terragrunt apply tfplan
 
+      # Pulumi steps
+      - name: Configure AWS credentials for Pulumi
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+
+      - name: Login to Amazon ECR (Pulumi)
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Set up virtual environment
+        shell: bash
+        run: |
+          python -m pip install virtualenv
+          cd pulumi
+          virtualenv ./venv
+
+      - name: Unzip ECR tag (Pulumi)
+        id: get_ecr_tag_pulumi
+        run: |
+          unzip new_ecr_tag.zip
+          output=$(cat new_ecr_tag.txt)
+          echo new_ecr_tag=$output >> $GITHUB_OUTPUT
+
+      # Deploy to stage
+      - name: Deploy new image to stage
+        shell: bash
+        env:
+          ECR_TAG: "${{ steps.get_ecr_tag_pulumi.outputs.new_ecr_tag }}"
+          PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
+        run: |
+          # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
+          # to do with the GHA workflow "env" settings above.
+          export PATH="/home/runner/.pulumi/bin:$PATH"
+
+          cd pulumi
+
+          # Create a YAML config stump containing only the nested tree leading to the image tag update
+          cat << EOF > newimage.yaml
+          resources:
+            tb:fargate:FargateClusterWithLogging:
+              backend:
+                task_definition:
+                  container_definitions:
+                    backend:
+                      image: "$ECR_TAG"
+          EOF
+
+          # Use yq to merge the stump into the main config
+          yq -i '. *= load("newimage.yaml")' config.stage.yaml
+
+          # Set up the Pulumi environment and update the service
+          export PULUMI_CONFIG_PASSPHRASE="${{ secrets.PULUMI_PASSPHRASE }}"
+          source ./venv/bin/activate
+          pulumi login
+          pulumi stack select stage
+          pulumi up -y --diff --target \
+            'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef'
+            --target-dependents
+
   create-release:
     needs:
       - build-backend-image
@@ -333,20 +444,33 @@ jobs:
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
           zip -r ../frontend.zip dist
 
-      - name: download ecr tag
+      - name: Build prod frontend (Pulumi)
+        run: |
+          rm -rf frontend/dist  # Clean up from previous build
+          cp frontend/.env.pulumiprod.example frontend/.env.prod
+          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+          zip -r ../pulumifrontend.zip dist
+
+      - name: Download ECR tag
         uses: actions/download-artifact@v4
         with:
             name: 
               ecr_tag
       
+      - name: Download ECR tag (Pulumi)
+        uses: actions/download-artifact@v4
+        with:
+            name: 
+              new_ecr_tag
+      
       - name: Zip IaC
         run: zip -r iac.zip tofu -x "tofu/environments/stage/*" "tofu/environments/prod/*/*/.terragrunt-cache/*"
 
-      - name: create release tag
+      - name: Create release tag
         id: create-release-tag
         run: echo "tag_name=r-$(printf %04d $GITHUB_RUN_NUMBER)" >> $GITHUB_OUTPUT
 
-      - name: create draft release
+      - name: Create draft release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.create-release-tag.outputs.tag_name }}
@@ -362,7 +486,9 @@ jobs:
           draft: true
           files: |
             ecr_tag.zip
+            new_ecr_tag.zip
             frontend.zip
+            pulumifrontend.zip
             iac.zip
 
   e2e-tests-browserstack-stage:

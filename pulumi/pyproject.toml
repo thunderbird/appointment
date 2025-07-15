@@ -1,0 +1,26 @@
+[project]
+name = "appointment-pulumi"
+version = "0.0.1"
+description = "Pulumi-based infrastructure code for Appointment"
+requires-python = ">3.12"
+dynamic = ["dependencies"]
+
+[project.scripts]
+run-command = "appointment.main:cli"
+
+[project.urls]
+homepage = "https://appointment.tb.pro"
+repository = "https://github.com/thunderbird/appointment"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+# This helps Setuptools understand that each .py file here isn't a separately installable module
+[tool.setuptools.packages.find]
+where = ["./"]
+include = ["__main__"]
