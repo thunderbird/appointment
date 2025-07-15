@@ -391,7 +391,7 @@ export default {
 }
 
 .title-cell {
-  max-width: 16rem;
+  width: 40%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -400,7 +400,7 @@ export default {
 .status-cell {
   text-align: center;
   text-transform: uppercase;
-  min-width: 120px;
+  width: 200px;
   color: var(--colour-ti-critical)
 }
 
