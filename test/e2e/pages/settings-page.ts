@@ -95,7 +95,8 @@ export class SettingsPage {
     // calendar settings
     this.connectedCalendarsHeader = this.page.getByText('Connected Calendars', { exact: true });
     this.editCalendarBtn = this.page.getByTestId('settings-calendar-edit-calendar-btn');
-    this.connectedCalendarTitle = this.page.getByText(APPT_LOGIN_EMAIL, { exact: true });
+    this.connectedCalendarTitle = this.page.getByRole('main').getByText(APPT_LOGIN_EMAIL, { exact: true });
+
     this.editCalendarTitleInput = this.page.getByTestId('settings-calendar-title-input');
     this.editCalendarColorInput = this.page.getByTestId('settings-calendar-color-input');
     this.syncCalendarsBtn = this.page.getByRole('button', { name: 'Sync Calendars' });
@@ -111,7 +112,11 @@ export class SettingsPage {
     this.editProfileBtn = this.page.getByRole('button', { name: 'Edit profile' });
     this.mozProfilePageLogo = this.page.getByTestId('logo');
     this.mozProfileSettingsSection = this.page.getByTestId('settings-profile');
-    this.disconnectGoogleCalendarBtn = this.page.getByTestId('connected-accounts-settings-google-disconnect-btn');
+
+    // getByTestId requires an exact match; our disconnect btn data-testid is now dynamic; our test account
+    // only has one google account connected so we can just use a wildcard to locate the disconnect btn
+    this.disconnectGoogleCalendarBtn = this.page.locator('[data-testid*="connected-accounts-settings-google-disconnect-btn"]');
+
     this.disconnectGoogleCalendarBackBtn = this.page.getByRole('button', { name: 'Back' });
     this.connectCaldavBtn = this.page.getByTestId('connected-accounts-settings-caldav-connect-btn');
     this.addCaldavConnectionUsernameInput = this.page.getByRole('textbox', { name: 'user' });
