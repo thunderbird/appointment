@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { IconX } from '@tabler/icons-vue'
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
   title?: string
@@ -17,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const panelRef = useTemplateRef<HTMLDialogElement>('panel')
+const contentRef = useTemplateRef<HTMLDivElement>('content')
 
 const panelClasses = computed(() => [
   'sliding-panel',
@@ -50,6 +54,10 @@ const showPanel = () => {
   emit('open')
 }
 
+const scrollToTop = () => {
+  contentRef.value?.focus()
+}
+
 defineExpose({
   showPanel,
   closePanel
@@ -68,15 +76,20 @@ defineExpose({
       <button
         class="close-btn"
         @click="closePanel"
-        aria-label="Close panel"
+        :aria-label="t('label.closePanel')"
       >
         <icon-x />
       </button>
     </div>
 
     <!-- Content -->
-    <div class="content">
+    <div ref="content" class="content" tabindex="-1">
       <slot />
+      <button
+        class="screen-reader-only"
+        @click="scrollToTop"
+        :aria-label="t('label.backToTop')"
+      />
     </div>
 
     <!-- CTA Container -->

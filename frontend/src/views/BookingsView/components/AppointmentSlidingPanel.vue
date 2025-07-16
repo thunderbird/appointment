@@ -110,6 +110,8 @@ defineExpose({
         </template>
       </div>
 
+      <div style="background-color: red; height: 1000px;"></div>
+
       <div class="appointment-info">
         <div class="info-row">
           <span class="info-label">
