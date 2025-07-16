@@ -550,3 +550,4 @@ jobs:
           cd ./test/e2e
           cp .env.stage.example .env
           npm run e2e-test-browserstack-gha
+
