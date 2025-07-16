@@ -42,8 +42,12 @@ const unconfirmedFirst = ref(false);
 
 // Handle table column sorting
 type TableColumn = 'date' | 'title' | 'calendar';
+enum SortDirection {
+  Ascending = 'asc',
+  Descending = 'desc',
+}
 const sortColumn = ref<TableColumn>('date');
-const sortDirection = ref<'asc' | 'desc'>('asc');
+const sortDirection = ref<SortDirection>(SortDirection.Ascending);
 
 // Handle data view
 const view = ref(BookingsViewTypes.List);
@@ -101,8 +105,8 @@ const filteredAppointments = computed(() => {
           return 0;
       }
 
-      if (aValue < bValue) return sortDirection.value === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection.value === 'asc' ? 1 : -1;
+      if (aValue < bValue) return sortDirection.value === SortDirection.Ascending ? -1 : 1;
+      if (aValue > bValue) return sortDirection.value === SortDirection.Ascending ? 1 : -1;
 
       return 0;
     });
@@ -115,18 +119,18 @@ const filteredAppointments = computed(() => {
 const handleColumnSort = (column: TableColumn) => {
   if (sortColumn.value === column) {
     // Toggle direction if same column
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    sortDirection.value = sortDirection.value === SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
   } else {
     // Set new column and default to ascending
     sortColumn.value = column;
-    sortDirection.value = 'asc';
+    sortDirection.value = SortDirection.Ascending;
   }
 };
 
 // Get sort indicator for column
 const getSortIndicator = (column: string) => {
   if (sortColumn.value !== column) return null;
-  return sortDirection.value === 'asc' ? IconCaretUpFilled : IconCaretDownFilled;
+  return sortDirection.value === SortDirection.Ascending ? IconCaretUpFilled : IconCaretDownFilled;
 };
 
 // handle single appointment modal
@@ -146,7 +150,7 @@ const handleCloseAppointmentSlidingPanel = () => {
 
 const ariaSortForColumn = (column: TableColumn) => {
   if (sortColumn.value !== column) return null;
-  return sortDirection.value === 'asc' ? 'ascending' : 'descending'
+  return sortDirection.value === SortDirection.Ascending ? 'ascending' : 'descending'
 }
 
 // initially load data when component gets remounted
@@ -192,7 +196,7 @@ export default {
       <table v-show="view === BookingsViewTypes.List" class="appointments-table"
         data-testid="bookings-appointments-list-table">
         <caption>
-          <span class="sr-only">
+          <span class="screen-reader-only">
             {{ t("label.columnHeadersSortable") }}
           </span>
         </caption>
@@ -237,7 +241,7 @@ export default {
             <th class="table-header status-header">
               <div class="status-header-content">
                 <span aria-hidden="true">&nbsp;</span>
-                <span class="sr-only">{{ t("label.status") }}</span>
+                <span class="screen-reader-only">{{ t("label.status") }}</span>
               </div>
             </th>
             <th

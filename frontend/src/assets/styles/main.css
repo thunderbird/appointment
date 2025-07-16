@@ -205,7 +205,7 @@
   overflow: hidden;
 }
 
-.sr-only {
+.screen-reader-only {
   position: absolute;
   width: 1px;
   height: 1px;
