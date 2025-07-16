@@ -4,14 +4,11 @@ import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
 import { IconChevronDown } from '@tabler/icons-vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
-
-interface FilterOption {
-  value: string | number;
-  label: string;
-}
+import { SelectOption } from '@/models';
+import FadeInOutTransition from '@/components/FadeInOutTransition.vue';
 
 interface Props {
-  options: FilterOption[];
+  options: SelectOption<string | number>[];
   selected: (string | number)[];
 }
 
@@ -41,7 +38,7 @@ const closeDropdown = () => {
   isOpen.value = false;
 };
 
-const toggleOption = (option: FilterOption) => {
+const toggleOption = (option: SelectOption<string | number>) => {
   const newSelected = [...props.selected];
   const index = newSelected.indexOf(option.value);
 
@@ -85,9 +82,7 @@ onMounted(() => {
     </button>
 
     <!-- Dropdown -->
-    <transition enter-active-class="dropdown-enter-active" enter-from-class="dropdown-enter-from"
-      enter-to-class="dropdown-enter-to" leave-active-class="dropdown-leave-active"
-      leave-from-class="dropdown-leave-from" leave-to-class="dropdown-leave-to">
+    <fade-in-out-transition>
       <div v-show="isOpen" class="dropdown-menu">
         <div class="options-list">
           <div v-for="option in options" :key="option.value" class="option-item">
@@ -100,7 +95,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </transition>
+    </fade-in-out-transition>
   </div>
 </template>
 
@@ -168,27 +163,6 @@ onMounted(() => {
   padding: 0.375rem 0.5rem;
 }
 
-/* Transition classes */
-.dropdown-enter-from {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-.dropdown-enter-to {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.dropdown-leave-from {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.dropdown-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .filter-trigger {
     transition: background-color 0.2s;
@@ -196,14 +170,6 @@ onMounted(() => {
 
   .chevron-icon {
     transition: transform 0.2s;
-  }
-
-  .dropdown-enter-active {
-    transition: all 0.2s ease-out;
-  }
-
-  .dropdown-leave-active {
-    transition: all 0.15s ease-in;
   }
 }
 </style>

@@ -41,7 +41,8 @@ const selectedFilters = ref([BookingStatus.Requested, BookingStatus.Booked]);
 const unconfirmedFirst = ref(false);
 
 // Handle table column sorting
-const sortColumn = ref<'date' | 'title' | 'calendar'>('date');
+type TableColumn = 'date' | 'title' | 'calendar';
+const sortColumn = ref<TableColumn>('date');
 const sortDirection = ref<'asc' | 'desc'>('asc');
 
 // Handle data view
@@ -111,7 +112,7 @@ const filteredAppointments = computed(() => {
 });
 
 // Handle column sorting
-const handleColumnSort = (column: 'date' | 'title' | 'calendar') => {
+const handleColumnSort = (column: TableColumn) => {
   if (sortColumn.value === column) {
     // Toggle direction if same column
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
@@ -142,6 +143,11 @@ const handleCloseAppointmentSlidingPanel = () => {
   // Shuffle them back to the appointments route.
   router.replace('/bookings');
 };
+
+const ariaSortForColumn = (column: TableColumn) => {
+  if (sortColumn.value !== column) return null;
+  return sortDirection.value === 'asc' ? 'ascending' : 'descending'
+}
 
 // initially load data when component gets remounted
 onMounted(async () => {
@@ -194,7 +200,7 @@ export default {
           <tr class="table-header-row">
             <th
               class="table-header"
-              :aria-sort="sortColumn === 'date' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+              :aria-sort="ariaSortForColumn('date')"
             >
               <button @click="handleColumnSort('date')" class="sortable-header sortable-header-with-border">
                 <component
@@ -208,7 +214,7 @@ export default {
             </th>
             <th
               class="table-header"
-              :aria-sort="sortColumn === 'date' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+              :aria-sort="ariaSortForColumn('date')"
             >
               <button @click="handleColumnSort('date')" class="sortable-header sortable-header-with-border">
                 {{ t("label.time") }}
@@ -216,7 +222,7 @@ export default {
             </th>
             <th
               class="table-header"
-              :aria-sort="sortColumn === 'title' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+              :aria-sort="ariaSortForColumn('title')"
             >
               <button @click="handleColumnSort('title')" class="sortable-header sortable-header-with-border">
                 <component
@@ -236,7 +242,7 @@ export default {
             </th>
             <th
               class="table-header"
-              :aria-sort="sortColumn === 'calendar' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : null"
+              :aria-sort="ariaSortForColumn('calendar')"
             >
               <button @click="handleColumnSort('calendar')" class="sortable-header">
                 <component
