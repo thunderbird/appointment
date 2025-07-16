@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - ci
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS
@@ -285,8 +286,8 @@ jobs:
           docker build --build-arg "RELEASE_VERSION=$RELEASE_VERSION" -t $ECR_TAG ./backend -f ./backend/Dockerfile
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
-          echo $ECR_TAG > ecr_tag.txt
-          zip ecr_tag.zip ecr_tag.txt
+          echo $ECR_TAG > new_ecr_tag.txt
+          zip new_ecr_tag.zip new_ecr_tag.txt
 
       - name: Archive ECR tag
         uses: actions/upload-artifact@v4
