@@ -47,13 +47,6 @@ const bookingStatusInfo = computed(() => {
     };
   }
 
-  if (status.value === BookingStatus.Requested) {
-    return {
-      label: t('label.requested'),
-      color: 'status-requested'
-    };
-  }
-
   return {
     label: t('label.unconfirmed'),
     color: 'status-unconfirmed'
@@ -226,11 +219,7 @@ defineExpose({
 @import '@/assets/styles/custom-media.pcss';
 
 .appointment-content {
-  color: #6b7280;
-}
-
-.appointment-content :deep(.dark) {
-  color: #d1d5db;
+  color: var(--colour-ti-base);
 }
 
 .position-center {
@@ -256,7 +245,7 @@ defineExpose({
 }
 
 .status-unconfirmed {
-  color: var(--colour-ti-muted);
+  color: var(--colour-ti-critical);
 }
 
 /* Time slots section */

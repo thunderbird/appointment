@@ -205,6 +205,18 @@
   overflow: hidden;
 }
 
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* Prevent scrolling of the body when a HTML dialog is open */
 body:has(dialog[open]) {
   overflow: hidden;
