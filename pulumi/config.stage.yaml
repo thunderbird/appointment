@@ -187,7 +187,7 @@ resources:
               - name: SERVICE_EMAIL
                 value: no-reply@appointment-stage.tb.pro
               - name: AUTH_SCHEME
-                value: "fxa"
+                value: "oidc"
               - name: JWT_ALGO
                 value: "HS256"
               - name: JWT_EXPIRE_IN_MINS
@@ -202,6 +202,10 @@ resources:
                 value: "True"
               - name: REDIS_USE_CLUSTER
                 value: "True"
+              - name: OIDC_TOKEN_INTROSPECTION_URL
+                value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
+              - name: OIDC_EXP_GRACE_PERIOD
+                value: "60"
 
   tb:cloudfront:CloudFrontS3Service:
     frontend:
