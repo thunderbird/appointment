@@ -59,21 +59,6 @@ const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPan
 const filteredAppointments = computed(() => {
   let list = appointments.value ? [...appointments.value] : [];
 
-  // Sort by unconfirmed first
-  if (unconfirmedFirst.value) {
-    list.sort((a, b) => {
-      const aIsUnconfirmed = a.slots[0].booking_status === BookingStatus.Requested;
-      const bIsUnconfirmed = b.slots[0].booking_status === BookingStatus.Requested;
-
-      if (aIsUnconfirmed && !bIsUnconfirmed) return -1;
-      if (!aIsUnconfirmed && bIsUnconfirmed) return 1;
-      return 0;
-    });
-
-    // Unconfirmed checkbox has priority, so early return list
-    return list;
-  }
-
   // Filter by selected status filters
   if (selectedFilters.value.length > 0) {
     list = list.filter((a) => {
@@ -108,6 +93,17 @@ const filteredAppointments = computed(() => {
       if (aValue < bValue) return sortDirection.value === SortDirection.Ascending ? -1 : 1;
       if (aValue > bValue) return sortDirection.value === SortDirection.Ascending ? 1 : -1;
 
+      return 0;
+    });
+  }
+
+  if (unconfirmedFirst.value) {
+    list = list.sort((a, b) => {
+      const aIsUnconfirmed = a.slots[0].booking_status === BookingStatus.Requested;
+      const bIsUnconfirmed = b.slots[0].booking_status === BookingStatus.Requested;
+
+      if (aIsUnconfirmed && !bIsUnconfirmed) return -1;
+      if (!aIsUnconfirmed && bIsUnconfirmed) return 1;
       return 0;
     });
   }
