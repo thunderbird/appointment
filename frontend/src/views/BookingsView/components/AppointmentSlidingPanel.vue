@@ -91,8 +91,8 @@ defineExpose({
     @close="emit('close')"
   >
     <div v-if="appointment" class="appointment-content">
-      <!-- Appointment status -->
-      <p :class="['status-label', bookingStatusInfo.color]">
+      <!-- Appointment status, first focusable content for back-to-top screen reader button -->
+      <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
         {{ bookingStatusInfo.label }}
       </p>
 
@@ -109,8 +109,6 @@ defineExpose({
           </div>
         </template>
       </div>
-
-      <div style="background-color: red; height: 1000px;"></div>
 
       <div class="appointment-info">
         <div class="info-row">

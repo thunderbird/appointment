@@ -54,8 +54,14 @@ const showPanel = () => {
   emit('open')
 }
 
-const scrollToTop = () => {
-  contentRef.value?.focus()
+const focusOnContentTop = () => {
+  const firstFocusableElement = contentRef.value?.querySelector<HTMLElement>(
+    'button, [href], input, select, textarea, [tabindex]'
+  )
+
+  if (firstFocusableElement) {
+    firstFocusableElement.focus();
+  }
 }
 
 defineExpose({
@@ -87,7 +93,7 @@ defineExpose({
       <slot />
       <button
         class="screen-reader-only"
-        @click="scrollToTop"
+        @click="focusOnContentTop"
         :aria-label="t('label.backToTop')"
       />
     </div>
