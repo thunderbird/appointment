@@ -47,7 +47,7 @@ jobs:
   deploy-stage-iac:
     needs: detect-changes
     
-    if: needs.detect-changes.outputs.deploy-iac == 'true'
+    if: false
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -244,13 +244,12 @@ jobs:
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > ecr_tag.txt
-          zip ecr_tag.zip ecr_tag.txt
       
       - name: Archive ECR tag
         uses: actions/upload-artifact@v4
         with:
           name: ecr_tag
-          path: ecr_tag.zip
+          path: ecr_tag.txt
 
   build-backend-image-pulumi:
     needs:
@@ -287,13 +286,12 @@ jobs:
           docker push $ECR_TAG
           echo "image_backend=$ECR_TAG" >> $GITHUB_OUTPUT
           echo $ECR_TAG > new_ecr_tag.txt
-          zip new_ecr_tag.zip new_ecr_tag.txt
 
       - name: Archive ECR tag
         uses: actions/upload-artifact@v4
         with:
           name: new_ecr_tag
-          path: new_ecr_tag.zip
+          path: new_ecr_tag.txt
 
   deploy-stage-backend:
     needs:
