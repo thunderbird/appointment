@@ -123,10 +123,11 @@ jobs:
     needs:
       - detect-changes
       - deploy-stage-iac
-    if: |
-      always() &&
-      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-      needs.detect-changes.outputs.deploy-frontend == 'true'
+    if: false
+    # if: |
+    #   always() &&
+    #   (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
+    #   needs.detect-changes.outputs.deploy-frontend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -190,6 +191,19 @@ jobs:
           aws s3 sync frontend/dist "s3://${{ steps.get-frontend-resources.outputs.bucket }}"
           aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
       
+  build-and-deploy-stage-frontend-pulumi:
+    needs:
+      - detect-changes
+      - deploy-stage-iac
+    if: |
+      always() &&
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-frontend == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Configure AWS credentials (Pulumi)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -199,7 +213,7 @@ jobs:
       
       - name: Build stage frontend (Pulumi)
         run: |
-          rm -rf frontent/dist  # Clean up from previous build
+          rm -rf frontend/dist  # Clean up from previous build
           cp frontend/.env.pulumistage.example frontend/.env.stage
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
 
