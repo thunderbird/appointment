@@ -35,7 +35,7 @@ const selectedFilters = useQueryParamState(
 );
 
 // Handle sorting by unconfirmed first
-const unconfirmedFirst = ref(false);
+const unconfirmedFirst = useQueryParamState<boolean>('unconfirmed', false);
 
 // Handle table column sorting
 type TableColumn = 'date' | 'title' | 'calendar';
