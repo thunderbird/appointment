@@ -72,6 +72,19 @@ export enum BookingStatus {
   None = 1,
   Requested = 2,
   Booked = 3,
+  Declined = 4,
+  Cancelled = 5
+}
+
+/**
+ * Booking status for filter query params. Don't i18n
+ */
+export enum BookingStatusFilterQueryParams {
+  None = 'none',
+  Requested = 'pending',
+  Booked = 'confirmed',
+  Declined = 'declined',
+  Cancelled = 'cancelled'
 }
 
 /**

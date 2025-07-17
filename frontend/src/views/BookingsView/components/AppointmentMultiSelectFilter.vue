@@ -1,32 +1,45 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
 import { IconChevronDown } from '@tabler/icons-vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import { SelectOption } from '@/models';
+import { BookingStatus } from '@/definitions';
 import FadeInOutTransition from '@/components/FadeInOutTransition.vue';
 
+import {
+  BOOKING_STATUS_TO_FILTER_QUERY_PARAM,
+  FILTER_QUERY_PARAM_TO_BOOKING_STATUS
+} from "../constants"
+
 interface Props {
-  options: SelectOption<string | number>[];
-  selected: (string | number)[];
+  selected: string[];
 }
 
 const { t } = useI18n();
 const props = defineProps<Props>();
 const emit = defineEmits(['update:selected']);
 
-const isOpen = ref(false);
+const filterOptions = [
+  { value: BookingStatus.Requested, label: t('label.pending') },
+  { value: BookingStatus.Booked, label: t('label.confirmed') },
+  { value: BookingStatus.Declined, label: t('label.declined') },
+  { value: BookingStatus.Cancelled, label: t('label.cancelled') },
+];
 
-// Create a reactive object to track checkbox states
-const checkboxStates = ref<Record<string | number, boolean>>({});
+const isOpen = ref(false);
+const checkboxStates = ref<Record<string, boolean>>({});
 
 // Initialize checkbox states based on selected props
 const initializeCheckboxStates = () => {
   const states: Record<string | number, boolean> = {};
-  props.options.forEach(option => {
-    states[option.value] = props.selected.includes(option.value);
+
+  filterOptions.forEach(option => {
+    const filterQueryParam = BOOKING_STATUS_TO_FILTER_QUERY_PARAM[option.value]
+    states[option.value] = props.selected.includes(filterQueryParam);
   });
+
   checkboxStates.value = states;
 };
 
@@ -38,8 +51,9 @@ const closeDropdown = () => {
   isOpen.value = false;
 };
 
-const toggleOption = (option: SelectOption<string | number>) => {
-  const newSelected = [...props.selected];
+const toggleOption = (option: SelectOption<number>) => {
+  const newSelected = props.selected.map((option) => FILTER_QUERY_PARAM_TO_BOOKING_STATUS[option]);
+
   const index = newSelected.indexOf(option.value);
 
   if (index > -1) {
@@ -51,7 +65,9 @@ const toggleOption = (option: SelectOption<string | number>) => {
   // Update the checkbox state to match
   checkboxStates.value[option.value] = newSelected.includes(option.value);
 
-  emit('update:selected', newSelected);
+  const filterQueryParams = newSelected.map((option) => BOOKING_STATUS_TO_FILTER_QUERY_PARAM[option])
+
+  emit('update:selected', filterQueryParams);
 };
 
 // Display text for the pill
@@ -61,16 +77,24 @@ const displayText = computed(() => {
   }
 
   const selectedLabels = props.selected.map(value => {
-    const option = props.options.find(opt => opt.value === value);
+    const bookingStatus = FILTER_QUERY_PARAM_TO_BOOKING_STATUS[value];
+    const option = filterOptions.find(opt => opt.value === bookingStatus);
+
     return option ? option.label : String(value);
   });
 
   return selectedLabels.join(', ');
 });
 
-onMounted(() => {
-  initializeCheckboxStates();
-});
+/*
+*  Filters are defined in query params with router.replace
+*  this happens _after_ the component has been mounted so we need
+*  to listen to changes instead of using onMounted
+*/
+watch(
+  () => props.selected,
+  () => initializeCheckboxStates()
+)
 </script>
 
 <template>
@@ -85,7 +109,7 @@ onMounted(() => {
     <fade-in-out-transition>
       <div v-show="isOpen" class="dropdown-menu">
         <div class="options-list">
-          <div v-for="option in options" :key="option.value" class="option-item">
+          <div v-for="option in filterOptions" :key="option.value" class="option-item">
             <checkbox-input
               :name="`filter-${option.value}`"
               :label="option.label"

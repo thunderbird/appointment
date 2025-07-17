@@ -5,17 +5,16 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { IconCaretUpFilled, IconCaretDownFilled } from '@tabler/icons-vue';
 
-import {
-  BookingStatus,
-  BookingsViewTypes,
-} from '@/definitions';
+import { BookingStatus } from '@/definitions';
 import { timeFormat } from '@/utils';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey, refreshKey } from '@/keys';
 
+import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
+import { useQueryParamState } from '@/composables/useQueryParamState';
 import AppointmentMultiSelectFilter from './components/AppointmentMultiSelectFilter.vue';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
-import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
+import { BOOKING_STATUS_TO_FILTER_QUERY_PARAM } from './constants';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -26,16 +25,14 @@ const refresh = inject(refreshKey);
 const appointmentStore = useAppointmentStore();
 const { appointments } = storeToRefs(appointmentStore);
 
-// Define filter options mapping to existing BookingStatus
-const filterOptions = [
-  { value: BookingStatus.Requested, label: t('label.pending') },
-  { value: BookingStatus.Booked, label: t('label.confirmed') },
-  { value: 'declined', label: t('label.declined') }, // TODO: Implement declined status on the backend
-  { value: 'cancelled', label: t('label.cancelled') }, // TODO: Implement cancelled status on the backend
-];
-
-// Default selected filters: Pending and Confirmed
-const selectedFilters = ref([BookingStatus.Requested, BookingStatus.Booked]);
+// Default selected filters: Pending (requested) and Confirmed (booked)
+const selectedFilters = useQueryParamState(
+  'filters',
+  [
+    BOOKING_STATUS_TO_FILTER_QUERY_PARAM[BookingStatus.Requested],
+    BOOKING_STATUS_TO_FILTER_QUERY_PARAM[BookingStatus.Booked],
+  ]
+);
 
 // Handle sorting by unconfirmed first
 const unconfirmedFirst = ref(false);
@@ -49,9 +46,6 @@ enum SortDirection {
 const sortColumn = ref<TableColumn>('date');
 const sortDirection = ref<SortDirection>(SortDirection.Ascending);
 
-// Handle data view
-const view = ref(BookingsViewTypes.List);
-
 // handle appointment sliding panel
 const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>()
 
@@ -63,7 +57,9 @@ const filteredAppointments = computed(() => {
   if (selectedFilters.value.length > 0) {
     list = list.filter((a) => {
       const status = a.slots[0].booking_status;
-      return selectedFilters.value.includes(status);
+      const filterQueryParam = BOOKING_STATUS_TO_FILTER_QUERY_PARAM[status];
+
+      return selectedFilters.value.includes(filterQueryParam);
     });
   }
 
@@ -172,7 +168,6 @@ export default {
     <div class="page-title">{{ t('label.appointments') }}</div>
     <div class="page-controls">
       <appointment-multi-select-filter
-        :options="filterOptions"
         :selected="selectedFilters"
         @update:selected="selectedFilters = $event"
       />
@@ -189,7 +184,7 @@ export default {
     <!-- main section: list of appointments with filter -->
     <div class="appointments-container">
       <!-- appointments list -->
-      <table v-show="view === BookingsViewTypes.List" class="appointments-table"
+      <table class="appointments-table"
         data-testid="bookings-appointments-list-table">
         <caption>
           <span class="screen-reader-only">
