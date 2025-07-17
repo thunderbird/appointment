@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, computed, onMounted } from 'vue';
+import { ref, inject, computed, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -128,16 +128,24 @@ const getSortIndicator = (column: string) => {
 // handle single appointment modal
 const selectedAppointment = ref(null);
 
-const showAppointmentSlidingPanel = (appointment) => {
+const showAppointmentSlidingPanel = async (appointment) => {
   selectedAppointment.value = appointment;
   appointmentSlidingPanelRef.value?.showPanel()
-  router.replace(`/bookings/${appointment.slug}`);
+
+  router.replace({
+    name: 'bookings',
+    params: { slug: appointment.slug },
+    query: route.query
+  });
 };
 
 const handleCloseAppointmentSlidingPanel = () => {
   selectedAppointment.value = null;
-  // Shuffle them back to the appointments route.
-  router.replace('/bookings');
+
+  router.replace({
+    path: '/bookings',
+    query: route.query
+  });
 };
 
 const ariaSortForColumn = (column: TableColumn) => {
@@ -261,7 +269,11 @@ export default {
             <td class="table-cell">
               <!-- Hidden link spanning the whole table row -->
               <router-link
-                :to="`/bookings/${appointment.slug}`"
+                :to="{
+                  name: 'bookings',
+                  params: { slug: appointment.slug },
+                  query: route.query
+                }"
                 class="absolute inset-0 z-10 opacity-0"
                 aria-label="Open appointment in new tab"
               ></router-link>

@@ -93,7 +93,8 @@ const displayText = computed(() => {
 */
 watch(
   () => props.selected,
-  () => initializeCheckboxStates()
+  () => initializeCheckboxStates(),
+  { immediate: true }
 )
 </script>
 
