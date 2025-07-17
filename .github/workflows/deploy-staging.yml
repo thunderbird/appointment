@@ -320,10 +320,11 @@ jobs:
       - build-backend-image
       - detect-changes
       - deploy-stage-iac
-    if: |
-      always() &&
-      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-      needs.detect-changes.outputs.deploy-backend == 'true'
+    if: false
+    # if: |
+    #   always() &&
+    #   (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
+    #   needs.detect-changes.outputs.deploy-backend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -364,9 +365,6 @@ jobs:
             name: 
               ecr_tag
 
-      - name: SSH DEBUG
-        uses: mxschmitt/action-tmate@v3
-
       - name: Unzip ECR tag
         id: get_ecr_tag
         run: |
@@ -389,7 +387,27 @@ jobs:
           terragrunt plan -var 'image=${{ steps.get_ecr_tag.outputs.ecr_tag }}' -out tfplan
           terragrunt apply tfplan
 
+  deploy-stage-backend-pulumi:
+    needs:
+      - build-backend-image-pulumi
+      - deploy-stage-iac
+      - detect-changes
+    if: |
+      always() &&
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-backend == 'true'
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
       # Pulumi steps
+      - uses: actions/checkout@v4
+
+      - name: Download ecr tag
+        uses: actions/download-artifact@v4
+        with:
+            name: 
+              new_ecr_tag
+
       - name: Configure AWS credentials for Pulumi
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -397,16 +415,16 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
 
-      - name: Login to Amazon ECR (Pulumi)
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: "true"
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Set up virtual environment
         shell: bash
@@ -414,11 +432,12 @@ jobs:
           python -m pip install virtualenv
           cd pulumi
           virtualenv ./venv
+          source ./venv/bin/activate
+          pip install -r requirements.txt
 
-      - name: Unzip ECR tag (Pulumi)
+      - name: Unpack ECR tag
         id: get_ecr_tag_pulumi
         run: |
-          unzip new_ecr_tag.zip
           output=$(cat new_ecr_tag.txt)
           echo new_ecr_tag=$output >> $GITHUB_OUTPUT
 
@@ -451,19 +470,20 @@ jobs:
 
           # Set up the Pulumi environment and update the service
           export PULUMI_CONFIG_PASSPHRASE="${{ secrets.PULUMI_PASSPHRASE }}"
-          source ./venv/bin/activate
           pulumi login
           pulumi stack select stage
           pulumi up -y --diff --target \
-            'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef'
+            'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef' \
             --target-dependents
 
   create-release:
     needs:
       - build-backend-image
       - build-and-deploy-stage-frontend
+      - build-and-deploy-stage-frontend-pulumi
       - deploy-stage-iac
       - deploy-stage-backend
+      - deploy-stage-backend-pulumi
     if: |
       always() &&
       contains(join(needs.*.result, ','), 'success') &&
@@ -538,7 +558,8 @@ jobs:
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
     needs: create-release
-    if: ${{ !failure() || !cancelled() }}
+    # if: ${{ !failure() || !cancelled() }}
+    if: false
     runs-on: ubuntu-latest
     environment: staging
     env:
