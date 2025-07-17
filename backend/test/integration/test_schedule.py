@@ -1387,8 +1387,9 @@ class TestDecideScheduleAvailabilitySlot:
             slot = db.get(models.Slot, slot_id)
             appointment = db.get(models.Appointment, appointment_id)
 
-            assert slot is None
-            assert appointment is None
+            assert slot is not None
+            assert slot.booking_status == models.BookingStatus.declined
+            assert appointment is not None
 
         # Now try to deny the same event again
         response = with_client.put(

@@ -971,6 +971,10 @@ class Tools:
 
         # handle already requested time slots
         for slot in schedule.slots:
+            # don't consider declined or cancelled slots as taken
+            if slot.booking_status == BookingStatus.declined or slot.booking_status == BookingStatus.cancelled:
+                continue
+
             existing_events.append(
                 schemas.Event(
                     title=schedule.name,

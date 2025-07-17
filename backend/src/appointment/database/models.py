@@ -44,6 +44,8 @@ class BookingStatus(enum.Enum):
     none = 1  # slot status doesn't matter, because the parent object holds the state
     requested = 2  # booking slot was requested
     booked = 3  # booking slot was assigned
+    declined = 4 # booking slot was declined
+    cancelled = 5 # booking slot was cancelled
 
 
 class LocationType(enum.Enum):

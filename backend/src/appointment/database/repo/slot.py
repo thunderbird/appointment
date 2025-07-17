@@ -56,13 +56,13 @@ def add_for_schedule(db: Session, slot: schemas.SlotBase, schedule_id: int):
 
 
 def exists_on_schedule(db: Session, slot: schemas.SlotBase, schedule_id: int):
-    """check if given slot already exists for schedule of given id"""
+    """check if given slot is already requested or booked for schedule of given id"""
     db_slot = (
         db.query(models.Slot)
         .filter(models.Slot.schedule_id == schedule_id)
         .filter(models.Slot.start == slot.start)
         .filter(models.Slot.duration == slot.duration)
-        .filter(models.Slot.booking_status != models.BookingStatus.none)
+        .filter(models.Slot.booking_status.in_([models.BookingStatus.requested, models.BookingStatus.booked]))
         .first()
     )
     return db_slot is not None
@@ -113,4 +113,22 @@ def delete(db: Session, slot_id: int):
     db_slot = get(db, slot_id)
     db.delete(db_slot)
     db.commit()
+    return db_slot
+
+
+def reject(db: Session, slot_id: int) -> models.Slot | None:
+    """update booking status for slot of given id as declined"""
+    db_slot = get(db, slot_id)
+    db_slot.booking_status = models.BookingStatus.declined
+    db.commit()
+    db.refresh(db_slot)
+    return db_slot
+
+
+def cancel(db: Session, slot_id: int) -> models.Slot | None:
+    """update booking status for slot of given id as cancelled"""
+    db_slot = get(db, slot_id)
+    db_slot.booking_status = models.BookingStatus.cancelled
+    db.commit()
+    db.refresh(db_slot)
     return db_slot

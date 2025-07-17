@@ -520,14 +520,9 @@ def handle_schedule_availability_decision(
     if confirmed is False:
         # send rejection information to bookee
         Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
-        repo.slot.delete(db, slot.id)
 
-        if slot.appointment_id:
-            # delete the appointment, this will also delete the slot.
-            repo.appointment.delete(db, slot.appointment_id)
-        else:
-            # delete the scheduled slot to make the time available again
-            repo.slot.delete(db, slot.id)
+        # mark the slot as BookingStatus.declined
+        repo.slot.reject(db, slot.id)
 
         # Delete remote HOLD event if existing
         if appointment:

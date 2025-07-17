@@ -12,7 +12,6 @@ import sqlalchemy as sa
 from sqlalchemy import DateTime
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
-from database.models import BookingStatus
 
 
 def secret():
@@ -33,7 +32,7 @@ def upgrade() -> None:
         sa.Column('booking_tkn', StringEncryptedType(sa.String, secret, AesEngine, 'pkcs5', length=512), index=False),
     )
     op.add_column('slots', sa.Column('booking_expires_at', DateTime()))
-    op.add_column('slots', sa.Column('booking_status', sa.Enum(BookingStatus), default=BookingStatus.none))
+    op.add_column('slots', sa.Column('booking_status', sa.Enum('none', 'requested', 'booked'), default='none'))
 
 
 def downgrade() -> None:
