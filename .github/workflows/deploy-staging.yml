@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - main
-      - ci
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS
