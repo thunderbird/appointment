@@ -6,7 +6,7 @@ locals {
 ################################################################################
 
 module "vpc" {
-  source = "github.com/terraform-aws-modules/terraform-aws-vpc"
+  source = "github.com/terraform-aws-modules/terraform-aws-vpc?ref=v5.21.0"
 
   name = var.name_prefix
   cidr = var.vpc_cidr
@@ -35,7 +35,7 @@ module "vpc" {
 }
 
 module "vpc_endpoints" {
-  source = "github.com/terraform-aws-modules/terraform-aws-vpc/modules/vpc-endpoints"
+  source = "github.com/terraform-aws-modules/terraform-aws-vpc?ref=v5.21.0/modules/vpc-endpoints"
 
   vpc_id = module.vpc.vpc_id
 

@@ -92,6 +92,8 @@ resources:
         - fxa-secrets
         - google-oauth
         - neon-database-connection
+        - oidc-client-id
+        - oidc-client-secret
         - smtp-connection
         - x-allow-secret
         - zoom-secrets
@@ -139,7 +141,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:82af7fd87268812ac42bfd0e4e542d6f234e14ac
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:0d290eecdec3d434ce8d033b624c0825dd5d9bda
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -157,6 +159,10 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-secrets-2i62be
               - name: GOOGLE_OAUTH_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-oauth-8S9Vvx
+              - name: OIDC_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-id-l0LS7y
+              - name: OIDC_CLIENT_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-secret-fMpKjV
               - name: SMTP_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-connection-5FT5yU
               - name: ZOOM_SECRETS
