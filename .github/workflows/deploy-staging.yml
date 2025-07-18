@@ -47,7 +47,6 @@ jobs:
   deploy-stage-iac:
     needs: detect-changes
     
-    if: false
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -123,11 +122,10 @@ jobs:
     needs:
       - detect-changes
       - deploy-stage-iac
-    if: false
-    # if: |
-    #   always() &&
-    #   (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-    #   needs.detect-changes.outputs.deploy-frontend == 'true'
+    if: |
+      always() &&
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-frontend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -320,11 +318,10 @@ jobs:
       - build-backend-image
       - detect-changes
       - deploy-stage-iac
-    if: false
-    # if: |
-    #   always() &&
-    #   (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-    #   needs.detect-changes.outputs.deploy-backend == 'true'
+    if: |
+      always() &&
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
+      needs.detect-changes.outputs.deploy-backend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -558,8 +555,7 @@ jobs:
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
     needs: create-release
-    # if: ${{ !failure() || !cancelled() }}
-    if: false
+    if: ${{ !failure() || !cancelled() }}
     runs-on: ubuntu-latest
     environment: staging
     env:
