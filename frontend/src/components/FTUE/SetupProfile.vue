@@ -5,9 +5,7 @@ import { createFTUEStore } from '@/stores/ftue-store';
 import { createUserStore } from '@/stores/user-store';
 import { useI18n } from 'vue-i18n';
 import { dayjsKey, callKey, shortUrlKey } from '@/keys';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, TextInput, SelectInput } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);

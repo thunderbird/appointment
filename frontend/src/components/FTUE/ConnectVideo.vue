@@ -2,8 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import { PrimaryButton, SecondaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';

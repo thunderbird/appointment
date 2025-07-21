@@ -4,8 +4,7 @@ import {
   onMounted, inject, ref, computed, watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import SyncCard from '@/tbpro/elements/SyncCard.vue';
-import { PrimaryButton, SecondaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, SecondaryButton, SyncCard } from '@thunderbirdops/services-ui';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { callKey } from '@/keys';

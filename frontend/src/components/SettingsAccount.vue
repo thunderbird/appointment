@@ -5,11 +5,11 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
-import { PrimaryButton, DangerButton, SecondaryButton } from '@thunderbirdops/services-ui';
+import {
+  PrimaryButton, DangerButton, SecondaryButton, TextInput, SelectInput
+} from '@thunderbirdops/services-ui';
 
 // icons
 import { IconInfoCircle } from '@tabler/icons-vue';

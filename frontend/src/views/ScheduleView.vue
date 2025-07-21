@@ -10,8 +10,7 @@ import { dayjsKey, callKey, refreshKey } from '@/keys';
 import { ScheduleAppointment, TimeFormatted } from '@/models';
 import ScheduleCreation from '@/components/ScheduleCreation.vue';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
-import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 
 // stores
 import { createScheduleStore } from '@/stores/schedule-store';
@@ -90,7 +89,7 @@ const dismiss = () => {
 </script>
 
 <template>
-  <notice-bar type="info" id="beta-warning" v-if="!userActivityData.dismissedBetaWarning">
+  <notice-bar :type="NoticeBarTypes.Info" id="beta-warning" v-if="!userActivityData.dismissedBetaWarning">
     <p>{{ t('notices.betaWarning.heading') }}</p>
     <ul>
       <li>{{ t('notices.betaWarning.list.0') }}</li>

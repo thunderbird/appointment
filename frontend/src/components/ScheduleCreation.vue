@@ -20,10 +20,9 @@ import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
-import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import { CopyIcon, BubbleSelect, CheckboxInput, LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
+import {
+  CopyIcon, BubbleSelect, CheckboxInput, LinkButton, PrimaryButton, SwitchToggle, TextInput, SelectInput
+} from '@thunderbirdops/services-ui';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';

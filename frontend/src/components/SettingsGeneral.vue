@@ -4,7 +4,7 @@ import { inject, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { createUserStore } from '@/stores/user-store';
 import { callKey, isoWeekdaysKey } from '@/keys';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
+import { SelectInput } from '@thunderbirdops/services-ui';
 
 // component constants
 const { t, locale, availableLocales } = useI18n({ useScope: 'global' });
