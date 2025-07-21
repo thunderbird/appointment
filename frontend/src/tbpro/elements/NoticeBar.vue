@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import NoticeInfoIcon from '@/tbpro/icons/NoticeInfoIcon.vue';
-import NoticeSuccessIcon from '@/tbpro/icons/NoticeSuccessIcon.vue';
-import NoticeWarningIcon from '@/tbpro/icons/NoticeWarningIcon.vue';
-import NoticeCriticalIcon from '@/tbpro/icons/NoticeCriticalIcon.vue';
+import {
+  NoticeInfoIcon, NoticeCriticalIcon, NoticeSuccessIcon, NoticeWarningIcon
+} from '@thunderbirdops/services-ui';
 
 // component properties
 interface Props {
