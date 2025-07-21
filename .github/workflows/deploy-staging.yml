@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - fix-releases
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS
@@ -32,16 +33,20 @@ jobs:
               - 'tofu/modules/**'
               - 'tofu/environments/stage/**'
               - '.github/workflows/deploy-staging.yml'
+              # TODO: Remove prod listings from here
+              - '.github/workflows/deploy-production.yml'
             deploy-backend:
               - 'backend/**'
               - 'tofu/modules/services/backend-service/**'
               - 'tofu/environments/stage/services/backend-service/**'
               - '.github/workflows/deploy-staging.yml'
+              - '.github/workflows/deploy-production.yml'
             deploy-frontend:
               - 'frontend/**'
               - 'tofu/modules/services/frontend-infra/**'
               - 'tofu/environments/stage/services/frontend-infra/**'
               - '.github/workflows/deploy-staging.yml'
+              - '.github/workflows/deploy-production.yml'
 
   deploy-stage-iac:
     needs: detect-changes
@@ -542,8 +547,8 @@ jobs:
             In order to promote this to prod, edit the draft and press **"Publish release"**.
           draft: true
           files: |
-            ecr_tag.zip
-            new_ecr_tag.zip
+            ecr_tag.txt
+            new_ecr_tag.txt
             frontend.zip
             pulumifrontend.zip
             iac.zip
