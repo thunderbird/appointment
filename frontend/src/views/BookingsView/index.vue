@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { IconCaretUpFilled, IconCaretDownFilled } from '@tabler/icons-vue';
-
+import { CheckboxInput } from '@thunderbirdops/services-ui';
 import {
   BookingStatus,
   BookingsViewTypes,
@@ -15,7 +15,6 @@ import { dayjsKey, refreshKey } from '@/keys';
 
 import AppointmentMultiSelectFilter from './components/AppointmentMultiSelectFilter.vue';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
-import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 
 const { t } = useI18n();
 const route = useRoute();

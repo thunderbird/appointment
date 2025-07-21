@@ -6,9 +6,9 @@ import { CopyTemplate } from '@/models';
 import { IconAsterisk } from '@tabler/icons-vue';
 import DropDown from '@/elements/DropDown.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import ContainerBox from '@/elements/ContainerBox.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import { CheckboxInput } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
