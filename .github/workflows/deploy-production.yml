@@ -275,6 +275,12 @@ jobs:
           version: ${{ github.event.release.id }}
           file: new_ecr_tag.txt
       
+      - name: Download Pulumi IaC artifact
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          version: ${{ github.event.release.id }}
+          file: pulumi.tbz
+      
       - name: Extract ECR tag from artifact
         id: pulumi-tag-extract
         run: |
@@ -310,7 +316,7 @@ jobs:
         shell: bash
         # source ./venv/bin/activate
         run: |
-          cd pulumi
+          tar -xvf pulumi.tbz
           curl -fsSL https://get.pulumi.com | sh
 
       - name: Deploy to prod

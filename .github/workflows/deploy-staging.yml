@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - main
-      - fix-releases
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS
@@ -33,7 +32,6 @@ jobs:
               - 'tofu/modules/**'
               - 'tofu/environments/stage/**'
               - '.github/workflows/deploy-staging.yml'
-              # TODO: Remove prod listings from here
               - '.github/workflows/deploy-production.yml'
             deploy-backend:
               - 'backend/**'
@@ -528,6 +526,16 @@ jobs:
       - name: Zip IaC
         run: zip -r iac.zip tofu -x "tofu/environments/stage/*" "tofu/environments/prod/*/*/.terragrunt-cache/*"
 
+      - name: Zip Pulumi
+        run: |
+          # Remove any lingering build pieces that may exist
+          pushd pulumi
+          rm -rf appointment_pulumi.egg-info build __pycache__ .ruff_cache venv
+          popd
+
+          # Tarbizz the Pulumi IaC
+          tar -cvjf pulumi.tbz pulumi/
+
       - name: Create release tag
         id: create-release-tag
         run: echo "tag_name=r-$(printf %04d $GITHUB_RUN_NUMBER)" >> $GITHUB_OUTPUT
@@ -552,6 +560,7 @@ jobs:
             frontend.zip
             pulumifrontend.zip
             iac.zip
+            pulumi.tbz
 
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
