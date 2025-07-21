@@ -89,6 +89,7 @@ defineExpose({
       :slotId="props.appointment.slots[0].id"
       :slotToken="props.appointment.slots[0].booking_tkn"
       :confirmed="isAppointmentConfirmed"
+      @close="closePanel"
     />
 
     <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->

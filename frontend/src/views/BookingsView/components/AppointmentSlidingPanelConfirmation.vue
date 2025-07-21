@@ -19,6 +19,10 @@ const props = defineProps<{
   confirmed: boolean;
 }>()
 
+const emit = defineEmits<{
+  (e: 'close'): void
+}>();
+
 const isError = ref<boolean|null>(null);
 const attendeeEmail = ref<string|null>(null);
 
@@ -33,7 +37,6 @@ onMounted(async () => {
   const { error, data }: AvailabilitySlotResponse = await call('schedule/public/availability/booking').put(obj).json();
   if (error.value) {
     isError.value = true;
-
     return;
   }
 
@@ -44,6 +47,11 @@ onMounted(async () => {
     const event = props.confirmed ? MetricEvents.ConfirmBooking : MetricEvents.DenyBooking;
     posthog.capture(event);
   }
+
+  // Close panel automatically after 7 seconds
+  setTimeout(() => {
+    emit('close');
+  }, 7000);
 });
 </script>
 
