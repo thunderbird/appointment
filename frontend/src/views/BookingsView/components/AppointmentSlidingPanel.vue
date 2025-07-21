@@ -76,7 +76,6 @@ defineExpose({
     :title="appointment?.title"
     @close="emit('close')"
   >
-    <!-- Content for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->
     <appointment-sliding-panel-details
       v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS"
       :appointment="appointment"

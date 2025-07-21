@@ -22,7 +22,6 @@ const props = defineProps<{
 const isError = ref<boolean|null>(null);
 const attendeeEmail = ref<string|null>(null);
 
-// initially load data when component gets remounted
 onMounted(async () => {
   // build data object for put request
   const obj = {
@@ -49,35 +48,35 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex-center h-full flex-col gap-12 px-4">
-    <div v-if="isError === null">
+  <div class="confirmation-container">
+    <div v-if="isError === null" class="loading-container">
       <loading-spinner />
     </div>
-    <div v-else-if="isError === true" class="flex-center flex-col gap-8 px-4">
-      <art-invalid-link class="my-6 h-auto max-w-sm" />
-      <div class="text-xl font-semibold text-sky-600">
+    <div v-else-if="isError === true" class="error-container">
+      <art-invalid-link class="error-art" />
+      <div class="error-title">
         {{ t('info.bookingLinkIsInvalid') }}
       </div>
-      <div class="text-gray-800 dark:text-gray-300">
+      <div class="error-message">
         {{ t('text.invalidOrAlreadyBooked') }}
       </div>
     </div>
-    <div v-else class="flex-center flex-col gap-8 px-4">
-      <art-successful-booking class="my-6 h-auto max-w-sm" />
+    <div v-else class="success-container">
+      <art-successful-booking class="success-art" />
       <template v-if="confirmed">
-        <div class="text-xl font-semibold text-sky-600">
+        <div class="success-title">
           {{ t('info.bookingSuccessfullyConfirmed') }}
         </div>
-        <div class="text-center text-gray-800 dark:text-gray-300">
+        <div class="success-message">
           {{ t('info.eventWasCreated') }}<br>
           {{ t('text.invitationSentToAddress', { 'address': attendeeEmail }) }}
         </div>
       </template>
       <template v-else>
-        <div class="text-xl font-semibold text-sky-600">
+        <div class="success-title">
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
-        <div class="text-center text-gray-800 dark:text-gray-300">
+        <div class="success-message">
           {{ t('text.denialSentToAddress', { 'address': attendeeEmail }) }}<br>
           {{ t('info.slotIsAvailableAgain') }}
         </div>
@@ -85,3 +84,57 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<style>
+.confirmation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 0 1rem;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.error-container,
+.success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 0 1rem;
+}
+
+.error-art,
+.success-art {
+  margin: 1.5rem 0;
+  height: auto;
+  max-width: 24rem;
+}
+
+.error-title,
+.success-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--colour-primary-default);
+  text-align: center;
+}
+
+.error-message,
+.success-message {
+  color: var(--colour-ti-base);
+  text-align: center;
+}
+
+:root.dark .error-message,
+:root.dark .success-message {
+  color: var(--colour-ti-secondary);
+}
+</style>
