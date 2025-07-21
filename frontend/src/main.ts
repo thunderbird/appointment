@@ -14,12 +14,12 @@ import router from '@/router';
 import useDayJS from '@/composables/dayjs';
 import i18ninstance from '@/composables/i18n';
 
-// init basic css with tailwind imports
+// init basic css with tailwind imports and services-ui styles
 import '@/assets/styles/main.css';
+import "@thunderbirdops/services-ui/style.css";
 
 // init sentry
- 
-import * as Sentry from '@sentry/vue';
+ import * as Sentry from '@sentry/vue';
 
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
