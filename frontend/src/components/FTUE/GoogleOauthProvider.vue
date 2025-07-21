@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import { SecondaryButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';

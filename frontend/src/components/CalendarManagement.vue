@@ -6,8 +6,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import { CalendarManagementType } from '@/definitions';
 import { Calendar } from '@/models';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import { PrimaryButton, SecondaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n({ useScope: 'global' });
 const emit = defineEmits(['modify', 'remove', 'sync']);
