@@ -7,9 +7,6 @@ concurrency:
 on:
   release:
     types: [published]
-  # push:
-  #   branches:
-  #     - fix-releases
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS
@@ -211,15 +208,14 @@ jobs:
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           version: ${{ github.event.release.id }}
-          file: ecr_tag.zip
+          file: ecr_tag.txt
 
       - name: Unzip IaC
         run: unzip iac.zip
 
-      - name: Unzip ECR tag
+      - name: Unpack ECR tag
         id: get_ecr_tag
         run: |
-          unzip ecr_tag.zip
           output=$(cat ecr_tag.txt)
           echo ecr_tag=$output >> $GITHUB_OUTPUT
 
@@ -266,12 +262,11 @@ jobs:
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           version: ${{ github.event.release.id }}
-          file: new_ecr_tag.zip
+          file: new_ecr_tag.txt
       
       - name: Extract ECR tag from artifact (Pulumi)
         id: pulumi-tag-extract
         run: |
-          unzip new_ecr_tag.zip
           echo "pulumi_tag=$(cat new_ecr_tag.txt)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials (Pulumi)
