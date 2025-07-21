@@ -143,7 +143,9 @@ class TestCancelAppointment:
             assert mock_tools().send_cancel_vevent.call_count == len(appointment.slots)
 
         with with_db() as db:
-            assert appointment_repo.get(db, appointment.id) is None
+            appointment = appointment_repo.get(db, appointment.id)
+            assert appointment is not None
+            assert appointment.slots[0].booking_status == BookingStatus.cancelled
 
     def test_cancel_appointment_not_found(self, with_client):
         payload = {'reason': 'Test cancellation'}

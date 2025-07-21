@@ -37,7 +37,7 @@ resource "aws_secretsmanager_secret_version" "x_allow_secret_version" {
 }
 
 module "ecs_cluster" {
-  source = "github.com/terraform-aws-modules/terraform-aws-ecs/modules/cluster"
+  source = "github.com/terraform-aws-modules/terraform-aws-ecs?ref=v5.12.1/modules/cluster"
 
   cluster_name = var.name_prefix
 
