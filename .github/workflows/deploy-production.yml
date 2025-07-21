@@ -337,7 +337,7 @@ jobs:
                 task_definition:
                   container_definitions:
                     backend:
-                      image: "${{ steps.pulumi-tag-extract.outputs.new_ecr_tag }}"
+                      image: "${{ steps.pulumi-tag-extract.outputs.pulumi_tag }}"
           EOF
 
           # Use yq to merge the stump into the main config
