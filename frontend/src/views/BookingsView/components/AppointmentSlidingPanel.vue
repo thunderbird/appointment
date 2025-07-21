@@ -10,6 +10,8 @@ import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
+import { APPOINTMENT_SLIDING_PANEL_STEPS } from '../constants';
+import AppointmentSlidingPanelConfirmation from './AppointmentSlidingPanelConfirmation.vue';
 
 const user = useUserStore();
 const apmtStore = useAppointmentStore();
@@ -27,12 +29,12 @@ interface Props {
 const props = defineProps<Props>();
 
 const cancelReason = ref<string>('');
+const isAppointmentConfirmed = ref<boolean>();
 const panelRef = ref<InstanceType<typeof SlidingPanel>>()
+const panelStep = ref<APPOINTMENT_SLIDING_PANEL_STEPS>(APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS);
 
 // computed properties
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
-const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
 const status = computed(() => props.appointment?.slots[0].booking_status);
 const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
@@ -59,10 +61,8 @@ const closePanel = () => {
 }
 
 const answer = (isConfirmed: boolean) => {
-  // We don't want to emit('close') here as we are redirecting
-  panelRef.value?.closePanel();
-
-  window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
+  isAppointmentConfirmed.value = isConfirmed
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.CONFIRMATION
 };
 
 const deleteAppointment = () => {
@@ -89,7 +89,8 @@ defineExpose({
     :title="appointment?.title"
     @close="emit('close')"
   >
-    <div v-if="appointment" class="appointment-content">
+    <!-- Content for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->
+    <div v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS" class="appointment-content">
       <!-- Appointment status, first focusable content for back-to-top screen reader button -->
       <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
         {{ bookingStatusInfo.label }}
@@ -174,8 +175,16 @@ defineExpose({
       </div>
     </div>
 
-    <!-- CTA buttons in the panel's CTA slot -->
-    <template #cta>
+    <appointment-sliding-panel-confirmation
+      v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CONFIRMATION"
+      :signedUrl="user.data.signedUrl"
+      :slotId="props.appointment.slots[0].id"
+      :slotToken="props.appointment.slots[0].booking_tkn"
+      :confirmed="isAppointmentConfirmed"
+    />
+
+    <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->
+    <template #cta v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS">
       <div v-if="status === BookingStatus.Booked && !isPast" class="cta-single">
         <danger-button 
           data-testid="appointment-modal-cancel-btn" 

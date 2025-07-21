@@ -13,3 +13,8 @@ export const FILTER_QUERY_PARAM_TO_BOOKING_STATUS = {
   [BookingStatusFilterQueryParams.Declined]: BookingStatus.Declined,
   [BookingStatusFilterQueryParams.Cancelled]: BookingStatus.Cancelled,
 }
+
+export enum APPOINTMENT_SLIDING_PANEL_STEPS {
+  DETAILS,
+  CONFIRMATION
+}
