@@ -2,8 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CalendarItem } from '@/models';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import { CheckboxInput } from '@thunderbirdops/services-ui';
+import { CheckboxInput, PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const model = defineModel<CalendarItem[]>();

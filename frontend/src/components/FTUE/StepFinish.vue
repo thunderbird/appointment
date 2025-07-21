@@ -5,9 +5,7 @@ import { createFTUEStore } from '@/stores/ftue-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import { CopyIcon } from '@thunderbirdops/services-ui';
+import { CopyIcon, LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const call = inject(callKey);

@@ -6,8 +6,8 @@ import { refreshKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { Alert } from '@/models';
 import { AlertSchemes } from '@/definitions';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
+import { LinkButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 

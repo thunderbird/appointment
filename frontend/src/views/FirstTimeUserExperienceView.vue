@@ -13,8 +13,8 @@ import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
 import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/StepFinish.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import ScheduleView from '@/views/ScheduleView.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const ftueStore = useFTUEStore();
 const {

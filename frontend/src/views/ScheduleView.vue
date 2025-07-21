@@ -11,7 +11,7 @@ import { ScheduleAppointment, TimeFormatted } from '@/models';
 import ScheduleCreation from '@/components/ScheduleCreation.vue';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import NoticeBar from '@/tbpro/elements/NoticeBar.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 // stores
 import { createScheduleStore } from '@/stores/schedule-store';

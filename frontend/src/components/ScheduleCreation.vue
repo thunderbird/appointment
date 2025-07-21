@@ -16,7 +16,6 @@ import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
 import { deepClone } from '@/utils';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
@@ -24,8 +23,7 @@ import SnackishBar from '@/elements/SnackishBar.vue';
 import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import { CopyIcon, BubbleSelect, CheckboxInput } from '@thunderbirdops/services-ui';
+import { CopyIcon, BubbleSelect, CheckboxInput, LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';

@@ -8,7 +8,7 @@ import { DEFAULT_SLOT_DURATION } from '@/definitions';
 import AlertBox from '@/elements/AlertBox.vue';
 import AvailabilityCopyDropdown from '@/elements/AvailabilityCopyDropdown.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
+import { LinkButton } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconPlus, IconX } from '@tabler/icons-vue';

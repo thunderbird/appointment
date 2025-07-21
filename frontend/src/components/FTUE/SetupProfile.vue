@@ -7,7 +7,7 @@ import { useI18n } from 'vue-i18n';
 import { dayjsKey, callKey, shortUrlKey } from '@/keys';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);

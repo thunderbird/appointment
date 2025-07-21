@@ -12,8 +12,8 @@ import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents, WaitingListAction } from '@/definitions';
 import GenericModal from '@/components/GenericModal.vue';
 import HomeView from '@/views/HomeView.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import WordMark from '@/elements/WordMark.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 // component constants
 const route = useRoute();
