@@ -101,6 +101,82 @@ class TestTools:
         # Verify get_busy_time was called twice (once for each calendar)
         assert mock_connector_instance.get_busy_time.call_count == 2
 
+    def test_existing_events_for_schedule_excludes_declined_cancelled_slots(
+        self, monkeypatch, with_db, make_pro_subscriber, make_google_calendar, make_external_connections, make_schedule
+    ):
+        subscriber = make_pro_subscriber()
+        ec = make_external_connections(subscriber.id, type=models.ExternalConnectionType.google)
+        calendar = make_google_calendar(subscriber_id=subscriber.id, connected=True, external_connection_id=ec.id)
+        schedule = make_schedule(calendar_id=calendar.id)
+        now = datetime.now()
+
+        with with_db() as db:
+            # Create slots with different booking statuses
+            slots = [
+                models.Slot(
+                    schedule=schedule,
+                    start=now,
+                    duration=30,
+                    booking_status=models.BookingStatus.declined
+                ),
+                models.Slot(
+                    schedule=schedule,
+                    start=now + timedelta(minutes=30),
+                    duration=30,
+                    booking_status=models.BookingStatus.cancelled
+                ),
+                models.Slot(
+                    schedule=schedule,
+                    start=now + timedelta(minutes=60),
+                    duration=30,
+                    booking_status=models.BookingStatus.requested
+                ),
+                models.Slot(
+                    schedule=schedule,
+                    start=now + timedelta(minutes=90),
+                    duration=30,
+                    booking_status=models.BookingStatus.booked
+                )
+            ]
+
+            # Add slots to the database
+            for slot in slots:
+                db.add(slot)
+            db.commit()
+
+            # Refresh the schedule object to bind it to this session and load relationships
+            db.add(schedule)
+            db.refresh(schedule)
+
+            # Mock Google connector to return no events
+            mock_connector_instance = Mock()
+            mock_connector_instance.get_busy_time.return_value = []
+            mock_google_client = Mock()
+
+            from appointment.controller.calendar import GoogleConnector
+            monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
+            monkeypatch.setattr(
+                GoogleConnector, 'get_busy_time', lambda self, *a, **kw: mock_connector_instance.get_busy_time(*a, **kw)
+            )
+
+            events = Tools.existing_events_for_schedule(
+                schedule=schedule,
+                calendars=[calendar],
+                subscriber=subscriber,
+                google_client=mock_google_client,
+                db=db,
+                redis=None
+            )
+
+        # Should only include requested and booked slots
+        assert len(events) == 2
+
+        # Verify the events correspond to the requested and booked slots
+        event_times = sorted([event.start for event in events])
+        assert event_times == [
+            now + timedelta(minutes=60),  # requested slot
+            now + timedelta(minutes=90)   # booked slot
+        ]
 
 class TestVCreate:
     def test_meeting_url_in_location(

@@ -469,6 +469,9 @@ def cancel_my_appointment(
                 zoom_client.delete_meeting(slot.meeting_link_id)
             except Exception as ex:
                 sentry_sdk.capture_exception(ex)
+        
+        # Mark the slot as BookingStatus.cancelled
+        repo.slot.cancel(db, slot.id)
 
     # Delete the remote calendar event
     uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)
@@ -477,9 +480,6 @@ def cancel_my_appointment(
         remote_calendar_connection.delete_event(uid=uuid)
     except EventNotDeletedException:            
         raise EventCouldNotBeDeleted
-
-    # Delete the appointment, this will also delete the slot
-    repo.appointment.delete(db, appointment.id)
 
 
 @router.post('/support')
