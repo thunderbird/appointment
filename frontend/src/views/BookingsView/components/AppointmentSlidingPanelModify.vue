@@ -12,11 +12,15 @@ interface Props {
   cancelReason: string;
 }
 const props = defineProps<Props>();
+const emit = defineEmits<{
+  (e: 'update:cancelReason', value: string): void;
+}>();
 
 const dj = inject(dayjsKey);
 const { t } = useI18n();
 
 const status = computed(() => props.appointment?.slots[0].booking_status);
+const isPast = computed(() => props.appointment?.slots[0].start < dj());
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 const bookingStatusInfo = computed(() => {
   switch (status.value) {
@@ -105,6 +109,19 @@ const bookingStatusInfo = computed(() => {
         {{ t('label.notes') }}
       </div>
       <div class="notes-content">{{ appointment.details }}</div>
+    </div>
+
+    <div v-if="status === BookingStatus.Booked">
+      <form v-if="!isPast" class="cancel-form" @submit.prevent>
+        <label for="cancelReason" class="cancel-label">
+          {{ t('label.cancelReason') }}
+          <textarea name="cancelReason" :value="cancelReason"
+            @input="emit('update:cancelReason', ($event.target as HTMLTextAreaElement).value)"
+            :placeholder="t('placeholder.writeHere')" class="cancel-textarea"
+            data-testid="appointment-modal-cancel-reason-input">
+          </textarea>
+        </label>
+      </form>
     </div>
   </div>
 </template>

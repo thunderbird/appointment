@@ -308,6 +308,7 @@ export enum MetricEvents {
   RefreshLink = 'apmt.account.refreshLink',
   DownloadData = 'apmt.account.download',
   DeleteAccount = 'apmt.account.delete',
+  CancelBooking = 'apmt.booking.cancel',
   ConfirmBooking = 'apmt.booking.confirm',
   DenyBooking = 'apmt.booking.deny',
   RequestBooking = 'apmt.booking.request',

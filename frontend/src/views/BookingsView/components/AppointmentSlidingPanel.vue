@@ -4,7 +4,7 @@ import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import SlidingPanel from '@/elements/SlidingPanel.vue';
-import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, DangerButton, TextInput } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
@@ -13,6 +13,8 @@ import { APPOINTMENT_SLIDING_PANEL_STEPS } from '../constants';
 // Panel Steps
 import AppointmentSlidingPanelConfirmation from './AppointmentSlidingPanelConfirmation.vue';
 import AppointmentSlidingPanelDetails from './AppointmentSlidingPanelDetails.vue';
+import AppointmentSlidingPanelModify from './AppointmentSlidingPanelModify.vue';
+import AppointmentSlidingPanelCancel from './AppointmentSlidingPanelCancel.vue';
 
 const user = useUserStore();
 const apmtStore = useAppointmentStore();
@@ -30,6 +32,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const cancelReason = ref<string>('');
+const newAppointmentTitle = ref<string>('');
 const isAppointmentConfirmed = ref<boolean>();
 const panelRef = ref<InstanceType<typeof SlidingPanel>>()
 const panelStep = ref<APPOINTMENT_SLIDING_PANEL_STEPS>(APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS);
@@ -44,6 +47,7 @@ const isPast = computed(() => props.appointment?.slots[0].start < dj());
 // methods
 const closePanel = () => {
   panelRef.value?.closePanel();
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS;
   emit('close');
 }
 
@@ -58,10 +62,13 @@ const deleteAppointment = () => {
 };
 
 const cancelAppointment = () => {
-  apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL
   cancelReason.value = '';
-  closePanel();
 };
+
+const modifyAppointment = () => {
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY
+}
 
 defineExpose({
   showPanel: () => {
@@ -76,6 +83,16 @@ defineExpose({
     :title="appointment?.title"
     @close="emit('close')"
   >
+    <!-- Title (only editable in step MODIFY) -->
+    <template #title v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY">
+      <text-input
+        name="appointmentTitle"
+        v-model="newAppointmentTitle"
+        :placeholder="appointment.title"
+      />
+    </template>
+
+    <!-- Content (each panel step with respective props) -->
     <appointment-sliding-panel-details
       v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS"
       :appointment="appointment"
@@ -92,18 +109,31 @@ defineExpose({
       @close="closePanel"
     />
 
+    <appointment-sliding-panel-modify
+      v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY"
+      :appointment="appointment"
+      :cancelReason="cancelReason"
+      @update:cancelReason="cancelReason = $event"
+    />
+
+    <appointment-sliding-panel-cancel
+      v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL"
+      :appointment="appointment"
+      cancelReason="cancelReason"
+    />
+
     <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->
     <template #cta v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS">
       <div v-if="status === BookingStatus.Booked && !isPast" class="cta-single">
         <danger-button 
-          data-testid="appointment-modal-cancel-btn" 
-          @click="cancelAppointment()" 
-          :title="t('label.cancel')"
+          data-testid="appointment-modal-modify-btn"
+          @click="modifyAppointment()"
+          :title="t('label.modify')"
         >
-          {{ t('label.cancelBooking') }}
+          {{ t('label.modifyBooking') }}
         </danger-button>
       </div>
-      <div v-else-if="isExpired" class="cta-single">
+      <div v-else-if="isExpired || status === BookingStatus.Cancelled || status === BookingStatus.Declined" class="cta-single">
         <danger-button 
           class="btn-deny" 
           @click="deleteAppointment()" 
@@ -127,6 +157,27 @@ defineExpose({
         >
           {{ t('label.denyBooking') }}
         </danger-button>
+      </div>
+    </template>
+
+    <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY -->
+    <template #cta v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY">
+      <div class="cta-dual-spaced">
+        <danger-button
+          data-testid="appointment-modal-cancel-btn"
+          @click="cancelAppointment()"
+          :title="t('label.cancel')"
+        >
+          {{ t('label.cancelBooking') }}
+        </danger-button>
+
+        <primary-button
+          data-testid="appointment-modal-save-btn"
+          @click="() => {}"
+          :title="t('label.save')"
+        >
+          {{ t('label.save') }}
+        </primary-button>
       </div>
     </template>
   </sliding-panel>
@@ -176,5 +227,11 @@ defineExpose({
       flex-grow: 0;
     }
   }
+}
+
+/* CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY */
+.cta-dual-spaced {
+  display: flex;
+  justify-content: space-between;
 }
 </style> 
