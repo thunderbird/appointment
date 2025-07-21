@@ -27,7 +27,7 @@ import TextInput from '@/tbpro/elements/TextInput.vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
+import { CopyIcon } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
@@ -846,7 +846,7 @@ watch(
           :force-tooltip="myLinkShow"
         >
           <template v-slot:icon>
-            <copy-icon/>
+            <copy-icon />
           </template>
           {{ t('label.shareMyLink') }}
         </primary-button>

@@ -7,7 +7,7 @@ import { IconAsterisk } from '@tabler/icons-vue';
 import DropDown from '@/elements/DropDown.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
-import ContainerBox from '@/tbpro/elements/ContainerBox.vue';
+import ContainerBox from '@/elements/ContainerBox.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 const { t } = useI18n();
