@@ -22,12 +22,11 @@ import ToolTip from '@/elements/ToolTip.vue';
 import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
 import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
-import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
 import TextInput from '@/tbpro/elements/TextInput.vue';
 import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import { CopyIcon } from '@thunderbirdops/services-ui';
+import { CopyIcon, BubbleSelect } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';

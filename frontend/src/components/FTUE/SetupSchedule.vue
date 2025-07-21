@@ -8,7 +8,7 @@ import TextInput from '@/tbpro/elements/TextInput.vue';
 import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
+import { BubbleSelect } from '@thunderbirdops/services-ui';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
