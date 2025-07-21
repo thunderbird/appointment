@@ -7,6 +7,9 @@ concurrency:
 on:
   release:
     types: [published]
+  # push:
+  #   branches:
+  #     - fix-releases
 
 permissions:
   id-token: write # required for OIDC connectiong to AWS

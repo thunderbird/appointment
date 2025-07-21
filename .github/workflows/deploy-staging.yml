@@ -542,8 +542,8 @@ jobs:
             In order to promote this to prod, edit the draft and press **"Publish release"**.
           draft: true
           files: |
-            ecr_tag.zip
-            new_ecr_tag.zip
+            ecr_tag.txt
+            new_ecr_tag.txt
             frontend.zip
             pulumifrontend.zip
             iac.zip
