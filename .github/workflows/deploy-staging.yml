@@ -336,6 +336,7 @@ jobs:
   deploy-stage-backend-pulumi:
     needs:
       - build-backend-image-pulumi
+    if: needs.build-backend-image-pulumi.result == 'success'
     environment: staging
     runs-on: ubuntu-latest
     steps:
