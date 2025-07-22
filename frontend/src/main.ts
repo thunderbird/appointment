@@ -19,7 +19,7 @@ import '@/assets/styles/main.css';
 import "@thunderbirdops/services-ui/style.css";
 
 // init sentry
- import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/vue';
 
 const app = createApp(App);
 const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
