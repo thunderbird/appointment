@@ -19,7 +19,6 @@ export class DashboardPage {
   readonly shareMyLink: Locator;
   readonly nextMonthArrow: Locator;
   readonly pendingBookingsPageHeader: Locator;
-  readonly pendingBookingsFilterSelect: Locator;
   readonly allFutureBookingsOptionText: string = 'All future bookings';
   readonly apptsFilterInput: Locator;
   readonly availabilityPanelHeader: Locator;
@@ -45,7 +44,6 @@ export class DashboardPage {
     this.shareMyLink = this.page.getByTestId('dashboard-share-quick-link-btn');
     this.nextMonthArrow = this.page.locator('[data-icon="chevron-right"]');
     this.pendingBookingsPageHeader = this.page.getByText('Bookings');
-    this.pendingBookingsFilterSelect = this.page.getByTestId('bookings-filter-select');
     this.apptsFilterInput = this.page.getByPlaceholder('Search bookings');
     this.availabilityPanelHeader = this.page.getByPlaceholder('My Schedule');
     this.firstDayOfWeekMonthView = this.page.locator('.calendar-month__week-day-name').first();
@@ -67,27 +65,16 @@ export class DashboardPage {
    * Navigate to the pending bookings page and display all future pending bookings
    */
   async gotoPendingBookings() {
+    // go to bookings page and set filter in URL to show pending only
     await this.page.goto(APPT_PENDING_BOOKINGS_PAGE);
-    // ensure all future pending bookings are displayed
-    await this.pendingBookingsFilterSelect.selectOption(this.allFutureBookingsOptionText, { timeout: TIMEOUT_60_SECONDS });
   }
 
   /**
    * Navigate to the booked bookings page and display all confirmed/booked bookings
    */
   async gotoBookedBookings() {
+    // go to bookings page and set filter in URL to show confirmed only
     await this.page.goto(APPT_BOOKED_BOOKINGS_PAGE);
-    // ensure all future booked bookings are displayed
-    await this.pendingBookingsFilterSelect.selectOption(this.allFutureBookingsOptionText, { timeout: TIMEOUT_60_SECONDS });
-  }
-
-  /**
-   * With pending bookings list displayed, enter a filter string to narrow down the list
-   */
-  async filterPendingBookings(filterString: string) {
-    await expect(this.apptsFilterInput).toBeVisible({ timeout: TIMEOUT_30_SECONDS});
-    await this.apptsFilterInput.fill(filterString);
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
  
   /**
@@ -108,17 +95,13 @@ export class DashboardPage {
       // depending on environment switch to the bookings page and verify the appt was created
       if (confirmBooking) {
         await this.gotoPendingBookings();
-        var eventFilter = `HOLD: Appointment - ${hostUserDisplayName} and ${requsterName}`;
       } else {
         await this.gotoBookedBookings();
-        var eventFilter = `Appointment - ${hostUserDisplayName} and ${requsterName}`;
       }
 
-      await this.filterPendingBookings(eventFilter);
       await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-      await this.page.evaluate(() => window.scrollBy(0, document.body.scrollHeight));
-
-      const apptLocator = this.page.getByRole('cell', { name: `${slotDate}` }).locator('div', { hasText: `${slotTime} to`});
+      const apptLocator = this.page.getByRole('row', { name: `Open appointment in new tab ${slotDate} ${slotTime} to` }).getByLabel('Open appointment in new tab')
+      await apptLocator.scrollIntoViewIfNeeded();
       await expect(apptLocator).toBeVisible();
     }).toPass({
       // Probe, wait 1s, probe, wait 2s, probe, wait 10s, probe, wait 10s, probe
