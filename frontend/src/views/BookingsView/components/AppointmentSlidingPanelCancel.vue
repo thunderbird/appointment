@@ -15,7 +15,6 @@ const { t } = useI18n();
 const call = inject(callKey);
 
 const props = defineProps<{
-  cancelReason: string,
   appointment: Appointment | null
 }>()
 
@@ -30,9 +29,7 @@ const isError = ref<boolean|null>(null);
 async function cancelAppointment() {
   confirmCancel.value = true;
 
-  const { error } = await call(`apmt/${props.appointment?.id}/cancel`).post({
-    reason: props.cancelReason
-  }).json();
+  const { error } = await call(`apmt/${props.appointment?.id}/cancel`).post().json();
 
   if (error.value) {
     isError.value = true;

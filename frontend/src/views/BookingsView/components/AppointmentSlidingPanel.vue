@@ -11,9 +11,9 @@ import { dayjsKey } from '@/keys';
 import { APPOINTMENT_SLIDING_PANEL_STEPS } from '../constants';
 
 // Panel Steps
-import AppointmentSlidingPanelConfirmation from './AppointmentSlidingPanelConfirmation.vue';
+import AppointmentSlidingPanelBookingConfirmation from './AppointmentSlidingPanelBookingConfirmation.vue';
 import AppointmentSlidingPanelDetails from './AppointmentSlidingPanelDetails.vue';
-import AppointmentSlidingPanelModify from './AppointmentSlidingPanelModify.vue';
+import AppointmentSlidingPanelModify, { ModifyFormData } from './AppointmentSlidingPanelModify.vue';
 import AppointmentSlidingPanelCancel from './AppointmentSlidingPanelCancel.vue';
 import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
@@ -27,11 +27,14 @@ const props = defineProps<{
   appointment: Appointment | null;
 }>();
 
-const cancelReason = ref<string>('');
-const newAppointmentTitle = ref<string>('');
-const isAppointmentConfirmed = ref<boolean>();
 const panelRef = ref<InstanceType<typeof SlidingPanel>>()
 const panelStep = ref<APPOINTMENT_SLIDING_PANEL_STEPS>(APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS);
+const modifyPanelRef = ref<InstanceType<typeof AppointmentSlidingPanelModify>>();
+
+const appointmentTitle = ref<string>('');
+const modifyFormData = ref<ModifyFormData>();
+const hideModifyFieldsAndCTA = ref<boolean>(false);
+const isAppointmentConfirmed = ref<boolean>();
 
 // computed properties
 const status = computed(() => props.appointment?.slots[0].booking_status);
@@ -42,8 +45,8 @@ const isPast = computed(() => props.appointment?.slots[0].start < dj());
 
 // methods
 const closePanel = () => {
-  panelRef.value?.closePanel();
   panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS;
+  hideModifyFieldsAndCTA.value = false;
   emit('close');
 }
 
@@ -59,11 +62,20 @@ const deleteAppointment = () => {
 
 const moveToCancelAppointmentStep = () => {
   panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL
-  cancelReason.value = '';
 };
 
 const moveToModifyAppointmentStep = () => {
+  appointmentTitle.value = props.appointment?.title || '';
+  modifyFormData.value = {
+    notes: '',
+    // Initialize other fields here
+  };
+
   panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY
+}
+
+const modifyAppointmentStepSaveClicked = () => {
+  modifyPanelRef.value?.handleModifyFormSubmit();
 }
 
 const moveToDetailsStep = () => {
@@ -81,13 +93,13 @@ defineExpose({
   <sliding-panel
     ref="panelRef"
     :title="appointment?.title"
-    @close="emit('close')"
+    @close="closePanel"
   >
     <!-- Title (only editable in step MODIFY) -->
-    <template #title v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY">
+    <template #title v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY && !hideModifyFieldsAndCTA">
       <text-input
         name="appointmentTitle"
-        v-model="newAppointmentTitle"
+        v-model="appointmentTitle"
         :placeholder="appointment.title"
       />
     </template>
@@ -97,11 +109,9 @@ defineExpose({
       <appointment-sliding-panel-details
         v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS"
         :appointment="appointment"
-        :cancelReason="cancelReason"
-        @update:cancelReason="cancelReason = $event"
       />
 
-      <appointment-sliding-panel-confirmation
+      <appointment-sliding-panel-booking-confirmation
         v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CONFIRMATION"
         :signedUrl="user.data.signedUrl"
         :slotId="props.appointment.slots[0].id"
@@ -112,15 +122,17 @@ defineExpose({
 
       <appointment-sliding-panel-modify
         v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY"
+        ref="modifyPanelRef"
         :appointment="appointment"
-        :cancelReason="cancelReason"
-        @update:cancelReason="cancelReason = $event"
+        :initialData="modifyFormData"
+        :title="appointmentTitle"
+        v-model:hideModifyFieldsAndCTA="hideModifyFieldsAndCTA"
+        @close="closePanel"
       />
 
       <appointment-sliding-panel-cancel
         v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL"
         :appointment="appointment"
-        cancelReason="cancelReason"
         @click:backButton="moveToDetailsStep()"
       />
     </template>
@@ -164,7 +176,7 @@ defineExpose({
     </template>
 
     <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY -->
-    <template #cta v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY">
+    <template #cta v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY && !hideModifyFieldsAndCTA">
       <div class="cta-dual-spaced">
         <link-button
           class="cancel-btn"
@@ -177,8 +189,8 @@ defineExpose({
 
         <primary-button
           data-testid="appointment-modal-save-btn"
-          @click="() => {}"
           :title="t('label.save')"
+          @click="modifyAppointmentStepSaveClicked()"
         >
           {{ t('label.save') }}
         </primary-button>

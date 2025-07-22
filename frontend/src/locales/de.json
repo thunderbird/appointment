@@ -126,6 +126,8 @@
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht. Bitte überprüfe deinen Posteingang, um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
     "bookingLinkIsInvalid": "Der Link zur Buchungsbestätigung ist ungültig.",
+    "bookingModified": "Buchung geändert",
+    "bookingModifiedSuccess": "Eine Bestätigung wurde an den Buchenden gesendet.",
     "bookingSuccessful": "Erfolgreich gebucht!",
     "bookingSuccessfullyConfirmed": "Buchung erfolgreich bestätigt!",
     "bookingSuccessfullyCancelled": "Buchung erfolgreich abgebrochen!",
@@ -460,6 +462,7 @@
   },
   "placeholder": {
     "biWeeklyCafeDates": "Zweiwöchentliche Café-Treffen …",
+    "bookingNotesPlaceholder": "Füge alle Notizen hinzu, die du mit deiner Antwort möchtest",
     "emailAddress": "max.muster{'@'}beispiel.de",
     "firstAndLastName": "Vor- und Nachname",
     "mySchedule": "Mein Zeitplan",

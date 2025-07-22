@@ -126,6 +126,8 @@
     "bookedPleaseCheckEmail": "This event has been booked. Check your email to add it to your calendar.",
     "bookingLinkHasAlreadyBeenUsed": "It looks like this link has been used.",
     "bookingLinkIsInvalid": "This booking confirmation link is invalid.",
+    "bookingModified": "Booking Modified",
+    "bookingModifiedSuccess": "Request for confirmation has been sent to the booker.",
     "bookingSuccessful": "Booking successful!",
     "bookingSuccessfullyConfirmed": "Booking confirmed",
     "bookingSuccessfullyCancelled": "Booking cancelled",
@@ -460,6 +462,7 @@
   },
   "placeholder": {
     "biWeeklyCafeDates": "Bi-weekly Café Dates…",
+    "bookingNotesPlaceholder": "Add any notes you'd like to include with your reply",
     "emailAddress": "john.doe{'@'}example.com",
     "firstAndLastName": "First and last name",
     "mySchedule": "My Schedule",

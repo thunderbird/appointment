@@ -9,7 +9,6 @@ import { BookingStatus } from '@/definitions';
 
 interface Props {
   appointment: Appointment | null;
-  cancelReason: string;
 }
 const props = defineProps<Props>();
 
@@ -263,40 +262,5 @@ const bookingStatusInfo = computed(() => {
 
 .dark .notes-content {
   border-color: var(--colour-neutral-border);
-}
-
-/* Cancel form */
-.cancel-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.cancel-label {
-  display: block;
-}
-
-.cancel-textarea {
-  width: 100%;
-  height: 6rem;
-  margin-top: 0.5rem;
-  margin-bottom: 2rem;
-  border-radius: 0.375rem;
-  resize: none;
-  border: 1px solid var(--colour-neutral-border);
-  padding: 0.5rem;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: var(--colour-primary-default);
-    box-shadow: 0 0 0 3px var(--colour-primary-soft);
-  }
-}
-
-.dark .cancel-textarea {
-  border-color: var(--colour-neutral-border);
-  background-color: var(--colour-neutral-lower);
-  color: var(--colour-ti-base);
 }
 </style>
