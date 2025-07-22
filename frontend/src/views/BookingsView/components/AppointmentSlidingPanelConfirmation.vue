@@ -93,7 +93,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .confirmation-container {
   display: flex;
   justify-content: center;
