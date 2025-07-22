@@ -9,7 +9,7 @@ on:
     types: [published]
 
 permissions:
-  id-token: write # required for OIDC connectiong to AWS
+  id-token: write # required for OIDC connecting to AWS
   contents: read
 
 jobs:
