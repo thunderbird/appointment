@@ -156,11 +156,6 @@ jobs:
           aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
       
   build-and-deploy-stage-frontend-pulumi:
-    needs:
-      - deploy-stage-iac
-    if: |
-      always() &&
-      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped')
     environment: staging
     runs-on: ubuntu-latest
     steps:
