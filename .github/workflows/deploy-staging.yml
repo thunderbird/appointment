@@ -10,45 +10,11 @@ on:
       - main
 
 permissions:
-  id-token: write # required for OIDC connectiong to AWS
+  id-token: write # required for OIDC connecting to AWS
   contents: write # This is required to create a release
 
 jobs:
-  detect-changes:
-    runs-on: ubuntu-latest
-    environment: staging
-    outputs:
-      deploy-iac: ${{ steps.check.outputs.deploy-iac }}
-      deploy-backend: ${{ steps.check.outputs.deploy-backend }}
-      deploy-frontend: ${{ steps.check.outputs.deploy-frontend }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dorny/paths-filter@v3
-        id: check
-        with:
-          filters: |
-            deploy-iac:
-              - 'tofu/modules/**'
-              - 'tofu/environments/stage/**'
-              - '.github/workflows/deploy-staging.yml'
-              - '.github/workflows/deploy-production.yml'
-            deploy-backend:
-              - 'backend/**'
-              - 'tofu/modules/services/backend-service/**'
-              - 'tofu/environments/stage/services/backend-service/**'
-              - '.github/workflows/deploy-staging.yml'
-              - '.github/workflows/deploy-production.yml'
-            deploy-frontend:
-              - 'frontend/**'
-              - 'tofu/modules/services/frontend-infra/**'
-              - 'tofu/environments/stage/services/frontend-infra/**'
-              - '.github/workflows/deploy-staging.yml'
-              - '.github/workflows/deploy-production.yml'
-
   deploy-stage-iac:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.deploy-iac == 'true'
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -122,12 +88,10 @@ jobs:
 
   build-and-deploy-stage-frontend:
     needs:
-      - detect-changes
       - deploy-stage-iac
     if: |
       always() &&
-      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-      needs.detect-changes.outputs.deploy-frontend == 'true'
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped')
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -192,13 +156,6 @@ jobs:
           aws cloudfront create-invalidation --distribution-id ${{ steps.get-frontend-resources.outputs.distribution }} --paths "/*"
       
   build-and-deploy-stage-frontend-pulumi:
-    needs:
-      - detect-changes
-      - deploy-stage-iac
-    if: |
-      always() &&
-      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-      needs.detect-changes.outputs.deploy-frontend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     steps:
@@ -231,12 +188,8 @@ jobs:
           aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID }} --paths '/*'
 
   build-backend-image:
-    needs:
-      - detect-changes
     environment: staging
     runs-on: ubuntu-latest
-    if: needs.detect-changes.outputs.deploy-backend == 'true'
-
     steps:
       - uses: actions/checkout@v4
 
@@ -274,11 +227,8 @@ jobs:
           path: ecr_tag.txt
 
   build-backend-image-pulumi:
-    needs:
-      - detect-changes
     environment: staging
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -318,12 +268,10 @@ jobs:
   deploy-stage-backend:
     needs:
       - build-backend-image
-      - detect-changes
       - deploy-stage-iac
     if: |
       always() &&
-      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped') &&
-      needs.detect-changes.outputs.deploy-backend == 'true'
+      (needs.deploy-stage-iac.result == 'success' || needs.deploy-stage-iac.result == 'skipped')
     environment: staging
     runs-on: ubuntu-latest
     env:
@@ -388,10 +336,6 @@ jobs:
   deploy-stage-backend-pulumi:
     needs:
       - build-backend-image-pulumi
-      - detect-changes
-    if: |
-      always() &&
-      needs.detect-changes.outputs.deploy-backend == 'true'
     environment: staging
     runs-on: ubuntu-latest
     steps:
