@@ -4,11 +4,10 @@ import { AlertSchemes } from '@/definitions';
 import { IconX } from '@tabler/icons-vue';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import {
+  NoticeInfoIcon, NoticeCriticalIcon, NoticeSuccessIcon, NoticeWarningIcon
+} from '@thunderbirdops/services-ui';
 
-import NoticeInfoIcon from '@/tbpro/icons/NoticeInfoIcon.vue';
-import NoticeCriticalIcon from '@/tbpro/icons/NoticeCriticalIcon.vue';
-import NoticeSuccessIcon from '@/tbpro/icons/NoticeSuccessIcon.vue';
-import NoticeWarningIcon from '@/tbpro/icons/NoticeWarningIcon.vue';
 
 const { t } = useI18n();
 

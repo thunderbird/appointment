@@ -3,10 +3,10 @@ import { ref, computed, watch } from 'vue';
 import { vOnClickOutside } from '@vueuse/components';
 import { useI18n } from 'vue-i18n';
 import { IconChevronDown } from '@tabler/icons-vue';
-import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
 import { SelectOption } from '@/models';
 import { BookingStatus } from '@/definitions';
 import FadeInOutTransition from '@/components/FadeInOutTransition.vue';
+import { CheckboxInput } from '@thunderbirdops/services-ui';
 
 import {
   BOOKING_STATUS_TO_FILTER_QUERY_PARAM,

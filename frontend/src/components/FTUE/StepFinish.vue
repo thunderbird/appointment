@@ -5,9 +5,7 @@ import { createFTUEStore } from '@/stores/ftue-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { createUserStore } from '@/stores/user-store';
 import { callKey } from '@/keys';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
+import { CopyIcon, LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const call = inject(callKey);
@@ -70,7 +68,7 @@ const copyLink = async () => {
       <p>{{ t('ftue.finishScreenText') }}</p>
       <link-button class="my-link-btn" @click="copyLink" :tooltip="myLinkTooltip" :force-tooltip="myLinkShow">
         <template v-slot:icon>
-          <copy-icon/>
+          <copy-icon />
         </template>
         {{ myLink }}
       </link-button>

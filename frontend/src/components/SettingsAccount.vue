@@ -2,35 +2,33 @@
 import {
   ref, inject, onMounted, computed,
 } from 'vue';
-import {useI18n} from 'vue-i18n';
-import {useRouter} from 'vue-router';
-import DangerButton from '@/tbpro/elements/DangerButton.vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
 import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
+import {
+  PrimaryButton, DangerButton, SecondaryButton, TextInput, SelectInput
+} from '@thunderbirdops/services-ui';
 
 // icons
-import {IconInfoCircle} from '@tabler/icons-vue';
+import { IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
 import UserInviteTable from '@/components/UserInviteTable.vue';
-import {createExternalConnectionsStore} from '@/stores/external-connections-store';
-import {createScheduleStore} from '@/stores/schedule-store';
+import { createExternalConnectionsStore } from '@/stores/external-connections-store';
+import { createScheduleStore } from '@/stores/schedule-store';
 
-import {MetricEvents} from '@/definitions';
-import {usePosthog, posthog} from '@/composables/posthog';
-import {
+import { MetricEvents}  from '@/definitions';
+import { usePosthog, posthog } from '@/composables/posthog';
+import { 
   StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse, SelectOption, Error,
 } from '@/models';
-import {callKey, shortUrlKey} from '@/keys';
-import {createUserStore} from '@/stores/user-store';
+import { callKey, shortUrlKey } from '@/keys';
+import { createUserStore } from '@/stores/user-store';
 
 // component constants
-const {t} = useI18n({useScope: 'global'});
+const { t } = useI18n({useScope: 'global'});
 const call = inject(callKey);
 const shortUrl = inject(shortUrlKey);
 const router = useRouter();

@@ -16,18 +16,13 @@ import { dayjsKey, callKey, isoWeekdaysKey } from '@/keys';
 import { deepClone } from '@/utils';
 
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
-import SwitchToggle from '@/tbpro/elements/SwitchToggle.vue';
-import BubbleSelect from '@/tbpro/elements/BubbleSelect.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
-import CheckboxInput from '@/tbpro/elements/CheckboxInput.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
-import CopyIcon from '@/tbpro/icons/CopyIcon.vue';
+import {
+  CopyIcon, BubbleSelect, CheckboxInput, LinkButton, PrimaryButton, SwitchToggle, TextInput, SelectInput
+} from '@thunderbirdops/services-ui';
 
 // icons
 import { IconChevronDown, IconInfoCircle } from '@tabler/icons-vue';
@@ -846,7 +841,7 @@ watch(
           :force-tooltip="myLinkShow"
         >
           <template v-slot:icon>
-            <copy-icon/>
+            <copy-icon />
           </template>
           {{ t('label.shareMyLink') }}
         </primary-button>

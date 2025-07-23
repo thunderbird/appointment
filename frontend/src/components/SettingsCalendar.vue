@@ -15,14 +15,11 @@ import {
 } from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import CalendarManagement from '@/components/CalendarManagement.vue';
-import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import GoogleCalendarButton from '@/elements/GoogleCalendarButton.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { clearFormErrors, handleFormError } from '@/utils';
+import { PrimaryButton, DangerButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });

@@ -5,12 +5,10 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import DangerButton from '@/tbpro/elements/DangerButton.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+import { PrimaryButton, DangerButton, SecondaryButton } from '@thunderbirdops/services-ui';
 import {
   callKey, fxaEditProfileUrlKey
 } from '@/keys';

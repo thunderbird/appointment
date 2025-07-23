@@ -7,9 +7,9 @@ import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
-import ToolTip from '@/tbpro/elements/ToolTip.vue';
 import { TooltipPosition } from '@/definitions';
 import { IconExternalLink, IconLink } from '@tabler/icons-vue';
+import { ToolTip } from '@thunderbirdops/services-ui';
 
 // component constants
 const user = useUserStore();

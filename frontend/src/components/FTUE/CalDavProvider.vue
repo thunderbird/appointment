@@ -4,13 +4,11 @@ import {
   computed, inject, ref,
 } from 'vue';
 import { callKey } from '@/keys';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import TextInput from '@/tbpro/elements/TextInput.vue';
 import {
   CalendarListResponse, PydanticException,
 } from '@/models';
 import { clearFormErrors, handleFormError } from '@/utils';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import { PrimaryButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const call = inject(callKey);
