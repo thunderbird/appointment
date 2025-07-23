@@ -44,12 +44,18 @@ const isPast = computed(() => props.appointment?.slots[0].start < dj());
 
 // methods
 const closePanel = () => {
-  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS;
-  hideModifyFieldsAndCTA.value = false;
+  resetPanelState();
+
+  // Close SlidingPanel component
   panelRef.value.closePanel()
 
   // Emit close event for the Bookings View to cleanup its state
   emit('close')
+}
+
+const resetPanelState = () => {
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS;
+  hideModifyFieldsAndCTA.value = false;
 }
 
 const moveToConfirmAppointmentStep = (isConfirmed: boolean) => {
@@ -92,7 +98,7 @@ defineExpose({
   <sliding-panel
     ref="panelRef"
     :title="appointment?.title"
-    @close="emit('close')"
+    @close="() => { resetPanelState(); emit('close')}"
   >
     <!-- Title (only editable in step MODIFY) -->
     <template #title v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY && !hideModifyFieldsAndCTA">
