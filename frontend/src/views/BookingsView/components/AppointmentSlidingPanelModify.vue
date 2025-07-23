@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
-import { timeFormat } from '@/utils';
-import { IconCalendarEvent, IconNotes } from '@tabler/icons-vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Appointment } from '@/models';
-import { dayjsKey } from '@/keys';
-import { BookingStatus } from '@/definitions';
+import { type Dayjs } from 'dayjs';
+import { Appointment, SelectOption } from '@/models';
+import { dayjsKey, callKey } from '@/keys';
+import { timeFormat } from '@/utils';
+import { MetricEvents } from '@/definitions';
+import { usePosthog, posthog } from '@/composables/posthog';
+import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
+import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
+import SelectInput from '@/tbpro/elements/SelectInput.vue';
 
 export interface ModifyFormData {
   notes: string;
@@ -25,38 +29,20 @@ const emit = defineEmits<{
 }>();
 
 const dj = inject(dayjsKey);
+const call = inject(callKey);
 const { t } = useI18n();
 
 const form = ref<ModifyFormData>({ ...props.initialData });
 const isSuccess = ref<boolean>(false);
 const isError = ref<boolean>(false);
 
-const status = computed(() => props.appointment?.slots[0].booking_status);
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-const bookingStatusInfo = computed(() => {
-  switch (status.value) {
-    case BookingStatus.Booked:
-      return {
-        label: t('label.confirmed'),
-        color: 'status-confirmed'
-      }
-    case BookingStatus.Declined:
-      return {
-        label: t('label.declined'),
-        color: 'status-unconfirmed'
-      }
-    case BookingStatus.Cancelled:
-      return {
-        label: t('label.cancelled'),
-        color: 'status-unconfirmed'
-      }
-    default:
-      return {
-        label: t('label.unconfirmed'),
-        color: 'status-unconfirmed'
-      };
-  }
-});
+
+const handleTryAgainClicked = () => {
+  isSuccess.value = false;
+  isError.value = false;
+  emit('update:hideModifyFieldsAndCTA', false);
+}
 
 const handleModifyFormSubmit = async () => {
   try {
@@ -64,23 +50,100 @@ const handleModifyFormSubmit = async () => {
 
     const payload = {
       title: props.title,
+      start: selectedBookingSlot.value,
+      slot_id: props.appointment?.slots[0].id,
       ...form.value,
     };
 
-    // TODO: The updateAppointment action does not exist on the store.
-    // It needs to be implemented.
-    // await apmtStore.updateAppointment(props.appointment?.id, payload);
-    console.log('Submitting from child:', {
-      id: props.appointment?.id,
-      ...payload,
-    })
+    const { error } = await call(`apmt/${props.appointment?.id}/modify`).put(payload).json();
 
+    if (error.value) {
+      isError.value = true;
+      return;
+    }
+
+    isError.value = false;
     isSuccess.value = true;
-    // emit('close');
+
+    if (usePosthog) {
+      const event = MetricEvents.ModifyBooking;
+      posthog.capture(event);
+    }
+
+    // Close panel automatically after 7 seconds
+    setTimeout(() => {
+      emit('close');
+    }, 7000);
   } catch (error) {
     console.error('Failed to update appointment:', error);
   }
 }
+
+// Mini calendar refs and functions
+const activeDate = ref(dj(props.appointment?.slots[0].start));
+const today = computed(() => dj());
+
+const populateTimeSlots = async () => {
+  isLoadingSlots.value = true;
+
+  const { data, error } = await call(`/schedule/availability_for_day?date=${activeDate.value.format('YYYY-MM-DD')}`)
+    .get()
+    .json();
+
+  if (error.value) {
+    console.error('Failed to fetch available slots:', error.value);
+    isError.value = true;
+    emit('update:hideModifyFieldsAndCTA', true);
+    return;
+  }
+
+  isLoadingSlots.value = false;
+  availableSlots.value = data.value;
+}
+
+const handleCalendarDaySelected = async (d: string) => {
+  activeDate.value = dj(d);
+  await populateTimeSlots();
+
+  // If no available slots are returned, pre-select the "No bookings available" option
+  // otherwise, pre-select the first available slot
+  if (!availableSlots.value.length) {
+    selectedBookingSlot.value = null
+  } else {
+    selectedBookingSlot.value = availableSlots.value[0].start
+  }
+};
+
+const dateNav = (forward = true) => {
+  if (forward) {
+    activeDate.value = activeDate.value.add(1, 'month');
+  } else {
+    activeDate.value = activeDate.value.subtract(1, 'month');
+  }
+};
+
+// Booking slot refs and functions
+const isLoadingSlots = ref<boolean>(false);
+const availableSlots = ref([]);
+const selectedBookingSlot = ref<string>();
+const earliestOptions = computed<SelectOption[]>(() => {
+  if (!availableSlots.value || availableSlots.value.length === 0) {
+    return [{ label: t('label.noSlotsAvailable'), value: null }];
+  }
+
+  return availableSlots.value.map((slot) => ({
+    label: dj(slot.start).format(timeFormat()),
+    value: slot.start,
+  }));
+});
+
+onMounted(async () => {
+  await populateTimeSlots();
+
+  // Appointment slot values come from the backend as 2025-07-25T09:00:00Z
+  // and the slot start is a Dayjs object so we need to convert it to match
+  selectedBookingSlot.value = (props.appointment.slots[0].start as Dayjs).toISOString().replace('.000', '')
+})
 
 defineExpose({
   handleModifyFormSubmit
@@ -91,45 +154,26 @@ defineExpose({
   <!-- Default state -->
   <template v-if="!isError && !isSuccess">
     <div class="appointment-content">
-      <!-- Appointment status, first focusable content for back-to-top screen reader button -->
-      <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
-        {{ bookingStatusInfo.label }}
-      </p>
-  
-      <div class="time-slots">
-        <template v-for="s in appointment.slots" :key="s.start">
-          <div class="time-slot">
-            <icon-calendar-event class="time-icon" :aria-label="t('label.timeOfTheEvent')" />
-            <div class="time-details">
-              <p class="date">{{ dj(s.start).format('LL') }}</p>
-              <div class="time-range">
-                {{ dj(s.start).format(timeFormat()) }} - {{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}
-                ({{ dj.duration(s.duration, 'minutes').humanize() }})
-              </div>
-            </div>
-          </div>
-        </template>
-      </div>
-  
-      <div class="appointment-info">
-        <div class="info-row">
-          <span class="info-label">
-            {{ t('label.calendar') }}:
-          </span>
-          {{ appointment.calendar_title }}
-        </div>
-        <div class="info-row">
-          <div class="info-row">
-            <span class="info-label">
-              {{ t('label.videoLink') }}:
-            </span>
-            <a v-if="appointment.location_url" :href="appointment.location_url" class="video-link" target="_blank">
-              {{ appointment.location_url }}
-            </a>
-            <span v-else>
-              {{ t('label.notProvided') }}
-            </span>
-          </div>
+      <div class="calendar-booking-slot-container">
+        <calendar-mini-month
+          class="calendar"
+          :selected="activeDate"
+          :nav="true"
+          :minDate="today"
+          @prev="dateNav(false)"
+          @next="dateNav()"
+          @day-selected="handleCalendarDaySelected"
+        />
+
+        <div class="booking-slot-container">
+          <label class="booking-slot-label" for="bookingSlotSelect">{{ t('label.bookingSlot') }}</label>
+          <select-input
+            name="bookingSlotSelect"
+            v-model="selectedBookingSlot"
+            data-testid="dashboard-scheduling-details-earliest-booking-input"
+            :options="earliestOptions"
+            :disabled="isLoadingSlots || availableSlots.length === 0"
+          />
         </div>
       </div>
   
@@ -144,14 +188,6 @@ defineExpose({
         </template>
       </div>
   
-      <div v-if="appointment.details" class="notes-section">
-        <div class="notes-header">
-          <icon-notes class="notes-icon" />
-          {{ t('label.notes') }}
-        </div>
-        <div class="notes-content">{{ appointment.details }}</div>
-      </div>
-  
       <form id="appointment-modify-form" class="notes-form" @submit.prevent="handleModifyFormSubmit">
         <label for="notes" class="notes-label">
           {{ t('label.notes') }}
@@ -160,16 +196,33 @@ defineExpose({
             data-testid="appointment-modal-modify-notes-input">
           </textarea>
         </label>
-  
-        <!-- Future form fields will go here -->
-        </form>
+      </form>
     </div>
   </template>
 
   <!-- Error state -->
   <template v-else-if="isError">
-    <div class="error-message">
-      {{ t('info.bookingModifiedFailed') }}
+    <div class="confirmation-container">
+      <div class="confirmation-header">
+        <h2 class="confirmation-title error">{{ t('info.bookingModifiedFailed') }}</h2>
+        <p class="confirmation-text">{{ t('info.bookingModifiedError') }}</p>
+      </div>
+      <div class="confirmation-button-container">
+        <secondary-button
+          data-testid="appointment-modal-modify-close-btn"
+          @click="emit('close')"
+          :title="t('label.close')"
+        >
+          {{ t('label.close') }}
+        </secondary-button>
+        <primary-button
+          data-testid="appointment-modal-modify-try-again-btn"
+          @click="handleTryAgainClicked()"
+          :title="t('label.tryAgain')"
+        >
+        {{ t('label.tryAgain') }}
+        </primary-button>
+      </div>
     </div>
   </template>
   
@@ -198,79 +251,22 @@ defineExpose({
   color: var(--colour-ti-base);
 }
 
-/* Status labels */
-.status-label {
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-confirmed {
-  color: var(--colour-ti-success);
-}
-
-.status-requested {
-  color: var(--colour-ti-warning);
-}
-
-.status-unconfirmed {
-  color: var(--colour-ti-critical);
-}
-
-/* Time slots section */
-.time-slots {
-  margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
-  font-size: 0.875rem;
-}
-
-.time-slot {
+.calendar-booking-slot-container {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-}
-
-.time-icon {
-  width: 2rem;
-  height: 2rem;
-  fill: transparent;
-  stroke: var(--colour-ti-muted);
-  stroke-width: 2;
-}
-
-.time-details .date {
-  margin: 0;
-}
-
-.time-range {
-  margin-top: 0.25rem;
-}
-
-/* Appointment info section */
-.appointment-info {
+  gap: 2.5rem;
   margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
-  font-size: 0.875rem;
-}
 
-.info-row {
-  margin-bottom: 0.25rem;
-}
+  .calendar {
+    width: 100%;
+  }
 
-.info-label {
-  font-weight: 600;
-}
+  .booking-slot-container {
+    width: 100%;
 
-.video-link {
-  color: var(--colour-accent-teal);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-
-  &:hover {
-    color: var(--colour-apmt-primary);
+    .booking-slot-label {
+      display: block;
+      margin: 0.2rem 0 0.5rem 0;
+    }
   }
 }
 
@@ -294,17 +290,6 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-/* Notes form */
-.notes-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.notes-label {
-  display: block;
 }
 
 .notes-textarea {
@@ -353,6 +338,26 @@ defineExpose({
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--colour-ti-success);
+
+  &.error {
+    color: var(--colour-ti-critical);
+  }
+}
+
+.confirmation-button-container {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+
+  button {
+    width: 100%;
+  }
+
+  @media (--sm) {
+    button {
+      width: auto;
+    }
+  }
 }
 
 .confirmation-text {
