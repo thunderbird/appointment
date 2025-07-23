@@ -46,6 +46,7 @@ class BookingStatus(enum.Enum):
     booked = 3  # booking slot was assigned
     declined = 4 # booking slot was declined
     cancelled = 5 # booking slot was cancelled
+    modified = 6 # booking slot was modified
 
 
 class LocationType(enum.Enum):

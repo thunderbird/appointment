@@ -63,6 +63,17 @@ class SlotBase(BaseModel):
     meeting_link_url: str | None = None
 
 
+class SlotUpdate(BaseModel):
+    start: datetime | None = None
+    duration: int | None = None
+    attendee_id: int | None = None
+    booking_tkn: str | None = None
+    booking_expires_at: datetime | None = None
+    booking_status: BookingStatus | None = None
+    meeting_link_id: str | None = None
+    meeting_link_url: str | None = None
+
+
 class Slot(SlotBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -392,6 +403,13 @@ class InviteAdminOut(ListResponse):
 class AppointmentSlots(BaseModel):
     appointment: AppointmentFull
     slots: list[SlotBase] = []
+
+
+class AppointmentModifyRequest(BaseModel):
+    title: str
+    slot_id: int
+    start: datetime
+    notes: str | None = None
 
 
 class AppointmentCancelRequest(BaseModel):

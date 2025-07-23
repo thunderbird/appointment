@@ -714,7 +714,9 @@ class Tools:
     @staticmethod
     def available_slots_from_schedule(schedule: models.Schedule, day: datetime = None) -> list[schemas.SlotBase]:
         """This helper calculates a list of slots according to the given schedule configuration.
-        If 'day' is provided, only slots for that day are returned. Otherwise, slots for the full schedule range are returned."""
+        If 'day' is provided, only slots for that day are returned.
+        Otherwise, slots for the full schedule range are returned."""
+
         slots = []
         now = datetime.now()
 
