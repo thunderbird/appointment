@@ -138,7 +138,7 @@ defineExpose({
 
     <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->
     <template #cta v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS">
-      <div v-if="status === BookingStatus.Booked && !isPast" class="cta-single">
+      <div v-if="status === BookingStatus.Booked && !isPast || status === BookingStatus.Modified" class="cta-single">
         <danger-button 
           data-testid="appointment-modal-modify-btn"
           @click="moveToModifyAppointmentStep()"

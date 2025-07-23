@@ -34,6 +34,11 @@ const bookingStatusInfo = computed(() => {
         label: t('label.cancelled'),
         color: 'status-unconfirmed'
       }
+    case BookingStatus.Modified:
+      return {
+        label: t('label.modifyConfirmationRequested'),
+        color: 'status-modified'
+      }
     default:
       return {
         label: t('label.unconfirmed'),
@@ -130,6 +135,10 @@ const bookingStatusInfo = computed(() => {
 
 .status-unconfirmed {
   color: var(--colour-ti-critical);
+}
+
+.status-modified {
+  color: var(--colour-warning-default);
 }
 
 /* Status labels */
