@@ -103,7 +103,7 @@ watch(
     <!-- Pill trigger -->
     <button @click="toggleDropdown" class="filter-trigger" type="button">
       <span>{{ displayText }}</span>
-      <IconChevronDown class="chevron-icon" :class="{ 'rotated': isOpen }" />
+      <icon-chevron-down class="chevron-icon" :class="{ 'rotated': isOpen }" />
     </button>
 
     <!-- Dropdown -->

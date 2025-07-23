@@ -8,8 +8,7 @@ import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import DangerButton from '@/tbpro/elements/DangerButton.vue';
+import { SecondaryButton, DangerButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const call = inject(callKey);

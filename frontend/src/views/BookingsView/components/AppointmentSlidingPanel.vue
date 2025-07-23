@@ -4,7 +4,7 @@ import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import SlidingPanel from '@/elements/SlidingPanel.vue';
-import { PrimaryButton, DangerButton, TextInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, DangerButton, TextInput, LinkButton } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
@@ -15,7 +15,6 @@ import AppointmentSlidingPanelBookingConfirmation from './AppointmentSlidingPane
 import AppointmentSlidingPanelDetails from './AppointmentSlidingPanelDetails.vue';
 import AppointmentSlidingPanelModify, { ModifyFormData } from './AppointmentSlidingPanelModify.vue';
 import AppointmentSlidingPanelCancel from './AppointmentSlidingPanelCancel.vue';
-import LinkButton from '@/tbpro/elements/LinkButton.vue';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);

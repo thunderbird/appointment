@@ -8,9 +8,7 @@ import { timeFormat } from '@/utils';
 import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
-import SecondaryButton from '@/tbpro/elements/SecondaryButton.vue';
-import PrimaryButton from '@/tbpro/elements/PrimaryButton.vue';
-import SelectInput from '@/tbpro/elements/SelectInput.vue';
+import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
 
 export interface ModifyFormData {
   notes: string;

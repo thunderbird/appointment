@@ -178,6 +178,7 @@ export default {
         @update:selected="selectedFilters = $event"
       />
       <checkbox-input
+        class="unconfirmed-first-checkbox"
         name="unconfirmed-first"
         :label="t('label.unconfirmedFirst')"
         v-model="unconfirmedFirst"
@@ -356,6 +357,10 @@ export default {
 .appointments-table {
   margin-top: 1rem;
   width: 100%;
+}
+
+.unconfirmed-first-checkbox {
+  width: auto;
 }
 
 /* Table styles */
