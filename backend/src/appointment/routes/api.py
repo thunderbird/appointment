@@ -432,7 +432,6 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
 def cancel_my_appointment(
     id: int,
     background_tasks: BackgroundTasks,
-    payload: schemas.AppointmentCancelRequest,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     redis=Depends(get_redis),
@@ -484,7 +483,7 @@ def cancel_my_appointment(
 
     # Send cancel information to all slots' bookees
     for slot in appointment.slots:
-        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee, payload.reason)
+        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
         # If needed, delete appointment's Zoom meeting through Zoom client
         if zoom_client:

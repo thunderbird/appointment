@@ -412,10 +412,6 @@ class AppointmentModifyRequest(BaseModel):
     notes: str | None = None
 
 
-class AppointmentCancelRequest(BaseModel):
-    reason: str | None = None
-
-
 class AvailabilitySlotConfirmation(BaseModel):
     slot_id: int
     slot_token: str

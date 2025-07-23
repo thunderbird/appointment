@@ -104,27 +104,14 @@ class TestMailer:
         subscriber = make_pro_subscriber()
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
-        reason = 'Change of plans'
 
-        # With reason
-        mailer = CancelMail(owner_name=subscriber.name, date=now, reason=reason, to=fake_email)
+        mailer = CancelMail(owner_name=subscriber.name, date=now, to=fake_email)
         assert mailer.html()
         assert mailer.text()
 
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
-            assert reason in content, fault
-
-        # Without reason
-        mailer = CancelMail(owner_name=subscriber.name, date=now, reason=None, to=fake_email)
-        assert mailer.html()
-        assert mailer.text()
-
-        for idx, content in enumerate([mailer.text(), mailer.html()]):
-            fault = 'text' if idx == 0 else 'html'
-            assert subscriber.name in content, fault
-            assert reason not in content, fault
 
     def test_zoom_invite_failed(self, faker, with_l10n):
         fake_title = faker.name()

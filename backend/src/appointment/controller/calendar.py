@@ -689,7 +689,6 @@ class Tools:
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
-        reason: str | None = None,
     ):
         """send a booking cancellation email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -705,7 +704,6 @@ class Tools:
             send_cancel_email,
             owner_name=organizer.name,
             date=date,
-            reason=reason,
             to=attendee.email,
             attachment=ics_file,
         )

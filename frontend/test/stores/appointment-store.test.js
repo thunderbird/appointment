@@ -116,15 +116,13 @@ describe('Appointment Store', () => {
     await apmt.fetch();
 
     // Cancel the first appointment
-    const reason = 'Test reason';
-    await apmt.cancelAppointment(apmt.appointments[0].id, reason);
+    await apmt.cancelAppointment(apmt.appointments[0].id);
 
-    // Assert fetch was called with the correct endpoint and payload
+    // Assert fetch was called with the correct endpoint
     expect(fetchSpy).toHaveBeenCalledWith(
       expect.stringContaining(`/apmt/${apmt.appointments[0].id}/cancel`),
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ reason }),
       })
     );
 
