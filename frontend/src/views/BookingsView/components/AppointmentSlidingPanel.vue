@@ -72,12 +72,15 @@ const moveToCancelAppointmentStep = () => {
   panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL
 };
 
-const moveToModifyAppointmentStep = () => {
-  appointmentTitle.value = props.appointment?.title || '';
-  modifyFormData.value = { notes: '' };
+// Commented out for now since we are still scoping the modify feature
+// Do not delete this!
+//
+// const moveToModifyAppointmentStep = () => {
+//   appointmentTitle.value = props.appointment?.title || '';
+//   modifyFormData.value = { notes: '' };
 
-  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY
-}
+//   panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY
+// }
 
 const modifyAppointmentStepSaveClicked = () => {
   modifyPanelRef.value?.handleModifyFormSubmit();
@@ -147,11 +150,11 @@ defineExpose({
     <template #cta v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS">
       <div v-if="status === BookingStatus.Booked && !isPast || status === BookingStatus.Modified" class="cta-single">
         <danger-button 
-          data-testid="appointment-modal-modify-btn"
-          @click="moveToModifyAppointmentStep()"
-          :title="t('label.modify')"
+          data-testid="appointment-modal-cancel-btn"
+          @click="moveToCancelAppointmentStep()"
+          :title="t('label.cancel')"
         >
-          {{ t('label.modifyBooking') }}
+          {{ t('label.cancelBooking') }}
         </danger-button>
       </div>
       <div v-else-if="isExpired || status === BookingStatus.Cancelled || status === BookingStatus.Declined" class="cta-single">

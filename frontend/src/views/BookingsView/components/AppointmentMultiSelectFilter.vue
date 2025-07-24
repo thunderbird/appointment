@@ -26,7 +26,7 @@ const filterOptions = [
   { value: BookingStatus.Booked, label: t('label.confirmed') },
   { value: BookingStatus.Declined, label: t('label.declined') },
   { value: BookingStatus.Cancelled, label: t('label.cancelled') },
-  { value: BookingStatus.Modified, label: t('label.modified') },
+  // { value: BookingStatus.Modified, label: t('label.modified') },
 ];
 
 const isOpen = ref(false);
