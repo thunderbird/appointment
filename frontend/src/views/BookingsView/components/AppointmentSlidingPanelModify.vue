@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { type Dayjs } from 'dayjs';
 import { Appointment, SelectOption } from '@/models';
 import { dayjsKey } from '@/keys';
 import { timeFormat } from '@/utils';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
-import { useUserStore } from '@/stores/user-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 
 export interface ModifyFormData {
@@ -28,7 +26,6 @@ const emit = defineEmits<{
 
 const dj = inject(dayjsKey);
 const { t } = useI18n();
-const user = useUserStore();
 const appointmentStore = useAppointmentStore();
 
 const form = ref<ModifyFormData>({ ...props.initialData });
@@ -92,11 +89,6 @@ const populateTimeSlots = async () => {
 
   isLoadingSlots.value = false;
   availableSlots.value = data.value;
-}
-
-const handleCalendarDaySelected = async (d: string) => {
-  activeDate.value = dj(d);
-  await populateTimeSlots();
 
   // If no available slots are returned, pre-select the "No bookings available" option
   // otherwise, pre-select the first available slot
@@ -105,6 +97,11 @@ const handleCalendarDaySelected = async (d: string) => {
   } else {
     selectedBookingSlot.value = availableSlots.value[0].start
   }
+}
+
+const handleCalendarDaySelected = async (d: string) => {
+  activeDate.value = dj(d);
+  await populateTimeSlots();
 };
 
 const dateNav = (forward = true) => {
@@ -134,12 +131,6 @@ const earliestOptions = computed<SelectOption[]>(() => {
 
 onMounted(async () => {
   await populateTimeSlots();
-
-  // Available appointment slot values come from the backend as 2025-07-29T09:00:00-06:00
-  // and the slot start is a Dayjs object so we need to format it to match, considering the timezone
-  selectedBookingSlot.value = (props.appointment.slots[0].start as Dayjs)
-      .tz(user.data.settings.timezone ?? dj.tz.guess())
-      .format()
 })
 
 defineExpose({

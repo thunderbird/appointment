@@ -21,7 +21,7 @@ const dj = inject(dayjsKey);
 const refresh = inject(refreshKey);
 
 const appointmentStore = useAppointmentStore();
-const { appointments } = storeToRefs(appointmentStore);
+const { appointments, selectedAppointment } = storeToRefs(appointmentStore);
 
 // Default selected filters: Pending (requested) and Confirmed (booked)
 const selectedFilters = useQueryParamState(
@@ -122,9 +122,6 @@ const getSortIndicator = (column: string) => {
   if (sortColumn.value !== column) return null;
   return sortDirection.value === SortDirection.Ascending ? IconCaretUpFilled : IconCaretDownFilled;
 };
-
-// handle single appointment modal
-const selectedAppointment = ref(null);
 
 const showAppointmentSlidingPanel = async (appointment) => {
   selectedAppointment.value = appointment;
