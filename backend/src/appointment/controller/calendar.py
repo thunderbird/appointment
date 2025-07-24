@@ -747,15 +747,20 @@ class Tools:
                 parts = [(x.start_time_local, x.end_time_local) for x in customAvailabilities]
 
             for (start_local, end_local) in parts:
+                # Calculate time difference from midnight for both start and end times
                 start_time = datetime.combine(now.min, start_local) - datetime.min
                 end_time = datetime.combine(now.min, end_local) - datetime.min
 
+                # If the end time is before the start time (slot spans midnight), add a day to the end time
                 if start_time > end_time:
                     end_time += timedelta(days=1)
 
+                # Calculate the total duration of the slot in seconds
                 total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
                 time_start = 0
 
+                # If the date is today and the current time is after the start time,
+                # we should skip the current slot, so time_start is set to the next slot after now
                 if now_tz.toordinal() == date.toordinal() and now_tz_total_seconds > start_time.total_seconds():
                     time_start = int(now_tz_total_seconds - start_time.total_seconds())
                     time_start -= time_start % slot_duration_seconds

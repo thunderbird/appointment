@@ -9,6 +9,7 @@ import { MetricEvents } from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
+import { useUserStore } from '@/stores/user-store';
 
 export interface ModifyFormData {
   notes: string;
@@ -29,6 +30,7 @@ const emit = defineEmits<{
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const { t } = useI18n();
+const user = useUserStore();
 
 const form = ref<ModifyFormData>({ ...props.initialData });
 const isSuccess = ref<boolean>(false);
@@ -129,6 +131,8 @@ const earliestOptions = computed<SelectOption[]>(() => {
     return [{ label: t('label.noSlotsAvailable'), value: null }];
   }
 
+  // Note that the label shows the time formatted as 9:00 AM
+  // but the underlying value will be 2025-07-29T09:00:00-06:00
   return availableSlots.value.map((slot) => ({
     label: dj(slot.start).format(timeFormat()),
     value: slot.start,
@@ -138,9 +142,11 @@ const earliestOptions = computed<SelectOption[]>(() => {
 onMounted(async () => {
   await populateTimeSlots();
 
-  // Appointment slot values come from the backend as 2025-07-25T09:00:00Z
-  // and the slot start is a Dayjs object so we need to convert it to match
-  selectedBookingSlot.value = (props.appointment.slots[0].start as Dayjs).toISOString().replace('.000', '')
+  // Available appointment slot values come from the backend as 2025-07-29T09:00:00-06:00
+  // and the slot start is a Dayjs object so we need to format it to match, considering the timezone
+  selectedBookingSlot.value = (props.appointment.slots[0].start as Dayjs)
+      .tz(user.data.settings.timezone ?? dj.tz.guess())
+      .format()
 })
 
 defineExpose({

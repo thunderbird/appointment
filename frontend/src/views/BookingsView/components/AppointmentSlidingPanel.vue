@@ -139,6 +139,7 @@ defineExpose({
         v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL"
         :appointment="appointment"
         @click:backButton="moveToDetailsStep()"
+        @close="closePanel"
       />
     </template>
 

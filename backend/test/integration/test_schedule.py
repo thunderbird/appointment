@@ -11,7 +11,7 @@ from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
-from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
+from defines import DAY1, DAY5, DAY14, auth_headers, DAY2, TEST_USER_ID
 
 
 class TestSchedule:
@@ -515,6 +515,86 @@ class TestSchedule:
         assert response.status_code == 403, response.text
         data = response.json()
         assert data['detail']['id'] == 'CALENDAR_NOT_CONNECTED'
+
+    def test_availability_for_day(
+        self,
+        monkeypatch,
+        with_client,
+        with_db,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        make_appointment,
+        make_appointment_slot,
+    ):
+        """
+        Test that if a slot is taken by an appointment, it is not returned in the response.
+        """
+        # Mock CalDavConnector to avoid real external calls
+        class MockCaldavConnector:
+            @staticmethod
+            def __init__(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
+                pass
+            @staticmethod
+            def get_busy_time(self, remote_calendar_ids, start, end):
+                return []
+
+        monkeypatch.setattr(CalDavConnector, '__init__', MockCaldavConnector.__init__)
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
+
+        # Setup: create subscriber, calendar, schedule
+        test_date = date(2024, 3, 5)
+        slot_time = time(10, 0, tzinfo=UTC)
+        slot_duration = 30
+
+        calendar = make_caldav_calendar(TEST_USER_ID, connected=True)
+        schedule = make_schedule(
+            calendar_id=calendar.id,
+            active=True,
+            start_date=test_date,
+            end_date=test_date,
+            start_time=slot_time,
+            end_time=time(12, 0, tzinfo=UTC),
+            earliest_booking=0,
+            farthest_booking=1440,
+            slot_duration=slot_duration,
+            weekdays=[test_date.isoweekday()],
+            timezone='UTC',
+        )
+
+        # Create an appointment and a slot that matches a possible slot for this schedule
+        slot_start_dt = datetime.combine(test_date, slot_time, tzinfo=UTC)
+        appointment = make_appointment(calendar_id=calendar.id, slots=[])
+        taken_slot = make_appointment_slot(
+            appointment_id=appointment.id,
+            start=slot_start_dt,
+            duration=slot_duration,
+            booking_status=models.BookingStatus.booked,
+        )[0]
+
+        # Link slot to schedule
+        with with_db() as db:
+            taken_slot.schedule_id = schedule.id
+            db.add(taken_slot)
+            db.commit()
+
+        # Freeze time to the test date
+        with freeze_time(test_date):
+            response = with_client.get(
+                f'/schedule/availability_for_day?date={test_date.isoformat()}',
+                headers=auth_headers,
+            )
+            assert response.status_code == 200, response.text
+            slots = response.json()
+
+            # The slot that was taken should NOT be in the returned slots
+            slot_starts = [s['start'] for s in slots]
+            assert slot_start_dt.isoformat() not in slot_starts, (
+                f'Taken slot {slot_start_dt.isoformat()} should not be available: {slot_starts}'
+            )
+
+            # There should be at least one other slot available (e.g., 10:30, 11:00, etc.)
+            assert any(s for s in slots if s['start'] != slot_start_dt.isoformat()), "Other slots should be available."
 
     def test_public_availability(
         self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
