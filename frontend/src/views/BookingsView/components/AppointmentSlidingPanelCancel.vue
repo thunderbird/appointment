@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { callKey } from '@/keys';
 import { Appointment } from '@/models';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import { usePosthog, posthog } from '@/composables/posthog';
-import { MetricEvents } from '@/definitions';
 import { SecondaryButton, DangerButton } from '@thunderbirdops/services-ui';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 const { t } = useI18n();
-const call = inject(callKey);
+const appointmentStore = useAppointmentStore();
 
 const props = defineProps<{
   appointment: Appointment | null
@@ -28,7 +26,7 @@ const isError = ref<boolean|null>(null);
 async function cancelAppointment() {
   confirmCancel.value = true;
 
-  const { error } = await call(`apmt/${props.appointment?.id}/cancel`).post().json();
+  const { error } = await appointmentStore.cancelAppointment(props.appointment?.id);
 
   if (error.value) {
     isError.value = true;
@@ -36,11 +34,6 @@ async function cancelAppointment() {
   }
 
   isError.value = false;
-
-  if (usePosthog) {
-    const event = MetricEvents.CancelBooking;
-    posthog.capture(event);
-  }
 
   // Close panel automatically after 7 seconds
   setTimeout(() => {

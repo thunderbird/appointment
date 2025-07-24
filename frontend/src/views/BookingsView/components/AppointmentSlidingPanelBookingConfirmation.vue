@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { ref, inject, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { callKey } from '@/keys';
-import { AvailabilitySlotResponse } from '@/models';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import { usePosthog, posthog } from '@/composables/posthog';
-import { MetricEvents } from '@/definitions';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 const { t } = useI18n();
-const call = inject(callKey);
 
 const props = defineProps<{
   signedUrl: string,
@@ -26,15 +22,16 @@ const emit = defineEmits<{
 const isError = ref<boolean|null>(null);
 const attendeeEmail = ref<string|null>(null);
 
+const appointmentStore = useAppointmentStore();
+
 onMounted(async () => {
-  // build data object for put request
-  const obj = {
-    slot_id: props.slotId,
-    slot_token: props.slotToken,
-    owner_url: props.signedUrl,
+  const { error, data } = await appointmentStore.confirmOrDenyBooking({
+    slotId: props.slotId,
+    slotToken: props.slotToken,
+    ownerUrl: props.signedUrl,
     confirmed: props.confirmed,
-  };
-  const { error, data }: AvailabilitySlotResponse = await call('schedule/public/availability/booking').put(obj).json();
+  });
+
   if (error.value) {
     isError.value = true;
     return;
@@ -42,11 +39,6 @@ onMounted(async () => {
 
   isError.value = false;
   attendeeEmail.value = data.value?.attendee?.email;
-
-  if (usePosthog) {
-    const event = props.confirmed ? MetricEvents.ConfirmBooking : MetricEvents.DenyBooking;
-    posthog.capture(event);
-  }
 
   // Close panel automatically after 7 seconds
   setTimeout(() => {

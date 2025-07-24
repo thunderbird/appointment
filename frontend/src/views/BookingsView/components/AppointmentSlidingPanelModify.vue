@@ -3,13 +3,12 @@ import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { type Dayjs } from 'dayjs';
 import { Appointment, SelectOption } from '@/models';
-import { dayjsKey, callKey } from '@/keys';
+import { dayjsKey } from '@/keys';
 import { timeFormat } from '@/utils';
-import { MetricEvents } from '@/definitions';
-import { usePosthog, posthog } from '@/composables/posthog';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 export interface ModifyFormData {
   notes: string;
@@ -28,9 +27,9 @@ const emit = defineEmits<{
 }>();
 
 const dj = inject(dayjsKey);
-const call = inject(callKey);
 const { t } = useI18n();
 const user = useUserStore();
+const appointmentStore = useAppointmentStore();
 
 const form = ref<ModifyFormData>({ ...props.initialData });
 const isSuccess = ref<boolean>(false);
@@ -49,14 +48,13 @@ const handleModifyFormSubmit = async () => {
     emit('update:hideModifyFieldsAndCTA', true);
 
     const payload = {
+      appointmentId: props.appointment?.id,
       title: props.title,
       start: selectedBookingSlot.value,
-      slot_id: props.appointment?.slots[0].id,
-      ...form.value,
+      slotId: props.appointment?.slots[0].id,
+      notes: form.value.notes,
     };
-
-    const { error } = await call(`apmt/${props.appointment?.id}/modify`).put(payload).json();
-
+    const { error } = await appointmentStore.modifyBookingAppointment(payload);
     if (error.value) {
       isError.value = true;
       return;
@@ -64,11 +62,6 @@ const handleModifyFormSubmit = async () => {
 
     isError.value = false;
     isSuccess.value = true;
-
-    if (usePosthog) {
-      const event = MetricEvents.ModifyBooking;
-      posthog.capture(event);
-    }
 
     // Close panel automatically after 7 seconds
     setTimeout(() => {
@@ -86,14 +79,14 @@ const today = computed(() => dj());
 const populateTimeSlots = async () => {
   isLoadingSlots.value = true;
 
-  const { data, error } = await call(`/schedule/availability_for_day?date=${activeDate.value.format('YYYY-MM-DD')}`)
-    .get()
-    .json();
+  const { data, error } = await appointmentStore.fetchAvailabilityForDay(activeDate.value.format('YYYY-MM-DD'));
 
   if (error.value) {
     console.error('Failed to fetch available slots:', error.value);
+
     isError.value = true;
     emit('update:hideModifyFieldsAndCTA', true);
+
     return;
   }
 

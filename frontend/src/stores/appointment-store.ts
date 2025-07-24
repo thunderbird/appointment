@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
-import { BookingStatus } from '@/definitions';
+import { BookingStatus, MetricEvents } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import {
   Appointment, AppointmentListResponse, Fetch, Slot,
+  AvailabilitySlotResponse,
 } from '@/models';
 import { dayjsKey, tzGuessKey } from '@/keys';
+import { usePosthog, posthog } from '@/composables/posthog';
 
  
 export const useAppointmentStore = defineStore('appointments', () => {
@@ -80,11 +82,65 @@ export const useAppointmentStore = defineStore('appointments', () => {
   };
 
   /**
-   * Cancel an appointment with an optional reason
-  */
-  const cancelAppointment = async (id: number) => {
-    await call.value(`apmt/${id}/cancel`).post();
+   * Confirm or deny a booking slot
+   */
+  const confirmOrDenyBooking = async ({ slotId, slotToken, ownerUrl, confirmed }) => {
+    const obj = {
+      slot_id: slotId,
+      slot_token: slotToken,
+      owner_url: ownerUrl,
+      confirmed,
+    };
+    const { error, data }: AvailabilitySlotResponse = await call.value('schedule/public/availability/booking').put(obj).json();
+
+    if (usePosthog && !error.value) {
+      const event = confirmed ? MetricEvents.ConfirmBooking : MetricEvents.DenyBooking;
+      posthog.capture(event);
+    }
+
     await fetch();
+
+    return { error, data };
+  };
+
+  /**
+   * Cancel an appointment (booking context)
+   */
+  const cancelAppointment = async (appointmentId: number) => {
+    const { error } = await call.value(`apmt/${appointmentId}/cancel`).post().json();
+
+    if (usePosthog && !error.value) {
+      posthog.capture(MetricEvents.CancelBooking);
+    }
+
+    await fetch();
+
+    return { error };
+  };
+
+  /**
+   * Modify an appointment (booking context)
+   */
+  const modifyBookingAppointment = async ({ appointmentId, title, start, slotId, notes }) => {
+    const payload = { title, start, slot_id: slotId, notes };
+
+    const { error } = await call.value(`apmt/${appointmentId}/modify`).put(payload).json();
+
+    if (usePosthog && !error.value) {
+      posthog.capture(MetricEvents.ModifyBooking);
+    }
+
+    await fetch();
+
+    return { error };
+  };
+
+  /**
+   * Fetch available slots for a given day
+   */
+  const fetchAvailabilityForDay = async (date: string) => {
+    const { data, error } = await call.value(`/schedule/availability_for_day?date=${date}`).get().json();
+    return { data, error };
   };
 
   return {
@@ -97,7 +153,10 @@ export const useAppointmentStore = defineStore('appointments', () => {
     fetch,
     $reset,
     deleteAppointment,
-    cancelAppointment
+    cancelAppointment,
+    confirmOrDenyBooking,
+    modifyBookingAppointment,
+    fetchAvailabilityForDay,
   };
 });
 
