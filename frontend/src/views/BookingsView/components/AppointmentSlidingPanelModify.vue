@@ -7,6 +7,7 @@ import { timeFormat } from '@/utils';
 import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import { useUserStore } from '@/stores/user-store';
 
 export interface ModifyFormData {
   notes: string;
@@ -26,6 +27,7 @@ const emit = defineEmits<{
 
 const dj = inject(dayjsKey);
 const { t } = useI18n();
+const user = useUserStore();
 const appointmentStore = useAppointmentStore();
 
 const form = ref<ModifyFormData>({ ...props.initialData });
@@ -44,14 +46,20 @@ const handleModifyFormSubmit = async () => {
   try {
     emit('update:hideModifyFieldsAndCTA', true);
 
+    const slotTimeInUTC = dj(selectedBookingSlot.value)
+      .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
+      .utc().format()
+
     const payload = {
       appointmentId: props.appointment?.id,
       title: props.title,
-      start: selectedBookingSlot.value,
+      start: slotTimeInUTC,
       slotId: props.appointment?.slots[0].id,
       notes: form.value.notes,
     };
+
     const { error } = await appointmentStore.modifyBookingAppointment(payload);
+
     if (error.value) {
       isError.value = true;
       return;
