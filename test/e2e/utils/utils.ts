@@ -1,7 +1,6 @@
 // utility functions that may be used by any tests
 import { SplashscreenPage } from "../pages/splashscreen-page";
 import { FxAPage } from "../pages/fxa-page";
-import { DashboardPage } from "../pages/dashboard-page";
 import { expect, type Page } from '@playwright/test';
 
 import {
@@ -30,7 +29,6 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
     console.log(`navigating to appointment ${APPT_TARGET_ENV} (${APPT_URL}) and signing in`);
     const homePage = new SplashscreenPage(page);
     const fxaSignInPage = new FxAPage(page);
-    const dashboardPage = new DashboardPage(page);
 
     await homePage.gotoDashboard();
 
@@ -51,7 +49,6 @@ export const navigateToAppointmentAndSignIn = async (page: Page) => {
 
     // now that we're signed into the appointment dashboard give it time to load
     await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_60_SECONDS }); // give generous time
-    await expect(dashboardPage.shareMyLink).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
 }
 
 /**

@@ -18,8 +18,8 @@ import { deepClone } from '@/utils';
 import AppointmentCreatedModal from '@/components/AppointmentCreatedModal.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 import ToolTip from '@/elements/ToolTip.vue';
-import AvailabilitySelect from '@/elements/AvailabilitySelect.vue';
 import SnackishBar from '@/elements/SnackishBar.vue';
+import AvailabilitySelect from './AvailabilitySelect.vue';
 import {
   CopyIcon, BubbleSelect, CheckboxInput, LinkButton, PrimaryButton, SwitchToggle, TextInput, SelectInput
 } from '@thunderbirdops/services-ui';
@@ -444,7 +444,7 @@ watch(
           no-legend
           @changed="toggleActive"
           :title="t(schedule.active ? 'label.deactivateSchedule' : 'label.activateSchedule')"
-          data-testid="dashboard-set-availability-toggle"
+          data-testid="availability-set-availability-toggle"
         />
       </div>
       <alert-box
@@ -472,7 +472,7 @@ watch(
       <div id="schedule-availability" class="schedule-creation-step" :class="{ 'active': activeStep1 }">
         <div
           @click="state = ScheduleCreationState.Availability"
-          class="btn-step-1 flex cursor-pointer items-center justify-between" data-testid="dashboard-availability-panel-btn"
+          class="btn-step-1 flex cursor-pointer items-center justify-between" data-testid="availability-panel-btn"
         >
           <div class="flex flex-col">
             <h2>
@@ -555,7 +555,7 @@ watch(
                 class="edit-link-btn"
                 @click="router.push({ name: 'settings' })"
                 :tooltip="t('label.editInSettings')"
-                data-testid="dashboard-availability-edit-link-btn"
+                data-testid="availability-edit-link-btn"
               >
                 {{ t('label.edit') }}
               </link-button>
@@ -569,7 +569,7 @@ watch(
         <div
           @click="state = ScheduleCreationState.Settings"
           class="btn-step-2 flex cursor-pointer items-center justify-between"
-          data-testid="dashboard-scheduling-details-panel-btn"
+          data-testid="availability-scheduling-details-panel-btn"
         >
           <div class="flex flex-col">
             <h2>
@@ -600,7 +600,7 @@ watch(
               name="earliest_booking"
               v-model="scheduleInput.earliest_booking"
               class="w-full"
-              data-testid="dashboard-scheduling-details-earliest-booking-input"
+              data-testid="availability-scheduling-details-earliest-booking-input"
               :options="earliestOptions"
               :disabled="!scheduleInput.active"
             >
@@ -610,7 +610,7 @@ watch(
               name="farthest_booking"
               v-model="scheduleInput.farthest_booking"
               class="w-full"
-              data-testid="dashboard-scheduling-details-farthest-booking-input"
+              data-testid="availability-scheduling-details-farthest-booking-input"
               :options="farthestOptions"
               :disabled="!scheduleInput.active"
             >
@@ -620,7 +620,7 @@ watch(
           <select-input
             name="slot_duration"
             v-model="scheduleInput.slot_duration"
-            data-testid="dashboard-scheduling-details-booking-duration-input"
+            data-testid="availability-scheduling-details-booking-duration-input"
             :options="durationOptions"
             :disabled="!scheduleInput.active"
             class="w-full"
@@ -647,7 +647,7 @@ watch(
         :class="{ 'active':  activeStep3 }"
         @click="state = ScheduleCreationState.Details"
       >
-        <div class="flex cursor-pointer items-center justify-between" data-testid="dashboard-meeting-details-panel-btn">
+        <div class="flex cursor-pointer items-center justify-between" data-testid="availability-meeting-details-panel-btn">
           <div class="flex flex-col">
             <h2>
               {{ t("label.meetingDetails") }}
@@ -712,7 +712,7 @@ watch(
               :disabled="!scheduleInput.active"
               class="place-holder h-24 w-full resize-none rounded-md text-sm"
               :maxlength="charLimit"
-              data-testid="dashboard-meeting-details-notes-input"
+              data-testid="availability-meeting-details-notes-input"
             ></textarea>
             <div
               class="absolute bottom-3 right-3 text-xs"
@@ -734,7 +734,7 @@ watch(
         :class="{ 'active': activeStep4 }"
         @click="state = ScheduleCreationState.Booking"
       >
-        <div class="flex cursor-pointer items-center justify-between" data-testid="dashboard-boooking-settings-panel-btn">
+        <div class="flex cursor-pointer items-center justify-between" data-testid="availability-boooking-settings-panel-btn">
           <div class="flex flex-col">
             <h2>
               {{ t("label.bookingSettings") }}
@@ -818,7 +818,7 @@ watch(
         class="btn-save w-full"
         @click="saveSchedule(!existing)"
         :disabled="!scheduleInput.active || savingInProgress"
-        data-testid="dashboard-save-changes-btn"
+        data-testid="availability-save-changes-btn"
       >
         {{ t('label.save') }}
       </primary-button>
@@ -836,7 +836,7 @@ watch(
           v-if="user.myLink && existing"
           class="btn-copy"
           @click="copyLink"
-          data-testid="dashboard-share-quick-link-btn"
+          data-testid="availability-share-quick-link-btn"
           :tooltip="myLinkTooltip"
           :force-tooltip="myLinkShow"
         >
