@@ -38,7 +38,11 @@ const copyLink = async () => {
       {{ pendingBookingRequestsCount }} {{ t('label.pendingBookingRequests', pendingBookingRequestsCount) }}
     </router-link>
 
-    <h2>{{ t('label.whatDoYouWantToDoToday') }}</h2>
+    <h2
+      :class="{ 'has-pending-requests': props.pendingBookingRequestsCount }"
+    >
+      {{ t('label.whatDoYouWantToDoToday') }}
+    </h2>
 
     <div class="quick-actions-container">
       <button class="link-buton" :class="{ 'copied': hasCopied }" @click="copyLink" data-testid="button-copy-booking-url">
@@ -60,7 +64,11 @@ const copyLink = async () => {
 h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 3rem 0 1.5rem 0;
+  margin-block-end: 1.5rem;
+
+  &.has-pending-requests {
+    margin-block-start: 3rem;
+  }
 }
 
 .quick-actions-container {
