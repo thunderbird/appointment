@@ -1,3 +1,4 @@
+import pytest
 import dateutil.parser
 from unittest.mock import patch, MagicMock
 
@@ -87,6 +88,7 @@ class TestAppointment:
         )
         assert response.status_code == 404, response.text
 
+    @pytest.mark.skip(reason="feature still being scoped")
     def test_modify_my_appointment(self, with_client, make_appointment, with_db):
         """
         Test modifying an appointment's title and slot start time via /apmt/{id}/modify.

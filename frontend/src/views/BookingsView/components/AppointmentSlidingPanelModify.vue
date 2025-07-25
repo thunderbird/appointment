@@ -1,3 +1,7 @@
+<!-- This is currently (as of Jul-25-2025) being scoped so this component is unused
+Do not delete though! It will be useful once this ticket is tackled:
+https://github.com/thunderbird/appointment/issues/1146 -->
+
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';

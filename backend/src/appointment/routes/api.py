@@ -400,6 +400,11 @@ def modify_my_appointment(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
+    # TODO: This endpoint shouldn't be used until the modify appointment
+    #       scoping has been done!
+    #       https://github.com/thunderbird/appointment/issues/1146
+    raise HTTPException(status_code=403)
+
     """endpoint to modify an appointment"""
     if not repo.appointment.exists(db, appointment_id=id):
         raise validation.AppointmentNotFoundException()
