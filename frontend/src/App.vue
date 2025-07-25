@@ -122,6 +122,7 @@ provide(callKey, call);
 // menu items for main navigation
 const navItems = [
   'dashboard',
+  'availability',
   'bookings',
   'settings',
 ];

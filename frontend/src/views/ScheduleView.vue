@@ -7,13 +7,11 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, callKey, refreshKey } from '@/keys';
-import { ScheduleAppointment, TimeFormatted } from '@/models';
-import ScheduleCreation from '@/components/ScheduleCreation.vue';
+import { TimeFormatted } from '@/models';
 import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 
 // stores
-import { createScheduleStore } from '@/stores/schedule-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
@@ -24,13 +22,11 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const refresh = inject(refreshKey);
 
-const scheduleStore = createScheduleStore(call);
 const appointmentStore = useAppointmentStore();
 const calendarStore = createCalendarStore(call);
 const userActivityStore = useUserActivityStore();
-const { schedules, firstSchedule } = storeToRefs(scheduleStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
-const { connectedCalendars, remoteEvents } = storeToRefs(calendarStore);
+const { remoteEvents } = storeToRefs(calendarStore);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
 // current selected date, defaults to now
@@ -40,14 +36,8 @@ const activeDateRange = computed(() => ({
   end: activeDate.value.endOf('month'),
 }));
 
-// user configured schedules from db (only the first for now, later multiple schedules will be available)
-const schedulesReady = ref(false);
-
 // schedule previews for showing corresponding placeholders in calendar views
 const schedulesPreviews = ref([]);
-const schedulePreview = (schedule: ScheduleAppointment) => {
-  schedulesPreviews.value = schedule ? [schedule] : [];
-};
 
 /**
  * Retrieve new events if a user navigates to a different month
@@ -72,14 +62,10 @@ const onDateChange = async (dateObj: TimeFormatted) => {
 onMounted(async () => {
   // Don't actually load anything during the FTUE
   if (route.name === 'setup') {
-    // Setup a default schedule so the schedule creation bar works correctly...
-    schedules.value = [scheduleStore.defaultSchedule];
-    schedulesReady.value = true;
     return;
   }
+
   await refresh();
-  scheduleStore.fetch();
-  schedulesReady.value = true;
   await calendarStore.getRemoteEvents(activeDate.value);
 });
 
@@ -123,28 +109,14 @@ const dismiss = () => {
   <div class="flex select-none flex-col items-start justify-between lg:flex-row">
     <div class="text-4xl font-light">{{ t('label.dashboard') }}</div>
   </div>
-  <!-- page content -->
-  <div class="mt-8 flex flex-col-reverse items-stretch gap-2 md:flex-row-reverse lg:gap-4">
-    <!-- schedule creation dialog -->
-    <div class="z-10 mx-auto mb-10 w-3/4 min-w-96 sm:w-1/4 md:mb-0 xl:w-1/6">
-      <schedule-creation
-        v-if="schedulesReady"
-        :calendars="connectedCalendars"
-        :schedule="firstSchedule"
-        :active-date="activeDate"
-        @created="scheduleStore.fetch(true)"
-        @updated="schedulePreview"
-      />
-    </div>
-    <!-- main section: big calendar showing active month, week or day -->
-    <calendar-qalendar
-      class="w-full md:w-9/12 xl:w-10/12"
-      :appointments="pendingAppointments"
-      :events="remoteEvents"
-      :schedules="schedulesPreviews"
-      @date-change="onDateChange"
-    />
-  </div>
+  <!-- main section: big calendar showing active month, week or day -->
+  <calendar-qalendar
+    class="w-full mt-8"
+    :appointments="pendingAppointments"
+    :events="remoteEvents"
+    :schedules="schedulesPreviews"
+    @date-change="onDateChange"
+  />
 </template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
