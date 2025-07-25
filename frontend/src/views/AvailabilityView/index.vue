@@ -53,7 +53,15 @@ export default {
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .availability-section {
-  width: 50%;
+  width: auto;
+}
+
+@media (--md) {
+  .availability-section {
+    width: 50%;
+  }
 }
 </style>
