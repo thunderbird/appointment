@@ -1,7 +1,7 @@
 import { defineAsyncComponent } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
-import ScheduleView from '@/views/ScheduleView.vue';
+import DashboardView from '@/views/DashboardView/index.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
@@ -95,7 +95,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: ScheduleView,
+    component: DashboardView,
   },
   {
     // This is just to auto-redirect old links. Can be removed in the future.
