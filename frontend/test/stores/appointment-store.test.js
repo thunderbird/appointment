@@ -44,6 +44,28 @@ const restHandlers = [
     },
   ])),
   http.post(`${API_URL}/apmt/:id/cancel`, async () => {}),
+  http.put(`${API_URL}/schedule/public/availability/booking`, async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      data: { confirmed: body.confirmed },
+      error: { value: false },
+    });
+  }),
+  http.put(`${API_URL}/apmt/:id/modify`, async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      error: { value: false },
+      data: { ...body },
+    });
+  }),
+  http.get(`${API_URL}/schedule/availability_for_day`, async ({ request }) => {
+    const url = new URL(request.url);
+    const date = url.searchParams.get('date');
+    return HttpResponse.json({
+      data: [{ slot: '09:00', date }],
+      error: { value: false },
+    });
+  }),
 ];
 
 const server = setupServer(...restHandlers);
@@ -116,18 +138,69 @@ describe('Appointment Store', () => {
     await apmt.fetch();
 
     // Cancel the first appointment
-    const reason = 'Test reason';
-    await apmt.cancelAppointment(apmt.appointments[0].id, reason);
+    await apmt.cancelAppointment(apmt.appointments[0].id);
 
-    // Assert fetch was called with the correct endpoint and payload
+    // Assert fetch was called with the correct endpoint
     expect(fetchSpy).toHaveBeenCalledWith(
       expect.stringContaining(`/apmt/${apmt.appointments[0].id}/cancel`),
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ reason }),
       })
     );
 
     fetchSpy.mockRestore();
+  });
+
+  test('confirmOrDenyBooking', async () => {
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
+    const result = await apmt.confirmOrDenyBooking({
+      slotId: 123,
+      slotToken: 'token',
+      ownerUrl: 'owner-url',
+      confirmed: true,
+    });
+
+    expect(result.error?.value ?? false).toBe(false);
+    expect(result.data.value.data.confirmed).toBe(true);
+  });
+
+  test('modifyBookingAppointment', async () => {
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    await apmt.fetch();
+    const result = await apmt.modifyBookingAppointment({
+      appointmentId: 1,
+      title: 'New Title',
+      start: '2024-01-01T10:00:00Z',
+      slotId: 456,
+      notes: 'Some notes',
+    });
+    expect(result.error?.value ?? false).toBe(false);
+    expect(result).toHaveProperty('error');
+  });
+
+  test('fetchAvailabilityForDay', async () => {
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+    const { data, error } = await apmt.fetchAvailabilityForDay('2024-01-01');
+
+    expect(error?.value ?? false).toBe(false);
+    expect(Array.isArray(data.value.data)).toBe(true);
+    expect(data.value.data[0]).toHaveProperty('slot', '09:00');
+    expect(data.value.data[0]).toHaveProperty('date', '2024-01-01');
+  });
+
+  test('selectedAppointment is updated after fetch', async () => {
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+
+    apmt.selectedAppointment = { id: 1, title: 'old title', slots: [{}] };
+    await apmt.fetch();
+
+    // After fetch, selectedAppointment should be updated to the new appointment object with id 1
+    expect(apmt.selectedAppointment).toBeDefined();
+    expect(apmt.selectedAppointment.id).toBe(1);
+    expect(apmt.selectedAppointment.title).toBe('title');
+
+    // Should be the same object as in appointments array
+    expect(apmt.selectedAppointment).toBe(apmt.appointments[0]);
   });
 });

@@ -21,7 +21,7 @@ const dj = inject(dayjsKey);
 const refresh = inject(refreshKey);
 
 const appointmentStore = useAppointmentStore();
-const { appointments } = storeToRefs(appointmentStore);
+const { appointments, selectedAppointment } = storeToRefs(appointmentStore);
 
 // Default selected filters: Pending (requested) and Confirmed (booked)
 const selectedFilters = useQueryParamState(
@@ -123,9 +123,6 @@ const getSortIndicator = (column: string) => {
   return sortDirection.value === SortDirection.Ascending ? IconCaretUpFilled : IconCaretDownFilled;
 };
 
-// handle single appointment modal
-const selectedAppointment = ref(null);
-
 const showAppointmentSlidingPanel = async (appointment) => {
   selectedAppointment.value = appointment;
   appointmentSlidingPanelRef.value?.showPanel()
@@ -178,6 +175,7 @@ export default {
         @update:selected="selectedFilters = $event"
       />
       <checkbox-input
+        class="unconfirmed-first-checkbox"
         name="unconfirmed-first"
         :label="t('label.unconfirmedFirst')"
         v-model="unconfirmedFirst"
@@ -356,6 +354,10 @@ export default {
 .appointments-table {
   margin-top: 1rem;
   width: 100%;
+}
+
+.unconfirmed-first-checkbox {
+  width: auto;
 }
 
 /* Table styles */

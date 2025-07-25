@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from .. import utils
-from ..database import repo, schemas
+from ..database import repo, schemas, models
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
@@ -393,6 +393,34 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
     )
 
 
+@router.put('/apmt/{id}/modify', response_model=schemas.Appointment)
+def modify_my_appointment(
+    id: int,
+    appointment_data: schemas.AppointmentModifyRequest,
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
+    # TODO: This endpoint shouldn't be used until the modify appointment
+    #       scoping has been done!
+    #       https://github.com/thunderbird/appointment/issues/1146
+    raise HTTPException(status_code=403)
+
+    """endpoint to modify an appointment"""
+    if not repo.appointment.exists(db, appointment_id=id):
+        raise validation.AppointmentNotFoundException()
+    if not repo.appointment.is_owned(db, appointment_id=id, subscriber_id=subscriber.id):
+        raise validation.AppointmentNotAuthorizedException()
+
+    modified_appointment = repo.appointment.update_title_and_slot(
+        db=db, appointment_id=id, appointment_data=appointment_data
+    )
+
+    # TODO: Send email to booker with link to confirm or cancel
+    #       use appointment_data.notes as the reason for the modification
+
+    return modified_appointment
+
+
 @router.delete('/apmt/{id}')
 def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     """endpoint to remove a appointment from db"""
@@ -409,7 +437,6 @@ def delete_my_appointment(id: int, db: Session = Depends(get_db), subscriber: Su
 def cancel_my_appointment(
     id: int,
     background_tasks: BackgroundTasks,
-    payload: schemas.AppointmentCancelRequest,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     redis=Depends(get_redis),
@@ -461,7 +488,7 @@ def cancel_my_appointment(
 
     # Send cancel information to all slots' bookees
     for slot in appointment.slots:
-        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee, payload.reason)
+        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
         # If needed, delete appointment's Zoom meeting through Zoom client
         if zoom_client:
@@ -471,7 +498,8 @@ def cancel_my_appointment(
                 sentry_sdk.capture_exception(ex)
         
         # Mark the slot as BookingStatus.cancelled
-        repo.slot.cancel(db, slot.id)
+        slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
+        repo.slot.update(db, slot.id, slot_update)
 
     # Delete the remote calendar event
     uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)

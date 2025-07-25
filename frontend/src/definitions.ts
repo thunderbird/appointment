@@ -73,7 +73,8 @@ export enum BookingStatus {
   Requested = 2,
   Booked = 3,
   Declined = 4,
-  Cancelled = 5
+  Cancelled = 5,
+  Modified = 6
 }
 
 /**
@@ -84,7 +85,8 @@ export enum BookingStatusFilterQueryParams {
   Requested = 'pending',
   Booked = 'confirmed',
   Declined = 'declined',
-  Cancelled = 'cancelled'
+  Cancelled = 'cancelled',
+  Modified = 'modified'
 }
 
 /**
@@ -308,6 +310,8 @@ export enum MetricEvents {
   RefreshLink = 'apmt.account.refreshLink',
   DownloadData = 'apmt.account.download',
   DeleteAccount = 'apmt.account.delete',
+  CancelBooking = 'apmt.booking.cancel',
+  ModifyBooking = 'apmt.booking.modify',
   ConfirmBooking = 'apmt.booking.confirm',
   DenyBooking = 'apmt.booking.deny',
   RequestBooking = 'apmt.booking.request',

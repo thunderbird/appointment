@@ -327,14 +327,13 @@ class ConfirmationMail(BaseBookingMail):
 
 
 class CancelMail(Mailer):
-    def __init__(self, owner_name, date, reason, *args, **kwargs):
+    def __init__(self, owner_name, date, *args, **kwargs):
         """Init Mailer with cancel specific defaults
            To: Bookee
            Reply-To: Event owner
         """
         self.owner_name = owner_name
         self.date = date
-        self.reason_line = f'{l10n("cancel-mail-reason-label")} {reason}' if reason else ''
         default_kwargs = {'subject': l10n('cancel-mail-subject')}
         super(CancelMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -344,7 +343,6 @@ class CancelMail(Mailer):
             {
                 'owner_name': self.owner_name,
                 'date': self.date,
-                'reason_line': self.reason_line,
             },
         )
 
@@ -352,7 +350,6 @@ class CancelMail(Mailer):
         return get_template('cancelled.jinja2').render(
             owner_name=self.owner_name,
             date=self.date,
-            reason_line=self.reason_line,
             tbpro_logo_cid=self._attachments()[0].filename,
         )
 

@@ -93,7 +93,7 @@ def delete_all_for_subscriber(db: Session, subscriber_id: int):
     return True
 
 
-def update(db: Session, slot_id: int, attendee: schemas.Attendee):
+def add_attendee_to_slot(db: Session, slot_id: int, attendee: schemas.Attendee):
     """update existing slot by id and create corresponding attendee"""
     # create attendee
     db_attendee = models.Attendee(**attendee.model_dump())
@@ -108,27 +108,23 @@ def update(db: Session, slot_id: int, attendee: schemas.Attendee):
     return db_attendee
 
 
+def update(db: Session, slot_id: int, slot_update: schemas.SlotUpdate) -> models.Slot | None:
+    """Update slot by id with partial SlotUpdate data (all fields optional)."""
+    db_slot = get(db, slot_id)
+    if not db_slot:
+        return None
+
+    update_data = slot_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_slot, key, value)
+    db.commit()
+    db.refresh(db_slot)
+    return db_slot
+
+
 def delete(db: Session, slot_id: int):
     """remove existing slot by id"""
     db_slot = get(db, slot_id)
     db.delete(db_slot)
     db.commit()
-    return db_slot
-
-
-def reject(db: Session, slot_id: int) -> models.Slot | None:
-    """update booking status for slot of given id as declined"""
-    db_slot = get(db, slot_id)
-    db_slot.booking_status = models.BookingStatus.declined
-    db.commit()
-    db.refresh(db_slot)
-    return db_slot
-
-
-def cancel(db: Session, slot_id: int) -> models.Slot | None:
-    """update booking status for slot of given id as cancelled"""
-    db_slot = get(db, slot_id)
-    db_slot.booking_status = models.BookingStatus.cancelled
-    db.commit()
-    db.refresh(db_slot)
     return db_slot

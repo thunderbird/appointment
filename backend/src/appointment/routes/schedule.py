@@ -345,7 +345,7 @@ def request_schedule_availability_slot(
     slot = repo.slot.add_for_schedule(db, slot, schedule.id)
 
     # create attendee for this slot
-    attendee = repo.slot.update(db, slot.id, s_a.attendee)
+    attendee = repo.slot.add_attendee_to_slot(db, slot.id, s_a.attendee)
 
     # Create a pending appointment
     prefix = f'{l10n('event-hold-prefix')} ' if schedule.booking_confirmation else ''
@@ -522,7 +522,8 @@ def handle_schedule_availability_decision(
         Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
         # mark the slot as BookingStatus.declined
-        repo.slot.reject(db, slot.id)
+        slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
+        repo.slot.update(db, slot.id, slot_update)
 
         # Delete remote HOLD event if existing
         if appointment:

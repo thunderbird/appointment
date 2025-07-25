@@ -26,6 +26,7 @@ const filterOptions = [
   { value: BookingStatus.Booked, label: t('label.confirmed') },
   { value: BookingStatus.Declined, label: t('label.declined') },
   { value: BookingStatus.Cancelled, label: t('label.cancelled') },
+  // { value: BookingStatus.Modified, label: t('label.modified') },
 ];
 
 const isOpen = ref(false);
@@ -103,7 +104,7 @@ watch(
     <!-- Pill trigger -->
     <button @click="toggleDropdown" class="filter-trigger" type="button">
       <span>{{ displayText }}</span>
-      <IconChevronDown class="chevron-icon" :class="{ 'rotated': isOpen }" />
+      <icon-chevron-down class="chevron-icon" :class="{ 'rotated': isOpen }" />
     </button>
 
     <!-- Dropdown -->

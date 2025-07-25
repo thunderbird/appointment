@@ -123,3 +123,24 @@ def update_external_id_by_id(db: Session, appointment_id: int, external_id: str)
     if not appointment:
         return False
     return update_external_id(db, appointment, external_id)
+
+
+def update_title_and_slot(db: Session, appointment_id: int, appointment_data: schemas.AppointmentModifyRequest):
+    """Update an existing appointment's title and slot."""
+    db_appointment = get(db, appointment_id)
+    if not db_appointment:
+        return None
+
+    db_appointment.title = appointment_data.title
+    db.commit()
+
+    slot_update = schemas.SlotUpdate(
+        start=appointment_data.start,
+        title=appointment_data.title,
+        booking_status=models.BookingStatus.modified,
+    )
+
+    repo.slot.update(db, appointment_data.slot_id, slot_update)
+
+    db.refresh(db_appointment)
+    return db_appointment

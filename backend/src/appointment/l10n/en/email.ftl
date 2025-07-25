@@ -109,14 +109,11 @@ cancel-mail-subject = Booking request cancelled
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
-# $reason_line (String) - Reason for cancelling the appointment
-cancel-mail-html-heading = { $owner_name } cancelled your booking request for this time slot: { $date }. { $reason_line }
-cancel-mail-reason-label = Reason:
+cancel-mail-html-heading = { $owner_name } cancelled your booking request for this time slot: { $date }.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $date (String) - Date of the requested appointment
-# $reason_line (String) - Reason for cancelling the appointment
-cancel-mail-plain = { $owner_name } cancelled your booking request for this time slot: { $date }. { $reason_line }
+cancel-mail-plain = { $owner_name } cancelled your booking request for this time slot: { $date }.
 {-brand-footer}
 
 ## Rejected Appointment

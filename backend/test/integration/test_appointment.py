@@ -1,3 +1,4 @@
+import pytest
 import dateutil.parser
 from unittest.mock import patch, MagicMock
 
@@ -86,6 +87,43 @@ class TestAppointment:
             f'/apmt/serve/ics/{generated_appointment.slug}/{generated_appointment.slots[0].id + 1}'
         )
         assert response.status_code == 404, response.text
+
+    @pytest.mark.skip(reason="feature still being scoped")
+    def test_modify_my_appointment(self, with_client, make_appointment, with_db):
+        """
+        Test modifying an appointment's title and slot start time via /apmt/{id}/modify.
+        """
+        from appointment.database import schemas, models
+        from datetime import timedelta
+
+        # Create an appointment with a slot
+        appointment = make_appointment()
+        slot = appointment.slots[0]
+        new_title = "Updated Appointment Title"
+        new_start = slot.start + timedelta(hours=1)
+        payload = schemas.AppointmentModifyRequest(
+            title=new_title,
+            slot_id=slot.id,
+            start=new_start,
+            notes="Rescheduled by user."
+        ).model_dump(mode="json")
+
+        response = with_client.put(f"/apmt/{appointment.id}/modify", json=payload, headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data["title"] == new_title
+
+        # Find the modified slot
+        modified_slot = next((s for s in data["slots"] if s["id"] == slot.id), None)
+        assert modified_slot is not None
+        assert modified_slot["start"] == new_start.isoformat()
+        assert modified_slot["booking_status"] == models.BookingStatus.modified.value
+
+        # Double-check in DB
+        with with_db() as db:
+            db_slot = db.get(models.Slot, slot.id)
+            assert db_slot.start == new_start
+            assert db_slot.booking_status == models.BookingStatus.modified
 
 
 class TestMyAppointments:

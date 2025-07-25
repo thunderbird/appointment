@@ -1,68 +1,66 @@
 <script setup lang="ts">
 import { BookingStatus } from '@/definitions';
-import { timeFormat } from '@/utils';
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import SlidingPanel from '@/elements/SlidingPanel.vue';
-import { IconCalendarEvent, IconNotes } from '@tabler/icons-vue';
-import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, DangerButton, TextInput, LinkButton } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
+import { APPOINTMENT_SLIDING_PANEL_STEPS } from '../constants';
 
+// Panel Steps
+import AppointmentSlidingPanelBookingConfirmation from './AppointmentSlidingPanelBookingConfirmation.vue';
+import AppointmentSlidingPanelDetails from './AppointmentSlidingPanelDetails.vue';
+import AppointmentSlidingPanelModify, { ModifyFormData } from './AppointmentSlidingPanelModify.vue';
+import AppointmentSlidingPanelCancel from './AppointmentSlidingPanelCancel.vue';
+
+const { t } = useI18n();
+const dj = inject(dayjsKey);
 const user = useUserStore();
 const apmtStore = useAppointmentStore();
 
-// component emits
 const emit = defineEmits(['close']);
-
-// component constants
-const { t } = useI18n();
-const dj = inject(dayjsKey);
-
-interface Props {
+const props = defineProps<{
   appointment: Appointment | null;
-}
-const props = defineProps<Props>();
+}>();
 
-const cancelReason = ref<string>('');
 const panelRef = ref<InstanceType<typeof SlidingPanel>>()
+const panelStep = ref<APPOINTMENT_SLIDING_PANEL_STEPS>(APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS);
+const modifyPanelRef = ref<InstanceType<typeof AppointmentSlidingPanelModify>>();
+
+const appointmentTitle = ref<string>('');
+const modifyFormData = ref<ModifyFormData>();
+const hideModifyFieldsAndCTA = ref<boolean>(false);
+const isAppointmentConfirmed = ref<boolean>();
 
 // computed properties
-const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-const confirmationUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/1`);
-const denyUrl = computed(() => `${user.data.signedUrl}/confirm/${props.appointment.slots[0].id}/${props.appointment.slots[0].booking_tkn}/0`);
 const status = computed(() => props.appointment?.slots[0].booking_status);
 const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
 const isPast = computed(() => props.appointment?.slots[0].start < dj());
-const bookingStatusInfo = computed(() => {
-  if (status.value === BookingStatus.Booked && !isPast.value) {
-    return {
-      label: t('label.confirmed'),
-      color: 'status-confirmed'
-    };
-  }
-
-  return {
-    label: t('label.unconfirmed'),
-    color: 'status-unconfirmed'
-  };
-});
 
 // methods
 const closePanel = () => {
-  panelRef.value?.closePanel();
-  emit('close');
+  resetPanelState();
+
+  // Close SlidingPanel component
+  panelRef.value.closePanel()
+
+  // Emit close event for the Bookings View to cleanup its state
+  emit('close')
 }
 
-const answer = (isConfirmed: boolean) => {
-  // We don't want to emit('close') here as we are redirecting
-  panelRef.value?.closePanel();
+const resetPanelState = () => {
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS;
+  hideModifyFieldsAndCTA.value = false;
+}
 
-  window.location.href = isConfirmed ? confirmationUrl.value : denyUrl.value;
+const moveToConfirmAppointmentStep = (isConfirmed: boolean) => {
+  isAppointmentConfirmed.value = isConfirmed
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.CONFIRMATION
 };
 
 const deleteAppointment = () => {
@@ -70,11 +68,27 @@ const deleteAppointment = () => {
   closePanel();
 };
 
-const cancelAppointment = () => {
-  apmtStore.cancelAppointment(props.appointment?.id, cancelReason.value);
-  cancelReason.value = '';
-  closePanel();
+const moveToCancelAppointmentStep = () => {
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL
 };
+
+// Commented out for now since we are still scoping the modify feature
+// Do not delete this!
+//
+// const moveToModifyAppointmentStep = () => {
+//   appointmentTitle.value = props.appointment?.title || '';
+//   modifyFormData.value = { notes: '' };
+
+//   panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY
+// }
+
+const modifyAppointmentStepSaveClicked = () => {
+  modifyPanelRef.value?.handleModifyFormSubmit();
+}
+
+const moveToDetailsStep = () => {
+  panelStep.value = APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS
+}
 
 defineExpose({
   showPanel: () => {
@@ -87,105 +101,63 @@ defineExpose({
   <sliding-panel
     ref="panelRef"
     :title="appointment?.title"
-    @close="emit('close')"
+    @close="() => { resetPanelState(); emit('close')}"
   >
-    <div v-if="appointment" class="appointment-content">
-      <!-- Appointment status, first focusable content for back-to-top screen reader button -->
-      <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
-        {{ bookingStatusInfo.label }}
-      </p>
+    <!-- Title (only editable in step MODIFY) -->
+    <template #title v-if="appointment && panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY && !hideModifyFieldsAndCTA">
+      <text-input
+        name="appointmentTitle"
+        v-model="appointmentTitle"
+        :placeholder="appointment.title"
+      />
+    </template>
 
-      <div class="time-slots">
-        <template v-for="s in appointment.slots" :key="s.start">
-          <div class="time-slot">
-            <icon-calendar-event class="time-icon" :aria-label="t('label.timeOfTheEvent')" />
-            <div class="time-details">
-              <p class="date">{{ dj(s.start).format('LL') }}</p>
-              <div class="time-range">
-                {{ dj(s.start).format(timeFormat()) }} - {{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }} ({{ dj.duration(s.duration, 'minutes').humanize() }})
-              </div>
-            </div>
-          </div>
-        </template>
-      </div>
+    <!-- Content (each panel step with respective props) -->
+    <template v-if="appointment">
+      <appointment-sliding-panel-details
+        v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS"
+        :appointment="appointment"
+      />
 
-      <div class="appointment-info">
-        <div class="info-row">
-          <span class="info-label">
-            {{ t('label.calendar') }}:
-          </span>
-          {{ appointment.calendar_title }}
-        </div>
-        <div class="info-row">
-          <div class="info-row">
-            <span class="info-label">
-              {{ t('label.videoLink') }}:
-            </span>
-            <a
-              v-if="appointment.location_url"
-              :href="appointment.location_url"
-              class="video-link"
-              target="_blank"
-            >
-              {{ appointment.location_url }}
-            </a>
-            <span v-else>
-              {{ t('label.notProvided') }}
-            </span>
-          </div>
-        </div>
-      </div>
+      <appointment-sliding-panel-booking-confirmation
+        v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CONFIRMATION"
+        :signedUrl="user.data.signedUrl"
+        :slotId="props.appointment.slots[0].id"
+        :slotToken="props.appointment.slots[0].booking_tkn"
+        :confirmed="isAppointmentConfirmed"
+        @close="closePanel"
+      />
 
-      <div
-        v-if="attendeesSlots.length > 0"
-        class="attendees-section"
-      >
-        <div class="attendees-header">
-          {{ t('label.attendees') }}:
-        </div>
-        <template v-for="s in attendeesSlots" :key="s.start">
-          <div class="attendee-item">
-            {{ s.attendee.email }}
-          </div>
-        </template>
-      </div>
+      <appointment-sliding-panel-modify
+        v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY"
+        ref="modifyPanelRef"
+        :appointment="appointment"
+        :initialData="modifyFormData"
+        :title="appointmentTitle"
+        v-model:hideModifyFieldsAndCTA="hideModifyFieldsAndCTA"
+        @close="closePanel"
+      />
 
-      <div v-if="appointment.details" class="notes-section">
-        <div class="notes-header">
-          <icon-notes class="notes-icon"/>
-          {{ t('label.notes') }}
-        </div>
-        <div class="notes-content">{{ appointment.details }}</div>
-      </div>
-      
-      <div v-if="status === BookingStatus.Booked">
-        <form v-if="!isPast" class="cancel-form" @submit.prevent>
-          <label for="cancelReason" class="cancel-label">
-            {{ t('label.cancelReason') }}
-            <textarea
-                name="cancelReason"
-                v-model="cancelReason"
-                :placeholder="t('placeholder.writeHere')"
-                class="cancel-textarea"
-                data-testid="appointment-modal-cancel-reason-input"
-              ></textarea>
-          </label>
-        </form>
-      </div>
-    </div>
+      <appointment-sliding-panel-cancel
+        v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.CANCEL"
+        :appointment="appointment"
+        @click:backButton="moveToDetailsStep()"
+        @close="closePanel"
+      />
+    </template>
 
-    <!-- CTA buttons in the panel's CTA slot -->
-    <template #cta>
-      <div v-if="status === BookingStatus.Booked && !isPast" class="cta-single">
+    <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS -->
+    <template #cta v-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS">
+      <div v-if="status === BookingStatus.Booked && !isPast || status === BookingStatus.Modified" class="cta-single">
         <danger-button 
-          data-testid="appointment-modal-cancel-btn" 
-          @click="cancelAppointment()" 
+          data-testid="appointment-modal-cancel-btn"
+          @click="moveToCancelAppointmentStep()"
           :title="t('label.cancel')"
         >
           {{ t('label.cancelBooking') }}
         </danger-button>
       </div>
-      <div v-else-if="isExpired" class="cta-single">
+      <div v-else-if="isExpired || status === BookingStatus.Cancelled || status === BookingStatus.Declined" class="cta-single">
         <danger-button 
           class="btn-deny" 
           @click="deleteAppointment()" 
@@ -197,18 +169,40 @@ defineExpose({
       <div v-else-if="status === BookingStatus.Requested" class="cta-dual">
         <primary-button 
           class="btn-confirm" 
-          @click="answer(true)" 
+          @click="moveToConfirmAppointmentStep(true)"
           :title="t('label.confirm')"
         >
           {{ t('label.confirmBooking') }}
         </primary-button>
         <danger-button 
           class="btn-deny" 
-          @click="answer(false)" 
+          @click="moveToConfirmAppointmentStep(false)"
           :title="t('label.deny')"
         >
           {{ t('label.denyBooking') }}
         </danger-button>
+      </div>
+    </template>
+
+    <!-- CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY -->
+    <template #cta v-else-if="panelStep === APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY && !hideModifyFieldsAndCTA">
+      <div class="cta-dual-spaced">
+        <link-button
+          class="cancel-btn"
+          data-testid="appointment-modal-cancel-btn"
+          @click="moveToCancelAppointmentStep()"
+          :title="t('label.cancel')"
+        >
+          {{ t('label.cancelBooking') }}
+        </link-button>
+
+        <primary-button
+          data-testid="appointment-modal-save-btn"
+          :title="t('label.save')"
+          @click="modifyAppointmentStepSaveClicked()"
+        >
+          {{ t('label.save') }}
+        </primary-button>
       </div>
     </template>
   </sliding-panel>
@@ -217,185 +211,7 @@ defineExpose({
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-.appointment-content {
-  color: var(--colour-ti-base);
-}
-
-.position-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Status labels */
-.status-label {
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-confirmed {
-  color: var(--colour-ti-success);
-}
-
-.status-requested {
-  color: var(--colour-ti-warning);
-}
-
-.status-unconfirmed {
-  color: var(--colour-ti-critical);
-}
-
-/* Time slots section */
-.time-slots {
-  margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
-  font-size: 0.875rem;
-}
-
-.time-slot {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-}
-
-.time-icon {
-  width: 2rem;
-  height: 2rem;
-  fill: transparent;
-  stroke: var(--colour-ti-muted);
-  stroke-width: 2;
-}
-
-.time-details .date {
-  margin: 0;
-}
-
-.time-range {
-  margin-top: 0.25rem;
-}
-
-/* Appointment info section */
-.appointment-info {
-  margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
-  font-size: 0.875rem;
-}
-
-.info-row {
-  margin-bottom: 0.25rem;
-}
-
-.info-label {
-  font-weight: 600;
-}
-
-.video-link {
-  color: var(--colour-accent-teal);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-
-  &:hover {
-    color: var(--colour-apmt-primary);
-  }
-}
-
-/* Attendees section */
-.attendees-section {
-  margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
-  font-size: 0.875rem;
-}
-
-.attendees-header {
-  margin-bottom: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-}
-
-.attendee-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Notes section */
-.notes-section {
-  width: 100%;
-  padding-left: 1rem;
-  font-size: 0.875rem;
-}
-
-.notes-header {
-  margin-bottom: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-}
-
-.notes-icon {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-  fill: transparent;
-  stroke: var(--colour-ti-muted);
-  stroke-width: 2;
-}
-
-.notes-content {
-  border-radius: 0.5rem;
-  border: 1px solid var(--colour-neutral-border);
-  padding: 1rem;
-}
-
-.dark .notes-content {
-  border-color: var(--colour-neutral-border);
-}
-
-/* Cancel form */
-.cancel-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.cancel-label {
-  display: block;
-}
-
-.cancel-textarea {
-  width: 100%;
-  height: 6rem;
-  margin-top: 0.5rem;
-  margin-bottom: 2rem;
-  border-radius: 0.375rem;
-  resize: none;
-  border: 1px solid var(--colour-neutral-border);
-  padding: 0.5rem;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: var(--colour-primary-default);
-    box-shadow: 0 0 0 3px var(--colour-primary-soft);
-  }
-}
-
-.dark .cancel-textarea {
-  border-color: var(--colour-neutral-border);
-  background-color: var(--colour-neutral-lower);
-  color: var(--colour-ti-base);
-}
-
-/* CTA buttons */
+/* CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS */
 .cta-single {
   display: flex;
   justify-content: flex-end;
@@ -435,6 +251,16 @@ defineExpose({
     .btn-deny {
       flex-grow: 0;
     }
+  }
+}
+
+/* CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.MODIFY */
+.cta-dual-spaced {
+  display: flex;
+  justify-content: space-between;
+
+  .cancel-btn {
+    color: var(--colour-danger-default);
   }
 }
 </style> 

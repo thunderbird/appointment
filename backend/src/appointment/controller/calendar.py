@@ -689,7 +689,6 @@ class Tools:
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
-        reason: str | None = None,
     ):
         """send a booking cancellation email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -705,16 +704,18 @@ class Tools:
             send_cancel_email,
             owner_name=organizer.name,
             date=date,
-            reason=reason,
             to=attendee.email,
             attachment=ics_file,
         )
 
-    @staticmethod
-    def available_slots_from_schedule(schedule: models.Schedule) -> list[schemas.SlotBase]:
-        """This helper calculates a list of slots according to the given schedule configuration."""
-        slots = []
 
+    @staticmethod
+    def available_slots_from_schedule(schedule: models.Schedule, day: datetime = None) -> list[schemas.SlotBase]:
+        """This helper calculates a list of slots according to the given schedule configuration.
+        If 'day' is provided, only slots for that day are returned.
+        Otherwise, slots for the full schedule range are returned."""
+
+        slots = []
         now = datetime.now()
 
         subscriber = schedule.calendar.owner
@@ -730,19 +731,6 @@ class Tools:
         start_time_local = schedule.start_time_local
         end_time_local = schedule.end_time_local
 
-        # FIXME: Currently the earliest booking acts in normal days, not within the scheduled days.
-        # So if they have the schedule setup for weekdays, it will count weekends too.
-        earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
-        # We add a day here because it should be inclusive of the final day.
-        farthest_booking = now + timedelta(days=1, minutes=schedule.farthest_booking)
-
-        schedule_start = max([datetime.combine(schedule.start_date, start_time_local), earliest_booking])
-        schedule_end = (
-            min([datetime.combine(schedule.end_date, end_time_local), farthest_booking])
-            if schedule.end_date
-            else farthest_booking
-        )
-
         # All user defined weekdays, falls back to working week if invalid
         weekdays = schedule.weekdays if isinstance(schedule.weekdays, list) else json.loads(schedule.weekdays)
         if not weekdays or len(weekdays) == 0:
@@ -750,43 +738,31 @@ class Tools:
 
         slot_duration_seconds = schedule.slot_duration * 60
 
-        # Between the available booking time
-        for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
-            date = datetime.fromordinal(ordinal)
-
-            # We only have one part of available time per default.
+        def generate_slots_for_date(date: datetime):
+            day_slots = []
             parts = [(start_time_local, end_time_local)]
-
-            # We have multiple parts if fine-tune availability was set up.
-            # Prepare time calculation based on the configured availability for the current weekday
             customAvailabilities = [x for x in availabilities if date.isoweekday() == x.day_of_week.value]
+
             if custom_times and len(customAvailabilities) > 0:
                 parts = [(x.start_time_local, x.end_time_local) for x in customAvailabilities]
 
-            # Now we cut every part of availability time to available time slots
             for (start_local, end_local) in parts:
+                # Calculate time difference from midnight for both start and end times
                 start_time = datetime.combine(now.min, start_local) - datetime.min
                 end_time = datetime.combine(now.min, end_local) - datetime.min
 
-                # Thanks to timezone conversion end_time can wrap around to the next day
+                # If the end time is before the start time (slot spans midnight), add a day to the end time
                 if start_time > end_time:
                     end_time += timedelta(days=1)
 
-                # Difference of the start and end time.
-                # Since our times are localized we start at 0, and go until we hit the diff.
+                # Calculate the total duration of the slot in seconds
                 total_time = int(end_time.total_seconds()) - int(start_time.total_seconds())
-
                 time_start = 0
 
-                # If it's today and now is greater than our normal start time...
-                if now_tz.toordinal() == ordinal and now_tz_total_seconds > start_time.total_seconds():
-                    # Note: This is in seconds!
-                    # Get the offset from now to 0:00:00, and adjust it so 0 aligns with our start_time.
-                    # (So if the date is today it's 9am, and our start time is also 9am then time_start should be 0)
+                # If the date is today and the current time is after the start time,
+                # we should skip the current slot, so time_start is set to the next slot after now
+                if now_tz.toordinal() == date.toordinal() and now_tz_total_seconds > start_time.total_seconds():
                     time_start = int(now_tz_total_seconds - start_time.total_seconds())
-
-                    # Round up to the nearest slot duration. Get the remainder of the slow, subtract that from our
-                    # time_start, then add the slot duration back in.
                     time_start -= time_start % slot_duration_seconds
                     time_start += slot_duration_seconds
 
@@ -799,16 +775,35 @@ class Tools:
                     tzinfo=timezone,
                 )
 
-                # Check if this weekday is within our schedule
                 if current_datetime.isoweekday() in weekdays:
-                    # Generate each timeslot based on the selected duration. We just loop through the difference of the
-                    # start and end time and step by slot duration in seconds.
-                    slots += [
+                    day_slots += [
                         schemas.SlotBase(
                             start=current_datetime + timedelta(seconds=time),
                             duration=schedule.slot_duration
                         ) for time in range(time_start, total_time, slot_duration_seconds)
                     ]
+
+            return day_slots
+
+        if day is not None:
+            slots = generate_slots_for_date(day)
+        else:
+            # FIXME: Currently the earliest booking acts in normal days, not within the scheduled days.
+            # So if they have the schedule setup for weekdays, it will count weekends too.
+            earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
+            # We add a day here because it should be inclusive of the final day.
+            farthest_booking = now + timedelta(days=1, minutes=schedule.farthest_booking)
+
+            schedule_start = max([datetime.combine(schedule.start_date, start_time_local), earliest_booking])
+            schedule_end = (
+                min([datetime.combine(schedule.end_date, end_time_local), farthest_booking])
+                if schedule.end_date
+                else farthest_booking
+            )
+
+            for ordinal in range(schedule_start.toordinal(), schedule_end.toordinal()):
+                date = datetime.fromordinal(ordinal)
+                slots += generate_slots_for_date(date)
 
         return slots
 

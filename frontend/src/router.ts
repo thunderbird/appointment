@@ -1,7 +1,6 @@
 import { defineAsyncComponent } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import BookingView from '@/views/BookingView.vue';
-import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import ScheduleView from '@/views/ScheduleView.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
@@ -77,15 +76,6 @@ const routes: RouteRecordRaw[] = [
     path: '/user/:username/:signatureOrSlug?',
     name: 'availability',
     component: BookingView,
-    meta: {
-      isPublic: true,
-      maskForMetrics: true,
-    },
-  },
-  {
-    path: '/user/:username/:signature/confirm/:slot/:token/:confirmed',
-    name: 'confirmation',
-    component: BookingConfirmationView,
     meta: {
       isPublic: true,
       maskForMetrics: true,
