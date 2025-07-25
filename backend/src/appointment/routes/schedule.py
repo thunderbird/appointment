@@ -128,56 +128,6 @@ def read_schedules(db: Session = Depends(get_db), subscriber: Subscriber = Depen
     return repo.schedule.get_by_subscriber(db, subscriber_id=subscriber.id)
 
 
-@router.get('/availability_for_day', response_model=list[schemas.SlotBase])
-def read_schedules_availability_for_day(
-    date: str,
-    db: Session = Depends(get_db),
-    redis=Depends(get_redis),
-    google_client: GoogleClient = Depends(get_google_client),
-    subscriber: Subscriber = Depends(get_subscriber),
-):
-    """Returns the calculated availability for all schedules for a specific day."""
-    schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
-
-    if not schedules:
-        return []
-
-    calendars = repo.calendar.get_by_subscriber(db, subscriber.id, False)
-
-    if not calendars or len(calendars) == 0:
-        raise validation.CalendarNotFoundException()
-
-    try:
-        day = datetime.strptime(date, '%Y-%m-%d')
-    except ValueError:
-        raise validation.ValidationException(f"Invalid date format for: {date}")
-
-    all_available_slots = []
-
-    # Filter for active schedules with connected calendars
-    active_schedules = [s for s in schedules if s.active and s.calendar and s.calendar.connected]
-
-    if not active_schedules:
-        return []
-
-    # Get all events from all connected calendars in scheduled date range
-    existing_slots = Tools.existing_events_for_schedule(
-        active_schedules[0], calendars, subscriber, google_client, db, redis
-    )
-
-    for schedule in active_schedules:
-        # calculate theoretically possible slots from schedule config for the given day
-        available_slots = Tools.available_slots_from_schedule(schedule, day)
-        all_available_slots.extend(available_slots)
-
-    actual_slots = Tools.events_roll_up_difference(all_available_slots, existing_slots)
-
-    if not actual_slots or len(actual_slots) == 0:
-        return []
-
-    return actual_slots
-
-
 @router.get('/{id}', response_model=schemas.Schedule)
 def read_schedule(
     id: int,
