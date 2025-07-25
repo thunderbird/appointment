@@ -9,6 +9,7 @@ import { useUserStore } from '@/stores/user-store';
 import LogoutView from '@/views/LogoutView.vue';
 
 // lazy loaded components
+const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
 const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView/index.vue'));
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
@@ -74,12 +75,17 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/user/:username/:signatureOrSlug?',
-    name: 'availability',
+    name: 'booking-view',
     component: BookingView,
     meta: {
       isPublic: true,
       maskForMetrics: true,
     },
+  },
+  {
+    path: '/availability',
+    name: 'availability',
+    component: AvailabilityView,
   },
   {
     path: '/schedule',
