@@ -82,7 +82,7 @@ h2 {
   position: relative;
   cursor: pointer;
   padding: 1rem 1.5rem;
-  background-color: var(--colour-neutral-raised);
+  background-color: var(--colour-neutral-lower);
   text-align: left;
 
   &.pending {
@@ -95,9 +95,18 @@ h2 {
 
     &:hover {
       text-decoration-line: none;
-      background-color: var(--colour-neutral-lower);
+      background-color: var(--colour-neutral-raised);
     }
   }
+
+  &:hover {
+    text-decoration-line: underline;
+    background-color: var(--colour-primary-soft);
+  }
+}
+
+.dark .link-buton {
+  background-color: var(--colour-neutral-raised);
 
   &:hover {
     text-decoration-line: underline;
