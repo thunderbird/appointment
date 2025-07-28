@@ -97,7 +97,6 @@
     "eventBooked": "Event booked!",
     "externalConnections": "Connections",
     "frequentlyAskedQuestions": "Frequently asked Questions",
-    "generalAvailability": "Set General Availability",
     "generalSettings": "General Settings",
     "languageAndAppearance": "Language & Appearance",
     "pendingAppointments": "Pending bookings",
@@ -113,6 +112,7 @@
         "zoom": "Zoom"
       }
     },
+    "setYourAvailability": "Set Your Availability",
     "zoom": "Zoom"
   },
   "icons": {
