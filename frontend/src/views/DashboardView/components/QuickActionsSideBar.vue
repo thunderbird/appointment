@@ -8,7 +8,7 @@ const user = useUserStore();
 
 const props = defineProps<{
   pendingBookingRequestsCount: number
-}>()
+}>();
 
 const copyBookingUrlLabel = ref(t('label.copyBookingUrl'));
 const hasCopied = ref(false);
@@ -30,7 +30,7 @@ const copyLink = async () => {
   <aside>
     <router-link v-if="props.pendingBookingRequestsCount" data-testid="link-pending-requests" class="link-buton pending"
       :to="{
-        path: '/bookings',
+        name: 'bookings',
         query: {
           unconfirmed: 'true'
         }
