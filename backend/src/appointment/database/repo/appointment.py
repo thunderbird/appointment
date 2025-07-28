@@ -37,9 +37,37 @@ def get_public(db: Session, slug: str):
     return None
 
 
-def get_by_subscriber(db: Session, subscriber_id: int):
+def get_by_subscriber(db: Session, subscriber_id: int, page: int = 0, per_page: int = 50, all: bool = False):
     """retrieve list of appointments by owner id"""
-    return db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id).all()
+    if all:
+        return (
+            db.query(models.Appointment)
+            .join(models.Calendar)
+            .filter(models.Calendar.owner_id == subscriber_id)
+            .order_by(models.Appointment.time_created.desc())
+            .all()
+        )
+
+    offset = page * per_page
+    return (
+        db.query(models.Appointment)
+        .join(models.Calendar)
+        .filter(models.Calendar.owner_id == subscriber_id)
+        .order_by(models.Appointment.time_created.desc())
+        .offset(offset)
+        .limit(per_page)
+        .all()
+    )
+
+
+def count_by_subscriber(db: Session, subscriber_id: int, status: models.BookingStatus = None):
+    """count total appointments by owner id"""
+    query = db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
+
+    if status:
+        query = query.join(models.Slot).filter(models.Slot.booking_status == status)
+
+    return query.count()
 
 
 def is_owned(db: Session, appointment_id: int, subscriber_id: int):

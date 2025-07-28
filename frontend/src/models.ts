@@ -360,7 +360,10 @@ export type PageMeta = {
 
 // Types and aliases used for our custom createFetch API calls and return types
 export type AuthUrlResponse = UseFetchReturn<AuthUrl|Exception>;
-export type AppointmentListResponse = UseFetchReturn<Appointment[]>;
+export type AppointmentListResponse = UseFetchReturn<{
+  page_meta: PageMeta,
+  items: Appointment[]
+}>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean|Exception>;

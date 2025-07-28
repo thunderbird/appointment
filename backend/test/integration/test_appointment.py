@@ -127,11 +127,12 @@ class TestAppointment:
 
 
 class TestMyAppointments:
-    def test_appointments(self, with_client, make_appointment, make_google_calendar):
-        appointment_count = 10
+    def test_appointments_default_pagination(self, with_client, make_appointment, make_google_calendar):
+        """Test default pagination behavior (no parameters)"""
+        appointment_count = 5
 
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
-        appointments = [make_appointment(calendar_id=calendar.id) for _ in range(appointment_count)]
+        [make_appointment(calendar_id=calendar.id) for _ in range(appointment_count)]
 
         response = with_client.get('/me/appointments', headers=auth_headers)
 
@@ -139,11 +140,12 @@ class TestMyAppointments:
 
         data = response.json()
 
-        assert len(data) == appointment_count
-
-        # Should be in order
-        for index, appointment in enumerate(appointments):
-            assert appointment.id == data[index]['id']
+        # Should return paginated response with default values
+        assert 'items' in data
+        assert 'page_meta' in data
+        assert len(data['items']) == appointment_count
+        assert data['page_meta']['page'] == 1
+        assert data['page_meta']['per_page'] == 50
 
     def test_dont_show_other_subscribers_appointments(
         self, with_client, make_basic_subscriber, make_appointment, make_google_calendar
@@ -164,10 +166,93 @@ class TestMyAppointments:
 
         data = response.json()
 
-        assert len(data) == 1
-        assert other_appointment.id != data[0]['id']
-        assert appointment.id == data[0]['id']
+        assert len(data['items']) == 1
+        assert other_appointment.id != data['items'][0]['id']
+        assert appointment.id == data['items'][0]['id']
 
+    def test_appointments_paginated(self, with_client, make_appointment, make_google_calendar):
+        """Test paginated appointments endpoint"""
+        appointment_count = 25
+        per_page = 10
+
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        [make_appointment(calendar_id=calendar.id) for _ in range(appointment_count)]
+
+        # Test first page
+        response = with_client.get(f'/me/appointments?page=1&per_page={per_page}', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+
+        assert len(data['items']) == per_page
+        assert data['page_meta']['page'] == 1
+        assert data['page_meta']['per_page'] == per_page
+        assert data['page_meta']['count'] == per_page
+        assert data['page_meta']['total_pages'] == 3  # 25 appointments / 10 per page = 3 pages
+
+        # Test second page
+        response = with_client.get(f'/me/appointments?page=2&per_page={per_page}', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+
+        assert len(data['items']) == per_page
+        assert data['page_meta']['page'] == 2
+
+        # Test third page (should have 5 remaining appointments)
+        response = with_client.get(f'/me/appointments?page=3&per_page={per_page}', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+
+        assert len(data['items']) == 5  # 25 - (2 * 10) = 5 remaining
+        assert data['page_meta']['page'] == 3
+
+    def test_pending_appointments_count(self, with_client, make_appointment, make_google_calendar, make_attendee, make_appointment_slot):
+        """Test pending appointments count endpoint"""
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        attendee = make_attendee()
+
+        # Create appointments with different booking statuses
+        appointment1 = make_appointment(calendar_id=calendar.id)
+        appointment2 = make_appointment(calendar_id=calendar.id)
+        appointment3 = make_appointment(calendar_id=calendar.id)
+
+        # Create slots with different booking statuses
+        slot1 = make_appointment_slot(
+            appointment_id=appointment1.id,
+            attendee_id=attendee.id,
+            booking_status=BookingStatus.requested
+        )[0]
+
+        slot2 = make_appointment_slot(
+            appointment_id=appointment2.id,
+            attendee_id=attendee.id,
+            booking_status=BookingStatus.booked
+        )[0]
+
+        slot3 = make_appointment_slot(
+            appointment_id=appointment3.id,
+            attendee_id=attendee.id,
+            booking_status=BookingStatus.requested
+        )[0]
+
+        # Update appointments to have the slots
+        appointment1.slots = [slot1]
+        appointment2.slots = [slot2]
+        appointment3.slots = [slot3]
+
+        response = with_client.get('/me/pending_appointments_count', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+
+        # Should count only appointments with requested booking status
+        assert data['count'] == 2  # appointment1 and appointment3 have requested status
 
 class TestCancelAppointment:
     def test_cancel_appointment(self, with_client, make_appointment, with_db):

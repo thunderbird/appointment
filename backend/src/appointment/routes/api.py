@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import os
 import secrets
 import requests.exceptions
@@ -100,19 +101,46 @@ def read_my_calendars(
     return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
 
 
-@router.get('/me/appointments', response_model=list[schemas.AppointmentWithCalendarOut])
-def read_my_appointments(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    """get all appointments of authenticated subscriber"""
-    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id)
+@router.get('/me/appointments', response_model=schemas.ListResponse)
+def read_my_appointments(
+    page: int = 1, per_page: int = 50, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
+):
+    """get appointments of authenticated subscriber"""
+    page = max(1, page)  # Ensure page is at least 1
+    per_page = max(1, min(per_page, 100))  # Ensure per_page is between 1 and 100
+
+    total_count = repo.appointment.count_by_subscriber(db, subscriber_id=subscriber.id)
+    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id, page=page - 1, per_page=per_page)
+
     # Mix in calendar title and color.
     # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
-    appointments = map(
-        lambda x: schemas.AppointmentWithCalendarOut(
-            **x.__dict__, calendar_title=x.calendar.title, calendar_color=x.calendar.color or DEFAULT_CALENDAR_COLOUR
+    appointments_with_calendar = [
+        schemas.AppointmentWithCalendarOut(
+            **appointment.__dict__,
+            calendar_title=appointment.calendar.title,
+            calendar_color=appointment.calendar.color or DEFAULT_CALENDAR_COLOUR,
+        )
+        for appointment in appointments
+    ]
+
+    return schemas.ListResponse(
+        items=appointments_with_calendar,
+        page_meta=schemas.Paginator(
+            page=page,
+            per_page=per_page,
+            count=len(appointments_with_calendar),
+            total_pages=math.ceil(total_count / per_page),
         ),
-        appointments,
     )
-    return appointments
+
+
+@router.get('/me/pending_appointments_count')
+def get_pending_appointments_count(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
+    pending_count = repo.appointment.count_by_subscriber(
+        db, subscriber_id=subscriber.id, status=models.BookingStatus.requested
+    )
+
+    return { 'count' : pending_count }
 
 
 @router.get('/me/signature')
@@ -496,7 +524,7 @@ def cancel_my_appointment(
                 zoom_client.delete_meeting(slot.meeting_link_id)
             except Exception as ex:
                 sentry_sdk.capture_exception(ex)
-        
+
         # Mark the slot as BookingStatus.cancelled
         slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
         repo.slot.update(db, slot.id, slot_update)
@@ -506,7 +534,7 @@ def cancel_my_appointment(
 
     try:
         remote_calendar_connection.delete_event(uid=uuid)
-    except EventNotDeletedException:            
+    except EventNotDeletedException:
         raise EventCouldNotBeDeleted
 
 
