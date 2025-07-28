@@ -320,10 +320,9 @@ onMounted(async () => {
     </site-notification>
     <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
     <main
-      class="pt-24"
       :class="{
-        'mx-4 min-h-full py-32 lg:mx-8': !routeIsHome && !routeIsPublic,
-        'min-h-full': routeIsPublic && !routeHasModal,
+        'private-route': !routeIsHome && !routeIsPublic,
+        'public-route': routeIsPublic && !routeHasModal,
       }"
     >
       <router-view/>
@@ -337,3 +336,29 @@ onMounted(async () => {
     <route-not-found-view/>
   </template>
 </template>
+
+<style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+main {
+  padding-block-start: 6rem;
+
+  &.public-route {
+    min-height: 100%;
+  }
+
+  &.private-route {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    margin-inline: 1rem;
+  }
+}
+
+@media (--lg) {
+  .private-route {
+    margin-inline: 2rem;
+  }
+}
+</style>

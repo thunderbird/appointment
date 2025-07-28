@@ -102,6 +102,10 @@ const filteredAppointments = computed(() => {
     });
   }
 
+  for (let i = 0; i < 100; i++) {
+    list.push(list[list.length - 1])
+  }
+
   return list;
 });
 
@@ -340,20 +344,30 @@ export default {
 }
 
 .page-content {
-  margin-top: 2rem;
+  margin-block: 2rem;
   display: flex;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
   justify-content: space-between;
   gap: 1rem;
 }
 
 .appointments-container {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
   width: 100%;
 }
 
 .appointments-table {
-  margin-top: 1rem;
   width: 100%;
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
 }
 
 .unconfirmed-first-checkbox {
