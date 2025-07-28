@@ -88,7 +88,7 @@ class TestAppointment:
         )
         assert response.status_code == 404, response.text
 
-    @pytest.mark.skip(reason="feature still being scoped")
+    @pytest.mark.skip(reason='feature still being scoped')
     def test_modify_my_appointment(self, with_client, make_appointment, with_db):
         """
         Test modifying an appointment's title and slot start time via /apmt/{id}/modify.
@@ -99,25 +99,22 @@ class TestAppointment:
         # Create an appointment with a slot
         appointment = make_appointment()
         slot = appointment.slots[0]
-        new_title = "Updated Appointment Title"
+        new_title = 'Updated Appointment Title'
         new_start = slot.start + timedelta(hours=1)
         payload = schemas.AppointmentModifyRequest(
-            title=new_title,
-            slot_id=slot.id,
-            start=new_start,
-            notes="Rescheduled by user."
-        ).model_dump(mode="json")
+            title=new_title, slot_id=slot.id, start=new_start, notes='Rescheduled by user.'
+        ).model_dump(mode='json')
 
-        response = with_client.put(f"/apmt/{appointment.id}/modify", json=payload, headers=auth_headers)
+        response = with_client.put(f'/apmt/{appointment.id}/modify', json=payload, headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data["title"] == new_title
+        assert data['title'] == new_title
 
         # Find the modified slot
-        modified_slot = next((s for s in data["slots"] if s["id"] == slot.id), None)
+        modified_slot = next((s for s in data['slots'] if s['id'] == slot.id), None)
         assert modified_slot is not None
-        assert modified_slot["start"] == new_start.isoformat()
-        assert modified_slot["booking_status"] == models.BookingStatus.modified.value
+        assert modified_slot['start'] == new_start.isoformat()
+        assert modified_slot['booking_status'] == models.BookingStatus.modified.value
 
         # Double-check in DB
         with with_db() as db:
@@ -211,7 +208,9 @@ class TestMyAppointments:
         assert len(data['items']) == 5  # 25 - (2 * 10) = 5 remaining
         assert data['page_meta']['page'] == 3
 
-    def test_pending_appointments_count(self, with_client, make_appointment, make_google_calendar, make_attendee, make_appointment_slot):
+    def test_pending_appointments_count(
+        self, with_client, make_appointment, make_google_calendar, make_attendee, make_appointment_slot
+    ):
         """Test pending appointments count endpoint"""
         calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
         attendee = make_attendee()
@@ -223,21 +222,15 @@ class TestMyAppointments:
 
         # Create slots with different booking statuses
         slot1 = make_appointment_slot(
-            appointment_id=appointment1.id,
-            attendee_id=attendee.id,
-            booking_status=BookingStatus.requested
+            appointment_id=appointment1.id, attendee_id=attendee.id, booking_status=BookingStatus.requested
         )[0]
 
         slot2 = make_appointment_slot(
-            appointment_id=appointment2.id,
-            attendee_id=attendee.id,
-            booking_status=BookingStatus.booked
+            appointment_id=appointment2.id, attendee_id=attendee.id, booking_status=BookingStatus.booked
         )[0]
 
         slot3 = make_appointment_slot(
-            appointment_id=appointment3.id,
-            attendee_id=attendee.id,
-            booking_status=BookingStatus.requested
+            appointment_id=appointment3.id, attendee_id=attendee.id, booking_status=BookingStatus.requested
         )[0]
 
         # Update appointments to have the slots
@@ -253,6 +246,81 @@ class TestMyAppointments:
 
         # Should count only appointments with requested booking status
         assert data['count'] == 2  # appointment1 and appointment3 have requested status
+
+    def test_appointments_with_status_filters(
+        self, with_client, make_appointment, make_google_calendar, make_attendee, make_appointment_slot
+    ):
+        """Test filtering appointments by booking status"""
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID)
+        attendee = make_attendee()
+
+        # Create appointments with different booking statuses
+        appointment1 = make_appointment(calendar_id=calendar.id)
+        appointment2 = make_appointment(calendar_id=calendar.id)
+        appointment3 = make_appointment(calendar_id=calendar.id)
+        appointment4 = make_appointment(calendar_id=calendar.id)
+
+        # Create slots with different booking statuses
+        slot1 = make_appointment_slot(
+            appointment_id=appointment1.id, attendee_id=attendee.id, booking_status=BookingStatus.requested
+        )[0]
+
+        slot2 = make_appointment_slot(
+            appointment_id=appointment2.id, attendee_id=attendee.id, booking_status=BookingStatus.booked
+        )[0]
+
+        slot3 = make_appointment_slot(
+            appointment_id=appointment3.id, attendee_id=attendee.id, booking_status=BookingStatus.declined
+        )[0]
+
+        slot4 = make_appointment_slot(
+            appointment_id=appointment4.id, attendee_id=attendee.id, booking_status=BookingStatus.cancelled
+        )[0]
+
+        # Update appointments to have the slots
+        appointment1.slots = [slot1]
+        appointment2.slots = [slot2]
+        appointment3.slots = [slot3]
+        appointment4.slots = [slot4]
+
+        # Test filtering by single status
+        response = with_client.get('/me/appointments?filters=requested', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data['items']) == 1
+        assert data['items'][0]['id'] == appointment1.id
+
+        # Test filtering by multiple statuses
+        response = with_client.get('/me/appointments?filters=requested&filters=booked', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data['items']) == 2
+        appointment_ids = [item['id'] for item in data['items']]
+        assert appointment1.id in appointment_ids
+        assert appointment2.id in appointment_ids
+
+        # Test filtering by declined and cancelled
+        response = with_client.get('/me/appointments?filters=declined&filters=cancelled', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data['items']) == 2
+        appointment_ids = [item['id'] for item in data['items']]
+        assert appointment3.id in appointment_ids
+        assert appointment4.id in appointment_ids
+
+        # Test with invalid filter (should be ignored)
+        response = with_client.get('/me/appointments?filters=invalid_status&filters=requested', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data['items']) == 1
+        assert data['items'][0]['id'] == appointment1.id
+
+        # Test without filters (should return all appointments)
+        response = with_client.get('/me/appointments', headers=auth_headers)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data['items']) == 4
+
 
 class TestCancelAppointment:
     def test_cancel_appointment(self, with_client, make_appointment, with_db):
@@ -308,6 +376,7 @@ class TestCancelAppointment:
 
         # Patch GoogleConnector to track delete_event calls
         from appointment.controller.calendar import GoogleConnector
+
         mock_delete_event = MagicMock()
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
@@ -355,6 +424,7 @@ class TestCancelAppointment:
 
         # Patch GoogleConnector to track delete_event calls
         from appointment.controller.calendar import GoogleConnector
+
         mock_delete_event = MagicMock()
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'delete_event', mock_delete_event)
@@ -380,6 +450,7 @@ class TestCancelAppointment:
 
         # Patch CalDavConnector to track delete_event calls
         from appointment.controller.calendar import CalDavConnector
+
         mock_delete_event = MagicMock()
         monkeypatch.setattr(CalDavConnector, 'delete_event', mock_delete_event)
 
@@ -393,7 +464,7 @@ class TestCancelAppointment:
             assert response.status_code == 200
             assert mock_send_cancel.call_count == len(appointment.slots)
             assert mock_delete_event.call_count == len(appointment.slots)
-        
+
 
 class TestSyncRemoteCalendars:
     def test_sync_remote_calendars_with_multiple_google_connections(
@@ -413,6 +484,7 @@ class TestSyncRemoteCalendars:
 
         # Patch GoogleConnector to track sync_calendars calls
         from appointment.controller.calendar import GoogleConnector
+
         mock_sync_calendars = MagicMock(return_value=False)
         monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
         monkeypatch.setattr(GoogleConnector, 'sync_calendars', mock_sync_calendars)
@@ -424,9 +496,7 @@ class TestSyncRemoteCalendars:
         # Verify sync_calendars was called twice (once for each external connection)
         assert mock_sync_calendars.call_count == 2
 
-    def test_sync_remote_calendars_with_mixed_connections(
-        self, monkeypatch, with_client, make_external_connections
-    ):
+    def test_sync_remote_calendars_with_mixed_connections(self, monkeypatch, with_client, make_external_connections):
         """Test that sync_remote_calendars handles both Google and CalDAV connections"""
 
         # Create one Google and one CalDAV external connection
@@ -457,4 +527,3 @@ class TestSyncRemoteCalendars:
         # Verify both sync_calendars methods were called once
         assert mock_google_sync.call_count == 1
         assert mock_caldav_sync.call_count == 1
-

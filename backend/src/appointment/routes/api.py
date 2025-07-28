@@ -16,7 +16,7 @@ from ..database import repo, schemas, models
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, InviteStatus, MeetingLinkProviderType
@@ -103,14 +103,38 @@ def read_my_calendars(
 
 @router.get('/me/appointments', response_model=schemas.ListResponse)
 def read_my_appointments(
-    page: int = 1, per_page: int = 50, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)
+    page: int = 1,
+    per_page: int = 50,
+    filters: list[str] = Query(
+        default=[],
+        description='Filter appointments by booking status (requested, booked, declined, cancelled, modified)',
+    ),
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
 ):
     """get appointments of authenticated subscriber"""
     page = max(1, page)  # Ensure page is at least 1
     per_page = max(1, min(per_page, 100))  # Ensure per_page is between 1 and 100
 
-    total_count = repo.appointment.count_by_subscriber(db, subscriber_id=subscriber.id)
-    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id, page=page - 1, per_page=per_page)
+    # Convert filter strings to BookingStatus enum values
+    status_filters = []
+    for filter_str in filters:
+        try:
+            status_filters.append(models.BookingStatus[filter_str])
+        except KeyError:
+            # Skip invalid filter values
+            continue
+
+    total_count = repo.appointment.count_by_subscriber(
+        db, subscriber_id=subscriber.id, status_filters=status_filters if status_filters else None
+    )
+    appointments = repo.appointment.get_by_subscriber(
+        db,
+        subscriber_id=subscriber.id,
+        page=page - 1,
+        per_page=per_page,
+        status_filters=status_filters if status_filters else None,
+    )
 
     # Mix in calendar title and color.
     # Note because we `__dict__` any relationship values won't be carried over, so don't forget to manually add those!
@@ -137,10 +161,10 @@ def read_my_appointments(
 @router.get('/me/pending_appointments_count')
 def get_pending_appointments_count(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
     pending_count = repo.appointment.count_by_subscriber(
-        db, subscriber_id=subscriber.id, status=models.BookingStatus.requested
+        db, subscriber_id=subscriber.id, status_filters=[models.BookingStatus.requested]
     )
 
-    return { 'count' : pending_count }
+    return {'count': pending_count}
 
 
 @router.get('/me/signature')

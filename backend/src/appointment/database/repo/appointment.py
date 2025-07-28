@@ -37,35 +37,36 @@ def get_public(db: Session, slug: str):
     return None
 
 
-def get_by_subscriber(db: Session, subscriber_id: int, page: int = 0, per_page: int = 50, all: bool = False):
+def get_by_subscriber(
+    db: Session,
+    subscriber_id: int,
+    page: int = 0,
+    per_page: int = 50,
+    all: bool = False,
+    status_filters: list[models.BookingStatus] = None,
+):
     """retrieve list of appointments by owner id"""
+    query = db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
+
+    # Apply status filters if provided
+    if status_filters:
+        query = query.join(models.Slot).filter(models.Slot.booking_status.in_(status_filters))
+
+    query = query.order_by(models.Appointment.time_created.desc())
+
     if all:
-        return (
-            db.query(models.Appointment)
-            .join(models.Calendar)
-            .filter(models.Calendar.owner_id == subscriber_id)
-            .order_by(models.Appointment.time_created.desc())
-            .all()
-        )
+        return query.all()
 
     offset = page * per_page
-    return (
-        db.query(models.Appointment)
-        .join(models.Calendar)
-        .filter(models.Calendar.owner_id == subscriber_id)
-        .order_by(models.Appointment.time_created.desc())
-        .offset(offset)
-        .limit(per_page)
-        .all()
-    )
+    return query.offset(offset).limit(per_page).all()
 
 
-def count_by_subscriber(db: Session, subscriber_id: int, status: models.BookingStatus = None):
+def count_by_subscriber(db: Session, subscriber_id: int, status_filters: list[models.BookingStatus] = None):
     """count total appointments by owner id"""
     query = db.query(models.Appointment).join(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
 
-    if status:
-        query = query.join(models.Slot).filter(models.Slot.booking_status == status)
+    if status_filters:
+        query = query.join(models.Slot).filter(models.Slot.booking_status.in_(status_filters))
 
     return query.count()
 
@@ -109,7 +110,7 @@ def delete(db: Session, appointment_id: int):
 
 def delete_by_subscriber(db: Session, subscriber_id: int):
     """Delete all appointments by subscriber"""
-    appointments = get_by_subscriber(db, subscriber_id=subscriber_id)
+    appointments = get_by_subscriber(db, subscriber_id=subscriber_id, all=True)
     for appointment in appointments:
         delete(db, appointment_id=appointment.id)
     return True
