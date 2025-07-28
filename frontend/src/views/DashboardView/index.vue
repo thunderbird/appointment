@@ -15,6 +15,7 @@ import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/servic
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
+import QuickActionsSideBar from './components/QuickActionsSideBar.vue';
 
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
@@ -74,6 +75,12 @@ const dismiss = () => {
 };
 </script>
 
+<script lang="ts">
+export default {
+  name: 'DashboardView'
+}
+</script>
+
 <template>
   <notice-bar :type="NoticeBarTypes.Info" id="beta-warning" v-if="!userActivityData.dismissedBetaWarning">
     <p>{{ t('notices.betaWarning.heading') }}</p>
@@ -105,21 +112,30 @@ const dismiss = () => {
     </ul>
     <primary-button class="dismiss" size="small" @click="dismiss">Dismiss</primary-button>
   </notice-bar>
-  <!-- page title area -->
-  <div class="flex select-none flex-col items-start justify-between lg:flex-row">
-    <div class="text-4xl font-light">{{ t('label.dashboard') }}</div>
+
+  <div class="main-container">
+    <quick-actions-side-bar
+      :pending-booking-requests-count="pendingAppointments.length"
+    />
+  
+    <!-- main section: big calendar showing active month, week or day -->
+    <calendar-qalendar
+      class="w-full"
+      :appointments="pendingAppointments"
+      :events="remoteEvents"
+      :schedules="schedulesPreviews"
+      @date-change="onDateChange"
+    />
   </div>
-  <!-- main section: big calendar showing active month, week or day -->
-  <calendar-qalendar
-    class="w-full mt-8"
-    :appointments="pendingAppointments"
-    :events="remoteEvents"
-    :schedules="schedulesPreviews"
-    @date-change="onDateChange"
-  />
 </template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
 
 #beta-warning {
   position: relative;
@@ -148,6 +164,10 @@ const dismiss = () => {
     .dismiss {
       margin: 1rem auto;
     }
+
+    .underline {
+      text-decoration-line: underline;
+    }
   }
 }
 
@@ -164,6 +184,11 @@ const dismiss = () => {
         margin: 0;
       }
     }
+  }
+
+  .main-container {
+    flex-direction: row;
+    gap: 2rem;
   }
 }
 </style>

@@ -15,6 +15,7 @@ export class DashboardPage {
   readonly logOutMenuItem: Locator;
   readonly firstDayOfWeekMonthView: Locator;
   readonly nextMonthArrow: Locator;
+  readonly pendingBookingRequestsLink: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -23,6 +24,7 @@ export class DashboardPage {
     this.logOutMenuItem = this.page.getByTestId('user-nav-logout-menu');
     this.firstDayOfWeekMonthView = this.page.locator('.calendar-month__week-day-name').first();
     this.nextMonthArrow = this.page.locator('[data-icon="chevron-right"]');
+    this.pendingBookingRequestsLink = this.page.getByTestId('link-pending-requests');
   }
 
   /**

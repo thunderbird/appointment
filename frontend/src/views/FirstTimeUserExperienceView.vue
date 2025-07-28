@@ -13,7 +13,7 @@ import ConnectCalendars from '@/components/FTUE/ConnectCalendars.vue';
 import SetupSchedule from '@/components/FTUE/SetupSchedule.vue';
 import ConnectVideo from '@/components/FTUE/ConnectVideo.vue';
 import Finish from '@/components/FTUE/StepFinish.vue';
-import ScheduleView from '@/views/ScheduleView.vue';
+import DashboardView from '@/views/DashboardView/index.vue';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const ftueStore = useFTUEStore();
@@ -30,7 +30,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <schedule-view></schedule-view>
+  <dashboard-view></dashboard-view>
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
       <div class="relative flex size-full w-full flex-col items-center gap-4">
