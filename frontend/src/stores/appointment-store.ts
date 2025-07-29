@@ -10,6 +10,8 @@ import { dayjsKey, tzGuessKey } from '@/keys';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { FILTER_QUERY_PARAM_TO_BOOKING_STATUS } from '@/views/BookingsView/constants';
 
+const DEFAULT_PAGE_SIZE = 50;
+
 export const useAppointmentStore = defineStore('appointments', () => {
   const dj = inject(dayjsKey);
   const tzGuess = inject(tzGuessKey);
@@ -81,7 +83,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
       // Build query parameters
       const queryParams = new URLSearchParams({
         page: page.toString(),
-        per_page: '50' // Default page size
+        per_page: DEFAULT_PAGE_SIZE.toString(),
       });
 
       // Add status filters if provided
