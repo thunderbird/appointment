@@ -54,12 +54,6 @@ export const useAppointmentStore = defineStore('appointments', () => {
         s.start = dj(s.start).utc(true).tz(userStore.data.settings.timezone ?? tzGuess);
       });
     });
-
-    // Update selectedAppointment with the latest data
-    if (selectedAppointment.value) {
-      const appointment = appointments.value.find((a) => a.id === selectedAppointment.value.id);
-      selectedAppointment.value = appointment ?? null;
-    }
   };
 
   /**
@@ -109,6 +103,12 @@ export const useAppointmentStore = defineStore('appointments', () => {
         } else {
           // Replace existing appointments
           appointments.value = newAppointments;
+        }
+
+        // Update selectedAppointment with the latest data
+        if (selectedAppointment.value) {
+          const appointment = appointments.value.find((a) => a.id === selectedAppointment.value.id);
+          selectedAppointment.value = appointment ?? null;
         }
 
         // Update pagination state
