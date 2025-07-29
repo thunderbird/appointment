@@ -357,7 +357,7 @@ main {
 }
 
 @media (--lg) {
-  .private-route {
+  main.private-route {
     margin-inline: 2rem;
   }
 }

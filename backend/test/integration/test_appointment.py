@@ -53,7 +53,7 @@ class TestAppointment:
         assert data[0]['start'] == generated_appointment.slots[0].start.isoformat()
         assert data[0]['end'] == dateutil.parser.parse(DAY3).isoformat()
 
-    def test_get_remote_caldav_events_inavlid_calendar(self, with_client, make_appointment):
+    def test_get_remote_caldav_events_invalid_calendar(self, with_client, make_appointment):
         generated_appointment = make_appointment()
 
         path = f'/rmt/cal/{generated_appointment.calendar_id + 999}/' + DAY1 + '/' + DAY3
@@ -238,7 +238,7 @@ class TestMyAppointments:
         appointment2.slots = [slot2]
         appointment3.slots = [slot3]
 
-        response = with_client.get('/me/pending_appointments_count', headers=auth_headers)
+        response = with_client.get('/me/appointments_count_by_status?status=requested', headers=auth_headers)
 
         assert response.status_code == 200, response.text
 

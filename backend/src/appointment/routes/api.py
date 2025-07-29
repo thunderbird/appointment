@@ -158,13 +158,29 @@ def read_my_appointments(
     )
 
 
-@router.get('/me/pending_appointments_count')
-def get_pending_appointments_count(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    pending_count = repo.appointment.count_by_subscriber(
-        db, subscriber_id=subscriber.id, status_filters=[models.BookingStatus.requested]
-    )
+@router.get('/me/appointments_count_by_status')
+def get_appointments_count_by_status(
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+    status: list[str] = Query(
+        default=[],
+        description='Filter appointments by booking status (requested, booked, declined, cancelled, modified)',
+    ),
+):
+    """get count of appointments by status"""
 
-    return {'count': pending_count}
+    # Convert filter strings to BookingStatus enum values
+    status_filters = []
+    for filter_str in status:
+        try:
+            status_filters.append(models.BookingStatus[filter_str])
+        except KeyError:
+            # Skip invalid filter values
+            continue
+
+    return {
+        'count': repo.appointment.count_by_subscriber(db, subscriber_id=subscriber.id, status_filters=status_filters)
+    }
 
 
 @router.get('/me/signature')

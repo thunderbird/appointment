@@ -364,6 +364,7 @@ export type AppointmentListResponse = UseFetchReturn<{
   page_meta: PageMeta,
   items: Appointment[]
 }>;
+export type PendingAppointmentsCount = UseFetchReturn<{ count: number }>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean|Exception>;

@@ -4,12 +4,12 @@ import { BookingStatus, MetricEvents } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import {
   Appointment, AppointmentListResponse, Fetch, Slot,
-  AvailabilitySlotResponse,
+  AvailabilitySlotResponse, PendingAppointmentsCount
 } from '@/models';
 import { dayjsKey, tzGuessKey } from '@/keys';
 import { usePosthog, posthog } from '@/composables/posthog';
 
- 
+
 export const useAppointmentStore = defineStore('appointments', () => {
   const dj = inject(dayjsKey);
   const tzGuess = inject(tzGuessKey);
@@ -33,9 +33,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
    *
    * @param fetch preconfigured function to perform API calls
    */
-    const init = (fetch: Fetch) => {
-      call.value = fetch;
-    }
+  const init = (fetch: Fetch) => {
+    call.value = fetch;
+  }
 
   /**
    * Append additional data to retrieved appointments
@@ -65,12 +65,17 @@ export const useAppointmentStore = defineStore('appointments', () => {
     const { data, error }: AppointmentListResponse = await call.value('me/appointments').get().json();
     if (!error.value) {
       if (data.value === null || typeof data.value === 'undefined') return;
-      appointments.value = data.value;
+      appointments.value = data.value.items;
       isLoaded.value = true;
     }
     // After we fetch the data, apply some processing
     await postFetchProcess();
   };
+
+  const fetchPendingAppointmentsCount = async () => {
+    const { data, error }: PendingAppointmentsCount = await call.value('me/appointments_count_by_status?status=requested').get().json();
+    return { data, error };
+  }
 
   /**
    * Restore default state, empty and unload appointments
@@ -165,6 +170,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
     confirmOrDenyBooking,
     modifyBookingAppointment,
     fetchAvailabilityForDay,
+    fetchPendingAppointmentsCount,
   };
 });
 
