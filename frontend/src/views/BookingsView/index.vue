@@ -163,7 +163,7 @@ onMounted(async () => {
   await appointmentStore.refresh(selectedFilters.value);
 
   // If we've got a slug
-  if (route.params?.slug) {
+  if (route.params?.slug && appointments.value) {
     showAppointmentSlidingPanel(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
   }
 });
