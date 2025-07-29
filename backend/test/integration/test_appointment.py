@@ -284,14 +284,14 @@ class TestMyAppointments:
         appointment4.slots = [slot4]
 
         # Test filtering by single status
-        response = with_client.get('/me/appointments?filters=requested', headers=auth_headers)
+        response = with_client.get('/me/appointments?status=requested', headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
         assert len(data['items']) == 1
         assert data['items'][0]['id'] == appointment1.id
 
         # Test filtering by multiple statuses
-        response = with_client.get('/me/appointments?filters=requested&filters=booked', headers=auth_headers)
+        response = with_client.get('/me/appointments?status=requested&status=booked', headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
         assert len(data['items']) == 2
@@ -300,7 +300,7 @@ class TestMyAppointments:
         assert appointment2.id in appointment_ids
 
         # Test filtering by declined and cancelled
-        response = with_client.get('/me/appointments?filters=declined&filters=cancelled', headers=auth_headers)
+        response = with_client.get('/me/appointments?status=declined&status=cancelled', headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
         assert len(data['items']) == 2
@@ -309,7 +309,7 @@ class TestMyAppointments:
         assert appointment4.id in appointment_ids
 
         # Test with invalid filter (should be ignored)
-        response = with_client.get('/me/appointments?filters=invalid_status&filters=requested', headers=auth_headers)
+        response = with_client.get('/me/appointments?status=invalid_status&status=requested', headers=auth_headers)
         assert response.status_code == 200, response.text
         data = response.json()
         assert len(data['items']) == 1

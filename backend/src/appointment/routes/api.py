@@ -105,7 +105,7 @@ def read_my_calendars(
 def read_my_appointments(
     page: int = 1,
     per_page: int = 50,
-    filters: list[str] = Query(
+    status: list[str] = Query(
         default=[],
         description='Filter appointments by booking status (requested, booked, declined, cancelled, modified)',
     ),
@@ -118,7 +118,7 @@ def read_my_appointments(
 
     # Convert filter strings to BookingStatus enum values
     status_filters = []
-    for filter_str in filters:
+    for filter_str in status:
         try:
             status_filters.append(models.BookingStatus[filter_str])
         except KeyError:

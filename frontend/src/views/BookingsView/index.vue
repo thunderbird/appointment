@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, computed, onMounted } from 'vue';
+import { ref, inject, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -8,7 +8,7 @@ import { CheckboxInput } from '@thunderbirdops/services-ui';
 import { BookingStatus } from '@/definitions';
 import { timeFormat } from '@/utils';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { dayjsKey, refreshKey } from '@/keys';
+import { dayjsKey } from '@/keys';
 import { useQueryParamState } from '@/composables/useQueryParamState';
 import AppointmentMultiSelectFilter from './components/AppointmentMultiSelectFilter.vue';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
@@ -18,10 +18,14 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const dj = inject(dayjsKey);
-const refresh = inject(refreshKey);
 
 const appointmentStore = useAppointmentStore();
-const { appointments, selectedAppointment } = storeToRefs(appointmentStore);
+const { 
+  appointments, 
+  selectedAppointment, 
+  isLoading, 
+  hasMorePages 
+} = storeToRefs(appointmentStore);
 
 // Default selected filters: Pending (requested) and Confirmed (booked)
 const selectedFilters = useQueryParamState(
@@ -50,16 +54,6 @@ const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPan
 // Handle filtered appointments list
 const filteredAppointments = computed(() => {
   let list = appointments.value ? [...appointments.value] : [];
-
-  // Filter by selected status filters
-  if (selectedFilters.value.length > 0) {
-    list = list.filter((a) => {
-      const status = a.slots[0].booking_status;
-      const filterQueryParam = BOOKING_STATUS_TO_FILTER_QUERY_PARAM[status];
-
-      return selectedFilters.value.includes(filterQueryParam);
-    });
-  }
 
   // Sort by table column
   if (sortColumn.value) {
@@ -100,10 +94,6 @@ const filteredAppointments = computed(() => {
       if (!aIsUnconfirmed && bIsUnconfirmed) return 1;
       return 0;
     });
-  }
-
-  for (let i = 0; i < 100; i++) {
-    list.push(list[list.length - 1])
   }
 
   return list;
@@ -152,9 +142,25 @@ const ariaSortForColumn = (column: TableColumn) => {
   return sortDirection.value === SortDirection.Ascending ? 'ascending' : 'descending'
 }
 
+// Handle infinite scrolling
+const handleScroll = async (event: Event) => {
+  const target = event.target as HTMLElement;
+  const { scrollTop, scrollHeight, clientHeight } = target;
+
+  // Load more when user scrolls to bottom (with a small threshold)
+  if (scrollHeight - scrollTop <= clientHeight + 100 && hasMorePages.value && !isLoading.value) {
+    await appointmentStore.loadMore(selectedFilters.value);
+  }
+};
+
+// Watch for filter changes and refresh data
+watch(selectedFilters, async (newFilters) => {
+  await appointmentStore.refresh(newFilters);
+}, { deep: true });
+
 // initially load data when component gets remounted
 onMounted(async () => {
-  await refresh();
+  await appointmentStore.refresh(selectedFilters.value);
 
   // If we've got a slug
   if (route.params?.slug) {
@@ -190,7 +196,7 @@ export default {
   <!-- page content -->
   <div class="page-content">
     <!-- main section: list of appointments with filter -->
-    <div class="appointments-container">
+    <div class="appointments-container" @scroll="handleScroll">
       <!-- appointments list -->
       <table class="appointments-table"
         data-testid="bookings-appointments-list-table">
@@ -262,12 +268,12 @@ export default {
         <tbody>
           <tr
             v-for="(appointment, i) in filteredAppointments"
-            :key="i"
+            :key="`${appointment.id}-${i}`"
             class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg relative"
             @click.left.exact="showAppointmentSlidingPanel(appointment)"
           >
             <td class="table-cell">
-              <!-- Hidden link spanning the whole table row -->
+              <!-- Hidden link spanning the whole table row for accessibility -->
               <router-link
                 :to="{
                   name: 'bookings',
@@ -304,6 +310,8 @@ export default {
           </tr>
         </tbody>
       </table>
+
+      <p class="loading-indicator" v-if="isLoading">{{ t('label.loading') }}</p>
     </div>
   </div>
 
@@ -358,6 +366,7 @@ export default {
   flex: 1;
   overflow-y: auto;
   width: 100%;
+  max-height: calc(100vh - 200px);
 }
 
 .appointments-table {
@@ -466,5 +475,11 @@ export default {
   height: 1rem;
   margin-block-start: 0.2rem;
   color: var(--colour-ti-base);
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 0.5rem;
+  color: var(--colour-ti-muted);
 }
 </style>
