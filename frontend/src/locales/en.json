@@ -197,7 +197,6 @@
     "booked": "Booked",
     "bookingConfirmation": "Booking Confirmation",
     "bookingLink": "Booking Link",
-    "bookingSettings": "Booking settings",
     "bookingSlot": "Booking slot",
     "bookings": "Bookings | Booking | Bookings",
     "busy": "Busy",
@@ -211,7 +210,6 @@
     "cancelReason": "Reason for cancelling",
     "changesNotSaved": "Changes have not been saved",
     "checkAvailableSlots": "Check available slots",
-    "chooseYourAvailability": "Availability",
     "clearForm": "Clear form",
     "close": "Close",
     "closed": "Closed",
@@ -297,7 +295,6 @@
     "logIn": "Log in",
     "logOut": "Log out",
     "loginToContinue": "Log in to continue",
-    "meetingDetails": "Meeting details",
     "meetingTitle": "Meeting title",
     "message": "Message",
     "modified": "Modified",
@@ -344,13 +341,6 @@
     "saveChanges": "Save changes",
     "schedule": "Schedule",
     "scheduleCreationError": "There was an error creating your schedule. Let's try that again.",
-    "scheduleDetails": "Scheduling details",
-    "scheduleSettings": {
-      "availabilitySubHeading": "Set your availability days and time",
-      "bookingSettingsSubHeading": "Handle booking confirmation and more",
-      "meetingDetailsSubHeading": "Add video and/or notes to events",
-      "schedulingDetailsSubHeading": "Set booking intervals and duration"
-    },
     "search": "Search",
     "searchAppointments": "Search bookings",
     "searchForCalendars": "Search for calendars",
@@ -488,8 +478,6 @@
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
       "disableAccountFirst": "You must disable the account first."
     },
-    "bookingsWillAutomaticallyBeConfirmed": "Bookings will automatically be confirmed and added to your calendar.",
-    "bookingsWillRequireToBeConfirmed": "You will need to confirm or decline bookings on your calendar.",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
     "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
@@ -579,13 +567,8 @@
     },
     "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
-    "toUpdateYourUsername": {
-      "link": "Account settings",
-      "text": "To update your username, go to {link}. "
-    },
     "updateLinkNotice": "Changing your username or slug will change your link. Your old link will no longer work.",
-    "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created.",
-    "yourQuickLinkIs": "Your quick link is:\n{url}"
+    "videoLinkNotice": "Video link will use the same link for all events created in this general availability. Generating zoom meetings will create a new zoom link for each event created."
   },
   "units": {
     "minutes": "{value} minutes",

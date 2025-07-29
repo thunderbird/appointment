@@ -9,9 +9,9 @@ import { createScheduleStore } from '@/stores/schedule-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { createAvailabilityStore } from '@/stores/availability-store';
 
-import ScheduleCreation from './components/ScheduleCreation.vue';
-import BookingPageDetails from './components/BookingPageDetails.vue';
-import BookingPageLink from './components/BookingPageLink.vue';
+import AvailabilitySettings from './components/AvailabilitySettings/index.vue';
+import BookingPageDetails from './components/BookingPageDetails/index.vue';
+import BookingPageLink from './components/BookingPageLink/index.vue';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
@@ -57,7 +57,7 @@ export default {
   <form @submit.prevent>
     <div class="page-content">
       <section>
-        <schedule-creation
+        <availability-settings
           v-if="schedulesReady"
           :calendars="connectedCalendars"
           :schedule="firstSchedule"
