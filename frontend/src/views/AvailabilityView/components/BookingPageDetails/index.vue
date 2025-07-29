@@ -4,6 +4,12 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 </script>
 
+<script lang="ts">
+export default {
+  name: 'BookingPageDetails'
+}
+</script>
+
 <template>
   <h2>Booking Page Details</h2>
   <div class="mb-1 px-4">

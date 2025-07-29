@@ -197,7 +197,6 @@
     "booked": "Gebucht",
     "bookingConfirmation": "Bestätigung für Buchungen",
     "bookingLink": "Buchungslink",
-    "bookingSettings": "Buchungseinstellungen",
     "bookingSlot": "Gebuchtes Zeitfenster",
     "bookings": "Buchungen",
     "busy": "Beschäftigt",
@@ -212,7 +211,6 @@
     "changeMyAvailability": "Verfügbarkeit ändern",
     "changesNotSaved": "Änderungen wurden nicht gespeichert",
     "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
-    "chooseYourAvailability": "Wähle deine Verfügbarkeit",
     "clearForm": "Zurücksetzen",
     "close": "Schließen",
     "closed": "Geschlossen",
@@ -300,7 +298,6 @@
     "logIn": "Anmelden",
     "logOut": "Abmelden",
     "loginToContinue": "Anmelden, um fortzufahren",
-    "meetingDetails": "Meeting Details",
     "meetingTitle": "Meeting Titel",
     "message": "Nachricht",
     "modified": "Geändert",
@@ -349,13 +346,6 @@
     "saveChanges": "Änderungen speichern",
     "schedule": "Zeitplan",
     "scheduleCreationError": "Fehler beim Speichern des Zeitplans",
-    "scheduleDetails": "Zeitplan Details",
-    "scheduleSettings": {
-      "availabilitySubHeading": "Lege deine Verfügbarkeit fest",
-      "bookingSettingsSubHeading": "Buchungsbestätigung und Sonstiges",
-      "meetingDetailsSubHeading": "Videos und/oder Notizen den Events hinzufügen",
-      "schedulingDetailsSubHeading": "Buchungsintervalle und Dauer festlegen"
-    },
     "search": "Suche",
     "searchAppointments": "Termine durchsuchen",
     "searchForCalendars": "Nach Kalendern suchen",
@@ -494,8 +484,6 @@
       "completelyRemoveUser": "Hier wird ein Benutzer vollständig aus Thunderbird Appointment entfernt, einschließlich aller Benutzerdaten. Diese Funktion bitte nicht ausführen, wenn es keine Aufforderung dafür gab.",
       "disableAccountFirst": "Das Konto muss zunächst deaktiviert sein."
     },
-    "bookingsWillAutomaticallyBeConfirmed": "Buchungen werden automatisch bestätigt und zum Kalender hinzugefügt.",
-    "bookingsWillRequireToBeConfirmed": "Buchungen müssen bestätigt oder abgelehnt werden.",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalender gespeichert sind.",
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erstellen.",
@@ -585,13 +573,8 @@
     },
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "toUpdateYourUsername": {
-      "link": "Kontoeinstellungen",
-      "text": "Der Nutzername kann unter {link} angepasst werden. "
-    },
     "updateLinkNotice": "Ein Ändern des Benutzernamens oder des Teillinks aktualisiert deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
-    "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt.",
-    "yourQuickLinkIs": "Dein Kurzlink ist:\n{url}"
+    "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt."
   },
   "units": {
     "minutes": "{value} Minuten",

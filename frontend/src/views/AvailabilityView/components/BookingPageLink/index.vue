@@ -1,3 +1,9 @@
+<script lang="ts">
+export default {
+  name: 'BookingPageLink'
+}
+</script>
+
 <template>
   <h2>Booking Page Link</h2>
 </template>
