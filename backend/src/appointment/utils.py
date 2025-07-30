@@ -108,6 +108,7 @@ def normalize_secrets():
     database_secrets = os.getenv('DATABASE_SECRETS')
 
     import logging
+
     log = logging.getLogger(__name__)
     log.info('Normalizing secrets...')
     if database_secrets:
@@ -131,8 +132,8 @@ def normalize_secrets():
             driver = None
         proto = f'{dialect}+{driver}' if driver else dialect
 
-        os.environ['DATABASE_URL'] = (
-            f"{proto}://{secrets['username']}:{secrets['password']}@{hostname}/{secrets['dbname']}"
+        os.environ['DATABASE_URL'] = parse.quote_plus(
+            f'{proto}://{secrets["username"]}:{secrets["password"]}@{hostname}/{secrets["dbname"]}'
         )
 
     database_enc_secret = os.getenv('DB_ENC_SECRET')
@@ -225,5 +226,3 @@ def get_expiry_time_with_grace_period(expiry: int):
     grace_period = max(int(os.getenv('OIDC_EXP_GRACE_PERIOD', 0)), 120)
     expiry += grace_period
     return expiry
-
-
