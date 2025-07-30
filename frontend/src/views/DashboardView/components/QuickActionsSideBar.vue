@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 const { t } = useI18n();
 const user = useUserStore();
-
-const props = defineProps<{
-  pendingBookingRequestsCount: number
-}>();
+const appointmentStore = useAppointmentStore();
 
 const copyBookingUrlLabel = ref(t('label.copyBookingUrl'));
 const hasCopied = ref(false);
+const pendingAppointmentsCount = ref<number>();
 
 const copyLink = async () => {
   await navigator.clipboard.writeText(user.myLink);
@@ -24,22 +23,30 @@ const copyLink = async () => {
     hasCopied.value = false
   }, 2000);
 };
+
+onMounted(async () => {
+  const { data, error } = await appointmentStore.fetchPendingAppointmentsCount();
+
+  if (!error.value) {
+    pendingAppointmentsCount.value = data.value.count;
+  }
+})
 </script>
 
 <template>
   <aside>
-    <router-link v-if="props.pendingBookingRequestsCount" data-testid="link-pending-requests" class="link-buton pending"
+    <router-link v-if="pendingAppointmentsCount" data-testid="link-pending-requests" class="link-buton pending"
       :to="{
         name: 'bookings',
         query: {
           unconfirmed: 'true'
         }
       }">
-      {{ pendingBookingRequestsCount }} {{ t('label.pendingBookingRequests', pendingBookingRequestsCount) }}
+      {{ pendingAppointmentsCount }} {{ t('label.pendingBookingRequests', pendingAppointmentsCount) }}
     </router-link>
 
     <h2
-      :class="{ 'has-pending-requests': props.pendingBookingRequestsCount }"
+      :class="{ 'has-pending-requests': pendingAppointmentsCount }"
     >
       {{ t('label.whatDoYouWantToDoToday') }}
     </h2>

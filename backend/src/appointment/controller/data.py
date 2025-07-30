@@ -38,7 +38,7 @@ def model_to_csv_buffer(models):
 def download(db, subscriber: Subscriber):
     """Generate a zip file of csvs that contain a copy of the subscriber's information."""
     attendees = repo.attendee.get_by_subscriber(db, subscriber_id=subscriber.id)
-    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id)
+    appointments = repo.appointment.get_by_subscriber(db, subscriber_id=subscriber.id, all=True)
     calendars = repo.calendar.get_by_subscriber(db, subscriber_id=subscriber.id)
     subscribers = [subscriber]
     slots = repo.slot.get_by_subscriber(db, subscriber_id=subscriber.id)
@@ -102,7 +102,7 @@ def delete_account(db, subscriber: Subscriber):
     empty_check = [
         len(repo.attendee.get_by_subscriber(db, subscriber.id)),
         len(repo.slot.get_by_subscriber(db, subscriber.id)),
-        len(repo.appointment.get_by_subscriber(db, subscriber.id)),
+        len(repo.appointment.get_by_subscriber(db, subscriber.id, all=True)),
         len(repo.calendar.get_by_subscriber(db, subscriber.id)),
         len(repo.schedule.get_by_subscriber(db, subscriber.id)),
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.fxa)),

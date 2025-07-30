@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue';
+import { ref, inject, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
 import { callKey, fxaEditProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
@@ -28,8 +28,9 @@ const appointmentStore = createAppointmentStore(call);
 const calendarStore = createCalendarStore(call);
 const user = createUserStore(call);
 
-const { pendingAppointments } = storeToRefs(appointmentStore);
 const { connectedCalendars } = storeToRefs(calendarStore);
+
+const pendingAppointmentsCount = ref<number>();
 
 // do log out
 const logout = async () => {
@@ -42,9 +43,14 @@ const editProfile = async () => {
 };
 
 // Load calendar and bookings information
-onMounted(() => {
+onMounted(async () => {
   calendarStore.fetch();
-  appointmentStore.fetch();
+
+  const { data, error } = await appointmentStore.fetchPendingAppointmentsCount();
+
+  if (!error.value) {
+    pendingAppointmentsCount.value = data.value.count
+  }
 });
 </script>
 
@@ -71,7 +77,7 @@ onMounted(() => {
       </div>
       <!-- appointments -->
       <div class="flex flex-col items-center">
-        <div class="text-3xl font-semibold">{{ pendingAppointments.length }}</div>
+        <div class="text-3xl font-semibold">{{ pendingAppointmentsCount }}</div>
         <div class="text-center text-gray-500">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
