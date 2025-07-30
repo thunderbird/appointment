@@ -9,7 +9,14 @@ services:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
-      - DATABASE_URL=mysql+mysqldb://tba:tba@mysql:3306/appointment
+      # The APMT_DB_* variables are set in the example backend .env file, which overrides these
+      # - APMT_DB_NAME=appointment
+      # - APMT_DB_ENGINE=mysql
+      # - APMT_DB_PORT=3306
+      # - APMT_DB_HOST=mysql
+      # - APMT_DB_USERNAME=tba
+      # - APMT_DB_PASSWORD=abcd%efgh
+      # - DATABASE_URL=mysql+mysqldb://tba:abcd%efgh@mysql:3306/appointment
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
     depends_on:
@@ -35,7 +42,7 @@ services:
     environment:
       - MYSQL_DATABASE=appointment
       - MYSQL_USER=tba
-      - MYSQL_PASSWORD=tba
+      - MYSQL_PASSWORD=abcd%efgh
       - MYSQL_RANDOM_ROOT_PASSWORD=true
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD

@@ -222,10 +222,10 @@ def server():
         if request.scope.get('route') and request.scope['route'].deprecated:
             app_env = os.getenv('APP_ENV')
             if app_env == APP_ENV_DEV:
-                logging.warning(f"Use of deprecated route: `{request.scope['route'].path}`!")
+                logging.warning(f'Use of deprecated route: `{request.scope["route"].path}`!')
             elif app_env == APP_ENV_TEST:
                 # Stale test runtime error
-                raise RuntimeError(f"Test uses deprecated route: `{request.scope['route'].path}`!")
+                raise RuntimeError(f'Test uses deprecated route: `{request.scope["route"].path}`!')
         return response
 
     @app.exception_handler(DefaultCredentialsError)

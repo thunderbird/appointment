@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import urllib.parse
 from urllib import parse
@@ -7,6 +8,7 @@ from datetime import time, datetime, timedelta
 from functools import cache
 
 from argon2 import PasswordHasher
+from sqlalchemy import url
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from appointment.database import repo
@@ -14,6 +16,7 @@ from appointment.database.models import secret
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 
 ph = PasswordHasher()
+log = logging.getLogger(__name__)
 
 
 def verify_password(password, hashed_password):
@@ -103,39 +106,58 @@ def chunk_list(to_chunk: list, chunk_by: int):
         yield to_chunk[i : i + chunk_by]
 
 
+def determine_database_driver(dialect: str) -> str:
+    if dialect == 'mysql':
+        return 'mysqldb'
+    elif dialect == 'postgresql':
+        return 'psycopg2'
+    else:
+        return None
+
+
+@cache
+def get_database_url() -> str | url.URL:
+    # If a url is set directly, reluctantly pass that through
+    if 'DATABASE_URL' in os.environ:
+        log.info('DEPRECATION WARNING: The use of the DATABASE_URL environment variable is discouraged.')
+        return os.environ.get('DATABASE_URL')
+
+    # But preferably pull the URL components from environment variables.
+
+    # These are settings we can safely assume defaults about.
+    db_name = os.environ.get('DATABASE_NAME', 'appointment')
+    dialect = os.environ.get('DATABASE_ENGINE', 'mysql')
+    driver = determine_database_driver(dialect=dialect)
+    port = os.environ.get('DATABASE_PORT', '3306')
+
+    # These settings are secrets and must be set manually.
+    host = os.environ.get('DATABASE_HOST')
+    username = os.environ.get('DATABASE_USERNAME')
+    password = os.environ.get('DATABASE_PASSWORD')
+
+    if not db_name or not dialect or not host or not password or not port or not username:
+        raise ValueError('Missing one or more database configuration value. Review your environment.')
+
+    # We need to escape these characters in passwords so SQLAlchemy doesn't choke on them
+    # _special_characters = '@%'
+    # password = parse.quote_plus(password)
+    # for char in _special_characters:
+    #     password = password.replace(char, f'%{char}')
+
+    # If we've had to compose this from parts, use the (preferred) SQLAlchemy URL class
+    return url.URL(
+        f'{dialect}+{driver}',
+        username=username,
+        password=password,
+        host=host,
+        database=db_name,
+    )
+
+
 def normalize_secrets():
     """Normalizes AWS secrets for Appointment"""
-    database_secrets = os.getenv('DATABASE_SECRETS')
 
-    import logging
-
-    log = logging.getLogger(__name__)
     log.info('Normalizing secrets...')
-    if database_secrets:
-        secrets = json.loads(database_secrets)
-
-        host = secrets['host']
-        port = secrets['port']
-
-        # If port is not already in the host var, then append it to hostname
-        hostname = host
-        if f':{port}' not in host:
-            hostname = f'{hostname}:{port}'
-
-        # Determine a "dialect+driver" scheme
-        dialect = secrets['engine']
-        if dialect == 'mysql':
-            driver = 'mysqldb'
-        elif dialect == 'postgresql':
-            driver = 'psycopg2'
-        else:
-            driver = None
-        proto = f'{dialect}+{driver}' if driver else dialect
-
-        os.environ['DATABASE_URL'] = parse.quote_plus(
-            f'{proto}://{secrets["username"]}:{secrets["password"]}@{hostname}/{secrets["dbname"]}'
-        )
-
     database_enc_secret = os.getenv('DB_ENC_SECRET')
 
     if database_enc_secret:
