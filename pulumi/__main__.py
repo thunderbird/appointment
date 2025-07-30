@@ -4,6 +4,7 @@ import cloudfront
 import pulumi
 import tb_pulumi
 import tb_pulumi.ci
+import tb_pulumi.ec2
 import tb_pulumi.cloudwatch
 import tb_pulumi.network
 import tb_pulumi.secrets
