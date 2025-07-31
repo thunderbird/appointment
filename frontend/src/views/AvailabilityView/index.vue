@@ -1,49 +1,16 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { callKey, dayjsKey, refreshKey } from '@/keys';
-import { ScheduleAppointment } from '@/models';
-
-import { createScheduleStore } from '@/stores/schedule-store';
-import { createCalendarStore } from '@/stores/calendar-store';
-import { createAvailabilityStore } from '@/stores/availability-store';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 import AvailabilitySettings from './components/AvailabilitySettings/index.vue';
 import BookingPageDetails from './components/BookingPageDetails/index.vue';
 import BookingPageLink from './components/BookingPageLink/index.vue';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
-
-const refresh = inject(refreshKey);
-const call = inject(callKey);
-const dj = inject(dayjsKey);
-
-const schedulesReady = ref(false);
-const scheduleStore = createScheduleStore(call);
-const calendarStore = createCalendarStore(call);
-const availabilityStore = createAvailabilityStore(call);
-const { connectedCalendars } = storeToRefs(calendarStore);
-const { firstSchedule } = storeToRefs(scheduleStore);
-
-const activeDate = ref(dj());
-const schedulesPreviews = ref([]);
-
-const onScheduleCreationUpdated = (schedule: ScheduleAppointment) => {
-  schedulesPreviews.value = schedule ? [schedule] : [];
-};
 
 const onSaveChanges = () => {
   console.log("Saved changes!");
 }
-
-onMounted(async () => {
-  await refresh();
-
-  scheduleStore.fetch();
-  schedulesReady.value = true;
-});
 </script>
 
 <script lang="ts">
@@ -57,14 +24,7 @@ export default {
   <form @submit.prevent>
     <div class="page-content">
       <section>
-        <availability-settings
-          v-if="schedulesReady"
-          :calendars="connectedCalendars"
-          :schedule="firstSchedule"
-          :active-date="activeDate"
-          @created="scheduleStore.fetch(true)"
-          @updated="onScheduleCreationUpdated"
-        />
+        <availability-settings />
       </section>
   
       <div class="page-content-right">
@@ -126,6 +86,7 @@ section {
   border: 1px solid var(--colour-neutral-border);
   border-radius: 8px;
   padding: 1.5rem;
+  align-self: flex-start;
 }
 
 @media (--md) {
