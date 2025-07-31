@@ -101,7 +101,7 @@ const defaultSchedule: Schedule = {
   slot_duration: DEFAULT_SLOT_DURATION,
   meeting_link_provider: MeetingLinkProviderType.None,
   slug: user.mySlug,
-  booking_confirmation: true,
+  booking_confirmation: props.schedule?.booking_confirmation ?? true,
   availabilities: [],
   use_custom_availabilities: false,
 };
