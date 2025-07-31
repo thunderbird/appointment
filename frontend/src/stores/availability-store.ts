@@ -1,6 +1,6 @@
 import { computed, ref, toRefs } from "vue";
 import { defineStore } from "pinia";
-import { Fetch } from "@/models";
+import { Fetch, AvailabilityFormFields } from "@/models";
 import { deepClone } from "@/utils";
 
 import { createCalendarStore } from "./calendar-store";
@@ -9,12 +9,12 @@ import { createScheduleStore } from "./schedule-store";
 import { createExternalConnectionsStore } from "./external-connections-store";
 
 export const useAvailabilityStore = defineStore('availability', () => {
-  // Refs
   const call = ref(null);
   const isLoaded = ref(false);
+  const hasZoom = ref(false);
 
-  const initialState: any = ref({}); // TODO: Update type
-  const currentState: any = ref({}); // TODO: Update type
+  const initialState = ref<AvailabilityFormFields>({});
+  const currentState = ref<AvailabilityFormFields>({});
 
   const isDirty = computed(() => (
     JSON.stringify(initialState.value) !== JSON.stringify(currentState.value)
@@ -54,7 +54,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
     if (firstSchedule.value) {
       initialState.value = firstSchedule.value;
 
-      // calculate utc back to user timezone
+      // Calculate utc back to user timezone
       initialState.value.start_time = scheduleStore.timeToFrontendTime(initialState.value.start_time, initialState.value.time_updated);
       initialState.value.end_time = scheduleStore.timeToFrontendTime(initialState.value.end_time, initialState.value.time_updated);
       initialState.value.availabilities?.forEach((a, i) => {
@@ -70,6 +70,9 @@ export const useAvailabilityStore = defineStore('availability', () => {
         initialState.value.calendar_id = connectedCalendars.value[0].id;
       }
     }
+
+    // Booking Page Details data
+    hasZoom.value = !!externalConnectionStore.zoom[0];
 
     // Booking Page Link data
     initialState.value.link_slug = userStore.mySlug;
@@ -92,6 +95,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
     init,
     isLoaded,
     isDirty,
+    hasZoom,
     initialState,
     currentState,
     saveChanges,

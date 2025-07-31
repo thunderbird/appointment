@@ -203,6 +203,7 @@
     "bookingSlot": "Booking slot",
     "bookings": "Bookings | Booking | Bookings",
     "bookingPageLink": "Booking Page Link",
+    "bookingPageDetails": "Booking Page Details",
     "bookingTo": "Booking to:",
     "bookingWindow": "Booking window",
     "busy": "Busy",
@@ -589,6 +590,7 @@
   },
   "units": {
     "minutes": "{value} minutes",
+    "minutesShort": "{value} min",
     "none": "{value}"
   },
   "waitingList": {

@@ -203,6 +203,7 @@
     "bookingSlot": "Gebuchtes Zeitfenster",
     "bookings": "Buchungen | Buchung | Buchungen",
     "bookingPageLink": "Link zur Buchungsseite",
+    "bookingPageDetails": "Buchungsseite Details",
     "bookingTo": "Buchung an:",
     "bookingWindow": "Buchungsfenster",
     "busy": "Beschäftigt",
@@ -589,6 +590,7 @@
   },
   "units": {
     "minutes": "{value} Minuten",
+    "minutesShort": "{value} min",
     "none": "{value}"
   },
   "waitingList": {
