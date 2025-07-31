@@ -1,9 +1,48 @@
 <script setup lang="ts">
-import { TextInput } from '@thunderbirdops/services-ui';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IconCopy } from '@tabler/icons-vue';
+import { IconCopy, IconRefresh } from '@tabler/icons-vue';
+import { TextInput } from '@thunderbirdops/services-ui';
+import { MetricEvents } from '@/definitions';
+import { useUserStore } from '@/stores/user-store';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { posthog, usePosthog } from '@/composables/posthog';
 
 const { t } = useI18n();
+
+const userStore = useUserStore();
+
+const refreshLinkModalOpen = ref(false);
+const copyButtonLabel = ref(t('label.copy'));
+
+function openRefreshLinkModal() {
+  refreshLinkModalOpen.value = true;
+}
+
+function closeRefreshLinkModal() {
+  refreshLinkModalOpen.value = false;
+}
+
+async function refreshLinkConfirm() {
+  await userStore.changeSignedUrl();
+  await userStore.profile();
+
+  closeRefreshLinkModal();
+
+  if (usePosthog) {
+    posthog.capture(MetricEvents.RefreshLink);
+  }
+};
+
+async function copyLink() {
+  await navigator.clipboard.writeText(userStore.myLink);
+
+  copyButtonLabel.value = t('label.copied');
+
+  setTimeout(() => {
+    copyButtonLabel.value = t('label.copy');
+  }, 2000);
+};
 </script>
 
 <script lang="ts">
@@ -14,28 +53,44 @@ export default {
 
 <template>
   <header>
-    <h2>Booking Page Link</h2>
+    <h2>{{ t('label.bookingPageLink') }}</h2>
   </header>
 
+  <!-- Customize your link -->
   <text-input
     name="customizeLink"
     class="customize-link-input"
     outer-prefix="apmt.day/username"
+    v-model="userStore.mySlug"
   >
     {{ t('label.customizeYourLink') }}:
+    <button @click="openRefreshLinkModal">
+      <icon-refresh size="20" />
+    </button>
   </text-input>
 
   <!-- Share your link -->
   <div>
-    <h3>Share your link:</h3>
+    <h3>{{ t('label.shareYourLink') }}:</h3>
     <div class="share-link-container">
-      <p>apmt.day/username/1c544cb3</p>
-      <button>
+      <p>{{ userStore.myLink }}</p>
+      <button @click="copyLink">
         <icon-copy size="12" />
-        Copy
+        {{ copyButtonLabel }}
       </button>
     </div>
   </div>
+
+  <!-- Refresh link confirmation modal -->
+  <confirmation-modal
+    :open="refreshLinkModalOpen"
+    :title="t('label.refreshLink')"
+    :message="t('text.refreshLinkNotice')"
+    :confirm-label="t('label.save')"
+    :cancel-label="t('label.cancel')"
+    @confirm="() => refreshLinkConfirm()"
+    @close="closeRefreshLinkModal"
+  ></confirmation-modal>
 </template>
 
 <style scoped>
@@ -54,7 +109,16 @@ h3 {
 }
 
 .customize-link-input {
+  position: relative;
   margin-block-end: 1rem;
+
+  button {
+    position: absolute;
+    z-index: 99;
+    right: 0.875rem;
+    bottom: 0.875rem;
+    color: var(--colour-apmt-primary);
+  }
 }
 
 .share-link-container {
