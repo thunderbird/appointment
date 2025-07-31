@@ -1,78 +1,24 @@
-import { computed, inject, ref } from "vue";
-import { defineStore, storeToRefs } from "pinia";
-import { Fetch, Schedule } from "@/models";
-import { DateFormatStrings, DEFAULT_SLOT_DURATION, EventLocationType, MeetingLinkProviderType } from "@/definitions";
-import { dayjsKey } from '@/keys';
-
-import { useCalendarStore } from "./calendar-store";
-import { useUserStore } from "./user-store";
-import { useScheduleStore } from "./schedule-store";
-import { useExternalConnectionsStore } from "./external-connections-store";
+import { computed, ref, toRefs } from "vue";
+import { defineStore } from "pinia";
+import { Fetch } from "@/models";
 import { deepClone } from "@/utils";
 
-export const useAvailabilityStore = defineStore('appointments', () => {
-  const dj = inject(dayjsKey);
+import { createCalendarStore } from "./calendar-store";
+import { createUserStore } from "./user-store";
+import { createScheduleStore } from "./schedule-store";
+import { createExternalConnectionsStore } from "./external-connections-store";
 
-  const userStore = useUserStore();
-  const calendarStore = useCalendarStore();
-  const scheduleStore = useScheduleStore();
-  const externalConnectionStore = useExternalConnectionsStore();
-
-  const { connectedCalendars } = storeToRefs(calendarStore);
-  const { firstSchedule } = storeToRefs(scheduleStore);
-
-  console.log(connectedCalendars);
-
-  const initialState: Schedule = {
-    active: calendarStore.hasConnectedCalendars,
-    name: `${userStore.data.name}'s Availability`,
-    calendar_id: connectedCalendars.value[0].id,
-    location_type: EventLocationType.InPerson,
-    location_url: '',
-    details: '',
-    start_date: dj().format(DateFormatStrings.QalendarFullDay),
-    end_date: null,
-    start_time: '09:00',
-    end_time: '17:00',
-    earliest_booking: 1440,
-    farthest_booking: 20160,
-    weekdays: [1, 2, 3, 4, 5],
-    slot_duration: DEFAULT_SLOT_DURATION,
-    meeting_link_provider: MeetingLinkProviderType.None,
-    slug: userStore.mySlug,
-    booking_confirmation: true,
-    availabilities: [],
-    use_custom_availabilities: false,
-  };
-
+export const useAvailabilityStore = defineStore('availability', () => {
   // Refs
   const call = ref(null);
-  const currentState = ref({ ...initialState });
   const isLoaded = ref(false);
 
-  // Computed properties
-  const shouldGenerateZoomLink = computed(() => currentState.value.meeting_link_provider === MeetingLinkProviderType.Zoom);
-  const isFormDirty = computed(
-    () => JSON.stringify(initialState) !== JSON.stringify(currentState.value),
-  );
+  const initialState: any = ref({}); // TODO: Update type
+  const currentState: any = ref({}); // TODO: Update type
 
-  /**
-   * Initialize helper stores if not initialized yet
-   * userStore doesn't have to be checked as it is already pre-loaded
-   */
-  const initializeHelperStores = async () => {
-    if (!calendarStore.isLoaded) {
-      await calendarStore.fetch();
-    }
-
-    if (!scheduleStore.isLoaded) {
-      await scheduleStore.fetch();
-    }
-
-    if (!externalConnectionStore.isLoaded) {
-      await externalConnectionStore.fetch();
-    }
-  }
+  const isDirty = computed(() => (
+    JSON.stringify(initialState.value) !== JSON.stringify(currentState.value)
+  ))
 
   /**
    * Initialize store with data required at runtime
@@ -82,45 +28,74 @@ export const useAvailabilityStore = defineStore('appointments', () => {
   const init = async (fetch: Fetch) => {
     call.value = fetch;
 
-    console.log("1");
+    const userStore = createUserStore(fetch);
+    const calendarStore = createCalendarStore(fetch);
+    const scheduleStore = createScheduleStore(fetch);
+    const externalConnectionStore = createExternalConnectionsStore(fetch);
 
-    await initializeHelperStores();
+    const { isLoaded: isCalendarStoreLoaded, connectedCalendars } = toRefs(calendarStore);
+    const { isLoaded: isExternalConnectionStoreLoaded } = toRefs(externalConnectionStore);
+    const { isLoaded: isScheduleStoreLoaded, firstSchedule } = toRefs(scheduleStore);
 
-    console.log("2");
+    // First, let's make sure that all stores are loaded
+    // so that we can initialize the currentState properly
+    if (!isCalendarStoreLoaded.value) {
+      await calendarStore.fetch();
+    }
 
-    if (firstSchedule) {
-      currentState.value = deepClone({ ...firstSchedule });
+    if (!isExternalConnectionStoreLoaded.value) {
+      await externalConnectionStore.fetch();
+    }
+
+    if (!isScheduleStoreLoaded.value) {
+      await scheduleStore.fetch();
+    }
+
+    if (firstSchedule.value) {
+      initialState.value = firstSchedule.value;
 
       // calculate utc back to user timezone
-      currentState.value.start_time = scheduleStore.timeToFrontendTime(currentState.value.start_time, currentState.value.time_updated);
-      currentState.value.end_time = scheduleStore.timeToFrontendTime(currentState.value.end_time, currentState.value.time_updated);
-      currentState.value.availabilities?.forEach((a, i) => {
-        currentState.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, currentState.value.time_updated);
-        currentState.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, currentState.value.time_updated);
+      initialState.value.start_time = scheduleStore.timeToFrontendTime(initialState.value.start_time, initialState.value.time_updated);
+      initialState.value.end_time = scheduleStore.timeToFrontendTime(initialState.value.end_time, initialState.value.time_updated);
+      initialState.value.availabilities?.forEach((a, i) => {
+        initialState.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, initialState.value.time_updated);
+        initialState.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, initialState.value.time_updated);
       });
 
       // Adjust the default calendar if the one attached is not connected.
-      const { calendar_id: calendarId } = currentState.value;
+      const { calendar_id: calendarId } = initialState.value;
 
       const calendar = connectedCalendars.value.find((cal) => cal.id === calendarId);
       if (!calendar || !calendar.connected) {
-        currentState.value.calendar_id = connectedCalendars.value[0].id;
+        initialState.value.calendar_id = connectedCalendars.value[0].id;
       }
     }
 
-    console.log("3");
+    // Booking Page Link data
+    initialState.value.link_slug = userStore.mySlug;
+
+    // Copy initialState
+    currentState.value = deepClone({ ...initialState.value }); 
 
     isLoaded.value = true;
   }
 
+  const saveChanges = async () => {
+    console.log("Object to be saved:", currentState.value);
+  }
+
+  const revertChanges = () => {
+    currentState.value = deepClone({ ...initialState.value }); 
+  }
+
   return {
     init,
-    initialState,
     isLoaded,
-    firstSchedule,
-    connectedCalendars,
-    shouldGenerateZoomLink,
-    isFormDirty,
+    isDirty,
+    initialState,
+    currentState,
+    saveChanges,
+    revertChanges,
   }
 });
 

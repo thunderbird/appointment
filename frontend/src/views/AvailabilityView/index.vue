@@ -1,15 +1,27 @@
 <script setup lang="ts">
+import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { storeToRefs } from 'pinia';
+import { callKey } from '@/keys';
+import { LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
+import { createAvailabilityStore } from '@/stores/availability-store';
 
 import AvailabilitySettings from './components/AvailabilitySettings/index.vue';
 import BookingPageDetails from './components/BookingPageDetails/index.vue';
 import BookingPageLink from './components/BookingPageLink/index.vue';
 
 const { t } = useI18n();
+const call = inject(callKey);
 
-const onSaveChanges = () => {
-  console.log("Saved changes!");
+const availabilityStore = createAvailabilityStore(call);
+const { isDirty } = storeToRefs(availabilityStore)
+
+const onSaveChanges = async () => {
+  await availabilityStore.saveChanges();
+}
+
+const onRevertChanges = () => {
+  availabilityStore.revertChanges();
 }
 </script>
 
@@ -38,9 +50,14 @@ export default {
       </div>
     </div>
 
-    <div class="footer-save-panel" v-if="false">
+    <div class="footer-save-panel" v-if="isDirty">
+      <link-button
+        @click="onRevertChanges"
+      >
+        {{ t('label.revertChanges') }}
+      </link-button>
       <primary-button
-        @click="onSaveChanges()"
+        @click="onSaveChanges"
       >
         {{ t('label.saveChanges') }}
       </primary-button>
@@ -75,6 +92,7 @@ export default {
   right: 0;
   display: flex;
   justify-content: flex-end;
+  gap: 2rem;
   margin-inline-start: auto;
   padding: 1rem 1.5rem;
   margin: 0 0.5rem 0.5rem 0.5rem;

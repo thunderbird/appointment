@@ -1,19 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
 import { IconCopy, IconRefresh } from '@tabler/icons-vue';
 import { TextInput } from '@thunderbirdops/services-ui';
 import { MetricEvents } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
+import { useAvailabilityStore } from '@/stores/availability-store';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { posthog, usePosthog } from '@/composables/posthog';
 
 const { t } = useI18n();
 
 const userStore = useUserStore();
+const availabilityStore = useAvailabilityStore();
+const { currentState } = storeToRefs(availabilityStore);
 
 const refreshLinkModalOpen = ref(false);
 const copyButtonLabel = ref(t('label.copy'));
+
+const linkSlug = computed({
+  get: () => currentState.value.link_slug,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { link_slug: value } })
+  }
+})
 
 function openRefreshLinkModal() {
   refreshLinkModalOpen.value = true;
@@ -61,7 +72,7 @@ export default {
     name="customizeLink"
     class="customize-link-input"
     outer-prefix="apmt.day/username"
-    v-model="userStore.mySlug"
+    v-model="linkSlug"
   >
     {{ t('label.customizeYourLink') }}:
     <button @click="openRefreshLinkModal">
