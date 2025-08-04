@@ -19,31 +19,39 @@ import withSetup from '../utils/with-setup';
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/me/appointments`, async () => HttpResponse.json([
-    {
-      id: 1,
-      calendar_id: 1,
-      title: 'title',
-      duration: 180,
-      location_type: 2,
-      slots: [
-        { start: '3000-01-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None },
-      ],
+  http.get(`${API_URL}/me/appointments`, async () => HttpResponse.json({
+    items: [
+      {
+        id: 1,
+        calendar_id: 1,
+        title: 'title',
+        duration: 180,
+        location_type: 2,
+        slots: [
+          { start: '3000-01-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None },
+        ],
+      },
+      {
+        id: 2,
+        calendar_id: 1,
+        title: 'title',
+        duration: 180,
+        location_type: 2,
+        slots: [
+          {
+            start: '2024-01-01T09:00:00Z', duration: 60, attendee_id: 1, booking_status: BookingStatus.Requested,
+          },
+        ],
+      },
+    ],
+    page_meta: {
+      current_page: 1,
+      per_page: 10,
+      total_items: 2,
+      total_pages: 1,
     },
-    {
-      id: 2,
-      calendar_id: 1,
-      title: 'title',
-      duration: 180,
-      location_type: 2,
-      slots: [
-        {
-          start: '2024-01-01T09:00:00Z', duration: 60, attendee_id: 1, booking_status: BookingStatus.Requested,
-        },
-      ],
-    },
-  ])),
-  http.post(`${API_URL}/apmt/:id/cancel`, async () => {}),
+  })),
+  http.post(`${API_URL}/apmt/:id/cancel`, async () => { }),
   http.put(`${API_URL}/schedule/public/availability/booking`, async ({ request }) => {
     const body = await request.json();
     return HttpResponse.json({

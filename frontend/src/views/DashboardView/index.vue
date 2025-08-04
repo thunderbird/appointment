@@ -114,9 +114,7 @@ export default {
   </notice-bar>
 
   <div class="main-container">
-    <quick-actions-side-bar
-      :pending-booking-requests-count="pendingAppointments.length"
-    />
+    <quick-actions-side-bar />
   
     <!-- main section: big calendar showing active month, week or day -->
     <calendar-qalendar
