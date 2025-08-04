@@ -16,12 +16,13 @@ def run():
     from alembic import command
     from alembic.config import Config
 
-    # TODO: Does this work on stage?
+    # The .ini template has the sqlalchemy.url option commented out.
     alembic_cfg = Config('./alembic.ini')
-
+    
+    # If DATABASE_URL is set, this will return its value as a string, otherwise as the (preferred) URL construction
     db_url = get_database_url()
 
-    # If the db_url is a string (meaning we set DATABASE_URL), pass that through to Alembic
+    # If we're in "connection string" mode, make sure to tell Alembic that
     if isinstance(db_url, str):
         alembic_cfg.set_main_option('sqlalchemy.url', db_url)
 

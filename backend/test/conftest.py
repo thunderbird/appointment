@@ -134,7 +134,8 @@ def _patch_fxa_client(monkeypatch):
 
 @pytest.fixture()
 def with_db():
-    engine = create_engine(os.getenv('DATABASE_URL'), connect_args={'check_same_thread': False}, poolclass=StaticPool)
+    database_url = database.get_database_url()
+    engine = create_engine(database_url, connect_args={'check_same_thread': False}, poolclass=StaticPool)
     testing_local_session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     models.Base.metadata.drop_all(bind=engine)

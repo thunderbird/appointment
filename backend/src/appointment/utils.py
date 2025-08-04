@@ -119,7 +119,10 @@ def determine_database_driver(dialect: str) -> str:
 def get_database_url() -> str | sqlalchemy_url:
     # If a url is set directly, reluctantly pass that through
     if 'DATABASE_URL' in os.environ:
-        log.info('DEPRECATION WARNING: The use of the DATABASE_URL environment variable is discouraged.')
+        log.info(
+            'The use of the DATABASE_URL environment variable is discouraged. Instead, use DATABASE_HOST, '
+            'DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_ENGINE, and DATABASE_NAME.'
+        )
         return os.environ.get('DATABASE_URL')
 
     # But preferably pull the URL components from environment variables.
