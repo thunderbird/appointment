@@ -96,11 +96,7 @@ resources:
         - zoom-secrets
         # - neon-database-connection
 
-  tb:ec2:SshableInstance:
-    rjung:
-      ssh_keypair_name: rjung-burrito
-      source_cidrs:
-        - 38.15.46.29/32
+  tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
   # tb:ec2:SshableInstance:
   #   bastion:
@@ -143,7 +139,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:0c5f0f37d3e801b6544563823bdb17cb860f20ae
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2107d26a431db8433d4641e18fb5c6b6710b85fc
             portMappings:
               - name: backend
                 containerPort: 5000
