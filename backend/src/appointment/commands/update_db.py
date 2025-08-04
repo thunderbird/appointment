@@ -5,6 +5,7 @@ from alembic.runtime import migration
 
 from ..dependencies.database import get_engine_and_session
 from ..main import _common_setup
+from ..utils import get_database_url
 
 
 def run():
@@ -19,9 +20,11 @@ def run():
     # TODO: Does this work on stage?
     alembic_cfg = Config('./alembic.ini')
 
-    # If we have our database url env variable set, use that instead!
-    if os.getenv('DATABASE_URL'):
-        alembic_cfg.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+    db_url = get_database_url()
+
+    # If the db_url is a string (meaning we set DATABASE_URL), pass that through to Alembic
+    if isinstance(db_url, str):
+        alembic_cfg.set_main_option('sqlalchemy.url', db_url)
 
     engine, _ = get_engine_and_session()
 
