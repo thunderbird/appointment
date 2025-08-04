@@ -8,7 +8,7 @@ from datetime import time, datetime, timedelta
 from functools import cache
 
 from argon2 import PasswordHasher
-from sqlalchemy import url
+from sqlalchemy.engine.url import URL as sqlalchemy_url
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from appointment.database import repo
@@ -116,7 +116,7 @@ def determine_database_driver(dialect: str) -> str:
 
 
 @cache
-def get_database_url() -> str | url.URL:
+def get_database_url() -> str | sqlalchemy_url:
     # If a url is set directly, reluctantly pass that through
     if 'DATABASE_URL' in os.environ:
         log.info('DEPRECATION WARNING: The use of the DATABASE_URL environment variable is discouraged.')
@@ -128,7 +128,7 @@ def get_database_url() -> str | url.URL:
     db_name = os.environ.get('DATABASE_NAME', 'appointment')
     dialect = os.environ.get('DATABASE_ENGINE', 'mysql')
     driver = determine_database_driver(dialect=dialect)
-    port = os.environ.get('DATABASE_PORT', '3306')
+    port = int(os.environ.get('DATABASE_PORT', '3306'))
 
     # These settings are secrets and must be set manually.
     host = os.environ.get('DATABASE_HOST')
@@ -145,12 +145,14 @@ def get_database_url() -> str | url.URL:
     #     password = password.replace(char, f'%{char}')
 
     # If we've had to compose this from parts, use the (preferred) SQLAlchemy URL class
-    return url.URL(
+    return sqlalchemy_url(
         f'{dialect}+{driver}',
-        username=username,
-        password=password,
-        host=host,
         database=db_name,
+        host=host,
+        password=password,
+        port=port,
+        query={},  # "query" as in "query string" for the URI, a key/value map. Ref: https://docs.sqlalchemy.org/en/21/core/engines.html#sqlalchemy.engine.URL.query
+        username=username,
     )
 
 

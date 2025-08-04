@@ -9,13 +9,15 @@ services:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
-      # The APMT_DB_* variables are set in the example backend .env file, which overrides these
-      # - APMT_DB_NAME=appointment
-      # - APMT_DB_ENGINE=mysql
-      # - APMT_DB_PORT=3306
-      # - APMT_DB_HOST=mysql
-      # - APMT_DB_USERNAME=tba
-      # - APMT_DB_PASSWORD=abcd%efgh
+      # The DATABASE_* variables are set in the example backend .env file, which overrides these
+      # DATABASE_ENGINE=mysql
+      # DATABASE_HOST=mysql
+      # DATABASE_NAME=appointment
+      # DATABASE_PASSWORD=abcd%efgh
+      # DATABASE_PORT=3306
+      # DATABASE_USERNAME=tba
+      
+      # The use of DATABASE_URL is problematic and deprecated
       # - DATABASE_URL=mysql+mysqldb://tba:abcd%efgh@mysql:3306/appointment
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev

@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from appointment.defines import APP_ENV_DEV
+from appointment.dependencies.database import get_engine_and_session
 
 # This is ran from src/ so ignore the errors
 from appointment.utils import normalize_secrets
@@ -80,15 +81,16 @@ def run_migrations_online() -> None:
 
     """
     # If we have our database url env variable set, use that instead!
-    if os.getenv('DATABASE_URL'):
-        config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+    # if os.getenv('DATABASE_URL'):
+    #     config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
 
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool,
-    )
+    # connectable = engine_from_config(
+    #     config.get_section(config.config_ini_section),
+    #     prefix='sqlalchemy.',
+    #     poolclass=pool.NullPool,
+    # )
 
+    connectable, session = get_engine_and_session()
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
 

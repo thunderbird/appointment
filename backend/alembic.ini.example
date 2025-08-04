@@ -55,7 +55,8 @@ version_path_separator = os  # Use os.pathsep. Default configuration used for ne
 # are written from script.py.mako
 # output_encoding = utf-8
 
-sqlalchemy.url = mysql+mysqlconnector://user:pass@localhost:port/appointment
+# We prefer to use the ORM's built-in URL factory, but you should set this value if you want to do an "offline" migration
+# sqlalchemy.url = mysql+mysqlconnector://user:pass@localhost:port/appointment
 
 
 [post_write_hooks]
