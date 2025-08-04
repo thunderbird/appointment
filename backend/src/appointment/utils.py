@@ -107,6 +107,15 @@ def chunk_list(to_chunk: list, chunk_by: int):
 
 
 def determine_database_driver(dialect: str) -> str:
+    """Return our preferred ORM driver for the given database dialect.
+
+    :param dialect: A class of database, like "mysql" or "postgresql".
+    :type dialect: str
+
+    :return: The string indicator of which driver the ORM should use.
+    :rtype: str
+    """
+
     if dialect == 'mysql':
         return 'mysqldb'
     elif dialect == 'postgresql':
@@ -117,6 +126,17 @@ def determine_database_driver(dialect: str) -> str:
 
 @cache
 def get_database_url() -> str | sqlalchemy_url:
+    """Returns a database URL value suitable for passing to SQLAlechemy's ``create_engine`` function. If DATABASE_URL is
+    set in the environment, that string will be used, but this is not preferred as there are problems handling some
+    special characters. Otherwise (and preferably), uses SQLAlchemy's URL factory to produce working connection URL
+    objects in which special character escaping is handled for us.
+
+    :raises ValueError: If a necessary URL component is not configured.
+
+    :return: Either a string or a sqlalchemy.engine.url.URL, depending on configuration.
+    :rtype: str | sqlalchemy_url
+    """
+
     # If a url is set directly, reluctantly pass that through
     if 'DATABASE_URL' in os.environ:
         log.info(
