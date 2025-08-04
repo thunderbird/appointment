@@ -1,4 +1,3 @@
-import os
 
 from ..database import models
 from alembic.runtime import migration
