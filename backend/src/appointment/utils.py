@@ -146,7 +146,6 @@ def get_database_url() -> str | sqlalchemy_url:
         return os.environ.get('DATABASE_URL')
 
     # But preferably pull the URL components from environment variables.
-
     # These are settings we can safely assume defaults about.
     db_name = os.environ.get('DATABASE_NAME', 'appointment')
     dialect = os.environ.get('DATABASE_ENGINE', 'mysql')
@@ -161,13 +160,7 @@ def get_database_url() -> str | sqlalchemy_url:
     if not db_name or not dialect or not host or not password or not port or not username:
         raise ValueError('Missing one or more database configuration value. Review your environment.')
 
-    # We need to escape these characters in passwords so SQLAlchemy doesn't choke on them
-    # _special_characters = '@%'
-    # password = parse.quote_plus(password)
-    # for char in _special_characters:
-    #     password = password.replace(char, f'%{char}')
-
-    # If we've had to compose this from parts, use the (preferred) SQLAlchemy URL class
+    # If we've had to compose this from parts, use the SQLAlchemy URL class
     return sqlalchemy_url(
         f'{dialect}+{driver}',
         database=db_name,
