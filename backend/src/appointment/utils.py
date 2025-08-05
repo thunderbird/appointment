@@ -157,7 +157,7 @@ def get_database_url() -> str | sqlalchemy_url:
     username = os.environ.get('DATABASE_USERNAME')
     password = os.environ.get('DATABASE_PASSWORD')
 
-    if not db_name or not dialect or not host or not password or not port or not username:
+    if not all([db_name, dialect, host, password, port, username]):
         raise ValueError('Missing one or more database configuration value. Review your environment.')
 
     # If we've had to compose this from parts, use the SQLAlchemy URL class
