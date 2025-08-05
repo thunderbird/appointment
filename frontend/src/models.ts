@@ -200,6 +200,7 @@ export type AvailabilityFormFields = {
   earliest_booking?: number;
   end_time?: string;
   farthest_booking?: number;
+  id?: number;
   link_slug?: string;
   location_url?: string;
   meeting_link_provider?: string;
@@ -208,6 +209,7 @@ export type AvailabilityFormFields = {
   slot_duration?: number;
   time_updated?: string;
   use_custom_availabilities?: boolean;
+  weekdays?: number[];
 }
 
 export type Schedule = {

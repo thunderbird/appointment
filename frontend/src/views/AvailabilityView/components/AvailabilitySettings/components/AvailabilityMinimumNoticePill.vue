@@ -43,5 +43,6 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
     name="minimum-notice"
     :legend="t('label.minimumNotice')"
     :options="earliestOptions"
+    :disabled="!currentState.active"
   />
 </template>

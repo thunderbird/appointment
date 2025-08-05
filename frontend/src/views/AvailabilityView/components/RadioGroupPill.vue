@@ -4,6 +4,7 @@ import { SelectOption } from '@/models';
 const props = defineProps<{
   legend: string;
   name: string;
+  disabled?: boolean;
   options: SelectOption<string | number>[];
 }>()
 
@@ -26,6 +27,7 @@ const model = defineModel<string | number>();
           :name="props.name"
           :value="option.value"
           :class="{ 'screen-reader-only': model !== option.value }"
+          :disabled="disabled"
           v-model="model"
         />
         <label :for="`${props.name}-${option.value}`">
@@ -48,6 +50,10 @@ legend {
   overflow: hidden;
   border: 1px solid var(--colour-apmt-primary);
   border-radius: 999px;
+
+  &:has(input[type="radio"]:disabled) {
+    border: 1px solid var(--colour-ti-muted);
+  }
 }
 
 .pill-item {
@@ -72,10 +78,19 @@ legend {
 
   &:not(:last-child) {
     border-inline-end: 1px solid var(--colour-apmt-primary);
+
+    &:has(input[type="radio"]:disabled) {
+      border-inline-end: 1px solid var(--colour-ti-muted);
+    }
   }
 
   &:has(input[type="radio"]:checked) {
     background-color: var(--colour-apmt-primary);
+    color: var(--colour-neutral-base);
+  }
+
+  &:has(input[type="radio"]:checked)&:has(input[type="radio"]:disabled) {
+    background-color: var(--colour-ti-muted);
     color: var(--colour-neutral-base);
   }
 }

@@ -76,6 +76,7 @@ export default {
       type="text"
       name="pageName"
       v-model="pageName"
+      required
     >
       {{ t('label.pageName') }}:
     </text-input>

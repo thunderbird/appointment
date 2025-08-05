@@ -33,5 +33,6 @@ const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
     name="booking-window"
     :legend="t('label.bookingWindow')"
     :options="bookingWindowOptions"
+    :disabled="!currentState.active"
   />
 </template>

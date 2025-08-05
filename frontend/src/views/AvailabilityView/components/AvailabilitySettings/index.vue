@@ -6,7 +6,7 @@ import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput, LinkButton } from
 import { dayjsKey, isoWeekdaysKey } from '@/keys';
 import { useUserStore } from '@/stores/user-store';
 import { useAvailabilityStore } from '@/stores/availability-store';
-import { SelectOption } from '@/models';
+import { Availability, SelectOption } from '@/models';
 
 import AvailabilityCalendarSelect from './components/AvailabilityCalendarSelect.vue';
 import AvailabilitySelect from './components/AvailabilitySelect.vue';
@@ -32,14 +32,42 @@ const isBookable = computed({
 const requiresBookingConfirmation = computed({
   get: () => currentState.value.booking_confirmation,
   set: (value) => {
-    currentState.value.booking_confirmation = value
+    availabilityStore.$patch({ currentState: { booking_confirmation: value } })
   }
 })
 
 const useCustomAvailabilities = computed({
   get: () => currentState.value.use_custom_availabilities,
   set: (value) => {
-    currentState.value.use_custom_availabilities = value
+    availabilityStore.$patch({ currentState: { use_custom_availabilities: value } })
+  }
+})
+
+const startTime = computed({
+  get: () => currentState.value.start_time,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { start_time: value } })
+  }
+})
+
+const endTime = computed({
+  get: () => currentState.value.end_time,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { end_time: value } })
+  }
+})
+
+const slotDuration = computed({
+  get: () => currentState.value.slot_duration,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { slot_duration: value } })
+  }
+})
+
+const weekDays = computed({
+  get: () => currentState.value.weekdays,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { weekdays: value } })
   }
 })
 
@@ -47,6 +75,13 @@ const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
   value: day.iso,
 }));
+
+function onAvailabilitySelectUpdated(availabilities: Availability[]) {
+  // Create a single array of availabilities from the list grouped by day of week
+  // Only take valid availabilities and filter placeholder availabilities out
+  const validAvailabilities = availabilities.map((a) => ({ ...a, schedule_id: currentState.value.id }));
+  availabilityStore.$patch({ currentState: { availabilities: validAvailabilities } })
+}
 </script>
 
 <script lang="ts">
@@ -92,6 +127,7 @@ export default {
       :label="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
       data-testid="availability-automatically-confirm-checkbox"
       v-model="requiresBookingConfirmation"
+      :disabled="!currentState.active"
     />
 
     <hr />
@@ -102,19 +138,21 @@ export default {
       name="customizePerDay"
       :label="t('label.customizePerDay')"
       v-model="useCustomAvailabilities"
+      :disabled="!currentState.active"
     />
 
     <!-- Availability with customization -->
     <template v-if="useCustomAvailabilities">
       <availability-select
-        class="availability-times-container"
         :options="scheduleDayOptions"
-        :availabilities="[]"
-        :start-time="''"
-        :end-time="''"
-        :slot-duration="1"
+        :availabilities="currentState.availabilities"
+        :start-time="startTime"
+        :end-time="endTime"
+        :slot-duration="slotDuration"
         :required="true"
-        @update="() => {}"
+        v-model="weekDays"
+        @update="onAvailabilitySelectUpdated"
+        :disabled="!currentState.active"
       />
     </template>
 
@@ -125,6 +163,8 @@ export default {
           type="time"
           name="start_time"
           class="full-width"
+          v-model="startTime"
+          :disabled="!currentState.active"
         >
           {{ t("label.startTime") }}
         </text-input>
@@ -135,6 +175,8 @@ export default {
           type="time"
           name="end_time"
           class="full-width"
+          v-model="endTime"
+          :disabled="!currentState.active"
         >
           {{ t("label.endTime") }}
         </text-input>
@@ -142,6 +184,8 @@ export default {
       <bubble-select
         :options="scheduleDayOptions"
         :required="false"
+        v-model="weekDays"
+        :disabled="!currentState.active"
       />
     </template>
 

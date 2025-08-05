@@ -39,6 +39,7 @@ onMounted(async () => {
     class="select-input"
     :options="calendarOptions"
     v-model="selectedCalendar"
+    :disabled="!currentState.active"
   >
     {{ t("label.bookingTo") }}
   </select-input>

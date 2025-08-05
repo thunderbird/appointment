@@ -123,6 +123,7 @@
     "warning": "Warning"
   },
   "info": {
+    "availabilitySavedSuccessfully": "Availability saved successfully",
     "bookedPleaseCheckEmail": "This event has been booked. Check your email to add it to your calendar.",
     "bookingLinkHasAlreadyBeenUsed": "It looks like this link has been used.",
     "bookingLinkIsInvalid": "This booking confirmation link is invalid.",

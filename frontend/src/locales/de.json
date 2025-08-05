@@ -123,6 +123,7 @@
     "warning": "Warnung"
   },
   "info": {
+    "availabilitySavedSuccessfully": "Verfügbarkeit erfolgreich gespeichert",
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht. Bitte überprüfe deinen Posteingang, um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
     "bookingLinkIsInvalid": "Der Link zur Buchungsbestätigung ist ungültig.",

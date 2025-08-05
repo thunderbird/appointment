@@ -83,12 +83,14 @@ export const useAvailabilityStore = defineStore('availability', () => {
     isLoaded.value = true;
   }
 
-  const saveChanges = async () => {
-    console.log("Object to be saved:", currentState.value);
-  }
-
   const revertChanges = () => {
     currentState.value = deepClone({ ...initialState.value }); 
+  }
+
+  const $reset = async () => {
+    isLoaded.value = false;
+
+    await init(call.value);
   }
 
   return {
@@ -98,8 +100,8 @@ export const useAvailabilityStore = defineStore('availability', () => {
     hasZoom,
     initialState,
     currentState,
-    saveChanges,
     revertChanges,
+    $reset,
   }
 });
 
