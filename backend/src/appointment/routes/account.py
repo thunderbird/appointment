@@ -54,7 +54,7 @@ def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depend
 def delete_account(
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
-    posthog: Posthog = Depends(get_posthog)
+    posthog: Posthog = Depends(get_posthog),
 ):
     """Delete your account and all the data associated with it forever!"""
     try:

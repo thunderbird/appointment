@@ -16,10 +16,7 @@ def get_by_subscriber(db: Session, subscriber_id: int) -> models.Invite:
 
 
 def get_by_owner(
-    db: Session,
-    subscriber_id: int,
-    status: Optional[InviteStatus] = None,
-    only_unused: bool = False
+    db: Session, subscriber_id: int, status: Optional[InviteStatus] = None, only_unused: bool = False
 ) -> list[models.Invite]:
     """Retrieve invites by the invite owner. Optionally filter by status, or unused."""
     query = db.query(models.Invite)

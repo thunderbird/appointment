@@ -109,7 +109,7 @@ def delete_account(db, subscriber: Subscriber):
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.google)),
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.zoom)),
         repo.invite.get_by_subscriber(db, subscriber.id),
-        repo.invite.get_waiting_list_entry_by_email(db, subscriber.email)
+        repo.invite.get_waiting_list_entry_by_email(db, subscriber.email),
     ]
 
     # Check if we have any left-over subscriber data

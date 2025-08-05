@@ -292,7 +292,7 @@ def accounts_callback(
 
     request.session['accounts_session'] = user_session_id
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/")
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/post-login/')
 
 
 @router.get('/fxa_login')
@@ -372,11 +372,11 @@ def fxa_callback(
 
     if 'fxa_state' not in request.session or request.session['fxa_state'] != state:
         return RedirectResponse(
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-state']}"
+            f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["invalid-state"]}'
         )
     if 'fxa_user_email' not in request.session or request.session['fxa_user_email'] == '':
         return RedirectResponse(
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-not-in-session']}"
+            f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["email-not-in-session"]}'
         )
 
     email = request.session['fxa_user_email'].lower()
@@ -400,7 +400,7 @@ def fxa_callback(
     if email == '' or profile.get('email', '').lower() != email:
         fxa_client.logout()
         return RedirectResponse(
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['email-mismatch']}"
+            f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["email-mismatch"]}'
         )
 
     # Check if we have an existing fxa connection by profile's uid
@@ -419,11 +419,11 @@ def fxa_callback(
         if not is_in_allow_list:
             if not repo.invite.code_exists(db, invite_code):
                 return RedirectResponse(
-                    f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invite-not-valid']}"
+                    f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["invite-not-valid"]}'
                 )
             if not repo.invite.code_is_available(db, invite_code):
                 return RedirectResponse(
-                    f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invite-not-valid']}"
+                    f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["invite-not-valid"]}'
                 )
 
         subscriber = repo.subscriber.create(
@@ -446,7 +446,7 @@ def fxa_callback(
             if not used:
                 repo.subscriber.hard_delete(db, subscriber)
                 return RedirectResponse(
-                    f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['unknown-error']}"
+                    f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["unknown-error"]}'
                 )
 
     elif not subscriber:
@@ -455,7 +455,7 @@ def fxa_callback(
     # Only proceed if user account is enabled (which is the default case for new users)
     if subscriber.is_deleted:
         return RedirectResponse(
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['disabled-account']}"
+            f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["disabled-account"]}'
         )
 
     fxa_connections = repo.external_connection.get_by_type(db, subscriber.id, ExternalConnectionType.fxa)
@@ -469,7 +469,7 @@ def fxa_callback(
             capture_exception(e)
 
         return RedirectResponse(
-            f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/login/?error={errors['invalid-credentials']}"
+            f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["invalid-credentials"]}'
         )
 
     external_connection_schema = schemas.ExternalConnection(
@@ -509,7 +509,7 @@ def fxa_callback(
         data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
     )
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/post-login/{one_time_access_token}")
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/post-login/{one_time_access_token}')
 
 
 @router.post('/fxa-token')

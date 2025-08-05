@@ -10,7 +10,7 @@ class TestZoom:
         # Mock the Zoom API calls
         mock_zoom_client = mock.Mock()
         mock_zoom_client.get_credentials.return_value = '{"access_token": "token", "refresh_token": "refresh"}'
-        mock_zoom_client.get_me.return_value = {"id": "zoom_id", "email": "test@test.com"}
+        mock_zoom_client.get_me.return_value = {'id': 'zoom_id', 'email': 'test@test.com'}
 
         def mock_get_zoom_client(*args, **kwargs):
             return mock_zoom_client
@@ -23,9 +23,7 @@ class TestZoom:
         # Mock the request.session checks
         with mock.patch('fastapi.Request.session', new_callable=mock.PropertyMock) as mock_session:
             mock_session.return_value = {'zoom_state': 'state', 'zoom_user_id': TEST_USER_ID}
-            with_client.get(
-                '/zoom/callback', params={'code': 'code', 'state': 'state'}, headers=auth_headers
-            )
+            with_client.get('/zoom/callback', params={'code': 'code', 'state': 'state'}, headers=auth_headers)
 
         # Refresh the schedule now to see the meeting_link_provider change
         with with_db() as db:

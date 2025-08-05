@@ -47,7 +47,7 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
             break
 
     if jwk_pem is None:
-        logging.error(f"Error decoding token. Key ID ({headers.get('kid')}) is missing from public list.")
+        logging.error(f'Error decoding token. Key ID ({headers.get("kid")}) is missing from public list.')
         return None
 
     # Amount of time over what the iat is issued for to allow
@@ -59,6 +59,6 @@ def get_webhook_auth(request: Request, fxa_client: FxaClient = Depends(get_fxa_c
 
     # Final verification
     if decoded_jwt.get('iss') != fxa_client.config.issuer:
-        logging.error(f"Issuer is not valid: ({decoded_jwt.get('iss')}) vs ({fxa_client.config.issuer})")
+        logging.error(f'Issuer is not valid: ({decoded_jwt.get("iss")}) vs ({fxa_client.config.issuer})')
 
     return decoded_jwt

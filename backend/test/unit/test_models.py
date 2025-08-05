@@ -148,11 +148,7 @@ class TestInvite:
             assert inv_subscriber
 
     def test_deleting_invited_user_deletes_invite_and_waiting_list(
-        self,
-        with_db,
-        make_basic_subscriber,
-        make_invite,
-        make_waiting_list
+        self, with_db, make_basic_subscriber, make_invite, make_waiting_list
     ):
         with with_db() as db:
             subscriber = make_basic_subscriber()
@@ -177,7 +173,7 @@ class TestInvite:
 class TestSubscriber:
     def test_get_external_connection_by_type_only(self, with_db, make_basic_subscriber, make_external_connections):
         """Test that get_external_connection returns the first connection of
-           the specified type when no type_id is provided"""
+        the specified type when no type_id is provided"""
 
         with with_db() as db:
             subscriber = make_basic_subscriber()
@@ -272,7 +268,7 @@ class TestExternalConnection:
                 subscriber_id=subscriber.id,
                 type=models.ExternalConnectionType.google,
                 type_id='test_google_id',
-                token='old_token'
+                token='old_token',
             )
 
             # Update the token

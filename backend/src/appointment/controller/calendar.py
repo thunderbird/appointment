@@ -708,7 +708,6 @@ class Tools:
             attachment=ics_file,
         )
 
-
     @staticmethod
     def available_slots_from_schedule(schedule: models.Schedule, day: datetime = None) -> list[schemas.SlotBase]:
         """This helper calculates a list of slots according to the given schedule configuration.
@@ -746,7 +745,7 @@ class Tools:
             if custom_times and len(customAvailabilities) > 0:
                 parts = [(x.start_time_local, x.end_time_local) for x in customAvailabilities]
 
-            for (start_local, end_local) in parts:
+            for start_local, end_local in parts:
                 # Calculate time difference from midnight for both start and end times
                 start_time = datetime.combine(now.min, start_local) - datetime.min
                 end_time = datetime.combine(now.min, end_local) - datetime.min
@@ -778,9 +777,9 @@ class Tools:
                 if current_datetime.isoweekday() in weekdays:
                     day_slots += [
                         schemas.SlotBase(
-                            start=current_datetime + timedelta(seconds=time),
-                            duration=schedule.slot_duration
-                        ) for time in range(time_start, total_time, slot_duration_seconds)
+                            start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration
+                        )
+                        for time in range(time_start, total_time, slot_duration_seconds)
                     ]
 
             return day_slots
@@ -923,9 +922,7 @@ class Tools:
             existing_events.extend(
                 [
                     schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
-                    for busy in con.get_busy_time(
-                        calendar_ids, start.strftime(DATEFMT), end.strftime(DATEFMT)
-                    )
+                    for busy in con.get_busy_time(calendar_ids, start.strftime(DATEFMT), end.strftime(DATEFMT))
                 ]
             )
 
@@ -945,9 +942,7 @@ class Tools:
                 existing_events.extend(
                     [
                         schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
-                        for busy in con.get_busy_time(
-                            [calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT)
-                        )
+                        for busy in con.get_busy_time([calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT))
                     ]
                 )
 

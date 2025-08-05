@@ -12,7 +12,7 @@ class APIException(HTTPException):
     message_key = None
     reason = None
 
-    def __init__(self, reason: str|None = None, **kwargs):
+    def __init__(self, reason: str | None = None, **kwargs):
         message_key = kwargs.pop('message_key', False)
         if message_key is not False:
             self.message_key = message_key
@@ -39,6 +39,7 @@ class APIException(HTTPException):
 
     def get_reason(self):
         return self.reason
+
 
 class InvalidPermissionLevelException(APIException):
     """Raise when the subscribers permission level is too low for the action"""
@@ -162,6 +163,7 @@ class ScheduleNotAuthorizedException(APIException):
 
 class ScheduleCreationException(APIException):
     """Raise when we have an error with schedule creation but don't want to give exactly what."""
+
     id_code = 'SCHEDULE_CREATION_EXCEPTION'
     status_code = 500
 
@@ -171,6 +173,7 @@ class ScheduleCreationException(APIException):
 
 class InvalidAvailabilityException(APIException):
     """Raise when any custom availability is invalid, e.g. start time after end time."""
+
     id_code = 'INVALID_AVAILABILITY_EXCEPTION'
     status_code = 400
 

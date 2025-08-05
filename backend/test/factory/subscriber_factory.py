@@ -23,7 +23,7 @@ def make_subscriber(with_db):
                     email=email if factory_has_value(email) else fake.unique.email(),
                     level=level,
                     timezone='America/Vancouver',
-                    short_link_hash=secrets.token_hex(32)
+                    short_link_hash=secrets.token_hex(32),
                 ),
             )
             # If we've passed in a password then hash it and save it to the subscriber
