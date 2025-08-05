@@ -1,27 +1,30 @@
-import os
 
 from ..database import models
 from alembic.runtime import migration
 
 from ..dependencies.database import get_engine_and_session
-from ..utils import normalize_secrets
+from ..main import _common_setup
+from ..utils import get_database_url
 
 
 def run():
     print('Checking if we have a fresh database...')
 
+    _common_setup()
     # then, load the Alembic configuration and generate the
     # version table, "stamping" it with the most recent rev:
     from alembic import command
     from alembic.config import Config
 
-    # TODO: Does this work on stage?
+    # The .ini template has the sqlalchemy.url option commented out.
     alembic_cfg = Config('./alembic.ini')
+    
+    # If DATABASE_URL is set, this will return its value as a string, otherwise as the (preferred) URL construction
+    db_url = get_database_url()
 
-    # If we have our database url env variable set, use that instead!
-    normalize_secrets()
-    if os.getenv('DATABASE_URL'):
-        alembic_cfg.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+    # If we're in "connection string" mode, make sure to tell Alembic that
+    if isinstance(db_url, str):
+        alembic_cfg.set_main_option('sqlalchemy.url', db_url)
 
     engine, _ = get_engine_and_session()
 

@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import urllib.parse
 from urllib import parse
@@ -7,6 +8,7 @@ from datetime import time, datetime, timedelta
 from functools import cache
 
 from argon2 import PasswordHasher
+from sqlalchemy.engine.url import URL as sqlalchemy_url
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from appointment.database import repo
@@ -14,6 +16,7 @@ from appointment.database.models import secret
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 
 ph = PasswordHasher()
+log = logging.getLogger(__name__)
 
 
 def verify_password(password, hashed_password):
@@ -103,38 +106,76 @@ def chunk_list(to_chunk: list, chunk_by: int):
         yield to_chunk[i : i + chunk_by]
 
 
+def determine_database_driver(dialect: str) -> str:
+    """Return our preferred ORM driver for the given database dialect.
+
+    :param dialect: A class of database, like "mysql" or "postgresql".
+    :type dialect: str
+
+    :return: The string indicator of which driver the ORM should use.
+    :rtype: str
+    """
+
+    if dialect == 'mysql':
+        return 'mysqldb'
+    elif dialect == 'postgresql':
+        return 'psycopg2'
+    else:
+        return None
+
+
+@cache
+def get_database_url() -> str | sqlalchemy_url:
+    """Returns a database URL value suitable for passing to SQLAlechemy's ``create_engine`` function. If DATABASE_URL is
+    set in the environment, that string will be used, but this is not preferred as there are problems handling some
+    special characters. Otherwise (and preferably), uses SQLAlchemy's URL factory to produce working connection URL
+    objects in which special character escaping is handled for us.
+
+    :raises ValueError: If a necessary URL component is not configured.
+
+    :return: Either a string or a sqlalchemy.engine.url.URL, depending on configuration.
+    :rtype: str | sqlalchemy_url
+    """
+
+    # If a url is set directly, reluctantly pass that through
+    if 'DATABASE_URL' in os.environ:
+        log.info(
+            'The use of the DATABASE_URL environment variable is discouraged. Instead, use DATABASE_HOST, '
+            'DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_ENGINE, and DATABASE_NAME.'
+        )
+        return os.environ.get('DATABASE_URL')
+
+    # But preferably pull the URL components from environment variables.
+    # These are settings we can safely assume defaults about.
+    db_name = os.environ.get('DATABASE_NAME', 'appointment')
+    dialect = os.environ.get('DATABASE_ENGINE', 'mysql')
+    driver = determine_database_driver(dialect=dialect)
+    port = int(os.environ.get('DATABASE_PORT', '3306'))
+
+    # These settings are secrets and must be set manually.
+    host = os.environ.get('DATABASE_HOST')
+    username = os.environ.get('DATABASE_USERNAME')
+    password = os.environ.get('DATABASE_PASSWORD')
+
+    if not all([db_name, dialect, host, password, port, username]):
+        raise ValueError('Missing one or more database configuration value. Review your environment.')
+
+    # If we've had to compose this from parts, use the SQLAlchemy URL class
+    return sqlalchemy_url(
+        f'{dialect}+{driver}',
+        database=db_name,
+        host=host,
+        password=password,
+        port=port,
+        query={},  # "query" as in "query string" for the URI, a key/value map. Ref: https://docs.sqlalchemy.org/en/21/core/engines.html#sqlalchemy.engine.URL.query
+        username=username,
+    )
+
+
 def normalize_secrets():
     """Normalizes AWS secrets for Appointment"""
-    database_secrets = os.getenv('DATABASE_SECRETS')
 
-    import logging
-    log = logging.getLogger(__name__)
     log.info('Normalizing secrets...')
-    if database_secrets:
-        secrets = json.loads(database_secrets)
-
-        host = secrets['host']
-        port = secrets['port']
-
-        # If port is not already in the host var, then append it to hostname
-        hostname = host
-        if f':{port}' not in host:
-            hostname = f'{hostname}:{port}'
-
-        # Determine a "dialect+driver" scheme
-        dialect = secrets['engine']
-        if dialect == 'mysql':
-            driver = 'mysqldb'
-        elif dialect == 'postgresql':
-            driver = 'psycopg2'
-        else:
-            driver = None
-        proto = f'{dialect}+{driver}' if driver else dialect
-
-        os.environ['DATABASE_URL'] = (
-            f"{proto}://{secrets['username']}:{secrets['password']}@{hostname}/{secrets['dbname']}"
-        )
-
     database_enc_secret = os.getenv('DB_ENC_SECRET')
 
     if database_enc_secret:
@@ -225,5 +266,3 @@ def get_expiry_time_with_grace_period(expiry: int):
     grace_period = max(int(os.getenv('OIDC_EXP_GRACE_PERIOD', 0)), 120)
     expiry += grace_period
     return expiry
-
-

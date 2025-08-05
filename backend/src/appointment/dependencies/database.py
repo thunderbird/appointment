@@ -9,13 +9,14 @@ from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from ..utils import get_database_url
 
 
 _redis_instance: Optional[RedisCluster] = None
 
 
 def get_engine_and_session():
-    database_url = os.getenv('DATABASE_URL')
+    database_url = get_database_url()
     connect_args = {}
 
     if 'sqlite://' in database_url:
