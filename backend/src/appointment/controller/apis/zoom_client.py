@@ -49,8 +49,8 @@ class ZoomClient:
             token['expires_in'] = -100
         elif not expires_at:
             # We shouldn't have to handle this but just in case alert us!
-            sentry_sdk.capture_message("Expires at is missing!")
-        
+            sentry_sdk.capture_message('Expires at is missing!')
+
         return token
 
     def setup(self, subscriber_id=None, token=None):

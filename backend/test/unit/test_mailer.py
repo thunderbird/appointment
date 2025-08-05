@@ -23,11 +23,7 @@ class TestMailer:
             email='fake@example.org',
             date=datetime.datetime.now(),
             duration=30,
-            attachments=[Attachment(
-                mime=('text', 'calendar'),
-                filename='test.ics',
-                data=b''
-            )]
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
         )
         assert mailer.html()
         assert mailer.text()
@@ -48,7 +44,7 @@ class TestMailer:
             to=fake_email,
             duration=30,
             schedule_name='test',
-            lang='en'
+            lang='en',
         )
         assert mailer.html()
         assert mailer.text()

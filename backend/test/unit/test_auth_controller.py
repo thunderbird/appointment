@@ -11,7 +11,7 @@ class TestSignedUrl:
         os.environ['SHORT_BASE_URL'] = 'https://example.org'
 
         short_url = os.getenv('SHORT_BASE_URL')
-        base_url = f'{os.getenv('FRONTEND_URL')}/user'
+        base_url = f'{os.getenv("FRONTEND_URL")}/user'
 
         subscriber = make_basic_subscriber()
 

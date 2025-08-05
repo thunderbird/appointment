@@ -91,9 +91,7 @@ def fxa_process(
 
 @router.post('/zoom-deauthorization')
 def zoom_deauthorization(
-    request: Request,
-    db: Session = Depends(get_db),
-    webhook_payload: dict | None = Depends(get_webhook_auth_zoom)
+    request: Request, db: Session = Depends(get_db), webhook_payload: dict | None = Depends(get_webhook_auth_zoom)
 ):
     if not webhook_payload:
         logging.warning('Invalid zoom webhook event received.')
@@ -101,10 +99,7 @@ def zoom_deauthorization(
 
     user_id = webhook_payload.get('user_id')
 
-    subscriber = repo.external_connection.get_subscriber_by_zoom_user_id(
-        db,
-        user_id
-    )
+    subscriber = repo.external_connection.get_subscriber_by_zoom_user_id(db, user_id)
 
     if not subscriber:
         logging.warning('Zoom webhook event received for non-existent user.')

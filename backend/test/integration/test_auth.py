@@ -67,7 +67,7 @@ class TestAuth:
         assert response.status_code == 401, response.text
 
     def test_permission_check_with_correct_admin_email(self, with_client):
-        os.environ['APP_ADMIN_ALLOW_LIST'] = f"@{os.getenv('TEST_USER_EMAIL').split('@')[1]}"
+        os.environ['APP_ADMIN_ALLOW_LIST'] = f'@{os.getenv("TEST_USER_EMAIL").split("@")[1]}'
 
         response = with_client.post('/permission-check', headers=auth_headers)
         assert response.status_code == 200, response.text
@@ -416,7 +416,7 @@ class TestFXA:
 
         subscriber = make_basic_subscriber(email=FXA_CLIENT_PATCH.get('subscriber_email'))
 
-        mismatch_uid = f"{FXA_CLIENT_PATCH.get('external_connection_type_id')}-not-actually"
+        mismatch_uid = f'{FXA_CLIENT_PATCH.get("external_connection_type_id")}-not-actually'
         make_external_connections(subscriber.id, type=models.ExternalConnectionType.fxa, type_id=mismatch_uid)
 
         monkeypatch.setattr(
@@ -662,16 +662,8 @@ class TestGoogle:
         mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
         mock_token = 'mock_google_token'
         mock_calendars = [
-            {
-                'id': 'primary',
-                'summary': 'Primary Calendar',
-                'backgroundColor': '#4285f4'
-            },
-            {
-                'id': 'work@example.com',
-                'summary': 'Work Calendar',
-                'backgroundColor': '#ea4335'
-            }
+            {'id': 'primary', 'summary': 'Primary Calendar', 'backgroundColor': '#4285f4'},
+            {'id': 'work@example.com', 'summary': 'Work Calendar', 'backgroundColor': '#ea4335'},
         ]
 
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google)
@@ -688,10 +680,7 @@ class TestGoogle:
 
             # Call sync_calendars
             error_occurred = mock_google_client.sync_calendars(
-                db=db,
-                subscriber_id=TEST_USER_ID,
-                token=mock_token,
-                external_connection_id=ec.id
+                db=db, subscriber_id=TEST_USER_ID, token=mock_token, external_connection_id=ec.id
             )
 
             assert error_occurred is False
@@ -727,13 +716,7 @@ class TestGoogle:
 
         mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
         mock_token = 'mock_google_token'
-        mock_calendars = [
-            {
-                'id': 'primary',
-                'summary': 'Primary Calendar',
-                'backgroundColor': '#4285f4'
-            }
-        ]
+        mock_calendars = [{'id': 'primary', 'summary': 'Primary Calendar', 'backgroundColor': '#4285f4'}]
 
         ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google)
 
@@ -747,15 +730,12 @@ class TestGoogle:
             original_update_or_create = repo.calendar.update_or_create
 
             def mock_update_or_create(*args, **kwargs):
-                raise Exception("Database error")
+                raise Exception('Database error')
 
             monkeypatch.setattr(repo.calendar, 'update_or_create', mock_update_or_create)
 
             error_occurred = mock_google_client.sync_calendars(
-                db=db,
-                subscriber_id=TEST_USER_ID,
-                token=mock_token,
-                external_connection_id=ec.id
+                db=db, subscriber_id=TEST_USER_ID, token=mock_token, external_connection_id=ec.id
             )
 
             # Error should be reported
@@ -777,10 +757,7 @@ class TestGoogle:
         first_google_id = 'google_user_123'
         first_google_email = 'user1@gmail.com'
         make_external_connections(
-            subscriber.id,
-            type=models.ExternalConnectionType.google,
-            type_id=first_google_id,
-            name=first_google_email
+            subscriber.id, type=models.ExternalConnectionType.google, type_id=first_google_id, name=first_google_email
         )
 
         # Mock Google client methods
@@ -796,10 +773,7 @@ class TestGoogle:
         # Mock profile data for second Google account
         second_google_id = 'google_user_456'
         second_google_email = 'user2@gmail.com'
-        mock_profile = {
-            'email': second_google_email,
-            'id': second_google_id
-        }
+        mock_profile = {'email': second_google_email, 'id': second_google_id}
 
         def mock_get_credentials(code):
             return mock_creds
@@ -829,9 +803,7 @@ class TestGoogle:
 
         # Call the google_callback endpoint
         response = with_client.get(
-            '/google/callback',
-            params={'code': 'mock_auth_code', 'state': state},
-            follow_redirects=False
+            '/google/callback', params={'code': 'mock_auth_code', 'state': state}, follow_redirects=False
         )
 
         # Should redirect successfully

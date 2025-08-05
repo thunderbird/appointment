@@ -114,9 +114,7 @@ class GoogleClient:
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             request = service.freebusy().query(
                 body=dict(
-                    timeMin=time_min,
-                    timeMax=time_max,
-                    items=[{'id': calendar_id} for calendar_id in calendar_ids]
+                    timeMin=time_min, timeMax=time_max, items=[{'id': calendar_id} for calendar_id in calendar_ids]
                 )
             )
 
@@ -130,8 +128,9 @@ class GoogleClient:
                         reasons = [
                             {
                                 'domain': utils.setup_encryption_engine().encrypt(error.get('domain')),
-                                'reason': error.get('reason')
-                            } for error in errors
+                                'reason': error.get('reason'),
+                            }
+                            for error in errors
                         ]
                         if os.getenv('SENTRY_DSN'):
                             ex = FreeBusyTimeException(reasons)
@@ -144,8 +143,9 @@ class GoogleClient:
                         items += [
                             {
                                 'start': datetime.strptime(entry.get('start'), DATETIMEFMT),
-                                'end': datetime.strptime(entry.get('end'), DATETIMEFMT)
-                            } for entry in busy
+                                'end': datetime.strptime(entry.get('end'), DATETIMEFMT),
+                            }
+                            for entry in busy
                         ]
                 except HttpError as e:
                     logging.warning(f'[google_client.get_free_time] Request Error: {e.status_code}/{e.error_details}')
@@ -154,7 +154,7 @@ class GoogleClient:
         perf_end = time.perf_counter_ns()
 
         # Capture the metric if sentry is enabled
-        print(f"Google FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds")
+        print(f'Google FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds')
         if os.getenv('SENTRY_DSN'):
             sentry_sdk.set_measurement('google_free_busy_time_response', perf_end - perf_start, 'nanosecond')
 

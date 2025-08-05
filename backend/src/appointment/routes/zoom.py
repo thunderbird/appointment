@@ -27,9 +27,11 @@ def zoom_callback_error(is_setup: bool, error: str):
     """Call if you encounter an unrecoverable error with the Zoom callback function"""
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
-        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/setup')
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/connectedAccounts?error={error}")
+    return RedirectResponse(
+        f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/settings/connectedAccounts?error={error}'
+    )
 
 
 @router.get('/ftue-status')
@@ -116,9 +118,9 @@ def zoom_callback(
 
     # Redirect non-setup subscribers back to the setup page
     if not subscriber.is_setup:
-        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/setup')
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/connectedAccounts")
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/settings/connectedAccounts')
 
 
 @router.post('/disconnect')

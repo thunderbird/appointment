@@ -437,4 +437,3 @@ class TestCaldav:
         assert cal.url == os.getenv('CALDAV_TEST_CALENDAR_URL')
         assert cal.user == os.getenv('CALDAV_TEST_USER')
         assert cal.password == ''
-

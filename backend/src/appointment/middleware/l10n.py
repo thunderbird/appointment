@@ -47,12 +47,10 @@ class L10n(Plugin):
 
         return parsed_locales
 
-
     def get_fluent_with_header(self, accept_languages):
         supported_locales = self.parse_accept_language(accept_languages)
 
         return get_fluent(supported_locales)
-
 
     async def process_request(self, request: Request):
         return self.get_fluent_with_header(request.headers.get('accept-language', FALLBACK_LOCALE))

@@ -39,18 +39,13 @@ def get_all_subscriber(
     return schemas.SubscriberAdminOut(
         items=subscribers,
         page_meta=schemas.Paginator(
-            page=data.page,
-            per_page=per_page,
-            count=len(subscribers),
-            total_pages=math.ceil(total_count / per_page)
+            page=data.page, per_page=per_page, count=len(subscribers), total_pages=math.ceil(total_count / per_page)
         ),
     )
 
 
 @router.put('/disable/{id}')
-def disable_subscriber(
-    id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)
-):
+def disable_subscriber(id: str, db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_admin_subscriber)):
     """endpoint to mark a subscriber deleted by id, needs admin permissions"""
     subscriber_to_delete = repo.subscriber.get(db, int(id))
     if not subscriber_to_delete:

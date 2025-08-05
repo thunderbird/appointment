@@ -81,6 +81,7 @@ class TestTools:
             mock_google_client = Mock()
 
             from appointment.controller.calendar import GoogleConnector
+
             monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
             monkeypatch.setattr(
                 GoogleConnector, 'get_busy_time', lambda self, *a, **kw: mock_connector_instance.get_busy_time(*a, **kw)
@@ -92,7 +93,7 @@ class TestTools:
                 subscriber=subscriber,
                 google_client=mock_google_client,
                 db=db,
-                redis=None
+                redis=None,
             )
 
         # Should have busy time from both calendars
@@ -113,30 +114,25 @@ class TestTools:
         with with_db() as db:
             # Create slots with different booking statuses
             slots = [
-                models.Slot(
-                    schedule=schedule,
-                    start=now,
-                    duration=30,
-                    booking_status=models.BookingStatus.declined
-                ),
+                models.Slot(schedule=schedule, start=now, duration=30, booking_status=models.BookingStatus.declined),
                 models.Slot(
                     schedule=schedule,
                     start=now + timedelta(minutes=30),
                     duration=30,
-                    booking_status=models.BookingStatus.cancelled
+                    booking_status=models.BookingStatus.cancelled,
                 ),
                 models.Slot(
                     schedule=schedule,
                     start=now + timedelta(minutes=60),
                     duration=30,
-                    booking_status=models.BookingStatus.requested
+                    booking_status=models.BookingStatus.requested,
                 ),
                 models.Slot(
                     schedule=schedule,
                     start=now + timedelta(minutes=90),
                     duration=30,
-                    booking_status=models.BookingStatus.booked
-                )
+                    booking_status=models.BookingStatus.booked,
+                ),
             ]
 
             # Add slots to the database
@@ -154,6 +150,7 @@ class TestTools:
             mock_google_client = Mock()
 
             from appointment.controller.calendar import GoogleConnector
+
             monkeypatch.setattr(GoogleConnector, '__init__', lambda self, *a, **kw: None)
             monkeypatch.setattr(
                 GoogleConnector, 'get_busy_time', lambda self, *a, **kw: mock_connector_instance.get_busy_time(*a, **kw)
@@ -165,7 +162,7 @@ class TestTools:
                 subscriber=subscriber,
                 google_client=mock_google_client,
                 db=db,
-                redis=None
+                redis=None,
             )
 
         # Should only include requested and booked slots
@@ -175,17 +172,13 @@ class TestTools:
         event_times = sorted([event.start for event in events])
         assert event_times == [
             now + timedelta(minutes=60),  # requested slot
-            now + timedelta(minutes=90)   # booked slot
+            now + timedelta(minutes=90),  # booked slot
         ]
+
 
 class TestVCreate:
     def test_meeting_url_in_location(
-        self,
-        with_db,
-        make_google_calendar,
-        make_appointment,
-        make_appointment_slot,
-        make_pro_subscriber
+        self, with_db, make_google_calendar, make_appointment, make_appointment_slot, make_pro_subscriber
     ):
         subscriber = make_pro_subscriber()
         calendar = make_google_calendar(subscriber_id=subscriber.id)

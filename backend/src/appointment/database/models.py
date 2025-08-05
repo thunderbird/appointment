@@ -44,9 +44,9 @@ class BookingStatus(enum.Enum):
     none = 1  # slot status doesn't matter, because the parent object holds the state
     requested = 2  # booking slot was requested
     booked = 3  # booking slot was assigned
-    declined = 4 # booking slot was declined
-    cancelled = 5 # booking slot was cancelled
-    modified = 6 # booking slot was modified
+    declined = 4  # booking slot was declined
+    cancelled = 5  # booking slot was cancelled
+    modified = 6  # booking slot was modified
 
 
 class LocationType(enum.Enum):
@@ -179,18 +179,11 @@ class Subscriber(HasSoftDelete, Base):
 
     # FIXME: Invite will be deleted if either the owner or the invited subscriber is deleted.
     invite: Mapped['Invite'] = relationship(
-        'Invite',
-        cascade='all,delete',
-        back_populates='subscriber',
-        uselist=False,
-        foreign_keys='Invite.subscriber_id'
+        'Invite', cascade='all,delete', back_populates='subscriber', uselist=False, foreign_keys='Invite.subscriber_id'
     )
 
     owned_invites: Mapped[list['Invite']] = relationship(
-        'Invite',
-        cascade='all,delete',
-        back_populates='owner',
-        foreign_keys='[Invite.owner_id]'
+        'Invite', cascade='all,delete', back_populates='owner', foreign_keys='[Invite.owner_id]'
     )
 
     def get_external_connection(
@@ -283,10 +276,7 @@ class Appointment(Base):
 
     calendar: Mapped[Calendar] = relationship('Calendar', back_populates='appointments')
     slots: Mapped[list['Slot']] = relationship(
-        'Slot',
-        cascade='all,delete',
-        back_populates='appointment',
-        lazy='joined'
+        'Slot', cascade='all,delete', back_populates='appointment', lazy='joined'
     )
 
     def __str__(self):
@@ -351,6 +341,7 @@ class Schedule(Base):
     re-create that date we'll get the correct utc offset. Since the *_local properties return a Time object and not
     Date/DateTime we can safely ignore any unintended date matching.
     """
+
     __tablename__ = 'schedules'
 
     id: int = Column(Integer, primary_key=True, index=True)
@@ -483,24 +474,15 @@ class Invite(Base):
     status = Column(Enum(InviteStatus), index=True)
 
     owner: Mapped['Subscriber'] = relationship(
-        'Subscriber',
-        back_populates='invite',
-        single_parent=True,
-        foreign_keys=[owner_id]
+        'Subscriber', back_populates='invite', single_parent=True, foreign_keys=[owner_id]
     )
 
     subscriber: Mapped['Subscriber'] = relationship(
-        'Subscriber',
-        back_populates='invite',
-        single_parent=True,
-        foreign_keys=[subscriber_id]
+        'Subscriber', back_populates='invite', single_parent=True, foreign_keys=[subscriber_id]
     )
 
     waiting_list: Mapped['WaitingList'] = relationship(
-        'WaitingList',
-        cascade='all,delete',
-        back_populates='invite',
-        uselist=False
+        'WaitingList', cascade='all,delete', back_populates='invite', uselist=False
     )
 
     @property

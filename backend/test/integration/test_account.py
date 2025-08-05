@@ -14,9 +14,7 @@ class TestAccount:
         assert google_ec.type_id == type_id
 
         # now get the list of our external connections and verify
-        response = with_client.get(
-            '/account/external-connections', headers=auth_headers
-        )
+        response = with_client.get('/account/external-connections', headers=auth_headers)
 
         assert response.status_code == 200, response.text
         ext_connections = response.json()
@@ -32,15 +30,13 @@ class TestAccount:
     def test_account_available_emails(self, with_client, make_external_connections):
         # currently we have one email available
         test_user_email = os.environ.get('TEST_USER_EMAIL')
-        user_email_list = [ test_user_email ]
+        user_email_list = [test_user_email]
 
         # get available emails and confirm
-        response = with_client.get(
-            '/account/available-emails', headers=auth_headers
-        )
+        response = with_client.get('/account/available-emails', headers=auth_headers)
 
         assert response.status_code == 200, response.text
-        email_list_ret = response.json()    
+        email_list_ret = response.json()
         assert email_list_ret == user_email_list
 
         # now add another email/name via a google connection
@@ -49,9 +45,7 @@ class TestAccount:
         user_email_list.append(google_ec.name)
 
         # get available emails again and confirm new one was added
-        response = with_client.get(
-            '/account/available-emails', headers=auth_headers
-        )
+        response = with_client.get('/account/available-emails', headers=auth_headers)
 
         assert response.status_code == 200, response.text
         email_list_ret = response.json()

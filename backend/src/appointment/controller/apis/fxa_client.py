@@ -97,7 +97,7 @@ class FxaClient:
         return email.endswith(tuple(allow_list.split(',')))
 
     def get_redirect_url(self, db, state, email):
-        utm_campaign = f"{self.ENTRYPOINT}_{os.getenv('APP_ENV')}"
+        utm_campaign = f'{self.ENTRYPOINT}_{os.getenv("APP_ENV")}'
         utm_source = 'login'
 
         try:

@@ -1,4 +1,3 @@
-
 from ..database import models
 from alembic.runtime import migration
 
@@ -18,7 +17,7 @@ def run():
 
     # The .ini template has the sqlalchemy.url option commented out.
     alembic_cfg = Config('./alembic.ini')
-    
+
     # If DATABASE_URL is set, this will return its value as a string, otherwise as the (preferred) URL construction
     db_url = get_database_url()
 

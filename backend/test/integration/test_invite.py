@@ -5,6 +5,7 @@ from defines import auth_headers, TEST_USER_ID
 from appointment.database import repo
 from appointment.database.models import InviteStatus
 
+
 class TestInvite:
     today = today = datetime.today().date()
 
@@ -135,7 +136,7 @@ class TestInvite:
 
         invites_per_page = len(invites)
 
-        for page in range(1, total_estimated_pages+1):
+        for page in range(1, total_estimated_pages + 1):
             response = with_client.post(
                 '/invite',
                 json={'page': page, 'per_page': per_page},
@@ -213,7 +214,6 @@ class TestInvite:
         assert response.status_code == 403, response.text
         data = response.json()
         assert data['detail']['id'] == 'INVITE_CODE_NOT_AVAILABLE'
-
 
     def test_revoke_invite_not_found(self, with_db, with_client, make_invite):
         """Ensures revoking an invite code fails if code is invalid"""

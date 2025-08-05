@@ -41,12 +41,8 @@ async def get_id(
         distinct_id = subscriber.unique_hash
 
     # Set a display id
-    posthog.set(distinct_id=distinct_id, properties={
-        'display_id': distinct_id
-    })
-    posthog.set_once(distinct_id=distinct_id, properties={
-        'initial_service': APP_NAME_SHORT
-    })
+    posthog.set(distinct_id=distinct_id, properties={'display_id': distinct_id})
+    posthog.set_once(distinct_id=distinct_id, properties={'initial_service': APP_NAME_SHORT})
 
     return {'id': distinct_id}
 
@@ -87,20 +83,19 @@ def page_load(
 
     # We only want to set user info if they're logged in, because most of this info isn't set yet...
     if subscriber:
-        posthog.set(distinct_id=distinct_id, properties={
-            'apmt.user.locale': data.locale,
-            'apmt.user.theme': data.theme,
-            'apmt.user.screen': data.resolution,
-            'apmt.user.ftue_max_level': subscriber.ftue_level
-        })
+        posthog.set(
+            distinct_id=distinct_id,
+            properties={
+                'apmt.user.locale': data.locale,
+                'apmt.user.theme': data.theme,
+                'apmt.user.screen': data.resolution,
+                'apmt.user.ftue_max_level': subscriber.ftue_level,
+            },
+        )
 
     # Set a display id
-    posthog.set(distinct_id=distinct_id, properties={
-        'display_id': distinct_id
-    })
-    posthog.set_once(distinct_id=distinct_id, properties={
-        'initial_service': APP_NAME_SHORT
-    })
+    posthog.set(distinct_id=distinct_id, properties={'display_id': distinct_id})
+    posthog.set_once(distinct_id=distinct_id, properties={'initial_service': APP_NAME_SHORT})
 
     posthog.capture(distinct_id=distinct_id, event='apmt.page.loaded', properties=payload)
     return {'id': distinct_id}
@@ -113,17 +108,20 @@ def ftue_step(
     posthog: Posthog | None = Depends(get_posthog),
     subscriber: Subscriber | None = Depends(get_subscriber),
 ):
-
     current_url = get_api_url(request)
     payload = {
         'apmt.ftue.step.name': data.step_name,
         'apmt.ftue.step.level': data.step_level,
-        '$current_url': current_url
+        '$current_url': current_url,
     }
     if posthog and subscriber:
         posthog.set(distinct_id=subscriber.unique_hash, properties=payload)
-        posthog.capture(distinct_id=subscriber.unique_hash, event='apmt.ftue.step', properties={
-            'step_name': data.step_name,
-            'step_level': data.step_level,
-            'service': APP_NAME_SHORT,
-        })
+        posthog.capture(
+            distinct_id=subscriber.unique_hash,
+            event='apmt.ftue.step',
+            properties={
+                'step_name': data.step_name,
+                'step_level': data.step_level,
+                'service': APP_NAME_SHORT,
+            },
+        )

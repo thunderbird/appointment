@@ -83,6 +83,7 @@ class TestAuthDependency:
                 # Since the token expires in less time than the max cache it should be about an hour instead of the day
                 # Exact value may differ due to execution time...
                 assert str(ex) < os.getenv('REDIS_OIDC_TOKEN_INTROSPECT_EXPIRE_SECONDS')
+
             monkeypatch.setattr(redis_mock, 'set', redis_mock_set_new)
 
             # Test a successful return
