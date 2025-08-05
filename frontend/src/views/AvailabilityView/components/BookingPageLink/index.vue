@@ -78,7 +78,7 @@ export default {
   >
     {{ t('label.customizeYourLink') }}:
     <button @click="openRefreshLinkModal">
-      <icon-refresh size="20" />
+      <icon-refresh size="20" :aria-label="t('label.refreshLink')" />
     </button>
   </text-input>
 
