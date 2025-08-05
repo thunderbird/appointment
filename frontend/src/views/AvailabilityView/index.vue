@@ -198,6 +198,7 @@ section {
   border-radius: 8px;
   padding: 1.5rem;
   align-self: flex-start;
+  background-color: var(--colour-neutral-lower);
 }
 
 @media (--md) {
