@@ -1,25 +1,47 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput } from '@thunderbirdops/services-ui';
+import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput, LinkButton } from '@thunderbirdops/services-ui';
 import { dayjsKey, isoWeekdaysKey } from '@/keys';
 import { useUserStore } from '@/stores/user-store';
+import { useAvailabilityStore } from '@/stores/availability-store';
 import { SelectOption } from '@/models';
 
 import AvailabilityCalendarSelect from './components/AvailabilityCalendarSelect.vue';
 import AvailabilitySelect from './components/AvailabilitySelect.vue';
-import RadioGroupPill from '../RadioGroupPill.vue';
+import AvailabilityMinimumNoticePill from './components/AvailabilityMinimumNoticePill.vue';
+import AvailabilityBookingWindowPill from './components/AvailabilityBookingWindowPill.vue';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 
 const userStore = useUserStore();
+const availabilityStore = useAvailabilityStore();
 
-const isBookable = ref(false);
-const useCustomAvailabilities = ref(false);
-const minimumNotice = ref("instant");
-const bookingWindow = ref("7_days");
+const { currentState } = storeToRefs(availabilityStore);
+
+const isBookable = computed({
+  get: () => currentState.value.active,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { active: value } })
+  }
+})
+
+const requiresBookingConfirmation = computed({
+  get: () => currentState.value.booking_confirmation,
+  set: (value) => {
+    currentState.value.booking_confirmation = value
+  }
+})
+
+const useCustomAvailabilities = computed({
+  get: () => currentState.value.use_custom_availabilities,
+  set: (value) => {
+    currentState.value.use_custom_availabilities = value
+  }
+})
 
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
@@ -51,7 +73,12 @@ export default {
     <!-- Time zone -->
     <div>
       <h3>{{ t('label.timeZone') }}:</h3>
-      <p>{{ userStore.data.settings.timezone ?? dj.tz.guess() }}</p>
+      <div class="user-timezone-container">
+        <p>{{ userStore.data.settings.timezone ?? dj.tz.guess() }}</p>
+        <router-link :to="{ name: 'settings' }">
+          <link-button>{{ t('label.edit') }}</link-button>
+        </router-link>
+      </div>
     </div>
 
     <!-- Booking to (calendars) -->
@@ -64,6 +91,7 @@ export default {
       :name="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
       :label="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
       data-testid="availability-automatically-confirm-checkbox"
+      v-model="requiresBookingConfirmation"
     />
 
     <hr />
@@ -118,32 +146,10 @@ export default {
     </template>
 
     <!-- Minimum notice -->
-    <radio-group-pill
-      v-model="minimumNotice"
-      name="minimum-notice"
-      :legend="t('label.minimumNotice')"
-      :options="[
-        { label: 'Instant', value: 'instant' },
-        { label: '12 Hrs', value: '12_hours' },
-        { label: '2 Days', value: '2_days' },
-        { label: '3 Days', value: '3_days' },
-        { label: '4 Days', value: '4_days' },
-        { label: '5 Days', value: '5_days' },
-      ]"
-    />
+    <availability-minimum-notice-pill />
 
     <!-- Booking window -->
-    <radio-group-pill
-      v-model="bookingWindow"
-      name="booking-window"
-      :legend="t('label.bookingWindow')"
-      :options="[
-        { label: '7 Days', value: '7_days' },
-        { label: '14 Days', value: '14_days' },
-        { label: '21 Days', value: '21_days' },
-        { label: 'A Month', value: 'a_month' },
-      ]"
-    />
+    <availability-booking-window-pill />
   </div>
 </template>
 
@@ -177,6 +183,12 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  .user-timezone-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
 
   .availability-times-container {
     display: flex;

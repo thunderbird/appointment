@@ -110,6 +110,7 @@ export default {
       type="text"
       name="virtualMeetingLink"
       v-model="virtualMeetingLink"
+      placeholder="https://meet.jit.si/room"
     >
       {{ t('label.virtualMeetingLink') }}:
     </text-input>

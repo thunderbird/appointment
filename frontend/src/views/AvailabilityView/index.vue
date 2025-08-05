@@ -69,7 +69,7 @@ export default {
 @import '@/assets/styles/custom-media.pcss';
 
 .page-title {
-  margin-bottom: 2rem;
+  margin-block-end: 2rem;
   font-size: 1.5rem;
 }
 
@@ -77,6 +77,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
+  margin-block-end: 2rem;
 }
 
 .page-content-right {
@@ -98,6 +99,7 @@ export default {
   margin: 0 0.5rem 0.5rem 0.5rem;
   border-radius: 8px;
   background-color: var(--colour-neutral-lower);
+  z-index: 99;
 }
 
 section {

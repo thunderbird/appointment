@@ -4,10 +4,10 @@ import { SelectOption } from '@/models';
 const props = defineProps<{
   legend: string;
   name: string;
-  options: SelectOption<string>[];
+  options: SelectOption<string | number>[];
 }>()
 
-const model = defineModel<string>();
+const model = defineModel<string | number>();
 </script>
 
 <template>
@@ -67,6 +67,7 @@ legend {
   label {
     font-size: 0.75rem;
     cursor: pointer;
+    text-transform: capitalize;
   }
 
   &:not(:last-child) {
