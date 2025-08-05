@@ -140,7 +140,7 @@ def send_invite_account_email(date, to, lang):
 
 def send_confirm_email(to, confirm_token, decline_token):
     try:
-        base_url = f"{os.getenv('FRONTEND_URL')}/waiting-list"
+        base_url = f'{os.getenv("FRONTEND_URL")}/waiting-list'
         confirm_url = f'{base_url}/{confirm_token}'
         decline_url = f'{base_url}/{decline_token}'
 

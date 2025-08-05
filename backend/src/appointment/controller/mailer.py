@@ -2,6 +2,7 @@
 
 Handle outgoing emails.
 """
+
 import datetime
 import logging
 import os
@@ -40,7 +41,7 @@ def get_template(template_name) -> 'jinja2.Template':
 
 
 class Attachment:
-    def __init__(self, mime: tuple[str,str], filename: str, data: str|bytes):
+    def __init__(self, mime: tuple[str, str], filename: str, data: str | bytes):
         self.mime_main = mime[0]
         self.mime_sub = mime[1]
         self.filename = filename
@@ -114,16 +115,10 @@ class Mailer:
         for a in self._attachments():
             # Handle ics files differently than inline images
             if a.mime_main == 'text' and a.mime_sub == 'calendar':
-                message.add_attachment(
-                    a.data,
-                    maintype=a.mime_main,
-                    subtype=a.mime_sub,
-                    filename=a.filename
-                )
+                message.add_attachment(a.data, maintype=a.mime_main, subtype=a.mime_sub, filename=a.filename)
                 # Fix the header of the attachment
                 message.get_payload()[-1].replace_header(
-                    'Content-Type',
-                    f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method={self.method}'
+                    'Content-Type', f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method={self.method}'
                 )
             else:
                 # Attach it to the html payload
@@ -180,7 +175,7 @@ class Mailer:
 class BaseBookingMail(Mailer):
     def __init__(self, name, email, date, duration, *args, **kwargs):
         """Base class for emails with name, email, and event information
-           Can have a different locale by providing a lang argument
+        Can have a different locale by providing a lang argument
         """
         self.name = name
         self.email = email
@@ -235,8 +230,8 @@ class BaseBookingMail(Mailer):
 class InvitationMail(BaseBookingMail):
     def __init__(self, *args, **kwargs):
         """Init Mailer with invitation/booking-accepted specific defaults
-           To: Bookee
-           Reply-To: Event owner
+        To: Bookee
+        Reply-To: Event owner
         """
         default_kwargs = {
             'subject': l10n('invite-mail-subject'),
@@ -263,7 +258,7 @@ class InvitationMail(BaseBookingMail):
 class ZoomMeetingFailedMail(Mailer):
     def __init__(self, appointment_title, *args, **kwargs):
         """Init Mailer with zoom-meeting-failed specific defaults
-           To: Event owner
+        To: Event owner
         """
         default_kwargs = {'subject': l10n('zoom-invite-failed-subject')}
         super(ZoomMeetingFailedMail, self).__init__(*args, **default_kwargs, **kwargs)
@@ -283,14 +278,13 @@ class ZoomMeetingFailedMail(Mailer):
 class ConfirmationMail(BaseBookingMail):
     def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
         """Init Mailer with action-required:confirm/deny specific defaults
-           To: Event owner
+        To: Event owner
         """
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
         self.schedule_name = schedule_name
         default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, kwargs['lang'])}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
-
 
     def text(self):
         return l10n(
@@ -329,8 +323,8 @@ class ConfirmationMail(BaseBookingMail):
 class CancelMail(Mailer):
     def __init__(self, owner_name, date, *args, **kwargs):
         """Init Mailer with cancel specific defaults
-           To: Bookee
-           Reply-To: Event owner
+        To: Bookee
+        Reply-To: Event owner
         """
         self.owner_name = owner_name
         self.date = date
@@ -357,8 +351,8 @@ class CancelMail(Mailer):
 class RejectionMail(Mailer):
     def __init__(self, owner_name, date, *args, **kwargs):
         """Init Mailer with rejection specific defaults
-           To: Bookee
-           Reply-To: Event owner
+        To: Bookee
+        Reply-To: Event owner
         """
         self.owner_name = owner_name
         self.date = date
@@ -380,7 +374,7 @@ class RejectionMail(Mailer):
 class PendingRequestMail(Mailer):
     def __init__(self, owner_name, date, *args, **kwargs):
         """Init Mailer with pending-request specific defaults
-           To: Bookee
+        To: Bookee
         """
         self.owner_name = owner_name
         self.date = date
@@ -401,20 +395,14 @@ class PendingRequestMail(Mailer):
 class NewBookingMail(BaseBookingMail):
     def __init__(self, name, email, date, duration, schedule_name, *args, **kwargs):
         """Init Mailer with new-booking specific defaults
-           To: Event owner
-           Reply-To: Bookee
+        To: Event owner
+        Reply-To: Bookee
         """
         self.schedule_name = schedule_name
         lang = kwargs['lang'] if 'lang' in kwargs else None
         default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang)}
         super(NewBookingMail, self).__init__(
-            name=name,
-            email=email,
-            date=date,
-            duration=duration,
-            *args,
-            **default_kwargs,
-            **kwargs
+            name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs
         )
         self.reply_to = email
 
@@ -447,8 +435,8 @@ class NewBookingMail(BaseBookingMail):
 class SupportRequestMail(Mailer):
     def __init__(self, requestee_name, requestee_email, topic, details, *args, **kwargs):
         """Init Mailer with support specific defaults
-           To: Support
-           Reply-To: Requestee
+        To: Support
+        Reply-To: Requestee
         """
         self.requestee_name = requestee_name
         self.requestee_email = requestee_email
@@ -456,10 +444,7 @@ class SupportRequestMail(Mailer):
         self.details = details
         default_kwargs = {'subject': l10n('support-mail-subject', {'topic': topic})}
         super(SupportRequestMail, self).__init__(
-            os.getenv('SUPPORT_EMAIL', 'help@tb.net'),
-            *args,
-            **default_kwargs,
-            **kwargs
+            os.getenv('SUPPORT_EMAIL', 'help@tb.net'), *args, **default_kwargs, **kwargs
         )
         self.reply_to = requestee_email
 

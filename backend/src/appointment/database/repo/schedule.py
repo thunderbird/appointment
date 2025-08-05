@@ -2,6 +2,7 @@
 
 Repository providing CRUD functions for schedule database models.
 """
+
 import uuid
 
 from sqlalchemy.orm import Session
@@ -31,11 +32,13 @@ def get_by_subscriber(db: Session, subscriber_id: int) -> list[models.Schedule]:
 
 def get_by_slug(db: Session, slug: str, subscriber_id: int) -> models.Schedule | None:
     """Get schedule by slug"""
-    return (db.query(models.Schedule)
-            .filter(models.Schedule.slug == slug)
-            .join(models.Schedule.calendar)
-            .filter(models.Calendar.owner_id == subscriber_id)
-            .first())
+    return (
+        db.query(models.Schedule)
+        .filter(models.Schedule.slug == slug)
+        .join(models.Schedule.calendar)
+        .filter(models.Calendar.owner_id == subscriber_id)
+        .first()
+    )
 
 
 def get(db: Session, schedule_id: int):
@@ -95,23 +98,29 @@ def all_availability_is_valid(schedule: schemas.ScheduleValidationIn):
 
     # Make sure, that the availabilities are sorted by weekday AND by start time. This is important for checking
     # validity of times of adjacent availabilities at the same day
-    for i, a in enumerate(sorted(schedule.availabilities, key = lambda x: (x.day_of_week.value, x.start_time))):
+    for i, a in enumerate(sorted(schedule.availabilities, key=lambda x: (x.day_of_week.value, x.start_time))):
         # Check valid times (start time before end time) and duration (end time at least x minutes after start)
         if not utils.is_valid_time_range(a.start_time, a.end_time, schedule.slot_duration):
             return False
         # If a previous slot exists on that day, fail if the times overlap
-        if (i > 0 and a.day_of_week == schedule.availabilities[i-1].day_of_week
-            and not utils.is_valid_time_range(schedule.availabilities[i-1].end_time, a.start_time)):
+        if (
+            i > 0
+            and a.day_of_week == schedule.availabilities[i - 1].day_of_week
+            and not utils.is_valid_time_range(schedule.availabilities[i - 1].end_time, a.start_time)
+        ):
             return False
         # If a next slot exists on that day, fail if the times overlap
-        if (i < size-1 and a.day_of_week == schedule.availabilities[i+1].day_of_week
-            and not utils.is_valid_time_range(a.end_time, schedule.availabilities[i+1].start_time)):
+        if (
+            i < size - 1
+            and a.day_of_week == schedule.availabilities[i + 1].day_of_week
+            and not utils.is_valid_time_range(a.end_time, schedule.availabilities[i + 1].start_time)
+        ):
             return False
 
     return True
 
 
-def generate_slug(db: Session, schedule_id: int) -> str|None:
+def generate_slug(db: Session, schedule_id: int) -> str | None:
     schedule = repo.schedule.get(db, schedule_id)
 
     if schedule.slug:

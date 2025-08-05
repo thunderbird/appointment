@@ -26,7 +26,7 @@ def is_owned(db: Session, calendar_id: int, subscriber_id: int):
     )
 
 
-def get(db: Session, calendar_id: int) -> models.Calendar|None:
+def get(db: Session, calendar_id: int) -> models.Calendar | None:
     """retrieve calendar by id"""
     return db.get(models.Calendar, calendar_id)
 
@@ -36,7 +36,7 @@ def is_connected(db: Session, calendar_id: int):
     return get(db, calendar_id).connected
 
 
-def get_by_url(db: Session, url: str) -> models.Calendar|None:
+def get_by_url(db: Session, url: str) -> models.Calendar | None:
     """retrieve calendar by calendar url"""
     return db.query(models.Calendar).filter(models.Calendar.url == url).first()
 
@@ -71,10 +71,8 @@ def create(
 
 
 def update_by_calendar(
-    db: Session,
-    calendar: schemas.CalendarConnection,
-    db_calendar: models.Calendar
-) -> models.Calendar|None:
+    db: Session, calendar: schemas.CalendarConnection, db_calendar: models.Calendar
+) -> models.Calendar | None:
     """Update a calendar from the database with calendar data."""
 
     # list of all attributes that must never be updated
@@ -161,7 +159,7 @@ def delete_by_subscriber_and_provider(
     subscriber_id: int,
     provider: models.CalendarProvider,
     user: Optional[str] = None,
-    external_connection_id: Optional[int] = None
+    external_connection_id: Optional[int] = None,
 ):
     """Delete all subscriber's calendar by a provider"""
     calendars = get_by_subscriber(db, subscriber_id=subscriber_id)

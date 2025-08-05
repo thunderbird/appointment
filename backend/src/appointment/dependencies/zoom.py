@@ -47,7 +47,7 @@ async def get_webhook_auth(request: Request):
     # Body is encoded in bytes so we'll need to decode it and re-encode it...
     body = await request.body()
     key = bytes(key, 'UTF-8')
-    message = bytes(f'v0:{signature_timestamp}:{body.decode('UTF-8')}', 'UTF-8')
+    message = bytes(f'v0:{signature_timestamp}:{body.decode("UTF-8")}', 'UTF-8')
     hash = hmac.new(key, message, hashlib.sha256).hexdigest()
     hash = f'v0={hash}'
 

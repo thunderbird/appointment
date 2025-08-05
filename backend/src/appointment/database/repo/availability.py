@@ -57,9 +57,17 @@ def sync_multiple(db: Session, availabilities: list[schemas.AvailabilityBase], s
     # Delete all records that were removed from the availability set
     db_schedule = repo.schedule.get(db, schedule_id)
     for record in db_schedule.availabilities:
-        if (record.day_of_week not in [a.day_of_week for a in availabilities] or len(
-            [a for a in availabilities if (a.day_of_week == record.day_of_week and a.start_time == record.start_time)]
-        ) == 0):
+        if (
+            record.day_of_week not in [a.day_of_week for a in availabilities]
+            or len(
+                [
+                    a
+                    for a in availabilities
+                    if (a.day_of_week == record.day_of_week and a.start_time == record.start_time)
+                ]
+            )
+            == 0
+        ):
             delete(db, record.id)
 
 

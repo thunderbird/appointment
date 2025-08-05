@@ -24,10 +24,7 @@ SESSION_OAUTH_SUBSCRIBER_ID = 'google_oauth_subscriber_id'
 
 
 @router.get('/ftue-status')
-def google_auth_status(
-    request: Request,
-    subscriber: Subscriber = Depends(get_subscriber)
-):
+def google_auth_status(request: Request, subscriber: Subscriber = Depends(get_subscriber)):
     """Checks if oauth flow has started but not finished, if so raises an error."""
     same_subscriber = subscriber.id == request.session.get(SESSION_OAUTH_SUBSCRIBER_ID)
     in_progress = request.session.get(SESSION_OAUTH_STATE, False) and same_subscriber
@@ -138,18 +135,18 @@ def google_callback(
 
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
-        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/setup')
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar")
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/settings/calendar')
 
 
 def google_callback_error(is_setup: bool, error: str):
     """Call if you encounter an unrecoverable error with the Google callback function"""
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
-        return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/setup")
+        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/setup')
 
-    return RedirectResponse(f"{os.getenv('FRONTEND_URL', 'http://localhost:8080')}/settings/calendar?error={error}")
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/settings/calendar?error={error}')
 
 
 @router.post('/disconnect')

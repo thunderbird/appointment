@@ -31,7 +31,7 @@ class TestSchedule:
             'farthest_booking': 20160,
             'weekdays': [1, 2, 3, 4, 5],
             'slot_duration': 30,
-            'timezone': 'America/Vancouver'
+            'timezone': 'America/Vancouver',
         }
 
     def test_create_schedule_on_connected_calendar(self, with_client, make_caldav_calendar, schedule_input):
@@ -259,7 +259,7 @@ class TestSchedule:
                 'earliest_booking': 1000,
                 'farthest_booking': 20000,
                 'weekdays': [2, 4, 6],
-                "use_custom_availabilities": True,
+                'use_custom_availabilities': True,
                 'availabilities': [
                     {
                         'day_of_week': 2,
@@ -311,7 +311,7 @@ class TestSchedule:
                 'earliest_booking': 1000,
                 'farthest_booking': 20000,
                 'weekdays': [4],
-                "use_custom_availabilities": True,
+                'use_custom_availabilities': True,
                 'availabilities': [
                     {
                         'day_of_week': 4,
@@ -364,7 +364,7 @@ class TestSchedule:
                 'earliest_booking': 1000,
                 'farthest_booking': 20000,
                 'weekdays': [4],
-                "use_custom_availabilities": True,
+                'use_custom_availabilities': True,
                 'availabilities': [
                     {
                         'day_of_week': 4,
@@ -403,7 +403,7 @@ class TestSchedule:
                 'earliest_booking': 1000,
                 'farthest_booking': 20000,
                 'weekdays': [4],
-                "use_custom_availabilities": True,
+                'use_custom_availabilities': True,
                 'availabilities': [
                     {
                         'day_of_week': 4,
@@ -436,7 +436,7 @@ class TestSchedule:
                 'earliest_booking': 1000,
                 'farthest_booking': 20000,
                 'weekdays': [4],
-                "use_custom_availabilities": True,
+                'use_custom_availabilities': True,
                 'availabilities': [
                     {
                         'day_of_week': 4,
@@ -728,7 +728,7 @@ class TestSchedule:
             @staticmethod
             def get_busy_time(self, calendar_ids, start, end):
                 return []
-            
+
             @staticmethod
             def bust_cached_events(self, all_calendars=False):
                 pass
@@ -1239,6 +1239,7 @@ class TestRequestScheduleAvailability:
             assert email_tasks.send_invite_email in send_invite_email_call[0]
             assert email_tasks.send_new_booking_email in send_new_booking_email_call[0]
 
+
 class TestDecideScheduleAvailabilitySlot:
     start_date = datetime.now() - timedelta(days=4)
     start_date = start_date.date()
@@ -1321,7 +1322,6 @@ class TestDecideScheduleAvailabilitySlot:
         )
 
         assert response.status_code == 404, response.text
-
 
     def test_deny(
         self,

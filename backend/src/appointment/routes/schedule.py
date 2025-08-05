@@ -167,7 +167,7 @@ def update_schedule(
     # If slug isn't provided, make it null in db
     if not schedule.slug:
         schedule.slug = None
-    
+
     # Check valid custom availability
     if schedule.use_custom_availabilities and not repo.schedule.all_availability_is_valid(schedule):
         raise validation.InvalidAvailabilityException()
@@ -348,7 +348,7 @@ def request_schedule_availability_slot(
     attendee = repo.slot.add_attendee_to_slot(db, slot.id, s_a.attendee)
 
     # Create a pending appointment
-    prefix = f'{l10n('event-hold-prefix')} ' if schedule.booking_confirmation else ''
+    prefix = f'{l10n("event-hold-prefix")} ' if schedule.booking_confirmation else ''
     title = Tools.default_event_title(slot, subscriber, prefix)
     status = models.AppointmentStatus.opened if schedule.booking_confirmation else models.AppointmentStatus.closed
 

@@ -322,7 +322,7 @@ class TestWaitingListAdminView:
         assert data[0]['id'] == waiting_list_user.id
 
     def test_view_with_admin_non_admin(self, with_client, with_db, with_l10n, make_waiting_list):
-        os.environ['APP_ADMIN_ALLOW_LIST'] = f"{os.getenv('TEST_USER_EMAIL')}-naw.com"
+        os.environ['APP_ADMIN_ALLOW_LIST'] = f'{os.getenv("TEST_USER_EMAIL")}-naw.com'
 
         make_waiting_list()
 

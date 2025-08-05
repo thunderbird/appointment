@@ -15,8 +15,7 @@ def open_or_get(path: str):
 
 
 def run():
-    """Helper function to generate documentation/help pages into plain html
-    """
+    """Helper function to generate documentation/help pages into plain html"""
     print('Fetching documentation...')
 
     # Attr_List: In-case remote markdown has attributes
