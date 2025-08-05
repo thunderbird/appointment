@@ -2,6 +2,7 @@
 import { inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput, LinkButton } from '@thunderbirdops/services-ui';
 import { dayjsKey, isoWeekdaysKey } from '@/keys';
 import { useUserStore } from '@/stores/user-store';
@@ -19,6 +20,7 @@ const isoWeekdays = inject(isoWeekdaysKey);
 
 const userStore = useUserStore();
 const availabilityStore = useAvailabilityStore();
+const router = useRouter();
 
 const { currentState } = storeToRefs(availabilityStore);
 
@@ -110,9 +112,7 @@ export default {
       <h3>{{ t('label.timeZone') }}:</h3>
       <div class="user-timezone-container">
         <p>{{ userStore.data.settings.timezone ?? dj.tz.guess() }}</p>
-        <router-link :to="{ name: 'settings' }">
-          <link-button>{{ t('label.edit') }}</link-button>
-        </router-link>
+        <link-button @click="router.push({ name: 'settings' })">{{ t('label.edit') }}</link-button>
       </div>
     </div>
 
