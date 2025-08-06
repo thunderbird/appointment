@@ -157,7 +157,7 @@ export default {
     </template>
 
     <!-- Availability without customization -->
-    <template v-if="!useCustomAvailabilities">
+    <template v-else>
       <div class="availability-times-container">
         <text-input
           type="time"

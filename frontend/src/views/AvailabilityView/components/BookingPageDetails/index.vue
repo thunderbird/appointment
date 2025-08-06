@@ -98,7 +98,7 @@ export default {
         v-model="autoGenerateZoomLink"
         :disabled="!hasZoom"
       />
-      <i18n-t v-if="!hasZoom" keypath="text.generateZoomMeetingHelpDisabled.text" tag="span" scope="global" class="text-xs">
+      <i18n-t v-if="!hasZoom" keypath="text.generateZoomMeetingHelpDisabled.text" tag="span" scope="global" class="zoom-helper-span">
         <template v-slot:link>
           <router-link class="underline" to="settings/connectedAccounts">
             {{ t('text.generateZoomMeetingHelpDisabled.link') }}
@@ -157,5 +157,10 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  .zoom-helper-span {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
 }
 </style>
