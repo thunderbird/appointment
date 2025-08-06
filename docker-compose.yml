@@ -19,12 +19,12 @@ services:
       
       # The use of DATABASE_URL is problematic and deprecated
       # - DATABASE_URL=mysql+mysqldb://tba:abcd%efgh@mysql:3306/appointment
-      # - DATABASE_URL=postgresql+psycopg://tba:abcd%efgh@postgres:5432/appointment
+      # - DATABASE_URL=postgresql+psycopg://tba:abcd%efgh@postgresql:5432/appointment
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
 
     depends_on:
-      postgres:
+      postgresql:
         condition: service_healthy
 
   frontend:
@@ -37,7 +37,7 @@ services:
     environment:
       - WATCHPACK_POLLING=true
 
-  postgres:
+  postgresql:
     image: postgres:17
     volumes:
       - apmt_db:/var/lib/postgresql/data
