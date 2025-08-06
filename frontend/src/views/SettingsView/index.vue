@@ -7,9 +7,7 @@ import { enumToObject } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import SettingsGeneral from './components/SettingsGeneral.vue';
 import SettingsCalendar from './components/SettingsCalendar.vue';
-import SettingsAccount from './components/SettingsAccount.vue';
 import SettingsConnections from './components/SettingsConnections.vue';
 
 // icons
@@ -20,6 +18,7 @@ import {
 
 import AccountSettings from './components/AccountSettings.vue';
 import Preferences from './components/Preferences.vue';
+import ConnectedApplications from './components/ConnectedApplications.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -116,16 +115,19 @@ export default {
     </div>
     <!-- content -->
     <div class="w-full lg:w-4/5">
-      <section>
+      <section id="accountSettings">
         <account-settings />
       </section>
 
-      <section>
+      <section id="preferences">
         <preferences />
       </section>
-      <settings-general />
+
+      <section id="connectedApplications">
+        <connected-applications />
+      </section>
+
       <settings-calendar />
-      <settings-account />
       <settings-connections />
     </div>
   </div>
