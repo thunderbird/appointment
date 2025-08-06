@@ -18,6 +18,7 @@ cli = [
 ]
 db = [
     "mysqlclient==2.2.5",
+    "psycopg==3.2.9",
 ]
 test = [
     "Faker==26.0.0",

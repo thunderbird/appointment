@@ -66,7 +66,7 @@ Copy the Client ID and Client Secret values to your backend's .env file as `TB_A
 * Backend can be accessed via: <http://localhost:5000>
 * OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
 
-A MySQL database will be accessible via `localhost:3306` with username and password set to: `tba`
+A PostgreSQL database will be accessible via `localhost:5433` with username and password set to: `tba`
 
 On first-run the database will initialize, and a first time setup command will be triggered. Going forward database migrations will automatically run on `docker-compose up`.
 

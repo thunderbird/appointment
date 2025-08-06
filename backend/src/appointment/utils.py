@@ -119,7 +119,7 @@ def determine_database_driver(dialect: str) -> str:
     if dialect == 'mysql':
         return 'mysqldb'
     elif dialect == 'postgresql':
-        return 'psycopg2'
+        return 'psycopg'
     else:
         return None
 
