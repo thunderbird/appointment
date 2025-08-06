@@ -78,8 +78,6 @@
     "videoMeetingLink": "Video meeting link"
   },
   "heading": {
-    "accountData": "Account Data",
-    "accountDeletion": "Account Deletion",
     "accountSettings": "Account Settings",
     "appointmentCreated": "Booking created!",
     "appointmentsAndBookingSettings": "Appointments & booking settings",
@@ -87,6 +85,7 @@
     "calendarSettings": "Calendar Settings",
     "calendarsConnected": "Connected Calendars",
     "calendarsUnconnected": "Available Calendars",
+    "cancelAppointmentService": "Cancel Appointment Service?",
     "connectedAccounts": "Connected Accounts",
     "connectedAccountsSettings": "Connected Accounts Settings",
     "contactRequest": "Contact Request",
@@ -137,6 +136,7 @@
     "bookingSuccessfullyDenied": "Booking rejected. Reach out to the booker to recommend an alternative.",
     "bookingSuccessfullyRequested": "Booking request sent",
     "bookingWillBeCanceled": "Booking will be canceled. An update will be sent to the booker.",
+    "cancelServiceInfo": "To cancel your Appointment service, click here:\n Note: This will not affect your TB Pro account or subscription.",
     "connectionEstablished": "Connection established",
     "copiedToClipboard": "Copied to clipboard",
     "eventWasCreated": "Event created in your calendar.",
@@ -155,8 +155,8 @@
     "MMDDYYYY": "MM/DD/YYYY",
     "accepted": "Accepted",
     "account": "Account",
-    "accountData": "Download your account data",
     "accountDeletion": "Delete your account",
+    "accountSettings": "Account settings",
     "activateSchedule": "Activate schedule",
     "active": "Active",
     "activeAppointment": "Active booking",
@@ -202,6 +202,8 @@
     "bookingConfirmation": "Booking Confirmation",
     "bookingLink": "Booking Link",
     "bookingSlot": "Booking slot",
+    "bookingPageURL": "Booking Page URL",
+    "bookingPageSettings": "Booking Page Settings",
     "bookings": "Bookings",
     "bookingPageLink": "Booking Page Link",
     "bookingPageDetails": "Booking Page Details",
@@ -216,6 +218,7 @@
     "cancelled": "Cancelled",
     "cancelBooking": "Cancel booking",
     "cancelReason": "Reason for cancelling",
+    "cancelService": "Cancel service",
     "changeMyAvailability": "Change my availability",
     "changesNotSaved": "Changes have not been saved",
     "checkAvailableSlots": "Check available slots",
@@ -233,7 +236,7 @@
     "connect": "Connect",
     "connectCalendar": "Connect calendar",
     "connectGoogleCalendar": "Connect Google Calendar",
-    "connectedAccounts": "Connected Accounts",
+    "connectedApplications": "Connected Applications",
     "connectedAs": "Connected as {name}",
     "contact": "Contact",
     "continue": "Continue",
@@ -257,7 +260,6 @@
     "defaultFont": "Default font",
     "delete": "Delete",
     "deleteBooking": "Delete booking",
-    "deleteYourAccount": "Delete your account",
     "deny": "Deny",
     "denyBooking": "Deny booking",
     "disable": "Disable",
@@ -301,7 +303,7 @@
     "inviteId": "Invite ID",
     "inviteStatus": "Invite Status",
     "invitedSubscriberId": "Invited Subscriber ID",
-    "language": "Choose language",
+    "language": "Language",
     "legal": "Legal",
     "light": "Light",
     "loading": "Loading",
@@ -341,6 +343,7 @@
     "past": "Past",
     "pending": "Pending",
     "pendingBookingRequests": "pending booking request | pending booking requests",
+    "preferences": "Preferences",
     "preferredEmail": "Preferred email",
     "primaryTimeZone": "Primary time zone",
     "principal": "Basic URL (CalDAV)",
@@ -492,14 +495,8 @@
     "writeHere": "Write here…",
     "zoomCom": "zoom.com…"
   },
-  "settings": {
-    "invite": {
-      "brief": "Below are invite codes for Thunderbird Appointment. Feel free to give them out, and tell the individual to present it during the login screen."
-    }
-  },
   "text": {
-    "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
-    "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
+    "accountCancelWarning": "You will no longer have access to TB Appointment. All booking calendars will be set to \"Inactive\" and all upcoming bookings will be cancelled.\nOther appointment data will be retained for 30 days, in accordance with the TB Pro Privacy Policy.",
     "admin": {
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
       "disableAccountFirst": "You must disable the account first."

@@ -6,17 +6,20 @@ import { SettingsSections } from '@/definitions';
 import { enumToObject } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import SettingsGeneral from '@/components/SettingsGeneral.vue';
-import SettingsCalendar from '@/components/SettingsCalendar.vue';
+import { useUserStore } from '@/stores/user-store';
+import SettingsGeneral from './components/SettingsGeneral.vue';
+import SettingsCalendar from './components/SettingsCalendar.vue';
+import SettingsAccount from './components/SettingsAccount.vue';
+import SettingsConnections from './components/SettingsConnections.vue';
 
 // icons
 import {
   IconChevronRight,
   IconSearch,
 } from '@tabler/icons-vue';
-import SettingsAccount from '@/components/SettingsAccount.vue';
-import SettingsConnections from '@/components/SettingsConnections.vue';
-import { useUserStore } from '@/stores/user-store';
+
+import AccountSettings from './components/AccountSettings.vue';
+import Preferences from './components/Preferences.vue';
 
 // component constants
 const { t } = useI18n({ useScope: 'global' });
@@ -24,7 +27,7 @@ const route = useRoute();
 const router = useRouter();
 const sections = ref(enumToObject(SettingsSections));
 // Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
-const activeView = computed<number>(() => (route.params.view && sections.value[route.params.view as string] ? sections.value[route.params.view as string] : SettingsSections.General));
+const activeView = computed<number>(() => (route.params.view && sections.value[route.params.view as string] ? sections.value[route.params.view as string] : SettingsSections.AccountSettings));
 const user = useUserStore();
 
 // menu navigation of different views
@@ -55,10 +58,16 @@ onMounted(() => {
 
     // Restrict settings to just the account settings
     sections.value = {
-      account: SettingsSections.Account,
+      account: SettingsSections.AccountSettings,
     };
   }
 });
+</script>
+
+<script lang="ts">
+export default {
+  name: 'SettingsView'
+}
 </script>
 
 <template>
@@ -99,19 +108,36 @@ onMounted(() => {
         <span>{{ t('label.' + key) }}</span>
         <icon-chevron-right
           class="
-            size-6 rotate-180 fill-transparent stroke-gray-800 stroke-1 transition-transform
+            size-6 rotate-0 fill-transparent stroke-gray-800 stroke-1 transition-transform
             dark:stroke-gray-300
           "
-          :class="{ '!rotate-0 !stroke-white': view === activeView }"
         />
       </div>
     </div>
     <!-- content -->
-    <div class="w-full pt-2 lg:w-4/5">
-      <settings-general v-if="activeView === SettingsSections.General" />
-      <settings-calendar v-if="activeView === SettingsSections.Calendar" />
-      <settings-account v-if="activeView === SettingsSections.Account" />
-      <settings-connections v-if="activeView === SettingsSections.ConnectedAccounts" />
+    <div class="w-full lg:w-4/5">
+      <section>
+        <account-settings />
+      </section>
+
+      <section>
+        <preferences />
+      </section>
+      <settings-general />
+      <settings-calendar />
+      <settings-account />
+      <settings-connections />
     </div>
   </div>
 </template>
+
+<style scoped>
+section {
+  border: 1px solid var(--colour-neutral-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  align-self: flex-start;
+  background-color: var(--colour-neutral-lower);
+  margin-block-end: 2rem;
+}
+</style>

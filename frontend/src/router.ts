@@ -12,7 +12,7 @@ import LogoutView from '@/views/LogoutView.vue';
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
 const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView/index.vue'));
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
-const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
+const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView/index.vue'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const DocsView = defineAsyncComponent(() => import('@/views/DocsView.vue'));

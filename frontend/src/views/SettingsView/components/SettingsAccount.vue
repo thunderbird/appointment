@@ -8,21 +8,20 @@ import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import TextButton from '@/elements/TextButton.vue';
 import ToolTip from '@/elements/ToolTip.vue';
 import {
-  PrimaryButton, DangerButton, SecondaryButton, TextInput, SelectInput
+  DangerButton, SecondaryButton, TextInput, SelectInput
 } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconInfoCircle } from '@tabler/icons-vue';
 
 // stores
-import UserInviteTable from '@/components/UserInviteTable.vue';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 
 import { MetricEvents}  from '@/definitions';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { 
-  StringListResponse, SubscriberResponse, BlobResponse, BooleanResponse, SelectOption, Error,
+  StringListResponse, SubscriberResponse, BooleanResponse, SelectOption, Error,
 } from '@/models';
 import { callKey, shortUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
@@ -192,10 +191,6 @@ const sendMetrics = (event, properties = {}) => {
   }
 };
 
-const downloadData = async () => {
-  downloadAccountModalOpen.value = true;
-};
-
 const deleteAccount = async () => {
   deleteAccountFirstModalOpen.value = true;
 };
@@ -211,24 +206,6 @@ const refreshLinkConfirm = async () => {
   closeModals();
 
   sendMetrics(MetricEvents.RefreshLink);
-};
-
-/**
- * Request a data download, and prompt the user to download the data.
- */
-const actuallyDownloadData = async () => {
-  const {data}: BlobResponse = await call('account/download').post().blob();
-  if (!data || !data.value) {
-    // TODO: show error
-    // console.error('Failed to download blob!!');
-    return;
-  }
-  // Data is a ref to our new blob
-  const fileObj = window.URL.createObjectURL(data.value);
-  window.location.assign(fileObj);
-
-  closeModals();
-  sendMetrics(MetricEvents.DownloadData);
 };
 
 /**
@@ -298,21 +275,6 @@ const actuallyDeleteAccount = async () => {
           data-testid="settings-account-email-select"
         />
       </label>
-      <label class="mt-4 flex items-center pl-4">
-        <div class="w-full max-w-2xs">{{ t('label.displayName') }}</div>
-        <div class="w-full">
-          <text-input
-            v-model="activeDisplayName"
-            type="text"
-            name="displayName"
-            :class="{ '!border-red-500': errorDisplayName }"
-            data-testid="settings-account-display-name-input"
-          />
-          <div v-if="errorDisplayName" class="text-sm text-red-500">
-            {{ errorDisplayName }}
-          </div>
-        </div>
-      </label>
       <!-- Custom quick link -->
       <label class="mt-6 flex items-center pl-4">
         <div class="w-full max-w-2xs">{{ t('label.myLink') }}</div>
@@ -362,30 +324,7 @@ const actuallyDeleteAccount = async () => {
         </secondary-button>
       </div>
     </form>
-    <div class="pl-6" id="invites">
-      <div class="text-xl">{{ t('label.admin-invite-codes-panel') }}</div>
-      <p class="mt-4 pl-4">
-        {{ t('settings.invite.brief') }}
-      </p>
-      <div class="mt-4 pl-4">
-        <user-invite-table></user-invite-table>
-      </div>
-    </div>
-    <div class="pl-6" id="download-your-data">
-      <div class="text-xl">{{ t('heading.accountData') }}</div>
-      <div class="mt-4 pl-4">
-        <primary-button
-          class="btn-download"
-          @click="downloadData"
-          :title="t('label.download')"
-          data-testid="settings-account-download-data-btn"
-        >
-          {{ t('label.downloadYourData') }}
-        </primary-button>
-      </div>
-    </div>
     <div class="pl-6" id="delete-your-account">
-      <div class="text-xl">{{ t('heading.accountDeletion') }}</div>
       <div class="mt-4 pl-4">
         <danger-button
           class="btn-delete"
@@ -393,7 +332,7 @@ const actuallyDeleteAccount = async () => {
           :title="t('label.delete')"
           data-testid="settings-account-delete-btn"
         >
-          {{ t('label.deleteYourAccount') }}
+          {{ t('label.cancelService') }}
         </danger-button>
       </div>
     </div>
@@ -416,16 +355,6 @@ const actuallyDeleteAccount = async () => {
     :confirm-label="t('label.saveChanges')"
     :cancel-label="t('label.cancel')"
     @confirm="() => updateUser()"
-    @close="closeModals"
-  ></confirmation-modal>
-  <!-- Account download modal -->
-  <confirmation-modal
-    :open="downloadAccountModalOpen"
-    :title="t('label.accountData')"
-    :message="t('text.accountDataNotice')"
-    :confirm-label="t('label.continue')"
-    :cancel-label="t('label.cancel')"
-    @confirm="actuallyDownloadData"
     @close="closeModals"
   ></confirmation-modal>
   <!-- Account deletion modals -->
