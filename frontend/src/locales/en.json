@@ -146,6 +146,7 @@
     "messageWasNotSent": "Your message couldn't be sent. Please try again.",
     "messageWasSent": "Your message has been sent to our support team.",
     "noPendingAppointmentsInList": "You have no pending events.",
+    "settingsSavedSuccessfully": "Settings saved successfully",
     "slotIsAvailableAgain": "Time slot now available for bookings."
   },
   "label": {
@@ -162,6 +163,8 @@
     "activeAppointment": "Active booking",
     "addCalendar": "Add {provider} calendar",
     "addDay": "Add day",
+    "addGoogleCalendar": "Add Google Calendar",
+    "addCalDavCalendar": "Add CalDav",
     "addSlot": "Add slot",
     "addTime": "Add time",
     "addToWaitingList": "Join the waiting list",
@@ -257,6 +260,7 @@
     "day": "Day",
     "deactivateSchedule": "Deactivate schedule",
     "declined": "Declined",
+    "default": "Default",
     "defaultFont": "Default font",
     "delete": "Delete",
     "deleteBooking": "Delete booking",

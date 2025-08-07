@@ -5,28 +5,58 @@ import { isoWeekdaysKey } from '@/keys';
 import { ColourSchemes } from '@/definitions';
 import { BubbleSelect, SelectInput } from '@thunderbirdops/services-ui';
 import RadioGroupPill from '@/components/RadioGroupPill.vue';
+import { useSettingsStore } from '@/stores/settings-store';
+import { storeToRefs } from 'pinia';
 
 const { t, availableLocales } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
 
+const settingsStore = useSettingsStore();
+const { currentState } = storeToRefs(settingsStore);
+
+// Colour Scheme
 const colourSchemeOptions = computed(() => Object.values(ColourSchemes).map((c) => ({
   label: t(`label.${c}`),
   value: c,
 })));
 
+const colourScheme = computed({
+  get: () => currentState.value.colourScheme,
+  set: (value) => {
+    settingsStore.$patch({ currentState: { colourScheme: value }})
+  }
+})
+
+// Language / Locale
 const localeOptions = computed(() => availableLocales.map((l) => ({
   label: `${l.toUpperCase()} — ${t(`locales.${l}`)}`,
   value: l,
 })));
 
-const timezoneOptions = computed(() => [{
-  label: '12:00 am/pm',
+const language = computed({
+  get: () => currentState.value.language,
+  set: (value) => {
+    settingsStore.$patch({ currentState: { language: value }})
+  }
+})
+
+// Time Format
+const timeFormatOptions = computed(() => [{
+  label: t('label.12hAmPm'),
   value: 12
 }, {
-  label: '24:00',
+  label: t('label.24h'),
   value: 24
 }])
 
+const timeFormat = computed({
+  get: () => currentState.value.timeFormat,
+  set: (value) => {
+    settingsStore.$patch({ currentState: { timeFormat: value }})
+  }
+})
+
+// Start of Week
 // As long as we use Qalendar, we can only support Sunday and Monday as start of week
 const availableStartOfTheWeekOptions = computed(
   () => isoWeekdays.filter((day) => [7,1].includes(day.iso)).map((e) => ({
@@ -34,6 +64,15 @@ const availableStartOfTheWeekOptions = computed(
     value: e.iso,
   }))
 );
+
+const startOfWeek = computed({
+  get: () => {
+    return [currentState.value.startOfWeek]
+  },
+  set: (value) => {
+    settingsStore.$patch({ currentState: { startOfWeek: value[0] }})
+  }
+})
 </script>
 
 <script lang="ts">
@@ -54,6 +93,7 @@ export default {
     <select-input
       name="theme"
       :options="colourSchemeOptions"
+      v-model="colourScheme"
       data-testid="settings-preferences-theme-select"
     />
 
@@ -63,6 +103,7 @@ export default {
     <select-input
       name="language"
       :options="localeOptions"
+      v-model="language"
       data-testid="settings-preferences-language-select"
     />
 
@@ -71,15 +112,20 @@ export default {
     </label>
     <radio-group-pill
       name="time-format"
-      :options="timezoneOptions"
+      v-model="timeFormat"
+      :options="timeFormatOptions"
     />
 
     <label for="start-of-week">
       {{ t('label.startOfWeek') }}
     </label>
+
+    <!-- TODO: BubbleSelect currently behaves like a multi-select but in this
+    case it should behave as a radio group (single selection) instead -->
     <bubble-select
       name="start-of-week"
       class="start-of-week-bubble-select"
+      v-model="startOfWeek"
       :options="availableStartOfTheWeekOptions"
       :required="false"
     />
@@ -99,7 +145,7 @@ h2 {
 
 .form-field-container {
   display: grid;
-  grid-template-columns: 20% 1fr;
+  grid-template-columns: 1fr;
   grid-gap: 1.5rem;
   align-items: center;
 
@@ -117,6 +163,12 @@ h2 {
   & > :last-child {
     justify-content: flex-start;
     gap: 0.75rem;
+  }
+}
+
+@media (--md) {
+  .form-field-container {
+    grid-template-columns: 20% 1fr;
   }
 }
 </style>

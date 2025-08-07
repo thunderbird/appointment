@@ -146,6 +146,7 @@
     "messageWasNotSent": "Die Nachricht konnte nicht gesendet werden. Bitte nochmal versuchen.",
     "messageWasSent": "Die Nachricht wurde an unser Support-Team gesendet.",
     "noPendingAppointmentsInList": "Hier gibt es aktuell keine ausstehenden Termine.",
+    "settingsSavedSuccessfully": "Einstellungen erfolgreich gespeichert",
     "slotIsAvailableAgain": "Das Zeitfenster ist jetzt wieder buchbar."
   },
   "label": {
@@ -162,6 +163,8 @@
     "activeAppointment": "Aktiver Termin",
     "addCalendar": "{provider} Kalender hinzufügen",
     "addDay": "Tag hinzufügen",
+    "addGoogleCalendar": "Google Kalender hinzufügen",
+    "addCalDavCalendar": "CalDav hinzufügen",
     "addSlot": "Zeitfenster hinzufügen",
     "addTime": "Zeit hinzufügen",
     "addToWaitingList": "Der Warteliste beitreten",
@@ -257,6 +260,7 @@
     "day": "Tag",
     "deactivateSchedule": "Zeitplan deaktivieren",
     "declined": "Abgelehnt",
+    "default": "Standard",
     "defaultFont": "Standard Schriftart",
     "delete": "Löschen",
     "deleteBooking": "Buchung löschen",

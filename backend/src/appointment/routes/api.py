@@ -98,7 +98,10 @@ def read_my_calendars(
 ):
     """get all calendar connections of authenticated subscriber"""
     calendars = repo.calendar.get_by_subscriber(db, subscriber_id=subscriber.id, include_unconnected=not only_connected)
-    return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
+    return [
+        schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected, provider=c.provider)
+        for c in calendars
+    ]
 
 
 @router.get('/me/appointments', response_model=schemas.ListResponse, tags=['no-cache'])

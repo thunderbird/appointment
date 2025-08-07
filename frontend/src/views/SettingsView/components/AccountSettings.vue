@@ -104,6 +104,8 @@ const actuallyDeleteAccount = async () => {
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 header {
   margin-block-end: 2rem;
 }
@@ -114,7 +116,7 @@ h2 {
 
 .booking-page-url-container {
   display: grid;
-  grid-template-columns: 20% 1fr;
+  grid-template-columns: 1fr;
   grid-gap: 1.5rem;
   align-items: center;
   margin-block-end: 1.5rem;
@@ -131,10 +133,11 @@ h2 {
 
 .booking-page-settings-container {
   display: flex;
-  justify-content: end;
   margin-block-end: 1.5rem;
 
   .booking-page-settings-button {
+    width: 100%;
+
     span {
       display: flex;
       align-items: center;
@@ -145,14 +148,42 @@ h2 {
 
 .cancel-service-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: end;
   gap: 2rem;
   white-space: pre-line;
-  text-align: end;
+  text-align: start;
 
   span {
     font-size: 0.825rem;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+@media (--md) {
+  .booking-page-url-container {
+    grid-template-columns: 20% 1fr;
+  }
+
+  .booking-page-settings-container {
+    justify-content: end;
+
+    .booking-page-settings-button {
+      width: auto;
+    }
+  }
+
+  .cancel-service-container {
+    text-align: end;
+    flex-direction: row;
+
+    button {
+      width: auto;
+    }
   }
 }
 </style>

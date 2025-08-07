@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import {
-  computed, onMounted, ref, watch,
+  computed, inject, onMounted, ref, watch,
 } from 'vue';
-import { SettingsSections } from '@/definitions';
-import { enumToObject } from '@/utils';
-import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
+import { SettingsSections, AlertSchemes, ColourSchemes } from '@/definitions';
+import { enumToObject } from '@/utils';
+import { callKey } from '@/keys';
+import { Alert, SubscriberResponse } from '@/models';
+import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
+import AlertBox from '@/elements/AlertBox.vue';
 import { useUserStore } from '@/stores/user-store';
+import { createSettingsStore } from '@/stores/settings-store';
 import { IconChevronRight } from '@tabler/icons-vue';
 
 // Page sections
@@ -18,13 +24,21 @@ import ConnectedApplications from './components/ConnectedApplications.vue';
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
+
 const sections = ref(enumToObject(SettingsSections));
+const savingInProgress = ref(false);
+const validationError = ref<Alert>(null);
+const saveSuccess = ref<Alert>(null);
+
 // Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
 const activeView = computed<number>(() => (route.hash && sections.value[route.hash.slice(1) as string] ? sections.value[route.hash.slice(1) as string] : SettingsSections.AccountSettings));
-const user = useUserStore();
+const userStore = useUserStore();
 
-// menu navigation of different views
-const show = (key: string) => {
+const call = inject(callKey);
+const settingsStore = createSettingsStore(call);
+const { currentState, isDirty } = storeToRefs(settingsStore)
+
+const scrollToSection = (key: string) => {
   router.push({ name: route.name, hash: `#${key}` });
 };
 
@@ -41,8 +55,57 @@ const redirectSetupUsers = (view: string) => {
   }
 };
 
+async function onSaveChanges() {
+  savingInProgress.value = true;
+
+  const obj = {
+    username: userStore.data.username,
+    language: currentState.value.language,
+    timezone: userStore.data.settings.timezone,
+    colour_scheme: currentState.value.colourScheme,
+    time_mode: currentState.value.timeFormat,
+    start_of_week: currentState.value.startOfWeek,
+  };
+
+  switch (currentState.value.colourScheme) {
+    case ColourSchemes.Dark:
+      document.documentElement.classList.add('dark');
+      break;
+    case ColourSchemes.Light:
+      document.documentElement.classList.remove('dark');
+      break;
+    case ColourSchemes.System:
+      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+      break;
+    default:
+      break;
+  }
+
+  const { error }: SubscriberResponse = await call('me').put(obj).json();
+
+  if (error.value) {
+    validationError.value = { title: (error.value as unknown as Error).message };
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Reload data form backend to reset currentState vs initialState
+  settingsStore.$reset();
+
+  saveSuccess.value = { title: t('info.settingsSavedSuccessfully') };
+  window.scrollTo(0, 0);
+}
+
+function onRevertChanges() {
+  settingsStore.revertChanges();
+}
+
 onMounted(() => {
-  if (!user?.data.isSetup) {
+  if (!userStore?.data.isSetup) {
     // If we're not setup watch (and initially apply) the view param
     watch(() => route.params.view, (val) => {
       redirectSetupUsers(val as string);
@@ -68,6 +131,21 @@ export default {
     <h2>{{ t('label.settings') }}</h2>
   </header>
 
+  <alert-box
+    class="alert-box"
+    v-if="validationError"
+    :alert="validationError"
+    @close="validationError = null"
+  />
+
+  <alert-box
+    class="alert-box"
+    v-else-if="saveSuccess"
+    :alert="saveSuccess"
+    :scheme="AlertSchemes.Success"
+    @close="saveSuccess = null"
+  />
+
   <div class="main-container">
     <!-- sidebar navigation -->
     <aside>
@@ -75,7 +153,7 @@ export default {
         v-for="(view, key) in sections"
         :key="key"
         :class="{ 'active': view === activeView }"
-        @click="show(key)"
+        @click="scrollToSection(key)"
         :data-testid="'settings-' + key + '-settings-btn'"
       >
         <span>{{ t('label.' + key) }}</span>
@@ -97,6 +175,21 @@ export default {
         <connected-applications />
       </section>
     </div>
+  </div>
+
+  <div class="footer-save-panel" v-if="isDirty">
+    <link-button
+      @click="onRevertChanges"
+      :disabled="savingInProgress"
+    >
+      {{ t('label.revertChanges') }}
+    </link-button>
+    <primary-button
+      @click="onSaveChanges"
+      :disabled="savingInProgress"
+    >
+      {{ t('label.saveChanges') }}
+    </primary-button>
   </div>
 </template>
 
@@ -120,6 +213,10 @@ section {
   margin-block-end: 2rem;
 }
 
+.alert-box {
+  margin-block-end: 2rem;
+}
+
 .main-container {
   display: flex;
   flex-direction: column;
@@ -135,12 +232,10 @@ section {
       justify-content: space-between;
       padding: 1.25rem;
       border-radius: 12px;
-
-      /* TODO: Update colors once final UI is ready */
-      background-color: #4b5563;
-      color: var(--colour-ti-base);
+      background-color: var(--colour-neutral-lower);
 
       &.active {
+        color: var(--colour-neutral-lower);
         background-color: var(--colour-apmt-primary-pressed);
       }
 
@@ -149,6 +244,22 @@ section {
       }
     }
   }
+}
+
+.footer-save-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+  margin-inline-start: auto;
+  padding: 1rem 1.5rem;
+  margin: 0 0.5rem 0.5rem 0.5rem;
+  border-radius: 8px;
+  background-color: var(--colour-neutral-lower);
+  z-index: 99;
 }
 
 @media (--md) {
