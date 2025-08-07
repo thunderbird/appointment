@@ -89,6 +89,10 @@ resources:
       secret_names:
         - database-connection
         - database-encryption
+        - database-host
+        - database-name
+        - database-password
+        - database-user
         - fxa-secrets
         - google-oauth
         - smtp-connection
@@ -139,7 +143,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2107d26a431db8433d4641e18fb5c6b6710b85fc
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:be8a94d940e85d58f8b825f21092ca1d954e3dad
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -149,8 +153,14 @@ resources:
             linuxParameters:
               initProcessEnabled: True
             secrets:
-              - name: DATABASE_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-connection-4koh7Z
+              - name: DATABASE_HOST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-host-jjBGiD
+              - name: DATABASE_NAME
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-name-s0pFYu
+              - name: DATABASE_PASSWORD
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-password-lrx1wH
+              - name: DATABASE_USERNAME
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-user-F5eCXv
               - name: DB_ENC_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-uS7JBM
               - name: FXA_SECRETS
@@ -162,6 +172,10 @@ resources:
               - name: ZOOM_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-secrets-btmho1
             environment:
+              - name: DATABASE_ENGINE
+                value: postgresql
+              - name: DATABASE_PORT
+                value: '5432'
               - name: LOG_LEVEL
                 value: ERROR
               - name: FRONTEND_URL
