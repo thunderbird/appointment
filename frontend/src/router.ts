@@ -207,6 +207,17 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  // Ref: https://router.vuejs.org/guide/advanced/scroll-behavior.html
+  scrollBehavior(to) {
+    if (to.hash) {
+      // This ensures that if hash is provided to router.push it works as expected.
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+        top: 64 + 16, // Account for the navigation header height (64px) + 16px for some padding
+      }
+    }
+  }
 });
 
 router.beforeEach((to, _from) => {

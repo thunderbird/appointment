@@ -48,44 +48,38 @@ export default {
   </header>
 
   <div class="form-field-container">
-    <label class="form-field-label" for="theme">
+    <label for="theme">
       {{ t('label.theme') }}
     </label>
     <select-input
       name="theme"
-      :options="localeOptions"
+      :options="colourSchemeOptions"
       data-testid="settings-preferences-theme-select"
     />
-  </div>
 
-  <div class="form-field-container">
-    <label class="form-field-label" for="language">
+    <label for="language">
       {{ t('label.language') }}
     </label>
     <select-input
       name="language"
-      :options="colourSchemeOptions"
+      :options="localeOptions"
       data-testid="settings-preferences-language-select"
     />
-  </div>
 
-  <div class="form-field-container">
-    <label class="form-field-label time-format" for="time-format">
+    <label class="time-format-label" for="time-format">
       {{ t('label.timeFormat') }}
     </label>
     <radio-group-pill
       name="time-format"
       :options="timezoneOptions"
     />
-  </div>
 
-  <div class="form-field-container">
-    <label class="form-field-label" for="time-format">
+    <label for="start-of-week">
       {{ t('label.startOfWeek') }}
     </label>
-    
     <bubble-select
-      name="time-format"
+      name="start-of-week"
+      class="start-of-week-bubble-select"
       :options="availableStartOfTheWeekOptions"
       :required="false"
     />
@@ -104,44 +98,25 @@ h2 {
 }
 
 .form-field-container {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 0.75rem;
-  margin-block-end: 1.5rem;
+  display: grid;
+  grid-template-columns: 20% 1fr;
+  grid-gap: 1.5rem;
+  align-items: center;
 
   label {
     width: 100%;
   }
 
-  .form-field-label.time-format {
+  .time-format-label {
     margin-block: 0.25rem;
   }
 }
 
-@media (--md) {
-  .form-field-container {
-    flex-direction: row;
-    align-items: center;
-    gap: 15rem;
-
-    .form-field-label {
-      width: 25%;
-    }
-
-    .form-field-label {
-      width: 25%;
-    }
-
-    /* The actual input, not the label */
-    & > :last-child {
-      width: 75%;
-    }
-
-    /* The last form-field-container */
-    &:last-child {
-      margin-block-end: 0;
-    }
+.start-of-week-bubble-select {
+  /* Fix for BubbleSelect component as we can't target .bubble-list */
+  & > :last-child {
+    justify-content: flex-start;
+    gap: 0.75rem;
   }
 }
 </style>
