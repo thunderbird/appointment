@@ -89,6 +89,10 @@ resources:
       secret_names:
         - database-connection
         - database-encryption
+        - database-host
+        - database-name
+        - database-password
+        - database-user
         - fxa-secrets
         - google-oauth
         - neon-database-connection
@@ -141,7 +145,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:0d290eecdec3d434ce8d033b624c0825dd5d9bda
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5cb8b4c36ce6e6527184d01010284b9153ed4b70
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -151,8 +155,14 @@ resources:
             linuxParameters:
               initProcessEnabled: True
             secrets:
-              - name: DATABASE_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-connection-cugbJu
+              - name: DATABASE_HOST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-host-cMwTdY
+              - name: DATABASE_NAME
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-name-bNiiOY
+              - name: DATABASE_USERNAME
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-user-cfbYYI
+              - name: DATABASE_PASSWORD
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-password-h8xPx9
               - name: DB_ENC_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-encryption-fY5K5W
               - name: FXA_SECRETS
@@ -168,6 +178,12 @@ resources:
               - name: ZOOM_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
             environment:
+              - name: DATABASE_ENGINE
+                # value: postgresql
+                value: mysql
+              - name: DATABASE_PORT
+                # value: 5432
+                value: '3306'
               - name: LOG_LEVEL
                 value: ERROR
               - name: FRONTEND_URL
