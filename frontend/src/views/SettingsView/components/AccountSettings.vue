@@ -62,12 +62,15 @@ const actuallyDeleteAccount = async () => {
   </header>
 
   <div class="booking-page-url-container">
-    <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.data.userLink">
+    <label for="booking-page-url">
       {{ t('label.bookingPageURL') }}
-    </text-input>
-    <secondary-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip">
-      <icon-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
-    </secondary-button>
+    </label>
+    <div class="booking-page-url-input-container">
+      <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.data.userLink" />
+      <secondary-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip">
+        <icon-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
+      </secondary-button>
+    </div>
   </div>
 
   <div class="booking-page-settings-container">
@@ -110,15 +113,18 @@ h2 {
 }
 
 .booking-page-url-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 20% 1fr;
+  grid-gap: 1.5rem;
   align-items: center;
-  gap: 2rem;
   margin-block-end: 1.5rem;
 
-  .booking-page-input {
+  .booking-page-url-input-container {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .booking-page-input {
     flex-grow: 1;
   }
 }

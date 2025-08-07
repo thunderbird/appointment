@@ -43,7 +43,7 @@ export const useCalendarStore = defineStore('calendars', () => {
    * Retrieve the calendar object by id
    * @param id
    */
-  const calendarById = (id: number) => calendars.value.filter((calendar) => calendar.id === id)?.at(0) ?? null;
+  const calendarById = (id: number) => calendars.value.filter((calendar) => calendar.id === id)?.[0] ?? null;
 
   /**
    * Get all calendars for current user

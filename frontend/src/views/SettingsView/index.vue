@@ -7,15 +7,9 @@ import { enumToObject } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import SettingsCalendar from './components/SettingsCalendar.vue';
-import SettingsConnections from './components/SettingsConnections.vue';
+import { IconChevronRight } from '@tabler/icons-vue';
 
-// icons
-import {
-  IconChevronRight,
-  IconSearch,
-} from '@tabler/icons-vue';
-
+// Page sections
 import AccountSettings from './components/AccountSettings.vue';
 import Preferences from './components/Preferences.vue';
 import ConnectedApplications from './components/ConnectedApplications.vue';
@@ -26,12 +20,12 @@ const route = useRoute();
 const router = useRouter();
 const sections = ref(enumToObject(SettingsSections));
 // Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
-const activeView = computed<number>(() => (route.params.view && sections.value[route.params.view as string] ? sections.value[route.params.view as string] : SettingsSections.AccountSettings));
+const activeView = computed<number>(() => (route.hash && sections.value[route.hash.slice(1) as string] ? sections.value[route.hash.slice(1) as string] : SettingsSections.AccountSettings));
 const user = useUserStore();
 
 // menu navigation of different views
 const show = (key: string) => {
-  router.push({ name: route.name, params: { view: key } });
+  router.push({ name: route.name, hash: `#${key}` });
 };
 
 /**
@@ -43,7 +37,7 @@ const redirectSetupUsers = (view: string) => {
     return;
   }
   if (view !== 'account') {
-    router.replace({ name: 'settings', params: { view: 'account' } });
+    router.replace({ name: 'settings', hash: `#accountSettings` });
   }
 };
 
@@ -70,51 +64,27 @@ export default {
 </script>
 
 <template>
-  <!-- page title area -->
-  <div class="flex select-none items-start justify-between">
-    <div class="text-4xl font-light">{{ t('label.settings') }}</div>
-  </div>
-  <div class="mt-8 flex flex-col items-stretch justify-between gap-4 pb-2 lg:flex-row lg:gap-24 lg:pb-16">
+  <header>
+    <h2>{{ t('label.settings') }}</h2>
+  </header>
+
+  <div class="main-container">
     <!-- sidebar navigation -->
-    <div class="mx-auto flex w-full flex-col gap-6 md:w-1/2 lg:w-full lg:max-w-60">
-      <!-- search -->
-      <label v-if="false" class="relative flex items-center">
-        <icon-search
-          class="
-            absolute left-4 top-1/2 size-4 -translate-y-1/2 cursor-text fill-transparent stroke-gray-300
-            stroke-2 dark:stroke-gray-500
-          "
-        />
-        <input
-          class="w-full rounded-md pl-12 pr-2 text-sm"
-          type="search"
-          name="search"
-          :placeholder="t('label.search')"
-        />
-      </label>
-      <!-- menu -->
-      <div
+    <aside>
+      <button
         v-for="(view, key) in sections"
         :key="key"
-        class="
-          btn-jump flex cursor-pointer justify-between rounded-lg bg-gray-100 p-4
-          font-semibold text-gray-500 dark:bg-gray-600 dark:text-gray-300
-        "
-        :class="{ '!bg-teal-500 !text-white': view === activeView }"
+        :class="{ 'active': view === activeView }"
         @click="show(key)"
         :data-testid="'settings-' + key + '-settings-btn'"
       >
         <span>{{ t('label.' + key) }}</span>
-        <icon-chevron-right
-          class="
-            size-6 rotate-0 fill-transparent stroke-gray-800 stroke-1 transition-transform
-            dark:stroke-gray-300
-          "
-        />
-      </div>
-    </div>
+        <icon-chevron-right size="18" />
+      </button>
+    </aside>
+
     <!-- content -->
-    <div class="w-full lg:w-4/5">
+    <div class="page-content">
       <section id="accountSettings">
         <account-settings />
       </section>
@@ -126,14 +96,21 @@ export default {
       <section id="connectedApplications">
         <connected-applications />
       </section>
-
-      <settings-calendar />
-      <settings-connections />
     </div>
   </div>
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+header {
+  h2 {
+    font-size: 2.25rem;
+    font-weight: 300;
+    margin-block-end: 2rem;
+  }
+}
+
 section {
   border: 1px solid var(--colour-neutral-border);
   border-radius: 8px;
@@ -141,5 +118,61 @@ section {
   align-self: flex-start;
   background-color: var(--colour-neutral-lower);
   margin-block-end: 2rem;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    button {
+      display: flex;
+      justify-content: space-between;
+      padding: 1.25rem;
+      border-radius: 12px;
+
+      /* TODO: Update colors once final UI is ready */
+      background-color: #4b5563;
+      color: var(--colour-ti-base);
+
+      &.active {
+        background-color: var(--colour-apmt-primary-pressed);
+      }
+
+      &:hover {
+        background-color: var(--colour-apmt-primary-hover);
+      }
+    }
+  }
+}
+
+@media (--md) {
+  .main-container {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+
+    aside {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 320px;
+
+      button {
+        display: flex;
+        align-items: center;
+        text-align: start;
+      }
+    }
+
+    .page-content {
+      flex-grow: 1;
+    }
+  }
 }
 </style>
