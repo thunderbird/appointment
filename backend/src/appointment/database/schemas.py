@@ -297,7 +297,7 @@ class Calendar(CalendarConnection):
 
 class CalendarOut(CalendarBase):
     id: int
-
+    provider: CalendarProvider | None = CalendarProvider.caldav
 
 """ INVITE model schemas
 """
