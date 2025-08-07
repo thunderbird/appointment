@@ -83,6 +83,7 @@ async function onSaveChanges() {
   }
 
   savingInProgress.value = false;
+  validationError.value = null;
   saveSuccess.value = { title: t('info.availabilitySavedSuccessfully') };
 
   // Reload data form backend to reset currentState vs initialState
@@ -119,7 +120,7 @@ export default {
   />
 
   <form @submit.prevent>
-    <div class="page-content">
+    <div class="page-content" :class="{ 'is-dirty': isDirty }">
       <section>
         <availability-settings />
       </section>
@@ -165,6 +166,10 @@ export default {
   grid-template-columns: 1fr;
   gap: 2rem;
   margin-block-end: 2rem;
+
+  &.is-dirty {
+    margin-block-end: 6rem;
+  }
 }
 
 .alert-box {
