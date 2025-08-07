@@ -24,3 +24,11 @@ config:
     secure: AAABAOP+nuT7/b1bIzb9R+6lUz9IX7ME2K9ksAvzWvJiaIR2Ivu4zIpOlEr0uXIsKUzC4cf/aPrKANdF4VCs
   appointment:oidc-client-secret:
     secure: AAABAEDX8K02kpnnSY67Vtg0yEwZYqWixRmRUZng9dBwZQgHzlM66NJe2AgRjxjumPCuBHRwEl1iP5i0cEelJA==
+  appointment:database-host:
+    secure: AAABAE6wnBYxRd2CfjZfo7Jdwt9R900byg5QHM+b7uYDQBYzQ/f7rYA5baT/D1qMAp6ZP2Y/ZNSSMgBYEr4+3yUQ7YE/DG+2i5dHBXfs/7zSS+ZcKviODV+/NtkucF2GC7c=
+  appointment:database-user:
+    secure: AAABAJttbIhI89Ge0zS1dt+UsUaxjmkwkj6Yp8IHK3A8qcqec8ye5usY
+  appointment:database-password:
+    secure: AAABAJuE3CUyQD5hDyzclgpbk/84LICjd9hAHFqyX7R9Pa7eNhMvc7qO1vjLxU2nAo4AlNRqXQMaQT9aSTu9LA==
+  appointment:database-name:
+    secure: AAABAO1hR9ZPKJVVwH++5ale2yMui2KLNiYe2aR3diaaKNiBhhqqU0r11A==
