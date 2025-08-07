@@ -179,11 +179,9 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
             environment:
               - name: DATABASE_ENGINE
-                # value: postgresql
-                value: mysql
+                value: postgresql
               - name: DATABASE_PORT
-                # value: 5432
-                value: '3306'
+                value: '5432'
               - name: LOG_LEVEL
                 value: ERROR
               - name: FRONTEND_URL
