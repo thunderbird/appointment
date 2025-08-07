@@ -112,7 +112,7 @@
         "zoom": "Zoom"
       }
     },
-    "setYourAvailability": "Legen Sie Ihre Verfügbarkeit fest",
+    "setYourAvailability": "Verfügbarkeit festlegen",
     "zoom": "Zoom"
   },
   "icons": {
@@ -309,10 +309,10 @@
     "logIn": "Anmelden",
     "logOut": "Abmelden",
     "loginToContinue": "Anmelden, um fortzufahren",
-    "meetingDuration": "Meeting Dauer",
+    "meetingDuration": "Meeting-Dauer",
     "meetingTitle": "Meeting Titel",
     "message": "Nachricht",
-    "minimumNotice": "Mindestfrist",
+    "minimumNotice": "Mindestvorlaufzeit",
     "modified": "Geändert",
     "modify": "Ändern",
     "modifyBooking": "Buchung ändern",
@@ -416,7 +416,7 @@
     "videoLink": "Konferenz-Link",
     "viewAll": "Alle ansehen",
     "viewBooking": "Buchung anschauen",
-    "virtualMeetingLink": "Virtuelle Konferenz-Link",
+    "virtualMeetingLink": "Online-Meeting-Link",
     "virtualMeetingDetails": "Virtuelle Konferenz-Details",
     "waitingListUser": "Wartelisten-Benutzer | Wartelisten-Benutzer | Wartelisten-Benutzer",
     "warning": "Warnung",
