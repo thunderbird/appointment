@@ -191,6 +191,27 @@ export type AvailabilitySet = {
   [key:number]: Availability[];
 }
 
+export type AvailabilityFormFields = {
+  active?: boolean;
+  availabilities?: Availability[];
+  booking_confirmation?: boolean;
+  calendar_id?: number;
+  details?: string;
+  earliest_booking?: number;
+  end_time?: string;
+  farthest_booking?: number;
+  id?: number;
+  link_slug?: string;
+  location_url?: string;
+  meeting_link_provider?: string;
+  name?: string;
+  start_time?: string;
+  slot_duration?: number;
+  time_updated?: string;
+  use_custom_availabilities?: boolean;
+  weekdays?: number[];
+}
+
 export type Schedule = {
   active: boolean;
   name: string;

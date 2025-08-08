@@ -43,16 +43,6 @@ export enum SubscriberLevels {
 }
 
 /**
- * Schedule creation state
- */
-export enum ScheduleCreationState {
-  Availability = 1,
-  Settings = 2,
-  Details = 3,
-  Booking = 4,
-}
-
-/**
  * Booking calendar view modes
  */
 export enum BookingCalendarView {
@@ -352,7 +342,6 @@ export default {
   MeetingLinkProviderType,
   MetricEvents,
   ModalStates,
-  ScheduleCreationState,
   SettingsSections,
   SLOT_DURATION_OPTIONS,
   SubscriberLevels,

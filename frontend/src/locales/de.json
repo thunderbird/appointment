@@ -97,7 +97,6 @@
     "eventBooked": "Event gebucht!",
     "externalConnections": "Verbindungen",
     "frequentlyAskedQuestions": "Häufig gestellte Fragen",
-    "generalAvailability": "Verfügbarkeit festlegen",
     "generalSettings": "Allgemeine Einstellungen",
     "languageAndAppearance": "Sprache & Aussehen",
     "pendingAppointments": "Ausstehende Buchungen",
@@ -113,6 +112,7 @@
         "zoom": "Zoom"
       }
     },
+    "setYourAvailability": "Verfügbarkeit festlegen",
     "zoom": "Zoom"
   },
   "icons": {
@@ -123,6 +123,7 @@
     "warning": "Warnung"
   },
   "info": {
+    "availabilitySavedSuccessfully": "Verfügbarkeit erfolgreich gespeichert",
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht. Bitte überprüfe deinen Posteingang, um das Event in deinen Kalender einzutragen.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
     "bookingLinkIsInvalid": "Der Link zur Buchungsbestätigung ist ungültig.",
@@ -187,8 +188,11 @@
     "areYouSure": "Sind Sie sicher?",
     "assign": "Zuweisen",
     "attendees": "Teilnehmer",
+    "automaticallyConfirmBookingsIfTimeIsAvailable": "Buchungen automatisch bestätigen, wenn Zeitfenster verfügbar ist",
+    "autogenerateZoomLinks": "Zoom-Link automatisch generieren und in Einladungen einfügen",
     "availabilityDay": "Verfügbarer Tag",
     "available": "Verfügbar",
+    "availableDaysAndTimes": "Verfügbare Tage und Zeiten",
     "availability": "Verfügbarkeit",
     "awaitingAccess": "Zugang erwartet",
     "back": "Zurück",
@@ -197,9 +201,12 @@
     "booked": "Gebucht",
     "bookingConfirmation": "Bestätigung für Buchungen",
     "bookingLink": "Buchungslink",
-    "bookingSettings": "Buchungseinstellungen",
     "bookingSlot": "Gebuchtes Zeitfenster",
     "bookings": "Buchungen",
+    "bookingPageLink": "Link zur Buchungsseite",
+    "bookingPageDetails": "Buchungsseite Details",
+    "bookingTo": "Buchung an:",
+    "bookingWindow": "Buchungsfenster",
     "busy": "Beschäftigt",
     "caldav": "CalDAV",
     "calendar": "Kalender | Kalender",
@@ -212,7 +219,6 @@
     "changeMyAvailability": "Verfügbarkeit ändern",
     "changesNotSaved": "Änderungen wurden nicht gespeichert",
     "checkAvailableSlots": "Verfügbare Zeiten anzeigen",
-    "chooseYourAvailability": "Wähle deine Verfügbarkeit",
     "clearForm": "Zurücksetzen",
     "close": "Schließen",
     "closed": "Geschlossen",
@@ -231,6 +237,7 @@
     "connectedAs": "Verbunden als {name}",
     "contact": "Kontakt",
     "continue": "Weiter",
+    "copied": "Kopiert",
     "copy": "Kopieren",
     "copyAvailability": "Verfügbarkeit auf ausgewählte Tage übertragen",
     "copyLink": "Link kopieren",
@@ -238,7 +245,8 @@
     "copyTo": "Kopieren nach:",
     "create": "Erstellen",
     "createAppointments": "Termin erstellen",
-    "customizePerDay": "Einzelne Tage anpassen",
+    "customizePerDay": "Zeiten für jeden Tag anpassen",
+    "customizeYourLink": "Deinen Link anpassen",
     "dark": "Dunkel",
     "dashboard": "Dashboard",
     "date": "Datum",
@@ -271,6 +279,7 @@
     "endDate": "Enddatum",
     "endTime": "Endzeit",
     "enterEmailToInvite": "Per E-Mail-Adresse zu Thunderbird Appointment einladen:",
+    "enterDescriptionToSchedulingPage": "Gib eine Beschreibung ein, die auf der Buchungsseite angezeigt wird",
     "error": "Fehler",
     "faq": "FAQ",
     "farthestBooking": "Späteste Buchung",
@@ -300,9 +309,10 @@
     "logIn": "Anmelden",
     "logOut": "Abmelden",
     "loginToContinue": "Anmelden, um fortzufahren",
-    "meetingDetails": "Meeting Details",
+    "meetingDuration": "Meeting-Dauer",
     "meetingTitle": "Meeting Titel",
     "message": "Nachricht",
+    "minimumNotice": "Mindestvorlaufzeit",
     "modified": "Geändert",
     "modify": "Ändern",
     "modifyBooking": "Buchung ändern",
@@ -325,6 +335,8 @@
     "open": "Offen",
     "openMyPage": "Meinen Link öffnen",
     "optionalPasscode": "Optionaler Passcode",
+    "pageName": "Seitenname",
+    "pageDescription": "Seitenbeschreibung",
     "password": "Passwort",
     "past": "Vergangen",
     "pending": "Ausstehend",
@@ -349,13 +361,6 @@
     "saveChanges": "Änderungen speichern",
     "schedule": "Zeitplan",
     "scheduleCreationError": "Fehler beim Speichern des Zeitplans",
-    "scheduleDetails": "Zeitplan Details",
-    "scheduleSettings": {
-      "availabilitySubHeading": "Lege deine Verfügbarkeit fest",
-      "bookingSettingsSubHeading": "Buchungsbestätigung und Sonstiges",
-      "meetingDetailsSubHeading": "Videos und/oder Notizen den Events hinzufügen",
-      "schedulingDetailsSubHeading": "Buchungsintervalle und Dauer festlegen"
-    },
     "search": "Suche",
     "searchAppointments": "Termine durchsuchen",
     "searchForCalendars": "Nach Kalendern suchen",
@@ -368,6 +373,7 @@
     "sentCountInvitesSuccessfully": "Alle ausgewählten Benutzer sind bereits eingeladen! | {count} Einladung gesendet! | {count} Einladungen gesendet!",
     "settings": "Einstellungen",
     "shareMyLink": "Meinen Link teilen",
+    "shareYourLink": "Deinen Link teilen",
     "showSecondaryTimeZone": "Zeige sekundäre Zeitzone",
     "signInWithGoogle": "Mit Google anmelden",
     "signUpForBeta": "Registriere dich für die Beta",
@@ -410,12 +416,16 @@
     "videoLink": "Konferenz-Link",
     "viewAll": "Alle ansehen",
     "viewBooking": "Buchung anschauen",
+    "virtualMeetingLink": "Online-Meeting-Link",
+    "virtualMeetingDetails": "Virtuelle Konferenz-Details",
     "waitingListUser": "Wartelisten-Benutzer | Wartelisten-Benutzer | Wartelisten-Benutzer",
     "warning": "Warnung",
     "wasInvited": "Wurde eingeladen",
     "whatDoYouWantToDoToday": "Was möchtest du heute tun?",
     "week": "Woche",
-    "yes": "Ja"
+    "yes": "Ja",
+    "youAreBookable": "Du bist verfügbar",
+    "youAreNotBookable": "Du bist nicht verfügbar"
   },
   "locales": {
     "de": "Deutsch",
@@ -494,8 +504,6 @@
       "completelyRemoveUser": "Hier wird ein Benutzer vollständig aus Thunderbird Appointment entfernt, einschließlich aller Benutzerdaten. Diese Funktion bitte nicht ausführen, wenn es keine Aufforderung dafür gab.",
       "disableAccountFirst": "Das Konto muss zunächst deaktiviert sein."
     },
-    "bookingsWillAutomaticallyBeConfirmed": "Buchungen werden automatisch bestätigt und zum Kalender hinzugefügt.",
-    "bookingsWillRequireToBeConfirmed": "Buchungen müssen bestätigt oder abgelehnt werden.",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalender gespeichert sind.",
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erstellen.",
@@ -544,7 +552,6 @@
     "scheduleSettings": {
       "clickHereToConnect": "Hier einen Kalender verbinden",
       "create": "Wähle einen Kalender unter Zeitplan Details und klicke Speichern!",
-      "formDirty": "Es gibt ungespeicherte Änderungen.",
       "noCalendars": "Dein Zeitplan benötigt mindestens einen verbundenen Kalender.",
       "notActive": "Der Zeitplan ist inaktiv, aktiviere ihn zum Bearbeiten oder Teilen."
     },
@@ -585,16 +592,12 @@
     },
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
-    "toUpdateYourUsername": {
-      "link": "Kontoeinstellungen",
-      "text": "Der Nutzername kann unter {link} angepasst werden. "
-    },
     "updateLinkNotice": "Ein Ändern des Benutzernamens oder des Teillinks aktualisiert deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
-    "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt.",
-    "yourQuickLinkIs": "Dein Kurzlink ist:\n{url}"
+    "videoLinkNotice": "Der Videolink verwendet denselben Link für alle Veranstaltungen, die im Rahmen deines Zeitplans erstellt werden. Bei der Erstellung von Zoom-Meetings wird für jede erstellte Veranstaltung ein neuer Zoom-Link erstellt."
   },
   "units": {
     "minutes": "{value} Minuten",
+    "minutesShort": "{value} min",
     "none": "{value}"
   },
   "waitingList": {
