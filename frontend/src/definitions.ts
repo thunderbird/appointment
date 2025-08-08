@@ -142,10 +142,9 @@ export enum EventLocationType {
  * Settings page sections
  */
 export enum SettingsSections {
-  General = 1,
-  Calendar = 2,
-  Account = 3,
-  ConnectedAccounts = 4,
+  AccountSettings = 1,
+  Preferences = 2,
+  ConnectedApplications = 3,
 }
 
 /**

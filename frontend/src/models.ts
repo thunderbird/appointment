@@ -262,6 +262,13 @@ export type User = {
   uniqueHash: string;
 };
 
+export type SettingsForm = {
+  colourScheme?: string;
+  language?: string;
+  startOfWeek?: number;
+  timeFormat?: number;
+}
+
 /**
  * User settings to customize the application
  * Used to store language, theme, time format and such.
