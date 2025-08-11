@@ -341,7 +341,7 @@ onMounted(async () => {
 @import '@/assets/styles/custom-media.pcss';
 
 main {
-  padding-block-start: 6rem;
+  padding-block-start: 1rem;
 
   &.public-route {
     min-height: 100%;
@@ -357,6 +357,10 @@ main {
 }
 
 @media (--lg) {
+  main {
+    padding-block-start: 6rem;
+  }
+
   main.private-route {
     margin-inline: 2rem;
   }
