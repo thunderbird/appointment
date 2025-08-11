@@ -51,12 +51,6 @@ const copyLink = async () => {
 </script>
 
 <template>
-  <!-- Mobile NavBar -->
-  <header class="header-mobile">
-    hi
-  </header>
-
-  <!-- Desktop NavBar -->
   <header class="header-desktop">
     <router-link
       class="appointment-logo"
@@ -142,17 +136,7 @@ const copyLink = async () => {
   display: none;
 }
 
-.header-mobile {
-  height: 64px;
-  background-color: var(--colour-neutral-base);
-}
-
 @media (--md) {
-  /* Hide header mobile in favor of desktop */
-  .header-mobile {
-    display: none;
-  }
-
   .header-desktop {
     position: fixed;
     display: flex;
