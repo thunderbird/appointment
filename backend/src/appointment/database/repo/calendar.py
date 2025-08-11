@@ -46,7 +46,7 @@ def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool
     query = db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
 
     if not include_unconnected:
-        query = query.filter(models.Calendar.connected == 1)
+        query = query.filter(models.Calendar.connected)
 
     return query.all()
 
