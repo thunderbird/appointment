@@ -91,7 +91,11 @@ export const useAppointmentStore = defineStore('appointments', () => {
         queryParams.append('status', status);
       });
 
-      const { data, error }: AppointmentListResponse = await call.value(`me/appointments?${queryParams.toString()}`).get().json();
+      const { data, error }: AppointmentListResponse = await call.value(`me/appointments?${queryParams.toString()}`, {
+        headers: {
+          'Cache-control': 'no-store'
+        }
+      }).get().json();
 
       if (!error.value && data.value) {
         const newAppointments = data.value.items;
@@ -179,7 +183,11 @@ export const useAppointmentStore = defineStore('appointments', () => {
       owner_url: ownerUrl,
       confirmed,
     };
-    const { error, data }: AvailabilitySlotResponse = await call.value('schedule/public/availability/booking').put(obj).json();
+    const { error, data }: AvailabilitySlotResponse = await call.value('schedule/public/availability/booking', {
+      headers: {
+        'Cache-control': 'no-store'
+      }
+    }).put(obj).json();
 
     if (usePosthog && !error.value) {
       const event = confirmed ? MetricEvents.ConfirmBooking : MetricEvents.DenyBooking;

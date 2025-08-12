@@ -3,11 +3,11 @@ import { BookingCalendarView, MetricEvents, ModalStates } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useBookingViewStore } from '@/stores/booking-view-store';
+import { createBookingViewStore } from '@/stores/booking-view-store';
 import { useBookingModalStore } from '@/stores/booking-modal-store';
 import { dayjsKey, callKey } from '@/keys';
 import {
-  Appointment, Slot, Exception, Attendee, ExceptionDetail, AppointmentResponse, SlotResponse,
+  Appointment, Slot, Exception, Attendee, ExceptionDetail,
 } from '@/models';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import BookingModal from '@/components/BookingModal.vue';
@@ -20,7 +20,7 @@ import { usePosthog, posthog } from '@/composables/posthog';
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
-const bookingViewStore = useBookingViewStore();
+const bookingViewStore = createBookingViewStore(call);
 const bookingModalStore = useBookingModalStore();
 
 const errorHeading = ref<string>(null);
@@ -102,9 +102,8 @@ const handleError = (data: Exception) => {
  */
 const getAppointment = async (): Promise<Appointment|null> => {
   const url = window.location.href.split('#')[0];
-  const request: AppointmentResponse = call('schedule/public/availability').post({ url });
 
-  const { data, error } = await request.json();
+  const { data, error } = await bookingViewStore.getAppointmentAvailability(url);
 
   if (error.value) {
     handleError(data?.value);
@@ -136,13 +135,9 @@ const bookEvent = async (attendeeData: Attendee) => {
   };
 
   const url = window.location.href.split('#')[0];
-  const request: SlotResponse = call('schedule/public/availability/request').put({
-    s_a: obj,
-    url,
-  });
 
   // Data should just be true here.
-  const { data, error } = await request.json();
+  const { data, error } = await bookingViewStore.putAvailabilityRequest(obj, url);
 
   if (error.value || !data.value) {
     modalState.value = ModalStates.Error;
