@@ -227,7 +227,7 @@ def server():
         """Adds cache-control: no-store response header for tagged requests"""
         response = await call_next(request)
         if request.scope.get('route') and 'no-cache' in request.scope['route'].tags:
-            response.headers['Cache-Control'] = 'no-store'
+            response.headers['cache-control'] = 'no-store'
         return response
 
     @app.middleware('http')
