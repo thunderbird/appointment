@@ -45,11 +45,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
       return;
     }
 
-    const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections', {
-      headers: {
-        'Cache-control': 'no-store'
-      }
-    }).get().json();
+    const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections').get().json();
 
     oidc.value = data.value?.oidc ?? [];
     zoom.value = data.value?.zoom ?? [];

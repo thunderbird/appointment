@@ -175,7 +175,7 @@ def update_schedule(
     return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
 
-@router.post('/public/availability', response_model=schemas.AppointmentOut)
+@router.post('/public/availability', response_model=schemas.AppointmentOut, tags=['no-cache'])
 @limiter.limit('20/minute')
 def read_schedule_availabilities(
     request: Request,
@@ -238,7 +238,7 @@ def read_schedule_availabilities(
     )
 
 
-@router.put('/public/availability/request')
+@router.put('/public/availability/request', tags=['no-cache'])
 @limiter.limit('20/minute')
 def request_schedule_availability_slot(
     request: Request,
@@ -452,7 +452,7 @@ def request_schedule_availability_slot(
     )
 
 
-@router.put('/public/availability/booking', response_model=schemas.AvailabilitySlotAttendee)
+@router.put('/public/availability/booking', response_model=schemas.AvailabilitySlotAttendee, tags=['no-cache'])
 def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     background_tasks: BackgroundTasks,

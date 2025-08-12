@@ -142,6 +142,13 @@ def server():
     # Hide openapi url (which will also hide docs/redoc) if we're not dev
     openapi_url = '/openapi.json' if os.getenv('APP_ENV') == APP_ENV_DEV else None
 
+    tags_metadata = [
+        {
+            "name": "no-cache",
+            "description": "Adds 'Cache-control': 'no-store' in the response headers",
+        },
+    ]
+
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # Boot the redis cluster as the app starts up
@@ -150,7 +157,7 @@ def server():
         close_redis_cluster()
 
     # init app
-    app = FastAPI(openapi_url=openapi_url, lifespan=lifespan)
+    app = FastAPI(openapi_url=openapi_url, lifespan=lifespan, openapi_tags=tags_metadata)
 
     @app.middleware('http')
     async def apply_x_forwarded_headers_to_client(request: Request, call_next):
@@ -214,6 +221,14 @@ def server():
         allow_methods=['*'],
         allow_headers=['*'],
     )
+
+    @app.middleware('http')
+    async def add_cache_control_headers(request: Request, call_next):
+        """Adds cache-control: no-store response header for tagged requests"""
+        response = await call_next(request)
+        if request.scope.get('route') and 'no-cache' in request.scope['route'].tags:
+            response.headers['Cache-Control'] = 'no-store'
+        return response
 
     @app.middleware('http')
     async def warn_about_deprecated_routes(request: Request, call_next):

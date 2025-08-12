@@ -22,7 +22,7 @@ from ..exceptions.account_api import AccountDeletionException
 router = APIRouter()
 
 
-@router.get('/external-connections')
+@router.get('/external-connections', tags=['no-cache'])
 def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
     # This could be moved to a helper function in the future
     # Create a list of supported external connections
