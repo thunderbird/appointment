@@ -14,7 +14,6 @@ import {
 export class AvailabilityPage {
   readonly page: Page;
   readonly allFutureBookingsOptionText: string = 'All future bookings';
-  readonly availabilityPanelHeader: Locator;
   readonly setAvailabilityText: Locator;
   readonly customizePerDayCheckBox: Locator;
   readonly allStartTimeInput: Locator;
@@ -24,15 +23,13 @@ export class AvailabilityPage {
   readonly customStartTime3Input: Locator;
   readonly customStartTime4Input: Locator;
   readonly customStartTime5Input: Locator;
-  readonly editLinkBtn: Locator;
   readonly saveChangesBtn: Locator;
   readonly revertChangesBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.availabilityPanelHeader = this.page.getByPlaceholder('My Schedule');
-    this.setAvailabilityText = this.page.getByText('Set your availability days and time');
-    this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Customize per day'});
+    this.setAvailabilityText = this.page.getByText('Set Your Availability');
+    this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
     this.allStartTimeInput = this.page.locator('#start_time');
     this.allEndTimeInput = this.page.locator('#end_time');
     this.customStartTime1Input = this.page.getByTestId('availability-start-time-1-0-input');
@@ -40,7 +37,6 @@ export class AvailabilityPage {
     this.customStartTime3Input = this.page.getByTestId('availability-start-time-3-0-input');
     this.customStartTime4Input = this.page.getByTestId('availability-start-time-4-0-input');
     this.customStartTime5Input = this.page.getByTestId('availability-start-time-5-0-input');
-    this.editLinkBtn = this.page.getByTestId('availability-edit-link-btn');
     this.saveChangesBtn = this.page.getByTestId('availability-save-changes-btn');
     this.revertChangesBtn = this.page.getByRole('button', { name: 'Revert changes' });
   }
@@ -101,13 +97,6 @@ export class AvailabilityPage {
       intervals: [15_000, 10_000, 5_000],
       timeout: 120_000
     });
-  }
-
-  /**
-   * Get the availability panel header text (i.e. '<display name>'s Availability')
-   */
-  async getAvailabilityPanelHeader(): Promise<string> {
-    return await this.availabilityPanelHeader.inputValue({ timeout: TIMEOUT_60_SECONDS });
   }
 
   /**

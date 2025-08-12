@@ -23,7 +23,6 @@ test.describe('availability panel', {
   test('default availability settings are displayed', async () => {
     // just verify that the default availability options are available/displayed
     // timzone display is covered in other tests so not checked here
-    expect(await availabilityPage.getAvailabilityPanelHeader()).toContain(APPT_DISPLAY_NAME);
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
     await expect(availabilityPage.customizePerDayCheckBox).toBeVisible();
     await expect(availabilityPage.customizePerDayCheckBox).toBeEnabled();
@@ -36,10 +35,6 @@ test.describe('availability panel', {
       await expect(availabilityPage.allEndTimeInput).toBeVisible();
       await expect(availabilityPage.allEndTimeInput).toBeEnabled();
     }
-
-    await availabilityPage.editLinkBtn.scrollIntoViewIfNeeded();
-    await expect(availabilityPage.editLinkBtn).toBeVisible();
-    await expect(availabilityPage.editLinkBtn).toBeEnabled();
   });
 
   test('customize-per-day checkbox reveals daily time slots', async () => {
