@@ -46,7 +46,9 @@ def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool
     query = db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
 
     if not include_unconnected:
-        query = query.filter(models.Calendar.connected)
+        # Skipping ruff check here since we need to compare a boolean to an integer in Postgresql
+        # and "models.Calendar.connected is True" always evaluates to false.
+        query = query.filter(models.Calendar.connected == True)  # noqa: E712
 
     return query.all()
 
