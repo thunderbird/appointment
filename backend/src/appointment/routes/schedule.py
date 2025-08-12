@@ -219,12 +219,19 @@ def read_schedule_availabilities(
     if not actual_slots or len(actual_slots) == 0:
         raise validation.SlotNotFoundException()
 
+    # Transform actual_slots (SlotBase) to SlotOut objects
+    # To filter out sensitive fields like meeting_link_id / meeting_link_url
+    slot_outs = [
+        schemas.SlotOut(**slot.model_dump(), id=getattr(slot, 'id', None))
+        for slot in actual_slots
+    ]
+
     # TODO: dedicate an own schema to this endpoint
     return schemas.AppointmentOut(
         title=schedule.name,
         details=schedule.details,
         owner_name=subscriber.name,
-        slots=actual_slots,
+        slots=slot_outs,
         slot_duration=schedule.slot_duration,
         booking_confirmation=schedule.booking_confirmation,
         use_custom_availabilities=schedule.use_custom_availabilities,
