@@ -13,6 +13,7 @@ import {
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
   APPT_TIMEZONE_SETTING_PRIMARY,
+  TIMEOUT_3_SECONDS,
 } from '../const/constants';
 
 var bookingPage: BookingPage;
@@ -85,5 +86,14 @@ test.describe('book an appointment', () => {
     // switches back to the dashboard the new pending appointment hasn't been added/displayed yet
     await page.waitForTimeout(TIMEOUT_15_SECONDS);
     await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, expMonthDayYear, expTimeStr);
+
+    // also go back to main dashboard and check that pending requests link now appears
+    await dashboardPage.gotoToDashboardMonthView();
+    await expect(dashboardPage.pendingBookingRequestsLink).toBeVisible();
+
+    // click the pending requests link and verify it navigates to the correct URL
+    await dashboardPage.pendingBookingRequestsLink.click();
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await expect(page).toHaveURL(/.*\/bookings\?unconfirmed=true/);
   });
 });
