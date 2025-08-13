@@ -301,6 +301,7 @@ class Calendar(CalendarConnection):
 
 class CalendarOut(CalendarBase):
     id: int
+    external_connection_id: int | None = None
     provider: CalendarProvider | None = CalendarProvider.caldav
 
 """ INVITE model schemas
@@ -478,6 +479,7 @@ class ExternalConnection(BaseModel):
 
 
 class ExternalConnectionOut(BaseModel):
+    id: int
     owner_id: int
     name: str
     type: str

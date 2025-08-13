@@ -149,6 +149,7 @@ export type EventPopup = {
 export type Calendar = {
   id?: number;
   connected: boolean;
+  external_connection_id: number;
   title: string;
   color: string;
   provider?: CalendarProviders;
@@ -163,6 +164,7 @@ export type CalendarItem = {
 };
 
 export type ExternalConnection = {
+  id: number;
   owner_id: number;
   name: string;
   type: string;

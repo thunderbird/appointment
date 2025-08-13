@@ -9,7 +9,7 @@ import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { keyByValue } from '@/utils';
-import { Alert } from '@/models';
+import { Alert, ExternalConnection } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -17,10 +17,10 @@ import { useUserStore } from '@/stores/user-store';
 
 const { t } = useI18n();
 
-const calendarDropdown = ref();
 const videoMeetingDropdown = ref();
 const connectCalDavModalOpen = ref(false);
 const calDavErrorMessage = ref();
+const calendarDropdownRefs = ref({});
 
 const disconnectTypeId = ref(null);
 const disconnectConnectionName = ref(null);
@@ -34,7 +34,22 @@ const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
 
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
-const calendars = computed(() => calendarStore.calendars);
+const calendars = computed(() => calendarStore.calendars.map((calendar) => {
+  
+  const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
+  const externalConnection: ExternalConnection = externalConnectionStore
+    .connections[connectionProvider]
+    .find((ec: ExternalConnection) => ec.id === calendar.external_connection_id)
+
+  // Injecting type_id and connection_name from externalConnectionStore
+  // to facilitate the disconnection logic
+  return {
+    ...calendar,
+    type_id: externalConnection?.type_id,
+    connection_name: externalConnection?.name,
+    provider_name: connectionProvider,
+  }
+}));
 
 async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar(userStore.data.email);
@@ -51,7 +66,11 @@ async function disconnectAccount(provider: ExternalConnectionProviders, typeId: 
   await refreshData();
 }
 
-function displayModal(provider: ExternalConnectionProviders, typeId: string | null = null, connectionName: string | null = null) {
+function displayModal(
+  provider: ExternalConnectionProviders | CalendarProviders,
+  typeId: string | null = null,
+  connectionName: string | null = null
+) {
   disconnectTypeId.value = typeId;
   disconnectConnectionName.value = connectionName;
 
@@ -141,23 +160,25 @@ async function refreshData() {
         <p>{{ calendar.title }}</p>
       </div>
 
-      <div class="calendar-color" :style="{ backgroundColor: calendar.color }"></div>
+      <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
+        <input type="color" v-model="calendar.color" />
+      </div>
 
-      <p class="calendar-provider">{{ keyByValue(CalendarProviders, calendar.provider, true) }}</p>
+      <p class="calendar-provider">{{ calendar.provider_name }}</p>
 
-      <drop-down class="dropdown" ref="calendarDropdown">
+      <drop-down class="dropdown" :ref="(el) => calendarDropdownRefs[calendar.id] = el">
         <template #trigger>
           <icon-dots size="24" />
         </template>
         <template #default>
-          <div class="dropdown-inner" @click="calendarDropdown.close()">
+          <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
             <button>
               {{ t('text.settings.connectedApplications.setAsDefault') }}
             </button>
             <button>
               {{ t('text.settings.connectedApplications.renameCalendar') }}
             </button>
-            <button>
+            <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name)">
               {{ t('label.disconnect') }}
             </button>
           </div>
@@ -189,35 +210,25 @@ async function refreshData() {
   </generic-modal>
 
   <!-- Disconnect Google Modal -->
-  <confirmation-modal
-    :open="disconnectGoogleModalOpen"
+  <confirmation-modal :open="disconnectGoogleModalOpen"
     :title="t('text.settings.connectedApplications.disconnect.google.title')"
     :message="t('text.settings.connectedApplications.disconnect.google.message', { googleAccountName: disconnectConnectionName })"
     :confirm-label="t('text.settings.connectedApplications.disconnect.google.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.google.cancel')"
-    :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google, disconnectTypeId)"
-    @close="closeModals"
-  />
+    :cancel-label="t('text.settings.connectedApplications.disconnect.google.cancel')" :use-caution-button="true"
+    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google, disconnectTypeId)" @close="closeModals" />
   <!-- Disconnect CalDav Modal -->
-  <confirmation-modal
-    :open="disconnectCalDavModalOpen"
+  <confirmation-modal :open="disconnectCalDavModalOpen"
     :title="t('text.settings.connectedApplications.disconnect.caldav.title')"
     :message="t('text.settings.connectedApplications.disconnect.caldav.message')"
     :confirm-label="t('text.settings.connectedApplications.disconnect.caldav.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.caldav.cancel')"
-    :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Caldav, disconnectTypeId)"
-    @close="closeModals"
-  />
+    :cancel-label="t('text.settings.connectedApplications.disconnect.caldav.cancel')" :use-caution-button="true"
+    @confirm="() => disconnectAccount(ExternalConnectionProviders.Caldav, disconnectTypeId)" @close="closeModals" />
   <!-- Disconnect Zoom Modal -->
-  <confirmation-modal
-    :open="disconnectZoomModalOpen"
+  <confirmation-modal :open="disconnectZoomModalOpen"
     :title="t('text.settings.connectedApplications.disconnect.zoom.title')"
     :message="t('text.settings.connectedApplications.disconnect.zoom.message')"
     :confirm-label="t('text.settings.connectedApplications.disconnect.zoom.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')"
-    :use-caution-button="true"
+    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')" :use-caution-button="true"
     @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom, zoomAccount.type_id)"
     @close="disconnectZoomModalOpen = false"></confirmation-modal>
 </template>
@@ -254,6 +265,7 @@ h2 {
   }
 
   .dropdown {
+    position: initial;
     align-self: center;
 
     .dropdown-inner {
@@ -293,6 +305,21 @@ h2 {
 .calendar-color {
   width: 24px;
   height: 24px;
+
+  input {
+    width: 24px;
+    height: 24px;
+    border: none;
+    cursor: pointer;
+
+    &::-moz-color-swatch {
+      border: none;
+    }
+
+    &::-webkit-color-swatch {
+      border: none;
+    }
+  }
 }
 
 .footer-buttons-container {

@@ -218,6 +218,7 @@ section {
 }
 
 .main-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2rem;

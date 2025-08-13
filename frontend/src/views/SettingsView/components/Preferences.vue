@@ -145,12 +145,11 @@ export default {
       {{ t('label.startOfWeek') }}
     </label>
 
-    <!-- TODO: BubbleSelect currently behaves like a multi-select but in this
-    case it should behave as a radio group (single selection) instead -->
     <bubble-select
       name="start-of-week"
       class="start-of-week-bubble-select"
       v-model="startOfWeek"
+      single-selection
       :options="availableStartOfTheWeekOptions"
       :required="false"
     />
