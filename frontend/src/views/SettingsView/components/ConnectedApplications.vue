@@ -2,7 +2,8 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IconDots } from '@tabler/icons-vue';
-import { CheckboxInput, SecondaryButton } from '@thunderbirdops/services-ui';
+import { CheckboxInput, SecondaryButton, PrimaryBadge } from '@thunderbirdops/services-ui';
+import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
 import GenericModal from '@/components/GenericModal.vue';
@@ -32,6 +33,8 @@ const userStore = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
+
+const { currentState } = storeToRefs(settingsStore);
 
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 const calendars = computed(() => calendarStore.calendars.map((calendar) => {
@@ -152,11 +155,14 @@ async function refreshData() {
 
     <template v-for="calendar in calendars" :key="calendar.id">
       <div class="calendar-details-container">
-        <checkbox-input name="calendarConnected" class="calendar-connected-checkbox" v-model="calendar.connected" />
-        <!-- TODO: How do we know which calendar is the default? -->
-        <!-- <primary-badge>
+        <checkbox-input
+          name="calendarConnected"
+          class="calendar-connected-checkbox"
+          v-model="calendar.connected"
+        />
+        <primary-badge v-if="currentState.defaultCalendarId === calendar.id">
           {{ t('label.default') }}
-        </primary-badge> -->
+        </primary-badge>
         <p>{{ calendar.title }}</p>
       </div>
 
@@ -172,7 +178,9 @@ async function refreshData() {
         </template>
         <template #default>
           <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
-            <button>
+            <button
+              v-if="calendar.connected && currentState.defaultCalendarId !== calendar.id"
+            >
               {{ t('text.settings.connectedApplications.setAsDefault') }}
             </button>
             <button>

@@ -6,6 +6,7 @@ import { deepClone } from "@/utils";
 import { createCalendarStore } from "./calendar-store";
 import { createUserStore } from "./user-store";
 import { createExternalConnectionsStore } from "./external-connections-store";
+import { createScheduleStore } from "./schedule-store";
 
 export const useSettingsStore = defineStore('settings', () => {
   const call = ref(null);
@@ -29,9 +30,11 @@ export const useSettingsStore = defineStore('settings', () => {
     const userStore = createUserStore(fetch);
     const calendarStore = createCalendarStore(fetch);
     const externalConnectionStore = createExternalConnectionsStore(fetch);
+    const scheduleStore = createScheduleStore(fetch);
 
     const { isLoaded: isCalendarStoreLoaded } = toRefs(calendarStore);
     const { isLoaded: isExternalConnectionStoreLoaded } = toRefs(externalConnectionStore);
+    const { isLoaded: isScheduleStoreLoaded } = toRefs(scheduleStore);
 
     // First, let's make sure that all stores are loaded
     // so that we can initialize the currentState properly
@@ -43,12 +46,19 @@ export const useSettingsStore = defineStore('settings', () => {
       await externalConnectionStore.fetch();
     }
 
+    if (!isScheduleStoreLoaded.value) {
+      await scheduleStore.fetch();
+    }
+
     // Preferences section
     initialState.value.colourScheme = userStore.data.settings.colourScheme;
     initialState.value.language = userStore.data.settings.language;
     initialState.value.startOfWeek = userStore.data.settings.startOfWeek;
     initialState.value.defaultTimeZone = userStore.data.settings.timezone;
     initialState.value.timeFormat = userStore.data.settings.timeFormat;
+
+    // Connected Applications section
+    initialState.value.defaultCalendarId = scheduleStore.firstSchedule.calendar_id;
 
     // Copy initialState
     currentState.value = deepClone({ ...initialState.value }); 

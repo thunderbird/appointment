@@ -14,7 +14,7 @@ const isoWeekdays = inject(isoWeekdaysKey);
 const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
 
-// Colour Scheme
+// Theme / Colour Scheme
 const colourSchemeOptions = computed(() => Object.values(ColourSchemes).map((c) => ({
   label: t(`label.${c}`),
   value: c,

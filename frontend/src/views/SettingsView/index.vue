@@ -5,11 +5,11 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { SettingsSections, AlertSchemes, ColourSchemes } from '@/definitions';
+import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
 import { enumToObject } from '@/utils';
 import { callKey } from '@/keys';
+import { SettingsSections, AlertSchemes, ColourSchemes } from '@/definitions';
 import { Alert, SubscriberResponse } from '@/models';
-import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useUserStore } from '@/stores/user-store';
 import { createSettingsStore } from '@/stores/settings-store';
@@ -21,6 +21,7 @@ import Preferences from './components/Preferences.vue';
 import ConnectedApplications from './components/ConnectedApplications.vue';
 
 // component constants
+const call = inject(callKey);
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
@@ -32,9 +33,8 @@ const saveSuccess = ref<Alert>(null);
 
 // Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
 const activeView = computed<number>(() => (route.hash && sections.value[route.hash.slice(1) as string] ? sections.value[route.hash.slice(1) as string] : SettingsSections.AccountSettings));
-const userStore = useUserStore();
 
-const call = inject(callKey);
+const userStore = useUserStore();
 const settingsStore = createSettingsStore(call);
 const { currentState, isDirty } = storeToRefs(settingsStore)
 
@@ -55,18 +55,27 @@ const redirectSetupUsers = (view: string) => {
   }
 };
 
-async function onSaveChanges() {
-  savingInProgress.value = true;
-
+async function updatePreferences() {
   const obj = {
     username: userStore.data.username,
+    timezone: currentState.value.defaultTimeZone,
     language: currentState.value.language,
-    timezone: userStore.data.settings.timezone,
     colour_scheme: currentState.value.colourScheme,
     time_mode: currentState.value.timeFormat,
     start_of_week: currentState.value.startOfWeek,
   };
 
+  const { error }: SubscriberResponse = await call('me').put(obj).json();
+
+  if (error.value) {
+    validationError.value = { title: (error.value as unknown as Error).message };
+    savingInProgress.value = false;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Color scheme needs to be applied manually so that
+  // the user doesn't have to refresh the pages to see the changes
   switch (currentState.value.colourScheme) {
     case ColourSchemes.Dark:
       document.documentElement.classList.add('dark');
@@ -85,19 +94,27 @@ async function onSaveChanges() {
       break;
   }
 
-  const { error }: SubscriberResponse = await call('me').put(obj).json();
+  // Update the userStore internal state with fresh backend values
+  await userStore.profile();
+}
 
-  if (error.value) {
-    validationError.value = { title: (error.value as unknown as Error).message };
+async function onSaveChanges() {
+  savingInProgress.value = true;
+
+  try {
+    await updatePreferences();
+
+    // Reload data form backend to reset currentState vs initialState
+    settingsStore.$reset();
+
+    saveSuccess.value = { title: t('info.settingsSavedSuccessfully') };
+    validationError.value = null;
     window.scrollTo(0, 0);
-    return;
+  } catch (error) {
+    validationError.value = { title: error };
+  } finally {
+    savingInProgress.value = false;
   }
-
-  // Reload data form backend to reset currentState vs initialState
-  settingsStore.$reset();
-
-  saveSuccess.value = { title: t('info.settingsSavedSuccessfully') };
-  window.scrollTo(0, 0);
 }
 
 function onRevertChanges() {
