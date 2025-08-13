@@ -80,6 +80,7 @@ debug: false # <boolean> # Set to true if you need screenshots for every seleniu
 networkLogs: false # <boolean> Set to true to enable HAR logs capturing; off as may contain sensitive info like login API requests
 consoleLogs: info # <string> Remote browser's console debug levels to be printed (`disable`, `errors`, `warnings`, `info`, or `verbose`)
 framework: playwright
+browserstack.playwrightVersion: 1.53.0 # must match our client playwright version in package.json; this is the latest supported in BrowserStack
 browserstack.playwrightLogs: false # disable playwright logs appearing on browserstack builds as may contain sensitive info like credentials
 # CUSTOM_TAG_<INT>: # <string> (Default: parent folder name of the test file) Custom tag for your test suite
 browserstack.maskBasicAuth: true # mask username and passwords from browserstack session logs
