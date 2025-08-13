@@ -103,7 +103,7 @@
     "profile": "Profile",
     "scheduleCreated": "Zeitplan erstellt!",
     "settings": {
-      "connectedAccounts": {
+      "connectedApplications": {
         "accounts": "Mozilla Konten",
         "caldav": "CalDAV Verbindungen",
         "fxa": "Mozilla Konten",
@@ -558,7 +558,9 @@
       "notActive": "Der Zeitplan ist inaktiv, aktiviere ihn zum Bearbeiten oder Teilen."
     },
     "settings": {
-      "connectedAccounts": {
+      "connectedApplications": {
+        "setAsDefault": "Als Standard festlegen",
+        "renameCalendar": "Kalender umbenennen",
         "connect": {
           "accounts": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "caldav": "Eine Verbindung zu einem CalDav-Server herstellen und die zugehörigen Kalender abrufen.",

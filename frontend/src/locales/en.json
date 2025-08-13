@@ -103,7 +103,7 @@
     "profile": "Profile",
     "scheduleCreated": "Schedule created!",
     "settings": {
-      "connectedAccounts": {
+      "connectedApplications": {
         "oidc": "Thunderbird Pro",
         "caldav": "CalDAV Connection",
         "fxa": "Mozilla Accounts",
@@ -558,7 +558,9 @@
       "notActive": "Schedule is not active, turn on the toggle to edit or share."
     },
     "settings": {
-      "connectedAccounts": {
+      "connectedApplications": {
+        "setAsDefault": "Set as default",
+        "renameCalendar": "Rename calendar",
         "connect": {
           "caldav": "You can connect to a CalDav server and pull its associated calendars.",
           "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",

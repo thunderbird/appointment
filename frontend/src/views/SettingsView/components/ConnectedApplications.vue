@@ -3,10 +3,11 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IconDots } from '@tabler/icons-vue';
 import { CheckboxInput, SecondaryButton } from '@thunderbirdops/services-ui';
-import { CalendarProviders } from '@/definitions';
+import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { keyByValue } from '@/utils';
 import { Alert } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
@@ -15,16 +16,24 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
 
 const { t } = useI18n();
+
 const calendarDropdown = ref();
+const videoMeetingDropdown = ref();
 const connectCalDavModalOpen = ref(false);
 const calDavErrorMessage = ref();
+
+const disconnectTypeId = ref(null);
+const disconnectConnectionName = ref(null);
+const disconnectCalDavModalOpen = ref(false);
+const disconnectZoomModalOpen = ref(false);
+const disconnectGoogleModalOpen = ref(false);
 
 const userStore = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
 
-const hasZoomAccount = computed(() => externalConnectionStore.zoom[0]);
+const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 const calendars = computed(() => calendarStore.calendars);
 
 async function connectGoogleCalendar() {
@@ -34,6 +43,47 @@ async function connectGoogleCalendar() {
 function afterCalDavConnect() {
   connectCalDavModalOpen.value = false;
 }
+
+async function disconnectAccount(provider: ExternalConnectionProviders, typeId: string | null = null) {
+  await externalConnectionStore.disconnect(provider, typeId);
+  closeModals();
+  externalConnectionStore.$reset();
+  await refreshData();
+}
+
+function displayModal(provider: ExternalConnectionProviders, typeId: string | null = null, connectionName: string | null = null) {
+  disconnectTypeId.value = typeId;
+  disconnectConnectionName.value = connectionName;
+
+  if (provider === ExternalConnectionProviders.Zoom) {
+    disconnectZoomModalOpen.value = true;
+  } else if (provider === ExternalConnectionProviders.Google) {
+    disconnectGoogleModalOpen.value = true;
+  } else if (provider === ExternalConnectionProviders.Caldav) {
+    disconnectCalDavModalOpen.value = true;
+  }
+};
+
+function closeModals() {
+  connectCalDavModalOpen.value = false;
+  disconnectZoomModalOpen.value = false;
+  disconnectGoogleModalOpen.value = false;
+  disconnectCalDavModalOpen.value = false;
+  disconnectTypeId.value = null;
+  disconnectConnectionName.value = null;
+}
+
+async function refreshData() {
+  // Need to reset calendar store first!
+  calendarStore.$reset();
+
+  await Promise.all([
+    externalConnectionStore.fetch(true),
+    calendarStore.fetch(),
+    // Need to update userStore in case they used an attached email
+    userStore.profile(),
+  ]);
+};
 </script>
 
 <template>
@@ -47,20 +97,27 @@ function afterCalDavConnect() {
       {{ t('label.videoMeeting') }}
     </label>
 
-    <template v-if="hasZoomAccount">
-      <p>Connected as dnakano@email.com</p>
+    <template v-if="zoomAccount">
+      <p>{{ t('label.connectedAs', { name: zoomAccount.name }) }}</p>
       <br />
-      <p>Zoom</p>
-      <icon-dots size="24" />
+      <p>{{ t('heading.zoom') }}</p>
+
+      <drop-down class="dropdown" ref="videoMeetingDropdown">
+        <template #trigger>
+          <icon-dots size="24" />
+        </template>
+        <template #default>
+          <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
+            <button @click="() => displayModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
+              {{ t('label.disconnect') }}
+            </button>
+          </div>
+        </template>
+      </drop-down>
     </template>
 
     <template v-else>
-      <i18n-t
-        keypath="text.generateZoomMeetingHelpDisabled.text"
-        tag="p"
-        scope="global"
-        class="video-not-connected"
-      >
+      <i18n-t keypath="text.generateZoomMeetingHelpDisabled.text" tag="p" scope="global" class="video-not-connected">
         <template v-slot:link>
           <button @click="settingsStore.connectZoom">
             {{ t('text.generateZoomMeetingHelpDisabled.link') }}
@@ -74,34 +131,35 @@ function afterCalDavConnect() {
       {{ t('label.calendar', calendars.length) }}
     </label>
 
-    <template
-      v-for="calendar in calendars"
-      :key="calendar.id"
-    >
+    <template v-for="calendar in calendars" :key="calendar.id">
       <div class="calendar-details-container">
-        <checkbox-input
-          name="calendarConnected"
-          class="calendar-connected-checkbox"
-          v-model="calendar.connected"
-        />
+        <checkbox-input name="calendarConnected" class="calendar-connected-checkbox" v-model="calendar.connected" />
         <!-- TODO: How do we know which calendar is the default? -->
         <!-- <primary-badge>
           {{ t('label.default') }}
         </primary-badge> -->
         <p>{{ calendar.title }}</p>
       </div>
-  
+
       <div class="calendar-color" :style="{ backgroundColor: calendar.color }"></div>
 
       <p class="calendar-provider">{{ keyByValue(CalendarProviders, calendar.provider, true) }}</p>
-  
-      <drop-down class="self-center" ref="calendarDropdown">
+
+      <drop-down class="dropdown" ref="calendarDropdown">
         <template #trigger>
           <icon-dots size="24" />
         </template>
         <template #default>
-          <div @click="calendarDropdown.close()">
-            <p>hey</p>
+          <div class="dropdown-inner" @click="calendarDropdown.close()">
+            <button>
+              {{ t('text.settings.connectedApplications.setAsDefault') }}
+            </button>
+            <button>
+              {{ t('text.settings.connectedApplications.renameCalendar') }}
+            </button>
+            <button>
+              {{ t('label.disconnect') }}
+            </button>
           </div>
         </template>
       </drop-down>
@@ -120,14 +178,48 @@ function afterCalDavConnect() {
   </div>
 
   <!-- Connect CalDav Modal Flow -->
-  <generic-modal v-if="connectCalDavModalOpen" @close="connectCalDavModalOpen = false" :error-message="calDavErrorMessage">
+  <generic-modal v-if="connectCalDavModalOpen" @close="connectCalDavModalOpen = false"
+    :error-message="calDavErrorMessage">
     <template v-slot:header>
       <h2 class="modal-title">
-        {{ t('heading.settings.connectedAccounts.caldav') }}
+        {{ t('heading.settings.connectedApplications.caldav') }}
       </h2>
     </template>
     <cal-dav-provider @next="afterCalDavConnect()" @error="(alert: Alert) => calDavErrorMessage = alert" />
   </generic-modal>
+
+  <!-- Disconnect Google Modal -->
+  <confirmation-modal
+    :open="disconnectGoogleModalOpen"
+    :title="t('text.settings.connectedApplications.disconnect.google.title')"
+    :message="t('text.settings.connectedApplications.disconnect.google.message', { googleAccountName: disconnectConnectionName })"
+    :confirm-label="t('text.settings.connectedApplications.disconnect.google.confirm')"
+    :cancel-label="t('text.settings.connectedApplications.disconnect.google.cancel')"
+    :use-caution-button="true"
+    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google, disconnectTypeId)"
+    @close="closeModals"
+  />
+  <!-- Disconnect CalDav Modal -->
+  <confirmation-modal
+    :open="disconnectCalDavModalOpen"
+    :title="t('text.settings.connectedApplications.disconnect.caldav.title')"
+    :message="t('text.settings.connectedApplications.disconnect.caldav.message')"
+    :confirm-label="t('text.settings.connectedApplications.disconnect.caldav.confirm')"
+    :cancel-label="t('text.settings.connectedApplications.disconnect.caldav.cancel')"
+    :use-caution-button="true"
+    @confirm="() => disconnectAccount(ExternalConnectionProviders.Caldav, disconnectTypeId)"
+    @close="closeModals"
+  />
+  <!-- Disconnect Zoom Modal -->
+  <confirmation-modal
+    :open="disconnectZoomModalOpen"
+    :title="t('text.settings.connectedApplications.disconnect.zoom.title')"
+    :message="t('text.settings.connectedApplications.disconnect.zoom.message')"
+    :confirm-label="t('text.settings.connectedApplications.disconnect.zoom.confirm')"
+    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')"
+    :use-caution-button="true"
+    @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom, zoomAccount.type_id)"
+    @close="disconnectZoomModalOpen = false"></confirmation-modal>
 </template>
 
 <style scoped>
@@ -159,6 +251,32 @@ h2 {
 
   .calendar-provider {
     text-transform: capitalize;
+  }
+
+  .dropdown {
+    align-self: center;
+
+    .dropdown-inner {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      min-width: max-content;
+      background-color: var(--colour-neutral-base);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      z-index: 2;
+
+      button {
+        width: 100%;
+        padding: 0.5rem;
+
+        &:hover {
+          background-color: var(--colour-neutral-lower);
+        }
+      }
+    }
   }
 }
 
