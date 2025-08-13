@@ -162,7 +162,7 @@ export default {
     </aside>
 
     <!-- content -->
-    <div class="page-content">
+    <div class="page-content" :class="{ 'is-dirty': isDirty }">
       <section id="accountSettings">
         <account-settings />
       </section>
@@ -243,6 +243,10 @@ section {
         background-color: var(--colour-apmt-primary-hover);
       }
     }
+  }
+
+  .page-content.is-dirty {
+    margin-block-end: 4rem;
   }
 }
 

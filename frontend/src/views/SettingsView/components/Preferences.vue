@@ -40,6 +40,21 @@ const language = computed({
   }
 })
 
+// Default Time Zone
+// @ts-expect-error ignore type err
+// See https://github.com/microsoft/TypeScript/issues/49231
+const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string) => ({
+  label: timezone.replaceAll('_', ' '),
+  value: timezone,
+}));
+
+const defaultTimeZone = computed({
+  get: () => currentState.value.defaultTimeZone,
+  set: (value) => {
+    settingsStore.$patch({ currentState: { defaultTimeZone: value }})
+  }
+})
+
 // Time Format
 const timeFormatOptions = computed(() => [{
   label: t('label.12hAmPm'),
@@ -105,6 +120,16 @@ export default {
       :options="localeOptions"
       v-model="language"
       data-testid="settings-preferences-language-select"
+    />
+
+    <label for="default-time-zone">
+      {{ t('label.defaultTimeZone') }}
+    </label>
+    <select-input
+      name="default-time-zone"
+      :options="timezoneOptions"
+      v-model="defaultTimeZone"
+      data-testid="settings-preferences-default-time-zone-select"
     />
 
     <label class="time-format-label" for="time-format">

@@ -264,6 +264,7 @@ export type User = {
 
 export type SettingsForm = {
   colourScheme?: string;
+  defaultTimeZone?: string;
   language?: string;
   startOfWeek?: number;
   timeFormat?: number;

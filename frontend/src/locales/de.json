@@ -262,6 +262,7 @@
     "declined": "Abgelehnt",
     "default": "Standard",
     "defaultFont": "Standard Schriftart",
+    "defaultTimeZone": "Standard Zeitzone",
     "delete": "Löschen",
     "deleteBooking": "Buchung löschen",
     "deny": "Ablehnen",
