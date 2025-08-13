@@ -101,7 +101,7 @@ def read_my_calendars(
     return [schemas.CalendarOut(id=c.id, title=c.title, color=c.color, connected=c.connected) for c in calendars]
 
 
-@router.get('/me/appointments', response_model=schemas.ListResponse)
+@router.get('/me/appointments', response_model=schemas.ListResponse, tags=['no-cache'])
 def read_my_appointments(
     page: int = 1,
     per_page: int = 50,
@@ -385,7 +385,7 @@ def sync_remote_calendars(
     return True
 
 
-@router.get('/rmt/cal/{id}/{start}/{end}', response_model=list[schemas.Event])
+@router.get('/rmt/cal/{id}/{start}/{end}', response_model=list[schemas.Event], tags=['no-cache'])
 def read_remote_events(
     id: int,
     start: str,

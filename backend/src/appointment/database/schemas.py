@@ -84,8 +84,12 @@ class Slot(SlotBase):
     attendee: Attendee | None = None
 
 
-class SlotOut(SlotBase):
+class SlotOut(BaseModel):
     id: int | None = None
+    attendee_id: int | None = None
+    booking_status: BookingStatus | None = BookingStatus.none
+    duration: int | None = None
+    start: datetime
 
 
 class SlotAttendee(BaseModel):
@@ -143,7 +147,7 @@ class AppointmentWithCalendarOut(Appointment):
 class AppointmentOut(AppointmentBase):
     id: int | None = None
     owner_name: str | None = None
-    slots: list[SlotBase | SlotOut] = []
+    slots: list[SlotOut] = []
     slot_duration: int
     booking_confirmation: bool
 
@@ -398,11 +402,6 @@ class InviteAdminOut(ListResponse):
 
 """ other schemas used for requests or data migration
 """
-
-
-class AppointmentSlots(BaseModel):
-    appointment: AppointmentFull
-    slots: list[SlotBase] = []
 
 
 class AppointmentModifyRequest(BaseModel):

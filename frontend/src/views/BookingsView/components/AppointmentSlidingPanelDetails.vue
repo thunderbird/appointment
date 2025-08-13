@@ -16,6 +16,7 @@ const dj = inject(dayjsKey);
 const { t } = useI18n();
 
 const status = computed(() => props.appointment?.slots[0].booking_status);
+const meetingLinkURL = computed(() => props.appointment?.slots[0].meeting_link_url);
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
 const bookingStatusInfo = computed(() => {
   switch (status.value) {
@@ -82,8 +83,8 @@ const bookingStatusInfo = computed(() => {
           <span class="info-label">
             {{ t('label.videoLink') }}:
           </span>
-          <a v-if="appointment.location_url" :href="appointment.location_url" class="video-link" target="_blank">
-            {{ appointment.location_url }}
+          <a v-if="meetingLinkURL" :href="meetingLinkURL" class="video-link" target="_blank">
+            {{ meetingLinkURL }}
           </a>
           <span v-else>
             {{ t('label.notProvided') }}

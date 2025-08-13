@@ -914,6 +914,10 @@ class TestRequestScheduleAvailability:
         # I miss dot notation
         assert data.get('detail').get('id') == validation.SlotAlreadyTakenException.id_code
 
+        # Check that sensitive fields are not in the response
+        assert 'meeting_link_id' not in data
+        assert 'meeting_link_url' not in data
+
         # Okay change up the time
         slot_availability['slot']['start'] = datetime.combine(start_date, time(11), tzinfo=timezone.utc).isoformat()
         # Check availability at the start of the schedule
@@ -929,6 +933,10 @@ class TestRequestScheduleAvailability:
         assert response.status_code == 200, response.text
         data = response.json()
         assert data.get('id')
+
+        # Check that sensitive fields are not in the response
+        assert 'meeting_link_id' not in data
+        assert 'meeting_link_url' not in data
 
         slot_id = data.get('id')
 

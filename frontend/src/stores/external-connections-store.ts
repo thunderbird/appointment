@@ -46,6 +46,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     }
 
     const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections').get().json();
+
     oidc.value = data.value?.oidc ?? [];
     zoom.value = data.value?.zoom ?? [];
     fxa.value = data.value?.fxa ?? [];
