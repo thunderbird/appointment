@@ -157,8 +157,17 @@ def get_database_url() -> str | sqlalchemy_url:
     username = os.environ.get('DATABASE_USERNAME')
     password = os.environ.get('DATABASE_PASSWORD')
 
-    if not all([db_name, dialect, host, password, port, username]):
-        raise ValueError('Missing one or more database configuration value. Review your environment.')
+    requirements = {
+        'db_name': db_name,
+        'dialect': dialect,
+        'host': host,
+        'password': password,
+        'port': port,
+        'username': username,
+    }
+    missing_requirements = [key for key, value in requirements.items() if not value]
+    if len(missing_requirements) > 0:
+        raise ValueError(f'Missing the following database options: {missing_requirements}')
 
     # If we've had to compose this from parts, use the SQLAlchemy URL class
     return sqlalchemy_url(
