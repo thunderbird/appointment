@@ -12,6 +12,8 @@ import { SettingsSections, AlertSchemes, ColourSchemes } from '@/definitions';
 import { Alert, SubscriberResponse } from '@/models';
 import AlertBox from '@/elements/AlertBox.vue';
 import { useUserStore } from '@/stores/user-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
 import { IconChevronRight } from '@tabler/icons-vue';
 
@@ -35,6 +37,8 @@ const saveSuccess = ref<Alert>(null);
 const activeView = computed<number>(() => (route.hash && sections.value[route.hash.slice(1) as string] ? sections.value[route.hash.slice(1) as string] : SettingsSections.AccountSettings));
 
 const userStore = useUserStore();
+const calendarStore = useCalendarStore();
+const scheduleStore = useScheduleStore();
 const settingsStore = createSettingsStore(call);
 const { currentState, isDirty } = storeToRefs(settingsStore)
 
@@ -65,6 +69,20 @@ async function updatePreferences() {
     start_of_week: currentState.value.startOfWeek,
   };
 
+  const originalValues = {
+    username: userStore.data.username,
+    timezone: userStore.data.settings.timezone,
+    language: userStore.data.settings.language,
+    colour_scheme: userStore.data.settings.colourScheme,
+    time_mode: userStore.data.settings.timeFormat,
+    start_of_week: userStore.data.settings.startOfWeek,
+  }
+
+  // Don't call the API if nothing hasn't changed
+  if (JSON.stringify(obj) === JSON.stringify(originalValues)) {
+    return;
+  }
+
   const { error }: SubscriberResponse = await call('me').put(obj).json();
 
   if (error.value) {
@@ -75,7 +93,7 @@ async function updatePreferences() {
   }
 
   // Color scheme needs to be applied manually so that
-  // the user doesn't have to refresh the pages to see the changes
+  // the user doesn't have to refresh the page to see the changes
   switch (currentState.value.colourScheme) {
     case ColourSchemes.Dark:
       document.documentElement.classList.add('dark');
@@ -98,11 +116,41 @@ async function updatePreferences() {
   await userStore.profile();
 }
 
+async function updateCalendarConnections() {
+  const calendarPromises = [];
+
+  Object.keys(currentState.value.changedCalendars).forEach((calendarId) => {
+    const nCalendarId = parseInt(calendarId, 10);
+
+    if (currentState.value.changedCalendars[calendarId]) {
+      calendarPromises.push(calendarStore.connectCalendar(nCalendarId))
+    } else {
+      calendarPromises.push(calendarStore.disconnectCalendar(nCalendarId))
+    }
+  });
+
+  await Promise.all(calendarPromises);
+}
+
+async function updateScheduleDefaultCalendar() {
+  const firstScheduleId = scheduleStore.firstSchedule.id;
+
+  // Only make the request if the default calendar has been changed
+  if (scheduleStore.firstSchedule.calendar_id !== currentState.value.defaultCalendarId) {
+    await scheduleStore.updateSchedule(firstScheduleId, {
+      ...scheduleStore.firstSchedule,
+      calendar_id: currentState.value.defaultCalendarId
+    });
+  }
+}
+
 async function onSaveChanges() {
   savingInProgress.value = true;
 
   try {
     await updatePreferences();
+    await updateCalendarConnections();
+    await updateScheduleDefaultCalendar();
 
     // Reload data form backend to reset currentState vs initialState
     settingsStore.$reset();

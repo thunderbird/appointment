@@ -271,6 +271,7 @@ export type SettingsForm = {
   language?: string;
   startOfWeek?: number;
   timeFormat?: number;
+  changedCalendars?: { [id: number]: boolean };
 }
 
 /**

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IconDots } from '@tabler/icons-vue';
-import { CheckboxInput, SecondaryButton, PrimaryBadge } from '@thunderbirdops/services-ui';
+import { SecondaryButton, PrimaryBadge, CheckboxInput } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
@@ -10,7 +10,7 @@ import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { keyByValue } from '@/utils';
-import { Alert, ExternalConnection } from '@/models';
+import { Alert, ExternalConnection, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -35,10 +35,14 @@ const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
 
 const { currentState } = storeToRefs(settingsStore);
+const { calendars } = storeToRefs(calendarStore);
 
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
-const calendars = computed(() => calendarStore.calendars.map((calendar) => {
-  
+
+// This computed property refers to the calendars from the backend combined
+// with some data from external connections to facilitate connection / disconnection.
+// It should be immutable as it represents the current state of the backend data.
+const initialCalendars = computed(() => calendars.value?.map((calendar) => {
   const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
   const externalConnection: ExternalConnection = externalConnectionStore
     .connections[connectionProvider]
@@ -52,7 +56,7 @@ const calendars = computed(() => calendarStore.calendars.map((calendar) => {
     connection_name: externalConnection?.name,
     provider_name: connectionProvider,
   }
-}));
+}) || []);
 
 async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar(userStore.data.email);
@@ -95,11 +99,31 @@ function closeModals() {
   disconnectConnectionName.value = null;
 }
 
+function onCalendarChecked(event: HTMLInputElementEvent, calendarId: number) {
+  // Only update local state, the actual connection / disconnection
+  // of the calendar happens on save changes in SettingsView/index.vue
+  settingsStore.$patch({
+    currentState: {
+      changedCalendars: {
+        ...currentState.value.changedCalendars,
+        [calendarId]: event.target.checked
+      }
+    }
+  })
+}
+
+function onSetAsDefaultClicked(calendarId: number) {
+  // Only update local state, the actual schedule's calendar change
+  // happens on save changes in SettingsView/index.vue
+  settingsStore.$patch({ currentState: { defaultCalendarId: calendarId }})
+}
+
 async function refreshData() {
   // Need to reset calendar store first!
   calendarStore.$reset();
 
   await Promise.all([
+    settingsStore.$reset(),
     externalConnectionStore.fetch(true),
     calendarStore.fetch(),
     // Need to update userStore in case they used an attached email
@@ -150,15 +174,16 @@ async function refreshData() {
 
     <!-- Calendars -->
     <label class="form-field-label" for="calendars">
-      {{ t('label.calendar', calendars.length) }}
+      {{ t('label.calendar', initialCalendars.length) }}
     </label>
 
-    <template v-for="calendar in calendars" :key="calendar.id">
+    <template v-for="calendar in initialCalendars" :key="calendar.id">
       <div class="calendar-details-container">
         <checkbox-input
           name="calendarConnected"
           class="calendar-connected-checkbox"
-          v-model="calendar.connected"
+          @change="(event) => onCalendarChecked(event, calendar.id)"
+          :checked="calendar.connected"
         />
         <primary-badge v-if="currentState.defaultCalendarId === calendar.id">
           {{ t('label.default') }}
@@ -180,6 +205,7 @@ async function refreshData() {
           <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
             <button
               v-if="calendar.connected && currentState.defaultCalendarId !== calendar.id"
+              @click="() => onSetAsDefaultClicked(calendar.id)"
             >
               {{ t('text.settings.connectedApplications.setAsDefault') }}
             </button>
