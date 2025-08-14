@@ -106,6 +106,8 @@ def read_my_calendars(
             color=c.color,
             connected=c.connected,
             provider=c.provider,
+            url=c.url,
+            user=c.user
         )
         for c in calendars
     ]

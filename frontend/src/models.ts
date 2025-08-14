@@ -155,6 +155,7 @@ export type Calendar = {
   provider?: CalendarProviders;
   url?: string;
   user?: string;
+  password?: string;
 };
 
 export type CalendarItem = {
@@ -272,6 +273,7 @@ export type SettingsForm = {
   startOfWeek?: number;
   timeFormat?: number;
   changedCalendars?: { [id: number]: boolean };
+  changedCalendarColors?: { [id: number]: string };
 }
 
 /**

@@ -60,6 +60,7 @@ export const useSettingsStore = defineStore('settings', () => {
     // Connected Applications section
     initialState.value.defaultCalendarId = scheduleStore.firstSchedule.calendar_id;
     initialState.value.changedCalendars = {};
+    initialState.value.changedCalendarColors = {};
 
     // Copy initialState
     currentState.value = deepClone({ ...initialState.value }); 

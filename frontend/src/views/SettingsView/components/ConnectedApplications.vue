@@ -19,12 +19,13 @@ import { useUserStore } from '@/stores/user-store';
 const { t } = useI18n();
 
 const videoMeetingDropdown = ref();
-const connectCalDavModalOpen = ref(false);
 const calDavErrorMessage = ref();
 const calendarDropdownRefs = ref({});
-
 const disconnectTypeId = ref(null);
 const disconnectConnectionName = ref(null);
+
+// Modals
+const connectCalDavModalOpen = ref(false);
 const disconnectCalDavModalOpen = ref(false);
 const disconnectZoomModalOpen = ref(false);
 const disconnectGoogleModalOpen = ref(false);
@@ -118,6 +119,19 @@ function onSetAsDefaultClicked(calendarId: number) {
   settingsStore.$patch({ currentState: { defaultCalendarId: calendarId }})
 }
 
+function onCalendarColorChanged(event: HTMLInputElementEvent, calendarId: number) {
+  // Only update local state, the actual calendar color change
+  // happens on save changes in SettingsView/index.vue
+  settingsStore.$patch({
+    currentState: {
+      changedCalendarColors: {
+        ...currentState.value.changedCalendarColors,
+        [calendarId]: event.target.value
+      }
+    }
+  })
+}
+
 async function refreshData() {
   // Need to reset calendar store first!
   calendarStore.$reset();
@@ -192,7 +206,11 @@ async function refreshData() {
       </div>
 
       <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
-        <input type="color" v-model="calendar.color" />
+        <input
+          type="color"
+          :value="calendar.color"
+          @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
+        />
       </div>
 
       <p class="calendar-provider">{{ calendar.provider_name }}</p>
@@ -209,9 +227,10 @@ async function refreshData() {
             >
               {{ t('text.settings.connectedApplications.setAsDefault') }}
             </button>
-            <button>
+            <!-- TODO: Rename Calendar not implemented -->
+            <!-- <button>
               {{ t('text.settings.connectedApplications.renameCalendar') }}
-            </button>
+            </button> -->
             <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name)">
               {{ t('label.disconnect') }}
             </button>
@@ -354,6 +373,13 @@ h2 {
       border: none;
     }
   }
+}
+
+.modal-title {
+  color: var(--colour-ti-base);
+  font-weight: 400;
+  font-size: 1.375rem;
+  line-height: 1.664rem;
 }
 
 .footer-buttons-container {

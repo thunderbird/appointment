@@ -301,6 +301,8 @@ class Calendar(CalendarConnection):
 
 class CalendarOut(CalendarBase):
     id: int
+    url: str | None = None
+    user: str | None = None
     external_connection_id: int | None = None
     provider: CalendarProvider | None = CalendarProvider.caldav
 

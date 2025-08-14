@@ -144,6 +144,24 @@ async function updateScheduleDefaultCalendar() {
   }
 }
 
+async function updateCalendarColors() {
+  const calendarPromises = [];
+
+  Object.keys(currentState.value.changedCalendarColors).forEach((calendarId) => {
+    const calendar = calendarStore.calendarById(parseInt(calendarId, 10));
+
+    calendarPromises.push(calendarStore.updateCalendar({
+      ...calendar,
+      // TODO: API expects a complete calendar object but we were always sending
+      // the password as empty before :thinking-face:
+      password: '',
+      color: currentState.value.changedCalendarColors[calendarId]
+    }))
+  })
+
+  await Promise.all(calendarPromises);
+}
+
 async function onSaveChanges() {
   savingInProgress.value = true;
 
@@ -151,8 +169,10 @@ async function onSaveChanges() {
     await updatePreferences();
     await updateCalendarConnections();
     await updateScheduleDefaultCalendar();
+    await updateCalendarColors();
 
     // Reload data form backend to reset currentState vs initialState
+    calendarStore.$reset();
     settingsStore.$reset();
 
     saveSuccess.value = { title: t('info.settingsSavedSuccessfully') };
