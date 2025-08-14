@@ -186,30 +186,16 @@ def normalize_secrets():
 
     log.info('Normalizing secrets...')
 
+    # If the legacy "DATABASE_SECRETS" variable is set, decode the options into the proper variables
     database_secrets = os.getenv('DATABASE_SECRETS')
     if database_secrets:
         secrets = json.loads(database_secrets)
-        host = secrets['host']
-        port = secrets['port']
-
-        # If port is not already in the host var, then append it to hostname
-        hostname = host
-        if f':{port}' not in host:
-            hostname = f'{hostname}:{port}'
-
-        # Determine a "dialect+driver" scheme
-        dialect = secrets['engine']
-        if dialect == 'mysql':
-            driver = 'mysqldb'
-        elif dialect == 'postgresql':
-            driver = 'psycopg2'
-        else:
-            driver = None
-        proto = f'{dialect}+{driver}' if driver else dialect
-
-        os.environ['DATABASE_URL'] = (
-            f'{proto}://{secrets["username"]}:{secrets["password"]}@{hostname}/{secrets["dbname"]}'
-        )
+        os.environ['DATABASE_ENGINE'] = secrets['engine']
+        os.environ['DATABASE_HOST'] = secrets['host']
+        os.environ['DATABASE_NAME'] = secrets['dbname']
+        os.environ['DATABASE_PASSWORD'] = secrets['password']
+        os.environ['DATABASE_PORT'] = secrets['port']
+        os.environ['DATABASE_USERNAME'] = secrets['username']
 
     database_enc_secret = os.getenv('DB_ENC_SECRET')
 
