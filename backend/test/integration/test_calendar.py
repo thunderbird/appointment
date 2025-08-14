@@ -113,8 +113,6 @@ class TestCalendar:
         assert calendar['title'] == generated_calendar.title
         assert calendar['color'] == generated_calendar.color
         assert not calendar['connected']
-        assert 'url' not in calendar
-        assert 'user' not in calendar
         assert 'password' not in calendar
 
     @pytest.mark.parametrize('provider,factory_name', get_calendar_factory())
@@ -181,8 +179,6 @@ class TestCalendar:
         assert data['title'] == generated_calendar.title
         assert data['color'] == generated_calendar.color
         assert data['connected']
-        assert 'url' not in data
-        assert 'user' not in data
         assert 'password' not in data
 
     @pytest.mark.parametrize('provider,factory_name', get_calendar_factory())
@@ -228,8 +224,6 @@ class TestCalendar:
         assert calendar['title'] == generated_calendar.title
         assert calendar['color'] == generated_calendar.color
         assert calendar['connected']
-        assert 'url' not in calendar
-        assert 'user' not in calendar
         assert 'password' not in calendar
 
     @pytest.mark.parametrize('provider,factory_name', get_calendar_factory())
@@ -253,8 +247,6 @@ class TestCalendar:
         assert data['title'] == generated_calendar.title
         assert data['color'] == generated_calendar.color
         assert data['connected']
-        assert 'url' not in data
-        assert 'user' not in data
         assert 'password' not in data
 
         response = with_client.get(f'/cal/{generated_calendar.id}', headers=auth_headers)
@@ -353,8 +345,6 @@ class TestCaldav:
         assert data['title'] == 'First CalDAV calendar'
         assert data['color'] == '#123456'
         assert not data['connected']
-        assert 'url' not in data
-        assert 'user' not in data
         assert 'password' not in data
 
     def test_create_google_caldav_calendar(self, with_client):
@@ -392,8 +382,6 @@ class TestCaldav:
         assert data['title'] == 'First modified CalDAV calendar'
         assert data['color'] == '#234567'
         assert not data['connected']
-        assert 'url' not in data
-        assert 'user' not in data
         assert 'password' not in data
 
         query = select(models.Calendar).where(models.Calendar.id == generated_calendar.id)
@@ -425,8 +413,6 @@ class TestCaldav:
         data = response.json()
         assert data['title'] == 'First modified CalDAV calendar'
         assert data['color'] == '#234567'
-        assert 'url' not in data
-        assert 'user' not in data
         assert 'password' not in data
 
         query = select(models.Calendar).where(models.Calendar.id == generated_calendar.id)

@@ -33,7 +33,9 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
 
     for ec in subscriber.external_connections:
         external_connections[ec.type.name].append(
-            schemas.ExternalConnectionOut(owner_id=ec.owner_id, type=ec.type.name, type_id=ec.type_id, name=ec.name)
+            schemas.ExternalConnectionOut(
+                id=ec.id, owner_id=ec.owner_id, type=ec.type.name, type_id=ec.type_id, name=ec.name
+            )
         )
 
     return external_connections

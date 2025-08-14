@@ -112,16 +112,16 @@ const onSubmit = async () => {
         </li>
       </ul>
       <i18n-t
-        :keypath="`text.settings.connectedAccounts.connect.googleLegal.text`"
+        :keypath="`text.settings.connectedApplications.connect.googleLegal.text`"
         tag="label"
-        :for="`text.settings.connectedAccounts.connect.googleLegal.link`"
+        :for="`text.settings.connectedApplications.connect.googleLegal.link`"
       >
         <a
           class="underline"
           href="https://developers.google.com/terms/api-services-user-data-policy"
           target="_blank"
         >
-          {{ t(`text.settings.connectedAccounts.connect.googleLegal.link`) }}
+          {{ t(`text.settings.connectedApplications.connect.googleLegal.link`) }}
         </a>
       </i18n-t>
     </div>

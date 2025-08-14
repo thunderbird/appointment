@@ -149,11 +149,13 @@ export type EventPopup = {
 export type Calendar = {
   id?: number;
   connected: boolean;
+  external_connection_id: number;
   title: string;
   color: string;
   provider?: CalendarProviders;
   url?: string;
   user?: string;
+  password?: string;
 };
 
 export type CalendarItem = {
@@ -163,6 +165,7 @@ export type CalendarItem = {
 };
 
 export type ExternalConnection = {
+  id: number;
   owner_id: number;
   name: string;
   type: string;
@@ -261,6 +264,17 @@ export type User = {
   isSetup: boolean,
   uniqueHash: string;
 };
+
+export type SettingsForm = {
+  colourScheme?: string;
+  defaultTimeZone?: string;
+  defaultCalendarId?: number;
+  language?: string;
+  startOfWeek?: number;
+  timeFormat?: number;
+  changedCalendars?: { [id: number]: boolean };
+  changedCalendarColors?: { [id: number]: string };
+}
 
 /**
  * User settings to customize the application
