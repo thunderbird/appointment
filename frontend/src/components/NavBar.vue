@@ -51,34 +51,15 @@ const copyLink = async () => {
 </script>
 
 <template>
-  <header
-    class="
-      fixed z-50 flex h-16 w-full justify-between overflow-x-auto overflow-y-visible border-b border-gray-300
-      bg-white px-4 shadow-lg dark:border-gray-600 dark:bg-gray-700 md:overflow-visible
-    "
-  >
+  <header class="header-desktop">
     <router-link
-      class="shrink-0 border-r border-gray-300 py-4 pl-4 pr-8 dark:border-gray-600"
+      class="appointment-logo"
       :to="{ name: user?.authenticated ? 'dashboard' : 'home' }"
     >
-      <img class="h-8" src="@/assets/svg/appointment_logo_beta.svg" alt="Appointment Logo" />
+      <img src="@/assets/svg/appointment_logo_beta.svg" alt="Appointment Logo" />
     </router-link>
-    <!-- <label class="grow flex items-center relative">
-      <icon-search
-        class="
-          absolute top-1/2 -translate-y-1/2 left-7 cursor-text h-8 w-8 stroke-2 fill-transparent
-          stroke-gray-300 dark:stroke-gray-500
-        "
-      />
-      <input
-        class="w-full h-full text-xl pl-20 pr-2 border-none"
-        type="search"
-        name="search"
-        :placeholder="t('label.search')"
-      />
-    </label> -->
-    <nav v-if="user.authenticated" class="flex items-stretch gap-4">
-      <div class="flex justify-end gap-8">
+    <nav v-if="user.authenticated">
+      <div class="nav-items-container">
         <nav-bar-item
           v-for="item in navItems"
           :key="item"
@@ -86,16 +67,16 @@ const copyLink = async () => {
           :label="t(`label.${item}`)"
           :link-name="item"
         />
-        <div v-if="user.myLink" class="flex items-center justify-center px-4 relative">
+        <div v-if="user.myLink" class="nav-copy-link-button-container">
           <button
-            class="cursor-pointer bg-transparent border-none font-semibold min-w-0 p-0 flex items-center relative group active:text-teal-500"
+            class="nav-copy-link-button"
             @click="copyLink"
             aria-labelledby="copy-meeting-link-button"
           >
             <icon-link id="copy-meeting-link-button"></icon-link>
             <tool-tip
               :position="TooltipPosition.Top"
-              class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 opacity-0 transition-opacity duration-250 ease-out group-hover:opacity-100 group-hover:pointer-events-auto whitespace-nowrap text-xs min-w-max"
+              class="nav-copy-link-tooltip"
             >
               {{ myLinkTooltip }}
             </tool-tip>
@@ -103,10 +84,10 @@ const copyLink = async () => {
         </div>
       </div>
 
-      <drop-down class="self-center" ref="profileDropdown">
+      <drop-down class="user-dropdown" ref="profileDropdown">
         <template #trigger>
-          <div class="flex items-center gap-4 border rounded-md border-gray-300 pl-3 pr-1 py-1 bg-white">
-            <span class="text-sm text-gray-500">
+          <div class="user-dropdown-trigger-container">
+            <span>
               {{ user.data.email }}
             </span>
 
@@ -116,9 +97,9 @@ const copyLink = async () => {
         <template #default>
           <div
             @click="profileDropdown.close()"
-            class="fixed left-0 top-16 flex w-full flex-col gap-2 rounded-md bg-white p-4 shadow-md dark:bg-gray-700 md:static md:left-auto md:top-auto md:w-48"
+            class="user-dropdown-content-container"
           >
-            <router-link :to="{ name: 'profile' }" class="p-2">
+            <router-link :to="{ name: 'profile' }">
               {{ t('label.userProfile') }}
             </router-link>
             <text-button
@@ -127,17 +108,17 @@ const copyLink = async () => {
               :label="t('navBar.shareMyLink')"
               :copy="user.myLink"
               :title="t('label.copy')"
-              class="btn-copy flex-row-reverse justify-between border-none !text-base !font-normal !text-inherit hover:bg-inherit hover:shadow-none"
+              class="share-link-button"
               data-testid="user-nav-share-link-btn"
             />
-            <router-link :to="{ name: 'report-bug' }" class="flex items-center justify-between gap-1 p-2" data-testid="user-nav-report-bug-menu">
+            <router-link :to="{ name: 'report-bug' }" class="router-link-with-icon" data-testid="user-nav-report-bug-menu">
               {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
             </router-link>
-            <router-link :to="{ name: 'contact' }" class="flex items-center justify-between gap-1 p-2" data-testid="user-nav-contact-menu">
+            <router-link :to="{ name: 'contact' }" class="router-link-with-icon" data-testid="user-nav-contact-menu">
               {{ t('label.contact') }} <icon-external-link class="size-4"/>
             </router-link>
             <hr class="border-teal-500" />
-            <router-link :to="{ name: 'logout' }" class="p-2" data-testid="user-nav-logout-menu">
+            <router-link :to="{ name: 'logout' }" data-testid="user-nav-logout-menu">
               {{ t('label.logOut') }}
             </router-link>
           </div>
@@ -146,3 +127,152 @@ const copyLink = async () => {
     </nav>
   </header>
 </template>
+
+<style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+/* Hide header desktop in favor of mobile */
+.header-desktop {
+  display: none;
+}
+
+@media (--md) {
+  .header-desktop {
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 64px;
+    padding-inline: 1rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    overflow: visible;
+    border-block-end: 1px solid var(--colour-neutral-border);
+    background-color: var(--colour-neutral-base);
+    z-index: 50;
+  }
+
+  nav {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .nav-items-container {
+    display: flex;
+    justify-content: end;
+    gap: 2rem;
+  }
+
+  .nav-copy-link-button-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 1rem;
+  }
+
+  .nav-copy-link-button {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &:active {
+      color: var(--colour-accent-teal);
+    }
+  }
+
+  .nav-copy-link-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.5rem;
+    opacity: 0;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    min-width: max-content;
+    pointer-events: none;
+  }
+
+  .nav-copy-link-button:hover .nav-copy-link-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .appointment-logo {
+    flex-shrink: 0;
+    border-inline-end: 1px solid var(--colour-neutral-border);
+    padding: 1rem 2rem 1rem 1rem;
+
+    img {
+      height: 2rem;
+    }
+  }
+
+  .user-dropdown {
+    align-self: center;
+  }
+
+  .user-dropdown-trigger-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid var(--colour-neutral-border);
+    border-radius: 0.375rem;
+    background-color: white;
+    padding: 0.25rem 0.25rem 0.25rem 0.75rem;
+
+    & > span {
+      font-size: 0.875rem;
+      color: var(--colour-ti-muted);
+    }
+  }
+
+  .user-dropdown-content-container {
+    position: static;
+    left: auto;
+    top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 12rem;
+    border-radius: 0.375rem;
+    background-color: var(--colour-neutral-raised);
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+    a {
+      padding: 0.5rem;
+    }
+
+    .share-link-button {
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      border: none;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5rem;
+      color: inherit;
+      padding: 0.5rem;
+
+      &:hover {
+        background-color: inherit;
+        box-shadow: none;
+      }
+    }
+
+    .router-link-with-icon {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav-copy-link-tooltip {
+    transition: opacity 250ms ease-out;
+  }
+}
+</style>

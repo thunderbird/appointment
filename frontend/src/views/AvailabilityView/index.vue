@@ -158,7 +158,8 @@ export default {
 
 .page-title {
   margin-block-end: 2rem;
-  font-size: 1.5rem;
+  font-size: 2.25rem;
+  font-weight: 300;
 }
 
 .page-content {
