@@ -157,8 +157,17 @@ def get_database_url() -> str | sqlalchemy_url:
     username = os.environ.get('DATABASE_USERNAME')
     password = os.environ.get('DATABASE_PASSWORD')
 
-    if not all([db_name, dialect, host, password, port, username]):
-        raise ValueError('Missing one or more database configuration value. Review your environment.')
+    requirements = {
+        'db_name': db_name,
+        'dialect': dialect,
+        'host': host,
+        'password': password,
+        'port': port,
+        'username': username,
+    }
+    missing_requirements = [key for key, value in requirements.items() if not value]
+    if len(missing_requirements) > 0:
+        raise ValueError(f'Missing the following database options: {missing_requirements}')
 
     # If we've had to compose this from parts, use the SQLAlchemy URL class
     return sqlalchemy_url(
@@ -176,6 +185,19 @@ def normalize_secrets():
     """Normalizes AWS secrets for Appointment"""
 
     log.info('Normalizing secrets...')
+
+    # If the legacy "DATABASE_SECRETS" variable is set, decode the options into the proper variables
+    database_secrets = os.getenv('DATABASE_SECRETS')
+    if database_secrets:
+        log.info('Decoding DATABASE_SECRETS...')
+        secrets = json.loads(database_secrets)
+        os.environ['DATABASE_ENGINE'] = secrets['engine']
+        os.environ['DATABASE_HOST'] = secrets['host']
+        os.environ['DATABASE_NAME'] = secrets['dbname']
+        os.environ['DATABASE_PASSWORD'] = secrets['password']
+        os.environ['DATABASE_PORT'] = secrets['port']
+        os.environ['DATABASE_USERNAME'] = secrets['username']
+
     database_enc_secret = os.getenv('DB_ENC_SECRET')
 
     if database_enc_secret:
