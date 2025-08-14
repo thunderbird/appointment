@@ -189,6 +189,7 @@ def normalize_secrets():
     # If the legacy "DATABASE_SECRETS" variable is set, decode the options into the proper variables
     database_secrets = os.getenv('DATABASE_SECRETS')
     if database_secrets:
+        log.info('Decoding DATABASE_SECRETS...')
         secrets = json.loads(database_secrets)
         os.environ['DATABASE_ENGINE'] = secrets['engine']
         os.environ['DATABASE_HOST'] = secrets['host']
