@@ -97,6 +97,7 @@ module "vpc_endpoints" {
 # ECS Task Execution Role
 module "ecs_task_execution_role" {
   source = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.60.0"
 
   trusted_role_services = [
     "ecs-tasks.amazonaws.com"
