@@ -8,14 +8,13 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, callKey, refreshKey } from '@/keys';
 import { TimeFormatted } from '@/models';
-import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import QuickActionsSideBar from './components/QuickActionsSideBar.vue';
 import WeekPicker from './components/WeekPicker.vue';
 import UserCalendarSync from './components/UserCalendarSync.vue';
+import WeekCalendar from './components/WeekCalendar.vue';
 
 // stores
-import { useAppointmentStore } from '@/stores/appointment-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
 
@@ -25,11 +24,8 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const refresh = inject(refreshKey);
 
-const appointmentStore = useAppointmentStore();
-const calendarStore = createCalendarStore(call);
 const userActivityStore = useUserActivityStore();
-const { pendingAppointments } = storeToRefs(appointmentStore);
-const { remoteEvents } = storeToRefs(calendarStore);
+const calendarStore = createCalendarStore(call);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
 // current selected date, defaults to now
@@ -39,29 +35,19 @@ const activeDateRange = computed(() => ({
   end: activeDate.value.endOf('week').format('L'),
 }));
 
-// schedule previews for showing corresponding placeholders in calendar views
-const schedulesPreviews = ref([]);
-
-/**
- * Retrieve new events if a user navigates to a different month
- * @param dateObj
- */
-const onDateChange = async (dateObj: TimeFormatted) => {
+async function onDateChange(dateObj: TimeFormatted) {
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
 
   activeDate.value = start.add(end.diff(start, 'minutes') / 2, 'minutes');
 
-  // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-  // if (
-  //   !dj(activeDateRange.value.end).isSame(dj(end), 'month')
-  //   || !dj(activeDateRange.value.start).isSame(dj(start), 'month')
-  // ) {
-  //   await calendarStore.getRemoteEvents(activeDate.value);
-  // }
+  await calendarStore.getRemoteEvents(activeDate.value);
 };
 
-// initially load data when component gets remounted
+function dismiss() {
+  userActivityStore.dismiss(Dismissibles.BetaWarning);
+};
+
 onMounted(async () => {
   // Don't actually load anything during the FTUE
   if (route.name === 'setup') {
@@ -71,10 +57,6 @@ onMounted(async () => {
   await refresh();
   await calendarStore.getRemoteEvents(activeDate.value);
 });
-
-const dismiss = () => {
-  userActivityStore.dismiss(Dismissibles.BetaWarning);
-};
 </script>
 
 <script lang="ts">
@@ -128,12 +110,8 @@ export default {
         <user-calendar-sync />
       </div>
 
-      <!-- main section: big calendar showing active month, week or day -->
-      <calendar-qalendar
-        :appointments="pendingAppointments"
-        :events="remoteEvents"
-        :schedules="schedulesPreviews"
-        @date-change="onDateChange"
+      <week-calendar
+        :active-date-range="activeDateRange"
       />
     </div>
   </div>
