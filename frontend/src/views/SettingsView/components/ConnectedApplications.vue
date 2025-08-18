@@ -197,7 +197,7 @@ async function refreshData() {
           name="calendarConnected"
           class="calendar-connected-checkbox"
           @change="(event) => onCalendarChecked(event, calendar.id)"
-          :checked="calendar.connected"
+          :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
         />
         <primary-badge v-if="currentState.defaultCalendarId === calendar.id">
           {{ t('label.default') }}

@@ -69,7 +69,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   const revertChanges = () => {
-    currentState.value = deepClone({ ...initialState.value }); 
+    currentState.value = deepClone({ ...initialState.value });
   }
 
   const connectZoom = async () => {
