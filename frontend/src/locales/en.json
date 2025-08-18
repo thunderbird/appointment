@@ -238,6 +238,7 @@
     "confirmBooking": "Confirm booking",
     "confirmSelection": "Confirm selection",
     "connect": "Connect",
+    "connected": "Connected",
     "connectCalendar": "Connect calendar",
     "connectGoogleCalendar": "Connect Google Calendar",
     "connectedAs": "Connected as {name}",
@@ -414,6 +415,7 @@
     "unconfirmedFirst": "Unconfirmed first",
     "unset": "Unset",
     "unused": "Unused",
+    "updated": "Updated",
     "updateLink": "Update link",
     "used": "Used",
     "userProfile": "User profile",
@@ -431,6 +433,7 @@
     "wasInvited": "Was Invited",
     "whatDoYouWantToDoToday": "What do you want to do today?",
     "week": "Week",
+    "weekOf": "Week of",
     "yes": "Yes",
     "youAreBookable": "You're bookable",
     "youAreNotBookable": "You're not bookable"
