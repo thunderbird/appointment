@@ -24,7 +24,7 @@ import ConnectedApplications from './components/ConnectedApplications.vue';
 
 // component constants
 const call = inject(callKey);
-const { t } = useI18n({ useScope: 'global' });
+const { t, locale } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
 
@@ -111,6 +111,9 @@ async function updatePreferences() {
     default:
       break;
   }
+
+  // Update i18n locale to change language on the page without page refresh
+  locale.value = currentState.value.language;
 
   // Update the userStore internal state with fresh backend values
   await userStore.profile();
