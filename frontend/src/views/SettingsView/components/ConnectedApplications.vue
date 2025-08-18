@@ -148,7 +148,7 @@ async function refreshData() {
 
 <template>
   <header>
-    <h2>{{ t('label.connectedApplications') }}</h2>
+    <h2>{{ t('heading.connectedApplications') }}</h2>
   </header>
 
   <div class="form-field-container">

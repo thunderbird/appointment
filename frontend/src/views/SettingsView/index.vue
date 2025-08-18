@@ -241,7 +241,7 @@ export default {
         @click="scrollToSection(key)"
         :data-testid="'settings-' + key + '-settings-btn'"
       >
-        <span>{{ t('label.' + key) }}</span>
+        <span>{{ t('heading.' + key) }}</span>
         <icon-chevron-right size="18" />
       </button>
     </aside>
@@ -273,7 +273,7 @@ export default {
       @click="onSaveChanges"
       :disabled="savingInProgress"
     >
-      {{ t('label.saveChanges') }}
+      {{ t('label.save') }}
     </primary-button>
   </div>
 </template>

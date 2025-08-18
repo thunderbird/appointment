@@ -98,7 +98,7 @@ export default {
 
 <template>
   <header>
-    <h2>{{ t('label.preferences') }}</h2>
+    <h2>{{ t('heading.preferences') }}</h2>
   </header>
 
   <div class="form-field-container">
