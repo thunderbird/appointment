@@ -58,7 +58,7 @@ const actuallyDeleteAccount = async () => {
 
 <template>
   <header>
-    <h2>{{ t('label.accountSettings') }}</h2>
+    <h2>{{ t('heading.accountSettings') }}</h2>
   </header>
 
   <div class="booking-page-url-container">
@@ -66,7 +66,7 @@ const actuallyDeleteAccount = async () => {
       {{ t('label.bookingPageURL') }}
     </label>
     <div class="booking-page-url-input-container">
-      <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.data.userLink" />
+      <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.myLink" />
       <secondary-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip">
         <icon-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
       </secondary-button>
