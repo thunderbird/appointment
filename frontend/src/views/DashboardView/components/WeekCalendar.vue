@@ -133,7 +133,7 @@ const filteredRemoteEventsForGrid = computed(() => {
 <template>
   <div class="calendar-container" :style="{ 'grid-template-rows': `auto repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }">
     <!-- Header / First row -->
-    <br />
+    <div class="corner-cell-block" />
     <div
       class="calendar-weekday-header"
       v-for="(weekday, index) in weekdays"
@@ -193,6 +193,8 @@ const filteredRemoteEventsForGrid = computed(() => {
   justify-items: center;
   border: 1px solid var(--colour-neutral-border-intense);
   margin-block-end: 2rem;
+  flex: 1;
+  overflow-y: auto;
 
   .calendar-weekday-header {
     grid-row: 1;
@@ -203,11 +205,28 @@ const filteredRemoteEventsForGrid = computed(() => {
     text-align: center;
     font-weight: bold;
     width: 100%;
+    background-color: var(--colour-neutral-base);
+    border-inline-start: 1px solid var(--colour-neutral-border-intense);
+  }
+
+  .corner-cell-block {
+    background-color: var(--colour-neutral-base);
+    grid-row: 1;
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
   }
 
   .time-slot-cell {
     padding-inline: 0.75rem;
-    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
   }
 
   .event-item {

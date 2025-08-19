@@ -100,7 +100,7 @@ export default {
   <div class="main-container">
     <quick-actions-side-bar />
   
-    <div class="w-full">
+    <div class="main-calendar-container">
       <div class="calendar-header-container">
         <week-picker
           :active-date-range="activeDateRange"
@@ -123,6 +123,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2.25rem;
+}
+
+.main-calendar-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .calendar-header-container {
@@ -186,6 +192,7 @@ export default {
   .main-container {
     flex-direction: row;
     gap: 2rem;
+    overflow-y: auto;
   }
 
   .calendar-header-container {
