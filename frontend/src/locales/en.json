@@ -78,8 +78,6 @@
     "videoMeetingLink": "Video meeting link"
   },
   "heading": {
-    "accountData": "Account Data",
-    "accountDeletion": "Account Deletion",
     "accountSettings": "Account Settings",
     "appointmentCreated": "Booking created!",
     "appointmentsAndBookingSettings": "Appointments & booking settings",
@@ -87,8 +85,10 @@
     "calendarSettings": "Calendar Settings",
     "calendarsConnected": "Connected Calendars",
     "calendarsUnconnected": "Available Calendars",
+    "cancelAppointmentService": "Cancel Appointment Service?",
     "connectedAccounts": "Connected Accounts",
     "connectedAccountsSettings": "Connected Accounts Settings",
+    "connectedApplications": "Connected Applications",
     "contactRequest": "Contact Request",
     "createNewAppointment": "Create new appointment",
     "dateAndTimeFormatting": "Date and Time Format",
@@ -100,11 +100,12 @@
     "generalSettings": "General Settings",
     "languageAndAppearance": "Language & Appearance",
     "pendingAppointments": "Pending bookings",
+    "preferences": "Preferences",
     "privacySettings": "Privacy Settings",
     "profile": "Profile",
     "scheduleCreated": "Schedule created!",
     "settings": {
-      "connectedAccounts": {
+      "connectedApplications": {
         "oidc": "Thunderbird Pro",
         "caldav": "CalDAV Connection",
         "fxa": "Mozilla Accounts",
@@ -137,6 +138,7 @@
     "bookingSuccessfullyDenied": "Booking rejected. Reach out to the booker to recommend an alternative.",
     "bookingSuccessfullyRequested": "Booking request sent",
     "bookingWillBeCanceled": "Booking will be canceled. An update will be sent to the booker.",
+    "cancelServiceInfo": "To cancel your Appointment service, click here:\n Note: This will not affect your TB Pro account or subscription.",
     "connectionEstablished": "Connection established",
     "copiedToClipboard": "Copied to clipboard",
     "eventWasCreated": "Event created in your calendar.",
@@ -146,6 +148,7 @@
     "messageWasNotSent": "Your message couldn't be sent. Please try again.",
     "messageWasSent": "Your message has been sent to our support team.",
     "noPendingAppointmentsInList": "You have no pending events.",
+    "settingsSavedSuccessfully": "Settings saved successfully",
     "slotIsAvailableAgain": "Time slot now available for bookings."
   },
   "label": {
@@ -155,13 +158,14 @@
     "MMDDYYYY": "MM/DD/YYYY",
     "accepted": "Accepted",
     "account": "Account",
-    "accountData": "Download your account data",
     "accountDeletion": "Delete your account",
     "activateSchedule": "Activate schedule",
     "active": "Active",
     "activeAppointment": "Active booking",
     "addCalendar": "Add {provider} calendar",
     "addDay": "Add day",
+    "addGoogleCalendar": "Add Google Calendar",
+    "addCalDavCalendar": "Add CalDav",
     "addSlot": "Add slot",
     "addTime": "Add time",
     "addToWaitingList": "Join the waiting list",
@@ -202,6 +206,8 @@
     "bookingConfirmation": "Booking Confirmation",
     "bookingLink": "Booking Link",
     "bookingSlot": "Booking slot",
+    "bookingPageURL": "Booking Page URL",
+    "bookingPageSettings": "Booking Page Settings",
     "bookings": "Bookings",
     "bookingPageLink": "Booking Page Link",
     "bookingPageDetails": "Booking Page Details",
@@ -216,6 +222,7 @@
     "cancelled": "Cancelled",
     "cancelBooking": "Cancel booking",
     "cancelReason": "Reason for cancelling",
+    "cancelService": "Cancel Service",
     "changeMyAvailability": "Change my availability",
     "changesNotSaved": "Changes have not been saved",
     "checkAvailableSlots": "Check available slots",
@@ -233,7 +240,6 @@
     "connect": "Connect",
     "connectCalendar": "Connect calendar",
     "connectGoogleCalendar": "Connect Google Calendar",
-    "connectedAccounts": "Connected Accounts",
     "connectedAs": "Connected as {name}",
     "contact": "Contact",
     "continue": "Continue",
@@ -254,10 +260,11 @@
     "day": "Day",
     "deactivateSchedule": "Deactivate schedule",
     "declined": "Declined",
+    "default": "Default",
     "defaultFont": "Default font",
+    "defaultTimeZone": "Default Time Zone",
     "delete": "Delete",
     "deleteBooking": "Delete booking",
-    "deleteYourAccount": "Delete your account",
     "deny": "Deny",
     "denyBooking": "Deny booking",
     "disable": "Disable",
@@ -301,7 +308,7 @@
     "inviteId": "Invite ID",
     "inviteStatus": "Invite Status",
     "invitedSubscriberId": "Invited Subscriber ID",
-    "language": "Choose language",
+    "language": "Language",
     "legal": "Legal",
     "light": "Light",
     "loading": "Loading",
@@ -381,7 +388,7 @@
     "slotLength": "Booking Duration",
     "start": "Start",
     "startDate": "Start date",
-    "startOfTheWeek": "Start of the week",
+    "startOfWeek": "Start of Week",
     "startTime": "Start time",
     "startUsingTba": "Try Appointment",
     "status": "Status",
@@ -414,6 +421,7 @@
     "verified": "Verified",
     "verifiedEmail": "Verified Email",
     "videoLink": "Video Link",
+    "videoMeeting": "Video Meeting",
     "viewAll": "View all",
     "viewBooking": "View booking",
     "virtualMeetingLink": "Virtual Meeting link",
@@ -492,14 +500,8 @@
     "writeHere": "Write here…",
     "zoomCom": "zoom.com…"
   },
-  "settings": {
-    "invite": {
-      "brief": "Below are invite codes for Thunderbird Appointment. Feel free to give them out, and tell the individual to present it during the login screen."
-    }
-  },
   "text": {
-    "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
-    "accountDeletionWarning": "Your account and data on Thunderbird Appointment will be deleted. This does not impact your linked calendars. And you can create a new account with us anytime.",
+    "accountCancelWarning": "You will no longer have access to TB Appointment. All booking calendars will be set to \"Inactive\" and all upcoming bookings will be cancelled.\nOther appointment data will be retained for 30 days, in accordance with the TB Pro Privacy Policy.",
     "admin": {
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
       "disableAccountFirst": "You must disable the account first."
@@ -556,7 +558,9 @@
       "notActive": "Schedule is not active, turn on the toggle to edit or share."
     },
     "settings": {
-      "connectedAccounts": {
+      "connectedApplications": {
+        "setAsDefault": "Set as default",
+        "renameCalendar": "Rename calendar",
         "connect": {
           "caldav": "You can connect to a CalDav server and pull its associated calendars.",
           "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",

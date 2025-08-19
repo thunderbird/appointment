@@ -12,7 +12,7 @@ import LogoutView from '@/views/LogoutView.vue';
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
 const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView/index.vue'));
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
-const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView.vue'));
+const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView/index.vue'));
 const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const DocsView = defineAsyncComponent(() => import('@/views/DocsView.vue'));
@@ -207,6 +207,19 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  // Ref: https://router.vuejs.org/guide/advanced/scroll-behavior.html
+  scrollBehavior(to) {
+    if (to.hash) {
+      // This ensures that if hash is provided to router.push it works as expected.
+      const noPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+      return {
+        el: to.hash,
+        behavior: noPrefersReducedMotion ? 'smooth' : 'auto',
+        top: 64 + 16, // Account for the navigation header height (64px) + 16px for some padding
+      }
+    }
+  }
 });
 
 router.beforeEach((to, _from) => {

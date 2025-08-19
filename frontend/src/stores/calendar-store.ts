@@ -123,6 +123,10 @@ export const useCalendarStore = defineStore('calendars', () => {
     await call.value(`cal/${id}/disconnect`).post();
   };
 
+  const updateCalendar = async (calendarData: Calendar) => {
+    await call.value(`cal/${calendarData.id}`).put(calendarData);
+  }
+
   const syncCalendars = async () => {
     await call.value('rmt/sync').post();
   };
@@ -140,6 +144,7 @@ export const useCalendarStore = defineStore('calendars', () => {
     connectGoogleCalendar,
     connectCalendar,
     disconnectCalendar,
+    updateCalendar,
     syncCalendars,
     calendarById,
     getRemoteEvents,

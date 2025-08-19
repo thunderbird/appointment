@@ -147,7 +147,7 @@ export default {
         @click="onSaveChanges"
         :disabled="savingInProgress"
       >
-        {{ t('label.saveChanges') }}
+        {{ t('label.save') }}
       </primary-button>
     </div>
   </form>

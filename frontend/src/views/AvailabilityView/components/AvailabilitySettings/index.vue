@@ -112,7 +112,7 @@ export default {
       <h3>{{ t('label.timeZone') }}:</h3>
       <div class="user-timezone-container">
         <p>{{ userStore.data.settings.timezone ?? dj.tz.guess() }}</p>
-        <link-button @click="router.push({ name: 'settings' })">{{ t('label.edit') }}</link-button>
+        <link-button @click="router.push({ name: 'settings', hash: '#preferences' })">{{ t('label.edit') }}</link-button>
       </div>
     </div>
 
