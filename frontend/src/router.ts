@@ -211,9 +211,11 @@ const router = createRouter({
   scrollBehavior(to) {
     if (to.hash) {
       // This ensures that if hash is provided to router.push it works as expected.
+      const noPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
       return {
         el: to.hash,
-        behavior: 'smooth',
+        behavior: noPrefersReducedMotion ? 'smooth' : 'auto',
         top: 64 + 16, // Account for the navigation header height (64px) + 16px for some padding
       }
     }
