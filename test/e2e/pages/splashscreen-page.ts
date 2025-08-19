@@ -8,6 +8,8 @@ import {
   TIMEOUT_30_SECONDS,
   TIMEOUT_90_SECONDS,
   TIMEOUT_60_SECONDS,
+  TIMEOUT_10_SECONDS,
+  TIMEOUT_3_SECONDS,
  } from '../const/constants';
 
 export class SplashscreenPage {
@@ -58,6 +60,7 @@ export class SplashscreenPage {
     await this.enterLoginEmail(APPT_LOGIN_EMAIL);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.clickLoginContinueBtn();
+    await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
     await expect(this.page).toHaveTitle(FXA_PAGE_TITLE, { timeout: TIMEOUT_90_SECONDS }); // be generous in case FxA is slow to load
   }
 

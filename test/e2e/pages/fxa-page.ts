@@ -18,6 +18,7 @@ export class FxAPage {
 
   async signIn() {
     expect(APPT_LOGIN_PWORD, 'getting APPT_LOGIN_PWORD env var').toBeTruthy();
+    await this.passwordInput.click();
     await this.passwordInput.fill(String(APPT_LOGIN_PWORD));
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.signInButton.click();
