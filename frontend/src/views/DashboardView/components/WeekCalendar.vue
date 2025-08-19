@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
-import { createScheduleStore } from '@/stores/schedule-store';
-import { callKey, dayjsKey } from '@/keys';
+import { useScheduleStore } from '@/stores/schedule-store';
+import { dayjsKey } from '@/keys';
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -18,18 +18,19 @@ const props = defineProps<{
   }
 }>();
 
-const call = inject(callKey);
 const dj = inject(dayjsKey);
 
 const appointmentStore = useAppointmentStore();
+const scheduleStore = useScheduleStore();
 const calendarStore = useCalendarStore();
-const scheduleStore = createScheduleStore(call);
 
 const { remoteEvents } = storeToRefs(calendarStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { firstSchedule } = storeToRefs(scheduleStore);
 
-// Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
+/**
+ * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
+ */
 const weekdays = computed(() => {
   const { start, end } = props.activeDateRange;
 
@@ -44,7 +45,7 @@ const weekdays = computed(() => {
   while (!currentDate.isAfter(endDate, 'day')) {
     days.push([
       currentDate.format('ddd').toUpperCase(), // Format to 'SUN', 'MON', etc.
-      currentDate.date()                      // Get the day of the month (e.g., 17)
+      currentDate.date() // Get the day of the month (e.g., 17)
     ]);
 
     // Move to the next day
@@ -54,40 +55,182 @@ const weekdays = computed(() => {
   return days;
 })
 
-// schedule previews for showing corresponding placeholders in calendar views
-const schedulesPreviews = ref([]);
+/**
+ * Generates an array of time slot objects, each with grid positioning info.
+ */
+const timeSlotsForGrid = computed(() => {
+  const slots = [];
+  const { start_time, end_time, slot_duration } = firstSchedule.value || {};
+
+  if (!start_time || !end_time || !slot_duration) return [];
+
+  let currentTime = dj(start_time, 'H:mm');
+  const finalTime = dj(end_time, 'H:mm');
+
+  // Start grid rows at 2 to leave space for the header row
+  let rowIndex = 2;
+
+  while (currentTime.isBefore(finalTime)) {
+    slots.push({
+      // The text to display (e.g., "9 AM" or empty for non-hour slots)
+      text: currentTime.minute() === 0 ? currentTime.format('h A') : '',
+      // The start time in a consistent format, useful for keys
+      startTime: currentTime.format('HH:mm'),
+      // Grid properties
+      gridRowStart: rowIndex,
+      gridRowEnd: rowIndex + 1,
+    });
+
+    currentTime = currentTime.add(slot_duration, 'minute');
+    rowIndex++;
+  }
+
+  return slots;
+});
+
+const filteredRemoteEventsForGrid = computed(() => {
+  const slots = timeSlotsForGrid.value;
+  if (!slots.length) return [];
+
+  const { start, end } = props.activeDateRange;
+  const remoteEventsWithinActiveWeek = remoteEvents.value.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
+
+  // Create a quick lookup map for slot start times to grid rows
+  const timeToRowMap = new Map(slots.map(s => [s.startTime, s.gridRowStart]));
+  const lastRow = slots[slots.length - 1].gridRowEnd;
+
+  return remoteEventsWithinActiveWeek.map(remoteEvent => {
+    const eventStart = dj(remoteEvent.start);
+    const eventEnd = dj(remoteEvent.end);
+
+    // 1. isoWeekday() returns 1 being Monday and 7 being Sunday but Sunday is the second column
+    // if not Sunday, we must offset the column by 2 to skip the time column and the Sunday column
+    const isoWeekday = eventStart.isoWeekday();
+    const gridColumn = isoWeekday === 7 ? 2 : isoWeekday + 2;
+
+    // 2. Calculate the Start Row
+    const startHourMinute = eventStart.format('HH:mm');
+    const gridRowStart = timeToRowMap.get(startHourMinute);
+
+    // 3. Calculate the End Row
+    // Find the first slot that starts AT or AFTER the event ends
+    const endSlot = slots.find(slot => slot.startTime >= eventEnd.format('HH:mm'));
+    const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
+
+    // Return the event with positioning data, only if it's within calendar hours
+    if (gridRowStart && gridRowEnd) {
+      return {
+        ...remoteEvent,
+        gridColumn,
+        gridRowStart,
+        gridRowEnd,
+      };
+    }
+  }).filter(Boolean)
+})
 </script>
 
 <template>
-  <div class="calendar-container">
+  <div class="calendar-container" :style="{ 'grid-template-rows': `auto repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }">
     <!-- Header / First row -->
     <br />
     <div
-      v-for="weekday in weekdays"
+      class="calendar-weekday-header"
+      v-for="(weekday, index) in weekdays"
       :key="weekday[Weekday.DayOfTheMonth]"
+      :style="{ gridColumn: index + 2 }"
     >
-      <div class="calendar-weekday-header">
-        <p>{{ weekday[Weekday.DayOfTheWeek] }}</p>
-        <p>{{ weekday[Weekday.DayOfTheMonth] }}</p>
-      </div>
+      <p>{{ weekday[Weekday.DayOfTheWeek] }}</p>
+      <p>{{ weekday[Weekday.DayOfTheMonth] }}</p>
     </div>
 
-    <!-- Hourly blocks / From second row onwards -->
-    <p>9AM</p>
-    
+    <!-- Left-side hourly blocks -->
+    <div
+      v-for="timeSlot in timeSlotsForGrid"
+      class="time-slot-cell"
+      :key="timeSlot.startTime"
+      :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
+    >
+      {{  timeSlot.text }}
+    </div>
+
+    <!-- Remote events -->
+    <div
+      v-for="event in filteredRemoteEventsForGrid"
+      :key="event?.start"
+      class="event-item"
+      :style="{
+        gridColumn: event?.gridColumn,
+        gridRow: `${event?.gridRowStart} / ${event?.gridRowEnd}`,
+        backgroundColor: `${event?.calendar_color}`
+      }"
+    >
+      {{ event?.title }}
+    </div>
+
+    <!-- Inner grid vertical lines -->
+    <div
+      v-for="n in 7"
+      :key="`line-${n}`"
+      class="vertical-line"
+      :style="{ gridColumn: n + 1, gridRow: '1 / -1' }"
+    ></div>
+
+    <!-- Inner grid horizontal lines -->
+    <div
+      v-for="timeSlot in timeSlotsForGrid"
+      :key="`h-line-${timeSlot.startTime}`"
+      class="horizontal-line"
+      :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '1 / -1' }"
+    ></div>
   </div>
 </template>
 
 <style scoped>
 .calendar-container {
   display: grid;
-  grid-template-columns: min-content repeat(7, 1fr);
+  grid-template-columns: max-content repeat(7, minmax(0, 1fr));
   justify-items: center;
-  border: 1px solid red;
+  border: 1px solid var(--colour-neutral-border-intense);
+  margin-block-end: 2rem;
 
   .calendar-weekday-header {
+    grid-row: 1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
     padding-block: 0.5rem;
     text-align: center;
+    font-weight: bold;
+    width: 100%;
+  }
+
+  .time-slot-cell {
+    padding-inline: 0.75rem;
+    align-self: center;
+  }
+
+  .event-item {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.5rem;
+    color: black;
+    font-size: 0.875rem;
+    border-top: 1px solid var(--colour-neutral-border-intense);
+    z-index: 2;
+  }
+
+  .vertical-line {
+    justify-self: flex-start;
+    border-left: 1px solid var(--colour-neutral-border-intense);
+    z-index: 3;
+  }
+
+  .horizontal-line {
+    height: 1px;
+    background-color: var(--colour-neutral-border-intense);
+    width: 100%;
   }
 }
 </style>
