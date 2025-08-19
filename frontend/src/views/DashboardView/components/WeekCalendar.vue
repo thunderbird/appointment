@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
 import { storeToRefs } from 'pinia';
+import { dayjsKey } from '@/keys';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { dayjsKey } from '@/keys';
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -56,7 +56,7 @@ const weekdays = computed(() => {
 })
 
 /**
- * Generates an array of time slot objects, each with grid positioning info.
+ * Generates an array of time slot objects, each with grid positioning info
  */
 const timeSlotsForGrid = computed(() => {
   const slots = [];
@@ -88,6 +88,10 @@ const timeSlotsForGrid = computed(() => {
   return slots;
 });
 
+/**
+ * Generates an array of remote events that fall within the active week with grid positioning info
+ * Note we are still fetching monthly events to reduce the roundtrips
+ */
 const filteredRemoteEventsForGrid = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
@@ -133,7 +137,7 @@ const filteredRemoteEventsForGrid = computed(() => {
 <template>
   <div class="calendar-container" :style="{ 'grid-template-rows': `auto repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }">
     <!-- Header / First row -->
-    <div class="corner-cell-block" />
+    <div class="corner-cell-block"></div>
     <div
       class="calendar-weekday-header"
       v-for="(weekday, index) in weekdays"
@@ -233,10 +237,12 @@ const filteredRemoteEventsForGrid = computed(() => {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
     padding: 0.5rem;
     color: black;
     font-size: 0.875rem;
     border-top: 1px solid var(--colour-neutral-border-intense);
+    cursor: pointer;
     z-index: 2;
   }
 
