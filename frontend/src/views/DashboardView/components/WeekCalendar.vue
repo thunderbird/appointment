@@ -310,76 +310,126 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .calendar-container {
   display: grid;
-  grid-template-columns: max-content repeat(7, minmax(0, 1fr));
+  grid-template-columns: max-content repeat(7, 200px);
   justify-items: center;
   border: 1px solid var(--colour-neutral-border-intense);
   margin-block-end: 2rem;
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+.calendar-weekday-header {
+  grid-row: 1;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding-block: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+  width: 100%;
+  background-color: var(--colour-neutral-base);
+  border-inline-start: 1px solid var(--colour-neutral-border-intense);
+  position: sticky;
+  left: 0;
+  min-width: 200px;
+}
+
+.corner-cell-block {
+  background-color: var(--colour-neutral-base);
+  grid-row: 1;
+  grid-column: 1;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  position: sticky;
+  left: 0;
+}
+
+.time-slot-cell {
+  padding-inline: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: sticky;
+  left: 0;
+  background-color: var(--colour-neutral-base);
+  z-index: 9;
+}
+
+.event-item {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.5rem;
+  color: black;
+  font-size: 0.875rem;
+  border-top: 1px solid var(--colour-neutral-border-intense);
+  cursor: pointer;
+  z-index: 1;
+  min-width: 200px;
+}
+
+.pending-appointment {
+  border: 1px dashed var(--colour-neutral-border-intense);
+  opacity: 0.75;
+}
+
+.vertical-line {
+  justify-self: flex-start;
+  border-left: 1px solid var(--colour-neutral-border-intense);
+  z-index: 1;
+}
+
+.horizontal-line {
+  height: 1px;
+  background-color: var(--colour-neutral-border-intense);
+  width: 100%;
+}
+
+@media (--md) {
+  .calendar-container {
+    grid-template-columns: max-content repeat(7, minmax(0, 1fr));
+    overflow-x: visible;
+  }
 
   .calendar-weekday-header {
-    grid-row: 1;
     position: sticky;
-    top: 0;
-    z-index: 3;
-    padding-block: 0.5rem;
-    text-align: center;
-    font-weight: bold;
-    width: 100%;
-    background-color: var(--colour-neutral-base);
-    border-inline-start: 1px solid var(--colour-neutral-border-intense);
+    left: auto;
+    min-width: auto;
   }
 
   .corner-cell-block {
-    background-color: var(--colour-neutral-base);
-    grid-row: 1;
-    grid-column: 1;
     position: sticky;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    left: auto;
     z-index: 3;
   }
 
   .time-slot-cell {
-    padding-inline: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
+    position: static;
+    left: auto;
+    background-color: transparent;
+    z-index: auto;
   }
 
   .event-item {
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 0.5rem;
-    color: black;
-    font-size: 0.875rem;
-    border-top: 1px solid var(--colour-neutral-border-intense);
-    cursor: pointer;
+    min-width: auto;
     z-index: 2;
   }
 
-  .pending-appointment {
-    border: 1px dashed var(--colour-neutral-border-intense);
-    opacity: 0.75;
-  }
-
   .vertical-line {
-    justify-self: flex-start;
-    border-left: 1px solid var(--colour-neutral-border-intense);
     z-index: 3;
-  }
-
-  .horizontal-line {
-    height: 1px;
-    background-color: var(--colour-neutral-border-intense);
-    width: 100%;
   }
 }
 </style>
