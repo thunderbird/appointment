@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { dayjsKey } from '@/keys';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
+import EventPopup from '@/elements/EventPopup.vue';
+import { initialEventPopupData, showEventPopup } from '@/utils';
+import { EventPopup as EventPopupType } from '@/models';
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -27,6 +30,27 @@ const calendarStore = useCalendarStore();
 const { remoteEvents } = storeToRefs(calendarStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 const { firstSchedule } = storeToRefs(scheduleStore);
+
+const popup = ref<EventPopupType>({ ...initialEventPopupData });
+
+function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
+  const popupEvent = {
+    ...remoteEvent,
+    time: {
+      start: remoteEvent.start,
+      end: remoteEvent.end
+    },
+    customData: {
+      calendar_title: remoteEvent.calendar_title,
+    }
+  }
+
+  popup.value = showEventPopup(event as any, popupEvent, 'right')
+}
+
+function onRemoteEventMouseLeave() {
+  popup.value = { ...initialEventPopupData };
+}
 
 /**
  * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
@@ -160,17 +184,34 @@ const filteredRemoteEventsForGrid = computed(() => {
 
     <!-- Remote events -->
     <div
-      v-for="event in filteredRemoteEventsForGrid"
-      :key="event?.start"
+      v-for="remoteEvent in filteredRemoteEventsForGrid"
+      :key="remoteEvent?.start"
       class="event-item"
       :style="{
-        gridColumn: event?.gridColumn,
-        gridRow: `${event?.gridRowStart} / ${event?.gridRowEnd}`,
-        backgroundColor: `${event?.calendar_color}`
+        gridColumn: remoteEvent?.gridColumn,
+        gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
+        backgroundColor: `${remoteEvent?.calendar_color}`
       }"
+      @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
+      @mouseleave="onRemoteEventMouseLeave"
     >
-      {{ event?.title }}
+      {{ remoteEvent?.title }}
     </div>
+
+    <!-- Event popup (appears on remote event hover) -->
+    <event-popup
+      v-if="(popup.event)"
+      :style="{
+        display: popup.display,
+        top: popup.top,
+        left: popup.left,
+        right: popup.right ?? 'initial',
+        position: 'fixed',
+        zIndex: 10,
+      }"
+      :event="popup.event"
+      position="right"
+    />
 
     <!-- Inner grid vertical lines -->
     <div
@@ -204,7 +245,7 @@ const filteredRemoteEventsForGrid = computed(() => {
     grid-row: 1;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 3;
     padding-block: 0.5rem;
     text-align: center;
     font-weight: bold;
@@ -221,7 +262,7 @@ const filteredRemoteEventsForGrid = computed(() => {
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 10;
+    z-index: 3;
   }
 
   .time-slot-cell {
