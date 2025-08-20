@@ -124,6 +124,7 @@ export const initialEventPopupData: EventPopup = {
   display: 'none',
   top: 0,
   left: 'initial',
+  position: 'right',
 };
 
 // calculate properties of event popup for given element and show popup
@@ -131,17 +132,86 @@ export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, posit
   const obj = { ...initialEventPopupData };
   obj.event = event;
   obj.display = 'block';
+
+  // Get viewport dimensions
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // Estimate popup dimensions (based on EventPopup component)
+  const popupWidth = 384; // max-w-sm = 384px
+  const popupHeight = 120; // Estimated height based on content
+  const offset = 4; // Gap between trigger and popup
+
+  // Calculate trigger element position relative to viewport
+  const triggerRect = el.target.getBoundingClientRect();
+  const triggerLeft = triggerRect.left;
+  const triggerRight = triggerRect.right;
+  const triggerTop = triggerRect.top;
+
+  // Determine optimal position based on available space
+  let optimalPosition = position;
+
+  if (position === 'right' || !position) {
+    // Check if popup would overflow right edge
+    if (triggerRight + popupWidth + offset > viewportWidth) {
+      // Check if left position would work (popup will be positioned at trigger's left edge)
+      if (triggerLeft >= popupWidth + offset) {
+        optimalPosition = 'left';
+      } else {
+        // Fall back to top position
+        optimalPosition = 'top';
+      }
+    }
+  } else if (position === 'left') {
+    // Check if popup would overflow left edge (popup will be positioned at trigger's left edge)
+    if (triggerLeft < popupWidth + offset) {
+      // Check if right position would work
+      if (triggerRight + popupWidth + offset <= viewportWidth) {
+        optimalPosition = 'right';
+      } else {
+        // Fall back to top position
+        optimalPosition = 'top';
+      }
+    }
+  } else if (position === 'top') {
+    // Check if popup would overflow top edge
+    if (triggerTop - popupHeight - offset < 0) {
+      // Try right position first
+      if (triggerRight + popupWidth + offset <= viewportWidth) {
+        optimalPosition = 'right';
+      } else if (triggerLeft - popupWidth - offset >= 0) {
+        optimalPosition = 'left';
+      }
+    }
+  }
+
+  // Additional check: if popup would overflow bottom edge, try to adjust
+  if (triggerTop + popupHeight + offset > viewportHeight) {
+    // If we're positioned to the right or left and would overflow bottom, try top
+    if (optimalPosition === 'right' || optimalPosition === 'left') {
+      if (triggerTop - popupHeight - offset >= 0) {
+        optimalPosition = 'top';
+      }
+    }
+  }
+
+  // Set position based on optimal position
   obj.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
-  if (!position || position === 'right') {
-    obj.left = `${el.target.offsetLeft + el.target.clientWidth + 4}px`;
-  }
-  if (position === 'left') {
-    obj.left = `${el.target.offsetLeft - 4}px`;
-  }
-  if (position === 'top') {
+
+  if (optimalPosition === 'right') {
+    obj.left = `${el.target.offsetLeft + el.target.clientWidth + offset}px`;
+  } else if (optimalPosition === 'left') {
+    // For left position, position at trigger's left edge (CSS transform will move it left by full width)
+    obj.left = `${el.target.offsetLeft}px`;
+  } else if (optimalPosition === 'top') {
+    // For top position, center horizontally (CSS transform will center it)
     obj.left = `${el.target.offsetLeft + el.target.clientWidth / 2}px`;
-    obj.top = `${el.target.offsetTop - 50}px`;
+    obj.top = `${el.target.offsetTop - popupHeight - offset}px`;
   }
+
+  // Store the optimal position for the component to use
+  obj.position = optimalPosition;
+
   return obj;
 };
 

@@ -144,6 +144,7 @@ export type EventPopup = {
   left: string|number;
   right?: string|number;
   bottom?: string|number;
+  position?: string;
 };
 
 export type Calendar = {

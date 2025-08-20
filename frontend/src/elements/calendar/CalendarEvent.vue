@@ -109,7 +109,7 @@ const formattedTimeRange = (eventObj: CalendarEvent) => {
         right: popup.right ?? 'initial',
       }"
       :event="popup.event"
-      :position="popupPosition"
+      :position="popup.position || popupPosition"
     />
   </div>
 </template>

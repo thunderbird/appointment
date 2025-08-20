@@ -278,7 +278,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
         zIndex: 10,
       }"
       :event="popup.event"
-      position="right"
+      :position="popup.position || 'right'"
     />
 
     <!-- Inner grid vertical lines -->
