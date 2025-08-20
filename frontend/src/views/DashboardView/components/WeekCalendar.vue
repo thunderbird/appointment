@@ -113,6 +113,42 @@ const timeSlotsForGrid = computed(() => {
 });
 
 /**
+ * Calculates grid positioning for calendar events
+ */
+function calculateEventGridPosition(eventStart, eventEnd, slots) {
+  if (!slots.length) return null;
+
+  // Create a quick lookup map for slot start times to grid rows
+  const timeToRowMap = new Map(slots.map(s => [s.startTime, s.gridRowStart]));
+  const lastRow = slots[slots.length - 1].gridRowEnd;
+
+  // 1. isoWeekday() returns 1 being Monday and 7 being Sunday but Sunday is the second column
+  // if not Sunday, we must offset the column by 2 to skip the time column and the Sunday column
+  const isoWeekday = eventStart.isoWeekday();
+  const gridColumn = isoWeekday === 7 ? 2 : isoWeekday + 2;
+
+  // 2. Calculate the Start Row
+  const startHourMinute = eventStart.format('HH:mm');
+  const gridRowStart = timeToRowMap.get(startHourMinute);
+
+  // 3. Calculate the End Row
+  // Find the first slot that starts AT or AFTER the event ends
+  const endSlot = slots.find(slot => slot.startTime >= eventEnd.format('HH:mm'));
+  const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
+
+  // Return the positioning data, only if it's within calendar hours
+  if (gridRowStart && gridRowEnd) {
+    return {
+      gridColumn,
+      gridRowStart,
+      gridRowEnd,
+    };
+  }
+
+  return null;
+}
+
+/**
  * Generates an array of remote events that fall within the active week with grid positioning info
  * Note we are still fetching monthly events to reduce the roundtrips
  */
@@ -123,35 +159,51 @@ const filteredRemoteEventsForGrid = computed(() => {
   const { start, end } = props.activeDateRange;
   const remoteEventsWithinActiveWeek = remoteEvents.value.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
 
-  // Create a quick lookup map for slot start times to grid rows
-  const timeToRowMap = new Map(slots.map(s => [s.startTime, s.gridRowStart]));
-  const lastRow = slots[slots.length - 1].gridRowEnd;
-
   return remoteEventsWithinActiveWeek.map(remoteEvent => {
     const eventStart = dj(remoteEvent.start);
     const eventEnd = dj(remoteEvent.end);
 
-    // 1. isoWeekday() returns 1 being Monday and 7 being Sunday but Sunday is the second column
-    // if not Sunday, we must offset the column by 2 to skip the time column and the Sunday column
-    const isoWeekday = eventStart.isoWeekday();
-    const gridColumn = isoWeekday === 7 ? 2 : isoWeekday + 2;
+    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots);
 
-    // 2. Calculate the Start Row
-    const startHourMinute = eventStart.format('HH:mm');
-    const gridRowStart = timeToRowMap.get(startHourMinute);
-
-    // 3. Calculate the End Row
-    // Find the first slot that starts AT or AFTER the event ends
-    const endSlot = slots.find(slot => slot.startTime >= eventEnd.format('HH:mm'));
-    const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
-
-    // Return the event with positioning data, only if it's within calendar hours
-    if (gridRowStart && gridRowEnd) {
+    if (gridPosition) {
       return {
         ...remoteEvent,
-        gridColumn,
-        gridRowStart,
-        gridRowEnd,
+        ...gridPosition,
+      };
+    }
+  }).filter(Boolean)
+})
+
+/**
+ * Generates an array of pending appointments that fall within the active week with grid positioning info
+ */
+const filteredPendingAppointmentsForGrid = computed(() => {
+  const slots = timeSlotsForGrid.value;
+  if (!slots.length) return [];
+
+  const { start, end } = props.activeDateRange;
+  const pendingAppointmentsWithinActiveWeek = pendingAppointments.value.filter((appointment) => {
+    const appointmentStart = dj(appointment.slots[0].start);
+    return appointmentStart.isBetween(start, end, 'day', '[]');
+  });
+
+  return pendingAppointmentsWithinActiveWeek.map(appointment => {
+    const appointmentStart = dj(appointment.slots[0].start);
+    const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
+
+    const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots);
+
+    if (gridPosition) {
+      return {
+        ...appointment,
+        ...gridPosition,
+
+        // Add properties to match the remote event structure for consistent rendering
+        title: appointment.title,
+        start: appointment.slots[0].start,
+        end: appointmentEnd.format(),
+        calendar_title: appointment.calendar_title,
+        calendar_color: appointment.calendar_color,
       };
     }
   }).filter(Boolean)
@@ -196,6 +248,22 @@ const filteredRemoteEventsForGrid = computed(() => {
       @mouseleave="onRemoteEventMouseLeave"
     >
       {{ remoteEvent?.title }}
+    </div>
+
+    <!-- Pending appointments -->
+    <div
+      v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
+      :key="pendingAppointment?.id"
+      class="event-item pending-appointment"
+      :style="{
+        gridColumn: pendingAppointment?.gridColumn,
+        gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
+        backgroundColor: `${pendingAppointment?.calendar_color}`
+      }"
+      @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
+      @mouseleave="onRemoteEventMouseLeave"
+    >
+      {{ pendingAppointment?.title }}
     </div>
 
     <!-- Event popup (appears on remote event hover) -->
@@ -285,6 +353,11 @@ const filteredRemoteEventsForGrid = computed(() => {
     border-top: 1px solid var(--colour-neutral-border-intense);
     cursor: pointer;
     z-index: 2;
+  }
+
+  .pending-appointment {
+    border: 1px dashed var(--colour-neutral-border-intense);
+    opacity: 0.75;
   }
 
   .vertical-line {
