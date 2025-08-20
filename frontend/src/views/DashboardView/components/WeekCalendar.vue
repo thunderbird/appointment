@@ -58,9 +58,9 @@ function onRemoteEventMouseLeave() {
 const weekdays = computed(() => {
   const { start, end } = props.activeDateRange;
 
-  // Parse the start and end dates from the MM/DD/YYYY format
-  const startDate = dj(start, 'MM/DD/YYYY');
-  const endDate = dj(end, 'MM/DD/YYYY');
+  // Parse the start and end dates using dayjs's automatic parsing
+  const startDate = dj(start);
+  const endDate = dj(end);
 
   const days = [];
   let currentDate = startDate;
@@ -122,10 +122,20 @@ function calculateEventGridPosition(eventStart, eventEnd, slots) {
   const timeToRowMap = new Map(slots.map(s => [s.startTime, s.gridRowStart]));
   const lastRow = slots[slots.length - 1].gridRowEnd;
 
-  // 1. isoWeekday() returns 1 being Monday and 7 being Sunday but Sunday is the second column
-  // if not Sunday, we must offset the column by 2 to skip the time column and the Sunday column
-  const isoWeekday = eventStart.isoWeekday();
-  const gridColumn = isoWeekday === 7 ? 2 : isoWeekday + 2;
+  // 1. Calculate grid column based on the event's position within the week
+  // Get the weekdays array to determine the correct column position
+  const { start } = props.activeDateRange;
+  const startDate = dj(start);
+
+  // Find the day of the week for this event (0-6, where 0 is the first day of the week)
+  const eventDayOfWeek = eventStart.diff(startDate, 'day');
+
+  // Safety check: ensure the event is within the displayed week range
+  if (eventDayOfWeek < 0 || eventDayOfWeek > 6) {
+    return null;
+  }
+
+  const gridColumn = eventDayOfWeek + 2; // +2 to account for the time column (column 1)
 
   // 2. Calculate the Start Row
   const startHourMinute = eventStart.format('HH:mm');

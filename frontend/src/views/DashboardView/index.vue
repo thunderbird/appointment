@@ -31,8 +31,8 @@ const { data: userActivityData } = storeToRefs(userActivityStore);
 // current selected date, defaults to now
 const activeDate = ref(dj());
 const activeDateRange = computed(() => ({
-  start: activeDate.value.startOf('week').format('L'),
-  end: activeDate.value.endOf('week').format('L'),
+  start: activeDate.value.startOf('week').format('YYYY-MM-DD'),
+  end: activeDate.value.endOf('week').format('YYYY-MM-DD'),
 }));
 
 async function onDateChange(dateObj: TimeFormatted) {

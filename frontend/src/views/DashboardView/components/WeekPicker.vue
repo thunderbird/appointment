@@ -43,7 +43,7 @@ function onWeekPickerClicked() {
     </button>
 
     <button class="week-picker-button" @click="onWeekPickerClicked">
-      {{ t('label.weekOf') }} {{ activeDateRange.start }} – {{ activeDateRange.end }}
+      {{ t('label.weekOf') }} {{ dj(activeDateRange.start).format('L') }} – {{ dj(activeDateRange.end).format('L') }}
     </button>
 
     <button @click="onNextWeekButtonClicked">
