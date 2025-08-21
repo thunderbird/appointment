@@ -128,14 +128,12 @@ async function copyLink() {
                 {{ t('label.contact') }}
               </li>
             </router-link>
-            <router-link to="logout">
-              <li>
-                <icon-logout size="24" />
-                {{ t('label.logOut') }}
-              </li>
-            </router-link>
           </ul>
         </details>
+        <router-link to="logout">
+          <icon-logout size="24" />
+          {{ t('label.logOut') }}
+        </router-link>
       </div>
     </div>
   </nav>
@@ -149,7 +147,7 @@ async function copyLink() {
   top: 0;
   display: flex;
   align-items: center;
-  height: 64px;
+  min-height: 64px;
   background-color: var(--colour-neutral-base);
   padding: 0.5rem;
   z-index: 9999;
@@ -269,13 +267,22 @@ nav {
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-          padding-top: 1rem;
+          padding-block-start: 0.75rem;
 
           li {
             display: flex;
             gap: 0.75rem;
           }
         }
+      }
+
+      > a {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        margin-top: 1rem;
+        text-decoration: none;
+        color: inherit;
       }
     }
   }
