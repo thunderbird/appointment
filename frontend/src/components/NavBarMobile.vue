@@ -3,21 +3,23 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import ArtLogo from '@/elements/arts/ArtLogo.vue';
-// import UserAvatar from '@/elements/UserAvatar.vue';
+import UserAvatar from '@/elements/UserAvatar.vue';
 import {
   IconMenu2,
   IconX,
   IconHome,
   IconCalendarClock,
   IconCalendarCheck,
-  // IconExternalLink,
+  IconExternalLink,
   IconSettings,
   IconLogout,
+  IconChevronDown,
+  IconUserSquare,
 } from '@tabler/icons-vue';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 // component constants
-const user = useUserStore();
+const userStore = useUserStore();
 const { t } = useI18n();
 
 // component properties
@@ -48,7 +50,7 @@ function onMenuClose() {
 }
 
 async function copyLink() {
-  await navigator.clipboard.writeText(user.myLink);
+  await navigator.clipboard.writeText(userStore.myLink);
 
   myLinkTooltip.value = t('info.copiedToClipboard');
 
@@ -59,26 +61,22 @@ async function copyLink() {
 </script>
 
 <template>
-  <!-- Mobile NavBar -->
+  <!-- Mobile NavBar (closed) -->
   <header class="header-mobile">
-    <button
-      @click="onMenuOpen"
-      :aria-label="t('label.openMenu')"
-      :aria-expanded="menuOpen"
-      aria-controls="primaryNav"
-    >
+    <button @click="onMenuOpen" :aria-label="t('label.openMenu')" :aria-expanded="menuOpen" aria-controls="primaryNav">
       <icon-menu2 size="24" />
     </button>
 
-    <router-link
-      :to="{ name: user?.authenticated ? 'dashboard' : 'home' }"
-    >
+    <router-link :to="{ name: userStore.authenticated ? 'dashboard' : 'home' }">
       <img src="@/assets/svg/appointment_logo_beta.svg" alt="Appointment Logo" />
     </router-link>
   </header>
 
-  <!-- Navigation Panel -->
+  <!-- Navigation Panel (open) -->
   <nav v-if="menuOpen" id="primaryNav">
+    <!-- Scrim/Overlay -->
+    <div class="menu-scrim" @click="onMenuClose"></div>
+
     <div class="menu-content-container">
       <header>
         <button @click="onMenuClose">
@@ -93,38 +91,52 @@ async function copyLink() {
       </primary-button>
 
       <ul @click="onMenuClose">
-        <router-link
-          v-for="navItem in navItems"
-          :key="navItem"
-          :to="navItem"
-        >
+        <router-link v-for="navItem in navItems" :key="navItem" :to="navItem">
           <li>
             <component :is="mainMenuIcons[navItem]" size="24" />
             <span>{{ t(`label.${navItem}`) }}</span>
           </li>
         </router-link>
       </ul>
-    </div>
 
-    <div class="menu-footer-container">
-      <ul @click="onMenuClose">
-        <router-link to="report-bug">
-          <li>
-            {{ t('navBar.reportBug') }}
-          </li>
-        </router-link>
-        <router-link to="contact">
-          <li>
-            {{ t('label.contact') }}
-          </li>
-        </router-link>
-        <router-link to="logout">
-          <li>
-            <icon-logout size="24" />
-            {{ t('label.logOut') }}
-          </li>
-        </router-link>
-      </ul>
+      <div class="menu-footer-container">
+        <details class="footer-accordion">
+          <summary class="footer-header">
+            <div class="user-info">
+              <user-avatar />
+              <span class="user-email">{{ userStore.data.email }}</span>
+            </div>
+            <icon-chevron-down size="20" class="chevron-icon" />
+          </summary>
+
+          <ul @click="onMenuClose">
+            <router-link to="profile">
+              <li>
+                <icon-user-square size="24" />
+                {{ t('label.userProfile') }}
+              </li>
+            </router-link>
+            <router-link to="report-bug">
+              <li>
+                <icon-external-link size="24" />
+                {{ t('navBar.reportBug') }}
+              </li>
+            </router-link>
+            <router-link to="contact">
+              <li>
+                <icon-external-link size="24" />
+                {{ t('label.contact') }}
+              </li>
+            </router-link>
+            <router-link to="logout">
+              <li>
+                <icon-logout size="24" />
+                {{ t('label.logOut') }}
+              </li>
+            </router-link>
+          </ul>
+        </details>
+      </div>
     </div>
   </nav>
 </template>
@@ -160,18 +172,34 @@ async function copyLink() {
 }
 
 nav {
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
   top: 0;
   bottom: 0;
-  width: 75%;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  left: 0;
+  right: 0;
   z-index: 99999;
-  background-color: var(--colour-neutral-raised);
+
+  .menu-scrim {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
 
   .menu-content-container {
-    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 75%;
+    height: 100%;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    background-color: var(--colour-neutral-raised);
+    z-index: 2;
     padding: 1rem;
 
     header {
@@ -180,7 +208,7 @@ nav {
       height: 32px;
       margin-block-end: 2rem;
 
-      & > svg {
+      &>svg {
         height: 48px;
         width: min-content;
         margin: 0 auto;
@@ -203,20 +231,51 @@ nav {
         padding-block: 0.5rem;
       }
     }
-  }
 
-  .menu-footer-container {
-    padding: 1rem;
-    background-color: var(--colour-neutral-base);
+    .menu-footer-container {
+      margin-top: auto;
+      margin-left: -1rem;
+      margin-right: -1rem;
+      margin-bottom: -1rem;
+      padding: 1rem;
+      background-color: var(--colour-neutral-base);
 
-    ul {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      .footer-accordion {
+        .footer-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          cursor: pointer;
+          padding: 0.5rem 0;
 
-      li {
-        display: flex;
-        gap: 0.75rem;
+          .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            .user-email {
+              font-size: 0.875rem;
+              color: var(--colour-ti-base);
+              font-weight: 500;
+            }
+          }
+        }
+
+        &[open] .footer-header .chevron-icon {
+          transform: rotate(180deg);
+        }
+
+        ul {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          padding-top: 1rem;
+
+          li {
+            display: flex;
+            gap: 0.75rem;
+          }
+        }
       }
     }
   }
