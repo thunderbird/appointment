@@ -49,14 +49,19 @@ onMounted(async () => {
 
 <template>
   <div class="user-info-container">
-    <div>
-      <p>{{ t('label.connected') }} - <strong>{{ scheduleCalendar?.user }}</strong></p>
-      <p>{{ t('label.updated') }} {{ timeAgo }}</p>
-    </div>
+    <template v-if="scheduleCalendar?.connected">
+      <div>
+        <p>{{ t('label.connected') }} - <strong>{{ scheduleCalendar?.user }}</strong></p>
+        <p>{{ t('label.updated') }} {{ timeAgo }}</p>
+      </div>
 
-    <button @click="onSyncCalendarButtonClicked" :disabled="loading" :class="{ 'loading': loading }">
-      <icon-reload size="20"/>
-    </button>
+      <button @click="onSyncCalendarButtonClicked" :disabled="loading" :class="{ 'loading': loading }">
+        <icon-reload size="20"/>
+      </button>
+    </template>
+    <template v-else>
+      <p>{{ t('label.disconnected') }}</p>
+    </template>
   </div>
 </template>
 
