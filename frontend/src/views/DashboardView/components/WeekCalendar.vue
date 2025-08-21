@@ -53,66 +53,6 @@ function onRemoteEventMouseLeave() {
 }
 
 /**
- * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
- */
-const weekdays = computed(() => {
-  const { start, end } = props.activeDateRange;
-
-  // Parse the start and end dates using dayjs's automatic parsing
-  const startDate = dj(start);
-  const endDate = dj(end);
-
-  const days = [];
-  let currentDate = startDate;
-
-  // Loop from the start date until it's the same as the end date, inclusive
-  while (!currentDate.isAfter(endDate, 'day')) {
-    days.push([
-      currentDate.format('ddd').toUpperCase(), // Format to 'SUN', 'MON', etc.
-      currentDate.date() // Get the day of the month (e.g., 17)
-    ]);
-
-    // Move to the next day
-    currentDate = currentDate.add(1, 'day');
-  }
-
-  return days;
-})
-
-/**
- * Generates an array of time slot objects, each with grid positioning info
- */
-const timeSlotsForGrid = computed(() => {
-  const slots = [];
-  const { start_time, end_time, slot_duration } = firstSchedule.value || {};
-
-  if (!start_time || !end_time || !slot_duration) return [];
-
-  let currentTime = dj(start_time, 'H:mm');
-  const finalTime = dj(end_time, 'H:mm');
-
-  // Start grid rows at 2 to leave space for the header row
-  let rowIndex = 2;
-
-  while (currentTime.isBefore(finalTime)) {
-    slots.push({
-      // The text to display (e.g., "9 AM" or empty for non-hour slots)
-      text: currentTime.minute() === 0 ? currentTime.format('h A') : '',
-      // The start time in a consistent format, useful for keys
-      startTime: currentTime.format('HH:mm'),
-      // Grid properties
-      gridRowStart: rowIndex,
-      gridRowEnd: rowIndex + 1,
-    });
-
-    currentTime = currentTime.add(slot_duration, 'minute');
-    rowIndex++;
-  }
-
-  return slots;
-});
-
-/**
  * Calculates grid positioning for calendar events
  */
 function calculateEventGridPosition(eventStart, eventEnd, slots) {
@@ -157,6 +97,73 @@ function calculateEventGridPosition(eventStart, eventEnd, slots) {
 
   return null;
 }
+
+/**
+ * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
+ */
+const weekdays = computed(() => {
+  const { start, end } = props.activeDateRange;
+
+  // Parse the start and end dates using dayjs's automatic parsing
+  const startDate = dj(start);
+  const endDate = dj(end);
+
+  const days = [];
+  let currentDate = startDate;
+
+  // Loop from the start date until it's the same as the end date, inclusive
+  while (!currentDate.isAfter(endDate, 'day')) {
+    days.push([
+      currentDate.format('ddd').toUpperCase(), // Format to 'SUN', 'MON', etc.
+      currentDate.date() // Get the day of the month (e.g., 17)
+    ]);
+
+    // Move to the next day
+    currentDate = currentDate.add(1, 'day');
+  }
+
+  return days;
+})
+
+/**
+ * Generates an array of time slot objects, each with grid positioning info
+ */
+const timeSlotsForGrid = computed(() => {
+  const slots = [];
+
+  // For FTUE for example, we don't have a firstSchedule yet,
+  // so we can initialize the time with a default 9-5 in 24 hrs format, 30 min duration
+  const { start_time, end_time, slot_duration } = firstSchedule.value || {
+    start_time: '9:00',
+    end_time: '17:00',
+    slot_duration: 30
+  };
+
+  if (!start_time || !end_time || !slot_duration) return [];
+
+  let currentTime = dj(start_time, 'H:mm');
+  const finalTime = dj(end_time, 'H:mm');
+
+  // Start grid rows at 2 to leave space for the header row
+  let rowIndex = 2;
+
+  while (currentTime.isBefore(finalTime)) {
+    slots.push({
+      // The text to display (e.g., "9 AM" or empty for non-hour slots)
+      text: currentTime.minute() === 0 ? currentTime.format('h A') : '',
+      // The start time in a consistent format, useful for keys
+      startTime: currentTime.format('HH:mm'),
+      // Grid properties
+      gridRowStart: rowIndex,
+      gridRowEnd: rowIndex + 1,
+    });
+
+    currentTime = currentTime.add(slot_duration, 'minute');
+    rowIndex++;
+  }
+
+  return slots;
+});
 
 /**
  * Generates an array of remote events that fall within the active week with grid positioning info

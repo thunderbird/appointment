@@ -116,6 +116,7 @@ export default {
     </div>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
