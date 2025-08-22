@@ -8,14 +8,15 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, callKey, refreshKey } from '@/keys';
 import { TimeFormatted } from '@/models';
-import CalendarQalendar from '@/components/CalendarQalendar.vue';
 import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import QuickActionsSideBar from './components/QuickActionsSideBar.vue';
+import WeekPicker from './components/WeekPicker.vue';
+import UserCalendarSync from './components/UserCalendarSync.vue';
+import WeekCalendar from './components/WeekCalendar.vue';
 
 // stores
-import { useAppointmentStore } from '@/stores/appointment-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
-import QuickActionsSideBar from './components/QuickActionsSideBar.vue';
 
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
@@ -23,43 +24,30 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 const refresh = inject(refreshKey);
 
-const appointmentStore = useAppointmentStore();
-const calendarStore = createCalendarStore(call);
 const userActivityStore = useUserActivityStore();
-const { pendingAppointments } = storeToRefs(appointmentStore);
-const { remoteEvents } = storeToRefs(calendarStore);
+const calendarStore = createCalendarStore(call);
 const { data: userActivityData } = storeToRefs(userActivityStore);
 
 // current selected date, defaults to now
 const activeDate = ref(dj());
 const activeDateRange = computed(() => ({
-  start: activeDate.value.startOf('month'),
-  end: activeDate.value.endOf('month'),
+  start: activeDate.value.startOf('week').format('YYYY-MM-DD'),
+  end: activeDate.value.endOf('week').format('YYYY-MM-DD'),
 }));
 
-// schedule previews for showing corresponding placeholders in calendar views
-const schedulesPreviews = ref([]);
-
-/**
- * Retrieve new events if a user navigates to a different month
- * @param dateObj
- */
-const onDateChange = async (dateObj: TimeFormatted) => {
+async function onDateChange(dateObj: TimeFormatted) {
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
 
   activeDate.value = start.add(end.diff(start, 'minutes') / 2, 'minutes');
 
-  // remote data is retrieved per month, so a data request happens as soon as the user navigates to a different month
-  if (
-    !dj(activeDateRange.value.end).isSame(dj(end), 'month')
-    || !dj(activeDateRange.value.start).isSame(dj(start), 'month')
-  ) {
-    await calendarStore.getRemoteEvents(activeDate.value);
-  }
+  await calendarStore.getRemoteEvents(activeDate.value);
 };
 
-// initially load data when component gets remounted
+function dismiss() {
+  userActivityStore.dismiss(Dismissibles.BetaWarning);
+};
+
 onMounted(async () => {
   // Don't actually load anything during the FTUE
   if (route.name === 'setup') {
@@ -69,10 +57,6 @@ onMounted(async () => {
   await refresh();
   await calendarStore.getRemoteEvents(activeDate.value);
 });
-
-const dismiss = () => {
-  userActivityStore.dismiss(Dismissibles.BetaWarning);
-};
 </script>
 
 <script lang="ts">
@@ -116,16 +100,23 @@ export default {
   <div class="main-container">
     <quick-actions-side-bar />
   
-    <!-- main section: big calendar showing active month, week or day -->
-    <calendar-qalendar
-      class="w-full"
-      :appointments="pendingAppointments"
-      :events="remoteEvents"
-      :schedules="schedulesPreviews"
-      @date-change="onDateChange"
-    />
+    <div class="main-calendar-container">
+      <div class="calendar-header-container">
+        <week-picker
+          :active-date-range="activeDateRange"
+          :onDateChange="onDateChange"
+        />
+
+        <user-calendar-sync />
+      </div>
+
+      <week-calendar
+        :active-date-range="activeDateRange"
+      />
+    </div>
   </div>
 </template>
+
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
@@ -133,6 +124,21 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2.25rem;
+}
+
+.main-calendar-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.calendar-header-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-block-end: 1rem;
+  gap: 2rem;
 }
 
 #beta-warning {
@@ -187,6 +193,14 @@ export default {
   .main-container {
     flex-direction: row;
     gap: 2rem;
+    overflow-y: auto;
+  }
+
+  .calendar-header-container {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-block-end: 1rem;
+    gap: 0;
   }
 }
 </style>

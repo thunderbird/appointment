@@ -21,7 +21,7 @@
     "@types/ua-parser-js": "^0.7.39",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueuse/components": "^13.0.0",
-    "@vueuse/core": "^13.0.0",
+    "@vueuse/core": "^13.7.0",
     "core-js": "^3.8.3",
     "dayjs": "^1.11.5",
     "oidc-client-ts": "^3.3.0",
