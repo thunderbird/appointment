@@ -324,7 +324,7 @@ onMounted(async () => {
     <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
 
     <!-- Mobile NavBar show / hide is handled in CSS land -->
-    <nav-bar-mobile v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
+    <nav-bar-mobile v-if="!(routeIsHome && !user?.authenticated)"/>
 
     <main
       :class="{

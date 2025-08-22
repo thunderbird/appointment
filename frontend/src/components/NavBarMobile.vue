@@ -22,19 +22,12 @@ import { PrimaryButton } from '@thunderbirdops/services-ui';
 const userStore = useUserStore();
 const { t } = useI18n();
 
-// component properties
-defineProps<{
-  navItems: string[], // list of route names that are also lang keys (format: label.<key>), used as nav items
-}>();
-
-const mainMenuIcons = computed(() => {
-  return {
-    'dashboard': IconHome,
-    'availability': IconCalendarClock,
-    'bookings': IconCalendarCheck,
-    'settings': IconSettings,
-  }
-})
+const navItems = [
+  { route: 'dashboard', i18nKey: 'dashboard', icon: IconHome },
+  { route: 'bookings', i18nKey: 'bookings', icon: IconCalendarCheck },
+  { route: 'availability', i18nKey: 'availability', icon: IconCalendarClock },
+  { route: 'settings', i18nKey: 'settings', icon: IconSettings },
+];
 
 const menuOpen = ref(false);
 const myLinkTooltip = ref(t('navBar.shareMyLink'));
@@ -91,10 +84,10 @@ async function copyLink() {
       </primary-button>
 
       <ul @click="onMenuClose">
-        <router-link v-for="navItem in navItems" :key="navItem" :to="navItem">
+        <router-link v-for="navItem in navItems" :key="navItem.route" :to="navItem.route">
           <li>
-            <component :is="mainMenuIcons[navItem]" size="24" />
-            <span>{{ t(`label.${navItem}`) }}</span>
+            <component :is="navItem.icon" size="24" />
+            <span>{{ t(`label.${navItem.i18nKey}`) }}</span>
           </li>
         </router-link>
       </ul>
