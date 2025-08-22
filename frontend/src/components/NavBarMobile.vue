@@ -286,6 +286,10 @@ nav {
   .header-mobile {
     display: none;
   }
+
+  nav {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
