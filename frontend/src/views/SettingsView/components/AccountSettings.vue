@@ -6,7 +6,7 @@ import { callKey } from '@/keys';
 import { DangerButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
 import { IconCopy, IconArrowRight } from '@tabler/icons-vue';
 import { createUserStore } from '@/stores/user-store';
-import { BooleanResponse } from '@/models';
+import { BlobResponse, BooleanResponse } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
@@ -19,8 +19,13 @@ const userStore = createUserStore(call);
 
 const copyLinkTooltip = ref(t('label.copyLink'));
 const cancelAccountModalOpen = ref(false);
+const downloadAccountModalOpen = ref(false);
 
-// Link copy
+const closeModals = () => {
+  cancelAccountModalOpen.value = false;
+  downloadAccountModalOpen.value = false;
+};
+
 const copyLink = async () => {
   await navigator.clipboard.writeText(userStore.myLink);
 
@@ -53,6 +58,29 @@ const actuallyDeleteAccount = async () => {
   // We can't logout since we've deleted the user by now, so just delete local storage data.
   userStore.$reset();
   await router.push('/');
+};
+
+/**
+ * Request a data download, and prompt the user to download the data.
+ */
+const actuallyDownloadData = async () => {
+  const { data }: BlobResponse = await call('account/download').post().blob();
+
+  if (!data || !data.value) {
+    // TODO: show error
+    // console.error('Failed to download blob!!');
+    return;
+  }
+
+  // Data is a ref to our new blob
+  const fileObj = window.URL.createObjectURL(data.value);
+  window.location.assign(fileObj);
+
+  closeModals();
+
+  if (usePosthog) {
+    posthog.capture(MetricEvents.DownloadData);
+  }
 };
 </script>
 
@@ -87,7 +115,25 @@ const actuallyDeleteAccount = async () => {
     <danger-button @click="cancelAccountModalOpen = true">
       {{ t('label.cancelService') }}
     </danger-button>
+    <secondary-button
+      :title="t('label.download')"
+      @click="downloadAccountModalOpen = true;"
+      data-testid="settings-account-download-data-btn"
+    >
+      {{ t('label.downloadYourData') }}
+    </secondary-button>
   </div>
+
+  <!-- Account download modal -->
+  <confirmation-modal
+    :open="downloadAccountModalOpen"
+    :title="t('label.accountData')"
+    :message="t('text.accountDataNotice')"
+    :confirm-label="t('label.continue')"
+    :cancel-label="t('label.cancel')"
+    @confirm="actuallyDownloadData"
+    @close="closeModals"
+  ></confirmation-modal>
 
   <!-- Account deletion modal -->
   <!-- TODO: This should be account _cancellation_ instead -->
@@ -99,7 +145,7 @@ const actuallyDeleteAccount = async () => {
     :cancel-label="t('label.cancel')"
     :use-caution-button="true"
     @confirm="actuallyDeleteAccount"
-    @close="cancelAccountModalOpen = false">
+    @close="closeModals">
   </confirmation-modal>
 </template>
 
