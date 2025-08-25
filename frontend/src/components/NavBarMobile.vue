@@ -34,6 +34,7 @@ const myLinkTooltip = ref(t('navBar.shareMyLink'));
 
 function onMenuOpen() {
   menuOpen.value = true;
+  // Hide body scroll when the menu is open so content underneath is not scrollable
   document.body.style.overflow = 'hidden'
 }
 
