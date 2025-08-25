@@ -1,6 +1,6 @@
 import { defineAsyncComponent } from 'vue';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
-import BookingView from '@/views/BookingView.vue';
+import BookerView from '@/views/BookerView/index.vue';
 import DashboardView from '@/views/DashboardView/index.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
@@ -75,8 +75,8 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/user/:username/:signatureOrSlug?',
-    name: 'booking-view',
-    component: BookingView,
+    name: 'booker',
+    component: BookerView,
     meta: {
       isPublic: true,
       maskForMetrics: true,

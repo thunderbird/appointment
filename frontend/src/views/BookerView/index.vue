@@ -11,9 +11,9 @@ import {
 } from '@/models';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import BookingModal from '@/components/BookingModal.vue';
-import BookingViewSlotSelection from '@/components/bookingView/BookingViewSlotSelection.vue';
-import BookingViewSuccess from '@/components/bookingView/BookingViewSuccess.vue';
-import BookingViewError from '@/components/bookingView/BookingViewError.vue';
+import BookingViewSlotSelection from './components/BookingViewSlotSelection.vue';
+import BookingViewSuccess from './components/BookingViewSuccess.vue';
+import BookingViewError from './components/BookingViewError.vue';
 import { usePosthog, posthog } from '@/composables/posthog';
 
 // component constants
@@ -183,6 +183,12 @@ onMounted(async () => {
     activeView.value = BookingCalendarView.Invalid;
   }
 });
+</script>
+
+<script lang="ts">
+export default {
+  name: 'BookerView'
+}
 </script>
 
 <template>
