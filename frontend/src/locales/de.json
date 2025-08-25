@@ -158,6 +158,7 @@
     "MMDDYYYY": "MM/TT/YYYY",
     "accepted": "Akzeptiert",
     "account": "Konto",
+    "accountData": "Benutzerdaten",
     "accountDeletion": "Benutzerkonto löschen",
     "accountSettings": "Benutzerkonto Einstellungen",
     "activateSchedule": "Zeitplan aktivieren",
@@ -512,6 +513,7 @@
     "zoomCom": "zoom.com …"
   },
   "text": {
+    "accountDataNotice": "Lade all deine Daten von Thunderbird Appointment herunter.",
     "accountCancelWarning": "Du wirst keinen Zugriff mehr auf Thunderbird Appointment haben. Alle Buchungs-Kalender werden auf \"Inaktiv\" gesetzt und alle zukünftigen Buchungen werden storniert.\nAndere Termin-Daten werden 30 Tage lang beibehalten, entsprechend der TB Pro Datenschutzrichtlinie.",
     "admin": {
       "completelyRemoveUser": "Hier wird ein Benutzer vollständig aus Thunderbird Appointment entfernt, einschließlich aller Benutzerdaten. Diese Funktion bitte nicht ausführen, wenn es keine Aufforderung dafür gab.",
