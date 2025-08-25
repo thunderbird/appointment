@@ -96,7 +96,7 @@ body {
   display: flex;
   left: 0;
   top: 0;
-  z-index: 55;
+  z-index: 9999;
   width: 100vw;
   height: 100vh;
   overflow: hidden;

@@ -52,6 +52,7 @@ const copyToClipboard = async () => {
     @focusin="hover = true"
     @focusout="hover = false"
   >
+    <!-- TODO: This stroke color shouldn't be set as stroke-gray-500 forcibly -->
     <icon-copy
       v-if="copy && !copied"
       class="size-4 fill-transparent stroke-gray-500 stroke-2 dark:stroke-gray-400"

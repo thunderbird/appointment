@@ -28,6 +28,7 @@ import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import {userManager} from "@/composables/oidcUserManager";
 import { isOidcAuth } from "@/composables/authSchemes";
+import NavBarMobile from './components/NavBarMobile.vue';
 
 // component constants
 const user = useUserStore();
@@ -318,7 +319,13 @@ onMounted(async () => {
     >
       {{ notificationMessage }}
     </site-notification>
+
+    <!-- Desktop NavBar show / hide is handled in CSS land -->
     <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
+
+    <!-- Mobile NavBar show / hide is handled in CSS land -->
+    <nav-bar-mobile v-if="!(routeIsHome && !user?.authenticated)"/>
+
     <main
       :class="{
         'private-route': !routeIsHome && !routeIsPublic,
@@ -341,7 +348,7 @@ onMounted(async () => {
 @import '@/assets/styles/custom-media.pcss';
 
 main {
-  padding-block-start: 6rem;
+  padding-block-start: 1rem;
 
   &.public-route {
     min-height: 100%;
@@ -357,6 +364,10 @@ main {
 }
 
 @media (--lg) {
+  main {
+    padding-block-start: 6rem;
+  }
+
   main.private-route {
     margin-inline: 2rem;
   }
