@@ -136,6 +136,12 @@ async function updateCalendarConnections() {
 }
 
 async function updateScheduleDefaultCalendar() {
+  // It is possible for the first / default schedule not to exist at this point
+  // (e.g. disconnecting all accounts and calendars and reconnecting a account)
+  if (!scheduleStore.firstSchedule) {
+    return;
+  }
+
   const firstScheduleId = scheduleStore.firstSchedule.id;
 
   // Only make the request if the default calendar has been changed
