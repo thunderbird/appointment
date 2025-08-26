@@ -27,7 +27,7 @@ const copyLinkTooltip = ref(t('label.copyLink'));
 const cancelAccountModalOpen = ref(false);
 const downloadAccountModalOpen = ref(false);
 
-const closeModals = () => {
+function closeModals() {
   cancelAccountModalOpen.value = false;
   downloadAccountModalOpen.value = false;
 };
@@ -54,7 +54,7 @@ const copyLink = async () => {
  * Request an account deletion, and then log out.
  * TODO: This will need to change for a cancellation flow
  */
-const actuallyDeleteAccount = async () => {
+async function actuallyDeleteAccount() {
   cancelAccountModalOpen.value = false;
 
   const { error }: BooleanResponse = await call('account/delete').delete();
@@ -77,7 +77,7 @@ const actuallyDeleteAccount = async () => {
 /**
  * Request a data download, and prompt the user to download the data.
  */
-const actuallyDownloadData = async () => {
+async function actuallyDownloadData() {
   const { data }: BlobResponse = await call('account/download').post().blob();
 
   if (!data || !data.value) {

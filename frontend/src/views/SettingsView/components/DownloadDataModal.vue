@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue';
+import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TextInput, PrimaryButton } from '@thunderbirdops/services-ui';
-import { isPasswordAuth } from "@/composables/authSchemes";
-import { Alert, PydanticException, Error } from '@/models';
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
+import { Alert, PydanticException, Error, AuthUrlResponse } from '@/models';
 import { useUserStore } from '@/stores/user-store';
 import { handleFormError } from '@/utils';
 import { AlertSchemes } from "@/definitions";
 import AlertBox from '@/elements/AlertBox.vue';
+import { userManager } from '@/composables/oidcUserManager';
+import { callKey, dayjsKey } from '@/keys';
 
 const { t } = useI18n();
+const call = inject(callKey);
+const dj = inject(dayjsKey);
 const userStore = useUserStore();
 
 const formRef = useTemplateRef<HTMLFormElement>('formRef');
@@ -23,30 +27,54 @@ const props = defineProps<{
 }>();
 
 async function onSubmit() {
-  loginError.value = null;
+  isLoading.value = true;
 
-  if (!formRef.value.checkValidity()) {
-    formRef.value.reportValidity();
-    isLoading.value = false;
-    return;
-  }
+  if (isOidcAuth) {
+    // TODO: Can we redirect for the Settings view specifically?
+    // How to catch errors?
+    await userManager.signinRedirect({
+      prompt: 'login',
+      login_hint: email.value,
+    });
+  } else if (isFxaAuth) {
+    const apiUrl = 'fxa_login';
+    const params = new URLSearchParams({
+      email: email.value,
+      timezone: dj.tz.guess(),
+    });
 
-  const { error }: Error = await userStore.refreshAccessToken(email.value, password.value);
+    const { error, data }: AuthUrlResponse = await call(`${apiUrl}?${params}`).get().json();
 
-  if (error) {
-    let errObj = error as PydanticException;
-    if (typeof error === 'string') {
-      errObj = { detail: error };
+    if (error.value) {
+      loginError.value = handleFormError(t, formRef, data.value as PydanticException);
+      isLoading.value = false;
+      return;
+    }
+  } else if (isPasswordAuth) {
+    if (!formRef.value.checkValidity()) {
+      formRef.value.reportValidity();
+      isLoading.value = false;
+      return;
     }
 
-    loginError.value = handleFormError(t, formRef, errObj);
-    isLoading.value = false;
-    return;
+    const { error }: Error = await userStore.refreshAccessToken(email.value, password.value);
+
+    if (error) {
+      let errObj = error as PydanticException;
+      if (typeof error === 'string') {
+        errObj = { detail: error };
+      }
+
+      loginError.value = handleFormError(t, formRef, errObj);
+      isLoading.value = false;
+      return;
+    }
   }
 
   loginError.value = null;
   isLoading.value = false;
 
+  // Actually download the data (defined in AccountSettings.vue)
   props.onLoginSuccessful();
 };
 </script>
@@ -58,7 +86,7 @@ async function onSubmit() {
     ref="formRef"
     autocomplete="off"
     @submit.prevent
-    @keyup.enter="() => onSubmit()"
+    @keyup.enter="onSubmit"
   >
     <text-input
       name="email"
