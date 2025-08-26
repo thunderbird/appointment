@@ -324,6 +324,22 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const refreshAccessToken = async (username: string, password: string | null): Promise<Error> => {
+    // fastapi wants us to send this as formdata :|
+    const formData = new FormData(document.createElement('form'));
+    formData.set('username', username);
+    formData.set('password', password);
+    const { error, data: tokenData }: TokenResponse = await call.value('token').post(formData).json();
+
+    if (error.value || !tokenData.value.access_token) {
+      return { error: tokenData.value ?? error.value };
+    }
+
+    data.value.accessToken = tokenData.value.access_token;
+
+    return { error: null };
+  }
+
   return {
     data,
     init,
@@ -342,6 +358,7 @@ export const useUserStore = defineStore('user', () => {
     myColourScheme,
     updateUser,
     finishFTUE,
+    refreshAccessToken,
   };
 });
 

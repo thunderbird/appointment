@@ -12,6 +12,8 @@ import { BlobResponse, BooleanResponse } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import GenericModal from '@/components/GenericModal.vue';
+import DownloadDataModal from './DownloadDataModal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -136,7 +138,7 @@ const actuallyDownloadData = async () => {
       @click="downloadAccountModalOpen = true;"
       data-testid="settings-account-download-data-btn"
     >
-      {{ t('label.downloadYourData') }}
+      {{ t('label.downloadMyData') }}
     </secondary-button>
   </div>
 
@@ -147,7 +149,16 @@ const actuallyDownloadData = async () => {
     </danger-button>
   </div>
 
-  <!-- Account download modal -->
+  <!-- Account download modal (re-auth) -->
+  <generic-modal v-if="downloadAccountModalOpen" @close="downloadAccountModalOpen = false">
+    <template v-slot:header>
+      <h2 class="modal-title">
+        {{ t('label.accountData') }}
+      </h2>
+    </template>
+    <download-data-modal @login-successful="actuallyDownloadData" />
+  </generic-modal>
+
   <confirmation-modal
     :open="downloadAccountModalOpen"
     :title="t('label.accountData')"
