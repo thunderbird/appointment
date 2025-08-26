@@ -58,7 +58,7 @@ export const useSettingsStore = defineStore('settings', () => {
     initialState.value.timeFormat = userStore.data.settings.timeFormat;
 
     // Connected Applications section
-    initialState.value.defaultCalendarId = scheduleStore.firstSchedule.calendar_id;
+    initialState.value.defaultCalendarId = scheduleStore.firstSchedule?.calendar_id;
     initialState.value.changedCalendars = {};
     initialState.value.changedCalendarColors = {};
 
