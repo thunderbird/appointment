@@ -205,7 +205,7 @@ export type AvailabilityFormFields = {
   end_time?: string;
   farthest_booking?: number;
   id?: number;
-  link_slug?: string;
+  slug?: string;
   location_url?: string;
   meeting_link_provider?: string;
   name?: string;

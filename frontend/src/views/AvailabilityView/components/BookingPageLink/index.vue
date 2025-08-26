@@ -20,9 +20,9 @@ const refreshLinkModalOpen = ref(false);
 const copyButtonLabel = ref(t('label.copy'));
 
 const linkSlug = computed({
-  get: () => currentState.value.link_slug,
+  get: () => currentState.value.slug || userStore.mySlug,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { link_slug: value } })
+    availabilityStore.$patch({ currentState: { slug: value } })
   }
 })
 
@@ -39,6 +39,13 @@ function closeRefreshLinkModal() {
 async function refreshLinkConfirm() {
   await userStore.changeSignedUrl();
   await userStore.profile();
+
+  // Update link slug in the "Customize Your Link" text field
+  // We need to update both initialState and currentState for the isDirty comparison
+  availabilityStore.$patch({
+    initialState: { slug: userStore.mySlug },
+    currentState: { slug: userStore.mySlug }
+  })
 
   closeRefreshLinkModal();
 

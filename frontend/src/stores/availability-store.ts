@@ -75,7 +75,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
     hasZoom.value = !!externalConnectionStore.zoom[0];
 
     // Booking Page Link data
-    initialState.value.link_slug = userStore.mySlug;
+    initialState.value.slug = userStore.mySlug;
 
     // Copy initialState
     currentState.value = deepClone({ ...initialState.value }); 
