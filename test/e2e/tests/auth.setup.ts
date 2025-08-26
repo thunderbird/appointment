@@ -5,7 +5,7 @@ import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from
 
 import {
     APPT_DASHBOARD_HOME_PAGE,
-    APPT_MAIN_SETTINGS_PAGE,
+    APPT_SETTINGS_PAGE,
     TIMEOUT_2_SECONDS,
 } from "../const/constants";
 
@@ -43,7 +43,7 @@ setup('authenticate', async ({ page }) => {
 
   // ensure our settings are set to what the tests expect as default (in case a
   // previous test run failed and left the settings in an incorrect state)
-  await page.goto(APPT_MAIN_SETTINGS_PAGE);
+  await page.goto(APPT_SETTINGS_PAGE);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
   await setDefaultUserSettingsLocalStore(page);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);

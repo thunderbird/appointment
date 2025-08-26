@@ -8,11 +8,10 @@ export const APPT_SHORT_SHARE_LINK_PREFIX = String(process.env.APPT_SHORT_SHARE_
 export const APPT_LONG_SHARE_LINK_PREFIX = String(process.env.APPT_LONG_SHARE_LINK_PREFIX);
 export const APPT_PENDING_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings?filters=pending&unconfirmed=true`);
 export const APPT_BOOKED_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings?filters=confirmed`);
-export const APPT_MAIN_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings`);
-export const APPT_GENERAL_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/general`);
-export const APPT_CALENDAR_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/calendar`);
-export const APPT_ACCOUNT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/account`);
-export const APPT_CONNECTED_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings/connectedAccounts`);
+export const APPT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings`);
+export const APPT_SETTINGS_ACCOUNT = String(`${process.env.APPT_URL}settings#accountSettings`);
+export const APPT_SETTINGS_PREFERENCES = String(`${process.env.APPT_URL}settings#preferences`);
+export const APPT_SETTINGS_CONNECTED_APPS = String(`${process.env.APPT_URL}settings#connectedApplications`);
 export const APPT_DASHBOARD_HOME_PAGE = String(`${process.env.APPT_URL}dashboard`);
 export const APPT_DASHBOARD_MONTH_PAGE = String(`${process.env.APPT_URL}dashboard#month`);
 export const APPT_AVAILABILITY_PAGE = String(`${process.env.APPT_URL}availability`);
@@ -44,8 +43,8 @@ export const APPT_THEME_SETTING_LIGHT = 'Light';
 export const APPT_THEME_SETTING_DARK = 'Dark';
 export const APPT_TIMEZONE_SETTING_PRIMARY = 'America/Toronto';
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax';
-export const APPT_START_OF_WEEK_SUN = 'Sunday';
-export const APPT_START_OF_WEEK_MON = 'Monday';
+export const APPT_START_OF_WEEK_SUN = 'S';
+export const APPT_START_OF_WEEK_MON = 'M';
 export const APPT_START_OF_WEEK_DASHBOARD_SUN = 'Sun';
 export const APPT_START_OF_WEEK_DASHBOARD_MON = 'Mon';
 

@@ -6,16 +6,15 @@ import { DashboardPage } from '../pages/dashboard-page';
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  APPT_THEME_SETTING_DARK,
-  APPT_THEME_SETTING_LIGHT,
-  APPT_BROWSER_STORE_THEME_LIGHT,
-  APPT_BROWSER_STORE_THEME_DARK,
+  APPT_TIMEZONE_SETTING_PRIMARY,
+  APPT_TIMEZONE_SETTING_HALIFAX,
+  TIMEOUT_2_SECONDS,
  } from '../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
-test.describe('general settings - theme', {
+test.describe('settings - timezone', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
@@ -23,25 +22,26 @@ test.describe('general settings - theme', {
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
 
-    // navigate to the general settings page
-    await settingsPage.gotoGeneralSettingsPage();
+    // navigate to the settings page, preferences section
+    await settingsPage.gotoPreferencesSettings();
   });
 
-  test('able to change theme', async ({ page }) => {
-    // change theme setting to dark mode and verify
-    await settingsPage.changeThemeSetting(APPT_THEME_SETTING_DARK);
-    expect.soft(await settingsPage.isDarkModeEnabled(page)).toBeTruthy();
+  test('able to change default timezone', async ({ page }) => {
+    // change default time zone setting
+    await settingsPage.defaultTimeZoneSelect.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
+    await settingsPage.changeDefaultTimezoneSetting(APPT_TIMEZONE_SETTING_HALIFAX);
 
     // verify setting saved in browser local storage
     let localStore = await getUserSettingsFromLocalStore(page);
-    expect(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_DARK);
+    expect(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_HALIFAX);
 
-    // change theme setting back to light mode and verify
-    await settingsPage.changeThemeSetting(APPT_THEME_SETTING_LIGHT);
-    expect(await settingsPage.isDarkModeEnabled(page)).toBeFalsy();
-  
+    // change time format setting back
+    await settingsPage.gotoPreferencesSettings()
+    await settingsPage.changeDefaultTimezoneSetting(APPT_TIMEZONE_SETTING_PRIMARY);
+
     // verify setting saved in browser local storage
     localStore = await getUserSettingsFromLocalStore(page);
-    expect(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_LIGHT);
+    expect(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_PRIMARY);
   });
 });

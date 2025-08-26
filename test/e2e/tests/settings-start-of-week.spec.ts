@@ -18,7 +18,7 @@ import {
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
-test.describe('general settings - start of week', {
+test.describe('settings - start of week', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
@@ -26,8 +26,8 @@ test.describe('general settings - start of week', {
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
 
-    // navigate to the general settings page
-    await settingsPage.gotoGeneralSettingsPage();
+    // // navigate to the settings page, preferences section
+    await settingsPage.gotoPreferencesSettings();
   });
 
   test('able to change start of week', async ({ page }) => {
@@ -35,7 +35,6 @@ test.describe('general settings - start of week', {
     await settingsPage.changeStartOfWeekSetting(APPT_START_OF_WEEK_MON);
 
     // verify setting saved in browser local storage
-    await settingsPage.gotoGeneralSettingsPage();
     let localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
 
@@ -46,11 +45,10 @@ test.describe('general settings - start of week', {
 
     // change start of week back to Sunday and verify
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
-    await settingsPage.gotoGeneralSettingsPage();
+    await settingsPage.gotoPreferencesSettings();
     await settingsPage.changeStartOfWeekSetting(APPT_START_OF_WEEK_SUN);
 
     // verify setting saved in browser local storage
-    await settingsPage.gotoGeneralSettingsPage();
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_SUN);
 
