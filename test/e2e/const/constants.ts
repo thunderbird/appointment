@@ -9,9 +9,6 @@ export const APPT_LONG_SHARE_LINK_PREFIX = String(process.env.APPT_LONG_SHARE_LI
 export const APPT_PENDING_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings?filters=pending&unconfirmed=true`);
 export const APPT_BOOKED_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings?filters=confirmed`);
 export const APPT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings`);
-export const APPT_SETTINGS_ACCOUNT = String(`${process.env.APPT_URL}settings#accountSettings`);
-export const APPT_SETTINGS_PREFERENCES = String(`${process.env.APPT_URL}settings#preferences`);
-export const APPT_SETTINGS_CONNECTED_APPS = String(`${process.env.APPT_URL}settings#connectedApplications`);
 export const APPT_DASHBOARD_HOME_PAGE = String(`${process.env.APPT_URL}dashboard`);
 export const APPT_DASHBOARD_MONTH_PAGE = String(`${process.env.APPT_URL}dashboard#month`);
 export const APPT_AVAILABILITY_PAGE = String(`${process.env.APPT_URL}availability`);

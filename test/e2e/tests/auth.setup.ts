@@ -1,4 +1,5 @@
-import { test as setup } from '@playwright/test';
+import { test as setup, expect } from '@playwright/test';
+import { AvailabilityPage } from '../pages/availability-page';
 import path from 'path';
 
 import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../utils/utils';
@@ -6,6 +7,7 @@ import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from
 import {
     APPT_DASHBOARD_HOME_PAGE,
     APPT_SETTINGS_PAGE,
+    TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
 } from "../const/constants";
 
@@ -50,4 +52,41 @@ setup('authenticate', async ({ page }) => {
 
   // End of authentication steps.
   await page.context().storageState({ path: authFile });
+
+  // Now also ensure the test account is bookable (availability panel) before we start
+  var changesMade = false;
+  const availabilityPage = new AvailabilityPage(page);
+  await availabilityPage.gotoAvailabilityPage();
+  await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
+  if (! await availabilityPage.bookableToggle.isChecked()) {
+    await availabilityPage.bookableToggleContainer.click();
+    changesMade = true;
+  }
+
+  // And ensure availability start time is 9am, end time 5pm
+  await availabilityPage.allStartTimeInput.scrollIntoViewIfNeeded();
+  if (await availabilityPage.allStartTimeInput.inputValue() != '09:00') {
+    await availabilityPage.allStartTimeInput.fill('09:00');
+    changesMade = true;
+  }
+
+  if (await availabilityPage.allEndTimeInput.inputValue() != '17:00') {
+    await availabilityPage.allEndTimeInput.fill('17:00');
+    changesMade = true;
+  }
+
+  // ensure booking page details meeting duration is 30 min
+  if (! await availabilityPage.bookingPageMtgDur30MinRadio.isChecked()) {
+    await availabilityPage.bookingPageMtgDur30MinRadio.scrollIntoViewIfNeeded();
+    await availabilityPage.bookingPageMtgDur30MinRadio.click();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    changesMade = true;
+  }
+
+  // if availability changes were made, save them
+  if (changesMade) {
+    await availabilityPage.saveChangesBtn.click();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
+  }
 });
