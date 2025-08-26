@@ -7,6 +7,7 @@ import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput, LinkButton } from
 import { dayjsKey, isoWeekdaysKey } from '@/keys';
 import { useUserStore } from '@/stores/user-store';
 import { useAvailabilityStore } from '@/stores/availability-store';
+import { useCalendarStore } from '@/stores/calendar-store';
 import { Availability, SelectOption } from '@/models';
 
 import AvailabilityCalendarSelect from './components/AvailabilityCalendarSelect.vue';
@@ -20,8 +21,10 @@ const isoWeekdays = inject(isoWeekdaysKey);
 
 const userStore = useUserStore();
 const availabilityStore = useAvailabilityStore();
+const calendarStore = useCalendarStore();
 const router = useRouter();
 
+const { connectedCalendars } = storeToRefs(calendarStore);
 const { currentState } = storeToRefs(availabilityStore);
 
 const isBookable = computed({
@@ -103,6 +106,7 @@ export default {
       v-model="isBookable"
       :title="t('label.activateSchedule')"
       data-testid="availability-set-availability-toggle"
+      :disabled="!connectedCalendars.length"
     />
   </header>
 
