@@ -141,6 +141,7 @@
     "cancelServiceInfo": "To cancel your Appointment service, click here:\n Note: This will not affect your TB Pro account or subscription.",
     "connectionEstablished": "Connection established",
     "copiedToClipboard": "Copied to clipboard",
+    "downloadAccountData": "To download all the data being used by the Appointment service, click here:",
     "eventWasCreated": "Event created in your calendar.",
     "invitationGenerated": "The invite codes were generated successfully.",
     "invitationWasSent": "An invitation was sent to your email.",

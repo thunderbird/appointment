@@ -129,11 +129,8 @@ const actuallyDownloadData = async () => {
     </secondary-button>
   </div>
 
-  <div class="cancel-service-container">
-    <span>{{ t('info.cancelServiceInfo') }}</span>
-    <danger-button @click="cancelAccountModalOpen = true">
-      {{ t('label.cancelService') }}
-    </danger-button>
+  <div class="button-info-container">
+    <span>{{ t('info.downloadAccountData') }}</span>
     <secondary-button
       :title="t('label.download')"
       @click="downloadAccountModalOpen = true;"
@@ -141,6 +138,13 @@ const actuallyDownloadData = async () => {
     >
       {{ t('label.downloadYourData') }}
     </secondary-button>
+  </div>
+
+  <div class="button-info-container">
+    <span>{{ t('info.cancelServiceInfo') }}</span>
+    <danger-button @click="cancelAccountModalOpen = true">
+      {{ t('label.cancelService') }}
+    </danger-button>
   </div>
 
   <!-- Account download modal -->
@@ -219,7 +223,7 @@ h2 {
   }
 }
 
-.cancel-service-container {
+.button-info-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -235,6 +239,10 @@ h2 {
   button {
     width: 100%;
   }
+}
+
+.booking-page-settings-container + .button-info-container {
+  margin-block-end: 1.5rem;
 }
 
 @media (--md) {
@@ -254,12 +262,13 @@ h2 {
     }
   }
 
-  .cancel-service-container {
+  .button-info-container {
     text-align: end;
     flex-direction: row;
 
     button {
       width: auto;
+      min-width: 178px;
     }
   }
 }
