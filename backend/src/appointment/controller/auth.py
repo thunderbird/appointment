@@ -66,7 +66,7 @@ def user_links_by_subscriber(subscriber: models.Subscriber):
 
 
 def signed_url_by_subscriber(subscriber: schemas.Subscriber):
-    """helper to generated signed url for given subscriber"""
+    """helper to generate signed url for given subscriber"""
     short_url, base_url = user_links_by_subscriber(subscriber)
 
     # We sign with a different hash that the end-user doesn't have access to

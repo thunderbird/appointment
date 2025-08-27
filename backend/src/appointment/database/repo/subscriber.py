@@ -5,6 +5,7 @@ Repository providing CRUD functions for subscriber database models.
 
 import datetime
 import secrets
+import os
 
 from sqlalchemy.orm import Session
 from .. import models, schemas
@@ -132,24 +133,20 @@ def verify_link(db: Session, url: str):
     """Check if a given url is a valid signed subscriber profile link
     Return subscriber if valid.
     """
-    print(f'==== verify_link called with {url} ====')
+
+    if os.getenv('SHORT_BASE_URL'):
+        # If the url is a short url, we need to reconstruct the long url
+        # otherwise it will fail the signature check as we always sign with the long url
+        url = url.replace(os.getenv('SHORT_BASE_URL'), f'{os.getenv("FRONTEND_URL")}/user')
 
     username, signature, clean_url = utils.retrieve_user_url_data(url)
 
-    print(f'{username}, {signature}, {clean_url}')
-
     subscriber = get_by_username(db, username)
     if not subscriber:
-        print('Subscriber not found!')
         return False
-
-    print('Subscriber found!')
 
     clean_url_with_short_link = clean_url + f'{subscriber.short_link_hash}'
     signed_signature = sign_url(clean_url_with_short_link)
-
-    print(f'clean_url_with_short_link = {clean_url_with_short_link}')
-    print(f'signed_signature = {signed_signature}')
 
     # Verify the signature matches the incoming one
     if signed_signature == signature:
