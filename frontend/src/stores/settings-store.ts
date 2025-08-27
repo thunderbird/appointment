@@ -50,6 +50,9 @@ export const useSettingsStore = defineStore('settings', () => {
       await scheduleStore.fetch();
     }
 
+    // Account Settings section
+    initialState.value.displayName = userStore.data.name;
+
     // Preferences section
     initialState.value.colourScheme = userStore.data.settings.colourScheme;
     initialState.value.language = userStore.data.settings.language;

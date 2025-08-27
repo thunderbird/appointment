@@ -62,6 +62,7 @@ const redirectSetupUsers = (view: string) => {
 async function updatePreferences() {
   const obj = {
     username: userStore.data.username,
+    name: currentState.value.displayName,
     timezone: currentState.value.defaultTimeZone,
     language: currentState.value.language,
     colour_scheme: currentState.value.colourScheme,
@@ -71,6 +72,7 @@ async function updatePreferences() {
 
   const originalValues = {
     username: userStore.data.username,
+    name: userStore.data.name,
     timezone: userStore.data.settings.timezone,
     language: userStore.data.settings.language,
     colour_scheme: userStore.data.settings.colourScheme,
