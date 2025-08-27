@@ -144,8 +144,8 @@ def server():
 
     tags_metadata = [
         {
-            "name": "no-cache",
-            "description": "Adds 'Cache-control': 'no-store' in the response headers",
+            'name': 'no-cache',
+            'description': "Adds 'Cache-control': 'no-store' in the response headers",
         },
     ]
 

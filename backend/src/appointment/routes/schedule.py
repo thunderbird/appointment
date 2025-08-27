@@ -221,10 +221,7 @@ def read_schedule_availabilities(
 
     # Transform actual_slots (SlotBase) to SlotOut objects
     # To filter out sensitive fields like meeting_link_id / meeting_link_url
-    slot_outs = [
-        schemas.SlotOut(**slot.model_dump(), id=getattr(slot, 'id', None))
-        for slot in actual_slots
-    ]
+    slot_outs = [schemas.SlotOut(**slot.model_dump(), id=getattr(slot, 'id', None)) for slot in actual_slots]
 
     # TODO: dedicate an own schema to this endpoint
     return schemas.AppointmentOut(
