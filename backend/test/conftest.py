@@ -132,6 +132,21 @@ def _patch_fxa_client(monkeypatch):
     monkeypatch.setattr(FxaClient, 'get_jwk', MockFxaClient.get_jwk)
 
 
+@pytest.fixture(autouse=True)
+def patch_long_base_sign_url(monkeypatch):
+    """Patch LONG_BASE_SIGN_URL in modules that use it, since the constant
+    gets evaluated at import time and tests may set FRONTEND_URL after import"""
+    from appointment.database.repo import subscriber as subscriber_repo
+    from appointment.controller import auth
+
+    # Use FRONTEND_URL from environment if available, otherwise use a test default
+    frontend_url = os.getenv('FRONTEND_URL', 'https://test-frontend.example.com')
+    long_url = f'{frontend_url}/user'
+
+    monkeypatch.setattr(subscriber_repo, 'LONG_BASE_SIGN_URL', long_url)
+    monkeypatch.setattr(auth, 'LONG_BASE_SIGN_URL', long_url)
+
+
 @pytest.fixture()
 def with_db():
     database_url = database.get_database_url()
