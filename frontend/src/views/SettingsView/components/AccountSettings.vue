@@ -12,8 +12,6 @@ import { BlobResponse, BooleanResponse } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import GenericModal from '@/components/GenericModal.vue';
-import DownloadDataModal from './DownloadDataModal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -25,12 +23,6 @@ const { currentState } = storeToRefs(settingsStore);
 
 const copyLinkTooltip = ref(t('label.copyLink'));
 const cancelAccountModalOpen = ref(false);
-const downloadAccountModalOpen = ref(false);
-
-function closeModals() {
-  cancelAccountModalOpen.value = false;
-  downloadAccountModalOpen.value = false;
-};
 
 const displayName = computed({
   get: () => currentState.value.displayName,
@@ -90,8 +82,6 @@ async function actuallyDownloadData() {
   const fileObj = window.URL.createObjectURL(data.value);
   window.location.assign(fileObj);
 
-  closeModals();
-
   if (usePosthog) {
     posthog.capture(MetricEvents.DownloadData);
   }
@@ -135,7 +125,7 @@ async function actuallyDownloadData() {
     <span>{{ t('info.downloadAccountData') }}</span>
     <secondary-button
       :title="t('label.download')"
-      @click="downloadAccountModalOpen = true;"
+      @click="actuallyDownloadData"
       data-testid="settings-account-download-data-btn"
     >
       {{ t('label.downloadMyData') }}
@@ -149,26 +139,6 @@ async function actuallyDownloadData() {
     </danger-button>
   </div>
 
-  <!-- Account download modal (re-auth) -->
-  <generic-modal v-if="downloadAccountModalOpen" @close="downloadAccountModalOpen = false">
-    <template v-slot:header>
-      <h2 class="modal-title">
-        {{ t('label.accountData') }}
-      </h2>
-    </template>
-    <download-data-modal @login-successful="actuallyDownloadData" />
-  </generic-modal>
-
-  <confirmation-modal
-    :open="downloadAccountModalOpen"
-    :title="t('label.accountData')"
-    :message="t('text.accountDataNotice')"
-    :confirm-label="t('label.continue')"
-    :cancel-label="t('label.cancel')"
-    @confirm="actuallyDownloadData"
-    @close="closeModals"
-  ></confirmation-modal>
-
   <!-- Account deletion modal -->
   <!-- TODO: This should be account _cancellation_ instead -->
   <confirmation-modal
@@ -179,7 +149,7 @@ async function actuallyDownloadData() {
     :cancel-label="t('label.cancel')"
     :use-caution-button="true"
     @confirm="actuallyDeleteAccount"
-    @close="closeModals">
+    @close="cancelAccountModalOpen = false">
   </confirmation-modal>
 </template>
 

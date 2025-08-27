@@ -159,7 +159,6 @@
     "MMDDYYYY": "MM/DD/YYYY",
     "accepted": "Accepted",
     "account": "Account",
-    "accountData": "Download your account data",
     "accountDeletion": "Delete your account",
     "activateSchedule": "Activate schedule",
     "active": "Active",
@@ -514,7 +513,6 @@
     "zoomCom": "zoom.com…"
   },
   "text": {
-    "accountDataNotice": "Download all of your data from Thunderbird Appointment.",
     "accountCancelWarning": "You will no longer have access to TB Appointment. All booking calendars will be set to \"Inactive\" and all upcoming bookings will be cancelled.\nOther appointment data will be retained for 30 days, in accordance with the TB Pro Privacy Policy.",
     "admin": {
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
