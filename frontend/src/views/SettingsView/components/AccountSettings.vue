@@ -46,7 +46,7 @@ const copyLink = async () => {
  * Request an account deletion, and then log out.
  * TODO: This will need to change for a cancellation flow
  */
-async function actuallyDeleteAccount() {
+const actuallyDeleteAccount = async () => {
   cancelAccountModalOpen.value = false;
 
   const { error }: BooleanResponse = await call('account/delete').delete();
@@ -69,7 +69,7 @@ async function actuallyDeleteAccount() {
 /**
  * Request a data download, and prompt the user to download the data.
  */
-async function actuallyDownloadData() {
+const actuallyDownloadData = async () => {
   const { data }: BlobResponse = await call('account/download').post().blob();
 
   if (!data || !data.value) {
