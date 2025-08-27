@@ -2,6 +2,7 @@ import { computed, ref, toRefs } from "vue";
 import { defineStore } from "pinia";
 import { Fetch, AvailabilityFormFields } from "@/models";
 import { deepClone } from "@/utils";
+import { DEFAULT_SLOT_DURATION } from "@/definitions";
 
 import { createCalendarStore } from "./calendar-store";
 import { createUserStore } from "./user-store";
@@ -69,13 +70,27 @@ export const useAvailabilityStore = defineStore('availability', () => {
       if (!calendar || !calendar.connected) {
         initialState.value.calendar_id = connectedCalendars.value[0].id;
       }
+    } else {
+      // Initialize schedule with minimum default values
+      initialState.value = {
+        active: false,
+        name: `${userStore.data.name}'s Availability`,
+        start_time: '09:00',
+        end_time: '17:00',
+        slot_duration: DEFAULT_SLOT_DURATION,
+        booking_confirmation: true,
+        earliest_booking:	1440,
+        farthest_booking: 20160,
+        weekdays: [1, 2, 3, 4, 5],
+        details: '',
+      }
     }
 
     // Booking Page Details data
     hasZoom.value = !!externalConnectionStore.zoom[0];
 
     // Booking Page Link data
-    initialState.value.link_slug = userStore.mySlug;
+    initialState.value.slug = userStore.mySlug;
 
     // Copy initialState
     currentState.value = deepClone({ ...initialState.value }); 

@@ -191,54 +191,60 @@ async function refreshData() {
       {{ t('label.calendar', initialCalendars.length) }}
     </label>
 
-    <template v-for="calendar in initialCalendars" :key="calendar.id">
-      <div class="calendar-details-container">
-        <checkbox-input
-          name="calendarConnected"
-          class="calendar-connected-checkbox"
-          @change="(event) => onCalendarChecked(event, calendar.id)"
-          :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
-        />
-        <primary-badge v-if="currentState.defaultCalendarId === calendar.id">
-          {{ t('label.default') }}
-        </primary-badge>
-        <p>{{ calendar.title }}</p>
-      </div>
+    <template v-if="initialCalendars.length > 0">
+      <template v-for="calendar in initialCalendars" :key="calendar.id">
+        <div class="calendar-details-container">
+          <checkbox-input
+            name="calendarConnected"
+            class="calendar-connected-checkbox"
+            @change="(event) => onCalendarChecked(event, calendar.id)"
+            :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
+          />
+          <primary-badge v-if="currentState.defaultCalendarId === calendar.id">
+            {{ t('label.default') }}
+          </primary-badge>
+          <p>{{ calendar.title }}</p>
+        </div>
+  
+        <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
+          <input
+            type="color"
+            :value="calendar.color"
+            @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
+          />
+        </div>
+  
+        <p class="calendar-provider">{{ calendar.provider_name }}</p>
+  
+        <drop-down class="dropdown" :ref="(el) => calendarDropdownRefs[calendar.id] = el">
+          <template #trigger>
+            <icon-dots size="24" />
+          </template>
+          <template #default>
+            <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
+              <button
+                v-if="calendar.connected && currentState.defaultCalendarId !== calendar.id"
+                @click="() => onSetAsDefaultClicked(calendar.id)"
+              >
+                {{ t('text.settings.connectedApplications.setAsDefault') }}
+              </button>
+              <!-- TODO: Rename Calendar not implemented -->
+              <!-- <button>
+                {{ t('text.settings.connectedApplications.renameCalendar') }}
+              </button> -->
+              <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name)">
+                {{ t('label.disconnect') }}
+              </button>
+            </div>
+          </template>
+        </drop-down>
+  
+        <br />
+      </template>
+    </template>
 
-      <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
-        <input
-          type="color"
-          :value="calendar.color"
-          @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
-        />
-      </div>
-
-      <p class="calendar-provider">{{ calendar.provider_name }}</p>
-
-      <drop-down class="dropdown" :ref="(el) => calendarDropdownRefs[calendar.id] = el">
-        <template #trigger>
-          <icon-dots size="24" />
-        </template>
-        <template #default>
-          <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
-            <button
-              v-if="calendar.connected && currentState.defaultCalendarId !== calendar.id"
-              @click="() => onSetAsDefaultClicked(calendar.id)"
-            >
-              {{ t('text.settings.connectedApplications.setAsDefault') }}
-            </button>
-            <!-- TODO: Rename Calendar not implemented -->
-            <!-- <button>
-              {{ t('text.settings.connectedApplications.renameCalendar') }}
-            </button> -->
-            <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name)">
-              {{ t('label.disconnect') }}
-            </button>
-          </div>
-        </template>
-      </drop-down>
-
-      <br />
+    <template v-else>
+      <p class="calendar-accounts-not-connected">{{ t('text.settings.calendars.noCalendars') }}</p>
     </template>
   </div>
 
@@ -311,6 +317,10 @@ h2 {
       text-decoration: underline;
       color: var(--colour-apmt-primary);
     }
+  }
+
+  .calendar-accounts-not-connected {
+    grid-column: span 4;
   }
 
   .calendar-provider {

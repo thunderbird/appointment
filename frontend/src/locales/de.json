@@ -603,6 +603,9 @@
             "title": "Zoom trennen"
           }
         }
+      },
+      "calendars": {
+        "noCalendars": "Keine Kalenderkonten verbunden. Füge ein Konto hinzu, um zu beginnen."
       }
     },
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",

@@ -69,8 +69,10 @@ async function onSaveChanges() {
     return;
   }
 
-  // save schedule data
-  const response = await scheduleStore.updateSchedule(obj.id, obj);
+  // create or update schedule data
+  const response = obj.id
+    ? await scheduleStore.updateSchedule(obj.id, obj)
+    : await scheduleStore.createSchedule(obj);
 
   if (Object.prototype.hasOwnProperty.call(response, 'error')) {
     // error message is in data
@@ -88,6 +90,14 @@ async function onSaveChanges() {
 
   // Reload data form backend to reset currentState vs initialState
   availabilityStore.$reset();
+
+  // Need to refresh the booking page link schedule slug
+  await userStore.profile();
+
+  availabilityStore.$patch({
+    initialState: { slug: userStore.mySlug },
+    currentState: { slug: userStore.mySlug }
+  })
 }
 
 function onRevertChanges() {

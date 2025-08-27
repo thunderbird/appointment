@@ -602,6 +602,9 @@
             "title": "Disconnect Zoom"
           }
         }
+      },
+      "calendars": {
+        "noCalendars": "No calendar accounts connected. Add an account to get started."
       }
     },
     "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
