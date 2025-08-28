@@ -499,18 +499,14 @@ class CalDavConnector(BaseConnector):
             if not vevent:
                 continue
 
-            event_components = vevent.components()
-
             # Ignore events with missing datetime data
-            if 'dtstart' not in event_components or (
-                'dtend' not in event_components and 'duration' not in event_components
-            ):
+            if not vevent or not vevent.dtstart or (not vevent.dtend and not vevent.duration):
                 continue
 
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = vevent.summary.value if 'summary' in event_components else l10n('event-summary-default')
+            title = vevent.summary.value if vevent.summary else l10n('event-summary-default')
             start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
