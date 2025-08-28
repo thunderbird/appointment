@@ -63,8 +63,10 @@ async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar(userStore.data.email);
 }
 
-function afterCalDavConnect() {
+async function afterCalDavConnect() {
   connectCalDavModalOpen.value = false;
+  externalConnectionStore.$reset();
+  await refreshData();
 }
 
 async function disconnectAccount(provider: ExternalConnectionProviders, typeId: string | null = null) {
@@ -77,17 +79,22 @@ async function disconnectAccount(provider: ExternalConnectionProviders, typeId: 
 function displayModal(
   provider: ExternalConnectionProviders | CalendarProviders,
   typeId: string | null = null,
-  connectionName: string | null = null
+  connectionName: string | null = null,
+  isCalendar: boolean = false,
 ) {
   disconnectTypeId.value = typeId;
   disconnectConnectionName.value = connectionName;
 
-  if (provider === ExternalConnectionProviders.Zoom) {
-    disconnectZoomModalOpen.value = true;
-  } else if (provider === ExternalConnectionProviders.Google) {
-    disconnectGoogleModalOpen.value = true;
-  } else if (provider === ExternalConnectionProviders.Caldav) {
-    disconnectCalDavModalOpen.value = true;
+  if (isCalendar) {
+    if (provider === CalendarProviders.Google) {
+      disconnectGoogleModalOpen.value = true;
+    } else if (provider === CalendarProviders.Caldav) {
+      disconnectCalDavModalOpen.value = true;
+    }
+  } else {
+    if (provider === ExternalConnectionProviders.Zoom) {
+      disconnectZoomModalOpen.value = true;
+    }
   }
 };
 
@@ -232,7 +239,7 @@ async function refreshData() {
               <!-- <button>
                 {{ t('text.settings.connectedApplications.renameCalendar') }}
               </button> -->
-              <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name)">
+              <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)">
                 {{ t('label.disconnect') }}
               </button>
             </div>
