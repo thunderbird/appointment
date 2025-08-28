@@ -422,7 +422,7 @@ class CalDavConnector(BaseConnector):
         # They need at least VEVENT support for appointment to work.
         return supports_vevent
 
-    def sync_calendars(self):
+    def sync_calendars(self, external_connection_id: int | None = None):
         error_occurred = False
 
         principal = self.client.principal()
@@ -443,7 +443,11 @@ class CalDavConnector(BaseConnector):
             # add calendar
             try:
                 repo.calendar.update_or_create(
-                    db=self.db, calendar=calendar, calendar_url=calendar.url, subscriber_id=self.subscriber_id
+                    db=self.db,
+                    calendar=calendar,
+                    calendar_url=calendar.url,
+                    subscriber_id=self.subscriber_id,
+                    external_connection_id=external_connection_id,
                 )
             except Exception as err:
                 logging.warning(f'[calendar.sync_calendars] Error occurred while creating calendar. Error: {str(err)}')

@@ -9,7 +9,7 @@ from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
 from sqlalchemy import select
 
-from defines import auth_headers
+from defines import auth_headers, TEST_USER_ID
 
 
 def get_calendar_factory():
@@ -423,3 +423,93 @@ class TestCaldav:
         assert cal.url == os.getenv('CALDAV_TEST_CALENDAR_URL')
         assert cal.user == os.getenv('CALDAV_TEST_USER')
         assert cal.password == ''
+
+    def test_caldav_auth_links_external_connection_id(self, with_client, with_db, monkeypatch):
+        """Test that creating calendars through /caldav/auth correctly links external_connection_id"""
+
+        # Mock the CalDAV client and its methods
+        class MockCalendar:
+            def __init__(self, name, url):
+                self.name = name  
+                self.url = url
+
+        class MockPrincipal:
+            def calendars(self):
+                return [
+                    MockCalendar("Test Calendar 1", "https://test-server.com/calendar1/"),
+                    MockCalendar("Test Calendar 2", "https://test-server.com/calendar2/"),
+                ]
+
+        class MockClient:
+            def principal(self):
+                return MockPrincipal()
+
+        from appointment.controller.calendar import CalDavConnector
+
+        def mock_init(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
+            # Store the parameters we need
+            self.db = db
+            self.subscriber_id = subscriber_id
+            self.user = user
+            self.password = password
+            self.client = MockClient()
+
+        def mock_test_connection(self):
+            return True
+
+        def mock_is_supported(self, cal):
+            return True
+
+        def mock_bust_cached_events(self, all_calendars=False):
+            # Mock implementation - no-op for testing
+            pass
+
+        # Apply all the mocks
+        monkeypatch.setattr(CalDavConnector, '__init__', mock_init)
+        monkeypatch.setattr(CalDavConnector, 'test_connection', mock_test_connection)
+        monkeypatch.setattr(CalDavConnector, '_is_supported', mock_is_supported)
+        monkeypatch.setattr(CalDavConnector, 'bust_cached_events', mock_bust_cached_events)
+
+        # Call the /caldav/auth endpoint
+        response = with_client.post(
+            '/caldav/auth',
+            json={
+                'url': 'https://test-caldav-server.com',
+                'user': 'test_user',
+                'password': 'test_password',
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200, response.text
+
+        with with_db() as db:
+            # Check that an external connection was created
+            external_connections_query = select(models.ExternalConnections).where(
+                models.ExternalConnections.owner_id == TEST_USER_ID
+            )
+            external_connections = db.scalars(external_connections_query).all()
+            assert len(external_connections) == 1
+
+            external_connection = external_connections[0]
+            assert external_connection.type == models.ExternalConnectionType.caldav
+            assert external_connection.name == 'test_user'
+
+            # Check that calendars were created with the correct external_connection_id
+            calendars_query = select(models.Calendar).where(
+                models.Calendar.owner_id == TEST_USER_ID
+            )
+            calendars = db.scalars(calendars_query).all()
+            assert len(calendars) == 2  # We mocked 2 calendars
+
+            # Verify both calendars have the correct external_connection_id
+            for calendar in calendars:
+                assert calendar.external_connection_id == external_connection.id
+                assert calendar.provider == models.CalendarProvider.caldav
+                assert calendar.user == 'test_user'
+                assert calendar.password == 'test_password'
+
+            # Verify calendar titles match our mock data  
+            calendar_titles = [cal.title for cal in calendars]
+            assert "Test Calendar 1" in calendar_titles
+            assert "Test Calendar 2" in calendar_titles
