@@ -8,7 +8,7 @@ import { DangerButton, SecondaryButton, TextInput } from '@thunderbirdops/servic
 import { IconCopy, IconArrowRight } from '@tabler/icons-vue';
 import { createUserStore } from '@/stores/user-store';
 import { useSettingsStore } from '@/stores/settings-store';
-import { BooleanResponse } from '@/models';
+import { BlobResponse, BooleanResponse } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
@@ -65,6 +65,27 @@ const actuallyDeleteAccount = async () => {
   userStore.$reset();
   await router.push('/');
 };
+
+/**
+ * Request a data download, and prompt the user to download the data.
+ */
+const actuallyDownloadData = async () => {
+  const { data }: BlobResponse = await call('account/download').post().blob();
+
+  if (!data || !data.value) {
+    // TODO: show error
+    // console.error('Failed to download blob!!');
+    return;
+  }
+
+  // Data is a ref to our new blob
+  const fileObj = window.URL.createObjectURL(data.value);
+  window.location.assign(fileObj);
+
+  if (usePosthog) {
+    posthog.capture(MetricEvents.DownloadData);
+  }
+};
 </script>
 
 <template>
@@ -100,7 +121,18 @@ const actuallyDeleteAccount = async () => {
     </secondary-button>
   </div>
 
-  <div class="cancel-service-container">
+  <div class="button-info-container">
+    <span>{{ t('info.downloadAccountData') }}</span>
+    <secondary-button
+      :title="t('label.download')"
+      @click="actuallyDownloadData"
+      data-testid="settings-account-download-data-btn"
+    >
+      {{ t('label.downloadMyData') }}
+    </secondary-button>
+  </div>
+
+  <div class="button-info-container">
     <span>{{ t('info.cancelServiceInfo') }}</span>
     <danger-button @click="cancelAccountModalOpen = true">
       {{ t('label.cancelService') }}
@@ -172,7 +204,7 @@ h2 {
   }
 }
 
-.cancel-service-container {
+.button-info-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -188,6 +220,10 @@ h2 {
   button {
     width: 100%;
   }
+}
+
+.booking-page-settings-container + .button-info-container {
+  margin-block-end: 1.5rem;
 }
 
 @media (--md) {
@@ -207,12 +243,13 @@ h2 {
     }
   }
 
-  .cancel-service-container {
+  .button-info-container {
     text-align: end;
     flex-direction: row;
 
     button {
       width: auto;
+      min-width: 178px;
     }
   }
 }
