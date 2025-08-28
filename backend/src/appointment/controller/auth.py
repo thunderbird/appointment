@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from .apis.accounts_client import AccountsClient
 from .apis.fxa_client import FxaClient
 from ..database import schemas, models, repo
+from ..defines import LONG_BASE_SIGN_URL
 
 
 def logout(
@@ -54,19 +55,18 @@ def user_links_by_subscriber(subscriber: models.Subscriber):
     Note1 that this contains a trailing slash
     Note2 if short url isn't supported then both return links will be the same"""
     short_url = os.getenv('SHORT_BASE_URL')
-    base_url = f'{os.getenv("FRONTEND_URL")}/user'
 
     # If we don't have a short url, then use the default url with /user added to it
     if not short_url:
-        short_url = base_url
+        short_url = LONG_BASE_SIGN_URL
 
     url_safe_username = urllib.parse.quote_plus(subscriber.username)
 
-    return f'{short_url}/{url_safe_username}/', f'{base_url}/{url_safe_username}/'
+    return f'{short_url}/{url_safe_username}/', f'{LONG_BASE_SIGN_URL}/{url_safe_username}/'
 
 
 def signed_url_by_subscriber(subscriber: schemas.Subscriber):
-    """helper to generated signed url for given subscriber"""
+    """helper to generate signed url for given subscriber"""
     short_url, base_url = user_links_by_subscriber(subscriber)
 
     # We sign with a different hash that the end-user doesn't have access to

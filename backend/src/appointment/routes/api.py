@@ -107,7 +107,7 @@ def read_my_calendars(
             connected=c.connected,
             provider=c.provider,
             url=c.url,
-            user=c.user
+            user=c.user,
         )
         for c in calendars
     ]
