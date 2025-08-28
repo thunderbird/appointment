@@ -118,13 +118,13 @@ def caldav_autodiscover_auth(
             token=connection.password,
         )
 
-        repo.external_connection.create(db, external_connection_schema)
+        external_connection = repo.external_connection.create(db, external_connection_schema)
     else:
-        repo.external_connection.update_token(
+        external_connection = repo.external_connection.update_token(
             db, connection.password, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
         )
 
-    con.sync_calendars()
+    con.sync_calendars(external_connection_id=external_connection.id)
     return True
 
 

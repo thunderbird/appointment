@@ -16,6 +16,7 @@ def make_caldav_calendar(with_db):
         connected=False,
         user=FAKER_RANDOM_VALUE,
         password=FAKER_RANDOM_VALUE,
+        external_connection_id=None,
     ):
         with with_db() as db:
             title = title if factory_has_value(title) else fake.name()
@@ -31,6 +32,7 @@ def make_caldav_calendar(with_db):
                     password=password if factory_has_value(password) else fake.password(),
                 ),
                 subscriber_id,
+                external_connection_id=external_connection_id,
             )
 
     return _make_caldav_calendar

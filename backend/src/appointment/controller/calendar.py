@@ -422,7 +422,7 @@ class CalDavConnector(BaseConnector):
         # They need at least VEVENT support for appointment to work.
         return supports_vevent
 
-    def sync_calendars(self):
+    def sync_calendars(self, external_connection_id: int | None = None):
         error_occurred = False
 
         principal = self.client.principal()
@@ -443,7 +443,11 @@ class CalDavConnector(BaseConnector):
             # add calendar
             try:
                 repo.calendar.update_or_create(
-                    db=self.db, calendar=calendar, calendar_url=calendar.url, subscriber_id=self.subscriber_id
+                    db=self.db,
+                    calendar=calendar,
+                    calendar_url=calendar.url,
+                    subscriber_id=self.subscriber_id,
+                    external_connection_id=external_connection_id,
                 )
             except Exception as err:
                 logging.warning(f'[calendar.sync_calendars] Error occurred while creating calendar. Error: {str(err)}')
@@ -495,18 +499,14 @@ class CalDavConnector(BaseConnector):
             if not vevent:
                 continue
 
-            event_components = vevent.components()
-
             # Ignore events with missing datetime data
-            if 'dtstart' not in event_components or (
-                'dtend' not in event_components and 'duration' not in event_components
-            ):
+            if not vevent or not vevent.dtstart or (not vevent.dtend and not vevent.duration):
                 continue
 
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = vevent.summary.value if 'summary' in event_components else l10n('event-summary-default')
+            title = vevent.summary.value if vevent.summary else l10n('event-summary-default')
             start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
