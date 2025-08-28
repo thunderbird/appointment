@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
 import { DangerButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
 import { IconCopy, IconArrowRight } from '@tabler/icons-vue';
 import { createUserStore } from '@/stores/user-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import { BooleanResponse } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
@@ -16,9 +18,18 @@ const router = useRouter();
 
 const call = inject(callKey);
 const userStore = createUserStore(call);
+const settingsStore = useSettingsStore();
+const { currentState } = storeToRefs(settingsStore);
 
 const copyLinkTooltip = ref(t('label.copyLink'));
 const cancelAccountModalOpen = ref(false);
+
+const displayName = computed({
+  get: () => currentState.value.displayName,
+  set: (value) => {
+    settingsStore.$patch({ currentState: { displayName: value }})
+  }
+})
 
 // Link copy
 const copyLink = async () => {
@@ -60,6 +71,13 @@ const actuallyDeleteAccount = async () => {
   <header>
     <h2>{{ t('heading.accountSettings') }}</h2>
   </header>
+
+  <div class="booking-page-display-name-container">
+    <label for="booking-page-display-name">
+      {{ t('label.displayName') }}
+    </label>
+    <text-input name="booking-page-display-name" v-model="displayName" />
+  </div>
 
   <div class="booking-page-url-container">
     <label for="booking-page-url">
@@ -114,6 +132,14 @@ h2 {
   font-size: 1.5rem;
 }
 
+.booking-page-display-name-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 1.5rem;
+  align-items: center;
+  margin-block-end: 1.5rem;
+}
+
 .booking-page-url-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -165,6 +191,10 @@ h2 {
 }
 
 @media (--md) {
+  .booking-page-display-name-container {
+    grid-template-columns: 20% 1fr;
+  }
+
   .booking-page-url-container {
     grid-template-columns: 20% 1fr;
   }
