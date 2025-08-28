@@ -7,10 +7,8 @@ import {
   PLAYWRIGHT_TAG_E2E_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   APPT_MY_SHARE_LINK,
-  APPT_AVAILABILITY_PAGE,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
-  TIMEOUT_3_SECONDS,
  } from '../const/constants';
 import { URL } from 'url';
 
@@ -36,11 +34,7 @@ test.describe('account settings', {
     expect(settingsPage.accountSettingsHeader).toBeVisible();
 
     // verify booking page url displayed is correct
-    await settingsPage.bookingPageURLInput.scrollIntoViewIfNeeded();
-    const expUrl = new URL(APPT_MY_SHARE_LINK);
-    const readUrl = new URL(await settingsPage.bookingPageURLInput.inputValue())
-    expect(readUrl.origin).toEqual(expUrl.origin);
-    expect(decodeURIComponent(readUrl.pathname)).toEqual(expUrl.pathname);
+    expect(await settingsPage.bookingPageURLInput.inputValue()).toBe(APPT_MY_SHARE_LINK);
 
     // click copy link button and verify copied link is correct
     // note: we can't access clipboard in firefox b/c of security so instead we will:
@@ -72,8 +66,7 @@ test.describe('account settings', {
     // clicking 'booking page settings' button brings up availability page
     await settingsPage.bookingPageSettingsBtn.scrollIntoViewIfNeeded();
     await settingsPage.bookingPageSettingsBtn.click();
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
-    expect(page.url()).toBe(APPT_AVAILABILITY_PAGE);
+    await page.waitForURL('**/availability');
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });
 });
