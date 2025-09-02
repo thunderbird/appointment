@@ -439,6 +439,7 @@
     "videoMeeting": "Video Meeting",
     "viewAll": "View all",
     "viewBooking": "View booking",
+    "virtual": "Virtual",
     "virtualMeetingLink": "Virtual Meeting link",
     "virtualMeetingDetails": "Virtual Meeting details",
     "waitingListUser": "Waiting List Users | Waiting List User | Waiting List Users",
@@ -561,7 +562,7 @@
     "login": {
       "continueToFxa": "Enter your email above to continue to Mozilla Accounts"
     },
-    "nameIsInvitingYou": "{name} is inviting you",
+    "nameIsInvitingYou": "{name} is inviting you to",
     "ownerNeedsToConfirmBooking": "When this option is active, you will be required to confirm or decline times booked on your schedule. When this option is deactivated, all times will automatically be confirmed.",
     "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",

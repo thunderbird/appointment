@@ -440,6 +440,7 @@
     "videoMeeting": "Video-Konferenz",
     "viewAll": "Alle ansehen",
     "viewBooking": "Buchung anschauen",
+    "virtual": "Virtuell",
     "virtualMeetingLink": "Online-Meeting-Link",
     "virtualMeetingDetails": "Virtuelle Konferenz-Details",
     "waitingListUser": "Wartelisten-Benutzer | Wartelisten-Benutzer | Wartelisten-Benutzer",
@@ -562,7 +563,7 @@
     "login": {
       "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
     },
-    "nameIsInvitingYou": "{name} lädt dich ein",
+    "nameIsInvitingYou": "{name} lädt dich ein zu",
     "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, müssen Buchungen dieses Zeitplans bestätigt oder ablehnt werden. Wenn diese Option deaktiviert ist, werden alle Zeiten automatisch bestätigt.",
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",

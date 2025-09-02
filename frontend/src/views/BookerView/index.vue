@@ -196,14 +196,14 @@ export default {
     <!-- booking page content: loading -->
     <main
       v-if="activeView === BookingCalendarView.Loading"
-      class="flex-center h-screen select-none"
+      class="booking-loading-container"
     >
       <loading-spinner/>
     </main>
     <!-- booking page content: invalid link -->
     <main
       v-else-if="activeView === BookingCalendarView.Invalid"
-      class="flex-center h-screen select-none flex-col gap-8 px-4"
+      class="booking-invalid-container"
     >
       <booking-view-error
         :heading="errorHeading"
@@ -213,7 +213,7 @@ export default {
     <!-- booking page content: successful booking -->
     <main
       v-else-if="activeView === BookingCalendarView.Success"
-      class="flex h-screen select-none flex-col-reverse items-center justify-evenly px-4 md:flex-row "
+      class="booking-success-container"
     >
       <booking-view-success
         :attendee-email="attendee.email"
@@ -224,7 +224,7 @@ export default {
     <!-- booking page content: time slot selection -->
     <main
       v-else
-      class="mx-auto max-w-screen-2xl select-none px-4 pb-32 "
+      class="booking-slot-selection-container"
     >
       <booking-view-slot-selection
         :show-navigation="showNavigation"
@@ -241,3 +241,49 @@ export default {
     />
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+.booking-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+}
+
+.booking-invalid-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 0 1rem;
+}
+
+.booking-success-container {
+  display: flex;
+  height: 100vh;
+  user-select: none;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 1rem;
+}
+
+.booking-slot-selection-container {
+  margin: 0 auto;
+  user-select: none;
+  padding: 0 1rem;
+  padding-bottom: 2rem;
+}
+
+@media (--md) {
+  .booking-success-container {
+    flex-direction: row;
+  }
+}
+</style>
