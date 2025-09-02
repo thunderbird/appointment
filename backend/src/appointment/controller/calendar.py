@@ -500,7 +500,7 @@ class CalDavConnector(BaseConnector):
                 continue
 
             # Ignore events with missing datetime data
-            if not vevent or not vevent.dtstart or (not vevent.dtend and not vevent.duration):
+            if not vevent.dtstart or (not vevent.dtend and not vevent.duration):
                 continue
 
             # Mark tentative events
