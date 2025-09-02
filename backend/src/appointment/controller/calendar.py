@@ -422,7 +422,7 @@ class CalDavConnector(BaseConnector):
         # They need at least VEVENT support for appointment to work.
         return supports_vevent
 
-    def sync_calendars(self):
+    def sync_calendars(self, external_connection_id: int | None = None):
         error_occurred = False
 
         principal = self.client.principal()
@@ -443,7 +443,11 @@ class CalDavConnector(BaseConnector):
             # add calendar
             try:
                 repo.calendar.update_or_create(
-                    db=self.db, calendar=calendar, calendar_url=calendar.url, subscriber_id=self.subscriber_id
+                    db=self.db,
+                    calendar=calendar,
+                    calendar_url=calendar.url,
+                    subscriber_id=self.subscriber_id,
+                    external_connection_id=external_connection_id,
                 )
             except Exception as err:
                 logging.warning(f'[calendar.sync_calendars] Error occurred while creating calendar. Error: {str(err)}')
@@ -495,18 +499,24 @@ class CalDavConnector(BaseConnector):
             if not vevent:
                 continue
 
-            event_components = vevent.components()
-
-            # Ignore events with missing datetime data
-            if 'dtstart' not in event_components or (
-                'dtend' not in event_components and 'duration' not in event_components
-            ):
+            # Ignore events with missing dtstart
+            if not hasattr(vevent, 'dtstart') or not vevent.dtstart:
                 continue
+
+            # Check for either dtend or duration (need at least one to determine event end)
+            has_dtend = hasattr(vevent, 'dtend') and vevent.dtend
+            has_duration = hasattr(vevent, 'duration') and vevent.duration
+
+            if not has_dtend and not has_duration:
+                continue
+
+            # Check for event summary or use default title
+            has_summary = hasattr(vevent, 'summary') and vevent.summary
+            title = vevent.summary.value if has_summary else l10n('event-summary-default')
 
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = vevent.summary.value if 'summary' in event_components else l10n('event-summary-default')
             start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
@@ -565,7 +575,12 @@ class CalDavConnector(BaseConnector):
         result = calendar.events()
         count = 0
         for e in result:
-            if str(e.vobject_instance.vevent.dtstart.value).startswith(start):
+            vevent = e.vobject_instance.vevent
+            if not vevent:
+                continue
+
+            has_dtstart = hasattr(vevent, 'dtstart') and vevent.dtstart
+            if has_dtstart and str(vevent.dtstart.value).startswith(start):
                 e.delete()
                 count += 1
 

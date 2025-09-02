@@ -55,7 +55,7 @@ onMounted(async () => {
   }
 
   await refresh();
-  await calendarStore.getRemoteEvents(activeDate.value);
+  await calendarStore.getRemoteEvents(activeDate.value, true);
 });
 </script>
 
