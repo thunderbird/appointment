@@ -499,14 +499,24 @@ class CalDavConnector(BaseConnector):
             if not vevent:
                 continue
 
-            # Ignore events with missing datetime data
-            if not vevent.dtstart or (not vevent.dtend and not vevent.duration):
+            # Ignore events with missing dtstart
+            if not hasattr(vevent, 'dtstart') or not vevent.dtstart:
                 continue
+
+            # Check for either dtend or duration (need at least one to determine event end)
+            has_dtend = hasattr(vevent, 'dtend') and vevent.dtend
+            has_duration = hasattr(vevent, 'duration') and vevent.duration
+
+            if not has_dtend and not has_duration:
+                continue
+
+            # Check for event summary or use default title
+            has_summary = hasattr(vevent, 'summary') and vevent.summary
+            title = vevent.summary.value if has_summary else l10n('event-summary-default')
 
             # Mark tentative events
             tentative = status == 'tentative'
 
-            title = vevent.summary.value if vevent.summary else l10n('event-summary-default')
             start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta
             end = start + e.get_duration()
@@ -565,7 +575,12 @@ class CalDavConnector(BaseConnector):
         result = calendar.events()
         count = 0
         for e in result:
-            if str(e.vobject_instance.vevent.dtstart.value).startswith(start):
+            vevent = e.vobject_instance.vevent
+            if not vevent:
+                continue
+
+            has_dtstart = hasattr(vevent, 'dtstart') and vevent.dtstart
+            if has_dtstart and str(vevent.dtstart.value).startswith(start):
                 e.delete()
                 count += 1
 
