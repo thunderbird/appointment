@@ -1,2 +1,2 @@
-tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@main
+tb_pulumi @ git+https://github.com/thunderbird/pulumi.git@v0.0.15
 pulumi_cloudflare==6.3.1
