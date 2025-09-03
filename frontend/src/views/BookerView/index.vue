@@ -1,35 +1,24 @@
 <script setup lang="ts">
-import { BookingCalendarView, MetricEvents, ModalStates } from '@/definitions';
+import { BookingCalendarView } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';
-import { useBookingModalStore } from '@/stores/booking-modal-store';
 import { dayjsKey, callKey } from '@/keys';
 import {
-  Appointment, Slot, Exception, Attendee, ExceptionDetail, AppointmentResponse, SlotResponse,
+  Appointment, Slot, Exception, ExceptionDetail, AppointmentResponse
 } from '@/models';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import BookingModal from '@/components/BookingModal.vue';
 import BookingViewSlotSelection from './components/BookingViewSlotSelection.vue';
 import BookingViewSuccess from './components/BookingViewSuccess.vue';
 import BookingViewError from './components/BookingViewError.vue';
-import { usePosthog, posthog } from '@/composables/posthog';
 
 // component constants
-const { t } = useI18n();
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const bookingViewStore = useBookingViewStore();
-const bookingModalStore = useBookingModalStore();
 
 const errorHeading = ref<string>(null);
 const errorBody = ref<string>(null);
-
-const bookingRequestFinished = ref(false);
-
-const showNavigation = ref(false);
-const showBookingModal = ref(false);
 
 const {
   appointment,
@@ -38,10 +27,6 @@ const {
   attendee,
   selectedEvent,
 } = storeToRefs(bookingViewStore);
-
-const { openModal, closeModal } = bookingModalStore;
-
-const { state: modalState, stateData: modalStateData } = storeToRefs(bookingModalStore);
 
 // check if slots are distributed over different months, weeks, days or only on a single day
 const getViewBySlotDistribution = (slots: Slot[]) => {
@@ -66,7 +51,6 @@ const getViewBySlotDistribution = (slots: Slot[]) => {
     lastDate = dj(slot.start);
   });
   if (monthChanged) {
-    showNavigation.value = true;
     return BookingCalendarView.Month;
   }
   if (weekChanged) {
@@ -120,58 +104,9 @@ const getAppointment = async (): Promise<Appointment|null> => {
   return data.value;
 };
 
-/**
- * Book or request to book a selected time.
- * @param attendeeData
- */
-const bookEvent = async (attendeeData: Attendee) => {
-  bookingRequestFinished.value = false;
-
-  const obj = {
-    slot: {
-      start: selectedEvent.value.start,
-      duration: selectedEvent.value.duration,
-    },
-    attendee: attendeeData,
-  };
-
-  const url = window.location.href.split('#')[0];
-  const request: SlotResponse = call('schedule/public/availability/request').put({
-    s_a: obj,
-    url,
-  });
-
-  // Data should just be true here.
-  const { data, error } = await request.json();
-
-  if (error.value || !data.value) {
-    modalState.value = ModalStates.Error;
-    modalStateData.value = data?.value?.detail?.message ?? t('error.unknownAppointmentError');
-    appointment.value = await getAppointment();
-    return;
-  }
-
-  // replace calendar view if every thing worked fine
-  attendee.value = attendeeData;
-  // update view to prevent reselection
-  activeView.value = BookingCalendarView.Success;
-  // update modal view as well
-  modalState.value = ModalStates.Finished;
-
-  if (usePosthog) {
-    // Not chained because it's the inverse of booking_confirmation, and it defaults to false.
-    const autoConfirmed = appointment && appointment.value.booking_confirmation !== undefined
-      ? !appointment.value.booking_confirmation : false;
-    posthog.capture(MetricEvents.RequestBooking, {
-      autoConfirmed,
-    });
-  }
-};
-
 // initially retrieve slot data and decide which view to show
 onMounted(async () => {
   bookingViewStore.$reset();
-  bookingModalStore.$reset();
 
   appointment.value = await getAppointment();
   // process appointment data, if everything went fine
@@ -226,19 +161,8 @@ export default {
       v-else
       class="booking-slot-selection-container"
     >
-      <booking-view-slot-selection
-        :show-navigation="showNavigation"
-        @open-modal="openModal()"
-      />
+      <booking-view-slot-selection />
     </main>
-    <!-- modals -->
-    <booking-modal
-      :open="showBookingModal"
-      :event="selectedEvent"
-      :requires-confirmation="appointment?.booking_confirmation"
-      @book="bookEvent"
-      @close="closeModal()"
-    />
   </div>
 </template>
 
