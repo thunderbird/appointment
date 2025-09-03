@@ -4,8 +4,9 @@ import cloudfront
 import pulumi
 import tb_pulumi
 import tb_pulumi.ci
-import tb_pulumi.ec2
 import tb_pulumi.cloudwatch
+import tb_pulumi.ec2
+import tb_pulumi.iam
 import tb_pulumi.network
 import tb_pulumi.secrets
 
@@ -111,3 +112,8 @@ if ci_opts:
         project=project,
         **automaton_opts,
     )
+
+sap = tb_pulumi.iam.StackAccessPolicies(
+    f'{project.name_prefix}-sap',
+    project=project,
+)
