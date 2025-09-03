@@ -166,6 +166,7 @@ export const useUserStore = defineStore('user', () => {
       // Include the previous values first
       ...data.value,
       // Then the new ones!
+      id: subscriber.id,
       username: subscriber.username,
       name: subscriber.name,
       email: subscriber.email,
