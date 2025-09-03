@@ -364,6 +364,7 @@ class Subscriber(SubscriberAuth):
 
 
 class SubscriberMeOut(SubscriberBase):
+    id: int
     unique_hash: Optional[str] = None
     user_link: Optional[str] = None
     schedule_slugs: dict = {}

@@ -251,6 +251,7 @@ export type Invite = {
 };
 
 export type User = {
+  id?: number;
   email: string;
   preferredEmail: string;
   level: number;
