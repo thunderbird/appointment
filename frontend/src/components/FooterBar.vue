@@ -133,6 +133,9 @@ footer {
       flex-direction: column;
       gap: 1rem;
       font-family: metropolis;
+      font-weight: 600;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
 
       /* FIXME: This should be a var but we don't have a background
       for the footer in light mode yet so it is not readable if not white-ish */
