@@ -18,6 +18,10 @@ export class BookingPage {
   readonly requestSentAvailabilityText: Locator;
   readonly requestSentCloseBtn: Locator;
   readonly eventBookedTitleText: Locator;
+  readonly scheduleTurnedOffText: Locator;
+  readonly bookApptPage7AMSlot: Locator;
+  readonly bookApptPage630PMSlot: Locator;
+  readonly bookApptPage15MinSlot: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -35,6 +39,10 @@ export class BookingPage {
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.eventBookedTitleText = this.page.getByText('Event booked!');
+    this.scheduleTurnedOffText = this.page.getByText('The schedule has been turned off.');
+    this.bookApptPage7AMSlot = this.page.getByText('07:00 AM - 07:30 AM', { exact: true }).first();
+    this.bookApptPage630PMSlot = this.page.getByText('06:30 PM - 07:00 PM', { exact: true }).first();
+    this.bookApptPage15MinSlot = this.page.getByText('09:15 AM - 09:30 AM', { exact: true }).first();
   }
 
   /**
@@ -43,6 +51,7 @@ export class BookingPage {
   async gotoBookingPageShortUrl() {
     // the default share link is a short URL
     await this.page.goto(APPT_MY_SHARE_LINK);
+    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
@@ -53,6 +62,7 @@ export class BookingPage {
     const prodShareLinkUser: string = APPT_MY_SHARE_LINK.split(APPT_SHORT_SHARE_LINK_PREFIX)[1];
     const longLink: string = `${APPT_LONG_SHARE_LINK_PREFIX}${prodShareLinkUser}`;
     await this.page.goto(longLink);
+    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   }
 
   /**

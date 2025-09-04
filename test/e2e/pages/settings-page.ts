@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
 import {
   APPT_SETTINGS_PAGE,
@@ -38,6 +38,8 @@ export class SettingsPage {
   readonly addGoogleBtn: Locator;
   readonly defaultCalendarConnectedCbox: Locator;
   readonly saveBtnEN: Locator;
+  readonly savedSuccessfullyTextEN: Locator;
+  readonly savedSuccessfullyTextDE: Locator;
   readonly saveBtnDE: Locator;
   readonly revertBtn: Locator;
 
@@ -49,6 +51,8 @@ export class SettingsPage {
     this.settingsHeaderEN = this.page.getByRole('main').getByText('Settings', { exact: true });
     this.settingsHeaderDE = this.page.getByRole('heading', { name: 'Einstellungen' }).first();
     this.saveBtnEN = this.page.getByRole('button', { name: 'Save' });
+    this.savedSuccessfullyTextEN = this.page.getByText('Settings saved successfully', { exact: true });
+    this.savedSuccessfullyTextDE = this.page.getByText('Einstellungen erfolgreich gespeichert', { exact: true });
     this.saveBtnDE = this.page.getByRole('button', { name: 'Speichern' });
     this.revertBtn = this.page.getByRole('button', { name: 'Revert changes' });
 
@@ -126,7 +130,8 @@ export class SettingsPage {
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.saveBtnEN.scrollIntoViewIfNeeded();
     await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect(this.savedSuccessfullyTextEN).toBeVisible();
   }
 
   /**
@@ -140,11 +145,14 @@ export class SettingsPage {
     if (currentLanguage == APPT_LANGUAGE_SETTING_EN) {
       await this.saveBtnEN.scrollIntoViewIfNeeded();
       await this.saveBtnEN.click();
+      await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+      await expect(this.savedSuccessfullyTextDE).toBeVisible();
     } else {
       await this.saveBtnDE.scrollIntoViewIfNeeded();
       await this.saveBtnDE.click();
+      await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+      await expect(this.savedSuccessfullyTextEN).toBeVisible();
     }
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
@@ -157,7 +165,8 @@ export class SettingsPage {
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.saveBtnEN.scrollIntoViewIfNeeded();
     await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect(this.savedSuccessfullyTextEN).toBeVisible();
   }
 
   /**
@@ -183,6 +192,7 @@ export class SettingsPage {
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.saveBtnEN.scrollIntoViewIfNeeded();
     await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS); // give a few seconds to be applied
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect(this.savedSuccessfullyTextEN).toBeVisible();
   }
 }
