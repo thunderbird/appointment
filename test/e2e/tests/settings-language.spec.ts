@@ -32,12 +32,12 @@ test.describe('settings - language', {
     // change language setting to DE and verify; we use expect.soft here because if the expect fails
     // we still want the test to continue so that the test will change the setting back to original value
     await settingsPage.changeLanguageSetting(APPT_LANGUAGE_SETTING_EN, APPT_LANGUAGE_SETTING_DE);
-    await expect(settingsPage.settingsHeaderDE).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    await expect(settingsPage.preferencesHeaderDE).toBeVisible();
+    await expect.soft(settingsPage.settingsHeaderDE).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect.soft(settingsPage.preferencesHeaderDE).toBeVisible();
 
     // verify setting saved in browser local storage
     let localStore = await getUserSettingsFromLocalStore(page);
-    expect(localStore['language']).toBe(APPT_BROWSER_STORE_LANGUAGE_DE);
+    expect.soft(localStore['language']).toBe(APPT_BROWSER_STORE_LANGUAGE_DE);
 
     // change language settings back to EN and verify
     await settingsPage.changeLanguageSetting(APPT_LANGUAGE_SETTING_DE, APPT_LANGUAGE_SETTING_EN);

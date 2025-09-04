@@ -34,7 +34,7 @@ test.describe('settings - timezone', {
 
     // verify setting saved in browser local storage
     let localStore = await getUserSettingsFromLocalStore(page);
-    expect(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_HALIFAX);
+    expect.soft(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_HALIFAX);
 
     // change time format setting back
     await settingsPage.gotoPreferencesSettings()

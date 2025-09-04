@@ -61,6 +61,15 @@ export const getUserSettingsFromLocalStore = async (page: Page) => {
 }
 
 /**
+ * Read and return the appointment user display name value from the local browser store
+ */
+export const getUserDisplayNameFromLocalStore = async (page: Page) => {
+    const localUserStoreData = JSON.parse(await page.evaluate("localStorage.getItem('tba/user')"));
+    console.log(`User display name from local browser store: ${JSON.stringify(localUserStoreData['name'])}`);
+    return localUserStoreData['name'];
+}
+
+/**
  * Set the appointment user settings in the local browser store to default values required by the tests
  */
 export const setDefaultUserSettingsLocalStore = async (page: Page) => {
