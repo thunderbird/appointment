@@ -87,6 +87,9 @@ const appointmentLoggedInNavItems = [
                 {{ $t('text.homepage.mzlaLinkText') }}
               </a>
             </template>
+            <template v-slot:currentYear>
+              {{ new Date().getFullYear() }}
+            </template>
             <template v-slot:creativeCommonsLink>
               <a href="https://www.mozilla.org/en-US/foundation/licensing/website-content/">
                 {{ $t('text.homepage.creativeCommonsLinkText') }}

@@ -542,7 +542,7 @@
     "googlePermissionEventsName": "Anzeigen und Bearbeiten von Terminen in allen Kalendern",
     "homepage": {
       "calendarCopy": "Verbinde deine Kalender und finde alle deine Termine an einem Ort. Buche einmalige oder wiederkehrende Veranstaltungen und lade andere dazu ein.",
-      "copywrite": "Thunderbird gehört nun zu {mzlaLink}, eine vollständige Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts sind ©1998-2025 von einzelnen Mitwirkenden. Der Inhalt ist unter einem {creativeCommonsLink} verfügbar.",
+      "copywrite": "Thunderbird gehört nun zu {mzlaLink}, eine vollständige Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts sind ©1998-{currentYear} von einzelnen Mitwirkenden. Der Inhalt ist unter einem {creativeCommonsLink} verfügbar.",
       "creativeCommonsLinkText": "Creative-Commons-Lizenz",
       "intro": "Thunderbird Appointment macht Termine finden zum Kinderspiel. Spar dir den Aufwand und gestalte deinen Tag effizienter.",
       "mzlaLinkText": "MZLA Technologies Corporation",
