@@ -19,6 +19,51 @@ const appointmentLoggedInNavItems = [
   { route: 'availability', i18nKey: 'availability' },
   { route: 'settings', i18nKey: 'settings' },
 ];
+
+const mozillaNavItems = [
+  { 
+    i18nKey: 'privacyPolicy', 
+    type: 'internal', 
+    route: 'privacy' 
+  },
+  { 
+    i18nKey: 'cookies', 
+    type: 'external', 
+    urlKey: 'cookies'
+  },
+  { 
+    i18nKey: 'legal', 
+    type: 'internal', 
+    route: 'terms' 
+  },
+  { 
+    i18nKey: 'sendDMCANotice', 
+    type: 'external', 
+    urlKey: 'dmcaNotice'
+  },
+  { 
+    i18nKey: 'reportFraud', 
+    type: 'external', 
+    urlKey: 'reportFraud'
+  },
+  { 
+    i18nKey: 'participationGuidelines', 
+    type: 'external', 
+    urlKey: 'participationGuidelines'
+  },
+];
+
+const urlMap = {
+  cookies: 'https://www.mozilla.org/privacy/websites/#data-tools',
+  dmcaNotice: 'https://www.mozilla.org/en-US/about/legal/report-infringement/',
+  reportFraud: 'https://www.mozilla.org/about/legal/fraud-report/',
+  participationGuidelines: 'https://www.mozilla.org/en-US/about/governance/policies/participation/',
+  mzlaLink: 'https://blog.thunderbird.net/2020/01/thunderbirds-new-home/',
+  creativeCommonsLink: 'https://www.mozilla.org/en-US/foundation/licensing/website-content/',
+  contributeToThisSite: 'https://github.com/thunderbird/appointment',
+} as const;
+
+const getUrl = (key: keyof typeof urlMap): string => urlMap[key];
 </script>
 
 <template>
@@ -48,34 +93,21 @@ const appointmentLoggedInNavItems = [
       <img src="@/assets/svg/mozilla-logo.svg" alt="Mozilla Logo" />
       <div class="mozilla-navigation-content">
         <ul>
-          <li>
-            <router-link :to="{ name: 'privacy' }" target="_blank">
-              {{ t('label.privacyPolicy' )}}
+          <li v-for="navItem in mozillaNavItems" :key="navItem.i18nKey">
+            <router-link 
+              v-if="navItem.type === 'internal'" 
+              :to="{ name: navItem.route }" 
+              target="_blank"
+            >
+              {{ t(`label.${navItem.i18nKey}`) }}
             </router-link>
-          </li>
-          <li>
-            <a href="https://www.mozilla.org/privacy/websites/#data-tools" target="_blank">
-              {{ t('label.cookies' )}}
-            </a>
-          </li>
-          <li>
-            <router-link :to="{ name: 'terms' }" target="_blank">
-              {{ t('label.legal' )}}
-            </router-link>
-          </li>
-          <li>
-            <a href="https://www.mozilla.org/en-US/about/legal/report-infringement/" target="_blank">
-              {{ t('label.sendDMCANotice' )}}
-            </a>
-          </li>
-          <li>
-            <a href="https://www.mozilla.org/about/legal/fraud-report/" target="_blank">
-              {{ t('label.reportFraud' )}}
-            </a>
-          </li>
-          <li>
-            <a href="https://www.mozilla.org/en-US/about/governance/policies/participation/" target="_blank">
-              {{ t('label.participationGuidelines' )}}
+
+            <a 
+              v-else 
+              :href="getUrl((navItem).urlKey as keyof typeof urlMap)" 
+              target="_blank"
+            >
+              {{ t(`label.${navItem.i18nKey}`) }}
             </a>
           </li>
         </ul>
@@ -83,7 +115,7 @@ const appointmentLoggedInNavItems = [
         <p>
           <i18n-t keypath="text.homepage.copywrite" scope="global">
             <template v-slot:mzlaLink>
-              <a href="https://blog.thunderbird.net/2020/01/thunderbirds-new-home/">
+              <a :href="getUrl('mzlaLink')">
                 {{ $t('text.homepage.mzlaLinkText') }}
               </a>
             </template>
@@ -91,14 +123,14 @@ const appointmentLoggedInNavItems = [
               {{ new Date().getFullYear() }}
             </template>
             <template v-slot:creativeCommonsLink>
-              <a href="https://www.mozilla.org/en-US/foundation/licensing/website-content/">
+              <a :href="getUrl('creativeCommonsLink')">
                 {{ $t('text.homepage.creativeCommonsLinkText') }}
               </a>
             </template>
           </i18n-t>
         </p>
 
-        <a class="underline" href="https://github.com/thunderbird/appointment" target="_blank">
+        <a class="underline" :href="getUrl('contributeToThisSite')" target="_blank">
           {{ t('label.contributeToThisSite' )}}
         </a>
       </div>
