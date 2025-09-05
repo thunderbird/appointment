@@ -87,6 +87,7 @@ const getUrl = (key: keyof typeof urlMap): string => urlMap[key];
       </ul>
     </nav>
 
+    <!-- TODO: Replace this with the divider component: <visual-divider /> -->
     <hr />
 
     <div class="mozilla-navigation">
