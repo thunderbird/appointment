@@ -89,6 +89,7 @@ const copyLink = async () => {
   
       <drop-down class="user-dropdown" ref="profileDropdown">
         <template #trigger>
+          <!-- TODO: Replace UserAvatar with component from services-ui -->
           <user-avatar />
         </template>
         <template #default>
