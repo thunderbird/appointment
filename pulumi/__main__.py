@@ -3,7 +3,6 @@
 import cloudfront
 import pulumi
 import tb_pulumi
-import tb_pulumi.ci
 import tb_pulumi.cloudwatch
 import tb_pulumi.ec2
 import tb_pulumi.iam
@@ -102,16 +101,6 @@ monitoring_opts = resources.get('tb:cloudwatch:CloudWatchMonitoringGroup', {}).g
 monitoring = tb_pulumi.cloudwatch.CloudWatchMonitoringGroup(
     name=f'{project.name_prefix}-monitoring', project=project, **monitoring_opts
 )
-
-# CI
-ci_opts = resources.get('tb:ci:AwsAutomationUser')
-if ci_opts:
-    automaton_opts = ci_opts.get('automaton')
-    automaton = tb_pulumi.ci.AwsAutomationUser(
-        name=f'{project.name_prefix}-automaton',
-        project=project,
-        **automaton_opts,
-    )
 
 
 def __sap_on_apply(resources):
