@@ -10,18 +10,31 @@ defineProps<Props>();
 
 <template>
   <div
-    class="group relative flex text-base font-medium"
-    :class="{ 'text-gray-600 dark:text-gray-300': !active }"
+    class="nav-bar-item-container"
+    :class="{ 'active': !active }"
   >
-    <router-link class="flex min-w-[120px] items-center justify-center" :to="{ name: linkName }">
+    <router-link :to="{ name: linkName }">
       {{ label }}
     </router-link>
-    <div
-      class="absolute bottom-0 h-1 w-full rounded bg-transparent transition-colors ease-in-out"
-      :class="{
-        'bg-gradient-to-r from-teal-500 to-sky-500': active,
-        'group-hover:bg-gray-200 group-hover:dark:bg-gray-400': !active,
-      }"
-    ></div>
   </div>
 </template>
+
+<style scoped>
+  .nav-bar-item-container {
+    display: flex;
+    font-family: metropolis;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #EEEEF0; /* TODO: --colour-ti-base but we don't have light mode for nav bar yet */
+
+    &.active {
+      color: #D9D9DE; /* TODO: --colour-ti-secondary but we don't have light mode for nav bar yet */
+    }
+
+    a {
+      text-align: center;
+      min-width: 120px;
+    }
+  }
+</style>

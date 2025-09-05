@@ -363,13 +363,15 @@ main {
   }
 }
 
-@media (--lg) {
+@media (--md) {
   main {
     padding-block-start: 6rem;
   }
+}
 
+@media (--lg) {
   main.private-route {
-    margin-inline: 2rem;
+    margin-inline: 3.5rem;
   }
 }
 </style>

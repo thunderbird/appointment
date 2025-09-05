@@ -211,7 +211,7 @@ footer {
 @media (--md) {
   footer {
     gap: 2.5rem;
-    padding: 3rem 3.5rem 5rem;
+    padding: 3rem 1rem 5rem;
 
     .appointment-navigation {
       flex-direction: row;
@@ -236,6 +236,12 @@ footer {
         gap: 2.25rem;
       }
     }
+  }
+}
+
+@media (--lg) {
+  footer {
+    padding: 3rem 3.5rem 5rem;
   }
 }
 </style>

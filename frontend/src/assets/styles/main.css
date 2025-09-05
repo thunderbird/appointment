@@ -221,3 +221,17 @@
 body:has(dialog[open]) {
   overflow: hidden;
 }
+
+/* Full height so that the footer is at the bottom regardless of main content's height */
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  flex: 1;
+}
