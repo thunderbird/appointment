@@ -48,6 +48,8 @@ jobs:
           build-name: 'TB Appointment Nightly Tests (Desktop): BUILD_INFO'
 
       - name: Run E2E Tests on Production on Browserstack (Desktop)
+        # don't send GHA failure email if any of the E2E tests fail, can be annoying (I check the jobs each day in BrowserStack)
+        continue-on-error: true
         run: |
           cd ./test/e2e
           cp .env.prod.example .env

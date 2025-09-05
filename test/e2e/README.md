@@ -51,23 +51,31 @@ APPT_MY_SHARE_LINK=<apointment-dev-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
-To run the E2E tests headless (still in `test/e2e`):
+To run the E2E tests on Firefox headless (still in `test/e2e`):
 
 ```bash
 npm run e2e-test
 ```
 
-To run the E2E tests with a UI so you can watch the tests run (still in `test/e2e`):
+To run the E2E tests on Firefox with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
 npm run e2e-test-headed
 ```
 
-To run the E2E tests in debug mode (still in `test/e2e`):
+To run the E2E tests against google chromium with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npm run e2e-test-debug
+npx playwright test --grep e2e-suite --project=chromium --headed
 ```
+
+To run the E2E tests against safari with a UI so you can watch the tests run (still in `test/e2e`):
+
+```bash
+npx playwright test --grep e2e-suite --project=safari --headed
+```
+
+Note that for project you can use any of the project/browser names as listed in the [playwright.config.ts](./playwright.config.ts) file (but the browser must be installed on your local machine).
 
 ## Running the E2E tests against the staging environmnent
 
@@ -87,22 +95,16 @@ APPT_MY_SHARE_LINK=<apointment-stage-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
-To run the E2E tests headless (still in `test/e2e`):
+To run the E2E tests on Firefox headless (still in `test/e2e`):
 
 ```bash
 npm run e2e-test
 ```
 
-To run the E2E tests with a UI so you can watch the tests run (still in `test/e2e`):
+To run the E2E tests on Firefox with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
 npm run e2e-test-headed
-```
-
-To run the E2E tests in debug mode (still in `test/e2e`):
-
-```bash
-npm run e2e-test-debug
 ```
 
 ## Running the production sanity test
@@ -123,22 +125,16 @@ APPT_MY_SHARE_LINK=<apointment-prod-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
-To run the production sanity test headless (still in `test/e2e`):
+To run the production sanity test on Firefox headless (still in `test/e2e`):
 
 ```bash
 npm run prod-sanity-test
 ```
 
-To run the production sanity test with a UI so you can watch the tests run (still in `test/e2e`):
+To run the production sanity test on Firefox with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
 npm run prod-sanity-test-headed
-```
-
-To run the production sanity test in debug mode (still in `test/e2e`):
-
-```bash
-npm run prod-sanity-test-debug
 ```
 
 ## Running on BrowserStack

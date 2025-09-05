@@ -22,9 +22,9 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : 1, // actualy don't run in parallel locally either, for now
   // Global timeout: Playwright will timeout if the entire session (includes all test runs) exceeds this.
-  // Must take into account running on mulitple browsers (and BrowserStack is much slower too!). Odds are the
+  // Must take into account total time running on mulitple platforms/browsers in BrowserStack. Odds are the
   // tests will time out at the locator/test level first anyway; but there is no default so best to specify
-  globalTimeout: 12 * 60 * 1000,
+  globalTimeout: 45 * 60 * 1000,
   // Individual test timeout - a single test will time out if it is still running after this time (ms)
   timeout:  150 * 1000, // 2.5 minutes
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -71,10 +71,15 @@ export default defineConfig({
       dependencies: ['setup'],
     },
 
-    //{
-    //  name: 'webkit',
-    //  use: { ...devices['Desktop Safari'] },
-    //},
+    {
+      name: 'safari',
+      use: {
+        ...devices['Desktop Safari'],
+        // Use prepared auth state
+        storageState: 'test-results/.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
 
     /* Test against mobile viewports. */
     // {
