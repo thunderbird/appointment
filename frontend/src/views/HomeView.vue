@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import PrimaryButton from '@/elements/PrimaryButton.vue';
 import InfoBox from '@/elements/home/InfoBox.vue';
-import HomeFooter from '@/components/HomeFooter.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -127,6 +126,5 @@ const signUp = () => {
           </div>
       </div>
     </section>
-    <home-footer></home-footer>
   </div>
 </template>
