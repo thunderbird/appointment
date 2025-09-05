@@ -369,7 +369,7 @@ main {
   }
 
   main.private-route {
-    margin-inline: 2rem;
+    margin-inline: 3.5rem;
   }
 }
 </style>

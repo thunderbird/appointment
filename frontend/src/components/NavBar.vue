@@ -8,7 +8,8 @@ import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
 import { TooltipPosition } from '@/definitions';
-import { IconExternalLink, IconLink } from '@tabler/icons-vue';
+import { IconExternalLink } from '@tabler/icons-vue';
+import { PhLinkSimple } from '@phosphor-icons/vue';
 import { ToolTip } from '@thunderbirdops/services-ui';
 
 // component constants
@@ -56,43 +57,39 @@ const copyLink = async () => {
       class="appointment-logo"
       :to="{ name: user?.authenticated ? 'dashboard' : 'home' }"
     >
-      <img src="@/assets/svg/appointment_logo_beta.svg" alt="Appointment Logo" />
+      <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
-    <nav v-if="user.authenticated">
-      <div class="nav-items-container">
-        <nav-bar-item
-          v-for="item in navItems"
-          :key="item"
-          :active="isNavEntryActive(item)"
-          :label="t(`label.${item}`)"
-          :link-name="item"
-        />
-        <div v-if="user.myLink" class="nav-copy-link-button-container">
-          <button
-            class="nav-copy-link-button"
-            @click="copyLink"
-            aria-labelledby="copy-meeting-link-button"
-          >
-            <icon-link id="copy-meeting-link-button"></icon-link>
-            <tool-tip
-              :position="TooltipPosition.Top"
-              class="nav-copy-link-tooltip"
-            >
-              {{ myLinkTooltip }}
-            </tool-tip>
-          </button>
-        </div>
-      </div>
 
+    <nav class="nav-items-container">
+      <nav-bar-item
+        v-for="item in navItems"
+        :key="item"
+        :active="isNavEntryActive(item)"
+        :label="t(`label.${item}`)"
+        :link-name="item"
+      />
+    </nav>
+
+    <div class="nav-items-right-container">
+      <div v-if="user.myLink" class="nav-copy-link-button-container">
+        <button
+          class="nav-copy-link-button"
+          @click="copyLink"
+          aria-labelledby="copy-meeting-link-button"
+        >
+          <ph-link-simple id="copy-meeting-link-button" :size="24" />
+          <tool-tip
+            :position="TooltipPosition.Top"
+            class="nav-copy-link-tooltip"
+          >
+            {{ myLinkTooltip }}
+          </tool-tip>
+        </button>
+      </div>
+  
       <drop-down class="user-dropdown" ref="profileDropdown">
         <template #trigger>
-          <div class="user-dropdown-trigger-container">
-            <span>
-              {{ user.data.email }}
-            </span>
-
-            <user-avatar />
-          </div>
+          <user-avatar />
         </template>
         <template #default>
           <div
@@ -124,7 +121,7 @@ const copyLink = async () => {
           </div>
         </template>
       </drop-down>
-    </nav>
+    </div>
   </header>
 </template>
 
@@ -140,14 +137,14 @@ const copyLink = async () => {
   .header-desktop {
     position: fixed;
     display: flex;
+    align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 64px;
+    height: 68px;
     padding-inline: 1rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     overflow: visible;
-    border-block-end: 1px solid var(--colour-neutral-border);
-    background-color: var(--colour-neutral-base);
+    background-color: #1A202C; /* TODO: --colour-neutral-base but we don't have light mode for NavBar yet */
     z-index: 50;
   }
 
@@ -160,15 +157,13 @@ const copyLink = async () => {
   .nav-items-container {
     display: flex;
     justify-content: end;
-    gap: 2rem;
+    gap: 0.5rem;
   }
 
-  .nav-copy-link-button-container {
-    position: relative;
+  .nav-items-right-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding-inline: 1rem;
+    gap: 1.5rem;
   }
 
   .nav-copy-link-button {
@@ -176,6 +171,7 @@ const copyLink = async () => {
     display: flex;
     align-items: center;
     position: relative;
+    color: #f3f4f6; /* TODO: hard-coded as we don't have light mode for NavBar yet */
 
     &:active {
       color: var(--colour-accent-teal);
@@ -201,10 +197,6 @@ const copyLink = async () => {
   }
 
   .appointment-logo {
-    flex-shrink: 0;
-    border-inline-end: 1px solid var(--colour-neutral-border);
-    padding: 1rem 2rem 1rem 1rem;
-
     img {
       height: 2rem;
     }
@@ -212,21 +204,6 @@ const copyLink = async () => {
 
   .user-dropdown {
     align-self: center;
-  }
-
-  .user-dropdown-trigger-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    border: 1px solid var(--colour-neutral-border);
-    border-radius: 0.375rem;
-    background-color: white;
-    padding: 0.25rem 0.25rem 0.25rem 0.75rem;
-
-    & > span {
-      font-size: 0.875rem;
-      color: var(--colour-ti-muted);
-    }
   }
 
   .user-dropdown-content-container {
@@ -267,6 +244,12 @@ const copyLink = async () => {
       align-items: center;
       justify-content: space-between;
     }
+  }
+}
+
+@media (--lg) {
+  .header-desktop {
+    padding-inline: 3.5rem;
   }
 }
 
