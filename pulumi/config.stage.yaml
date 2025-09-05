@@ -145,7 +145,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:435f248011868501cc2a739c039801b04bc13085
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5201a66e89a9adf761aef44ea2a9453af9213558
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -246,25 +246,3 @@ resources:
         - thunderbird-services-monitoring@thunderbird.net
       config:
         alarms: {}
-
-  tb:ci:AwsAutomationUser:
-    automaton:
-      active_stack: stage
-      additional_policies:
-        - arn:aws:iam::768512802988:policy/appointment-stage-frontend-cache-invalidation
-        - arn:aws:iam::768512802988:policy/appointment-prod-frontend-cache-invalidation
-      enable_ecr_image_push: True
-      ecr_repositories:
-        - thunderbird/appointment
-      enable_fargate_deployments: True
-      fargate_clusters:
-        - appointment-stage-fargate-backend
-        - appointment-prod-fargate-backend
-      fargate_task_role_arns:
-        - arn:aws:iam::768512802988:role/appointment-stage-fargate-backend
-        - arn:aws:iam::768512802988:role/appointment-prod-fargate-backend
-      enable_full_s3_access: False
-      enable_s3_bucket_upload: True
-      s3_upload_buckets:
-        - tb-appointment-stage-frontend
-        - tb-appointment-prod-frontend
