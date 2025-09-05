@@ -249,9 +249,8 @@ aside {
     .appointment-card-inner {
       padding: 1rem 1.5rem;
       border-radius: 0.25rem;
-      color: var(--colour-ti-base);
-      /* TODO: Color not in design system */
-      background-color: #7d9cfb;
+      color: black; /* TODO: Update colors when hi-fi is available */
+      background-color: #58C9FF; /* TODO: Update colors when hi-fi is available */
 
       header {
         display: flex;
@@ -268,7 +267,8 @@ aside {
         column-gap: 0.125rem;
 
         .timezone-badge {
-          background-color: var(--colour-neutral-raised);
+          color: #58C9FF; /* TODO: Update colors when hi-fi is available */
+          background-color: black; /* TODO: Update colors when hi-fi is available */
           font-size: 0.75rem;
           padding: 0.25rem 0.375rem;
           margin-inline-start: 0.25rem;
