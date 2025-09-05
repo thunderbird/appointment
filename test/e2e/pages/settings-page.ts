@@ -24,11 +24,13 @@ export class SettingsPage {
   readonly startOfWeekMondayBtn: Locator;
   readonly startOfWeekSundayBtn: Locator;
   readonly accountSettingsHeader: Locator;
+  readonly displayNameInput: Locator;
   readonly bookingPageURLInput: Locator;
   readonly copyLinkBtn: Locator;
   readonly cancelServiceBtn: Locator;
   readonly cancelServiceConfirmCancelBtn: Locator;
   readonly bookingPageSettingsBtn: Locator;
+  readonly downloadDataBtn: Locator;
   readonly connectedAppsHdr: Locator;
   readonly addCaldavBtn: Locator;
   readonly addCaldavUsernameInput: Locator;
@@ -59,11 +61,13 @@ export class SettingsPage {
     // account settings section
     this.accountSettingsBtn = this.page.getByTestId('settings-accountSettings-settings-btn');
     this.accountSettingsHeader = this.page.getByRole('heading', { name: 'Account Settings' });
+    this.displayNameInput = this.page.locator('#booking-page-display-name');
     this.bookingPageURLInput = this.page.locator('#booking-page-url');
     this.copyLinkBtn = this.page.locator('#copy-booking-page-url-button');
     this.cancelServiceBtn = this.page.getByRole('button', { name: 'Cancel Service' });
     this.cancelServiceConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel', exact: true });
     this.bookingPageSettingsBtn = this.page.getByRole('button', { name: 'Booking Page Settings' });
+    this.downloadDataBtn = this.page.getByTestId('settings-account-download-data-btn');
 
     // preferences section
     this.preferencesBtn = this.page.getByTestId('settings-preferences-settings-btn');
@@ -194,5 +198,18 @@ export class SettingsPage {
     await this.saveBtnEN.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(this.savedSuccessfullyTextEN).toBeVisible();
+  }
+
+  /**
+   * Change the display name setting
+   */
+  async changeDisplaName(newName: string) {
+    await this.displayNameInput.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.displayNameInput.fill(newName);
+    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    await this.saveBtnEN.scrollIntoViewIfNeeded();
+    await this.saveBtnEN.click();
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 }

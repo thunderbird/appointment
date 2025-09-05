@@ -34,7 +34,7 @@ test.describe('settings - theme', {
 
     // verify setting saved in browser local storage
     let localStore = await getUserSettingsFromLocalStore(page);
-    expect(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_DARK);
+    expect.soft(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_DARK);
 
     // change theme setting back to light mode and verify
     await settingsPage.changeThemeSetting(APPT_THEME_SETTING_LIGHT);

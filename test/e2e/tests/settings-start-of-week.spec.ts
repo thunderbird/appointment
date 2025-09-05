@@ -36,12 +36,13 @@ test.describe('settings - start of week', {
 
     // verify setting saved in browser local storage
     let localStore = await getUserSettingsFromLocalStore(page);
-    expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
+    expect.soft(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
 
+    // note: temporarily removed until dashboard calendar UI is finsished being overhauled
     // verify on dashboard
-    await dashboardPage.gotoToDashboardMonthView();
-    var firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
-    expect(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_MON);
+    // await dashboardPage.gotoToDashboardMonthView();
+    // var firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
+    // expect.soft(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_MON);
 
     // change start of week back to Sunday and verify
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
@@ -52,9 +53,10 @@ test.describe('settings - start of week', {
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_SUN);
 
+    // note: temporarily removed until dashboard calendar UI is finsished being overhauled
     // verify on dashboard
-    await dashboardPage.gotoToDashboardMonthView();
-    firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
-    expect(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_SUN);
+    // await dashboardPage.gotoToDashboardMonthView();
+    // firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
+    // expect(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_SUN);
   });
 });
