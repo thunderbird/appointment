@@ -64,7 +64,9 @@ const selectEvent = (day: string) => {
 
 @media (--md) {
   .booker-view-container {
+    position: relative;
     flex-direction: row;
+    align-items: flex-start;
   }
 }
 

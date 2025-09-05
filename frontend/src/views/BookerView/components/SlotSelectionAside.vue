@@ -294,6 +294,8 @@ aside {
 
 @media (--md) {
   aside {
+    position: sticky;
+    top: 5rem;
     width: 470px;
 
     .timezone-section {
