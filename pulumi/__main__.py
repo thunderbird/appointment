@@ -113,6 +113,7 @@ if ci_opts:
         **automaton_opts,
     )
 
+
 def __sap_on_apply(resources):
     ci_user_name = f'{project.name_prefix}-ci'
     tb_pulumi.iam.UserWithAccessKey(
@@ -129,4 +130,3 @@ sap = tb_pulumi.iam.StackAccessPolicies(
     project=project,
     on_apply=__sap_on_apply,
 )
-
