@@ -607,6 +607,7 @@ def me(
     hash = subscriber.unique_hash
 
     return schemas.SubscriberMeOut(
+        id=subscriber.id,
         username=subscriber.username,
         email=subscriber.email,
         preferred_email=subscriber.preferred_email,
