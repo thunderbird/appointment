@@ -26,7 +26,7 @@ buildIdentifier: '${DATE_TIME}'
 # Entire list available here -> (https://www.browserstack.com/list-of-browsers-and-platforms/automate)
 platforms:
   - os: OS X
-    osVersion: Tahoe
+    osVersion: Sequoia
     browserName: playwright-firefox
     browserVersion: latest
     playwrightConfigOptions:
@@ -38,7 +38,7 @@ platforms:
         storageState: 'test-results/.auth/user.json'
 
   - os: OS X
-    osVersion: Tahoe
+    osVersion: Sequoia
     browserName: playwright-webkit
     browserVersion: 26.0
     playwrightConfigOptions:
