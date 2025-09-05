@@ -95,7 +95,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #A0C7F0;
+  background-color: #A0C7F0; /* TODO: pending final colour / not yet in colours.css */
   color: #1a202c;
   border-radius: 9999px;
   width: 1.5rem;
