@@ -299,11 +299,12 @@ const filteredPendingAppointmentsForGrid = computed(() => {
     />
 
     <!-- Inner grid vertical lines -->
+    <!-- 8 instead of 7 here because we want to add border to the right most edge and we start at 2 -->
     <div
-      v-for="n in 7"
+      v-for="n in 8"
       :key="`line-${n}`"
       class="vertical-line"
-      :style="{ gridColumn: n + 1, gridRow: '1 / -1' }"
+      :style="{ gridColumn: n + 1, gridRow: '2 / -1' }"
     ></div>
 
     <!-- Inner grid horizontal lines -->
@@ -311,7 +312,16 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       v-for="timeSlot in timeSlotsForGrid"
       :key="`h-line-${timeSlot.startTime}`"
       class="horizontal-line"
-      :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '1 / -1' }"
+      :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '2 / -1' }"
+    ></div>
+
+    <!-- Last horizontal line, dynamically calculated based on time schedule -->
+    <div
+      class="horizontal-line"
+      :style="{
+        gridRow: timeSlotsForGrid[timeSlotsForGrid.length - 1].gridRowStart + 1,
+        gridColumn: '2 / -1'
+      }"
     ></div>
   </div>
 </template>
@@ -323,8 +333,9 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   display: grid;
   grid-template-columns: max-content repeat(7, 200px);
   justify-items: center;
-  border: 1px solid var(--colour-neutral-border-intense);
+  border: 1px solid var(--colour-neutral-border);
   border-radius: 1.5rem;
+  background-color: var(--colour-neutral-base);
   margin-block-end: 2rem;
   flex: 1;
   overflow-y: auto;
@@ -338,16 +349,21 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   position: sticky;
   top: 0;
   z-index: 3;
-  padding-block: 0.5rem;
+  padding-block: 1rem;
   text-align: center;
   font-weight: bold;
   width: 100%;
   background-color: var(--colour-neutral-base);
   color: var(--colour-ti-secondary);
-  border-inline-start: 1px solid var(--colour-neutral-border-intense);
   position: sticky;
   left: 0;
   min-width: 200px;
+
+  /* Weekday */
+  & :first-child {
+    font-weight: normal;
+    font-size: 0.68rem;
+  }
 }
 
 .corner-cell-block {
@@ -374,6 +390,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   left: 0;
   background-color: var(--colour-neutral-base);
   color: var(--colour-ti-secondary);
+  font-size: 0.68rem;
   z-index: 9;
 }
 
@@ -385,26 +402,26 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   padding: 0.5rem;
   color: black;
   font-size: 0.875rem;
-  border-top: 1px solid var(--colour-neutral-border-intense);
+  border-top: 1px solid var(--colour-neutral-border);
   cursor: pointer;
   z-index: 1;
   min-width: 200px;
 }
 
 .pending-appointment {
-  border: 1px dashed var(--colour-neutral-border-intense);
+  border: 1px dashed var(--colour-neutral-border);
   opacity: 0.75;
 }
 
 .vertical-line {
   justify-self: flex-start;
-  border-left: 1px solid var(--colour-neutral-border-intense);
+  border-left: 1px solid var(--colour-neutral-border);
   z-index: 1;
 }
 
 .horizontal-line {
   height: 1px;
-  background-color: var(--colour-neutral-border-intense);
+  background-color: var(--colour-neutral-border);
   width: 100%;
 }
 
@@ -412,6 +429,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   .calendar-container {
     grid-template-columns: max-content repeat(7, minmax(0, 1fr));
     overflow-x: visible;
+    padding: 1rem 1rem 1.5rem 1rem;
   }
 
   .calendar-weekday-header {
