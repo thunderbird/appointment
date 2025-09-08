@@ -259,7 +259,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       :style="{
         gridColumn: remoteEvent?.gridColumn,
         gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
-        backgroundColor: `${remoteEvent?.calendar_color}`,
+        backgroundColor: hexToRgba(remoteEvent?.calendar_color, 0.6),
         borderLeftColor: darkenColor(remoteEvent?.calendar_color, 30)
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
