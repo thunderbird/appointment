@@ -171,6 +171,8 @@ export class SettingsPage {
     await this.saveBtnEN.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(this.savedSuccessfullyTextEN).toBeVisible();
+    // need a bit of time for theme to be applied
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
   }
 
   /**
