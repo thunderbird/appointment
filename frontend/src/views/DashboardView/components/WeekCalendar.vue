@@ -6,7 +6,7 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup } from '@/utils';
+import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
 import { EventPopup as EventPopupType } from '@/models';
 
 enum Weekday {
@@ -259,7 +259,8 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       :style="{
         gridColumn: remoteEvent?.gridColumn,
         gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
-        backgroundColor: `${remoteEvent?.calendar_color}`
+        backgroundColor: `${remoteEvent?.calendar_color}`,
+        borderLeftColor: darkenColor(remoteEvent?.calendar_color, 30)
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
       @mouseleave="onRemoteEventMouseLeave"
@@ -275,7 +276,8 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       :style="{
         gridColumn: pendingAppointment?.gridColumn,
         gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
-        backgroundColor: `${pendingAppointment?.calendar_color}`
+        backgroundColor: hexToRgba(pendingAppointment?.calendar_color, 0.4),
+        borderColor: darkenColor(pendingAppointment?.calendar_color, 30)
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
       @mouseleave="onRemoteEventMouseLeave"
@@ -400,17 +402,18 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 0.5rem;
-  color: black;
-  font-size: 0.875rem;
+  color: #4C4D58; /* TODO: should be --colour-ti-secondary but we don't have dark mode defined yet */
+  font-size: 0.68rem;
+  border-left: solid 3px;
   border-top: 1px solid var(--colour-neutral-border);
+  border-radius: 3px;
   cursor: pointer;
   z-index: 1;
   min-width: 200px;
 }
 
 .pending-appointment {
-  border: 1px dashed var(--colour-neutral-border);
-  opacity: 0.75;
+  border: 2px dashed;
 }
 
 .vertical-line {
@@ -453,7 +456,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 
   .event-item {
     min-width: auto;
-    z-index: 2;
+    z-index: 4;
   }
 
   .vertical-line {
