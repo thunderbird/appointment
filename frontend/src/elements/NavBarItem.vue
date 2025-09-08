@@ -22,6 +22,7 @@ defineProps<Props>();
 <style scoped>
   .nav-bar-item-container {
     display: flex;
+    align-items: center;
     font-family: metropolis;
     font-size: 0.8125rem;
     font-weight: 600;
@@ -33,8 +34,12 @@ defineProps<Props>();
     }
 
     a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
       min-width: 120px;
+      height: 100%;
     }
   }
 </style>
