@@ -2,7 +2,7 @@
 import { inject, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dayjsKey } from '@/keys';
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons-vue';
+import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue';
 import { TimeFormatted } from '@/models';
 
 const dj = inject(dayjsKey);
@@ -24,7 +24,7 @@ const dateInputRef = ref<HTMLInputElement>();
 const currentWeekLabel = computed(() => {
   const startDate = dj(props.activeDateRange.start).format('L');
   const endDate = dj(props.activeDateRange.end).format('L');
-  return t('label.weekOf') + ' ' + startDate + ' – ' + endDate;
+  return startDate + ' – ' + endDate;
 });
 
 const previousWeekLabel = computed(() => {
@@ -94,37 +94,37 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div 
+  <div
     class="week-picker-container"
     role="group"
     :aria-label="t('label.weekPicker')"
     tabindex="0"
     @keydown="onKeyDown"
   >
-    <button 
+    <button
       @click="onPreviousWeekButtonClicked"
       :aria-label="previousWeekLabel"
       :title="previousWeekLabel"
     >
-      <icon-arrow-left size="20" />
+      <ph-caret-left size="24" />
       <span class="screen-reader-only">{{ t('label.previousWeek') }}</span>
     </button>
 
-    <button 
+    <button
       class="week-picker-button" 
       @click="onWeekPickerClicked"
       :aria-label="t('label.selectWeek') + ': ' + currentWeekLabel"
       :title="t('label.selectWeek')"
     >
-      {{ t('label.weekOf') }} {{ dj(activeDateRange.start).format('L') }} – {{ dj(activeDateRange.end).format('L') }}
+      {{ dj(activeDateRange.start).format('MMMM DD') }} – {{ dj(activeDateRange.end).format('MMMM DD') }}
     </button>
 
-    <button 
+    <button
       @click="onNextWeekButtonClicked"
       :aria-label="nextWeekLabel"
       :title="nextWeekLabel"
     >
-      <icon-arrow-right size="20" />
+      <ph-caret-right size="24" />
       <span class="screen-reader-only">{{ t('label.nextWeek') }}</span>
     </button>
 
@@ -148,8 +148,8 @@ function onKeyDown(event: KeyboardEvent) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
+  gap: 0.5rem;
+  width: auto;
   outline: none;
 
   &:focus-visible {
@@ -159,9 +159,13 @@ function onKeyDown(event: KeyboardEvent) {
   }
 
   .week-picker-button {
-    background-color: var(--colour-neutral-lower);
-    padding: 0.25rem 1rem;
+    font-family: metropolis;
+    font-size: 1.5rem;
+    font-weight: 500;
+    text-wrap: nowrap;
     border-radius: 18px;
+    color: var(--colour-ti-secondary);
+    padding-inline: 0.5rem;
 
     &:hover {
       background-color: var(--colour-primary-soft);
