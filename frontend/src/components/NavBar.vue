@@ -145,7 +145,7 @@ const copyLink = async () => {
     padding-inline: 1rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     overflow: visible;
-    background-color: #1A202C; /* TODO: --colour-neutral-base but we don't have light mode for NavBar yet */
+    background-image: linear-gradient(to top, #1a202c, #24a39d 300%); /* TODO: update to point to a var when we have light mode defined */
     z-index: 50;
   }
 
