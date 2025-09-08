@@ -216,7 +216,7 @@ const router = createRouter({
       return {
         el: to.hash,
         behavior: noPrefersReducedMotion ? 'smooth' : 'auto',
-        top: 64 + 16, // Account for the navigation header height (64px) + 16px for some padding
+        top: 68 + 16, // Account for the navigation header height (68px) + 16px for some padding
       }
     }
   }
