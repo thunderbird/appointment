@@ -10,7 +10,6 @@ class TestSubscriber:
         long (FRONTEND_USER/user) type urls since we are always signing with the long url."""
 
         os.environ['SHORT_BASE_URL'] = 'https://example.org'
-        os.environ['FRONTEND_URL'] = 'https://example-long.org'
 
         subscriber = make_basic_subscriber()
 
@@ -31,7 +30,6 @@ class TestSubscriber:
 
         # Don't set SHORT_BASE_URL
         os.environ.pop('SHORT_BASE_URL', None)
-        os.environ['FRONTEND_URL'] = 'https://example-long.org'
 
         subscriber = make_basic_subscriber()
 
