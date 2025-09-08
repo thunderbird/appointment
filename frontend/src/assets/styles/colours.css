@@ -72,6 +72,7 @@ html {
    * Text+Icon
    * Applied frequently for text and icons.
    */
+  --colour-ti-black: #000000;
   --colour-ti-base: #1A202C;
   --colour-ti-secondary: #4C4D58;
   --colour-ti-muted: #737584;
@@ -180,6 +181,7 @@ html {
      * Text+Icon
      * Applied frequently for text and icons.
      */
+    --colour-ti-black: #FFFFFF;
     --colour-ti-base: #EEEEF0;
     --colour-ti-secondary: #D9D9DE;
     --colour-ti-muted: #7F94AC;
