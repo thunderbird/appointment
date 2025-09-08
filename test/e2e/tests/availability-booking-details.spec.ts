@@ -62,7 +62,7 @@ test.describe('availability - booking page details', {
     await expect.soft(pageDescLocator).toBeVisible();
 
     // verify a 15 min slot now exists
-    await expect(bookApptPage.bookApptPage15MinSlot).toBeVisible();
+    await expect.soft(bookApptPage.bookApptPage15MinSlot).toBeVisible();
 
     // now go back to booking page settings and change back
     await availabilityPage.gotoAvailabilityPage();

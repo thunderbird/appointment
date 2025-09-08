@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { type Page, type Locator } from '@playwright/test';
-import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX, TIMEOUT_30_SECONDS } from '../const/constants';
+import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX, TIMEOUT_30_SECONDS, APPT_TIMEZONE_SETTING_PRIMARY } from '../const/constants';
 
 export class BookingPage {
   readonly page: Page;
@@ -135,24 +135,32 @@ export class BookingPage {
   /**
    * Verify the given appointment time slot text is displayed in the current page
    * @param expSlotDateStr Expected slot date string formatted as 'Friday, January 10, 2025'
-   * @param expSlotTimeStr Expected time slot time string formatted as '14:30' (24 hr time)
+   * @param expSlotTimeStr Expected time slot time string formatted as '14:30 PM AMERICA/TORONTO'
    */
   async verifyRequestedSlotTextDisplayed(expSlotDateStr: string, expSlotTimeStr: string) {
-    // due to the way the element is we must locate by the date text only
-    const slotDisplayText: Locator = this.page.getByText(expSlotDateStr);
-    await expect(slotDisplayText).toBeVisible();
-    // the slot text has been found so now verify it contains both the given date and time
-    await expect(slotDisplayText).toHaveText(`${expSlotDateStr} ${expSlotTimeStr}`);
+    const slotDateDisplayText: Locator = this.page.getByText(expSlotDateStr);
+    await expect(slotDateDisplayText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    const slotTimeDisplayText: Locator = this.page.getByText(`${expSlotTimeStr}`);
+    await expect(slotTimeDisplayText).toBeVisible();
+    const slotTimezoneDisplayText: Locator = this.page.getByText(APPT_TIMEZONE_SETTING_PRIMARY);
+    await expect(slotTimezoneDisplayText).toBeVisible();
   }
 
   /**
    * Utility to return a string containing the date abstracted from a given time slot string 
    * @param timeSlotString Slot string read from DOM (ie. 'event-2025-01-14 14:30')
-   * @returns Formatted date string (ie. 'Tuesday, January 14, 2025')
+   * @returns Formatted date string (ie. 'January 14, 2025')
    */
   async getDateFromSlotString(timeSlotString: string): Promise<string> {
     const selectedSlotDateTime = new Date(timeSlotString.substring(6));
-    return selectedSlotDateTime.toLocaleDateString('default', { dateStyle: 'full' });
+
+    const options:Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+
+    return selectedSlotDateTime.toLocaleDateString('default', options);
   }
 
   /**
