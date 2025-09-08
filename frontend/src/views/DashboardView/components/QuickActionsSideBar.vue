@@ -116,6 +116,10 @@ h2 {
   text-align: left;
   text-transform: capitalize;
 
+  .icon-left {
+    color: var(--colour-ti-highlight);
+  }
+
   &.with-icon {
     display: flex;
     align-items: center;
