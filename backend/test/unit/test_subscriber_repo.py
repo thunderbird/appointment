@@ -6,11 +6,11 @@ from appointment.controller.auth import signed_url_by_subscriber
 
 
 @pytest.fixture
-def clear_url_cache(monkeypatch):
+def clear_url_cache():
     """Clear the get_long_base_sign_url cache and set test FRONTEND_URL"""
     from appointment.defines import get_long_base_sign_url
     get_long_base_sign_url.cache_clear()
-    monkeypatch.setenv('FRONTEND_URL', 'https://example-long.org')
+    os.environ['FRONTEND_URL'] = 'https://example-long.org'
 
 
 class TestSubscriber:
