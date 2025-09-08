@@ -365,7 +365,7 @@ main {
 
 @media (--md) {
   main {
-    padding-block-start: 6rem;
+    padding-block-start: 6.5rem;
   }
 }
 
