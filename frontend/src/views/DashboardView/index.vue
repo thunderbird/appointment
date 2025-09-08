@@ -130,6 +130,7 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-block-start: 0.25rem;
 }
 
 .calendar-header-container {

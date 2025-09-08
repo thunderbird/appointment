@@ -160,9 +160,9 @@ function onKeyDown(event: KeyboardEvent) {
 
   .week-picker-button {
     font-family: metropolis;
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 500;
-    text-wrap: nowrap;
+    text-wrap: wrap;
     border-radius: 18px;
     color: var(--colour-ti-secondary);
     padding-inline: 0.5rem;
@@ -181,6 +181,11 @@ function onKeyDown(event: KeyboardEvent) {
 @media (--md) {
   .week-picker-container {
     justify-content: initial;
+
+    .week-picker-button {
+      font-size: 1.5rem;
+      text-wrap: nowrap;
+    }
   }
 }
 </style>
