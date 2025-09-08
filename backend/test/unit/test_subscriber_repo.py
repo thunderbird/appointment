@@ -1,6 +1,6 @@
 import os
 import pytest
-
+from urllib.parse import urlparse
 from appointment.database.repo.subscriber import verify_link
 from appointment.controller.auth import signed_url_by_subscriber
 
@@ -46,7 +46,7 @@ class TestSubscriber:
             signed_url = signed_url_by_subscriber(subscriber)
 
             # When SHORT_BASE_URL is not set, the signed_url should contain the long URL format
-            assert 'https://example-long.org' in signed_url
+            assert urlparse(signed_url).hostname == 'example-long.org'
             assert '/user' in signed_url
 
             verified_subscriber = verify_link(db, signed_url)
