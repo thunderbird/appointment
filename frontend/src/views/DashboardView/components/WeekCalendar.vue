@@ -343,6 +343,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   font-weight: bold;
   width: 100%;
   background-color: var(--colour-neutral-base);
+  color: var(--colour-ti-secondary);
   border-inline-start: 1px solid var(--colour-neutral-border-intense);
   position: sticky;
   left: 0;
@@ -372,6 +373,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   position: sticky;
   left: 0;
   background-color: var(--colour-neutral-base);
+  color: var(--colour-ti-secondary);
   z-index: 9;
 }
 

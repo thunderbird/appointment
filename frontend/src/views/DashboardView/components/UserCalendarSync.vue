@@ -74,6 +74,10 @@ onMounted(async () => {
   gap: 0.5rem;
   width: 100%;
 
+  button {
+    color: var(--colour-ti-secondary);
+  }
+
   button.loading {
     color: var(--colour-ti-muted);
     cursor: not-allowed;

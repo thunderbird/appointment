@@ -151,6 +151,7 @@ function onKeyDown(event: KeyboardEvent) {
   gap: 0.5rem;
   width: auto;
   outline: none;
+  color: var(--colour-ti-secondary);
 
   &:focus-visible {
     outline: 2px solid var(--colour-primary);
@@ -161,10 +162,8 @@ function onKeyDown(event: KeyboardEvent) {
   .week-picker-button {
     font-family: metropolis;
     font-size: 1rem;
-    font-weight: 500;
     text-wrap: wrap;
     border-radius: 18px;
-    color: var(--colour-ti-secondary);
     padding-inline: 0.5rem;
 
     &:hover {
