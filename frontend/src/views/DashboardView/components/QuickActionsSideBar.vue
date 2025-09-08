@@ -115,6 +115,7 @@ h2 {
   font-size: 0.875rem;
   text-align: left;
   text-transform: capitalize;
+  color: var(--colour-ti-secondary);
 
   .icon-left {
     color: var(--colour-ti-highlight);
