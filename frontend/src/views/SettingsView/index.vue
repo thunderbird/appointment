@@ -294,18 +294,19 @@ export default {
 
 header {
   h2 {
+    font-family: metropolis;
     font-size: 2.25rem;
-    font-weight: 300;
+    color: var(--colour-ti-base);
     margin-block-end: 2rem;
   }
 }
 
 section {
-  border: 1px solid var(--colour-neutral-border);
   border-radius: 8px;
   padding: 1.5rem;
   align-self: flex-start;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-base);
+  box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
   margin-block-end: 2rem;
 }
 
@@ -318,6 +319,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  color: var(--colour-ti-secondary);
 
   aside {
     display: flex;
@@ -329,7 +331,7 @@ section {
       justify-content: space-between;
       padding: 1.25rem;
       border-radius: 12px;
-      background-color: var(--colour-neutral-lower);
+      background-color: var(--colour-neutral-base);
 
       &.active {
         color: var(--colour-neutral-lower);
@@ -359,7 +361,7 @@ section {
   padding: 1rem 1.5rem;
   margin: 0 0.5rem 0.5rem 0.5rem;
   border-radius: 8px;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-base);
   z-index: 99;
 }
 
