@@ -35,9 +35,10 @@ GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
 # Resolves to absolute appointment package path
 BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
-# Base URL used to sign / verify subscriber's signature in requests
-LONG_BASE_SIGN_URL = f'{os.getenv("FRONTEND_URL")}/user'
-
+# This has to be lazy loaded because the env vars are not available at import time in main.py
+def get_long_base_sign_url():
+    """Get the base URL used to sign/verify subscriber's signature in requests"""
+    return f'{os.getenv("FRONTEND_URL")}/user'
 
 class AuthScheme(StrEnum):
     """Enum for authentication scheme"""

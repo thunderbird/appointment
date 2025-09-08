@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ... import utils
 from ...controller.auth import sign_url
-from ...defines import LONG_BASE_SIGN_URL
+from ...defines import get_long_base_sign_url
 
 
 def get(db: Session, subscriber_id: int) -> models.Subscriber | None:
@@ -138,7 +138,7 @@ def verify_link(db: Session, url: str):
     if os.getenv('SHORT_BASE_URL'):
         # If the url is a short url, we need to reconstruct the long url
         # otherwise it will fail the signature check as we always sign with the long url
-        url = url.replace(os.getenv('SHORT_BASE_URL'), LONG_BASE_SIGN_URL)
+        url = url.replace(os.getenv('SHORT_BASE_URL'), get_long_base_sign_url())
 
     username, signature, clean_url = utils.retrieve_user_url_data(url)
 
