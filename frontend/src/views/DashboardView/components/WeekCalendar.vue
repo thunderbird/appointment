@@ -324,6 +324,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   grid-template-columns: max-content repeat(7, 200px);
   justify-items: center;
   border: 1px solid var(--colour-neutral-border-intense);
+  border-radius: 1.5rem;
   margin-block-end: 2rem;
   flex: 1;
   overflow-y: auto;
