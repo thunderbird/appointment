@@ -350,10 +350,6 @@ onMounted(async () => {
 main {
   padding-block-start: 1rem;
 
-  &.public-route {
-    min-height: 100%;
-  }
-
   &.private-route {
     display: flex;
     flex-direction: column;
