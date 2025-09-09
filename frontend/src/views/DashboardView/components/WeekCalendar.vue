@@ -5,9 +5,11 @@ import { dayjsKey } from '@/keys';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
+import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
 import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
 import { EventPopup as EventPopupType } from '@/models';
+import { ColourSchemes } from '@/definitions';
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -23,6 +25,7 @@ const props = defineProps<{
 
 const dj = inject(dayjsKey);
 
+const userStore = useUserStore();
 const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
 const calendarStore = useCalendarStore();
@@ -32,6 +35,8 @@ const { pendingAppointments } = storeToRefs(appointmentStore);
 const { firstSchedule } = storeToRefs(scheduleStore);
 
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
+
+const isDarkMode = computed(() => userStore.myColourScheme === ColourSchemes.Dark);
 
 function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
   const popupEvent = {
@@ -273,11 +278,12 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
       :key="pendingAppointment?.id"
       class="event-item pending-appointment"
+      :class="{ 'dark': isDarkMode }"
       :style="{
         gridColumn: pendingAppointment?.gridColumn,
         gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
         backgroundColor: hexToRgba(pendingAppointment?.calendar_color, 0.4),
-        borderColor: darkenColor(pendingAppointment?.calendar_color, 30)
+        borderColor: darkenColor(pendingAppointment?.calendar_color, 30),
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
       @mouseleave="onRemoteEventMouseLeave"
@@ -414,6 +420,10 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 
 .pending-appointment {
   border: 2px dashed;
+
+  &.dark {
+    color: var(--colour-ti-black);
+  }
 }
 
 .vertical-line {
