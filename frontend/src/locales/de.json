@@ -23,6 +23,7 @@
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",
     "fieldIsRequired": "{field} darf nicht leer sein.",
+    "fieldIsTooLong": "{field} darf höchstens {value} Zeichen lang sein.",
     "generalBookingError": "Beim Abrufen des Zeitplans ist ein Problem aufgetreten. Bitte später nochmal versuchen.",
     "googleRefreshError": "Es gab ein Problem mit Google, bitte erneut verbinden.",
     "invalidTimeConfiguration": "Das Ende muss mindestens {value} nach dem Start sein und angrenzende Zeiten dürfen sich nicht überlappen.",
@@ -40,6 +41,7 @@
     "weCouldntConnect": "Es konnte keine Verbindung hergestellt werden."
   },
   "fields": {
+    "details": "Seitenbeschreibung",
     "slot_duration": "Dauer",
     "unknown": "Unbekannt"
   },

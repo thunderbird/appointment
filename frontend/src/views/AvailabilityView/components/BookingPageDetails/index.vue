@@ -27,6 +27,9 @@ const pageDescription = computed({
   }
 })
 
+const MAX_DESCRIPTION_LENGTH = 250;
+const pageDescriptionHelpLabel = computed(() => `${pageDescription.value?.length.toString() ?? 0}/${MAX_DESCRIPTION_LENGTH}`)
+
 const autoGenerateZoomLink = computed({
   get: () => currentState.value.meeting_link_provider === MeetingLinkProviderType.Zoom,
   set: (value) => {
@@ -84,8 +87,11 @@ export default {
     <!-- Page description -->
     <text-area
       name="pageDescription"
-      :placeholder="t('label.enterDescriptionToSchedulingPage')"
+      class="page-description"
       v-model="pageDescription"
+      :placeholder="t('label.enterDescriptionToSchedulingPage')"
+      :max-length="MAX_DESCRIPTION_LENGTH"
+      :help="pageDescriptionHelpLabel"
     >
       {{ t('label.pageDescription') }}:
     </text-area>
@@ -151,6 +157,13 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  .page-description {
+    /* Help text (character count) */
+    & :last-child {
+      justify-content: end;
+    }
+  }
 }
 
 .auto-generate-link-container {
