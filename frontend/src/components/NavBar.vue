@@ -60,69 +60,71 @@ const copyLink = async () => {
       <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
 
-    <nav class="nav-items-container">
-      <nav-bar-item
-        v-for="item in navItems"
-        :key="item"
-        :active="isNavEntryActive(item)"
-        :label="t(`label.${item}`)"
-        :link-name="item"
-      />
-    </nav>
+    <template v-if="user?.authenticated">
+      <nav class="nav-items-container">
+        <nav-bar-item
+          v-for="item in navItems"
+          :key="item"
+          :active="isNavEntryActive(item)"
+          :label="t(`label.${item}`)"
+          :link-name="item"
+        />
+      </nav>
 
-    <div class="nav-items-right-container">
-      <div v-if="user.myLink" class="nav-copy-link-button-container">
-        <button
-          class="nav-copy-link-button"
-          @click="copyLink"
-          aria-labelledby="copy-meeting-link-button"
-        >
-          <ph-link-simple id="copy-meeting-link-button" :size="24" />
-          <tool-tip
-            :position="TooltipPosition.Top"
-            class="nav-copy-link-tooltip"
+      <div class="nav-items-right-container">
+        <div v-if="user.myLink" class="nav-copy-link-button-container">
+          <button
+            class="nav-copy-link-button"
+            @click="copyLink"
+            aria-labelledby="copy-meeting-link-button"
           >
-            {{ myLinkTooltip }}
-          </tool-tip>
-        </button>
+            <ph-link-simple id="copy-meeting-link-button" :size="24" />
+            <tool-tip
+              :position="TooltipPosition.Top"
+              class="nav-copy-link-tooltip"
+            >
+              {{ myLinkTooltip }}
+            </tool-tip>
+          </button>
+        </div>
+
+        <drop-down class="user-dropdown" ref="profileDropdown">
+          <template #trigger>
+            <!-- TODO: Replace UserAvatar with component from services-ui -->
+            <user-avatar />
+          </template>
+          <template #default>
+            <div
+              @click="profileDropdown.close()"
+              class="user-dropdown-content-container"
+            >
+              <router-link :to="{ name: 'profile' }">
+                {{ t('label.userProfile') }}
+              </router-link>
+              <text-button
+                v-show="user.myLink"
+                uid="myLink"
+                :label="t('navBar.shareMyLink')"
+                :copy="user.myLink"
+                :title="t('label.copy')"
+                class="share-link-button"
+                data-testid="user-nav-share-link-btn"
+              />
+              <router-link :to="{ name: 'report-bug' }" class="router-link-with-icon" data-testid="user-nav-report-bug-menu">
+                {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
+              </router-link>
+              <router-link :to="{ name: 'contact' }" class="router-link-with-icon" data-testid="user-nav-contact-menu">
+                {{ t('label.contact') }} <icon-external-link class="size-4"/>
+              </router-link>
+              <hr class="border-teal-500" />
+              <router-link :to="{ name: 'logout' }" data-testid="user-nav-logout-menu">
+                {{ t('label.logOut') }}
+              </router-link>
+            </div>
+          </template>
+        </drop-down>
       </div>
-  
-      <drop-down class="user-dropdown" ref="profileDropdown">
-        <template #trigger>
-          <!-- TODO: Replace UserAvatar with component from services-ui -->
-          <user-avatar />
-        </template>
-        <template #default>
-          <div
-            @click="profileDropdown.close()"
-            class="user-dropdown-content-container"
-          >
-            <router-link :to="{ name: 'profile' }">
-              {{ t('label.userProfile') }}
-            </router-link>
-            <text-button
-              v-show="user.myLink"
-              uid="myLink"
-              :label="t('navBar.shareMyLink')"
-              :copy="user.myLink"
-              :title="t('label.copy')"
-              class="share-link-button"
-              data-testid="user-nav-share-link-btn"
-            />
-            <router-link :to="{ name: 'report-bug' }" class="router-link-with-icon" data-testid="user-nav-report-bug-menu">
-              {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
-            </router-link>
-            <router-link :to="{ name: 'contact' }" class="router-link-with-icon" data-testid="user-nav-contact-menu">
-              {{ t('label.contact') }} <icon-external-link class="size-4"/>
-            </router-link>
-            <hr class="border-teal-500" />
-            <router-link :to="{ name: 'logout' }" data-testid="user-nav-logout-menu">
-              {{ t('label.logOut') }}
-            </router-link>
-          </div>
-        </template>
-      </drop-down>
-    </div>
+    </template>
   </header>
 </template>
 
@@ -218,6 +220,7 @@ const copyLink = async () => {
     width: 12rem;
     border-radius: 0.375rem;
     background-color: var(--colour-neutral-raised);
+    color: var(--colour-ti-secondary);
     padding: 1rem;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 
