@@ -35,7 +35,6 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
     trace: 'off', // traces can contain sensitive info so only do this manually locally if need be
-    screenshot: 'only-on-failure',
     // Maximum time (ms) each action such as `click()` can take. Defaults to 0 (no limit)
     actionTimeout: 10_000,
     // Maximum time given for browser page navigation
@@ -50,56 +49,48 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup project - signs into Appointment once for all the tests
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    { name: 'desktop-setup', testMatch: /.*\.desktop.setup\.ts/ },
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
         // Use prepared auth state
         storageState: 'test-results/.auth/user.json',
        },
-      dependencies: ['setup'],
+      dependencies: ['desktop-setup'],
     },
 
     {
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        screenshot: 'only-on-failure',
         // Use prepared auth state
         storageState: 'test-results/.auth/user.json',
        },
-      dependencies: ['setup'],
+      dependencies: ['desktop-setup'],
     },
 
     {
       name: 'safari',
       use: {
         ...devices['Desktop Safari'],
+        screenshot: 'only-on-failure',
         // Use prepared auth state
         storageState: 'test-results/.auth/user.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['desktop-setup'],
     },
 
     /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    {
+      name: 'Google-Pixel-7-View',
+      use: {
+        ...devices['Pixel 7'],
+        screenshot: 'only-on-failure',
+       },
+    },
   ],
 
   /* Run your local dev server before starting the tests */
