@@ -6,14 +6,54 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="mb-20 flex w-full flex-col shadow-[0_-5px_5px_-5px_rgb(0_0_0/0.3)] md:w-1/3
-">
-    <div class="m-4 flex h-16 gap-4">
-      <!--<img class="w-[64px] h-[64px]" src="@/assets/svg/icon-wand.svg"/>-->
-      <h3 class="my-auto text-2xl text-teal-600 dark:text-teal-400">{{ title }}</h3>
-    </div>
-    <div class="m-4 mb-8">
-      <p class="text-lg leading-loose"><slot></slot></p>
+  <div class="info-box-container">
+    <header>
+      <h3>{{ title }}</h3>
+    </header>
+    <div class="info-box-container-content">
+      <p><slot></slot></p>
     </div>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+.info-box-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-block-end: 5rem;
+  border-block-start: 1px solid var(--colour-neutral-border);
+
+  header {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem;
+    height: 4rem;
+  }
+
+  h3 {
+    margin-block: auto;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    color: var(--colour-apmt-secondary);
+  }
+
+  p {
+    font-size: 1.125rem;
+    line-height: 2;
+  }
+
+  .info-box-container-content {
+    margin: 1rem;
+    margin-block-end: 2rem;
+  }
+}
+
+@media (--md) {
+  .info-box-container {
+    width: 33.33%;
+  }
+}
+</style>
