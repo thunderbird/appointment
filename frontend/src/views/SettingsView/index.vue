@@ -332,6 +332,8 @@ section {
       padding: 1.25rem;
       border-radius: 12px;
       background-color: var(--colour-neutral-base);
+      border: 1px solid transparent;
+      box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
 
       &.active {
         color: var(--colour-neutral-lower);
@@ -339,7 +341,7 @@ section {
       }
 
       &:hover {
-        background-color: var(--colour-apmt-primary-hover);
+        border-color: var(--colour-apmt-primary-hover);
       }
     }
   }
