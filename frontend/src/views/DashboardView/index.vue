@@ -124,6 +124,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 2.25rem;
+  margin: 0 auto;
+  max-width: 80rem;
 }
 
 .main-calendar-container {
