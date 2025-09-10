@@ -122,6 +122,10 @@ export const useAvailabilityStore = defineStore('availability', () => {
 
 export const createAvailabilityStore = (call: Fetch) => {
   const store = useAvailabilityStore();
-  store.init(call);
+
+  if (!store.isLoaded) {
+    store.init(call);
+  }
+
   return store;
 };
