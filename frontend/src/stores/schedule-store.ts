@@ -139,6 +139,9 @@ export const useScheduleStore = defineStore('schedules', () => {
           const timeZoned = dj(err.ctx['err_value'], 'HH:mm:ss').utc(true).tz(dj.tz.guess());
           message = err.msg.replace('{field}', i18n.t('label.endTime'));
           message = message.replace('{value}', timeZoned.format(timeFormat()));
+        } else if (err.type === 'string_too_long') {
+          const maxLength = err.ctx.max_length;
+          message = i18n.t('error.fieldIsTooLong', { field: fieldLocalized, value: maxLength })
         }
 
         return message;

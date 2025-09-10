@@ -367,7 +367,7 @@ export type ExceptionDetail = {
   status?: number;
 }
 export type PydanticExceptionDetail = {
-  ctx: { reason: string, ge?: string },
+  ctx: { reason: string, ge?: string, max_length?: number },
   input: string,
   loc: string[],
   msg: string,

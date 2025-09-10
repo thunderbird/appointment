@@ -23,6 +23,7 @@
     "dataSourceIsEmpty": "No {name} could be found.",
     "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
     "fieldIsRequired": "{field} cannot be empty.",
+    "fieldIsTooLong": "{field} should have at most {value} characters.",
     "generalBookingError": "Sorry, there was a problem retrieving the schedule details. Please try again later.",
     "googleRefreshError": "Error connecting with Google API, please re-connect.",
     "invalidTimeConfiguration": "Please make sure the end time is at least {value} after the start and adjacent times are valid.",
@@ -40,6 +41,7 @@
     "weCouldntConnect": "We couldn't connect to your calendar."
   },
   "fields": {
+    "details": "Page Description",
     "slot_duration": "Slot Duration",
     "unknown": "Unknown"
   },

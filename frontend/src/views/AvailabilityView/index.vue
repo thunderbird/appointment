@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey, dayjsKey } from '@/keys';
@@ -28,6 +28,7 @@ const { currentState, isDirty } = storeToRefs(availabilityStore)
 const savingInProgress = ref(false);
 const validationError = ref<Alert>(null);
 const saveSuccess = ref<Alert>(null);
+const availabilityPageForm = useTemplateRef('availability-form');
 
 function validateSchedule(schedule) {
   // Schedule name is empty
@@ -64,6 +65,14 @@ async function onSaveChanges() {
   const validationErrorMessage = validateSchedule(obj);
   if (validationErrorMessage) {
     validationError.value = { title: validationErrorMessage };
+    savingInProgress.value = false;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Use built-in form field validations
+  if (!availabilityPageForm.value.checkValidity()) {
+    availabilityPageForm.value.reportValidity();
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
@@ -129,7 +138,7 @@ export default {
     @close="saveSuccess = null"
   />
 
-  <form @submit.prevent>
+  <form ref="availability-form" @submit.prevent>
     <div class="page-content" :class="{ 'is-dirty': isDirty }">
       <section>
         <availability-settings />
