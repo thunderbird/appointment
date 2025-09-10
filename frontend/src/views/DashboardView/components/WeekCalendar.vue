@@ -327,7 +327,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
     <div
       class="horizontal-line"
       :style="{
-        gridRow: timeSlotsForGrid[timeSlotsForGrid.length - 1].gridRowStart + 1,
+        gridRow: timeSlotsForGrid[timeSlotsForGrid.length - 1]?.gridRowStart + 1,
         gridColumn: '2 / -1'
       }"
     ></div>
