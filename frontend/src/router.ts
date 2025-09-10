@@ -7,6 +7,7 @@ import LoginView from '@/views/LoginView.vue';
 import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
 import LogoutView from '@/views/LogoutView.vue';
+import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 
 // lazy loaded components
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
@@ -77,6 +78,15 @@ const routes: RouteRecordRaw[] = [
     path: '/user/:username/:signatureOrSlug?',
     name: 'booker',
     component: BookerView,
+    meta: {
+      isPublic: true,
+      maskForMetrics: true,
+    },
+  },
+  {
+    path: '/user/:username/:signature/confirm/:slot/:token/:confirmed',
+    name: 'confirmation',
+    component: BookingConfirmationView,
     meta: {
       isPublic: true,
       maskForMetrics: true,
