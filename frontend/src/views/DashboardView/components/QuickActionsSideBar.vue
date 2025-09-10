@@ -79,6 +79,7 @@ h2 {
   font-size: 1rem;
   font-weight: 600;
   margin-block-end: 1.5rem;
+  color: var(--colour-ti-black);
 
   &.has-pending-requests {
     margin-block-start: 3rem;
@@ -110,11 +111,17 @@ h2 {
   position: relative;
   cursor: pointer;
   padding: 0.75rem 1rem;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-base);
   border-radius: 0.5rem;
+  box-shadow: 3px 3px 16px 0 rgba(0, 0, 0, 0.04);
   font-size: 0.875rem;
   text-align: left;
   text-transform: capitalize;
+  color: var(--colour-ti-secondary);
+
+  .icon-left {
+    color: var(--colour-ti-highlight);
+  }
 
   &.with-icon {
     display: flex;

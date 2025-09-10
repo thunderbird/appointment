@@ -269,7 +269,6 @@ export default {
           <tr
             v-for="(appointment, i) in filteredAppointments"
             :key="`${appointment.id}-${i}`"
-            class="cursor-pointer hover:bg-sky-400/10 hover:shadow-lg relative"
             @click.left.exact="showAppointmentSlidingPanel(appointment)"
           >
             <td class="table-cell">
@@ -334,9 +333,10 @@ export default {
 }
 
 .page-title {
-  margin-bottom: 0;
+  margin-block-end: 0;
+  font-family: metropolis;
   font-size: 2.25rem;
-  font-weight: 300;
+  color: var(--colour-ti-base);
 }
 
 .page-controls {
@@ -371,11 +371,23 @@ export default {
 
 .appointments-table {
   width: 100%;
+  color: var(--colour-ti-secondary);
 
   thead {
     position: sticky;
     top: 0;
     z-index: 10;
+  }
+
+  tbody {
+    tr {
+      position: relative;
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--colour-neutral-base);
+      }
+    }
   }
 }
 
@@ -385,11 +397,7 @@ export default {
 
 /* Table styles */
 .table-header-row {
-  background-color: var(--colour-neutral-lower);
-
-  .dark & {
-    background-color: var(--colour-neutral-raised);
-  }
+  background-color: var(--colour-neutral-base);
 }
 
 .table-header {

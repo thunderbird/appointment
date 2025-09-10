@@ -203,6 +203,7 @@ export default {
   user-select: none;
   padding: 0 1rem;
   padding-bottom: 2rem;
+  color: var(--colour-ti-secondary);
 }
 
 @media (--md) {

@@ -130,6 +130,7 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-block-start: 0.25rem;
 }
 
 .calendar-header-container {
@@ -144,7 +145,7 @@ export default {
 #beta-warning {
   position: relative;
   /* The navbar provides margin already */
-  margin: 0 0 2rem;
+  margin-block-end: 2rem;
 
   :deep(.icon) {
     top: 0.75rem;
@@ -177,9 +178,6 @@ export default {
 
 @media (--md) {
   #beta-warning {
-    position: relative;
-    margin: 0 1rem 2rem;
-
     :deep(.body) {
       .dismiss {
         position: absolute;
@@ -199,7 +197,7 @@ export default {
   .calendar-header-container {
     flex-direction: row;
     justify-content: space-between;
-    margin-block-end: 1rem;
+    margin-block-end: 2.25rem;
     gap: 0;
   }
 }

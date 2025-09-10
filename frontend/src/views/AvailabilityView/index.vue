@@ -121,55 +121,57 @@ export default {
 </script>
 
 <template>
-  <h1 class="page-title">{{ t('label.availability') }}</h1>
-
-  <alert-box
-    class="alert-box"
-    v-if="validationError"
-    :alert="validationError"
-    @close="validationError = null"
-  />
-
-  <alert-box
-    class="alert-box"
-    v-else-if="saveSuccess"
-    :alert="saveSuccess"
-    :scheme="AlertSchemes.Success"
-    @close="saveSuccess = null"
-  />
-
-  <form ref="availability-form" @submit.prevent>
-    <div class="page-content" :class="{ 'is-dirty': isDirty }">
-      <section>
-        <availability-settings />
-      </section>
+  <div class="availability-page-container">
+    <h1 class="page-title">{{ t('label.availability') }}</h1>
   
-      <div class="page-content-right">
-        <section>
-          <booking-page-details />
-        </section>
+    <alert-box
+      class="alert-box"
+      v-if="validationError"
+      :alert="validationError"
+      @close="validationError = null"
+    />
   
+    <alert-box
+      class="alert-box"
+      v-else-if="saveSuccess"
+      :alert="saveSuccess"
+      :scheme="AlertSchemes.Success"
+      @close="saveSuccess = null"
+    />
+  
+    <form ref="availability-form" @submit.prevent>
+      <div class="page-content">
         <section>
-          <booking-page-link />
+          <availability-settings />
         </section>
+    
+        <div class="page-content-right">
+          <section>
+            <booking-page-details />
+          </section>
+    
+          <section>
+            <booking-page-link />
+          </section>
+        </div>
       </div>
-    </div>
-
-    <div class="footer-save-panel" v-if="isDirty">
-      <link-button
-        @click="onRevertChanges"
-        :disabled="savingInProgress"
-      >
-        {{ t('label.revertChanges') }}
-      </link-button>
-      <primary-button
-        @click="onSaveChanges"
-        :disabled="savingInProgress"
-      >
-        {{ t('label.save') }}
-      </primary-button>
-    </div>
-  </form>
+  
+      <div class="footer-save-panel" v-if="isDirty">
+        <link-button
+          @click="onRevertChanges"
+          :disabled="savingInProgress"
+        >
+          {{ t('label.revertChanges') }}
+        </link-button>
+        <primary-button
+          @click="onSaveChanges"
+          :disabled="savingInProgress"
+        >
+          {{ t('label.save') }}
+        </primary-button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <style scoped>
@@ -177,8 +179,9 @@ export default {
 
 .page-title {
   margin-block-end: 2rem;
+  font-family: metropolis;
   font-size: 2.25rem;
-  font-weight: 300;
+  color: var(--colour-ti-base);
 }
 
 .page-content {
@@ -186,10 +189,6 @@ export default {
   grid-template-columns: 1fr;
   gap: 2rem;
   margin-block-end: 2rem;
-
-  &.is-dirty {
-    margin-block-end: 6rem;
-  }
 }
 
 .alert-box {
@@ -214,21 +213,24 @@ export default {
   padding: 1rem 1.5rem;
   margin: 0 0.5rem 0.5rem 0.5rem;
   border-radius: 8px;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-base);
   z-index: 99;
 }
 
 section {
-  border: 1px solid var(--colour-neutral-border);
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   align-self: flex-start;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-neutral-base);
+  box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
+  border-radius: 1.5rem;
 }
 
 @media (--md) {
-  .page-content {
-    grid-template-columns: 1fr 1fr;
+  .availability-page-container {
+    width: 100%;
+    max-width: 969px;
+    margin: 0 auto;
   }
 }
 </style>

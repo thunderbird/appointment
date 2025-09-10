@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
 
-  color: var(--ti-base);
+  color: var(--colour-ti-base);
   font-family: 'Metropolis', sans-serif;
   font-weight: 200;
   font-size: 2rem;

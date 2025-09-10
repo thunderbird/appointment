@@ -143,6 +143,7 @@ async function copyLink() {
   align-items: center;
   min-height: 64px;
   background-color: var(--colour-neutral-base);
+  color: var(--colour-ti-secondary);
   padding: 0.5rem;
   z-index: 9999;
 
@@ -191,6 +192,7 @@ nav {
     height: 100%;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     background-color: var(--colour-neutral-raised);
+    color: var(--colour-ti-secondary);
     z-index: 2;
     padding: 1rem;
 

@@ -230,6 +230,7 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
+  background-color: var(--colour-neutral-lower);
 }
 
 #app {
