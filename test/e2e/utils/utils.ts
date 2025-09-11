@@ -7,15 +7,18 @@ import {
     APPT_TARGET_ENV,
     APPT_URL,
     APPT_PAGE_TITLE,
-    TIMEOUT_1_SECOND,
+    APPT_DASHBOARD_HOME_PAGE,
+    APPT_SETTINGS_PAGE,
     APPT_DISPLAY_NAME,
+    APPT_TIMEZONE_SETTING_PRIMARY,
     APPT_BROWSER_STORE_LANGUAGE_EN,
     APPT_BROWSER_STORE_THEME_LIGHT,
     APPT_BROWSER_STORE_12HR_TIME,
     APPT_BROWSER_STORE_START_WEEK_SUN,
+    TIMEOUT_1_SECOND,
+    TIMEOUT_2_SECONDS,
     TIMEOUT_3_SECONDS,
     TIMEOUT_60_SECONDS,
-    APPT_TIMEZONE_SETTING_PRIMARY,
 } from "../const/constants";
 
 /**
@@ -96,4 +99,26 @@ export const setDefaultUserSettingsLocalStore = async (page: Page) => {
 
     console.log(`updated user settings from local browser store: ${JSON.stringify(updatedLocalUserStoreData['settings'])}`);
     expect(updatedLocalUserStoreData['settings']).toStrictEqual(localUserStoreData['settings']);
+}
+
+/**
+ * Sign into Appointment on mobile browser and set default settings required by tests
+ */
+export const mobileSignInAndSetup = async (page: Page) => {
+    // playwright for mobile browsers doesn't support saving auth storage state, so unfortunately
+    // we must sign into Appointment at the start of every test
+    await navigateToAppointmentAndSignIn(page);
+
+    // Wait until the page receives the cookies.
+    // Sometimes login flow sets cookies in the process of several redirects.
+    // Wait for the final URL to ensure that the cookies are actually set.
+    await page.waitForURL(APPT_DASHBOARD_HOME_PAGE);
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
+
+    // ensure our settings are set to what the tests expect as default (in case a
+    // previous test run failed and left the settings in an incorrect state)
+    await page.goto(APPT_SETTINGS_PAGE);
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
+    await setDefaultUserSettingsLocalStore(page);
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
 }

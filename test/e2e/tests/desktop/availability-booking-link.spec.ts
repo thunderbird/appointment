@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { AvailabilityPage } from '../pages/availability-page';
+import { AvailabilityPage } from '../../pages/availability-page';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
- } from '../const/constants';
+ } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;
 

@@ -23,29 +23,29 @@ buildIdentifier: '${DATE_TIME}'
 # Platforms (Browsers / Devices to test)
 # =======================================
 # Platforms object contains all the browser / device combinations you want to test on.
-# Entire list available here -> (https://www.browserstack.com/list-of-browsers-and-platforms/automate)
+# For browser/os versions compatible with our playwright version see https://www.browserstack.com/docs/automate/playwright/browsers-and-os?fw-lang=nodejs
 platforms:
   - os: OS X
     osVersion: Sequoia
     browserName: playwright-firefox
-    browserVersion: latest
+    browserVersion: 139.0
     playwrightConfigOptions:
       name: Firefox-OSX
       setup: 
       - name: 'setup_firefox'
-        testMatch: 'auth.setup.ts'
+        testMatch: 'auth.desktop.setup.ts'
       use:
         storageState: 'test-results/.auth/user.json'
 
   - os: OS X
     osVersion: Sequoia
     browserName: playwright-chromium
-    browserVersion: latest
+    browserVersion: 138.0
     playwrightConfigOptions:
       name: Chromium-OSX
       setup: 
       - name: 'setup_chromium'
-        testMatch: 'auth.setup.ts'
+        testMatch: 'auth.desktop.setup.ts'
       use:
         storageState: 'test-results/.auth/user.json'
 
@@ -80,7 +80,11 @@ debug: false # <boolean> # Set to true if you need screenshots for every seleniu
 networkLogs: false # <boolean> Set to true to enable HAR logs capturing; off as may contain sensitive info like login API requests
 consoleLogs: info # <string> Remote browser's console debug levels to be printed (`disable`, `errors`, `warnings`, `info`, or `verbose`)
 framework: playwright
-browserstack.playwrightVersion: 1.55.0 # must match our client playwright version in package.json; this is the latest supported in BrowserStack
+# the e2e tests use the same node.js project so the playwright version dependecy must work on both desktop
+# and mobile browsers; and therefore must be the same in all of our browserstack-*.yml config files
+# for playwright ver we need one compatible with our desktop and mobile browsers, see:
+# https://www.browserstack.com/docs/automate/playwright/browsers-and-os?fw-lang=nodejs
+browserstack.playwrightVersion: 1.53.0 # must match our client playwright version in package.json
 browserstack.playwrightLogs: false # disable playwright logs appearing on browserstack builds as may contain sensitive info like credentials
 # CUSTOM_TAG_<INT>: # <string> (Default: parent folder name of the test file) Custom tag for your test suite
 browserstack.maskBasicAuth: true # mask username and passwords from browserstack session logs

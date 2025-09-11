@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { getUserSettingsFromLocalStore } from '../utils/utils';
-import { SettingsPage } from '../pages/settings-page';
-import { DashboardPage } from '../pages/dashboard-page';
+import { getUserSettingsFromLocalStore } from '../../utils/utils';
+import { SettingsPage } from '../../pages/settings-page';
+import { DashboardPage } from '../../pages/dashboard-page';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -11,7 +11,7 @@ import {
   TIMEOUT_30_SECONDS,
   APPT_BROWSER_STORE_LANGUAGE_EN,
   APPT_BROWSER_STORE_LANGUAGE_DE,
- } from '../const/constants';
+ } from '../../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;

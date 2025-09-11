@@ -5,9 +5,9 @@ import {
   APPT_PENDING_BOOKINGS_PAGE,
   APPT_BOOKED_BOOKINGS_PAGE,
   TIMEOUT_1_SECOND,
-  TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
   APPT_TIMEZONE_SETTING_PRIMARY,
+  TIMEOUT_30_SECONDS,
 } from '../const/constants';
 
 
@@ -92,9 +92,13 @@ export class AvailabilityPage {
    * Navigate to the availability page
    */
   async gotoAvailabilityPage() {
-    // go to availability page, sometimes takes a bit to load all element values
+    // go to availability page, sometimes takes a bit to load all element values!
     await this.page.goto(APPT_AVAILABILITY_PAGE);
-    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
+    await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
+    await this.bookingPageMtgDur15MinRadio.waitFor({ timeout: TIMEOUT_30_SECONDS });
+    await this.minNoticeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
   }
 
   /**

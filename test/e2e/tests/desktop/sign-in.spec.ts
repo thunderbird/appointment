@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { SplashscreenPage } from '../pages/splashscreen-page';
-import { FxAPage } from '../pages/fxa-page';
-import { DashboardPage } from '../pages/dashboard-page';
-import { navigateToAppointmentAndSignIn } from '../utils/utils';
+import { SplashscreenPage } from '../../pages/splashscreen-page';
+import { FxAPage } from '../../pages/fxa-page';
+import { DashboardPage } from '../../pages/dashboard-page';
+import { navigateToAppointmentAndSignIn } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_PROD_SANITY,
   TIMEOUT_30_SECONDS,
-} from '../const/constants';
+} from '../../const/constants';
 
 let splashscreenPage: SplashscreenPage;
 let signInPage: FxAPage;
