@@ -1,0 +1,273 @@
+---
+resources:
+
+  domains:
+    redis: cache.appointment-dev.tb.pro
+
+  tb:network:MultiCidrVpc:
+    appointment:
+      cidr_block: 10.22.0.0/16
+      subnets:
+        eu-central-1a:
+          - 10.22.0.0/17
+        eu-central-1b:
+          - 10.22.128.0/17
+      enable_internet_gateway: True
+      egress_via_internet_gateway: True
+      enable_dns_hostnames: True
+      endpoint_interfaces:
+        - ecr.api
+        - ecr.dkr
+        - logs
+        - secretsmanager
+  
+  # The __main.py__ here is very specific in the following way:
+  # For each ECS cluster you eventually define, you **must** have one entry by the same exact name in the
+  # `load_balancers` and `containers` sections below. If the cluster does not expose a service (f/ex, uses
+  # `build_load_balancer: False`), you may set the `load_balancers` entry to `null`.
+  tb:network:SecurityGroupWithRules:
+    load_balancers:
+      backend:
+        rules:
+          ingress:
+            - description: TLS traffic to the load balancer from the world
+              cidr_blocks:
+                - 0.0.0.0/0
+              protocol: tcp
+              from_port: 443
+              to_port: 443
+          egress:
+            - description: Allow outbound traffic to anywhere
+              protocol: tcp
+              from_port: 0
+              to_port: 65535
+              cidr_blocks:
+                - 0.0.0.0/0
+        
+    containers:
+      backend:
+        rules:
+          ingress:
+            - description: Allow traffic from the load balancer to the container
+              # Sources are set in code
+              protocol: tcp
+              from_port: 5000
+              to_port: 5000
+          egress:
+            - description: Allow traffic from the container out to the Internet
+              protocol: tcp
+              from_port: 0
+              to_port: 65535
+              cidr_blocks:
+                - 0.0.0.0/0
+    
+    other:
+      backend_cache:
+        rules:
+          ingress:
+            - description: Primary Redis traffic
+              # source_sgs set in code
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+            - description: Replica Redis traffic
+              # source_sgs set in code
+              protocol: tcp
+              from_port: 6380
+              to_port: 6380
+          egress:
+            - description: Allow outbound traffic to anywhere
+              protocol: tcp
+              from_port: 0
+              to_port: 65535
+              cidr_blocks:
+                - 0.0.0.0/0
+  
+  tb:secrets:PulumiSecretsManager:
+    pulumi:
+      recovery_window_in_days: 0
+      secret_names:
+        - database-encryption
+        - database-host
+        - database-name
+        - database-password
+        - database-user
+        - fxa-secrets
+        - google-oauth
+        - oidc-client-id
+        - oidc-client-secret
+        - smtp-connection
+        - x-allow-secret
+        - zoom-secrets
+
+  tb:ec2:SshableInstance: {}
+  # Fill out this template to build an SSH bastion
+  # tb:ec2:SshableInstance:
+  #   bastion:
+  #     ssh_keypair_name: your-ec2-keypair
+  #     source_cidrs:
+  #       - your.ip.addr.ess/32
+
+  aws:elasticache:ServerlessCache:
+    backend:
+      description: Appointment backend (dev)
+      engine: redis
+      major_engine_version: "7"
+
+  tb:fargate:FargateClusterWithLogging:
+    backend:
+      assign_public_ip: True
+      desired_count: 1
+      health_check_grace_period_seconds: 30 # Time before the LB checks for health of a new backend
+      internal: False
+      services:
+        backend:
+          listener_port: 443
+          listener_proto: HTTPS
+          listener_cert_arn: arn:aws:acm:eu-central-1:768512802988:certificate/3443266a-dd83-4ad7-9e35-15734466813c
+          container_port: 5000
+          container_name: backend
+          # "name" field is arbitrary, but must be unique and no longer than 32 chars
+          name: appointment-backend-dev
+          health_check:
+            healthy_threshold: 2
+            unhealthy_threshold: 5
+            interval: 30
+            path: /
+            port: 5000
+      task_definition:
+        network_mode: awsvpc
+        cpu: 512
+        memory: 2048
+        requires_compatibilities:
+          - FARGATE
+        container_definitions:
+          backend:
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5201a66e89a9adf761aef44ea2a9453af9213558
+            portMappings:
+              - name: backend
+                containerPort: 5000
+                hostPort: 5000
+                protocol: tcp
+                appProtocol: http
+            linuxParameters:
+              initProcessEnabled: True
+            secrets:
+              - name: DATABASE_HOST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-host-9udgGP
+              - name: DATABASE_NAME
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-name-ajG5gL
+              - name: DATABASE_USERNAME
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-ARowLy
+              - name: DATABASE_PASSWORD
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yetVzH
+              # - name: DB_ENC_SECRET
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-encryption-wVW5q5
+              # - name: FXA_SECRETS
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/fxa-secrets-9V5Bk5
+              # - name: GOOGLE_OAUTH_SECRETS
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/google-oauth-fkGJlJ
+              - name: OIDC_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-yaAyEa
+              - name: OIDC_CLIENT_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-uSFyGx
+              #  - name: SMTP_SECRETS
+              #    valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/smtp-connection-6QglYt
+              # - name: ZOOM_SECRETS
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/zoom-secrets-0A8KzQ
+            environment:
+              - name: DATABASE_ENGINE
+                value: postgresql
+              - name: DATABASE_PORT
+                value: '5432'
+              - name: LOG_LEVEL
+                value: ERROR
+              - name: FRONTEND_URL
+                value: https://appointment-dev.tb.pro
+              - name: SHORT_BASE_URL
+                value: https://dev.apt.mt/
+              - name: TIER_BASIC_CALENDAR_LIMIT
+                value: "3"
+              - name: TIER_PLUS_CALENDAR_LIMIT
+                value: "5"
+              - name: TIER_PRO_CALENDAR_LIMIT
+                value: "10"
+              - name: LOG_USE_STREAM
+                value: "True"
+              - name: APP_ENV
+                value: dev
+              - name: SENTRY_DSN
+                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
+              - name: ZOOM_API_ENABLED
+                value: "True"
+              - name: ZOOM_AUTH_CALLBACK
+                value: https://appointment-stage.tb.pro/api/v1/zoom/callback
+              - name: SERVICE_EMAIL
+                value: no-reply@appointment-dev.tb.pro
+              - name: AUTH_SCHEME
+                value: "oidc"
+              - name: JWT_ALGO
+                value: "HS256"
+              - name: JWT_EXPIRE_IN_MINS
+                value: "10000"
+              - name: REDIS_URL
+                value: cache.appointment-dev.tb.pro
+              - name: REDIS_PORT
+                value: "6379"
+              - name: REDIS_DB
+                value: "0"
+              - name: REDIS_USE_SSL
+                value: "True"
+              - name: REDIS_USE_CLUSTER
+                value: "True"
+              - name: OIDC_TOKEN_INTROSPECTION_URL
+                value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
+              - name: OIDC_EXP_GRACE_PERIOD
+                value: "60"
+
+  tb:autoscale:EcsServiceAutoscaler:
+    backend:
+      cpu_threshold: 80
+      ram_threshold: 80
+      cooldown: 180
+      disable_scale_in: False
+      min_capacity: 2
+      max_capacity: 4
+      suspend: False
+
+  tb:cloudfront:CloudFrontS3Service:
+    frontend:
+      service_bucket_name: tb-appointment-dev-frontend
+      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront
+      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/c172ccdd-425f-4fe3-a834-c0f603c2d46c
+      distribution:
+        aliases:
+          - appointment-dev.tb.pro
+        comment: Appointment dev frontend
+        # Do not define ordered cache behaviors here; they are programmatically overridden
+        logging_config:
+          include_cookies: True
+
+  tb:cloudwatch:CloudWatchMonitoringGroup:
+    cloudwatch:
+      notify_emails:
+        - thunderbird-services-monitoring@thunderbird.net
+      config:
+        alarms: {}
+
+  tb:ci:AwsAutomationUser:
+    ci:
+      additional_policies: []
+      # - arn:aws:iam::768512802988:policy/appointment-dev-frontend-cache-invalidation
+      enable_ecr_image_push: True
+      ecr_repositories:
+        - thunderbird/appointment
+      enable_fargate_deployments: True
+      fargate_clusters:
+        - appointment-dev-fargate-backend
+      fargate_task_role_arns:
+        - arn:aws:iam::768512802988:role/appointment-dev-fargate-backend
+      enable_full_s3_access: False
+      enable_s3_bucket_upload: True
+      s3_upload_buckets:
+        - tb-appointment-dev-frontend
