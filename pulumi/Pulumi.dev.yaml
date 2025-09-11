@@ -1,0 +1,29 @@
+config:
+  appointment:database-host:
+    secure: AAABAAXL7ftqw1uy/1pMxmSJ7rcYIqhCnXIxS23m8CoOMi6TorG7iyQwA1yDRzrXckRK2ZPsI9muNCMLvMYgJNXfrFsml0nrgwypXMBk0jmucrtVv7E=
+  appointment:database-user:
+    secure: AAABAFtG4YSoGGinV7HO4DgPZW8LSIT1YnQWlw4rMtOuCsu7LcZ3M6c5c59BdwjLnQ==
+  appointment:database-password:
+    secure: AAABAF5N116PE6bQAQM7WMDcGDiabxVRqr44ttBOMK+U3PUJHY2+YSd4hvZzqfas
+  appointment:database-name:
+    secure: AAABAK8640ayvldJYR9f+27ptfAhqN/7QYkkaBUSjZqIjx7zP4YbrKU0Ng==
+  appointment:database-encryption:
+    secure: AAABAJ3CSDIDChGurJzAlFFta4bUCxkBpN1W4mmBShhF95LElmiiOQnImp74c9jbjP3s
+  appointment:fxa-secrets:
+    secure: AAABAN8WL8OkNKJkUhCyyaK0OBzQHjLqNIA/fqK9Np1XkpFWqa4d3dEI
+  appointment:google-oauth:
+    secure: AAABADUjdz1aNFmyMlg45vaWwfxI43lN/z2e3ZqpDEdYHvKPepN7erFvLhM=
+  appointment:oidc-client-id:
+    secure: AAABAPd6WxiOvGsa0gFrNPQzBdEfTIuq3/SfHhATVAEsgHW3GZAFzh1xGZQM7Q==
+  appointment:oidc-client-secret:
+    secure: AAABACthYmM6Q9UM/kn9K9M2iga31Jlvft/k7UePq5T1YhFSDw+E3/SEdqnDnPml3RM=
+  appointment:smtp-connection:
+    secure: AAABAMfkCtAtiQs2ezMU74yzipBN0T4UGoB/nPpShb3btwhPTYAwdr2KLjvXcw3eRwMIyvAjhlOFhq/9Nq0ePkwESXFVgStjhTkcQo4/3rlf2seuExJzphECCXwf8MogVfRHmNf0SrYsMPWpZwo8McTVHuYk+FrlTxMumxeWp1g+ikJ0ruyoyNyvTzoJUttiIPtvuLgHDv7RZCv8yc95FWUgZ4Kcx8EgxoXHxkej1SSN7pHpldS0ZuplzIBvIdsDIzKQJCbx/ciI0UsOXvTw45CIo9XTpBBrC/Ta2mfANxoMzg==
+  appointment:x-allow-secret:
+    secure: AAABAA4fg6xZLsCWJP0y5gzZvDcsfeRRFdrX8TyQ0SHMiFiUpnRLiw1npPMdmTCjPYFrd+zRX7epmT00DZWQ8nCsAxZZBQ5DJCo9IxwHL/ykXW9McnTmu8JMVZRfVB4cMdLBszBecAglPR3TFGI4J7CQVd/vB9KTn1JGhUlr9NdPpGgK4maEo3uvqqjHDxNcX+tcJoyTDCt76iM3arWXNA==
+  appointment:zoom-secrets:
+    secure: AAABAIS4de/wVDkhlvT83+HSPxN8tksZbcRppyOLoCPDx8CLInXomVS5KCQ=
+  appointment:cloudflare_zone_id:
+    secure: AAABALME378yGG6J4Lq/lLOyDItd/6lWjiKX0d+yGyb3hg2P5F0byl9h1DkWhg/VNrmfLauJ1YZzQ+DJvCSgIw==
+  cloudflare:apiToken:
+    secure: AAABAOQBeXa+Y/BkiDmVNF2mfiWlEd79crSQTRExRoxcRKIkXZdNsA1NU0unYBlfuTBVMbRpLZ/qZW30EP/cqfplAfl7t6L5
