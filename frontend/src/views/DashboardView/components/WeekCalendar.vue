@@ -146,13 +146,21 @@ const timeSlotsForGrid = computed(() => {
 
   if (!start_time || !end_time || !slot_duration) return [];
 
-  let currentTime = dj(start_time, 'H:mm');
-  const finalTime = dj(end_time, 'H:mm');
+  const startTime = dj(start_time, 'H:mm');
+  let endTime = dj(end_time, 'H:mm');
+
+  // If the end time is before the start time (slot spans midnight), add a day to the end time
+  if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
+    endTime = endTime.add(1, 'day');
+  }
+
+  let currentTime = startTime;
 
   // Start grid rows at 2 to leave space for the header row
   let rowIndex = 2;
 
-  while (currentTime.isBefore(finalTime)) {
+  while (currentTime.isBefore(endTime)) {
+    // Create the slot for the current time
     slots.push({
       // The text to display (e.g., "9 AM" or empty for non-hour slots)
       text: currentTime.minute() === 0 ? currentTime.format('h A') : '',
