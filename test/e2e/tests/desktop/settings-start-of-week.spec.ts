@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { getUserSettingsFromLocalStore } from '../utils/utils';
-import { SettingsPage } from '../pages/settings-page';
-import { DashboardPage } from '../pages/dashboard-page';
+import { getUserSettingsFromLocalStore } from '../../utils/utils';
+import { SettingsPage } from '../../pages/settings-page';
+import { DashboardPage } from '../../pages/dashboard-page';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -11,9 +11,7 @@ import {
   APPT_BROWSER_STORE_START_WEEK_SUN,
   APPT_START_OF_WEEK_MON,
   APPT_START_OF_WEEK_SUN,
-  APPT_START_OF_WEEK_DASHBOARD_MON,
-  APPT_START_OF_WEEK_DASHBOARD_SUN,
- } from '../const/constants';
+ } from '../../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;

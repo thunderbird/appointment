@@ -1,6 +1,6 @@
 import { test, expect, mergeExpects } from '@playwright/test';
-import { AvailabilityPage } from '../pages/availability-page';
-import { BookingPage } from '../pages/booking-page';
+import { AvailabilityPage } from '../../pages/availability-page';
+import { BookingPage } from '../../pages/booking-page';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -8,7 +8,7 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
- } from '../const/constants';
+ } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;

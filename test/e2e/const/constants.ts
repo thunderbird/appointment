@@ -32,6 +32,8 @@ export const APPT_BOOKEE_EMAIL = String(process.env.APPT_BOOKEE_EMAIL);
 export const PLAYWRIGHT_TAG_PROD_SANITY = '@prod-sanity';
 export const PLAYWRIGHT_TAG_E2E_SUITE = '@e2e-suite';
 export const PLAYWRIGHT_TAG_PROD_NIGHTLY = '@prod-nightly';
+export const PLAYWRIGHT_TAG_E2E_SUITE_MOBILE = '@e2e-mobile-suite';
+export const PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY = '@prod-mobile-nightly';
 
 // general settings options
 export const APPT_LANGUAGE_SETTING_EN = 'EN — English';
@@ -61,6 +63,7 @@ export const APPT_HTML_DARK_MODE_CLASS = 'dark';
 export const TIMEOUT_1_SECOND = 1_000;
 export const TIMEOUT_2_SECONDS = 2_000;
 export const TIMEOUT_3_SECONDS = 3_000;
+export const TIMEOUT_5_SECONDS = 5_000;
 export const TIMEOUT_10_SECONDS = 10_000;
 export const TIMEOUT_15_SECONDS = 15_000;
 export const TIMEOUT_30_SECONDS = 30_000;

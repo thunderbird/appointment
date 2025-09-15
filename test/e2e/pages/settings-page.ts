@@ -4,10 +4,13 @@ import {
   APPT_SETTINGS_PAGE,
   APPT_HTML_DARK_MODE_CLASS,
   TIMEOUT_1_SECOND,
+  TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
+  TIMEOUT_10_SECONDS,
   TIMEOUT_30_SECONDS,
   APPT_LANGUAGE_SETTING_EN,
   } from '../const/constants';
+
 
 export class SettingsPage {
   readonly page: Page;
@@ -163,16 +166,14 @@ export class SettingsPage {
    * Change the theme setting
    */
   async changeThemeSetting(theme: string) {
+    await this.themeSelect.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.themeSelect.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.themeSelect.selectOption(theme, { timeout: TIMEOUT_30_SECONDS });
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.saveBtnEN.scrollIntoViewIfNeeded();
+    await this.themeSelect.selectOption(theme);
+    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
     await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(this.savedSuccessfullyTextEN).toBeVisible();
-    // need a bit of time for theme to be applied
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    // wait for theme to take affect, can take time especially on browserstack
+    await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
   }
 
   /**

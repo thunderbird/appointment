@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { SettingsPage } from '../pages/settings-page';
-import { DashboardPage } from '../pages/dashboard-page';
-import { AvailabilityPage } from '../pages/availability-page';
-import { BookingPage } from '../pages/booking-page';
-import { getUserDisplayNameFromLocalStore } from '../utils/utils';
+import { SettingsPage } from '../../pages/settings-page';
+import { DashboardPage } from '../../pages/dashboard-page';
+import { AvailabilityPage } from '../../pages/availability-page';
+import { BookingPage } from '../../pages/booking-page';
+import { getUserDisplayNameFromLocalStore } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -12,7 +12,7 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
- } from '../const/constants';
+ } from '../../const/constants';
 import { URL } from 'url';
 
 let settingsPage: SettingsPage;

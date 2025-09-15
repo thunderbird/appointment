@@ -12,6 +12,8 @@
     "prod-sanity-test-browserstack": "npx browserstack-node-sdk playwright test --grep prod-sanity --browserstack.buildName 'Production Sanity Test (Desktop)' --browserstack.config 'browserstack-desktop.yml'",
     "prod-sanity-test-browserstack-gha": "npx browserstack-node-sdk playwright test --grep prod-sanity --browserstack.config 'browserstack-desktop.yml'",
     "prod-nightly-tests-browserstack-gha": "npx browserstack-node-sdk playwright test --grep prod-nightly --browserstack.config 'browserstack-desktop-nightly.yml'",
+    "e2e-test-mobile-browserstack": "npx browserstack-node-sdk playwright test --grep e2e-mobile-suite --browserstack.buildName 'Appointment E2E Tests (Mobile)' --browserstack.config 'browserstack-mobile.yml'",
+    "prod-nightly-tests-mobile-browserstack-gha": "npx browserstack-node-sdk playwright test --grep prod-mobile-nightly --browserstack.config 'browserstack-mobile-nightly.yml'",
     "postinstall": "npm update browserstack-node-sdk"
   },
   "keywords": [],
@@ -19,7 +21,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@playwright/test": "1.55.0",
+    "@playwright/test": "1.53.0",
     "@types/node": "^24.1.0",
     "browserstack-node-sdk": "^1.40.8",
     "dotenv": "^17.2.1"

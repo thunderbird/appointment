@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { getUserSettingsFromLocalStore } from '../utils/utils';
-import { SettingsPage } from '../pages/settings-page';
-import { DashboardPage } from '../pages/dashboard-page';
+import { getUserSettingsFromLocalStore } from '../../utils/utils';
+import { SettingsPage } from '../../pages/settings-page';
+import { DashboardPage } from '../../pages/dashboard-page';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -10,7 +10,7 @@ import {
   APPT_THEME_SETTING_LIGHT,
   APPT_BROWSER_STORE_THEME_LIGHT,
   APPT_BROWSER_STORE_THEME_DARK,
- } from '../const/constants';
+ } from '../../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;

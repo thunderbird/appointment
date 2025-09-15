@@ -11,7 +11,7 @@
 # Set 'projectName' to the name of your project. Example, Marketing Website
 projectName: Thunderbird Appointment
 # Set `buildName` as the name of the job / testsuite being run
-buildName: Nightly Appointment E2E Tests (Desktop)
+buildName: Appointment E2E Tests (Mobile)
 # `buildIdentifier` is a unique id to differentiate every execution that gets appended to
 # buildName. Choose your buildIdentifier format from the available expressions:
 # ${BUILD_NUMBER} (Default): Generates an incremental counter with every execution
@@ -25,54 +25,12 @@ buildIdentifier: '${DATE_TIME}'
 # Platforms object contains all the browser / device combinations you want to test on.
 # For browser/os versions compatible with our playwright version see https://www.browserstack.com/docs/automate/playwright/browsers-and-os?fw-lang=nodejs
 platforms:
-  - os: OS X
-    osVersion: Sequoia
-    browserName: playwright-firefox
-    browserVersion: 139.0
+  - browserName: chrome
+    osVersion: 16.0
+    deviceName: Google Pixel 10
     playwrightConfigOptions:
-      name: Firefox-OSX
-      setup: 
-      - name: 'setup_firefox'
-        testMatch: 'auth.desktop.setup.ts'
-      use:
-        storageState: 'test-results/.auth/user.json'
-
-  - os: OS X
-    osVersion: Sequoia
-    browserName: playwright-webkit
-    browserVersion: 18.5
-    playwrightConfigOptions:
-      name: Safari-OSX
-      setup: 
-      - name: 'setup_safari_osx'
-        testMatch: 'auth.desktop.setup.ts'
-      use:
-        storageState: 'test-results/.auth/user.json'
-
-  - os: Windows
-    osVersion: 11
-    browserName: playwright-chromium
-    browserVersion: 138.0
-    playwrightConfigOptions:
-      name: Chromium-Win11
-      setup: 
-      - name: 'setup_chromium_win'
-        testMatch: 'auth.desktop.setup.ts'
-      use:
-        storageState: 'test-results/.auth/user.json'
-
-  - os: Windows
-    osVersion: 11
-    browserName: edge
-    browserVersion: latest
-    playwrightConfigOptions:
-      name: Edge-Win11
-      setup: 
-      - name: 'setup_edge_win'
-        testMatch: 'auth.desktop.setup.ts'
-      use:
-        storageState: 'test-results/.auth/user.json'
-
+      name: Chrome-GooglePixel10
+  
 # =======================
 # Parallels per Platform
 # =======================
@@ -108,7 +66,7 @@ framework: playwright
 # and mobile browsers; and therefore must be the same in all of our browserstack-*.yml config files
 # for playwright ver we need one compatible with our desktop and mobile browsers, see:
 # https://www.browserstack.com/docs/automate/playwright/browsers-and-os?fw-lang=nodejs
-browserstack.playwrightVersion: 1.53.0 # must match our client playwright version in package.json
+browserstack.playwrightVersion: 1.53.0 # must match ver in package.json
 browserstack.playwrightLogs: false # disable playwright logs appearing on browserstack builds as may contain sensitive info like credentials
 # CUSTOM_TAG_<INT>: # <string> (Default: parent folder name of the test file) Custom tag for your test suite
 browserstack.maskBasicAuth: true # mask username and passwords from browserstack session logs

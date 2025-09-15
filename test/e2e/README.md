@@ -77,6 +77,18 @@ npx playwright test --grep e2e-suite --project=safari --headed
 
 Note that for project you can use any of the project/browser names as listed in the [playwright.config.ts](./playwright.config.ts) file (but the browser must be installed on your local machine).
 
+## Running on a Local Playwright Emulated Mobile Browser View
+
+You can run the E2E tests on your local machine on emulated mobile browser views provided by Playwright (as installed above). Note: This is not a real device emulator, it just uses a local plawyright browser and sets the browser screen size to match a mobile device, etc. More info about mobile emulation [is here](https://playwright.dev/docs/emulation).
+
+To run the E2E tests on an emulated Google Pixel 7 mobile browser view (still in `test/e2e`):
+
+```bash
+npx playwright test --grep e2e-mobile-suite --project=Google-Pixel-7-View --headed
+```
+
+Note that for project you can use any of the project/browser names as listed in the [playwright.config.ts](./playwright.config.ts) file (but the browser must be installed on your local machine).
+
 ## Running the E2E tests against the staging environmnent
 
 First copy over the provided `.env.stage.example` to a local `.env`:
@@ -173,6 +185,18 @@ To run the production sanity test on BrowserStack (still in `test/e2e`):
 
 ```bash
 npm run prod-sanity-test-browserstack
+```
+
+To run the E2E tests on mobile devices on BrowserStack (still in `test/e2e`):
+
+```bash
+npm run e2e-test-mobile-browserstack
+```
+
+To run the nightly test suite on real mobile devices in BrowserStack (still in `test/e2e`):
+
+```bash
+npm run prod-nightly-tests-mobile-browserstack-gha
 ```
 
 After the tests finish in your local console you'll see a link to the BrowserStack test session; when signed into your BrowserStack account you'll be able to use that link to see the test session results including video playback.
