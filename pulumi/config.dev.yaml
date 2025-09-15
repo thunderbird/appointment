@@ -2,16 +2,16 @@
 resources:
 
   domains:
-    redis: cache.appointment-stage.tb.pro
+    redis: cache.appointment-dev.tb.pro
 
   tb:network:MultiCidrVpc:
     appointment:
-      cidr_block: 10.21.0.0/16
+      cidr_block: 10.22.0.0/16
       subnets:
         eu-central-1a:
-          - 10.21.0.0/17
+          - 10.22.0.0/17
         eu-central-1b:
-          - 10.21.128.0/17
+          - 10.22.128.0/17
       enable_internet_gateway: True
       egress_via_internet_gateway: True
       enable_dns_hostnames: True
@@ -87,7 +87,6 @@ resources:
     pulumi:
       recovery_window_in_days: 0
       secret_names:
-        - database-connection
         - database-encryption
         - database-host
         - database-name
@@ -95,7 +94,6 @@ resources:
         - database-user
         - fxa-secrets
         - google-oauth
-        - neon-database-connection
         - oidc-client-id
         - oidc-client-secret
         - smtp-connection
@@ -112,7 +110,7 @@ resources:
 
   aws:elasticache:ServerlessCache:
     backend:
-      description: Appointment backend (stage)
+      description: Appointment backend (dev)
       engine: redis
       major_engine_version: "7"
 
@@ -126,11 +124,11 @@ resources:
         backend:
           listener_port: 443
           listener_proto: HTTPS
-          listener_cert_arn: arn:aws:acm:eu-central-1:768512802988:certificate/d345f230-258b-4f4f-ae74-6211fd7c234e
+          listener_cert_arn: arn:aws:acm:eu-central-1:768512802988:certificate/3443266a-dd83-4ad7-9e35-15734466813c
           container_port: 5000
           container_name: backend
           # "name" field is arbitrary, but must be unique and no longer than 32 chars
-          name: appointment-backend-stage
+          name: appointment-backend-dev
           health_check:
             healthy_threshold: 2
             unhealthy_threshold: 5
@@ -145,7 +143,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:b5cf7399061638c6b39d3aa8e3ec136caaa725b5
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5201a66e89a9adf761aef44ea2a9453af9213558
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -156,27 +154,27 @@ resources:
               initProcessEnabled: True
             secrets:
               - name: DATABASE_HOST
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-host-cMwTdY
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-host-9udgGP
               - name: DATABASE_NAME
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-name-bNiiOY
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-name-ajG5gL
               - name: DATABASE_USERNAME
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-user-cfbYYI
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-ARowLy
               - name: DATABASE_PASSWORD
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-password-h8xPx9
-              - name: DB_ENC_SECRET
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-encryption-fY5K5W
-              - name: FXA_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-secrets-2i62be
-              - name: GOOGLE_OAUTH_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-oauth-8S9Vvx
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yetVzH
+              # - name: DB_ENC_SECRET
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-encryption-wVW5q5
+              # - name: FXA_SECRETS
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/fxa-secrets-9V5Bk5
+              # - name: GOOGLE_OAUTH_SECRETS
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/google-oauth-fkGJlJ
               - name: OIDC_CLIENT_ID
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-id-l0LS7y
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-yaAyEa
               - name: OIDC_CLIENT_SECRET
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-secret-fMpKjV
-              - name: SMTP_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-connection-5FT5yU
-              - name: ZOOM_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-uSFyGx
+              #  - name: SMTP_SECRETS
+              #    valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/smtp-connection-6QglYt
+              # - name: ZOOM_SECRETS
+              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/zoom-secrets-0A8KzQ
             environment:
               - name: DATABASE_ENGINE
                 value: postgresql
@@ -185,9 +183,9 @@ resources:
               - name: LOG_LEVEL
                 value: ERROR
               - name: FRONTEND_URL
-                value: https://appointment-stage.tb.pro
+                value: https://appointment-dev.tb.pro
               - name: SHORT_BASE_URL
-                value: https://stage.apt.mt/
+                value: https://dev.apt.mt/
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT
@@ -197,7 +195,7 @@ resources:
               - name: LOG_USE_STREAM
                 value: "True"
               - name: APP_ENV
-                value: stage
+                value: dev
               - name: SENTRY_DSN
                 value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
               - name: ZOOM_API_ENABLED
@@ -205,7 +203,7 @@ resources:
               - name: ZOOM_AUTH_CALLBACK
                 value: https://appointment-stage.tb.pro/api/v1/zoom/callback
               - name: SERVICE_EMAIL
-                value: no-reply@appointment-stage.tb.pro
+                value: no-reply@appointment-dev.tb.pro
               - name: AUTH_SCHEME
                 value: "oidc"
               - name: JWT_ALGO
@@ -213,7 +211,7 @@ resources:
               - name: JWT_EXPIRE_IN_MINS
                 value: "10000"
               - name: REDIS_URL
-                value: cache.appointment-stage.tb.pro
+                value: cache.appointment-dev.tb.pro
               - name: REDIS_PORT
                 value: "6379"
               - name: REDIS_DB
@@ -239,13 +237,13 @@ resources:
 
   tb:cloudfront:CloudFrontS3Service:
     frontend:
-      service_bucket_name: tb-appointment-stage-frontend
+      service_bucket_name: tb-appointment-dev-frontend
       # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront
-      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/616d9faf-61e0-4d2a-b82d-b1c3d2592052
+      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/c172ccdd-425f-4fe3-a834-c0f603c2d46c
       distribution:
         aliases:
-          - appointment-stage.tb.pro
-        comment: Appointment stage frontend
+          - appointment-dev.tb.pro
+        comment: Appointment dev frontend
         # Do not define ordered cache behaviors here; they are programmatically overridden
         logging_config:
           include_cookies: True
@@ -259,17 +257,17 @@ resources:
 
   tb:ci:AwsAutomationUser:
     ci:
-      additional_policies:
-        - arn:aws:iam::768512802988:policy/appointment-stage-frontend-cache-invalidation
+      additional_policies: []
+      # - arn:aws:iam::768512802988:policy/appointment-dev-frontend-cache-invalidation
       enable_ecr_image_push: True
       ecr_repositories:
         - thunderbird/appointment
       enable_fargate_deployments: True
       fargate_clusters:
-        - appointment-stage-fargate-backend
+        - appointment-dev-fargate-backend
       fargate_task_role_arns:
-        - arn:aws:iam::768512802988:role/appointment-stage-fargate-backend
+        - arn:aws:iam::768512802988:role/appointment-dev-fargate-backend
       enable_full_s3_access: False
       enable_s3_bucket_upload: True
       s3_upload_buckets:
-        - tb-appointment-stage-frontend
+        - tb-appointment-dev-frontend

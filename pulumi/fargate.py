@@ -1,4 +1,5 @@
 import pulumi
+import tb_pulumi.autoscale
 import tb_pulumi.fargate
 
 from tb_pulumi import ThunderbirdPulumiProject
@@ -18,7 +19,8 @@ def fargate(
     vpc: MultiCidrVpc,
 ) -> dict:
     """
-    Builds out all Fargate clusters defined in the resource config.
+    Builds out all Fargate clusters defined in the resource config. If there are any autoscaling configurations for this
+    service, it builds those, too.
 
     :param container_security_groups: Dict of security groups for the containers.
     :type container_security_groups: dict
@@ -42,8 +44,9 @@ def fargate(
     :rtype: dict
     """
 
+    autoscalers = {}
     fargate_clusters = {}
-    for service, opts in resources['tb:fargate:FargateClusterWithLogging'].items():
+    for service, fargate_opts in resources['tb:fargate:FargateClusterWithLogging'].items():
         if service not in load_balancer_security_groups:
             raise ValueError(f'{MSG_LB_MATCHING_CLUSTER} Create a matching load_balancers entry for "{service}".')
         if service not in container_security_groups:
@@ -59,14 +62,27 @@ def fargate(
         ]
         if load_balancer_security_groups[service]:
             depends_on.append(load_balancer_security_groups[service].resources['sg'])
+
+        autoscaler_opts = resources.get('tb:autoscale:EcsServiceAutoscaler', {}).get(service)
+        desired_count = fargate_opts.pop('desired_count')
         fargate_clusters[service] = tb_pulumi.fargate.FargateClusterWithLogging(
             name=f'{project.name_prefix}-fargate-{service}',
             project=project,
             subnets=vpc.resources['subnets'],
             container_security_groups=[container_security_groups[service].resources['sg'].id],
+            desired_count=None if autoscaler_opts is not None else desired_count,
             load_balancer_security_groups=lb_sg_ids,
             opts=pulumi.ResourceOptions(depends_on=depends_on),
-            **opts,
+            **fargate_opts,
         )
 
-    return fargate_clusters
+        if autoscaler_opts is not None:
+            autoscalers[service] = tb_pulumi.autoscale.EcsServiceAutoscaler(
+                f'{project.name_prefix}-autoscl-{service}',
+                project=project,
+                service=fargate_clusters[service].resources.get('service'),
+                opts=pulumi.ResourceOptions(depends_on=[fargate_clusters[service]]),
+                **autoscaler_opts,
+            )
+
+    return fargate_clusters, autoscalers
