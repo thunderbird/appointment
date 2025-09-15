@@ -138,16 +138,20 @@ const timeSlotsForGrid = computed(() => {
 
   // For FTUE for example, we don't have a firstSchedule yet,
   // so we can initialize the time with a default 9-5 in 24 hrs format, 30 min duration
-  const { start_time, end_time, slot_duration } = firstSchedule.value || {
+  const { start_time, end_time, slot_duration, time_updated } = firstSchedule.value || {
     start_time: '9:00',
     end_time: '17:00',
-    slot_duration: 30
+    slot_duration: 30,
+    time_updated: '1970-01-01T00:00:00',
   };
 
   if (!start_time || !end_time || !slot_duration) return [];
 
-  const startTime = dj(start_time, 'H:mm');
-  let endTime = dj(end_time, 'H:mm');
+  const timezoneAwareStartTime = scheduleStore.timeToFrontendTime(start_time, time_updated)
+  const timezoneAwareEndTime = scheduleStore.timeToFrontendTime(end_time, time_updated)
+
+  const startTime = dj(timezoneAwareStartTime, 'H:mm');
+  let endTime = dj(timezoneAwareEndTime, 'H:mm');
 
   // If the end time is before the start time (slot spans midnight), add a day to the end time
   if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
