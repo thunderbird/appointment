@@ -32,11 +32,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: 'test/e2e-mobile/package-lock.json'
+          cache-dependency-path: 'test/e2e/package-lock.json'
 
       - name: Install dependencies
         run: |
-          cd ./test/e2e-mobile
+          cd ./test/e2e
           npm install
 
       - name: BrowserStack Env Setup
@@ -51,6 +51,6 @@ jobs:
         # don't send GHA failure email if any of the E2E tests fail, can be annoying (I check the jobs each day in BrowserStack)
         continue-on-error: true
         run: |
-          cd ./test/e2e-mobile
+          cd ./test/e2e
           cp .env.prod.example .env
           npm run prod-nightly-tests-mobile-browserstack-gha
