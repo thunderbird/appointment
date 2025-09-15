@@ -217,6 +217,16 @@ resources:
               - name: REDIS_USE_CLUSTER
                 value: "True"
 
+  tb:autoscale:EcsServiceAutoscaler:
+    backend:
+      cpu_threshold: 80
+      ram_threshold: 80
+      cooldown: 180
+      disable_scale_in: False
+      min_capacity: 2
+      max_capacity: 4
+      suspend: False
+
   tb:cloudfront:CloudFrontS3Service:
     frontend:
       service_bucket_name: tb-appointment-prod-frontend
