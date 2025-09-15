@@ -15,7 +15,7 @@ import {
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
-test.describe('settings - theme', {
+test.describe('settings - theme on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
@@ -27,7 +27,7 @@ test.describe('settings - theme', {
     await settingsPage.gotoPreferencesSettings();
   });
 
-  test('able to change theme', async ({ page }) => {
+  test('able to change theme on desktop browser', async ({ page }) => {
     // change theme setting to dark mode and verify
     await settingsPage.changeThemeSetting(APPT_THEME_SETTING_DARK);
     expect(await settingsPage.isDarkModeEnabled(page)).toBeTruthy();

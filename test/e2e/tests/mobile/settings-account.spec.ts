@@ -3,38 +3,41 @@ import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 import { AvailabilityPage } from '../../pages/availability-page';
 import { BookingPage } from '../../pages/booking-page';
-import { getUserDisplayNameFromLocalStore } from '../../utils/utils';
+import { mobileSignInAndSetup, getUserDisplayNameFromLocalStore } from '../../utils/utils';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE,
-  PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  APPT_DISPLAY_NAME,
+  PLAYWRIGHT_TAG_E2E_SUITE_MOBILE,
+  PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY,
   APPT_MY_SHARE_LINK,
+  APPT_DISPLAY_NAME,
   TIMEOUT_1_SECOND,
+  TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
  } from '../../const/constants';
-import { URL } from 'url';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
 
-test.describe('account settings on desktop browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+test.describe('account settings on mobile browser', {
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // note: we are already signed into Appointment with our default settings (via our auth-setup)
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
     availabilityPage = new AvailabilityPage(page);
     bookApptPage = new BookingPage(page);
 
+    // mobile browsers don't support saving auth storage state so must sign in before each test
+    await mobileSignInAndSetup(page);
+
     // navigate to settings page, account settings section
     await settingsPage.gotoAccountSettings();
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
   });
 
-  test('verify account settings on desktop browser', async ({ page }) => {
+  test('verify account settings on mobile browser', async ({ page }) => {
     // verify section header
     await expect(settingsPage.accountSettingsHeader).toBeVisible();
 
@@ -86,26 +89,26 @@ test.describe('account settings on desktop browser', {
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });
 
-    test('able to change display name on desktop browser', async ({ page }) => {
-      // change display name and verify
-      const newDisplayName = `Name modified by E2E test at ${Date.now()}`;
-      await settingsPage.changeDisplaName(newDisplayName);
-  
-      // verify setting saved in browser local storage
-      expect.soft(await getUserDisplayNameFromLocalStore(page)).toBe(newDisplayName);
-  
-      // go to share link/book appointment page and verify display name was changed;
-      // expect soft so that display name will be changed back even if the test fails
-      await page.goto(APPT_MY_SHARE_LINK);
-      await page.waitForTimeout(TIMEOUT_1_SECOND);
-      await expect.soft(bookApptPage.invitingText).toContainText(newDisplayName);
+  test('able to change display name on mobile browser', async ({ page }) => {
+    // change display name and verify
+    const newDisplayName = `Name modified by E2E test at ${Date.now()}`;
+    await settingsPage.changeDisplaName(newDisplayName);
 
-      // change display name back
-      await settingsPage.gotoAccountSettings();
-      await page.waitForTimeout(TIMEOUT_1_SECOND);
-      await settingsPage.changeDisplaName(APPT_DISPLAY_NAME);
-  
-      // verify setting saved in browser local storage
-      expect.soft(await getUserDisplayNameFromLocalStore(page)).toBe(APPT_DISPLAY_NAME);
-    });
+    // verify setting saved in browser local storage
+    expect.soft(await getUserDisplayNameFromLocalStore(page)).toBe(newDisplayName);
+
+    // go to share link/book appointment page and verify display name was changed;
+    // expect soft so that display name will be changed back even if the test fails
+    await page.goto(APPT_MY_SHARE_LINK);
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect.soft(bookApptPage.invitingText).toContainText(newDisplayName);
+
+    // change display name back
+    await settingsPage.gotoAccountSettings();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    await settingsPage.changeDisplaName(APPT_DISPLAY_NAME);
+
+    // verify setting saved in browser local storage
+    expect(await getUserDisplayNameFromLocalStore(page)).toBe(APPT_DISPLAY_NAME);
+  });
 });

@@ -1,9 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { getUserSettingsFromLocalStore } from '../../utils/utils';
+import { mobileSignInAndSetup, getUserSettingsFromLocalStore } from '../../utils/utils';
 import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
-
-import { mobileSignInAndSetup } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE_MOBILE,
@@ -18,10 +16,7 @@ import {
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
-// playwright screenshots not working on browserstack mobile; it's ok we have video anyway
-//test.use({ screenshot: 'off' });
-
-test.describe('settings - mobile theme', {
+test.describe('settings - theme on mobile browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
 }, () => {
 
@@ -42,7 +37,7 @@ test.describe('settings - mobile theme', {
     await page.close();
   });
 
-  test('able to change mobile theme', async ({ page }) => {
+  test('able to change theme on mobile browser', async ({ page }) => {
     // change theme setting to dark mode and verify
     await settingsPage.changeThemeSetting(APPT_THEME_SETTING_DARK);
     // can take a bit of extra time on mobile/view emulator to update theme

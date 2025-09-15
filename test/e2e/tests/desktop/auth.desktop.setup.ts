@@ -32,7 +32,7 @@ fs.mkdir(directoryPath, (err: any) => {
 // We write it here so it is blown away and re-created at the start of every test run; and is in .gitignore
 const authFile = path.join(__dirname, '../../test-results/.auth/user.json');
 
-setup('authenticate', async ({ page }) => {
+setup('desktop browser authenticate', async ({ page }) => {
   console.log('inside authenticate setup, about to call navigate and sign in');
   // Perform authentication steps
   await navigateToAppointmentAndSignIn(page);
