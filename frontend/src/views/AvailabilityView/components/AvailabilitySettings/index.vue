@@ -203,24 +203,33 @@ export default {
 
 <style scoped>
 header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-block-end: 2rem;
+  font-family: metropolis;
+  font-size: 1.5rem;
+  margin-block-end: 1.5rem;
+  color: var(--colour-ti-highlight);
+
+  .toggle-bookable {
+    font-family: Inter;
+    color: var(--colour-ti-base);
+  }
 
   .toggle-bookable.component-container {
-    font-size: 0.75rem;
-    gap: 1rem;
+    font-size: 1rem;
+    gap: 0.5rem;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
   }
 }
 
 h2 {
   font-size: 1.5rem;
+  margin-block-end: 2.25rem;
 }
 
 h3 {
   font-size: 0.8125rem;
   font-weight: bold;
+  color: var(--colour-ti-secondary);
 }
 
 .full-width {
@@ -231,6 +240,13 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  color: var(--colour-ti-secondary);
+
+  .booking-to-calendar-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
 
   .user-timezone-container {
     display: flex;

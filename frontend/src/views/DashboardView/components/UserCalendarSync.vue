@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
 import { callKey, refreshKey } from '@/keys';
-import { IconReload } from '@tabler/icons-vue';
+import { PhArrowClockwise } from '@phosphor-icons/vue';
 import { storeToRefs } from 'pinia';
 import { useTimeAgoIntl } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
@@ -51,12 +51,12 @@ onMounted(async () => {
   <div class="user-info-container">
     <template v-if="scheduleCalendar?.connected">
       <div>
-        <p>{{ t('label.connected') }} - <strong>{{ scheduleCalendar?.user }}</strong></p>
-        <p>{{ t('label.updated') }} {{ timeAgo }}</p>
+        <p class="user-email">{{ scheduleCalendar?.user }}</p>
+        <p class="user-updated-at">{{ t('label.updated') }} {{ timeAgo }}</p>
       </div>
 
       <button @click="onSyncCalendarButtonClicked" :disabled="loading" :class="{ 'loading': loading }">
-        <icon-reload size="20"/>
+        <ph-arrow-clockwise size="24" />
       </button>
     </template>
     <template v-else>
@@ -71,13 +71,26 @@ onMounted(async () => {
   align-items: center;
   justify-content: end;
   text-align: right;
-  font-size: 0.875rem;
-  gap: 1rem;
+  gap: 0.5rem;
   width: 100%;
+
+  button {
+    color: var(--colour-ti-secondary);
+  }
 
   button.loading {
     color: var(--colour-ti-muted);
     cursor: not-allowed;
+  }
+
+  .user-email {
+    font-size: 0.75rem;
+    color: var(--colour-ti-base);
+  }
+
+  .user-updated-at {
+    font-size: 0.6875rem;
+    color: var(--colour-ti-secondary);
   }
 }
 

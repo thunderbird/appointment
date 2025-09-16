@@ -141,7 +141,10 @@ export default {
 
 <style scoped>
 header {
-  margin-block-end: 2rem;
+  font-family: metropolis;
+  font-size: 1.5rem;
+  margin-block-end: 1.5rem;
+  color: var(--colour-ti-highlight);
 }
 
 h2 {
@@ -157,6 +160,7 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  color: var(--colour-ti-secondary);
 
   .page-description {
     /* Help text (character count) */

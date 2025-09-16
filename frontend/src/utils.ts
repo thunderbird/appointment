@@ -227,6 +227,61 @@ export const getAccessibleColor = (hexcolor: string): string => {
 };
 
 /**
+ * Helper function to parse hex color to RGB values
+ * @param hexcolor - Hex color string (with or without #)
+ * @returns Object with r, g, b values or null if invalid
+ */
+const parseHexToRgb = (hexcolor: string): { r: number, g: number, b: number } | null => {
+  if (!hexcolor) return null;
+
+  // Remove # if present
+  const hex = hexcolor.replace('#', '');
+
+  // Validate hex format (6 characters)
+  if (hex.length !== 6) return null;
+
+  // Parse r, g, b values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return { r, g, b };
+};
+
+/**
+ * Darken a hex color by a given percentage
+ * @param hexcolor - Hex color string (with or without #)
+ * @param percent - Amount to darken (0-100, default 20)
+ */
+export const darkenColor = (hexcolor: string, percent: number = 20): string => {
+  const rgb = parseHexToRgb(hexcolor);
+  if (!rgb) return hexcolor;
+
+  // Calculate darkened values
+  const darkenFactor = (100 - percent) / 100;
+  const newR = Math.round(rgb.r * darkenFactor);
+  const newG = Math.round(rgb.g * darkenFactor);
+  const newB = Math.round(rgb.b * darkenFactor);
+
+  // Convert back to hex and ensure two digits
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
+};
+
+/**
+ * Convert a hex color to rgba with specified alpha
+ * @param hexcolor - Hex color string (with or without #)
+ * @param alpha - Alpha value (0-1)
+ */
+export const hexToRgba = (hexcolor: string, alpha: number = 1): string => {
+  const rgb = parseHexToRgb(hexcolor);
+  if (!rgb) return hexcolor;
+
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+};
+
+/**
  * Handles Pydantic errors, returns a form-level error message
  * or null if the error has to do with individual fields
  * @param i18n - i18n instance
@@ -370,6 +425,8 @@ export default {
   initialEventPopupData,
   showEventPopup,
   getAccessibleColor,
+  darkenColor,
+  hexToRgba,
   handleFormError,
   sleep,
   hhmmToMinutes,

@@ -53,7 +53,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
     }
 
     if (firstSchedule.value) {
-      initialState.value = firstSchedule.value;
+      initialState.value = deepClone({ ...firstSchedule.value });
 
       // Calculate utc back to user timezone
       initialState.value.start_time = scheduleStore.timeToFrontendTime(initialState.value.start_time, initialState.value.time_updated);

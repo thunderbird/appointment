@@ -164,6 +164,7 @@ header {
 }
 
 h2 {
+  color: var(--colour-ti-highlight);
   font-size: 1.5rem;
 }
 

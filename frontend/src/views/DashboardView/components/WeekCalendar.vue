@@ -5,9 +5,11 @@ import { dayjsKey } from '@/keys';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
+import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup } from '@/utils';
+import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
 import { EventPopup as EventPopupType } from '@/models';
+import { ColourSchemes } from '@/definitions';
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -23,6 +25,7 @@ const props = defineProps<{
 
 const dj = inject(dayjsKey);
 
+const userStore = useUserStore();
 const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
 const calendarStore = useCalendarStore();
@@ -32,6 +35,8 @@ const { pendingAppointments } = storeToRefs(appointmentStore);
 const { firstSchedule } = storeToRefs(scheduleStore);
 
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
+
+const isDarkMode = computed(() => userStore.myColourScheme === ColourSchemes.Dark);
 
 function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
   const popupEvent = {
@@ -133,21 +138,33 @@ const timeSlotsForGrid = computed(() => {
 
   // For FTUE for example, we don't have a firstSchedule yet,
   // so we can initialize the time with a default 9-5 in 24 hrs format, 30 min duration
-  const { start_time, end_time, slot_duration } = firstSchedule.value || {
+  const { start_time, end_time, slot_duration, time_updated } = firstSchedule.value || {
     start_time: '9:00',
     end_time: '17:00',
-    slot_duration: 30
+    slot_duration: 30,
+    time_updated: '1970-01-01T00:00:00',
   };
 
   if (!start_time || !end_time || !slot_duration) return [];
 
-  let currentTime = dj(start_time, 'H:mm');
-  const finalTime = dj(end_time, 'H:mm');
+  const timezoneAwareStartTime = scheduleStore.timeToFrontendTime(start_time, time_updated)
+  const timezoneAwareEndTime = scheduleStore.timeToFrontendTime(end_time, time_updated)
+
+  const startTime = dj(timezoneAwareStartTime, 'H:mm');
+  let endTime = dj(timezoneAwareEndTime, 'H:mm');
+
+  // If the end time is before the start time (slot spans midnight), add a day to the end time
+  if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
+    endTime = endTime.add(1, 'day');
+  }
+
+  let currentTime = startTime;
 
   // Start grid rows at 2 to leave space for the header row
   let rowIndex = 2;
 
-  while (currentTime.isBefore(finalTime)) {
+  while (currentTime.isBefore(endTime)) {
+    // Create the slot for the current time
     slots.push({
       // The text to display (e.g., "9 AM" or empty for non-hour slots)
       text: currentTime.minute() === 0 ? currentTime.format('h A') : '',
@@ -259,7 +276,8 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       :style="{
         gridColumn: remoteEvent?.gridColumn,
         gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
-        backgroundColor: `${remoteEvent?.calendar_color}`
+        backgroundColor: remoteEvent?.calendar_color,
+        borderLeftColor: darkenColor(remoteEvent?.calendar_color, 30)
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
       @mouseleave="onRemoteEventMouseLeave"
@@ -272,10 +290,12 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
       :key="pendingAppointment?.id"
       class="event-item pending-appointment"
+      :class="{ 'dark': isDarkMode }"
       :style="{
         gridColumn: pendingAppointment?.gridColumn,
         gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
-        backgroundColor: `${pendingAppointment?.calendar_color}`
+        backgroundColor: hexToRgba(pendingAppointment?.calendar_color, 0.4),
+        borderColor: darkenColor(pendingAppointment?.calendar_color, 30),
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
       @mouseleave="onRemoteEventMouseLeave"
@@ -299,11 +319,12 @@ const filteredPendingAppointmentsForGrid = computed(() => {
     />
 
     <!-- Inner grid vertical lines -->
+    <!-- 8 instead of 7 here because we want to add border to the right most edge and we start at 2 -->
     <div
-      v-for="n in 7"
+      v-for="n in 8"
       :key="`line-${n}`"
       class="vertical-line"
-      :style="{ gridColumn: n + 1, gridRow: '1 / -1' }"
+      :style="{ gridColumn: n + 1, gridRow: '2 / -1' }"
     ></div>
 
     <!-- Inner grid horizontal lines -->
@@ -311,7 +332,16 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       v-for="timeSlot in timeSlotsForGrid"
       :key="`h-line-${timeSlot.startTime}`"
       class="horizontal-line"
-      :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '1 / -1' }"
+      :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '2 / -1' }"
+    ></div>
+
+    <!-- Last horizontal line, dynamically calculated based on time schedule -->
+    <div
+      class="horizontal-line"
+      :style="{
+        gridRow: timeSlotsForGrid[timeSlotsForGrid.length - 1]?.gridRowStart + 1,
+        gridColumn: '2 / -1'
+      }"
     ></div>
   </div>
 </template>
@@ -323,7 +353,9 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   display: grid;
   grid-template-columns: max-content repeat(7, 200px);
   justify-items: center;
-  border: 1px solid var(--colour-neutral-border-intense);
+  border: 1px solid var(--colour-neutral-border);
+  border-radius: 1.5rem;
+  background-color: var(--colour-neutral-base);
   margin-block-end: 2rem;
   flex: 1;
   overflow-y: auto;
@@ -337,15 +369,21 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   position: sticky;
   top: 0;
   z-index: 3;
-  padding-block: 0.5rem;
+  padding-block: 1rem;
   text-align: center;
   font-weight: bold;
   width: 100%;
   background-color: var(--colour-neutral-base);
-  border-inline-start: 1px solid var(--colour-neutral-border-intense);
+  color: var(--colour-ti-secondary);
   position: sticky;
   left: 0;
   min-width: 200px;
+
+  /* Weekday */
+  & :first-child {
+    font-weight: normal;
+    font-size: 0.68rem;
+  }
 }
 
 .corner-cell-block {
@@ -371,6 +409,8 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   position: sticky;
   left: 0;
   background-color: var(--colour-neutral-base);
+  color: var(--colour-ti-secondary);
+  font-size: 0.68rem;
   z-index: 9;
 }
 
@@ -380,28 +420,33 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 0.5rem;
-  color: black;
-  font-size: 0.875rem;
-  border-top: 1px solid var(--colour-neutral-border-intense);
+  color: #4C4D58; /* TODO: should be --colour-ti-secondary but we don't have dark mode defined yet */
+  font-size: 0.68rem;
+  border-left: solid 3px;
+  border-top: 1px solid var(--colour-neutral-border);
+  border-radius: 3px;
   cursor: pointer;
   z-index: 1;
   min-width: 200px;
 }
 
 .pending-appointment {
-  border: 1px dashed var(--colour-neutral-border-intense);
-  opacity: 0.75;
+  border: 2px dashed;
+
+  &.dark {
+    color: var(--colour-ti-black);
+  }
 }
 
 .vertical-line {
   justify-self: flex-start;
-  border-left: 1px solid var(--colour-neutral-border-intense);
+  border-left: 1px solid var(--colour-neutral-border);
   z-index: 1;
 }
 
 .horizontal-line {
   height: 1px;
-  background-color: var(--colour-neutral-border-intense);
+  background-color: var(--colour-neutral-border);
   width: 100%;
 }
 
@@ -409,6 +454,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   .calendar-container {
     grid-template-columns: max-content repeat(7, minmax(0, 1fr));
     overflow-x: visible;
+    padding: 1rem 1rem 1.5rem 1rem;
   }
 
   .calendar-weekday-header {
@@ -432,7 +478,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 
   .event-item {
     min-width: auto;
-    z-index: 2;
+    z-index: 4;
   }
 
   .vertical-line {
