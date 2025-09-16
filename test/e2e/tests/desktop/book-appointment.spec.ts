@@ -32,9 +32,9 @@ test.use({
   timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
 
-test.describe('book an appointment', () => {
+test.describe('book an appointment on desktop browser', () => {
 
-  test('able to request a booking', {
+  test('able to request a booking on desktop browser', {
     tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
   }, async ({ page }) => {
     // in order to ensure we find an available slot we can click on, first switch to week view URL

@@ -65,7 +65,7 @@ test.use({
   timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
 
-test.describe('access booking page', () => {
+test.describe('access booking page on desktop browser', () => {
   test('able to access booking page via short link', {
     tag: [PLAYWRIGHT_TAG_PROD_SANITY],
   }, async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('access booking page', () => {
     await verifyBookingPageLoaded();
   });
 
-  test('able to access booking page via long link', {
+  test('able to access booking page via long link on desktop browser', {
     tag: [PLAYWRIGHT_TAG_PROD_SANITY]
   }, async ({ page }) => {
     // not supported on local dev env

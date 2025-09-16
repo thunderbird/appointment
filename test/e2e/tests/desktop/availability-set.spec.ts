@@ -14,7 +14,7 @@ import {
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
 
-test.describe('set availability', {
+test.describe('set availability on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe('set availability', {
     await availabilityPage.gotoAvailabilityPage();
   });
 
-  test('default availability settings are displayed', async ({ page }) => {
+  test('default availability settings are displayed on desktop browser', async ({ page }) => {
     // just verify that the default availability options are available/displayed
     // timzone display is covered in other tests so not checked here
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
@@ -83,7 +83,7 @@ test.describe('set availability', {
     await page.waitForURL('**/settings#preferences');
   });
 
-  test('customize-per-day checkbox reveals daily time slots', async () => {
+  test('customize-per-day checkbox reveals daily time slots on desktop browser', async () => {
     // get current status of customize per day check box (so this test will run regardless of state)
     await expect(availabilityPage.customizePerDayCheckBox).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
     await expect(availabilityPage.customizePerDayCheckBox).toBeEnabled({ timeout: TIMEOUT_60_SECONDS });
@@ -101,7 +101,7 @@ test.describe('set availability', {
     }
   });
 
-  test('able to turn off availability', async ({ page }) => {
+  test('able to turn off availability on desktop browser', async ({ page }) => {
     // turn off availability (via the `you're bookable` toggle)
     // note: we can check the active/bookable toggle checkbox setting but playwright cannot
     // interact with it (i.e. click to turn off/on) because it is covered up by a component container;
@@ -134,7 +134,7 @@ test.describe('set availability', {
     await expect(availabilityPage.bookableToggle).toBeChecked();
   });
 
-  test('able to change availability time', async ({ page }) => {
+  test('able to change availability time on desktop browser', async ({ page }) => {
     // turn off 'automatically confirm bookings' checkbox and then revert
     await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
     await expect(availabilityPage.autoConfirmBookingsCheckBox).toBeChecked();

@@ -10,7 +10,7 @@ import {
 
 let availabilityPage: AvailabilityPage;
 
-test.describe('availability - booking page link', {
+test.describe('availability - booking page link on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('availability - booking page link', {
     await availabilityPage.gotoAvailabilityPage();
   });
 
-  test('verify booking page link', async ({ page }) => {
+  test('verify booking page link on desktop browser', async ({ page }) => {
     await availabilityPage.bookingPageLinkHdr.scrollIntoViewIfNeeded();
     await expect(availabilityPage.bookingPageLinkHdr).toBeVisible();
 

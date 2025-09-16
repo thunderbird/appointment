@@ -1,34 +1,44 @@
 import { test, expect } from '@playwright/test';
-import { getUserSettingsFromLocalStore } from '../../utils/utils';
+import { mobileSignInAndSetup, getUserSettingsFromLocalStore } from '../../utils/utils';
 import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE,
-  PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  APPT_LANGUAGE_SETTING_DE,
+  PLAYWRIGHT_TAG_E2E_SUITE_MOBILE,
+  PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY,
   APPT_LANGUAGE_SETTING_EN,
-  TIMEOUT_30_SECONDS,
+  APPT_LANGUAGE_SETTING_DE,
   APPT_BROWSER_STORE_LANGUAGE_EN,
   APPT_BROWSER_STORE_LANGUAGE_DE,
+  TIMEOUT_3_SECONDS,
+  TIMEOUT_30_SECONDS,
  } from '../../const/constants';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
-test.describe('settings - language on desktop browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+test.describe('settings - language on mobile browser', {
+  tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
 }, () => {
+
   test.beforeEach(async ({ page }) => {
-    // note: we are already signed into Appointment with our default settings (via our auth-setup)
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
 
-    // navigate to the settings page, preferences section
+    // mobile browsers don't support saving auth storage state so must sign in before each test
+    await mobileSignInAndSetup(page);
+
+    // now navigate to the settings page, preferences section
     await settingsPage.gotoPreferencesSettings();
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
   });
 
-  test('able to change language on desktop browser', async ({ page }) => {
+  test.afterEach(async ({ page }) => {
+    // close the browser page when we're done so it doesn't stay as a tab on mobile browser
+    await page.close();
+  });
+
+  test('able to change language on mobile browser', async ({ page }) => {
     // change language setting to DE and verify; we use expect.soft here because if the expect fails
     // we still want the test to continue so that the test will change the setting back to original value
     await settingsPage.changeLanguageSetting(APPT_LANGUAGE_SETTING_EN, APPT_LANGUAGE_SETTING_DE);
