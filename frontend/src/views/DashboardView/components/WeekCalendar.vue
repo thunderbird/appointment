@@ -2,37 +2,45 @@
 import { computed, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { dayjsKey } from '@/keys';
-import { useAppointmentStore } from '@/stores/appointment-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
 import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
-import { EventPopup as EventPopupType } from '@/models';
-import { ColourSchemes } from '@/definitions';
+import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
+import { BookingStatus, ColourSchemes } from '@/definitions';
+import { Dayjs } from 'dayjs';
 
 enum Weekday {
   DayOfTheWeek = 0,
   DayOfTheMonth = 1,
 }
 
-const props = defineProps<{
+interface Props {
   activeDateRange: {
     start: string,
     end: string
-  }
-}>();
+  },
+  events?: RemoteEvent[],
+  pendingAppointments?: Appointment[],
+  selectableSlots?: Slot[],
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  events: () => [] as RemoteEvent[],
+  pendingAppointments: () => [] as Appointment[],
+  selectableSlots: () => [] as Slot[],
+});
+
+const emit = defineEmits(['event-selected'])
 
 const dj = inject(dayjsKey);
 
 const userStore = useUserStore();
-const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
-const calendarStore = useCalendarStore();
 
-const { remoteEvents } = storeToRefs(calendarStore);
-const { pendingAppointments } = storeToRefs(appointmentStore);
 const { firstSchedule } = storeToRefs(scheduleStore);
+const { selectedEvent } = storeToRefs(useBookingViewStore());
 
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
 
@@ -60,7 +68,7 @@ function onRemoteEventMouseLeave() {
 /**
  * Calculates grid positioning for calendar events
  */
-function calculateEventGridPosition(eventStart, eventEnd, slots) {
+function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
   if (!slots.length) return null;
 
   // Create a quick lookup map for slot start times to grid rows
@@ -191,7 +199,7 @@ const filteredRemoteEventsForGrid = computed(() => {
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const remoteEventsWithinActiveWeek = remoteEvents.value.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
+  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
 
   return remoteEventsWithinActiveWeek.map(remoteEvent => {
     const eventStart = dj(remoteEvent.start);
@@ -206,7 +214,7 @@ const filteredRemoteEventsForGrid = computed(() => {
       };
     }
   }).filter(Boolean)
-})
+});
 
 /**
  * Generates an array of pending appointments that fall within the active week with grid positioning info
@@ -216,7 +224,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const pendingAppointmentsWithinActiveWeek = pendingAppointments.value.filter((appointment) => {
+  const pendingAppointmentsWithinActiveWeek = props.pendingAppointments.filter((appointment) => {
     const appointmentStart = dj(appointment.slots[0].start);
     return appointmentStart.isBetween(start, end, 'day', '[]');
   });
@@ -241,7 +249,44 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       };
     }
   }).filter(Boolean)
-})
+});
+
+/**
+ * Generates an array of selectable time slots that fall within the active week with grid positioning info
+ */
+const filteredSelectableSlotsForGrid = computed(() => {
+  const slots = timeSlotsForGrid.value;
+  if (!slots.length) return [];
+
+  const { start, end } = props.activeDateRange;
+  const selectableSlotsWithinActiveWeek = props.selectableSlots
+    .filter((slot) => {
+      const slotStart = dj(slot.start);
+      return slotStart.isBetween(start, end, 'day', '[]');
+    })
+    .filter((slot) => slot.booking_status !== BookingStatus.Booked);
+
+  return selectableSlotsWithinActiveWeek.map(slot => {
+    const slotStart = dj(slot.start);
+    const slotEnd = slotStart.add(slot.duration, 'minute');
+
+    const gridPosition = calculateEventGridPosition(slotStart, slotEnd, slots);
+
+    if (gridPosition) {
+      return {
+        ...slot,
+        ...gridPosition,
+
+        // Add properties to match the remote event structure for consistent rendering
+        title: slotStart.format('LT'),
+        start: slot.start,
+        end: slotEnd.format(),
+        calendar_title: 'caltitle',
+        calendar_color: '58C9FF',
+      };
+    }
+  }).filter(Boolean)
+});
 </script>
 
 <template>
@@ -265,7 +310,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       :key="timeSlot.startTime"
       :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
     >
-      {{  timeSlot.text }}
+      {{ timeSlot.text }}
     </div>
 
     <!-- Remote events -->
@@ -301,6 +346,23 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       @mouseleave="onRemoteEventMouseLeave"
     >
       {{ pendingAppointment?.title }}
+    </div>
+
+    <!-- Selectable time slots -->
+    <div
+      v-for="slot in filteredSelectableSlotsForGrid"
+      :key="slot?.id"
+      class="event-item selectable-slot"
+      :class="{ 'dark': isDarkMode, 'selected': (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
+      :style="{
+        gridColumn: slot?.gridColumn,
+        gridRow: `${slot?.gridRowStart} / ${slot?.gridRowEnd}`,
+        backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
+        borderColor: darkenColor(slot?.calendar_color, 30),
+      }"
+      @click="emit('event-selected', slot.start)"
+    >
+      {{ slot?.title }}
     </div>
 
     <!-- Event popup (appears on remote event hover) -->
@@ -435,6 +497,20 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 
   &.dark {
     color: var(--colour-ti-black);
+  }
+}
+
+.selectable-slot {
+  border: none;
+  margin: .125rem;
+  width: 90%;
+
+  &.dark {
+    color: var(--colour-ti-black);
+  }
+
+  &.selected {
+    background-color: #58C9FF !important;
   }
 }
 

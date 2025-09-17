@@ -1,29 +1,36 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import { inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useBookingViewStore } from '@/stores/booking-view-store';
-import { useScheduleStore } from '@/stores/schedule-store';
-import { DateFormatStrings } from '@/definitions';
-import { Slot } from '@/models';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { Slot, TimeFormatted } from '@/models';
 import { dayjsKey } from '@/keys';
 
-import CalendarQalendar from '@/components/CalendarQalendar.vue';
+import WeekPicker from '@/views/DashboardView/components/WeekPicker.vue';
+import WeekCalendar from '@/views/DashboardView/components/WeekCalendar.vue';
 import SlotSelectionAside from './SlotSelectionAside.vue';
+import { Dayjs } from 'dayjs';
 
-const { activeSchedules } = storeToRefs(useScheduleStore());
+const calendarStore = useCalendarStore();
 const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
 const dj = inject(dayjsKey);
+
+// current selected date, defaults to now
+const activeDateRange = computed(() => ({
+  start: activeDate.value.startOf('week').format('YYYY-MM-DD'),
+  end: activeDate.value.endOf('week').format('YYYY-MM-DD'),
+}));
 
 /**
  * Select a specific time slot
  * @param day string
  */
-const selectEvent = (day: string) => {
+const selectEvent = (day: Dayjs) => {
   // set event selected
   for (let i = 0; i < appointment.value.slots.length; i += 1) {
     const slot: Slot = appointment.value.slots[i];
-    if (dj(slot.start).format(DateFormatStrings.Qalendar) === day) {
+    if (dj(slot.start).isSame(day)) {
       slot.selected = true;
       const e = { ...appointment.value, ...slot };
       delete e.slots;
@@ -34,20 +41,30 @@ const selectEvent = (day: string) => {
   }
 };
 
+async function onDateChange(dateObj: TimeFormatted) {
+  const start = dj(dateObj.start);
+  const end = dj(dateObj.end);
+
+  activeDate.value = start.add(end.diff(start, 'minutes') / 2, 'minutes');
+
+  await calendarStore.getRemoteEvents(activeDate.value);
+};
+
 </script>
 
 <template>
   <div v-if="appointment" class="booker-view-container">
-    <calendar-qalendar
-      class="w-full"
-      :current-date="activeDate"
-      :appointments="[appointment]"
-      :is-booking-route="true"
-      :fixed-duration="activeSchedules[0]?.slot_duration"
-      @event-selected="selectEvent"
-      data-testid="booking-view-calendar-div"
-    >
-    </calendar-qalendar>
+    <div class="calendar-container">
+      <week-picker
+        :active-date-range="activeDateRange"
+        :onDateChange="onDateChange"
+      />
+      <week-calendar
+        :active-date-range="activeDateRange"
+        :selectable-slots="appointment.slots"
+        @event-selected="selectEvent"
+      />
+    </div>
 
     <slot-selection-aside />
   </div>
@@ -60,6 +77,10 @@ const selectEvent = (day: string) => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.calendar-container {
+  width: 100%;
 }
 
 @media (--md) {

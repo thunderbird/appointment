@@ -17,6 +17,7 @@ import WeekCalendar from './components/WeekCalendar.vue';
 // stores
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserActivityStore } from '@/stores/user-activity-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
@@ -25,7 +26,10 @@ const refresh = inject(refreshKey);
 
 const userActivityStore = useUserActivityStore();
 const calendarStore = useCalendarStore();
+const appointmentStore = useAppointmentStore();
 const { data: userActivityData } = storeToRefs(userActivityStore);
+const { remoteEvents } = storeToRefs(calendarStore);
+const { pendingAppointments } = storeToRefs(appointmentStore);
 
 // current selected date, defaults to now
 const activeDate = ref(dj());
@@ -111,6 +115,8 @@ export default {
 
       <week-calendar
         :active-date-range="activeDateRange"
+        :events="remoteEvents"
+        :pending-appointments="pendingAppointments"
       />
     </div>
   </div>
