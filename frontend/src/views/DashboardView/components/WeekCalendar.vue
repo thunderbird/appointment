@@ -281,8 +281,8 @@ const filteredSelectableSlotsForGrid = computed(() => {
         title: slotStart.format('LT'),
         start: slot.start,
         end: slotEnd.format(),
-        calendar_title: 'caltitle',
-        calendar_color: '58C9FF',
+        calendar_title: '',
+        calendar_color: '58C9FF', // TODO: Use design colors
       };
     }
   }).filter(Boolean)
@@ -358,7 +358,6 @@ const filteredSelectableSlotsForGrid = computed(() => {
         gridColumn: slot?.gridColumn,
         gridRow: `${slot?.gridRowStart} / ${slot?.gridRowEnd}`,
         backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
-        borderColor: darkenColor(slot?.calendar_color, 30),
       }"
       @click="emit('event-selected', slot.start)"
     >
