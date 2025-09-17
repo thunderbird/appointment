@@ -12,6 +12,7 @@ export enum AuthSchemes {
  */
 export enum DateFormatStrings {
   // Qalendar specific formats (These have to be in this format for qalendar to understand them)
+  // TODO: remove Qalendar specific enums
   Qalendar = 'YYYY-MM-DD HH:mm',
   QalendarFullDay = 'YYYY-MM-DD',
   // Time display formats
