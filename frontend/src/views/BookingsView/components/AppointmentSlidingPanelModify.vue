@@ -1,6 +1,8 @@
 <!-- This is currently (as of Jul-25-2025) being scoped so this component is unused
 Do not delete though! It will be useful once this ticket is tackled:
 https://github.com/thunderbird/appointment/issues/1146 -->
+<!-- Also during a revamp of the calendar implementation (Sep-17-2025), the calendar-mini-month component
+was removed and might be re-implemented if needed in the future. -->
 
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue';
@@ -8,7 +10,6 @@ import { useI18n } from 'vue-i18n';
 import { Appointment, SelectOption } from '@/models';
 import { dayjsKey } from '@/keys';
 import { timeFormat } from '@/utils';
-import CalendarMiniMonth from '@/components/CalendarMiniMonth.vue';
 import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useUserStore } from '@/stores/user-store';
@@ -83,7 +84,6 @@ const handleModifyFormSubmit = async () => {
 
 // Mini calendar refs and functions
 const activeDate = ref(dj(props.appointment?.slots[0].start));
-const today = computed(() => dj());
 
 const populateTimeSlots = async () => {
   isLoadingSlots.value = true;
@@ -155,16 +155,6 @@ defineExpose({
   <template v-if="!isError && !isSuccess">
     <div class="appointment-content">
       <div class="calendar-booking-slot-container">
-        <calendar-mini-month
-          class="calendar"
-          :selected="activeDate"
-          :nav="true"
-          :minDate="today"
-          @prev="dateNav(false)"
-          @next="dateNav()"
-          @day-selected="handleCalendarDaySelected"
-        />
-
         <div class="booking-slot-container">
           <label class="booking-slot-label" for="bookingSlotSelect">{{ t('label.bookingSlot') }}</label>
           <select-input

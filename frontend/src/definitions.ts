@@ -158,14 +158,6 @@ export enum ColourSchemes {
 }
 
 /**
- * Calendar management type states
- */
-export enum CalendarManagementType {
-  Connect = 1,
-  Edit = 2,
-}
-
-/**
  * Supported calendar providers
  */
 export enum CalendarProviders {
@@ -327,7 +319,6 @@ export default {
   BookingStatus,
   BookingsViews,
   BookingsViewTypes,
-  CalendarManagementType,
   CalendarProviders,
   ColorPalette,
   ColourSchemes,
