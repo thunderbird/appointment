@@ -96,8 +96,8 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   // 3. Calculate the End Row
   // Find the first slot that starts AT or AFTER the event ends
-  // Attention: the end time could be lower than the start time on events going to or over midnight! So we must
-  // normalize the end of an event to 24 instead of 0.
+  // Attention: the end time could be lower than the start time on events going to or over midnight! So we must always
+  // normalize the end of an event to 24 if it is 0.
   const endTime = eventEnd.format('HH:mm') === '00:00' ? '24:00' : eventEnd.format('HH:mm');
   const endSlot = slots.find(slot => slot.startTime >= endTime);
   
@@ -158,6 +158,17 @@ const latestTime = computed(() => {
 });
 
 /**
+ * Get the latest end time of all given calendar events
+ */
+const shortestDuration = computed(() => {
+  return Math.min(
+    props.events.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
+    props.pendingAppointments.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
+    props.selectableSlots.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
+  );
+});
+
+/**
  * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
  */
 const weekdays = computed(() => {
@@ -195,7 +206,7 @@ const timeSlotsForGrid = computed(() => {
   const { start_time, end_time, slot_duration, time_updated } = firstSchedule.value || {
     start_time: minutesToHhmm(earliestTime.value),
     end_time: minutesToHhmm(latestTime.value),
-    slot_duration: 60,
+    slot_duration: shortestDuration.value,
     time_updated: '1970-01-01T00:00:00',
   };
 
