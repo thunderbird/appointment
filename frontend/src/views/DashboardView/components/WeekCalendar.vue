@@ -6,7 +6,7 @@ import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
+import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba, hhmmToMinutes, minutesToHhmm } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes } from '@/definitions';
 import { Dayjs } from 'dayjs';
@@ -96,7 +96,11 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   // 3. Calculate the End Row
   // Find the first slot that starts AT or AFTER the event ends
-  const endSlot = slots.find(slot => slot.startTime >= eventEnd.format('HH:mm'));
+  // Attention: the end time could be lower than the start time on events going to or over midnight! So we must
+  // normalize the end of an event to 24 instead of 0.
+  const endTime = eventEnd.format('HH:mm') === '00:00' ? '24:00' : eventEnd.format('HH:mm');
+  const endSlot = slots.find(slot => slot.startTime >= endTime);
+  
   const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
 
   // Return the positioning data, only if it's within calendar hours
@@ -110,6 +114,48 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   return null;
 }
+
+/**
+ * Get the earliest start time of all given calendar events
+ */
+const earliestTime = computed(() => {
+  return Math.min(
+    props.events.reduce(
+      (p, c) => hhmmToMinutes(c.start) < p ? hhmmToMinutes(c.start) : p,
+      24 * 60
+    ),
+    props.pendingAppointments.reduce(
+      (p, c) => hhmmToMinutes(c.slots[0].start) < p ? hhmmToMinutes(c.slots[0].start) : p,
+      24 * 60
+    ),
+    props.selectableSlots.reduce(
+      (p, c) => hhmmToMinutes(c.start) < p ? hhmmToMinutes(c.start) : p,
+      24 * 60
+    ),
+  );
+});
+
+/**
+ * Get the latest end time of all given calendar events
+ */
+const latestTime = computed(() => {
+  return Math.max(
+    props.events.reduce(
+      (p, c) => hhmmToMinutes(c.end) > p ? hhmmToMinutes(c.end) : p,
+      0
+    ),
+    props.pendingAppointments.reduce(
+      (p, c) => hhmmToMinutes(c.slots[0].start) + c.slots[0].duration > p
+        ? hhmmToMinutes(c.slots[0].start) + c.slots[0].duration
+        : p,
+      0
+    ),
+    props.selectableSlots.reduce(
+      (p, c) => hhmmToMinutes(c.start) + c.duration > p ? hhmmToMinutes(c.start) + c.duration : p,
+      0
+    ),
+  );
+});
 
 /**
  * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
@@ -144,19 +190,23 @@ const weekdays = computed(() => {
 const timeSlotsForGrid = computed(() => {
   const slots = [];
 
-  // For FTUE for example, we don't have a firstSchedule yet,
-  // so we can initialize the time with a default 9-5 in 24 hrs format, 30 min duration
+  // We initialize times using the first schedule. If we don't have one (e.g. FTUE, Booker page), we initialize the
+  // grid by using the minimum and maximum times from the displayed events.
   const { start_time, end_time, slot_duration, time_updated } = firstSchedule.value || {
-    start_time: '9:00',
-    end_time: '17:00',
-    slot_duration: 30,
+    start_time: minutesToHhmm(earliestTime.value),
+    end_time: minutesToHhmm(latestTime.value),
+    slot_duration: 60,
     time_updated: '1970-01-01T00:00:00',
   };
 
   if (!start_time || !end_time || !slot_duration) return [];
 
-  const timezoneAwareStartTime = scheduleStore.timeToFrontendTime(start_time, time_updated)
-  const timezoneAwareEndTime = scheduleStore.timeToFrontendTime(end_time, time_updated)
+  const timezoneAwareStartTime = firstSchedule.value
+    ? scheduleStore.timeToFrontendTime(start_time, time_updated)
+    : start_time;
+  const timezoneAwareEndTime = firstSchedule.value
+    ? scheduleStore.timeToFrontendTime(end_time, time_updated)
+    : end_time;
 
   const startTime = dj(timezoneAwareStartTime, 'H:mm');
   let endTime = dj(timezoneAwareEndTime, 'H:mm');
