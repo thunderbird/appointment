@@ -158,7 +158,7 @@ const latestTime = computed(() => {
 });
 
 /**
- * Get the latest end time of all given calendar events
+ * Get the shortest duration of all given calendar events for building the grid
  */
 const shortestDuration = computed(() => {
   return Math.min(
@@ -570,7 +570,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
   }
 
   &.selected {
-    background-color: #58C9FF !important;
+    background-color: #58C9FF !important; /* TODO: Update this once design is ready */
   }
 }
 
