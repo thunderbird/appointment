@@ -111,19 +111,6 @@ const populateTimeSlots = async () => {
   }
 }
 
-const handleCalendarDaySelected = async (d: string) => {
-  activeDate.value = dj(d);
-  await populateTimeSlots();
-};
-
-const dateNav = (forward = true) => {
-  if (forward) {
-    activeDate.value = activeDate.value.add(1, 'month');
-  } else {
-    activeDate.value = activeDate.value.subtract(1, 'month');
-  }
-};
-
 // Booking slot refs and functions
 const isLoadingSlots = ref<boolean>(false);
 const availableSlots = ref([]);
