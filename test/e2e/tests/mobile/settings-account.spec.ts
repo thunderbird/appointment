@@ -37,6 +37,11 @@ test.describe('account settings on mobile browser', {
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
   });
 
+  test.afterEach(async ({ page }) => {
+    // close the current browser page so it won't interfere with next test
+    await page.close();
+  });
+
   test('verify account settings on mobile browser', async ({ page }) => {
     // verify section header
     await expect(settingsPage.accountSettingsHeader).toBeVisible();
