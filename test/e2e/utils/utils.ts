@@ -1,4 +1,5 @@
 // utility functions that may be used by any tests
+import { DashboardPage } from "../pages/dashboard-page";
 import { SplashscreenPage } from "../pages/splashscreen-page";
 import { FxAPage } from "../pages/fxa-page";
 import { expect, type Page } from '@playwright/test';
@@ -7,7 +8,6 @@ import {
     APPT_TARGET_ENV,
     APPT_URL,
     APPT_PAGE_TITLE,
-    APPT_DASHBOARD_HOME_PAGE,
     APPT_SETTINGS_PAGE,
     APPT_DISPLAY_NAME,
     APPT_TIMEZONE_SETTING_PRIMARY,
@@ -19,7 +19,9 @@ import {
     TIMEOUT_2_SECONDS,
     TIMEOUT_3_SECONDS,
     TIMEOUT_60_SECONDS,
+    TIMEOUT_30_SECONDS,
 } from "../const/constants";
+
 
 /**
  * Navigate to and sign into the Appointment application target environment, using the URL and
@@ -105,6 +107,8 @@ export const setDefaultUserSettingsLocalStore = async (page: Page) => {
  * Sign into Appointment on mobile browser and set default settings required by tests
  */
 export const mobileSignInAndSetup = async (page: Page) => {
+    const dashboardPage = new DashboardPage(page);
+
     // playwright for mobile browsers doesn't support saving auth storage state, so unfortunately
     // we must sign into Appointment at the start of every test
     await navigateToAppointmentAndSignIn(page);
@@ -112,8 +116,8 @@ export const mobileSignInAndSetup = async (page: Page) => {
     // Wait until the page receives the cookies.
     // Sometimes login flow sets cookies in the process of several redirects.
     // Wait for the final URL to ensure that the cookies are actually set.
-    await page.waitForURL(APPT_DASHBOARD_HOME_PAGE);
-    await page.waitForTimeout(TIMEOUT_2_SECONDS);
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await dashboardPage.pendingBookingRequestsLink.waitFor({ timeout: TIMEOUT_30_SECONDS });
 
     // ensure our settings are set to what the tests expect as default (in case a
     // previous test run failed and left the settings in an incorrect state)

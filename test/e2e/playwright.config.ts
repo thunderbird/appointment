@@ -91,12 +91,21 @@ export default defineConfig({
         screenshot: 'only-on-failure',
        },
     },
-  ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+    {
+      name: 'iPhone-15-View',
+      use: {
+        ...devices['iPhone 15'],
+        screenshot: 'only-on-failure',
+       },
+    },
+
+    {
+      name: 'iPad-Pro-11-View',
+      use: {
+        ...devices['iPad Pro 11'],
+        screenshot: 'only-on-failure',
+       },
+    },
+  ],
 });

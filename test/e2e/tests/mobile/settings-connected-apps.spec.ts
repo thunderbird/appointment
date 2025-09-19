@@ -29,6 +29,11 @@ test.describe('settings - connected applications on mobile browser', {
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
   });
 
+  test.afterEach(async ({ page }) => {
+    // close the current browser page so it won't interfere with next test
+    await page.close();
+  });
+
   test('verify connected applications settings on mobile browser', async ({ page }) => {
     // verify section header
     await expect(settingsPage.connectedAppsHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
