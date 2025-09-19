@@ -2,37 +2,45 @@
 import { computed, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { dayjsKey } from '@/keys';
-import { useAppointmentStore } from '@/stores/appointment-store';
-import { useCalendarStore } from '@/stores/calendar-store';
+import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
-import { EventPopup as EventPopupType } from '@/models';
-import { ColourSchemes } from '@/definitions';
+import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba, hhmmToMinutes, minutesToHhmm } from '@/utils';
+import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
+import { BookingStatus, ColourSchemes } from '@/definitions';
+import { Dayjs } from 'dayjs';
 
 enum Weekday {
   DayOfTheWeek = 0,
   DayOfTheMonth = 1,
 }
 
-const props = defineProps<{
+interface Props {
   activeDateRange: {
     start: string,
     end: string
-  }
-}>();
+  },
+  events?: RemoteEvent[],
+  pendingAppointments?: Appointment[],
+  selectableSlots?: Slot[],
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  events: () => [] as RemoteEvent[],
+  pendingAppointments: () => [] as Appointment[],
+  selectableSlots: () => [] as Slot[],
+});
+
+const emit = defineEmits(['event-selected'])
 
 const dj = inject(dayjsKey);
 
 const userStore = useUserStore();
-const appointmentStore = useAppointmentStore();
 const scheduleStore = useScheduleStore();
-const calendarStore = useCalendarStore();
 
-const { remoteEvents } = storeToRefs(calendarStore);
-const { pendingAppointments } = storeToRefs(appointmentStore);
 const { firstSchedule } = storeToRefs(scheduleStore);
+const { selectedEvent } = storeToRefs(useBookingViewStore());
 
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
 
@@ -60,7 +68,7 @@ function onRemoteEventMouseLeave() {
 /**
  * Calculates grid positioning for calendar events
  */
-function calculateEventGridPosition(eventStart, eventEnd, slots) {
+function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
   if (!slots.length) return null;
 
   // Create a quick lookup map for slot start times to grid rows
@@ -88,7 +96,11 @@ function calculateEventGridPosition(eventStart, eventEnd, slots) {
 
   // 3. Calculate the End Row
   // Find the first slot that starts AT or AFTER the event ends
-  const endSlot = slots.find(slot => slot.startTime >= eventEnd.format('HH:mm'));
+  // Attention: the end time could be lower than the start time on events going to or over midnight! So we must always
+  // normalize the end of an event to 24 if it is 0.
+  const endTime = eventEnd.format('HH:mm') === '00:00' ? '24:00' : eventEnd.format('HH:mm');
+  const endSlot = slots.find(slot => slot.startTime >= endTime);
+  
   const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
 
   // Return the positioning data, only if it's within calendar hours
@@ -102,6 +114,59 @@ function calculateEventGridPosition(eventStart, eventEnd, slots) {
 
   return null;
 }
+
+/**
+ * Get the earliest start time of all given calendar events
+ */
+const earliestTime = computed(() => {
+  return Math.min(
+    props.events.reduce(
+      (p, c) => hhmmToMinutes(c.start) < p ? hhmmToMinutes(c.start) : p,
+      24 * 60
+    ),
+    props.pendingAppointments.reduce(
+      (p, c) => hhmmToMinutes(c.slots[0].start) < p ? hhmmToMinutes(c.slots[0].start) : p,
+      24 * 60
+    ),
+    props.selectableSlots.reduce(
+      (p, c) => hhmmToMinutes(c.start) < p ? hhmmToMinutes(c.start) : p,
+      24 * 60
+    ),
+  );
+});
+
+/**
+ * Get the latest end time of all given calendar events
+ */
+const latestTime = computed(() => {
+  return Math.max(
+    props.events.reduce(
+      (p, c) => hhmmToMinutes(c.end) > p ? hhmmToMinutes(c.end) : p,
+      0
+    ),
+    props.pendingAppointments.reduce(
+      (p, c) => hhmmToMinutes(c.slots[0].start) + c.slots[0].duration > p
+        ? hhmmToMinutes(c.slots[0].start) + c.slots[0].duration
+        : p,
+      0
+    ),
+    props.selectableSlots.reduce(
+      (p, c) => hhmmToMinutes(c.start) + c.duration > p ? hhmmToMinutes(c.start) + c.duration : p,
+      0
+    ),
+  );
+});
+
+/**
+ * Get the shortest duration of all given calendar events for building the grid
+ */
+const shortestDuration = computed(() => {
+  return Math.min(
+    props.events.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
+    props.pendingAppointments.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
+    props.selectableSlots.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
+  );
+});
 
 /**
  * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
@@ -136,19 +201,23 @@ const weekdays = computed(() => {
 const timeSlotsForGrid = computed(() => {
   const slots = [];
 
-  // For FTUE for example, we don't have a firstSchedule yet,
-  // so we can initialize the time with a default 9-5 in 24 hrs format, 30 min duration
+  // We initialize times using the first schedule. If we don't have one (e.g. FTUE, Booker page), we initialize the
+  // grid by using the minimum and maximum times from the displayed events.
   const { start_time, end_time, slot_duration, time_updated } = firstSchedule.value || {
-    start_time: '9:00',
-    end_time: '17:00',
-    slot_duration: 30,
+    start_time: minutesToHhmm(earliestTime.value),
+    end_time: minutesToHhmm(latestTime.value),
+    slot_duration: shortestDuration.value,
     time_updated: '1970-01-01T00:00:00',
   };
 
   if (!start_time || !end_time || !slot_duration) return [];
 
-  const timezoneAwareStartTime = scheduleStore.timeToFrontendTime(start_time, time_updated)
-  const timezoneAwareEndTime = scheduleStore.timeToFrontendTime(end_time, time_updated)
+  const timezoneAwareStartTime = firstSchedule.value
+    ? scheduleStore.timeToFrontendTime(start_time, time_updated)
+    : start_time;
+  const timezoneAwareEndTime = firstSchedule.value
+    ? scheduleStore.timeToFrontendTime(end_time, time_updated)
+    : end_time;
 
   const startTime = dj(timezoneAwareStartTime, 'H:mm');
   let endTime = dj(timezoneAwareEndTime, 'H:mm');
@@ -191,7 +260,7 @@ const filteredRemoteEventsForGrid = computed(() => {
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const remoteEventsWithinActiveWeek = remoteEvents.value.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
+  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
 
   return remoteEventsWithinActiveWeek.map(remoteEvent => {
     const eventStart = dj(remoteEvent.start);
@@ -206,7 +275,7 @@ const filteredRemoteEventsForGrid = computed(() => {
       };
     }
   }).filter(Boolean)
-})
+});
 
 /**
  * Generates an array of pending appointments that fall within the active week with grid positioning info
@@ -216,7 +285,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const pendingAppointmentsWithinActiveWeek = pendingAppointments.value.filter((appointment) => {
+  const pendingAppointmentsWithinActiveWeek = props.pendingAppointments.filter((appointment) => {
     const appointmentStart = dj(appointment.slots[0].start);
     return appointmentStart.isBetween(start, end, 'day', '[]');
   });
@@ -241,7 +310,44 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       };
     }
   }).filter(Boolean)
-})
+});
+
+/**
+ * Generates an array of selectable time slots that fall within the active week with grid positioning info
+ */
+const filteredSelectableSlotsForGrid = computed(() => {
+  const slots = timeSlotsForGrid.value;
+  if (!slots.length) return [];
+
+  const { start, end } = props.activeDateRange;
+  const selectableSlotsWithinActiveWeek = props.selectableSlots
+    .filter((slot) => {
+      const slotStart = dj(slot.start);
+      return slotStart.isBetween(start, end, 'day', '[]');
+    })
+    .filter((slot) => slot.booking_status !== BookingStatus.Booked);
+
+  return selectableSlotsWithinActiveWeek.map(slot => {
+    const slotStart = dj(slot.start);
+    const slotEnd = slotStart.add(slot.duration, 'minute');
+
+    const gridPosition = calculateEventGridPosition(slotStart, slotEnd, slots);
+
+    if (gridPosition) {
+      return {
+        ...slot,
+        ...gridPosition,
+
+        // Add properties to match the remote event structure for consistent rendering
+        title: slotStart.format('LT'),
+        start: slot.start,
+        end: slotEnd.format(),
+        calendar_title: '',
+        calendar_color: '58C9FF', // TODO: Use design colors
+      };
+    }
+  }).filter(Boolean)
+});
 </script>
 
 <template>
@@ -265,7 +371,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       :key="timeSlot.startTime"
       :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
     >
-      {{  timeSlot.text }}
+      {{ timeSlot.text }}
     </div>
 
     <!-- Remote events -->
@@ -301,6 +407,22 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       @mouseleave="onRemoteEventMouseLeave"
     >
       {{ pendingAppointment?.title }}
+    </div>
+
+    <!-- Selectable time slots -->
+    <div
+      v-for="slot in filteredSelectableSlotsForGrid"
+      :key="slot?.id"
+      class="event-item selectable-slot"
+      :class="{ 'dark': isDarkMode, 'selected': (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
+      :style="{
+        gridColumn: slot?.gridColumn,
+        gridRow: `${slot?.gridRowStart} / ${slot?.gridRowEnd}`,
+        backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
+      }"
+      @click="emit('event-selected', slot.start)"
+    >
+      {{ slot?.title }}
     </div>
 
     <!-- Event popup (appears on remote event hover) -->
@@ -435,6 +557,20 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 
   &.dark {
     color: var(--colour-ti-black);
+  }
+}
+
+.selectable-slot {
+  border: none;
+  margin: .125rem;
+  width: 90%;
+
+  &.dark {
+    color: var(--colour-ti-black);
+  }
+
+  &.selected {
+    background-color: #58C9FF !important; /* TODO: Update this once design is ready */
   }
 }
 

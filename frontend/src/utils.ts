@@ -1,5 +1,6 @@
 // get the first key of given object that points to given value
 import { Ref } from 'vue';
+import { Dayjs } from 'dayjs';
 import { i18nType } from '@/composables/i18n';
 import {
   CustomEventData,
@@ -396,9 +397,22 @@ export const staggerRetrieve = async (requestFn: any, perPage: number, pageError
  * Calculate number of minutes from formatted time string.
  * @param formattedTime A string of format HH:MM
  */
-export const hhmmToMinutes = (formattedTime: string): number => {
+export const hhmmToMinutes = (formattedTime: string | Dayjs): number => {
+  if (typeof formattedTime === 'object') {
+    formattedTime = formattedTime.format('HH:mm');
+  }
   const [hours, minutes] = formattedTime.split(':');
   return (Number(hours) * 60 + Number(minutes));
+};
+
+/**
+ * Calculate number of minutes from formatted time string.
+ * @param formattedTime A string of format HH:MM
+ */
+export const minutesToHhmm = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
 };
 
 /**
@@ -430,6 +444,7 @@ export default {
   handleFormError,
   sleep,
   hhmmToMinutes,
+  minutesToHhmm,
   compareAvailabilityStart,
   deepClone,
 };

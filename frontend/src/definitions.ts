@@ -12,6 +12,7 @@ export enum AuthSchemes {
  */
 export enum DateFormatStrings {
   // Qalendar specific formats (These have to be in this format for qalendar to understand them)
+  // TODO: remove Qalendar specific enums
   Qalendar = 'YYYY-MM-DD HH:mm',
   QalendarFullDay = 'YYYY-MM-DD',
   // Time display formats
@@ -154,14 +155,6 @@ export enum ColourSchemes {
   System = 'system',
   Dark = 'dark',
   Light = 'light',
-}
-
-/**
- * Calendar management type states
- */
-export enum CalendarManagementType {
-  Connect = 1,
-  Edit = 2,
 }
 
 /**
@@ -326,7 +319,6 @@ export default {
   BookingStatus,
   BookingsViews,
   BookingsViewTypes,
-  CalendarManagementType,
   CalendarProviders,
   ColorPalette,
   ColourSchemes,

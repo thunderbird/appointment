@@ -273,6 +273,7 @@ aside {
           padding: 0.25rem 0.375rem;
           margin-inline-start: 0.25rem;
           border-radius: 8px;
+          white-space: nowrap;
         }
       }
     }

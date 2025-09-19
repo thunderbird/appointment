@@ -72,7 +72,7 @@ const timeFormat = computed({
 })
 
 // Start of Week
-// As long as we use Qalendar, we can only support Sunday and Monday as start of week
+// TODO: As long as we use Qalendar, we can only support Sunday and Monday as start of week
 const availableStartOfTheWeekOptions = computed(
   () => isoWeekdays.filter((day) => [7,1].includes(day.iso)).map((e) => ({
     label: e.min[0],
