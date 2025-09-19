@@ -30,7 +30,19 @@ platforms:
     deviceName: Google Pixel 10
     playwrightConfigOptions:
       name: Chrome-GooglePixel10
- 
+
+  - browserName: safari
+    osVersion: 18.5
+    deviceName: iPhone 16
+    playwrightConfigOptions:
+      name: Safari-iPhone16
+
+  - browserName: safari
+    osVersion: 17.5
+    deviceName: iPad Pro 11 2024
+    playwrightConfigOptions:
+      name: Safari-iPadPro11
+
 # =======================
 # Parallels per Platform
 # =======================

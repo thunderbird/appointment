@@ -33,7 +33,7 @@ test.describe('settings - start of week on mobile browser', {
   });
 
   test.afterEach(async ({ page }) => {
-    // close the browser page when we're done so it doesn't stay as a tab on mobile browser
+    // close the current browser page so it won't interfere with next test
     await page.close();
   });
 

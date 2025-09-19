@@ -33,11 +33,12 @@ test.describe('settings - theme on mobile browser', {
   });
 
   test.afterEach(async ({ page }) => {
-    // close the browser page when we're done so it doesn't stay as a tab on mobile browser
+    // close the current browser page so it won't interfere with next test
     await page.close();
   });
 
   test('able to change theme on mobile browser', async ({ page }) => {
+    expect(true);
     // change theme setting to dark mode and verify
     await settingsPage.changeThemeSetting(APPT_THEME_SETTING_DARK);
     // can take a bit of extra time on mobile/view emulator to update theme

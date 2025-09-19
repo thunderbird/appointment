@@ -5,6 +5,7 @@ import {
   FXA_PAGE_TITLE,
   APPT_LOGIN_PWORD, 
   TIMEOUT_1_SECOND,
+  TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
   TIMEOUT_90_SECONDS,
   TIMEOUT_60_SECONDS,
@@ -58,6 +59,7 @@ export class SplashscreenPage {
     await this.enterLoginEmail(APPT_LOGIN_EMAIL);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.clickLoginContinueBtn();
+    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
     await expect(this.page).toHaveTitle(FXA_PAGE_TITLE, { timeout: TIMEOUT_90_SECONDS }); // be generous in case FxA is slow to load
   }
 
