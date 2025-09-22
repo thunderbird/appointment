@@ -9,8 +9,8 @@ const userStore = useUserStore();
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
 const appointmentNotLoggedInNavItems = [
-  { route: 'login', i18nKey: 'logIn' },
-  { route: 'waiting-list', i18nKey: 'signUpForBeta' },
+  { route: '/login', i18nKey: 'logIn' },
+  { route: '/waiting-list', i18nKey: 'signUpForBeta' },
 ];
 
 const appointmentLoggedInNavItems = [
