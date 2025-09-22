@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { SecondaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
@@ -127,22 +127,25 @@ const onSubmit = async () => {
     </div>
   </div>
   <div class="buttons">
-    <secondary-button
+    <primary-button
       class="btn-switch"
+      variant="outline"
       @click="emits('switch')"
       v-if="showSwitch">
         {{ t('calDAVForm.switchToCalDAV') }}
-    </secondary-button>
-    <secondary-button
+    </primary-button>
+    <primary-button
       class="btn-back"
+      variant="outline"
       :title="t('label.back')"
       v-if="showPrevious"
       :disabled="isLoading"
       @click="emits('previous')"
     >{{ t('label.back') }}
-    </secondary-button>
-    <secondary-button
+    </primary-button>
+    <primary-button
       class="btn-continue"
+      variant="outline"
       :title="t('label.connectGoogleCalendar')"
       v-if="hasNextStep"
       @click="onSubmit()"
@@ -150,7 +153,7 @@ const onSubmit = async () => {
     >
       <template v-slot:icon><span :title="t('ftue.googleCalendarLogo')" class="google-calendar-logo"/></template>
       {{ t('label.connectGoogleCalendar') }}
-    </secondary-button>
+    </primary-button>
   </div>
 </template>
 

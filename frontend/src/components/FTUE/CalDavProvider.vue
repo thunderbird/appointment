@@ -8,7 +8,7 @@ import {
   CalendarListResponse, PydanticException,
 } from '@/models';
 import { clearFormErrors, handleFormError } from '@/utils';
-import { PrimaryButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const call = inject(callKey);
@@ -92,12 +92,12 @@ const onSubmit = async () => {
         </text-input>
       </form>
       <div class="buttons">
-        <secondary-button class="btn-switch" @click="emits('switch')" v-if="showSwitch">
+        <primary-button variant="outline" class="btn-switch" @click="emits('switch')" v-if="showSwitch">
         {{ t('calDAVForm.switchToGoogleCalendar') }}
-        </secondary-button>
-        <secondary-button @click="emits('previous')" v-if="showPrevious">
+        </primary-button>
+        <primary-button variant="outline" @click="emits('previous')" v-if="showPrevious">
         {{ t('label.back') }}
-        </secondary-button>
+        </primary-button>
         <primary-button
           :label="t('label.connect')"
           :disabled="isLoading"
