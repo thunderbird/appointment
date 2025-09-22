@@ -5,7 +5,6 @@ import { IconCalendarEvent, IconNotes } from '@tabler/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import { dayjsKey } from '@/keys';
-import { BookingStatus } from '@/definitions';
 
 interface Props {
   appointment: Appointment | null;
@@ -15,46 +14,16 @@ const props = defineProps<Props>();
 const dj = inject(dayjsKey);
 const { t } = useI18n();
 
-const status = computed(() => props.appointment?.slots[0].booking_status);
 const meetingLinkURL = computed(() => props.appointment?.slots[0].meeting_link_url);
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-const bookingStatusInfo = computed(() => {
-  switch (status.value) {
-    case BookingStatus.Booked:
-      return {
-        label: t('label.confirmed'),
-        color: 'status-confirmed'
-      }
-    case BookingStatus.Declined:
-      return {
-        label: t('label.declined'),
-        color: 'status-unconfirmed'
-      }
-    case BookingStatus.Cancelled:
-      return {
-        label: t('label.cancelled'),
-        color: 'status-unconfirmed'
-      }
-    case BookingStatus.Modified:
-      return {
-        label: t('label.modifyConfirmationRequested'),
-        color: 'status-modified'
-      }
-    default:
-      return {
-        label: t('label.unconfirmed'),
-        color: 'status-unconfirmed'
-      };
-  }
-});
 </script>
 
 <template>
   <div class="appointment-content">
     <!-- Appointment status, first focusable content for back-to-top screen reader button -->
-    <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
+    <!-- <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
       {{ bookingStatusInfo.label }}
-    </p>
+    </p> -->
 
     <div class="time-slots">
       <template v-for="s in appointment.slots" :key="s.start">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconX } from '@tabler/icons-vue'
+import { PhX } from '@phosphor-icons/vue'
 
 const { t } = useI18n();
 
@@ -84,7 +84,7 @@ defineExpose({
         @click="closePanel"
         :aria-label="t('label.closePanel')"
       >
-        <icon-x />
+        <ph-x size="24" />
       </button>
     </div>
 
@@ -169,11 +169,10 @@ defineExpose({
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--colour-neutral-border);
+  padding: 2rem 1.5rem 2.25rem 1.5rem;
   background-color: var(--colour-neutral-raised);
   flex-shrink: 0;
 
@@ -187,8 +186,9 @@ defineExpose({
 }
 
 .title {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 500;
+  font-family: metropolis;
   color: var(--colour-ti-base);
   flex: 1;
 }
@@ -197,11 +197,11 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: none;
-  background: none;
-  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 999px;
   color: var(--colour-ti-muted);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -221,7 +221,7 @@ defineExpose({
 .content {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding-inline: 1.5rem;
   background-color: var(--colour-neutral-base);
 }
 

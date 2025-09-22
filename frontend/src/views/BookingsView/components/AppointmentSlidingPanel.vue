@@ -41,6 +41,35 @@ const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
 const isPast = computed(() => props.appointment?.slots[0].start < dj());
+const bookingStatusInfo = computed(() => {
+  switch (status.value) {
+    case BookingStatus.Booked:
+      return {
+        label: t('label.confirmed'),
+        color: 'status-confirmed'
+      }
+    case BookingStatus.Declined:
+      return {
+        label: t('label.declined'),
+        color: 'status-unconfirmed'
+      }
+    case BookingStatus.Cancelled:
+      return {
+        label: t('label.cancelled'),
+        color: 'status-unconfirmed'
+      }
+    case BookingStatus.Modified:
+      return {
+        label: t('label.modifyConfirmationRequested'),
+        color: 'status-modified'
+      }
+    default:
+      return {
+        label: t('label.unconfirmed'),
+        color: 'status-unconfirmed'
+      };
+  }
+});
 
 // methods
 const closePanel = () => {
@@ -100,7 +129,6 @@ defineExpose({
 <template>
   <sliding-panel
     ref="panelRef"
-    :title="appointment?.title"
     @close="() => { resetPanelState(); emit('close')}"
   >
     <!-- Title (only editable in step MODIFY) -->
@@ -110,6 +138,14 @@ defineExpose({
         v-model="appointmentTitle"
         :placeholder="appointment.title"
       />
+    </template>
+
+    <template #title v-else-if="appointment">
+      <h1>{{ appointment?.title }}</h1>
+
+      <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
+        {{ bookingStatusInfo.label }}
+      </p>
     </template>
 
     <!-- Content (each panel step with respective props) -->
