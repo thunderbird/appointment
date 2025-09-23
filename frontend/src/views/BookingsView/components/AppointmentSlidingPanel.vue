@@ -271,7 +271,7 @@ defineExpose({
 /* CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS */
 .cta-single {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 
   .btn-confirm {
     flex-grow: 1;

@@ -158,6 +158,7 @@ const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.at
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .time-icon {
@@ -166,6 +167,7 @@ const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.at
   padding: 0.5rem;
   background-color: color-mix(in srgb, var(--colour-ti-highlight) 20%, transparent);
   border-radius: 9999px;
+  flex-shrink: 0;
 }
 
 .time-details .date {
@@ -241,6 +243,11 @@ const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.at
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+
+  & :first-child {
+    flex-shrink: 0;
+  }  
 }
 
 /* Notes section */
