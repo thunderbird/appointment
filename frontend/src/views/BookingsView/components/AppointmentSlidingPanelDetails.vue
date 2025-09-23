@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
 import { timeFormat } from '@/utils';
-import { IconCalendarEvent, IconNotes } from '@tabler/icons-vue';
+import { IconNotes } from '@tabler/icons-vue';
+import { PhClock, PhCalendarBlank, PhVideoCamera } from '@phosphor-icons/vue'
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
-import { dayjsKey } from '@/keys';
-import { BookingStatus } from '@/definitions';
+import { apiUrlKey, dayjsKey } from '@/keys';
+import { UserAvatar, VisualDivider } from '@thunderbirdops/services-ui';
+import { useUserStore } from '@/stores/user-store';
 
 interface Props {
   appointment: Appointment | null;
@@ -13,53 +15,22 @@ interface Props {
 const props = defineProps<Props>();
 
 const dj = inject(dayjsKey);
-const { t } = useI18n();
+const apiUrl = inject(apiUrlKey);
 
-const status = computed(() => props.appointment?.slots[0].booking_status);
+const { t } = useI18n();
+const user = useUserStore();
+
 const meetingLinkURL = computed(() => props.appointment?.slots[0].meeting_link_url);
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-const bookingStatusInfo = computed(() => {
-  switch (status.value) {
-    case BookingStatus.Booked:
-      return {
-        label: t('label.confirmed'),
-        color: 'status-confirmed'
-      }
-    case BookingStatus.Declined:
-      return {
-        label: t('label.declined'),
-        color: 'status-unconfirmed'
-      }
-    case BookingStatus.Cancelled:
-      return {
-        label: t('label.cancelled'),
-        color: 'status-unconfirmed'
-      }
-    case BookingStatus.Modified:
-      return {
-        label: t('label.modifyConfirmationRequested'),
-        color: 'status-modified'
-      }
-    default:
-      return {
-        label: t('label.unconfirmed'),
-        color: 'status-unconfirmed'
-      };
-  }
-});
+const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointment?.slug}/${props.appointment?.slots[0].id}`)
 </script>
 
 <template>
   <div class="appointment-content">
-    <!-- Appointment status, first focusable content for back-to-top screen reader button -->
-    <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
-      {{ bookingStatusInfo.label }}
-    </p>
-
     <div class="time-slots">
       <template v-for="s in appointment.slots" :key="s.start">
         <div class="time-slot">
-          <icon-calendar-event class="time-icon" :aria-label="t('label.timeOfTheEvent')" />
+          <ph-clock class="time-icon" weight="duotone" :aria-label="t('label.timeOfTheEvent')" />
           <div class="time-details">
             <p class="date">{{ dj(s.start).format('LL') }}</p>
             <div class="time-range">
@@ -67,42 +38,55 @@ const bookingStatusInfo = computed(() => {
               ({{ dj.duration(s.duration, 'minutes').humanize() }})
             </div>
           </div>
+          <a class="download-ics-button" :href="downloadICSUrl" download="invite.ics">
+            {{ t('label.downloadICS') }}
+          </a>
         </div>
       </template>
     </div>
 
     <div class="appointment-info">
-      <div class="info-row">
-        <span class="info-label">
-          {{ t('label.calendar') }}:
-        </span>
+      <ph-calendar-blank class="icon" />
+      <span class="info-label">
+        {{ t('label.calendar') }}
+      </span>
+      <span>
         {{ appointment.calendar_title }}
+      </span>
+
+      <ph-video-camera class="icon" />
+      <span class="info-label">
+        {{ t('label.videoLink') }}
+      </span>
+      <a v-if="meetingLinkURL" :href="meetingLinkURL" class="video-link" target="_blank">
+        {{ meetingLinkURL }}
+      </a>
+      <span v-else>
+        {{ t('label.notProvided') }}
+      </span>
+    </div>
+
+    <VisualDivider />
+
+    <div class="attendees-section">
+      <div class="attendees-header">
+        {{ t('label.attendees') }}
       </div>
-      <div class="info-row">
-        <div class="info-row">
-          <span class="info-label">
-            {{ t('label.videoLink') }}:
-          </span>
-          <a v-if="meetingLinkURL" :href="meetingLinkURL" class="video-link" target="_blank">
-            {{ meetingLinkURL }}
-          </a>
-          <span v-else>
-            {{ t('label.notProvided') }}
-          </span>
+      <div class="attendees-content">
+        <div class="attendee-item">
+          <UserAvatar :avatar-url="user.data.avatarUrl" :username="user.data.username" size="small" />
+          {{ user.data.username }} ({{ t('label.host') }})
         </div>
+        <template v-for="s in attendeesSlots" :key="s.start">
+          <div class="attendee-item">
+            <UserAvatar :username="s.attendee.email" size="small" />
+            {{ s.attendee.email }}
+          </div>
+        </template>
       </div>
     </div>
 
-    <div v-if="attendeesSlots.length > 0" class="attendees-section">
-      <div class="attendees-header">
-        {{ t('label.attendees') }}:
-      </div>
-      <template v-for="s in attendeesSlots" :key="s.start">
-        <div class="attendee-item">
-          {{ s.attendee.email }}
-        </div>
-      </template>
-    </div>
+    <VisualDivider />
 
     <div v-if="appointment.details" class="notes-section">
       <div class="notes-header">
@@ -115,8 +99,14 @@ const bookingStatusInfo = computed(() => {
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .appointment-content {
-  color: var(--colour-ti-base);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-block-end: 2rem;
+  color: var(--colour-ti-secondary);
 }
 
 /* Status labels */
@@ -163,49 +153,75 @@ const bookingStatusInfo = computed(() => {
 
 /* Time slots section */
 .time-slots {
-  margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
   font-size: 0.875rem;
+  background-color: var(--colour-neutral-lower);
 }
 
 .time-slot {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
+  gap: 1rem;
+
+  .download-ics-button {
+    font-size: 0.75rem;
+    color: var(--colour-ti-highlight);
+    text-decoration: underline;
+    text-underline-offset: 0.125rem;
+  }
 }
 
 .time-icon {
-  width: 2rem;
-  height: 2rem;
-  fill: transparent;
-  stroke: var(--colour-ti-muted);
-  stroke-width: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  background-color: color-mix(in srgb, var(--colour-ti-highlight) 20%, transparent);
+  border-radius: 9999px;
+  flex-shrink: 0;
 }
 
-.time-details .date {
-  margin: 0;
+.time-details {
+  flex-grow: 1;
+
+  .date {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.32;
+  }
 }
 
 .time-range {
   margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--colour-ti-secondary);
 }
 
 /* Appointment info section */
 .appointment-info {
-  margin-bottom: 1.5rem;
-  width: max-content;
-  max-width: 100%;
-  font-size: 0.875rem;
+  display: grid;
+  grid-template-columns: 1.5rem minmax(auto-fit, 116px) 1fr;
+  align-items: center;
+  row-gap: 0.75rem;
+  column-gap: 0.5rem;
+  font-size: 1rem;
+
+  .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--colour-ti-highlight);
+  }
 }
 
 .info-row {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .info-label {
   font-weight: 600;
+  font-size: 1rem;
 }
 
 .video-link {
@@ -220,24 +236,34 @@ const bookingStatusInfo = computed(() => {
 
 /* Attendees section */
 .attendees-section {
-  margin-bottom: 1.5rem;
   width: max-content;
   max-width: 100%;
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .attendees-header {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
 }
 
+.attendees-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .attendee-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+
+  & :first-child {
+    flex-shrink: 0;
+  }  
 }
 
 /* Notes section */
@@ -272,5 +298,11 @@ const bookingStatusInfo = computed(() => {
 
 .dark .notes-content {
   border-color: var(--colour-neutral-border);
+}
+
+@media (--md) {
+  .appointment-info {
+    grid-template-columns: 1.5rem minmax(auto, 100px) 1fr;
+  }
 }
 </style>

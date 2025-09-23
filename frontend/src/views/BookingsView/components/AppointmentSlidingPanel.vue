@@ -41,6 +41,35 @@ const isExpired = computed(() => {
   return props.appointment?.slots.reduce((p, c) => dj.max(p, dj(c.start).add(c.duration, 'minutes')), dj('1970-01-01')) < dj();
 });
 const isPast = computed(() => props.appointment?.slots[0].start < dj());
+const bookingStatusInfo = computed(() => {
+  switch (status.value) {
+    case BookingStatus.Booked:
+      return {
+        label: t('label.confirmed'),
+        color: 'status-confirmed'
+      }
+    case BookingStatus.Declined:
+      return {
+        label: t('label.declined'),
+        color: 'status-unconfirmed'
+      }
+    case BookingStatus.Cancelled:
+      return {
+        label: t('label.cancelled'),
+        color: 'status-unconfirmed'
+      }
+    case BookingStatus.Modified:
+      return {
+        label: t('label.modifyConfirmationRequested'),
+        color: 'status-modified'
+      }
+    default:
+      return {
+        label: t('label.unconfirmed'),
+        color: 'status-unconfirmed'
+      };
+  }
+});
 
 // methods
 const closePanel = () => {
@@ -100,7 +129,6 @@ defineExpose({
 <template>
   <sliding-panel
     ref="panelRef"
-    :title="appointment?.title"
     @close="() => { resetPanelState(); emit('close')}"
   >
     <!-- Title (only editable in step MODIFY) -->
@@ -110,6 +138,15 @@ defineExpose({
         v-model="appointmentTitle"
         :placeholder="appointment.title"
       />
+    </template>
+
+    <template #title v-else-if="appointment">
+      <h1>{{ appointment?.title }}</h1>
+
+      <!-- TODO: Replace this with the Badge component from services-ui when ready -->
+      <span :class="['status-badge', bookingStatusInfo.color]">
+        {{ bookingStatusInfo.label }}
+      </span>
     </template>
 
     <!-- Content (each panel step with respective props) -->
@@ -211,10 +248,30 @@ defineExpose({
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
+.status-badge {
+  border: 1px solid transparent;
+  border-radius: 4rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--colour-ti-secondary);
+  text-transform: uppercase;
+
+  &.status-confirmed {
+    border-color: var(--colour-ti-success);
+    background-color: var(--colour-success-soft);
+  }
+
+  &.status-unconfirmed {
+    border-color: var(--colour-ti-warning);
+    background-color: var(--colour-warning-soft);
+  }
+}
+
 /* CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS */
 .cta-single {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 
   .btn-confirm {
     flex-grow: 1;
@@ -227,7 +284,7 @@ defineExpose({
 
 .cta-dual {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 1rem;
   flex-wrap: wrap;
 }
