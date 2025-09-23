@@ -4,7 +4,7 @@ import {
   onMounted, inject, ref, computed, watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import { PrimaryButton, SecondaryButton, SyncCard } from '@thunderbirdops/services-ui';
+import { PrimaryButton, SyncCard } from '@thunderbirdops/services-ui';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { callKey } from '@/keys';
@@ -81,15 +81,16 @@ const onSubmit = async () => {
     </form>
   </div>
   <div class="buttons">
-    <secondary-button
+    <primary-button
       class="btn-back"
+      variant="outline"
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="ftueStore.previousStep()"
     >
       {{ t('label.back') }}
-    </secondary-button>
+    </primary-button>
     <primary-button
       class="btn-continue"
       :aria-label="continueTitle"

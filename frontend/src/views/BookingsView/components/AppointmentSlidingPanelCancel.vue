@@ -5,7 +5,7 @@ import { Appointment } from '@/models';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import ArtSuccessfulBooking from '@/elements/arts/ArtSuccessfulBooking.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import { SecondaryButton, DangerButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 
 const { t } = useI18n();
@@ -50,13 +50,14 @@ async function cancelAppointment() {
         <p class="confirmation-text">{{ t('info.bookingWillBeCanceled') }}</p>
       </div>
       <div class="confirmation-button-container">
-        <secondary-button
+        <primary-button
+          variant="outline"
           data-testid="appointment-modal-confirm-cancel-back-btn"
           @click="emit('click:backButton')"
           :title="t('label.back')"
         >
           {{ t('label.back') }}
-        </secondary-button>
+        </primary-button>
         <danger-button
           data-testid="appointment-modal-confirm-cancel-btn"
           @click="cancelAppointment()"

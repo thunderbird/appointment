@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { BubbleSelect, SecondaryButton, PrimaryButton, TextInput, SelectInput } from '@thunderbirdops/services-ui';
+import { BubbleSelect, PrimaryButton, TextInput, SelectInput } from '@thunderbirdops/services-ui';
 import { DateFormatStrings, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { useUserStore } from '@/stores/user-store';
@@ -175,15 +175,16 @@ onMounted(async () => {
     </form>
   </div>
   <div class="buttons">
-    <secondary-button
+    <primary-button
       class="btn-back"
+      variant="outline"
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="ftueStore.previousStep()"
     >
       {{ t('label.back') }}
-    </secondary-button>
+    </primary-button>
     <primary-button
       class="btn-continue"
       :title="t('label.continue')"

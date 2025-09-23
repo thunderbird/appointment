@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
-import CautionButton from '@/elements/CautionButton.vue';
+import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconX } from '@tabler/icons-vue';
@@ -44,12 +42,15 @@ const emit = defineEmits(['close', 'confirm', 'error']);
       {{ message }}
     </div>
     <div class="flex gap-4">
-      <secondary-button
+      <primary-button
         class="btn-close"
+        variant="outline"
         :label="cancelLabel"
         @click="emit('close')"
         :title="t('label.close')"
-      />
+      >
+        {{ t('label.close') }}
+      </primary-button>
       <primary-button
         v-if="!useCautionButton"
         class="btn-confirm"
@@ -57,13 +58,15 @@ const emit = defineEmits(['close', 'confirm', 'error']);
         @click="emit('confirm')"
         :title="t('label.confirm')"
       />
-      <caution-button
+      <danger-button
         v-else
         class="btn-confirm"
         :label="confirmLabel"
         @click="emit('confirm')"
         :title="t('label.confirm')"
-      />
+      >
+        {{ t('label.confirm') }}
+      </danger-button>
     </div>
   </div>
 </template>

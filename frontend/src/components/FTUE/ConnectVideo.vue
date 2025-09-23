@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import { onMounted, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { PrimaryButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
@@ -121,14 +121,15 @@ const connectZoom = async () => {
     </div>
   </div>
   <div class="buttons">
-    <secondary-button
+    <primary-button
       class="btn-back"
+      variant="outline"
       :title="t('label.back')"
       v-if="hasPreviousStep"
       :disabled="isLoading"
       @click="ftueStore.previousStep()"
     >{{ t('label.back') }}
-    </secondary-button>
+    </primary-button>
     <primary-button
       class="btn-continue"
       :title="t('label.continue')"

@@ -6,8 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { SubscriberLevels } from '@/definitions';
 import { createUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 // icons
 import { IconPencil } from '@tabler/icons-vue';
@@ -81,18 +80,23 @@ onMounted(async () => {
         <div class="text-center text-gray-500">{{ t('heading.pendingAppointments') }}</div>
       </div>
     </div>
-    <secondary-button
+    <primary-button
       v-if="isFxaAuth || isOidcAuth"
       class="btn-edit mb-8"
+      variant="outline"
       :label="t('label.editProfile')"
       @click="editProfile"
       :title="t('label.edit')"
-    />
+    >
+      {{ t('label.edit') }}
+    </primary-button>
     <primary-button
       :label="t('label.logOut')"
       class="btn-logout"
       @click="logout"
       :title="t('label.logOut')"
-    />
+    >
+      {{ t('label.logOut') }}
+    </primary-button>
   </div>
 </template>

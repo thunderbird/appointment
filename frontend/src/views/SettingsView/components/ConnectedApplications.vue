@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IconDots } from '@tabler/icons-vue';
-import { SecondaryButton, PrimaryBadge, CheckboxInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, PrimaryBadge, CheckboxInput } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
@@ -256,12 +256,12 @@ async function refreshData() {
   </div>
 
   <div class="footer-buttons-container">
-    <secondary-button @click="connectGoogleCalendar">
+    <primary-button variant="outline" @click="connectGoogleCalendar">
       {{ t('label.addGoogleCalendar') }}
-    </secondary-button>
-    <secondary-button @click="connectCalDavModalOpen = true">
+    </primary-button>
+    <primary-button variant="outline" @click="connectCalDavModalOpen = true">
       {{ t('label.addCalDavCalendar') }}
-    </secondary-button>
+    </primary-button>
   </div>
 
   <!-- Connect CalDav Modal Flow -->

@@ -136,6 +136,14 @@
   }
 }
 
+@layer utilities {
+  /* Our outline button has the same .outline class as Tailwind,
+     but we don't want it to set a double visible outline */
+  .outline {
+    outline-style: none;
+  }
+}
+
 /* vue specific classes */
 .v-enter-active,
 .v-leave-active {
@@ -231,6 +239,7 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--colour-neutral-lower);
+  color: var(--colour-ti-secondary);
 }
 
 #app {

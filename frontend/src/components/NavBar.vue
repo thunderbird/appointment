@@ -3,14 +3,13 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import UserAvatar from '@/elements/UserAvatar.vue';
 import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
 import { TooltipPosition } from '@/definitions';
 import { IconExternalLink } from '@tabler/icons-vue';
 import { PhLinkSimple } from '@phosphor-icons/vue';
-import { ToolTip } from '@thunderbirdops/services-ui';
+import { UserAvatar, ToolTip } from '@thunderbirdops/services-ui';
 
 // component constants
 const user = useUserStore();
@@ -48,7 +47,6 @@ const copyLink = async () => {
     myLinkTooltip.value = t('label.copyLink');
   }, 2000);
 };
-
 </script>
 
 <template>
@@ -90,8 +88,7 @@ const copyLink = async () => {
 
         <drop-down class="user-dropdown" ref="profileDropdown">
           <template #trigger>
-            <!-- TODO: Replace UserAvatar with component from services-ui -->
-            <user-avatar />
+            <user-avatar :username="user.data.username" :avatar-url="user.data.avatarUrl" />
           </template>
           <template #default>
             <div

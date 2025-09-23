@@ -9,9 +9,7 @@ import {
   TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent,
 } from '@/models';
 import ListPagination from '@/elements/ListPagination.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
-import SecondaryButton from '@/elements/SecondaryButton.vue';
-import CautionButton from '@/elements/CautionButton.vue';
+import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
 import TextButton from '@/elements/TextButton.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
@@ -209,22 +207,23 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
                 >
                   {{ fieldData.value }}
                 </primary-button>
-                <secondary-button
+                <primary-button
                   v-else-if="fieldData.buttonType === TableDataButtonType.Secondary"
+                  variant="outline"
                   :disabled="fieldData.disabled"
                   :title="fieldData?.tooltip"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}
-                </secondary-button>
-                <caution-button
+                </primary-button>
+                <danger-button
                   v-else-if="fieldData.buttonType === TableDataButtonType.Caution"
                   :disabled="fieldData.disabled"
                   :title="fieldData?.tooltip"
                   @click="emit('fieldClick', fieldKey, datum)"
                 >
                   {{ fieldData.value }}
-                </caution-button>
+                </danger-button>
               </span>
             </td>
           </tr>

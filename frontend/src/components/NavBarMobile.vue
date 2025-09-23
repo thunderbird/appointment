@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import ArtLogo from '@/elements/arts/ArtLogo.vue';
-import UserAvatar from '@/elements/UserAvatar.vue';
 import {
   IconMenu2,
   IconX,
@@ -16,7 +15,7 @@ import {
   IconChevronDown,
   IconUserSquare,
 } from '@tabler/icons-vue';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
 
 // component constants
 const userStore = useUserStore();
@@ -97,7 +96,7 @@ async function copyLink() {
         <details class="footer-accordion">
           <summary class="footer-header">
             <div class="user-info">
-              <user-avatar />
+              <user-avatar :username="userStore.data.username" :avatar-url="userStore.data.avatarUrl" />
               <span class="user-email">{{ userStore.data.email }}</span>
             </div>
             <icon-chevron-down size="20" class="chevron-icon" />

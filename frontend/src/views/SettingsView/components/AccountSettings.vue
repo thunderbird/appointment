@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
-import { DangerButton, SecondaryButton, TextInput } from '@thunderbirdops/services-ui';
+import { DangerButton, PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
 import { IconCopy, IconArrowRight } from '@tabler/icons-vue';
 import { createUserStore } from '@/stores/user-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -106,30 +106,40 @@ const actuallyDownloadData = async () => {
     </label>
     <div class="booking-page-url-input-container">
       <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.myLink" />
-      <secondary-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip">
+      <primary-button
+        variant="outline"
+        aria-labelledby="copy-booking-page-url-button"
+        @click="copyLink"
+        :tooltip="copyLinkTooltip"
+      >
         <icon-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
-      </secondary-button>
+      </primary-button>
     </div>
   </div>
 
   <div class="booking-page-settings-container">
-    <secondary-button class="booking-page-settings-button" @click="router.push({ name: 'availability' })">
+    <primary-button
+      class="booking-page-settings-button"
+      variant="outline"
+      @click="router.push({ name: 'availability' })"
+    >
       <span>
         {{ t('label.bookingPageSettings') }}
         <icon-arrow-right size="18" />
       </span>
-    </secondary-button>
+    </primary-button>
   </div>
 
   <div class="button-info-container">
     <span>{{ t('info.downloadAccountData') }}</span>
-    <secondary-button
+    <primary-button
       :title="t('label.download')"
+      variant="outline"
       @click="actuallyDownloadData"
       data-testid="settings-account-download-data-btn"
     >
       {{ t('label.downloadMyData') }}
-    </secondary-button>
+    </primary-button>
   </div>
 
   <div class="button-info-container">

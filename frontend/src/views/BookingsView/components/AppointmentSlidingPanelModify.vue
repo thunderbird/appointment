@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n';
 import { Appointment, SelectOption } from '@/models';
 import { dayjsKey } from '@/keys';
 import { timeFormat } from '@/utils';
-import { SecondaryButton, PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useUserStore } from '@/stores/user-store';
 
@@ -185,13 +185,14 @@ defineExpose({
         <p class="confirmation-text">{{ t('info.bookingModifiedError') }}</p>
       </div>
       <div class="confirmation-button-container">
-        <secondary-button
+        <primary-button
+          variant="outline"
           data-testid="appointment-modal-modify-close-btn"
           @click="emit('close')"
           :title="t('label.close')"
         >
           {{ t('label.close') }}
-        </secondary-button>
+        </primary-button>
         <primary-button
           data-testid="appointment-modal-modify-try-again-btn"
           @click="handleTryAgainClicked()"
@@ -210,13 +211,14 @@ defineExpose({
         <h2 class="confirmation-title">{{ t('info.bookingModified') }}</h2>
         <p class="confirmation-text">{{ t('info.bookingModifiedSuccess') }}</p>
       </div>
-      <secondary-button
+      <primary-button
+        variant="outline"
         data-testid="appointment-modal-modify-close-btn"
         @click="emit('close')"
         :title="t('label.close')"
       >
         {{ t('label.close') }}
-      </secondary-button>
+      </primary-button>
     </div>
   </template>
 </template>

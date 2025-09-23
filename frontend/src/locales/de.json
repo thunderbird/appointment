@@ -648,5 +648,10 @@
       "Bitte bestätige deine E-Mail-Adresse, um auf die Warteliste zu kommen.",
       "In Kürze erhätst du weitere Informationen in deinen Posteingang."
     ]
+  },
+  "footer": {
+    "creativeCommonsLinkText": "Creative-Commons-Lizenz",
+    "copywrite": "Thunderbird gehört zu {mzlaLink}, einer vollständigen Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts unterliegen dem Copyright ©1998-{currentYear} einzelner Mitwirkender. Der Inhalt ist unter einer {creativeCommonsLink} verfügbar.",
+    "mzlaLinkText": "MZLA Technologies Corporation"
   }
 }

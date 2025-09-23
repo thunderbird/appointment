@@ -647,5 +647,10 @@
       "Please confirm your email to join our waiting list.",
       "Check your inbox for more information shortly."
     ]
+  },
+  "footer": {
+    "copywrite": "Thunderbird is part of {mzlaLink}, a wholly owned subsidiary of Mozilla Foundation. Portions of this content are ©1998–{currentYear} by individual contributors. Content available under a {creativeCommonsLink}.",
+    "creativeCommonsLinkText": "Creative Commons license",
+    "mzlaLinkText": "MZLA Technologies Corporation"
   }
 }
