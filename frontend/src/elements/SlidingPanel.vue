@@ -91,17 +91,15 @@ defineExpose({
     <!-- Content -->
     <div ref="content" class="content" tabindex="-1">
       <slot />
+
       <button
         class="screen-reader-only"
         @click="focusOnContentTop"
         :aria-label="t('label.backToTop')"
       />
-    </div>
 
-    <!-- CTA Container -->
-    <div v-if="$slots.cta" class="cta-container">
       <slot name="cta" />
-    </div>    
+    </div>
   </dialog>
 </template>
 
@@ -173,7 +171,7 @@ defineExpose({
   justify-content: space-between;
   gap: 1rem;
   padding: 2rem 1.5rem 2.25rem 1.5rem;
-  background-color: var(--colour-neutral-raised);
+  background-color: var(--colour-neutral-base);
   flex-shrink: 0;
 
   &.header--right-side {
@@ -223,12 +221,5 @@ defineExpose({
   overflow-y: auto;
   padding-inline: 1.5rem;
   background-color: var(--colour-neutral-base);
-}
-
-.cta-container {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--colour-neutral-border);
-  background-color: var(--colour-neutral-raised);
-  flex-shrink: 0;
 }
 </style>

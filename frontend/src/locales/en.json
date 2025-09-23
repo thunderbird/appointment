@@ -309,6 +309,7 @@
     "guest": "{count} guests | {count} guest | {count} guests",
     "hardDelete": "Hard Delete",
     "home": "Home",
+    "host": "Host",
     "id": "Id",
     "immediately": "instant",
     "inPerson": "In person",

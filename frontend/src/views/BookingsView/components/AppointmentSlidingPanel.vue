@@ -143,9 +143,10 @@ defineExpose({
     <template #title v-else-if="appointment">
       <h1>{{ appointment?.title }}</h1>
 
-      <p :class="['status-label', bookingStatusInfo.color]" tabindex="-1">
+      <!-- TODO: Replace this with the Badge component from services-ui when ready -->
+      <span :class="['status-badge', bookingStatusInfo.color]">
         {{ bookingStatusInfo.label }}
-      </p>
+      </span>
     </template>
 
     <!-- Content (each panel step with respective props) -->
@@ -247,6 +248,26 @@ defineExpose({
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
+.status-badge {
+  border: 1px solid transparent;
+  border-radius: 4rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--colour-ti-secondary);
+  text-transform: uppercase;
+
+  &.status-confirmed {
+    border-color: var(--colour-ti-success);
+    background-color: var(--colour-success-soft);
+  }
+
+  &.status-unconfirmed {
+    border-color: var(--colour-ti-warning);
+    background-color: var(--colour-warning-soft);
+  }
+}
+
 /* CTA buttons for APPOINTMENT_SLIDING_PANEL_STEPS.DETAILS */
 .cta-single {
   display: flex;
@@ -263,7 +284,7 @@ defineExpose({
 
 .cta-dual {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 1rem;
   flex-wrap: wrap;
 }
