@@ -5,7 +5,7 @@ import { IconNotes } from '@tabler/icons-vue';
 import { PhClock, PhCalendarBlank, PhVideoCamera } from '@phosphor-icons/vue'
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
-import { dayjsKey } from '@/keys';
+import { apiUrlKey, dayjsKey } from '@/keys';
 import { UserAvatar, VisualDivider } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 
@@ -15,11 +15,14 @@ interface Props {
 const props = defineProps<Props>();
 
 const dj = inject(dayjsKey);
+const apiUrl = inject(apiUrlKey);
+
 const { t } = useI18n();
 const user = useUserStore();
 
 const meetingLinkURL = computed(() => props.appointment?.slots[0].meeting_link_url);
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
+const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointment?.slug}/${props.appointment?.slots[0].id}`)
 </script>
 
 <template>
@@ -35,6 +38,9 @@ const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.at
               ({{ dj.duration(s.duration, 'minutes').humanize() }})
             </div>
           </div>
+          <a class="download-ics-button" :href="downloadICSUrl" download="invite.ics">
+            {{ t('label.downloadICS') }}
+          </a>
         </div>
       </template>
     </div>
@@ -158,7 +164,13 @@ const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.at
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
+
+  .download-ics-button {
+    font-size: 0.75rem;
+    color: var(--colour-ti-highlight);
+    text-decoration: underline;
+    text-underline-offset: 0.125rem;
+  }
 }
 
 .time-icon {
@@ -170,11 +182,15 @@ const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.at
   flex-shrink: 0;
 }
 
-.time-details .date {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.32;
+.time-details {
+  flex-grow: 1;
+
+  .date {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.32;
+  }
 }
 
 .time-range {

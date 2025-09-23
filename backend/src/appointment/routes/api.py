@@ -17,6 +17,7 @@ from ..database import repo, schemas, models
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
+from fastapi.responses import Response
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, InviteStatus, MeetingLinkProviderType
@@ -451,7 +452,7 @@ def read_remote_events(
     return events
 
 
-@router.get('/apmt/serve/ics/{slug}/{slot_id}', response_model=schemas.FileDownload)
+@router.get('/apmt/serve/ics/{slug}/{slot_id}')
 def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(get_db)):
     """endpoint to serve ICS file for time slot to download"""
     db_appointment = repo.appointment.get_public(db, slug=slug)
@@ -467,10 +468,12 @@ def public_appointment_serve_ics(slug: str, slot_id: int, db: Session = Depends(
 
     organizer = repo.subscriber.get_by_appointment(db=db, appointment_id=db_appointment.id)
 
-    return schemas.FileDownload(
-        name='invite',
-        content_type='text/calendar',
-        data=Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode('utf-8'),
+    ics_text = Tools().create_vevent(appointment=db_appointment, slot=slot, organizer=organizer).decode('utf-8')
+
+    return Response(
+        content=ics_text,
+        media_type='text/calendar; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename="invite.ics"'},
     )
 
 

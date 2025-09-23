@@ -193,10 +193,17 @@ class TestAppointment:
 
         response = with_client.get(f'/apmt/serve/ics/{generated_appointment.slug}/{generated_appointment.slots[0].id}')
         assert response.status_code == 200, response.text
-        data = response.json()
-        assert data['name'] == 'invite'
-        assert data['content_type'] == 'text/calendar'
-        assert 'data' in data
+
+        content_type = response.headers.get('content-type', '')
+        assert 'text/calendar' in content_type
+
+        content_disposition = response.headers.get('content-disposition', '')
+        assert 'attachment' in content_disposition
+        assert 'filename="invite.ics"' in content_disposition
+
+        # Body should contain ICS content
+        assert 'BEGIN:VCALENDAR' in response.text
+        assert 'BEGIN:VEVENT' in response.text
 
     def test_get_invitation_ics_file_for_missing_appointment(self, with_client, make_appointment):
         generated_appointment = make_appointment()
