@@ -16,8 +16,7 @@ from ..database import repo, schemas, models
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
-from fastapi.responses import Response
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Response, Query
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
 from ..database.models import Subscriber, CalendarProvider, InviteStatus, MeetingLinkProviderType
