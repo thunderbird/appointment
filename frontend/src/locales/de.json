@@ -311,7 +311,7 @@
     "guest": "{count} Gäste | {count} Gast | {count} Gäste",
     "hardDelete": "Endgültig Löschen",
     "home": "Start",
-    "host": "Gastgeber",
+    "host": "Organisator",
     "id": "ID",
     "immediately": "Sofort",
     "inPerson": "Vor Ort",
