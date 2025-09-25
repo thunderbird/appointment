@@ -19,11 +19,11 @@ export class AvailabilityPage {
   readonly setAvailabilityText: Locator;
   readonly bookableToggle: Locator;
   readonly bookableToggleContainer: Locator;
-  readonly timeZoneText: Locator;
-  readonly editTimeZoneBtn: Locator;
+  readonly timeZoneSelect: Locator;
   readonly calendarSelect: Locator;
   readonly autoConfirmBookingsCheckBox: Locator;
   readonly customizePerDayCheckBox: Locator;
+  readonly customizePerDayCheckBoxContainer: Locator;
   readonly allStartTimeInput: Locator;
   readonly allEndTimeInput: Locator;
   readonly customStartTime1Input: Locator;
@@ -37,8 +37,8 @@ export class AvailabilityPage {
   readonly bookingPageNameInput: Locator;
   readonly bookingPageDescInput: Locator;
   readonly bookingPageMtgLinkInput: Locator;
-  readonly bookingPageMtgDur15MinRadio: Locator;
-  readonly bookingPageMtgDur30MinRadio: Locator;
+  readonly bookingPageMtgDur15MinBtn: Locator;
+  readonly bookingPageMtgDur30MinBtn: Locator;
   readonly bookingPageLinkHdr: Locator;
   readonly refreshLinkBtn: Locator;
   readonly refreshLinkConfirmTxt: Locator;
@@ -48,19 +48,19 @@ export class AvailabilityPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.saveChangesBtn = this.page.getByRole('button', { name: 'Save', exact: true });
+    this.saveChangesBtn = this.page.getByTestId('notice-bar').getByRole('button', { name: 'Save changes' });
     this.savedSuccessfullyText = this.page.getByText('Availability saved successfully', { exact: true });
-    this.revertChangesBtn = this.page.getByRole('button', { name: 'Revert changes', exact: true });
+    this.revertChangesBtn = this.page.getByTestId('notice-bar').getByRole('button', { name: 'Revert changes' });
 
     // set your availability section
     this.setAvailabilityText = this.page.getByText('Set Your Availability');
     this.bookableToggle = this.page.getByTestId('availability-set-availability-toggle');
     this.bookableToggleContainer = this.page.getByTitle('Activate schedule');
-    this.timeZoneText = this.page.getByText(APPT_TIMEZONE_SETTING_PRIMARY);
-    this.editTimeZoneBtn = this.page.getByRole('button', { name: 'Edit' });
+    this.timeZoneSelect = this.page.getByLabel(APPT_TIMEZONE_SETTING_PRIMARY);
     this.calendarSelect = this.page.locator('select[name="calendar"]');
     this.autoConfirmBookingsCheckBox = this.page.getByTestId('availability-automatically-confirm-checkbox');
     this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
+    this.customizePerDayCheckBoxContainer = this.page.locator('#app div').filter({ hasText: 'Set custom times for each day' }).nth(4);
     this.allStartTimeInput = this.page.locator('#start_time');
     this.allEndTimeInput = this.page.locator('#end_time');
     this.customStartTime1Input = this.page.getByTestId('availability-start-time-1-0-input');
@@ -68,16 +68,16 @@ export class AvailabilityPage {
     this.customStartTime3Input = this.page.getByTestId('availability-start-time-3-0-input');
     this.customStartTime4Input = this.page.getByTestId('availability-start-time-4-0-input');
     this.customStartTime5Input = this.page.getByTestId('availability-start-time-5-0-input');
-    this.minNoticeInput = this.page.getByRole('radio', { name: 'instant' });
-    this.bookingWindowInput = this.page.getByRole('radio', { name: '7 days' });
+    this.minNoticeInput = this.page.getByRole('button', { name: 'instant' });
+    this.bookingWindowInput = this.page.getByRole('button', { name: '7 days' });
 
     // booking page details section
     this.bookingPageDetailsHdr = this.page.getByRole('heading', { name: 'Booking Page Details' });
     this.bookingPageNameInput = this.page.locator('#pageName');
     this.bookingPageDescInput = this.page.locator('#pageDescription');
     this.bookingPageMtgLinkInput = this.page.locator('#virtualMeetingLink');
-    this.bookingPageMtgDur15MinRadio = this.page.getByText('15 Min');
-    this.bookingPageMtgDur30MinRadio = this.page.getByText('30 Min');
+    this.bookingPageMtgDur15MinBtn = this.page.getByText('15 Min');
+    this.bookingPageMtgDur30MinBtn = this.page.getByRole('button', { name: '30 Min' });
 
     // booking page link section
     this.bookingPageLinkHdr = this.page.getByRole('heading', { name: 'Your Booking Page Link' });
@@ -93,11 +93,11 @@ export class AvailabilityPage {
    */
   async gotoAvailabilityPage() {
     // go to availability page, sometimes takes a bit to load all element values!
-    await this.page.goto(APPT_AVAILABILITY_PAGE);
+    await this.page.goto(APPT_AVAILABILITY_PAGE, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
-    await this.bookingPageMtgDur15MinRadio.waitFor({ timeout: TIMEOUT_30_SECONDS });
+    await this.bookingPageMtgDur15MinBtn.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.minNoticeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
   }
 
@@ -157,20 +157,23 @@ export class AvailabilityPage {
   async turnOnCustomizePerDayAndVerify() {
     await this.customizePerDayCheckBox.scrollIntoViewIfNeeded(); 
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.customizePerDayCheckBox.check();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-    await expect(this.customStartTime1Input).toBeVisible();
-    await expect(this.customStartTime1Input).toBeEnabled();
-    await expect(this.customStartTime2Input).toBeVisible();
-    await expect(this.customStartTime2Input).toBeEnabled();
-    await expect(this.customStartTime3Input).toBeVisible();
-    await expect(this.customStartTime3Input).toBeEnabled();
-    await expect(this.customStartTime4Input).toBeVisible();
-    await expect(this.customStartTime4Input).toBeEnabled();
-    await expect(this.customStartTime5Input).toBeVisible();
-    await this.customStartTime5Input.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(this.customStartTime5Input).toBeEnabled();
+    if (!await this.customizePerDayCheckBox.isChecked()) {
+      // container blocks cbox itself so click container to change
+      await this.customizePerDayCheckBoxContainer.click();
+      await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+      await expect(this.customStartTime1Input).toBeVisible();
+      await expect(this.customStartTime1Input).toBeEnabled();
+      await expect(this.customStartTime2Input).toBeVisible();
+      await expect(this.customStartTime2Input).toBeEnabled();
+      await expect(this.customStartTime3Input).toBeVisible();
+      await expect(this.customStartTime3Input).toBeEnabled();
+      await expect(this.customStartTime4Input).toBeVisible();
+      await expect(this.customStartTime4Input).toBeEnabled();
+      await expect(this.customStartTime5Input).toBeVisible();
+      await this.customStartTime5Input.scrollIntoViewIfNeeded();
+      await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+      await expect(this.customStartTime5Input).toBeEnabled();
+    }
   }
 
   /**
@@ -179,12 +182,15 @@ export class AvailabilityPage {
   async turnOffCustomizePerDayAndVerify() {
     await this.customizePerDayCheckBox.scrollIntoViewIfNeeded();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.customizePerDayCheckBox.uncheck();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-    await expect(this.customStartTime1Input).toBeHidden();
-    await expect(this.customStartTime2Input).toBeHidden();
-    await expect(this.customStartTime3Input).toBeHidden();
-    await expect(this.customStartTime4Input).toBeHidden();
-    await expect(this.customStartTime5Input).toBeHidden();
+    if (await this.customizePerDayCheckBox.isChecked()) {
+      // container blocks cbox itself so click container to change
+      await this.customizePerDayCheckBoxContainer.click();
+      await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+      await expect(this.customStartTime1Input).toBeHidden();
+      await expect(this.customStartTime2Input).toBeHidden();
+      await expect(this.customStartTime3Input).toBeHidden();
+      await expect(this.customStartTime4Input).toBeHidden();
+      await expect(this.customStartTime5Input).toBeHidden();
+    }
   }
 }

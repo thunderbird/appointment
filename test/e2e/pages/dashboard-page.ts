@@ -20,7 +20,7 @@ export class DashboardPage {
   constructor(page: Page) {
     this.page = page;
     this.navBarDashboardBtn = this.page.getByRole('link', { name: 'Dashboard' });
-    this.userMenuAvatar = this.page.getByTestId('user-menu-avatar');
+    this.userMenuAvatar = this.page.locator('.avatar regular');
     this.logOutMenuItem = this.page.getByTestId('user-nav-logout-menu');
     this.firstDayOfWeekMonthView = this.page.locator('.calendar-month__week-day-name').first();
     this.nextMonthArrow = this.page.locator('[data-icon="chevron-right"]');

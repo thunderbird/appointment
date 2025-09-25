@@ -49,7 +49,7 @@ test.describe('settings - language on mobile browser', {
     let localStore = await getUserSettingsFromLocalStore(page);
     expect.soft(localStore['language']).toBe(APPT_BROWSER_STORE_LANGUAGE_DE);
 
-    // change language settings back to EN and verify
+    // change language settings back to EN and verify; uses DE save changes button
     await settingsPage.changeLanguageSetting(APPT_LANGUAGE_SETTING_DE, APPT_LANGUAGE_SETTING_EN);
     await expect(settingsPage.settingsHeaderEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await expect(settingsPage.preferencesHeaderEN).toBeVisible();

@@ -9,6 +9,7 @@ import {
     APPT_SETTINGS_PAGE,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
+    TIMEOUT_10_SECONDS,
 } from "../../const/constants";
 
 const fs = require('fs');
@@ -54,14 +55,12 @@ setup('desktop browser authenticate', async ({ page }) => {
   await page.context().storageState({ path: authFile });
 
   // Now also ensure the test account is bookable (availability panel) before we start
-  var changesMade = false;
   const availabilityPage = new AvailabilityPage(page);
   await availabilityPage.gotoAvailabilityPage();
   await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
   if (! await availabilityPage.bookableToggle.isChecked()) {
     await availabilityPage.bookableToggleContainer.click();
     console.log('turned booking availibility on');
-    changesMade = true;
   }
 
   // And ensure availability start time is 9am, end time 5pm
@@ -72,27 +71,22 @@ setup('desktop browser authenticate', async ({ page }) => {
   if (await availabilityPage.allStartTimeInput.inputValue() != '09:00') {
     await availabilityPage.allStartTimeInput.fill('09:00');
     console.log('set availability start time to 09:00');
-    changesMade = true;
   }
 
   if (await availabilityPage.allEndTimeInput.inputValue() != '17:00') {
     await availabilityPage.allEndTimeInput.fill('17:00');
     console.log('set availability end time to 17:00');
-    changesMade = true;
   }
 
   // ensure booking page details meeting duration is 30 min
-  if (! await availabilityPage.bookingPageMtgDur30MinRadio.isChecked()) {
-    await availabilityPage.bookingPageMtgDur30MinRadio.scrollIntoViewIfNeeded();
-    await availabilityPage.bookingPageMtgDur30MinRadio.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    console.log('set meeting duration to 30 min');
-    changesMade = true;
-  }
+  await availabilityPage.bookingPageMtgDur30MinBtn.scrollIntoViewIfNeeded();
+  await availabilityPage.bookingPageMtgDur30MinBtn.click();
+  await page.waitForTimeout(TIMEOUT_1_SECOND);
+  console.log('set meeting duration to 30 min');
 
   // if availability changes were made, save them
-  if (changesMade) {
-    console.log('saving settings changes');
+  const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
+  if (saveBtnVisible) {
     await availabilityPage.saveChangesBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
