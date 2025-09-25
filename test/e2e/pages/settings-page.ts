@@ -31,7 +31,7 @@ export class SettingsPage {
   readonly bookingPageURLInput: Locator;
   readonly copyLinkBtn: Locator;
   readonly cancelServiceBtn: Locator;
-  readonly cancelServiceConfirmCancelBtn: Locator;
+  readonly cancelServiceConfirmCloseBtn: Locator;
   readonly bookingPageSettingsBtn: Locator;
   readonly downloadDataBtn: Locator;
   readonly connectedAppsHdr: Locator;
@@ -68,7 +68,7 @@ export class SettingsPage {
     this.bookingPageURLInput = this.page.locator('#booking-page-url');
     this.copyLinkBtn = this.page.locator('#copy-booking-page-url-button');
     this.cancelServiceBtn = this.page.getByRole('button', { name: 'Cancel Service' });
-    this.cancelServiceConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel', exact: true });
+    this.cancelServiceConfirmCloseBtn = this.page.getByRole('button', { name: 'Close', exact: true });
     this.bookingPageSettingsBtn = this.page.getByRole('button', { name: 'Booking Page Settings' });
     this.downloadDataBtn = this.page.getByTestId('settings-account-download-data-btn');
 
@@ -131,6 +131,7 @@ export class SettingsPage {
    * Change the default time zone setting
    */
   async changeDefaultTimezoneSetting(timezone: string) {
+    await this.defaultTimeZoneSelect.waitFor( { timeout: TIMEOUT_30_SECONDS });
     await this.defaultTimeZoneSelect.scrollIntoViewIfNeeded();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.defaultTimeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });

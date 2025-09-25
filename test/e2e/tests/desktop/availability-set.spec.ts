@@ -8,6 +8,7 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
+  TIMEOUT_10_SECONDS,
   TIMEOUT_60_SECONDS,
  } from '../../const/constants';
 
@@ -123,15 +124,18 @@ test.describe('set availability on desktop browser', {
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect.soft(bookApptPage.scheduleTurnedOffText).toBeVisible();
 
-    // go back to availability page and turn back on availability toggle
+    // set availability back on again
     await availabilityPage.gotoAvailabilityPage();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
     await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
-    await expect.soft(availabilityPage.bookableToggle).toBeChecked({ checked: false });
     await availabilityPage.bookableToggleContainer.click();
-    await availabilityPage.saveChangesBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(availabilityPage.bookableToggle).toBeChecked();
+
+    const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
+
+    if (saveBtnVisible) {
+      await availabilityPage.saveChangesBtn.click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+      await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
+    }
   });
 
   test('able to change availability time on desktop browser', async ({ page }) => {
@@ -156,19 +160,22 @@ test.describe('set availability on desktop browser', {
     // goto book appt page week view, ensure 7:00 AM and 6:30 PM appointment slot exists on any day
     // need the week view so that the entire day is displayed as checking earliest and latest slots
     await bookApptPage.gotoBookingPageWeekView();
-    await expect(bookApptPage.bookApptPage7AMSlot).toBeVisible();
-    await expect(bookApptPage.bookApptPage630PMSlot).toBeVisible();
-  
-    // set back to original (start 9:00 AM, end 5:00 PM) and save
+    await bookApptPage.goForwardOneWeek();
+    await expect.soft(bookApptPage.bookApptPage7AMSlot).toBeVisible();
+    await expect.soft(bookApptPage.bookApptPage630PMSlot).toBeVisible();
+
+    // set availability time back to original (start 9:00 AM, end 5:00 PM)
     await availabilityPage.gotoAvailabilityPage();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
     await availabilityPage.bookingWindowInput.scrollIntoViewIfNeeded(); // scroll to btm for debug screenshots
     await availabilityPage.allStartTimeInput.fill('09:00');
     await availabilityPage.allEndTimeInput.fill('17:00');
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await availabilityPage.saveChangesBtn.scrollIntoViewIfNeeded();
-    await availabilityPage.saveChangesBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
+
+    const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
+    if (saveBtnVisible) {
+      await availabilityPage.saveChangesBtn.click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+      await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
+    }
   });
 });

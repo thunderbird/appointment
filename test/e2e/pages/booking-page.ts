@@ -9,7 +9,7 @@ export class BookingPage {
   readonly confirmBtn: Locator;
   readonly bookingCalendar: Locator;
   readonly calendarHeader: Locator;
-  readonly nextMonthArrow: Locator;
+  readonly nextWeekArrow: Locator;
   readonly availableBookingSlot: Locator;
   readonly bookSelectionNameInput: Locator;
   readonly bookSelectionEmailInput: Locator;
@@ -30,8 +30,8 @@ export class BookingPage {
     this.bookingCalendar = this.page.getByTestId('booking-view-calendar-div');
     this.confirmBtn = this.page.getByTestId('booking-view-confirm-selection-button');
     this.calendarHeader = this.page.locator('.calendar-header__period-name');
-    this.nextMonthArrow = this.page.locator('[data-icon="chevron-right"]');
-    this.availableBookingSlot = this.page.locator('[data-test="day-event"]', { hasNotText: 'Busy'});
+    this.nextWeekArrow = this.page.getByRole('button', { name: 'Next week' });
+    this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy'});
     this.bookSelectionNameInput = this.page.getByPlaceholder('First and last name');
     this.bookSelectionEmailInput = this.page.getByPlaceholder('john.doe@example.com');
     this.bookSelectionBookBtn = this.page.getByRole('button', { name: 'Book' });
@@ -40,9 +40,9 @@ export class BookingPage {
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.eventBookedTitleText = this.page.getByText('Event booked!');
     this.scheduleTurnedOffText = this.page.getByText('The schedule has been turned off.');
-    this.bookApptPage7AMSlot = this.page.getByText('07:00 AM - 07:30 AM', { exact: true }).first();
-    this.bookApptPage630PMSlot = this.page.getByText('06:30 PM - 07:00 PM', { exact: true }).first();
-    this.bookApptPage15MinSlot = this.page.getByText('09:15 AM - 09:30 AM', { exact: true }).first();
+    this.bookApptPage7AMSlot = this.page.getByText('7:00 AM', { exact: true }).first();
+    this.bookApptPage630PMSlot = this.page.getByText('6:30 PM', { exact: true }).first();
+    this.bookApptPage15MinSlot = this.page.getByText('9:15 AM', { exact: true }).first();
   }
 
   /**
@@ -78,7 +78,7 @@ export class BookingPage {
    * With the booking page week view already displayed, go forward to the next week.
    */
   async goForwardOneWeek() {
-    await this.nextMonthArrow.click();
+    await this.nextWeekArrow.click();
     await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   }
 
@@ -108,7 +108,7 @@ export class BookingPage {
 
     // slots are available in current week view so get the first one
     const firstSlot: Locator = this.availableBookingSlot.first();
-    let slotRef = await firstSlot.getAttribute('data-ref'); // ie. 'event-2025-01-08 09:30'
+    let slotRef = await firstSlot.getAttribute('data-testid'); // ie. 'event-2025-01-08 09:30'
     if (!slotRef)
       slotRef = 'none';
     expect(slotRef).toContain('event-');

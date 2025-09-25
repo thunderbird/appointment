@@ -58,9 +58,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 // the share link (request a booking page) will display in the local browser context timezone but the main
-// appointment account settings could be a different timezone (if so the test will fail to find the booked
-// appointment since the time slot value will not match); set the browser context to always be in
-// `America/Toronto` so the share link will be in the same timezone as the main account settings
+// appointment account settings could be a different timezone; set the browser context to always be in
+// the primary timezone
 test.use({
   timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
