@@ -8,10 +8,14 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
+  TIMEOUT_10_SECONDS,
  } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
+let origPageName: string;
+let origPageDesc: string;
+
 
 test.describe('availability - booking page details on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
@@ -29,12 +33,12 @@ test.describe('availability - booking page details on desktop browser', {
     await expect(availabilityPage.bookingPageDetailsHdr).toBeVisible();
 
     // change page name (use current date/time value so can verify was changed by this test)
-    const origPageName = await availabilityPage.bookingPageNameInput.inputValue();
+    origPageName = await availabilityPage.bookingPageNameInput.inputValue();
     const newPageName = `Page name modified by E2E test at ${Date.now()}`;
     await availabilityPage.bookingPageNameInput.fill(newPageName);
 
     // add a page description (again use current date/time in there too so can verify was changed by this test)
-    const origPageDesc = await availabilityPage.bookingPageDescInput.inputValue();
+    origPageDesc = await availabilityPage.bookingPageDescInput.inputValue();
     const newPageDesc = `Page description modified by E2E test at ${Date.now()}`;
     await availabilityPage.bookingPageDescInput.fill(newPageDesc);
 
@@ -51,28 +55,37 @@ test.describe('availability - booking page details on desktop browser', {
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
     // now go to book appointment page (share link) and verify the changes took effect
-    // we use expect.soft here so that we ensure even on a failure the test will continue
-    // so that the booking page details will be set back to what they were before
     await page.goto(APPT_MY_SHARE_LINK);
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
 
     // page name and description
-    expect.soft(await bookApptPage.titleText.innerText()).toEqual(newPageName);
+    expect(await bookApptPage.titleText.innerText()).toEqual(newPageName);
     const pageDescLocator = page.getByText(newPageDesc, { exact: true });
-    await expect.soft(pageDescLocator).toBeVisible();
+    await expect(pageDescLocator).toBeVisible();
 
     // verify a 15 min slot now exists
-    await expect.soft(bookApptPage.bookApptPage15MinSlot).toBeVisible();
+    await expect(bookApptPage.bookApptPage15MinSlot).toBeVisible();
+  });
 
-    // now go back to booking page settings and change back
+  test.afterEach(async ({ page }) => {
+    // now go back to booking page settings and change back; this runs no matter if test passed or failed
+    availabilityPage = new AvailabilityPage(page);
+
     await availabilityPage.gotoAvailabilityPage();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
+
     await availabilityPage.bookingPageNameInput.fill(origPageName);
     await availabilityPage.bookingPageDescInput.fill(origPageDesc);
     await availabilityPage.bookingPageMtgLinkInput.clear();
     await availabilityPage.bookingPageMtgDur30MinRadio.scrollIntoViewIfNeeded();
     await availabilityPage.bookingPageMtgDur30MinRadio.click();
-    await availabilityPage.saveChangesBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
+
+    const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
+
+    if (saveBtnVisible) {
+      await availabilityPage.saveChangesBtn.click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+    }
   });
 });

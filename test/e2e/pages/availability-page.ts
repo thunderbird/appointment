@@ -42,7 +42,7 @@ export class AvailabilityPage {
   readonly bookingPageLinkHdr: Locator;
   readonly refreshLinkBtn: Locator;
   readonly refreshLinkConfirmTxt: Locator;
-  readonly refreshLinkConfirmCancelBtn: Locator;
+  readonly refreshLinkConfirmCloseBtn: Locator;
   readonly shareYourLinkInput: Locator;
   readonly shareLinkCopyBtn: Locator;
 
@@ -83,7 +83,7 @@ export class AvailabilityPage {
     this.bookingPageLinkHdr = this.page.getByRole('heading', { name: 'Booking Page Link' });
     this.refreshLinkBtn = this.page.getByRole('button', { name: 'Refresh link' });
     this.refreshLinkConfirmTxt = this.page.getByText('Refresh link', { exact: true });
-    this.refreshLinkConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel' });
+    this.refreshLinkConfirmCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.shareYourLinkInput = this.page.locator('#shareLink');
     this.shareLinkCopyBtn = this.page.getByRole('button', { name: 'Copy', exact: true });
   }
@@ -93,7 +93,7 @@ export class AvailabilityPage {
    */
   async gotoAvailabilityPage() {
     // go to availability page, sometimes takes a bit to load all element values!
-    await this.page.goto(APPT_AVAILABILITY_PAGE);
+    await this.page.goto(APPT_AVAILABILITY_PAGE, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });

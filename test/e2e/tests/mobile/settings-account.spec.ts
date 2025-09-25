@@ -78,8 +78,8 @@ test.describe('account settings on mobile browser', {
     await settingsPage.cancelServiceBtn.scrollIntoViewIfNeeded();
     await settingsPage.cancelServiceBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.cancelServiceConfirmCancelBtn.scrollIntoViewIfNeeded();
-    await settingsPage.cancelServiceConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
+    await settingsPage.cancelServiceConfirmCloseBtn.scrollIntoViewIfNeeded();
+    await settingsPage.cancelServiceConfirmCloseBtn.click({ timeout: TIMEOUT_30_SECONDS });
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
     // clicking 'booking page settings' button brings up availability page
