@@ -18,7 +18,7 @@
     "@sentry/vue": "^9.10.1",
     "@tabler/icons-vue": "^3.7.0",
     "@tailwindcss/forms": "^0.5.3",
-    "@thunderbirdops/services-ui": "^1.0.2",
+    "@thunderbirdops/services-ui": "^1.1.0",
     "@types/ua-parser-js": "^0.7.39",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueuse/components": "^13.0.0",
