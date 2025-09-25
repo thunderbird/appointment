@@ -47,7 +47,7 @@ test.describe('book an appointment on desktop browser', () => {
 
     // now we have an availble booking time slot selected, click confirm button
     await bookingPage.confirmBtn.click();
-    
+
     // verify booking request sent pop-up
     await expect(bookingPage.requestSentTitleText.first()).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
     await bookingPage.requestSentTitleText.scrollIntoViewIfNeeded();
