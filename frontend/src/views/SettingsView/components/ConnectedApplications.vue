@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IconDots } from '@tabler/icons-vue';
-import { PrimaryButton, PrimaryBadge, CheckboxInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, BaseBadge, CheckboxInput } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
@@ -207,9 +207,9 @@ async function refreshData() {
             @change="(event) => onCalendarChecked(event, calendar.id)"
             :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
           />
-          <primary-badge v-if="currentState.defaultCalendarId === calendar.id">
+          <base-badge v-if="currentState.defaultCalendarId === calendar.id">
             {{ t('label.default') }}
-          </primary-badge>
+          </base-badge>
           <p>{{ calendar.title }}</p>
         </div>
   
