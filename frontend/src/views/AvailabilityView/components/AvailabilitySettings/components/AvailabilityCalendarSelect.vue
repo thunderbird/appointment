@@ -47,6 +47,7 @@ onMounted(async () => {
 
 <style scoped>
 .select-input {
+  max-width: 388px;
   width: 100%;
 }
 </style>
