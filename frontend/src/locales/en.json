@@ -457,7 +457,8 @@
     "weekPicker": "Week picker",
     "yes": "Yes",
     "youAreBookable": "You're bookable",
-    "youAreNotBookable": "You're not bookable"
+    "youAreNotBookable": "You're not bookable",
+    "youHaveUnsavedChanges": "You have unsaved changes"
   },
   "locales": {
     "de": "German",
