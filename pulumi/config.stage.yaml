@@ -89,18 +89,37 @@ resources:
       secret_names:
         - database-connection
         - database-encryption
+        - database-encryption-secret
         - database-host
         - database-name
         - database-password
         - database-user
+        - fxa-client-id
+        - fxa-secret
+        - fxa-openid-config
+        - fxa-allow-list
+        - fxa-admin-list
         - fxa-secrets
         - google-oauth
+        - google-auth-client-id
+        - google-auth-secret
+        - google-auth-project-id
+        - jwt-secret
         - neon-database-connection
         - oidc-client-id
         - oidc-client-secret
+        - posthog-project-key
+        - session-encryption-secret
+        - signed-url-secret
         - smtp-connection
+        - smtp-url
+        - smtp-username
+        - smtp-password
         - x-allow-secret
         - zoom-secrets
+        - zoom-client-id
+        - zoom-auth-secret
+        - zoom-api-secret
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
@@ -145,7 +164,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:b5cf7399061638c6b39d3aa8e3ec136caaa725b5
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:3ade29177ce2e361bdb3c2a8b7df1f80928bd8e3
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -155,6 +174,7 @@ resources:
             linuxParameters:
               initProcessEnabled: True
             secrets:
+              # Database connection
               - name: DATABASE_HOST
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-host-cMwTdY
               - name: DATABASE_NAME
@@ -163,69 +183,128 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-user-cfbYYI
               - name: DATABASE_PASSWORD
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-password-h8xPx9
-              - name: DB_ENC_SECRET
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-encryption-fY5K5W
+              
+              # Firefox auth
               - name: FXA_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-secrets-2i62be
-              - name: GOOGLE_OAUTH_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-oauth-8S9Vvx
+              - name: FXA_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-client-id-YxqZfU
+              - name: FXA_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-secret-w9FcXe
+              - name: FXA_OPEN_ID_CONFIG
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-openid-config-r1tYME
+              - name: FXA_ALLOW_LIST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-allow-list-xrnkYm
+              - name: APP_ADMIN_ALLOW_LIST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-admin-list-71QqCa
+              - name: POSTHOG_PROJECT_KEY
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/posthog-project-key-1h1LsO
+
+              # Google OAuth
+              - name: GOOGLE_AUTH_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-auth-client-id-AVHrWq
+              - name: GOOGLE_AUTH_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-auth-secret-CLWZFR
+              - name: GOOGLE_AUTH_PROJECT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/google-auth-project-id-fotn7G
+              
+              # OIDC
               - name: OIDC_CLIENT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-id-l0LS7y
               - name: OIDC_CLIENT_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-secret-fMpKjV
-              - name: SMTP_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-connection-5FT5yU
+
+              # STMP via SocketLabs
+              - name: SMTP_URL
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-url-HAuJtZ
+              - name: SMTP_USER
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-username-fWTyya
+              - name: SMTP_PASS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-password-A5vsVJ
+              
+              # Zoom auth
               - name: ZOOM_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-secrets-KdyrDH
+              - name: ZOOM_AUTH_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-client-id-npOU9F
+              - name: ZOOM_AUTH_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-auth-secret-eCUX9h
+              - name: ZOOM_API_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/zoom-api-secret-Od9vn5
+
+              # Various encryption settings
+              - name: DB_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/database-encryption-secret-R0j1vH
+              - name: SIGNED_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/signed-url-secret-FMy5P5
+              - name: SESSION_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/session-encryption-secret-6EYEm1
+              - name: JWT_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/jwt-secret-JKYzbA
+
             environment:
+              - name: APP_ENV
+                value: stage
+              - name: AUTH_SCHEME
+                value: "oidc"
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT
                 value: '5432'
-              - name: LOG_LEVEL
-                value: ERROR
               - name: FRONTEND_URL
                 value: https://appointment-stage.tb.pro
+              - name: FXA_CALLBACK
+                value: https://appointment-stage.tb.pro/fxa
+              - name: GOOGLE_AUTH_CALLBACK_URL
+                value: https://appointment-stage.tb.pro/api/v1/google/callback
+              - name: JWT_ALGO
+                value: "HS256"
+              - name: JWT_EXPIRE_IN_MINS
+                value: "10000"
+              - name: LOG_LEVEL
+                value: ERROR
+              - name: LOG_USE_STREAM
+                value: "True"
+              - name: OIDC_EXP_GRACE_PERIOD
+                value: "60"
+              - name: OIDC_TOKEN_INTROSPECTION_URL
+                value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
+              - name: POSTHOG_HOST
+                value: https://us.i.posthog.com
+              - name: REDIS_DB
+                value: "0"
+              - name: REDIS_PORT
+                value: "6379"
+              - name: REDIS_URL
+                value: cache.appointment-stage.tb.pro
+              - name: REDIS_USE_CLUSTER
+                value: "True"
+              - name: REDIS_USE_SSL
+                value: "True"
+              - name: SENTRY_DSN
+                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
+              - name: SERVICE_EMAIL
+                value: no-reply@appointment-stage.tb.pro
               - name: SHORT_BASE_URL
                 value: https://stage.apt.mt/
+              - name: SMTP_PORT
+                value: "587"
+              - name: SMTP_SECURITY
+                value: STARTTLS
+              - name: SUPPORT_EMAIL
+                value: appointment-support@thunderbird.net
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT
                 value: "5"
               - name: TIER_PRO_CALENDAR_LIMIT
                 value: "10"
-              - name: LOG_USE_STREAM
-                value: "True"
-              - name: APP_ENV
-                value: stage
-              - name: SENTRY_DSN
-                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
               - name: ZOOM_API_ENABLED
                 value: "True"
+              - name: ZOOM_API_NEW_APP
+                value: "False"
               - name: ZOOM_AUTH_CALLBACK
                 value: https://appointment-stage.tb.pro/api/v1/zoom/callback
-              - name: SERVICE_EMAIL
-                value: no-reply@appointment-stage.tb.pro
-              - name: AUTH_SCHEME
-                value: "oidc"
-              - name: JWT_ALGO
-                value: "HS256"
-              - name: JWT_EXPIRE_IN_MINS
-                value: "10000"
-              - name: REDIS_URL
-                value: cache.appointment-stage.tb.pro
-              - name: REDIS_PORT
-                value: "6379"
-              - name: REDIS_DB
-                value: "0"
-              - name: REDIS_USE_SSL
-                value: "True"
-              - name: REDIS_USE_CLUSTER
-                value: "True"
-              - name: OIDC_TOKEN_INTROSPECTION_URL
-                value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
-              - name: OIDC_EXP_GRACE_PERIOD
-                value: "60"
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
@@ -259,6 +338,8 @@ resources:
 
   tb:ci:AwsAutomationUser:
     ci:
+      access_keys: {}
+      enable_legacy_access_key: True
       additional_policies:
         - arn:aws:iam::768512802988:policy/appointment-stage-frontend-cache-invalidation
       enable_ecr_image_push: True
