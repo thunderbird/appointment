@@ -88,6 +88,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
 
     // Booking Page Details data
     hasZoom.value = !!externalConnectionStore.zoom[0];
+    initialState.value.defaultTimeZone = userStore.data.settings.timezone;
 
     // Booking Page Link data
     initialState.value.slug = userStore.mySlug;

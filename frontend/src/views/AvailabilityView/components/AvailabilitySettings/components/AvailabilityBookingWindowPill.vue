@@ -5,8 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { dayjsKey } from '@/keys';
 import { SelectOption } from '@/models';
 import { useAvailabilityStore } from '@/stores/availability-store';
-
-import RadioGroupPill from '../../RadioGroupPill.vue';
+import { SegmentedControl } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -28,11 +27,14 @@ const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
 </script>
 
 <template>
-  <radio-group-pill
+  <segmented-control
     v-model="bookingWindow"
     name="booking-window"
+    required
     :legend="t('label.bookingWindow')"
     :options="bookingWindowOptions"
     :disabled="!currentState.active"
-  />
+  >
+    {{ t('label.bookingWindow') }}
+  </segmented-control>
 </template>
