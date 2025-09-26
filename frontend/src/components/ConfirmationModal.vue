@@ -57,7 +57,9 @@ const emit = defineEmits(['close', 'confirm', 'error']);
         :label="confirmLabel"
         @click="emit('confirm')"
         :title="t('label.confirm')"
-      />
+      >
+        {{ t('label.confirm') }}
+      </primary-button>
       <danger-button
         v-else
         class="btn-confirm"

@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { IconCopy, IconRefresh } from '@tabler/icons-vue';
-import { TextInput } from '@thunderbirdops/services-ui';
+import { PhCopy, PhArrowClockwise } from '@phosphor-icons/vue';
+import { TextInput, LinkButton } from '@thunderbirdops/services-ui';
 import { MetricEvents } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import { useAvailabilityStore } from '@/stores/availability-store';
@@ -85,7 +85,7 @@ export default {
   >
     {{ t('label.customizeYourLink') }}:
     <button @click="openRefreshLinkModal">
-      <icon-refresh size="20" :aria-label="t('label.refreshLink')" />
+      <ph-arrow-clockwise size="24" :aria-label="t('label.refreshLink')" />
     </button>
   </text-input>
 
@@ -96,10 +96,13 @@ export default {
     :model-value="userStore.myLink"
   >
     {{ t('label.shareYourLink') }}:
-    <button @click="copyLink">
-      <icon-copy size="12" />
+    <link-button @click="copyLink">
+      <template #iconLeft>
+        <ph-copy size="16" />
+      </template>
+
       {{ copyButtonLabel }}
-    </button>
+    </link-button>
   </text-input>
 
   <!-- Refresh link confirmation modal -->
@@ -118,7 +121,7 @@ export default {
 header {
   font-family: metropolis;
   font-size: 1.5rem;
-  margin-block-end: 1.5rem;
+  margin-block-end: 1rem;
   color: var(--colour-ti-highlight);
 }
 
@@ -135,33 +138,32 @@ h3 {
 
 .customize-link-input {
   position: relative;
-  margin-block-end: 1rem;
+  margin-block-end: 2rem;
 
   button {
     position: absolute;
     z-index: 9;
     right: 0.875rem;
     bottom: 0.875rem;
-    color: var(--colour-apmt-primary);
+    color: var(--colour-ti-secondary);
   }
 }
 
 .share-link-input {
   position: relative;
   margin-block-end: 1rem;
+  width: 100%;
+  max-width: 792px;
 
   button {
     position: absolute;
     display: flex;
-    gap: 0.25rem;
+    gap: 0.5rem;
     padding: 0.25rem 0.5rem;
-    right: 0.75rem;
-    bottom: 0.75rem;
-    align-items: center;
-    background-color: var(--colour-apmt-primary);
-    color: var(--colour-neutral-base);
+    right: 0.25rem;
+    bottom: 1rem;
+    color: var(--colour-ti-secondary);
     font-size: 0.75rem;
-    border-radius: 4px;
     z-index: 9;
   }
 }

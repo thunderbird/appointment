@@ -5,8 +5,7 @@ import { storeToRefs } from 'pinia';
 import { MeetingLinkProviderType, SLOT_DURATION_OPTIONS } from '@/definitions';
 import { SelectOption } from '@/models';
 import { useAvailabilityStore } from '@/stores/availability-store';
-import { CheckboxInput, TextArea, TextInput } from '@thunderbirdops/services-ui';
-import RadioGroupPill from '../RadioGroupPill.vue';
+import { CheckboxInput, TextArea, TextInput, SegmentedControl } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 
@@ -71,11 +70,13 @@ export default {
 <template>
   <header>
     <h2>{{ t('label.bookingPageDetails') }}</h2>
+    <p>{{ t('label.chooseWhatVisitorsSeeOnYourBookingPage') }}</p>
   </header>
 
   <div class="fields-container">
     <!-- Page name -->
     <text-input
+      class="page-name-input"
       type="text"
       name="pageName"
       v-model="pageName"
@@ -114,6 +115,7 @@ export default {
     </div>
 
     <text-input
+      class="virtual-meeting-link-input"
       type="text"
       name="virtualMeetingLink"
       v-model="virtualMeetingLink"
@@ -130,25 +132,31 @@ export default {
       {{ t('label.virtualMeetingDetails') }}:
     </text-input> -->
 
-    <radio-group-pill
+    <segmented-control
       v-model="meetingDuration"
       name="meetingDuration"
+      required
       :legend="t('label.meetingDuration')"
       :options="durationOptions"
-    />
+    >
+      {{ t('label.meetingDuration') }}
+    </segmented-control>
   </div>
 </template>
 
 <style scoped>
 header {
-  font-family: metropolis;
-  font-size: 1.5rem;
-  margin-block-end: 1.5rem;
-  color: var(--colour-ti-highlight);
-}
+  margin-block-end: 2.25rem;
 
-h2 {
-  font-size: 1.5rem;
+  h2 {
+    font-family: metropolis;
+    font-size: 1.5rem;
+    color: var(--colour-ti-highlight);
+  }
+
+  p {
+    color: var(--colour-ti-muted);
+  }
 }
 
 h3 {
@@ -160,6 +168,7 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  max-width: 768px;
   color: var(--colour-ti-secondary);
 
   .page-description {
@@ -167,6 +176,16 @@ h3 {
     & :last-child {
       justify-content: end;
     }
+  }
+
+  .page-name-input {
+    max-width: 364px;
+    width: 100%;
+  }
+
+  .virtual-meeting-link-input {
+    max-width: 389px;
+    width: 100%;
   }
 }
 
