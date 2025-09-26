@@ -458,7 +458,8 @@
     "weekPicker": "Wochenauswahl",
     "yes": "Ja",
     "youAreBookable": "Du bist verfügbar",
-    "youAreNotBookable": "Du bist nicht verfügbar"
+    "youAreNotBookable": "Du bist nicht verfügbar",
+    "youHaveUnsavedChanges": "Du hast ungespeicherte Änderungen"
   },
   "locales": {
     "de": "Deutsch",
