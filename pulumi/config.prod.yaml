@@ -206,8 +206,6 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-project-id-1LsMyl
               - name: GOOGLE_OAUTH_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-oauth-aSrasg
-              
-              # OIDC ???
 
               # STMP via SocketLabs
               - name: SMTP_SECRETS
