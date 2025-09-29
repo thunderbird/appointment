@@ -89,16 +89,34 @@ resources:
       secret_names:
         - database-connection
         - database-encryption
+        - database-encryption-secret
         - database-host
         - database-name
         - database-password
         - database-user
+        - fxa-admin-list
+        - fxa-allow-list
+        - fxa-client-id
+        - fxa-openid-config
+        - fxa-secret
         - fxa-secrets
+        - google-auth-client-id
+        - google-auth-secret
+        - google-auth-project-id
         - google-oauth
+        - jwt-secret
+        - posthog-project-key
+        - session-encryption-secret
+        - signed-url-secret
         - smtp-connection
+        - smtp-password
+        - smtp-url
+        - smtp-username
         - x-allow-secret
+        - zoom-api-secret
+        - zoom-auth-secret
+        - zoom-client-id
         - zoom-secrets
-        # - neon-database-connection
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
@@ -153,6 +171,7 @@ resources:
             linuxParameters:
               initProcessEnabled: True
             secrets:
+              # Databsase connection
               - name: DATABASE_HOST
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-host-jjBGiD
               - name: DATABASE_NAME
@@ -161,61 +180,126 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-password-lrx1wH
               - name: DATABASE_USERNAME
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-user-F5eCXv
-              - name: DB_ENC_SECRET
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-uS7JBM
+
+              # Firefox auth
               - name: FXA_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-secrets-tbPt8s
+              - name: FXA_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-client-id-Kw1MOD
+              - name: FXA_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-secret-bVZQ1Q
+              - name: FXA_OPEN_ID_CONFIG
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-openid-config-FoRyD4
+              - name: FXA_ALLOW_LIST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-allow-list-5BMjhF
+              - name: APP_ADMIN_ALLOW_LIST
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-admin-list-LGZ72H
+              - name: POSTHOG_PROJECT_KEY
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/posthog-project-key-wU9Dyi
+
+              # Google OAuth
+              - name: GOOGLE_AUTH_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-client-id-FFp5Se
+              - name: GOOGLE_AUTH_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-secret-HkUTMA
+              - name: GOOGLE_AUTH_PROJECT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-project-id-1LsMyl
               - name: GOOGLE_OAUTH_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-oauth-aSrasg
+              
+              # OIDC ???
+
+              # STMP via SocketLabs
               - name: SMTP_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-connection-eW2HFf
+              - name: SMTP_URL
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-url-d48icD
+              - name: SMTP_USER
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-username-hx6dcp
+              - name: SMTP_PASS
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-password-ItpbDS
+              
+              # Zoom auth
               - name: ZOOM_SECRETS
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-secrets-btmho1
+              - name: ZOOM_AUTH_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-client-id-BA59JX
+              - name: ZOOM_AUTH_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-auth-secret-fJa1R1
+              - name: ZOOM_API_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-api-secret-5JqmI2
+
+              # Various encryption secrets
+              - name: DB_ENC_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-uS7JBM
+              - name: DB_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-secret-Ozx7B2
+              - name: SIGNED_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/signed-url-secret-P75Afi
+              - name: SESSION_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/session-encryption-secret-z1Z9wK
+              - name: JWT_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/jwt-secret-NrzNnW
+
             environment:
+              - name: APP_ENV
+                value: prod
+              - name: AUTH_SCHEME
+                value: "fxa"
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT
                 value: '5432'
-              - name: LOG_LEVEL
-                value: ERROR
+              - name: FXA_CALLBACK
+                value: https://appointment.day/fxa
               - name: FRONTEND_URL
                 value: https://appointment.tb.pro
+              - name: GOOGLE_AUTH_CALLBACK_URL
+                value: https://appointment.tb.pro/api/v1/google/callback
+              - name: JWT_ALGO
+                value: "HS256"
+              - name: JWT_EXPIRE_IN_MINS
+                value: "10000"
+              - name: LOG_LEVEL
+                value: ERROR
+              - name: LOG_USE_STREAM
+                value: "True"
+              - name: POSTHOG_HOST
+                value: https://us.i.posthog.com
+              - name: REDIS_DB
+                value: "0"
+              - name: REDIS_PORT
+                value: "6379"
+              - name: REDIS_URL
+                value: cache.appointment.tb.pro
+              - name: REDIS_USE_CLUSTER
+                value: "True"
+              - name: REDIS_USE_SSL
+                value: "True"
+              - name: SERVICE_EMAIL
+                value: no-reply@appointment.tb.pro
+              - name: SMTP_PORT
+                value: "587"
+              - name: SMTP_SECURITY
+                value: STARTTLS
+              - name: SENTRY_DSN
+                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
               - name: SHORT_BASE_URL
                 value: https://apt.mt/
+              - name: SUPPORT_EMAIL
+                value: appointment-support@thunderbird.net
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT
                 value: "5"
               - name: TIER_PRO_CALENDAR_LIMIT
                 value: "10"
-              - name: LOG_USE_STREAM
-                value: "True"
-              - name: APP_ENV
-                value: prod
-              - name: SENTRY_DSN
-                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
               - name: ZOOM_API_ENABLED
                 value: "True"
               - name: ZOOM_AUTH_CALLBACK
                 value: https://appointment.tb.pro/api/v1/zoom/callback
-              - name: SERVICE_EMAIL
-                value: no-reply@appointment.tb.pro
-              - name: AUTH_SCHEME
-                value: "fxa"
-              - name: JWT_ALGO
-                value: "HS256"
-              - name: JWT_EXPIRE_IN_MINS
-                value: "10000"
-              - name: REDIS_URL
-                value: cache.appointment.tb.pro
-              - name: REDIS_PORT
-                value: "6379"
-              - name: REDIS_DB
-                value: "0"
-              - name: REDIS_USE_SSL
-                value: "True"
-              - name: REDIS_USE_CLUSTER
-                value: "True"
+              - name: ZOOM_API_NEW_APP
+                value: "False"
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
@@ -249,6 +333,8 @@ resources:
 
   tb:ci:AwsAutomationUser:
     ci:
+      access_keys: {}
+      enable_legacy_access_key: True
       additional_policies:
         - arn:aws:iam::768512802988:policy/appointment-prod-frontend-cache-invalidation
       enable_ecr_image_push: True

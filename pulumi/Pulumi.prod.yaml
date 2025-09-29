@@ -25,3 +25,41 @@ config:
     secure: AAABALqKhforwIPv0VrT26wjnZywcXOZyPesItCEp3Z2DDZwNcbe96gFMKtndZoD
   appointment:database-name:
     secure: AAABAEhOw/G08M7QWETxNEoRig52DtSd+pt9tnI1aoJgDdmH2Lle3vxeIw==
+  appointment:database-encryption-secret:
+    secure: AAABAGjFHukNdFgkBfY7igkACYigPzrI2M5hxd+82gRPw1kZp2KxjUuC7IogJK3uEdG8dV+IXJtEmWpS4duC9DDzzG0xV8SKMk5PdmSgY90TG8lamPKQiaXuRtk+mMsOxVs7WcCZKt92yf7eRq0UdsgL3wEaGVc95b6BmNs8ncb8JOQuqTN7Mkq4RQc+929MwdzWLCaTXwiuU5pjqf2FGg==
+  appointment:signed-url-secret:
+    secure: AAABAJFzSgCo8d5nKTXMPXFLsRqD5RPNgszvJwcXls2FY4ZLfZLW63ATjboHghmjDhCFkISYObEuejbPaw74E8Us2hJUuzQF5AKDq8H+oOkS6wWuUOXIMvwpJRRoMf+HuJwqcctwVdTclGVFcCPng7sJtELtPj9XDisxwsZS5weId4RDG3yfmVhWW5niQk+qW9GYBFbsUJgDxCf3S39Kdg==
+  appointment:session-encryption-secret:
+    secure: AAABAPDisxKhQHpBlPDqSGwt9BIYsjkbEVkdlOHYiTCyQVR7ib/GGZAde7hyZ22S/xZuksW42AchHZ7pSHkBbbb+3MsgwloyRRCEasRKZUIxc2wFrvk/icBOUyobylkMMavd9ugXFmRQQ8/PBJ3QKQpede4QbYIwV3Hg1SxL+MJMZaOBS+cfJntD8YGYrHk9UZb08PK6/+pJUBttgKHv4uFNb4GCN3/olTDJ6b4P5J02ABiyzRsS4k/nf+nJ8XqEy1+uU4MShtGxDQCWx6GKPOWKy+x0iwDaphzNlNtZ++534niIjRIJwFDPgzBK5nK5DMsuO61kqeI1aq5u84XaCjSp8AW6KS+QzMINQPe4XFUa/57UY70eFHH/IfDqWzwQ
+  appointment:jwt-secret:
+    secure: AAABAOk3b6llGm+wDOXk0Ltf7/BDSIkfLSmA2Q56hTJ2HA9m4bvpKOPl9c2UHucKWD49bMAFtKwjOowjI7kYxcsoayZ3ag1kP8zZ6Wt3Yp163XXmkrdHgdVM5h2mbsuEQDqlrk2N8X2nFP0jxhkWZNGaTDcADWi5e09SBbd/JVT3KKGdV1sj+FDM03MC3q308ZRKl6elsygMk6oS85Jr1DBcXq5IVC/b20DVf5HeGj7Nt+jd+RnSFwsrZuP9bBepKMIqwxUrjIvbtmLtJcsK2WA3RFZC0mhXYF/N3mS9QyqsmbRmR5kOzU3kIZ8uV7OvpqUUG8f7MtMTRZV2LAJ86MSFPFlg1YAwn2t3N2AQBhm1jO+/uAwg44KQeDFhuncl
+  appointment:smtp-url:
+    secure: AAABAIf1fkRe93kIpcX84pBwsxyOW7RCbSRHM26G5rXNI5Sv4j6dUX0cJepHr6b2Q189
+  appointment:smtp-username:
+    secure: AAABAH7xFvt5hYg7Apwp+4WsyaQJMdylQS82pEggbqIB1pqRXdAbJixF2A==
+  appointment:smtp-password:
+    secure: AAABADR2aPhMbwVyLUKpQCXVArrafvo57gjx4YHkg+OVkgTCIz2h1rAboLu/wUmCGQ==
+  appointment:google-auth-client-id:
+    secure: AAABADyDdiU79PHuM3S84LHy6xuPa12KPG5LYwAIo4Orp/SJUBq6qqVzUyfY4Yr+aQKKBy/dfcGgxrYb9WhpkAY/WKzgJ7cKoyaQ8U8BklMT1qAgnxye5v/ZZQL+FlSeU85EnOtNBoM=
+  appointment:google-auth-secret:
+    secure: AAABAC/JrP1PlvdOO/oVCTdQUFJ7gyEv4bq1TLlMu6wbrSKOfoPohFsVzb5WXthJWpiqhCOoB3O8FeuygVQaqxOwXg==
+  appointment:google-auth-project-id:
+    secure: AAABAI6ptzC1cQDJH9kXsDTq27ADpE22Z1RlrJuyzoaQaF2jfzm+8Nd0B5j5OpsaU3K6vfLcuA==
+  appointment:zoom-client-id:
+    secure: AAABAK9oY4CHJe8UvV1yNKlFCXDpBWqyK7P2CRNAaeSP1HSNeSsnrluVElpoYIZO4NijX3kX
+  appointment:zoom-auth-secret:
+    secure: AAABANKi3OmjMQbqjPKnUl0qyM4/ZJrlCxjs+GvQ7enUBm4IqL4QIgp7VFTPN7jspmnGTkr3ZpL6BxlMKfU/fg==
+  appointment:zoom-api-secret:
+    secure: AAABANVV56anW2LuPdU0E3hDgdRcisQwfi3h4tJda59pPiHG+zOEcLh8KVTmtKDYY4wqgxvN
+  appointment:fxa-client-id:
+    secure: AAABAOIYnd1M1pzV/Cybq8JoXa2nUFVpfUwXJvirnyVwpxoMy7YXs4lFPZVUHDsE
+  appointment:fxa-secret:
+    secure: AAABAPu74R3PjWcfOrhT1k/KWT1Vkj3AXE2Q5kwtcIvl/NupCGM1wpzHHYp3qJTpvTQjxUb/GrNHcxWxxp3muQ7WdsmIjQoRqJxfufmppibPNDBaGke3vrXhMY7cFjrI
+  appointment:fxa-openid-config:
+    secure: AAABALmuQpYbCrfqeW0tPFqcDkB/okqKoh1rXmy3X4XpGgTFBGQqV9MK+NOoM66qX/YQ11R1HgJgc5s7cRCeKHax7a9eD/We0X/0uTEm6mgOe+1i/lG5PH4L/wxM
+  appointment:fxa-allow-list:
+    secure: AAABAB27/gfn4Migu0c9XgH+XS3f/psD7b3EXiGc6P3DGU11a7P2ONWuwZUxE3M0Hn5Vkf18x9IsnREqeJAhPVDVVE/VhtZn20gnobXOvCGNatY6CVN5llX9uLsgBi++m+KUclAwlnLLRtfO35pm/w9gKVRLp2uIckn/O2siXVhbBM4gFYo8gHhcNzDn2dpv86WYMwicnYnjivj+HpYUth9t7ptEP/PVDfNlG9Ds+eP0FEJx3xrDAXsgsrphOoH54vhcgY3PS2wyFXjYtmQ2MIsz7NEQbrVCsNjz
+  appointment:fxa-admin-list:
+    secure: AAABAMcI1Svz3I0vBeP6tptaRA3MfWXmc1UDUj5MTRj+gAs32al5Uyx35p563AFQAHVjTQ9ry+g15wgXyQRArd5ECKxDRyn1PD8/V5sutyBow+/v2dbWMmdm+qquCdiO52/ApEyJdl2BhpC1Qm2JuOeyBbG7eT4kpN+U/5kJMMISnSafmMM26pc1Rg588ZpjeIw=
+  appointment:posthog-project-key:
+    secure: AAABAKRmpsbJZh+umkJvjdU/AzH/WDX2FtP0ui+cF6Z7hUF0kvEcLazxtArS57ZUqSW8sJtZLnLdFGJHZA4JBeyS04OvmzG5vAmj0OAV/g==
