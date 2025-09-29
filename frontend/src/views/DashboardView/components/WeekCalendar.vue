@@ -8,7 +8,7 @@ import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
 import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba, hhmmToMinutes, minutesToHhmm } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
-import { BookingStatus, ColourSchemes } from '@/definitions';
+import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
 
 enum Weekday {
@@ -370,6 +370,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
       class="time-slot-cell"
       :key="timeSlot.startTime"
       :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
+      :data-testid="`time-${timeSlot.startTime}`"
     >
       {{ timeSlot.text }}
     </div>
@@ -387,6 +388,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
       @mouseleave="onRemoteEventMouseLeave"
+      :data-testid="`remote-event-${dj(remoteEvent.start).format(DateFormatStrings.Qalendar)}`"
     >
       {{ remoteEvent?.title }}
     </div>
@@ -405,6 +407,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
       }"
       @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
       @mouseleave="onRemoteEventMouseLeave"
+      :data-testid="`pending-appointment-${dj(pendingAppointment.start).format(DateFormatStrings.Qalendar)}`"
     >
       {{ pendingAppointment?.title }}
     </div>
@@ -421,6 +424,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
         backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
       }"
       @click="emit('event-selected', slot.start)"
+      :data-testid="`event-${dj(slot.start).format(DateFormatStrings.Qalendar)}`"
     >
       {{ slot?.title }}
     </div>
