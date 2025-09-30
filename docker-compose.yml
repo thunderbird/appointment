@@ -9,16 +9,6 @@ services:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
-      # The DATABASE_* variables are set in the example backend .env file, which overrides these
-      # DATABASE_ENGINE=postgresql
-      # DATABASE_HOST=postgresql
-      # DATABASE_NAME=appointment
-      # DATABASE_PASSWORD=abcd%efgh
-      # DATABASE_PORT=5432
-      # DATABASE_USERNAME=tba
-      
-      # The use of DATABASE_URL is problematic and deprecated
-      # - DATABASE_URL=postgresql+psycopg://tba:abcd%efgh@postgresql:5432/appointment
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
 
