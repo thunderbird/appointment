@@ -87,8 +87,6 @@ resources:
     pulumi:
       recovery_window_in_days: 0
       secret_names:
-        - database-connection
-        - database-encryption
         - database-encryption-secret
         - database-host
         - database-name
@@ -99,16 +97,13 @@ resources:
         - fxa-client-id
         - fxa-openid-config
         - fxa-secret
-        - fxa-secrets
         - google-auth-client-id
         - google-auth-secret
         - google-auth-project-id
-        - google-oauth
         - jwt-secret
         - posthog-project-key
         - session-encryption-secret
         - signed-url-secret
-        - smtp-connection
         - smtp-password
         - smtp-url
         - smtp-username
@@ -116,7 +111,6 @@ resources:
         - zoom-api-secret
         - zoom-auth-secret
         - zoom-client-id
-        - zoom-secrets
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
@@ -182,8 +176,6 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-user-F5eCXv
 
               # Firefox auth
-              - name: FXA_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-secrets-tbPt8s
               - name: FXA_CLIENT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/fxa-client-id-Kw1MOD
               - name: FXA_SECRET
@@ -204,12 +196,8 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-secret-HkUTMA
               - name: GOOGLE_AUTH_PROJECT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-project-id-1LsMyl
-              - name: GOOGLE_OAUTH_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-oauth-aSrasg
 
               # STMP via SocketLabs
-              - name: SMTP_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-connection-eW2HFf
               - name: SMTP_URL
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-url-d48icD
               - name: SMTP_USER
@@ -218,8 +206,6 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-password-ItpbDS
               
               # Zoom auth
-              - name: ZOOM_SECRETS
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-secrets-btmho1
               - name: ZOOM_AUTH_CLIENT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-client-id-BA59JX
               - name: ZOOM_AUTH_SECRET
@@ -228,8 +214,6 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-api-secret-5JqmI2
 
               # Various encryption secrets
-              - name: DB_ENC_SECRET
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-uS7JBM
               - name: DB_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-secret-Ozx7B2
               - name: SIGNED_SECRET

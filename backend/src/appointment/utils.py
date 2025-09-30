@@ -120,6 +120,8 @@ def determine_database_driver(dialect: str) -> str:
         return 'mysqldb'
     elif dialect == 'postgresql':
         return 'psycopg'
+    elif dialect == 'sqlite':
+        return 'pysqlite'
     else:
         return None
 
@@ -137,18 +139,19 @@ def get_database_url() -> str | sqlalchemy_url:
     :rtype: str | sqlalchemy_url
     """
 
-    # If a url is set directly, reluctantly pass that through
-    if 'DATABASE_URL' in os.environ:
+    # Tests make use of an in-memory SQLite database, and I can't figure out how to make that work with sqlalchemy_url.
+    # So we make an exception for that scenario. However, if a url is set directly for other engines, only reluctantly
+    # pass that through with a deprecation warning. Preferably pull the URL components from environment variables.
+    dialect = os.environ.get('DATABASE_ENGINE', 'mysql')
+    if 'DATABASE_URL' in os.environ and dialect != 'sqlite':
         log.info(
             'The use of the DATABASE_URL environment variable is discouraged. Instead, use DATABASE_HOST, '
             'DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_ENGINE, and DATABASE_NAME.'
         )
         return os.environ.get('DATABASE_URL')
 
-    # But preferably pull the URL components from environment variables.
     # These are settings we can safely assume defaults about.
     db_name = os.environ.get('DATABASE_NAME', 'appointment')
-    dialect = os.environ.get('DATABASE_ENGINE', 'mysql')
     driver = determine_database_driver(dialect=dialect)
     port = int(os.environ.get('DATABASE_PORT', '3306'))
 
