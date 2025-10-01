@@ -9,7 +9,13 @@ from alembic import context
 from appointment.defines import APP_ENV_DEV
 from appointment.dependencies.database import get_engine_and_session
 
+# This is ran from src/ so ignore the errors
+from appointment.utils import normalize_secrets
+
 import sentry_sdk
+
+# Normalize any AWS secrets
+normalize_secrets()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

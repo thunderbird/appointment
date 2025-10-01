@@ -41,11 +41,16 @@ from slowapi.errors import RateLimitExceeded
 
 import sentry_sdk
 
+from .utils import normalize_secrets
+
 
 def _common_setup():
     # load any available .env into env
     if os.getenv('APP_ENV') != APP_ENV_TEST:
         load_dotenv()
+
+    # This needs to be ran before any other imports
+    normalize_secrets()
 
     # init logging
     level = os.getenv('LOG_LEVEL', 'ERROR')

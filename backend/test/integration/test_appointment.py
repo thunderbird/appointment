@@ -66,14 +66,14 @@ class TestAppointment:
 
                 if has_summary:
                     self.summary = MagicMock()
-                    self.summary.value = 'Test Event'
+                    self.summary.value = "Test Event"
 
                 if has_dtend:
                     self.dtend = MagicMock()
                     self.dtend.value = datetime(2023, 12, 1, 11, 0, 0)
                 elif has_duration:
                     self.duration = MagicMock()
-                    self.duration.value = 'PT1H'  # 1 hour
+                    self.duration.value = "PT1H"  # 1 hour
 
         class MockVObjectInstance:
             def __init__(self, has_summary=True, has_dtend=True, has_duration=False):
@@ -86,21 +86,19 @@ class TestAppointment:
 
             def get_duration(self):
                 from datetime import timedelta
-
                 return timedelta(hours=1)
 
         # Create various test events
         mock_events = [
-            MockEvent(has_summary=True, has_dtend=True),  # Normal event
-            MockEvent(has_summary=False, has_dtend=True),  # Missing summary
+            MockEvent(has_summary=True, has_dtend=True),     # Normal event
+            MockEvent(has_summary=False, has_dtend=True),    # Missing summary
             MockEvent(has_summary=True, has_dtend=False, has_duration=True),  # Has duration instead of dtend
-            MockEvent(has_summary=False, has_dtend=False, has_duration=True),  # Missing summary and dtend
+            MockEvent(has_summary=False, has_dtend=False, has_duration=True), # Missing summary and dtend
         ]
 
         # Add events that should be filtered out by our guards
         class MockBadVEvent:
             """VEvent with missing critical properties"""
-
             def __init__(self, missing_dtstart=False, missing_both_end_props=False):
                 if not missing_dtstart:
                     self.dtstart = MagicMock()
@@ -121,16 +119,13 @@ class TestAppointment:
 
             def get_duration(self):
                 from datetime import timedelta
-
                 return timedelta(hours=1)
 
         # Add events that should be filtered out
-        mock_events.extend(
-            [
-                MockBadEvent(missing_dtstart=True),  # Missing dtstart - should be filtered
-                MockBadEvent(missing_both_end_props=True),  # Missing both dtend and duration - should be filtered
-            ]
-        )
+        mock_events.extend([
+            MockBadEvent(missing_dtstart=True),           # Missing dtstart - should be filtered
+            MockBadEvent(missing_both_end_props=True),    # Missing both dtend and duration - should be filtered
+        ])
 
         def mock_search(start, end, event=True, expand=True):
             return mock_events
@@ -149,9 +144,9 @@ class TestAppointment:
             subscriber_id=1,
             calendar_id=1,
             redis_instance=None,
-            url='https://test.com/caldav',
-            user='test',
-            password='test',
+            url="https://test.com/caldav",
+            user="test",
+            password="test"
         )
 
         # Mock the client.calendar method
@@ -163,18 +158,18 @@ class TestAppointment:
         connector.put_cached_events = MagicMock()
 
         # Test the method with problematic events
-        start_str = '2023-12-01'
-        end_str = '2023-12-02'
+        start_str = "2023-12-01"
+        end_str = "2023-12-02"
 
         # This should not raise any exceptions despite missing properties
         events = connector.list_events(start_str, end_str)
 
         # Verify the results - should only process 4 valid events, filtering out 2 bad ones
-        assert len(events) == 4, 'Should process 4 valid events and filter out 2 invalid ones'
+        assert len(events) == 4, "Should process 4 valid events and filter out 2 invalid ones"
 
         # Check that events with missing summary get default title
         events_with_default_title = [e for e in events if 'event-summary-default' in e.title]
-        assert len(events_with_default_title) == 2, 'Events without summary should get default title'
+        assert len(events_with_default_title) == 2, "Events without summary should get default title"
 
         # Check that all events have required fields
         for event in events:
