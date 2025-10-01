@@ -430,14 +430,14 @@ class TestCaldav:
         # Mock the CalDAV client and its methods
         class MockCalendar:
             def __init__(self, name, url):
-                self.name = name
+                self.name = name  
                 self.url = url
 
         class MockPrincipal:
             def calendars(self):
                 return [
-                    MockCalendar('Test Calendar 1', 'https://test-server.com/calendar1/'),
-                    MockCalendar('Test Calendar 2', 'https://test-server.com/calendar2/'),
+                    MockCalendar("Test Calendar 1", "https://test-server.com/calendar1/"),
+                    MockCalendar("Test Calendar 2", "https://test-server.com/calendar2/"),
                 ]
 
         class MockClient:
@@ -496,7 +496,9 @@ class TestCaldav:
             assert external_connection.name == 'test_user'
 
             # Check that calendars were created with the correct external_connection_id
-            calendars_query = select(models.Calendar).where(models.Calendar.owner_id == TEST_USER_ID)
+            calendars_query = select(models.Calendar).where(
+                models.Calendar.owner_id == TEST_USER_ID
+            )
             calendars = db.scalars(calendars_query).all()
             assert len(calendars) == 2  # We mocked 2 calendars
 
@@ -507,7 +509,7 @@ class TestCaldav:
                 assert calendar.user == 'test_user'
                 assert calendar.password == 'test_password'
 
-            # Verify calendar titles match our mock data
+            # Verify calendar titles match our mock data  
             calendar_titles = [cal.title for cal in calendars]
-            assert 'Test Calendar 1' in calendar_titles
-            assert 'Test Calendar 2' in calendar_titles
+            assert "Test Calendar 1" in calendar_titles
+            assert "Test Calendar 2" in calendar_titles
