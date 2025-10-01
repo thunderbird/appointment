@@ -6,12 +6,13 @@ import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput } from '@thunderbi
 import { isoWeekdaysKey } from '@/keys';
 import { useAvailabilityStore } from '@/stores/availability-store';
 import { useCalendarStore } from '@/stores/calendar-store';
-import { SelectOption } from '@/models';
+import { Availability, SelectOption } from '@/models';
 
 import AvailabilityCalendarSelect from './components/AvailabilityCalendarSelect.vue';
 import AvailabilityMinimumNoticePill from './components/AvailabilityMinimumNoticePill.vue';
 import AvailabilityBookingWindowPill from './components/AvailabilityBookingWindowPill.vue';
 import AvailabilityTimezoneSelect from './components/AvailabilityTimezoneSelect.vue';
+import AvailabilitySelect from './components/AvailabilitySelect.vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
@@ -62,27 +63,26 @@ const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   value: day.iso,
 }));
 
-/* DO NOT DELETE (Sep 2025) - For Early Bird HiFis, custom availabilities are not included yet */
-// const useCustomAvailabilities = computed({
-//   get: () => currentState.value.use_custom_availabilities,
-//   set: (value) => {
-//     availabilityStore.$patch({ currentState: { use_custom_availabilities: value } })
-//   }
-// })
+const useCustomAvailabilities = computed({
+  get: () => currentState.value.use_custom_availabilities,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { use_custom_availabilities: value } })
+  }
+})
 
-// const slotDuration = computed({
-//   get: () => currentState.value.slot_duration,
-//   set: (value) => {
-//     availabilityStore.$patch({ currentState: { slot_duration: value } })
-//   }
-// })
+const slotDuration = computed({
+  get: () => currentState.value.slot_duration,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { slot_duration: value } })
+  }
+})
 
-//function onAvailabilitySelectUpdated(availabilities: Availability[]) {
+function onAvailabilitySelectUpdated(availabilities: Availability[]) {
   /* Create a single array of availabilities from the list grouped by day of week
      Only take valid availabilities and filter placeholder availabilities out */
-//  const validAvailabilities = availabilities.map((a) => ({ ...a, schedule_id: currentState.value.id }));
-//  availabilityStore.$patch({ currentState: { availabilities: validAvailabilities } })
-//}
+  const validAvailabilities = availabilities.map((a) => ({ ...a, schedule_id: currentState.value.id }));
+  availabilityStore.$patch({ currentState: { availabilities: validAvailabilities } })
+}
 </script>
 
 <script lang="ts">
@@ -160,20 +160,17 @@ export default {
           {{ t("label.endTime") }}
         </text-input>
       </div>
+
+      <checkbox-input
+        name="customizePerDay"
+        :label="t('label.customizePerDay')"
+        v-model="useCustomAvailabilities"
+        :disabled="!currentState.active"
+      />
     </div>
 
-    <!-- DO NOT DELETE (Sep 2025)
-    For Early Bird HiFis, custom availabilities are not included yet -->
-
-    <!-- <checkbox-input
-      name="customizePerDay"
-      :label="t('label.customizePerDay')"
-      v-model="useCustomAvailabilities"
-      :disabled="!currentState.active"
-    /> -->
-
     <!-- Availability with customization -->
-    <!-- <template v-if="useCustomAvailabilities">
+    <template v-if="useCustomAvailabilities">
       <availability-select
         :options="scheduleDayOptions"
         :availabilities="currentState.availabilities"
@@ -185,7 +182,7 @@ export default {
         @update="onAvailabilitySelectUpdated"
         :disabled="!currentState.active"
       />
-    </template> -->
+    </template>
 
     <div class="segmented-controls-container">
       <!-- Minimum notice -->
@@ -274,7 +271,8 @@ h3 {
 
   .segmented-controls-container {
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 }
 </style>

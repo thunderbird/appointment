@@ -241,7 +241,6 @@ const removeAvailability = (option: SelectOption, index: number) => {
               v-model="availability.start_time"
               :error="validationErrors[option.value][i]"
               :disabled="disabled"
-              :small-input="true"
               :data-testid="`availability-start-time-${option.value}-${i}-input`"
               @change="update()"
             />
@@ -252,7 +251,6 @@ const removeAvailability = (option: SelectOption, index: number) => {
               v-model="availability.end_time"
               :error="validationErrors[option.value][i]"
               :disabled="disabled"
-              :small-input="true"
               :data-testid="`availability-end-time-${option.value}-${i}-input`"
               @change="update()"
             />
@@ -260,7 +258,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
               <link-button
                 v-if="i === 0"
                 size="small"
-                class="action-btn"
+                class="action-btn action-add-slot"
                 @click="addAvailability(option)"
                 :title="t('label.addSlot')"
               >
@@ -312,8 +310,9 @@ const removeAvailability = (option: SelectOption, index: number) => {
   display: grid;
   grid-template-columns: 2rem auto;
   row-gap: .25rem;
-  column-gap: .5rem;
+  column-gap: 1.5rem;
   align-items: center;
+  color: var(--colour-ti-secondary);
 }
 
 .label {
@@ -327,20 +326,26 @@ const removeAvailability = (option: SelectOption, index: number) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  align-self: flex-start;
 
-  width: 2rem;
-  height: 2rem;
-  border: 0.0625rem solid var(--colour-neutral-border);
-  border-radius: 100%;
-  background-color: var(--colour-neutral-subtle);
-  font-weight: 700;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0.0625rem solid rgba(0, 0, 0, 0.1);
+  border-radius: 6.25rem;
+  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.05) inset;
+  background-color: var(--colour-neutral-lower);
+  font-weight: 600;
+  font-size: 0.8125rem;
   line-height: 150%;
-  color: var(--colour-ti-muted);
+  color: var(--colour-ti-secondary);
+  cursor: pointer;
+  text-transform: uppercase;
+
+  &:hover:not(.selected):not(.disabled) {
+    border-color: var(--colour-primary-hover);
+  }
 }
 .selected {
-  background-color: var(--colour-service-primary);
-  border-color: var(--colour-service-primary-pressed);
+  background-color: var(--colour-ti-secondary);
   color: var(--colour-neutral-base);
 }
 .required {
@@ -368,6 +373,9 @@ const removeAvailability = (option: SelectOption, index: number) => {
   
     .action-btn {
       padding: .25rem .125rem;
+    }
+    .action-add-slot {
+      color: var(--colour-primary-default);
     }
     .action-remove {
       opacity: 0;
