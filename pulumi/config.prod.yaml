@@ -227,7 +227,7 @@ resources:
               - name: APP_ENV
                 value: prod
               - name: AUTH_SCHEME
-                value: "fxa"
+                value: oidc
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT
