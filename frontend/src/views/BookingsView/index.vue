@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { ref, inject, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { BaseBadge, BaseBadgeTypes, SegmentedControl, SelectInput, VisualDivider } from '@thunderbirdops/services-ui';
+import { SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { dayjsKey } from '@/keys';
-import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
 import { BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
+import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
+import DateRequestedAppointments from './components/DateRequestedAppointments.vue';
+import MeetingDateAppointments from './components/MeetingDateAppointments.vue';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject(dayjsKey);
 
 const appointmentStore = useAppointmentStore();
 const { 
-  appointments, 
-  selectedAppointment, 
-  isLoading, 
+  appointments,
+  selectedAppointment,
+  isLoading,
   hasMorePages
 } = storeToRefs(appointmentStore);
 
@@ -58,16 +58,14 @@ const selectedFilter = ref<string>(BookingsFilterOptions.All);
 
 /* Sort Option */
 const sortOptions = computed(() => [{
-  label: t('label.showAll'),
+  label: t('label.dateRequested'),
   value: BookingsSortOptions.DateRequested,
 }, {
-  label: t('label.unconfirmed'),
-  value: BookingsSortOptions.MeetingTime,
+  label: t('label.meetingDate'),
+  value: BookingsSortOptions.MeetingDate,
 }])
 
 const selectedSort = ref<string>(BookingsSortOptions.DateRequested);
-
-console.log(appointments.value);
 
 onMounted(async () => {
   if (!appointmentStore.isLoaded) {
@@ -117,35 +115,8 @@ export default {
       </template>
 
       <div v-else class="appointments-container">
-        <template v-if="selectedSort === BookingsSortOptions.DateRequested">
-          <h2>{{ t('label.today') }}</h2>
-
-          <visual-divider />
-
-          <div class="appointment-item">
-            <div>
-              <strong>Ben S</strong>
-              <p>ben@lumoncorp.com</p>
-            </div>
-
-            <div>
-              <p>Request date</p>
-              <strong>8/12/2025, 11:17 am</strong>
-            </div>
-
-            <div>
-              <p>Meeting date</p>
-              <strong>8/12/2025, 11:17 am</strong>
-            </div>
-
-            <base-badge :type="BaseBadgeTypes.NotSet">
-              NEEDS CONFIRMATION
-            </base-badge>
-          </div>
-        </template>
-
-        <template v-else-if="selectedSort === BookingsSortOptions.MeetingTime">
-        </template>
+        <date-requested-appointments v-if="selectedSort === BookingsSortOptions.DateRequested" />
+        <meeting-date-appointments v-else-if="selectedSort === BookingsSortOptions.MeetingDate" />
       </div>
     </div>
   </div>
@@ -195,28 +166,6 @@ h1 {
   padding: 1rem 0.75rem;
   border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
-
-  h2 {
-    font-size: 1.5rem;
-    font-family: metropolis;
-    text-align: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .appointment-item {
-    display: grid;
-    grid-template-columns: 300px 1fr 1fr auto;
-    align-items: center;
-    background-color: var(--colour-neutral-lower);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-
-    strong {
-      font-weight: 600;
-      font-size: 1rem;
-    }
-  }
 }
 
 @media (--md) {

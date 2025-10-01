@@ -25,10 +25,37 @@ export const useAppointmentStore = defineStore('appointments', () => {
 
   // Data
   const appointments = ref<Appointment[]>([]);
+  const selectedAppointment = ref<Appointment | null>(null);
+
   const pendingAppointments = computed(
     (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === BookingStatus.Requested),
   );
-  const selectedAppointment = ref<Appointment | null>(null);
+  const appointmentsSortedByDateRequested = computed(
+    () => {
+      const today: Appointment[] = [];
+      const thisWeek: Appointment[] = [];
+      const thisMonth: Appointment[] = [];
+      const earlier: Appointment[] = [];
+
+      const now = dj();
+
+      for (const appointment of appointments.value) {
+        const start = dj(appointment.slots[0].start);
+
+        if (start.isToday()) {
+          today.push(appointment);
+        } else if (start.isSame(now, 'week')) {
+          thisWeek.push(appointment);
+        } else if (start.isSame(now, 'month')) {
+          thisMonth.push(appointment);
+        } else {
+          earlier.push(appointment);
+        }
+      }
+
+      return { today, thisWeek, thisMonth, earlier };
+    }
+  )
 
   /**
    * Initialize store with data required at runtime
@@ -218,6 +245,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
     appointments,
     selectedAppointment,
     pendingAppointments,
+    appointmentsSortedByDateRequested,
     init,
     postFetchProcess,
     fetch,

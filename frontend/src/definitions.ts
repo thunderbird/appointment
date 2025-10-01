@@ -75,7 +75,7 @@ export enum BookingsFilterOptions {
 
 export enum BookingsSortOptions {
   DateRequested = 'date-requested',
-  MeetingTime = 'meeting-time'
+  MeetingDate = 'meeting-date'
 }
 
 /**
