@@ -101,6 +101,8 @@ resources:
         - google-auth-secret
         - google-auth-project-id
         - jwt-secret
+        - oidc-client-id
+        - oidc-client-secret
         - posthog-project-key
         - session-encryption-secret
         - signed-url-secret
@@ -197,6 +199,12 @@ resources:
               - name: GOOGLE_AUTH_PROJECT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-project-id-1LsMyl
 
+              # OIDC
+              - name: OIDC_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/oidc-client-id-OO2uRC
+              - name: OIDC_CLIENT_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/oidc-client-secret-Nhu1bl
+
               # STMP via SocketLabs
               - name: SMTP_URL
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-url-d48icD
@@ -227,7 +235,7 @@ resources:
               - name: APP_ENV
                 value: prod
               - name: AUTH_SCHEME
-                value: "fxa"
+                value: oidc
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT
@@ -246,6 +254,10 @@ resources:
                 value: ERROR
               - name: LOG_USE_STREAM
                 value: "True"
+              - name: OIDC_EXP_GRACE_PERIOD
+                value: "60"
+              - name: OIDC_TOKEN_INTROSPECTION_URL
+                value: "https://auth.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
               - name: POSTHOG_HOST
                 value: https://us.i.posthog.com
               - name: REDIS_DB
