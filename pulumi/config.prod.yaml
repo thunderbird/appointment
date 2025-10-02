@@ -244,7 +244,7 @@ resources:
                 value: https://appointment.day/fxa
               - name: FRONTEND_URL
                 value: https://appointment.tb.pro
-              - name: GOOGLE_AUTH_CALLBACK_URL
+              - name: GOOGLE_AUTH_CALLBACK
                 value: https://appointment.tb.pro/api/v1/google/callback
               - name: JWT_ALGO
                 value: "HS256"
