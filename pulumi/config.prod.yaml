@@ -101,6 +101,8 @@ resources:
         - google-auth-secret
         - google-auth-project-id
         - jwt-secret
+        - oidc-client-id
+        - oidc-client-secret
         - posthog-project-key
         - session-encryption-secret
         - signed-url-secret
@@ -246,6 +248,10 @@ resources:
                 value: ERROR
               - name: LOG_USE_STREAM
                 value: "True"
+              - name: OIDC_EXP_GRACE_PERIOD
+                value: "60"
+              - name: OIDC_TOKEN_INTROSPECTION_URL
+                value: "https://auth.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
               - name: POSTHOG_HOST
                 value: https://us.i.posthog.com
               - name: REDIS_DB

@@ -63,3 +63,7 @@ config:
     secure: AAABAMcI1Svz3I0vBeP6tptaRA3MfWXmc1UDUj5MTRj+gAs32al5Uyx35p563AFQAHVjTQ9ry+g15wgXyQRArd5ECKxDRyn1PD8/V5sutyBow+/v2dbWMmdm+qquCdiO52/ApEyJdl2BhpC1Qm2JuOeyBbG7eT4kpN+U/5kJMMISnSafmMM26pc1Rg588ZpjeIw=
   appointment:posthog-project-key:
     secure: AAABAKRmpsbJZh+umkJvjdU/AzH/WDX2FtP0ui+cF6Z7hUF0kvEcLazxtArS57ZUqSW8sJtZLnLdFGJHZA4JBeyS04OvmzG5vAmj0OAV/g==
+  appointment:oidc-client-id:
+    secure: AAABALLDZz2Q04wpdd9fR9sEqpcqQCpQIiZuJd6yZuGmB4cDayNzSCSBxyD5UdfUnpZa3V24khxyoszAQbV6
+  appointment:oidc-client-secret:
+    secure: AAABADBA6IumCfksQ8T1sh3bpAhd7odMASdieI+MvrjnXOSGA1pIWYO6rvimaDNd/P79oAH842JArGq7pg8HXw==
