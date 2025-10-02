@@ -2,27 +2,23 @@
 import { inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput, LinkButton } from '@thunderbirdops/services-ui';
-import { dayjsKey, isoWeekdaysKey } from '@/keys';
-import { useUserStore } from '@/stores/user-store';
+import { BubbleSelect, TextInput, SwitchToggle, CheckboxInput } from '@thunderbirdops/services-ui';
+import { isoWeekdaysKey } from '@/keys';
 import { useAvailabilityStore } from '@/stores/availability-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { Availability, SelectOption } from '@/models';
 
 import AvailabilityCalendarSelect from './components/AvailabilityCalendarSelect.vue';
-import AvailabilitySelect from './components/AvailabilitySelect.vue';
 import AvailabilityMinimumNoticePill from './components/AvailabilityMinimumNoticePill.vue';
 import AvailabilityBookingWindowPill from './components/AvailabilityBookingWindowPill.vue';
+import AvailabilityTimezoneSelect from './components/AvailabilityTimezoneSelect.vue';
+import AvailabilitySelect from './components/AvailabilitySelect.vue';
 
 const { t } = useI18n();
-const dj = inject(dayjsKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 
-const userStore = useUserStore();
 const availabilityStore = useAvailabilityStore();
 const calendarStore = useCalendarStore();
-const router = useRouter();
 
 const { connectedCalendars } = storeToRefs(calendarStore);
 const { currentState } = storeToRefs(availabilityStore);
@@ -41,13 +37,6 @@ const requiresBookingConfirmation = computed({
   }
 })
 
-const useCustomAvailabilities = computed({
-  get: () => currentState.value.use_custom_availabilities,
-  set: (value) => {
-    availabilityStore.$patch({ currentState: { use_custom_availabilities: value } })
-  }
-})
-
 const startTime = computed({
   get: () => currentState.value.start_time,
   set: (value) => {
@@ -62,13 +51,6 @@ const endTime = computed({
   }
 })
 
-const slotDuration = computed({
-  get: () => currentState.value.slot_duration,
-  set: (value) => {
-    availabilityStore.$patch({ currentState: { slot_duration: value } })
-  }
-})
-
 const weekDays = computed({
   get: () => currentState.value.weekdays,
   set: (value) => {
@@ -77,13 +59,27 @@ const weekDays = computed({
 })
 
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
-  label: day.min[0],
+  label: day.short.toUpperCase(),
   value: day.iso,
 }));
 
+const useCustomAvailabilities = computed({
+  get: () => currentState.value.use_custom_availabilities,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { use_custom_availabilities: value } })
+  }
+})
+
+const slotDuration = computed({
+  get: () => currentState.value.slot_duration,
+  set: (value) => {
+    availabilityStore.$patch({ currentState: { slot_duration: value } })
+  }
+})
+
 function onAvailabilitySelectUpdated(availabilities: Availability[]) {
-  // Create a single array of availabilities from the list grouped by day of week
-  // Only take valid availabilities and filter placeholder availabilities out
+  /* Create a single array of availabilities from the list grouped by day of week
+     Only take valid availabilities and filter placeholder availabilities out */
   const validAvailabilities = availabilities.map((a) => ({ ...a, schedule_id: currentState.value.id }));
   availabilityStore.$patch({ currentState: { availabilities: validAvailabilities } })
 }
@@ -111,39 +107,67 @@ export default {
   </header>
 
   <div class="fields-container">
-    <!-- Time zone -->
-    <div>
-      <h3>{{ t('label.timeZone') }}:</h3>
-      <div class="user-timezone-container">
-        <p>{{ userStore.data.settings.timezone ?? dj.tz.guess() }}</p>
-        <link-button @click="router.push({ name: 'settings', hash: '#preferences' })">{{ t('label.edit') }}</link-button>
-      </div>
-    </div>
-
     <!-- Booking to (calendars) -->
-    <div class="booking-to-calendar-container">
-      <availability-calendar-select />
+    <div>
+      <div class="booking-to-calendar-container">
+        <availability-calendar-select />
+        <availability-timezone-select />
+      </div>
+
+      <!-- Automatically confirm booking checkbox -->
+      <checkbox-input
+        :name="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
+        :label="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
+        data-testid="availability-automatically-confirm-checkbox"
+        v-model="requiresBookingConfirmation"
+        :disabled="!currentState.active"
+      />
     </div>
-
-    <!-- Automatically confirm booking checkbox -->
-    <checkbox-input
-      :name="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
-      :label="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
-      data-testid="availability-automatically-confirm-checkbox"
-      v-model="requiresBookingConfirmation"
-      :disabled="!currentState.active"
-    />
-
-    <hr />
 
     <!-- Available days and times -->
-    <h3>{{ t('label.availableDaysAndTimes') }}:</h3>
-    <checkbox-input
-      name="customizePerDay"
-      :label="t('label.customizePerDay')"
-      v-model="useCustomAvailabilities"
-      :disabled="!currentState.active"
-    />
+    <div class="available-days-and-times-container">
+      <div>
+        <h3>{{ t('label.availableDaysAndTimes') }}</h3>
+        <bubble-select
+          :options="scheduleDayOptions"
+          :required="false"
+          v-model="weekDays"
+          :disabled="!currentState.active"
+        />
+      </div>
+
+      <!-- Availability without customization -->
+      <div class="availability-times-container">
+        <text-input
+          type="time"
+          name="start_time"
+          class="time-text-input"
+          v-model="startTime"
+          :disabled="!currentState.active"
+        >
+          {{ t("label.startTime") }}
+        </text-input>
+
+        <span class="to-span">{{ t("label.to") }}</span>
+
+        <text-input
+          type="time"
+          name="end_time"
+          class="time-text-input"
+          v-model="endTime"
+          :disabled="!currentState.active"
+        >
+          {{ t("label.endTime") }}
+        </text-input>
+      </div>
+
+      <checkbox-input
+        name="customizePerDay"
+        :label="t('label.customizePerDay')"
+        v-model="useCustomAvailabilities"
+        :disabled="!currentState.active"
+      />
+    </div>
 
     <!-- Availability with customization -->
     <template v-if="useCustomAvailabilities">
@@ -160,44 +184,13 @@ export default {
       />
     </template>
 
-    <!-- Availability without customization -->
-    <template v-else>
-      <div class="availability-times-container">
-        <text-input
-          type="time"
-          name="start_time"
-          class="full-width"
-          v-model="startTime"
-          :disabled="!currentState.active"
-        >
-          {{ t("label.startTime") }}
-        </text-input>
+    <div class="segmented-controls-container">
+      <!-- Minimum notice -->
+      <availability-minimum-notice-pill />
 
-        <span class="to-span">{{ t("label.to") }}</span>
-
-        <text-input
-          type="time"
-          name="end_time"
-          class="full-width"
-          v-model="endTime"
-          :disabled="!currentState.active"
-        >
-          {{ t("label.endTime") }}
-        </text-input>
-      </div>
-      <bubble-select
-        :options="scheduleDayOptions"
-        :required="false"
-        v-model="weekDays"
-        :disabled="!currentState.active"
-      />
-    </template>
-
-    <!-- Minimum notice -->
-    <availability-minimum-notice-pill />
-
-    <!-- Booking window -->
-    <availability-booking-window-pill />
+      <!-- Booking window -->
+      <availability-booking-window-pill />
+    </div>
   </div>
 </template>
 
@@ -227,25 +220,30 @@ h2 {
 }
 
 h3 {
-  font-size: 0.8125rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--colour-ti-secondary);
-}
-
-.full-width {
-  width: 100%;
+  margin-block-end: 0.5rem;
 }
 
 .fields-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 3rem;
   color: var(--colour-ti-secondary);
 
   .booking-to-calendar-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: inline-flex;
     gap: 1rem;
+    margin-block-end: 1.5rem;
+  }
+
+  .available-days-and-times-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 356px;
   }
 
   .user-timezone-container {
@@ -257,11 +255,24 @@ h3 {
   .availability-times-container {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+
+    .time-text-input {
+      max-width: 172px;
+      width: 100%;
+    }
 
     .to-span {
-      margin-block-start: 1.25rem;
+      font-size: 0.8125rem;
+      color: var(--colour-ti-muted);
+      margin-block-start: 1.5rem;
     }
+  }
+
+  .segmented-controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 }
 </style>

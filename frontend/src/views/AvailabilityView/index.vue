@@ -3,7 +3,7 @@ import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey, dayjsKey } from '@/keys';
-import { LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
+import { LinkButton, NoticeBar, NoticeBarTypes, PrimaryButton } from '@thunderbirdops/services-ui';
 import { createAvailabilityStore } from '@/stores/availability-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
@@ -43,8 +43,8 @@ function validateSchedule(schedule) {
 async function onSaveChanges() {
   savingInProgress.value = true;
 
-  // build data object for post requestz
-  const obj = deepClone({ ...currentState.value, timezone: userStore.data.settings.timezone });
+  // build data object for post request
+  const obj = deepClone({ ...currentState.value });
 
   // convert local input times to utc times
   obj.start_time = scheduleStore.timeToBackendTime(obj.start_time);
@@ -95,6 +95,7 @@ async function onSaveChanges() {
 
   savingInProgress.value = false;
   validationError.value = null;
+  window.scrollTo(0, 0);
   saveSuccess.value = { title: t('info.availabilitySavedSuccessfully') };
 
   // Reload data form backend to reset currentState vs initialState
@@ -122,8 +123,37 @@ export default {
 
 <template>
   <div class="availability-page-container">
-    <h1 class="page-title">{{ t('label.availability') }}</h1>
+    <h1
+      class="page-title"
+      :class="{ 'isDirty': isDirty }"
+    >
+      {{ t('label.availability') }}
+    </h1>
   
+    <notice-bar
+      v-if="isDirty"
+      :type="NoticeBarTypes.Warning"
+      class="notice-bar"
+    >
+      {{ t('label.youHaveUnsavedChanges') }}
+
+      <template #cta>
+        <link-button
+          @click="onRevertChanges"
+          :disabled="savingInProgress"
+        >
+          {{ t('label.revertChanges') }}
+        </link-button>
+        <primary-button
+          @click="onSaveChanges"
+          :disabled="savingInProgress"
+          size="small"
+        >
+          {{ t('label.saveChanges') }}
+        </primary-button>
+      </template>
+    </notice-bar>
+
     <alert-box
       class="alert-box"
       v-if="validationError"
@@ -155,22 +185,22 @@ export default {
           </section>
         </div>
       </div>
-  
-      <div class="footer-save-panel" v-if="isDirty">
-        <link-button
-          @click="onRevertChanges"
-          :disabled="savingInProgress"
-        >
-          {{ t('label.revertChanges') }}
-        </link-button>
-        <primary-button
-          @click="onSaveChanges"
-          :disabled="savingInProgress"
-        >
-          {{ t('label.save') }}
-        </primary-button>
-      </div>
     </form>
+
+    <div class="footer-save-panel" v-if="isDirty">
+      <link-button
+        @click="onRevertChanges"
+        :disabled="savingInProgress"
+      >
+        {{ t('label.revertChanges') }}
+      </link-button>
+      <primary-button
+        @click="onSaveChanges"
+        :disabled="savingInProgress"
+      >
+        {{ t('label.saveChanges') }}
+      </primary-button>
+    </div>
   </div>
 </template>
 
@@ -182,6 +212,17 @@ export default {
   font-family: metropolis;
   font-size: 2.25rem;
   color: var(--colour-ti-base);
+
+  &.isDirty {
+    margin-block-end: 1.5rem;
+  }
+}
+
+.notice-bar {
+  margin-block-end: 2rem;
+  position: sticky;
+  top: 5rem;
+  z-index: 50;
 }
 
 .page-content {
@@ -202,19 +243,11 @@ export default {
 }
 
 .footer-save-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 2rem;
-  margin-inline-start: auto;
-  padding: 1rem 1.5rem;
-  margin: 0 0.5rem 0.5rem 0.5rem;
-  border-radius: 8px;
-  background-color: var(--colour-neutral-base);
-  z-index: 99;
+  gap: 1rem;
+  margin-block-end: 2rem;
 }
 
 section {

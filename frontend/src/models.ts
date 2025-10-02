@@ -205,6 +205,7 @@ export type AvailabilityFormFields = {
   availabilities?: Availability[];
   booking_confirmation?: boolean;
   calendar_id?: number;
+  timezone?: string;
   details?: string;
   earliest_booking?: number;
   end_time?: string;

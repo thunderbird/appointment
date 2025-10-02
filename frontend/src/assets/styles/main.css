@@ -30,7 +30,11 @@
   input:is(.dark *),
   select:is(.dark *),
   textarea:is(.dark *) {
-    @apply transition-all dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 focus:ring-teal-500 focus:border-teal-500 checked:border-teal-500 checked:bg-teal-500;
+    @apply transition-all dark:text-white bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500;
+  }
+
+  select {
+    background-image: none; /* services-ui select already has a custom caret */
   }
 
   hr {

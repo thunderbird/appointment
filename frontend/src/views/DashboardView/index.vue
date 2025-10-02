@@ -97,7 +97,9 @@ export default {
         </i18n-t>
       </li>
     </ul>
-    <primary-button class="dismiss" size="small" @click="dismiss">Dismiss</primary-button>
+    <template #cta>
+      <primary-button class="dismiss" size="small" @click="dismiss">{{ t('label.dismiss') }}</primary-button>
+    </template>
   </notice-bar>
 
   <div class="main-container">

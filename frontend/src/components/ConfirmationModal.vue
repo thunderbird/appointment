@@ -45,29 +45,26 @@ const emit = defineEmits(['close', 'confirm', 'error']);
       <primary-button
         class="btn-close"
         variant="outline"
-        :label="cancelLabel"
         @click="emit('close')"
-        :title="t('label.close')"
+        :title="cancelLabel"
       >
-        {{ t('label.close') }}
+        {{ cancelLabel }}
       </primary-button>
       <primary-button
         v-if="!useCautionButton"
         class="btn-confirm"
-        :label="confirmLabel"
         @click="emit('confirm')"
-        :title="t('label.confirm')"
+        :title="confirmLabel"
       >
-        {{ t('label.confirm') }}
+        {{ confirmLabel }}
       </primary-button>
       <danger-button
         v-else
         class="btn-confirm"
-        :label="confirmLabel"
         @click="emit('confirm')"
-        :title="t('label.confirm')"
+        :title="confirmLabel"
       >
-        {{ t('label.confirm') }}
+        {{ confirmLabel}}
       </danger-button>
     </div>
   </div>

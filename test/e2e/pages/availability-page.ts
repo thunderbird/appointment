@@ -80,7 +80,7 @@ export class AvailabilityPage {
     this.bookingPageMtgDur30MinRadio = this.page.getByText('30 Min');
 
     // booking page link section
-    this.bookingPageLinkHdr = this.page.getByRole('heading', { name: 'Booking Page Link' });
+    this.bookingPageLinkHdr = this.page.getByRole('heading', { name: 'Your Booking Page Link' });
     this.refreshLinkBtn = this.page.getByRole('button', { name: 'Refresh link' });
     this.refreshLinkConfirmTxt = this.page.getByText('Refresh link', { exact: true });
     this.refreshLinkConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel' });
