@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { Dayjs } from 'dayjs';
 import { dayjsKey } from '@/keys';
 import { BaseBadge, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 
@@ -10,7 +11,7 @@ const dj = inject(dayjsKey);
 defineProps<{
   name: string;
   email: string;
-  startTime: string;
+  startTime: string | Dayjs;
   duration: number;
   needsConfirmation: boolean;
 }>();

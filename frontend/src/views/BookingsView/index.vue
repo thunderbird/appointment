@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import { SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
@@ -111,7 +112,7 @@ export default {
     <!-- page content -->
     <div class="page-content">
       <template v-if="isLoading">
-        <p class="loading-indicator">{{ t('label.loading') }}</p>
+        <loading-spinner />
       </template>
 
       <div v-else class="appointments-container">
@@ -156,6 +157,7 @@ h1 {
   flex: 1;
   min-height: 0;
   flex-direction: column;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }

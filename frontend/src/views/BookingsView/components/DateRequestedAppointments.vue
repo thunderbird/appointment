@@ -68,7 +68,7 @@ const { appointmentsSortedByDateRequested } = storeToRefs(appointmentStore);
   <template v-if="appointmentsSortedByDateRequested.earlier.length > 0">
     <h2>{{ t('label.earlier') }}</h2>
   
-    <visual-divider />
+    <visual-divider class="divider" />
 
     <date-requested-appointment-item
       v-for="earlierAppt in appointmentsSortedByDateRequested.earlier"
@@ -88,5 +88,9 @@ h2 {
   font-family: metropolis;
   text-align: center;
   margin-bottom: 0.5rem;
+}
+
+.divider {
+  margin-block: 0.875rem 0.375rem;
 }
 </style>
