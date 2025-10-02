@@ -199,6 +199,12 @@ resources:
               - name: GOOGLE_AUTH_PROJECT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/google-auth-project-id-1LsMyl
 
+              # OIDC
+              - name: OIDC_CLIENT_ID
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/oidc-client-id-OO2uRC
+              - name: OIDC_CLIENT_SECRET
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/oidc-client-secret-Nhu1bl
+
               # STMP via SocketLabs
               - name: SMTP_URL
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/smtp-url-d48icD
