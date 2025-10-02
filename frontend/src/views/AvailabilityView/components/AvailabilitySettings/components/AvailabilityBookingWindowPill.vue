@@ -30,7 +30,7 @@ const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   <segmented-control
     v-model="bookingWindow"
     name="booking-window"
-    required
+    :required="false"
     :legend="t('label.bookingWindow')"
     :options="bookingWindowOptions"
     :disabled="!currentState.active"

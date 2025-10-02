@@ -41,7 +41,7 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
     class="minimum-notice-segment-control"
     v-model="minimumNotice"
     name="minimum-notice"
-    required
+    :required="false"
     :legend="t('label.minimumNotice')"
     :options="earliestOptions"
     :disabled="!currentState.active"
