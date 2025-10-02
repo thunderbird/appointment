@@ -5,7 +5,6 @@ import { DashboardPage } from '../../pages/dashboard-page';
 import {
   APPT_DISPLAY_NAME,
   APPT_BOOKEE_NAME,
-  APPT_BOOKEE_EMAIL,
   PLAYWRIGHT_TAG_PROD_SANITY,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -24,10 +23,10 @@ test.beforeEach(async ({ page }) => {
   dashboardPage = new DashboardPage(page);
 });
 
-// the share link (request a booking page) will display in the local browser context timezone but the main
-// appointment account settings could be a different timezone (if so the test will fail to find the booked
-// appointment since the time slot value will not match); set the browser context to always be in
-// `America/Toronto` so the share link will be in the same timezone as the main account settings
+// the APPT_TIMEZONE_SETTING_PRIMARY is set to the local timezone where the test is running; that way
+// the setting in Appointment will also match what is displayed in the book appoitment page, since
+// the book appoitment page uses the local timezone and not a setting; in CI the tests run in BrowserStack
+// which is located in a different timezone than when running the tests locally, so must be dynamic
 test.use({
   timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
@@ -47,7 +46,7 @@ test.describe('book an appointment on desktop browser', () => {
 
     // now we have an availble booking time slot selected, click confirm button
     await bookingPage.confirmBtn.click();
-    
+
     // verify booking request sent pop-up
     await expect(bookingPage.requestSentTitleText.first()).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
     await bookingPage.requestSentTitleText.scrollIntoViewIfNeeded();

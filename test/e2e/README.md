@@ -29,7 +29,6 @@ The tests expect the following Appointment application settings:
 - The user scheduling availability hasn't been changed from the default settings;
 - In the dashboard the default calendar view is the current month view; this is important so that the tests can find an available booking slot, etc.
 - In `Booking Settings`, the `Booking Confirmation` option is enabled, so that requested appointments generate HOLD appointments that need to be confirmed
-- The timezone is set to `America/Toronto`
 
 ## Running the E2E tests against your local dev environment
 

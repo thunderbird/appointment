@@ -29,7 +29,7 @@ test.describe('availability - booking page link on desktop browser', {
     await availabilityPage.refreshLinkBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(availabilityPage.refreshLinkConfirmTxt).toBeVisible();
-    await availabilityPage.refreshLinkConfirmCancelBtn.click();
+    await availabilityPage.refreshLinkConfirmCloseBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
     // verify booking page link displayed in 'share your link' is correct
