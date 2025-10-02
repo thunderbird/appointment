@@ -220,6 +220,9 @@ export default {
 
 .notice-bar {
   margin-block-end: 2rem;
+  position: sticky;
+  top: 5rem;
+  z-index: 50;
 }
 
 .page-content {

@@ -326,7 +326,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
   display: flex;
   justify-content: center;
   align-items: center;
-
+  align-self: flex-start;
   width: 2.75rem;
   height: 2.75rem;
   border: 0.0625rem solid rgba(0, 0, 0, 0.1);
