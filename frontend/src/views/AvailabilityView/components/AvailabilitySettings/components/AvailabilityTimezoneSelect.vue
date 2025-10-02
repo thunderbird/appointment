@@ -18,10 +18,10 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
   value: timezone,
 }));
 
-const defaultTimeZone = computed({
-  get: () => currentState.value.defaultTimeZone,
+const timezone = computed({
+  get: () => currentState.value.timezone,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { defaultTimeZone: value }})
+    availabilityStore.$patch({ currentState: { timezone: value }})
   }
 })
 </script>
@@ -31,7 +31,7 @@ const defaultTimeZone = computed({
     name="timezone"
     class="select-input"
     :options="timezoneOptions"
-    v-model="defaultTimeZone"
+    v-model="timezone"
     :disabled="!currentState.active"
   >
     {{ t('label.timeZone') }}

@@ -43,8 +43,8 @@ function validateSchedule(schedule) {
 async function onSaveChanges() {
   savingInProgress.value = true;
 
-  // build data object for post requestz
-  const obj = deepClone({ ...currentState.value, timezone: userStore.data.settings.timezone });
+  // build data object for post request
+  const obj = deepClone({ ...currentState.value });
 
   // convert local input times to utc times
   obj.start_time = scheduleStore.timeToBackendTime(obj.start_time);
