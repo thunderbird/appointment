@@ -245,7 +245,7 @@ resources:
                 value: https://appointment-stage.tb.pro
               - name: FXA_CALLBACK
                 value: https://appointment-stage.tb.pro/fxa
-              - name: GOOGLE_AUTH_CALLBACK_URL
+              - name: GOOGLE_AUTH_CALLBACK
                 value: https://appointment-stage.tb.pro/api/v1/google/callback
               - name: JWT_ALGO
                 value: "HS256"
