@@ -4,7 +4,14 @@ from contextlib import contextmanager
 import os
 
 import typer
-from ..commands import update_db, download_legal, create_invite_codes, setup, generate_documentation_pages
+from ..commands import (
+    update_db,
+    download_legal,
+    create_invite_codes,
+    setup,
+    generate_documentation_pages,
+    export_users_to_keycloak,
+)
 
 router = typer.Typer()
 
@@ -44,6 +51,11 @@ def generate_docs():
 @router.command('create-invite-codes')
 def create_app_invite_codes(n: int):
     create_invite_codes.run(n)
+
+
+@router.command('export-users-to-keycloak')
+def export_users():
+    export_users_to_keycloak.run()
 
 
 @router.command('setup')
