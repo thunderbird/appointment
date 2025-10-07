@@ -38,7 +38,7 @@ jobs:
       - name: Build stage frontend
         run: |
           rm -rf frontend/dist  # Clean up from previous build
-          cp frontend/.env.pulumistage.example frontend/.env.stage
+          cp frontend/.env.stage.example frontend/.env.stage
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
 
       - name: Deploy frontend to S3
