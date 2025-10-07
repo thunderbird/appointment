@@ -32,12 +32,12 @@ jobs:
         uses: dsaltares/fetch-gh-release-asset@master
         with:
           version: ${{ github.event.release.id }}
-          file: pulumifrontend.zip
+          file: frontend.zip
 
       - name: Unzip Artifact
-        run: unzip pulumifrontend.zip
+        run: unzip frontend.zip
 
-      - name: Deploy frontend to S3 (Pulumi)
+      - name: Deploy frontend to S3
         run: |
           aws s3 sync ./dist "s3://${{ secrets.FRONTEND_BUCKET }}"
           aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID }} --paths "/*"
@@ -85,7 +85,6 @@ jobs:
       - name: Set up Pulumi environment
         id: pulumi-env
         shell: bash
-        # source ./venv/bin/activate
         run: |
           tar -xvf pulumi.tbz
           curl -fsSL https://get.pulumi.com | sh

@@ -92,7 +92,6 @@ jobs:
     environment: staging
     runs-on: ubuntu-latest
     steps:
-      # Pulumi steps
       - uses: actions/checkout@v4
 
       - name: Download ecr tag
@@ -119,17 +118,8 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Set up virtual environment
-        shell: bash
-        run: |
-          python -m pip install virtualenv
-          cd pulumi
-          virtualenv ./venv
-          source ./venv/bin/activate
-          pip install -r requirements.txt
-
       - name: Unpack ECR tag
-        id: get_ecr_tag_pulumi
+        id: get_ecr_tag
         run: |
           output=$(cat new_ecr_tag.txt)
           echo new_ecr_tag=$output >> $GITHUB_OUTPUT
@@ -138,7 +128,7 @@ jobs:
       - name: Deploy new image to stage
         shell: bash
         env:
-          ECR_TAG: "${{ steps.get_ecr_tag_pulumi.outputs.new_ecr_tag }}"
+          ECR_TAG: "${{ steps.get_ecr_tag.outputs.new_ecr_tag }}"
           PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
         run: |
           # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
@@ -198,28 +188,12 @@ jobs:
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
           zip -r ../frontend.zip dist
 
-      - name: Build prod frontend (Pulumi)
-        run: |
-          rm -rf frontend/dist  # Clean up from previous build
-          cp frontend/.env.pulumiprod.example frontend/.env.prod
-          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
-          zip -r ../pulumifrontend.zip dist
-
       - name: Download ECR tag
-        uses: actions/download-artifact@v4
-        with:
-            name: 
-              ecr_tag
-      
-      - name: Download ECR tag (Pulumi)
         uses: actions/download-artifact@v4
         with:
             name: 
               new_ecr_tag
       
-      - name: Zip IaC
-        run: zip -r iac.zip tofu -x "tofu/environments/stage/*" "tofu/environments/prod/*/*/.terragrunt-cache/*"
-
       - name: Zip Pulumi
         run: |
           # Remove any lingering build pieces that may exist
@@ -249,11 +223,8 @@ jobs:
             In order to promote this to prod, edit the draft and press **"Publish release"**.
           draft: true
           files: |
-            ecr_tag.txt
             new_ecr_tag.txt
             frontend.zip
-            pulumifrontend.zip
-            iac.zip
             pulumi.tbz
 
   e2e-tests-browserstack-stage:
