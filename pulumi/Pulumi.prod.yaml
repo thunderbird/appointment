@@ -58,7 +58,7 @@ config:
   appointment:fxa-openid-config:
     secure: AAABALmuQpYbCrfqeW0tPFqcDkB/okqKoh1rXmy3X4XpGgTFBGQqV9MK+NOoM66qX/YQ11R1HgJgc5s7cRCeKHax7a9eD/We0X/0uTEm6mgOe+1i/lG5PH4L/wxM
   appointment:fxa-allow-list:
-    secure: AAABAAXUHksVbYOI3kh99/kk+2j53QtKFanWLwbclJ7tV5S0pywzSO/EtjHUJYC1O7rKuTg6/6v0UEAp7H8b7Eh50t7S751cWQ4LMyrelXabth6leXprGbDKOZ4vQWVqic/K0zZjM16p6t7XfF9xLlsP5rf5k5y4ZGeLJ2Wfak35FXYQUShkiPpE5xbPpJqdhwIF43NZLBwm6N8EiHzcEcmnseAU+C3kMO1bsko4XKskUhVYowFKSOot0fy4Du9QywGFaNAY2r6RxFm1AJPr0r1kE/nMbku+jnqBRKni5NlnNEMlnmJ7TVWb09L9
+    secure: AAABAM/i0Sg4pkCB4GtXYm6KaS9DzKmv1UjcC3zJxqkhDBPCIXHhr9oqEz4V1XOOqNb126Qay2tZUH90FTHB+v+wBeLmL6DLF9NRuPob8YF5koYK8mlb1RnCgSSsREm/mxgTfGaA7WU13D4dUFhLPzZViBRElEageMXAcba/QvJuMKZhwp7nuSl8af+5hicWyU2seX5LNfBZ7wJXc9sBeW11vvc/asWBHw6QBo4h1w6bcFMFlRmwON4fR2CszQLUIUq323y4T8YHGYTNXm43ZWAn4nvRoen/zqwBCDpj+E+ZOuu6o++2AxbQin0=
   appointment:fxa-admin-list:
     secure: AAABAMcI1Svz3I0vBeP6tptaRA3MfWXmc1UDUj5MTRj+gAs32al5Uyx35p563AFQAHVjTQ9ry+g15wgXyQRArd5ECKxDRyn1PD8/V5sutyBow+/v2dbWMmdm+qquCdiO52/ApEyJdl2BhpC1Qm2JuOeyBbG7eT4kpN+U/5kJMMISnSafmMM26pc1Rg588ZpjeIw=
   appointment:posthog-project-key:
