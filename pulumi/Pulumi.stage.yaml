@@ -65,7 +65,7 @@ config:
   appointment:fxa-openid-config:
     secure: AAABALN/+NLIqD/AVK0ixneRqQKtEXMSMNTBtagbV7ZdZXiyL6O56yNrZHWqAXP39OLYxNqi9GtavAYIBZIrp61tPlFzLEWKCAqbvSdd8Ebnt8bm9PQB6RIrPFdtIyRQrCI=
   appointment:fxa-allow-list:
-    secure: AAABAOXdjZdoi+9mhW5me3USch1AMiE9a46K1TcbXwXmFxNsbubJn1mbj7bjyJBHOXzccOxVAUKjgB/VOd7uRMgWMxufxg6OeTN+zpEJefkbNosbVyrALR/QCt3KKQ==
+    secure: AAABAIfs6wlN03txj3SJndnPmf8ctdV3qsqHmf6esVWHj58Va63plTSDgUPjsG9ZnAFXJmPzI53AQSRU4kUifMxeq0GrTO6vwEQjkOtyz6VNzEtxKJzl/UflF1wjk8oR4UP+I3SbyjdxGthBt0lJ
   appointment:fxa-admin-list:
     secure: AAABAFDGWcE0W4Dsjg2wBx92Rm7c+2EPad7/CcpVFeuD1BqHEoWz6sE3DeROU/8I
   appointment:posthog-project-key:
