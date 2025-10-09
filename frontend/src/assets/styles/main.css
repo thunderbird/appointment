@@ -37,6 +37,10 @@
     background-image: none; /* services-ui select already has a custom caret */
   }
 
+  select {
+    background-image: none; /* services-ui select already has a custom caret */
+  }
+
   hr {
     @apply border-t-gray-300 dark:border-t-gray-500
   }

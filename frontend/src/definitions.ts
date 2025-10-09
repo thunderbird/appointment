@@ -68,16 +68,14 @@ export enum BookingStatus {
   Modified = 6
 }
 
-/**
- * Booking status for filter query params. Don't i18n
- */
-export enum BookingStatusFilterQueryParams {
-  None = 'none',
-  Requested = 'pending',
-  Booked = 'confirmed',
-  Declined = 'declined',
-  Cancelled = 'cancelled',
-  Modified = 'modified'
+export enum BookingsFilterOptions {
+  All = 'all',
+  Unconfirmed = 'unconfirmed'
+}
+
+export enum BookingsSortOptions {
+  DateRequested = 'date-requested',
+  MeetingDate = 'meeting-date'
 }
 
 /**

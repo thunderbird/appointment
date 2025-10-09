@@ -135,7 +135,7 @@ export default {
     <segmented-control
       v-model="meetingDuration"
       name="meetingDuration"
-      required
+      :required="false"
       :legend="t('label.meetingDuration')"
       :options="durationOptions"
     >
