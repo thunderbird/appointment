@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getUserSettingsFromLocalStore } from '../../utils/utils';
+import { getUserSettingsFromLocalStore, setDefaultUserSettingsLocalStore } from '../../utils/utils';
 import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 
@@ -36,9 +36,9 @@ test.describe('settings - timezone on desktop browser', {
     let localStore = await getUserSettingsFromLocalStore(page);
     expect.soft(localStore['timezone']).toBe(APPT_TIMEZONE_SETTING_HALIFAX);
 
-    // change time format setting back
-    await settingsPage.gotoPreferencesSettings()
-    await settingsPage.changeDefaultTimezoneSetting(APPT_TIMEZONE_SETTING_PRIMARY);
+    // change timzone setting back via local storage
+    await setDefaultUserSettingsLocalStore(page);
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
 
     // verify setting saved in browser local storage
     localStore = await getUserSettingsFromLocalStore(page);

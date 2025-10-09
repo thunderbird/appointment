@@ -131,6 +131,7 @@ export class SettingsPage {
    * Change the default time zone setting
    */
   async changeDefaultTimezoneSetting(timezone: string) {
+    await this.defaultTimeZoneSelect.waitFor( { timeout: TIMEOUT_30_SECONDS });
     await this.defaultTimeZoneSelect.scrollIntoViewIfNeeded();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.defaultTimeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });

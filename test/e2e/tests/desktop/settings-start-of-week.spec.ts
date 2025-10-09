@@ -6,7 +6,6 @@ import { DashboardPage } from '../../pages/dashboard-page';
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  TIMEOUT_3_SECONDS,
   APPT_BROWSER_STORE_START_WEEK_MON,
   APPT_BROWSER_STORE_START_WEEK_SUN,
   APPT_START_OF_WEEK_MON,
@@ -36,25 +35,14 @@ test.describe('settings - start of week on desktop browser', {
     let localStore = await getUserSettingsFromLocalStore(page);
     expect.soft(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
 
-    // note: temporarily removed until dashboard calendar UI is finsished being overhauled
-    // verify on dashboard
-    // await dashboardPage.gotoToDashboardMonthView();
-    // var firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
-    // expect.soft(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_MON);
+    // currently start of week setting doesn't actually change the dashboard calendar (see issue 1295)
 
-    // change start of week back to Sunday and verify
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
+    // change start of week back to Sunday
     await settingsPage.gotoPreferencesSettings();
     await settingsPage.changeStartOfWeekSetting(APPT_START_OF_WEEK_SUN);
 
     // verify setting saved in browser local storage
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_SUN);
-
-    // note: temporarily removed until dashboard calendar UI is finsished being overhauled
-    // verify on dashboard
-    // await dashboardPage.gotoToDashboardMonthView();
-    // firstDayOfWeekText = await dashboardPage.firstDayOfWeekMonthView.innerText();
-    // expect(firstDayOfWeekText).toEqual(APPT_START_OF_WEEK_DASHBOARD_SUN);
   });
 });

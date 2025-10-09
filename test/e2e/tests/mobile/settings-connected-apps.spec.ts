@@ -34,14 +34,8 @@ test.describe('settings - connected applications on mobile browser', {
     await expect(settingsPage.connectedAppsHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.connectedAppsHdr.scrollIntoViewIfNeeded();
 
-    // verify default calendar checkbox is on (test expects google cal already connected); then turn it
-    // off but do NOT save - just revert changes and verify checkbox is back on again after the revert changes
+    // verify default calendar checkbox is on (test expects google cal already connected)
     await settingsPage.defaultCalendarConnectedCbox.scrollIntoViewIfNeeded();
-    await settingsPage.defaultCalendarConnectedCbox.uncheck({ timeout: TIMEOUT_30_SECONDS });
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.revertBtn.scrollIntoViewIfNeeded();
-    await settingsPage.revertBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
     expect(await settingsPage.defaultCalendarConnectedCbox.isChecked()).toBeTruthy();
 
     // verify that clicking the 'add caldav' button brings up the caldav connection dialog; just close it

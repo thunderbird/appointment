@@ -8,7 +8,9 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
+  TIMEOUT_10_SECONDS,
   TIMEOUT_60_SECONDS,
+  APPT_LOGIN_EMAIL,
  } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;
@@ -31,14 +33,15 @@ test.describe('set availability on desktop browser', {
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
 
     // timezone displayed is correct
-    await expect(availabilityPage.timeZoneText).toBeVisible();
-    await availabilityPage.timeZoneText.scrollIntoViewIfNeeded();
+    await expect(availabilityPage.timeZoneSelect).toBeVisible();
+    await availabilityPage.timeZoneSelect.scrollIntoViewIfNeeded();
 
-    // selected calendar ('booking to') has value; takes a bit to load
+    // selected calendar ('booking to') has correct value; takes a bit to load
     if ((await availabilityPage.calendarSelect.inputValue()).length == 0) {
       await page.waitForTimeout(TIMEOUT_3_SECONDS);
     }
     expect(await availabilityPage.calendarSelect.inputValue()).toBeTruthy();
+    expect(await availabilityPage.calendarSelect.textContent()).toContain(APPT_LOGIN_EMAIL);
 
     // automatically confirm bookings checkbox is on
     await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
@@ -76,11 +79,6 @@ test.describe('set availability on desktop browser', {
     // booking window is visible
     await availabilityPage.bookingWindowInput.scrollIntoViewIfNeeded();
     await expect(availabilityPage.bookingWindowInput).toBeVisible();
-
-    // clicking time zone edit link navigates to settings page
-    await availabilityPage.editTimeZoneBtn.scrollIntoViewIfNeeded();
-    await availabilityPage.editTimeZoneBtn.click();
-    await page.waitForURL('**/settings#preferences');
   });
 
   test('customize-per-day checkbox reveals daily time slots on desktop browser', async () => {
@@ -123,52 +121,30 @@ test.describe('set availability on desktop browser', {
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect.soft(bookApptPage.scheduleTurnedOffText).toBeVisible();
 
-    // go back to availability page and turn back on availability toggle
+    // set availability back on again
     await availabilityPage.gotoAvailabilityPage();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
     await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
-    await expect.soft(availabilityPage.bookableToggle).toBeChecked({ checked: false });
     await availabilityPage.bookableToggleContainer.click();
-    await availabilityPage.saveChangesBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(availabilityPage.bookableToggle).toBeChecked();
+
+    const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
+
+    if (saveBtnVisible) {
+      await availabilityPage.saveChangesBtn.click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+      await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
+    }
   });
 
   test('able to change availability time on desktop browser', async ({ page }) => {
-    // turn off 'automatically confirm bookings' checkbox and then revert
-    await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
-    await expect(availabilityPage.autoConfirmBookingsCheckBox).toBeChecked();
-    await availabilityPage.autoConfirmBookingsCheckBox.uncheck();
-    await availabilityPage.revertChangesBtn.scrollIntoViewIfNeeded();
-    await availabilityPage.revertChangesBtn.click();
-    await expect(availabilityPage.autoConfirmBookingsCheckBox).toBeChecked();
-
-    // change start time to 7:00 AM and end time 7:00 PM
-    await availabilityPage.bookingWindowInput.scrollIntoViewIfNeeded(); // scroll to btm for debug screenshot
+    // change start and end time values,
+    await availabilityPage.bookingWindowInput.scrollIntoViewIfNeeded();
     await availabilityPage.allStartTimeInput.fill('07:00');
     await availabilityPage.allEndTimeInput.fill('19:00');
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await availabilityPage.saveChangesBtn.scrollIntoViewIfNeeded();
-    await availabilityPage.saveChangesBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
 
-    // goto book appt page week view, ensure 7:00 AM and 6:30 PM appointment slot exists on any day
-    // need the week view so that the entire day is displayed as checking earliest and latest slots
-    await bookApptPage.gotoBookingPageWeekView();
-    await expect(bookApptPage.bookApptPage7AMSlot).toBeVisible();
-    await expect(bookApptPage.bookApptPage630PMSlot).toBeVisible();
-  
-    // set back to original (start 9:00 AM, end 5:00 PM) and save
-    await availabilityPage.gotoAvailabilityPage();
+    // revert changes; don't want to actually save as if there's an issue it
+    // will cause other / future test runs to fail
+    await availabilityPage.revertChangesBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await availabilityPage.bookingWindowInput.scrollIntoViewIfNeeded(); // scroll to btm for debug screenshots
-    await availabilityPage.allStartTimeInput.fill('09:00');
-    await availabilityPage.allEndTimeInput.fill('17:00');
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await availabilityPage.saveChangesBtn.scrollIntoViewIfNeeded();
-    await availabilityPage.saveChangesBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
   });
 });

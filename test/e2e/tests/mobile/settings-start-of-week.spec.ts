@@ -45,7 +45,7 @@ test.describe('settings - start of week on mobile browser', {
     let localStore = await getUserSettingsFromLocalStore(page);
     expect.soft(localStore['startOfWeek']).toBe(APPT_BROWSER_STORE_START_WEEK_MON);
 
-    // in future when dashboard calendar UI is finsished being overhauled, verify on dashboard
+    // currently start of week setting doesn't actually change the dashboard calendar (see issue 1295)
 
     // change start of week back to Sunday and verify
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
