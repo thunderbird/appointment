@@ -37,4 +37,4 @@ typer==0.15.2
 tzdata==2025.2
 uvicorn==0.34.0
 validators==0.34.0
-Authlib==1.6.0
+Authlib==1.6.5
