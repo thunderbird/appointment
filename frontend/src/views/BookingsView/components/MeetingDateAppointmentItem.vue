@@ -28,9 +28,11 @@ defineProps<{
       <span>{{ dj(startTime).format('LT') }}</span> - <span>{{ dj(startTime).add(duration, 'minutes').format('LT') }}</span>
     </div>
 
-    <base-badge class="badge" :type="BaseBadgeTypes.NotSet" v-if="needsConfirmation">
-      {{ t('label.needsConfirmation') }}
-    </base-badge>
+    <div>
+      <base-badge  v-if="needsConfirmation" class="badge" :type="BaseBadgeTypes.NotSet">
+        {{ t('label.needsConfirmation') }}
+      </base-badge>
+    </div>
   </div>
 </template>
 

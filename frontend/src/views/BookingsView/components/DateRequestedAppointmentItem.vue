@@ -37,16 +37,18 @@ const formattedMeetingDate = computed(() => dj(props.meetingDate).format('L, LT'
       <strong>{{ formattedMeetingDate }}</strong>
     </div>
 
-    <base-badge :type="BaseBadgeTypes.NotSet" v-if="needsConfirmation">
-      {{ t('label.needsConfirmation') }}
-    </base-badge>
+    <div>
+      <base-badge v-if="needsConfirmation" :type="BaseBadgeTypes.NotSet">
+        {{ t('label.needsConfirmation') }}
+      </base-badge>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .appointment-item {
   display: grid;
-  grid-template-columns: 300px 1fr 1fr auto;
+  grid-template-columns: 300px 1fr 1fr 1fr;
   align-items: center;
   background-color: var(--colour-neutral-lower);
   border-radius: 0.5rem;
