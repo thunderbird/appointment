@@ -7,6 +7,7 @@ import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from
 import {
     APPT_DASHBOARD_HOME_PAGE,
     APPT_SETTINGS_PAGE,
+    APPT_DISPLAY_NAME,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
     TIMEOUT_10_SECONDS,
@@ -78,11 +79,16 @@ setup('desktop browser authenticate', async ({ page }) => {
     console.log('set availability end time to 17:00');
   }
 
-  // ensure booking page details meeting duration is 30 min
+  // set booking meeting duration and page name
   await availabilityPage.bookingPageMtgDur30MinBtn.scrollIntoViewIfNeeded();
   await availabilityPage.bookingPageMtgDur30MinBtn.click();
   await page.waitForTimeout(TIMEOUT_1_SECOND);
   console.log('set meeting duration to 30 min');
+  await availabilityPage.bookingPageNameInput.scrollIntoViewIfNeeded();
+  await availabilityPage.bookingPageNameInput.fill(APPT_DISPLAY_NAME);
+  await page.waitForTimeout(TIMEOUT_1_SECOND);
+  await availabilityPage.bookingPageDescInput.clear();
+  console.log('set booking page name and description');
 
   // if availability changes were made, save them
   const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
