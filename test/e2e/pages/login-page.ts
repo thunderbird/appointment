@@ -1,16 +1,16 @@
 import { expect, type Page, type Locator } from '@playwright/test';
 import {
   APPT_URL,
-  APPT_LOGIN_EMAIL,
-  FXA_PAGE_TITLE,
-  APPT_LOGIN_PWORD, 
+  APPT_USERNAME,
+  TB_ACCTS_PAGE_TITLE,
+  TB_ACCTS_PWORD,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
   TIMEOUT_90_SECONDS,
   TIMEOUT_60_SECONDS,
  } from '../const/constants';
 
-export class SplashscreenPage {
+export class LoginPage {
   readonly page: Page;
   readonly loginBtn: Locator;
   readonly homeContinueBtn: Locator;
@@ -37,7 +37,7 @@ export class SplashscreenPage {
     await this.loginBtn.click();
   }
 
-  async enterLoginEmail(emailAddress: string) {
+  async enterUsername(emailAddress: string) {
     await this.loginEmailInput.fill(emailAddress);
   }
 
@@ -49,26 +49,34 @@ export class SplashscreenPage {
     await this.loginDialogContinueBtn.click();
   }
 
-  async getToFxA() {
+
+  /**
+   * Sign in on the main Appointment login page, which will redirect us to sign in with TB Accounts. 
+   */
+  async getToTBAccts() {
     await expect(this.loginBtn).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
     await this.clickLoginBtn();
     await expect(this.loginEmailInput).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
     await expect(this.loginDialogContinueBtn).toBeVisible();
-    expect(APPT_LOGIN_EMAIL, 'getting APPT_LOGIN_EMAIL env var').toBeTruthy();
-    await this.enterLoginEmail(APPT_LOGIN_EMAIL);
+    expect(APPT_USERNAME, 'getting APPT_USERNAME env var').toBeTruthy();
+    await this.enterUsername(APPT_USERNAME);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.clickLoginContinueBtn();
-    await expect(this.page).toHaveTitle(FXA_PAGE_TITLE, { timeout: TIMEOUT_90_SECONDS }); // be generous in case FxA is slow to load
+    // be generous in case TB Accounts sign-in is slow to load
+    await expect(this.page).toHaveTitle(new RegExp(`^${TB_ACCTS_PAGE_TITLE}`), { timeout: TIMEOUT_90_SECONDS });
   }
 
+  /**
+   * Sign in when running Appointment on the local dev stack, doesn't require TB Accounts login.
+   */
   async localApptSignIn() {
     await expect(this.loginBtn).toBeVisible();
     await this.clickLoginBtn();
     await expect(this.loginEmailInput).toBeVisible();
     await expect(this.loginDialogContinueBtn).toBeVisible();
-    expect(APPT_LOGIN_EMAIL, 'getting APPT_LOGIN_EMAIL env var').toBeTruthy();
-    await this.enterLoginEmail(APPT_LOGIN_EMAIL);
-    await this.enterPassword(APPT_LOGIN_PWORD);
+    expect(APPT_USERNAME, 'getting APPT_USERNAME env var').toBeTruthy();
+    await this.enterUsername(APPT_USERNAME);
+    await this.enterPassword(TB_ACCTS_PWORD);
     await this.clickLoginContinueBtn();
   }
 }
