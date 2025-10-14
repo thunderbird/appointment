@@ -6,8 +6,8 @@ export const APPT_URL = String(process.env.APPT_URL);
 export const APPT_MY_SHARE_LINK = String(process.env.APPT_MY_SHARE_LINK);
 export const APPT_SHORT_SHARE_LINK_PREFIX = String(process.env.APPT_SHORT_SHARE_LINK_PREFIX);
 export const APPT_LONG_SHARE_LINK_PREFIX = String(process.env.APPT_LONG_SHARE_LINK_PREFIX);
-export const APPT_PENDING_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings?filters=pending&unconfirmed=true`);
-export const APPT_BOOKED_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings?filters=confirmed`);
+export const v = String(`${process.env.APPT_URL}bookings?filters=pending&unconfirmed=true`);
+export const APPT_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings`);
 export const APPT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings`);
 export const APPT_DASHBOARD_HOME_PAGE = String(`${process.env.APPT_URL}dashboard`);
 export const APPT_DASHBOARD_MONTH_PAGE = String(`${process.env.APPT_URL}dashboard#month`);
@@ -15,11 +15,11 @@ export const APPT_AVAILABILITY_PAGE = String(`${process.env.APPT_URL}availabilit
 
 // page titles
 export const APPT_PAGE_TITLE = 'Thunderbird Appointment';
-export const FXA_PAGE_TITLE = 'Mozilla accounts';
+export const TB_ACCTS_PAGE_TITLE = 'Sign in to Thunderbird';
 
-// sign-in credentials and corresponding account display name
-export const APPT_LOGIN_EMAIL = String(process.env.APPT_LOGIN_EMAIL);
-export const APPT_LOGIN_PWORD = String(process.env.APPT_LOGIN_PWORD);
+// sign-in credentials
+export const TB_ACCTS_EMAIL = String(process.env.TB_ACCTS_EMAIL);
+export const TB_ACCTS_PWORD = String(process.env.TB_ACCTS_PWORD);
 
 // appointment user display name (settings => account) for above user
 export const APPT_DISPLAY_NAME = String(process.env.APPT_DISPLAY_NAME);

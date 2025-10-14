@@ -111,7 +111,7 @@ export class SettingsPage {
   async gotoPreferencesSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-    await this.preferencesBtn.scrollIntoViewIfNeeded();
+    await this.preferencesBtn.scrollIntoViewIfNeeded({ timeout: TIMEOUT_30_SECONDS });
     await this.preferencesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
   }

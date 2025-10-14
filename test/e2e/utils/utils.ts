@@ -1,6 +1,6 @@
 // utility functions that may be used by any tests
-import { SplashscreenPage } from "../pages/splashscreen-page";
-import { FxAPage } from "../pages/fxa-page";
+import { LandingPage } from "../pages/landing-page";
+import { TBAcctsPage } from "../pages/tb-accts-page";
 import { expect, type Page } from '@playwright/test';
 
 import {
@@ -24,30 +24,31 @@ import {
 /**
  * Navigate to and sign into the Appointment application target environment, using the URL and
  * credentials provided in the .env file. When signing into Appointment on production or stage
- * you provide the username (email) and then are redirected to the FxA sign in page. When signing
- * in on the local dev environment you provide a username (email) and password directly and are
- * not redirected to sign in to FxA.
+ * you provide the username (email) and then are redirected to the TB Accounts sign in page. When
+ * signing in on the local dev environment you provide a username (email) and password directly
+ * and are not redirected to sign in to TB Accounts.
  */
-export const navigateToAppointmentAndSignIn = async (page: Page) => {
+export const navigateToAppointmentAndSignIn = async (page: Page, mobile: boolean=false) => {
     console.log(`navigating to appointment ${APPT_TARGET_ENV} (${APPT_URL}) and signing in`);
-    const homePage = new SplashscreenPage(page);
-    const fxaSignInPage = new FxAPage(page);
-
-    await homePage.gotoDashboard();
-
+    const landingPage = new LandingPage(page);
+    const TBAcctsSignInPage = new TBAcctsPage(page);
+    
     if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
+        await landingPage.gotoLandingPage();
         // check for the 'continue' button first in case sign-in was saved in local cookies
-        if (await homePage.homeContinueBtn.isVisible() &&  await homePage.homeContinueBtn.isEnabled()) {
+        if (await landingPage.homeContinueBtn.isVisible() &&  await landingPage.homeContinueBtn.isEnabled()) {
             console.log("already signed in; just need to click the Appointment home page 'continue' button");
-            await homePage.homeContinueBtn.click();
+            await landingPage.homeContinueBtn.click();
             await page.waitForTimeout(TIMEOUT_3_SECONDS);
         } else {
-            await homePage.getToFxA();
-            await fxaSignInPage.signIn();
+            await landingPage.getToTBAccts(mobile);
+            await TBAcctsSignInPage.signIn();
         }
     } else {
-        // local dev env doesn't use fxa; just signs into appt using username and pword
-        await homePage.localApptSignIn();
+        // local dev env doesn't use tb accts; just signs into appt using username and pword; must add
+        // '/login' to the APPT_URL since there is no landing / marketing page first when run local stack
+        await page.goto(`${APPT_URL}login`);
+        await landingPage.localApptSignIn();
     }
 
     // now that we're signed into the appointment dashboard give it time to load
@@ -107,7 +108,7 @@ export const setDefaultUserSettingsLocalStore = async (page: Page) => {
 export const mobileSignInAndSetup = async (page: Page) => {
     // playwright for mobile browsers doesn't support saving auth storage state, so unfortunately
     // we must sign into Appointment at the start of every test
-    await navigateToAppointmentAndSignIn(page);
+    await navigateToAppointmentAndSignIn(page, true);
 
     // Wait until the page receives the cookies.
     // Sometimes login flow sets cookies in the process of several redirects.
@@ -121,4 +122,25 @@ export const mobileSignInAndSetup = async (page: Page) => {
     await page.waitForTimeout(TIMEOUT_2_SECONDS);
     await setDefaultUserSettingsLocalStore(page);
     await page.waitForTimeout(TIMEOUT_2_SECONDS);
+}
+
+/**
+ * Convert an event slot date (received from the request booking page) to the date format
+ * expected on the bookings list page.
+ * @param dateString Date string in the format of 'February 17, 2025'
+ * @returns A string containg date now formatted as MM/DD/YYYY i.e. '02/17/2025'
+ */
+export const convertLongDate = async (dateString: string) => {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.getMonth() + 1; // is zero-based
+  const year = date.getFullYear(); // returns a 4-digit year
+
+  // padStart() adds a leading zero if the day or month is a single digit
+  const formattedDay = String(day).padStart(2, '0');
+  const formattedMonth = String(month).padStart(2, '0');
+  const formattedYear = String(year);
+
+  // return new string MM/DD/YYYY
+  return `${formattedMonth}/${formattedDay}/${formattedYear}`;
 }
