@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -20,7 +20,6 @@ const {
   appointments,
   selectedAppointment,
   isLoading,
-  hasMorePages
 } = storeToRefs(appointmentStore);
 
 /* Appointment Sliding Panel */

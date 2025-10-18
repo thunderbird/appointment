@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
-import { BookingsFilterOptions, BookingStatus } from '@/definitions';
+import { BookingsFilterOptions } from '@/definitions';
 import { Appointment } from '@/models';
 import { VisualDivider } from '@thunderbirdops/services-ui';
 import MeetingDateAppointmentItem from './MeetingDateAppointmentItem.vue';

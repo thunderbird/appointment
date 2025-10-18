@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { VisualDivider } from '@thunderbirdops/services-ui';
-import { BookingsFilterOptions, BookingStatus } from '@/definitions';
+import { BookingsFilterOptions } from '@/definitions';
 import DateRequestedAppointmentItem from './DateRequestedAppointmentItem.vue';
 import { isUnconfirmed } from '@/utils';
 
@@ -22,9 +22,6 @@ const { appointmentsSortedByDateRequested } = storeToRefs(appointmentStore);
 
 
 const filteredAppointments = computed(() => {
-  if (props.filter === BookingsFilterOptions.All) {
-    return appointmentsSortedByDateRequested.value;
-  }
   if (props.filter === BookingsFilterOptions.Unconfirmed) {
     return {
       today: appointmentsSortedByDateRequested.value.today.filter((a) => isUnconfirmed(a)),
@@ -33,6 +30,8 @@ const filteredAppointments = computed(() => {
       earlier: appointmentsSortedByDateRequested.value.earlier.filter((a) => isUnconfirmed(a)),
     };
   }
+
+  return appointmentsSortedByDateRequested.value;
 });
 </script>
 
