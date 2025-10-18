@@ -13,7 +13,9 @@ import {
   Alert,
   ListResponse,
   Availability,
+  Appointment,
 } from '@/models';
+import { BookingStatus } from './definitions';
 
 /**
 * Lowercases the first character of a string
@@ -429,6 +431,13 @@ export const deepClone = (entity: any): any => {
   return JSON.parse(JSON.stringify(entity));
 };
 
+/**
+ * Return true if the Appointment is not confirmed by the owner yet
+ */
+export const isUnconfirmed = (a: Appointment): boolean => {
+  return a.slots[0].booking_status === BookingStatus.Requested;
+};
+
 export default {
   keyByValue,
   eventColor,
@@ -447,4 +456,5 @@ export default {
   minutesToHhmm,
   compareAvailabilityStart,
   deepClone,
+  isUnconfirmed,
 };

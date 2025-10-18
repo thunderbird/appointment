@@ -29,7 +29,7 @@ defineProps<{
     </div>
 
     <div>
-      <base-badge  v-if="needsConfirmation" class="badge" :type="BaseBadgeTypes.NotSet">
+      <base-badge v-if="needsConfirmation" class="badge" :type="BaseBadgeTypes.NotSet">
         {{ t('label.needsConfirmation') }}
       </base-badge>
     </div>

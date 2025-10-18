@@ -47,26 +47,26 @@ const handleCloseAppointmentSlidingPanel = () => {
 };
 
 /* Filter Options */
-const filterOptions = computed(() => [{
+const filterOptions = [{
   label: t('label.showAll'),
   value: BookingsFilterOptions.All,
 }, {
   label: t('label.unconfirmed'),
   value: BookingsFilterOptions.Unconfirmed,
-}])
+}];
 
-const selectedFilter = ref<string>(BookingsFilterOptions.All);
+const selectedFilter = ref<BookingsFilterOptions>(BookingsFilterOptions.All);
 
 /* Sort Option */
-const sortOptions = computed(() => [{
+const sortOptions = [{
   label: t('label.dateRequested'),
   value: BookingsSortOptions.DateRequested,
 }, {
   label: t('label.meetingDate'),
   value: BookingsSortOptions.MeetingDate,
-}])
+}];
 
-const selectedSort = ref<string>(BookingsSortOptions.DateRequested);
+const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
 onMounted(async () => {
   if (!appointmentStore.isLoaded) {
@@ -116,8 +116,14 @@ export default {
       </template>
 
       <div v-else class="appointments-container">
-        <date-requested-appointments v-if="selectedSort === BookingsSortOptions.DateRequested" />
-        <meeting-date-appointments v-else-if="selectedSort === BookingsSortOptions.MeetingDate" />
+        <date-requested-appointments
+          v-if="selectedSort === BookingsSortOptions.DateRequested"
+          :filter="selectedFilter"
+        />
+        <meeting-date-appointments
+          v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
+          :filter="selectedFilter"
+        />
       </div>
     </div>
   </div>

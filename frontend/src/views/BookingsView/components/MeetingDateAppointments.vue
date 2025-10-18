@@ -5,10 +5,18 @@ import { storeToRefs } from 'pinia';
 import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { dayjsKey } from '@/keys';
-import { BookingStatus } from '@/definitions';
+import { BookingsFilterOptions, BookingStatus } from '@/definitions';
 import { Appointment } from '@/models';
 import { VisualDivider } from '@thunderbirdops/services-ui';
 import MeetingDateAppointmentItem from './MeetingDateAppointmentItem.vue';
+import { isUnconfirmed } from '@/utils';
+
+interface Props {
+  filter: BookingsFilterOptions,
+}
+const props = withDefaults(defineProps<Props>(), {
+  filter: BookingsFilterOptions.All,
+});
 
 const dj = inject(dayjsKey);
 const appointmentStore = useAppointmentStore();
@@ -34,9 +42,9 @@ const groupedAppointments = computed(() => {
     .map(([day, appts]) => ({
       day,
       label: dj(day).format('dddd, MMM D'),
-      appointments: appts.sort(
-        (a, b) => dj(a.slots[0].start).valueOf() - dj(b.slots[0].start).valueOf()
-      ),
+      appointments: appts
+        .filter((a) => props.filter === BookingsFilterOptions.Unconfirmed ? isUnconfirmed(a) : true)
+        .sort((a, b) => dj(a.slots[0].start).valueOf() - dj(b.slots[0].start).valueOf()),
     }));
 });
 </script>
@@ -57,15 +65,18 @@ const groupedAppointments = computed(() => {
   <visual-divider class="divider" />
 
   <template v-for="group in groupedAppointments" :key="group.day">
-    <h2>{{ group.label }}</h2>
-    <template v-for="monthlyAppt in group.appointments" :key="monthlyAppt.id">
-      <meeting-date-appointment-item
-        :name="monthlyAppt.slots[0].attendee.name"
-        :email="monthlyAppt.slots[0].attendee.email"
-        :startTime="monthlyAppt.slots[0].start as string"
-        :duration="monthlyAppt.slots[0].duration"
-        :needs-confirmation="monthlyAppt.slots[0].booking_status === BookingStatus.Requested"
-      />
+    <template v-if="group.appointments.length > 0">
+      <h2>{{ group.label }}</h2>
+      <div class="item-container">
+        <meeting-date-appointment-item
+          v-for="monthlyAppt in group.appointments" :key="monthlyAppt.id"
+          :name="monthlyAppt.slots[0].attendee.name"
+          :email="monthlyAppt.slots[0].attendee.email"
+          :startTime="(monthlyAppt.slots[0].start as string)"
+          :duration="monthlyAppt.slots[0].duration"
+          :needs-confirmation="isUnconfirmed(monthlyAppt)"
+        />
+      </div>
     </template>
   </template>
 </template>
@@ -82,7 +93,8 @@ h2 {
   font-size: 1rem;
   color: var(--colour-ti-secondary);
   text-align: center;
-  margin-block-end: 0.875rem;
+  margin-block-start: 0.875rem;
+  margin-block-end: 0.625rem;
 }
 
 .divider {
@@ -93,5 +105,11 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.item-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 </style>
