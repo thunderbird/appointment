@@ -1,45 +1,55 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Dayjs } from 'dayjs';
 import { dayjsKey } from '@/keys';
 import { BaseBadge, BaseBadgeTypes } from '@thunderbirdops/services-ui';
+import type { Appointment } from '@/models';
+import { isUnconfirmed } from '@/utils';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
 
-defineProps<{
-  name: string;
-  email: string;
-  startTime: string | Dayjs;
-  duration: number;
-  needsConfirmation: boolean;
-}>();
+const props = defineProps<{ appointment: Appointment }>();
+
+const appointmentItem = computed(() => {
+  return {
+    name: props.appointment.slots[0].attendee.name,
+    email: props.appointment.slots[0].attendee.email,
+    startTime: props.appointment.slots[0].start,
+    duration: props.appointment.slots[0].duration,
+    needsConfirmation: isUnconfirmed(props.appointment),
+  }
+})
+
+const emit = defineEmits(['select-appointment']);
 </script>
 
 <template>
-  <div class="appointment-item">
-    <div>
-      <strong>{{ name }}</strong>
-      <p>{{ email }}</p>
+  <button class="appointment-item" @click="emit('select-appointment', appointment)">
+    <div class="user-info">
+      <strong>{{ appointmentItem.name }}</strong>
+      <p>{{ appointmentItem.email }}</p>
     </div>
 
     <div class="time-range">
-      <span>{{ dj(startTime).format('LT') }}</span> - <span>{{ dj(startTime).add(duration, 'minutes').format('LT') }}</span>
+      <span>{{ dj(appointmentItem.startTime).format('LT') }}</span> - <span>{{ dj(appointmentItem.startTime).add(appointmentItem.duration, 'minutes').format('LT') }}</span>
     </div>
 
-    <div>
-      <base-badge v-if="needsConfirmation" class="badge" :type="BaseBadgeTypes.NotSet">
+    <div class="badge-column">
+      <base-badge v-if="appointmentItem.needsConfirmation" :type="BaseBadgeTypes.NotSet">
         {{ t('label.needsConfirmation') }}
       </base-badge>
     </div>
-  </div>
+  </button>
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .appointment-item {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   align-items: center;
   justify-content: space-between;
   background-color: var(--colour-neutral-lower);
@@ -55,8 +65,23 @@ defineProps<{
   .time-range {
     justify-self: center;
   }
+}
 
-  .badge {
+@media (--md) {
+  .appointment-item {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .user-info {
+    text-align: left;
+  }
+
+  .time-range {
+    justify-self: center;
+  }
+
+  .badge-column {
     justify-self: flex-end;
   }
 }

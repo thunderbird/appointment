@@ -20,7 +20,6 @@ const { t } = useI18n();
 const appointmentStore = useAppointmentStore();
 const { appointmentsSortedByDateRequested } = storeToRefs(appointmentStore);
 
-
 const filteredAppointments = computed(() => {
   if (props.filter === BookingsFilterOptions.Unconfirmed) {
     return {
@@ -33,24 +32,23 @@ const filteredAppointments = computed(() => {
 
   return appointmentsSortedByDateRequested.value;
 });
+
+const emit = defineEmits(['select-appointment']);
 </script>
 
 <template>
   <!-- Today -->
   <template v-if="filteredAppointments.today.length > 0">
     <h2>{{ t('label.today') }}</h2>
-  
+
     <visual-divider />
 
     <div class="item-container">
       <date-requested-appointment-item
         v-for="todayAppt in filteredAppointments.today"
         :key="todayAppt.id"
-        :name="todayAppt.slots[0].attendee.name"
-        :email="todayAppt.slots[0].attendee.email"
-        :request-date="todayAppt.time_created"
-        :meeting-date="(todayAppt.slots[0].start as string)"
-        :needs-confirmation="isUnconfirmed(todayAppt)"
+        :appointment="todayAppt"
+        @select-appointment="emit('select-appointment', $event)"
       />
     </div>
   </template>
@@ -58,16 +56,13 @@ const filteredAppointments = computed(() => {
   <!-- This week -->
   <template v-if="filteredAppointments.thisWeek.length > 0">
     <h2>{{ t('label.thisWeek') }}</h2>
-  
+
     <div class="item-container">
       <date-requested-appointment-item
         v-for="weekAppt in filteredAppointments.thisWeek"
         :key="weekAppt.id"
-        :name="weekAppt.slots[0].attendee.name"
-        :email="weekAppt.slots[0].attendee.email"
-        :request-date="weekAppt.time_created"
-        :meeting-date="(weekAppt.slots[0].start as string)"
-        :needs-confirmation="isUnconfirmed(weekAppt)"
+        :appointment="weekAppt"
+        @select-appointment="emit('select-appointment', $event)"
       />
     </div>
   </template>
@@ -75,16 +70,13 @@ const filteredAppointments = computed(() => {
   <!-- This month -->
   <template v-if="filteredAppointments.thisMonth.length > 0">
     <h2>{{ t('label.thisMonth') }}</h2>
-  
+
     <div class="item-container">
       <date-requested-appointment-item
         v-for="monthAppt in filteredAppointments.thisMonth"
         :key="monthAppt.id"
-        :name="monthAppt.slots[0].attendee.name"
-        :email="monthAppt.slots[0].attendee.email"
-        :request-date="monthAppt.time_created"
-        :meeting-date="(monthAppt.slots[0].start as string)"
-        :needs-confirmation="isUnconfirmed(monthAppt)"
+        :appointment="monthAppt"
+        @select-appointment="emit('select-appointment', $event)"
       />
     </div>
   </template>
@@ -92,16 +84,13 @@ const filteredAppointments = computed(() => {
   <!-- Earlier -->
   <template v-if="filteredAppointments.earlier.length > 0">
     <h2>{{ t('label.earlier') }}</h2>
-  
+
     <div class="item-container">
       <date-requested-appointment-item
         v-for="earlierAppt in filteredAppointments.earlier"
         :key="earlierAppt.id"
-        :name="earlierAppt.slots[0].attendee.name"
-        :email="earlierAppt.slots[0].attendee.email"
-        :request-date="earlierAppt.time_created"
-        :meeting-date="(earlierAppt.slots[0].start as string)"
-        :needs-confirmation="isUnconfirmed(earlierAppt)"
+        :appointment="earlierAppt"
+        @select-appointment="emit('select-appointment', $event)"
       />
     </div>
   </template>
@@ -109,11 +98,18 @@ const filteredAppointments = computed(() => {
 
 <style scoped>
 h2 {
-  font-size: 1.5rem;
-  font-family: metropolis;
+  font-size: 1rem;
+  font-family: Inter;
   text-align: center;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-block-start: 0.875rem;
+  margin-block-end: 0.875rem;
+
+  &:first-child {
+    font-size: 1.5rem;
+    font-family: metropolis;
+    margin-block-start: 0.5rem;
+    margin-block-end: 0.5rem;
+  }
 }
 
 .divider {

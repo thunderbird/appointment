@@ -47,6 +47,8 @@ const groupedAppointments = computed(() => {
         .sort((a, b) => dj(a.slots[0].start).valueOf() - dj(b.slots[0].start).valueOf()),
     }));
 });
+
+const emit = defineEmits(['select-appointment']);
 </script>
 
 <template>
@@ -54,9 +56,9 @@ const groupedAppointments = computed(() => {
     <button @click="selectedMonth = selectedMonth.subtract(1, 'month')">
       <ph-caret-left size="24" />
     </button>
-  
+
     <h1>{{ selectedMonth.format('MMMM YYYY') }}</h1>
-  
+
     <button @click="selectedMonth = selectedMonth.add(1, 'month')">
       <ph-caret-right size="24" />
     </button>
@@ -70,11 +72,8 @@ const groupedAppointments = computed(() => {
       <div class="item-container">
         <meeting-date-appointment-item
           v-for="monthlyAppt in group.appointments" :key="monthlyAppt.id"
-          :name="monthlyAppt.slots[0].attendee.name"
-          :email="monthlyAppt.slots[0].attendee.email"
-          :startTime="(monthlyAppt.slots[0].start as string)"
-          :duration="monthlyAppt.slots[0].duration"
-          :needs-confirmation="isUnconfirmed(monthlyAppt)"
+          :appointment="monthlyAppt"
+          @select-appointment="emit('select-appointment', $event)"
         />
       </div>
     </template>

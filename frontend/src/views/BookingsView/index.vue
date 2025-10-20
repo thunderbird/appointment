@@ -118,10 +118,12 @@ export default {
         <date-requested-appointments
           v-if="selectedSort === BookingsSortOptions.DateRequested"
           :filter="selectedFilter"
+          @select-appointment="showAppointmentSlidingPanel"
         />
         <meeting-date-appointments
           v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
           :filter="selectedFilter"
+          @select-appointment="showAppointmentSlidingPanel"
         />
       </div>
     </div>
@@ -148,6 +150,8 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
 
   .sort-by-container {
     display: flex;
@@ -157,7 +161,8 @@ h1 {
 }
 
 .page-content {
-  margin-block: 1.5rem;
+  margin-block-start: 1.5rem;
+  margin-block-end: 3rem;
   display: flex;
   flex: 1;
   min-height: 0;
@@ -180,6 +185,10 @@ h1 {
     width: 100%;
     max-width: 969px;
     margin: 0 auto;
+  }
+
+  .page-controls {
+    gap: 0;
   }
 }
 </style>
