@@ -158,7 +158,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:743aa79783aac2ac914a8e006ffce80885336fc6
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:f0547ac563e4852aae1c4585a5757b60c6b27f47
             portMappings:
               - name: backend
                 containerPort: 5000
