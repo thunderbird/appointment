@@ -8,7 +8,6 @@ import {
 } from '@/models';
 import { dayjsKey, tzGuessKey } from '@/keys';
 import { usePosthog, posthog } from '@/composables/posthog';
-import { FILTER_QUERY_PARAM_TO_BOOKING_STATUS } from '@/views/BookingsView/constants';
 
 const DEFAULT_PAGE_SIZE = 50;
 
@@ -26,13 +25,37 @@ export const useAppointmentStore = defineStore('appointments', () => {
 
   // Data
   const appointments = ref<Appointment[]>([]);
+  const selectedAppointment = ref<Appointment | null>(null);
+
   const pendingAppointments = computed(
     (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === BookingStatus.Requested),
   );
-  const pendingFutureAppointments = computed(
-    (): Appointment[] => pendingAppointments.value.filter((a) => a?.slots[0]?.start > dj()),
-  );
-  const selectedAppointment = ref<Appointment | null>(null);
+  const appointmentsSortedByDateRequested = computed(
+    () => {
+      const today: Appointment[] = [];
+      const thisWeek: Appointment[] = [];
+      const thisMonth: Appointment[] = [];
+      const earlier: Appointment[] = [];
+
+      const now = dj();
+
+      for (const appointment of appointments.value) {
+        const start = dj(appointment.slots[0].start);
+
+        if (start.isToday()) {
+          today.push(appointment);
+        } else if (start.isSame(now, 'week')) {
+          thisWeek.push(appointment);
+        } else if (start.isSame(now, 'month')) {
+          thisMonth.push(appointment);
+        } else {
+          earlier.push(appointment);
+        }
+      }
+
+      return { today, thisWeek, thisMonth, earlier };
+    }
+  )
 
   /**
    * Initialize store with data required at runtime
@@ -59,16 +82,6 @@ export const useAppointmentStore = defineStore('appointments', () => {
   };
 
   /**
-   * Convert filter query params to backend status values
-   */
-  const convertFiltersToStatusParams = (filters: string[]): string[] => {
-    return filters.map(filter => {
-      const status = FILTER_QUERY_PARAM_TO_BOOKING_STATUS[filter];
-      return status ? BookingStatus[status].toLowerCase() : null;
-    }).filter(Boolean);
-  };
-
-  /**
    * Get appointments for current user with pagination and filters
    */
   const fetch = async (page: number = 1, statusFilters: string[] = [], append: boolean = false) => {
@@ -77,18 +90,10 @@ export const useAppointmentStore = defineStore('appointments', () => {
     isLoading.value = true;
 
     try {
-      // Convert filter query params to backend status values
-      const statusParams = convertFiltersToStatusParams(statusFilters);
-
       // Build query parameters
       const queryParams = new URLSearchParams({
         page: page.toString(),
         per_page: DEFAULT_PAGE_SIZE.toString(),
-      });
-
-      // Add status filters if provided
-      statusParams.forEach(status => {
-        queryParams.append('status', status);
       });
 
       const { data, error }: AppointmentListResponse = await call.value(`me/appointments?${queryParams.toString()}`).get().json();
@@ -240,7 +245,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
     appointments,
     selectedAppointment,
     pendingAppointments,
-    pendingFutureAppointments,
+    appointmentsSortedByDateRequested,
     init,
     postFetchProcess,
     fetch,

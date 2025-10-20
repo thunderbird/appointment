@@ -1,121 +1,29 @@
 <script setup lang="ts">
-import { ref, inject, computed, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { IconCaretUpFilled, IconCaretDownFilled } from '@tabler/icons-vue';
-import { CheckboxInput } from '@thunderbirdops/services-ui';
-import { BookingStatus } from '@/definitions';
-import { timeFormat } from '@/utils';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+import { SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
-import { dayjsKey } from '@/keys';
-import { useQueryParamState } from '@/composables/useQueryParamState';
-import AppointmentMultiSelectFilter from './components/AppointmentMultiSelectFilter.vue';
+import { BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
-import { BOOKING_STATUS_TO_FILTER_QUERY_PARAM } from './constants';
+import DateRequestedAppointments from './components/DateRequestedAppointments.vue';
+import MeetingDateAppointments from './components/MeetingDateAppointments.vue';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const dj = inject(dayjsKey);
 
 const appointmentStore = useAppointmentStore();
 const { 
-  appointments, 
-  selectedAppointment, 
-  isLoading, 
-  hasMorePages 
+  appointments,
+  selectedAppointment,
+  isLoading,
 } = storeToRefs(appointmentStore);
 
-// Default selected filters: Pending (requested) and Confirmed (booked)
-const selectedFilters = useQueryParamState(
-  'filters',
-  [
-    BOOKING_STATUS_TO_FILTER_QUERY_PARAM[BookingStatus.Requested],
-    BOOKING_STATUS_TO_FILTER_QUERY_PARAM[BookingStatus.Booked],
-  ]
-);
-
-// Handle sorting by unconfirmed first
-const unconfirmedFirst = useQueryParamState<boolean>('unconfirmed', false);
-
-// Handle table column sorting
-type TableColumn = 'date' | 'title' | 'calendar';
-enum SortDirection {
-  Ascending = 'asc',
-  Descending = 'desc',
-}
-const sortColumn = ref<TableColumn>('date');
-const sortDirection = ref<SortDirection>(SortDirection.Ascending);
-
-// handle appointment sliding panel
+/* Appointment Sliding Panel */
 const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>()
-
-// Handle filtered appointments list
-const filteredAppointments = computed(() => {
-  let list = appointments.value ? [...appointments.value] : [];
-
-  // Sort by table column
-  if (sortColumn.value) {
-    list.sort((a, b) => {
-      let aValue, bValue;
-
-      switch (sortColumn.value) {
-        case 'date':
-          // Sort by date and time combined
-          aValue = a.slots[0].start.valueOf();
-          bValue = b.slots[0].start.valueOf();
-          break;
-        case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        case 'calendar':
-          aValue = a.calendar_title.toLowerCase();
-          bValue = b.calendar_title.toLowerCase();
-          break;
-        default:
-          return 0;
-      }
-
-      if (aValue < bValue) return sortDirection.value === SortDirection.Ascending ? -1 : 1;
-      if (aValue > bValue) return sortDirection.value === SortDirection.Ascending ? 1 : -1;
-
-      return 0;
-    });
-  }
-
-  if (unconfirmedFirst.value) {
-    list = list.sort((a, b) => {
-      const aIsUnconfirmed = a.slots[0].booking_status === BookingStatus.Requested;
-      const bIsUnconfirmed = b.slots[0].booking_status === BookingStatus.Requested;
-
-      if (aIsUnconfirmed && !bIsUnconfirmed) return -1;
-      if (!aIsUnconfirmed && bIsUnconfirmed) return 1;
-      return 0;
-    });
-  }
-
-  return list;
-});
-
-// Handle column sorting
-const handleColumnSort = (column: TableColumn) => {
-  if (sortColumn.value === column) {
-    // Toggle direction if same column
-    sortDirection.value = sortDirection.value === SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
-  } else {
-    // Set new column and default to ascending
-    sortColumn.value = column;
-    sortDirection.value = SortDirection.Ascending;
-  }
-};
-
-// Get sort indicator for column
-const getSortIndicator = (column: string) => {
-  if (sortColumn.value !== column) return null;
-  return sortDirection.value === SortDirection.Ascending ? IconCaretUpFilled : IconCaretDownFilled;
-};
 
 const showAppointmentSlidingPanel = async (appointment) => {
   selectedAppointment.value = appointment;
@@ -137,32 +45,34 @@ const handleCloseAppointmentSlidingPanel = () => {
   });
 };
 
-const ariaSortForColumn = (column: TableColumn) => {
-  if (sortColumn.value !== column) return null;
-  return sortDirection.value === SortDirection.Ascending ? 'ascending' : 'descending'
-}
+/* Filter Options */
+const filterOptions = [{
+  label: t('label.showAll'),
+  value: BookingsFilterOptions.All,
+}, {
+  label: t('label.unconfirmed'),
+  value: BookingsFilterOptions.Unconfirmed,
+}];
 
-// Handle infinite scrolling
-const handleScroll = async (event: Event) => {
-  const target = event.target as HTMLElement;
-  const { scrollTop, scrollHeight, clientHeight } = target;
+const selectedFilter = ref<BookingsFilterOptions>(BookingsFilterOptions.All);
 
-  // Load more when user scrolls to bottom (with a small threshold)
-  if (scrollHeight - scrollTop <= clientHeight + 100 && hasMorePages.value && !isLoading.value) {
-    await appointmentStore.loadMore(selectedFilters.value);
-  }
-};
+/* Sort Option */
+const sortOptions = [{
+  label: t('label.dateRequested'),
+  value: BookingsSortOptions.DateRequested,
+}, {
+  label: t('label.meetingDate'),
+  value: BookingsSortOptions.MeetingDate,
+}];
 
-// Watch for filter changes and refresh data
-watch(selectedFilters, async (newFilters) => {
-  await appointmentStore.refresh(newFilters);
-}, { deep: true });
+const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
-// initially load data when component gets remounted
 onMounted(async () => {
-  await appointmentStore.refresh(selectedFilters.value);
+  if (!appointmentStore.isLoaded) {
+    await appointmentStore.fetch();
+  }
 
-  // If we've got a slug
+  // If we've got a slug, already open the Appointment Sliding Panel
   if (route.params?.slug && appointments.value) {
     showAppointmentSlidingPanel(appointments.value.filter((appointment) => appointment.slug === route.params.slug)[0]);
   }
@@ -176,141 +86,46 @@ export default {
 </script>
 
 <template>
-  <!-- page title area -->
-  <div class="page-title-area">
-    <div class="page-title">{{ t('label.appointments') }}</div>
+  <div class="bookings-page-container">
+    <!-- page title area -->
+    <h1>{{ t('label.appointments') }}</h1>
+  
     <div class="page-controls">
-      <appointment-multi-select-filter
-        :selected="selectedFilters"
-        @update:selected="selectedFilters = $event"
-      />
-      <checkbox-input
-        class="unconfirmed-first-checkbox"
+      <segmented-control
         name="unconfirmed-first"
-        :label="t('label.unconfirmedFirst')"
-        v-model="unconfirmedFirst"
+        :required="false"
+        :options="filterOptions"
+        v-model="selectedFilter"
       />
+
+      <div class="sort-by-container">
+        <span>{{ t('label.sortBy') }}:</span>
+        <select-input
+          name="sort-select"
+          :options="sortOptions"
+          v-model="selectedSort"
+        />
+      </div>
     </div>
-  </div>
+  
+    <!-- page content -->
+    <div class="page-content">
+      <template v-if="isLoading">
+        <loading-spinner />
+      </template>
 
-  <!-- page content -->
-  <div class="page-content">
-    <!-- main section: list of appointments with filter -->
-    <div class="appointments-container" @scroll="handleScroll">
-      <!-- appointments list -->
-      <table class="appointments-table"
-        data-testid="bookings-appointments-list-table">
-        <caption>
-          <span class="screen-reader-only">
-            {{ t("label.columnHeadersSortable") }}
-          </span>
-        </caption>
-        <thead>
-          <tr class="table-header-row">
-            <th
-              class="table-header"
-              :aria-sort="ariaSortForColumn('date')"
-            >
-              <button @click="handleColumnSort('date')" class="sortable-header sortable-header-with-border">
-                <component
-                  :is="getSortIndicator('date')"
-                  v-if="getSortIndicator('date')"
-                  class="sort-indicator"
-                  aria-hidden="true"
-                />
-                {{ t("label.date") }}
-              </button>
-            </th>
-            <th
-              class="table-header"
-              :aria-sort="ariaSortForColumn('date')"
-            >
-              <button @click="handleColumnSort('date')" class="sortable-header sortable-header-with-border">
-                {{ t("label.time") }}
-              </button>
-            </th>
-            <th
-              class="table-header"
-              :aria-sort="ariaSortForColumn('title')"
-            >
-              <button @click="handleColumnSort('title')" class="sortable-header sortable-header-with-border">
-                <component
-                  :is="getSortIndicator('title')"
-                  v-if="getSortIndicator('title')"
-                  class="sort-indicator"
-                  aria-hidden="true"
-                />
-                {{ t("label.meetingTitle") }}
-              </button>
-            </th>
-            <th class="table-header status-header">
-              <div class="status-header-content">
-                <span aria-hidden="true">&nbsp;</span>
-                <span class="screen-reader-only">{{ t("label.status") }}</span>
-              </div>
-            </th>
-            <th
-              class="table-header"
-              :aria-sort="ariaSortForColumn('calendar')"
-            >
-              <button @click="handleColumnSort('calendar')" class="sortable-header">
-                <component
-                  :is="getSortIndicator('calendar')"
-                  v-if="getSortIndicator('calendar')"
-                  class="sort-indicator"
-                  aria-hidden="true"
-                />
-                {{ t("label.calendar") }}
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(appointment, i) in filteredAppointments"
-            :key="`${appointment.id}-${i}`"
-            @click.left.exact="showAppointmentSlidingPanel(appointment)"
-          >
-            <td class="table-cell">
-              <!-- Hidden link spanning the whole table row for accessibility -->
-              <router-link
-                :to="{
-                  name: 'bookings',
-                  params: { slug: appointment.slug },
-                  query: route.query
-                }"
-                class="absolute inset-0 z-10 opacity-0"
-                aria-label="Open appointment in new tab"
-              ></router-link>
-
-              <span>{{ dj(appointment?.slots[0].start).format('LL') }}</span>
-            </td>
-            <td class="table-cell">
-              <span>
-                {{ dj(appointment?.slots[0].start).format(timeFormat()) }}
-                {{ t('label.to') }}
-                {{ dj(appointment?.slots[0].start).add(appointment?.slots[0].duration, 'minutes').format(timeFormat())
-                }}
-              </span>
-            </td>
-            <td class="table-cell title-cell">
-              <span>{{ appointment.title }}</span>
-            </td>
-            <td class="table-cell status-cell">
-              <span
-                v-if="appointment?.slots[0].booking_status === BookingStatus.Requested"
-              >
-                {{ t('label.unconfirmed')}}
-              </span>
-            </td>
-            <td class="table-cell">
-              <span>{{ appointment.calendar_title }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <p class="loading-indicator" v-if="isLoading">{{ t('label.loading') }}</p>
+      <div v-else class="appointments-container">
+        <date-requested-appointments
+          v-if="selectedSort === BookingsSortOptions.DateRequested"
+          :filter="selectedFilter"
+          @select-appointment="showAppointmentSlidingPanel"
+        />
+        <meeting-date-appointments
+          v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
+          :filter="selectedFilter"
+          @select-appointment="showAppointmentSlidingPanel"
+        />
+      </div>
     </div>
   </div>
 
@@ -322,172 +137,58 @@ export default {
 </template>
 
 <style scoped>
-.page-title-area {
-  display: flex;
-  user-select: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  flex-direction: row;
-}
+@import '@/assets/styles/custom-media.pcss';
 
-.page-title {
-  margin-block-end: 0;
+h1 {
+  margin-block-end: 2rem;
   font-family: metropolis;
   font-size: 2.25rem;
   color: var(--colour-ti-base);
 }
 
 .page-controls {
-  margin: 0 0 0 auto;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
 
-  & .checkbox-input-wrapper {
-    width: auto;
+  .sort-by-container {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
   }
 }
 
 .page-content {
-  margin-block: 2rem;
+  margin-block-start: 1.5rem;
+  margin-block-end: 3rem;
   display: flex;
   flex: 1;
   min-height: 0;
   flex-direction: column;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
 .appointments-container {
-  position: relative;
-  flex: 1;
-  overflow-y: auto;
   width: 100%;
-  max-height: calc(100vh - 200px);
-}
-
-.appointments-table {
-  width: 100%;
-  color: var(--colour-ti-secondary);
-
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  tbody {
-    tr {
-      position: relative;
-      cursor: pointer;
-
-      &:hover {
-        background-color: var(--colour-neutral-base);
-      }
-    }
-  }
-}
-
-.unconfirmed-first-checkbox {
-  width: auto;
-}
-
-/* Table styles */
-.table-header-row {
+  box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
+  padding: 1rem 0.75rem;
+  border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
 }
 
-.table-header {
-  padding: 0.5rem;
-  text-align: left;
-  font-weight: normal;
-}
-
-.status-header {
-  min-width: 120px;
-}
-
-.status-header-content {
-  border-right: 1px solid var(--colour-neutral-border);
-  padding: 0.25rem 0;
-
-  .dark & {
-    border-right-color: var(--colour-neutral-border-intense);
+@media (--md) {
+  .bookings-page-container {
+    width: 100%;
+    max-width: 969px;
+    margin: 0 auto;
   }
-}
 
-.table-row {
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background-color: rgba(56, 189, 248, 0.1);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  .page-controls {
+    gap: 0;
   }
-}
-
-.table-cell {
-  padding: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.title-cell {
-  width: 40%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status-cell {
-  text-align: center;
-  text-transform: uppercase;
-  width: 200px;
-  color: var(--colour-ti-critical)
-}
-
-/* Sortable header styles */
-.sortable-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  font-size: inherit;
-  font-weight: inherit;
-  color: inherit;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  padding: 0.25rem 0;
-
-  &:hover {
-    background-color: var(--colour-neutral-subtle);
-  }
-}
-
-.sortable-header-with-border {
-  border-right: 1px solid var(--colour-neutral-border);
-  padding: 0.25rem 0;
-
-  .dark & {
-    border-right-color: var(--colour-neutral-border-intense);
-  }
-}
-
-.sort-indicator {
-  width: 1rem;
-  height: 1rem;
-  margin-block-start: 0.2rem;
-  color: var(--colour-ti-base);
-}
-
-.loading-indicator {
-  text-align: center;
-  padding: 0.5rem;
-  color: var(--colour-ti-muted);
 }
 </style>
