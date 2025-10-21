@@ -185,7 +185,7 @@ resources:
               - name: FRONTEND_URL
                 value: https://appointment-dev.tb.pro
               - name: SHORT_BASE_URL
-                value: https://dev.apt.mt/
+                value: https://dev.apt.mt
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT

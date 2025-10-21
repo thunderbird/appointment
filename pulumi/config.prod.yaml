@@ -279,7 +279,7 @@ resources:
               - name: SENTRY_DSN
                 value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
               - name: SHORT_BASE_URL
-                value: https://apt.mt/
+                value: https://apt.mt
               - name: SUPPORT_EMAIL
                 value: appointment-support@thunderbird.net
               - name: TIER_BASIC_CALENDAR_LIMIT
