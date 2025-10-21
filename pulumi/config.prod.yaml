@@ -314,7 +314,7 @@ resources:
       distribution:
         aliases:
           - appointment.tb.pro
-          - apmt.tb.pro
+          - apt.mt
         comment: Appointment prod frontend
         # Do not define ordered cache behaviors here; they are programmatically overridden
         logging_config:
