@@ -309,9 +309,9 @@ resources:
   tb:cloudfront:CloudFrontS3Service:
     frontend:
       service_bucket_name: tb-appointment-stage-frontend
-      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront
+      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront. It must
+      # also cover both the normal and short URL domains.
       certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/d57d4e06-0125-4759-a828-fcc4a7641003
-      # certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/616d9faf-61e0-4d2a-b82d-b1c3d2592052
       distribution:
         aliases:
           - appointment-stage.tb.pro
