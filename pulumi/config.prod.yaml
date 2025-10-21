@@ -279,7 +279,7 @@ resources:
               - name: SENTRY_DSN
                 value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
               - name: SHORT_BASE_URL
-                value: https://apt.mt/
+                value: https://apt.mt
               - name: SUPPORT_EMAIL
                 value: appointment-support@thunderbird.net
               - name: TIER_BASIC_CALENDAR_LIMIT
@@ -308,11 +308,13 @@ resources:
   tb:cloudfront:CloudFrontS3Service:
     frontend:
       service_bucket_name: tb-appointment-prod-frontend
-      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront
-      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/bba8ed51-31ca-4db6-8331-87b6a4be9775
+      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront. It must
+      # also cover both the normal and short URL domains.
+      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/1bf9a946-e840-4c70-a726-19865db25a2f
       distribution:
         aliases:
           - appointment.tb.pro
+          - apt.mt
         comment: Appointment prod frontend
         # Do not define ordered cache behaviors here; they are programmatically overridden
         logging_config:

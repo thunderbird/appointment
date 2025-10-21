@@ -1,12 +1,29 @@
   async function handler(event) {
     const request = event.request;
-    const apiPath = "/api/v1";
+    const headers = request.headers;
+    const host = headers.host.value;
+    const apiPath = '/api/v1';
     const ignorePaths = ['/fxa', '/assets', '/appointment_logo.svg', '/sitemap.txt'];
     const pathCheckFn = (path) => request.uri.startsWith(path);
+    const domainRewrites = {
+      'apt.mt': 'appointment.tb.pro',
+      'stage.apt.mt': 'appointment-stage.tb.pro'
+    }
+
+    // If we got a short URL, rewrite to the long domain with '/user' prepended
+    if (Object.keys(domainRewrites).includes(host)) {
+      return {
+        statusCode: 302,
+        statusDescription: 'Found',
+        headers: {
+          location: {value: `https://${domainRewrites[host]}/user${request.uri}`}
+        }
+      }
+    }
 
     // If our api path is the first thing that's found in the uri then remove it from the uri.
     if (request.uri.indexOf(apiPath) === 0) {
-      request.uri = request.uri.replace(apiPath, "");
+      request.uri = request.uri.replace(apiPath, '');
     } else if (!ignorePaths.some(pathCheckFn)) {
       // If we're not in one of the ignorePaths then force them to /index.html
       request.uri = '/index.html';

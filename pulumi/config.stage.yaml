@@ -158,7 +158,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:743aa79783aac2ac914a8e006ffce80885336fc6
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:24146d74c0876ced7fbfbffc1f72fcfd9d6e49de
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -276,7 +276,7 @@ resources:
               - name: SERVICE_EMAIL
                 value: no-reply@appointment-stage.tb.pro
               - name: SHORT_BASE_URL
-                value: https://stage.apt.mt/
+                value: https://stage.apt.mt
               - name: SMTP_PORT
                 value: "587"
               - name: SMTP_SECURITY
@@ -309,11 +309,13 @@ resources:
   tb:cloudfront:CloudFrontS3Service:
     frontend:
       service_bucket_name: tb-appointment-stage-frontend
-      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront
-      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/616d9faf-61e0-4d2a-b82d-b1c3d2592052
+      # This cert must be hosted in us-east-1; this limitation is imposed by CloudFront. It must
+      # also cover both the normal and short URL domains.
+      certificate_arn: arn:aws:acm:us-east-1:768512802988:certificate/d57d4e06-0125-4759-a828-fcc4a7641003
       distribution:
         aliases:
           - appointment-stage.tb.pro
+          - stage.apt.mt
         comment: Appointment stage frontend
         # Do not define ordered cache behaviors here; they are programmatically overridden
         logging_config:
