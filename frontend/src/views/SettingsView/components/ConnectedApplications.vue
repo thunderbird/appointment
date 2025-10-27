@@ -43,21 +43,27 @@ const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 // This computed property refers to the calendars from the backend combined
 // with some data from external connections to facilitate connection / disconnection.
 // It should be immutable as it represents the current state of the backend data.
-const initialCalendars = computed(() => calendars.value?.map((calendar) => {
-  const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
-  const externalConnection: ExternalConnection = externalConnectionStore
-    .connections[connectionProvider]
-    .find((ec: ExternalConnection) => ec.id === calendar.external_connection_id)
+const initialCalendars = computed(() => {
+  const formattedCalendars = calendars.value?.map((calendar) => {
+    const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
+    const externalConnection: ExternalConnection = externalConnectionStore
+      .connections[connectionProvider]
+      .find((ec: ExternalConnection) => ec.id === calendar.external_connection_id)
 
-  // Injecting type_id and connection_name from externalConnectionStore
-  // to facilitate the disconnection logic
-  return {
-    ...calendar,
-    type_id: externalConnection?.type_id,
-    connection_name: externalConnection?.name,
-    provider_name: connectionProvider,
-  }
-}) || []);
+    // Injecting type_id and connection_name from externalConnectionStore
+    // to facilitate the disconnection logic
+    return {
+      ...calendar,
+      type_id: externalConnection?.type_id,
+      connection_name: externalConnection?.name,
+      provider_name: connectionProvider,
+    }
+  }) || [];
+
+  const sortedCalendars = formattedCalendars.sort((a, b) => a.title.localeCompare(b.title));
+
+  return sortedCalendars;
+});
 
 async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar(userStore.data.email);
@@ -202,7 +208,7 @@ async function refreshData() {
       <template v-for="calendar in initialCalendars" :key="calendar.id">
         <div class="calendar-details-container">
           <checkbox-input
-            name="calendarConnected"
+            :name="`calendarConnected-${calendar.id}`"
             class="calendar-connected-checkbox"
             @change="(event) => onCalendarChecked(event, calendar.id)"
             :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
@@ -367,6 +373,10 @@ h2 {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+
+  .checkbox-wrapper {
+     width: auto;
+  }
 
   .calendar-connected-checkbox {
     width: auto;
