@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
-import ArtLogo from '@/elements/arts/ArtLogo.vue';
 import {
   IconMenu2,
   IconX,
@@ -61,7 +60,7 @@ async function copyLink() {
     </button>
 
     <router-link :to="{ name: userStore.authenticated ? 'dashboard' : 'home' }">
-      <img src="@/assets/svg/appointment_logo_beta.svg" alt="Appointment Logo" />
+      <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
   </header>
 
@@ -76,7 +75,7 @@ async function copyLink() {
           <icon-x size="24" />
         </button>
 
-        <art-logo />
+        <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
       </header>
 
       <primary-button @click="copyLink" class="share-link-button">
@@ -141,8 +140,8 @@ async function copyLink() {
   display: flex;
   align-items: center;
   min-height: 64px;
-  background-color: var(--colour-neutral-base);
-  color: var(--colour-ti-secondary);
+  background-color: #1a202c; /* Forced dark mode as we don't have light mode for logo yet */
+  color: #eeeef0; /* Forced dark mode as we don't have light mode for logo yet */
   padding: 0.5rem;
   z-index: 9999;
 
@@ -190,8 +189,8 @@ nav {
     width: 75%;
     height: 100%;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    background-color: var(--colour-neutral-raised);
-    color: var(--colour-ti-secondary);
+    background-color: #262d3b; /* Forced dark mode as we don't have light mode for logo yet */
+    color: #d9d9de; /* Forced dark mode as we don't have light mode for logo yet */
     z-index: 2;
     padding: 1rem;
 
@@ -199,6 +198,7 @@ nav {
       display: flex;
       align-items: center;
       height: 32px;
+      gap: 1rem;
       margin-block-end: 2rem;
 
       &>svg {
@@ -231,7 +231,8 @@ nav {
       margin-right: -1rem;
       margin-bottom: -1rem;
       padding: 1rem;
-      background-color: var(--colour-neutral-base);
+      background-color: #1a202c; /* Forced dark mode as we don't have light mode for logo yet */
+      color: #eeeef0; /* Forced dark mode as we don't have light mode for logo yet */
 
       .footer-accordion {
         .footer-header {
@@ -245,11 +246,23 @@ nav {
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            min-width: 0;
+            flex: 1;
+
+            :deep(.avatar.regular) {
+              flex-shrink: 0;
+            }
+
+            :deep(.initials) {
+              color: #eeeef0; /* Forced dark mode as we don't have light mode for logo yet */
+            }
 
             .user-email {
               font-size: 0.875rem;
-              color: var(--colour-ti-base);
               font-weight: 500;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
           }
         }
