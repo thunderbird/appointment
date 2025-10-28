@@ -37,9 +37,9 @@ const activate = (key: string) => {
             'hover:bg-gray-100 dark:hover:bg-gray-700': item != active && !disabled,
           }"
           @click="!disabled ? activate(key) : null"
-          :data-testid="'booking-' + key + '-btn'"
+          :data-testid="'booking-' + item + '-btn'"
         >
-          {{ t('label.' + key) }}
+          {{ t('label.' + item) }}
         </li>
       </ul>
     </nav>
