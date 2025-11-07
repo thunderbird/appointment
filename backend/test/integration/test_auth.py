@@ -1,6 +1,7 @@
 import os
 import json
 import secrets
+import pytest
 from datetime import timedelta
 from uuid import uuid4
 from unittest.mock import patch
@@ -839,6 +840,15 @@ class TestGoogle:
 
 class TestOIDCToken:
     """Tests for the OIDC token endpoint"""
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown(self):
+        """Save and restore AUTH_SCHEME and related env vars for each test"""
+        saved_scheme = os.environ.get('AUTH_SCHEME', 'password')
+        saved_fallback = os.environ.get('OIDC_FALLBACK_MATCH_BY_EMAIL', '')
+        yield
+        os.environ['AUTH_SCHEME'] = saved_scheme
+        os.environ['OIDC_FALLBACK_MATCH_BY_EMAIL'] = saved_fallback
 
     def test_oidc_token_not_enabled(self, with_client):
         """Test that endpoint returns 405 when AUTH_SCHEME is not OIDC"""
