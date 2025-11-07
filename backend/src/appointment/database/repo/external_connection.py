@@ -134,3 +134,23 @@ def get_subscriber_by_oidc_id(db: Session, type_id: str):
         return result.owner
 
     return None
+
+
+def get_subscriber_without_oidc_by_email(db: Session, email: str):
+    """Return a subscriber by the OIDC recovery email address without an OIDC connection"""
+    # Subquery to check if a subscriber has an OIDC external connection
+    oidc_exists = (
+        db.query(models.ExternalConnections.id)
+        .filter(models.ExternalConnections.owner_id == models.Subscriber.id)
+        .filter(models.ExternalConnections.type == models.ExternalConnectionType.oidc)
+        .exists()
+    )
+    
+    # Find subscribers without an OIDC connection that match the email
+    query = (
+        db.query(models.Subscriber)
+        .filter(~oidc_exists)
+        .filter(models.Subscriber.email == email)
+    )
+
+    return query.first()
