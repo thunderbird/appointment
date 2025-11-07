@@ -916,13 +916,6 @@ class TestOIDCToken:
         os.environ['OIDC_FALLBACK_MATCH_BY_EMAIL'] = 'True'
 
         subscriber = make_pro_subscriber()
-
-        # Update subscriber with secondary_email to match the fallback logic
-        with with_db() as db:
-            db_subscriber = repo.subscriber.get(db, subscriber.id)
-            db_subscriber.secondary_email = subscriber.email
-            db.commit()
-
         oidc_id = 'new-oidc-id-456'
 
         # Mock OIDCClient to return valid token data
