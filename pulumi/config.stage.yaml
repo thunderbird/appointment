@@ -259,6 +259,8 @@ resources:
                 value: "60"
               - name: OIDC_TOKEN_INTROSPECTION_URL
                 value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
+              - name: OIDC_FALLBACK_MATCH_BY_EMAIL
+                value: "True"
               - name: POSTHOG_HOST
                 value: https://us.i.posthog.com
               - name: REDIS_DB

@@ -224,6 +224,8 @@ resources:
                 value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
               - name: OIDC_EXP_GRACE_PERIOD
                 value: "60"
+              - name: OIDC_FALLBACK_MATCH_BY_EMAIL
+                value: "True"
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
