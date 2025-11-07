@@ -835,3 +835,108 @@ class TestGoogle:
             assert second_connection[0].type_id == second_google_id
             assert second_connection[0].name == second_google_email
             assert second_connection[0].owner_id == subscriber.id
+
+
+class TestOIDCToken:
+    """Tests for the OIDC token endpoint"""
+
+    def test_oidc_token_not_enabled(self, with_client):
+        """Test that endpoint returns 405 when AUTH_SCHEME is not OIDC"""
+        os.environ['AUTH_SCHEME'] = 'password'
+
+        response = with_client.post(
+            '/oidc/token',
+            json={'access_token': 'test_token', 'timezone': 'America/Vancouver'}
+        )
+
+        assert response.status_code == 405, response.text
+
+    def test_oidc_token_invalid_token(self, with_client):
+        """Test that endpoint returns 403 when token introspection fails"""
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        # Mock OIDCClient to return None (invalid token)
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
+            mock_introspect.return_value = None
+
+            response = with_client.post(
+                '/oidc/token',
+                json={'access_token': 'invalid_token', 'timezone': 'America/Vancouver'}
+            )
+
+            assert response.status_code == 403, response.text
+            data = response.json()
+            assert 'not valid' in data['detail']
+
+    def test_oidc_token_existing_subscriber(self, with_client, make_pro_subscriber, make_external_connections):
+        """Test successful login for existing subscriber with OIDC connection"""
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        subscriber = make_pro_subscriber()
+        oidc_id = 'test-oidc-id-123'
+
+        # Create existing OIDC external connection
+        make_external_connections(
+            subscriber_id=subscriber.id,
+            type=models.ExternalConnectionType.oidc,
+            type_id=oidc_id,
+            name=subscriber.email
+        )
+
+        # Mock OIDCClient to return valid token data
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
+            mock_introspect.return_value = {
+                'sub': oidc_id,
+                'email': subscriber.email,
+                'username': subscriber.username,
+                'name': subscriber.name,
+            }
+
+            response = with_client.post(
+                '/oidc/token',
+                json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+            )
+
+            assert response.status_code == 200, response.text
+            assert response.json() is True
+
+    def test_oidc_token_fallback_match_by_email(self, with_db, with_client, make_pro_subscriber):
+        """Test that fallback email matching works when OIDC_FALLBACK_MATCH_BY_EMAIL is True"""
+        os.environ['AUTH_SCHEME'] = 'oidc'
+        os.environ['OIDC_FALLBACK_MATCH_BY_EMAIL'] = 'True'
+
+        subscriber = make_pro_subscriber()
+
+        # Update subscriber with secondary_email to match the fallback logic
+        with with_db() as db:
+            db_subscriber = repo.subscriber.get(db, subscriber.id)
+            db_subscriber.secondary_email = subscriber.email
+            db.commit()
+
+        oidc_id = 'new-oidc-id-456'
+
+        # Mock OIDCClient to return valid token data
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
+            mock_introspect.return_value = {
+                'sub': oidc_id,
+                'email': subscriber.email,
+                'username': subscriber.username,
+                'name': subscriber.name,
+            }
+
+            response = with_client.post(
+                '/oidc/token',
+                json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+            )
+
+            assert response.status_code == 200, response.text
+            assert response.json() is True
+
+            # Verify the OIDC external connection was created
+            with with_db() as db:
+                oidc_connection = repo.external_connection.get_by_type(
+                    db, subscriber.id, models.ExternalConnectionType.oidc, oidc_id
+                )
+                assert oidc_connection is not None
+                assert len(oidc_connection) == 1
+                assert oidc_connection[0].type_id == oidc_id

@@ -134,3 +134,15 @@ def get_subscriber_by_oidc_id(db: Session, type_id: str):
         return result.owner
 
     return None
+
+
+def get_subscriber_by_email(db: Session, email: str):
+    """Return a subscriber by the OIDC recovery email address"""
+    query = (
+        db.query(models.Subscriber)
+        .filter(models.Subscriber.secondary_email == email)
+    )
+
+    result = query.first()
+
+    return result

@@ -658,6 +658,12 @@ def oidc_token(
     name = token_data.get('name')
 
     subscriber = repo.external_connection.get_subscriber_by_oidc_id(db, oidc_id)
+
+    # If we can't find the subscriber by oidc_id, try to find them by email
+    # as a fallback in case the OIDC_FALLBACK_MATCH_BY_EMAIL env var is set to True
+    if os.getenv('OIDC_FALLBACK_MATCH_BY_EMAIL') == 'True' and not subscriber:
+        subscriber = repo.external_connection.get_subscriber_by_email(db, email)
+
     if not subscriber:
         is_in_allow_list = utils.is_in_allow_list(db, email)
 
