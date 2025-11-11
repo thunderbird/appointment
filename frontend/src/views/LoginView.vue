@@ -59,11 +59,16 @@ onMounted(async () => {
   }
 
   // This route will be used by the TB Pro Appointment landing page
-  // in its login button. This will redirect the user to the OIDC login page.
+  // in its login button. This will redirect the user to the OIDC login page
+  // if they are not authenticated, otherwise it will redirect to the dashboard.
   if (isOidcAuth) {
-    await userManager.signinRedirect({
-      prompt: 'login',
-    });
+    if (user.authenticated) {
+      await router.push({ name: 'dashboard' });
+    } else {
+      await userManager.signinRedirect({
+        prompt: 'login',
+      });
+    }
   }
 });
 
