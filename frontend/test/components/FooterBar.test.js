@@ -32,7 +32,7 @@ describe('FooterBar', () => {
     });
 
     // verify all expected router-link child components were rendered
-    const expectedLinks = ['/login', '/waiting-list', '/privacy', '/terms'];
+    const expectedLinks = ['/login', '/privacy', '/terms'];
     const allRouterLinks = wrapper.findAllComponents(RouterLink);
     var foundLinks = [];
     for (let link of allRouterLinks) {
