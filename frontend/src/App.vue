@@ -140,6 +140,9 @@ const routeIsPublic = computed(
 const routeIsHome = computed(
   () => ['home'].includes(typeof route.name === 'string' ? route.name : ''),
 );
+const routeIsLogin = computed(
+  () => ['login'].includes(typeof route.name === 'string' ? route.name : ''),
+);
 const routeHasModal = computed(
   () => ['login'].includes(typeof route.name === 'string' ? route.name : ''),
 );
@@ -310,8 +313,13 @@ onMounted(async () => {
 </script>
 
 <template>
+  <!-- Home page is actually just a redirect to another route -->
+  <template v-if="routeIsHome || (routeIsLogin && isOidcAuth)">
+    <router-view/>
+  </template>
+
   <!-- authenticated subscriber content -->
-  <template v-if="router.hasRoute(route.name) && (user?.authenticated || routeIsPublic)">
+  <template v-else-if="router.hasRoute(route.name) && (user?.authenticated || routeIsPublic)">
     <site-notification
       v-if="user?.authenticated && visibleNotification"
       :title="notificationTitle"
@@ -321,14 +329,14 @@ onMounted(async () => {
     </site-notification>
 
     <!-- Desktop NavBar show / hide is handled in CSS land -->
-    <nav-bar v-if="!(routeIsHome && !user?.authenticated)" :nav-items="navItems"/>
+    <nav-bar :nav-items="navItems"/>
 
     <!-- Mobile NavBar show / hide is handled in CSS land -->
-    <nav-bar-mobile v-if="!(routeIsHome && !user?.authenticated)"/>
+    <nav-bar-mobile />
 
     <main
       :class="{
-        'private-route': !routeIsHome && !routeIsPublic,
+        'private-route': !routeIsPublic,
         'public-route': routeIsPublic && !routeHasModal,
       }"
     >

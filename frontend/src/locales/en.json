@@ -555,23 +555,6 @@
     "googlePermissionDisclaimer": "Thunderbird Appointment requires the following permissions from Google Calendar for optimal functionality.",
     "googlePermissionEventReason": "Thunderbird Appointment requires this permission to add bookings to your connected Google Calendars.",
     "googlePermissionEventsName": "View and edit events on all your calendars",
-    "homepage": {
-      "calendarCopy": "Connect your calendar and see all your meetings in one place. Book one-off or recurring events and invite people to join you.",
-      "copywrite": "Thunderbird is now part of {mzlaLink}, a wholly owned subsidiary of Mozilla Foundation. Portions of this content are ©1998–{currentYear} by individual contributors. Content available under a {creativeCommonsLink}.",
-      "creativeCommonsLinkText": "Creative Commons license",
-      "intro": "Thunderbird Appointment makes it easy to find a time to meet. So you can ditch the admin and streamline your day.",
-      "mzlaLinkText": "MZLA Technologies Corporation",
-      "planEventBody": "With multiple ways of organising and setting up meetings.",
-      "planEventTitle": "Plan an Event",
-      "scheduleCopy": "Need to organise a meeting with a client? We’ve got you covered. Send them your general availability and stop the calendar juggling.",
-      "screenshotCalendarAlt": "A screenshot of Thunderbird Appointment's calendar page.",
-      "screenshotScheduleAlt": "A screenshot of Thunderbird Appointment's schedule page.",
-      "sectionHeader": "Easier scheduling for everyone",
-      "setAvailabilityBody": "Choose when and how people can book time with you.",
-      "setAvailabilityTitle": "Set your availability",
-      "shareWithOthersBody": "Send your personal link via email, or add it to your website.",
-      "shareWithOthersTitle": "Share with others"
-    },
     "invalidOrAlreadyBooked": "The booking slot might not be available anymore or the link is broken.",
     "invitationSentToAddress": "An invitation for this event has been emailed to {address}.",
     "login": {
