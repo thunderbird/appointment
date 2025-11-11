@@ -8,6 +8,8 @@ import PostLoginView from '@/views/PostLoginView.vue';
 import { useUserStore } from '@/stores/user-store';
 import LogoutView from '@/views/LogoutView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
+import { isOidcAuth } from '@/composables/authSchemes';
+import { userManager } from '@/composables/oidcUserManager';
 
 // lazy loaded components
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
@@ -232,14 +234,23 @@ const router = createRouter({
   }
 });
 
-router.beforeEach((to, _from) => {
+router.beforeEach(async (to, _from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
+  const user = useUserStore();
 
-  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'logout', 'undefined'].includes(String(to.name))) {
-    const user = useUserStore();
+  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'logout', 'undefined'].includes(String(to.name))) {    
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };
     }
+  }
+
+  // If the route is not public and the user is not authenticated, redirect to the OIDC login
+  if (!toMeta?.isPublic && !user.authenticated && isOidcAuth) {
+    await userManager.signinRedirect({
+      prompt: 'login',
+    });
+
+    return false;
   }
 });
 
