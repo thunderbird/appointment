@@ -213,6 +213,18 @@ form {
   padding: 1rem;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pair {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .dark {
   .card {
     --colour-background: var(--colour-neutral-lower);
@@ -274,13 +286,11 @@ form {
     height: 100%;
   }
   .column {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     width: 50%;
   }
   .pair {
     display: flex;
+    flex-direction: row;
     gap: 2rem;
   }
 }

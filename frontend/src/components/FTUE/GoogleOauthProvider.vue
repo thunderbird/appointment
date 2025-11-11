@@ -200,6 +200,7 @@ const onSubmit = async () => {
 
 .buttons {
   display: flex;
+  flex-direction: column;
   width: 100%;
   gap: 1rem;
   justify-content: center;
@@ -214,6 +215,7 @@ const onSubmit = async () => {
   }
 
   .buttons {
+    flex-direction: row;
     justify-content: flex-end;
   }
 }
