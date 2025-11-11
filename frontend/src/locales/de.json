@@ -556,23 +556,6 @@
     "googlePermissionDisclaimer": "Thunderbird Appointment benötigt die folgenden Berechtigungen von Google, um korrekt zu funktionieren",
     "googlePermissionEventReason": "Thunderbird Appointment benötigt diese Berechtigung, um Termine zu verbundenen Google-Kalendern hinzuzufügen.",
     "googlePermissionEventsName": "Anzeigen und Bearbeiten von Terminen in allen Kalendern",
-    "homepage": {
-      "calendarCopy": "Verbinde deine Kalender und finde alle deine Termine an einem Ort. Buche einmalige oder wiederkehrende Veranstaltungen und lade andere dazu ein.",
-      "copywrite": "Thunderbird gehört nun zu {mzlaLink}, einer vollständigen Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts unterliegen dem Copyright ©1998-{currentYear} einzelner Mitwirkender. Der Inhalt ist unter einer {creativeCommonsLink} verfügbar.",
-      "creativeCommonsLinkText": "Creative-Commons-Lizenz",
-      "intro": "Thunderbird Appointment macht Termine finden zum Kinderspiel. Spar dir den Aufwand und gestalte deinen Tag effizienter.",
-      "mzlaLinkText": "MZLA Technologies Corporation",
-      "planEventBody": "Mit mehreren Möglichkeiten, Meetings zu organisieren und einzurichten.",
-      "planEventTitle": "Einen Termin planen",
-      "scheduleCopy": "Du musst ein Treffen mit einem Kunden organisieren? Schicke einfach deine allgemeine Verfügbarkeit. Kein Grund mehr, mit dem Kalender zu jonglieren.",
-      "screenshotCalendarAlt": "Ein Screenshot der Kalenderansicht von Thunderbird Appointment.",
-      "screenshotScheduleAlt": "Ein Screenshot der Verfügbarkeitsansicht von Thunderbird Appointment.",
-      "sectionHeader": "Einfache Terminplanung für alle",
-      "setAvailabilityBody": "Lege fest, wann und wie deine Zeit gebucht wird.",
-      "setAvailabilityTitle": "Definiere deine Verfügbarkeit",
-      "shareWithOthersBody": "Versende deinen persönlichen Link per E-Mail, oder füge ihn deiner Website hinzu.",
-      "shareWithOthersTitle": "Mit anderen teilen"
-    },
     "invalidOrAlreadyBooked": "Der Buchungsplatz ist möglicherweise nicht mehr verfügbar oder der Link ist defekt.",
     "invitationSentToAddress": "Eine Einladung für dieses Event wurde an {address} geschickt.",
     "login": {

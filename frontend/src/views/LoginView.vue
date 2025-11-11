@@ -12,7 +12,6 @@ import {
 import { posthog, usePosthog } from '@/composables/posthog';
 import { INVITE_CODE_KEY, MetricEvents } from '@/definitions';
 import GenericModal from '@/components/GenericModal.vue';
-import HomeView from '@/views/HomeView.vue';
 import WordMark from '@/elements/WordMark.vue';
 import { PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
 import { handleFormError } from '@/utils';
@@ -57,6 +56,19 @@ onMounted(async () => {
   if (route.name === 'join-the-waiting-list') {
     hideInviteField.value = true;
     loginStep.value = LoginSteps.SignUp;
+  }
+
+  // This route will be used by the TB Pro Appointment landing page
+  // in its login button. This will redirect the user to the OIDC login page
+  // if they are not authenticated, otherwise it will redirect to the dashboard.
+  if (isOidcAuth) {
+    if (user.authenticated) {
+      await router.push({ name: 'dashboard' });
+    } else {
+      await userManager.signinRedirect({
+        prompt: 'login',
+      });
+    }
   }
 });
 
@@ -207,8 +219,14 @@ const onEnter = () => {
 </script>
 
 <template>
-  <div>
-    <home-view></home-view>
+  <!-- If the user is coming from the TB Pro Appointment landing page,
+      and the auth scheme is OIDC we don't need to show anything here since we are redirecting. -->
+  <template v-if="isOidcAuth">
+    <div class="full-height-placeholder" />
+  </template>
+
+  <template v-else>
+    <div class="full-height-placeholder" />
     <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})">
       <template v-slot:header>
         <word-mark/>
@@ -290,10 +308,15 @@ const onEnter = () => {
         <router-link :to="{name: 'home'}">{{ t('app.tagline') }}</router-link>
       </template>
     </generic-modal>
-  </div>
+  </template>
 </template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+.full-height-placeholder {
+  /* 68px is the height of the navbar, 365px is the height of the modal */
+  height: calc(100dvh - 68px - 365px);
+}
 
 .intro-text {
   display: flex;
