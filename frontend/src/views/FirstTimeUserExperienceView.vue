@@ -33,7 +33,7 @@ onMounted(async () => {
   <dashboard-view></dashboard-view>
   <div class="page-ftue overlay" role="dialog" tabindex="-1" aria-labelledby="ftue-title" aria-modal="true">
     <div class="modal">
-      <div class="relative flex size-full w-full flex-col items-center gap-4">
+      <div class="relative flex w-full flex-col items-center">
         <div class="modal-header">
           <word-mark v-if="currentStep === FtueStep.SetupProfile || currentStep === FtueStep.Finish"/>
           <h2 id="ftue-title">
@@ -57,7 +57,6 @@ onMounted(async () => {
             :scheme="AlertSchemes.Info"
             @close="infoMessage = null"
           />
-          <div class="pls-keep-height" v-else/>
         </div>
         <div class="modal-body flex w-full flex-col items-center justify-center">
           <setup-profile v-if="currentStep === FtueStep.SetupProfile"/>
@@ -110,14 +109,9 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 8.0rem;
   width: 100%;
   gap: 1rem;
-}
-
-/* Empty space if a notice bar isn't shown */
-.pls-keep-height {
-  min-height: 2.0625rem; /* 33px */
+  margin-block-end: 1rem;
 }
 
 #ftue-title {
@@ -126,6 +120,7 @@ body {
   font-weight: 400;
   font-size: 1.375rem;
   line-height: 1.664rem;
+  margin-block: 1rem;
 }
 
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
@@ -184,7 +179,6 @@ body {
 }
 
 .footer {
-  bottom: 0;
   height: 4rem;
   width: 100%;
   display: flex;
@@ -226,30 +220,20 @@ body {
 }
 
 @media (--md) {
-  .modal-header {
-    margin-bottom: 0;
-  }
-
   .modal {
+    box-sizing: content-box;
     width: 50rem; /* 800px */
-    height: 37.5rem; /* 600px */
+    height: fit-content;
     padding: 2rem 2rem 0;
     overflow: visible;
   }
 
-  .modal-body {
-    height: 15.0rem;
-  }
-
   .divider {
-    position: absolute;
-    bottom: 4rem;
     width: 50rem;
     height: 0.0625rem;
   }
 
   .footer {
-    position: absolute;
     padding-bottom: 0;
   }
 }

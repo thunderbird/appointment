@@ -140,9 +140,6 @@ const copyLink = async () => {
 
   .buttons {
     justify-content: flex-end;
-    position: absolute;
-    bottom: 5.75rem;
-    margin: 0;
   }
 }
 </style>

@@ -80,31 +80,31 @@ const onSubmit = async () => {
 </script>
 <template>
   <div class="content">
-      <form class="form" ref="formRef" @submit.prevent @keyup.enter="() => onSubmit()">
-        <text-input :disabled="isLoading" name="user" v-model="principal.user" :help="t('calDAVForm.help.user')" :required="true">
-          {{ t('label.username') }}
-        </text-input>
-        <text-input :disabled="isLoading" :placeholder="locationPreview" name="url" :help="t('calDAVForm.help.location')" v-model="principal.url">
-          {{ t('label.location') }}
-        </text-input>
-        <text-input :disabled="isLoading" type="password" name="password" :help="t('calDAVForm.help.password')" v-model="principal.password">
-          {{ t('label.password') }}
-        </text-input>
-      </form>
-      <div class="buttons">
-        <primary-button variant="outline" class="btn-switch" @click="emits('switch')" v-if="showSwitch">
-        {{ t('calDAVForm.switchToGoogleCalendar') }}
-        </primary-button>
-        <primary-button variant="outline" @click="emits('previous')" v-if="showPrevious">
-        {{ t('label.back') }}
-        </primary-button>
-        <primary-button
-          :label="t('label.connect')"
-          :disabled="isLoading"
-          @click="onSubmit"
-        >{{ t('label.connect') }}</primary-button>
-      </div>
+    <form class="form" ref="formRef" @submit.prevent @keyup.enter="() => onSubmit()">
+      <text-input :disabled="isLoading" name="user" v-model="principal.user" :help="t('calDAVForm.help.user')" :required="true">
+        {{ t('label.username') }}
+      </text-input>
+      <text-input :disabled="isLoading" :placeholder="locationPreview" name="url" :help="t('calDAVForm.help.location')" v-model="principal.url">
+        {{ t('label.location') }}
+      </text-input>
+      <text-input :disabled="isLoading" type="password" name="password" :help="t('calDAVForm.help.password')" v-model="principal.password">
+        {{ t('label.password') }}
+      </text-input>
+    </form>
+    <div class="buttons">
+      <primary-button variant="outline" class="btn-switch" @click="emits('switch')" v-if="showSwitch">
+      {{ t('calDAVForm.switchToGoogleCalendar') }}
+      </primary-button>
+      <primary-button variant="outline" @click="emits('previous')" v-if="showPrevious">
+      {{ t('label.back') }}
+      </primary-button>
+      <primary-button
+        :label="t('label.connect')"
+        :disabled="isLoading"
+        @click="onSubmit"
+      >{{ t('label.connect') }}</primary-button>
     </div>
+  </div>
 </template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
@@ -123,7 +123,6 @@ const onSubmit = async () => {
   margin: auto;
 }
 .btn-switch {
-  margin-left: 2rem;
   margin-right: auto;
 }
 .buttons {
@@ -131,17 +130,11 @@ const onSubmit = async () => {
   width: 100%;
   gap: 1rem;
   justify-content: center;
-  margin-top: 2rem;
-  left: auto;
-  right: auto;
+  margin-block-end: 2rem;
 }
 @media (--md) {
   .buttons {
     justify-content: flex-end;
-    position: absolute;
-    right: 2rem;
-    bottom: 5.75rem;
-    margin: 0;
   }
 }
 </style>

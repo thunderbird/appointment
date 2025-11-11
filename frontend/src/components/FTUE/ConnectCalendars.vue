@@ -114,7 +114,6 @@ const onSubmit = async () => {
   width: 100%;
   justify-content: center;
   align-items: center;
-
 }
 
 .sync-card {
@@ -133,7 +132,7 @@ const onSubmit = async () => {
   width: 100%;
   gap: 1rem;
   justify-content: center;
-  margin-top: 2rem;
+  margin-block: 2rem;
 }
 
 @media (--md) {
@@ -143,9 +142,6 @@ const onSubmit = async () => {
 
   .buttons {
     justify-content: flex-end;
-    position: absolute;
-    bottom: 5.75rem;
-    margin: 0;
   }
 }
 </style>

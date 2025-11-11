@@ -226,7 +226,7 @@ const connectZoom = async () => {
   width: 100%;
   gap: 1rem;
   justify-content: center;
-  margin-top: 2rem;
+  margin-block: 2rem;
 }
 
 .skip-text {
@@ -243,9 +243,6 @@ const connectZoom = async () => {
 @media (--md) {
   .buttons {
     justify-content: flex-end;
-    position: absolute;
-    bottom: 5.75rem;
-    margin: 0;
   }
 
   .card {
