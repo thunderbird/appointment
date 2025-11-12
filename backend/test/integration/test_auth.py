@@ -923,7 +923,7 @@ class TestOIDCToken:
             mock_introspect.return_value = {
                 'sub': oidc_id,
                 'email': subscriber.email,
-                'username': subscriber.username,
+                'preferred_username': subscriber.email, # preferred_username is the thundermail address
                 'name': subscriber.name,
             }
 
