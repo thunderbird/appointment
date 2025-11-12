@@ -213,6 +213,18 @@ form {
   padding: 1rem;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pair {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .dark {
   .card {
     --colour-background: var(--colour-neutral-lower);
@@ -233,6 +245,7 @@ form {
   justify-content: center;
   align-items: center;
   font-family: 'Inter', 'sans-serif';
+  margin-block-end: 2rem;
 }
 
 .scheduleInfo {
@@ -257,7 +270,7 @@ form {
   width: 100%;
   gap: 1rem;
   justify-content: center;
-  margin-top: 2rem;
+  margin-block-end: 2rem;
 }
 
 @media (--md) {
@@ -266,23 +279,18 @@ form {
   }
   .buttons {
     justify-content: flex-end;
-    position: absolute;
-    bottom: 5.75rem;
-    margin: 0;
   }
   form {
     flex-direction: row;
-    width: 40.0rem;
-    height: 18rem
+    width: 100%;
+    height: 100%;
   }
   .column {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
     width: 50%;
   }
   .pair {
     display: flex;
+    flex-direction: row;
     gap: 2rem;
   }
 }

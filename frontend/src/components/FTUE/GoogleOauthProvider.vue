@@ -145,7 +145,6 @@ const onSubmit = async () => {
     </primary-button>
     <primary-button
       class="btn-continue"
-      variant="outline"
       :title="t('label.connectGoogleCalendar')"
       v-if="hasNextStep"
       @click="onSubmit()"
@@ -178,7 +177,7 @@ const onSubmit = async () => {
   @mixin faded-background var(--colour-background);
   @mixin faded-border var(--colour-background);
   font-size: 0.8125rem;
-  margin: auto;
+  margin: 0 auto;
 }
 
 .dark {
@@ -201,10 +200,11 @@ const onSubmit = async () => {
 
 .buttons {
   display: flex;
+  flex-direction: column;
   width: 100%;
   gap: 1rem;
   justify-content: center;
-  margin-top: 2rem;
+  margin-block: 2rem;
   right: auto;
   left: auto;
 }
@@ -215,10 +215,8 @@ const onSubmit = async () => {
   }
 
   .buttons {
+    flex-direction: row;
     justify-content: flex-end;
-    position: absolute;
-    bottom: 5.75rem;
-    margin: 0;
   }
 }
 </style>

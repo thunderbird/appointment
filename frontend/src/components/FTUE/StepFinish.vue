@@ -96,7 +96,6 @@ const copyLink = async () => {
   width: 100%;
   justify-content: center;
   align-items: center;
-
 }
 
 .copy {
@@ -109,6 +108,10 @@ const copyLink = async () => {
 
 .my-link-btn {
   flex-direction: row-reverse;
+}
+
+:deep(.base.link.filled > span) {
+  line-height: 1.25rem;
 }
 
 .link {
@@ -126,12 +129,11 @@ const copyLink = async () => {
   width: 100%;
   gap: 1rem;
   justify-content: center;
-  margin-top: 2rem;
+  margin-block: 2rem;
 }
 
 @media (--md) {
   .content {
-    margin-top: -6rem;
     gap: 0;
   }
   .copy {
@@ -140,9 +142,6 @@ const copyLink = async () => {
 
   .buttons {
     justify-content: flex-end;
-    position: absolute;
-    bottom: 5.75rem;
-    margin: 0;
   }
 }
 </style>
