@@ -46,8 +46,11 @@ const initialAvailabilitySet = Object.fromEntries(
   isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]
 ));
 const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
-const validationErrors = ref<string[][]>(Array.from({length: props.options.length}, () => []));
-const validationErrorsExist = computed(() => validationErrors.value.some(e => e.filter(d => d == '').length));
+const validationErrors = ref<{[k: string]: string[]}>(Object.fromEntries(isoWeekdays.map((d) => [d.iso, []])));
+const validationErrorsExist = computed(
+  () => Object.values(validationErrors.value).some(e => e.filter(d => d == '').length)
+);
+
 const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
 const disabledWeekdays = computed(() => isoWeekdays.map(d => d.iso).filter(d => !model.value.includes(d)));
 const validationAlert = { title: t('error.invalidTimeConfiguration', { value: durationHumanized.value }) } as Alert;
@@ -71,7 +74,7 @@ watch(
   () => props.availabilities,
   () => {
     availabilitySet.value = defaultAvailabilitySet();
-    validationErrors.value = Array.from({length: props.options.length}, () => []);
+    validationErrors.value = Object.fromEntries(isoWeekdays.map((d) => [d.iso, []]));
   },
 );
 
