@@ -268,8 +268,8 @@ async function refreshData() {
             </div>
           </template>
         </drop-down>
-  
-        <br />
+        <span v-else></span>
+        <span></span>
       </template>
     </template>
 
