@@ -15,6 +15,7 @@ import { useExternalConnectionsStore } from '@/stores/external-connections-store
 import { useSettingsStore } from '@/stores/settings-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
+import { useAvailabilityStore } from '@/stores/availability-store';
 
 const { t } = useI18n();
 
@@ -34,6 +35,7 @@ const userStore = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
+const availabilityStore = useAvailabilityStore();
 
 const { currentState } = storeToRefs(settingsStore);
 const { calendars } = storeToRefs(calendarStore);
@@ -57,6 +59,7 @@ const initialCalendars = computed(() => {
       type_id: externalConnection?.type_id,
       connection_name: externalConnection?.name,
       provider_name: connectionProvider,
+      is_default: currentState.value.defaultCalendarId === calendar.id,
     }
   }) || [];
 
@@ -129,7 +132,13 @@ function onCalendarChecked(event: HTMLInputElementEvent, calendarId: number) {
 function onSetAsDefaultClicked(calendarId: number) {
   // Only update local state, the actual schedule's calendar change
   // happens on save changes in SettingsView/index.vue
-  settingsStore.$patch({ currentState: { defaultCalendarId: calendarId }})
+  settingsStore.$patch({ currentState: { defaultCalendarId: calendarId }});
+  // Update the current availability too, otherwise it will be out
+  // of sync until the user refreshes the page
+  availabilityStore.$patch({
+    initialState: { calendar_id: calendarId },
+    currentState: { calendar_id: calendarId },
+  });
 }
 
 function onCalendarColorChanged(event: HTMLInputElementEvent, calendarId: number) {
@@ -212,8 +221,9 @@ async function refreshData() {
             class="calendar-connected-checkbox"
             @change="(event) => onCalendarChecked(event, calendar.id)"
             :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
+            :disabled="calendar.is_default"
           />
-          <base-badge v-if="currentState.defaultCalendarId === calendar.id">
+          <base-badge v-if="calendar.is_default">
             {{ t('label.default') }}
           </base-badge>
           <p>{{ calendar.title }}</p>
@@ -236,7 +246,7 @@ async function refreshData() {
           <template #default>
             <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
               <button
-                v-if="calendar.connected && currentState.defaultCalendarId !== calendar.id"
+                v-if="calendar.connected && !calendar.is_default"
                 @click="() => onSetAsDefaultClicked(calendar.id)"
               >
                 {{ t('text.settings.connectedApplications.setAsDefault') }}
@@ -245,7 +255,10 @@ async function refreshData() {
               <!-- <button>
                 {{ t('text.settings.connectedApplications.renameCalendar') }}
               </button> -->
-              <button @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)">
+              <button
+                @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
+                :disabled="calendar.is_default"
+              >
                 {{ t('label.disconnect') }}
               </button>
             </div>
