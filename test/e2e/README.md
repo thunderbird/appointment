@@ -18,8 +18,8 @@ npx playwright install
 ```
 
 ## E2E Test Prerequisites
-The E2E tests require an existing Appointment (and corresponding FxA account) and associated data, and reads this from your local .env file. This includes:
-- Credentials for an existing Appointment (FxA) account (email address, password)
+The E2E tests require an existing Appointment username (and the associated TB Accounts email and password), and reads this from your local .env file. This includes:
+- Credentials for an existing Appointment account (Appointment username, associated TB Accounts email and password)
 - The account user's display name and share link:
     - The display name is found in Appointment => Settings => Account => Display name.
     - The share link is found in Appointment => Settings => Account => My Link.
@@ -43,8 +43,9 @@ cp .env.dev.example .env
 
 Then edit your local `.env` file and provide the following values:
 ```dotenv
-APPT_LOGIN_EMAIL=<existing-dev-FxA-user-email>
-APPT_LOGIN_PWORD=<exisiting-dev-FxA-user-password>
+APPT_USERNAME=<existing-dev-appointment-username>
+TB_ACCTS_EMAIL=<existing-dev-tb-accounts-user-email>
+TB_ACCTS_PWORD=<exisiting-dev-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-dev-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-dev-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
@@ -99,8 +100,9 @@ cp .env.stage.example .env
 
 Then edit your local `.env` file and provide the following values:
 ```dotenv
-APPT_LOGIN_EMAIL=<existing-stage-FxA-user-email>
-APPT_LOGIN_PWORD=<exisiting-stage-FxA-user-password>
+APPT_USERNAME=<existing-stage-appointment-username>
+TB_ACCTS_EMAIL=<existing-stage-tb-accounts-user-email>
+TB_ACCTS_PWORD=<exisiting-stage-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-stage-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-stage-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
@@ -129,8 +131,9 @@ cp .env.prod.example .env
 
 Then edit your local `.env` file and provide the following values:
 ```dotenv
-APPT_LOGIN_EMAIL=<existing-prod-FxA-user-email>
-APPT_LOGIN_PWORD=<exisiting-prod-FxA-user-password>
+APPT_USERNAME=<existing-prod-appointment-username>
+TB_ACCTS_EMAIL=<existing-prod-tb-accounts-user-email>
+TB_ACCTS_PWORD=<exisiting-prod-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-prod-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-prod-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
@@ -152,13 +155,14 @@ npm run prod-sanity-test-headed
 
 You can run the E2E tests from your local machine but against browsers provided in the BrowserStack Automate cloud.
 
-<b>For security reasons when running the tests on BrowserStack I recommend that you use a dedicated test Appointment FxA account / credentials (NOT your own personal Appointment (FxA) credentials).</b>
+<b>For security reasons when running the tests on BrowserStack I recommend that you use a dedicated test Appointment account / credentials (NOT your own personal Appointment credentials).</b>
 
 Once you have credentials for an existing Appointemnt test account, edit your local `.env` file and add these details (more information found above):
 
 ```dotenv
-APPT_LOGIN_EMAIL=<existing-test-FxA-user-email>
-APPT_LOGIN_PWORD=<exisiting-test-FxA-user-password>
+APPT_USERNAME=<existing-appointment-username>
+TB_ACCTS_EMAIL=<existing-tb-accounts-user-email>
+TB_ACCTS_PWORD=<exisiting-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-user-share-link>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>

@@ -10,7 +10,7 @@ import {
   TIMEOUT_3_SECONDS,
   TIMEOUT_10_SECONDS,
   TIMEOUT_60_SECONDS,
-  APPT_LOGIN_EMAIL,
+  TB_ACCTS_EMAIL,
  } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;
@@ -41,7 +41,7 @@ test.describe('set availability on desktop browser', {
       await page.waitForTimeout(TIMEOUT_3_SECONDS);
     }
     expect(await availabilityPage.calendarSelect.inputValue()).toBeTruthy();
-    expect(await availabilityPage.calendarSelect.textContent()).toContain(APPT_LOGIN_EMAIL);
+    expect(await availabilityPage.calendarSelect.textContent()).toContain(TB_ACCTS_EMAIL);
 
     // automatically confirm bookings checkbox is on
     await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
@@ -118,7 +118,7 @@ test.describe('set availability on desktop browser', {
 
     // go to share link/book appointment page and verify not available
     await page.goto(APPT_MY_SHARE_LINK);
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    await page.waitForTimeout(TIMEOUT_3_SECONDS);
     await expect.soft(bookApptPage.scheduleTurnedOffText).toBeVisible();
 
     // set availability back on again
