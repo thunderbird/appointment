@@ -17,8 +17,6 @@ cli = [
     "ruff",
 ]
 db = [
-    "mysqlclient==2.2.5",
-    "psycopg==3.2.9",
 ]
 test = [
     "Faker==26.0.0",
@@ -30,8 +28,16 @@ test = [
 ]
 deploy = ['appointment[cli]', 'appointment[db]']
 
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["./src"]
+include = ["appointment"]
 
 # Ruff
 [tool.ruff]
