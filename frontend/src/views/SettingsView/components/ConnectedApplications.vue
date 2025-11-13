@@ -239,7 +239,11 @@ async function refreshData() {
   
         <p class="calendar-provider">{{ calendar.provider_name }}</p>
   
-        <drop-down class="dropdown" :ref="(el) => calendarDropdownRefs[calendar.id] = el">
+        <drop-down
+          v-if="!calendar.is_default"
+          class="dropdown"
+          :ref="(el) => calendarDropdownRefs[calendar.id] = el"
+        >
           <template #trigger>
             <icon-dots size="24" />
           </template>
