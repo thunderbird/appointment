@@ -332,6 +332,7 @@ h2 {
 
 .form-field-container {
   display: grid;
+  align-items: center;
   grid-template-columns: 20% 2fr 24px 1fr 24px;
   grid-gap: 1.5rem;
   margin-block-end: 2rem;
@@ -356,7 +357,6 @@ h2 {
 
   .dropdown {
     position: initial;
-    align-self: center;
 
     .dropdown-inner {
       position: relative;
