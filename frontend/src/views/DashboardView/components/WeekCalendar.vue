@@ -252,32 +252,6 @@ const timeSlotsForGrid = computed(() => {
 });
 
 /**
- * Generates an array of remote events that fall within the active week with grid positioning info
- * Note we are still fetching monthly events to reduce the roundtrips
- */
-const filteredRemoteEventsForGrid = computed(() => {
-  const slots = timeSlotsForGrid.value;
-  if (!slots.length) return [];
-
-  const { start, end } = props.activeDateRange;
-  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
-
-  return remoteEventsWithinActiveWeek.map(remoteEvent => {
-    const eventStart = dj(remoteEvent.start);
-    const eventEnd = dj(remoteEvent.end);
-
-    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots);
-
-    if (gridPosition) {
-      return {
-        ...remoteEvent,
-        ...gridPosition,
-      };
-    }
-  }).filter(Boolean)
-});
-
-/**
  * Generates an array of pending appointments that fall within the active week with grid positioning info
  */
 const filteredPendingAppointmentsForGrid = computed(() => {
@@ -310,6 +284,37 @@ const filteredPendingAppointmentsForGrid = computed(() => {
       };
     }
   }).filter(Boolean)
+});
+
+/**
+ * Generates an array of remote events that fall within the active week with grid positioning info
+ * Note we are still fetching monthly events to reduce the roundtrips
+ */
+const filteredRemoteEventsForGrid = computed(() => {
+  const slots = timeSlotsForGrid.value;
+  if (!slots.length) return [];
+
+  const { start, end } = props.activeDateRange;
+  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
+
+  return remoteEventsWithinActiveWeek.map(remoteEvent => {
+    const eventStart = dj(remoteEvent.start);
+    const eventEnd = dj(remoteEvent.end);
+
+    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots);
+    const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
+      (a) => a.title === remoteEvent.title && eventStart.isSame(a.start)
+    );
+
+    // Only show remote event, if we have a valid grid position and if we don't already have calculated
+    // a placeholder for a pending (HOLD) event
+    if (gridPosition && !hasPendingPlaceholder) {
+      return {
+        ...remoteEvent,
+        ...gridPosition,
+      };
+    }
+  }).filter(Boolean);
 });
 
 /**
