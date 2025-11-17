@@ -30,10 +30,12 @@ const isBookable = computed({
   }
 })
 
-const requiresBookingConfirmation = computed({
-  get: () => currentState.value.booking_confirmation,
+// The database stores a boolean, if booking requests should have manual confirmation. However, since we offer 
+// an "automatic confirmation" toggle in the UI, we need to negate the value from the database here.
+const autoConfirmBookings = computed({
+  get: () => !currentState.value.booking_confirmation,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { booking_confirmation: value } })
+    availabilityStore.$patch({ currentState: { booking_confirmation: !value } })
   }
 })
 
@@ -116,10 +118,10 @@ export default {
 
       <!-- Automatically confirm booking checkbox -->
       <checkbox-input
-        :name="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
+        name="availability-automatically-confirm"
         :label="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
         data-testid="availability-automatically-confirm-checkbox"
-        v-model="requiresBookingConfirmation"
+        v-model="autoConfirmBookings"
         :disabled="!currentState.active"
       />
     </div>
