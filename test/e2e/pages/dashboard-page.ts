@@ -1,8 +1,8 @@
 import { expect, type Page, type Locator } from '@playwright/test';
+import { convertLongDate } from '../utils/utils';
 
 import {
-  APPT_PENDING_BOOKINGS_PAGE,
-  APPT_BOOKED_BOOKINGS_PAGE,
+  APPT_BOOKINGS_PAGE,
   APPT_DASHBOARD_MONTH_PAGE,
   TIMEOUT_3_SECONDS,
 } from '../const/constants';
@@ -28,51 +28,49 @@ export class DashboardPage {
   }
 
   /**
-   * Navigate to the pending bookings page and display all future pending bookings
+   * Navigate to the bookings page so we can see all of our bookings
    */
-  async gotoPendingBookings() {
-    // go to bookings page and set filter in URL to show pending only
-    await this.page.goto(APPT_PENDING_BOOKINGS_PAGE);
-  }
-
-  /**
-   * Navigate to the booked bookings page and display all confirmed/booked bookings
-   */
-  async gotoBookedBookings() {
+  async gotoBookings() {
     // go to bookings page and set filter in URL to show confirmed only
-    await this.page.goto(APPT_BOOKED_BOOKINGS_PAGE);
+    await this.page.goto(APPT_BOOKINGS_PAGE);
   }
  
   /**
    * Given a requested booking's time slot reference, verify that a corresponding event exists
-   * in the host account's list of bookings. If the host user's `Booking Confirmation` setting
-   * is enabled (which is the default), then the created appointment will be pending (HOLD) as
-   * it needs to be confirmed; but if the `Booking Confirmation` option is turned off then the
-   * created appt is automaticaly confirmed and booked, so the event text won't contain 'HOLD'.
-   * @param hostUserDisplayName String containing the host account's user display name
-   * @param requsterName String containing the name of the requester (provided at booking request)
-   * @param slotDate String containing date of the requested slot (format e.g: 'February 7, 2025')
-   * @param slotTime String containg the time of the requested slot (format e.g: '03:30 PM')
-   * @param confirmBooking Boolean whether the requested appt booking requires confirmation
+   * in the host account's list of bookings. The bookings screen shows all bookings by default
+   * (confirmed and unconfirmed) which is great because it is possible the test account could
+   * have 'auto confirm' turned on.
+   * @param slotDate String containing date of the requested slot (format 'October 29, 2025') as
+   * provided by the booking request confirmation dialog at the time of requesting the slot.
+   * @param slotTime String containg the time of the requested slot (format e.g: '03:30 PM') as
+   * provided by the booking request confirmation dialog at the time of requesting the slot.
    */
-  async verifyEventCreated(hostUserDisplayName: string, requsterName: string, slotDate: string, slotTime: string, confirmBooking: boolean = true) {
+  async verifyEventCreated(slotDate: string, slotTime: string) {
     // now wait a max of 2 minutes for the newly request appt to appear in the dashboard pending appts list
     await expect(async () => {
-      // depending on environment switch to the bookings page and verify the appt was created
-      if (confirmBooking) {
-        await this.gotoPendingBookings();
-      } else {
-        await this.gotoBookedBookings();
+      await this.gotoBookings();
+      await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+
+      // the slot date is received in the format of 'February 17, 2025' but it needs to be in the format
+      // of a string as MM/DD/YYYY (ie. 02/17/2025) to match the bookings list.
+      const shortDate = await convertLongDate(slotDate);
+
+      // the slot time is received in the format of `03:00 PM` but we need to drop the leading zero to
+      // match the format on the bookings list
+      if(slotTime[0] == '0') {
+        slotTime = slotTime.slice(1);
       }
 
-      await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-      const apptLocator = this.page.getByRole('row', { name: `Open appointment in new tab ${slotDate} ${slotTime} to` }).getByLabel('Open appointment in new tab')
+      // now we can build the event date, time string and search for it on the bookings list
+      const eventString = `${shortDate}, ${slotTime}`;
+      console.log(`searching bookings list for event: ${eventString}`);
+      const apptLocator = this.page.getByRole('button', { name: eventString });
       await apptLocator.scrollIntoViewIfNeeded();
       await expect(apptLocator).toBeVisible();
     }).toPass({
       // Probe, wait 1s, probe, wait 2s, probe, wait 10s, probe, wait 10s, probe
       // ... Defaults to [100, 250, 500, 1000].
-      intervals: [15_000, 10_000, 5_000],
+      intervals: [10_000, 10_000, 5_000],
       timeout: 120_000
     });
   }

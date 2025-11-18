@@ -854,10 +854,7 @@ class TestOIDCToken:
         """Test that endpoint returns 405 when AUTH_SCHEME is not OIDC"""
         os.environ['AUTH_SCHEME'] = 'password'
 
-        response = with_client.post(
-            '/oidc/token',
-            json={'access_token': 'test_token', 'timezone': 'America/Vancouver'}
-        )
+        response = with_client.post('/oidc/token', json={'access_token': 'test_token', 'timezone': 'America/Vancouver'})
 
         assert response.status_code == 405, response.text
 
@@ -870,8 +867,7 @@ class TestOIDCToken:
             mock_introspect.return_value = None
 
             response = with_client.post(
-                '/oidc/token',
-                json={'access_token': 'invalid_token', 'timezone': 'America/Vancouver'}
+                '/oidc/token', json={'access_token': 'invalid_token', 'timezone': 'America/Vancouver'}
             )
 
             assert response.status_code == 403, response.text
@@ -887,10 +883,7 @@ class TestOIDCToken:
 
         # Create existing OIDC external connection
         make_external_connections(
-            subscriber_id=subscriber.id,
-            type=models.ExternalConnectionType.oidc,
-            type_id=oidc_id,
-            name=subscriber.email
+            subscriber_id=subscriber.id, type=models.ExternalConnectionType.oidc, type_id=oidc_id, name=subscriber.email
         )
 
         # Mock OIDCClient to return valid token data
@@ -903,8 +896,7 @@ class TestOIDCToken:
             }
 
             response = with_client.post(
-                '/oidc/token',
-                json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+                '/oidc/token', json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
             )
 
             assert response.status_code == 200, response.text
@@ -923,13 +915,12 @@ class TestOIDCToken:
             mock_introspect.return_value = {
                 'sub': oidc_id,
                 'email': subscriber.email,
-                'preferred_username': subscriber.email, # preferred_username is the thundermail address
+                'preferred_username': subscriber.email,  # preferred_username is the thundermail address
                 'name': subscriber.name,
             }
 
             response = with_client.post(
-                '/oidc/token',
-                json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+                '/oidc/token', json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
             )
 
             assert response.status_code == 200, response.text

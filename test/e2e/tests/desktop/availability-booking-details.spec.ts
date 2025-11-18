@@ -1,4 +1,4 @@
-import { test, expect, mergeExpects } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { AvailabilityPage } from '../../pages/availability-page';
 import { BookingPage } from '../../pages/booking-page';
 
@@ -42,12 +42,12 @@ test.describe('availability - booking page details on desktop browser', {
 
     // change page name (use current date/time value so can verify was changed by this test)
     origPageName = await availabilityPage.bookingPageNameInput.inputValue();
-    const newPageName = `Page name modified by E2E test at ${Date.now()}`;
+    const newPageName = `Page name modified by E2E test at ${new Date().toDateString()}`;
     await availabilityPage.bookingPageNameInput.fill(newPageName);
 
     // add a page description (again use current date/time in there too so can verify was changed by this test)
     origPageDesc = await availabilityPage.bookingPageDescInput.inputValue();
-    const newPageDesc = `Page description modified by E2E test at ${Date.now()}`;
+    const newPageDesc = `Page description modified by E2E test at ${new Date().toDateString}`;
     await availabilityPage.bookingPageDescInput.fill(newPageDesc);
 
     // able to type in a virtual meeting link

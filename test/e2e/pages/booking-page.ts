@@ -20,7 +20,7 @@ export class BookingPage {
   readonly bookSelectionNameInput: Locator;
   readonly bookSelectionEmailInput: Locator;
   readonly bookSelectionBookBtn: Locator;
-  readonly requestSentTitleText: Locator;
+  readonly bookingConfirmedTitleText: Locator;
   readonly requestSentAvailabilityText: Locator;
   readonly requestSentCloseBtn: Locator;
   readonly eventBookedTitleText: Locator;
@@ -47,7 +47,7 @@ export class BookingPage {
     this.bookSelectionNameInput = this.page.getByPlaceholder('First and last name');
     this.bookSelectionEmailInput = this.page.getByPlaceholder('john.doe@example.com');
     this.bookSelectionBookBtn = this.page.getByRole('button', { name: 'Book' });
-    this.requestSentTitleText = this.page.getByText('Booking request sent');
+    this.bookingConfirmedTitleText = this.page.getByText('Booking confirmed');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.eventBookedTitleText = this.page.getByText('Event booked!');

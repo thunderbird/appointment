@@ -4,15 +4,14 @@ import { DashboardPage } from '../../pages/dashboard-page';
 
 import {
   APPT_DISPLAY_NAME,
-  APPT_BOOKEE_NAME,
   PLAYWRIGHT_TAG_PROD_SANITY,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   PLAYWRIGHT_TAG_E2E_SUITE,
-  TIMEOUT_15_SECONDS,
   TIMEOUT_30_SECONDS,
   TIMEOUT_60_SECONDS,
   APPT_TIMEZONE_SETTING_PRIMARY,
   TIMEOUT_3_SECONDS,
+  TIMEOUT_10_SECONDS,
 } from '../../const/constants';
 
 var bookingPage: BookingPage;
@@ -48,8 +47,8 @@ test.describe('book an appointment on desktop browser', () => {
     await bookingPage.confirmBtn.click();
 
     // verify booking request sent pop-up
-    await expect(bookingPage.requestSentTitleText.first()).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
-    await bookingPage.requestSentTitleText.scrollIntoViewIfNeeded();
+    await expect(bookingPage.bookingConfirmedTitleText.first()).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
+    await bookingPage.bookingConfirmedTitleText.scrollIntoViewIfNeeded();
 
     // booking request sent dialog should display the correct time slot that was requested
     // our requested time slot is stored in this format, as example: 'event-2025-01-14 14:30'
@@ -65,8 +64,8 @@ test.describe('book an appointment on desktop browser', () => {
     // note: we are already signed into Appointment (via our auth-setup)
     // wait N seconds for the appointment dashboard to update, sometimes the test is so fast when it
     // switches back to the dashboard the new pending appointment hasn't been added/displayed yet
-    await page.waitForTimeout(TIMEOUT_15_SECONDS);
-    await dashboardPage.verifyEventCreated(APPT_DISPLAY_NAME, APPT_BOOKEE_NAME, expDateStr, expTimeStr);
+    await page.waitForTimeout(TIMEOUT_10_SECONDS);
+    await dashboardPage.verifyEventCreated(expDateStr, expTimeStr);
 
     // also go back to main dashboard and check that pending requests link now appears
     await dashboardPage.gotoToDashboardMonthView();

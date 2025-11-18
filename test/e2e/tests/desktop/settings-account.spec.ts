@@ -12,8 +12,8 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
+  TIMEOUT_3_SECONDS,
  } from '../../const/constants';
-import { URL } from 'url';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
@@ -88,7 +88,7 @@ test.describe('account settings on desktop browser', {
 
     test('able to change display name on desktop browser', async ({ page }) => {
       // change display name and verify
-      const newDisplayName = `Name modified by E2E test at ${Date.now()}`;
+      const newDisplayName = `Name modified by E2E test at ${new Date().toDateString()}`;
       await settingsPage.changeDisplaName(newDisplayName);
   
       // verify setting saved in browser local storage
@@ -97,8 +97,8 @@ test.describe('account settings on desktop browser', {
       // go to share link/book appointment page and verify display name was changed;
       // expect soft so that display name will be changed back even if the test fails
       await page.goto(APPT_MY_SHARE_LINK);
-      await page.waitForTimeout(TIMEOUT_1_SECOND);
-      await expect.soft(bookApptPage.invitingText).toContainText(newDisplayName);
+      await page.waitForTimeout(TIMEOUT_3_SECONDS);
+      await expect.soft(bookApptPage.invitingText).toContainText(newDisplayName, { timeout: TIMEOUT_30_SECONDS });
 
       // change display name back
       await settingsPage.gotoAccountSettings();
