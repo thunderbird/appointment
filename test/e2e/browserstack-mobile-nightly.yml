@@ -30,7 +30,13 @@ platforms:
     deviceName: Google Pixel 10
     playwrightConfigOptions:
       name: Chrome-GooglePixel10
- 
+    chrome:
+      chromeOptions:
+        prefs:
+          credentials_enable_service: false
+        profile:
+          password_manager_enabled: false
+
 # =======================
 # Parallels per Platform
 # =======================

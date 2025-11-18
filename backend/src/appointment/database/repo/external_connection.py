@@ -145,12 +145,8 @@ def get_subscriber_without_oidc_by_email(db: Session, email: str):
         .filter(models.ExternalConnections.type == models.ExternalConnectionType.oidc)
         .exists()
     )
-    
+
     # Find subscribers without an OIDC connection that match the email
-    query = (
-        db.query(models.Subscriber)
-        .filter(~oidc_exists)
-        .filter(models.Subscriber.email == email)
-    )
+    query = db.query(models.Subscriber).filter(~oidc_exists).filter(models.Subscriber.email == email)
 
     return query.first()

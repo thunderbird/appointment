@@ -235,8 +235,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     env:
-      APPT_LOGIN_EMAIL: ${{ secrets.E2E_APPT_STAGE_LOGIN_EMAIL }}
-      APPT_LOGIN_PWORD: ${{ secrets.E2E_APPT_STAGE_LOGIN_PASSWORD }}
+      TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_STAGE_TB_ACCTS_EMAIL }}
+      TB_ACCTS_PWORD: ${{ secrets.E2E_APPT_STAGE_TB_ACCTS_PWORD }}
       APPT_DISPLAY_NAME: ${{ secrets.E2E_APPT_STAGE_DISPLAY_NAME }}
       APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_STAGE_MY_SHARE_LINK }}
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_STAGE_BOOKEE_EMAIL }}
