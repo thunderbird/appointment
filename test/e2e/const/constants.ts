@@ -6,7 +6,6 @@ export const APPT_URL = String(process.env.APPT_URL);
 export const APPT_MY_SHARE_LINK = String(process.env.APPT_MY_SHARE_LINK);
 export const APPT_SHORT_SHARE_LINK_PREFIX = String(process.env.APPT_SHORT_SHARE_LINK_PREFIX);
 export const APPT_LONG_SHARE_LINK_PREFIX = String(process.env.APPT_LONG_SHARE_LINK_PREFIX);
-export const v = String(`${process.env.APPT_URL}bookings?filters=pending&unconfirmed=true`);
 export const APPT_BOOKINGS_PAGE = String(`${process.env.APPT_URL}bookings`);
 export const APPT_SETTINGS_PAGE = String(`${process.env.APPT_URL}settings`);
 export const APPT_DASHBOARD_HOME_PAGE = String(`${process.env.APPT_URL}dashboard`);

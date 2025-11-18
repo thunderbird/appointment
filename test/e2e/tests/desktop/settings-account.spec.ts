@@ -14,7 +14,6 @@ import {
   TIMEOUT_30_SECONDS,
   TIMEOUT_3_SECONDS,
  } from '../../const/constants';
-import { URL } from 'url';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
