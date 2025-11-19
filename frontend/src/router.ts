@@ -25,6 +25,7 @@ const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/Inv
 const WaitingListPanelView = defineAsyncComponent(() => import('@/views/admin/WaitingListPanelView.vue'));
 const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
 const ReportBugView = defineAsyncComponent(() => import('@/views/ReportBugView.vue'));
+const FTUEView = defineAsyncComponent(() => import('@/views/FTUEView/index.vue'));
 
 type ApmtRouteMeta = {
   isPublic?: boolean; // Can the page be accessed without authentication?
@@ -177,7 +178,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/setup',
     name: 'setup',
-    component: FirstTimeUserExperienceView,
+    component: FTUEView,
   },
   {
     path: '/waiting-list/:token',
