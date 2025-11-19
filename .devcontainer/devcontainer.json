@@ -15,10 +15,10 @@
 			"version": "0.14.5"
 		},
 		"ghcr.io/devcontainers/features/aws-cli:1": {},
-		"ghcr.io/guiyomh/features/vim:0": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers/features/node:1": {},
-		"ghcr.io/devcontainers-extra/features/lerna-npm:1": {}
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "20"
+		}
 	},
 	"mounts": [
         // "source=/${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached",
