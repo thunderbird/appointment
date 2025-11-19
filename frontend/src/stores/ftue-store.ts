@@ -9,7 +9,6 @@ const initialObject = {
   step: FtueStep.SetupProfile,
 };
 
- 
 export const useFTUEStore = defineStore('FTUE', () => {
   // State
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));

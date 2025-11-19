@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import OrbGraphic from '@/assets/images/orb-graphic.png';
+import { useFTUEStore } from '@/stores/ftue-store';
+import { FtueStep } from '@/definitions';
 
 // Steps
 import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
-
-// Types
-import { FTUE_STEPS } from './types';
+import ConnectYourCalendarStep from './steps/ConnectYourCalendarStep.vue';
 
 const STEPS = {
-  [FTUE_STEPS.CREATE_YOUR_PROFILE]: CreateYourProfileStep,
+  [FtueStep.SetupProfile]: CreateYourProfileStep,
+  [FtueStep.CalendarProvider]: ConnectYourCalendarStep,
 }
 
-const currentStep = ref(FTUE_STEPS.CREATE_YOUR_PROFILE);
+const ftueStore = useFTUEStore();
+const { currentStep } = storeToRefs(ftueStore);
 
 // Force light mode in FTUE
 document.documentElement.classList.remove('dark');

@@ -5,6 +5,7 @@ import { PhArrowRight } from '@phosphor-icons/vue';
 import { BaseButton, SelectInput, TextInput } from '@thunderbirdops/services-ui';
 import { callKey, dayjsKey, shortUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
+import { useFTUEStore } from '@/stores/ftue-store';
 
 const { t } = useI18n();
 
@@ -13,6 +14,7 @@ const call = inject(callKey);
 const dj = inject(dayjsKey);
 
 const user = createUserStore(call);
+const ftueStore = useFTUEStore();
 
 const timezone = ref(user.data.settings.timezone ?? dj.tz.guess());
 
@@ -25,8 +27,8 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 
 const quickLink = shortUrl.substring(shortUrl.indexOf('//')+2) + '/';
 
-const onSubmit = () => {
-  console.log('submit');
+const onSubmit = async () => {
+  await ftueStore.nextStep();
 };
 </script>
 
