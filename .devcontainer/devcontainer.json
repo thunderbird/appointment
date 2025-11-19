@@ -34,7 +34,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install -g bun"
+	// "postCreateCommand": "npm install -g bun"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
