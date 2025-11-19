@@ -9,10 +9,11 @@ import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
 import ConnectYourCalendarStep from './steps/ConnectYourCalendarStep.vue';
 import ConnectYourCalendarCalDavStep from './steps/ConnectYourCalendarCalDavStep.vue';
 import ConnectYourCalendarGoogleStep from './steps/ConnectYourCalendarGoogleStep.vue';
+import CreateBookingPageStep from './steps/CreateBookingPageStep.vue';
 
 const STEPS = {
   [FtueStep.SetupProfile]: CreateYourProfileStep,
-  [FtueStep.CalendarProvider]: ConnectYourCalendarGoogleStep,
+  [FtueStep.CalendarProvider]: CreateBookingPageStep,
 }
 
 const ftueStore = useFTUEStore();
