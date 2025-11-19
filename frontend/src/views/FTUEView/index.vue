@@ -1,5 +1,21 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import OrbGraphic from '@/assets/images/orb-graphic.png';
+
+// Steps
+import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
+
+// Types
+import { FTUE_STEPS } from './types';
+
+const STEPS = {
+  [FTUE_STEPS.CREATE_YOUR_PROFILE]: CreateYourProfileStep,
+}
+
+const currentStep = ref(FTUE_STEPS.CREATE_YOUR_PROFILE);
+
+// Force light mode in FTUE
+document.documentElement.classList.remove('dark');
 </script>
 
 <script lang="ts">
@@ -19,7 +35,7 @@ export default {
       <!-- Right side: Panel -->
       <div class="right-side">
         <div class="panel">
-          TODO: Add content here
+          <component :is="STEPS[currentStep]" />
         </div>
       </div>
     </div>
@@ -34,7 +50,7 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1A202C; /* --colour-ti-base forced on light mode */
+  background-color: var(--colour-ti-base);
 
   .card {
     width: 100%;
@@ -56,7 +72,7 @@ section {
       justify-content: center;
       min-height: 100vh;
       flex: 1;
-      background-color: #FEFFFF; /* --colour-neutral-base forced on light mode */
+      background-color: var(--colour-neutral-base);
     }
 
     .panel {

@@ -46,6 +46,11 @@
     "unknown": "Unknown"
   },
   "ftue": {
+    "createYourProfile": "Create your profile",
+    "fullName": "Full Name",
+    "urlUsername": "URL Username",
+    "createAccount": "Create account",
+    "OLD": "OLD",
     "calendarIcon": "Calendar icon",
     "connectCalendarInfo": "Connect your calendars to manage your availability",
     "customVideoMeetingLink": "Custom Video meeting link",
@@ -55,7 +60,6 @@
     "finish": "Finish",
     "finishAltText": "A user icon in front of two calendars.",
     "finishScreenText": "Before you close this screen, copy your shareable schedule link to start receiving appointments.",
-    "fullName": "Full Name",
     "googleCalendarLogo": "Google Calendar Logo",
     "itemsSelected": "{count} Selected",
     "oneCalendarRequired": "Please enable one calendar to continue",
