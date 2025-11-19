@@ -2,8 +2,11 @@
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
+import calendarIcon from '@/assets/svg/icons/calendar.svg';
+import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
 
 import StepTitle from '../components/StepTitle.vue';
+import ProviderCardButton from '../components/ProviderCardButton.vue';
 
 const { t } = useI18n();
 
@@ -14,23 +17,19 @@ const ftueStore = useFTUEStore();
   <step-title :title="t('ftue.connectYourCalendar')" />
   <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
 
-  <button>
-    <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>
+  <provider-card-button
+    :title="t('ftue.connectCalendarCalDav')"
+    :description="t('ftue.connectCalendarCalDavInfo')"
+    :iconSrc="calendarIcon"
+    :iconAlt="t('ftue.calendarIcon')"
+  />
 
-    <div>
-      <h3>{{ t('ftue.connectCalendarCalDav') }}</h3>
-      <p>{{ t('ftue.connectCalendarCalDavInfo') }}</p>
-    </div>
-  </button>
-
-  <button>
-    <img src="@/assets/svg/google-calendar-logo.svg" :alt="t('ftue.googleCalendarLogo')" :title="t('ftue.googleCalendarLogo')"/>
-
-    <div>
-      <h3>{{ t('ftue.connectCalendarCalDav') }}</h3>
-      <p>{{ t('ftue.connectCalendarCalDavInfo') }}</p>
-    </div>
-  </button>
+  <provider-card-button
+    :title="t('ftue.connectCalendarGoogle')"
+    :description="t('ftue.connectCalendarGoogleInfo')"
+    :iconSrc="googleCalendarLogo"
+    :iconAlt="t('ftue.googleCalendarLogo')"
+  />
 
   <div class="buttons-container">
     <link-button :title="t('label.cancel')" @click="ftueStore.previousStep()">
@@ -46,36 +45,6 @@ const ftueStore = useFTUEStore();
 p {
   line-height: 1.32;
   margin-block-end: 1rem;
-}
-
-button {
-  display: flex;
-  gap: 1.5rem;
-  padding: 1rem;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12);
-  border-radius: 0.5rem;
-  text-align: left;
-  align-items: center;
-
-  img { 
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--colour-ti-base);
-    margin-block-end: 0.5rem;
-  }
-
-  p {
-    margin-block-end: 0;
-  }
-
-  &:hover {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12);
-  }
 }
 
 button + button {
