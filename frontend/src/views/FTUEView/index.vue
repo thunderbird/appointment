@@ -12,10 +12,11 @@ import ConnectYourCalendarGoogleStep from './steps/ConnectYourCalendarGoogleStep
 import CreateBookingPageStep from './steps/CreateBookingPageStep.vue';
 import SetYourAvailabilityStep from './steps/SetYourAvailabilityStep.vue';
 import VideoMeetingLinkStep from './steps/VideoMeetingLinkStep.vue';
+import SetupCompleteStep from './steps/SetupCompleteStep.vue';
 
 const STEPS = {
   [FtueStep.SetupProfile]: CreateYourProfileStep,
-  [FtueStep.CalendarProvider]: VideoMeetingLinkStep,
+  [FtueStep.CalendarProvider]: SetupCompleteStep,
 }
 
 const ftueStore = useFTUEStore();
