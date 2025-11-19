@@ -7,6 +7,8 @@ import { callKey, dayjsKey, shortUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
 import { useFTUEStore } from '@/stores/ftue-store';
 
+import StepTitle from '../components/StepTitle.vue';
+
 const { t } = useI18n();
 
 const shortUrl = inject(shortUrlKey);
@@ -33,7 +35,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <h2>{{ t('ftue.createYourProfile') }}</h2>
+  <step-title :title="t('ftue.createYourProfile')" />
 
   <form @submit.prevent @keyup.enter="onSubmit">
     <text-input
@@ -73,16 +75,6 @@ const onSubmit = async () => {
 </template>
 
 <style scoped>
-h2 {
-  font-size: 2.25rem;
-  font-family: metropolis;
-  font-weight: normal;
-  letter-spacing: -0.36px;
-  line-height: 1.2;
-  color: var(--colour-ti-highlight);
-  margin: 0 0 1.5rem 0;
-}
-
 form {
   display: flex;
   flex-direction: column;

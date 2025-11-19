@@ -6,6 +6,8 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { isoWeekdaysKey } from '@/keys';
 import { SelectOption } from '@/models';
 
+import StepTitle from '../components/StepTitle.vue';
+
 const isoWeekdays = inject(isoWeekdaysKey);
 
 const ftueStore = useFTUEStore();
@@ -20,7 +22,7 @@ const bookingDurationOptions = []
 </script>
 
 <template>
-  <h2>{{ t('ftue.setYourAvailability') }}</h2>
+  <step-title :title="t('ftue.setYourAvailability')" />
 
   <div class="availability-container">
     <bubble-select
@@ -60,16 +62,6 @@ const bookingDurationOptions = []
 </template>
 
 <style scoped>
-h2 {
-  font-size: 2.25rem;
-  font-family: metropolis;
-  font-weight: normal;
-  letter-spacing: -0.36px;
-  line-height: 1.2;
-  color: var(--colour-ti-highlight);
-  margin: 0 0 1.5rem 0;
-}
-
 .availability-container {
   display: flex;
   flex-direction: column;

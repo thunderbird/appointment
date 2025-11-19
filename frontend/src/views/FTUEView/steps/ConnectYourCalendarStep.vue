@@ -3,13 +3,15 @@ import { useI18n } from 'vue-i18n';
 import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 
+import StepTitle from '../components/StepTitle.vue';
+
 const { t } = useI18n();
 
 const ftueStore = useFTUEStore();
 </script>
 
 <template>
-  <h2>{{ t('ftue.connectYourCalendar') }}</h2>
+  <step-title :title="t('ftue.connectYourCalendar')" />
   <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
 
   <button>
@@ -41,16 +43,6 @@ const ftueStore = useFTUEStore();
 </template>
 
 <style scoped>
-h2 {
-  font-size: 2.25rem;
-  font-family: metropolis;
-  font-weight: normal;
-  letter-spacing: -0.36px;
-  line-height: 1.2;
-  color: var(--colour-ti-highlight);
-  margin: 0 0 1.1325rem 0;
-}
-
 p {
   line-height: 1.32;
   margin-block-end: 1rem;

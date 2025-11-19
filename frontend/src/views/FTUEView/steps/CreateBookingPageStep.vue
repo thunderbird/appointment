@@ -3,6 +3,8 @@ import { LinkButton, PrimaryButton, SelectInput, TextInput } from '@thunderbirdo
 import { useI18n } from 'vue-i18n';
 import { useFTUEStore } from '@/stores/ftue-store';
 
+import StepTitle from '../components/StepTitle.vue';
+
 const { t } = useI18n();
 const ftueStore = useFTUEStore();
 
@@ -10,7 +12,7 @@ const calendarOptions = [];
 </script>
 
 <template>
-  <h2>{{ t('ftue.createBookingPage') }}</h2>
+  <step-title :title="t('ftue.createBookingPage')" />
 
   <text-input
     name="bookingPageTitle"
@@ -42,16 +44,6 @@ const calendarOptions = [];
 </template>
 
 <style scoped>
-h2 {
-  font-size: 2.25rem;
-  font-family: metropolis;
-  font-weight: normal;
-  letter-spacing: -0.36px;
-  line-height: 1.2;
-  color: var(--colour-ti-highlight);
-  margin: 0 0 1.5rem 0;
-}
-
 .booking-page-title-input {
   margin-block-end: 2.25rem;
 }

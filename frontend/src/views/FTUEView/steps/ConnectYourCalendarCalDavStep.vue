@@ -3,6 +3,8 @@ import { useI18n } from 'vue-i18n';
 import { CheckboxInput, TextInput, PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 
+import StepTitle from '../components/StepTitle.vue';
+
 const { t } = useI18n();
 const ftueStore = useFTUEStore();
 
@@ -12,7 +14,7 @@ const onSubmit = () => {
 </script>
 
 <template>
-  <h2>{{ t('ftue.connectWithCalDav') }}</h2>
+  <step-title :title="t('ftue.connectWithCalDav')" />
 
   <form @submit.prevent @keyup.enter="onSubmit">
     <div class="calendar-url-container">
@@ -52,16 +54,6 @@ const onSubmit = () => {
 </template>
 
 <style scoped>
-h2 {
-  font-size: 2.25rem;
-  font-family: metropolis;
-  font-weight: normal;
-  letter-spacing: -0.36px;
-  line-height: 1.2;
-  color: var(--colour-ti-highlight);
-  margin: 0 0 1.5rem 0;
-}
-
 .calendar-url-container {
   display: flex;
   align-items: center;

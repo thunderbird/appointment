@@ -76,6 +76,7 @@
     "startTime": "Start Time",
     "endTime": "End Time",
     "bookingDuration": "Booking Duration",
+    "videoMeetingLink": "Video Meeting Link",
     "OLD": "OLD",
     "calendarIcon": "Calendar icon",
     "connectCalendarInfo": "Connect your calendars to manage your availability",
@@ -106,8 +107,7 @@
       "setupSchedule": "Set up your appointment availability"
     },
     "usernameHelp": "This will become your quick link",
-    "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue.",
-    "videoMeetingLink": "Video meeting link"
+    "videoConnectionRequired": "Connect your zoom account, enter a custom meeting link to continue."
   },
   "heading": {
     "accountSettings": "Account Settings",
