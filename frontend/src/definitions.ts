@@ -238,11 +238,13 @@ export enum TableDataButtonType {
  */
 export enum FtueStep {
   SetupProfile = 10,
-  CalendarProvider = 20,
-  ConnectCalendars = 30,
-  SetupSchedule = 40,
-  ConnectVideoConferencing = 50,
-  Finish = 100,
+  ConnectCalendars = 20,
+  ConnectCalendarsCalDav = 21,
+  ConnectCalendarsGoogle = 22,
+  CreateBookingPage = 30,
+  SetAvailability = 40,
+  VideoMeetingLink = 50,
+  SetupComplete = 100,
 }
 
 export enum TooltipPosition {

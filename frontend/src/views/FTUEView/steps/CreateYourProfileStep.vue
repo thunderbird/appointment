@@ -6,6 +6,7 @@ import { BaseButton, SelectInput, TextInput } from '@thunderbirdops/services-ui'
 import { callKey, dayjsKey, shortUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { FtueStep } from '@/definitions';
 
 import StepTitle from '../components/StepTitle.vue';
 
@@ -30,7 +31,7 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 const quickLink = shortUrl.substring(shortUrl.indexOf('//')+2) + '/';
 
 const onSubmit = async () => {
-  await ftueStore.nextStep();
+  await ftueStore.moveToStep(FtueStep.ConnectCalendars);
 };
 </script>
 

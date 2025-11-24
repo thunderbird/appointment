@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import OrbGraphic from '@/assets/images/orb-graphic.png';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { createFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
+import { callKey } from '@/keys';
+import { inject, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
 // Steps
 import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
@@ -16,11 +19,42 @@ import SetupCompleteStep from './steps/SetupCompleteStep.vue';
 
 const STEPS = {
   [FtueStep.SetupProfile]: CreateYourProfileStep,
-  [FtueStep.CalendarProvider]: SetupCompleteStep,
+  [FtueStep.ConnectCalendars]: ConnectYourCalendarStep,
+  [FtueStep.ConnectCalendarsCalDav]: ConnectYourCalendarCalDavStep,
+  [FtueStep.ConnectCalendarsGoogle]: ConnectYourCalendarGoogleStep,
+  [FtueStep.CreateBookingPage]: CreateBookingPageStep,
+  [FtueStep.SetAvailability]: SetYourAvailabilityStep,
+  [FtueStep.VideoMeetingLink]: VideoMeetingLinkStep,
+  [FtueStep.SetupComplete]: SetupCompleteStep,
 }
 
-const ftueStore = useFTUEStore();
+const call = inject(callKey);
+const ftueStore = createFTUEStore(call);
 const { currentStep } = storeToRefs(ftueStore);
+const route = useRoute();
+
+// Sync step from query parameter on mount and when route changes
+onMounted(() => {
+  // If there's a query param, sync from it; otherwise, ensure URL matches current step
+  if (route.query.step) {
+    ftueStore.syncStepFromQuery();
+  } else {
+    // If we're not on the first step but there's no query param, add it
+    // If we're on the first step, ensure query param is removed
+    if (ftueStore.currentStep !== FtueStep.SetupProfile) {
+      ftueStore.moveToStep(ftueStore.currentStep, true);
+    } else {
+      // Ensure first step has no query param
+      if (route.query.step) {
+        ftueStore.moveToStep(FtueStep.SetupProfile, true);
+      }
+    }
+  }
+});
+
+watch(() => route.query.step, () => {
+  ftueStore.syncStepFromQuery();
+});
 
 // Force light mode in FTUE
 document.documentElement.classList.remove('dark');

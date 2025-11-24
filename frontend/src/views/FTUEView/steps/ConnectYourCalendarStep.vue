@@ -1,41 +1,66 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
+import { FtueStep } from '@/definitions';
 
 import StepTitle from '../components/StepTitle.vue';
-import ProviderCardButton from '../components/ProviderCardButton.vue';
+import RadioProviderCardButton from '../components/RadioProviderCardButton.vue';
+
+const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
 
 const { t } = useI18n();
 
 const ftueStore = useFTUEStore();
+
+type CalendarProvider = 'caldav' | 'google';
+const calendarProvider = ref<CalendarProvider | null>(null);
+
+const onContinueButtonClick = () => {
+  if (calendarProvider.value === 'caldav') {
+    ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
+  } else {
+    ftueStore.moveToStep(FtueStep.ConnectCalendarsGoogle);
+  }
+};
 </script>
 
 <template>
   <step-title :title="t('ftue.connectYourCalendar')" />
   <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
 
-  <provider-card-button
-    :title="t('ftue.connectCalendarCalDav')"
-    :description="t('ftue.connectCalendarCalDavInfo')"
-    :iconSrc="calendarIcon"
-    :iconAlt="t('ftue.calendarIcon')"
-  />
+  <div class="radio-group" role="radiogroup" :aria-label="t('ftue.connectYourCalendar')">
+    <radio-provider-card-button
+      :title="t('ftue.connectCalendarCalDav')"
+      :description="t('ftue.connectCalendarCalDavInfo')"
+      :iconSrc="calendarIcon"
+      :iconAlt="t('ftue.calendarIcon')"
+      value="caldav"
+      name="calendar-provider"
+      v-model="calendarProvider"
+    />
 
-  <provider-card-button
-    :title="t('ftue.connectCalendarGoogle')"
-    :description="t('ftue.connectCalendarGoogleInfo')"
-    :iconSrc="googleCalendarLogo"
-    :iconAlt="t('ftue.googleCalendarLogo')"
-  />
+    <radio-provider-card-button
+      :title="t('ftue.connectCalendarGoogle')"
+      :description="t('ftue.connectCalendarGoogleInfo')"
+      :iconSrc="googleCalendarLogo"
+      :iconAlt="t('ftue.googleCalendarLogo')"
+      value="google"
+      name="calendar-provider"
+      v-model="calendarProvider"
+    />
+  </div>
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')" @click="ftueStore.previousStep()">
-      {{ t('label.cancel') }}
+    <link-button :title="t('label.cancel')">
+      <a :href="accountDashboardUrl">
+        {{ t('label.cancel') }}
+      </a>
     </link-button>
-    <primary-button :title="t('label.continue')" @click="ftueStore.nextStep()">
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
       {{ t('label.continue') }}
     </primary-button>
   </div>
@@ -47,8 +72,10 @@ p {
   margin-block-end: 1rem;
 }
 
-button + button {
-  margin-block-start: 0.5rem;
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .buttons-container {

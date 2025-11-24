@@ -462,13 +462,6 @@ export type TableFilter = {
   fn: (value: string, list: TableDataRow[]) => TableDataRow[];
 };
 
-// First Time User Experience State
-export type FtueState = {
-  previous: FtueStep;
-  next: FtueStep;
-  title: string;
-};
-
 // Utility types
 export type Time<T> = {
   start: T;
