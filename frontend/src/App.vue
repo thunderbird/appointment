@@ -50,8 +50,6 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
-provide(fxaEditProfileUrlKey, import.meta.env?.VITE_AUTH_EDIT_PROFILE);
-
 if (isOidcAuth) {
   /**
    * The user is reloaded after the access token is refreshed
