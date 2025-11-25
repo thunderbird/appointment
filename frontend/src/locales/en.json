@@ -56,6 +56,8 @@
     "connectCalendarCalDavInfo": "Sync Thunderbird Appointment calendar with your calendar using a CalDAV link.",
     "connectCalendarGoogle": "Connect with Google Calendar",
     "connectCalendarGoogleInfo": "Sync Thunderbird Appointment with your Google Calendar. You'll be able to choose which calendars to include.",
+    "connectCalendarTBPro": "Connect with Thunderbird Pro",
+    "connectCalendarTBProInfo": "Sync Thunderbird Appointment with your Thunderbird Pro calendar. You'll be able to choose which calendars to include.",
     "connectWithCalDav": "Connect with CalDav",
     "calendarUrl": "Calendar URL",
     "calendarUrlPlaceholder": "Enter full URL",

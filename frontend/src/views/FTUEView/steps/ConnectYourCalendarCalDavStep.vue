@@ -1,25 +1,78 @@
 <script setup lang="ts">
+import { ref, inject, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { CheckboxInput, TextInput, PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
+import { callKey } from '@/keys';
+import { CheckboxInput, TextInput, PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { CalendarListResponse, PydanticException } from '@/models';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { FtueStep } from '@/definitions';
+import { handleFormError } from '@/utils';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const { t } = useI18n();
-const ftueStore = useFTUEStore();
+const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
 
-const onSubmit = () => {
-  console.log('Connect with CalDAV');
+const call = inject(callKey);
+
+const ftueStore = useFTUEStore();
+const { t } = useI18n();
+
+const calendarUrl = ref(null);
+const noSignInCredentialsRequired = ref(false);
+const login = ref(null);
+const password = ref(null);
+const errorMessage = ref(null);
+const isLoading = ref(false);
+const formRef = useTemplateRef('formRef');
+
+const onContinueButtonClick = async () => {
+  if (!formRef.value.checkValidity()) {
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    const payload =  noSignInCredentialsRequired.value
+      ? { url: calendarUrl.value }
+      : { login: login.value, password: password.value };
+
+    const { error, data }: CalendarListResponse = await call('caldav/auth').post(payload).json();
+
+    if (error.value) {
+      const err = data?.value as PydanticException;
+      const { title, details } = handleFormError(t, formRef, err);
+
+      errorMessage.value = `${title}: ${details}`;
+      return;
+    }
+
+    await ftueStore.moveToStep(FtueStep.CreateBookingPage);
+  } catch (error) {
+    errorMessage.value = error ? error.message : t('error.somethingWentWrong');
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
 <template>
   <step-title :title="t('ftue.connectWithCalDav')" />
 
-  <form @submit.prevent @keyup.enter="onSubmit">
+  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
+    {{ errorMessage }}
+  </notice-bar>
+
+  <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">
     <div class="calendar-url-container">
       <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>
-      <text-input name="calendarUrl" :placeholder="t('ftue.calendarUrlPlaceholder')" required class="calendar-url-input">
+      <text-input
+        name="calendarUrl"
+        :placeholder="t('ftue.calendarUrlPlaceholder')"
+        required
+        class="calendar-url-input"
+        v-model="calendarUrl"
+      >
         {{ t('ftue.calendarUrl') }}
       </text-input>
     </div>
@@ -29,24 +82,27 @@ const onSubmit = () => {
         name="noSignInCredentialsRequired"
         :label="t('ftue.noSignInCredentialsRequired')"
         class="no-sign-in-credentials-checkbox"
+        v-model="noSignInCredentialsRequired"
       />
     </div>
 
     <div class="credentials-container">
-      <text-input name="login" required>
+      <text-input name="login" required v-model="login" :disabled="noSignInCredentialsRequired">
         {{ t('label.logIn') }}
       </text-input>
 
-      <text-input name="password" required>
+      <text-input name="password" required v-model="password" :disabled="noSignInCredentialsRequired">
         {{ t('label.password') }}
       </text-input>
     </div>
 
     <div class="buttons-container">
-      <link-button :title="t('label.cancel')" @click="ftueStore.previousStep()">
-        {{ t('label.cancel') }}
+      <link-button :title="t('label.cancel')">
+        <a :href="accountDashboardUrl">
+          {{ t('label.cancel') }}
+        </a>
       </link-button>
-      <primary-button :title="t('label.continue')" @click="ftueStore.nextStep()">
+      <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
         {{ t('label.continue') }}
       </primary-button>
     </div>
@@ -54,6 +110,10 @@ const onSubmit = () => {
 </template>
 
 <style scoped>
+.notice-bar {
+  margin-block-end: 1.5rem;
+}
+
 .calendar-url-container {
   display: flex;
   align-items: center;

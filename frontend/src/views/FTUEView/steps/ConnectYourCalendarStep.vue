@@ -16,14 +16,22 @@ const { t } = useI18n();
 
 const ftueStore = useFTUEStore();
 
-type CalendarProvider = 'caldav' | 'google';
+type CalendarProvider = 'caldav' | 'google' | 'oidc';
 const calendarProvider = ref<CalendarProvider | null>(null);
 
-const onContinueButtonClick = () => {
-  if (calendarProvider.value === 'caldav') {
-    ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
-  } else {
-    ftueStore.moveToStep(FtueStep.ConnectCalendarsGoogle);
+const onContinueButtonClick = async () => {
+  switch (calendarProvider.value) {
+    case 'oidc':
+      // TODO: Implement OIDC flow (get the token and try to authenticate)
+      break;
+    case 'caldav':
+      await ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
+      break;
+    case 'google':
+      await ftueStore.moveToStep(FtueStep.ConnectCalendarsGoogle);
+      break;
+    default:
+      break;
   }
 };
 </script>
@@ -33,6 +41,16 @@ const onContinueButtonClick = () => {
   <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
 
   <div class="radio-group" role="radiogroup" :aria-label="t('ftue.connectYourCalendar')">
+    <!-- <radio-provider-card-button
+      :title="t('ftue.connectCalendarTBPro')"
+      :description="t('ftue.connectCalendarTBProInfo')"
+      :iconSrc="calendarIcon"
+      :iconAlt="t('ftue.appointmentLogo')"
+      value="oidc"
+      name="calendar-provider"
+      v-model="calendarProvider"
+    /> -->
+
     <radio-provider-card-button
       :title="t('ftue.connectCalendarCalDav')"
       :description="t('ftue.connectCalendarCalDavInfo')"
