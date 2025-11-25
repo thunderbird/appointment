@@ -15,7 +15,6 @@ import {
   apiUrlKey,
   callKey,
   refreshKey,
-  fxaEditProfileUrlKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';

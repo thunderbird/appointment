@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import OrbGraphic from '@/assets/images/orb-graphic.png';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
-import { callKey } from '@/keys';
+import { callKey, refreshKey } from '@/keys';
 import { inject, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -29,12 +29,16 @@ const STEPS = {
 }
 
 const call = inject(callKey);
+const refresh = inject(refreshKey);
+
 const ftueStore = createFTUEStore(call);
 const { currentStep } = storeToRefs(ftueStore);
 const route = useRoute();
 
 // Sync step from query parameter on mount and when route changes
-onMounted(() => {
+onMounted(async () => {
+  await refresh();
+
   // If there's a query param, sync from it; otherwise, ensure URL matches current step
   if (route.query.step) {
     ftueStore.syncStepFromQuery();
