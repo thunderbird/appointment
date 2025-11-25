@@ -1,43 +1,123 @@
 <script setup lang="ts">
-import { LinkButton, PrimaryButton, SelectInput, TextInput } from '@thunderbirdops/services-ui';
+import { ref, computed, useTemplateRef, inject } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import { LinkButton, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { useUserStore } from '@/stores/user-store';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { useCalendarStore } from '@/stores/calendar-store';
+import { useScheduleStore } from '@/stores/schedule-store';
+import { SelectOption } from '@/models';
+import { FtueStep, DEFAULT_SLOT_DURATION } from '@/definitions';
+import { dayjsKey } from '@/keys';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const { t } = useI18n();
-const ftueStore = useFTUEStore();
+const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
 
-const calendarOptions = [];
+const dj = inject(dayjsKey);
+
+const { t } = useI18n();
+const user = useUserStore();
+const ftueStore = useFTUEStore();
+const calendarStore = useCalendarStore();
+const scheduleStore = useScheduleStore();
+
+const { calendars } = storeToRefs(calendarStore);
+
+const bookingPageTitle = ref(scheduleStore.firstSchedule?.name ?? '');
+const calendarForNewAppointments = ref(scheduleStore.firstSchedule?.calendar_id ?? 0);
+const isLoading = ref(false);
+const errorMessage = ref(null);
+const formRef = useTemplateRef('formRef');
+
+const calendarOptions = computed<SelectOption[]>(() => calendars.value.map((calendar) => ({
+  label: calendar.title,
+  value: calendar.id,
+})));
+
+const onContinueButtonClick = async () => {
+  if (!formRef.value.checkValidity()) {
+    return;
+  }
+
+  isLoading.value = true;
+ 
+  try {
+    // First, we need to connect / activate the selected calendar
+    await calendarStore.connectCalendar(calendarForNewAppointments.value);
+
+    const payload = {
+      name: bookingPageTitle.value,
+      calendar_id: calendarForNewAppointments.value,
+      // The API endpoint expects a full schedule object
+      // but on this step we only have two fields: name and calendar
+      // so we will fill the rest with default values
+      start_date: dj().format('YYYY-MM-DD'),
+      start_time: '09:00',
+      end_time: '17:00',
+      slot_duration: DEFAULT_SLOT_DURATION,
+      weekdays: [1, 2, 3, 4, 5],
+      earliest_booking: 1440,
+      farthest_booking: 20160,
+      timezone: user.data.settings.timezone,
+    };
+
+    const data = await scheduleStore.createSchedule(payload);
+
+    if (Object.prototype.hasOwnProperty.call(data, 'error')) {
+      errorMessage.value = (data as unknown as Error)?.message ?? t('error.somethingWentWrong');
+      isLoading.value = false;
+      return;
+    }
+
+    ftueStore.clearMessages();
+    await ftueStore.moveToStep(FtueStep.SetAvailability);
+  } catch (error) {
+    errorMessage.value = error ? error.message : t('error.somethingWentWrong');
+  } finally {
+    isLoading.value = false;
+  }
+};
 </script>
 
 <template>
   <step-title :title="t('ftue.createBookingPage')" />
 
-  <text-input
-    name="bookingPageTitle"
-    :placeholder="t('ftue.bookingPagePlaceholder')"
-    :help="t('ftue.bookingPageTitleHelp')"
-    class="booking-page-title-input"
-    required
-  >
-    {{ t('ftue.bookingPageTitle') }}
-  </text-input>
+  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
+    {{ errorMessage }}
+  </notice-bar>
 
-  <select-input
-    name="calendarForNewAppointments"
-    :options="calendarOptions"
-    :help="t('ftue.calendarForNewAppointmentsHelp')"
-    required
-  >
-    {{ t('ftue.calendarForNewAppointments') }}
-  </select-input>
+  <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">
+    <text-input
+      name="bookingPageTitle"
+      :placeholder="t('ftue.bookingPagePlaceholder')"
+      :help="t('ftue.bookingPageTitleHelp')"
+      class="booking-page-title-input"
+      required
+      v-model="bookingPageTitle"
+    >
+      {{ t('ftue.bookingPageTitle') }}
+    </text-input>
+  
+    <select-input
+      name="calendarForNewAppointments"
+      :options="calendarOptions"
+      :help="t('ftue.calendarForNewAppointmentsHelp')"
+      required
+      v-model="calendarForNewAppointments"
+    >
+      {{ t('ftue.calendarForNewAppointments') }}
+    </select-input>
+  </form>
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')" @click="ftueStore.previousStep()">
-      {{ t('label.cancel') }}
+    <link-button :title="t('label.cancel')">
+      <a :href="accountDashboardUrl">
+        {{ t('label.cancel') }}
+      </a>
     </link-button>
-    <primary-button :title="t('label.continue')" @click="ftueStore.nextStep()">
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
       {{ t('label.continue') }}
     </primary-button>
   </div>
@@ -46,6 +126,10 @@ const calendarOptions = [];
 <style scoped>
 .booking-page-title-input {
   margin-block-end: 2.25rem;
+}
+
+.notice-bar {
+  margin-block-end: 1.5rem;
 }
 
 .buttons-container {
