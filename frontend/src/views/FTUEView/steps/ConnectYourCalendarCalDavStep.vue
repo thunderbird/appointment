@@ -31,19 +31,20 @@ const onContinueButtonClick = async () => {
   }
 
   isLoading.value = true;
+  errorMessage.value = null;
 
   try {
     const payload =  noSignInCredentialsRequired.value
       ? { url: calendarUrl.value }
-      : { login: login.value, password: password.value };
+      : { url: calendarUrl.value, user: login.value, password: password.value };
 
     const { error, data }: CalendarListResponse = await call('caldav/auth').post(payload).json();
 
     if (error.value) {
       const err = data?.value as PydanticException;
-      const { title, details } = handleFormError(t, formRef, err);
+      const { title } = handleFormError(t, formRef, err);
 
-      errorMessage.value = `${title}: ${details}`;
+      errorMessage.value = title;
       return;
     }
 
@@ -92,7 +93,7 @@ const onContinueButtonClick = async () => {
         {{ t('label.logIn') }}
       </text-input>
 
-      <text-input name="password" required v-model="password" :disabled="noSignInCredentialsRequired">
+      <text-input name="password" type="password" required v-model="password" :disabled="noSignInCredentialsRequired">
         {{ t('label.password') }}
       </text-input>
     </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, useTemplateRef, inject } from 'vue';
+import { ref, computed, useTemplateRef, inject, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { LinkButton, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
@@ -78,6 +78,12 @@ const onContinueButtonClick = async () => {
     isLoading.value = false;
   }
 };
+
+onMounted(async () => {
+  // Force re-fetch calendars to ensure we have the latest data
+  // since we just connected an account on the previous step and data will be outdated
+  await calendarStore.fetch(true);
+});
 </script>
 
 <template>
