@@ -23,7 +23,6 @@ const WaitingListActionView = defineAsyncComponent(() => import('@/views/Waiting
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
 const WaitingListPanelView = defineAsyncComponent(() => import('@/views/admin/WaitingListPanelView.vue'));
-const FirstTimeUserExperienceView = defineAsyncComponent(() => import('@/views/FirstTimeUserExperienceView.vue'));
 const ReportBugView = defineAsyncComponent(() => import('@/views/ReportBugView.vue'));
 const FTUEView = defineAsyncComponent(() => import('@/views/FTUEView/index.vue'));
 
