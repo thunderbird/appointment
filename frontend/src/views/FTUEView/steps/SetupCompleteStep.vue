@@ -1,12 +1,31 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFTUEStore } from '@/stores/ftue-store';
+import { useRouter } from 'vue-router';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { useUserStore } from '@/stores/user-store';
 
 import StepTitle from '../components/StepTitle.vue';
 
 const { t } = useI18n();
-const ftueStore = useFTUEStore();
+
+const router = useRouter();
+const userStore = useUserStore();
+
+const onContinueButtonClick = async () => {
+  router.push('/dashboard');
+};
+
+onMounted(async () => {
+  await userStore.finishFTUE();
+  await userStore.profile();
+
+  // Clear the FTUE flow
+  window.localStorage?.removeItem('tba/ftue');
+
+  // Redirect to dashboard after a delay
+  setTimeout(() => router.push('/dashboard'), 5000);
+});
 </script>
 
 <template>
@@ -18,7 +37,7 @@ const ftueStore = useFTUEStore();
     <h3>{{ t('ftue.thunderbirdAppointmentIsReady') }}</h3>
     <p>{{ t('ftue.redirectingToDashboard') }}</p>
 
-    <primary-button :title="t('ftue.continueToDashboard')" @click="ftueStore.nextStep()">
+    <primary-button :title="t('ftue.continueToDashboard')" @click="onContinueButtonClick()">
       {{ t('ftue.continueToDashboard') }}
     </primary-button>
   </div>
