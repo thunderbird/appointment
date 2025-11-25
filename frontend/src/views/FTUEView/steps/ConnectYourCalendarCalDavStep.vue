@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { callKey } from '@/keys';
+import { callKey, accountsTbProfileUrlKey } from '@/keys';
 import { CheckboxInput, TextInput, PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { CalendarListResponse, PydanticException } from '@/models';
 import { useFTUEStore } from '@/stores/ftue-store';
@@ -10,7 +10,7 @@ import { handleFormError } from '@/utils';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const call = inject(callKey);
 
@@ -99,7 +99,7 @@ const onContinueButtonClick = async () => {
 
     <div class="buttons-container">
       <link-button :title="t('label.cancel')">
-        <a :href="accountDashboardUrl">
+        <a :href="accountsTbProfileUrl">
           {{ t('label.cancel') }}
         </a>
       </link-button>

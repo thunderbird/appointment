@@ -9,15 +9,15 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { ExternalConnectionProviders, FtueStep, CalendarProviders } from '@/definitions';
-import { callKey } from '@/keys';
+import { callKey, accountsTbProfileUrlKey } from '@/keys';
 import { BooleanResponse, Exception, ExceptionDetail } from '@/models';
 
 import GradientCheckCircle from '../components/GradientCheckCircle.vue';
 import StepTitle from '../components/StepTitle.vue';
 
-const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
 const initFlowKey = 'tba/startedCalConnect';
 
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const call = inject(callKey);
 
 const { t } = useI18n();
@@ -141,7 +141,7 @@ onMounted(async () => {
 
   <div class="buttons-container">
     <link-button :title="t('label.cancel')">
-      <a :href="accountDashboardUrl">
+      <a :href="accountsTbProfileUrl">
         {{ t('label.cancel') }}
       </a>
     </link-button>

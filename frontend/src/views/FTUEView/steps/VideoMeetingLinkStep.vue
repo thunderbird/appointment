@@ -6,15 +6,15 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import zoomLogo from '@/assets/images/zoom-icon.png';
 import { FtueStep } from '@/definitions';
-import { callKey } from '@/keys';
+import { callKey, accountsTbProfileUrlKey } from '@/keys';
 import { AuthUrlResponse, AuthUrl, BooleanResponse, Exception, ExceptionDetail } from '@/models';
 
 import StepTitle from '../components/StepTitle.vue';
 import ProviderCardButton from '../components/ProviderCardButton.vue';
 
-const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
 const initFlowKey = 'tba/startedMeetingConnect';
 
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const call = inject(callKey);
 
 const { t } = useI18n();
@@ -109,7 +109,7 @@ onMounted(async () => {
 
   <div class="buttons-container">
     <link-button :title="t('label.cancel')" :disabled="isLoading">
-      <a :href="accountDashboardUrl">
+      <a :href="accountsTbProfileUrl">
         {{ t('label.cancel') }}
       </a>
     </link-button>

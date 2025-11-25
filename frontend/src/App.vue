@@ -15,6 +15,7 @@ import {
   apiUrlKey,
   callKey,
   refreshKey,
+  accountsTbProfileUrlKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -48,6 +49,8 @@ const {
   show: showNotification,
   lock: lockNotification,
 } = siteNotificationStore;
+
+provide(accountsTbProfileUrlKey, import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL);
 
 if (isOidcAuth) {
   /**

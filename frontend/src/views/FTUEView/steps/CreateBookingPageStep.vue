@@ -9,12 +9,11 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { SelectOption } from '@/models';
 import { FtueStep, DEFAULT_SLOT_DURATION } from '@/definitions';
-import { dayjsKey } from '@/keys';
+import { dayjsKey, accountsTbProfileUrlKey } from '@/keys';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
-
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const dj = inject(dayjsKey);
 
 const { t } = useI18n();
@@ -113,7 +112,7 @@ const onContinueButtonClick = async () => {
 
   <div class="buttons-container">
     <link-button :title="t('label.cancel')">
-      <a :href="accountDashboardUrl">
+      <a :href="accountsTbProfileUrl">
         {{ t('label.cancel') }}
       </a>
     </link-button>

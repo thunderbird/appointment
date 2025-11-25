@@ -4,14 +4,13 @@ import { useI18n } from 'vue-i18n';
 import { BubbleSelect, LinkButton, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { isoWeekdaysKey } from '@/keys';
+import { isoWeekdaysKey, accountsTbProfileUrlKey } from '@/keys';
 import { SelectOption } from '@/models';
 import { FtueStep, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
-
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 
 const { t } = useI18n();
@@ -113,7 +112,7 @@ const onContinueButtonClick = async () => {
 
   <div class="buttons-container">
     <link-button :title="t('label.cancel')">
-      <a :href="accountDashboardUrl">
+      <a :href="accountsTbProfileUrl">
         {{ t('label.cancel') }}
       </a>
     </link-button>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
@@ -7,11 +7,12 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
 import { FtueStep } from '@/definitions';
+import { accountsTbProfileUrlKey } from '@/keys';
 
 import StepTitle from '../components/StepTitle.vue';
 import RadioProviderCardButton from '../components/RadioProviderCardButton.vue';
 
-const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const { t } = useI18n();
 
@@ -83,7 +84,7 @@ const onContinueButtonClick = async () => {
 
   <div class="buttons-container">
     <link-button :title="t('label.cancel')">
-      <a :href="accountDashboardUrl">
+      <a :href="accountsTbProfileUrl">
         {{ t('label.cancel') }}
       </a>
     </link-button>
