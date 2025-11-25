@@ -18,8 +18,8 @@ const dj = inject(dayjsKey);
 const user = useUserStore();
 const ftueStore = useFTUEStore();
 
-const fullName = ref(null);
-const username = ref(null);
+const fullName = ref(user.data.name ?? '');
+const username = ref(user.data.username ?? '');
 const timezone = ref(user.data.settings.timezone ?? dj.tz.guess());
 const isLoading = ref(false);
 const errorMessage = ref(null);
@@ -35,6 +35,7 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 const quickLink = shortUrl.substring(shortUrl.indexOf('//')+2) + '/';
 
 const onSubmit = async () => {
+  ftueStore.clearMessages();
   isLoading.value = true;
 
   try {

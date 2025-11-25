@@ -36,7 +36,6 @@ export const useFTUEStore = defineStore('FTUE', () => {
   };
 
   const moveToStep = async (newStep: FtueStep, replace = false) => {
-    clearMessages();
     data.value.step = newStep;
 
     // Add query parameter to router history for browser back button support
@@ -105,6 +104,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
     init,
     currentStep,
     moveToStep,
+    clearMessages,
     syncStepFromQuery,
     $reset,
     infoMessage,

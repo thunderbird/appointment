@@ -47,6 +47,7 @@ const onContinueButtonClick = async () => {
       return;
     }
 
+    ftueStore.clearMessages();
     await ftueStore.moveToStep(FtueStep.CreateBookingPage);
   } catch (error) {
     errorMessage.value = error ? error.message : t('error.somethingWentWrong');

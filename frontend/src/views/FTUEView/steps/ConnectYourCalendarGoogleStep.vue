@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, inject } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
@@ -8,7 +8,7 @@ import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useUserStore } from '@/stores/user-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { ExternalConnectionProviders, FtueStep } from '@/definitions';
+import { ExternalConnectionProviders, FtueStep, CalendarProviders } from '@/definitions';
 import { callKey } from '@/keys';
 import { BooleanResponse, Exception, ExceptionDetail } from '@/models';
 
@@ -22,7 +22,6 @@ const call = inject(callKey);
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const user = useUserStore();
 const ftueStore = useFTUEStore();
 const calendarStore = useCalendarStore();
@@ -54,24 +53,34 @@ onMounted(async () => {
   // Are we coming back from the Google OAuth flow?
   const hasFlowKey = localStorage?.getItem(initFlowKey);
 
-  const noCalendarsError = hasFlowKey && calendars.value.length === 0;
+  const googleCalendars = calendars.value.filter((calendar) => calendar.provider === CalendarProviders.Google);
+  const noCalendarsError = hasFlowKey && googleCalendars.length === 0;
 
   // Error occurred during flow
   if (route.query.error || noCalendarsError) {
     localStorage?.removeItem(initFlowKey);
 
     if (noCalendarsError) {
-      errorMessage.value = t('error.externalAccountHasNoCalendars', { external: 'Google' });
+      // This error message should be shown in the previous step, so it needs to be in the store
+      ftueStore.errorMessage = {
+        title: t('error.externalAccountHasNoCalendars', { external: 'Google' }),
+        details: null,
+      };
 
       // Also remove the google calendar
       if (externalConnectionStore.google.length > 0) {
         await externalConnectionStore.disconnect(ExternalConnectionProviders.Google);
       }
     } else {
-      errorMessage.value = route.query.error;
+      // This error message should be shown in the previous step, so it needs to be in the store
+      ftueStore.errorMessage = {
+        title: route.query.error as string,
+        details: null,
+      };
     }
 
-    await router.replace(route.path);
+    await ftueStore.moveToStep(FtueStep.ConnectCalendars);
+    return;
   }
 
   if (localStorage?.getItem(initFlowKey)) {
@@ -89,6 +98,7 @@ onMounted(async () => {
     }
 
     // We are all good, move to the next step
+    ftueStore.clearMessages();
     await ftueStore.moveToStep(FtueStep.CreateBookingPage);
   }
 });

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
@@ -15,11 +16,14 @@ const accountDashboardUrl = import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL;
 const { t } = useI18n();
 
 const ftueStore = useFTUEStore();
+const { errorMessage } = storeToRefs(ftueStore);
 
 type CalendarProvider = 'caldav' | 'google' | 'oidc';
 const calendarProvider = ref<CalendarProvider | null>(null);
 
 const onContinueButtonClick = async () => {
+  ftueStore.clearMessages();
+
   switch (calendarProvider.value) {
     case 'oidc':
       // TODO: Implement OIDC flow (get the token and try to authenticate)
@@ -40,7 +44,12 @@ const onContinueButtonClick = async () => {
   <step-title :title="t('ftue.connectYourCalendar')" />
   <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
 
+  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
+    {{ errorMessage.title }}
+  </notice-bar>
+
   <div class="radio-group" role="radiogroup" :aria-label="t('ftue.connectYourCalendar')">
+    <!-- TODO: Implement OIDC / TB Pro Calendar auto-connect through token -->
     <!-- <radio-provider-card-button
       :title="t('ftue.connectCalendarTBPro')"
       :description="t('ftue.connectCalendarTBProInfo')"
@@ -88,6 +97,10 @@ const onContinueButtonClick = async () => {
 p {
   line-height: 1.32;
   margin-block-end: 1rem;
+}
+
+.notice-bar {
+  margin-block-end: 1.5rem;
 }
 
 .radio-group {
