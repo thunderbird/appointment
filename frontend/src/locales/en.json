@@ -86,6 +86,7 @@
     "customVideoMeetingLink": "Custom Video Meeting link",
     "customVideoMeetingLinkInfo": "Enter a video meeting URL to use this link with all new meetings. This can be changed in Settings.",
     "customVideoMeetingLinkPlaceholder": "https://meeting.zoom.com/lkjlskjf",
+    "zoomIcon": "Zoom",
     "skipThisStep": "skip this step",
     "setupComplete": "Account setup complete",
     "thunderbirdAppointmentIsReady": "Thunderbird Appointment is ready!",
