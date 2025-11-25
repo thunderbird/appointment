@@ -17,9 +17,16 @@ const isoWeekdays = inject(isoWeekdaysKey);
 const { t } = useI18n();
 const ftueStore = useFTUEStore();
 const scheduleStore = useScheduleStore();
+const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
 
-const startTime = ref(scheduleStore.firstSchedule?.start_time ?? '09:00');
-const endTime = ref(scheduleStore.firstSchedule?.end_time ?? '17:00');
+const startTime = ref(scheduleStore.firstSchedule?.start_time
+  ? timeToFrontendTime(scheduleStore.firstSchedule.start_time, scheduleStore.firstSchedule.time_updated)
+  : '09:00');
+
+const endTime = ref(scheduleStore.firstSchedule?.end_time
+  ? timeToFrontendTime(scheduleStore.firstSchedule.end_time, scheduleStore.firstSchedule.time_updated)
+  : '17:00');
+
 const duration = ref(scheduleStore.firstSchedule?.slot_duration ?? DEFAULT_SLOT_DURATION);
 const weekdays = ref(scheduleStore.firstSchedule?.weekdays ?? [1, 2, 3, 4, 5]);
 const isLoading = ref(false);
@@ -47,8 +54,8 @@ const onContinueButtonClick = async () => {
   try {
     const data = await scheduleStore.updateSchedule(scheduleStore.firstSchedule.id, {
       ...scheduleStore.firstSchedule,
-      start_time: startTime.value,
-      end_time: endTime.value,
+      start_time: timeToBackendTime(startTime.value),
+      end_time: timeToBackendTime(endTime.value),
       slot_duration: duration.value,
       weekdays: weekdays.value,
     });
