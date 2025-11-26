@@ -6,7 +6,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { createCalendarStore } from '@/stores/calendar-store';
-import { useUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { callKey } from '@/keys';
 import { ExternalConnectionProviders } from '@/definitions';
@@ -84,13 +83,11 @@ onMounted(async () => {
 });
 
 const onSubmit = async () => {
-  const user = useUserStore();
-
   isLoading.value = true;
 
   // Create key so we can move to the next page after we come back
   localStorage?.setItem(initFlowKey, 'true');
-  await calendarStore.connectGoogleCalendar(user.data.email);
+  await calendarStore.connectGoogleCalendar();
 };
 
 </script>

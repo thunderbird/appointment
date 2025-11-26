@@ -48,15 +48,13 @@ class GoogleClient:
         """Actually create the client, this is separate, so we can catch any errors without breaking everything"""
         self.client = Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
 
-    def get_redirect_url(self, email):
+    def get_redirect_url(self):
         """Returns the redirect url for the google oauth flow"""
         if self.client is None:
             return None
 
         # (Url, State ID)
-        return self.client.authorization_url(
-            access_type='offline', prompt='consent', login_hint=email if email else None
-        )
+        return self.client.authorization_url(access_type='offline', prompt='consent')
 
     def get_credentials(self, code: str):
         if self.client is None:
