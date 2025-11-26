@@ -128,16 +128,42 @@ export default {
     <div class="available-days-and-times-container">
       <div>
         <h3>{{ t('label.availableDaysAndTimes') }}</h3>
+
+        <div class="custom-availability-toggle">
+          <checkbox-input
+            name="customizePerDay"
+            :label="t('label.customizePerDay')"
+            v-model="useCustomAvailabilities"
+            :disabled="!currentState.active"
+          />
+        </div>
+
         <bubble-select
+          v-if="!useCustomAvailabilities"
+          v-model="weekDays"
           :options="scheduleDayOptions"
           :required="false"
-          v-model="weekDays"
           :disabled="!currentState.active"
         />
+
+        <!-- Availability with customization -->
+        <template v-if="useCustomAvailabilities">
+          <availability-select
+            :options="scheduleDayOptions"
+            :availabilities="currentState.availabilities"
+            :start-time="startTime"
+            :end-time="endTime"
+            :slot-duration="slotDuration"
+            :required="true"
+            v-model="weekDays"
+            @update="onAvailabilitySelectUpdated"
+            :disabled="!currentState.active"
+          />
+        </template>
       </div>
 
       <!-- Availability without customization -->
-      <div class="availability-times-container">
+      <div v-if="!useCustomAvailabilities" class="availability-times-container">
         <text-input
           type="time"
           name="start_time"
@@ -161,28 +187,7 @@ export default {
         </text-input>
       </div>
 
-      <checkbox-input
-        name="customizePerDay"
-        :label="t('label.customizePerDay')"
-        v-model="useCustomAvailabilities"
-        :disabled="!currentState.active"
-      />
     </div>
-
-    <!-- Availability with customization -->
-    <template v-if="useCustomAvailabilities">
-      <availability-select
-        :options="scheduleDayOptions"
-        :availabilities="currentState.availabilities"
-        :start-time="startTime"
-        :end-time="endTime"
-        :slot-duration="slotDuration"
-        :required="true"
-        v-model="weekDays"
-        @update="onAvailabilitySelectUpdated"
-        :disabled="!currentState.active"
-      />
-    </template>
 
     <div class="segmented-controls-container">
       <!-- Minimum notice -->
@@ -236,6 +241,7 @@ h3 {
     display: inline-flex;
     gap: 1rem;
     margin-block-end: 1.5rem;
+    width: 100%;
   }
 
   .available-days-and-times-container {
@@ -244,6 +250,10 @@ h3 {
     gap: 1.5rem;
     width: 100%;
     max-width: 356px;
+
+    .custom-availability-toggle {
+      margin-bottom: 1rem;
+    }
   }
 
   .user-timezone-container {
@@ -271,7 +281,8 @@ h3 {
 
   .segmented-controls-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 1.5rem;
   }
 }
