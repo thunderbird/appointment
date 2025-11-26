@@ -4,7 +4,6 @@ Repository providing CRUD functions for schedule database models.
 """
 
 import uuid
-import logging
 
 from sqlalchemy.orm import Session
 from .. import models, schemas, repo
