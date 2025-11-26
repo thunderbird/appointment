@@ -10,7 +10,7 @@ onMounted(() => {
   if (user.authenticated) {
     router.push('/dashboard');
   } else {
-    window.location.href = import.meta.env.VITE_LANDING_PAGE_URL;
+    router.push('/login');
   }
 });
 </script>
