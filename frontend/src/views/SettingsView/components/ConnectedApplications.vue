@@ -69,7 +69,7 @@ const initialCalendars = computed(() => {
 });
 
 async function connectGoogleCalendar() {
-  await calendarStore.connectGoogleCalendar(userStore.data.email);
+  await calendarStore.connectGoogleCalendar();
 }
 
 async function afterCalDavConnect() {
