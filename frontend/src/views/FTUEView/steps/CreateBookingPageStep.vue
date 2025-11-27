@@ -2,18 +2,17 @@
 import { ref, computed, useTemplateRef, inject, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { LinkButton, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { SelectOption } from '@/models';
 import { FtueStep, DEFAULT_SLOT_DURATION } from '@/definitions';
-import { dayjsKey, accountsTbProfileUrlKey } from '@/keys';
+import { dayjsKey } from '@/keys';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const dj = inject(dayjsKey);
 
 const { t } = useI18n();
@@ -30,10 +29,16 @@ const isLoading = ref(false);
 const errorMessage = ref(null);
 const formRef = useTemplateRef('formRef');
 
+const isContinueButtonDisabled = computed(() => !bookingPageTitle.value?.trim() || !calendarForNewAppointments.value || isLoading.value);
+
 const calendarOptions = computed<SelectOption[]>(() => calendars.value.map((calendar) => ({
   label: calendar.title,
   value: calendar.id,
 })));
+
+const onBackButtonClick = () => {
+  ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
+};
 
 const onContinueButtonClick = async () => {
   if (!formRef.value.checkValidity()) {
@@ -117,12 +122,10 @@ onMounted(async () => {
   </form>
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')">
-      <a :href="accountsTbProfileUrl">
-        {{ t('label.cancel') }}
-      </a>
-    </link-button>
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
+    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+      {{ t('label.back') }}
+    </primary-button>
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="isContinueButtonDisabled">
       {{ t('label.continue') }}
     </primary-button>
   </div>
@@ -142,6 +145,10 @@ onMounted(async () => {
   justify-content: end;
   gap: 1.5rem;
   margin-block-start: 10.30rem;
+
+  button {
+    min-width: 123px;
+  }
 
   .base.link.filled {
     font-size: 0.75rem;

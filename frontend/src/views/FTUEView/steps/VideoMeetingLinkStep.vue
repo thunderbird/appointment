@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TextInput, PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import zoomLogo from '@/assets/images/zoom-icon.png';
 import { FtueStep } from '@/definitions';
-import { callKey, accountsTbProfileUrlKey } from '@/keys';
+import { callKey } from '@/keys';
 import { AuthUrlResponse, AuthUrl, BooleanResponse, Exception, ExceptionDetail } from '@/models';
 
 import StepTitle from '../components/StepTitle.vue';
@@ -14,7 +14,6 @@ import ProviderCardButton from '../components/ProviderCardButton.vue';
 
 const initFlowKey = 'tba/startedMeetingConnect';
 
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const call = inject(callKey);
 
 const { t } = useI18n();
@@ -25,6 +24,8 @@ const customMeetingLink = ref(scheduleStore.firstSchedule?.location_url ?? '');
 const isLoading = ref(false);
 const errorMessage = ref(null);
 
+const isContinueButtonDisabled = computed(() => !customMeetingLink.value?.trim() || isLoading.value);
+
 const onZoomButtonClick = async () => {
   localStorage?.setItem(initFlowKey, 'true');
   isLoading.value = true;
@@ -32,6 +33,10 @@ const onZoomButtonClick = async () => {
 
   // Ship them to the auth link
   window.location.href = (data.value as AuthUrl).url;
+};
+
+const onBackButtonClick = () => {
+  ftueStore.moveToStep(FtueStep.SetAvailability, true);
 };
 
 const onContinueButtonClick = async () => {
@@ -108,15 +113,13 @@ onMounted(async () => {
   />
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')" :disabled="isLoading">
-      <a :href="accountsTbProfileUrl">
-        {{ t('label.cancel') }}
-      </a>
-    </link-button>
-    <link-button :title="t('ftue.skipThisStep')" @click="onSkipButtonClick()" :disabled="isLoading">
+    <link-button :title="t('ftue.skipThisStep')" class="btn-skip" @click="onSkipButtonClick()" :disabled="isLoading">
       {{ t('ftue.skipThisStep') }}
     </link-button>
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick()" :disabled="!customMeetingLink.length || isLoading">
+    <primary-button variant="outline" :title="t('label.back')" :disabled="isLoading" @click="onBackButtonClick">
+      {{ t('label.back') }}
+    </primary-button>
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick()" :disabled="isContinueButtonDisabled">
       {{ t('label.continue') }}
     </primary-button>
   </div>
@@ -147,6 +150,14 @@ p {
   justify-content: end;
   gap: 1.5rem;
   margin-block-start: 5.8125rem;
+
+  button {
+    min-width: 123px;
+  }
+
+  .btn-skip {
+    min-width: auto;
+  }
 
   .base.link.filled {
     font-size: 0.75rem;

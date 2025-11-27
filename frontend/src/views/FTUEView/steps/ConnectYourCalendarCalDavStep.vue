@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { ref, inject, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { callKey, accountsTbProfileUrlKey } from '@/keys';
-import { CheckboxInput, TextInput, PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { callKey } from '@/keys';
+import { CheckboxInput, TextInput, PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { CalendarListResponse, PydanticException } from '@/models';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
 import { handleFormError } from '@/utils';
 
 import StepTitle from '../components/StepTitle.vue';
-
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const call = inject(callKey);
 
@@ -24,6 +22,10 @@ const password = ref(null);
 const errorMessage = ref(null);
 const isLoading = ref(false);
 const formRef = useTemplateRef('formRef');
+
+const onBackButtonClick = () => {
+  ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
+};
 
 const onContinueButtonClick = async () => {
   if (!formRef.value.checkValidity()) {
@@ -99,11 +101,9 @@ const onContinueButtonClick = async () => {
     </div>
 
     <div class="buttons-container">
-      <link-button :title="t('label.cancel')">
-        <a :href="accountsTbProfileUrl">
-          {{ t('label.cancel') }}
-        </a>
-      </link-button>
+      <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+        {{ t('label.back') }}
+      </primary-button>
       <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
         {{ t('label.continue') }}
       </primary-button>
@@ -145,6 +145,10 @@ const onContinueButtonClick = async () => {
   justify-content: end;
   gap: 1.5rem;
   margin-block-start: 10.45rem;
+
+  button {
+    min-width: 123px;
+  }
 
   .base.link.filled {
     font-size: 0.75rem;

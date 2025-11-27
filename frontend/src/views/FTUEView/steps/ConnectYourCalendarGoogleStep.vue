@@ -3,13 +3,12 @@ import { ref, onMounted, inject } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
-import { useUserStore } from '@/stores/user-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { ExternalConnectionProviders, FtueStep, CalendarProviders } from '@/definitions';
-import { callKey, accountsTbProfileUrlKey } from '@/keys';
+import { callKey } from '@/keys';
 import { BooleanResponse, Exception, ExceptionDetail } from '@/models';
 
 import GradientCheckCircle from '../components/GradientCheckCircle.vue';
@@ -17,12 +16,10 @@ import StepTitle from '../components/StepTitle.vue';
 
 const initFlowKey = 'tba/startedCalConnect';
 
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const call = inject(callKey);
 
 const { t } = useI18n();
 const route = useRoute();
-const user = useUserStore();
 const ftueStore = useFTUEStore();
 const calendarStore = useCalendarStore();
 const externalConnectionStore = useExternalConnectionsStore();
@@ -32,13 +29,17 @@ const { calendars } = storeToRefs(calendarStore);
 const isLoading = ref(false);
 const errorMessage = ref(null);
 
+const onBackButtonClick = () => {
+  ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
+};
+
 const onContinueButtonClick = async () => {
   isLoading.value = true;
 
   try {
     // Create key so we can move to the next page after we come back
     localStorage?.setItem(initFlowKey, 'true');
-    await calendarStore.connectGoogleCalendar(user.data.email);
+    await calendarStore.connectGoogleCalendar();
   } catch (error) {
     errorMessage.value = error ? error.message : t('error.somethingWentWrong');
   } finally {
@@ -140,11 +141,9 @@ onMounted(async () => {
   </i18n-t>
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')">
-      <a :href="accountsTbProfileUrl">
-        {{ t('label.cancel') }}
-      </a>
-    </link-button>
+    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+      {{ t('label.back') }}
+    </primary-button>
     <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
       {{ t('label.continue') }}
     </primary-button>
@@ -174,6 +173,10 @@ onMounted(async () => {
   justify-content: end;
   gap: 1.5rem;
   margin-block-start: 3.125rem;
+
+  button {
+    min-width: 123px;
+  }
 
   .base.link.filled {
     font-size: 0.75rem;

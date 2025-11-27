@@ -1,36 +1,32 @@
 <script setup lang="ts">
-import { ref, inject, useTemplateRef } from 'vue';
+import { ref, inject, useTemplateRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { BubbleSelect, LinkButton, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { BubbleSelect, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
-import { isoWeekdaysKey, accountsTbProfileUrlKey } from '@/keys';
+import { isoWeekdaysKey } from '@/keys';
 import { SelectOption } from '@/models';
 import { FtueStep, DEFAULT_SLOT_DURATION, SLOT_DURATION_OPTIONS } from '@/definitions';
 
 import StepTitle from '../components/StepTitle.vue';
 
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const isoWeekdays = inject(isoWeekdaysKey);
 
 const { t } = useI18n();
 const ftueStore = useFTUEStore();
 const scheduleStore = useScheduleStore();
-const { timeToBackendTime, timeToFrontendTime } = scheduleStore;
+const { timeToBackendTime } = scheduleStore;
 
-const startTime = ref(scheduleStore.firstSchedule?.start_time
-  ? timeToFrontendTime(scheduleStore.firstSchedule.start_time, scheduleStore.firstSchedule.time_updated)
-  : '09:00');
-
-const endTime = ref(scheduleStore.firstSchedule?.end_time
-  ? timeToFrontendTime(scheduleStore.firstSchedule.end_time, scheduleStore.firstSchedule.time_updated)
-  : '17:00');
+const startTime = ref(scheduleStore.firstSchedule?.start_time || '09:00');
+const endTime = ref(scheduleStore.firstSchedule?.end_time || '17:00');
 
 const duration = ref(scheduleStore.firstSchedule?.slot_duration ?? DEFAULT_SLOT_DURATION);
 const weekdays = ref(scheduleStore.firstSchedule?.weekdays ?? [1, 2, 3, 4, 5]);
 const isLoading = ref(false);
 const errorMessage = ref(null);
 const formRef = useTemplateRef('formRef');
+
+const isContinueButtonDisabled = computed(() => !weekdays.value.length || !startTime.value || !endTime.value || !duration.value || isLoading.value);
 
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
@@ -41,6 +37,10 @@ const bookingDurationOptions: SelectOption<string>[] = SLOT_DURATION_OPTIONS.map
   label: t('units.minutesShort', { value: duration }),
   value: duration.toString(),
 }));
+
+const onBackButtonClick = () => {
+  ftueStore.moveToStep(FtueStep.CreateBookingPage, true);
+};
 
 const onContinueButtonClick = async () => {
   if (!formRef.value.checkValidity()) {
@@ -111,12 +111,10 @@ const onContinueButtonClick = async () => {
   </form>
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')">
-      <a :href="accountsTbProfileUrl">
-        {{ t('label.cancel') }}
-      </a>
-    </link-button>
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick()">
+    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+      {{ t('label.back') }}
+    </primary-button>
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick()" :disabled="isContinueButtonDisabled">
       {{ t('label.continue') }}
     </primary-button>
   </div>
@@ -147,6 +145,10 @@ const onContinueButtonClick = async () => {
   justify-content: end;
   gap: 1.5rem;
   margin-block-start: 7.75rem;
+
+  button {
+    min-width: 123px;
+  }
 
   .base.link.filled {
     font-size: 0.75rem;

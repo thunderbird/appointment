@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
 import { FtueStep } from '@/definitions';
-import { accountsTbProfileUrlKey } from '@/keys';
 
 import StepTitle from '../components/StepTitle.vue';
 import RadioProviderCardButton from '../components/RadioProviderCardButton.vue';
-
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const { t } = useI18n();
 
@@ -21,6 +18,10 @@ const { errorMessage } = storeToRefs(ftueStore);
 
 type CalendarProvider = 'caldav' | 'google' | 'oidc';
 const calendarProvider = ref<CalendarProvider | null>(null);
+
+const onBackButtonClick = () => {
+  ftueStore.moveToStep(FtueStep.SetupProfile, true);
+};
 
 const onContinueButtonClick = async () => {
   ftueStore.clearMessages();
@@ -83,12 +84,10 @@ const onContinueButtonClick = async () => {
   </div>
 
   <div class="buttons-container">
-    <link-button :title="t('label.cancel')">
-      <a :href="accountsTbProfileUrl">
-        {{ t('label.cancel') }}
-      </a>
-    </link-button>
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
+    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+      {{ t('label.back') }}
+    </primary-button>
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider">
       {{ t('label.continue') }}
     </primary-button>
   </div>
@@ -115,6 +114,10 @@ p {
   justify-content: end;
   gap: 1.5rem;
   margin-block-start: 4.25rem;
+
+  button {
+    min-width: 123px;
+  }
 
   .base.link.filled {
     font-size: 0.75rem;
