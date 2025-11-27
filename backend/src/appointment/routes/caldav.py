@@ -2,6 +2,7 @@ import json
 import urllib
 from typing import Optional
 from urllib.parse import urlparse
+from caldav.requests import HTTPBearerAuth
 
 import sentry_sdk
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,9 +10,10 @@ from redis import Redis
 from sqlalchemy.orm import Session
 
 from appointment import utils
+from appointment.controller.apis.oidc_client import OIDCClient
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
-from appointment.dependencies.auth import get_subscriber
+from appointment.dependencies.auth import get_subscriber, oauth2_scheme
 from appointment.dependencies.database import get_db, get_redis
 from appointment.exceptions.calendar import TestConnectionFailed
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
@@ -125,6 +127,90 @@ def caldav_autodiscover_auth(
         )
 
     con.sync_calendars(external_connection_id=external_connection.id)
+    return True
+
+
+@router.post('/oidc/auth')
+def oidc_autodiscover_auth(
+    db: Session = Depends(get_db),
+    subscriber: models.Subscriber = Depends(get_subscriber),
+    token: str = Depends(oauth2_scheme),
+):
+    """Connects a principal caldav server through oidc token auth"""
+
+    oidc_client = OIDCClient()
+    token_data = oidc_client.introspect_token(token)
+
+    if not token_data:
+        raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
+
+    # Get user from token
+    user_email = token_data.get('email')
+    user_name = token_data.get('preferred_username') or token_data.get('username') or user_email
+
+    if not user_email:
+        raise RemoteCalendarConnectionError(reason=l10n('remote-calendar-reason-no-email'))
+
+    # Auto-discover URL
+    domain = user_email.split('@')[1]
+    caldav_url, _ = Tools.dns_caldav_lookup(domain, secure=True)
+
+    if not caldav_url:
+        caldav_url = Tools.well_known_caldav_lookup(f'https://{domain}')
+
+    if not caldav_url:
+        # Try insecure lookup
+        caldav_url, _ = Tools.dns_caldav_lookup(domain, secure=False)
+
+    if not caldav_url:
+        # Try insecure well-known
+        caldav_url = Tools.well_known_caldav_lookup(f'http://{domain}')
+
+    if not caldav_url:
+        raise RemoteCalendarConnectionError(reason=l10n('remote-calendar-reason-autodiscovery-failed'))
+
+    con = CalDavConnector(
+        db=db,
+        redis_instance=None,
+        url=caldav_url,
+        user=user_name,
+        password=token,
+        subscriber_id=subscriber.id,
+        calendar_id=None,
+        auth=HTTPBearerAuth(token),
+    )
+
+    # If it returns False it doesn't support VEVENT (aka caldav)
+    # If it raises an exception there's a connection problem
+    try:
+        if not con.test_connection():
+            raise RemoteCalendarConnectionError(reason=l10n('remote-calendar-reason-doesnt-support-caldav'))
+    except TestConnectionFailed as ex:
+        raise RemoteCalendarConnectionError(reason=ex.reason)
+
+    caldav_id = json.dumps([caldav_url, user_name])
+    external_connection = repo.external_connection.get_by_type(
+        db, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
+    )
+
+    # Create or update the external connection
+    if not external_connection:
+        external_connection_schema = schemas.ExternalConnection(
+            name=user_name,
+            type=models.ExternalConnectionType.caldav,
+            type_id=caldav_id,
+            owner_id=subscriber.id,
+            token=token,
+        )
+
+        external_connection = repo.external_connection.create(db, external_connection_schema)
+    else:
+        external_connection = repo.external_connection.update_token(
+            db, token, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
+        )
+
+    con.sync_calendars(external_connection_id=external_connection.id)
+
     return True
 
 

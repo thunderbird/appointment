@@ -38,6 +38,13 @@ export const useCalendarStore = defineStore('calendars', () => {
     window.location.href = googleUrl.data.value.slice(1, -1);
   };
 
+  const connectOIDCCalendar = async () => {
+    const response = await call.value('caldav/oidc/auth').post();
+
+    console.log(response);
+    return;
+  };
+
   /**
    * Retrieve the calendar object by id
    * @param id
@@ -140,6 +147,7 @@ export const useCalendarStore = defineStore('calendars', () => {
     init,
     fetch,
     $reset,
+    connectOIDCCalendar,
     connectGoogleCalendar,
     connectCalendar,
     disconnectCalendar,

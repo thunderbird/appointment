@@ -320,7 +320,15 @@ class GoogleConnector(BaseConnector):
 
 class CalDavConnector(BaseConnector):
     def __init__(
-        self, db: Session, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str
+        self,
+        db: Session,
+        subscriber_id: int,
+        calendar_id: int,
+        redis_instance,
+        url: str,
+        user: str,
+        password: str,
+        auth=None,
     ):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
@@ -336,7 +344,7 @@ class CalDavConnector(BaseConnector):
             sentry_sdk.set_tag('caldav_host', parsed_url.hostname)
 
         # connect to the CalDAV server
-        self.client = DAVClient(url=self.url, username=self.user, password=self.password)
+        self.client = DAVClient(url=self.url, username=self.user, password=self.password, auth=auth)
 
     def get_busy_time(self, calendar_ids: list, start: str, end: str):
         """Retrieve a list of { start, end } dicts that will indicate busy time for a user
