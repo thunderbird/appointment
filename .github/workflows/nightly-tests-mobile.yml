@@ -18,6 +18,8 @@ jobs:
   prod-nightly-mobile-browserstack:
     name: prod-nighlty-mobile-browserstack
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     environment: production
     env:
       TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_PROD_TB_ACCTS_EMAIL }}
@@ -27,12 +29,6 @@ jobs:
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKEE_EMAIL }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'test/e2e/package-lock.json'
 
       - name: Install dependencies
         run: |
