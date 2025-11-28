@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
-import { callKey, fxaEditProfileUrlKey } from '@/keys';
+import { callKey, accountsTbProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { SubscriberLevels } from '@/definitions';
 import { createUserStore } from '@/stores/user-store';
@@ -21,7 +21,7 @@ import { isFxaAuth, isOidcAuth } from "@/composables/authSchemes";
 const router = useRouter();
 const { t } = useI18n();
 const call = inject(callKey);
-const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const appointmentStore = createAppointmentStore(call);
 const calendarStore = createCalendarStore(call);
@@ -38,7 +38,7 @@ const logout = async () => {
 };
 
 const editProfile = async () => {
-  window.location.href = fxaEditProfileUrl;
+  window.location.href = accountsTbProfileUrl;
 };
 
 // Load calendar and bookings information

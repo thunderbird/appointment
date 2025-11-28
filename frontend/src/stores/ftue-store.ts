@@ -1,15 +1,14 @@
-import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { defineStore } from 'pinia';
+import { useRouter, useRoute } from 'vue-router';
 import { useLocalStorage } from '@vueuse/core';
 import { FtueStep } from '@/definitions';
-import { Alert, Fetch, FtueState } from '@/models';
+import { Alert, Fetch } from '@/models';
 
 const initialObject = {
-  // First step
-  step: FtueStep.SetupProfile,
+  step: FtueStep.SetupProfile, // First step
 };
 
- 
 export const useFTUEStore = defineStore('FTUE', () => {
   // State
   const data = useLocalStorage('tba/ftue', structuredClone(initialObject));
@@ -18,6 +17,8 @@ export const useFTUEStore = defineStore('FTUE', () => {
   const warningMessage = ref<Alert>(null);
 
   const call = ref(null);
+  const router = useRouter();
+  const route = useRoute();
 
   /**
    * Initialize store with data required at runtime
@@ -28,70 +29,67 @@ export const useFTUEStore = defineStore('FTUE', () => {
     call.value = fetch;
   }
 
-  /**
-   * State information for navigating the First Time User Experience
-   */
-  const stepList: Record<FtueStep, FtueState> = {
-    [FtueStep.SetupProfile]: {
-      previous: null,
-      next: FtueStep.CalendarProvider,
-      title: 'ftue.steps.setupProfile',
-    },
-    [FtueStep.CalendarProvider]: {
-      previous: FtueStep.SetupProfile,
-      next: FtueStep.ConnectCalendars,
-      title: 'ftue.steps.calendarProvider',
-    },
-    [FtueStep.ConnectCalendars]: {
-      previous: FtueStep.CalendarProvider,
-      next: FtueStep.SetupSchedule,
-      title: 'ftue.steps.connectCalendars',
-    },
-    [FtueStep.SetupSchedule]: {
-      previous: FtueStep.ConnectCalendars,
-      next: FtueStep.ConnectVideoConferencing,
-      title: 'ftue.steps.setupSchedule',
-    },
-    [FtueStep.ConnectVideoConferencing]: {
-      previous: FtueStep.SetupSchedule,
-      next: FtueStep.Finish,
-      title: 'ftue.steps.connectVideo',
-    },
-    [FtueStep.Finish]: {
-      previous: FtueStep.ConnectVideoConferencing,
-      next: FtueStep.Finish,
-      title: 'ftue.steps.finish',
-    },
-  };
-
-  const hasNextStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].next));
-  const hasPreviousStep = computed(() => !!(stepList[data.value.step] && stepList[data.value.step].previous));
-  const stepTitle = computed(() => stepList[data.value.step]?.title ?? 'ftue.steps.error');
-
   const clearMessages = () => {
     infoMessage.value = null;
     errorMessage.value = null;
     warningMessage.value = null;
   };
 
-  const nextStep = async () => {
-    if (hasNextStep.value) {
-      clearMessages();
-      data.value.step = stepList[data.value.step].next;
+  const moveToStep = async (newStep: FtueStep, replace = false) => {
+    data.value.step = newStep;
 
-      if (call.value) {
-        call.value('metrics/ftue-step').post({
-          step_level: data.value.step,
-          step_name: stepList[data.value.step].title.replace('ftue.steps.', ''),
-        });
-      }
+    // Add query parameter to router history for browser back button support
+    const routerMethod = replace ? router.replace : router.push;
+
+    // First step (SetupProfile) doesn't have a query param
+    const isFirstStep = newStep === FtueStep.SetupProfile;
+
+    if (isFirstStep) {
+      // Remove step query param for first step
+      const restQuery = { ...route.query };
+      delete restQuery.step;
+
+      routerMethod({
+        query: Object.keys(restQuery).length > 0 ? restQuery : undefined,
+      });
+    } else {
+      routerMethod({
+        query: {
+          ...route.query,
+          step: FtueStep[newStep],
+        },
+      });
+    }
+
+    if (call.value) {
+      call.value('metrics/ftue-step').post({
+        step_level: data.value.step,
+        step_name: FtueStep[data.value.step],
+      });
     }
   };
 
-  const previousStep = () => {
-    if (hasPreviousStep.value) {
-      clearMessages();
-      data.value.step = stepList[data.value.step].previous;
+  /**
+   * Sync step from query parameter without creating a new history entry
+   * Used when navigating via browser back/forward buttons
+   */
+  const syncStepFromQuery = () => {
+    const stepParam = route.query.step;
+
+    if (stepParam && typeof stepParam === 'string') {
+      const stepName = stepParam as keyof typeof FtueStep;
+      const stepValue = FtueStep[stepName];
+
+      if (stepValue !== undefined && stepValue !== data.value.step) {
+        data.value.step = stepValue;
+        clearMessages();
+      }
+    } else if (!stepParam) {
+      // No query param means we're on the first step
+      if (data.value.step !== FtueStep.SetupProfile) {
+        data.value.step = FtueStep.SetupProfile;
+        clearMessages();
+      }
     }
   };
 
@@ -104,12 +102,10 @@ export const useFTUEStore = defineStore('FTUE', () => {
   return {
     data,
     init,
-    nextStep,
-    previousStep,
     currentStep,
-    hasNextStep,
-    hasPreviousStep,
-    stepTitle,
+    moveToStep,
+    clearMessages,
+    syncStepFromQuery,
     $reset,
     infoMessage,
     errorMessage,

@@ -1,9 +1,20 @@
 import {
-  expect, test, beforeEach, describe,
+  expect, test, beforeEach, describe, vi,
 } from 'vitest';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { createPinia, setActivePinia } from 'pinia';
 import { FtueStep } from '@/definitions';
+
+// Mock vue-router as moveToStep uses it to navigate to the next step
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+  }),
+  useRoute: () => ({
+    query: {},
+  }),
+}));
 
 describe('FTUE Store', () => {
   // Create a pinia instance before each test
@@ -14,9 +25,6 @@ describe('FTUE Store', () => {
   test('init', () => {
     const ftue = useFTUEStore();
     expect(ftue.currentStep).toBe(FtueStep.SetupProfile);
-    expect(ftue.hasNextStep).toBe(true);
-    expect(ftue.hasPreviousStep).toBe(false);
-    expect(ftue.stepTitle).toBe('ftue.steps.setupProfile');
   });
 
   test('messages', () => {
@@ -43,24 +51,19 @@ describe('FTUE Store', () => {
   test('steps', () => {
     const ftue = useFTUEStore();
     expect(ftue.currentStep).toBe(FtueStep.SetupProfile);
-    ftue.nextStep();
-    expect(ftue.currentStep).toBe(FtueStep.CalendarProvider);
-    ftue.nextStep();
+    ftue.moveToStep(FtueStep.ConnectCalendars);
     expect(ftue.currentStep).toBe(FtueStep.ConnectCalendars);
-    ftue.nextStep();
-    expect(ftue.currentStep).toBe(FtueStep.SetupSchedule);
-    ftue.nextStep();
-    expect(ftue.currentStep).toBe(FtueStep.ConnectVideoConferencing);
-    ftue.nextStep();
-    expect(ftue.currentStep).toBe(FtueStep.Finish);
-    ftue.nextStep();
-    expect(ftue.currentStep).toBe(FtueStep.Finish);
-    ftue.previousStep();
-    expect(ftue.currentStep).toBe(FtueStep.ConnectVideoConferencing);
-    ftue.previousStep();
-    ftue.previousStep();
-    ftue.previousStep();
-    ftue.previousStep();
-    expect(ftue.currentStep).toBe(FtueStep.SetupProfile);
+    ftue.moveToStep(FtueStep.ConnectCalendarsCalDav);
+    expect(ftue.currentStep).toBe(FtueStep.ConnectCalendarsCalDav);
+    ftue.moveToStep(FtueStep.ConnectCalendarsGoogle);
+    expect(ftue.currentStep).toBe(FtueStep.ConnectCalendarsGoogle);
+    ftue.moveToStep(FtueStep.CreateBookingPage);
+    expect(ftue.currentStep).toBe(FtueStep.CreateBookingPage);
+    ftue.moveToStep(FtueStep.SetAvailability);
+    expect(ftue.currentStep).toBe(FtueStep.SetAvailability);
+    ftue.moveToStep(FtueStep.VideoMeetingLink);
+    expect(ftue.currentStep).toBe(FtueStep.VideoMeetingLink);
+    ftue.moveToStep(FtueStep.SetupComplete);
+    expect(ftue.currentStep).toBe(FtueStep.SetupComplete);
   });
 });
