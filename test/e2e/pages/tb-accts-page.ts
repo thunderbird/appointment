@@ -19,7 +19,7 @@ export class TBAcctsPage {
     this.emailInput = this.page.getByTestId('username-input');
     this.passwordInput = this.page.getByTestId('password-input');
     this.signInButton = this.page.getByRole('button', { name: 'Sign in' });
-    this.loginEmailInput = this.page.getByLabel('Email address');
+    this.loginEmailInput = this.page.getByLabel('Email');
     this.localDevpasswordInput = this.page.getByLabel('Password');
     this.loginDialogContinueBtn = this.page.getByTitle('Continue');
   }
