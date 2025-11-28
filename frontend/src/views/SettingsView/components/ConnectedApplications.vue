@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
 import GenericModal from '@/components/GenericModal.vue';
-import CalDavProvider from '@/components/FTUE/CalDavProvider.vue';
+import CalDavProvider from '@/components/CalDavProvider.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { keyByValue } from '@/utils';
 import { Alert, ExternalConnection, HTMLInputElementEvent } from '@/models';

@@ -26,7 +26,7 @@ export const bookingUrlKey = Symbol('bookingUrl') as InjectionKey<string>;
 export const shortUrlKey = Symbol('shortUrl') as InjectionKey<string>;
 
 // Provide environment and authentication keys
-export const fxaEditProfileUrlKey = Symbol('fxaEditProfileUrl') as InjectionKey<string>;
+export const accountsTbProfileUrlKey = Symbol('accountsTbProfileUrl') as InjectionKey<string>;
 
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
