@@ -38,7 +38,7 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
 
 <template>
   <segmented-control
-    class="minimum-notice-segment-control"
+    class="minimum-notice-segmented-control"
     v-model="minimumNotice"
     name="minimum-notice"
     :required="false"
@@ -49,3 +49,13 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
     {{ t('label.minimumNotice') }}
   </segmented-control>
 </template>
+
+<style>
+.minimum-notice-segmented-control ul {
+  font-size: 0.875rem;
+
+  li:first-child button {
+    text-transform: capitalize;
+  }
+}
+</style>

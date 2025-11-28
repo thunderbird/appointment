@@ -30,6 +30,7 @@ const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   <segmented-control
     v-model="bookingWindow"
     name="booking-window"
+    class="booking-window-segmented-control"
     :required="false"
     :legend="t('label.bookingWindow')"
     :options="bookingWindowOptions"
@@ -38,3 +39,9 @@ const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
     {{ t('label.bookingWindow') }}
   </segmented-control>
 </template>
+
+<style>
+.booking-window-segmented-control ul {
+  font-size: 0.875rem;
+}
+</style>
