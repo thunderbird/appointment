@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import OrbGraphic from '@/assets/images/orb-graphic.png';
+import AppointmentSplashImage from '@/assets/images/appointment-splash.png';
 import { createFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
 import { callKey, refreshKey } from '@/keys';
@@ -75,7 +75,7 @@ export default {
     <div class="card">
       <!-- Left side: Orb graphic -->
       <div class="left-side">
-        <img :src="OrbGraphic" alt="Thunderbird Orb" class="orb-graphic" />
+        <img :src="AppointmentSplashImage" alt="Thunderbird Appointment" class="appointment-splash" />
       </div>
 
       <!-- Right side: Panel -->
@@ -141,7 +141,7 @@ section {
         min-height: 100vh;
         background-color: #1A202C; /* --colour-ti-base forced on light mode */
 
-        .orb-graphic {
+        .appointment-splash {
           display: block;
           width: 100%;
           height: 100%;
@@ -175,7 +175,7 @@ section {
         height: auto;
         min-height: auto;
 
-        .orb-graphic {
+        .appointment-splash {
           min-height: auto;
           border-radius: 2rem 0 0 2rem;
         }
