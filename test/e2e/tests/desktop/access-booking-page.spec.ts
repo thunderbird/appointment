@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { BookingPage } from '../../pages/booking-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 
@@ -8,13 +8,14 @@ import {
   TIMEOUT_60_SECONDS,
   APPT_TARGET_ENV,
   APPT_TIMEZONE_SETTING_PRIMARY,
+  TIMEOUT_1_SECOND,
 } from '../../const/constants';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;
 
 // verify booking page loaded successfully
-const verifyBookingPageLoaded = async () => {
+const verifyBookingPageLoaded = async (page: Page) => {
   await expect(bookingPage.titleText).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
   await expect(bookingPage.titleText).toContainText(APPT_DISPLAY_NAME);
   await expect(bookingPage.invitingText).toBeVisible();
@@ -39,6 +40,7 @@ const verifyBookingPageLoaded = async () => {
   expect(await bookingPage.bookingWeekPickerBtn.textContent()).toContain(monthName);
 
   // also the confirm button is disabled by default until a slot is selected
+  await page.waitForTimeout(TIMEOUT_1_SECOND);
   await expect(bookingPage.confirmBtn).toBeDisabled();
 }
 
@@ -59,7 +61,7 @@ test.describe('access booking page on desktop browser', () => {
     tag: [PLAYWRIGHT_TAG_PROD_SANITY],
   }, async ({ page }) => {
     await bookingPage.gotoBookingPageShortUrl();
-    await verifyBookingPageLoaded();
+    await verifyBookingPageLoaded(page);
   });
 
   test('able to access booking page via long link on desktop browser', {
@@ -68,7 +70,7 @@ test.describe('access booking page on desktop browser', () => {
     // not supported on local dev env
     if (APPT_TARGET_ENV != 'dev') {
       await bookingPage.gotoBookingPageLongUrl();
-      await verifyBookingPageLoaded();
+      await verifyBookingPageLoaded(page);
     }
   });
 });
