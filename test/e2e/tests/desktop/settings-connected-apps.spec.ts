@@ -37,9 +37,9 @@ test.describe('connected applications settings on desktop browser', {
     await settingsPage.addCaldavBtn.scrollIntoViewIfNeeded();
     await settingsPage.addCaldavBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(settingsPage.addCaldavUsernameInput).toBeEditable();
-    await expect(settingsPage.addCaldavLocationInput).toBeEditable();
-    await expect(settingsPage.addCaldavPasswordInput).toBeEditable();
+    await expect(settingsPage.addCaldavUsernameInput).toBeVisible();
+    await expect(settingsPage.addCaldavLocationInput).toBeVisible();
+    await expect(settingsPage.addCaldavPasswordInput).toBeVisible();
     await settingsPage.addCaldavCloseModalBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 

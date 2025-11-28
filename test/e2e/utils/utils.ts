@@ -1,5 +1,4 @@
 // utility functions that may be used by any tests
-import { LandingPage } from "../pages/landing-page";
 import { TBAcctsPage } from "../pages/tb-accts-page";
 import { expect, type Page } from '@playwright/test';
 
@@ -17,7 +16,6 @@ import {
     APPT_BROWSER_STORE_START_WEEK_SUN,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
-    TIMEOUT_3_SECONDS,
     TIMEOUT_60_SECONDS,
 } from "../const/constants";
 
@@ -28,27 +26,17 @@ import {
  * signing in on the local dev environment you provide a username (email) and password directly
  * and are not redirected to sign in to TB Accounts.
  */
-export const navigateToAppointmentAndSignIn = async (page: Page, mobile: boolean=false) => {
+export const navigateToAppointmentAndSignIn = async (page: Page) => {
     console.log(`navigating to appointment ${APPT_TARGET_ENV} (${APPT_URL}) and signing in`);
-    const landingPage = new LandingPage(page);
     const TBAcctsSignInPage = new TBAcctsPage(page);
-    
+
+    await page.goto(`${APPT_URL}`);
+
     if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
-        await landingPage.gotoLandingPage();
-        // check for the 'continue' button first in case sign-in was saved in local cookies
-        if (await landingPage.homeContinueBtn.isVisible() &&  await landingPage.homeContinueBtn.isEnabled()) {
-            console.log("already signed in; just need to click the Appointment home page 'continue' button");
-            await landingPage.homeContinueBtn.click();
-            await page.waitForTimeout(TIMEOUT_3_SECONDS);
-        } else {
-            await landingPage.getToTBAccts(mobile);
-            await TBAcctsSignInPage.signIn();
-        }
+        await TBAcctsSignInPage.signIn();
     } else {
-        // local dev env doesn't use tb accts; just signs into appt using username and pword; must add
-        // '/login' to the APPT_URL since there is no landing / marketing page first when run local stack
-        await page.goto(`${APPT_URL}login`);
-        await landingPage.localApptSignIn();
+        // local dev env doesn't use tb accts; just signs into appt using username and pword
+        await TBAcctsSignInPage.localApptSignIn();
     }
 
     // now that we're signed into the appointment dashboard give it time to load
@@ -108,7 +96,7 @@ export const setDefaultUserSettingsLocalStore = async (page: Page) => {
 export const mobileSignInAndSetup = async (page: Page) => {
     // playwright for mobile browsers doesn't support saving auth storage state, so unfortunately
     // we must sign into Appointment at the start of every test
-    await navigateToAppointmentAndSignIn(page, true);
+    await navigateToAppointmentAndSignIn(page);
 
     // Wait until the page receives the cookies.
     // Sometimes login flow sets cookies in the process of several redirects.

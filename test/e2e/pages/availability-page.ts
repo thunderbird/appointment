@@ -2,7 +2,6 @@ import { expect, type Page, type Locator } from '@playwright/test';
 
 import {
   APPT_AVAILABILITY_PAGE,
-  APPT_BOOKINGS_PAGE,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   APPT_TIMEZONE_SETTING_PRIMARY,
@@ -59,7 +58,8 @@ export class AvailabilityPage {
     this.calendarSelect = this.page.locator('select[name="calendar"]');
     this.autoConfirmBookingsCheckBox = this.page.getByTestId('availability-automatically-confirm-checkbox');
     this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
-    this.customizePerDayCheckBoxContainer = this.page.locator('#app div').filter({ hasText: 'Set custom times for each day' }).nth(4);
+    this.customizePerDayCheckBoxContainer = this.page.locator('label').filter({ hasText: 'Set custom times for each day' }).locator('span').first();
+
     this.allStartTimeInput = this.page.locator('#start_time');
     this.allEndTimeInput = this.page.locator('#end_time');
     this.customStartTime1Input = this.page.getByTestId('availability-start-time-1-0-input');
