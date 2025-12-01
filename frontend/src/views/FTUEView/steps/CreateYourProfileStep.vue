@@ -23,6 +23,8 @@ const username = ref(user.data.username ?? '');
 const timezone = ref(user.data.settings.timezone ?? dj.tz.guess());
 const isLoading = ref(false);
 const errorMessage = ref(null);
+const usernameError = ref(null);
+const fullNameError = ref(null);
 const formRef = useTemplateRef('formRef');
 
 // @ts-expect-error ignore type err
@@ -43,6 +45,21 @@ const onSubmit = async () => {
       name: fullName.value,
       username: username.value,
       timezone: timezone.value,
+    }
+
+    // Required values from an <input /> does not validate trim()
+    // so we need to check it manually
+    if (fullName.value.trim() === '') {
+      fullNameError.value = t('error.fieldIsRequired', { field: t('ftue.fullName') });
+    }
+
+    if (username.value.trim() === '') {
+      usernameError.value = t('error.fieldIsRequired', { field: t('ftue.urlUsername') });
+    }
+
+    // If there were errors detected, we short-circuit the flow
+    if (fullNameError.value || usernameError.value) {
+      return;
     }
 
     if (!formRef.value.checkValidity()) {
@@ -74,6 +91,7 @@ const onSubmit = async () => {
       placeholder="Giles Bernam"
       required
       v-model="fullName"
+      :error="fullNameError"
     >
       {{ t('ftue.fullName') }}
     </text-input>
@@ -84,6 +102,7 @@ const onSubmit = async () => {
       required
       :outer-prefix="quickLink"
       v-model="username"
+      :error="usernameError"
     >
       {{ t('ftue.urlUsername') }}
     </text-input>
