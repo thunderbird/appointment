@@ -22,6 +22,7 @@ const calendarStore = useCalendarStore();
 const scheduleStore = useScheduleStore();
 
 const { calendars } = storeToRefs(calendarStore);
+const { timeToBackendTime } = scheduleStore;
 
 const bookingPageTitle = ref(scheduleStore.firstSchedule?.name ?? '');
 const calendarForNewAppointments = ref(
@@ -60,8 +61,8 @@ const onContinueButtonClick = async () => {
       // but on this step we only have two fields: name and calendar
       // so we will fill the rest with default values
       start_date: dj().format('YYYY-MM-DD'),
-      start_time: '09:00',
-      end_time: '17:00',
+      start_time: timeToBackendTime('09:00'),
+      end_time: timeToBackendTime('17:00'),
       slot_duration: DEFAULT_SLOT_DURATION,
       weekdays: [1, 2, 3, 4, 5],
       earliest_booking: 1440,

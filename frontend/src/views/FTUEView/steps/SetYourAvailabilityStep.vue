@@ -15,10 +15,15 @@ const isoWeekdays = inject(isoWeekdaysKey);
 const { t } = useI18n();
 const ftueStore = useFTUEStore();
 const scheduleStore = useScheduleStore();
-const { timeToBackendTime } = scheduleStore;
+const { timeToFrontendTime, timeToBackendTime } = scheduleStore;
 
-const startTime = ref(scheduleStore.firstSchedule?.start_time || '09:00');
-const endTime = ref(scheduleStore.firstSchedule?.end_time || '17:00');
+const startTime = ref(scheduleStore.firstSchedule
+  ? timeToFrontendTime(scheduleStore.firstSchedule?.start_time, scheduleStore.firstSchedule?.time_updated)
+  : '09:00');
+
+const endTime = ref(scheduleStore.firstSchedule
+  ? timeToFrontendTime(scheduleStore.firstSchedule?.end_time, scheduleStore.firstSchedule?.time_updated)
+  : '17:00');
 
 const duration = ref(scheduleStore.firstSchedule?.slot_duration ?? DEFAULT_SLOT_DURATION);
 const weekdays = ref(scheduleStore.firstSchedule?.weekdays ?? [1, 2, 3, 4, 5]);
