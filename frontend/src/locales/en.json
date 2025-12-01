@@ -258,6 +258,7 @@
     "confirmBooking": "Confirm booking",
     "confirmSelection": "Confirm selection",
     "connect": "Connect",
+    "connecting": "Connecting",
     "connectCalendar": "Connect calendar",
     "connectGoogleCalendar": "Connect Google Calendar",
     "connectedAs": "Connected as {name}",

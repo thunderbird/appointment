@@ -101,11 +101,11 @@ const onContinueButtonClick = async () => {
     </div>
 
     <div class="buttons-container">
-      <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+      <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick" :disabled="isLoading">
         {{ t('label.back') }}
       </primary-button>
-      <primary-button :title="t('label.continue')" @click="onContinueButtonClick">
-        {{ t('label.continue') }}
+      <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="isLoading">
+        {{ isLoading ? t('label.connecting') : t('label.continue') }}
       </primary-button>
     </div>
   </form>
