@@ -2,7 +2,7 @@
 import { ref, inject, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { callKey } from '@/keys';
-import { CheckboxInput, TextInput, PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { TextInput, PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { CalendarListResponse, PydanticException } from '@/models';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
@@ -81,14 +81,16 @@ const onContinueButtonClick = async () => {
       </text-input>
     </div>
 
-    <div class="no-sign-in-credentials-checkbox">
+    <!-- TODO: Implement this checkbox when we support anonymous CalDAV servers -->
+    <!-- https://github.com/thunderbird/appointment/issues/1363 -->
+    <!-- <div class="no-sign-in-credentials-checkbox">
       <checkbox-input
         name="noSignInCredentialsRequired"
         :label="t('ftue.noSignInCredentialsRequired')"
         class="no-sign-in-credentials-checkbox"
         v-model="noSignInCredentialsRequired"
       />
-    </div>
+    </div> -->
 
     <div class="credentials-container">
       <text-input name="login" required v-model="login" :disabled="noSignInCredentialsRequired">
