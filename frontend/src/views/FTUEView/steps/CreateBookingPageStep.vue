@@ -24,7 +24,9 @@ const scheduleStore = useScheduleStore();
 const { calendars } = storeToRefs(calendarStore);
 
 const bookingPageTitle = ref(scheduleStore.firstSchedule?.name ?? '');
-const calendarForNewAppointments = ref(scheduleStore.firstSchedule?.calendar_id ?? 0);
+const calendarForNewAppointments = ref(
+  scheduleStore.firstSchedule?.calendar_id ?? calendars.value?.[0]?.id ?? 0
+);
 const isLoading = ref(false);
 const errorMessage = ref(null);
 const formRef = useTemplateRef('formRef');
