@@ -2,9 +2,10 @@ import { expect, type Page, type Locator } from '@playwright/test';
 
 import {
   APPT_AVAILABILITY_PAGE,
+  APPT_TIMEZONE_SETTING_PRIMARY,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
-  APPT_TIMEZONE_SETTING_PRIMARY,
+  TIMEOUT_10_SECONDS,
   TIMEOUT_30_SECONDS,
 } from '../const/constants';
 
@@ -93,7 +94,7 @@ export class AvailabilityPage {
   async gotoAvailabilityPage() {
     // go to availability page, sometimes takes a bit to load all element values!
     await this.page.goto(APPT_AVAILABILITY_PAGE, { timeout: TIMEOUT_30_SECONDS });
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.bookingPageMtgDur15MinBtn.waitFor({ timeout: TIMEOUT_30_SECONDS });

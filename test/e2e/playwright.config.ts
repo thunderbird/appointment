@@ -48,8 +48,16 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // Setup project - signs into Appointment once for all the tests
-    { name: 'desktop-setup', testMatch: /.*\.desktop.setup\.ts/ },
+    // Setup browsers - signs into Appointment once for all the tests and saves auth
+    { name: 'desktop-setup',
+      testMatch: /.*\.desktop.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        screenshot: 'only-on-failure',
+       },
+    },
+
+    // Main tests; each browser runs the setup above and saves auth state which is loaded for each test in the suite
     {
       name: 'chromium',
       use: {
@@ -91,6 +99,7 @@ export default defineConfig({
         screenshot: 'only-on-failure',
        },
     },
+    // no dependency as mobile browsers don't support loading auth state so must sign-in for each test
   ],
 
   /* Run your local dev server before starting the tests */

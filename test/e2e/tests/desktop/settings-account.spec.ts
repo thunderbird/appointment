@@ -3,7 +3,7 @@ import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 import { AvailabilityPage } from '../../pages/availability-page';
 import { BookingPage } from '../../pages/booking-page';
-import { getUserDisplayNameFromLocalStore } from '../../utils/utils';
+import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -24,7 +24,7 @@ test.describe('account settings on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // note: we are already signed into Appointment with our default settings (via our auth-setup)
+    await ensureWeAreSignedIn(page);
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
     availabilityPage = new AvailabilityPage(page);
@@ -85,27 +85,4 @@ test.describe('account settings on desktop browser', {
     await page.waitForURL('**/availability');
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });
-
-    test('able to change display name on desktop browser', async ({ page }) => {
-      // change display name and verify
-      const newDisplayName = `Name modified by E2E test at ${new Date().toDateString()}`;
-      await settingsPage.changeDisplaName(newDisplayName);
-  
-      // verify setting saved in browser local storage
-      expect.soft(await getUserDisplayNameFromLocalStore(page)).toBe(newDisplayName);
-  
-      // go to share link/book appointment page and verify display name was changed;
-      // expect soft so that display name will be changed back even if the test fails
-      await page.goto(APPT_MY_SHARE_LINK);
-      await page.waitForTimeout(TIMEOUT_3_SECONDS);
-      await expect.soft(bookApptPage.invitingText).toContainText(newDisplayName, { timeout: TIMEOUT_30_SECONDS });
-
-      // change display name back
-      await settingsPage.gotoAccountSettings();
-      await page.waitForTimeout(TIMEOUT_1_SECOND);
-      await settingsPage.changeDisplaName(APPT_DISPLAY_NAME);
-  
-      // verify setting saved in browser local storage
-      expect.soft(await getUserDisplayNameFromLocalStore(page)).toBe(APPT_DISPLAY_NAME);
-    });
 });

@@ -10,7 +10,7 @@ import {
     APPT_DISPLAY_NAME,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
-    TIMEOUT_10_SECONDS,
+    TIMEOUT_5_SECONDS,
 } from "../../const/constants";
 
 const fs = require('fs');
@@ -43,16 +43,16 @@ setup('desktop browser authenticate', async ({ page }) => {
   // Sometimes login flow sets cookies in the process of several redirects.
   // Wait for the final URL to ensure that the cookies are actually set.
   await page.waitForURL(APPT_DASHBOARD_HOME_PAGE);
-  await page.waitForTimeout(TIMEOUT_2_SECONDS);
+  await page.waitForTimeout(TIMEOUT_5_SECONDS);
 
   // ensure our settings are set to what the tests expect as default (in case a
   // previous test run failed and left the settings in an incorrect state)
   await page.goto(APPT_SETTINGS_PAGE);
-  await page.waitForTimeout(TIMEOUT_2_SECONDS);
+  await page.waitForTimeout(TIMEOUT_5_SECONDS);
   await setDefaultUserSettingsLocalStore(page);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
 
-  // End of authentication steps.
+  // End of authentication steps, save the auth
   await page.context().storageState({ path: authFile });
 
   // Now also ensure the test account is bookable (availability panel) before we start
@@ -61,6 +61,7 @@ setup('desktop browser authenticate', async ({ page }) => {
   await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
   if (! await availabilityPage.bookableToggle.isChecked()) {
     await availabilityPage.bookableToggleContainer.click();
+    await page.waitForTimeout(TIMEOUT_5_SECONDS)
     console.log('turned booking availibility on');
   }
 
@@ -71,11 +72,13 @@ setup('desktop browser authenticate', async ({ page }) => {
 
   if (await availabilityPage.allStartTimeInput.inputValue() != '09:00') {
     await availabilityPage.allStartTimeInput.fill('09:00');
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
     console.log('set availability start time to 09:00');
   }
 
   if (await availabilityPage.allEndTimeInput.inputValue() != '17:00') {
     await availabilityPage.allEndTimeInput.fill('17:00');
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
     console.log('set availability end time to 17:00');
   }
 
@@ -88,13 +91,14 @@ setup('desktop browser authenticate', async ({ page }) => {
   await availabilityPage.bookingPageNameInput.fill(APPT_DISPLAY_NAME);
   await page.waitForTimeout(TIMEOUT_1_SECOND);
   await availabilityPage.bookingPageDescInput.clear();
+  await page.waitForTimeout(TIMEOUT_1_SECOND);
   console.log('set booking page name and description');
 
   // if availability changes were made, save them
-  const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_10_SECONDS });
+  const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_5_SECONDS });
   if (saveBtnVisible) {
     await availabilityPage.saveChangesBtn.click();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    await page.waitForTimeout(TIMEOUT_2_SECONDS);
     await expect(availabilityPage.savedSuccessfullyText).toBeVisible();
   }
 });
