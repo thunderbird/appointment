@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 import { useUserStore } from '@/stores/user-store';
 
@@ -9,11 +8,10 @@ import StepTitle from '../components/StepTitle.vue';
 
 const { t } = useI18n();
 
-const router = useRouter();
 const userStore = useUserStore();
 
 const onContinueButtonClick = async () => {
-  router.push('/dashboard');
+  window.location.href = '/dashboard';
 };
 
 onMounted(async () => {
@@ -23,8 +21,9 @@ onMounted(async () => {
   // Clear the FTUE flow
   window.localStorage?.removeItem('tba/ftue');
 
-  // Redirect to dashboard after a delay
-  setTimeout(() => router.push('/dashboard'), 5000);
+  // Hard reload to dashboard after a delay so that
+  // we initialize all the stores and data properly
+  setTimeout(() => window.location.href = '/dashboard', 5000);
 });
 </script>
 
