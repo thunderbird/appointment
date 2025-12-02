@@ -2,11 +2,12 @@
 import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PhArrowRight } from '@phosphor-icons/vue';
-import { BaseButton, SelectInput, TextInput } from '@thunderbirdops/services-ui';
+import { BaseButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { dayjsKey, shortUrlKey } from '@/keys';
 import { useUserStore } from '@/stores/user-store';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
+import { handleFormError } from '@/utils';
 
 import StepTitle from '../components/StepTitle.vue';
 
@@ -69,7 +70,8 @@ const onSubmit = async () => {
     const response = await user.updateUser(payload);
 
     if (response.error) {
-      errorMessage.value = response.error;
+      const formattedError = handleFormError(t, formRef, response.error);
+      errorMessage.value = formattedError?.title;
       return;
     }
 
@@ -84,6 +86,10 @@ const onSubmit = async () => {
 
 <template>
   <step-title :title="t('ftue.createYourProfile')" />
+
+  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
+    {{ errorMessage }}
+  </notice-bar>
 
   <form ref="formRef" @submit.prevent @keyup.enter="onSubmit">
     <text-input
@@ -127,6 +133,10 @@ const onSubmit = async () => {
 </template>
 
 <style scoped>
+.notice-bar {
+  margin-block-end: 1.5rem;
+}
+
 form {
   display: flex;
   flex-direction: column;

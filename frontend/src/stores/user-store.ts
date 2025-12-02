@@ -217,7 +217,7 @@ export const useUserStore = defineStore('user', () => {
       return { error: false };
     }
 
-    return { error: data.value ?? error.value };
+    return { error: error.value };
   };
 
   /**
