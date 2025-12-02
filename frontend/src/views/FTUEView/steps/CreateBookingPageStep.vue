@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, useTemplateRef, inject, onMounted } from 'vue';
+import { ref, computed, useTemplateRef, inject, onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
@@ -86,6 +86,14 @@ const onContinueButtonClick = async () => {
     isLoading.value = false;
   }
 };
+
+watch(calendars, (newCalendars) => {
+  // Select the first calendar if no calendar is selected
+  // since we might not have the calendars yet during first render / initialization
+  if (!calendarForNewAppointments.value && newCalendars?.length) {
+    calendarForNewAppointments.value = newCalendars[0].id;
+  }
+});
 
 onMounted(async () => {
   // Force re-fetch calendars to ensure we have the latest data
