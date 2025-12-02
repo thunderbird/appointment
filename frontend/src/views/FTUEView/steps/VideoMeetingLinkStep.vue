@@ -100,6 +100,7 @@ onMounted(async () => {
       :iconSrc="zoomLogo"
       :iconAlt="t('ftue.zoomIcon')"
       @click="onZoomButtonClick()"
+      :showDescription="true"
     />
   </div>
 
