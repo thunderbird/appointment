@@ -4,7 +4,6 @@ import {
   InviteStatus,
   WaitingListAction,
   EventLocationType,
-  FtueStep,
   CalendarProviders,
   TableDataButtonType,
   TableDataType,
