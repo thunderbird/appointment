@@ -15,7 +15,7 @@ import {
   apiUrlKey,
   callKey,
   refreshKey,
-  fxaEditProfileUrlKey,
+  accountsTbProfileUrlKey,
 } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -50,7 +50,7 @@ const {
   lock: lockNotification,
 } = siteNotificationStore;
 
-provide(fxaEditProfileUrlKey, import.meta.env?.VITE_AUTH_EDIT_PROFILE);
+provide(accountsTbProfileUrlKey, import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL);
 
 if (isOidcAuth) {
   /**
@@ -145,6 +145,12 @@ const routeIsLogin = computed(
 );
 const routeHasModal = computed(
   () => ['login'].includes(typeof route.name === 'string' ? route.name : ''),
+);
+const routeIsFTUE = computed(
+  () => ['setup'].includes(typeof route.name === 'string' ? route.name : ''),
+);
+const routeIsPostLogin = computed(
+  () => ['post-login'].includes(typeof route.name === 'string' ? route.name : ''),
 );
 
 // retrieve calendars and appointments after checking login and persisting user to db
@@ -314,7 +320,7 @@ onMounted(async () => {
 
 <template>
   <!-- Home page is actually just a redirect to another route -->
-  <template v-if="routeIsHome || (routeIsLogin && isOidcAuth)">
+  <template v-if="routeIsHome || (routeIsLogin && isOidcAuth) || routeIsFTUE || routeIsPostLogin">
     <router-view/>
   </template>
 

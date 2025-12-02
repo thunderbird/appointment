@@ -9,7 +9,7 @@ from uuid import UUID
 from datetime import datetime, date, time, timezone, timedelta
 from typing import Annotated, Optional, Self
 
-from pydantic import BaseModel, ConfigDict, Field, EmailStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, EmailStr, model_validator, StringConstraints
 from pydantic_core import PydanticCustomError
 
 from ..defines import DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
@@ -333,8 +333,8 @@ class InviteOut(BaseModel):
 
 class SubscriberIn(BaseModel):
     timezone: str | None = None
-    username: str = Field(min_length=1, max_length=128)
-    name: Optional[str] = Field(min_length=1, max_length=128, default=None)
+    username: Annotated[str, StringConstraints(min_length=1, max_length=128, strip_whitespace=True)]
+    name: Annotated[str | None, StringConstraints(min_length=1, max_length=128, strip_whitespace=True)] = None
     avatar_url: str | None = None
     secondary_email: str | None = None
     language: str | None = FALLBACK_LOCALE

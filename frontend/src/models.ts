@@ -4,7 +4,6 @@ import {
   InviteStatus,
   WaitingListAction,
   EventLocationType,
-  FtueStep,
   CalendarProviders,
   TableDataButtonType,
   TableDataType,
@@ -460,13 +459,6 @@ export type TableFilter = {
   name: string;
   options: TableFilterOption[];
   fn: (value: string, list: TableDataRow[]) => TableDataRow[];
-};
-
-// First Time User Experience State
-export type FtueState = {
-  previous: FtueStep;
-  next: FtueStep;
-  title: string;
 };
 
 // Utility types
