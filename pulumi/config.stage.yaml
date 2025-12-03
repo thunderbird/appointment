@@ -297,6 +297,8 @@ resources:
                 value: "False"
               - name: ZOOM_AUTH_CALLBACK
                 value: https://appointment-stage.tb.pro/api/v1/zoom/callback
+              - name: TB_ACCOUNTS_CALDAV_URL
+                value: https://stage-thundermail.com
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:

@@ -285,8 +285,8 @@ class CalendarConnection(CalendarConnectionOut):
 
 
 class CalendarConnectionIn(CalendarConnection):
-    url: str = Field(min_length=1)
-    user: str = Field(min_length=1)
+    url: str = Optional[str]
+    user: str = Optional[str]
     password: Optional[str]
 
 
