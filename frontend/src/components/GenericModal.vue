@@ -68,12 +68,11 @@ onUnmounted(() => {
           :scheme="AlertSchemes.Info"
           @close="infoMessage = null"
         />
-        <div class="pls-keep-height" v-else/>
       </div>
       <div class="modal-body">
         <slot></slot>
       </div>
-      <div class="modal-actions">
+      <div class="modal-actions" v-if="$slots.actions">
         <slot name="actions"></slot>
       </div>
       <div class="divider"></div>
@@ -93,7 +92,7 @@ onUnmounted(() => {
   display: flex;
   left: 0;
   top: 0;
-  z-index: 55;
+  z-index: 9999;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -122,6 +121,7 @@ onUnmounted(() => {
 .modal-body {
   display: flex;
   width: 100%;
+  height: 100%;
   flex-direction: column;
   align-items: center;
 }
@@ -139,14 +139,9 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 8.0rem;
   width: 100%;
   gap: 1rem;
-}
-
-/* Empty space if a notice bar isn't shown */
-.pls-keep-height {
-  min-height: 2.0625rem; /* 33px */
+  margin-block: 2rem;
 }
 
 /* position-center apmt-background-color fixed z-[60] flex size-full gap-6 rounded-xl bg-white p-8 pb-0 drop-shadow-xl*/
@@ -164,6 +159,8 @@ onUnmounted(() => {
   padding: 1rem 1rem 0;
   overflow-y: scroll;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .dark .modal {
@@ -232,39 +229,24 @@ onUnmounted(() => {
 }
 
 @media (--md) {
-  .modal-header {
-    margin-bottom: 0;
-  }
-
   .modal {
     width: 50rem; /* 800px */
-    height: 37.5rem; /* 600px */
     padding: 2rem 2rem 0;
     overflow: visible;
-  }
-
-  .modal-body {
-    height: 15.0rem;
+    height: min-content;
   }
 
   .modal-actions {
     justify-content: center;
-    position: absolute;
-    left: 0;
-    bottom: 5.75rem;
-    margin: 0;
+    margin-block: 2rem;
   }
 
   .divider {
-    position: absolute;
-    bottom: 4rem;
     width: 50rem;
     margin: 0;
   }
 
   .footer {
-    position: absolute;
-    left: 0;
     padding-bottom: 0;
   }
 }
