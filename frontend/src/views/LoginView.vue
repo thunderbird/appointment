@@ -227,7 +227,7 @@ const onEnter = () => {
 
   <template v-else>
     <div class="full-height-placeholder" />
-    <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})">
+    <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})" :closable="false">
       <template v-slot:header>
         <word-mark/>
         <h2 id="title" v-if="hideInviteField">
