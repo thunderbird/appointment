@@ -230,24 +230,37 @@ onUnmounted(() => {
 
 @media (--md) {
   .modal {
-    width: 50rem; /* 800px */
+    width: 48rem; /* 768px */
     padding: 2rem 2rem 0;
-    overflow: visible;
+    overflow: hidden;
     height: min-content;
+    max-height: 90vh;
+  }
+
+  .modal-header {
+    flex-shrink: 0;
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    min-height: 0;
   }
 
   .modal-actions {
     justify-content: center;
     margin-block: 2rem;
+    flex-shrink: 0;
   }
 
   .divider {
     width: 50rem;
     margin: 0;
+    flex-shrink: 0;
   }
 
   .footer {
     padding-bottom: 0;
+    flex-shrink: 0;
   }
 }
 
