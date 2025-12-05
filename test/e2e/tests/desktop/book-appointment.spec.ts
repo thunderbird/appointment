@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { BookingPage } from '../../pages/booking-page';
 import { DashboardPage } from '../../pages/dashboard-page';
+import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
   APPT_DISPLAY_NAME,
@@ -61,10 +62,10 @@ test.describe('book an appointment on desktop browser', () => {
     await bookingPage.verifyRequestedSlotTextDisplayed(expDateStr, expTimeStr);  
 
     // now verify a corresponding pending booking was created on the host account's list of pending bookings
-    // note: we are already signed into Appointment (via our auth-setup)
     // wait N seconds for the appointment dashboard to update, sometimes the test is so fast when it
     // switches back to the dashboard the new pending appointment hasn't been added/displayed yet
     await page.waitForTimeout(TIMEOUT_10_SECONDS);
+    await ensureWeAreSignedIn(page);
     await dashboardPage.verifyEventCreated(expDateStr, expTimeStr);
 
     // also go back to main dashboard and check that pending requests link now appears

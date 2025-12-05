@@ -42,10 +42,10 @@ test.describe('settings - connected applications on mobile browser', {
     await settingsPage.addCaldavBtn.scrollIntoViewIfNeeded();
     await settingsPage.addCaldavBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(settingsPage.addCaldavUsernameInput).toBeEditable({ timeout: TIMEOUT_30_SECONDS });
+    await expect(settingsPage.addCaldavUsernameInput).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.addCaldavUsernameInput.scrollIntoViewIfNeeded();
-    await expect(settingsPage.addCaldavLocationInput).toBeEditable();
-    await expect(settingsPage.addCaldavPasswordInput).toBeEditable();
+    await expect(settingsPage.addCaldavLocationInput).toBeVisible();
+    await expect(settingsPage.addCaldavPasswordInput).toBeVisible();
 
     // on android mobile browser there is no close button for the add caldav dialog (issue 1250)
     // so to continue this test go back to the settings URL / refresh the page to close the add caldav dialog

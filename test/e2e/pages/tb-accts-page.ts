@@ -14,7 +14,7 @@ export class TBAcctsPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.signInHeaderText = this.page.getByText('Enter your password');
+    this.signInHeaderText = this.page.getByText('Sign in to your account');
     this.userAvatar = this.page.getByTestId('avatar-default');
     this.emailInput = this.page.getByTestId('username-input');
     this.passwordInput = this.page.getByTestId('password-input');
