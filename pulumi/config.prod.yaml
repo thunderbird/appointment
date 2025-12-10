@@ -327,7 +327,11 @@ resources:
       notify_emails:
         - thunderbird-services-monitoring@thunderbird.net
       config:
-        alarms: {}
+        alarms:
+          appointment-prod-fargate-backend-fargateservicealb-alb-backend:
+            response_time:
+              threshold: 1
+              period: 120
 
   tb:ci:AwsAutomationUser:
     ci:
