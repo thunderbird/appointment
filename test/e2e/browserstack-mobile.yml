@@ -29,7 +29,7 @@ platforms:
     osVersion: 16.0
     deviceName: Google Pixel 10
     playwrightConfigOptions:
-      name: Chrome-GooglePixel10
+      name: android-chrome
     chrome:
       chromeOptions:
         prefs:
@@ -37,6 +37,12 @@ platforms:
         profile:
           password_manager_enabled: false
 
+  - browserName: safari
+    osVersion: 26
+    deviceName: iPhone 17
+    playwrightConfigOptions:
+      name: ios-safari
+  
 # =======================
 # Parallels per Platform
 # =======================
@@ -68,6 +74,7 @@ debug: false # <boolean> # Set to true if you need screenshots for every seleniu
 networkLogs: false # <boolean> Set to true to enable HAR logs capturing; off as may contain sensitive info like login API requests
 consoleLogs: info # <string> Remote browser's console debug levels to be printed (`disable`, `errors`, `warnings`, `info`, or `verbose`)
 framework: playwright
+idleTimeout: 500 # seeing if this helps rid BROWSERSTACK_IDLE_TIMEOUTs on ios
 # the e2e tests use the same node.js project so the playwright version dependecy must work on both desktop
 # and mobile browsers; and therefore must be the same in all of our browserstack-*.yml config files
 # for playwright ver we need one compatible with our desktop and mobile browsers, see:

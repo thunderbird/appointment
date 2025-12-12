@@ -175,28 +175,28 @@ export BROWSERSTACK_USERNAME=<your-browserstack-user-name>
 export BROWSERSTACK_ACCESS_KEY=<your-browserstack-access-key>
 ```
 
-To run the E2E tests on BrowserStack (still in `test/e2e`):
+To run the E2E tests on Firefox Desktop on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run e2e-test-browserstack
+npm run e2e-test-browserstack-firefox
 ```
 
-To run the production sanity test on BrowserStack (still in `test/e2e`):
+To run the production sanity test on Firefox Desktop on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run prod-sanity-test-browserstack
+npm run prod-sanity-test-browserstack-firefox
 ```
 
-To run the E2E tests on mobile devices on BrowserStack (still in `test/e2e`):
+To run the E2E tests on Android Chrome on a real Google Pixel device on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run e2e-test-mobile-browserstack
+npm run e2e-tests-mobile-browserstack-android-chrome
 ```
 
-To run the nightly test suite on real mobile devices in BrowserStack (still in `test/e2e`):
+To run the E2E tests on iOS Safari on a real iPhone device on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run prod-nightly-tests-mobile-browserstack-gha
+npm run e2e-tests-mobile-browserstack-ios-safari
 ```
 
 After the tests finish in your local console you'll see a link to the BrowserStack test session; when signed into your BrowserStack account you'll be able to use that link to see the test session results including video playback.

@@ -4,7 +4,6 @@ from datetime import date, time
 
 
 class TestScheduleAvailability:
-
     def test_empty_availability_is_valid(self):
         # Test empty availability is valid
         schedule = schemas.ScheduleValidationIn(
@@ -16,7 +15,6 @@ class TestScheduleAvailability:
             end_time=time(17, 0),
         )
         assert all_availability_is_valid(schedule)
-
 
     def test_all_availability_is_valid(self):
         # Test already sorted availabilities
@@ -37,7 +35,7 @@ class TestScheduleAvailability:
                 schemas.AvailabilityValidationIn(
                     schedule_id=1, day_of_week=2, start_time=time(9, 0), end_time=time(10, 0)
                 ),
-            ]
+            ],
         )
         assert all_availability_is_valid(schedule)
 
@@ -49,15 +47,12 @@ class TestScheduleAvailability:
             schemas.AvailabilityValidationIn(
                 schedule_id=1, day_of_week=1, start_time=time(10, 0), end_time=time(11, 0)
             ),
-            schemas.AvailabilityValidationIn(
-                schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(10, 0)
-            ),
+            schemas.AvailabilityValidationIn(schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(10, 0)),
             schemas.AvailabilityValidationIn(
                 schedule_id=1, day_of_week=1, start_time=time(17, 0), end_time=time(18, 0)
             ),
         ]
         assert all_availability_is_valid(schedule)
-
 
     def test_all_availability_is_invalid(self):
         # Test overlapping end-start times
@@ -75,15 +70,13 @@ class TestScheduleAvailability:
                 schemas.AvailabilityValidationIn(
                     schedule_id=1, day_of_week=1, start_time=time(10, 0), end_time=time(12, 0)
                 ),
-            ]
+            ],
         )
         assert not all_availability_is_valid(schedule)
 
         # Test completely overlapping slots
         schedule.availabilities = [
-            schemas.AvailabilityValidationIn(
-                schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(12, 0)
-            ),
+            schemas.AvailabilityValidationIn(schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(12, 0)),
             schemas.AvailabilityValidationIn(
                 schedule_id=1, day_of_week=1, start_time=time(10, 0), end_time=time(11, 0)
             ),
@@ -92,9 +85,7 @@ class TestScheduleAvailability:
 
         # Test slots with invalid start/end time
         schedule.availabilities = [
-            schemas.AvailabilityValidationIn(
-                schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(12, 0)
-            ),
+            schemas.AvailabilityValidationIn(schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(12, 0)),
             schemas.AvailabilityValidationIn(
                 schedule_id=1, day_of_week=1, start_time=time(14, 0), end_time=time(13, 0)
             ),
@@ -103,8 +94,6 @@ class TestScheduleAvailability:
 
         # Test slots that are too small for the defined duration
         schedule.availabilities = [
-            schemas.AvailabilityValidationIn(
-                schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(9, 15)
-            ),
+            schemas.AvailabilityValidationIn(schedule_id=1, day_of_week=1, start_time=time(9, 0), end_time=time(9, 15)),
         ]
         assert not all_availability_is_valid(schedule)

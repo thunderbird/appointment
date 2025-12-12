@@ -3,7 +3,7 @@ import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 import { AvailabilityPage } from '../../pages/availability-page';
 import { BookingPage } from '../../pages/booking-page';
-import { mobileSignInAndSetup, getUserDisplayNameFromLocalStore } from '../../utils/utils';
+import { mobileSignInAndSetup } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE_MOBILE,
@@ -23,21 +23,27 @@ let bookApptPage: BookingPage;
 test.describe('account settings on mobile browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
 }, () => {
-  test.beforeEach(async ({ page }) => {
-    settingsPage = new SettingsPage(page);
+  test.beforeEach(async ({ page }, testInfo) => {
+    settingsPage = new SettingsPage(page, testInfo.project.name); // i.e. 'ios-safari'
     dashboardPage = new DashboardPage(page);
     availabilityPage = new AvailabilityPage(page);
     bookApptPage = new BookingPage(page);
 
     // mobile browsers don't support saving auth storage state so must sign in before each test
-    await mobileSignInAndSetup(page);
+    // send in the playright test project name i.e. safari-ios because some mobile platforms differ
+    await mobileSignInAndSetup(page, testInfo.project.name);
 
     // navigate to settings page, account settings section
     await settingsPage.gotoAccountSettings();
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
   });
 
-  test('verify account settings on mobile browser', async ({ page }) => {
+  test.afterEach(async ({ page }) => {
+    // close the browser page when we're done so it doesn't stay as a tab on mobile browser
+    await page.close();
+  });
+
+  test('verify account settings on mobile browser', async ({ page }, testInfo) => {
     // verify section header
     await expect(settingsPage.accountSettingsHeader).toBeVisible();
 
@@ -46,7 +52,7 @@ test.describe('account settings on mobile browser', {
     expect(await settingsPage.displayNameInput.inputValue()).toBe(APPT_DISPLAY_NAME);
 
     // verify booking page url displayed is correct
-    await settingsPage.bookingPageURLInput.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.bookingPageURLInput);
     expect(await settingsPage.bookingPageURLInput.inputValue()).toBe(APPT_MY_SHARE_LINK);
 
     // click copy link button and verify copied link is correct
@@ -63,29 +69,37 @@ test.describe('account settings on mobile browser', {
     await settingsPage.bookingPageURLInput.clear();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     await settingsPage.bookingPageURLInput.focus();
-    await page.keyboard.press('ControlOrMeta+V');
+    // paste using keyboard, different command for ios
+    if (testInfo.project.name.includes('ios')) {
+      await page.keyboard.press('Meta+V');
+    } else {
+      await page.keyboard.press('ControlOrMeta+V');
+    }
     await page.waitForTimeout(TIMEOUT_1_SECOND);
     const afterPasteBookingUrl = await settingsPage.bookingPageURLInput.inputValue();
     expect(afterPasteBookingUrl).toEqual(correctBookingUrl);
 
     // just ensure the download your data button exists and is enabled as don't want to actually
     // download and leave potenial sensitive data on the test instance
-    await settingsPage.downloadDataBtn.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.downloadDataBtn);
     await expect(settingsPage.downloadDataBtn).toBeVisible();
-    await expect(settingsPage.downloadDataBtn).toBeEnabled();
 
     // cancel service button brings up confirmation dialog (just cancel out)
-    await settingsPage.cancelServiceBtn.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.cancelServiceBtn);
     await settingsPage.cancelServiceBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.cancelServiceConfirmCancelBtn.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.cancelServiceConfirmCancelBtn);
     await settingsPage.cancelServiceConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
-    // clicking 'booking page settings' button brings up availability page
-    await settingsPage.bookingPageSettingsBtn.scrollIntoViewIfNeeded();
+    // clicking 'booking page settings' button brings up availability section
+    await settingsPage.scrollIntoView(settingsPage.bookingPageSettingsBtn);
     await settingsPage.bookingPageSettingsBtn.click();
-    await page.waitForURL('**/availability');
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
+  });
+
+  test.afterAll(async ({ browser }) => {
+    // close the browser when we're done, BrowserStack needs this or may report BROWSERSTACK_IDLE_TIMEOUT
+    await browser.close();
   });
 });

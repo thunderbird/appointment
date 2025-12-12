@@ -5,15 +5,16 @@ import {
   APPT_HTML_DARK_MODE_CLASS,
   TIMEOUT_1_SECOND,
   TIMEOUT_2_SECONDS,
-  TIMEOUT_3_SECONDS,
   TIMEOUT_5_SECONDS,
   TIMEOUT_30_SECONDS,
   APPT_LANGUAGE_SETTING_EN,
   } from '../const/constants';
+import test from 'node:test';
 
 
 export class SettingsPage {
   readonly page: Page;
+  readonly testPlatform: string;
   readonly accountSettingsBtn: Locator;
   readonly connectedAppsBtn: Locator;
   readonly preferencesBtn: Locator;
@@ -47,10 +48,11 @@ export class SettingsPage {
   readonly savedSuccessfullyTextDE: Locator;
   readonly saveBtnDE: Locator;
   readonly revertBtn: Locator;
+  readonly googleSignInHdr: Locator;
 
-
-  constructor(page: Page) {
+  constructor(page: Page, testPlatform: string = 'desktop') {
     this.page = page;
+    this.testPlatform = testPlatform;
 
     // main settings view
     this.settingsHeaderEN = this.page.getByRole('main').getByText('Settings', { exact: true });
@@ -92,6 +94,16 @@ export class SettingsPage {
     this.addCaldavCloseModalBtn = this.page.getByRole('img', { name: 'Close' });
     this.addGoogleBtn = this.page.getByRole('button', { name: 'Add Google Calendar' });
     this.defaultCalendarConnectedCbox = this.page.locator('div').filter({ hasText: /^Default*/ }).getByTestId('checkbox-input');
+    this.googleSignInHdr = this.page.getByText('Sign in with Google');
+  }
+
+  /**
+   * Scroll the given element into view. The reason why we do this here is because playright doesn't yet supported this on ios.
+   */
+  async scrollIntoView(targetElement: Locator, timeout: number = 10000) {
+    if (!this.testPlatform.includes('ios')) {
+      await targetElement.scrollIntoViewIfNeeded({ timeout: timeout });
+    }
   }
 
   /**
@@ -100,7 +112,7 @@ export class SettingsPage {
   async gotoAccountSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
-    await this.accountSettingsBtn.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.accountSettingsBtn);
     await this.accountSettingsBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
   }
@@ -111,7 +123,7 @@ export class SettingsPage {
   async gotoPreferencesSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
-    await this.preferencesBtn.scrollIntoViewIfNeeded({ timeout: TIMEOUT_30_SECONDS });
+    await this.scrollIntoView(this.preferencesBtn, TIMEOUT_30_SECONDS);
     await this.preferencesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
   }
@@ -122,7 +134,7 @@ export class SettingsPage {
   async gotoConnectedAppSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
-    await this.connectedAppsBtn.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.connectedAppsBtn);
     await this.connectedAppsBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
   }
@@ -132,31 +144,32 @@ export class SettingsPage {
    */
   async changeDefaultTimezoneSetting(timezone: string) {
     await this.defaultTimeZoneSelect.waitFor( { timeout: TIMEOUT_30_SECONDS });
-    await this.defaultTimeZoneSelect.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.defaultTimeZoneSelect);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.defaultTimeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.saveBtnEN.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.saveBtnEN);
     await this.saveBtnEN.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(this.savedSuccessfullyTextEN).toBeVisible();
+    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
   }
 
   /**
    * Change the language setting
    */
   async changeLanguageSetting(currentLanguage: string, newLanguage: string) {
-    await this.languageSelect.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.languageSelect);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.languageSelect.selectOption(newLanguage, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     if (currentLanguage == APPT_LANGUAGE_SETTING_EN) {
-      await this.saveBtnEN.scrollIntoViewIfNeeded();
+      await this.scrollIntoView(this.saveBtnEN);
       await this.saveBtnEN.click();
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);
       await expect(this.savedSuccessfullyTextDE).toBeVisible();
     } else {
-      await this.saveBtnDE.scrollIntoViewIfNeeded();
+      await this.scrollIntoView(this.saveBtnDE);
       await this.saveBtnDE.click();
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);
       await expect(this.savedSuccessfullyTextEN).toBeVisible();
@@ -169,10 +182,11 @@ export class SettingsPage {
    */
   async changeThemeSetting(theme: string) {
     await this.themeSelect.waitFor({ timeout: TIMEOUT_30_SECONDS });
-    await this.themeSelect.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.themeSelect);
     await this.themeSelect.selectOption(theme);
     await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
     await this.saveBtnEN.click();
+    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
     await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     // wait for theme to take affect, can take time especially on browserstack
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
@@ -199,7 +213,7 @@ export class SettingsPage {
       await this.startOfWeekSundayBtn.click({ timeout: TIMEOUT_30_SECONDS });
     }
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.saveBtnEN.scrollIntoViewIfNeeded();
+    await this.scrollIntoView(this.saveBtnEN);
     await this.saveBtnEN.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(this.savedSuccessfullyTextEN).toBeVisible();
