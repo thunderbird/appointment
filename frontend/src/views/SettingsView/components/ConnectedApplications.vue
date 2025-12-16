@@ -245,7 +245,7 @@ async function refreshData() {
           :ref="(el) => calendarDropdownRefs[calendar.id] = el"
         >
           <template #trigger>
-            <icon-dots size="24" />
+            <ph-dots-three size="24" />
           </template>
           <template #default>
             <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
