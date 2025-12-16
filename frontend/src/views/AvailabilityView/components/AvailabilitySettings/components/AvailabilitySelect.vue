@@ -10,7 +10,7 @@ import { LinkButton, TextInput } from '@thunderbirdops/services-ui';
 import AvailabilityCopyDropdown from './AvailabilityCopyDropdown.vue';
 
 // icons
-import { IconPlus, IconX } from '@tabler/icons-vue';
+import { PhPlus, PhX } from '@phosphor-icons/vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
@@ -265,7 +265,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
                 @click="addAvailability(option)"
                 :title="t('label.addSlot')"
               >
-                <icon-plus class="w-5" aria-hidden="true"/>
+                <ph-plus class="w-5" aria-hidden="true"/>
               </link-button>
             </span>
             <span>
@@ -282,7 +282,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
                 @click="removeAvailability(option, i)"
                 :title="t('label.removeSlot')"
               >
-                <icon-x class="w-4" aria-hidden="true"/>
+                <ph-x class="w-4" aria-hidden="true"/>
               </link-button>
             </span>
           </div>

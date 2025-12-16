@@ -3,17 +3,17 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
-  IconMenu2,
-  IconX,
-  IconHome,
-  IconCalendarClock,
-  IconCalendarCheck,
-  IconExternalLink,
-  IconSettings,
-  IconLogout,
-  IconChevronDown,
-  IconUserSquare,
-} from '@tabler/icons-vue';
+  PhList,
+  PhX,
+  PhHouse,
+  PhCalendarDot,
+  PhCalendarCheck,
+  PhArrowSquareOut,
+  PhGear,
+  PhSignOut,
+  PhCaretDown,
+  PhUserSquare,
+} from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
 
 // component constants
@@ -21,10 +21,10 @@ const userStore = useUserStore();
 const { t } = useI18n();
 
 const navItems = [
-  { route: 'dashboard', i18nKey: 'dashboard', icon: IconHome },
-  { route: 'bookings', i18nKey: 'bookings', icon: IconCalendarCheck },
-  { route: 'availability', i18nKey: 'availability', icon: IconCalendarClock },
-  { route: 'settings', i18nKey: 'settings', icon: IconSettings },
+  { route: 'dashboard', i18nKey: 'dashboard', icon: PhHouse },
+  { route: 'bookings', i18nKey: 'bookings', icon: PhCalendarCheck },
+  { route: 'availability', i18nKey: 'availability', icon: PhCalendarDot },
+  { route: 'settings', i18nKey: 'settings', icon: PhGear },
 ];
 
 const menuOpen = ref(false);
@@ -56,7 +56,7 @@ async function copyLink() {
   <!-- Mobile NavBar (closed) -->
   <header class="header-mobile">
     <button @click="onMenuOpen" :aria-label="t('label.openMenu')" :aria-expanded="menuOpen" aria-controls="primaryNav">
-      <icon-menu2 size="24" />
+      <ph-list size="24" />
     </button>
 
     <router-link :to="{ name: userStore.authenticated ? 'dashboard' : 'home' }">
@@ -72,7 +72,7 @@ async function copyLink() {
     <div class="menu-content-container">
       <header>
         <button @click="onMenuClose">
-          <icon-x size="24" />
+          <ph-x size="24" />
         </button>
 
         <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
@@ -98,32 +98,32 @@ async function copyLink() {
               <user-avatar :username="userStore.data.username" :avatar-url="userStore.data.avatarUrl" />
               <span class="user-email">{{ userStore.data.email }}</span>
             </div>
-            <icon-chevron-down size="20" class="chevron-icon" />
+            <ph-caret-down size="20" class="chevron-icon" />
           </summary>
 
           <ul @click="onMenuClose">
             <router-link to="profile">
               <li>
-                <icon-user-square size="24" />
+                <ph-user-square size="24" />
                 {{ t('label.userProfile') }}
               </li>
             </router-link>
             <router-link to="report-bug">
               <li>
-                <icon-external-link size="24" />
+                <ph-arrow-square-out size="24" />
                 {{ t('navBar.reportBug') }}
               </li>
             </router-link>
             <router-link to="contact">
               <li>
-                <icon-external-link size="24" />
+                <ph-arrow-square-out size="24" />
                 {{ t('label.contact') }}
               </li>
             </router-link>
           </ul>
         </details>
         <router-link to="logout">
-          <icon-logout size="24" />
+          <ph-sign-out size="24" />
           {{ t('label.logOut') }}
         </router-link>
       </div>

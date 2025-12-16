@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IconInfoCircle } from '@tabler/icons-vue';
+import { PhInfo } from '@phosphor-icons/vue';
 
 // component properties
 interface Props {
@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), {
 <template>
   <div class="container">
     <p v-if="message" class="message">
-      <icon-info-circle v-if="showIcon" class="icon" aria-hidden="true"/>
+      <ph-info v-if="showIcon" class="icon" aria-hidden="true"/>
       {{ message }}
     </p>
     <slot></slot>

@@ -2,7 +2,7 @@
 import {
   computed, inject, onMounted, ref,
 } from 'vue';
-import { IconSend } from '@tabler/icons-vue';
+import { PhPaperPlaneTilt } from '@phosphor-icons/vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AdminNav from '@/elements/admin/AdminNav.vue';
@@ -318,7 +318,7 @@ onMounted(async () => {
             </label>
             <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
               <template #iconLeft>
-                <icon-send/>
+                <ph-paper-plane-tilt/>
               </template>
               {{ t('label.send') }}
             </primary-button>

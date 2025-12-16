@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
 
 // icons
-import { IconX } from '@tabler/icons-vue';
+import { PhX } from '@phosphor-icons/vue';
 
 const { t } = useI18n();
 
@@ -33,7 +33,7 @@ const emit = defineEmits(['close', 'confirm', 'error']);
     class="position-center fixed z-50 flex w-full max-w-lg flex-col items-center gap-6 rounded-xl bg-white p-12 dark:bg-gray-700"
   >
     <div class="btn-close absolute right-8 top-8 cursor-pointer" @click="emit('close')" :title="t('label.close')">
-      <icon-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400" />
+      <ph-x class="size-6 fill-transparent stroke-gray-700 stroke-1 dark:stroke-gray-400" />
     </div>
     <div class="text-2xl font-semibold text-teal-500">
       {{ title }}

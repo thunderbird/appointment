@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // icons
-import { IconCheck, IconCopy } from '@tabler/icons-vue';
+import { PhCheck, PhCopy } from '@phosphor-icons/vue';
 
 // component properties
 interface Props {
@@ -26,8 +26,8 @@ defineProps<Props>();
       v-if="waiting"
       class="absolute size-5 animate-spin rounded-full border-2 border-white border-t-transparent"
     ></div>
-    <icon-copy v-if="icon === 'copy'" class="size-6 fill-transparent stroke-current stroke-2" />
-    <icon-check v-if="icon === 'check'" class="size-6 fill-transparent stroke-current stroke-2" />
+    <ph-copy v-if="icon === 'copy'" class="size-6 fill-transparent stroke-current stroke-2" />
+    <ph-check v-if="icon === 'check'" class="size-6 fill-transparent stroke-current stroke-2" />
     <template v-if="label">
       {{ label }}
     </template>

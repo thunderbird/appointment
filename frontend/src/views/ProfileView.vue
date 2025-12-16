@@ -9,7 +9,7 @@ import { storeToRefs } from 'pinia';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 // icons
-import { IconPencil } from '@tabler/icons-vue';
+import { PhPencilSimple } from '@phosphor-icons/vue';
 import { useRouter } from 'vue-router';
 
 // Stores
@@ -64,7 +64,7 @@ onMounted(async () => {
       <div class="flex gap-1 text-gray-500">
         {{ user.data.settings.timezone }}
         <router-link :to="{ name: 'settings' }" class="cursor-pointer pt-0.5">
-          <icon-pencil class="stroke-1.5 size-4" />
+          <ph-pencil-simple class="stroke-1.5 size-4" />
         </router-link>
       </div>
     </div>

@@ -7,10 +7,10 @@ import { Appointment } from '@/models';
 
 // icons
 import {
-  IconBulb,
-  IconCalendar,
-  IconClock,
-} from '@tabler/icons-vue';
+  PhLightbulb,
+  PhCalendarBlank,
+  PhClock,
+} from '@phosphor-icons/vue';
 import { dayjsKey, paintBackgroundKey } from '@/keys';
 
 // component constants
@@ -49,15 +49,15 @@ const isPending = computed(() => props.appointment.slots[0].booking_status === B
     >
       <div>{{ appointment.title }}</div>
       <div class="flex items-center gap-1 text-sm">
-        <icon-bulb class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
+        <ph-lightbulb class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
         {{ t('label.' + keyByValue(BookingStatus, appointment?.slots[0].booking_status ?? 'Unknown', true)) }}
       </div>
       <div class="flex items-center gap-1 text-sm">
-        <icon-calendar class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
+        <ph-calendar-blank class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
         {{ appointment.calendar_title }}
       </div>
       <div class="flex items-center gap-1 text-sm">
-        <icon-clock class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
+        <ph-clock class="size-4 shrink-0 fill-transparent stroke-gray-500 stroke-2"/>
         <div>{{ dj(appointment?.slots[0].start).format('LL') }}</div>
         <div>{{ dj(appointment?.slots[0].start).format(timeFormat()) }}</div>
         <div>{{ t('label.to') }}</div>

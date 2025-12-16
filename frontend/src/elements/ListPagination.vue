@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 
 // icons
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-vue';
+import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue';
 
 // component properties and emits
 interface Props {
@@ -52,7 +52,7 @@ const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.valu
 <template>
   <nav class="flex flex-nowrap items-center gap-2">
     <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'text-gray-500': isFirstPage }">
-      <icon-chevron-left class="stroke-1.5 size-5" />
+      <ph-caret-left class="stroke-1.5 size-5" />
     </button>
     <div
       v-for="(p, i) in pageCount" :key="i"
@@ -70,7 +70,7 @@ const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.valu
       <div v-show="showLastEllipsis(p)">&hellip;</div>
     </div>
     <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'text-gray-500': isLastPage }">
-      <icon-chevron-right class="stroke-1.5 size-5" />
+      <ph-caret-right class="stroke-1.5 size-5" />
     </button>
   </nav>
 </template>

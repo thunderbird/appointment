@@ -3,7 +3,7 @@ import { inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { isoWeekdaysKey } from '@/keys';
 import { CopyTemplate } from '@/models';
-import { IconAsterisk } from '@tabler/icons-vue';
+import { PhAsterisk } from '@phosphor-icons/vue';
 import DropDown from '@/elements/DropDown.vue';
 import ContainerBox from '@/elements/ContainerBox.vue';
 import { CheckboxInput, LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
@@ -47,7 +47,7 @@ watch(
   <drop-down class="self-center" ref="copyDropdown">
     <template #trigger>
       <link-button size="small" class="action-btn action-copy" :title="t('label.copyAvailability')">
-        <icon-asterisk class="w-4" aria-hidden="true"/>
+        <ph-asterisk class="w-4" aria-hidden="true"/>
       </link-button>
     </template>
     <template #default>

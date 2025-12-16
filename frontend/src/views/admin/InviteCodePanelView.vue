@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { IconSend } from '@tabler/icons-vue';
+import { PhPaperPlaneTilt } from '@phosphor-icons/vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import PrimaryButton from '@/elements/PrimaryButton.vue';
@@ -281,7 +281,7 @@ onMounted(async () => {
               :title="t('label.generate')"
             >
               <template #iconLeft>
-                <icon-send/>
+                <ph-paper-plane-tilt/>
               </template>
               {{ t('label.generate') }}
             </primary-button>

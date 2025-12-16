@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
 import { timeFormat } from '@/utils';
-import { IconNotes } from '@tabler/icons-vue';
-import { PhClock, PhCalendarBlank, PhVideoCamera } from '@phosphor-icons/vue'
+import { PhNote, PhClock, PhCalendarBlank, PhVideoCamera } from '@phosphor-icons/vue'
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import { apiUrlKey, dayjsKey } from '@/keys';
@@ -90,7 +89,7 @@ const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointm
 
     <div v-if="appointment.details" class="notes-section">
       <div class="notes-header">
-        <icon-notes class="notes-icon" />
+        <ph-note class="notes-icon" />
         {{ t('label.notes') }}
       </div>
       <div class="notes-content">{{ appointment.details }}</div>

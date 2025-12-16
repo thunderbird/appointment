@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import ToolTip from '@/elements/ToolTip.vue';
 
 // icons
-import { IconCopy, IconClipboardCheck } from '@tabler/icons-vue';
+import { PhCopy, PhCheck } from '@phosphor-icons/vue';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
 
@@ -53,14 +53,8 @@ const copyToClipboard = async () => {
     @focusout="hover = false"
   >
     <!-- TODO: This stroke color shouldn't be set as stroke-gray-500 forcibly -->
-    <icon-copy
-      v-if="copy && !copied"
-      class="size-4 fill-transparent stroke-gray-500 stroke-2 dark:stroke-gray-400"
-    />
-    <icon-clipboard-check
-      v-if="copy && copied"
-      class="size-4 fill-transparent stroke-teal-500 stroke-2"
-    />
+    <ph-copy v-if="copy && !copied" class="size-4 fill-transparent stroke-gray-500 stroke-2 dark:stroke-gray-400" />
+    <ph-check v-if="copy && copied" class="size-4 fill-transparent stroke-teal-500 stroke-2" />
     {{ label }}
     <transition>
       <tool-tip v-show="copied" :content="t('info.copiedToClipboard')" />
