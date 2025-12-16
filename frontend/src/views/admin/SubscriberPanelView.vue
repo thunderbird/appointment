@@ -317,7 +317,9 @@ onMounted(async () => {
               />
             </label>
             <primary-button class="btn-send" :disabled="loading" @click="sendInvite" :title="t('label.send')">
-              <icon-send/>
+              <template #iconLeft>
+                <icon-send/>
+              </template>
               {{ t('label.send') }}
             </primary-button>
           </div>

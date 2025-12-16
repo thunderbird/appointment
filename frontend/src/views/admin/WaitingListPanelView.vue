@@ -290,7 +290,9 @@ onMounted(async () => {
             @click="sendInvites"
             :title="t('label.send')"
           >
-            <icon-send />
+            <template #iconLeft>
+              <icon-send />
+            </template>
             {{ t('label.send') }}
           </primary-button>
         </div>
