@@ -3,13 +3,13 @@ import { computed, inject, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import {
-  IconWorld,
-  IconCalendarClock,
-  IconCalendar,
-  IconClock,
-  IconCircleCheckFilled,
-  IconMapPin
-} from '@tabler/icons-vue';
+  PhGlobe,
+  PhCalendarDot,
+  PhCalendarBlank,
+  PhClock,
+  PhCheckCircle,
+  PhMapPin
+} from '@phosphor-icons/vue';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
 import { SlotResponse } from '@/models';
@@ -123,7 +123,7 @@ const bookEvent = async () => {
     <div class="timezone-section">
       <span class="timezone-label">{{ t('label.timeZone') }}:</span>
       <div class="timezone-display">
-        <icon-world size="24" />
+        <ph-globe size="24" />
         {{ timezone }}
       </div>
     </div>
@@ -134,18 +134,18 @@ const bookEvent = async () => {
         <div class="appointment-card-inner">
           <header>
             {{ selectedEvent.title }}
-            <icon-circle-check-filled size="24"/>
+            <ph-check-circle size="24"/>
           </header>
           <div class="appointment-card-inner-details">
-            <icon-calendar size="16"/>
+            <ph-calendar-blank size="16"/>
             <span>{{ selectedSlotDate }}</span>
-            <icon-map-pin size="16"/>
+            <ph-map-pin size="16"/>
             <!-- TODO: We are currently only allowing for events to be online but the backend defaults to in person -->
             <!-- <span>{{ selectedEvent.location_type === EventLocationType.Online ? t('label.virtual') : t('label.inPerson') }}</span> -->
             <span>{{ t('label.virtual') }}</span>
-            <icon-clock size="16"/>
+            <ph-clock size="16"/>
             <span>{{ selectedSlotTimeDuration }} <span class="timezone-badge">{{ timezone }}</span></span>
-            <icon-clock size="16"/>
+            <ph-clock size="16"/>
             <span>{{ t('units.minutes', { value: selectedEvent.slot_duration }) }}</span>
           </div>
         </div>
@@ -156,7 +156,7 @@ const bookEvent = async () => {
 
     <div v-else class="appointment-card empty">
       {{ t('label.selectATimeFromTheCalendar') }}
-      <icon-calendar-clock size="108"/>
+      <ph-calendar-dot size="108"/>
     </div>
 
     <alert-box

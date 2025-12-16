@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
 import { DangerButton, PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
-import { IconCopy, IconArrowRight } from '@tabler/icons-vue';
+import { PhCopy, PhArrowRight } from '@phosphor-icons/vue';
 import { createUserStore } from '@/stores/user-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { BlobResponse, BooleanResponse } from '@/models';
@@ -112,7 +112,7 @@ const actuallyDownloadData = async () => {
         @click="copyLink"
         :tooltip="copyLinkTooltip"
       >
-        <icon-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
+        <ph-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
       </primary-button>
     </div>
   </div>
@@ -123,10 +123,10 @@ const actuallyDownloadData = async () => {
       variant="outline"
       @click="router.push({ name: 'availability' })"
     >
-      <span>
-        {{ t('label.bookingPageSettings') }}
-        <icon-arrow-right size="18" />
-      </span>
+      {{ t('label.bookingPageSettings') }}
+      <template #iconRight>
+        <ph-arrow-right />
+      </template>
     </primary-button>
   </div>
 

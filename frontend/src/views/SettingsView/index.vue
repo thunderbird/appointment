@@ -15,7 +15,7 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { IconChevronRight } from '@tabler/icons-vue';
+import { PhCaretRight } from '@phosphor-icons/vue';
 
 // Page sections
 import AccountSettings from './components/AccountSettings.vue';
@@ -253,7 +253,7 @@ export default {
         :data-testid="'settings-' + key + '-settings-btn'"
       >
         <span>{{ t('heading.' + key) }}</span>
-        <icon-chevron-right size="18" />
+        <ph-caret-right size="18" />
       </button>
     </aside>
 

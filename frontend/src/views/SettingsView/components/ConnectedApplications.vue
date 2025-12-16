@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IconDots } from '@tabler/icons-vue';
+import { PhDotsThree } from '@phosphor-icons/vue';
 import { PrimaryButton, BaseBadge, CheckboxInput } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
@@ -186,7 +186,7 @@ async function refreshData() {
 
       <drop-down class="dropdown" ref="videoMeetingDropdown">
         <template #trigger>
-          <icon-dots size="24" />
+          <ph-dots-three size="24" />
         </template>
         <template #default>
           <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
@@ -245,7 +245,7 @@ async function refreshData() {
           :ref="(el) => calendarDropdownRefs[calendar.id] = el"
         >
           <template #trigger>
-            <icon-dots size="24" />
+            <ph-dots-three size="24" />
           </template>
           <template #default>
             <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">

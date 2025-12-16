@@ -6,10 +6,10 @@ import { CalendarEvent } from '@/models';
 
 // icons
 import {
-  IconCalendar,
-  IconClock,
-  IconUsers,
-} from '@tabler/icons-vue';
+  PhCalendarBlank,
+  PhClock,
+  PhUsers,
+} from '@phosphor-icons/vue';
 import { dayjsKey } from '@/keys';
 
 // component constants
@@ -64,15 +64,15 @@ const eventDateTime = computed(
     <div class="flex flex-col gap-2 text-gray-700 dark:text-gray-200">
       <div class="max-w-sm truncate text-lg font-semibold text-teal-500">{{ event?.title }}</div>
       <div class="flex items-center gap-1.5 text-xs">
-        <icon-clock class="size-4 fill-transparent stroke-teal-500 stroke-2" />
+        <ph-clock class="size-4 fill-transparent stroke-teal-500 stroke-2" />
         {{ eventDateTime }}
       </div>
       <div class="flex items-center gap-1.5 text-xs">
-        <icon-calendar class="size-4 fill-transparent stroke-teal-500 stroke-2" />
+        <ph-calendar-blank class="size-4 fill-transparent stroke-teal-500 stroke-2" />
         {{ event?.customData?.calendar_title }}
       </div>
       <div v-if="event?.customData?.attendee" class="flex items-center gap-1.5 text-xs">
-        <icon-users class="size-4 fill-transparent stroke-teal-500 stroke-2" />
+        <ph-users class="size-4 fill-transparent stroke-teal-500 stroke-2" />
         {{ t('label.guest', { 'count': 1 }) }}
       </div>
     </div>

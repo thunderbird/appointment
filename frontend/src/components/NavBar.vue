@@ -7,8 +7,7 @@ import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import TextButton from '@/elements/TextButton.vue';
 import { TooltipPosition } from '@/definitions';
-import { IconExternalLink } from '@tabler/icons-vue';
-import { PhLinkSimple } from '@phosphor-icons/vue';
+import { PhArrowSquareOut, PhLinkSimple } from '@phosphor-icons/vue';
 import { UserAvatar, ToolTip } from '@thunderbirdops/services-ui';
 
 // component constants
@@ -108,10 +107,10 @@ const copyLink = async () => {
                 data-testid="user-nav-share-link-btn"
               />
               <router-link :to="{ name: 'report-bug' }" class="router-link-with-icon" data-testid="user-nav-report-bug-menu">
-                {{ t('navBar.reportBug') }} <icon-external-link class="size-4"/>
+                {{ t('navBar.reportBug') }} <ph-arrow-square-out class="size-4"/>
               </router-link>
               <router-link :to="{ name: 'contact' }" class="router-link-with-icon" data-testid="user-nav-contact-menu">
-                {{ t('label.contact') }} <icon-external-link class="size-4"/>
+                {{ t('label.contact') }} <ph-arrow-square-out class="size-4"/>
               </router-link>
               <hr class="border-teal-500" />
               <router-link :to="{ name: 'logout' }" data-testid="user-nav-logout-menu">

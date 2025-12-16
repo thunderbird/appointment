@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IconChevronRight } from '@tabler/icons-vue';
+import { PhCaretRight } from '@phosphor-icons/vue';
 
 // component properties
 interface Props {
@@ -21,7 +21,7 @@ defineProps<Props>();
       <span class="mr-2 flex-auto text-left font-semibold">
         <slot></slot>
       </span>
-      <icon-chevron-right class="stroke-white-500 size-6 fill-transparent stroke-1"/>
+      <ph-caret-right class="stroke-white-500 size-6 fill-transparent stroke-1"/>
     </div>
   </a>
 </template>

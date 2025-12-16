@@ -98,7 +98,9 @@ export default {
       </li>
     </ul>
     <template #cta>
-      <primary-button class="dismiss" size="small" @click="dismiss">{{ t('label.dismiss') }}</primary-button>
+      <primary-button class="dismiss" size="small" @click="dismiss">
+        {{ t('label.dismiss') }}
+      </primary-button>
     </template>
   </notice-bar>
 

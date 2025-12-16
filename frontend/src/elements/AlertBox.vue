@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Alert } from '@/models';
 import { AlertSchemes } from '@/definitions';
-import { IconX } from '@tabler/icons-vue';
+import { PhX } from '@phosphor-icons/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
@@ -56,7 +56,7 @@ const toggleDetails = () => {
           <span v-if="!open">Show more</span>
         </span>
         <span v-if="canClose" class="btn-close" @click="emit('close')" :title="t('label.close')">
-          <icon-x />
+          <ph-x />
         </span>
       </span>
     </template>

@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { IconSend } from '@tabler/icons-vue';
+import { PhPaperPlaneTilt } from '@phosphor-icons/vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import AlertBox from '@/elements/AlertBox.vue';
@@ -290,7 +290,9 @@ onMounted(async () => {
             @click="sendInvites"
             :title="t('label.send')"
           >
-            <icon-send />
+            <template #iconLeft>
+              <ph-paper-plane-tilt />
+            </template>
             {{ t('label.send') }}
           </primary-button>
         </div>
