@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import ToolTip from '@/elements/ToolTip.vue';
 
 // icons
-import { IconClipboardCheck, IconCopy } from '@tabler/icons-vue';
+import { PhCheck, PhCopy } from '@phosphor-icons/vue';
 
 // component constants
 const { t } = useI18n();
@@ -43,14 +43,8 @@ const copyToClipboard = async () => {
       v-if="waiting"
       class="absolute size-5 animate-spin rounded-full border-2 border-white border-t-transparent"
     ></div>
-    <icon-copy
-      v-if="copy && !copied"
-      class="size-6 fill-transparent stroke-current stroke-2"
-    />
-    <icon-clipboard-check
-      v-if="copy && copied"
-      class="size-6 fill-transparent stroke-current stroke-2"
-    />
+    <ph-copy v-if="copy && !copied" class="size-6 fill-transparent stroke-current stroke-2" />
+    <ph-check v-if="copy && copied" class="size-6 fill-transparent stroke-current stroke-2" />
     <template v-if="label">
       {{ label }}
     </template>

@@ -533,28 +533,30 @@ class TestSchedule:
         monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
 
         start_date = date(2024, 3, 1)
-        start_time = time(16, tzinfo=UTC)
+        start_time = time(17, tzinfo=UTC)
         # Next day
-        end_time = time(0, tzinfo=UTC)
+        end_time = time(1, tzinfo=UTC)
 
         subscriber = make_pro_subscriber()
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
-        make_schedule(
-            calendar_id=generated_calendar.id,
-            active=True,
-            start_date=start_date,
-            start_time=start_time,
-            end_time=end_time,
-            end_date=None,
-            earliest_booking=1440,
-            farthest_booking=20160,
-            slot_duration=30,
-        )
-
         signed_url = signed_url_by_subscriber(subscriber)
 
         # Check availability at the start of the schedule
         with freeze_time(start_date):
+            # We create the schedule inside the freeze_time block to ensure the time_updated
+            # is set to a known date (PST) so start_time_local calculation is deterministic.
+            make_schedule(
+                calendar_id=generated_calendar.id,
+                active=True,
+                start_date=start_date,
+                start_time=start_time,
+                end_time=end_time,
+                end_date=None,
+                earliest_booking=1440,
+                farthest_booking=20160,
+                slot_duration=30,
+            )
+
             response = with_client.post(
                 '/schedule/public/availability',
                 json={'url': signed_url},

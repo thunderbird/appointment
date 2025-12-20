@@ -15,8 +15,8 @@ permissions:
   contents: read    # This is required for actions/checkout
 
 jobs:
-  prod-nightly-mobile-browserstack:
-    name: prod-nighlty-mobile-browserstack
+  nightly-prod-mobile-e2e:
+    name: nightly-prod-mobile-e2e
     runs-on: ubuntu-latest
     container:
         image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
@@ -49,4 +49,4 @@ jobs:
         run: |
           cd ./test/e2e
           cp .env.prod.example .env
-          npm run prod-nightly-tests-mobile-browserstack-gha
+          npm run prod-nightly-tests-mobile-browserstack-android-chrome

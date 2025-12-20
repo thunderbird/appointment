@@ -144,8 +144,8 @@ jobs:
           project-name: 'Thunderbird Appointment'
           build-name: 'Production Deployment Tests: BUILD_INFO'
 
-      - name: Run Playwright Tests on Browserstack
+      - name: Production Sanity E2E Tests on Desktop Firefox
         run: |
           cd ./test/e2e
           cp .env.prod.example .env
-          npm run prod-sanity-test-browserstack-gha
+          npm run prod-sanity-test-browserstack-firefox

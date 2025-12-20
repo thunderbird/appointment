@@ -6,7 +6,7 @@ import {
   TIMEOUT_1_SECOND,
   TIMEOUT_2_SECONDS,
   TIMEOUT_3_SECONDS,
-  TIMEOUT_10_SECONDS,
+  TIMEOUT_5_SECONDS,
   TIMEOUT_30_SECONDS,
   APPT_LANGUAGE_SETTING_EN,
   } from '../const/constants';
@@ -86,9 +86,9 @@ export class SettingsPage {
     this.connectedAppsBtn = this.page.getByTestId('settings-connectedApplications-settings-btn');
     this.connectedAppsHdr = this.page.getByRole('heading', { name: 'Connected Applications' });
     this.addCaldavBtn = this.page.getByRole('button', { name: 'Add CalDAV' });
-    this.addCaldavUsernameInput = this.page.getByRole('textbox', { name: 'user' });
-    this.addCaldavLocationInput = this.page.getByRole('textbox', { name: 'Location The URL or hostname' });
-    this.addCaldavPasswordInput = this.page.getByRole('textbox', { name: 'password' });
+    this.addCaldavUsernameInput = this.page.getByLabel('Username');
+    this.addCaldavLocationInput = this.page.getByLabel('Location');
+    this.addCaldavPasswordInput = this.page.getByLabel('Password');
     this.addCaldavCloseModalBtn = this.page.getByRole('img', { name: 'Close' });
     this.addGoogleBtn = this.page.getByRole('button', { name: 'Add Google Calendar' });
     this.defaultCalendarConnectedCbox = this.page.locator('div').filter({ hasText: /^Default*/ }).getByTestId('checkbox-input');
@@ -99,7 +99,7 @@ export class SettingsPage {
    */
   async gotoAccountSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
     await this.accountSettingsBtn.scrollIntoViewIfNeeded();
     await this.accountSettingsBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
@@ -110,7 +110,7 @@ export class SettingsPage {
    */
   async gotoPreferencesSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
     await this.preferencesBtn.scrollIntoViewIfNeeded({ timeout: TIMEOUT_30_SECONDS });
     await this.preferencesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
@@ -121,7 +121,7 @@ export class SettingsPage {
    */
   async gotoConnectedAppSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
     await this.connectedAppsBtn.scrollIntoViewIfNeeded();
     await this.connectedAppsBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
@@ -161,6 +161,7 @@ export class SettingsPage {
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);
       await expect(this.savedSuccessfullyTextEN).toBeVisible();
     }
+    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
   }
 
   /**
@@ -174,7 +175,7 @@ export class SettingsPage {
     await this.saveBtnEN.click();
     await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     // wait for theme to take affect, can take time especially on browserstack
-    await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
   }
 
   /**
@@ -202,18 +203,6 @@ export class SettingsPage {
     await this.saveBtnEN.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await expect(this.savedSuccessfullyTextEN).toBeVisible();
-  }
-
-  /**
-   * Change the display name setting
-   */
-  async changeDisplaName(newName: string) {
-    await this.displayNameInput.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.displayNameInput.fill(newName);
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.saveBtnEN.scrollIntoViewIfNeeded();
-    await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
   }
 }

@@ -38,15 +38,12 @@ def google_auth_status(request: Request, subscriber: Subscriber = Depends(get_su
 @router.get('/auth')
 def google_auth(
     request: Request,
-    email: str | None = None,
     google_client: GoogleClient = Depends(get_google_client),
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Starts the google oauth process"""
-    if email:
-        email = email.lower()
-    url, state = google_client.get_redirect_url(email)
+    url, state = google_client.get_redirect_url()
 
     request.session[SESSION_OAUTH_STATE] = state
     request.session[SESSION_OAUTH_SUBSCRIBER_ID] = subscriber.id

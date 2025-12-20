@@ -250,9 +250,8 @@ jobs:
           project-name: 'Thunderbird Appointment'
           build-name: 'E2E Tests: BUILD_INFO'
 
-      - name: Run E2E Tests on stage via Browserstack
+      - name: Stage E2E Tests on Desktop Firefox
         run: |
           cd ./test/e2e
           cp .env.stage.example .env
-          npm run e2e-test-browserstack-gha
-
+          npm run e2e-test-browserstack-firefox

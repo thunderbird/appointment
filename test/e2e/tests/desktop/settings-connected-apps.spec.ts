@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
+import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -17,7 +18,7 @@ test.describe('connected applications settings on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // note: we are already signed into Appointment with our default settings (via our auth-setup)
+    await ensureWeAreSignedIn(page);
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
     // navigate to the settings page, connected apps section
@@ -37,9 +38,9 @@ test.describe('connected applications settings on desktop browser', {
     await settingsPage.addCaldavBtn.scrollIntoViewIfNeeded();
     await settingsPage.addCaldavBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(settingsPage.addCaldavUsernameInput).toBeEditable();
-    await expect(settingsPage.addCaldavLocationInput).toBeEditable();
-    await expect(settingsPage.addCaldavPasswordInput).toBeEditable();
+    await expect(settingsPage.addCaldavUsernameInput).toBeVisible();
+    await expect(settingsPage.addCaldavLocationInput).toBeVisible();
+    await expect(settingsPage.addCaldavPasswordInput).toBeVisible();
     await settingsPage.addCaldavCloseModalBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 

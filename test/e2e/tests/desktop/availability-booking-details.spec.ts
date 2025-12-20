@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AvailabilityPage } from '../../pages/availability-page';
 import { BookingPage } from '../../pages/booking-page';
+import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -22,7 +23,7 @@ test.describe('availability - booking page details on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // note: we are already signed into Appointment with our default settings (via our auth-setup)
+    await ensureWeAreSignedIn(page);
     // availability panel is displayed open as default
     bookApptPage = new BookingPage(page);
     availabilityPage = new AvailabilityPage(page);

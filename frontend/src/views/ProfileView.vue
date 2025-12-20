@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, onMounted } from 'vue';
 import { keyByValue } from '@/utils';
-import { callKey, fxaEditProfileUrlKey } from '@/keys';
+import { callKey, accountsTbProfileUrlKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { SubscriberLevels } from '@/definitions';
 import { createUserStore } from '@/stores/user-store';
@@ -9,7 +9,7 @@ import { storeToRefs } from 'pinia';
 import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 // icons
-import { IconPencil } from '@tabler/icons-vue';
+import { PhPencilSimple } from '@phosphor-icons/vue';
 import { useRouter } from 'vue-router';
 
 // Stores
@@ -21,7 +21,7 @@ import { isFxaAuth, isOidcAuth } from "@/composables/authSchemes";
 const router = useRouter();
 const { t } = useI18n();
 const call = inject(callKey);
-const fxaEditProfileUrl = inject(fxaEditProfileUrlKey);
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const appointmentStore = createAppointmentStore(call);
 const calendarStore = createCalendarStore(call);
@@ -38,7 +38,7 @@ const logout = async () => {
 };
 
 const editProfile = async () => {
-  window.location.href = fxaEditProfileUrl;
+  window.location.href = accountsTbProfileUrl;
 };
 
 // Load calendar and bookings information
@@ -64,7 +64,7 @@ onMounted(async () => {
       <div class="flex gap-1 text-gray-500">
         {{ user.data.settings.timezone }}
         <router-link :to="{ name: 'settings' }" class="cursor-pointer pt-0.5">
-          <icon-pencil class="stroke-1.5 size-4" />
+          <ph-pencil-simple class="stroke-1.5 size-4" />
         </router-link>
       </div>
     </div>

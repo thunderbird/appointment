@@ -33,9 +33,8 @@ export const useCalendarStore = defineStore('calendars', () => {
     call.value = fetch;
   }
 
-  const connectGoogleCalendar = async (email: string) => {
-    const urlFriendlyEmail = encodeURIComponent(email);
-    const googleUrl = await call.value(`google/auth?email=${urlFriendlyEmail}`).get();
+  const connectGoogleCalendar = async () => {
+    const googleUrl = await call.value('google/auth').get();
     window.location.href = googleUrl.data.value.slice(1, -1);
   };
 

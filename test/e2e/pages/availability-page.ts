@@ -2,10 +2,10 @@ import { expect, type Page, type Locator } from '@playwright/test';
 
 import {
   APPT_AVAILABILITY_PAGE,
-  APPT_BOOKINGS_PAGE,
+  APPT_TIMEZONE_SETTING_PRIMARY,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
-  APPT_TIMEZONE_SETTING_PRIMARY,
+  TIMEOUT_10_SECONDS,
   TIMEOUT_30_SECONDS,
 } from '../const/constants';
 
@@ -59,7 +59,8 @@ export class AvailabilityPage {
     this.calendarSelect = this.page.locator('select[name="calendar"]');
     this.autoConfirmBookingsCheckBox = this.page.getByTestId('availability-automatically-confirm-checkbox');
     this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
-    this.customizePerDayCheckBoxContainer = this.page.locator('#app div').filter({ hasText: 'Set custom times for each day' }).nth(4);
+    this.customizePerDayCheckBoxContainer = this.page.locator('label').filter({ hasText: 'Set custom times for each day' }).locator('span').first();
+
     this.allStartTimeInput = this.page.locator('#start_time');
     this.allEndTimeInput = this.page.locator('#end_time');
     this.customStartTime1Input = this.page.getByTestId('availability-start-time-1-0-input');
@@ -93,7 +94,7 @@ export class AvailabilityPage {
   async gotoAvailabilityPage() {
     // go to availability page, sometimes takes a bit to load all element values!
     await this.page.goto(APPT_AVAILABILITY_PAGE, { timeout: TIMEOUT_30_SECONDS });
-    await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+    await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.bookingPageMtgDur15MinBtn.waitFor({ timeout: TIMEOUT_30_SECONDS });

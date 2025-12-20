@@ -44,7 +44,7 @@ platforms:
     playwrightConfigOptions:
       name: Safari-OSX
       setup: 
-      - name: 'setup_safari_osx'
+      - name: 'setup_webkit'
         testMatch: 'auth.desktop.setup.ts'
       use:
         storageState: 'test-results/.auth/user.json'
@@ -56,19 +56,7 @@ platforms:
     playwrightConfigOptions:
       name: Chromium-Win11
       setup: 
-      - name: 'setup_chromium_win'
-        testMatch: 'auth.desktop.setup.ts'
-      use:
-        storageState: 'test-results/.auth/user.json'
-
-  - os: Windows
-    osVersion: 11
-    browserName: edge
-    browserVersion: latest
-    playwrightConfigOptions:
-      name: Edge-Win11
-      setup: 
-      - name: 'setup_edge_win'
+      - name: 'setup_chromium'
         testMatch: 'auth.desktop.setup.ts'
       use:
         storageState: 'test-results/.auth/user.json'

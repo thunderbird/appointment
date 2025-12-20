@@ -84,7 +84,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
   /**
    * Get appointments for current user with pagination and filters
    */
-  const fetch = async (page: number = 1, statusFilters: string[] = [], append: boolean = false) => {
+  const fetch = async (page: number = 1, _statusFilters: string[] = [], append: boolean = false) => {
     if (isLoading.value) return;
 
     isLoading.value = true;

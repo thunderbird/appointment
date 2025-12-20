@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { getUserSettingsFromLocalStore } from '../../utils/utils';
 import { SettingsPage } from '../../pages/settings-page';
 import { DashboardPage } from '../../pages/dashboard-page';
+import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -19,7 +20,7 @@ test.describe('settings - start of week on desktop browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
-    // note: we are already signed into Appointment with our default settings (via our auth-setup)
+    await ensureWeAreSignedIn(page);
     settingsPage = new SettingsPage(page);
     dashboardPage = new DashboardPage(page);
 

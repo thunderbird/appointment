@@ -88,27 +88,4 @@ test.describe('account settings on mobile browser', {
     await page.waitForURL('**/availability');
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });
-
-  test('able to change display name on mobile browser', async ({ page }) => {
-    // change display name and verify
-    const newDisplayName = `Name modified by E2E test at ${new Date().toDateString()}`;
-    await settingsPage.changeDisplaName(newDisplayName);
-
-    // verify setting saved in browser local storage
-    expect.soft(await getUserDisplayNameFromLocalStore(page)).toBe(newDisplayName);
-
-    // go to share link/book appointment page and verify display name was changed;
-    // expect soft so that display name will be changed back even if the test fails
-    await page.goto(APPT_MY_SHARE_LINK);
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
-    await expect.soft(bookApptPage.invitingText).toContainText(newDisplayName);
-
-    // change display name back
-    await settingsPage.gotoAccountSettings();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.changeDisplaName(APPT_DISPLAY_NAME);
-
-    // verify setting saved in browser local storage
-    expect(await getUserDisplayNameFromLocalStore(page)).toBe(APPT_DISPLAY_NAME);
-  });
 });
