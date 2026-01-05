@@ -49,6 +49,7 @@
     "createYourProfile": "Dein Profil erstellen",
     "fullName": "Vollständiger Name",
     "urlUsername": "URL Benutzername",
+    "urlUsernameHelp": "Wähle einen eindeutigen Namen. Dies wird dein Buchungslink sein.",
     "createAccount": "Konto erstellen",
     "connectYourCalendar": "Kalender verbinden",
     "connectYourCalendarInfo": "Thunderbird Appointment benötigt Zugriff auf einen Kalender, um deine Verfügbarkeit zu prüfen. Du kannst jederzeit weitere Kalender aus den Einstellungen verbinden.",
