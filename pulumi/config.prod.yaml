@@ -157,7 +157,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:ddd147e76509ede8927a0760572ef3b4a838e738
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5b88df955e78edca86b9de0a277ac0bd4bd8ed7d
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -327,7 +327,10 @@ resources:
       notify_emails:
         - thunderbird-services-monitoring@thunderbird.net
       config:
-        alarms: {}
+        alarms:
+          appointment-prod-fargate-backend-fargateservicealb-alb-backend:
+            response_time:
+              threshold: 2
 
   tb:ci:AwsAutomationUser:
     ci:
