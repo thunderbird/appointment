@@ -18,16 +18,17 @@ export class TBAcctsPage {
     this.userAvatar = this.page.getByTestId('avatar-default');
     this.emailInput = this.page.getByTestId('username-input');
     this.passwordInput = this.page.getByTestId('password-input');
-    this.signInButton = this.page.getByRole('button', { name: 'Sign in' });
+    this.signInButton = this.page.getByTestId('submit-btn');
     this.loginEmailInput = this.page.getByLabel('Email');
     this.localDevpasswordInput = this.page.getByLabel('Password');
     this.loginDialogContinueBtn = this.page.getByTitle('Continue');
   }
 
   /**
-   * Sign in to TB Accounts using the provided email and password.
+   * Sign in to TB Accounts using the provided email and password. We provide the playwright
+   * test project name (i.e. 'android-chrome') as some actions differ on different mobile platforms.
    */
-  async signIn() {
+  async signIn(testProjectName: string = 'desktop') {
     console.log('signing in to TB Accounts');
     expect(TB_ACCTS_EMAIL, 'getting TB_ACCTS_EMAIL env var').toBeTruthy();
     expect(TB_ACCTS_PWORD, 'getting TB_ACCTS_PWORD env var').toBeTruthy();
@@ -37,7 +38,12 @@ export class TBAcctsPage {
     await this.passwordInput.fill(String(TB_ACCTS_PWORD));
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.signInButton.click({ force: true });
+    // 'force' is needed for android but doesn't work on ios
+    if (testProjectName.includes('android')) {
+      await this.signInButton.click({ force: true });
+    } else {
+      await this.signInButton.click({ timeout: TIMEOUT_10_SECONDS });
+    }
     await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
   }
 

@@ -20,12 +20,13 @@ test.describe('settings - theme on mobile browser', {
   tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
 }, () => {
 
-  test.beforeEach(async ({ page }) => {
-    settingsPage = new SettingsPage(page);
+  test.beforeEach(async ({ page }, testInfo) => {
+    settingsPage = new SettingsPage(page, testInfo.project.name); // i.e. 'ios-safari'
     dashboardPage = new DashboardPage(page);
 
     // mobile browsers don't support saving auth storage state so must sign in before each test
-    await mobileSignInAndSetup(page);
+    // send in the playright test project name i.e. safari-ios because some mobile platforms differ
+    await mobileSignInAndSetup(page, testInfo.project.name);
 
     // now navigate to the settings page, preferences section
     await settingsPage.gotoPreferencesSettings();
@@ -57,5 +58,13 @@ test.describe('settings - theme on mobile browser', {
     // verify setting saved in browser local storage
     localStore = await getUserSettingsFromLocalStore(page);
     expect(localStore['colourScheme']).toBe(APPT_BROWSER_STORE_THEME_LIGHT);
+  });
+
+  test.afterAll(async ({ browser }, testInfo) => {
+    // close the browser when we're done (good practice for BrowserStack); only do this for BrowserStack,
+    // because if we do this when running on a local playwright mobile viewport the tests will fail
+    if (!testInfo.project.name.includes('View')) {
+      await browser.close();
+    }
   });
 });

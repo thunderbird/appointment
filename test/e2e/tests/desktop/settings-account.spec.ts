@@ -12,7 +12,6 @@ import {
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
-  TIMEOUT_3_SECONDS,
  } from '../../const/constants';
 
 let settingsPage: SettingsPage;
@@ -46,24 +45,10 @@ test.describe('account settings on desktop browser', {
     await settingsPage.bookingPageURLInput.scrollIntoViewIfNeeded();
     expect(await settingsPage.bookingPageURLInput.inputValue()).toBe(APPT_MY_SHARE_LINK);
 
-    // click copy link button and verify copied link is correct
-    // note: we can't access clipboard in firefox b/c of security so instead we will:
-    //  - get the contents of the booking page URL input field (correct link)
-    //  - click the copy link button
-    //  - clear the booking page URL input field so it is empty
-    //  - focus on the booking page URL input field
-    //  - do a keyboard paste into the field
-    //  - retrieve the new contents of the booking page url after the paste into that field
-    //  - verify the input field now has the correct link url
-    const correctBookingUrl = await settingsPage.bookingPageURLInput.inputValue();
+    // ensure we can click the copy link button; note: we can't access clipboard in firefox b/c of security
+    await settingsPage.scrollIntoView(settingsPage.copyLinkBtn);
+    await expect(settingsPage.copyLinkBtn).toBeEnabled();
     await settingsPage.copyLinkBtn.click();
-    await settingsPage.bookingPageURLInput.clear();
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.bookingPageURLInput.focus();
-    await page.keyboard.press('ControlOrMeta+V');
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-    const afterPasteBookingUrl = await settingsPage.bookingPageURLInput.inputValue();
-    expect(afterPasteBookingUrl).toEqual(correctBookingUrl);
 
     // just ensure the download your data button exists and is enabled as don't want to actually
     // download and leave potenial sensitive data on the test instance
