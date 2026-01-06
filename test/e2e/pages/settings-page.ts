@@ -9,7 +9,6 @@ import {
   TIMEOUT_30_SECONDS,
   APPT_LANGUAGE_SETTING_EN,
   } from '../const/constants';
-import test from 'node:test';
 
 
 export class SettingsPage {
@@ -205,7 +204,7 @@ export class SettingsPage {
    * Change the start of week setting
    */
   async changeStartOfWeekSetting(startOfWeek: string) {
-    await this.startOfWeekMondayBtn
+    await this.scrollIntoView(this.startOfWeekMondayBtn);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     if (startOfWeek == 'M') {
       await this.startOfWeekMondayBtn.click({ timeout: TIMEOUT_30_SECONDS });

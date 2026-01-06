@@ -19,7 +19,6 @@ import {
   TIMEOUT_5_SECONDS,
   TIMEOUT_60_SECONDS,
 } from "../const/constants";
-import { createDecipheriv } from "crypto";
 
 const authFile = path.join(__dirname, '../test-results/.auth/user.json');
 

@@ -60,8 +60,11 @@ test.describe('settings - language on mobile browser', {
     expect(localStore['language']).toBe(APPT_BROWSER_STORE_LANGUAGE_EN);
   });
 
-  test.afterAll(async ({ browser }) => {
-    // close the browser when we're done, BrowserStack needs this or may report BROWSERSTACK_IDLE_TIMEOUT
-    await browser.close();
+  test.afterAll(async ({ browser }, testInfo) => {
+    // close the browser when we're done (good practice for BrowserStack); only do this for BrowserStack,
+    // because if we do this when running on a local playwright mobile viewport the tests will fail
+    if (!testInfo.project.name.includes('View')) {
+      await browser.close();
+    }
   });
 });
