@@ -105,7 +105,7 @@ const actuallyDownloadData = async () => {
       {{ t('label.bookingPageURL') }}
     </label>
     <div class="booking-page-url-input-container">
-      <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.myLink" />
+      <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.myLink" readonly />
       <primary-button
         variant="outline"
         aria-labelledby="copy-booking-page-url-button"
