@@ -30,6 +30,7 @@ export class SettingsPage {
   readonly displayNameInput: Locator;
   readonly bookingPageURLInput: Locator;
   readonly copyLinkBtn: Locator;
+  readonly copyLinkToolTipText: Locator;
   readonly cancelServiceBtn: Locator;
   readonly cancelServiceConfirmCancelBtn: Locator;
   readonly bookingPageSettingsBtn: Locator;
@@ -68,6 +69,7 @@ export class SettingsPage {
     this.displayNameInput = this.page.locator('#booking-page-display-name');
     this.bookingPageURLInput = this.page.locator('#booking-page-url');
     this.copyLinkBtn = this.page.locator('#copy-booking-page-url-button');
+    this.copyLinkToolTipText = this.page.locator('#tooltip-body');
     this.cancelServiceBtn = this.page.getByRole('button', { name: 'Cancel Service' });
     this.cancelServiceConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel', exact: true });
     this.bookingPageSettingsBtn = this.page.getByRole('button', { name: 'Booking Page Settings' });
