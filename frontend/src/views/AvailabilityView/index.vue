@@ -3,14 +3,14 @@ import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey, dayjsKey } from '@/keys';
-import { LinkButton, NoticeBar, NoticeBarTypes, PrimaryButton } from '@thunderbirdops/services-ui';
+import { IconButton, LinkButton, NoticeBar, NoticeBarTypes, PrimaryButton } from '@thunderbirdops/services-ui';
+import { PhX } from '@phosphor-icons/vue';
 import { createAvailabilityStore } from '@/stores/availability-store';
 import { createScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 import { deepClone } from '@/utils';
 import { Alert, Availability } from '@/models';
-import { DateFormatStrings, AlertSchemes } from '@/definitions';
-import AlertBox from '@/elements/AlertBox.vue';
+import { DateFormatStrings } from '@/definitions';
 
 import AvailabilitySettings from './components/AvailabilitySettings/index.vue';
 import BookingPageDetails from './components/BookingPageDetails/index.vue';
@@ -111,6 +111,9 @@ async function onSaveChanges() {
 }
 
 function onRevertChanges() {
+  validationError.value = null;
+  saveSuccess.value = null;
+
   availabilityStore.revertChanges();
 }
 </script>
@@ -154,20 +157,41 @@ export default {
       </template>
     </notice-bar>
 
-    <alert-box
-      class="alert-box"
-      v-if="validationError"
-      :alert="validationError"
-      @close="validationError = null"
-    />
+    <notice-bar
+      v-else-if="validationError"
+      :type="NoticeBarTypes.Critical"
+      class="notice-bar"
+    >
+      {{ validationError.title }}
+
+      <template #cta>
+        <icon-button
+          @click="validationError = null"
+          :title="t('label.close')"
+          class="btn-close"
+        >
+          <ph-x />
+        </icon-button>
+      </template>
+    </notice-bar>
   
-    <alert-box
-      class="alert-box"
+    <notice-bar
       v-else-if="saveSuccess"
-      :alert="saveSuccess"
-      :scheme="AlertSchemes.Success"
-      @close="saveSuccess = null"
-    />
+      :type="NoticeBarTypes.Success"
+      class="notice-bar"
+    >
+      {{ saveSuccess.title }}
+
+      <template #cta>
+        <icon-button
+          @click="saveSuccess = null"
+          :title="t('label.close')"
+          class="btn-close"
+        >
+          <ph-x />
+        </icon-button>
+      </template>
+    </notice-bar>
   
     <form ref="availability-form" @submit.prevent>
       <div class="page-content">
@@ -223,16 +247,17 @@ export default {
   position: sticky;
   top: 5rem;
   z-index: 50;
+
+  .btn-close {
+    height: 2.375rem;
+    width: 2.375rem;
+  }
 }
 
 .page-content {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
-  margin-block-end: 2rem;
-}
-
-.alert-box {
   margin-block-end: 2rem;
 }
 
