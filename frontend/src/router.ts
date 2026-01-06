@@ -16,7 +16,6 @@ const AvailabilityView = defineAsyncComponent(() => import('@/views/Availability
 const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView/index.vue'));
 const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView/index.vue'));
-const ProfileView = defineAsyncComponent(() => import('@/views/ProfileView.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const DocsView = defineAsyncComponent(() => import('@/views/DocsView.vue'));
 const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
@@ -131,11 +130,6 @@ const routes: RouteRecordRaw[] = [
     path: '/settings/:view?',
     name: 'settings',
     component: SettingsView,
-  },
-  {
-    path: '/profile',
-    name: 'profile',
-    component: ProfileView,
   },
   {
     path: '/contact',

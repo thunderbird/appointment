@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
@@ -15,6 +15,7 @@ import {
   PhUserSquare,
 } from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
+import { accountsTbProfileUrlKey } from '@/keys';
 
 // component constants
 const userStore = useUserStore();
@@ -26,6 +27,8 @@ const navItems = [
   { route: 'availability', i18nKey: 'availability', icon: PhCalendarDot },
   { route: 'settings', i18nKey: 'settings', icon: PhGear },
 ];
+
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const menuOpen = ref(false);
 const myLinkTooltip = ref(t('navBar.shareMyLink'));
@@ -102,12 +105,12 @@ async function copyLink() {
           </summary>
 
           <ul @click="onMenuClose">
-            <router-link to="profile">
+            <a :href="accountsTbProfileUrl">
               <li>
                 <ph-user-square size="24" />
                 {{ t('label.userProfile') }}
               </li>
-            </router-link>
+            </a>
             <router-link to="report-bug">
               <li>
                 <ph-arrow-square-out size="24" />

@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
-import DropDown from '@/elements/DropDown.vue';
 import NavBarItem from '@/elements/NavBarItem.vue';
-import TextButton from '@/elements/TextButton.vue';
 import { TooltipPosition } from '@/definitions';
-import { PhArrowSquareOut, PhLinkSimple } from '@phosphor-icons/vue';
+import { PhLinkSimple } from '@phosphor-icons/vue';
 import { UserAvatar, ToolTip } from '@thunderbirdops/services-ui';
+import { accountsTbProfileUrlKey } from '@/keys';
 
 // component constants
 const user = useUserStore();
@@ -21,7 +20,8 @@ interface Props {
 }
 defineProps<Props>();
 
-const profileDropdown = ref();
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
+
 const myLinkTooltip = ref(t('label.copyLink'));
 
 /**
@@ -85,40 +85,9 @@ const copyLink = async () => {
           </button>
         </div>
 
-        <drop-down class="user-dropdown" ref="profileDropdown">
-          <template #trigger>
-            <user-avatar :username="user.data.username" :avatar-url="user.data.avatarUrl" />
-          </template>
-          <template #default>
-            <div
-              @click="profileDropdown.close()"
-              class="user-dropdown-content-container"
-            >
-              <router-link :to="{ name: 'profile' }">
-                {{ t('label.userProfile') }}
-              </router-link>
-              <text-button
-                v-show="user.myLink"
-                uid="myLink"
-                :label="t('navBar.shareMyLink')"
-                :copy="user.myLink"
-                :title="t('label.copy')"
-                class="share-link-button"
-                data-testid="user-nav-share-link-btn"
-              />
-              <router-link :to="{ name: 'report-bug' }" class="router-link-with-icon" data-testid="user-nav-report-bug-menu">
-                {{ t('navBar.reportBug') }} <ph-arrow-square-out class="size-4"/>
-              </router-link>
-              <router-link :to="{ name: 'contact' }" class="router-link-with-icon" data-testid="user-nav-contact-menu">
-                {{ t('label.contact') }} <ph-arrow-square-out class="size-4"/>
-              </router-link>
-              <hr class="border-teal-500" />
-              <router-link :to="{ name: 'logout' }" data-testid="user-nav-logout-menu">
-                {{ t('label.logOut') }}
-              </router-link>
-            </div>
-          </template>
-        </drop-down>
+        <a :href="accountsTbProfileUrl">
+          <user-avatar :username="user.data.username" :avatar-url="user.data.avatarUrl" />
+        </a>
       </div>
     </template>
   </header>
@@ -130,6 +99,15 @@ const copyLink = async () => {
 /* Hide header desktop in favor of mobile */
 .header-desktop {
   display: none;
+}
+
+/* Override default avatar styles from services-ui */
+:deep(.avatar.regular) {
+  span {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--colour-ti-base-dark);
+  }
 }
 
 @media (--md) {
@@ -198,52 +176,7 @@ const copyLink = async () => {
 
   .appointment-logo {
     img {
-      height: 2rem;
-    }
-  }
-
-  .user-dropdown {
-    align-self: center;
-  }
-
-  .user-dropdown-content-container {
-    position: static;
-    left: auto;
-    top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 12rem;
-    border-radius: 0.375rem;
-    background-color: var(--colour-neutral-raised);
-    color: var(--colour-ti-secondary);
-    padding: 1rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-
-    a {
-      padding: 0.5rem;
-    }
-
-    .share-link-button {
-      flex-direction: row-reverse;
-      justify-content: space-between;
-      border: none;
-      font-size: 1rem;
-      font-weight: 400;
-      line-height: 1.5rem;
-      color: inherit;
-      padding: 0.5rem;
-
-      &:hover {
-        background-color: inherit;
-        box-shadow: none;
-      }
-    }
-
-    .router-link-with-icon {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      height: 2.25rem;
     }
   }
 }
