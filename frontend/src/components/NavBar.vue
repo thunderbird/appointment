@@ -101,6 +101,15 @@ const copyLink = async () => {
   display: none;
 }
 
+/* Override default avatar styles from services-ui */
+:deep(.avatar.regular) {
+  span {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--colour-ti-base-dark);
+  }
+}
+
 @media (--md) {
   .header-desktop {
     position: fixed;
@@ -167,7 +176,7 @@ const copyLink = async () => {
 
   .appointment-logo {
     img {
-      height: 2rem;
+      height: 2.25rem;
     }
   }
 }
