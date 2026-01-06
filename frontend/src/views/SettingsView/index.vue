@@ -5,17 +5,16 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import { PrimaryButton, LinkButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { enumToObject } from '@/utils';
 import { callKey } from '@/keys';
-import { SettingsSections, AlertSchemes, ColourSchemes } from '@/definitions';
+import { SettingsSections, ColourSchemes } from '@/definitions';
 import { Alert, SubscriberResponse } from '@/models';
-import AlertBox from '@/elements/AlertBox.vue';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { PhCaretRight } from '@phosphor-icons/vue';
+import { PhCaretRight, PhX } from '@phosphor-icons/vue';
 
 // Page sections
 import AccountSettings from './components/AccountSettings.vue';
@@ -196,7 +195,14 @@ async function onSaveChanges() {
   }
 }
 
+function clearNotices() {
+  validationError.value = null;
+  saveSuccess.value = null;
+}
+
 function onRevertChanges() {
+  clearNotices();
+
   settingsStore.revertChanges();
 }
 
@@ -227,20 +233,39 @@ export default {
     <h2>{{ t('label.settings') }}</h2>
   </header>
 
-  <alert-box
-    class="alert-box"
+  <notice-bar
+    class="notice-bar"
     v-if="validationError"
-    :alert="validationError"
-    @close="validationError = null"
-  />
+    :type="NoticeBarTypes.Critical"
+  >
+    {{ validationError.title }}
 
-  <alert-box
-    class="alert-box"
+    <template #cta>
+      <icon-button
+        @click="clearNotices"
+        :title="t('label.close')"
+      >
+        <ph-x />
+      </icon-button>
+    </template>
+  </notice-bar>
+
+  <notice-bar
+    class="notice-bar"
     v-else-if="saveSuccess"
-    :alert="saveSuccess"
-    :scheme="AlertSchemes.Success"
-    @close="saveSuccess = null"
-  />
+    :type="NoticeBarTypes.Success"
+  >
+    {{ saveSuccess.title }}
+
+    <template #cta>
+      <icon-button
+        @click="clearNotices"
+        :title="t('label.close')"
+      >
+        <ph-x />
+      </icon-button>
+    </template>
+  </notice-bar>
 
   <div class="main-container">
     <!-- sidebar navigation -->
@@ -310,7 +335,7 @@ section {
   margin-block-end: 2rem;
 }
 
-.alert-box {
+.notice-bar {
   margin-block-end: 2rem;
 }
 
