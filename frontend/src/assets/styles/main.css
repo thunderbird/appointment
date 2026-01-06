@@ -35,7 +35,9 @@
   [type='password'],
   [type='password']:is(.dark *),
   [type='text'],
-  [type='text']:is(.dark *) {
+  [type='text']:is(.dark *),
+  [type='email'],
+  [type='email']:is(.dark *) {
     border: none;
     background: none;
     padding: 0;
