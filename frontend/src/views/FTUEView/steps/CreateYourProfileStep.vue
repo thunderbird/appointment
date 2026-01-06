@@ -109,6 +109,7 @@ const onSubmit = async () => {
       :outer-prefix="quickLink"
       v-model="username"
       :error="usernameError"
+      :help="t('ftue.urlUsernameHelp')"
     >
       {{ t('ftue.urlUsername') }}
     </text-input>
