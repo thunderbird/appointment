@@ -7,11 +7,22 @@ import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import NavBarMobile from '@/components/NavBarMobile.vue';
+import { accountsTbProfileUrlKey } from '@/keys';
 
 
 describe('NavBarMobile', () => {
   var app;
   var wrapper;
+  const testAccountsTbProfileUrl = 'https://accounts.tb.pro/dashboard';
+
+  const getMountOptions = () => ({
+    global: {
+      plugins: [i18ninstance, router],
+      provide: {
+        [accountsTbProfileUrlKey]: testAccountsTbProfileUrl,
+      },
+    },
+  });
 
   beforeEach(() => {
     app = withSetup();
@@ -23,11 +34,7 @@ describe('NavBarMobile', () => {
   });
 
   it('renders correctly when not logged in', () => {
-    wrapper = mount(NavBarMobile, {
-      global: {
-        plugins: [i18ninstance, router],
-      },
-    });
+    wrapper = mount(NavBarMobile, getMountOptions());
 
     // verify all expected router-link child components were rendered (only one when not signed in)
     const allRouterLinks = wrapper.findAllComponents(RouterLink);
@@ -45,11 +52,7 @@ describe('NavBarMobile', () => {
     user.data.accessToken = 'abc';
     expect(user.authenticated).toBe(true);
 
-    wrapper = mount(NavBarMobile, {
-      global: {
-        plugins: [i18ninstance, router],
-      },
-    });
+    wrapper = mount(NavBarMobile, getMountOptions());
 
     // verify all expected router-link child components were rendered (only one when menu is closed)
     const allRouterLinks = wrapper.findAllComponents(RouterLink);
@@ -67,11 +70,7 @@ describe('NavBarMobile', () => {
     user.data.accessToken = 'abc';
     expect(user.authenticated).toBe(true);
 
-    wrapper = mount(NavBarMobile, {
-      global: {
-        plugins: [i18ninstance, router],
-      },
-    });
+    wrapper = mount(NavBarMobile, getMountOptions());
 
     // click to open/show the menu
     const menuButton = wrapper.find('button[aria-label="Open menu"]');
@@ -79,12 +78,11 @@ describe('NavBarMobile', () => {
 
     // verify all expected router-link child components were rendered when signed in and menu is now shown
     const expectedLinks = [
-      'dashboard', // there are two dashboard rounter-link child components
+      'dashboard', // there are two dashboard router-link child components
       'dashboard',
       'bookings',
       'availability',
       'settings',
-      'profile',
       'report-bug',
       'contact',
       'logout'
@@ -103,6 +101,10 @@ describe('NavBarMobile', () => {
     for (let expLink of expectedLinks) {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
+
+    // verify the anchor tag to accountsTbProfileUrl exists and has the correct href
+    const profileAnchor = wrapper.find('a[href="' + testAccountsTbProfileUrl + '"]');
+    expect(profileAnchor.exists(), 'expected anchor tag to accountsTbProfileUrl to be rendered').toBe(true);
   });
 
   it('able to click the copy link button', async () => {
@@ -121,11 +123,7 @@ describe('NavBarMobile', () => {
     user.myLink = 'https://stage.apt.mt/fakeuser/6e16a160/';
     expect(user.authenticated).toBe(true);
 
-    wrapper = mount(NavBarMobile, {
-      global: {
-        plugins: [i18ninstance, router],
-      },
-    });
+    wrapper = mount(NavBarMobile, getMountOptions());
 
     // need to open the menu in order to access the copy link option
     const menuButton = wrapper.find('button[aria-label="Open menu"]');

@@ -74,6 +74,7 @@ html {
    */
   --colour-ti-black: #000000;
   --colour-ti-base: #1A202C;
+  --colour-ti-base-dark: #EEEEF0; /* Forced dark mode colour */
   --colour-ti-secondary: #4C4D58;
   --colour-ti-muted: #737584;
   --colour-ti-highlight: #1373D9;
