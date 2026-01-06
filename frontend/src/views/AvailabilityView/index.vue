@@ -110,10 +110,13 @@ async function onSaveChanges() {
   })
 }
 
-function onRevertChanges() {
+function clearNotices() {
   validationError.value = null;
   saveSuccess.value = null;
+}
 
+function onRevertChanges() {
+  clearNotices();
   availabilityStore.revertChanges();
 }
 </script>
@@ -166,7 +169,7 @@ export default {
 
       <template #cta>
         <icon-button
-          @click="validationError = null"
+          @click="clearNotices"
           :title="t('label.close')"
           class="btn-close"
         >
@@ -184,7 +187,7 @@ export default {
 
       <template #cta>
         <icon-button
-          @click="saveSuccess = null"
+          @click="clearNotices"
           :title="t('label.close')"
           class="btn-close"
         >
