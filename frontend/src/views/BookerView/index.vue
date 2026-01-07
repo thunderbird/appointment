@@ -127,43 +127,41 @@ export default {
 </script>
 
 <template>
-  <div>
-    <!-- booking page content: loading -->
-    <main
-      v-if="activeView === BookingCalendarView.Loading"
-      class="booking-loading-container"
-    >
-      <loading-spinner/>
-    </main>
-    <!-- booking page content: invalid link -->
-    <main
-      v-else-if="activeView === BookingCalendarView.Invalid"
-      class="booking-invalid-container"
-    >
-      <booking-view-error
-        :heading="errorHeading"
-        :body="errorBody"
-      />
-    </main>
-    <!-- booking page content: successful booking -->
-    <main
-      v-else-if="activeView === BookingCalendarView.Success"
-      class="booking-success-container"
-    >
-      <booking-view-success
-        :attendee-email="attendee.email"
-        :selected-event="selectedEvent"
-        :requested="appointment?.booking_confirmation"
-      />
-    </main>
-    <!-- booking page content: time slot selection -->
-    <main
-      v-else
-      class="booking-slot-selection-container"
-    >
-      <booking-view-slot-selection />
-    </main>
-  </div>
+  <!-- booking page content: loading -->
+  <main
+    v-if="activeView === BookingCalendarView.Loading"
+    class="booking-loading-container"
+  >
+    <loading-spinner/>
+  </main>
+  <!-- booking page content: invalid link -->
+  <main
+    v-else-if="activeView === BookingCalendarView.Invalid"
+    class="booking-invalid-container"
+  >
+    <booking-view-error
+      :heading="errorHeading"
+      :body="errorBody"
+    />
+  </main>
+  <!-- booking page content: successful booking -->
+  <main
+    v-else-if="activeView === BookingCalendarView.Success"
+    class="booking-success-container"
+  >
+    <booking-view-success
+      :attendee-email="attendee.email"
+      :selected-event="selectedEvent"
+      :requested="appointment?.booking_confirmation"
+    />
+  </main>
+  <!-- booking page content: time slot selection -->
+  <main
+    v-else
+    class="booking-slot-selection-container"
+  >
+    <booking-view-slot-selection />
+  </main>
 </template>
 
 <style scoped>
@@ -209,6 +207,12 @@ export default {
 @media (--md) {
   .booking-success-container {
     flex-direction: row;
+  }
+}
+
+@media (--lg) {
+  .booking-slot-selection-container {
+    padding-inline: 3.5rem;
   }
 }
 </style>

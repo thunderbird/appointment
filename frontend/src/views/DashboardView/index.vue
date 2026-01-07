@@ -71,11 +71,13 @@ export default {
         <user-calendar-sync />
       </div>
 
-      <week-calendar
-        :active-date-range="activeDateRange"
-        :events="remoteEvents"
-        :pending-appointments="pendingAppointments"
-      />
+      <div class="calendar-container">
+        <week-calendar
+          :active-date-range="activeDateRange"
+          :events="remoteEvents"
+          :pending-appointments="pendingAppointments"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -94,6 +96,10 @@ export default {
   flex-direction: column;
   width: 100%;
   margin-block-start: 0.25rem;
+
+  .calendar-container {
+    margin-block-end: 2rem;
+  }
 }
 
 .calendar-header-container {

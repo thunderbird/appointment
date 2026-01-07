@@ -539,6 +539,7 @@
       "completelyRemoveUser": "Hier wird ein Benutzer vollständig aus Thunderbird Appointment entfernt, einschließlich aller Benutzerdaten. Diese Funktion bitte nicht ausführen, wenn es keine Aufforderung dafür gab.",
       "disableAccountFirst": "Das Konto muss zunächst deaktiviert sein."
     },
+    "bookATimeToMeetWith": "Buche einen Zeitpunkt um mit {name} zu treffen",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalender gespeichert sind.",
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erstellen.",
@@ -560,7 +561,6 @@
     "login": {
       "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
     },
-    "nameIsInvitingYou": "{name} lädt dich ein zu",
     "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, müssen Buchungen dieses Zeitplans bestätigt oder ablehnt werden. Wenn diese Option deaktiviert ist, werden alle Zeiten automatisch bestätigt.",
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",

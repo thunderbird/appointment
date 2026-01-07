@@ -111,23 +111,6 @@ const bookEvent = async () => {
 
 <template>
   <aside>
-    <p class="invitation-text" data-testid="booking-view-inviting-you-text">
-      {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
-    </p>
-    <h1 class="appointment-title" data-testid="booking-view-title-text">
-      {{ appointment.title }}
-    </h1>
-    <p v-if="appointment.details" class="appointment-details">
-      {{ appointment.details }}
-    </p>
-    <div class="timezone-section">
-      <span class="timezone-label">{{ t('label.timeZone') }}:</span>
-      <div class="timezone-display">
-        <ph-globe size="24" />
-        {{ timezone }}
-      </div>
-    </div>
-
     <template v-if="selectedEvent">
       <div class="appointment-card">
         <h3>{{ t('label.bookingDetails') }}</h3>
@@ -183,48 +166,6 @@ const bookEvent = async () => {
 @import '@/assets/styles/custom-media.pcss';
 
 aside {
-  .invitation-text {
-    margin-bottom: 0.825rem;
-    font-size: 0.825rem;
-    font-weight: 600;
-    color: var(--colour-ti-muted);
-  }
-
-  .appointment-title {
-    margin-bottom: 0.825rem;
-    font-size: 1.725rem;
-    line-height: 2.25rem;
-    color: var(--colour-ti-base);
-  }
-
-  .appointment-details {
-    margin-bottom: 1.5rem;
-    color: var(--colour-ti-base);
-  }
-
-  .timezone-section {
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-
-    .timezone-label {
-      font-size: 0.875rem;
-      line-height: 1.75rem;
-      color: var(--colour-ti-base);
-    }
-
-    .timezone-display {
-      font-size: 0.875rem;
-      line-height: 1.25rem;
-      color: var(--colour-accent-teal);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-  }
-
   .appointment-card {
     display: flex;
     flex-direction: column;
@@ -298,10 +239,6 @@ aside {
     position: sticky;
     top: 5rem;
     width: 470px;
-
-    .timezone-section {
-      flex-direction: row;
-    }
   }
 }
 </style>
