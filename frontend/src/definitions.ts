@@ -306,10 +306,6 @@ export enum MetricEvents {
   WaitingListEmailRemoved = 'apmt.signup.email-removed',
 }
 
-export enum Dismissibles {
-  BetaWarning = 'beta-warning'
-}
-
 export default {
   AlertSchemes,
   AuthSchemes,
@@ -324,7 +320,6 @@ export default {
   ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
-  Dismissibles,
   EventLocationType,
   ExternalConnectionProviders,
   FtueStep,

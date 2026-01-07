@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { Dismissibles } from '@/definitions';
 import {
   ref, inject, onMounted, computed,
 } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, refreshKey } from '@/keys';
 import { TimeFormatted } from '@/models';
-import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import QuickActionsSideBar from './components/QuickActionsSideBar.vue';
 import WeekPicker from './components/WeekPicker.vue';
 import UserCalendarSync from './components/UserCalendarSync.vue';
@@ -16,18 +13,14 @@ import WeekCalendar from './components/WeekCalendar.vue';
 
 // stores
 import { useCalendarStore } from '@/stores/calendar-store';
-import { useUserActivityStore } from '@/stores/user-activity-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 
-const { t } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const dj = inject(dayjsKey);
 const refresh = inject(refreshKey);
 
-const userActivityStore = useUserActivityStore();
 const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
-const { data: userActivityData } = storeToRefs(userActivityStore);
 const { remoteEvents } = storeToRefs(calendarStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 
@@ -45,10 +38,6 @@ async function onDateChange(dateObj: TimeFormatted) {
   activeDate.value = start.add(end.diff(start, 'minutes') / 2, 'minutes');
 
   await calendarStore.getRemoteEvents(activeDate.value);
-};
-
-function dismiss() {
-  userActivityStore.dismiss(Dismissibles.BetaWarning);
 };
 
 onMounted(async () => {
@@ -69,41 +58,6 @@ export default {
 </script>
 
 <template>
-  <notice-bar :type="NoticeBarTypes.Info" id="beta-warning" v-if="!userActivityData.dismissedBetaWarning">
-    <p>{{ t('notices.betaWarning.heading') }}</p>
-    <ul>
-      <li>{{ t('notices.betaWarning.list.0') }}</li>
-      <li>
-        <i18n-t keypath="notices.betaWarning.list.1">
-          <template v-slot:connectedAccounts>
-            <router-link class="underline" :to="{ path: '/settings/connectedAccounts' }" target="_blank">
-              {{ t('notices.betaWarning.linkText.connectedAccounts') }}
-            </router-link>
-          </template>
-        </i18n-t>
-      </li>
-      <li>
-        <i18n-t keypath="notices.betaWarning.list.2">
-          <template v-slot:contactUs>
-            <router-link class="underline" :to="{ name: 'contact' }" target="_blank">
-              {{ t('notices.betaWarning.linkText.contactUs') }}
-            </router-link>
-          </template>
-          <template v-slot:matrixChannel>
-            <a class="underline" href="https://matrix.to/#/#tb-services:mozilla.org" target="_blank">
-              {{ t('notices.betaWarning.linkText.matrixChannel') }}
-            </a>
-          </template>
-        </i18n-t>
-      </li>
-    </ul>
-    <template #cta>
-      <primary-button class="dismiss" size="small" @click="dismiss">
-        {{ t('label.dismiss') }}
-      </primary-button>
-    </template>
-  </notice-bar>
-
   <div class="main-container">
     <quick-actions-side-bar />
   
@@ -151,52 +105,7 @@ export default {
   gap: 2rem;
 }
 
-#beta-warning {
-  position: relative;
-  /* The navbar provides margin already */
-  margin-block-end: 2rem;
-
-  :deep(.icon) {
-    top: 0.75rem;
-  }
-
-  :deep(.body) {
-    text-align: left;
-    margin-left: 0.5rem;
-    line-height: 1.5;
-
-    a {
-      text-decoration: underline;
-    }
-
-    ul {
-      list-style: circle;
-      margin-left: 1rem;
-      font-weight: 400;
-    }
-
-    .dismiss {
-      margin: 1rem auto;
-    }
-
-    .underline {
-      text-decoration-line: underline;
-    }
-  }
-}
-
 @media (--md) {
-  #beta-warning {
-    :deep(.body) {
-      .dismiss {
-        position: absolute;
-        top: 0.75rem;
-        right: 1rem;
-        margin: 0;
-      }
-    }
-  }
-
   .main-container {
     flex-direction: row;
     gap: 2rem;
