@@ -2,6 +2,7 @@ import sentry_sdk
 import logging
 import os
 import zoneinfo
+from posthog import Posthog
 
 from oauthlib.oauth2 import OAuth2Error
 from requests import HTTPError
@@ -25,6 +26,7 @@ from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_schedule_or_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
+from ..dependencies.metrics import get_posthog
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -45,6 +47,114 @@ from fastapi import APIRouter, Depends, BackgroundTasks, Request
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
+
+
+def _add_sentry_schedule_breadcrumb(message: str, schedule=None, slot=None, extra: dict | None = None):
+    """Lightweight Sentry breadcrumb for schedule flows."""
+    data = dict(extra or {})
+
+    if schedule and getattr(schedule, 'id', None) is not None:
+        sentry_sdk.set_tag('schedule_id', schedule.id)
+
+        data.setdefault('schedule_id', schedule.id)
+        data.setdefault('booking_confirmation', getattr(schedule, 'booking_confirmation', None))
+
+    if slot:
+        slot_id = getattr(slot, 'id', None)
+        if slot_id is not None:
+            data.setdefault('slot_id', slot_id)
+
+        slot_start = getattr(slot, 'start', None)
+        if slot_start is not None:
+            try:
+                data.setdefault('slot_start', slot_start.isoformat())
+            except AttributeError:
+                pass
+
+    sentry_sdk.add_breadcrumb(category='schedule', message=message, level='info', data=data)
+
+
+def _schedule_metric_payload(
+    schedule=None, calendar=None, slot=None, attendee=None, subscriber=None, extra: dict | None = None
+):
+    payload = {
+        'schedule_id': getattr(schedule, 'id', None),
+        'calendar_id': getattr(calendar, 'id', None),
+        'calendar_provider': getattr(getattr(calendar, 'provider', None), 'name', getattr(calendar, 'provider', None)),
+        'booking_confirmation': getattr(schedule, 'booking_confirmation', None),
+        'meeting_link_provider': getattr(
+            getattr(schedule, 'meeting_link_provider', None), 'name', getattr(schedule, 'meeting_link_provider', None)
+        ),
+        'owner_timezone': getattr(subscriber, 'timezone', None),
+    }
+
+    if slot is not None:
+        payload.update(
+            {
+                'slot_duration': getattr(slot, 'duration', None),
+                'slot_status': getattr(
+                    getattr(slot, 'booking_status', None), 'name', getattr(slot, 'booking_status', None)
+                ),
+            }
+        )
+
+        slot_start = getattr(slot, 'start', None)
+        if slot_start is not None:
+            try:
+                payload['slot_start'] = slot_start.isoformat()
+            except AttributeError:
+                pass
+
+    if attendee is not None:
+        attendee_email = getattr(attendee, 'email', None)
+        attendee_timezone = getattr(attendee, 'timezone', None)
+
+        if attendee_email and '@' in attendee_email:
+            payload['attendee_email_domain'] = attendee_email.split('@')[-1]
+        if attendee_timezone:
+            payload['attendee_timezone'] = attendee_timezone
+
+    if extra:
+        payload.update(extra)
+
+    return {k: v for k, v in payload.items() if v is not None}
+
+
+def _capture_schedule_metric(
+    event: str,
+    subscriber: Subscriber | None,
+    posthog: Posthog | None,
+    schedule=None,
+    calendar=None,
+    slot=None,
+    attendee=None,
+    extra: dict | None = None,
+):
+    payload = _schedule_metric_payload(
+        schedule=schedule, calendar=calendar, slot=slot, attendee=attendee, subscriber=subscriber, extra=extra
+    )
+
+    if payload.get('calendar_provider') and os.getenv('SENTRY_DSN'):
+        sentry_sdk.set_tag('calendar_provider', payload['calendar_provider'])
+
+    if os.getenv('SENTRY_DSN'):
+        _add_sentry_schedule_breadcrumb(event, schedule=schedule, slot=slot, extra=payload)
+
+    if not posthog:
+        return
+
+    distinct_id = None
+    if subscriber and getattr(subscriber, 'unique_hash', None):
+        distinct_id = subscriber.unique_hash
+    elif getattr(schedule, 'id', None) is not None:
+        distinct_id = f'schedule-{schedule.id}'
+    else:
+        distinct_id = 'unknown-schedule'
+
+    try:
+        posthog.capture(distinct_id=distinct_id, event=event, properties=payload)
+    except Exception as exc:
+        logging.warning('Failed to capture Posthog event %s: %s', event, exc)
 
 
 def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schemas.SlotBase) -> bool:
@@ -245,6 +355,7 @@ def request_schedule_availability_slot(
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client=Depends(get_google_client),
+    posthog: Posthog | None = Depends(get_posthog),
 ):
     """endpoint to request a time slot for a schedule via public link and send confirmation mail to owner if set"""
 
@@ -267,6 +378,17 @@ def request_schedule_availability_slot(
     calendar = repo.calendar.get(db, calendar_id=schedule.calendar_id)
     if calendar is None:
         raise validation.CalendarNotFoundException()
+
+    _capture_schedule_metric(
+        'apmt.schedule.request_slot.received',
+        subscriber,
+        posthog,
+        schedule=schedule,
+        calendar=calendar,
+        slot=s_a.slot,
+        attendee=s_a.attendee,
+        extra={'status': 'received'},
+    )
 
     # Ensure the request is valid
     if not is_this_a_valid_booking_time(schedule, s_a.slot):
@@ -296,11 +418,31 @@ def request_schedule_availability_slot(
         except UnexpectedBehaviourWarning as ex:
             sentry_sdk.capture_exception(ex)
 
+        _capture_schedule_metric(
+            'apmt.schedule.request_slot.rejected',
+            subscriber,
+            posthog,
+            schedule=schedule,
+            calendar=calendar,
+            slot=s_a.slot,
+            attendee=s_a.attendee,
+            extra={'status': 'rejected', 'reason': 'invalid_booking_time'},
+        )
         raise validation.SlotNotFoundException()
 
     # check if slot still available, might already be taken at this time
     slot = schemas.SlotBase(**s_a.slot.model_dump())
     if repo.slot.exists_on_schedule(db, slot, schedule.id):
+        _capture_schedule_metric(
+            'apmt.schedule.request_slot.rejected',
+            subscriber,
+            posthog,
+            schedule=schedule,
+            calendar=calendar,
+            slot=slot,
+            attendee=s_a.attendee,
+            extra={'status': 'rejected', 'reason': 'slot_exists_on_schedule'},
+        )
         raise validation.SlotAlreadyTakenException()
 
     # We need to verify that the time is actually available on the remote calendar
@@ -339,6 +481,16 @@ def request_schedule_availability_slot(
     has_collision = Tools.events_roll_up_difference([slot], existing_remote_events)
     # If we only have booked entries in this list then it means our slot is not available.
     if all(evt.booking_status == BookingStatus.booked for evt in has_collision):
+        _capture_schedule_metric(
+            'apmt.schedule.request_slot.rejected',
+            subscriber,
+            posthog,
+            schedule=schedule,
+            calendar=calendar,
+            slot=slot,
+            attendee=s_a.attendee,
+            extra={'status': 'rejected', 'reason': 'remote_collision', 'collision_count': len(has_collision)},
+        )
         raise validation.SlotAlreadyTakenException()
 
     # create slot in db with token and expiration date
@@ -376,6 +528,20 @@ def request_schedule_availability_slot(
     db.commit()
     db.refresh(slot)
 
+    _capture_schedule_metric(
+        'apmt.schedule.request_slot.persisted',
+        subscriber,
+        posthog,
+        schedule=schedule,
+        calendar=calendar,
+        slot=slot,
+        attendee=attendee,
+        extra={
+            'status': 'pending_confirmation' if schedule.booking_confirmation else 'auto_confirm',
+            'appointment_id': appointment.id if appointment else None,
+        },
+    )
+
     # generate confirm and deny links with encoded booking token and signed owner url
     url = f'{signed_url_by_subscriber(subscriber)}/confirm/{slot.id}/{token}'
 
@@ -384,7 +550,7 @@ def request_schedule_availability_slot(
     date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone))
 
     # If bookings are configured to be confirmed by the owner for this schedule,
-    # Create HOLD event in owners calender and send emails to owner for confirmation and attendee for information
+    # Create HOLD event in owners calendar and send emails to owner for confirmation and attendee for information
     if schedule.booking_confirmation:
         # Sending confirmation email to owner
         background_tasks.add_task(
@@ -413,11 +579,26 @@ def request_schedule_availability_slot(
             uuid=slot.appointment.uuid if slot.appointment else None,
         )
 
-        # create HOLD event in owners calender
+        # create HOLD event in owners calendar
         event = save_remote_event(event, calendar, subscriber, slot, db, redis, google_client)
         # Add the external id if available
         if appointment and event.external_id:
             repo.appointment.update_external_id(db, appointment, event.external_id)
+
+        _capture_schedule_metric(
+            'apmt.schedule.hold_event.created',
+            subscriber,
+            posthog,
+            schedule=schedule,
+            calendar=calendar,
+            slot=slot,
+            attendee=attendee,
+            extra={
+                'status': 'pending_confirmation',
+                'appointment_id': appointment.id if appointment else None,
+                'external_id': getattr(event, 'external_id', None),
+            },
+        )
 
         # Sending confirmation pending information email to attendee with HOLD event attached
         Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
@@ -425,7 +606,17 @@ def request_schedule_availability_slot(
     # If no confirmation is needed, directly confirm the booking and send invitation mail
     else:
         handle_schedule_availability_decision(
-            True, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
+            True,
+            calendar,
+            schedule,
+            subscriber,
+            slot,
+            db,
+            redis,
+            google_client,
+            background_tasks,
+            posthog=posthog,
+            decision_source='auto',
         )
 
         # Notify the subscriber that they have a new confirmed booking
@@ -456,6 +647,7 @@ def decide_on_schedule_availability_slot(
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
+    posthog: Posthog | None = Depends(get_posthog),
 ):
     """endpoint to react to owners decision to a request of a time slot of his public link"""
     subscriber = repo.subscriber.verify_link(db, data.owner_url)
@@ -493,7 +685,17 @@ def decide_on_schedule_availability_slot(
 
     # handle decision, do the actual booking if confirmed and send invitation mail
     handle_schedule_availability_decision(
-        data.confirmed, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
+        data.confirmed,
+        calendar,
+        schedule,
+        subscriber,
+        slot,
+        db,
+        redis,
+        google_client,
+        background_tasks,
+        posthog=posthog,
+        decision_source='owner',
     )
 
     return schemas.AvailabilitySlotAttendee(
@@ -505,7 +707,17 @@ def decide_on_schedule_availability_slot(
 
 
 def handle_schedule_availability_decision(
-    confirmed: bool, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
+    confirmed: bool,
+    calendar,
+    schedule,
+    subscriber,
+    slot,
+    db,
+    redis,
+    google_client,
+    background_tasks,
+    posthog: Posthog | None = None,
+    decision_source: str = 'owner',
 ):
     """Actual handling of the availability decision
     if confirmed: create an event in remote calendar and send invitation mail
@@ -518,6 +730,23 @@ def handle_schedule_availability_decision(
         appointment = slot.appointment
         db.add(appointment)
         appointment_calendar = appointment.calendar
+
+    active_calendar = appointment_calendar or calendar
+
+    _capture_schedule_metric(
+        'apmt.schedule.decision.received',
+        subscriber,
+        posthog,
+        schedule=schedule,
+        calendar=active_calendar,
+        slot=slot,
+        attendee=slot.attendee if slot else None,
+        extra={
+            'confirmed': confirmed,
+            'decision_source': decision_source,
+            'appointment_id': appointment.id if appointment else None,
+        },
+    )
 
     # TODO: Check booking expiration date
     # check if request was denied
@@ -533,6 +762,20 @@ def handle_schedule_availability_decision(
         if appointment:
             uuid = slot.appointment.external_id if slot.appointment.external_id else str(slot.appointment.uuid)
             delete_remote_event(uuid, appointment_calendar, subscriber, db, redis, google_client)
+
+        _capture_schedule_metric(
+            'apmt.schedule.decision.declined',
+            subscriber,
+            posthog,
+            schedule=schedule,
+            calendar=active_calendar,
+            slot=slot,
+            attendee=slot.attendee if slot else None,
+            extra={
+                'decision_source': decision_source,
+                'appointment_id': appointment.id if appointment else None,
+            },
+        )
 
         return True
 
@@ -606,6 +849,21 @@ def handle_schedule_availability_decision(
     slot = repo.slot.book(db, slot.id)
 
     Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+
+    _capture_schedule_metric(
+        'apmt.schedule.decision.confirmed',
+        subscriber,
+        posthog,
+        schedule=schedule,
+        calendar=active_calendar,
+        slot=slot,
+        attendee=slot.attendee if slot else None,
+        extra={
+            'decision_source': decision_source,
+            'appointment_id': appointment.id if appointment else None,
+            'external_id': getattr(event, 'external_id', None),
+        },
+    )
 
     return True
 
