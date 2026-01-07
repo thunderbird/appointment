@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, inject } from 'vue';
 import { BookingCalendarView } from '@/definitions';
-import { Appointment, Attendee, Slot, GuestUserInfo } from '@/models';
+import { Appointment, Attendee, Slot } from '@/models';
 import { dayjsKey } from '@/keys';
 
 /**
@@ -19,8 +19,6 @@ export const useBookingViewStore = defineStore('bookingView', () => {
   const selectedEvent = ref<Appointment & Slot>(null); // The selected slot also needs some data from its parent
   const appointment = ref<Appointment>(null);
   const attendee = ref<Attendee>(null); // Attendee can either be a guest or an actual user
-  const guestUserInfo = ref<GuestUserInfo>({ name: '', email: '' }); // Used in the SlotSelectionUserInfo form
-  const guestUserInfoValid = ref<boolean>(false); // Used in the SlotSelectionUserInfo form
 
   /**
    * Restore default state, set date to today and remove other data
@@ -31,7 +29,6 @@ export const useBookingViewStore = defineStore('bookingView', () => {
     selectedEvent.value = null;
     appointment.value = null;
     attendee.value = null;
-    guestUserInfo.value = { name: '', email: '' };
   };
 
   return {
@@ -42,8 +39,6 @@ export const useBookingViewStore = defineStore('bookingView', () => {
     selectedEvent,
     appointment,
     attendee,
-    guestUserInfo,
-    guestUserInfoValid,
     // Funcs
     $reset,
   };

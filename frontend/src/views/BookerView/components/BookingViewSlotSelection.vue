@@ -76,14 +76,14 @@ async function onDateChange(dateObj: TimeFormatted) {
           :selectable-slots="appointment.slots"
           @event-selected="selectEvent"
         />
-
-        <div class="calendar-footer">
-          <ph-globe size="16" />
-          <span>{{ t('label.timeZone') }}: {{ timezone }}</span>
-        </div>
       </div>
-  
+
       <slot-selection-aside />
+    </div>
+
+    <div class="calendar-footer">
+      <ph-globe size="16" />
+      <span>{{ t('label.timeZone') }}: {{ timezone }}</span>
     </div>
   </template>
 </template>
@@ -103,14 +103,14 @@ async function onDateChange(dateObj: TimeFormatted) {
 
 .calendar-container {
   flex: 1;
+}
 
-  .calendar-footer {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-block: 1.25rem;
-    font-size: 0.6875rem;
-  }
+.calendar-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 1.25rem;
+  font-size: 0.6875rem;
 }
 
 @media (--md) {

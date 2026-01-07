@@ -16,11 +16,6 @@ export type Attendee = {
   timezone: string;
 };
 
-export type GuestUserInfo = {
-  name?: string;
-  email: string;
-}
-
 export type Slot = {
   id: number;
   start: Dayjs|string;

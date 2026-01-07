@@ -20,11 +20,13 @@ const { appointment } = storeToRefs(calendarStore);
       <div class="booking-header-time-place">
         <div class="booking-header-time-place-item">
           <ph-clock size="16" />
-          <span>{{ appointment.slot_duration }} minutes</span>
+          <span>{{ t('units.minutes', { value: appointment.slot_duration }) }}</span>
         </div>
         <div class="booking-header-time-place-item">
           <ph-map-pin size="16" />
-          <span>Online meeting</span>
+          <!-- TODO: We are currently only allowing for events to be online but the backend defaults to in person -->
+          <!-- <span>{{ selectedEvent.location_type === EventLocationType.Online ? t('label.virtual') : t('label.inPerson') }}</span> -->
+          <span>{{ t('label.onlineMeeting') }}</span>
         </div>
       </div>
     </div>

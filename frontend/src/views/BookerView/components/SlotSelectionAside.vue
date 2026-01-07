@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, useTemplateRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import {
@@ -7,14 +7,13 @@ import {
   PhClock,
   PhMapPin
 } from '@phosphor-icons/vue';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { TextInput, PrimaryButton } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
 import { SlotResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import { BookingCalendarView, MetricEvents, AlertSchemes } from '@/definitions';
-import SlotSelectionUserInfo from './SlotSelectionUserInfo.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 
 const { t } = useI18n();
@@ -26,14 +25,16 @@ const userStore = useUserStore();
 const {
   appointment,
   selectedEvent,
-  guestUserInfo,
-  guestUserInfoValid,
   attendee,
   activeView
 } = storeToRefs(useBookingViewStore());
 
+const userInfoForm = useTemplateRef<HTMLFormElement>('userInfoForm');
+
 const bookingRequestLoading = ref<boolean>(false);
 const bookingRequestError = ref<string>('');
+const guestUserName = ref<string>('');
+const guestUserEmail = ref<string>('');
 
 const timezone = computed(() => dj.tz.guess());
 const selectedSlotDate = computed(() => dj(selectedEvent.value?.start).format('LL'))
@@ -51,6 +52,11 @@ const selectedSlotTimeDuration = computed(() => {
  * Book or request to book a selected time.
  */
 const bookEvent = async () => {
+  if (!userInfoForm.value.checkValidity()) {
+    userInfoForm.value.reportValidity();
+    return;
+  }
+
   bookingRequestLoading.value = true;
   bookingRequestError.value = '';
 
@@ -60,8 +66,8 @@ const bookEvent = async () => {
     name: userStore.data.name,
     timezone: userStore.data.settings.timezone,
   } : {
-    email: guestUserInfo.value.email,
-    name: guestUserInfo.value.name,
+    email: guestUserEmail.value,
+    name: guestUserName.value,
     timezone: timezone.value,
   }
 
@@ -142,27 +148,35 @@ const bookEvent = async () => {
         </div>
       </div>
 
-      <slot-selection-user-info />
+      <form ref="userInfoForm" class="user-info-form" @submit.prevent @keyup.enter="bookEvent">
+        <text-input required name="booker-view-user-name" v-model="guestUserName">
+          {{ t('label.name') }}
+        </text-input>
 
-      <alert-box
-        v-if="bookingRequestError"
-        :alert="{ title: bookingRequestError }"
-        :scheme="AlertSchemes.Error"
-        @close="bookingRequestError = ''"
-        class="booking-request-error"
-      />
+        <text-input required type="email" name="booker-view-user-email" v-model="guestUserEmail">
+          {{ t('label.email') }}
+        </text-input>
 
-      <primary-button
-        v-if="selectedEvent"
-        :label="t('label.confirmSelection')"
-        :disabled="bookingRequestLoading || !guestUserInfoValid"
-        @click="bookEvent"
-        :title="t('label.confirm')"
-        class="confirm-selection-button"
-        data-testid="booking-view-confirm-selection-button"
-      >
-        {{ t('label.confirmSelection') }}
-      </primary-button>
+        <alert-box
+          v-if="bookingRequestError"
+          :alert="{ title: bookingRequestError }"
+          :scheme="AlertSchemes.Error"
+          @close="bookingRequestError = ''"
+          class="booking-request-error"
+        />
+
+        <primary-button
+          v-if="selectedEvent && userInfoForm"
+          :label="t('label.confirmSelection')"
+          :disabled="bookingRequestLoading"
+          @click="bookEvent"
+          :title="t('label.confirm')"
+          class="confirm-selection-button"
+          data-testid="booking-view-confirm-selection-button"
+        >
+          {{ t('label.confirmSelection') }}
+        </primary-button>
+      </form>
 
       <p
         v-if="selectedEvent && !appointment.booking_confirmation"
@@ -276,6 +290,12 @@ aside {
     }
   }
 
+  .user-info-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  } 
+
   .booking-request-error {
     margin-block: 1rem;
     border-radius: 0.25rem;
@@ -285,11 +305,7 @@ aside {
   }
 
   .booking-request-error {
-    margin-block: 1rem 0;
-  }
-
-  .confirm-selection-button {
-    margin-block-start: 1rem;
+    margin-block: 0;
   }
 
   .confirmation-footer-note {
