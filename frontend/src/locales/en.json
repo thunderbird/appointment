@@ -265,7 +265,6 @@
     "connectedAs": "Connected as {name}",
     "contact": "Contact",
     "continue": "Continue",
-    "continueAsGuest": "Continue as Guest",
     "contributeToThisSite": "Contribute to this site",
     "cookies": "Cookies",
     "copied": "Copied",
@@ -364,6 +363,7 @@
     "next": "Next",
     "nextWeek": "Next week",
     "no": "No",
+    "noneSelected": "None selected",
     "notConnected": "Not connected",
     "notProvided": "Not Provided",
     "notVerified": "Not Verified",
@@ -411,7 +411,7 @@
     "searchAppointments": "Search bookings",
     "searchForCalendars": "Search for calendars",
     "secondaryTimeZone": "Secondary time zone",
-    "selectATimeFromTheCalendar": "Select a time from the calendar",
+    "selectATimeFromTheCalendar": "Select an open time slot from the calendar.",
     "selectCalendar": "Select calendar",
     "selectDays": "Select days",
     "selectDateForWeek": "Select date for week",
@@ -484,7 +484,8 @@
     "yes": "Yes",
     "youAreBookable": "You're bookable",
     "youAreNotBookable": "You're not bookable",
-    "youHaveUnsavedChanges": "You have unsaved changes"
+    "youHaveUnsavedChanges": "You have unsaved changes",
+    "yourAppointmentWillBeConfirmedAutomatically": "Your appointment will be confirmed automatically."
   },
   "locales": {
     "de": "German",

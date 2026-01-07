@@ -262,7 +262,6 @@
     "connectedAs": "Verbunden als {name}",
     "contact": "Kontakt",
     "continue": "Weiter",
-    "continueAsGuest": "Weiter als Gast",
     "contributeToThisSite": "Dieser Seite beitragen",
     "cookies": "Cookies",
     "copied": "Kopiert",
@@ -360,6 +359,7 @@
     "next": "Weiter",
     "nextWeek": "Nächste Woche",
     "no": "Nein",
+    "noneSelected": "Keine Auswahl",
     "earlier": "Früher",
     "notConnected": "Nicht verbunden",
     "notProvided": "Keine Angabe",
@@ -408,7 +408,7 @@
     "searchAppointments": "Termine durchsuchen",
     "searchForCalendars": "Nach Kalendern suchen",
     "secondaryTimeZone": "Sekundäre Zeitzone",
-    "selectATimeFromTheCalendar": "Zeit aus dem Kalender wählen",
+    "selectATimeFromTheCalendar": "Wähle einen freien Zeitpunkt aus dem Kalender",
     "selectCalendar": "Kalender auswählen",
     "selectDays": "Wochentage auswählen",
     "selectDateForWeek": "Datum für Woche auswählen",
@@ -481,7 +481,8 @@
     "yes": "Ja",
     "youAreBookable": "Du bist verfügbar",
     "youAreNotBookable": "Du bist nicht verfügbar",
-    "youHaveUnsavedChanges": "Du hast ungespeicherte Änderungen"
+    "youHaveUnsavedChanges": "Du hast ungespeicherte Änderungen",
+    "yourAppointmentWillBeConfirmedAutomatically": "Deine Buchung wird automatisch bestätigt."
   },
   "locales": {
     "de": "Deutsch",

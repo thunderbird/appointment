@@ -62,14 +62,15 @@ async function onDateChange(dateObj: TimeFormatted) {
   <template v-if="appointment">
     <slot-selection-header />
 
+    <div class="week-picker-container">
+      <week-picker
+        :active-date-range="activeDateRange"
+        :onDateChange="onDateChange"
+      />
+    </div>
+
     <div class="booker-view-container">
       <div class="calendar-container">
-        <div class="week-picker-container">
-          <week-picker
-            :active-date-range="activeDateRange"
-            :onDateChange="onDateChange"
-          />
-        </div>
         <week-calendar
           :active-date-range="activeDateRange"
           :selectable-slots="appointment.slots"
@@ -96,12 +97,12 @@ async function onDateChange(dateObj: TimeFormatted) {
   gap: 2rem;
 }
 
-.calendar-container {
-  width: 100%;
+.week-picker-container {
+  margin-block-end: 2rem;
+}
 
-  .week-picker-container {
-    margin-block-end: 2rem;
-  }
+.calendar-container {
+  flex: 1;
 
   .calendar-footer {
     display: flex;

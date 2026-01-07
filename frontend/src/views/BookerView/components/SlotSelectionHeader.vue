@@ -8,8 +8,6 @@ const { t } = useI18n();
 const calendarStore = useBookingViewStore();
 
 const { appointment } = storeToRefs(calendarStore);
-
-console.log(appointment.value);
 </script>
 
 <template>
@@ -37,6 +35,8 @@ console.log(appointment.value);
 </template>
 
 <style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
 .booking-header {
   margin-block-end: 2rem;
   font-family: Inter, sans-serif;
@@ -54,8 +54,8 @@ console.log(appointment.value);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: calc(100% - 370px); /* Aligns with the slot-selection-aside width */
     margin-block-end: 1rem;
+    flex-wrap: wrap-reverse;
 
     h2 {
       font-size: 1.5rem;
@@ -75,6 +75,14 @@ console.log(appointment.value);
         font-size: 0.875rem;
         color: var(--colour-ti-base);
       }
+    }
+  }
+}
+
+@media (--md) {
+  .booking-header {
+    .booking-header-title-container {
+      max-width: calc(100% - 302px); /* Aligns with the slot-selection-aside width */
     }
   }
 }
