@@ -167,14 +167,14 @@ const bookEvent = async () => {
 
         <primary-button
           v-if="selectedEvent && userInfoForm"
-          :label="t('label.confirmSelection')"
+          :label="t('label.bookAppointment')"
           :disabled="bookingRequestLoading"
           @click="bookEvent"
           :title="t('label.confirm')"
-          class="confirm-selection-button"
+          class="book-appointment-button"
           data-testid="booking-view-confirm-selection-button"
         >
-          {{ t('label.confirmSelection') }}
+          {{ t('label.bookAppointment') }}
         </primary-button>
       </form>
 
@@ -249,7 +249,6 @@ aside {
   .appointment-card-inner {
     padding: 0.75rem;
     border-radius: 0.25rem;
-    color: black; /* TODO: Update colors when hi-fi is available */
     background-color: var(--colour-primary-soft);
     margin-block-end: 1.5rem;
 
@@ -259,6 +258,7 @@ aside {
       justify-content: space-between;
       font-weight: 600;
       margin-block-end: 0.5rem;
+      color: var(--colour-ti-base);
     }
 
     .appointment-card-inner-details {
@@ -294,6 +294,10 @@ aside {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+
+    .book-appointment-button {
+      text-transform: capitalize;
+    }
   } 
 
   .booking-request-error {
