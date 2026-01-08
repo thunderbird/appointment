@@ -43,6 +43,7 @@ class RemoteEventState(Enum):
     REJECTED = 'REJECTED'
     TENTATIVE = 'TENTATIVE'
     CONFIRMED = 'CONFIRMED'
+    ACCEPTED = 'ACCEPTED'
 
 
 class BaseConnector:
@@ -599,12 +600,14 @@ class Tools:
     ):
         """create an event in ical format for .ics file creation"""
         cal = Calendar()
-        cal.add('prodid', '-//Thunderbird Appointment//tba.dk//')
+        cal.add('prodid', '-//thunderbird.net/Thunderbird Appointment//EN')
         cal.add('version', '2.0')
         cal.add('method', 'CANCEL' if event_status == RemoteEventState.CANCELLED.value else 'REQUEST')
+
         org = vCalAddress('MAILTO:' + organizer.preferred_email)
         org.params['cn'] = vText(organizer.preferred_email)
         org.params['role'] = vText('CHAIR')
+
         event = Event()
         event.add('uid', appointment.uuid.hex)
         event.add('summary', appointment.title)
@@ -617,6 +620,20 @@ class Tools:
         event.add('status', event_status)
         event['description'] = appointment.details
         event['organizer'] = org
+
+        if slot.attendee:
+            attendee = vCalAddress(f'MAILTO:{slot.attendee.email}')
+
+            if slot.attendee.name and len(slot.attendee.name.strip()) > 0:
+                attendee.params['cn'] = vText(slot.attendee.name)
+            else:
+                attendee.params['cn'] = vText(slot.attendee.email)
+
+            # Set the attendee status to accepted by default
+            # since they are the ones who are submitting the request
+            attendee.params['partstat'] = vText(RemoteEventState.ACCEPTED.value)
+            attendee.params['role'] = vText('REQ-PARTICIPANT')
+            event.add('attendee', attendee)
 
         # Prefer the slot meeting link url over the appointment location url
         location_url = slot.meeting_link_url if slot.meeting_link_url is not None else appointment.location_url

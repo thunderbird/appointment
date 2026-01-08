@@ -191,6 +191,72 @@ class TestVCreate:
         assert ics
         assert ':'.join(['LOCATION', slot.meeting_link_url]) in ics.decode()
 
+    def test_prodid_is_set(self, make_google_calendar, make_appointment, make_pro_subscriber):
+        """Verify that the prodid is set correctly in the calendar"""
+        subscriber = make_pro_subscriber()
+        calendar = make_google_calendar(subscriber_id=subscriber.id)
+        appointment = make_appointment(calendar_id=calendar.id)
+        slot = appointment.slots[0]
+
+        ics = Tools().create_vevent(appointment, slot, subscriber)
+        ics_str = ics.decode()
+
+        assert 'PRODID:-//thunderbird.net/Thunderbird Appointment//EN' in ics_str
+
+    def test_attendee_with_name(self, make_google_calendar, make_appointment, make_pro_subscriber):
+        """Verify attendee is added with name when slot has an attendee with a name"""
+        subscriber = make_pro_subscriber()
+        calendar = make_google_calendar(subscriber_id=subscriber.id)
+        appointment = make_appointment(calendar_id=calendar.id)
+        slot = appointment.slots[0]
+        slot.attendee = models.Attendee(email='attendee@example.com', name='John Doe', timezone='Europe/Berlin')
+
+        ics = Tools().create_vevent(appointment, slot, subscriber)
+        ics_str = ics.decode()
+
+        # Unfold lines (remove CRLF + leading space) and drop CR to keep assertions simple
+        ics_str = ics_str.replace('\r\n ', '').replace('\r', '')
+
+        assert 'ATTENDEE' in ics_str
+        assert 'MAILTO:attendee@example.com' in ics_str
+        assert 'CN="John Doe"' in ics_str
+        assert 'ROLE=REQ-PARTICIPANT' in ics_str
+        assert 'PARTSTAT=ACCEPTED' in ics_str
+
+    def test_attendee_without_name_uses_email(self, make_google_calendar, make_appointment, make_pro_subscriber):
+        """Verify attendee is added with email as name when slot has an attendee without a name"""
+        subscriber = make_pro_subscriber()
+        calendar = make_google_calendar(subscriber_id=subscriber.id)
+        appointment = make_appointment(calendar_id=calendar.id)
+        slot = appointment.slots[0]
+        slot.attendee = models.Attendee(email='attendee@example.com', name=None, timezone='Europe/Berlin')
+
+        ics = Tools().create_vevent(appointment, slot, subscriber)
+        ics_str = ics.decode()
+
+        # Unfold lines (remove CRLF + leading space) and drop CR to keep assertions simple
+        ics_str = ics_str.replace('\r\n ', '').replace('\r', '')
+
+        assert 'ATTENDEE' in ics_str
+        assert 'MAILTO:attendee@example.com' in ics_str
+        assert 'CN=attendee@example.com' in ics_str
+        assert 'ROLE=REQ-PARTICIPANT' in ics_str
+        assert 'PARTSTAT=ACCEPTED' in ics_str
+
+    def test_no_attendee(self, make_google_calendar, make_appointment, make_pro_subscriber):
+        """Verify no attendee is added when slot has no attendee"""
+        subscriber = make_pro_subscriber()
+        calendar = make_google_calendar(subscriber_id=subscriber.id)
+        appointment = make_appointment(calendar_id=calendar.id)
+        slot = appointment.slots[0]
+        slot.attendee = None
+
+        ics = Tools().create_vevent(appointment, slot, subscriber)
+        ics_str = ics.decode()
+
+        # The ATTENDEE field should not be present when there's no attendee
+        assert 'ATTENDEE' not in ics_str
+
 
 class TestDnsCaldavLookup:
     def test_for_host(self):
