@@ -33,8 +33,8 @@ const userInfoForm = useTemplateRef<HTMLFormElement>('userInfoForm');
 
 const bookingRequestLoading = ref<boolean>(false);
 const bookingRequestError = ref<string>('');
-const guestUserName = ref<string>('');
-const guestUserEmail = ref<string>('');
+const guestUserName = ref<string>(userStore.authenticated ? userStore.data.name : '');
+const guestUserEmail = ref<string>(userStore.authenticated ? userStore.data.email : '');
 
 const timezone = computed(() => dj.tz.guess());
 const selectedSlotDate = computed(() => dj(selectedEvent.value?.start).format('LL'))
@@ -60,12 +60,7 @@ const bookEvent = async () => {
   bookingRequestLoading.value = true;
   bookingRequestError.value = '';
 
-  const attendeeData = userStore.authenticated ? {
-    id: userStore.data.id,
-    email: userStore.data.email,
-    name: userStore.data.name,
-    timezone: userStore.data.settings.timezone,
-  } : {
+  const attendeeData = {
     email: guestUserEmail.value,
     name: guestUserName.value,
     timezone: timezone.value,
