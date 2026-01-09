@@ -1,23 +1,19 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, useTemplateRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import {
-  PhGlobe,
-  PhCalendarDot,
   PhCalendarBlank,
   PhClock,
-  PhCheckCircle,
   PhMapPin
 } from '@phosphor-icons/vue';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { TextInput, PrimaryButton } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
 import { SlotResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import { BookingCalendarView, MetricEvents, AlertSchemes } from '@/definitions';
-import SlotSelectionUserInfo from './SlotSelectionUserInfo.vue';
 import AlertBox from '@/elements/AlertBox.vue';
 
 const { t } = useI18n();
@@ -29,17 +25,20 @@ const userStore = useUserStore();
 const {
   appointment,
   selectedEvent,
-  guestUserInfo,
-  guestUserInfoValid,
   attendee,
   activeView
 } = storeToRefs(useBookingViewStore());
 
+const userInfoForm = useTemplateRef<HTMLFormElement>('userInfoForm');
+
 const bookingRequestLoading = ref<boolean>(false);
 const bookingRequestError = ref<string>('');
+const guestUserName = ref<string>(userStore.authenticated ? userStore.data.name : '');
+const guestUserEmail = ref<string>(userStore.authenticated ? userStore.data.email : '');
 
 const timezone = computed(() => dj.tz.guess());
 const selectedSlotDate = computed(() => dj(selectedEvent.value?.start).format('LL'))
+const selectedSlotDateDayOfWeek = computed(() => dj(selectedEvent.value?.start).format('dddd'));
 const selectedSlotTimeDuration = computed(() => {
   const startTime = dj(selectedEvent.value?.start).format('LT');
   const endTime = dj(selectedEvent.value?.start)
@@ -53,17 +52,17 @@ const selectedSlotTimeDuration = computed(() => {
  * Book or request to book a selected time.
  */
 const bookEvent = async () => {
+  if (!userInfoForm.value.checkValidity()) {
+    userInfoForm.value.reportValidity();
+    return;
+  }
+
   bookingRequestLoading.value = true;
   bookingRequestError.value = '';
 
-  const attendeeData = userStore.authenticated ? {
-    id: userStore.data.id,
-    email: userStore.data.email,
-    name: userStore.data.name,
-    timezone: userStore.data.settings.timezone,
-  } : {
-    email: guestUserInfo.value.email,
-    name: guestUserInfo.value.name,
+  const attendeeData = {
+    email: guestUserEmail.value,
+    name: guestUserName.value,
     timezone: timezone.value,
   }
 
@@ -111,71 +110,82 @@ const bookEvent = async () => {
 
 <template>
   <aside>
-    <p class="invitation-text" data-testid="booking-view-inviting-you-text">
-      {{ t('text.nameIsInvitingYou', { name: appointment.owner_name }) }}
-    </p>
-    <h1 class="appointment-title" data-testid="booking-view-title-text">
-      {{ appointment.title }}
-    </h1>
-    <p v-if="appointment.details" class="appointment-details">
-      {{ appointment.details }}
-    </p>
-    <div class="timezone-section">
-      <span class="timezone-label">{{ t('label.timeZone') }}:</span>
-      <div class="timezone-display">
-        <ph-globe size="24" />
-        {{ timezone }}
-      </div>
-    </div>
+    <h3>{{ t('label.bookingDetails') }}</h3>
 
     <template v-if="selectedEvent">
-      <div class="appointment-card">
-        <h3>{{ t('label.bookingDetails') }}</h3>
-        <div class="appointment-card-inner">
-          <header>
-            {{ selectedEvent.title }}
-            <ph-check-circle size="24"/>
-          </header>
-          <div class="appointment-card-inner-details">
-            <ph-calendar-blank size="16"/>
-            <span>{{ selectedSlotDate }}</span>
-            <ph-map-pin size="16"/>
+      <div class="appointment-card-inner">
+        <header>{{ selectedEvent.title }}</header>
+        <div class="appointment-card-inner-details">
+          <div class="appointment-card-inner-details-item">
+            <ph-calendar-blank size="20"/>
+            <div class="appointment-card-inner-details-item-details">
+              <p>{{ selectedSlotDateDayOfWeek }}</p>
+              <span>{{ selectedSlotDate }}</span>
+            </div>
+          </div>
+          <div class="appointment-card-inner-details-item">
+            <ph-clock size="20"/>
+            <div class="appointment-card-inner-details-item-details">
+              <p>{{ timezone }}</p>
+              <span>{{ selectedSlotTimeDuration }}</span>
+            </div>
+          </div>
+          <div class="appointment-card-inner-details-item">
+            <ph-clock size="20"/>
+            <span>{{ t('units.minutes', { value: selectedEvent.slot_duration }) }}</span>
+          </div>
+          <div class="appointment-card-inner-details-item">
+            <ph-map-pin size="20"/>
             <!-- TODO: We are currently only allowing for events to be online but the backend defaults to in person -->
             <!-- <span>{{ selectedEvent.location_type === EventLocationType.Online ? t('label.virtual') : t('label.inPerson') }}</span> -->
             <span>{{ t('label.virtual') }}</span>
-            <ph-clock size="16"/>
-            <span>{{ selectedSlotTimeDuration }} <span class="timezone-badge">{{ timezone }}</span></span>
-            <ph-clock size="16"/>
-            <span>{{ t('units.minutes', { value: selectedEvent.slot_duration }) }}</span>
           </div>
         </div>
       </div>
 
-      <slot-selection-user-info v-if="!userStore.authenticated" />
+      <form ref="userInfoForm" class="user-info-form" @submit.prevent @keyup.enter="bookEvent">
+        <text-input required name="booker-view-user-name" v-model="guestUserName">
+          {{ t('label.name') }}
+        </text-input>
+
+        <text-input required type="email" name="booker-view-user-email" v-model="guestUserEmail">
+          {{ t('label.email') }}
+        </text-input>
+
+        <alert-box
+          v-if="bookingRequestError"
+          :alert="{ title: bookingRequestError }"
+          :scheme="AlertSchemes.Error"
+          @close="bookingRequestError = ''"
+          class="booking-request-error"
+        />
+
+        <primary-button
+          v-if="selectedEvent && userInfoForm"
+          :label="t('label.bookAppointment')"
+          :disabled="bookingRequestLoading"
+          @click="bookEvent"
+          :title="t('label.confirm')"
+          class="book-appointment-button"
+          data-testid="booking-view-confirm-selection-button"
+        >
+          {{ t('label.bookAppointment') }}
+        </primary-button>
+      </form>
+
+      <p
+        v-if="selectedEvent && !appointment.booking_confirmation"
+        class="confirmation-footer-note"
+      >
+        {{ t('label.yourAppointmentWillBeConfirmedAutomatically') }}
+      </p>
     </template>
 
     <div v-else class="appointment-card empty">
-      {{ t('label.selectATimeFromTheCalendar') }}
-      <ph-calendar-dot size="108"/>
+      <ph-calendar-blank size="24" class="empty-icon" weight="duotone" />
+      <strong>{{ t('label.noneSelected') }}</strong>
+      <p>{{ t('label.selectATimeFromTheCalendar') }}</p>
     </div>
-
-    <alert-box
-      v-if="bookingRequestError"
-      :alert="{ title: bookingRequestError }"
-      :scheme="AlertSchemes.Error"
-      @close="bookingRequestError = ''"
-    />
-
-    <primary-button
-      :label="t('label.confirmSelection')"
-      :disabled="!selectedEvent || bookingRequestLoading || (!userStore.authenticated && !guestUserInfoValid)"
-      @click="bookEvent"
-      :title="t('label.confirm')"
-      class="confirm-selection-button"
-      data-testid="booking-view-confirm-selection-button"
-    >
-      {{ t('label.confirmSelection') }}
-    </primary-button>
   </aside>
 </template>
 
@@ -183,46 +193,18 @@ const bookEvent = async () => {
 @import '@/assets/styles/custom-media.pcss';
 
 aside {
-  .invitation-text {
-    margin-bottom: 0.825rem;
-    font-size: 0.825rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  border: 1px solid var(--colour-neutral-border);
+  border-radius: 24px;
+  background-color: var(--colour-neutral-base);
+  font-family: Inter, sans-serif;
+
+  h3 {
     font-weight: 600;
-    color: var(--colour-ti-muted);
-  }
-
-  .appointment-title {
-    margin-bottom: 0.825rem;
-    font-size: 1.725rem;
-    line-height: 2.25rem;
-    color: var(--colour-ti-base);
-  }
-
-  .appointment-details {
-    margin-bottom: 1.5rem;
-    color: var(--colour-ti-base);
-  }
-
-  .timezone-section {
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-
-    .timezone-label {
-      font-size: 0.875rem;
-      line-height: 1.75rem;
-      color: var(--colour-ti-base);
-    }
-
-    .timezone-display {
-      font-size: 0.875rem;
-      line-height: 1.25rem;
-      color: var(--colour-accent-teal);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+    color: var(--colour-ti-highlight);
+    margin-block-end: 1.5rem;
   }
 
   .appointment-card {
@@ -230,54 +212,88 @@ aside {
     flex-direction: column;
     justify-content: center;
     gap: 1rem;
-    padding: 1rem 0.5rem;
-    border: 1px dashed var(--colour-neutral-border);
-    border-radius: 0.25rem;
-    background-color: var(--colour-neutral-raised);
-    margin-block-end: 1rem;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--colour-neutral-border);
+    border-radius: 4px;
+    background-color: var(--colour-neutral-lower);
+    margin-block-end: 1.5rem;
 
     &.empty {
       align-items: center;
-      padding: 4rem 1.5rem;
-    }
-
-    h3 {
       text-align: center;
-      font-weight: 500;
-    }
+      font-size: 1rem;
+      gap: 0;
+      margin-block-end: 0;
 
-    .appointment-card-inner {
-      padding: 1rem 1.5rem;
-      border-radius: 0.25rem;
-      color: black; /* TODO: Update colors when hi-fi is available */
-      background-color: #58C9FF; /* TODO: Update colors when hi-fi is available */
-
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-block-end: 1rem;
+      .empty-icon {
+        margin-block: 0.75rem 1.5rem;
       }
 
-      .appointment-card-inner-details {
-        display: grid;
-        grid-template-columns: 1.5rem 1fr;
-        align-items: center;
-        row-gap: 0.25rem;
-        column-gap: 0.125rem;
+      strong {
+        font-weight: 500;
+        margin-block-end: 0.5rem;
+      }
 
-        .timezone-badge {
-          color: #58C9FF; /* TODO: Update colors when hi-fi is available */
-          background-color: black; /* TODO: Update colors when hi-fi is available */
-          font-size: 0.75rem;
-          padding: 0.25rem 0.375rem;
-          margin-inline-start: 0.25rem;
-          border-radius: 8px;
-          white-space: nowrap;
-        }
+      p {
+        font-size: 0.875rem;
+        margin-block-end: 0.75rem;
       }
     }
   }
+
+  .appointment-card-inner {
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    background-color: var(--colour-primary-soft);
+    margin-block-end: 1.5rem;
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-block-end: 0.5rem;
+      color: var(--colour-ti-base);
+    }
+
+    .appointment-card-inner-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--colour-ti-base);
+
+      .appointment-card-inner-details-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .appointment-card-inner-details-item-details {
+          display: flex;
+          flex-direction: column;
+
+          p {
+            line-height: 0.75rem;
+            font-size: 0.6875rem;
+          }
+        }
+      }
+
+      svg {
+        color: var(--colour-ti-highlight);
+      }
+    }
+  }
+
+  .user-info-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .book-appointment-button {
+      text-transform: capitalize;
+    }
+  } 
 
   .booking-request-error {
     margin-block: 1rem;
@@ -287,8 +303,13 @@ aside {
     color: var(--colour-danger-default);
   }
 
-  .confirm-selection-button {
-    margin-inline-start: auto;
+  .booking-request-error {
+    margin-block: 0;
+  }
+
+  .confirmation-footer-note {
+    text-align: center;
+    font-size: 0.6875rem;
     margin-block-start: 1rem;
   }
 }
@@ -297,11 +318,7 @@ aside {
   aside {
     position: sticky;
     top: 5rem;
-    width: 470px;
-
-    .timezone-section {
-      flex-direction: row;
-    }
+    width: 268px;
   }
 }
 </style>

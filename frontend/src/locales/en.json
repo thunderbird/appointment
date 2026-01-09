@@ -222,6 +222,7 @@
     "back": "Back",
     "backToTop": "Back to top",
     "bookEvent": "Book",
+    "bookAppointment": "Book appointment",
     "booked": "Booked",
     "bookingConfirmation": "Booking Confirmation",
     "bookingDetails": "Booking Details",
@@ -257,7 +258,6 @@
     "confirm": "Confirm",
     "confirmed": "Confirmed",
     "confirmBooking": "Confirm booking",
-    "confirmSelection": "Confirm selection",
     "connect": "Connect",
     "connecting": "Connecting",
     "connectCalendar": "Connect calendar",
@@ -265,7 +265,6 @@
     "connectedAs": "Connected as {name}",
     "contact": "Contact",
     "continue": "Continue",
-    "continueAsGuest": "Continue as Guest",
     "contributeToThisSite": "Contribute to this site",
     "cookies": "Cookies",
     "copied": "Copied",
@@ -364,6 +363,7 @@
     "next": "Next",
     "nextWeek": "Next week",
     "no": "No",
+    "noneSelected": "None selected",
     "notConnected": "Not connected",
     "notProvided": "Not Provided",
     "notVerified": "Not Verified",
@@ -373,6 +373,7 @@
     "off": "Off",
     "on": "On",
     "online": "Online",
+    "onlineMeeting": "Online meeting",
     "open": "Open",
     "openMenu": "Open menu",
     "openMyPage": "Open my page",
@@ -411,7 +412,7 @@
     "searchAppointments": "Search bookings",
     "searchForCalendars": "Search for calendars",
     "secondaryTimeZone": "Secondary time zone",
-    "selectATimeFromTheCalendar": "Select a time from the calendar",
+    "selectATimeFromTheCalendar": "Select an open time slot from the calendar.",
     "selectCalendar": "Select calendar",
     "selectDays": "Select days",
     "selectDateForWeek": "Select date for week",
@@ -451,7 +452,7 @@
     "timeFormat": "Time Format",
     "timeOfTheEvent": "Time of the event:",
     "timeUpdated": "Time Updated",
-    "timeZone": "Time Zone",
+    "timeZone": "Timezone",
     "title": "Title",
     "to": "to",
     "today": "Today",
@@ -484,7 +485,8 @@
     "yes": "Yes",
     "youAreBookable": "You're bookable",
     "youAreNotBookable": "You're not bookable",
-    "youHaveUnsavedChanges": "You have unsaved changes"
+    "youHaveUnsavedChanges": "You have unsaved changes",
+    "yourAppointmentWillBeConfirmedAutomatically": "Your appointment will be confirmed automatically."
   },
   "locales": {
     "de": "German",
@@ -542,6 +544,7 @@
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
       "disableAccountFirst": "You must disable the account first."
     },
+    "bookATimeToMeetWith": "Book a time to meet with {name}",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",
     "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
@@ -563,7 +566,6 @@
     "login": {
       "continueToFxa": "Enter your email above to continue to Mozilla Accounts"
     },
-    "nameIsInvitingYou": "{name} is inviting you to",
     "ownerNeedsToConfirmBooking": "When this option is active, you will be required to confirm or decline times booked on your schedule. When this option is deactivated, all times will automatically be confirmed.",
     "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",

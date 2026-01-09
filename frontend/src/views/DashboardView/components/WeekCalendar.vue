@@ -487,7 +487,6 @@ const filteredSelectableSlotsForGrid = computed(() => {
   border: 1px solid var(--colour-neutral-border);
   border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
-  margin-block-end: 2rem;
   flex: 1;
   overflow-y: auto;
   overflow-x: auto;
