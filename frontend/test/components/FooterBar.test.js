@@ -32,7 +32,7 @@ describe('FooterBar', () => {
     });
 
     // verify all expected router-link child components were rendered
-    const expectedLinks = ['/login', '/privacy', '/terms'];
+    const expectedLinks = ['/privacy', '/terms'];
     const allRouterLinks = wrapper.findAllComponents(RouterLink);
     var foundLinks = [];
     for (let link of allRouterLinks) {
@@ -42,6 +42,12 @@ describe('FooterBar', () => {
     for (let expLink of expectedLinks) {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
+
+    // verify we show the external Thunderbird Pro link and no support link
+    const proLink = wrapper.find(`a[href="${import.meta.env.VITE_TB_PRO_URL}"]`);
+    expect(proLink.exists()).toBe(true);
+    expect(proLink.text()).toBe(i18ninstance.global.t('label.exploreThunderbirdPro'));
+    expect(wrapper.find('.contact-support-link').exists()).toBe(false);
   });
 
   it('renders correctly when logged in', () => {
@@ -68,5 +74,11 @@ describe('FooterBar', () => {
     for (let expLink of expectedLinks) {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
+
+    // verify the support link is rendered for authenticated users
+    const supportLink = wrapper.find('.contact-support-link');
+    expect(supportLink.exists()).toBe(true);
+    expect(supportLink.attributes('href')).toBe(import.meta.env.VITE_SUPPORT_URL);
+    expect(supportLink.text()).toBe(i18ninstance.global.t('label.needHelpVisitSupport'));
   });
 });
