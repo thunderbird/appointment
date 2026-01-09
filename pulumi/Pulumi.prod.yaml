@@ -34,11 +34,11 @@ config:
   appointment:jwt-secret:
     secure: AAABAOk3b6llGm+wDOXk0Ltf7/BDSIkfLSmA2Q56hTJ2HA9m4bvpKOPl9c2UHucKWD49bMAFtKwjOowjI7kYxcsoayZ3ag1kP8zZ6Wt3Yp163XXmkrdHgdVM5h2mbsuEQDqlrk2N8X2nFP0jxhkWZNGaTDcADWi5e09SBbd/JVT3KKGdV1sj+FDM03MC3q308ZRKl6elsygMk6oS85Jr1DBcXq5IVC/b20DVf5HeGj7Nt+jd+RnSFwsrZuP9bBepKMIqwxUrjIvbtmLtJcsK2WA3RFZC0mhXYF/N3mS9QyqsmbRmR5kOzU3kIZ8uV7OvpqUUG8f7MtMTRZV2LAJ86MSFPFlg1YAwn2t3N2AQBhm1jO+/uAwg44KQeDFhuncl
   appointment:smtp-url:
-    secure: AAABAIf1fkRe93kIpcX84pBwsxyOW7RCbSRHM26G5rXNI5Sv4j6dUX0cJepHr6b2Q189
+    secure: AAABAAKd/Fc8YDKj+wN4QZcCruPgQrojmHbAu0UAKeW9OZQJLpehKN6kTTtujXDAN4nnDRXyvpaIEFOqhL+KYolmVEjc
   appointment:smtp-username:
-    secure: AAABAH7xFvt5hYg7Apwp+4WsyaQJMdylQS82pEggbqIB1pqRXdAbJixF2A==
+    secure: AAABAJJjK9e1GT28FBKpsXYuXsZgxT5fwQgR5x7KVTZm0esZazk1uQFsJwWd6uMNT7x0ng==
   appointment:smtp-password:
-    secure: AAABADR2aPhMbwVyLUKpQCXVArrafvo57gjx4YHkg+OVkgTCIz2h1rAboLu/wUmCGQ==
+    secure: AAABAIn8472/qF77fXx+A/+PKiOUSCrTfXRruA3vWcrqzFO1IHhwTlLv6wIEtx3g/RyBDmKGzgJLLXQ1/L4AInF3M8LWobuFs6AKOQ==
   appointment:google-auth-client-id:
     secure: AAABADyDdiU79PHuM3S84LHy6xuPa12KPG5LYwAIo4Orp/SJUBq6qqVzUyfY4Yr+aQKKBy/dfcGgxrYb9WhpkAY/WKzgJ7cKoyaQ8U8BklMT1qAgnxye5v/ZZQL+FlSeU85EnOtNBoM=
   appointment:google-auth-secret:

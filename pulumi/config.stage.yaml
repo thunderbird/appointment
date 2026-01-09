@@ -206,7 +206,7 @@ resources:
               - name: OIDC_CLIENT_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/oidc-client-secret-fMpKjV
 
-              # STMP via SocketLabs
+              # SMTP via AWS SES
               - name: SMTP_URL
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/smtp-url-HAuJtZ
               - name: SMTP_USER
