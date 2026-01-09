@@ -18,8 +18,8 @@ var dashboardPage: DashboardPage;
 const verifyBookingPageLoaded = async (page: Page) => {
   await expect(bookingPage.titleText).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
   await expect(bookingPage.titleText).toContainText(APPT_DISPLAY_NAME);
-  await expect(bookingPage.invitingText).toBeVisible();
-  await expect(bookingPage.invitingText).toContainText(APPT_DISPLAY_NAME);
+  await expect(bookingPage.bookATimeToMeetText).toBeVisible();
+  await expect(bookingPage.bookATimeToMeetText).toContainText(APPT_DISPLAY_NAME);
   await expect(bookingPage.bookingCalendarHdrSun).toBeVisible();
   await expect(bookingPage.bookingCalendarHdrMon).toBeVisible();
   await expect(bookingPage.bookingCalendarHdrTue).toBeVisible();
@@ -39,9 +39,9 @@ const verifyBookingPageLoaded = async (page: Page) => {
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
   expect(await bookingPage.bookingWeekPickerBtn.textContent()).toContain(monthName);
 
-  // also the confirm button is disabled by default until a slot is selected
+  // also the book appt button is hidden by default (since a slot is not yet selected)
   await page.waitForTimeout(TIMEOUT_1_SECOND);
-  await expect(bookingPage.confirmBtn).toBeDisabled();
+  await expect(bookingPage.bookApptBtn).toBeHidden();
 }
 
 test.beforeEach(async ({ page }) => {
