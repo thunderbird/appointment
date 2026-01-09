@@ -116,9 +116,12 @@ export const setDefaultUserSettingsLocalStore = async (page: Page, setTimeZone: 
 }
 
 /**
- * Sign into Appointment on mobile browser and set default settings required by tests
+ * Sign into Appointment on mobile browser and set default settings required by tests; if setTimeZone is provided
+ * set the Appointment app default timezone setting to that value, otherwise use APPT_TIMEZONE_SETTING_PRIMARY. This
+ * allows the book an appoitment test to set the timezone in Appointment to the timezone that was used by the
+ * booking page, when a timeslot was selected.
  */
-export const mobileSignInAndSetup = async (page: Page, testProjectName: string) => {
+export const mobileSignInAndSetup = async (page: Page, testProjectName: string, setTimeZone: string = APPT_TIMEZONE_SETTING_PRIMARY) => {
   // playwright for mobile browsers doesn't support saving auth storage state, so unfortunately
   // we must sign into Appointment at the start of every test
   await navigateToAppointmentAndSignIn(page, testProjectName);
@@ -127,7 +130,7 @@ export const mobileSignInAndSetup = async (page: Page, testProjectName: string) 
   await page.goto(APPT_SETTINGS_PAGE);
   await page.waitForTimeout(TIMEOUT_5_SECONDS);
   await page.waitForURL(APPT_SETTINGS_PAGE);
-  await setDefaultUserSettingsLocalStore(page);
+  await setDefaultUserSettingsLocalStore(page, setTimeZone);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
 }
 
