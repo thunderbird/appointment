@@ -133,6 +133,7 @@ const copyLink = async () => {
 
   .nav-items-container {
     display: flex;
+    align-items: center;
     justify-content: end;
     gap: 0.5rem;
     height: 100%;

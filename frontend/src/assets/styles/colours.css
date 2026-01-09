@@ -16,6 +16,7 @@ html {
    */
   --colour-neutral-base: #FEFFFF;
   --colour-neutral-lower: #F7F7F7;
+  --colour-neutral-lower-dark: #18181B; /* Forced dark mode colour */
   --colour-neutral-raised: var(--colour-neutral-base);
   --colour-neutral-subtle: var(--colour-neutral-lower);
   --colour-neutral-border: #E4E4E7;
