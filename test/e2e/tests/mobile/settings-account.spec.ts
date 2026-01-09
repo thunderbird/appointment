@@ -28,7 +28,7 @@ test.describe('account settings on mobile browser', {
     settingsPage = new SettingsPage(page, testInfo.project.name); // i.e. 'ios-safari'
     dashboardPage = new DashboardPage(page);
     availabilityPage = new AvailabilityPage(page);
-    bookApptPage = new BookingPage(page);
+    bookApptPage = new BookingPage(page, testInfo.project.name); // i.e. 'ios-safari'
 
     // mobile browsers don't support saving auth storage state so must sign in before each test
     // send in the playright test project name i.e. safari-ios because some mobile platforms differ

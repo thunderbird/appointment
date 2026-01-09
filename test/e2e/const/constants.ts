@@ -40,8 +40,7 @@ export const APPT_LANGUAGE_SETTING_DE = 'DE — German';
 export const APPT_THEME_SETTING_LIGHT = 'Light';
 export const APPT_THEME_SETTING_DARK = 'Dark';
 // set the Appointment time zone setting to the local timezone is where the test is running
-export const APPT_TIMEZONE_SETTING_PRIMARY = Intl.DateTimeFormat().resolvedOptions().timeZone;
-console.log(`using local timezone: ${APPT_TIMEZONE_SETTING_PRIMARY}`)
+export const APPT_TIMEZONE_SETTING_PRIMARY = 'America/Toronto';
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax'; // settings test changes to this tz temporarily
 export const APPT_START_OF_WEEK_SUN = 'SUN';
 export const APPT_START_OF_WEEK_MON = 'MON';

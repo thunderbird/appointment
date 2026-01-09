@@ -65,7 +65,6 @@ export class DashboardPage {
       const eventString = `${shortDate}, ${slotTime}`;
       console.log(`searching bookings list for event: ${eventString}`);
       const apptLocator = this.page.getByRole('button', { name: eventString });
-      await apptLocator.scrollIntoViewIfNeeded();
       await expect(apptLocator).toBeVisible();
     }).toPass({
       // Probe, wait 1s, probe, wait 2s, probe, wait 10s, probe, wait 10s, probe
