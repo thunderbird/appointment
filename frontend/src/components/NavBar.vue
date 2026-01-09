@@ -136,7 +136,7 @@ const copyLink = async () => {
     padding-inline: 1rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     overflow: visible;
-    background-image: linear-gradient(to top, #1a202c, #24a39d 300%); /* TODO: update to point to a var when we have light mode defined */
+    background-image: linear-gradient(to top, #1a202c, #1c3f47); /* one-off colours to approximate Zeplin gradient */
     z-index: 50;
   }
 
