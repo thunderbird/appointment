@@ -21,6 +21,7 @@ export class AvailabilityPage {
   readonly timeZoneSelect: Locator;
   readonly calendarSelect: Locator;
   readonly autoConfirmBookingsCheckBox: Locator;
+  readonly autoConfirmBookingsCheckBoxContainer: Locator;
   readonly customizePerDayCheckBox: Locator;
   readonly customizePerDayCheckBoxContainer: Locator;
   readonly allStartTimeInput: Locator;
@@ -58,6 +59,8 @@ export class AvailabilityPage {
     this.timeZoneSelect = this.page.getByLabel(APPT_TIMEZONE_SETTING_PRIMARY);
     this.calendarSelect = this.page.locator('select[name="calendar"]');
     this.autoConfirmBookingsCheckBox = this.page.getByTestId('availability-automatically-confirm-checkbox');
+    this.autoConfirmBookingsCheckBoxContainer = this.page.locator('label').filter({ hasText: 'Automatically confirm bookings' }).locator('span').first();
+
     this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
     this.customizePerDayCheckBoxContainer = this.page.locator('label').filter({ hasText: 'Set custom times for each day' }).locator('span').first();
 
