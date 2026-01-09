@@ -51,7 +51,7 @@ const appointmentLoggedInNavItems = [
               </router-link>
             </li>
           </ul>
-          <a :href="supportUrl" class="contact-support-link">
+          <a v-if="isAuthenticated" :href="supportUrl" class="contact-support-link">
             {{ t('label.needHelpVisitSupport') }}
           </a>
         </div>
