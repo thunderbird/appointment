@@ -5,8 +5,9 @@ import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_
 export class BookingPage {
   readonly page: Page;
   readonly titleText: Locator;
-  readonly invitingText: Locator;
-  readonly confirmBtn: Locator;
+  readonly bookATimeToMeetText: Locator;
+  readonly selectTimeSlotText: Locator;
+  readonly bookApptBtn: Locator;
   readonly bookingCalendarHdrSun: Locator;
   readonly bookingCalendarHdrMon: Locator;
   readonly bookingCalendarHdrTue: Locator;
@@ -19,7 +20,6 @@ export class BookingPage {
   readonly availableBookingSlot: Locator;
   readonly bookSelectionNameInput: Locator;
   readonly bookSelectionEmailInput: Locator;
-  readonly bookSelectionBookBtn: Locator;
   readonly bookingConfirmedTitleText: Locator;
   readonly requestSentAvailabilityText: Locator;
   readonly requestSentCloseBtn: Locator;
@@ -32,7 +32,8 @@ export class BookingPage {
   constructor(page: Page) {
     this.page = page;
     this.titleText = this.page.getByTestId('booking-view-title-text');
-    this.invitingText = this.page.getByTestId('booking-view-inviting-you-text');
+    this.bookATimeToMeetText = this.page.getByTestId('booking-view-book-a-time-to-meet-with-text');
+    this.selectTimeSlotText = this.page.getByText('Select an open time slot from the calendar');
     this.bookingCalendarHdrSun = this.page.getByText('SUN', { exact: true });
     this.bookingCalendarHdrMon = this.page.getByText('MON', { exact: true });
     this.bookingCalendarHdrTue = this.page.getByText('TUE', { exact: true });
@@ -41,12 +42,11 @@ export class BookingPage {
     this.bookingCalendarHdrFri = this.page.getByText('FRI', { exact: true });
     this.bookingCalendarHdrSat = this.page.getByText('SAT', { exact: true });
     this.bookingWeekPickerBtn = this.page.locator('.week-picker-button');
-    this.confirmBtn = this.page.getByTestId('booking-view-confirm-selection-button');
+    this.bookApptBtn = this.page.getByTestId('booking-view-confirm-selection-button');
     this.nextWeekArrow = this.page.getByRole('button', { name: 'Next week' });
     this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy'});
     this.bookSelectionNameInput = this.page.getByPlaceholder('First and last name');
     this.bookSelectionEmailInput = this.page.getByPlaceholder('john.doe@example.com');
-    this.bookSelectionBookBtn = this.page.getByRole('button', { name: 'Book' });
     this.bookingConfirmedTitleText = this.page.getByText('Booking confirmed');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
@@ -63,7 +63,7 @@ export class BookingPage {
   async gotoBookingPageShortUrl() {
     // the default share link is a short URL
     await this.page.goto(APPT_MY_SHARE_LINK);
-    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(this.selectTimeSlotText).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
@@ -74,7 +74,7 @@ export class BookingPage {
     const prodShareLinkUser: string = APPT_MY_SHARE_LINK.split(APPT_SHORT_SHARE_LINK_PREFIX)[1];
     const longLink: string = `${APPT_LONG_SHARE_LINK_PREFIX}${prodShareLinkUser}`;
     await this.page.goto(longLink);
-    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(this.selectTimeSlotText).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
@@ -83,7 +83,7 @@ export class BookingPage {
   async gotoBookingPageWeekView() {
     const weekLink: string = `${APPT_MY_SHARE_LINK}#week`;
     await this.page.goto(weekLink);
-    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(this.selectTimeSlotText).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
@@ -91,7 +91,7 @@ export class BookingPage {
    */
   async goForwardOneWeek() {
     await this.nextWeekArrow.click();
-    await expect(this.confirmBtn).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(this.selectTimeSlotText).toBeVisible( { timeout: TIMEOUT_30_SECONDS });
   }
 
   /**
@@ -141,7 +141,7 @@ export class BookingPage {
   async finishBooking(bookerName: string, bookerEmail: string) {
     await this.bookSelectionNameInput.fill(bookerName);
     await this.bookSelectionEmailInput.fill(bookerEmail);
-    await this.bookSelectionBookBtn.click();
+    await this.bookApptBtn.click();
   }
 
   /**
