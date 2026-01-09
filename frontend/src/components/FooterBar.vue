@@ -4,13 +4,15 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { StandardFooter } from '@thunderbirdops/services-ui';
 
+const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
+
 const { t } = useI18n();
 const userStore = useUserStore();
 
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
 const appointmentNotLoggedInNavItems = [
-  { route: '/login', i18nKey: 'logIn' },
+  { route: tbProUrl, i18nKey: 'exploreThunderbirdPro', external: true },
 ];
 
 const appointmentLoggedInNavItems = [
@@ -38,7 +40,11 @@ const appointmentLoggedInNavItems = [
 
         <ul v-else>
           <li v-for="navItem in appointmentNotLoggedInNavItems" :key="navItem.route">
-            <router-link :to="navItem.route">
+            <a v-if="navItem.external" :href="navItem.route">
+              {{ t(`label.${navItem.i18nKey}`) }}
+            </a>
+
+            <router-link v-else :to="navItem.route">
               {{ t(`label.${navItem.i18nKey}`) }}
             </router-link>
           </li>

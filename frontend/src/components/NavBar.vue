@@ -6,10 +6,11 @@ import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple } from '@phosphor-icons/vue';
-import { UserAvatar, ToolTip } from '@thunderbirdops/services-ui';
+import { UserAvatar, ToolTip, BaseButton } from '@thunderbirdops/services-ui';
 import { accountsTbProfileUrlKey } from '@/keys';
 
 // component constants
+const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
 const user = useUserStore();
 const route = useRoute();
 const { t } = useI18n();
@@ -90,6 +91,12 @@ const copyLink = async () => {
         </a>
       </div>
     </template>
+
+    <template v-else>
+      <a :href="tbProUrl">
+        <base-button type="brand" variant="outline" class="learn-more-button">Learn more</base-button>
+      </a>
+    </template>
   </header>
 </template>
 
@@ -108,6 +115,14 @@ const copyLink = async () => {
     font-size: 0.875rem;
     color: var(--colour-ti-base-dark);
   }
+}
+
+:deep(.learn-more-button.base.brand.outline) {
+  height: 2.25rem;
+  font-family: metropolis;
+  font-size: 0.8125rem;
+  padding: 0.875rem 1rem;
+  letter-spacing: 0.65px;
 }
 
 @media (--md) {
