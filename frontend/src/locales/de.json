@@ -74,6 +74,7 @@
     "googleCalendarLogo": "Google Kalender Logo",
     "createBookingPage": "Buchungsseite erstellen",
     "bookingPageTitle": "Buchungsseite Titel",
+    "bookingPageInitialValue": "{name}'s Verfügbarkeit",
     "bookingPagePlaceholder": "[Vor- und Nachname]'s Verfügbarkeit",
     "bookingPageTitleHelp": "Dies kann später in der Verfügbarkeit geändert werden.",
     "calendarForNewAppointments": "Kalender für neue Termine",
