@@ -6,10 +6,11 @@ import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple } from '@phosphor-icons/vue';
-import { UserAvatar, ToolTip } from '@thunderbirdops/services-ui';
+import { UserAvatar, ToolTip, BaseButton } from '@thunderbirdops/services-ui';
 import { accountsTbProfileUrlKey } from '@/keys';
 
 // component constants
+const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
 const user = useUserStore();
 const route = useRoute();
 const { t } = useI18n();
@@ -90,6 +91,12 @@ const copyLink = async () => {
         </a>
       </div>
     </template>
+
+    <template v-else>
+      <a :href="tbProUrl">
+        <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
+      </a>
+    </template>
   </header>
 </template>
 
@@ -110,6 +117,15 @@ const copyLink = async () => {
   }
 }
 
+:deep(.learn-more-button.base.brand.outline) {
+  height: 2.25rem;
+  font-family: metropolis;
+  font-size: 0.8125rem;
+  padding: 0.875rem 1rem;
+  letter-spacing: 0.65px;
+  color: var(--colour-ti-base-dark);
+}
+
 @media (--md) {
   .header-desktop {
     position: fixed;
@@ -121,7 +137,7 @@ const copyLink = async () => {
     padding-inline: 1rem;
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     overflow: visible;
-    background-image: linear-gradient(to top, #1a202c, #24a39d 300%); /* TODO: update to point to a var when we have light mode defined */
+    background-image: linear-gradient(to top, #1a202c, #1c3f47); /* one-off colours to approximate Zeplin gradient */
     z-index: 50;
   }
 
@@ -133,6 +149,7 @@ const copyLink = async () => {
 
   .nav-items-container {
     display: flex;
+    align-items: center;
     justify-content: end;
     gap: 0.5rem;
     height: 100%;

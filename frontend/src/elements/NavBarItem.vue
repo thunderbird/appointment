@@ -11,7 +11,7 @@ defineProps<Props>();
 <template>
   <div
     class="nav-bar-item-container"
-    :class="{ 'active': !active }"
+    :class="{ 'active': active }"
   >
     <router-link :to="{ name: linkName }">
       {{ label }}
@@ -21,16 +21,16 @@ defineProps<Props>();
 
 <style scoped>
   .nav-bar-item-container {
-    display: flex;
-    align-items: center;
     font-family: metropolis;
     font-size: 0.8125rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #EEEEF0; /* TODO: --colour-ti-base but we don't have light mode for nav bar yet */
+    color: var(--colour-ti-base-dark);
+    height: 2.25rem;
+    border-radius: 8px;
 
     &.active {
-      color: #D9D9DE; /* TODO: --colour-ti-secondary but we don't have light mode for nav bar yet */
+      background-color: var(--colour-neutral-lower-dark);
     }
 
     a {

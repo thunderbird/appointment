@@ -4,13 +4,16 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { StandardFooter } from '@thunderbirdops/services-ui';
 
+const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
+const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
+
 const { t } = useI18n();
 const userStore = useUserStore();
 
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
 const appointmentNotLoggedInNavItems = [
-  { route: '/login', i18nKey: 'logIn' },
+  { route: tbProUrl, i18nKey: 'exploreThunderbirdPro', external: true },
 ];
 
 const appointmentLoggedInNavItems = [
@@ -28,21 +31,30 @@ const appointmentLoggedInNavItems = [
     <template #default>
       <nav class="appointment-navigation">
         <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
-        <ul v-if="isAuthenticated">
-          <li v-for="navItem in appointmentLoggedInNavItems" :key="navItem.route">
-            <router-link :to="navItem.route">
-              {{ t(`label.${navItem.i18nKey}`) }}
-            </router-link>
-          </li>
-        </ul>
-
-        <ul v-else>
-          <li v-for="navItem in appointmentNotLoggedInNavItems" :key="navItem.route">
-            <router-link :to="navItem.route">
-              {{ t(`label.${navItem.i18nKey}`) }}
-            </router-link>
-          </li>
-        </ul>
+        <div>
+          <ul v-if="isAuthenticated">
+            <li v-for="navItem in appointmentLoggedInNavItems" :key="navItem.route">
+              <router-link :to="navItem.route">
+                {{ t(`label.${navItem.i18nKey}`) }}
+              </router-link>
+            </li>
+          </ul>
+  
+          <ul v-else>
+            <li v-for="navItem in appointmentNotLoggedInNavItems" :key="navItem.route">
+              <a v-if="navItem.external" :href="navItem.route">
+                {{ t(`label.${navItem.i18nKey}`) }}
+              </a>
+  
+              <router-link v-else :to="navItem.route">
+                {{ t(`label.${navItem.i18nKey}`) }}
+              </router-link>
+            </li>
+          </ul>
+          <a v-if="isAuthenticated" :href="supportUrl" class="contact-support-link">
+            {{ t('label.needHelpVisitSupport') }}
+          </a>
+        </div>
       </nav>
     </template>
 
@@ -87,6 +99,19 @@ const appointmentLoggedInNavItems = [
     for the footer in light mode yet so it is not readable if not white-ish */
     color: white;
   }
+
+  .contact-support-link {
+    display: block;
+    font-family: Inter, sans-serif;
+    font-size: 0.6875rem;
+    font-weight: normal;
+    text-decoration: underline;
+    margin-block-start: 1.5rem;
+
+    /* FIXME: This should be a var but we don't have a background
+    for the footer in light mode yet so it is not readable if not white-ish */
+    color: white;
+  }
 }
 
 @media (--md) {
@@ -100,6 +125,10 @@ const appointmentLoggedInNavItems = [
 
     ul {
       gap: 3rem;
+    }
+
+    .contact-support-link {
+      text-align: end;
     }
   }
 }
