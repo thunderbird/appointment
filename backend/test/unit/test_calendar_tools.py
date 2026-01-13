@@ -265,9 +265,8 @@ class TestDnsCaldavLookup:
         assert ttl
 
     def test_for_txt_record(self):
-        """This domain is used with permission from the owner (me, melissa autumn!)"""
-        host, ttl = Tools.dns_caldav_lookup('melissaautumn.com')
-        assert host == 'https://caldav.fastmail.com:443/dav/'
+        host, ttl = Tools.dns_caldav_lookup('thundermail.com')
+        assert host == 'https://mail.thundermail.com:443/dav/cal/'
         assert ttl
 
     def test_no_records(self):
