@@ -24,7 +24,7 @@ const scheduleStore = useScheduleStore();
 const { calendars } = storeToRefs(calendarStore);
 const { timeToBackendTime } = scheduleStore;
 
-const bookingPageTitle = ref(scheduleStore.firstSchedule?.name ?? '');
+const bookingPageTitle = ref(scheduleStore.firstSchedule?.name ?? t('ftue.bookingPageInitialValue', { name: user.data.name }));
 const calendarForNewAppointments = ref(
   scheduleStore.firstSchedule?.calendar_id ?? calendars.value?.[0]?.id ?? 0
 );

@@ -74,6 +74,7 @@
     "googleCalendarLogo": "Google Calendar Logo",
     "createBookingPage": "Create booking page",
     "bookingPageTitle": "Booking Page Title",
+    "bookingPageInitialValue": "{name}'s Availability",
     "bookingPagePlaceholder": "[Full Name]'s Availability",
     "bookingPageTitleHelp": "This can be changed later in Availability.",
     "calendarForNewAppointments": "Calendar for New Appointments",

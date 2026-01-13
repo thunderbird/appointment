@@ -653,8 +653,14 @@ def oidc_token(
         raise HTTPException(status_code=403, detail=l10n('invalid-credentials'))
 
     oidc_id = token_data.get('sub')
-    username = email = token_data.get('preferred_username', token_data.get('username'))
     name = token_data.get('name')
+
+    # preferred_username is the thundermail address (@thundermail.com)
+    email = token_data.get('preferred_username', token_data.get('username'))
+
+    # the local part of the email should already be unique
+    # so we can strip out the domain portion for a better Booking Link URL
+    username = email.split('@')[0] if email else email
 
     subscriber = repo.external_connection.get_subscriber_by_oidc_id(db, oidc_id)
 
