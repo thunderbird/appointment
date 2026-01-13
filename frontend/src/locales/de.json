@@ -168,8 +168,8 @@
     "slotIsAvailableAgain": "Das Zeitfenster ist jetzt wieder buchbar."
   },
   "label": {
-    "12hAmPm": "12-hour AM/PM",
-    "24h": "24-hour",
+    "12hAmPm": "12:00 Uhr (12-Stunden-Format)",
+    "24h": "24:00 (24-Stunden-Format)",
     "DDMMYYYY": "TT/MM/YYYY",
     "MMDDYYYY": "MM/TT/YYYY",
     "accepted": "Akzeptiert",
@@ -435,7 +435,7 @@
     "sortBy": "Sortieren nach",
     "start": "Start",
     "startDate": "Startdatum",
-    "startOfWeek": "Wochenbeginn",
+    "startOfWeek": "Wochentag als Wochenbeginn",
     "startTime": "Startzeit",
     "startUsingTba": "Starte mit TBA",
     "status": "Status",
