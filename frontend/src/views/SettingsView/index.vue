@@ -347,13 +347,13 @@ header {
     font-family: metropolis;
     font-size: 2.25rem;
     color: var(--colour-ti-base);
-    margin-block-end: 2rem;
+    margin-block-end: 1.5rem;
   }
 }
 
 section {
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
   align-self: flex-start;
   background-color: var(--colour-neutral-base);
   box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
