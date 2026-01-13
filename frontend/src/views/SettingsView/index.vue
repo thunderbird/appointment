@@ -333,7 +333,7 @@ export default {
         @click="onSaveChanges"
         :disabled="savingInProgress"
       >
-        {{ t('label.save') }}
+        {{ t('label.saveChanges') }}
       </primary-button>
     </div>
   </div>
@@ -341,6 +341,11 @@ export default {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+:deep(.base.link.filled) {
+  font-size: 0.75rem;
+  color: var(--colour-ti-secondary);
+}
 
 header {
   h2 {
