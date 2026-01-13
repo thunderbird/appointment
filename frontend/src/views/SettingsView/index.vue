@@ -14,7 +14,7 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { PhCaretRight, PhX } from '@phosphor-icons/vue';
+import { PhX } from '@phosphor-icons/vue';
 
 // Page sections
 import AccountSettings from './components/AccountSettings.vue';
@@ -229,88 +229,113 @@ export default {
 </script>
 
 <template>
-  <header>
-    <h2>{{ t('label.settings') }}</h2>
-  </header>
+  <div class="settings-page-container">
+    <header>
+      <h2>{{ t('label.settings') }}</h2>
+    </header>
 
-  <notice-bar
-    class="notice-bar"
-    v-if="validationError"
-    :type="NoticeBarTypes.Critical"
-  >
-    {{ validationError.title }}
+    <notice-bar
+      v-if="isDirty"
+      :type="NoticeBarTypes.Warning"
+      class="notice-bar"
+    >
+      {{ t('label.youHaveUnsavedChanges') }}
 
-    <template #cta>
-      <icon-button
-        @click="clearNotices"
-        :title="t('label.close')"
-      >
-        <ph-x />
-      </icon-button>
-    </template>
-  </notice-bar>
+      <template #cta>
+        <link-button
+          @click="onRevertChanges"
+          :disabled="savingInProgress"
+        >
+          {{ t('label.revertChanges') }}
+        </link-button>
+        <primary-button
+          @click="onSaveChanges"
+          :disabled="savingInProgress"
+          size="small"
+        >
+          {{ t('label.saveChanges') }}
+        </primary-button>
+      </template>
+    </notice-bar>
 
-  <notice-bar
-    class="notice-bar"
-    v-else-if="saveSuccess"
-    :type="NoticeBarTypes.Success"
-  >
-    {{ saveSuccess.title }}
+    <notice-bar
+      v-else-if="validationError"
+      class="notice-bar"
+      :type="NoticeBarTypes.Critical"
+    >
+      {{ validationError.title }}
 
-    <template #cta>
-      <icon-button
-        @click="clearNotices"
-        :title="t('label.close')"
-      >
-        <ph-x />
-      </icon-button>
-    </template>
-  </notice-bar>
+      <template #cta>
+        <icon-button
+          @click="clearNotices"
+          :title="t('label.close')"
+        >
+          <ph-x />
+        </icon-button>
+      </template>
+    </notice-bar>
 
-  <div class="main-container">
-    <!-- sidebar navigation -->
-    <aside>
-      <button
-        v-for="(view, key) in sections"
-        :key="key"
-        :class="{ 'active': view === activeView }"
-        @click="scrollToSection(key)"
-        :data-testid="'settings-' + key + '-settings-btn'"
-      >
-        <span>{{ t('heading.' + key) }}</span>
-        <ph-caret-right size="18" />
-      </button>
-    </aside>
+    <notice-bar
+      v-else-if="saveSuccess"
+      class="notice-bar"
+      :type="NoticeBarTypes.Success"
+    >
+      {{ saveSuccess.title }}
 
-    <!-- content -->
-    <div class="page-content" :class="{ 'is-dirty': isDirty }">
-      <section id="accountSettings">
-        <account-settings />
-      </section>
+      <template #cta>
+        <icon-button
+          @click="clearNotices"
+          :title="t('label.close')"
+        >
+          <ph-x />
+        </icon-button>
+      </template>
+    </notice-bar>
 
-      <section id="preferences">
-        <preferences />
-      </section>
+    <div class="main-container">
+      <!-- sidebar navigation -->
+      <aside>
+        <button
+          v-for="(view, key) in sections"
+          :key="key"
+          :class="{ 'active': view === activeView }"
+          @click="scrollToSection(key)"
+          :data-testid="'settings-' + key + '-settings-btn'"
+        >
+          <span>{{ t('heading.' + key) }}</span>
+        </button>
+      </aside>
 
-      <section id="connectedApplications">
-        <connected-applications />
-      </section>
+      <!-- content -->
+      <div class="page-content" :class="{ 'is-dirty': isDirty }">
+        <section id="accountSettings">
+          <account-settings />
+        </section>
+
+        <section id="preferences">
+          <preferences />
+        </section>
+
+        <section id="connectedApplications">
+          <connected-applications />
+        </section>
+      </div>
     </div>
-  </div>
 
-  <div class="footer-save-panel" v-if="isDirty">
-    <link-button
-      @click="onRevertChanges"
-      :disabled="savingInProgress"
-    >
-      {{ t('label.revertChanges') }}
-    </link-button>
-    <primary-button
-      @click="onSaveChanges"
-      :disabled="savingInProgress"
-    >
-      {{ t('label.save') }}
-    </primary-button>
+    <div class="footer-save-panel" v-if="isDirty">
+      <link-button
+        @click="onRevertChanges"
+        :disabled="savingInProgress"
+      >
+        {{ t('label.revertChanges') }}
+      </link-button>
+      <primary-button
+        @click="onSaveChanges"
+        :disabled="savingInProgress"
+      >
+        {{ t('label.save') }}
+      </primary-button>
+    </div>
   </div>
 </template>
 
@@ -337,6 +362,15 @@ section {
 
 .notice-bar {
   margin-block-end: 2rem;
+  position: sticky;
+  top: 5rem;
+  z-index: 50;
+  height: 72px;
+
+  .btn-close {
+    height: 2.375rem;
+    width: 2.375rem;
+  }
 }
 
 .main-container {
@@ -354,45 +388,43 @@ section {
     button {
       display: flex;
       justify-content: space-between;
-      padding: 1.25rem;
-      border-radius: 12px;
+      padding: 1rem;
+      border-radius: 8px;
       background-color: var(--colour-neutral-base);
       border: 1px solid transparent;
-      box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
+      box-shadow: 3px 3px 16px 0 rgba(0, 0, 0, 0.04);
+      height: 3rem;
+      font-size: 0.875rem;
+      line-height: 17.2px;
+      font-weight: 400;
 
       &.active {
         color: var(--colour-neutral-lower);
-        background-color: var(--colour-apmt-primary-pressed);
+        background-color: var(--colour-primary-default);
       }
 
       &:hover {
-        border-color: var(--colour-apmt-primary-hover);
+        border-color: var(--colour-primary-hover);
       }
     }
-  }
-
-  .page-content.is-dirty {
-    margin-block-end: 4rem;
   }
 }
 
 .footer-save-panel {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 2rem;
-  margin-inline-start: auto;
-  padding: 1rem 1.5rem;
-  margin: 0 0.5rem 0.5rem 0.5rem;
-  border-radius: 8px;
-  background-color: var(--colour-neutral-base);
-  z-index: 99;
+  gap: 1rem;
+  margin-block-end: 2rem;
 }
 
 @media (--md) {
+  .settings-page-container {
+    width: 100%;
+    max-width: 969px;
+    margin: 0 auto;
+  }
+
   .main-container {
     display: flex;
     flex-direction: row;
@@ -402,7 +434,7 @@ section {
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      width: 320px;
+      width: 268px;
 
       button {
         display: flex;
