@@ -438,8 +438,8 @@ h2 {
 
 .calendar-color {
   position: relative;
-  width: 12px;
-  height: 12px;
+  width: 0.75rem;
+  height: 0.75rem;
   border-radius: 9999px;
 
   input {
