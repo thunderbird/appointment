@@ -65,9 +65,7 @@ onMounted(async () => {
     if (user.authenticated) {
       await router.push({ name: 'dashboard' });
     } else {
-      await userManager.signinRedirect({
-        prompt: 'login',
-      });
+      await userManager.signinRedirect({});
     }
   }
 });
@@ -149,7 +147,6 @@ const login = async () => {
       window.sessionStorage?.setItem(INVITE_CODE_KEY, inviteCode.value.trim());
     }
     await userManager.signinRedirect({
-      prompt: 'login',
       login_hint: email.value,
     });
   } else if (isFxaAuth) {
