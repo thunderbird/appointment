@@ -102,13 +102,13 @@
     "calendarSettings": "Kalender-Einstellungen",
     "calendarsConnected": "Verbundene Kalender",
     "calendarsUnconnected": "Verfügbare Kalender",
-    "cancelAppointmentService": "Termin-Service abbrechen?",
     "connectedAccounts": "Verbundene Konten",
     "connectedAccountsSettings": "Verbundene Konten Einstellungen",
     "connectedApplications": "Verbundene Anwendungen",
     "contactRequest": "Kontaktanfrage",
     "createNewAppointment": "Neuen Termin erstellen",
     "dateAndTimeFormatting": "Datums- und Zeitformat",
+    "deleteAppointmentData": "Termin-Daten löschen",
     "discoverCaldavcalendars": "CalDAV-Kalender abfragen",
     "displayInformation": "Anzeige-Informationen",
     "eventBooked": "Event gebucht!",
@@ -539,7 +539,6 @@
     "zoomCom": "zoom.com …"
   },
   "text": {
-    "accountCancelWarning": "Du wirst keinen Zugriff mehr auf Thunderbird Appointment haben. Alle Buchungs-Kalender werden auf \"Inaktiv\" gesetzt und alle zukünftigen Buchungen werden storniert.\nAndere Termin-Daten werden 30 Tage lang beibehalten, entsprechend der TB Pro Datenschutzrichtlinie.",
     "admin": {
       "completelyRemoveUser": "Hier wird ein Benutzer vollständig aus Thunderbird Appointment entfernt, einschließlich aller Benutzerdaten. Diese Funktion bitte nicht ausführen, wenn es keine Aufforderung dafür gab.",
       "disableAccountFirst": "Das Konto muss zunächst deaktiviert sein."
@@ -549,6 +548,7 @@
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",
     "connectZoom": "Du kannst dein Zoom-Konto verbinden, um Besprechungen direkt mit einer Zoom-Einladung zu erstellen.",
     "contactRequestForm": "Bitte verwende das nachstehende Kontaktformular, um Feedback, Fragen oder Anliegen an unser Support-Team zu senden. Wir werden ggf. versuchen, so schnell wie möglich zu antworten.",
+    "deleteAppointmentDataWarning": "Du wirst keinen Zugriff mehr auf Thunderbird Appointment haben. Alle Buchungs-Kalender werden auf \"Inaktiv\" gesetzt und alle zukünftigen Buchungen werden storniert.\nAndere Termin-Daten werden 30 Tage lang beibehalten, entsprechend der TB Pro Datenschutzrichtlinie.",
     "defineDaysAndTimeSlots": "Definiere Tage und Zeitfenster, damit Teilnehmer die Zeit des Events auswählen können …",
     "denialSentToAddress": "Die Informationen über die Ablehnung der Anfrage wurde per E-Mail an {address} geschickt.",
     "disclaimerGABooking": "Bitte beachten: Der Eigentümer muss die Buchung bestätigen.",

@@ -381,6 +381,7 @@ h2 {
     grid-template-columns: 1fr 20px auto 24px;
     grid-gap: 1rem;
     align-items: center;
+    overflow-x: auto;
   }
 
   .calendars-container {

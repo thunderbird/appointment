@@ -22,7 +22,7 @@ const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
 
 const copyLinkTooltip = ref(t('label.copyLink'));
-const cancelAccountModalOpen = ref(false);
+const deleteAppointmentDataModalOpen = ref(false);
 
 const displayName = computed({
   get: () => currentState.value.displayName,
@@ -43,11 +43,10 @@ const copyLink = async () => {
 };
 
 /**
- * Request an account deletion, and then log out.
- * TODO: This will need to change for a cancellation flow
+ * Request an appointment data deletion, and then log out.
  */
 const actuallyDeleteAccount = async () => {
-  cancelAccountModalOpen.value = false;
+  deleteAppointmentDataModalOpen.value = false;
 
   const { error }: BooleanResponse = await call('account/delete').delete();
 
@@ -123,7 +122,7 @@ const actuallyDownloadData = async () => {
     <hr class="account-settings-divider" />
 
     <div class="delete-appointment-data-container">
-      <button @click="cancelAccountModalOpen = true">
+      <button @click="deleteAppointmentDataModalOpen = true">
         {{ t('label.deleteAllAppointmentData') }}
       </button>
 
@@ -131,12 +130,11 @@ const actuallyDownloadData = async () => {
     </div>
   </div>
 
-  <!-- Account deletion modal -->
-  <!-- TODO: This should be account _cancellation_ instead -->
-  <confirmation-modal :open="cancelAccountModalOpen" :title="t('heading.cancelAppointmentService')"
-    :message="t('text.accountCancelWarning')" :confirm-label="t('label.cancelService')"
+  <!-- Delete Appointment Data modal -->
+  <confirmation-modal :open="deleteAppointmentDataModalOpen" :title="t('heading.deleteAppointmentData')"
+    :message="t('text.deleteAppointmentDataWarning')" :confirm-label="t('heading.deleteAppointmentData')"
     :cancel-label="t('label.cancel')" :use-caution-button="true" @confirm="actuallyDeleteAccount"
-    @close="cancelAccountModalOpen = false">
+    @close="deleteAppointmentDataModalOpen = false">
   </confirmation-modal>
 </template>
 
@@ -189,7 +187,7 @@ h2 {
 
 .account-settings-buttons-container {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: flex-start;
 
@@ -205,12 +203,6 @@ h2 {
     font-size: 0.75rem;
     text-decoration: underline;
     text-underline-offset: 0.125rem;
-  }
-
-  .account-settings-divider {
-    border: 0;
-    border-inline-start: 1px solid var(--colour-neutral-border);
-    min-height: 53px;
   }
 
   .delete-appointment-data-container {
@@ -244,6 +236,16 @@ h2 {
 
   .booking-page-url-container {
     grid-template-columns: 20% 1fr;
+  }
+
+  .account-settings-buttons-container {
+    grid-template-columns: 1fr 1px 1fr;
+
+    .account-settings-divider {
+      border: 0;
+      border-inline-start: 1px solid var(--colour-neutral-border);
+      min-height: 53px;
+    }
   }
 }
 </style>

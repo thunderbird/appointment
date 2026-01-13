@@ -105,13 +105,13 @@
     "calendarSettings": "Calendar Settings",
     "calendarsConnected": "Connected Calendars",
     "calendarsUnconnected": "Available Calendars",
-    "cancelAppointmentService": "Cancel Appointment Service?",
     "connectedAccounts": "Connected Accounts",
     "connectedAccountsSettings": "Connected Accounts Settings",
     "connectedApplications": "Connected Applications",
     "contactRequest": "Contact Request",
     "createNewAppointment": "Create new appointment",
     "dateAndTimeFormatting": "Date and Time Format",
+    "deleteAppointmentData": "Delete Appointment Data",
     "discoverCaldavcalendars": "Discover CalDAV Calendars",
     "displayInformation": "Display information",
     "eventBooked": "Event booked!",
@@ -542,7 +542,6 @@
     "zoomCom": "zoom.com…"
   },
   "text": {
-    "accountCancelWarning": "You will no longer have access to TB Appointment. All booking calendars will be set to \"Inactive\" and all upcoming bookings will be cancelled.\nOther appointment data will be retained for 30 days, in accordance with the TB Pro Privacy Policy.",
     "admin": {
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
       "disableAccountFirst": "You must disable the account first."
@@ -552,6 +551,7 @@
     "chooseDateAndTime": "Choose when to meet.",
     "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
     "contactRequestForm": "Please use the contact form below to send any feedback, questions, or concerns to our support team. If needed we will try and contact you for further information as soon as possible.",
+    "deleteAppointmentDataWarning": "You will no longer have access to TB Appointment. All booking calendars will be set to \"Inactive\" and all upcoming bookings will be cancelled.\nOther appointment data will be retained for 30 days, in accordance with the TB Pro Privacy Policy.",
     "defineDaysAndTimeSlots": "Choose the days and time this event can be booked.",
     "denialSentToAddress": "We've let the booker ({address}) know you can't make this event.",
     "disclaimerGABooking": "Your booking will be confirmed by the calendar owner.",
