@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PhDotsThree } from '@phosphor-icons/vue';
-import { PrimaryButton, BaseBadge, CheckboxInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
@@ -174,115 +174,138 @@ async function refreshData() {
   </header>
 
   <div class="form-field-container">
-    <!-- Video Meeting -->
-    <label class="form-field-label" for="videoMeeting">
-      {{ t('label.videoMeeting') }}
-    </label>
-
-    <template v-if="zoomAccount">
-      <p>{{ t('label.connectedAs', { name: zoomAccount.name }) }}</p>
-      <br />
-      <p>{{ t('heading.zoom') }}</p>
-
-      <drop-down class="dropdown" ref="videoMeetingDropdown">
-        <template #trigger>
-          <ph-dots-three size="24" />
-        </template>
-        <template #default>
-          <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
-            <button @click="() => displayModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
-              {{ t('label.disconnect') }}
-            </button>
+    <div>
+      <!-- Video Meeting -->
+      <label for="videoMeeting" class="video-label">
+        {{ t('label.videoMeeting') }}
+      </label>
+  
+      <template v-if="zoomAccount">
+        <div class="video-meeting-container">
+          <div>
+            <span>{{ t('label.connectedAs') }} {{ ' ' }}</span>
+            <strong>{{ zoomAccount.name }}</strong>
           </div>
-        </template>
-      </drop-down>
-    </template>
 
-    <template v-else>
-      <i18n-t keypath="text.generateZoomMeetingHelpDisabled.text" tag="p" scope="global" class="video-not-connected">
-        <template v-slot:link>
-          <button @click="settingsStore.connectZoom">
-            {{ t('text.generateZoomMeetingHelpDisabled.link') }}
-          </button>
-        </template>
-      </i18n-t>
-    </template>
+          <div />
+
+          <p>{{ t('heading.zoom') }}</p>
+    
+          <drop-down class="dropdown" ref="videoMeetingDropdown">
+            <template #trigger>
+              <ph-dots-three size="24" />
+            </template>
+            <template #default>
+              <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
+                <button @click="() => displayModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
+                  {{ t('label.disconnect') }}
+                </button>
+              </div>
+            </template>
+          </drop-down>
+        </div>
+      </template>
+  
+      <template v-else>
+        <i18n-t keypath="text.generateZoomMeetingHelpDisabled.text" tag="p" scope="global" class="video-not-connected">
+          <template v-slot:link>
+            <button @click="settingsStore.connectZoom">
+              {{ t('text.generateZoomMeetingHelpDisabled.link') }}
+            </button>
+          </template>
+        </i18n-t>
+      </template>
+    </div>
 
     <!-- Calendars -->
-    <label class="form-field-label" for="calendars">
-      {{ t('label.calendar', initialCalendars.length) }}
-    </label>
+    <div>
+      <label for="calendars" class="calendars-label">
+        {{ t('label.calendar', initialCalendars.length) }}
+      </label>
+  
+      <div class="calendars-container">
+        <template v-if="initialCalendars.length > 0">
+          <template v-for="calendar in initialCalendars" :key="calendar.id">
+            <!-- Calendar checkbox -->
+            <checkbox-input
+              :name="`calendarConnected-${calendar.id}`"
+              class="calendar-connected-checkbox"
+              @change="(event) => onCalendarChecked(event, calendar.id)"
+              :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
+              :disabled="calendar.is_default"
+            />
 
-    <template v-if="initialCalendars.length > 0">
-      <template v-for="calendar in initialCalendars" :key="calendar.id">
-        <div class="calendar-details-container">
-          <checkbox-input
-            :name="`calendarConnected-${calendar.id}`"
-            class="calendar-connected-checkbox"
-            @change="(event) => onCalendarChecked(event, calendar.id)"
-            :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
-            :disabled="calendar.is_default"
-          />
-          <base-badge v-if="calendar.is_default">
-            {{ t('label.default') }}
-          </base-badge>
-          <p>{{ calendar.title }}</p>
-        </div>
-  
-        <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
-          <input
-            type="color"
-            :value="calendar.color"
-            @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
-          />
-        </div>
-  
-        <p class="calendar-provider">{{ calendar.provider_name }}</p>
-  
-        <drop-down
-          v-if="!calendar.is_default"
-          class="dropdown"
-          :ref="(el) => calendarDropdownRefs[calendar.id] = el"
-        >
-          <template #trigger>
-            <ph-dots-three size="24" />
-          </template>
-          <template #default>
-            <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
-              <button
-                v-if="calendar.connected && !calendar.is_default"
-                @click="() => onSetAsDefaultClicked(calendar.id)"
-              >
-                {{ t('text.settings.connectedApplications.setAsDefault') }}
-              </button>
-              <!-- TODO: Rename Calendar not implemented -->
-              <!-- <button>
-                {{ t('text.settings.connectedApplications.renameCalendar') }}
-              </button> -->
-              <button
-                @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
-                :disabled="calendar.is_default"
-              >
-                {{ t('label.disconnect') }}
-              </button>
+            <!-- Calendar title -->
+            <p>{{ calendar.title }}</p>
+
+            <!-- Default badge -->
+            <template v-if="calendar.is_default">
+              <base-badge :type="BaseBadgeTypes.Default">
+                {{ t('label.default') }}
+              </base-badge>
+            </template>
+            <template v-else>
+              <span />
+            </template>
+
+            <!-- Calendar color -->
+            <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
+              <input
+                type="color"
+                :value="calendar.color"
+                @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
+              />
             </div>
-          </template>
-        </drop-down>
-        <span v-else></span>
-        <span></span>
-      </template>
-    </template>
 
-    <template v-else>
-      <p class="calendar-accounts-not-connected">{{ t('text.settings.calendars.noCalendars') }}</p>
-    </template>
+            <!-- Calendar provider -->
+            <p class="calendar-provider">{{ calendar.provider_name }}</p>
+
+            <!-- Dropdown actions -->
+            <drop-down
+              v-if="!calendar.is_default"
+              class="dropdown"
+              :ref="(el) => calendarDropdownRefs[calendar.id] = el"
+            >
+              <template #trigger>
+                <ph-dots-three size="24" />
+              </template>
+              <template #default>
+                <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
+                  <button
+                    v-if="calendar.connected && !calendar.is_default"
+                    @click="() => onSetAsDefaultClicked(calendar.id)"
+                  >
+                    {{ t('text.settings.connectedApplications.setAsDefault') }}
+                  </button>
+                  <!-- TODO: Rename Calendar not implemented -->
+                  <!-- <button>
+                    {{ t('text.settings.connectedApplications.renameCalendar') }}
+                  </button> -->
+                  <button
+                    @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
+                    :disabled="calendar.is_default"
+                  >
+                    {{ t('label.disconnect') }}
+                  </button>
+                </div>
+              </template>
+            </drop-down>
+            <span v-else></span>
+          </template>
+        </template>
+
+        <template v-else>
+          <p class="calendar-accounts-not-connected">{{ t('text.settings.calendars.noCalendars') }}</p>
+        </template>
+      </div>
+    </div>
   </div>
 
   <div class="footer-buttons-container">
-    <primary-button variant="outline" @click="connectGoogleCalendar">
+    <primary-button variant="outline" size="small" @click="connectGoogleCalendar">
       {{ t('label.addGoogleCalendar') }}
     </primary-button>
-    <primary-button variant="outline" @click="connectCalDavModalOpen = true">
+    <primary-button variant="outline" size="small" @click="connectCalDavModalOpen = true">
       {{ t('label.addCalDavCalendar') }}
     </primary-button>
   </div>
@@ -326,21 +349,47 @@ async function refreshData() {
 @import '@/assets/styles/custom-media.pcss';
 
 header {
-  margin-block-end: 2rem;
+  margin-block-end: 1.5rem;
 }
 
 h2 {
   color: var(--colour-ti-highlight);
   font-size: 1.5rem;
+  font-family: metropolis;
 }
 
 .form-field-container {
-  display: grid;
-  align-items: center;
-  grid-template-columns: 20% 2fr 24px 1fr 24px;
-  grid-gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   margin-block-end: 2rem;
-  overflow-x: auto;
+
+  .calendars-label, .video-label {
+    display: block;
+    color: var(--colour-ti-secondary);
+    letter-spacing: 0.48px;
+    font-weight: 600;
+    margin-block-end: 0.5rem;
+  }
+
+  .calendars-label {
+    margin-block-end: 1rem;
+  }
+
+  .video-meeting-container {
+    display: grid;
+    grid-template-columns: 1fr 20px auto 24px;
+    grid-gap: 1rem;
+    align-items: center;
+  }
+
+  .calendars-container {
+    display: grid;
+    grid-template-columns: auto 1fr min-content 12px auto 24px;
+    grid-gap: 1rem;
+    align-items: center;
+    overflow-x: auto;
+  }
 
   .video-not-connected {
     grid-column: span 4;
@@ -386,29 +435,21 @@ h2 {
   }
 }
 
-.calendar-details-container {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-
-  .checkbox-wrapper {
-     width: auto;
-  }
-
-  .calendar-connected-checkbox {
-    width: auto;
-  }
-}
-
 .calendar-color {
-  width: 24px;
-  height: 24px;
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
 
   input {
-    width: 24px;
-    height: 24px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     border: none;
     cursor: pointer;
+    border-radius: 9999px;
 
     &::-moz-color-swatch {
       border: none;
