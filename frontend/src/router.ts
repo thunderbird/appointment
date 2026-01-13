@@ -240,9 +240,7 @@ router.beforeEach(async (to, _from) => {
 
   // If the route is not public and the user is not authenticated, redirect to the OIDC login
   if (!toMeta?.isPublic && !user.authenticated && isOidcAuth) {
-    await userManager.signinRedirect({
-      prompt: 'login',
-    });
+    await userManager.signinRedirect({});
 
     return false;
   }
