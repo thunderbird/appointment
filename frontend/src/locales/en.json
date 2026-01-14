@@ -1,8 +1,9 @@
 {
   "app": {
     "summary": "Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.",
-    "tagline": "Plan less, do more",
-    "title": "Thunderbird Appointment"
+    "tagline": "Plan less. Do more.",
+    "title": "Thunderbird Appointment",
+    "description": "Thunderbird Appointment makes it easy to find a time to meet. So you can ditch the admin and streamline your day."
   },
   "calDAVForm": {
     "help": {
@@ -300,7 +301,7 @@
     "download": "Download",
     "downloadICS": "Download ICS",
     "downloadInvitation": "Download invitation",
-    "downloadTheIcsFile": "Add to your calendar",
+    "downloadTheIcsFile": "Add to calendar",
     "downloadMyData": "Download My Data",
     "earlier": "Earlier",
     "earliestBooking": "Earliest Booking",
@@ -442,6 +443,7 @@
     "startTime": "Start time",
     "startUsingTba": "Try Appointment",
     "status": "Status",
+    "subscribe": "Subscribe",
     "success": "Success",
     "sync": "Sync",
     "syncCalendars": "Sync Calendars",
@@ -621,6 +623,9 @@
         "noCalendars": "No calendar accounts connected. Add an account to get started."
       }
     },
+    "timeHasBeenConfirmed": "Your time has been confirmed. Thunderbird Appointment has sent a calendar invite to {email}.",
+    "hostHasBeenNotified": "Your host has been notified. Thunderbird Appointment will email you once they respond.",
+    "virtualMeetingWith": "Virtual meeting with {name}",
     "timesAreDisplayedInLocalTimezone": "Times are displayed in your local timezone {timezone}.",
     "titleIsReadyForBookings": "{title} is ready for bookings",
     "updateLinkNotice": "Changing your username or slug will change your link. Your old link will no longer work.",
