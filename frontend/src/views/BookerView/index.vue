@@ -150,8 +150,8 @@ export default {
     class="booking-success-container"
   >
     <booking-view-success
-      :attendee-email="attendee.email"
       :selected-event="selectedEvent"
+      :attendee="attendee"
       :requested="appointment?.booking_confirmation"
     />
   </main>
@@ -171,16 +171,14 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  user-select: none;
+  height: calc(100vh - 30rem); /* FIXME: Set footer alignment to the bottom of the screen */
 }
 
 .booking-invalid-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  user-select: none;
+  height: calc(100vh - 30rem); /* FIXME: Set footer alignment to the bottom of the screen */
   flex-direction: column;
   gap: 2rem;
   padding: 0 1rem;
@@ -188,11 +186,10 @@ export default {
 
 .booking-success-container {
   display: flex;
-  height: 100vh;
-  user-select: none;
-  flex-direction: column-reverse;
-  align-items: center;
-  justify-content: space-evenly;
+  height: calc(100vh - 20rem); /* FIXME: Set footer alignment to the bottom of the screen */
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
   padding: 0 1rem;
 }
 
@@ -207,6 +204,7 @@ export default {
 @media (--md) {
   .booking-success-container {
     flex-direction: row;
+    height: calc(100vh - 29rem); /* FIXME: Set footer alignment to the bottom of the screen */
   }
 }
 
