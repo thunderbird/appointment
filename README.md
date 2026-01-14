@@ -1,5 +1,7 @@
 # Thunderbird Appointment
 
+ignore me
+
 > [!IMPORTANT]  
 > Thunderbird Appointment is in a beta state, so be prepared to encounter bugs
 
