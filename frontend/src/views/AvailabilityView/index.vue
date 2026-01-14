@@ -234,6 +234,11 @@ export default {
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
+:deep(.base.link.filled) {
+  font-size: 0.75rem;
+  color: var(--colour-ti-secondary);
+}
+
 .page-title {
   margin-block-end: 2rem;
   font-family: metropolis;

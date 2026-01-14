@@ -4,8 +4,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
-import { DangerButton, PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
-import { PhCopy, PhArrowRight } from '@phosphor-icons/vue';
+import { TextInput, IconButton } from '@thunderbirdops/services-ui';
+import { PhCopySimple, PhArrowRight, PhDownloadSimple } from '@phosphor-icons/vue';
 import { createUserStore } from '@/stores/user-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { BlobResponse, BooleanResponse } from '@/models';
@@ -22,12 +22,12 @@ const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
 
 const copyLinkTooltip = ref(t('label.copyLink'));
-const cancelAccountModalOpen = ref(false);
+const deleteAppointmentDataModalOpen = ref(false);
 
 const displayName = computed({
   get: () => currentState.value.displayName,
   set: (value) => {
-    settingsStore.$patch({ currentState: { displayName: value }})
+    settingsStore.$patch({ currentState: { displayName: value } })
   }
 })
 
@@ -43,11 +43,10 @@ const copyLink = async () => {
 };
 
 /**
- * Request an account deletion, and then log out.
- * TODO: This will need to change for a cancellation flow
+ * Request an appointment data deletion, and then log out.
  */
 const actuallyDeleteAccount = async () => {
-  cancelAccountModalOpen.value = false;
+  deleteAppointmentDataModalOpen.value = false;
 
   const { error }: BooleanResponse = await call('account/delete').delete();
 
@@ -93,73 +92,49 @@ const actuallyDownloadData = async () => {
     <h2>{{ t('heading.accountSettings') }}</h2>
   </header>
 
-  <div class="booking-page-display-name-container">
-    <label for="booking-page-display-name">
-      {{ t('label.displayName') }}
-    </label>
-    <text-input name="booking-page-display-name" v-model="displayName" />
+  <text-input name="booking-page-display-name" v-model="displayName" class="booking-page-display-name-input">
+    {{ t('label.displayName') }}
+  </text-input>
+
+  <div class="booking-page-url-input-container">
+    <text-input name="booking-page-url" v-model="userStore.myLink" readonly class="booking-page-url-input">
+      {{ t('label.bookingPageLinkLabel') }}
+    </text-input>
+
+    <icon-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip"
+      class="copy-url-button" size="medium">
+      <ph-copy-simple id="copy-booking-page-url-button" :aria-label="t('label.copy')" />
+    </icon-button>
+
+    <router-link to="availability" class="manage-booking-page-link">
+      <span>{{ t('label.manageBookingLink') }}</span>
+      <ph-arrow-right size="16" />
+    </router-link>
   </div>
 
-  <div class="booking-page-url-container">
-    <label for="booking-page-url">
-      {{ t('label.bookingPageURL') }}
-    </label>
-    <div class="booking-page-url-input-container">
-      <text-input name="booking-page-url" class="booking-page-input" v-model="userStore.myLink" readonly />
-      <primary-button
-        variant="outline"
-        aria-labelledby="copy-booking-page-url-button"
-        @click="copyLink"
-        :tooltip="copyLinkTooltip"
-      >
-        <ph-copy id="copy-booking-page-url-button" :aria-label="t('label.copy')" size="18" />
-      </primary-button>
+  <div class="account-settings-buttons-container">
+    <button :title="t('label.download')" variant="outline" @click="actuallyDownloadData"
+      data-testid="settings-account-download-data-btn" class="download-appointment-data-button">
+      <ph-download-simple size="16" />
+      {{ t('label.downloadMyData') }}
+    </button>
+
+    <hr class="account-settings-divider" />
+
+    <div class="delete-appointment-data-container">
+      <button @click="deleteAppointmentDataModalOpen = true">
+        {{ t('label.deleteAllAppointmentData') }}
+      </button>
+
+      <p>{{ t('label.deleteAllAppointmentDataInfo') }}</p>
     </div>
   </div>
 
-  <div class="booking-page-settings-container">
-    <primary-button
-      class="booking-page-settings-button"
-      variant="outline"
-      @click="router.push({ name: 'availability' })"
-    >
-      {{ t('label.bookingPageSettings') }}
-      <template #iconRight>
-        <ph-arrow-right />
-      </template>
-    </primary-button>
-  </div>
-
-  <div class="button-info-container">
-    <span>{{ t('info.downloadAccountData') }}</span>
-    <primary-button
-      :title="t('label.download')"
-      variant="outline"
-      @click="actuallyDownloadData"
-      data-testid="settings-account-download-data-btn"
-    >
-      {{ t('label.downloadMyData') }}
-    </primary-button>
-  </div>
-
-  <div class="button-info-container">
-    <span>{{ t('info.cancelServiceInfo') }}</span>
-    <danger-button @click="cancelAccountModalOpen = true">
-      {{ t('label.cancelService') }}
-    </danger-button>
-  </div>
-
-  <!-- Account deletion modal -->
-  <!-- TODO: This should be account _cancellation_ instead -->
-  <confirmation-modal
-    :open="cancelAccountModalOpen"
-    :title="t('heading.cancelAppointmentService')"
-    :message="t('text.accountCancelWarning')"
-    :confirm-label="t('label.cancelService')"
-    :cancel-label="t('label.cancel')"
-    :use-caution-button="true"
-    @confirm="actuallyDeleteAccount"
-    @close="cancelAccountModalOpen = false">
+  <!-- Delete Appointment Data modal -->
+  <confirmation-modal :open="deleteAppointmentDataModalOpen" :title="t('heading.deleteAppointmentData')"
+    :message="t('text.deleteAppointmentDataWarning')" :confirm-label="t('heading.deleteAppointmentData')"
+    :cancel-label="t('label.cancel')" :use-caution-button="true" @confirm="actuallyDeleteAccount"
+    @close="deleteAppointmentDataModalOpen = false">
   </confirmation-modal>
 </template>
 
@@ -167,74 +142,91 @@ const actuallyDownloadData = async () => {
 @import '@/assets/styles/custom-media.pcss';
 
 header {
-  margin-block-end: 2rem;
+  margin-block-end: 1.5rem;
 }
 
 h2 {
   color: var(--colour-ti-highlight);
   font-size: 1.5rem;
+  font-family: metropolis;
 }
 
-.booking-page-display-name-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-gap: 1.5rem;
-  align-items: center;
+.booking-page-display-name-input {
   margin-block-end: 1.5rem;
 }
 
-.booking-page-url-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-gap: 1.5rem;
-  align-items: center;
-  margin-block-end: 1.5rem;
+.booking-page-url-input-container {
+  position: relative;
+  margin-block-end: 2rem;
 
-  .booking-page-url-input-container {
-    display: flex;
-    gap: 1.5rem;
+  .booking-page-url-input {
+    margin-block-end: 0.5rem;
   }
 
-  .booking-page-input {
-    flex-grow: 1;
-  }
-}
+  .copy-url-button {
+    position: absolute;
+    right: 0.5rem;
+    top: 2.25rem;
+    background-color: var(--colour-neutral-base);
+    color: var(--colour-ti-secondary);
 
-.booking-page-settings-container {
-  display: flex;
-  margin-block-end: 1.5rem;
-
-  .booking-page-settings-button {
-    width: 100%;
-
-    span {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    :deep(.tooltip) {
+      width: max-content;
     }
   }
-}
 
-.button-info-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: end;
-  gap: 2rem;
-  white-space: pre-line;
-  text-align: start;
-
-  span {
-    font-size: 0.825rem;
-  }
-
-  button {
-    width: 100%;
+  .manage-booking-page-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--colour-ti-highlight);
+    font-size: 0.75rem;
+    text-decoration: underline;
   }
 }
 
-.booking-page-settings-container + .button-info-container {
-  margin-block-end: 1.5rem;
+.account-settings-buttons-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+
+  .download-appointment-data-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    color: var(--colour-ti-highlight);
+    background-color: transparent;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    text-underline-offset: 0.125rem;
+  }
+
+  .delete-appointment-data-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    button {
+      margin-block-end: 0.5rem;
+      background-color: transparent;
+      color: var(--colour-ti-critical);
+      text-decoration: underline;
+      text-underline-offset: 0.125rem;
+      font-size: 0.75rem;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    p {
+      font-size: 0.75rem;
+      color: var(--colour-ti-secondary);
+    }
+  }
 }
 
 @media (--md) {
@@ -246,21 +238,13 @@ h2 {
     grid-template-columns: 20% 1fr;
   }
 
-  .booking-page-settings-container {
-    justify-content: end;
+  .account-settings-buttons-container {
+    grid-template-columns: 1fr 1px 1fr;
 
-    .booking-page-settings-button {
-      width: auto;
-    }
-  }
-
-  .button-info-container {
-    text-align: end;
-    flex-direction: row;
-
-    button {
-      width: auto;
-      min-width: 178px;
+    .account-settings-divider {
+      border: 0;
+      border-inline-start: 1px solid var(--colour-neutral-border);
+      min-height: 53px;
     }
   }
 }
