@@ -98,7 +98,7 @@ const actuallyDownloadData = async () => {
 
   <div class="booking-page-url-input-container">
     <text-input name="booking-page-url" v-model="userStore.myLink" readonly class="booking-page-url-input">
-      {{ t('label.bookingPageURL') }}
+      {{ t('label.bookingPageLinkLabel') }}
     </text-input>
 
     <icon-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip"

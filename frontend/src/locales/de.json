@@ -225,7 +225,7 @@
     "bookingDetails": "Buchungsdetails",
     "bookingLink": "Buchungslink",
     "bookingSlot": "Gebuchtes Zeitfenster",
-    "bookingPageURL": "Buchungsseite URL",
+    "bookingPageLinkLabel": "Buchungsseite Link",
     "bookings": "Buchungen",
     "bookingPageLink": "Dein Buchungsseiten-Link",
     "bookingPageDetails": "Buchungsseite Details",
