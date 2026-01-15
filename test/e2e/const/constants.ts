@@ -43,8 +43,8 @@ export const APPT_THEME_SETTING_DARK = 'Dark';
 export const APPT_TIMEZONE_SETTING_PRIMARY = Intl.DateTimeFormat().resolvedOptions().timeZone;
 console.log(`using local timezone: ${APPT_TIMEZONE_SETTING_PRIMARY}`)
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax'; // settings test changes to this tz temporarily
-export const APPT_START_OF_WEEK_SUN = 'S';
-export const APPT_START_OF_WEEK_MON = 'M';
+export const APPT_START_OF_WEEK_SUN = 'SUN';
+export const APPT_START_OF_WEEK_MON = 'MON';
 export const APPT_START_OF_WEEK_DASHBOARD_SUN = 'Sun';
 export const APPT_START_OF_WEEK_DASHBOARD_MON = 'Mon';
 
