@@ -77,7 +77,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
       <primary-button @click="router.push({ name: 'home' })">
         {{ user.authenticated ? t('label.dashboard') : t('label.subscribe') }}
         <template #iconRight>
-          <ph-arrow-right />
+          <ph-arrow-right weight="bold" />
         </template>
       </primary-button>
     </div>
@@ -180,6 +180,26 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
   .description {
     font-size: 0.875rem;
     color: var(--colour-neutral-lower);
+  }
+
+  :deep(.base.primary.filled) {
+    position: relative;
+    z-index: 1;
+    background-image: linear-gradient(161deg, #a0e1ff -26%, #2b8cdc 45%);
+    color: var(--colour-ti-base);
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.8125rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      background-image: linear-gradient(353deg, #1373d9 -36%, #58c9ff);
+      border-radius: .5rem;
+    }
   }
 }
 </style>
