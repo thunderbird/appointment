@@ -174,6 +174,10 @@ const shortestDuration = computed(() => {
 const weekdays = computed(() => {
   const { start, end } = props.activeDateRange;
 
+  // Access language setting to trigger recomputation when locale changes
+  // The actual locale is set globally on dayjs, but we need this reactive dependency
+  void userStore.data.settings.language;
+
   // Parse the start and end dates using dayjs's automatic parsing
   const startDate = dj(start);
   const endDate = dj(end);

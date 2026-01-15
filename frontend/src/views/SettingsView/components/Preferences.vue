@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { isoWeekdaysKey } from '@/keys';
+import { dayjsKey } from '@/keys';
 import { ColourSchemes } from '@/definitions';
 import { BubbleSelect, SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useSettingsStore } from '@/stores/settings-store';
+import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
 
 const { t, availableLocales } = useI18n();
-const isoWeekdays = inject(isoWeekdaysKey);
+const dj = inject(dayjsKey);
+const userStore = useUserStore();
 
 const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
@@ -71,13 +73,28 @@ const timeFormat = computed({
 })
 
 // Start of Week
-// TODO: As long as we use Qalendar, we can only support Sunday and Monday as start of week
-const availableStartOfTheWeekOptions = computed(
-  () => isoWeekdays.filter((day) => [7,1].includes(day.iso)).map((e) => ({
-    label: e.short,
-    value: e.iso,
-  }))
-);
+// Generate options dynamically using dayjs to respect current locale
+const availableStartOfTheWeekOptions = computed(() => {
+  // Access language to trigger recomputation when locale changes
+  void userStore.data.settings.language;
+
+  // ISO weekday values: 1=Monday, 2=Tuesday, ..., 7=Sunday
+  // dayjs weekday values: 0=Sunday, 1=Monday, ..., 6=Saturday
+  const allDays = [
+    { iso: 7, dayjsDay: 0 }, // Sunday
+    { iso: 1, dayjsDay: 1 }, // Monday
+    { iso: 2, dayjsDay: 2 }, // Tuesday
+    { iso: 3, dayjsDay: 3 }, // Wednesday
+    { iso: 4, dayjsDay: 4 }, // Thursday
+    { iso: 5, dayjsDay: 5 }, // Friday
+    { iso: 6, dayjsDay: 6 }, // Saturday
+  ];
+
+  return allDays.map((day) => ({
+    label: dj().day(day.dayjsDay).format('ddd'),
+    value: day.iso,
+  }));
+});
 
 const startOfWeek = computed({
   get: () => {
