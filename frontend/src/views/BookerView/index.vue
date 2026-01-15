@@ -171,14 +171,12 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 30rem); /* FIXME: Set footer alignment to the bottom of the screen */
 }
 
 .booking-invalid-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 30rem); /* FIXME: Set footer alignment to the bottom of the screen */
   flex-direction: column;
   gap: 2rem;
   padding: 0 1rem;
@@ -186,14 +184,15 @@ export default {
 
 .booking-success-container {
   display: flex;
-  height: calc(100vh - 20rem); /* FIXME: Set footer alignment to the bottom of the screen */
   flex-direction: column;
-  align-items: start;
+  align-items: center;
   justify-content: center;
   padding: 0 1rem;
+  gap: 2rem;
 }
 
 .booking-slot-selection-container {
+  width: 100%;
   margin: 0 auto;
   user-select: none;
   padding: 0 1rem;
@@ -204,7 +203,7 @@ export default {
 @media (--md) {
   .booking-success-container {
     flex-direction: row;
-    height: calc(100vh - 29rem); /* FIXME: Set footer alignment to the bottom of the screen */
+    align-items: start;
   }
 }
 

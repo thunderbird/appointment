@@ -44,54 +44,46 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 </script>
 
 <template>
-  <div class="booking-success-container">
-    <div class="booking-details">
-      <div class="heading">
-        <ph-confetti />
-        {{ heading }}
+  <div class="booking-details">
+    <div class="heading">
+      <ph-confetti />
+      {{ heading }}
+    </div>
+    <p>{{ description }}</p>
+    <div class="info">
+      <div class="logo">
+        <img src="@/assets/svg/appointment_calendar_logo.svg" alt="Appointment Calendar Logo" />
       </div>
-      <p>{{ description }}</p>
-      <div class="info">
-        <div class="logo">
-          <img src="@/assets/svg/appointment_calendar_logo.svg" alt="Appointment Calendar Logo" />
-        </div>
-        <div>
-          {{ date }}
-          <br />
-          {{ t('text.virtualMeetingWith', {name: attendee.name}) }}
-        </div>
-      </div>
-      <div class="actions">
-        <link-button :href="downloadUrl">
-          <template #iconLeft>
-            <ph-download-simple />
-          </template>
-          {{ t('label.downloadTheIcsFile') }}
-        </link-button>
+      <div>
+        {{ date }}
+        <br />
+        {{ t('text.virtualMeetingWith', {name: attendee.name}) }}
       </div>
     </div>
-    <div class="appointment-call-out">
-      <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
-      <span class="tagline" v-text="t('app.tagline')"></span>
-      <span class="description" v-text="t('app.description')"></span>
-      <primary-button @click="router.push({ name: 'home' })">
-        {{ user.authenticated ? t('label.dashboard') : t('label.subscribe') }}
-        <template #iconRight>
-          <ph-arrow-right weight="bold" />
+    <div class="actions">
+      <link-button :href="downloadUrl">
+        <template #iconLeft>
+          <ph-download-simple />
         </template>
-      </primary-button>
+        {{ t('label.downloadTheIcsFile') }}
+      </link-button>
     </div>
+  </div>
+  <div class="appointment-call-out">
+    <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
+    <span class="tagline" v-text="t('app.tagline')"></span>
+    <span class="description" v-text="t('app.description')"></span>
+    <primary-button @click="router.push({ name: 'home' })">
+      {{ user.authenticated ? t('label.dashboard') : t('label.subscribe') }}
+      <template #iconRight>
+        <ph-arrow-right weight="bold" />
+      </template>
+    </primary-button>
   </div>
 </template>
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
-
-.booking-success-container {
-  display: flex;
-  flex-direction: row;
-  gap: 2rem;
-}
 
 .booking-details {
   border-radius: 1rem;
@@ -125,6 +117,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 
   .info {
     display: flex;
+    flex-direction: column;
     gap: 1.5rem;
     font-size: 1.25rem;
     color: var(--colour-ti-black);
@@ -152,6 +145,11 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
       width: 16px !important;
       height: 16px !important;
     }
+  }
+}
+@media (--sm) {
+  .booking-details .info {
+    flex-direction: row;
   }
 }
 
