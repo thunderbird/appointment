@@ -179,14 +179,14 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 
   .description {
     font-size: 0.875rem;
-    color: var(--colour-neutral-lower);
+    color: var(--colour-neutral-lower-light);
   }
 
   :deep(.base.primary.filled) {
     position: relative;
     z-index: 1;
     background-image: linear-gradient(161deg, #a0e1ff -26%, #2b8cdc 45%);
-    color: var(--colour-ti-base);
+    color: var(--colour-ti-base-light);
     text-transform: uppercase;
     font-weight: 600;
     font-size: 0.8125rem;
