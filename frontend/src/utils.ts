@@ -17,9 +17,7 @@ import {
 } from '@/models';
 import { BookingStatus } from './definitions';
 
-/**
-* Lowercases the first character of a string
-*/
+// Lowercases the first character of a string
 export const lcFirst = (s: string): string => {
   if (typeof s !== 'string' || !s) {
     return '';
@@ -109,7 +107,7 @@ export const timeFormat = (): string => {
   }
 
   const format = Number(user.settings?.timeFormat ?? detected);
-  return format === 24 ? 'HH:mm' : 'hh:mm A';
+  return format === 24 ? 'HH:mm' : 'hh:mma';
 };
 
 // Check if we already have a local user preferred language

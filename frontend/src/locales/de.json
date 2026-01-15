@@ -1,9 +1,9 @@
 {
   "app": {
     "summary": "Lass Freunde und Kollegen Zeiten in deinem Kalender wählen. Terminabsprachen so simpel wie möglich.",
-    "tagline": "Weniger planen, mehr schaffen",
-    "title": "Thunderbird Appointment"
-  },
+    "tagline": "Weniger planen. Mehr schaffen.",
+    "title": "Thunderbird Appointment",
+    "description": "Mit Thunderbird Appointment findest Du ganz einfach einen Termin für ein Treffen. So kannst Du Verwaltungsaufwand hinter Dir lassen und Deinen Tag optimieren."  },
   "calDAVForm": {
     "help": {
       "location": "URL oder Hostname, den wir für die Verbindung deiner Kalender verwenden werden.",
@@ -296,7 +296,7 @@
     "download": "Download",
     "downloadICS": "Download ICS",
     "downloadInvitation": "Termineinladung herunterladen",
-    "downloadTheIcsFile": "ICS-Datei herunterladen",
+    "downloadTheIcsFile": "Zu Kalender hinzufügen",
     "downloadMyData": "Alle deine Daten von Appointment herunterladen",
     "earliestBooking": "Früheste Buchung",
     "edit": "Bearbeiten",
@@ -439,6 +439,7 @@
     "startTime": "Startzeit",
     "startUsingTba": "Starte mit TBA",
     "status": "Status",
+    "subscribe": "Abonnieren",
     "success": "Erfolg",
     "sync": "Synchronisieren",
     "syncCalendars": "Kalender synchronisieren",
@@ -618,6 +619,9 @@
         "noCalendars": "Keine Kalenderkonten verbunden. Füge ein Konto hinzu, um zu beginnen."
       }
     },
+    "timeHasBeenConfirmed": "Der Termin wurde bestätigt. Thunderbird Appointment hat eine Kalendereinladung an {email} gesendet.",
+    "hostHasBeenNotified": "Der Gastgeber wurde benachrichtigt. Thunderbird Appointment wird dir eine E-Mail senden, sobald er antwortet.",
+    "virtualMeetingWith": "Online-Meeting mit {name}",
     "timesAreDisplayedInLocalTimezone": "Die Zeiten werden in deiner lokalen Zeitzone {timezone} angezeigt.",
     "titleIsReadyForBookings": "{title} ist für Buchungen bereit",
     "updateLinkNotice": "Ein Ändern des Benutzernamens oder des Teillinks aktualisiert deinen Link. Alle alten Links werden dann nicht mehr funktionieren.",
