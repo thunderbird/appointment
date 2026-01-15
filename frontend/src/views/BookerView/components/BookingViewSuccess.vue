@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject } from 'vue';
-import { timeFormat, toTitleCase } from '@/utils';
+import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -26,8 +26,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const heading = props.requested
-  ? toTitleCase(t('info.bookingSuccessfullyRequested'))
-  : toTitleCase(t('info.bookingSuccessfullyConfirmed'));
+  ? t('info.bookingSuccessfullyRequested')
+  : t('info.bookingSuccessfullyConfirmed');
 
 const description = props.requested
   ? t('text.hostHasBeenNotified')
@@ -116,6 +116,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
   
     color: var(--colour-ti-highlight);
     font-size: 1.5rem;
+    text-transform: capitalize;
   
     svg {
       fill: var(--colour-ti-highlight);

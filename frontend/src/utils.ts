@@ -26,15 +26,6 @@ export const lcFirst = (s: string): string => {
   return s[0].toLowerCase() + s.slice(1);
 };
 
-// Title Case a string
-export const toTitleCase = (s: string): string => {
-  if (typeof s !== 'string' || !s) {
-    return '';
-  }
-
-  return s.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
-};
-
 // Convert a numeric enum to an object for key-value iteration
 export const enumToObject = (e: object): { [key in string]: number } => {
   const o = {};
@@ -446,7 +437,6 @@ export const isUnconfirmed = (a: Appointment): boolean => {
 };
 
 export default {
-  toTitleCase,
   keyByValue,
   eventColor,
   initials,
