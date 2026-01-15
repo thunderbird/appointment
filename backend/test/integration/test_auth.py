@@ -934,3 +934,31 @@ class TestOIDCToken:
                 assert oidc_connection is not None
                 assert len(oidc_connection) == 1
                 assert oidc_connection[0].type_id == oidc_id
+
+    def test_oidc_token_strips_domain_from_username(self, with_db, with_client, faker):
+        """Ensure usernames derived from emails drop the domain portion"""
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        email = faker.email()
+        expected_username = email.split('@')[0]
+        oidc_id = 'new-oidc-id-strip-domain'
+
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
+            mock_introspect.return_value = {
+                'sub': oidc_id,
+                'email': email,
+                'preferred_username': email, # preferred_username is the thundermail address
+                'name': 'OIDC User',
+            }
+
+            response = with_client.post(
+                '/oidc/token', json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+            )
+
+        assert response.status_code == 200, response.text
+        assert response.json() is True
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, email)
+            assert subscriber is not None
+            assert subscriber.username == expected_username

@@ -27,7 +27,7 @@ const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointm
 <template>
   <div class="appointment-content">
     <div class="time-slots">
-      <template v-for="s in appointment.slots" :key="s.start">
+      <template v-for="s in appointment.slots" :key="s.id">
         <div class="time-slot">
           <ph-clock class="time-icon" weight="duotone" :aria-label="t('label.timeOfTheEvent')" />
           <div class="time-details">
@@ -76,7 +76,7 @@ const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointm
           <UserAvatar :avatar-url="user.data.avatarUrl" :username="user.data.username" size="small" />
           {{ user.data.username }} ({{ t('label.host') }})
         </div>
-        <template v-for="s in attendeesSlots" :key="s.start">
+        <template v-for="s in attendeesSlots" :key="s.id">
           <div class="attendee-item">
             <UserAvatar :username="s.attendee.email" size="small" />
             {{ s.attendee.email }}
@@ -262,6 +262,7 @@ const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointm
 
   & :first-child {
     flex-shrink: 0;
+    color: var(--colour-ti-base);
   }  
 }
 
