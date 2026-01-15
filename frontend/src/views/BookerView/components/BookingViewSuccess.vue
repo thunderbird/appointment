@@ -77,7 +77,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
     <div class="appointment-call-out">
       <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
       <span class="tagline" v-text="t('app.tagline')"></span>
-      <span v-text="t('app.description')"></span>
+      <span class="description" v-text="t('app.description')"></span>
       <primary-button @click="router.push({ name: 'home' })">
         {{ user.authenticated ? t('label.dashboard') : t('label.subscribe') }}
         <template #iconRight>
@@ -122,10 +122,15 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
     }
   }
 
+  p {
+    color: var(--colour-ti-base);
+  }
+
   .info {
     display: flex;
     gap: 1.5rem;
     font-size: 1.25rem;
+    color: var(--colour-ti-black);
 
     .logo {
       padding: 0.5rem;
@@ -155,7 +160,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 
   border-radius: 1rem;
   padding: 1.5rem 1.5rem 3.5rem;
-  max-width: 22rem;
+  max-width: 23rem;
 
   background-image: radial-gradient(circle at 100% 100%, #336d71, #1b222e);
   color: var(--colour-neutral-lower-light);
@@ -166,6 +171,11 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
     font-size: 2rem;
     font-weight: 300;
     font-family: Metropolis, sans-serif;
+  }
+
+  .description {
+    font-size: 0.875rem;
+    color: var(--colour-neutral-lower);
   }
 }
 </style>
