@@ -68,17 +68,17 @@ test.describe('account settings on mobile browser', {
     await settingsPage.scrollIntoView(settingsPage.downloadDataBtn);
     await expect(settingsPage.downloadDataBtn).toBeVisible();
 
-    // cancel service button brings up confirmation dialog (just cancel out)
-    await settingsPage.scrollIntoView(settingsPage.cancelServiceBtn);
-    await settingsPage.cancelServiceBtn.click();
+    // delete all data button brings up confirmation dialog (just cancel out)
+    await settingsPage.scrollIntoView(settingsPage.deleteDataBtn);
+    await settingsPage.deleteDataBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.scrollIntoView(settingsPage.cancelServiceConfirmCancelBtn);
-    await settingsPage.cancelServiceConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
+    await settingsPage.scrollIntoView(settingsPage.deleteDataConfirmCancelBtn);
+    await settingsPage.deleteDataConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
-    // clicking 'booking page settings' button brings up availability section
-    await settingsPage.scrollIntoView(settingsPage.bookingPageSettingsBtn);
-    await settingsPage.bookingPageSettingsBtn.click();
+    // clicking 'manage booking' link brings up availability page
+    await settingsPage.scrollIntoView(settingsPage.manageBookingLink);
+    await settingsPage.manageBookingLink.click();
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });
 

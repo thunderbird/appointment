@@ -36,14 +36,14 @@ export const navigateToAppointmentAndSignIn = async (page: Page, testProjectName
   await page.goto(`${APPT_URL}`);
   await page.waitForTimeout(TIMEOUT_5_SECONDS);
 
-  // if we are already signed in then we can skip this
+  // local dev can use 'password' only or oidc; check if using password only
+  if (APPT_TARGET_ENV == 'dev' && await tbAcctsSignInPage.localDevEmailInput.isVisible()) {
+    await tbAcctsSignInPage.localApptSignIn();
+  }
+
+  // using oidc/keyloak; if we are already signed in then we can skip this
   if (await tbAcctsSignInPage.signInHeaderText.isVisible() && await tbAcctsSignInPage.signInButton.isEnabled()) {
-      if (APPT_TARGET_ENV == 'prod' || APPT_TARGET_ENV == 'stage') {
-          await tbAcctsSignInPage.signIn(testProjectName);
-      } else {
-          // local dev env doesn't use tb accts; just signs into appt using username and pword
-          await tbAcctsSignInPage.localApptSignIn();
-      }
+    await tbAcctsSignInPage.signIn(testProjectName);
   }
 
   // now that we're signed into the appointment dashboard give it time to load
