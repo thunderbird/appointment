@@ -19,6 +19,7 @@
     "authenticationRequired": "Sorry, this page requires you to be logged in.",
     "bookingCancelError": "Booking couldn't be cancelled.",
     "calendarConnectError": "There was a problem with the calendar connection.",
+    "calendarConnectionUnavailable": "The calendar connection is currently not available. Please contact the calendar owner directly.",
     "credentialsIncomplete": "Please provide login credentials.",
     "dataSourceIsEmpty": "No {name} could be found.",
     "externalAccountHasNoCalendars": "Your {external} account contains no calendars. Please connect a different account.",
