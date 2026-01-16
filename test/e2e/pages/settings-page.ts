@@ -8,6 +8,7 @@ import {
   TIMEOUT_5_SECONDS,
   TIMEOUT_30_SECONDS,
   APPT_LANGUAGE_SETTING_EN,
+  APPT_START_OF_WEEK_MON,
   } from '../const/constants';
 
 
@@ -31,9 +32,9 @@ export class SettingsPage {
   readonly bookingPageURLInput: Locator;
   readonly copyLinkBtn: Locator;
   readonly copyLinkToolTipText: Locator;
-  readonly cancelServiceBtn: Locator;
-  readonly cancelServiceConfirmCancelBtn: Locator;
-  readonly bookingPageSettingsBtn: Locator;
+  readonly deleteDataBtn: Locator;
+  readonly deleteDataConfirmCancelBtn: Locator;
+  readonly manageBookingLink: Locator;
   readonly downloadDataBtn: Locator;
   readonly connectedAppsHdr: Locator;
   readonly addCaldavBtn: Locator;
@@ -42,7 +43,7 @@ export class SettingsPage {
   readonly addCaldavPasswordInput: Locator;
   readonly addCaldavCloseModalBtn: Locator;
   readonly addGoogleBtn: Locator;
-  readonly defaultCalendarConnectedCbox: Locator;
+  readonly defaultCalendarBadge: Locator;
   readonly saveBtnEN: Locator;
   readonly savedSuccessfullyTextEN: Locator;
   readonly savedSuccessfullyTextDE: Locator;
@@ -57,10 +58,10 @@ export class SettingsPage {
     // main settings view
     this.settingsHeaderEN = this.page.getByRole('main').getByText('Settings', { exact: true });
     this.settingsHeaderDE = this.page.getByRole('heading', { name: 'Einstellungen' }).first();
-    this.saveBtnEN = this.page.getByRole('button', { name: 'Save' });
+    this.saveBtnEN = this.page.getByRole('button', { name: 'Save' }).nth(1); // save button at bottom, not in notice bar
     this.savedSuccessfullyTextEN = this.page.getByText('Settings saved successfully', { exact: true });
     this.savedSuccessfullyTextDE = this.page.getByText('Einstellungen erfolgreich gespeichert', { exact: true });
-    this.saveBtnDE = this.page.getByRole('button', { name: 'Speichern' });
+    this.saveBtnDE = this.page.getByRole('button', { name: 'Speichern' }).nth(1);
     this.revertBtn = this.page.getByRole('button', { name: 'Revert changes' });
 
     // account settings section
@@ -70,9 +71,9 @@ export class SettingsPage {
     this.bookingPageURLInput = this.page.locator('#booking-page-url');
     this.copyLinkBtn = this.page.locator('#copy-booking-page-url-button');
     this.copyLinkToolTipText = this.page.locator('#tooltip-body');
-    this.cancelServiceBtn = this.page.getByRole('button', { name: 'Cancel Service' });
-    this.cancelServiceConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel', exact: true });
-    this.bookingPageSettingsBtn = this.page.getByRole('button', { name: 'Booking Page Settings' });
+    this.deleteDataBtn = this.page.getByRole('button', { name: 'Delete all Appointment data' });
+    this.deleteDataConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel', exact: true });
+    this.manageBookingLink = this.page.getByText('Manage booking link');
     this.downloadDataBtn = this.page.getByTestId('settings-account-download-data-btn');
 
     // preferences section
@@ -82,8 +83,8 @@ export class SettingsPage {
     this.preferencesHeaderEN = this.page.getByRole('heading', { name: 'Preferences' })
     this.preferencesHeaderDE = this.page.locator('#preferences').getByRole('heading', { name: 'Einstellungen' });
     this.defaultTimeZoneSelect = this.page.getByTestId('settings-preferences-default-time-zone-select');
-    this.startOfWeekMondayBtn = this.page.getByRole('button', { name: 'M', exact: true });
-    this.startOfWeekSundayBtn = this.page.getByRole('button', { name: 'S', exact: true });
+    this.startOfWeekMondayBtn = this.page.getByRole('button', { name: 'Mon', exact: true });
+    this.startOfWeekSundayBtn = this.page.getByRole('button', { name: 'Sun', exact: true });
 
     // connected apps section
     this.connectedAppsBtn = this.page.getByTestId('settings-connectedApplications-settings-btn');
@@ -94,7 +95,7 @@ export class SettingsPage {
     this.addCaldavPasswordInput = this.page.getByLabel('Password');
     this.addCaldavCloseModalBtn = this.page.getByRole('img', { name: 'Close' });
     this.addGoogleBtn = this.page.getByRole('button', { name: 'Add Google Calendar' });
-    this.defaultCalendarConnectedCbox = this.page.locator('div').filter({ hasText: /^Default*/ }).getByTestId('checkbox-input');
+    this.defaultCalendarBadge = this.page.getByTestId('badge');
     this.googleSignInHdr = this.page.getByText('Sign in with Google');
   }
 
@@ -208,7 +209,7 @@ export class SettingsPage {
   async changeStartOfWeekSetting(startOfWeek: string) {
     await this.scrollIntoView(this.startOfWeekMondayBtn);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    if (startOfWeek == 'M') {
+    if (startOfWeek == APPT_START_OF_WEEK_MON) {
       await this.startOfWeekMondayBtn.click({ timeout: TIMEOUT_30_SECONDS });
     } else {
       await this.startOfWeekSundayBtn.click({ timeout: TIMEOUT_30_SECONDS });
