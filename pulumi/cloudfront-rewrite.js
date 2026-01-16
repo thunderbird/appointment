@@ -3,7 +3,19 @@
     const headers = request.headers;
     const host = headers.host.value;
     const apiPath = '/api/v1';
-    const ignorePaths = ['/fxa', '/assets', '/appointment_logo.svg', '/sitemap.txt'];
+    const ignorePaths = [
+      '/fxa',
+      '/assets',
+      '/sitemap.txt',
+      '/favicon.ico',
+      '/favicon-dark.ico',
+      '/site.webmanifest',
+      '/apple-touch-icon.png',
+      '/android-chrome-192x192.png',
+      '/android-chrome-512x512.png',
+      '/favicon-16x16.png',
+      '/favicon-32x32.png',
+    ];
     const pathCheckFn = (path) => request.uri.startsWith(path);
     const domainRewrites = {
       'apt.mt': 'appointment.tb.pro',
