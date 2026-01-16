@@ -4,8 +4,11 @@ import { useI18n } from 'vue-i18n';
 import { dayjsKey } from '@/keys';
 import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue';
 import { TimeFormatted } from '@/models';
+import { useUserStore } from '@/stores/user-store';
+import { getStartOfWeek, getEndOfWeek } from '@/utils';
 
 const dj = inject(dayjsKey);
+const userStore = useUserStore();
 
 const props = defineProps<{
   onDateChange: (dateObj: TimeFormatted) => void,
@@ -21,22 +24,32 @@ const { t } = useI18n();
 const dateInputRef = ref<HTMLInputElement>();
 
 // Computed values for accessibility
+// Access language setting to trigger recomputation when locale changes
 const currentWeekLabel = computed(() => {
+  void userStore.data.settings.language;
   const startDate = dj(props.activeDateRange.start).format('L');
   const endDate = dj(props.activeDateRange.end).format('L');
   return startDate + ' – ' + endDate;
 });
 
 const previousWeekLabel = computed(() => {
+  void userStore.data.settings.language;
   const prevStart = dj(props.activeDateRange.start).subtract(7, 'day').format('L');
   const prevEnd = dj(props.activeDateRange.start).subtract(1, 'day').format('L');
   return t('label.previousWeek') + ': ' + prevStart + ' – ' + prevEnd;
 });
 
 const nextWeekLabel = computed(() => {
+  void userStore.data.settings.language;
   const nextStart = dj(props.activeDateRange.end).add(1, 'day').format('L');
   const nextEnd = dj(props.activeDateRange.end).add(7, 'day').format('L');
   return t('label.nextWeek') + ': ' + nextStart + ' – ' + nextEnd;
+});
+
+// Week picker button display text
+const weekPickerButtonText = computed(() => {
+  void userStore.data.settings.language;
+  return `${dj(props.activeDateRange.start).format('MMMM DD')} – ${dj(props.activeDateRange.end).format('MMMM DD')}`;
 });
 
 function onPreviousWeekButtonClicked() {
@@ -63,12 +76,13 @@ function onDateSelected(event: Event) {
 
   if (target.value) {
     const selectedDate = dj(target.value);
-    const startOfWeek = selectedDate.startOf('week');
-    const endOfWeek = selectedDate.endOf('week');
+    const startOfWeekSetting = userStore.data.settings.startOfWeek ?? 7;
+    const weekStart = getStartOfWeek(selectedDate, startOfWeekSetting);
+    const weekEnd = getEndOfWeek(selectedDate, startOfWeekSetting);
 
     props.onDateChange({
-      start: startOfWeek.format('YYYY-MM-DD'),
-      end: endOfWeek.format('YYYY-MM-DD'),
+      start: weekStart.format('YYYY-MM-DD'),
+      end: weekEnd.format('YYYY-MM-DD'),
     });
   }
 }
@@ -116,7 +130,7 @@ function onKeyDown(event: KeyboardEvent) {
       :aria-label="t('label.selectWeek') + ': ' + currentWeekLabel"
       :title="t('label.selectWeek')"
     >
-      {{ dj(activeDateRange.start).format('MMMM DD') }} – {{ dj(activeDateRange.end).format('MMMM DD') }}
+      {{ weekPickerButtonText }}
     </button>
 
     <button

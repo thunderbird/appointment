@@ -14,6 +14,7 @@ type DayjsType = ((_?: ConfigType) => Dayjs) & {
   max: (...dayjs: Dayjs[]) => Dayjs | null,
   min: (...dayjs: Dayjs[]) => Dayjs | null,
   duration: CreateDurationType,
+  locale: (preset?: string) => string,
 } & ((objToParse: any, format: string) => Dayjs);
 export const dayjsKey = Symbol('dayjs') as InjectionKey<DayjsType>;
 export const isoWeekdaysKey = Symbol('isoWeekdays') as InjectionKey<IsoWeekday[]>;

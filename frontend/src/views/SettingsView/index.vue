@@ -7,7 +7,7 @@ import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { enumToObject } from '@/utils';
-import { callKey } from '@/keys';
+import { callKey, dayjsKey } from '@/keys';
 import { SettingsSections, ColourSchemes } from '@/definitions';
 import { Alert, SubscriberResponse } from '@/models';
 import { useUserStore } from '@/stores/user-store';
@@ -23,6 +23,7 @@ import ConnectedApplications from './components/ConnectedApplications.vue';
 
 // component constants
 const call = inject(callKey);
+const dj = inject(dayjsKey);
 const { t, locale } = useI18n({ useScope: 'global' });
 const route = useRoute();
 const router = useRouter();
@@ -115,6 +116,9 @@ async function updatePreferences() {
 
   // Update i18n locale to change language on the page without page refresh
   locale.value = currentState.value.language;
+
+  // Update dayjs locale to match the new language
+  dj.locale(currentState.value.language);
 
   // Update the userStore internal state with fresh backend values
   await userStore.profile();
