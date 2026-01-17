@@ -4,7 +4,9 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { useCalendarStore } from '@/stores/calendar-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
+import mailIcon from '@/assets/svg/icons/mail.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
 import { FtueStep } from '@/definitions';
 
@@ -13,11 +15,12 @@ import RadioProviderCardButton from '../components/RadioProviderCardButton.vue';
 
 const { t } = useI18n();
 
+const calendarStore = useCalendarStore();
 const ftueStore = useFTUEStore();
 const { errorMessage } = storeToRefs(ftueStore);
 
 type CalendarProvider = 'caldav' | 'google' | 'oidc';
-const calendarProvider = ref<CalendarProvider | null>(null);
+const calendarProvider = ref<CalendarProvider | null>('oidc');
 
 const onBackButtonClick = () => {
   ftueStore.moveToStep(FtueStep.SetupProfile, true);
@@ -28,7 +31,7 @@ const onContinueButtonClick = async () => {
 
   switch (calendarProvider.value) {
     case 'oidc':
-      // TODO: Implement OIDC flow (get the token and try to authenticate)
+      await calendarStore.connectOIDCCalendar();
       break;
     case 'caldav':
       await ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
@@ -51,16 +54,15 @@ const onContinueButtonClick = async () => {
   </notice-bar>
 
   <div class="radio-group" role="radiogroup" :aria-label="t('ftue.connectYourCalendar')">
-    <!-- TODO: Implement OIDC / TB Pro Calendar auto-connect through token -->
-    <!-- <radio-provider-card-button
+    <radio-provider-card-button
       :title="t('ftue.connectCalendarTBPro')"
       :description="t('ftue.connectCalendarTBProInfo')"
-      :iconSrc="calendarIcon"
+      :iconSrc="mailIcon"
       :iconAlt="t('ftue.appointmentLogo')"
       value="oidc"
       name="calendar-provider"
       v-model="calendarProvider"
-    /> -->
+    />
 
     <radio-provider-card-button
       :title="t('ftue.connectCalendarCalDav')"

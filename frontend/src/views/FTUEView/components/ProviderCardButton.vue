@@ -4,6 +4,7 @@ defineProps<{
   description: string;
   iconSrc: string;
   iconAlt: string;
+  showDescription?: boolean;
 }>();
 </script>
 
@@ -13,7 +14,7 @@ defineProps<{
 
     <div>
       <h3>{{ title }}</h3>
-      <p>{{ description }}</p>
+      <p v-if="showDescription">{{ description }}</p>
     </div>
   </button>
 </template>
@@ -27,6 +28,7 @@ button {
   border-radius: 0.5rem;
   text-align: left;
   align-items: center;
+  width: 100%;
 
   img { 
     width: 2.25rem;

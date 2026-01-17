@@ -296,6 +296,8 @@ resources:
                 value: https://appointment.tb.pro/api/v1/zoom/callback
               - name: ZOOM_API_NEW_APP
                 value: "False"
+              - name: TB_ACCOUNTS_CALDAV_URL
+                value: https://thundermail.com
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
