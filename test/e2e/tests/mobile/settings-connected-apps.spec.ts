@@ -40,9 +40,9 @@ test.describe('settings - connected applications on mobile browser', {
     await expect(settingsPage.connectedAppsHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.scrollIntoView(settingsPage.connectedAppsHdr);
 
-    // verify default calendar checkbox is on (test expects google cal already connected)
-    await settingsPage.scrollIntoView(settingsPage.defaultCalendarConnectedCbox);
-    expect(await settingsPage.defaultCalendarConnectedCbox.isChecked()).toBeTruthy();
+    // one of the calendars is marked with the default badge; if there is more than one badge found this will fail
+    await expect(settingsPage.defaultCalendarBadge).toBeVisible();
+    await settingsPage.scrollIntoView(settingsPage.defaultCalendarBadge);
 
     // verify that clicking the 'add caldav' button brings up the caldav connection dialog; just close it
     await settingsPage.scrollIntoView(settingsPage.addCaldavBtn);
@@ -60,15 +60,7 @@ test.describe('settings - connected applications on mobile browser', {
 
     // verify clicking the 'add google calendar' button brings up the google sign-in url
     await settingsPage.addGoogleBtn.click();
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
-
-    // on ios the URL stays as the settings URL but displays connect to google page
-    if (settingsPage.testPlatform.includes('ios')) {
-      expect(settingsPage.googleSignInHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    } else {
-      expect(page.url().includes('auth.mozilla') || page.url().includes('accounts.google')).toBeTruthy();
-    }
-    await settingsPage.gotoConnectedAppSettings();
+    await expect(settingsPage.googleSignInHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   });
 
   test.afterAll(async ({ browser }, testInfo) => {
