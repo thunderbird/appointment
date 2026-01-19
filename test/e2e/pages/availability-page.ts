@@ -84,7 +84,7 @@ export class AvailabilityPage {
     this.refreshLinkBtn = this.page.getByRole('button', { name: 'Refresh link' });
     this.refreshLinkConfirmTxt = this.page.getByText('Refresh link', { exact: true });
     this.refreshLinkConfirmCancelBtn = this.page.getByRole('button', { name: 'Cancel' });
-    this.shareYourLinkInput = this.page.locator('#shareLink');
+    this.shareYourLinkInput = this.page.locator('#bookingPageLinkInput');
     this.shareLinkCopyBtn = this.page.getByRole('button', { name: 'Copy', exact: true });
   }
 

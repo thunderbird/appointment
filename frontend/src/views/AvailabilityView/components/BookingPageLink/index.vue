@@ -91,7 +91,7 @@ export default {
 
   <!-- Share your link -->
   <text-input
-    name="shareLink"
+    name="bookingPageLinkInput"
     class="share-link-input"
     :model-value="userStore.myLink"
   >
@@ -153,7 +153,6 @@ h3 {
   position: relative;
   margin-block-end: 1rem;
   width: 100%;
-  max-width: 792px;
 
   button {
     position: absolute;
