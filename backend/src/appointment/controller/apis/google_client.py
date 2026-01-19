@@ -98,6 +98,17 @@ class GoogleClient:
 
                 request = service.calendarList().list_next(request, response)
 
+        # Sort calendars by primary first, then selected, then others
+        # since primary is the most likely to be the one the user wants to use
+        def calendar_sort_key(cal):
+            if cal.get('primary'):
+                return 0
+            if cal.get('selected'):
+                return 1
+            return 2
+
+        items.sort(key=calendar_sort_key)
+
         return items
 
     def get_free_busy(self, calendar_ids, time_min, time_max, token):
@@ -231,6 +242,7 @@ class GoogleClient:
         # Grab all the Google calendars
         calendars = self.list_calendars(token)
         error_occurred = False
+
         for calendar in calendars:
             cal = CalendarConnection(
                 title=calendar.get('summary'),
