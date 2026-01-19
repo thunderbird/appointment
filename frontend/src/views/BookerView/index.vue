@@ -73,15 +73,20 @@ const handleError = (data: Exception) => {
 
   const errorDetail = data?.detail as ExceptionDetail;
 
-  if (errorDetail?.id === 'SCHEDULE_NOT_ACTIVE') {
-    errorHeading.value = '';
-    errorBody.value = errorDetail.message;
-  } else if (errorDetail?.id === 'RATE_LIMIT_EXCEEDED') {
-    errorHeading.value = '';
-    errorBody.value = errorDetail.message;
-  } else if (errorDetail?.id === 'REMOTE_CALENDAR_CONNECTION_ERROR') {
-    errorHeading.value = '';
-    errorBody.value = t('error.calendarConnectionUnavailable');
+  switch (errorDetail?.id) {
+    case 'SCHEDULE_NOT_ACTIVE':
+    case 'RATE_LIMIT_EXCEEDED':
+      errorHeading.value = '';
+      errorBody.value = errorDetail.message;
+      break;
+    case 'REMOTE_CALENDAR_CONNECTION_ERROR':
+      errorHeading.value = '';
+      errorBody.value = t('error.calendarConnectionUnavailable');
+      break;
+    default:
+      errorHeading.value = '';
+      errorBody.value = t('error.generalBookingError');
+      break;
   }
 };
 
