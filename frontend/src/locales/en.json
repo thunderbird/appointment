@@ -89,7 +89,6 @@
     "connectWithZoomInfo": "Connect your Zoom account to generate meeting links for new bookings.",
     "customVideoMeetingLink": "Custom Video Meeting link",
     "customVideoMeetingLinkInfo": "Enter a video meeting URL to use this link with all new meetings. This can be changed in Settings.",
-    "customVideoMeetingLinkPlaceholder": "https://meeting.zoom.com/username",
     "zoomIcon": "Zoom",
     "skipThisStep": "skip this step",
     "setupComplete": "Account setup complete",
