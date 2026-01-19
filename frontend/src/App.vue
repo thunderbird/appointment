@@ -363,11 +363,11 @@ onMounted(async () => {
 
 main {
   padding-block-start: 1rem;
+  flex-grow: 1;
 
   &.private-route {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
     min-height: 0;
     margin-inline: 1rem;
   }
