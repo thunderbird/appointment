@@ -53,7 +53,7 @@ watch(
     <template #default>
       <container-box class="flex flex-col gap-2">
         {{ t('label.copyTo') }}
-        <checkbox-input name="all" :label="t('ftue.selectAll')" v-model="allDaysSelected" />
+        <checkbox-input name="all" :label="t('label.selectAll')" v-model="allDaysSelected" />
         <hr>
         <checkbox-input
           v-for="d in isoWeekdays"
