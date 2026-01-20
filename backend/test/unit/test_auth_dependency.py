@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from freezegun import freeze_time
 from unittest import mock
+from fastapi.params import Depends as DependsClass
 
 
 from appointment.controller.auth import signed_url_by_subscriber
@@ -166,6 +167,44 @@ class TestAuthDependency:
             with pytest.raises(InvalidTokenException):
                 # Use a nonsense value, like the subscriber id!
                 get_subscriber(request, subscriber.id, db)
+
+    def test_get_subscriber_handles_depends_object_for_redis(
+        self, with_db, with_l10n, make_pro_subscriber, make_external_connections, monkeypatch
+    ):
+        """Test that get_subscriber gracefully handles when redis_instance is a Depends object."""
+
+        saved_scheme = os.environ.get('AUTH_SCHEME', 'password')
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        try:
+            subscriber = make_pro_subscriber()
+            oidc_id = uuid.uuid4().hex
+            access_token = uuid.uuid4().hex
+
+            make_external_connections(
+                subscriber_id=subscriber.id, type_id=oidc_id, type=ExternalConnectionType.oidc
+            )
+
+            request = mock.MagicMock()
+
+            with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as introspect_mock:
+                introspect_mock.return_value = {
+                    'sub': oidc_id,
+                    'username': subscriber.username,
+                    'email': subscriber.email,
+                }
+
+                with with_db() as db:
+                    # Pass a Depends object as redis_instance (simulating direct call without DI resolution)
+                    depends_obj = DependsClass(lambda: None)
+                    retrieved_subscriber = get_subscriber(request, access_token, db, depends_obj)
+
+                    # Should succeed by treating Depends as None and falling back to OIDC introspection
+                    assert retrieved_subscriber is not None
+                    assert retrieved_subscriber.id == subscriber.id
+                    introspect_mock.assert_called_once_with(access_token)
+        finally:
+            os.environ['AUTH_SCHEME'] = saved_scheme
 
     def test_get_admin_subscriber(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()

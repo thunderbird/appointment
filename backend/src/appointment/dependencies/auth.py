@@ -5,6 +5,7 @@ from typing import Annotated
 
 import sentry_sdk
 from fastapi import Depends, Body, Request, HTTPException
+from fastapi.params import Depends as DependsClass
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
@@ -127,6 +128,12 @@ def get_subscriber(
     if token is None:
         raise InvalidTokenException()
 
+    # When this method is called directly (not through FastAPI DI), redis_instance will be
+    # the Depends object itself rather than the resolved value, so assigning it to None will
+    # make it call the OIDC introspect endpoint in that case (no caching)
+    if isinstance(redis_instance, DependsClass):
+        redis_instance = None
+
     if AuthScheme.is_oidc():
         user = get_user_from_oidc_token_introspection(db, token, redis_instance)
     else:
@@ -149,20 +156,22 @@ def get_subscriber(
 async def get_subscriber_from_onetime_token(
     request: Request,
     db: Session = Depends(get_db),
+    redis_instance=Depends(get_redis),
 ):
     """Retrieve the subscriber via a one-time token only!"""
     token: str = await oauth2_scheme(request)
-    return get_subscriber(request, token, db, require_jti=True)
+    return get_subscriber(request, token, db, redis_instance, require_jti=True)
 
 
 async def get_subscriber_or_none(
     request: Request,
     db: Session = Depends(get_db),
+    redis_instance=Depends(get_redis),
 ):
     """Retrieve the subscriber or return None. This does not automatically error out like the other deps"""
     try:
         token: str = await oauth2_scheme(request)
-        subscriber = get_subscriber(request, token, db)
+        subscriber = get_subscriber(request, token, db, redis_instance)
     except InvalidTokenException:
         return None
     except HTTPException:
