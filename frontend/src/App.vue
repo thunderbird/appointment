@@ -371,6 +371,14 @@ main {
     min-height: 0;
     margin-inline: 1rem;
   }
+
+  &.public-route {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    padding-block-end: 1rem;
+  }
 }
 
 @media (--md) {

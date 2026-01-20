@@ -150,8 +150,8 @@ export default {
     class="booking-success-container"
   >
     <booking-view-success
-      :attendee-email="attendee.email"
       :selected-event="selectedEvent"
+      :attendee="attendee"
       :requested="appointment?.booking_confirmation"
     />
   </main>
@@ -171,16 +171,12 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  user-select: none;
 }
 
 .booking-invalid-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  user-select: none;
   flex-direction: column;
   gap: 2rem;
   padding: 0 1rem;
@@ -188,15 +184,15 @@ export default {
 
 .booking-success-container {
   display: flex;
-  height: 100vh;
-  user-select: none;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
   padding: 0 1rem;
+  gap: 2rem;
 }
 
 .booking-slot-selection-container {
+  width: 100%;
   margin: 0 auto;
   user-select: none;
   padding: 0 1rem;
@@ -207,6 +203,7 @@ export default {
 @media (--md) {
   .booking-success-container {
     flex-direction: row;
+    align-items: start;
   }
 }
 

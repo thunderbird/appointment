@@ -443,6 +443,7 @@ def request_schedule_availability_slot(
     # Mini version of slot, so we can grab the newly created slot id for tests
     return schemas.SlotOut(
         id=slot.id,
+        slug=appointment.slug,
         start=slot.start,
         duration=slot.duration,
         attendee_id=slot.attendee_id,
