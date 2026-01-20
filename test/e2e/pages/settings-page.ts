@@ -44,6 +44,11 @@ export class SettingsPage {
   readonly addCaldavCloseModalBtn: Locator;
   readonly addGoogleBtn: Locator;
   readonly defaultCalendarBadge: Locator;
+  readonly calendarDropdownTriggers: Locator;
+  readonly calendarDropdownSetAsDefault: Locator;
+  readonly calendarDropdownDisconnect: Locator;
+  readonly calendarCheckboxes: Locator;
+  readonly unsavedChangesNotice: Locator;
   readonly saveBtnEN: Locator;
   readonly savedSuccessfullyTextEN: Locator;
   readonly savedSuccessfullyTextDE: Locator;
@@ -96,6 +101,11 @@ export class SettingsPage {
     this.addCaldavCloseModalBtn = this.page.getByRole('img', { name: 'Close' });
     this.addGoogleBtn = this.page.getByRole('button', { name: 'Add Google Calendar' });
     this.defaultCalendarBadge = this.page.getByTestId('badge');
+    this.calendarDropdownTriggers = this.page.locator('.calendars-container .dropdown');
+    this.calendarDropdownSetAsDefault = this.page.getByRole('button', { name: 'Set as default' });
+    this.calendarDropdownDisconnect = this.page.locator('.calendars-container .dropdown-inner').getByRole('button', { name: 'Disconnect' });
+    this.calendarCheckboxes = this.page.locator('.calendars-container input[type="checkbox"]');
+    this.unsavedChangesNotice = this.page.getByText('You have unsaved changes');
     this.googleSignInHdr = this.page.getByText('Sign in with Google');
   }
 

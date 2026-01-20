@@ -581,6 +581,79 @@ class TestCalDAV:
             calendar = repo.calendar.get(db, calendar.id)
             assert calendar is None
 
+    def test_disconnect_fails_when_connection_contains_default_calendar(
+        self, with_db, with_client, make_external_connections, make_caldav_calendar, make_schedule
+    ):
+        """Ensure we cannot disconnect an external connection that contains the default calendar (used by a schedule)"""
+        username = 'username'
+        type_id = json.dumps(['url', username])
+        ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.caldav, type_id=type_id)
+        calendar = make_caldav_calendar(
+            subscriber_id=TEST_USER_ID, user=username, connected=True, external_connection_id=ec.id
+        )
+
+        # Create a schedule that uses this calendar (making it the "default" calendar)
+        make_schedule(calendar_id=calendar.id)
+
+        # Attempt to disconnect - should fail
+        # Note: type_id is a query parameter in the caldav disconnect route, not a body parameter
+        response = with_client.post('/caldav/disconnect', params={'type_id': ec.type_id}, headers=auth_headers)
+
+        assert response.status_code == 400, response.content
+        data = response.json()
+        assert data['detail']['id'] == 'CONNECTION_CONTAINS_DEFAULT_CALENDAR'
+
+        # Verify the connection and calendar still exist
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id
+            )
+            assert len(ecs) == 1
+
+            calendar_check = repo.calendar.get(db, calendar.id)
+            assert calendar_check is not None
+
+    def test_disconnect_succeeds_when_different_connection_contains_default_calendar(
+        self, with_db, with_client, make_external_connections, make_caldav_calendar, make_schedule
+    ):
+        """Ensure we can disconnect an external connection when a different connection contains the default calendar"""
+        # Create first connection with calendar that will be the default
+        username1 = 'username1'
+        type_id1 = json.dumps(['url1', username1])
+        ec1 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.caldav, type_id=type_id1)
+        calendar1 = make_caldav_calendar(
+            subscriber_id=TEST_USER_ID, user=username1, connected=True, external_connection_id=ec1.id
+        )
+
+        # Create second connection with calendar that we'll try to disconnect
+        username2 = 'username2'
+        type_id2 = json.dumps(['url2', username2])
+        ec2 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.caldav, type_id=type_id2)
+        make_caldav_calendar(
+            subscriber_id=TEST_USER_ID, user=username2, connected=True, external_connection_id=ec2.id
+        )
+
+        # Create a schedule that uses the first calendar (making it the "default" calendar)
+        make_schedule(calendar_id=calendar1.id)
+
+        # Attempt to disconnect the second connection - should succeed
+        # Note: type_id is a query parameter in the caldav disconnect route, not a body parameter
+        response = with_client.post('/caldav/disconnect', params={'type_id': ec2.type_id}, headers=auth_headers)
+
+        assert response.status_code == 200, response.content
+
+        # Verify the second connection is removed but the first still exists
+        with with_db() as db:
+            ecs1 = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id1
+            )
+            assert len(ecs1) == 1
+
+            ecs2 = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.caldav, type_id=type_id2
+            )
+            assert len(ecs2) == 0
+
 
 class TestGoogle:
     def test_disconnect(self, with_db, with_client, make_external_connections, make_google_calendar):
@@ -655,6 +728,68 @@ class TestGoogle:
             # Verify total count of Google connections is now 1
             all_ecs = repo.external_connection.get_by_type(db, TEST_USER_ID, models.ExternalConnectionType.google)
             assert len(all_ecs) == 1
+
+    def test_disconnect_fails_when_connection_contains_default_calendar(
+        self, with_db, with_client, make_external_connections, make_google_calendar, make_schedule
+    ):
+        """Ensure we cannot disconnect an external connection that contains the default calendar (used by a schedule)"""
+        type_id = str(uuid4())
+        ec = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id)
+        calendar = make_google_calendar(subscriber_id=TEST_USER_ID, connected=True, external_connection_id=ec.id)
+
+        # Create a schedule that uses this calendar (making it the "default" calendar)
+        make_schedule(calendar_id=calendar.id)
+
+        # Attempt to disconnect - should fail
+        response = with_client.post('/google/disconnect', json={'type_id': ec.type_id}, headers=auth_headers)
+
+        assert response.status_code == 400, response.content
+        data = response.json()
+        assert data['detail']['id'] == 'CONNECTION_CONTAINS_DEFAULT_CALENDAR'
+
+        # Verify the connection and calendar still exist
+        with with_db() as db:
+            ecs = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id
+            )
+            assert len(ecs) == 1
+
+            calendar_check = repo.calendar.get(db, calendar.id)
+            assert calendar_check is not None
+
+    def test_disconnect_succeeds_when_different_connection_contains_default_calendar(
+        self, with_db, with_client, make_external_connections, make_google_calendar, make_schedule
+    ):
+        """Ensure we can disconnect an external connection when a different connection contains the default calendar"""
+        # Create first connection with calendar that will be the default
+        type_id1 = str(uuid4())
+        ec1 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id1)
+        calendar1 = make_google_calendar(subscriber_id=TEST_USER_ID, connected=True, external_connection_id=ec1.id)
+
+        # Create second connection with calendar that we'll try to disconnect
+        type_id2 = str(uuid4())
+        ec2 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.google, type_id=type_id2)
+        make_google_calendar(subscriber_id=TEST_USER_ID, connected=True, external_connection_id=ec2.id)
+
+        # Create a schedule that uses the first calendar (making it the "default" calendar)
+        make_schedule(calendar_id=calendar1.id)
+
+        # Attempt to disconnect the second connection - should succeed
+        response = with_client.post('/google/disconnect', json={'type_id': ec2.type_id}, headers=auth_headers)
+
+        assert response.status_code == 200, response.content
+
+        # Verify the second connection is removed but the first still exists
+        with with_db() as db:
+            ecs1 = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id1
+            )
+            assert len(ecs1) == 1
+
+            ecs2 = repo.external_connection.get_by_type(
+                db, TEST_USER_ID, models.ExternalConnectionType.google, type_id=type_id2
+            )
+            assert len(ecs2) == 0
 
     def test_sync_calendars(self, with_db, with_client, make_external_connections, monkeypatch):
         """Test that sync_calendars creates calendars from Google API response"""

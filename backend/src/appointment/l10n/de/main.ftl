@@ -48,6 +48,7 @@ schedule-availability-invalid = Die benutzerdefinierte Verfügbarkeit ist nicht 
 schedule-not-active = Der Zeitplan wurde abgeschaltet. Bitte für weitere Informationen den Eigentümer des Zeitplans kontaktieren.
 
 remote-calendar-connection-error = Es konnte keine Verbindung hergestellt werden.
+connection-contains-default-calendar = Dieses Konto kann nicht getrennt werden, da es den Standardkalender enthält. Bitte zuerst einen anderen Kalender als Standard festlegen.
 
 # Possible error reasons
 remote-calendar-reason-doesnt-support-caldav = Der Kalender bietet keine CalDAV-Unterstützung.

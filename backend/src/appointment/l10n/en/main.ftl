@@ -48,6 +48,7 @@ schedule-availability-invalid = The custom availability is not valid. Please che
 schedule-not-active = The schedule has been turned off. Please contact the schedule owner for more information.
 
 remote-calendar-connection-error = We couldn't connect to your calendar.
+connection-contains-default-calendar = Cannot disconnect this account because it contains your default calendar. Please set a different calendar as default first.
 
 # Possible error reasons
 remote-calendar-reason-doesnt-support-caldav = The remote calendar does not support CalDAV.

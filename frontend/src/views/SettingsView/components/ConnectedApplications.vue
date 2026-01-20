@@ -40,12 +40,22 @@ const availabilityStore = useAvailabilityStore();
 const { currentState } = storeToRefs(settingsStore);
 const { calendars } = storeToRefs(calendarStore);
 
+const calendarConnectedMap = new Map<number, ReturnType<typeof computed<boolean>>>();
+
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 
 // This computed property refers to the calendars from the backend combined
 // with some data from external connections to facilitate connection / disconnection.
 // It should be immutable as it represents the current state of the backend data.
 const initialCalendars = computed(() => {
+  // Find the default calendar's external_connection_id to determine which
+  // calendars share the same connection. Calendars sharing the default's
+  // connection cannot be disconnected without affecting the default calendar.
+  const defaultCalendar = calendars.value?.find(
+    (calendar) => calendar.id === currentState.value.defaultCalendarId
+  );
+  const defaultExternalConnectionId = defaultCalendar?.external_connection_id;
+
   const formattedCalendars = calendars.value?.map((calendar) => {
     const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
     const externalConnection: ExternalConnection = externalConnectionStore
@@ -60,6 +70,7 @@ const initialCalendars = computed(() => {
       connection_name: externalConnection?.name,
       provider_name: connectionProvider,
       is_default: currentState.value.defaultCalendarId === calendar.id,
+      shares_default_connection: calendar.external_connection_id === defaultExternalConnectionId,
     }
   }) || [];
 
@@ -116,17 +127,29 @@ function closeModals() {
   disconnectConnectionName.value = null;
 }
 
-function onCalendarChecked(event: HTMLInputElementEvent, calendarId: number) {
-  // Only update local state, the actual connection / disconnection
-  // of the calendar happens on save changes in SettingsView/index.vue
-  settingsStore.$patch({
-    currentState: {
-      changedCalendars: {
-        ...currentState.value.changedCalendars,
-        [calendarId]: event.target.checked
+function calendarConnected(calendarId: number) {
+  if (!calendarConnectedMap.has(calendarId)) {
+    calendarConnectedMap.set(calendarId, computed({
+      get: () => {
+        const calendar = initialCalendars.value.find(c => c.id === calendarId);
+        return currentState.value.changedCalendars?.[calendarId] !== undefined
+          ? currentState.value.changedCalendars[calendarId]
+          : calendar?.connected ?? false;
+      },
+      set: (value: boolean) => {
+        settingsStore.$patch({
+          currentState: {
+            changedCalendars: {
+              ...currentState.value.changedCalendars,
+              [calendarId]: value
+            }
+          }
+        })
       }
-    }
-  })
+    }));
+  }
+
+  return calendarConnectedMap.get(calendarId)!;
 }
 
 function onSetAsDefaultClicked(calendarId: number) {
@@ -230,8 +253,7 @@ async function refreshData() {
             <checkbox-input
               :name="`calendarConnected-${calendar.id}`"
               class="calendar-connected-checkbox"
-              @change="(event) => onCalendarChecked(event, calendar.id)"
-              :checked="currentState.changedCalendars?.[calendar.id] !== undefined ? currentState.changedCalendars[calendar.id] : calendar.connected"
+              v-model="calendarConnected(calendar.id).value"
               :disabled="calendar.is_default"
             />
 
@@ -261,8 +283,10 @@ async function refreshData() {
             <p class="calendar-provider">{{ calendar.provider_name }}</p>
 
             <!-- Dropdown actions -->
+            <!-- Hide dropdown for calendars that share the same ExternalConnection as the default calendar,
+                 since disconnecting would affect the default calendar -->
             <drop-down
-              v-if="!calendar.is_default"
+              v-if="!calendar.shares_default_connection"
               class="dropdown"
               :ref="(el) => calendarDropdownRefs[calendar.id] = el"
             >
@@ -270,9 +294,9 @@ async function refreshData() {
                 <ph-dots-three size="24" />
               </template>
               <template #default>
-                <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id].close()">
+                <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
                   <button
-                    v-if="calendar.connected && !calendar.is_default"
+                    v-if="calendar.connected"
                     @click="() => onSetAsDefaultClicked(calendar.id)"
                   >
                     {{ t('text.settings.connectedApplications.setAsDefault') }}
@@ -283,7 +307,6 @@ async function refreshData() {
                   </button> -->
                   <button
                     @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
-                    :disabled="calendar.is_default"
                   >
                     {{ t('label.disconnect') }}
                   </button>
