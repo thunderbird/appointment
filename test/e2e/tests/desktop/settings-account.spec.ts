@@ -56,17 +56,17 @@ test.describe('account settings on desktop browser', {
     await expect(settingsPage.downloadDataBtn).toBeVisible();
     await expect(settingsPage.downloadDataBtn).toBeEnabled();
 
-    // cancel service button brings up confirmation dialog (just cancel out)
-    await settingsPage.cancelServiceBtn.scrollIntoViewIfNeeded();
-    await settingsPage.cancelServiceBtn.click();
+    // delete all data button brings up confirmation dialog (just cancel out)
+    await settingsPage.deleteDataBtn.scrollIntoViewIfNeeded();
+    await settingsPage.deleteDataBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.cancelServiceConfirmCancelBtn.scrollIntoViewIfNeeded();
-    await settingsPage.cancelServiceConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
+    await settingsPage.deleteDataConfirmCancelBtn.scrollIntoViewIfNeeded();
+    await settingsPage.deleteDataConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
-    // clicking 'booking page settings' button brings up availability page
-    await settingsPage.bookingPageSettingsBtn.scrollIntoViewIfNeeded();
-    await settingsPage.bookingPageSettingsBtn.click();
+    // clicking 'manage booking' link brings up availability page
+    await settingsPage.manageBookingLink.scrollIntoViewIfNeeded();
+    await settingsPage.manageBookingLink.click();
     await page.waitForURL('**/availability');
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });

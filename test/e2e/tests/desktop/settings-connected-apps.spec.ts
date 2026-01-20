@@ -30,9 +30,9 @@ test.describe('connected applications settings on desktop browser', {
     await expect(settingsPage.connectedAppsHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.connectedAppsHdr.scrollIntoViewIfNeeded();
 
-    // verify default calendar checkbox is on (test expects google cal already connected)
-    await settingsPage.defaultCalendarConnectedCbox.scrollIntoViewIfNeeded();
-    expect(await settingsPage.defaultCalendarConnectedCbox.isChecked()).toBeTruthy();
+    // one of the calendars is marked with the default badge; if there is more than one badge found this will fail
+    await expect(settingsPage.defaultCalendarBadge).toBeVisible();
+    await settingsPage.defaultCalendarBadge.scrollIntoViewIfNeeded();
 
     // verify that clicking the 'add caldav' button brings up the caldav connection dialog; just close it
     await settingsPage.addCaldavBtn.scrollIntoViewIfNeeded();
@@ -46,9 +46,7 @@ test.describe('connected applications settings on desktop browser', {
 
     // verify clicking the 'add google calendar' button brings up the google sign-in url
     await settingsPage.addGoogleBtn.click();
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
-    // will go to moz sso auth or google auth depending on local/env setup
-    expect(page.url().includes('auth.mozilla') || page.url().includes('accounts.google')).toBeTruthy();
+    await expect(settingsPage.googleSignInHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.gotoConnectedAppSettings();
   });
 });

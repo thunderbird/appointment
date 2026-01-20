@@ -17,7 +17,49 @@ import {
 } from '@/models';
 import { BookingStatus } from './definitions';
 
-// Lowercases the first character of a string
+/**
+ * Convert ISO weekday (1=Monday, 7=Sunday) to dayjs weekday (0=Sunday, 1=Monday, etc.)
+ * @param isoDay - ISO weekday number (1-7)
+ * @returns dayjs weekday number (0-6)
+ */
+export const isoWeekdayToDayjs = (isoDay: number): number => {
+  return isoDay === 7 ? 0 : isoDay;
+};
+
+/**
+ * Calculate the start of week for a given date based on user's preferred start of week.
+ * @param date - Dayjs date object
+ * @param startOfWeekIso - ISO weekday format: 1=Monday, 2=Tuesday, ..., 7=Sunday
+ * @returns Dayjs object representing the start of the week
+ */
+export const getStartOfWeek = (date: Dayjs, startOfWeekIso: number): Dayjs => {
+  // Convert ISO format (1=Monday, 7=Sunday) to dayjs format (0=Sunday, 1=Monday)
+  const startOfWeekDayjs = isoWeekdayToDayjs(startOfWeekIso);
+
+  // Get current day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+  const currentDay = date.day();
+
+  // Calculate the difference to get to the start of week
+  const diff = (currentDay - startOfWeekDayjs + 7) % 7;
+
+  return date.subtract(diff, 'day').startOf('day');
+};
+
+/**
+ * Calculate the end of week for a given date based on user's preferred start of week.
+ * @param date - Dayjs date object
+ * @param startOfWeekIso - ISO weekday format: 1=Monday, 2=Tuesday, ..., 7=Sunday
+ * @returns Dayjs object representing the end of the week
+ */
+export const getEndOfWeek = (date: Dayjs, startOfWeekIso: number): Dayjs => {
+  // Get the start of week and add 6 days to get the end of week
+  const weekStart = getStartOfWeek(date, startOfWeekIso);
+  return weekStart.add(6, 'day').endOf('day');
+};
+
+/**
+* Lowercases the first character of a string
+*/
 export const lcFirst = (s: string): string => {
   if (typeof s !== 'string' || !s) {
     return '';
@@ -455,4 +497,7 @@ export default {
   compareAvailabilityStart,
   deepClone,
   isUnconfirmed,
+  isoWeekdayToDayjs,
+  getStartOfWeek,
+  getEndOfWeek,
 };

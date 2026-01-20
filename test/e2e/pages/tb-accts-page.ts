@@ -8,9 +8,9 @@ export class TBAcctsPage {
   readonly emailInput: Locator;
   readonly passwordInput: Locator;
   readonly signInButton: Locator;
-  readonly loginEmailInput: Locator;
+  readonly localDevEmailInput: Locator;
   readonly localDevpasswordInput: Locator;
-  readonly loginDialogContinueBtn: Locator;
+  readonly localDevLoginContinueBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,9 +19,10 @@ export class TBAcctsPage {
     this.emailInput = this.page.getByTestId('username-input');
     this.passwordInput = this.page.getByTestId('password-input');
     this.signInButton = this.page.getByTestId('submit-btn');
-    this.loginEmailInput = this.page.getByLabel('Email');
-    this.localDevpasswordInput = this.page.getByLabel('Password');
-    this.loginDialogContinueBtn = this.page.getByTitle('Continue');
+    
+    this.localDevEmailInput = this.page.getByTestId('login-email-input');
+    this.localDevpasswordInput = this.page.getByTestId('login-password-input');
+    this.localDevLoginContinueBtn = this.page.getByTestId('login-continue-btn');
   }
 
   /**
@@ -48,17 +49,17 @@ export class TBAcctsPage {
   }
 
   /**
-   * Sign in when running Appointment on the local dev stack; doesn't redirect to TB Accounts login; just local sign-in
+   * Sign in when running Appointment on the local dev stack and not using TB Accounts OIDC; just local password
    */
   async localApptSignIn() {
-    await expect(this.loginEmailInput).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    await expect(this.loginDialogContinueBtn).toBeVisible();
+    await expect(this.localDevEmailInput).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(this.localDevLoginContinueBtn).toBeVisible();
     expect(TB_ACCTS_EMAIL, 'getting TB_ACCTS_EMAIL env var').toBeTruthy();
-    await this.loginEmailInput.fill(TB_ACCTS_EMAIL);
+    await this.localDevEmailInput.fill(TB_ACCTS_EMAIL);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     await this.localDevpasswordInput.fill(TB_ACCTS_PWORD);
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.loginDialogContinueBtn.click();
+    await this.localDevLoginContinueBtn.click();
     await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
   }
 }

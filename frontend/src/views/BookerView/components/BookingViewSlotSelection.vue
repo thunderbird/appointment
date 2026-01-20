@@ -7,8 +7,10 @@ import { PhGlobe } from '@phosphor-icons/vue';
 
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useCalendarStore } from '@/stores/calendar-store';
+import { useUserStore } from '@/stores/user-store';
 import { Slot, TimeFormatted } from '@/models';
 import { dayjsKey } from '@/keys';
+import { getStartOfWeek, getEndOfWeek } from '@/utils';
 
 import WeekPicker from '@/views/DashboardView/components/WeekPicker.vue';
 import WeekCalendar from '@/views/DashboardView/components/WeekCalendar.vue';
@@ -17,14 +19,18 @@ import SlotSelectionHeader from './SlotSelectionHeader.vue';
 
 const { t } = useI18n();
 const calendarStore = useCalendarStore();
+const userStore = useUserStore();
 const { appointment, activeDate, selectedEvent } = storeToRefs(useBookingViewStore());
 const dj = inject(dayjsKey);
 
 // current selected date, defaults to now
-const activeDateRange = computed(() => ({
-  start: activeDate.value.startOf('week').format('YYYY-MM-DD'),
-  end: activeDate.value.endOf('week').format('YYYY-MM-DD'),
-}));
+const activeDateRange = computed(() => {
+  const startOfWeek = userStore.data.settings.startOfWeek ?? 7;
+  return {
+    start: getStartOfWeek(activeDate.value, startOfWeek).format('YYYY-MM-DD'),
+    end: getEndOfWeek(activeDate.value, startOfWeek).format('YYYY-MM-DD'),
+  };
+});
 
 const timezone = computed(() => dj.tz.guess());
 

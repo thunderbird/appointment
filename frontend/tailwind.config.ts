@@ -6,9 +6,7 @@ export default {
   content: ['./public/index.html', './src/**/*.{vue,ts,js}'],
   theme: {
     fontFamily: {
-      sans: ['"Open Sans"', ...defaultTheme.fontFamily.sans],
-      display: ['"Raleway"', ...defaultTheme.fontFamily.sans],
-      roboto: ['"Roboto"', ...defaultTheme.fontFamily.sans],
+      sans: ['"Inter"', ...defaultTheme.fontFamily.sans],
     },
     extend: {
       gridTemplateColumns: {

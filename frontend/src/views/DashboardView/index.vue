@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, refreshKey } from '@/keys';
 import { TimeFormatted } from '@/models';
+import { getStartOfWeek, getEndOfWeek } from '@/utils';
 import QuickActionsSideBar from './components/QuickActionsSideBar.vue';
 import WeekPicker from './components/WeekPicker.vue';
 import UserCalendarSync from './components/UserCalendarSync.vue';
@@ -14,6 +15,7 @@ import WeekCalendar from './components/WeekCalendar.vue';
 // stores
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import { useUserStore } from '@/stores/user-store';
 
 const route = useRoute();
 const dj = inject(dayjsKey);
@@ -21,15 +23,19 @@ const refresh = inject(refreshKey);
 
 const calendarStore = useCalendarStore();
 const appointmentStore = useAppointmentStore();
+const userStore = useUserStore();
 const { remoteEvents } = storeToRefs(calendarStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 
 // current selected date, defaults to now
 const activeDate = ref(dj());
-const activeDateRange = computed(() => ({
-  start: activeDate.value.startOf('week').format('YYYY-MM-DD'),
-  end: activeDate.value.endOf('week').format('YYYY-MM-DD'),
-}));
+const activeDateRange = computed(() => {
+  const startOfWeek = userStore.data.settings.startOfWeek ?? 7;
+  return {
+    start: getStartOfWeek(activeDate.value, startOfWeek).format('YYYY-MM-DD'),
+    end: getEndOfWeek(activeDate.value, startOfWeek).format('YYYY-MM-DD'),
+  };
+});
 
 async function onDateChange(dateObj: TimeFormatted) {
   const start = dj(dateObj.start);
