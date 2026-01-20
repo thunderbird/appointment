@@ -108,7 +108,7 @@ onMounted(async () => {
 
   <text-input
     name="customVideoMeetingLink"
-    :placeholder="t('ftue.customVideoMeetingLinkPlaceholder')"
+    placeholder="https://meet.jit.si/room"
     v-model="customMeetingLink"
   />
 
