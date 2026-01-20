@@ -86,6 +86,7 @@ class Slot(SlotBase):
 
 class SlotOut(BaseModel):
     id: int | None = None
+    slug: str | None = None
     attendee_id: int | None = None
     booking_status: BookingStatus | None = BookingStatus.none
     duration: int | None = None
