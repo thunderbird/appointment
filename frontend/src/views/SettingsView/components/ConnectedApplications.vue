@@ -48,6 +48,14 @@ const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 // with some data from external connections to facilitate connection / disconnection.
 // It should be immutable as it represents the current state of the backend data.
 const initialCalendars = computed(() => {
+  // Find the default calendar's external_connection_id to determine which
+  // calendars share the same connection. Calendars sharing the default's
+  // connection cannot be disconnected without affecting the default calendar.
+  const defaultCalendar = calendars.value?.find(
+    (calendar) => calendar.id === currentState.value.defaultCalendarId
+  );
+  const defaultExternalConnectionId = defaultCalendar?.external_connection_id;
+
   const formattedCalendars = calendars.value?.map((calendar) => {
     const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
     const externalConnection: ExternalConnection = externalConnectionStore
@@ -62,6 +70,7 @@ const initialCalendars = computed(() => {
       connection_name: externalConnection?.name,
       provider_name: connectionProvider,
       is_default: currentState.value.defaultCalendarId === calendar.id,
+      shares_default_connection: calendar.external_connection_id === defaultExternalConnectionId,
     }
   }) || [];
 
@@ -274,8 +283,10 @@ async function refreshData() {
             <p class="calendar-provider">{{ calendar.provider_name }}</p>
 
             <!-- Dropdown actions -->
+            <!-- Hide dropdown for calendars that share the same ExternalConnection as the default calendar,
+                 since disconnecting would affect the default calendar -->
             <drop-down
-              v-if="!calendar.is_default"
+              v-if="!calendar.shares_default_connection"
               class="dropdown"
               :ref="(el) => calendarDropdownRefs[calendar.id] = el"
             >
@@ -285,7 +296,7 @@ async function refreshData() {
               <template #default>
                 <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
                   <button
-                    v-if="calendar.connected && !calendar.is_default"
+                    v-if="calendar.connected"
                     @click="() => onSetAsDefaultClicked(calendar.id)"
                   >
                     {{ t('text.settings.connectedApplications.setAsDefault') }}
@@ -296,7 +307,6 @@ async function refreshData() {
                   </button> -->
                   <button
                     @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
-                    :disabled="calendar.is_default"
                   >
                     {{ t('label.disconnect') }}
                   </button>
