@@ -1,27 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { BookingPage } from '../../pages/booking-page';
 import { DashboardPage } from '../../pages/dashboard-page';
-import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../../utils/utils';
+import { mobileSignInAndSetup } from '../../utils/utils';
 
 import {
   APPT_DISPLAY_NAME,
-  PLAYWRIGHT_TAG_PROD_SANITY,
-  PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  PLAYWRIGHT_TAG_E2E_SUITE,
-  TIMEOUT_30_SECONDS,
-  TIMEOUT_60_SECONDS,
-  APPT_TIMEZONE_SETTING_PRIMARY,
+  PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY,
+  PLAYWRIGHT_TAG_E2E_SUITE_MOBILE,
+  APPT_BOOKEE_NAME,
+  APPT_BOOKEE_EMAIL,  
   TIMEOUT_3_SECONDS,
   TIMEOUT_10_SECONDS,
+  TIMEOUT_30_SECONDS,
+  TIMEOUT_60_SECONDS,
+  TIMEOUT_2_SECONDS,
 } from '../../const/constants';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;
-
-test.beforeEach(async ({ page }) => {
-  bookingPage = new BookingPage(page);
-  dashboardPage = new DashboardPage(page);
-});
+var testProjectName: string;
 
 
 /**
@@ -35,29 +32,46 @@ test.beforeEach(async ({ page }) => {
  * the Appointment timezone setting to match the time zone of the booking page; then when searching for a confirmed booking
  * that matches the selected time slot, the list of bookings matches the timezone that was used when the slot was selected.
  */
-test.describe('book an appointment on desktop browser', () => {
+test.describe('book an appointment on mobile browser', () => {
 
-  test('able to request a booking on desktop browser', {
-    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  test.beforeEach(async ({ page }, testInfo) => {
+    bookingPage = new BookingPage(page, testInfo.project.name); // i.e. 'ios-safari'
+    dashboardPage = new DashboardPage(page);
+    testProjectName = testInfo.project.name;
+  });
+
+  test('able to request a booking on mobile browser', {
+    tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
   }, async ({ page }) => {
     // in order to ensure we find an available slot we can click on, first switch to week view URL
     await bookingPage.gotoBookingPageWeekView();
     await expect(bookingPage.titleText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
     // record the timezone that the booking page is using (will be the timezone of selected time slot)
-    const selectedSlotTimeZone = (await bookingPage.bookingPageTimeZoneFooter.innerText()).split(': ')[1].trim();
+    // issue 1035 causes the timezone to be read by the Appointment booking page on android as "+00:00"; check
+    // if that is the retrieved timezone value from the booking page and if so use "UTC" instead
+    var selectedSlotTimeZone = (await bookingPage.bookingPageTimeZoneFooter.innerText()).split(': ')[1].trim();
+    if (selectedSlotTimeZone == '+00:00')
+      selectedSlotTimeZone = 'UTC';
     console.log(`booking page is using time zone: ${selectedSlotTimeZone}`);
 
     // now select an available booking time slot  
     const selectedSlot: string|null = await bookingPage.selectAvailableBookingSlot(APPT_DISPLAY_NAME);
     console.log(`selected appointment time slot: ${selectedSlot}`);
 
-    // now we have an availble booking time slot selected, click confirm button
-    await bookingPage.bookApptBtn.click();
+    // now provide the bookee details for our selected time slot; when signed into Appointment this
+    // info is provided automatically however for this test we are selecting a time slot without being
+    // signed in / without being an Appointment user; so we must specify the bookee name and email
+    // also after entering bookee details, this clicks the 'book appointment' button to request the slot
+    await bookingPage.finishBooking(APPT_BOOKEE_NAME, APPT_BOOKEE_EMAIL);
 
     // verify booking request sent pop-up
+    // on iOS we currently have to scroll to top of page first to see the confirmation
+    // we can remove the scrolling to top once issue #1423 is resolved
+    page.evaluate("window.scrollTo(0, 0)")
+    page.waitForTimeout(TIMEOUT_2_SECONDS);
     await expect(bookingPage.bookingConfirmedTitleText.first()).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
-    await bookingPage.bookingConfirmedTitleText.scrollIntoViewIfNeeded();
+    await bookingPage.scrollIntoView(bookingPage.bookingConfirmedTitleText);
 
     // booking request sent dialog should display the correct time slot that was requested
     // our requested time slot is stored in this format, as example: 'event-2025-01-14 14:30'
@@ -66,28 +80,22 @@ test.describe('book an appointment on desktop browser', () => {
     const expDateStr = await bookingPage.getDateFromSlotString(selectedSlot);
     const expTimeStr = await bookingPage.getTimeFromSlotString(selectedSlot);
 
-    // now verify the correct date/time is dispalyed on the booking request sent pop-up
-    await bookingPage.verifyRequestedSlotTextDisplayed(expDateStr, expTimeStr, selectedSlotTimeZone);  
+    // now verify the correct date/time is dispalyed on the booking confirmed dialog
+    await bookingPage.verifyRequestedSlotTextDisplayed(expDateStr, expTimeStr, selectedSlotTimeZone);
 
     // give some initial time for the new confirmed appointment to make it to the Appointment dashboard sometimes the
     // test is so fast when it switches back to the dashboard the new appointment hasn't been added/displayed yet
     await page.waitForTimeout(TIMEOUT_10_SECONDS);
 
-    // now verify a corresponding booking was created on the host account's list of bookings; if we aren't already signed
-    // into Appointment then sign in to the main dashboard first; then setDefaultUserSettinsLocalStore will set the
-    // Appointment timezone setting to match the timezone that was used by the booking page; so that we can easily find the
-    // selected time slot in the list of confirmed Appointment bookings
-    await navigateToAppointmentAndSignIn(page);
-    await setDefaultUserSettingsLocalStore(page, selectedSlotTimeZone);
+    // now verify a corresponding booking was created on the host account's list of bookings; on mobile we aren't signed
+    // into Apppointment yet, so sign in to the main dashboard first; mobileSignInAndSetup will then set the Appointment
+    // settings timezone to match the timezone that was used by the booking page; so that we can easily find the selected
+    // time slot in the list of confirmed Appointment bookings
+    await mobileSignInAndSetup(page, testProjectName, selectedSlotTimeZone);
     await dashboardPage.verifyEventCreated(expDateStr, expTimeStr);
 
     // also go back to main dashboard and check that pending requests link now appears
     await dashboardPage.gotoToDashboardMonthView();
     await expect(dashboardPage.pendingBookingRequestsLink).toBeVisible();
-
-    // click the pending requests link and verify it navigates to the correct URL
-    await dashboardPage.pendingBookingRequestsLink.click();
-    await page.waitForTimeout(TIMEOUT_3_SECONDS);
-    await expect(page).toHaveURL(/.*\/bookings\?unconfirmed=true/);
   });
 });

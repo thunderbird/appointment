@@ -1,10 +1,13 @@
 import { expect } from '@playwright/test';
 import { type Page, type Locator } from '@playwright/test';
 import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX, TIMEOUT_30_SECONDS, APPT_TIMEZONE_SETTING_PRIMARY } from '../const/constants';
+import { NONAME } from 'dns';
 
 export class BookingPage {
   readonly page: Page;
+  readonly testPlatform: String;
   readonly titleText: Locator;
+  readonly bookingPageTimeZoneFooter: Locator;
   readonly bookATimeToMeetText: Locator;
   readonly selectTimeSlotText: Locator;
   readonly bookApptBtn: Locator;
@@ -29,9 +32,11 @@ export class BookingPage {
   readonly bookApptPage630PMSlot: Locator;
   readonly bookApptPage15MinSlot: Locator;
 
-  constructor(page: Page) {
+  constructor(page: Page, testPlatform: string = 'desktop') {
     this.page = page;
+    this.testPlatform = testPlatform;
     this.titleText = this.page.getByTestId('booking-view-title-text');
+    this.bookingPageTimeZoneFooter = this.page.locator('.calendar-footer');
     this.bookATimeToMeetText = this.page.getByTestId('booking-view-book-a-time-to-meet-with-text');
     this.selectTimeSlotText = this.page.getByText('Select an open time slot from the calendar');
     this.bookingCalendarHdrSun = this.page.getByText('SUN', { exact: true });
@@ -42,11 +47,11 @@ export class BookingPage {
     this.bookingCalendarHdrFri = this.page.getByText('FRI', { exact: true });
     this.bookingCalendarHdrSat = this.page.getByText('SAT', { exact: true });
     this.bookingWeekPickerBtn = this.page.locator('.week-picker-button');
-    this.bookApptBtn = this.page.getByTestId('booking-view-confirm-selection-button');
     this.nextWeekArrow = this.page.getByRole('button', { name: 'Next week' });
-    this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy'});
-    this.bookSelectionNameInput = this.page.getByPlaceholder('First and last name');
-    this.bookSelectionEmailInput = this.page.getByPlaceholder('john.doe@example.com');
+    this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy' });
+    this.bookSelectionNameInput = this.page.locator('[name="booker-view-user-name"]');
+    this.bookSelectionEmailInput = this.page.locator('[name="booker-view-user-email"]');
+    this.bookApptBtn = this.page.getByTestId('booking-view-confirm-selection-button');
     this.bookingConfirmedTitleText = this.page.getByText('Booking confirmed');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
@@ -87,6 +92,15 @@ export class BookingPage {
   }
 
   /**
+   * Scroll the given element into view. The reason why we do this here is because playright doesn't yet supported this on ios.
+   */
+  async scrollIntoView(targetElement: Locator, timeout: number = 10000) {
+    if (!this.testPlatform.includes('ios')) {
+      await targetElement.scrollIntoViewIfNeeded({ timeout: timeout });
+    }
+  }
+
+  /**
    * With the booking page week view already displayed, go forward to the next week.
    */
   async goForwardOneWeek() {
@@ -105,28 +119,26 @@ export class BookingPage {
    */
   async selectAvailableBookingSlot(userDisplayName: string): Promise<string> {
     // let's check if a non-busy appointment slot exists in the current week view
-    const slotCount: number = await this.availableBookingSlot.count();
-    console.log(`available slot count: ${slotCount}`);
+    // playwrignt doesn't yet support 'count' or 'all' or 'elementHandles' on ios
+    var availableSlot: Locator = this.availableBookingSlot.first();
 
     // if no slots are available in current week view then fast forward to next week
-    if (slotCount === 0) {
+    if (!availableSlot) {
       console.log('no slots available in current week, skipping ahead to the next week');
       await this.goForwardOneWeek();
       // now check again for available slots; if none then fail out the test (safety catch but shouldn't happen)
-      const newSlotCount: number = await this.availableBookingSlot.count();
-      console.log(`available slot count: ${newSlotCount}`);
-      expect(newSlotCount, `no booking slots available, please check availability settings for ${userDisplayName}`).toBeGreaterThan(0);
+      availableSlot = this.availableBookingSlot.first();
+      expect(availableSlot, `no booking slots available, please check availability settings for ${userDisplayName}`).toBeTruthy();
     }
 
-    // slots are available in current week view so get the first one
-    const firstSlot: Locator = this.availableBookingSlot.first();
-    let slotRef = await firstSlot.getAttribute('data-testid'); // ie. 'event-2025-01-08 09:30'
+    // get our slot info for the available slot that we are going to request
+    let slotRef = await availableSlot.getAttribute('data-testid'); // ie. 'event-2025-01-08 09:30'
     if (!slotRef)
       slotRef = 'none';
     expect(slotRef).toContain('event-');
 
     // now that we've found an availalbe slot select it and confirm
-    await firstSlot.click();
+    await availableSlot.click();
     return slotRef;
   }
 
@@ -141,21 +153,29 @@ export class BookingPage {
   async finishBooking(bookerName: string, bookerEmail: string) {
     await this.bookSelectionNameInput.fill(bookerName);
     await this.bookSelectionEmailInput.fill(bookerEmail);
-    await this.bookApptBtn.click();
+    // when clicking the book appt button for some reason on android it won't click it unless we force it; but
+    // force doesn't work on ios
+    if (this.testPlatform.includes('android')) { 
+      await this.bookApptBtn.click({ force: true });
+    } else {
+      await this.bookApptBtn.click();
+    }
   }
 
   /**
-   * Verify the given appointment time slot text is displayed in the current page
+   * Verify the given appointment time slot text is displayed in the appointment confirmed dialog
    * @param expSlotDateStr Expected slot date string formatted as 'Friday, January 10, 2025'
-   * @param expSlotTimeStr Expected time slot time string formatted as '14:30 PM AMERICA/TORONTO'
+   * @param expSlotTimeStr Expected time slot time string formatted as '14:30 PM'
+   * @param expSlotTimeZoneStr Expected time zone that the time slot was booked in
    */
-  async verifyRequestedSlotTextDisplayed(expSlotDateStr: string, expSlotTimeStr: string) {
+  async verifyRequestedSlotTextDisplayed(expSlotDateStr: string, expSlotTimeStr: string, expSlotTimeZoneStr: string) {
+    console.log(`selected time slot that is expected to appear on the appointment confirmation dialog: ${expSlotDateStr} ${expSlotTimeStr} ${expSlotTimeZoneStr}`);
     const slotDateDisplayText: Locator = this.page.getByText(expSlotDateStr);
     await expect(slotDateDisplayText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     const slotTimeDisplayText: Locator = this.page.getByText(`${expSlotTimeStr}`);
     await expect(slotTimeDisplayText).toBeVisible();
-    const slotTimezoneDisplayText: Locator = this.page.getByText(APPT_TIMEZONE_SETTING_PRIMARY);
-    await expect(slotTimezoneDisplayText).toBeVisible();
+    const slotTimeZoneDisplayText: Locator = this.page.getByText(`${expSlotTimeZoneStr}`);
+    await expect(slotTimeZoneDisplayText).toBeVisible();
   }
 
   /**

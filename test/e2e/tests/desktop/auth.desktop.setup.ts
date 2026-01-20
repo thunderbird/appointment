@@ -11,6 +11,7 @@ import {
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
     TIMEOUT_5_SECONDS,
+    APPT_TIMEZONE_SETTING_PRIMARY,
 } from "../../const/constants";
 
 const fs = require('fs');
@@ -63,6 +64,15 @@ setup('desktop browser authenticate', async ({ page }) => {
     await availabilityPage.bookableToggleContainer.click();
     await page.waitForTimeout(TIMEOUT_5_SECONDS)
     console.log('turned booking availibility on');
+  }
+
+  // Ensure 'automatically confirm bookings' is turned on.
+  // The section containing the auto confirm checkbox prevents playwright from being able to interact with the actual
+  // checkbox element directly; we can use the checkbox element to check if it is chekced, but in order to turn it on
+  // we need to then click on the checkbox container instead of the actual checkbox
+  if (!await availabilityPage.autoConfirmBookingsCheckBox.isChecked()) {
+    await availabilityPage.autoConfirmBookingsCheckBoxContainer.click();
+    await expect(availabilityPage.autoConfirmBookingsCheckBox).toBeChecked();
   }
 
   // And ensure availability start time is 9am, end time 5pm
