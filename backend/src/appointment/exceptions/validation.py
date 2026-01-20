@@ -364,3 +364,13 @@ class GoogleCaldavNotSupported(APIException):
 
     def get_reason(self):
         return l10n('google-caldav-not-supported-details')
+
+
+class ConnectionContainsDefaultCalendarException(APIException):
+    """Raise when attempting to disconnect an external connection that contains the default calendar"""
+
+    id_code = 'CONNECTION_CONTAINS_DEFAULT_CALENDAR'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('connection-contains-default-calendar')

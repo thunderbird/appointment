@@ -14,7 +14,7 @@ from ..database.models import Subscriber, ExternalConnectionType
 from ..dependencies.google import get_google_client
 from ..exceptions.google_api import GoogleInvalidCredentials
 from ..exceptions.google_api import GoogleScopeChanged
-from ..exceptions.validation import OAuthFlowNotFinished
+from ..exceptions.validation import OAuthFlowNotFinished, ConnectionContainsDefaultCalendarException
 from ..l10n import l10n
 
 router = APIRouter()
@@ -154,6 +154,13 @@ def disconnect_account(
 ):
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     google_connection = subscriber.get_external_connection(ExternalConnectionType.google, request_body.type_id)
+
+    # Check if any schedule uses a calendar from this connection as its default
+    # If so, prevent disconnection to avoid breaking the user's booking setup
+    schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
+    for schedule in schedules:
+        if schedule.calendar and schedule.calendar.external_connection_id == google_connection.id:
+            raise ConnectionContainsDefaultCalendarException()
 
     # Remove all of the google calendars on their given google connection
     repo.calendar.delete_by_subscriber_and_provider(

@@ -15,7 +15,11 @@ from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
 from appointment.exceptions.calendar import TestConnectionFailed
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
-from appointment.exceptions.validation import RemoteCalendarConnectionError, GoogleCaldavNotSupported
+from appointment.exceptions.validation import (
+    RemoteCalendarConnectionError,
+    GoogleCaldavNotSupported,
+    ConnectionContainsDefaultCalendarException,
+)
 from appointment.l10n import l10n
 from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
@@ -173,7 +177,14 @@ def disconnect_account(
     )
 
     if ec is None:
-        return RemoteCalendarConnectionError()
+        raise RemoteCalendarConnectionError()
+
+    # Check if any schedule uses a calendar from this connection as its default
+    # If so, prevent disconnection to avoid breaking the user's booking setup
+    schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
+    for schedule in schedules:
+        if schedule.calendar and schedule.calendar.external_connection_id == ec.id:
+            raise ConnectionContainsDefaultCalendarException()
 
     # Deserialize the url/user
     _, user = json.loads(ec.type_id)
