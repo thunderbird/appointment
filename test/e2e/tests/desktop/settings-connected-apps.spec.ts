@@ -8,7 +8,6 @@ import {
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
-  TIMEOUT_3_SECONDS,
  } from '../../const/constants';
 
 let settingsPage: SettingsPage;
@@ -48,5 +47,38 @@ test.describe('connected applications settings on desktop browser', {
     await settingsPage.addGoogleBtn.click();
     await expect(settingsPage.googleSignInHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.gotoConnectedAppSettings();
+  });
+
+  test('verify calendar dropdown only shows for calendars with different external connection than default', async ({ page }) => {
+    // verify section header and default badge
+    await expect(settingsPage.connectedAppsHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(settingsPage.defaultCalendarBadge).toBeVisible();
+    await settingsPage.defaultCalendarBadge.scrollIntoViewIfNeeded();
+
+    // Get all calendar checkboxes to count total calendars
+    const calendarCheckboxes = page.locator('.calendars-container input[type="checkbox"]');
+    const totalCalendars = await calendarCheckboxes.count();
+
+    // Get all dropdown triggers (only visible for calendars with different ExternalConnection than default)
+    const dropdownCount = await settingsPage.calendarDropdownTriggers.count();
+
+    // There should be fewer dropdowns than total calendars since calendars sharing
+    // the same ExternalConnection as the default calendar won't have dropdowns
+    expect(dropdownCount).toBeLessThan(totalCalendars);
+
+    // If there are any dropdown triggers visible, verify the dropdown menu works
+    if (dropdownCount > 0) {
+      await settingsPage.calendarDropdownTriggers.first().scrollIntoViewIfNeeded();
+      await settingsPage.calendarDropdownTriggers.first().click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+
+      // Verify dropdown menu options are visible for non-default-connection calendars
+      await expect(settingsPage.calendarDropdownSetAsDefault).toBeVisible();
+      await expect(settingsPage.calendarDropdownDisconnect).toBeVisible();
+
+      // Close the dropdown by pressing Escape
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+    }
   });
 });

@@ -63,6 +63,39 @@ test.describe('settings - connected applications on mobile browser', {
     await expect(settingsPage.googleSignInHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
   });
 
+  test('verify calendar dropdown only shows for calendars with different external connection than default', async ({ page }) => {
+    // verify section header and default badge
+    await expect(settingsPage.connectedAppsHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
+    await expect(settingsPage.defaultCalendarBadge).toBeVisible();
+    await settingsPage.scrollIntoView(settingsPage.defaultCalendarBadge);
+
+    // Get all calendar checkboxes to count total calendars
+    const calendarCheckboxes = page.locator('.calendars-container input[type="checkbox"]');
+    const totalCalendars = await calendarCheckboxes.count();
+
+    // Get all dropdown triggers (only visible for calendars with different ExternalConnection than default)
+    const dropdownCount = await settingsPage.calendarDropdownTriggers.count();
+
+    // There should be fewer dropdowns than total calendars since calendars sharing
+    // the same ExternalConnection as the default calendar won't have dropdowns
+    expect(dropdownCount).toBeLessThan(totalCalendars);
+
+    // If there are any dropdown triggers visible, verify the dropdown menu works
+    if (dropdownCount > 0) {
+      await settingsPage.scrollIntoView(settingsPage.calendarDropdownTriggers.first());
+      await settingsPage.calendarDropdownTriggers.first().click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+
+      // Verify dropdown menu options are visible for non-default-connection calendars
+      await expect(settingsPage.calendarDropdownSetAsDefault).toBeVisible();
+      await expect(settingsPage.calendarDropdownDisconnect).toBeVisible();
+
+      // Close the dropdown by tapping elsewhere
+      await settingsPage.connectedAppsHdr.click();
+      await page.waitForTimeout(TIMEOUT_1_SECOND);
+    }
+  });
+
   test.afterAll(async ({ browser }, testInfo) => {
     // close the browser when we're done (good practice for BrowserStack); only do this for BrowserStack,
     // because if we do this when running on a local playwright mobile viewport the tests will fail
