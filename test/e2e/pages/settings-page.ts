@@ -47,6 +47,8 @@ export class SettingsPage {
   readonly calendarDropdownTriggers: Locator;
   readonly calendarDropdownSetAsDefault: Locator;
   readonly calendarDropdownDisconnect: Locator;
+  readonly calendarCheckboxes: Locator;
+  readonly unsavedChangesNotice: Locator;
   readonly saveBtnEN: Locator;
   readonly savedSuccessfullyTextEN: Locator;
   readonly savedSuccessfullyTextDE: Locator;
@@ -102,6 +104,8 @@ export class SettingsPage {
     this.calendarDropdownTriggers = this.page.locator('.calendars-container .dropdown');
     this.calendarDropdownSetAsDefault = this.page.getByRole('button', { name: 'Set as default' });
     this.calendarDropdownDisconnect = this.page.locator('.calendars-container .dropdown-inner').getByRole('button', { name: 'Disconnect' });
+    this.calendarCheckboxes = this.page.locator('.calendars-container input[type="checkbox"]');
+    this.unsavedChangesNotice = this.page.getByText('You have unsaved changes');
     this.googleSignInHdr = this.page.getByText('Sign in with Google');
   }
 
