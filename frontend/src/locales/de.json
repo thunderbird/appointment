@@ -19,6 +19,7 @@
     "authenticationRequired": "Entschuldigung, um diese Seite zu sehen ist eine Anmeldung erforderlich.",
     "bookingCancelError": "Buchung konnte nicht abgebrochen werden.",
     "calendarConnectError": "Es gab ein Problem mit der Kalender-Verbindung.",
+    "calendarConnectionUnavailable": "Die Kalenderverbindung ist derzeit nicht verfügbar. Bitte kontaktiere den Kalenderbesitzer direkt.",
     "credentialsIncomplete": "Bitte gib deine Zugangsdaten ein.",
     "dataSourceIsEmpty": "{name} konnte nicht gefunden werden.",
     "externalAccountHasNoCalendars": "Dein {external}-Konto enthält keine Kalender. Bitte verbinde ein anderes Konto.",

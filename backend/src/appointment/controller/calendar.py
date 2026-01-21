@@ -938,58 +938,68 @@ class Tools:
             if external_connection is None or external_connection.token is None:
                 raise RemoteCalendarConnectionError()
 
-            # Create a single connector for this batch of calendars
-            con = GoogleConnector(
-                db=db,
-                redis_instance=redis,
-                google_client=google_client,
-                remote_calendar_id=google_calendars[0].user,  # This isn't used for get_busy_time but is still needed.
-                calendar_id=google_calendars[0].id,  # This isn't used for get_busy_time but is still needed.
-                subscriber_id=subscriber.id,
-                google_tkn=external_connection.token,
-            )
-
-            # Batch all calendar IDs for this connection into a single API call
-            calendar_ids = [calendar.user for calendar in google_calendars]
-            existing_events.extend(
-                [
-                    schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
-                    for busy in con.get_busy_time(calendar_ids, start.strftime(DATEFMT), end.strftime(DATEFMT))
-                ]
-            )
-
-        # Process CalDAV calendars individually (no batching support)
-        for calendar in caldav_calendars:
-            con = CalDavConnector(
-                db=db,
-                redis_instance=redis,
-                url=calendar.url,
-                user=calendar.user,
-                password=calendar.password,
-                subscriber_id=subscriber.id,
-                calendar_id=calendar.id,
-            )
-
             try:
+                # Create a single connector for this batch of calendars
+                con = GoogleConnector(
+                    db=db,
+                    redis_instance=redis,
+                    google_client=google_client,
+                    remote_calendar_id=google_calendars[0].user,  # Not used for get_busy_time but needed.
+                    calendar_id=google_calendars[0].id,  # Not used for get_busy_time but needed.
+                    subscriber_id=subscriber.id,
+                    google_tkn=external_connection.token,
+                )
+
+                # Batch all calendar IDs for this connection into a single API call
+                calendar_ids = [calendar.user for calendar in google_calendars]
                 existing_events.extend(
                     [
                         schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
-                        for busy in con.get_busy_time([calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT))
+                        for busy in con.get_busy_time(calendar_ids, start.strftime(DATEFMT), end.strftime(DATEFMT))
                     ]
                 )
+            except RemoteCalendarConnectionError:
+                raise
+            except Exception as e:
+                logging.warning(f'[Tools.existing_events_for_schedule] Google Calendar connection error: {e}')
+                raise RemoteCalendarConnectionError()
 
-                # We're good here, continue along the loop
-                continue
-            except caldav.lib.error.ReportError:
-                logging.debug('[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.')
-                pass
-
-            # Okay maybe this server doesn't support freebusy, try the old way
+        # Process CalDAV calendars individually (no batching support)
+        for calendar in caldav_calendars:
             try:
+                con = CalDavConnector(
+                    db=db,
+                    redis_instance=redis,
+                    url=calendar.url,
+                    user=calendar.user,
+                    password=calendar.password,
+                    subscriber_id=subscriber.id,
+                    calendar_id=calendar.id,
+                )
+
+                try:
+                    busy_times = con.get_busy_time(
+                        [calendar.url], start.strftime(DATEFMT), end.strftime(DATEFMT)
+                    )
+                    existing_events.extend(
+                        [
+                            schemas.Event(start=busy.get('start'), end=busy.get('end'), title='Busy')
+                            for busy in busy_times
+                        ]
+                    )
+
+                    # We're good here, continue along the loop
+                    continue
+                except caldav.lib.error.ReportError:
+                    logging.debug('[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.')
+
+                # Okay maybe this server doesn't support freebusy, try the old way
                 existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
-            except requests.exceptions.ConnectionError:
-                # Connection error with remote caldav calendar, don't crash this route.
-                pass
+            except RemoteCalendarConnectionError:
+                raise
+            except Exception as e:
+                logging.warning(f'[Tools.existing_events_for_schedule] CalDAV connection error: {e}')
+                raise RemoteCalendarConnectionError()
 
         # handle already requested time slots
         for slot in schedule.slots:
