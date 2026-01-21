@@ -71,7 +71,7 @@ onBeforeUnmount(() => {
       position: absolute;
       right: 0;
       margin-top: 0.5rem;
-      background: var(--colour-ti-base);
+      background: var(--colour-ti-base-light);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 0.5rem;
       box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
