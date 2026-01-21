@@ -152,6 +152,9 @@ const routeIsFTUE = computed(
 const routeIsPostLogin = computed(
   () => ['post-login'].includes(typeof route.name === 'string' ? route.name : ''),
 );
+const routeIsLogout = computed(
+  () => ['logout'].includes(typeof route.name === 'string' ? route.name : ''),
+);
 
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
@@ -320,7 +323,7 @@ onMounted(async () => {
 
 <template>
   <!-- Home page is actually just a redirect to another route -->
-  <template v-if="routeIsHome || (routeIsLogin && isOidcAuth) || routeIsFTUE || routeIsPostLogin">
+  <template v-if="routeIsHome || (routeIsLogin && isOidcAuth) || routeIsFTUE || routeIsPostLogin || routeIsLogout">
     <router-view/>
   </template>
 
