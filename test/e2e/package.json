@@ -26,6 +26,7 @@
     "@playwright/test": "1.56.1",
     "@types/node": "^24.1.0",
     "browserstack-node-sdk": "^1.40.8",
-    "dotenv": "^17.2.1"
+    "dotenv": "^17.2.1",
+    "date-fns": "4.1.0"
   }
 }

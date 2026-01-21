@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Locator } from '@playwright/test';
 import { BookingPage } from '../../pages/booking-page';
 import { DashboardPage } from '../../pages/dashboard-page';
 import { ensureWeAreSignedIn } from '../../utils/utils';
@@ -40,7 +40,8 @@ test.describe('book an appointment on desktop browser', () => {
     await bookingPage.gotoBookingPageWeekView();
     await expect(bookingPage.titleText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
-    // now select an available booking time slot  
+    // now select an available booking time slot
+    // selectedSlot is in the format of 'event-2026-01-22 15:00'
     const selectedSlot: string|null = await bookingPage.selectAvailableBookingSlot(APPT_DISPLAY_NAME);
     console.log(`selected appointment time slot: ${selectedSlot}`);
 
@@ -52,21 +53,24 @@ test.describe('book an appointment on desktop browser', () => {
     await bookingPage.bookingConfirmedTitleText.scrollIntoViewIfNeeded();
 
     // booking request sent dialog should display the correct time slot that was requested
-    // our requested time slot is stored in this format, as example: 'event-2025-01-14 14:30'
-    // the dialog reports the slot in this format, as example: 'January 14, 2025' with start time
-    // on next line; convert our selected slot value to same format as displayed so we can verify
-    const expDateStr = await bookingPage.getDateFromSlotString(selectedSlot);
-    const expTimeStr = await bookingPage.getTimeFromSlotString(selectedSlot);
+    // our requested time slot is stored in this format, as example: 'event-2026-01-22 15:00'
+    // the dialog reports the slot in this format: 'Thu, Jan 22 from 03:00pm'
+    // convert our selected slot value to same format as displayed so we can verify
+    const expSlotDateStr = await bookingPage.getDateFromSlotString(selectedSlot);
+    const expSlotTimeStr = await bookingPage.getStartTimeFromSlotString(selectedSlot);
+    const expConfirmDateTimeStr = `${expSlotDateStr} from ${expSlotTimeStr}`;
 
-    // now verify the correct date/time is dispalyed on the booking request sent pop-up
-    await bookingPage.verifyRequestedSlotTextDisplayed(expDateStr, expTimeStr);  
+    // now verify the correct date/time is dispalyed on the booking request sent pop-up 
+    console.log(`expect this time slot to be on the confirmation dialog: '${expConfirmDateTimeStr}'`);
+    const confirmDateDisplayText: Locator = page.getByText(expConfirmDateTimeStr);
+    await expect(confirmDateDisplayText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
     // now verify a corresponding pending booking was created on the host account's list of pending bookings
     // wait N seconds for the appointment dashboard to update, sometimes the test is so fast when it
     // switches back to the dashboard the new pending appointment hasn't been added/displayed yet
     await page.waitForTimeout(TIMEOUT_10_SECONDS);
     await ensureWeAreSignedIn(page);
-    await dashboardPage.verifyEventCreated(expDateStr, expTimeStr);
+    await dashboardPage.verifyEventCreated(selectedSlot);
 
     // also go back to main dashboard and check that pending requests link now appears
     await dashboardPage.gotoToDashboardMonthView();

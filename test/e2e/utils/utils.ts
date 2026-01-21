@@ -123,27 +123,6 @@ export const mobileSignInAndSetup = async (page: Page, testProjectName: string) 
 }
 
 /**
- * Convert an event slot date (received from the request booking page) to the date format
- * expected on the bookings list page.
- * @param dateString Date string in the format of 'February 17, 2025'
- * @returns A string containg date now formatted as MM/DD/YYYY i.e. '02/17/2025'
- */
-export const convertLongDate = async (dateString: string) => {
-  const date = new Date(dateString);
-  const day = date.getDate();
-  const month = date.getMonth() + 1; // is zero-based
-  const year = date.getFullYear(); // returns a 4-digit year
-
-  // padStart() adds a leading zero if the day or month is a single digit
-  const formattedDay = String(day).padStart(2, '0');
-  const formattedMonth = String(month).padStart(2, '0');
-  const formattedYear = String(year);
-
-  // return new string MM/DD/YYYY
-  return `${formattedMonth}/${formattedDay}/${formattedYear}`;
-}
-
-/**
  * Ensure we are already signed into Appointment, and if we aren't then sign in. Also set
  * the default opts and save the storage and auth state. This is meant to be used at the start
  * of each test to ensure we are signed in; the auth.desktop.setup already signs us in before
