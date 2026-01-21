@@ -5,6 +5,7 @@ from typing import Annotated
 
 import sentry_sdk
 from fastapi import Depends, Body, Request, HTTPException
+from fastapi.params import Depends as DependsClass
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
@@ -126,6 +127,12 @@ def get_subscriber(
     """Automatically retrieve and return the subscriber"""
     if token is None:
         raise InvalidTokenException()
+
+    # When this method is called directly (not through FastAPI DI), redis_instance will be
+    # the Depends object itself rather than the resolved value, so assigning it to None will
+    # make it call the OIDC introspect endpoint in that case (no caching)
+    if isinstance(redis_instance, DependsClass):
+        redis_instance = None
 
     if AuthScheme.is_oidc():
         user = get_user_from_oidc_token_introspection(db, token, redis_instance)
