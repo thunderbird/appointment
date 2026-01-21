@@ -7,20 +7,15 @@ import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import NavBarMobile from '@/components/NavBarMobile.vue';
-import { accountsTbProfileUrlKey } from '@/keys';
 
 
 describe('NavBarMobile', () => {
   var app;
   var wrapper;
-  const testAccountsTbProfileUrl = 'https://accounts.tb.pro/dashboard';
 
   const getMountOptions = () => ({
     global: {
       plugins: [i18ninstance, router],
-      provide: {
-        [accountsTbProfileUrlKey]: testAccountsTbProfileUrl,
-      },
     },
   });
 
@@ -83,8 +78,6 @@ describe('NavBarMobile', () => {
       'bookings',
       'availability',
       'settings',
-      'report-bug',
-      'contact',
       'logout'
     ];
 
@@ -102,9 +95,11 @@ describe('NavBarMobile', () => {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
 
-    // verify the anchor tag to accountsTbProfileUrl exists and has the correct href
-    const profileAnchor = wrapper.find('a[href="' + testAccountsTbProfileUrl + '"]');
-    expect(profileAnchor.exists(), 'expected anchor tag to accountsTbProfileUrl to be rendered').toBe(true);
+    // verify the footer accordion contains anchor tags for account and support (logout is outside the accordion)
+    const footerAccordion = wrapper.find('.footer-accordion');
+    expect(footerAccordion.exists(), 'expected footer accordion to be rendered').toBe(true);
+    const footerAnchors = footerAccordion.findAll('a');
+    expect(footerAnchors.length, 'expected footer accordion to contain anchor tags').toBe(2);
   });
 
   it('able to click the copy link button', async () => {
