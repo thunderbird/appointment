@@ -161,9 +161,9 @@ const getDbData = async () => {
   if (user?.authenticated) {
     await Promise.all([
       user.profile(),
-      calendarStore.fetch(),
+      calendarStore.fetch(true),
       appointmentStore.fetch(),
-      scheduleStore.fetch(),
+      scheduleStore.fetch(true),
     ]);
   }
 };
