@@ -5,11 +5,16 @@ import { PhArrowClockwise } from '@phosphor-icons/vue';
 import { storeToRefs } from 'pinia';
 import { formatTimeAgoIntl, useNow } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import { Dayjs } from 'dayjs';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 
 const loading = defineModel<boolean>('loading', { required: true });
+
+const props = defineProps<{
+  activeDate: Dayjs,
+}>();
 
 const refresh = inject(refreshKey);
 const { t } = useI18n();
@@ -34,8 +39,8 @@ const scheduleCalendar = computed(() => {
 async function onSyncCalendarButtonClicked() {
   loading.value = true;
 
-  await calendarStore.syncCalendars();
   await refresh();
+  await calendarStore.getRemoteEvents(props.activeDate, true);
 
   const currentTime = new Date();
   lastRefreshedTime.value = currentTime;

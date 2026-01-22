@@ -84,7 +84,7 @@ export default {
           :onDateChange="onDateChange"
         />
 
-        <user-calendar-sync v-model:loading="isLoading" />
+        <user-calendar-sync v-model:loading="isLoading" :active-date="activeDate" />
       </div>
 
       <div class="calendar-container">
