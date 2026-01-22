@@ -1,5 +1,5 @@
 import { expect, type Page, type Locator } from '@playwright/test';
-import { convertLongDate } from '../utils/utils';
+import { format } from 'date-fns';
 
 import {
   APPT_BOOKINGS_PAGE,
@@ -40,31 +40,24 @@ export class DashboardPage {
    * in the host account's list of bookings. The bookings screen shows all bookings by default
    * (confirmed and unconfirmed) which is great because it is possible the test account could
    * have 'auto confirm' turned on.
-   * @param slotDate String containing date of the requested slot (format 'October 29, 2025') as
-   * provided by the booking request confirmation dialog at the time of requesting the slot.
-   * @param slotTime String containg the time of the requested slot (format e.g: '03:30 PM') as
-   * provided by the booking request confirmation dialog at the time of requesting the slot.
+   * @param selectedSlot String containing date time of the requested slot (format 'event-2026-01-23 17:00')
+   * as provided from the booking page (dom element of the requested time slot)
    */
-  async verifyEventCreated(slotDate: string, slotTime: string) {
+  async verifyEventCreated(selectedSlot: string) {
     // now wait a max of 2 minutes for the newly request appt to appear in the dashboard pending appts list
     await expect(async () => {
       await this.gotoBookings();
       await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
 
-      // the slot date is received in the format of 'February 17, 2025' but it needs to be in the format
-      // of a string as MM/DD/YYYY (ie. 02/17/2025) to match the bookings list.
-      const shortDate = await convertLongDate(slotDate);
+      // the selected slot date and time is received in the format 'event-2026-01-23 17:00', but on the bookings
+      // page list bookings are listed in the format of '01/23/2026, 5:00 PM'; so convert received string to match
+      const selectedSlotStr = selectedSlot.substring(6).replace(' ', 'T'); // '2026-01-23T17:00'
+      const selectedSlotDateObj = new Date(selectedSlotStr);
+      const selectedSlotFormattedDate = format(selectedSlotDateObj, 'MM/dd/yyyy, h:mm a'); // '01/23/2026, 5:00 PM'
 
-      // the slot time is received in the format of `03:00 PM` but we need to drop the leading zero to
-      // match the format on the bookings list
-      if(slotTime[0] == '0') {
-        slotTime = slotTime.slice(1);
-      }
-
-      // now we can build the event date, time string and search for it on the bookings list
-      const eventString = `${shortDate}, ${slotTime}`;
-      console.log(`searching bookings list for event: ${eventString}`);
-      const apptLocator = this.page.getByRole('button', { name: eventString });
+      // now we can search for it on the bookings list
+      console.log(`searching bookings list for event: ${selectedSlotFormattedDate}`);
+      const apptLocator = this.page.getByRole('button', { name: selectedSlotFormattedDate });
       await apptLocator.scrollIntoViewIfNeeded();
       await expect(apptLocator).toBeVisible();
     }).toPass({

@@ -145,30 +145,15 @@ export class BookingPage {
   }
 
   /**
-   * Verify the given appointment time slot text is displayed in the current page
-   * @param expSlotDateStr Expected slot date string formatted as 'Friday, January 10, 2025'
-   * @param expSlotTimeStr Expected time slot time string formatted as '14:30 PM AMERICA/TORONTO'
-   */
-  async verifyRequestedSlotTextDisplayed(expSlotDateStr: string, expSlotTimeStr: string) {
-    const slotDateDisplayText: Locator = this.page.getByText(expSlotDateStr);
-    await expect(slotDateDisplayText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    const slotTimeDisplayText: Locator = this.page.getByText(`${expSlotTimeStr}`);
-    await expect(slotTimeDisplayText).toBeVisible();
-    const slotTimezoneDisplayText: Locator = this.page.getByText(APPT_TIMEZONE_SETTING_PRIMARY);
-    await expect(slotTimezoneDisplayText).toBeVisible();
-  }
-
-  /**
    * Utility to return a string containing the date abstracted from a given time slot string 
    * @param timeSlotString Slot string read from DOM (ie. 'event-2025-01-14 14:30')
-   * @returns Formatted date string (ie. 'January 14, 2025')
+   * @returns Formatted date string month and day only (ie. 'Jan 14')
    */
   async getDateFromSlotString(timeSlotString: string): Promise<string> {
     const selectedSlotDateTime = new Date(timeSlotString.substring(6));
 
     const options:Intl.DateTimeFormatOptions = {
-      year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     };
 
@@ -176,16 +161,16 @@ export class BookingPage {
   }
 
   /**
-   * Utility to return a string containg the time abstracted from a given time slot string.
-   * The time in the given time slot string is in 24 hour format (i.e. 14:30), but we want
-   * it to be like '02:30 PM'
+   * Utility to return a string containing the event start time abstracted from a
+   * given time slot string.
    * @param timeSlotString Slot string read from DOM (ie. 'event-2025-01-14 14:30')
-   * @returns Formatted time string (ie. '02:30 PM')
+   * @returns Formatted event start time string (ie. '02:30pm')
    */
-  async getTimeFromSlotString(timeSlotString: string): Promise<string> {
+  async getStartTimeFromSlotString(timeSlotString: string): Promise<string> {
     const selectedSlotDateTime = new Date(timeSlotString.substring(6));
-    const expTimeStr = selectedSlotDateTime.toLocaleTimeString('default', { hour12: true, hour: '2-digit', minute: '2-digit' });
-    // now expTimeStr looks like this, for example: '04:30 p.m.' but need it to be like '04:30 PM'
-    return expTimeStr.toUpperCase().replace('.', '').replace('.', '');
+    var startTimeStr = selectedSlotDateTime.toLocaleTimeString('default', { hour12: true, hour: '2-digit', minute: '2-digit' });
+    // now startTimeStr looks like this, for example: '04:30 p.m.' but need it to be like '04:30pm'
+    startTimeStr = startTimeStr.replace(' ', '').replace('.', '').replace('.', '');
+    return startTimeStr
   }
 }
