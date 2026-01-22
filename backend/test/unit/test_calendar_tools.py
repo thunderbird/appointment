@@ -1,7 +1,8 @@
 from appointment.controller.calendar import Tools
 from appointment.database import schemas, models
-from datetime import datetime, timedelta
-from unittest.mock import Mock
+from datetime import datetime, timedelta, time, date
+from unittest.mock import Mock, PropertyMock
+import zoneinfo
 
 
 class TestTools:
@@ -273,3 +274,163 @@ class TestDnsCaldavLookup:
         host, ttl = Tools.dns_caldav_lookup('appointment.day')
         assert host is None
         assert ttl is None
+
+
+class TestAvailableSlotsFromSchedule:
+    """Tests for Tools.available_slots_from_schedule"""
+
+    def _create_mock_schedule(
+        self,
+        start_time_local: time,
+        end_time_local: time,
+        slot_duration: int,
+        weekdays: list[int] = None,
+        timezone_str: str = 'UTC',
+    ):
+        """Helper to create a mock schedule with the necessary properties"""
+        if weekdays is None:
+            weekdays = [1, 2, 3, 4, 5]
+
+        # Create mock subscriber with timezone
+        subscriber = Mock()
+        subscriber.timezone = timezone_str
+
+        # Create mock calendar with owner
+        calendar = Mock()
+        calendar.owner = subscriber
+
+        # Create mock schedule
+        schedule = Mock()
+        schedule.calendar = calendar
+        schedule.availabilities = []
+        schedule.use_custom_availabilities = False
+        schedule.weekdays = weekdays
+        schedule.slot_duration = slot_duration
+        schedule.earliest_booking = 0  # No minimum booking time
+        schedule.farthest_booking = 60 * 24 * 7  # 1 week in minutes
+        schedule.start_date = date.today()
+        schedule.end_date = date.today() + timedelta(days=7)
+
+        # Mock the local time properties
+        type(schedule).start_time_local = PropertyMock(return_value=start_time_local)
+        type(schedule).end_time_local = PropertyMock(return_value=end_time_local)
+
+        return schedule
+
+    def test_slots_fit_exactly_in_availability_window(self):
+        """Test when slot duration divides evenly into availability window"""
+        # 9:00 AM to 10:00 AM = 60 minutes, with 30 minute slots = exactly 2 slots
+        schedule = self._create_mock_schedule(
+            start_time_local=time(9, 0),
+            end_time_local=time(10, 0),
+            slot_duration=30,
+            weekdays=[1, 2, 3, 4, 5, 6, 7],  # All days
+        )
+
+        # Test for a specific day (use a Monday)
+        test_day = datetime(2026, 1, 26, tzinfo=zoneinfo.ZoneInfo('UTC'))  # A Monday
+        slots = Tools.available_slots_from_schedule(schedule, day=test_day)
+
+        assert len(slots) == 2
+        # First slot at 9:00, ends at 9:30
+        assert slots[0].start.hour == 9
+        assert slots[0].start.minute == 0
+        assert slots[0].duration == 30
+        # Second slot at 9:30, ends at 10:00
+        assert slots[1].start.hour == 9
+        assert slots[1].start.minute == 30
+        assert slots[1].duration == 30
+
+    def test_last_slot_does_not_exceed_availability_end(self):
+        """Ensure last slot doesn't exceed the availability end time"""
+        # 9:00 AM to 9:40 AM = 40 minutes, with 30 minute slots
+        # Should only generate 1 slot at 9:00 (ends at 9:30, within 9:40)
+        schedule = self._create_mock_schedule(
+            start_time_local=time(9, 0),
+            end_time_local=time(9, 40),
+            slot_duration=30,
+            weekdays=[1, 2, 3, 4, 5, 6, 7],
+        )
+
+        test_day = datetime(2026, 1, 26, tzinfo=zoneinfo.ZoneInfo('UTC'))
+        slots = Tools.available_slots_from_schedule(schedule, day=test_day)
+
+        assert len(slots) == 1
+        assert slots[0].start.hour == 9
+        assert slots[0].start.minute == 0
+        # Verify the slot end time (start + duration) doesn't exceed 9:40
+        slot_end = slots[0].start + timedelta(minutes=slots[0].duration)
+        assert slot_end.hour == 9
+        assert slot_end.minute == 30  # 9:30 is before 9:40
+
+    def test_availability_too_short_for_any_slot(self):
+        """Test when availability window is shorter than slot duration"""
+        # 9:00 AM to 9:20 AM = 20 minutes, with 30 minute slots = no slots possible
+        schedule = self._create_mock_schedule(
+            start_time_local=time(9, 0),
+            end_time_local=time(9, 20),
+            slot_duration=30,
+            weekdays=[1, 2, 3, 4, 5, 6, 7],
+        )
+
+        test_day = datetime(2026, 1, 26, tzinfo=zoneinfo.ZoneInfo('UTC'))
+        slots = Tools.available_slots_from_schedule(schedule, day=test_day)
+
+        assert len(slots) == 0
+
+    def test_exactly_one_slot_fits(self):
+        """Test when exactly one slot fits in the availability window"""
+        # 9:00 AM to 9:30 AM = 30 minutes, with 30 minute slots = exactly 1 slot
+        schedule = self._create_mock_schedule(
+            start_time_local=time(9, 0),
+            end_time_local=time(9, 30),
+            slot_duration=30,
+            weekdays=[1, 2, 3, 4, 5, 6, 7],
+        )
+
+        test_day = datetime(2026, 1, 26, tzinfo=zoneinfo.ZoneInfo('UTC'))
+        slots = Tools.available_slots_from_schedule(schedule, day=test_day)
+
+        assert len(slots) == 1
+        assert slots[0].start.hour == 9
+        assert slots[0].start.minute == 0
+
+    def test_multiple_slots_with_remainder(self):
+        """Test multiple slots when there's leftover time that doesn't fit another slot"""
+        # 9:00 AM to 10:15 AM = 75 minutes, with 30 minute slots
+        # Should generate 2 slots (60 minutes used), 15 minutes remainder can't fit a 30-min slot
+        schedule = self._create_mock_schedule(
+            start_time_local=time(9, 0),
+            end_time_local=time(10, 15),
+            slot_duration=30,
+            weekdays=[1, 2, 3, 4, 5, 6, 7],
+        )
+
+        test_day = datetime(2026, 1, 26, tzinfo=zoneinfo.ZoneInfo('UTC'))
+        slots = Tools.available_slots_from_schedule(schedule, day=test_day)
+
+        assert len(slots) == 2
+
+        # Verify no slot exceeds 10:15
+        for slot in slots:
+            slot_end = slot.start + timedelta(minutes=slot.duration)
+            assert slot_end <= test_day.replace(hour=10, minute=15)
+
+    def test_respects_weekday_filter(self):
+        """Test that slots are only generated for specified weekdays"""
+        schedule = self._create_mock_schedule(
+            start_time_local=time(9, 0),
+            end_time_local=time(10, 0),
+            slot_duration=30,
+            weekdays=[1],  # Monday only
+        )
+
+        # Test on a Monday (should have slots)
+        monday = datetime(2026, 1, 26, tzinfo=zoneinfo.ZoneInfo('UTC'))
+        slots_monday = Tools.available_slots_from_schedule(schedule, day=monday)
+        assert len(slots_monday) == 2
+
+        # Test on a Tuesday (should have no slots)
+        tuesday = datetime(2026, 1, 27, tzinfo=zoneinfo.ZoneInfo('UTC'))
+        slots_tuesday = Tools.available_slots_from_schedule(schedule, day=tuesday)
+        assert len(slots_tuesday) == 0
