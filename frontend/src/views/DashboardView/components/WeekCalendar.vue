@@ -43,7 +43,50 @@ const userStore = useUserStore();
 const { selectedEvent } = storeToRefs(useBookingViewStore());
 
 const calendarContainerRef = ref<HTMLElement | null>(null);
+const calendarHeaderRef = ref<HTMLElement | null>(null);
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
+
+// Scroll sync state
+let pendingScrollSync: number | null = null;
+let lastScrollSource: 'header' | 'body' | null = null;
+let isProgrammaticScroll = false;
+
+/**
+ * Syncs horizontal scroll between header and body for mobile
+ * Uses requestAnimationFrame to batch updates and prevent layout thrashing
+ */
+function syncScroll(source: 'header' | 'body') {
+  // Ignore scroll events triggered by our own programmatic updates
+  if (isProgrammaticScroll) return;
+
+  lastScrollSource = source;
+
+  // If we already have a pending frame, don't schedule another
+  if (pendingScrollSync !== null) return;
+
+  pendingScrollSync = requestAnimationFrame(() => {
+    const header = calendarHeaderRef.value;
+    const body = calendarContainerRef.value;
+
+    if (header && body && lastScrollSource) {
+      isProgrammaticScroll = true;
+
+      if (lastScrollSource === 'header') {
+        body.scrollLeft = header.scrollLeft;
+      } else {
+        header.scrollLeft = body.scrollLeft;
+      }
+
+      // Reset flag after a microtask to allow the scroll event to fire and be ignored
+      queueMicrotask(() => {
+        isProgrammaticScroll = false;
+      });
+    }
+
+    pendingScrollSync = null;
+    lastScrollSource = null;
+  });
+}
 
 const isDarkMode = computed(() => userStore.myColourScheme === ColourSchemes.Dark);
 
@@ -325,7 +368,7 @@ onMounted(() => {
     </div>
 
     <!-- Header row (separate from scrollable grid) -->
-    <div class="calendar-header">
+    <div ref="calendarHeaderRef" class="calendar-header" @scroll="syncScroll('header')">
       <div class="corner-cell-block"></div>
       <div
         class="calendar-weekday-header"
@@ -343,6 +386,7 @@ onMounted(() => {
       ref="calendarContainerRef"
       class="calendar-body"
       :style="{ 'grid-template-rows': `repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }"
+      @scroll="syncScroll('body')"
     >
       <!-- Left-side hourly blocks -->
       <div
@@ -459,9 +503,11 @@ onMounted(() => {
   background-color: var(--colour-neutral-base);
   width: 100%;
   max-width: 100%;
-  max-height: 505px;
+  min-height: 505px;
+  max-height: calc(100dvh - 400px);
   overflow: hidden;
-  padding-block-end: 1rem;
+  padding: 1rem;
+  padding-block-start: 0;
   position: relative;
 
   &.loading {
@@ -537,6 +583,9 @@ onMounted(() => {
   grid-column: 1;
   width: 100%;
   height: 100%;
+  position: sticky;
+  left: 0;
+  z-index: 2;
 }
 
 .time-slot-cell {
@@ -619,10 +668,6 @@ onMounted(() => {
 }
 
 @media (--md) {
-  .calendar-wrapper {
-    padding-inline: 1rem;
-  }
-
   .calendar-header {
     grid-template-columns: 4rem repeat(7, minmax(0, 1fr));
     overflow-x: visible;
