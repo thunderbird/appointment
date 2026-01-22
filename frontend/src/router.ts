@@ -22,7 +22,6 @@ const WaitingListActionView = defineAsyncComponent(() => import('@/views/Waiting
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
 const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
 const WaitingListPanelView = defineAsyncComponent(() => import('@/views/admin/WaitingListPanelView.vue'));
-const ReportBugView = defineAsyncComponent(() => import('@/views/ReportBugView.vue'));
 const FTUEView = defineAsyncComponent(() => import('@/views/FTUEView/index.vue'));
 
 type ApmtRouteMeta = {
@@ -138,11 +137,6 @@ const routes: RouteRecordRaw[] = [
     meta: {
       isPublic: true,
     },
-  },
-  {
-    path: '/report-bug',
-    name: 'report-bug',
-    component: ReportBugView,
   },
   {
     path: '/privacy',

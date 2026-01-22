@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
@@ -15,7 +15,6 @@ import {
   PhUserSquare,
 } from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
-import { accountsTbProfileUrlKey } from '@/keys';
 
 // component constants
 const userStore = useUserStore();
@@ -28,7 +27,8 @@ const navItems = [
   { route: 'settings', i18nKey: 'settings', icon: PhGear },
 ];
 
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
+const accountsTbProfileUrl = import.meta.env?.VITE_TB_ACCOUNT_DASHBOARD_URL;
+const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
 
 const menuOpen = ref(false);
 const myLinkTooltip = ref(t('navBar.shareMyLink'));
@@ -108,21 +108,15 @@ async function copyLink() {
             <a :href="accountsTbProfileUrl">
               <li>
                 <ph-user-square size="24" />
-                {{ t('label.userProfile') }}
+                {{ t('label.account') }}
               </li>
             </a>
-            <router-link to="report-bug">
+            <a :href="supportUrl">
               <li>
                 <ph-arrow-square-out size="24" />
-                {{ t('navBar.reportBug') }}
+                {{ t('label.support') }}
               </li>
-            </router-link>
-            <router-link to="contact">
-              <li>
-                <ph-arrow-square-out size="24" />
-                {{ t('label.contact') }}
-              </li>
-            </router-link>
+            </a>
           </ul>
         </details>
         <router-link to="logout">
@@ -291,7 +285,7 @@ nav {
         display: flex;
         gap: 0.75rem;
         padding: 0.5rem 0;
-        margin-top: 1rem;
+        margin-top: 0.625rem;
         text-decoration: none;
         color: inherit;
       }

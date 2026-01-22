@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple } from '@phosphor-icons/vue';
-import { UserAvatar, ToolTip, BaseButton } from '@thunderbirdops/services-ui';
-import { accountsTbProfileUrlKey } from '@/keys';
+import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
+import UserMenu from '@/components/UserMenu.vue';
 
 // component constants
 const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
@@ -20,8 +20,6 @@ interface Props {
   navItems: string[], // list of route names that are also lang keys (format: label.<key>), used as nav items
 }
 defineProps<Props>();
-
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 
 const myLinkTooltip = ref(t('label.copyLink'));
 
@@ -86,9 +84,7 @@ const copyLink = async () => {
           </button>
         </div>
 
-        <a :href="accountsTbProfileUrl">
-          <user-avatar :username="user.data.username" :avatar-url="user.data.avatarUrl" />
-        </a>
+        <user-menu :username="user.data.username" :avatar-url="user.data.avatarUrl" />
       </div>
     </template>
 

@@ -25,7 +25,7 @@ const scheduleCalendar = computed(() => {
   return calendarStore.calendarById(firstSchedule.value?.calendar_id)
 })
 
-const timeAgo = useTimeAgoIntl(lastRefreshedTime, { locale: userStore.data.settings.language });
+const timeAgo = userStore?.data?.settings?.language && useTimeAgoIntl(lastRefreshedTime, { locale: userStore.data.settings.language });
 
 async function onSyncCalendarButtonClicked() {
   loading.value = true;

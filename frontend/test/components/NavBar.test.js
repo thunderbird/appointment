@@ -7,13 +7,11 @@ import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import NavBar from '@/components/NavBar.vue';
-import { accountsTbProfileUrlKey } from '@/keys';
 
 
 describe('NavBar', () => {
   var app;
   var wrapper;
-  const testAccountsTbProfileUrl = 'https://accounts.tb.pro/dashboard';
 
   // list of route names that are also lang keys (format: label.<key>), used as nav items
   // these routes are added in addition to the routes already specified in NavBar.vue
@@ -29,9 +27,6 @@ describe('NavBar', () => {
     propsData: ourProps,
     global: {
       plugins: [i18ninstance, router],
-      provide: {
-        [accountsTbProfileUrlKey]: testAccountsTbProfileUrl,
-      },
     },
   });
 
@@ -57,7 +52,7 @@ describe('NavBar', () => {
     expect(foundLinks[0]['name'], 'expected link component to be rendered').toBe('home');
   });
 
-  it('renders correctly when logged in', () => {
+  it('renders correctly when logged in', async () => {
     // fake sign-in via user store
     const user = useUserStore();
     user.data.accessToken = 'abc';
@@ -79,9 +74,15 @@ describe('NavBar', () => {
       expect(foundLinks, 'expected link component to be rendered').toContain(expRoute);
     }
 
-    // verify the anchor tag to accountsTbProfileUrl exists and has the correct href
-    const profileAnchor = wrapper.find('a[href="' + testAccountsTbProfileUrl + '"]');
-    expect(profileAnchor.exists(), 'expected anchor tag to accountsTbProfileUrl to be rendered').toBe(true);
+    // open the user menu dropdown by clicking the avatar
+    const userAvatar = wrapper.find('.user-menu .avatar');
+    await userAvatar.trigger('click');
+
+    // verify the dropdown is visible and contains the account, support, and logout links
+    const dropdown = wrapper.find('.user-menu .dropdown');
+    expect(dropdown.exists(), 'expected dropdown to be visible after clicking avatar').toBe(true);
+    const dropdownAnchors = dropdown.findAll('a');
+    expect(dropdownAnchors.length, 'expected dropdown to contain anchor tags').toBe(3);
   });
 
   it('able to click the copy link button', async () => {
