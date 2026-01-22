@@ -9,6 +9,7 @@ import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@
 import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -23,12 +24,14 @@ interface Props {
   events?: RemoteEvent[],
   pendingAppointments?: Appointment[],
   selectableSlots?: Slot[],
+  isLoading?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {
   events: () => [] as RemoteEvent[],
   pendingAppointments: () => [] as Appointment[],
   selectableSlots: () => [] as Slot[],
+  isLoading: false,
 });
 
 const emit = defineEmits(['event-selected'])
@@ -316,7 +319,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="calendar-wrapper">
+  <div class="calendar-wrapper" :class="{ 'loading': isLoading }">
+    <div class="calendar-loading" v-if="isLoading">
+      <loading-spinner />
+    </div>
+
     <!-- Header row (separate from scrollable grid) -->
     <div class="calendar-header">
       <div class="corner-cell-block"></div>
@@ -455,6 +462,21 @@ onMounted(() => {
   max-height: 505px;
   overflow: hidden;
   padding-block-end: 1rem;
+  position: relative;
+
+  &.loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .calendar-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
 }
 
 .calendar-header {

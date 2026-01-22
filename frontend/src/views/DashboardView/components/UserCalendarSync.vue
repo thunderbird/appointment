@@ -9,6 +9,8 @@ import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 
+const loading = defineModel<boolean>('loading', { required: true });
+
 const refresh = inject(refreshKey);
 const { t } = useI18n();
 
@@ -18,7 +20,6 @@ const scheduleStore = useScheduleStore();
 
 const { firstSchedule } = storeToRefs(scheduleStore);
 
-const loading = ref(false);
 const lastRefreshedTime = ref(new Date());
 
 const { now } = useNow({ interval: 30000, controls: true });
