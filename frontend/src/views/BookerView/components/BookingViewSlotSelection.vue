@@ -82,14 +82,14 @@ async function onDateChange(dateObj: TimeFormatted) {
           :selectable-slots="appointment.slots"
           @event-selected="selectEvent"
         />
+
+        <div class="calendar-footer">
+          <ph-globe size="16" />
+          <span>{{ t('label.timeZone') }}: {{ timezone }}</span>
+        </div>
       </div>
 
       <slot-selection-aside />
-    </div>
-
-    <div class="calendar-footer">
-      <ph-globe size="16" />
-      <span>{{ t('label.timeZone') }}: {{ timezone }}</span>
     </div>
   </template>
 </template>
