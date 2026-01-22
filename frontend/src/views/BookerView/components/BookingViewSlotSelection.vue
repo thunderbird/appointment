@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue';
+import { ref, inject, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Dayjs } from 'dayjs';
 import { useI18n } from 'vue-i18n';
@@ -34,6 +34,8 @@ const activeDateRange = computed(() => {
 
 const timezone = computed(() => dj.tz.guess());
 
+const isLoading = ref(false);
+
 /**
  * Select a specific time slot
  * @param day string
@@ -54,12 +56,16 @@ const selectEvent = (day: Dayjs) => {
 };
 
 async function onDateChange(dateObj: TimeFormatted) {
+  isLoading.value = true;
+
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
 
   activeDate.value = start.add(end.diff(start, 'minutes') / 2, 'minutes');
 
   await calendarStore.getRemoteEvents(activeDate.value);
+
+  isLoading.value = false;
 };
 
 </script>
@@ -81,6 +87,7 @@ async function onDateChange(dateObj: TimeFormatted) {
           :active-date-range="activeDateRange"
           :selectable-slots="appointment.slots"
           @event-selected="selectEvent"
+          :is-loading="isLoading"
         />
 
         <div class="calendar-footer">

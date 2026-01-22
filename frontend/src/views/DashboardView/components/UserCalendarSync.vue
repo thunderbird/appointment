@@ -71,6 +71,7 @@ async function onSyncCalendarButtonClicked() {
   text-align: right;
   gap: 0.5rem;
   width: 100%;
+  padding-inline-end: 0.3rem;
 
   button {
     color: var(--colour-ti-secondary);
