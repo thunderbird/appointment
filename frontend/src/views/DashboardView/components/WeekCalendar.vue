@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { computed, inject, nextTick, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
-import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba, hhmmToMinutes, minutesToHhmm } from '@/utils';
+import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
@@ -37,11 +36,10 @@ const emit = defineEmits(['event-selected'])
 const dj = inject(dayjsKey);
 
 const userStore = useUserStore();
-const scheduleStore = useScheduleStore();
 
-const { firstSchedule } = storeToRefs(scheduleStore);
 const { selectedEvent } = storeToRefs(useBookingViewStore());
 
+const calendarContainerRef = ref<HTMLElement | null>(null);
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
 
 const isDarkMode = computed(() => userStore.myColourScheme === ColourSchemes.Dark);
@@ -100,7 +98,7 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
   // normalize the end of an event to 24 if it is 0.
   const endTime = eventEnd.format('HH:mm') === '00:00' ? '24:00' : eventEnd.format('HH:mm');
   const endSlot = slots.find(slot => slot.startTime >= endTime);
-  
+
   const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
 
   // Return the positioning data, only if it's within calendar hours
@@ -114,59 +112,6 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   return null;
 }
-
-/**
- * Get the earliest start time of all given calendar events
- */
-const earliestTime = computed(() => {
-  return Math.min(
-    props.events.reduce(
-      (p, c) => hhmmToMinutes(c.start) < p ? hhmmToMinutes(c.start) : p,
-      24 * 60
-    ),
-    props.pendingAppointments.reduce(
-      (p, c) => hhmmToMinutes(c.slots[0].start) < p ? hhmmToMinutes(c.slots[0].start) : p,
-      24 * 60
-    ),
-    props.selectableSlots.reduce(
-      (p, c) => hhmmToMinutes(c.start) < p ? hhmmToMinutes(c.start) : p,
-      24 * 60
-    ),
-  );
-});
-
-/**
- * Get the latest end time of all given calendar events
- */
-const latestTime = computed(() => {
-  return Math.max(
-    props.events.reduce(
-      (p, c) => hhmmToMinutes(c.end) > p ? hhmmToMinutes(c.end) : p,
-      0
-    ),
-    props.pendingAppointments.reduce(
-      (p, c) => hhmmToMinutes(c.slots[0].start) + c.slots[0].duration > p
-        ? hhmmToMinutes(c.slots[0].start) + c.slots[0].duration
-        : p,
-      0
-    ),
-    props.selectableSlots.reduce(
-      (p, c) => hhmmToMinutes(c.start) + c.duration > p ? hhmmToMinutes(c.start) + c.duration : p,
-      0
-    ),
-  );
-});
-
-/**
- * Get the shortest duration of all given calendar events for building the grid
- */
-const shortestDuration = computed(() => {
-  return Math.min(
-    props.events.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
-    props.pendingAppointments.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
-    props.selectableSlots.reduce((p, c) => Math.min(p, c.duration), 24 * 60),
-  );
-});
 
 /**
  * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
@@ -200,41 +145,20 @@ const weekdays = computed(() => {
 })
 
 /**
- * Generates an array of time slot objects, each with grid positioning info
+ * Generates an array of time slot objects for a full 24-hour day with grid positioning info
  */
 const timeSlotsForGrid = computed(() => {
   const slots = [];
 
-  // We initialize times using the first schedule. If we don't have one (e.g. FTUE, Booker page), we initialize the
-  // grid by using the minimum and maximum times from the displayed events.
-  const { start_time, end_time, slot_duration, time_updated } = firstSchedule.value || {
-    start_time: minutesToHhmm(earliestTime.value),
-    end_time: minutesToHhmm(latestTime.value),
-    slot_duration: shortestDuration.value,
-    time_updated: '1970-01-01T00:00:00',
-  };
-
-  if (!start_time || !end_time || !slot_duration) return [];
-
-  const timezoneAwareStartTime = firstSchedule.value
-    ? scheduleStore.timeToFrontendTime(start_time, time_updated)
-    : start_time;
-  const timezoneAwareEndTime = firstSchedule.value
-    ? scheduleStore.timeToFrontendTime(end_time, time_updated)
-    : end_time;
-
-  const startTime = dj(timezoneAwareStartTime, 'H:mm');
-  let endTime = dj(timezoneAwareEndTime, 'H:mm');
-
-  // If the end time is before the start time (slot spans midnight), add a day to the end time
-  if (endTime.isBefore(startTime) || endTime.isSame(startTime)) {
-    endTime = endTime.add(1, 'day');
-  }
+  // Always show full 24-hour day with 30-minute intervals
+  const startTime = dj('00:00', 'HH:mm');
+  const endTime = dj('00:00', 'HH:mm').add(1, 'day');
+  const slotDuration = 30;
 
   let currentTime = startTime;
 
-  // Start grid rows at 2 to leave space for the header row
-  let rowIndex = 2;
+  // Start grid rows at 1
+  let rowIndex = 1;
 
   while (currentTime.isBefore(endTime)) {
     // Create the slot for the current time
@@ -248,7 +172,7 @@ const timeSlotsForGrid = computed(() => {
       gridRowEnd: rowIndex + 1,
     });
 
-    currentTime = currentTime.add(slot_duration, 'minute');
+    currentTime = currentTime.add(slotDuration, 'minute');
     rowIndex++;
   }
 
@@ -357,161 +281,227 @@ const filteredSelectableSlotsForGrid = computed(() => {
     }
   }).filter(Boolean)
 });
+
+/**
+ * Scrolls the calendar to the current time position
+ */
+function scrollToCurrentTime() {
+  if (!calendarContainerRef.value) return;
+
+  const now = dj();
+  const currentHour = now.hour();
+  const currentMinute = now.minute();
+
+  // Find the slot that corresponds to the current time (round down to nearest 30 minutes)
+  const roundedMinute = currentMinute >= 30 ? 30 : 0;
+  const targetTime = `${String(currentHour).padStart(2, '0')}:${String(roundedMinute).padStart(2, '0')}`;
+
+  // Find the time slot element using its data-testid
+  const targetElement = calendarContainerRef.value.querySelector(`[data-testid="time-${targetTime}"]`);
+
+  if (targetElement) {
+    // Get the element's offset position within the container
+    const elementTop = (targetElement as HTMLElement).offsetTop;
+
+    // Scroll to position the current time near the top (with some padding for the weekday header)
+    calendarContainerRef.value.scrollTop = elementTop - 80;
+  }
+}
+
+onMounted(() => {
+  nextTick(() => {
+    scrollToCurrentTime();
+  });
+});
 </script>
 
 <template>
-  <div class="calendar-container" :style="{ 'grid-template-rows': `auto repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }">
-    <!-- Header / First row -->
-    <div class="corner-cell-block"></div>
-    <div
-      class="calendar-weekday-header"
-      v-for="(weekday, index) in weekdays"
-      :key="weekday[Weekday.DayOfTheMonth]"
-      :style="{ gridColumn: index + 2 }"
-    >
-      <p>{{ weekday[Weekday.DayOfTheWeek] }}</p>
-      <p>{{ weekday[Weekday.DayOfTheMonth] }}</p>
+  <div class="calendar-wrapper">
+    <!-- Header row (separate from scrollable grid) -->
+    <div class="calendar-header">
+      <div class="corner-cell-block"></div>
+      <div
+        class="calendar-weekday-header"
+        v-for="(weekday, index) in weekdays"
+        :key="weekday[Weekday.DayOfTheMonth]"
+        :style="{ gridColumn: index + 2 }"
+      >
+        <p>{{ weekday[Weekday.DayOfTheWeek] }}</p>
+        <p>{{ weekday[Weekday.DayOfTheMonth] }}</p>
+      </div>
     </div>
 
-    <!-- Left-side hourly blocks -->
+    <!-- Scrollable grid body -->
     <div
-      v-for="timeSlot in timeSlotsForGrid"
-      class="time-slot-cell"
-      :key="timeSlot.startTime"
-      :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
-      :data-testid="`time-${timeSlot.startTime}`"
+      ref="calendarContainerRef"
+      class="calendar-body"
+      :style="{ 'grid-template-rows': `repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }"
     >
-      {{ timeSlot.text }}
+      <!-- Left-side hourly blocks -->
+      <div
+        v-for="timeSlot in timeSlotsForGrid"
+        class="time-slot-cell"
+        :key="timeSlot.startTime"
+        :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
+        :data-testid="`time-${timeSlot.startTime}`"
+      >
+        {{ timeSlot.text }}
+      </div>
+
+      <!-- Remote events -->
+      <div
+        v-for="remoteEvent in filteredRemoteEventsForGrid"
+        :key="remoteEvent?.start"
+        class="event-item"
+        :style="{
+          gridColumn: remoteEvent?.gridColumn,
+          gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
+          backgroundColor: remoteEvent?.calendar_color,
+          borderLeftColor: darkenColor(remoteEvent?.calendar_color, 30)
+        }"
+        @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
+        @mouseleave="onRemoteEventMouseLeave"
+        :data-testid="`remote-event-${dj(remoteEvent.start).format(DateFormatStrings.Qalendar)}`"
+      >
+        {{ remoteEvent?.title }}
+      </div>
+
+      <!-- Pending appointments -->
+      <div
+        v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
+        :key="pendingAppointment?.id"
+        class="event-item pending-appointment"
+        :class="{ 'dark': isDarkMode }"
+        :style="{
+          gridColumn: pendingAppointment?.gridColumn,
+          gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
+          backgroundColor: hexToRgba(pendingAppointment?.calendar_color, 0.4),
+          borderColor: darkenColor(pendingAppointment?.calendar_color, 30),
+        }"
+        @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
+        @mouseleave="onRemoteEventMouseLeave"
+        :data-testid="`pending-appointment-${dj(pendingAppointment.start).format(DateFormatStrings.Qalendar)}`"
+      >
+        {{ pendingAppointment?.title }}
+      </div>
+
+      <!-- Selectable time slots -->
+      <div
+        v-for="slot in filteredSelectableSlotsForGrid"
+        :key="slot?.id"
+        class="event-item selectable-slot"
+        :class="{ 'dark': isDarkMode, 'selected': (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
+        :style="{
+          gridColumn: slot?.gridColumn,
+          gridRow: `${slot?.gridRowStart} / ${slot?.gridRowEnd}`,
+          backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
+        }"
+        @click="emit('event-selected', slot.start)"
+        :data-testid="`event-${dj(slot.start).format(DateFormatStrings.Qalendar)}`"
+      >
+        {{ slot?.title }}
+      </div>
+
+      <!-- Event popup (appears on remote event hover) -->
+      <event-popup
+        v-if="(popup.event)"
+        :style="{
+          display: popup.display,
+          top: popup.top,
+          left: popup.left,
+          right: popup.right ?? 'initial',
+          position: 'fixed',
+          zIndex: 10,
+        }"
+        :event="popup.event"
+        :position="popup.position || 'right'"
+      />
+
+      <!-- Inner grid vertical lines -->
+      <div
+        v-for="n in 8"
+        :key="`line-${n}`"
+        class="vertical-line"
+        :style="{ gridColumn: n + 1, gridRow: '1 / -1' }"
+      ></div>
+
+      <!-- Inner grid horizontal lines (skip first since header has border-block-end) -->
+      <div
+        v-for="timeSlot in timeSlotsForGrid.slice(1)"
+        :key="`h-line-${timeSlot.startTime}`"
+        class="horizontal-line"
+        :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '2 / -1' }"
+      ></div>
     </div>
 
-    <!-- Remote events -->
-    <div
-      v-for="remoteEvent in filteredRemoteEventsForGrid"
-      :key="remoteEvent?.start"
-      class="event-item"
-      :style="{
-        gridColumn: remoteEvent?.gridColumn,
-        gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
-        backgroundColor: remoteEvent?.calendar_color,
-        borderLeftColor: darkenColor(remoteEvent?.calendar_color, 30)
-      }"
-      @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
-      @mouseleave="onRemoteEventMouseLeave"
-      :data-testid="`remote-event-${dj(remoteEvent.start).format(DateFormatStrings.Qalendar)}`"
-    >
-      {{ remoteEvent?.title }}
+    <div class="calendar-footer">
+      <div class="corner-cell-block"></div>
+      <hr class="calendar-container-bottom-border" />
     </div>
-
-    <!-- Pending appointments -->
-    <div
-      v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
-      :key="pendingAppointment?.id"
-      class="event-item pending-appointment"
-      :class="{ 'dark': isDarkMode }"
-      :style="{
-        gridColumn: pendingAppointment?.gridColumn,
-        gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
-        backgroundColor: hexToRgba(pendingAppointment?.calendar_color, 0.4),
-        borderColor: darkenColor(pendingAppointment?.calendar_color, 30),
-      }"
-      @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
-      @mouseleave="onRemoteEventMouseLeave"
-      :data-testid="`pending-appointment-${dj(pendingAppointment.start).format(DateFormatStrings.Qalendar)}`"
-    >
-      {{ pendingAppointment?.title }}
-    </div>
-
-    <!-- Selectable time slots -->
-    <div
-      v-for="slot in filteredSelectableSlotsForGrid"
-      :key="slot?.id"
-      class="event-item selectable-slot"
-      :class="{ 'dark': isDarkMode, 'selected': (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
-      :style="{
-        gridColumn: slot?.gridColumn,
-        gridRow: `${slot?.gridRowStart} / ${slot?.gridRowEnd}`,
-        backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
-      }"
-      @click="emit('event-selected', slot.start)"
-      :data-testid="`event-${dj(slot.start).format(DateFormatStrings.Qalendar)}`"
-    >
-      {{ slot?.title }}
-    </div>
-
-    <!-- Event popup (appears on remote event hover) -->
-    <event-popup
-      v-if="(popup.event)"
-      :style="{
-        display: popup.display,
-        top: popup.top,
-        left: popup.left,
-        right: popup.right ?? 'initial',
-        position: 'fixed',
-        zIndex: 10,
-      }"
-      :event="popup.event"
-      :position="popup.position || 'right'"
-    />
-
-    <!-- Inner grid vertical lines -->
-    <!-- 8 instead of 7 here because we want to add border to the right most edge and we start at 2 -->
-    <div
-      v-for="n in 8"
-      :key="`line-${n}`"
-      class="vertical-line"
-      :style="{ gridColumn: n + 1, gridRow: '2 / -1' }"
-    ></div>
-
-    <!-- Inner grid horizontal lines -->
-    <div
-      v-for="timeSlot in timeSlotsForGrid"
-      :key="`h-line-${timeSlot.startTime}`"
-      class="horizontal-line"
-      :style="{ gridRow: timeSlot.gridRowStart, gridColumn: '2 / -1' }"
-    ></div>
-
-    <!-- Last horizontal line, dynamically calculated based on time schedule -->
-    <div
-      class="horizontal-line"
-      :style="{
-        gridRow: timeSlotsForGrid[timeSlotsForGrid.length - 1]?.gridRowStart + 1,
-        gridColumn: '2 / -1'
-      }"
-    ></div>
   </div>
 </template>
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-.calendar-container {
-  display: grid;
-  grid-template-columns: max-content repeat(7, 200px);
-  justify-items: center;
+.calendar-wrapper {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--colour-neutral-border);
   border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
+  width: 100%;
+  max-width: 100%;
+  max-height: 505px;
+  overflow: hidden;
+  padding-block-end: 1rem;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: 4rem repeat(7, 200px);
+  justify-items: center;
+  background-color: var(--colour-neutral-base);
+  flex-shrink: 0;
+  overflow-x: auto;
+
+  /* Hide scrollbar but keep scrolling functional */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: 4rem repeat(7, 200px);
+  justify-items: center;
   flex: 1;
   overflow-y: auto;
   overflow-x: auto;
-  width: 100%;
-  max-width: 100%;
+  position: relative;
+
+  /* Hide scrollbar but keep scrolling functional */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .calendar-weekday-header {
-  grid-row: 1;
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  padding-block: 1rem;
+  padding-block-start: 2rem;
+  padding-block-end: 1rem;
   text-align: center;
   font-weight: bold;
   width: 100%;
   background-color: var(--colour-neutral-base);
   color: var(--colour-ti-secondary);
-  position: sticky;
-  left: 0;
   min-width: 200px;
+  border-block-end: 1px solid var(--colour-neutral-border);
 
   /* Weekday */
   & :first-child {
@@ -522,19 +512,13 @@ const filteredSelectableSlotsForGrid = computed(() => {
 
 .corner-cell-block {
   background-color: var(--colour-neutral-base);
-  grid-row: 1;
   grid-column: 1;
-  position: sticky;
-  top: 0;
   width: 100%;
   height: 100%;
-  z-index: 10;
-  position: sticky;
-  left: 0;
 }
 
 .time-slot-cell {
-  padding-inline: 0.75rem;
+  padding-inline: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -554,7 +538,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 0.5rem;
-  color: #4C4D58; /* TODO: should be --colour-ti-secondary but we don't have dark mode defined yet */
+  color: var(--colour-ti-secondary-light);
   font-size: 0.68rem;
   border-left: solid 3px;
   border-top: 1px solid var(--colour-neutral-border);
@@ -582,13 +566,14 @@ const filteredSelectableSlotsForGrid = computed(() => {
   }
 
   &.selected {
-    background-color: #58C9FF !important; /* TODO: Update this once design is ready */
+    background-color: var(--colour-accent-blue) !important; /* TODO: Update this once design is ready */
   }
 }
 
 .vertical-line {
   justify-self: flex-start;
   border-left: 1px solid var(--colour-neutral-border);
+  position: relative;
   z-index: 1;
 }
 
@@ -596,25 +581,38 @@ const filteredSelectableSlotsForGrid = computed(() => {
   height: 1px;
   background-color: var(--colour-neutral-border);
   width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.calendar-footer {
+  display: grid;
+  grid-template-columns: 4rem repeat(7, minmax(0, 1fr));
+
+  .calendar-container-bottom-border {
+    border: none;
+    border-block-end: 1px solid var(--colour-neutral-border);
+    grid-column: 2 / -1;
+  }
 }
 
 @media (--md) {
-  .calendar-container {
-    grid-template-columns: max-content repeat(7, minmax(0, 1fr));
+  .calendar-wrapper {
+    padding-inline: 1rem;
+  }
+
+  .calendar-header {
+    grid-template-columns: 4rem repeat(7, minmax(0, 1fr));
     overflow-x: visible;
-    padding: 1rem 1rem 1.5rem 1rem;
+  }
+
+  .calendar-body {
+    grid-template-columns: 4rem repeat(7, minmax(0, 1fr));
+    overflow-x: visible;
   }
 
   .calendar-weekday-header {
-    position: sticky;
-    left: auto;
     min-width: auto;
-  }
-
-  .corner-cell-block {
-    position: sticky;
-    left: auto;
-    z-index: 3;
   }
 
   .time-slot-cell {
