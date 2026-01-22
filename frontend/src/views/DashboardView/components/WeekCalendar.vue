@@ -196,10 +196,10 @@ const weekdays = computed(() => {
 const timeSlotsForGrid = computed(() => {
   const slots = [];
 
-  // Always show full 24-hour day with 30-minute intervals
+  // Always show full 24-hour day with 15-minute intervals
   const startTime = dj('00:00', 'HH:mm');
   const endTime = dj('00:00', 'HH:mm').add(1, 'day');
-  const slotDuration = 30;
+  const slotDuration = 15;
 
   let currentTime = startTime;
 
@@ -338,8 +338,8 @@ function scrollToCurrentTime() {
   const currentHour = now.hour();
   const currentMinute = now.minute();
 
-  // Find the slot that corresponds to the current time (round down to nearest 30 minutes)
-  const roundedMinute = currentMinute >= 30 ? 30 : 0;
+  // Find the slot that corresponds to the current time (round down to nearest 15 minutes)
+  const roundedMinute = currentMinute >= 15 ? 15 : 0;
   const targetTime = `${String(currentHour).padStart(2, '0')}:${String(roundedMinute).padStart(2, '0')}`;
 
   // Find the time slot element using its data-testid
