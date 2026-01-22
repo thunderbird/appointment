@@ -47,34 +47,112 @@ const eventDateTime = computed(
 
 <template>
   <div
-    class="absolute z-30 -translate-y-1/2 rounded-md bg-white p-3 shadow-lg transition-all dark:bg-gray-800"
+    class="event-popup"
     :class="{
-      '-translate-x-full': position === 'left',
-      '-translate-x-1/2': position === 'top'
+      'position-left': position === 'left',
+      'position-top': position === 'top'
     }"
   >
     <div
-      class="absolute size-3 rotate-45 bg-white dark:bg-gray-800"
+      class="popup-arrow"
       :class="{
-        '-left-1.5 top-1/2 -translate-y-1/2': !position || position === 'right',
-        '-right-1.5 top-1/2 -translate-y-1/2': position === 'left',
-        '-bottom-1.5 left-1/2 -translate-x-1/2': position === 'top',
+        'arrow-right': !position || position === 'right',
+        'arrow-left': position === 'left',
+        'arrow-top': position === 'top',
       }"
     ></div>
-    <div class="flex flex-col gap-2 text-gray-700 dark:text-gray-200">
-      <div class="max-w-sm truncate text-lg font-semibold text-teal-500">{{ event?.title }}</div>
-      <div class="flex items-center gap-1.5 text-xs">
-        <ph-clock class="size-4 fill-transparent stroke-teal-500 stroke-2" />
+    <div class="popup-content">
+      <div class="event-title">{{ event?.title }}</div>
+      <div class="event-detail">
+        <ph-clock class="detail-icon" />
         {{ eventDateTime }}
       </div>
-      <div class="flex items-center gap-1.5 text-xs">
-        <ph-calendar-blank class="size-4 fill-transparent stroke-teal-500 stroke-2" />
+      <div class="event-detail">
+        <ph-calendar-blank class="detail-icon" />
         {{ event?.customData?.calendar_title }}
       </div>
-      <div v-if="event?.customData?.attendee" class="flex items-center gap-1.5 text-xs">
-        <ph-users class="size-4 fill-transparent stroke-teal-500 stroke-2" />
+      <div v-if="event?.customData?.attendee" class="event-detail">
+        <ph-users class="detail-icon" />
         {{ t('label.guest', { 'count': 1 }) }}
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.event-popup {
+  position: absolute;
+  z-index: 30;
+  transform: translateY(-50%);
+  border-radius: 0.375rem;
+  background-color: var(--colour-neutral-base);
+  padding: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transition: all 0.15s ease;
+
+  &.position-left {
+    transform: translateX(-100%) translateY(-50%);
+  }
+
+  &.position-top {
+    transform: translateX(-50%) translateY(-100%);
+  }
+}
+
+.popup-arrow {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  transform: rotate(45deg);
+  background-color: var(--colour-neutral-base);
+
+  &.arrow-right {
+    left: -0.375rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  &.arrow-left {
+    right: -0.375rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  &.arrow-top {
+    bottom: -0.375rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+  }
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--colour-ti-base);
+}
+
+.event-title {
+  max-width: 24rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--colour-primary-default);
+}
+
+.event-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.detail-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--colour-primary-default);
+}
+</style>
