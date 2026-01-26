@@ -4,7 +4,7 @@ import pytest
 
 from appointment.database.models import CalendarProvider
 from appointment.controller.calendar import CalDavConnector, GoogleConnector
-from appointment.database import schemas, models
+from appointment.database import schemas, models, repo
 from appointment.defines import GOOGLE_CALDAV_DOMAINS
 
 from sqlalchemy import select
@@ -511,3 +511,230 @@ class TestCaldav:
             calendar_titles = [cal.title for cal in calendars]
             assert 'Test Calendar 1' in calendar_titles
             assert 'Test Calendar 2' in calendar_titles
+
+
+class TestCalendarUpdateOrCreate:
+    """Tests for the update_or_create function in the calendar repository.
+
+    These tests ensure that multiple subscribers can connect the same external calendar
+    (e.g., the same Google calendar) and each gets their own calendar record.
+    """
+
+    def test_update_or_create_creates_new_calendar_when_none_exists(
+        self, with_db, make_pro_subscriber, make_external_connections
+    ):
+        """Test that update_or_create creates a new calendar when no calendar exists with that URL."""
+        subscriber = make_pro_subscriber()
+        ec = make_external_connections(subscriber.id, type=models.ExternalConnectionType.google)
+
+        calendar_url = 'test-calendar@google.com'
+        calendar_data = schemas.CalendarConnection(
+            title='Test Calendar',
+            color='#4285f4',
+            provider=models.CalendarProvider.google,
+            url=calendar_url,
+            user=calendar_url,
+            password='',
+        )
+
+        with with_db() as db:
+            result = repo.calendar.update_or_create(
+                db=db,
+                calendar=calendar_data,
+                calendar_url=calendar_url,
+                subscriber_id=subscriber.id,
+                external_connection_id=ec.id,
+            )
+
+            assert result is not None
+            assert result.owner_id == subscriber.id
+            assert result.url == calendar_url
+            assert result.title == 'Test Calendar'
+            assert result.external_connection_id == ec.id
+
+    def test_update_or_create_updates_existing_calendar_for_same_subscriber(
+        self, with_db, make_pro_subscriber, make_external_connections
+    ):
+        """Test that update_or_create updates an existing calendar when the same subscriber calls it."""
+        subscriber = make_pro_subscriber()
+        ec = make_external_connections(subscriber.id, type=models.ExternalConnectionType.google)
+
+        calendar_url = 'test-calendar@google.com'
+        original_calendar = schemas.CalendarConnection(
+            title='Original Title',
+            color='#4285f4',
+            provider=models.CalendarProvider.google,
+            url=calendar_url,
+            user=calendar_url,
+            password='',
+        )
+
+        with with_db() as db:
+            # Create the initial calendar
+            first_result = repo.calendar.update_or_create(
+                db=db,
+                calendar=original_calendar,
+                calendar_url=calendar_url,
+                subscriber_id=subscriber.id,
+                external_connection_id=ec.id,
+            )
+            first_calendar_id = first_result.id
+
+            # Now call update_or_create again with updated data
+            updated_calendar = schemas.CalendarConnection(
+                title='Updated Title',
+                color='#ff0000',
+                provider=models.CalendarProvider.google,
+                url=calendar_url,
+                user=calendar_url,
+                password='',
+            )
+
+            second_result = repo.calendar.update_or_create(
+                db=db,
+                calendar=updated_calendar,
+                calendar_url=calendar_url,
+                subscriber_id=subscriber.id,
+                external_connection_id=ec.id,
+            )
+
+            # Should update the existing calendar, not create a new one
+            assert second_result.id == first_calendar_id
+            assert second_result.title == 'Updated Title'
+            assert second_result.color == '#ff0000'
+
+            # Verify only one calendar exists for this subscriber
+            subscriber_calendars = repo.calendar.get_by_subscriber(db, subscriber.id)
+            assert len(subscriber_calendars) == 1
+
+    def test_update_or_create_creates_separate_calendar_for_different_subscriber(
+        self, with_db, make_pro_subscriber, make_external_connections
+    ):
+        """Test that update_or_create creates a new calendar when a different subscriber
+        connects the same external calendar (e.g., same Google calendar URL) successfully.
+        """
+        subscriber_a = make_pro_subscriber()
+        subscriber_b = make_pro_subscriber()
+
+        ec_a = make_external_connections(subscriber_a.id, type=models.ExternalConnectionType.google)
+        ec_b = make_external_connections(subscriber_b.id, type=models.ExternalConnectionType.google)
+
+        # Both subscribers are connecting the same Google calendar
+        shared_calendar_url = 'shared-calendar@google.com'
+
+        calendar_data_a = schemas.CalendarConnection(
+            title='Calendar for Subscriber A',
+            color='#4285f4',
+            provider=models.CalendarProvider.google,
+            url=shared_calendar_url,
+            user=shared_calendar_url,
+            password='',
+        )
+
+        calendar_data_b = schemas.CalendarConnection(
+            title='Calendar for Subscriber B',
+            color='#ff0000',
+            provider=models.CalendarProvider.google,
+            url=shared_calendar_url,
+            user=shared_calendar_url,
+            password='',
+        )
+
+        with with_db() as db:
+            # Subscriber A connects the calendar first
+            calendar_a = repo.calendar.update_or_create(
+                db=db,
+                calendar=calendar_data_a,
+                calendar_url=shared_calendar_url,
+                subscriber_id=subscriber_a.id,
+                external_connection_id=ec_a.id,
+            )
+
+            assert calendar_a is not None
+            assert calendar_a.owner_id == subscriber_a.id
+
+            # Subscriber B connects the same calendar
+            calendar_b = repo.calendar.update_or_create(
+                db=db,
+                calendar=calendar_data_b,
+                calendar_url=shared_calendar_url,
+                subscriber_id=subscriber_b.id,
+                external_connection_id=ec_b.id,
+            )
+
+            # Subscriber B should get their own calendar record
+            assert calendar_b is not None
+            assert calendar_b.owner_id == subscriber_b.id
+            assert calendar_b.id != calendar_a.id  # Different calendar records
+
+            # Verify each subscriber has exactly one calendar
+            calendars_a = repo.calendar.get_by_subscriber(db, subscriber_a.id)
+            calendars_b = repo.calendar.get_by_subscriber(db, subscriber_b.id)
+
+            assert len(calendars_a) == 1
+            assert len(calendars_b) == 1
+
+            # Verify the calendars belong to the correct subscribers
+            assert calendars_a[0].owner_id == subscriber_a.id
+            assert calendars_b[0].owner_id == subscriber_b.id
+
+            # Verify the external connections are correct
+            assert calendars_a[0].external_connection_id == ec_a.id
+            assert calendars_b[0].external_connection_id == ec_b.id
+
+    def test_update_or_create_does_not_modify_other_subscribers_calendar(
+        self, with_db, make_pro_subscriber, make_external_connections
+    ):
+        """Test that when Subscriber B connects a calendar that Subscriber A already has,
+        Subscriber A's calendar is not modified."""
+        subscriber_a = make_pro_subscriber()
+        subscriber_b = make_pro_subscriber()
+
+        ec_a = make_external_connections(subscriber_a.id, type=models.ExternalConnectionType.google)
+        ec_b = make_external_connections(subscriber_b.id, type=models.ExternalConnectionType.google)
+
+        shared_calendar_url = 'shared-calendar@google.com'
+
+        calendar_data_a = schemas.CalendarConnection(
+            title='Original Title A',
+            color='#4285f4',
+            provider=models.CalendarProvider.google,
+            url=shared_calendar_url,
+            user=shared_calendar_url,
+            password='',
+        )
+
+        calendar_data_b = schemas.CalendarConnection(
+            title='Title B',
+            color='#ff0000',
+            provider=models.CalendarProvider.google,
+            url=shared_calendar_url,
+            user=shared_calendar_url,
+            password='',
+        )
+
+        with with_db() as db:
+            # Subscriber A connects first
+            repo.calendar.update_or_create(
+                db=db,
+                calendar=calendar_data_a,
+                calendar_url=shared_calendar_url,
+                subscriber_id=subscriber_a.id,
+                external_connection_id=ec_a.id,
+            )
+
+            # Subscriber B connects the same calendar
+            repo.calendar.update_or_create(
+                db=db,
+                calendar=calendar_data_b,
+                calendar_url=shared_calendar_url,
+                subscriber_id=subscriber_b.id,
+                external_connection_id=ec_b.id,
+            )
+
+            # Verify Subscriber A's calendar was not modified
+            calendars_a = repo.calendar.get_by_subscriber(db, subscriber_a.id)
+            assert len(calendars_a) == 1
+            assert calendars_a[0].title == 'Original Title A'
+            assert calendars_a[0].color == '#4285f4'
+            assert calendars_a[0].external_connection_id == ec_a.id
