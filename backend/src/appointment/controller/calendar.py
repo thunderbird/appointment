@@ -12,6 +12,7 @@ from functools import cache
 from urllib.parse import urlparse, urljoin
 
 import caldav.lib.error
+import lxml.etree
 import requests
 import sentry_sdk
 from dns.exception import DNSException
@@ -398,27 +399,34 @@ class CalDavConnector(BaseConnector):
         except NotImplementedError:
             # Doesn't support authorization by digest, bearer, or basic header values
             raise TestConnectionFailed(reason=l10n('remote-calendar-reason-doesnt-support-auth'))
+        except lxml.etree.XMLSyntaxError as ex:
+            # Server returned invalid XML (e.g., an HTML error page like nginx 404)
+            logging.error(f'Test Connection XML Error: {ex}')
+            raise TestConnectionFailed(reason=l10n('remote-calendar-reason-invalid-response'))
+        except caldav.lib.error.NotFoundError as ex:
+            # Good server, bad URL - 404 response
+            logging.error(f'Test Connection NotFoundError: {ex}')
+            raise TestConnectionFailed(reason=l10n('remote-calendar-reason-not-found'))
         except (
-            caldav.lib.error.NotFoundError,
             caldav.lib.error.PropfindError,
             caldav.lib.error.AuthorizationError,
         ) as ex:
             """
-            NotFoundError: Good server, bad url.
             PropfindError: Some properties could not be retrieved.
             AuthorizationError: Credentials are not accepted.
             """
             logging.error(f'Test Connection Error: {ex}')
 
+            reason = ex.reason
             # Don't use the default "no reason" error message if we encounter it.
-            if ex.reason == caldav.lib.error.DAVError.reason:
-                ex.reason = None
-            if ex.reason == 'Unauthorized':
+            if reason == caldav.lib.error.DAVError.reason:
+                reason = None
+            if reason == 'Unauthorized':
                 # ex.reason seems to be pulling from status codes for some errors?
                 # Let's replace this with our own.
-                ex.reason = l10n('remote-calendar-reason-unauthorized')
+                reason = l10n('remote-calendar-reason-unauthorized')
 
-            raise TestConnectionFailed(reason=ex.reason)
+            raise TestConnectionFailed(reason=reason)
 
         # They need at least VEVENT support for appointment to work.
         return supports_vevent

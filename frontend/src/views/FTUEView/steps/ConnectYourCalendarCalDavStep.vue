@@ -19,7 +19,7 @@ const calendarUrl = ref(null);
 const noSignInCredentialsRequired = ref(false);
 const login = ref(null);
 const password = ref(null);
-const errorMessage = ref(null);
+const errorMessage = ref<{ title: string; details?: string } | null>(null);
 const isLoading = ref(false);
 const formRef = useTemplateRef('formRef');
 
@@ -44,16 +44,25 @@ const onContinueButtonClick = async () => {
 
     if (error.value) {
       const err = data?.value as PydanticException;
-      const { title } = handleFormError(t, formRef, err);
+      const formError = handleFormError(t, formRef, err);
 
-      errorMessage.value = title;
+      if (formError) {
+        errorMessage.value = {
+          title: formError.title,
+          details: formError.details,
+        };
+      }
       return;
     }
 
     ftueStore.clearMessages();
     await ftueStore.moveToStep(FtueStep.CreateBookingPage);
   } catch (error) {
-    errorMessage.value = error ? error.message : t('error.somethingWentWrong');
+    const message = error instanceof Error ? error.message : null;
+
+    errorMessage.value = {
+      title: message || t('error.somethingWentWrong'),
+    };
   } finally {
     isLoading.value = false;
   }
@@ -64,7 +73,12 @@ const onContinueButtonClick = async () => {
   <step-title :title="t('ftue.connectWithCalDav')" />
 
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
-    {{ errorMessage }}
+    {{ errorMessage.title }}
+    <template v-if="errorMessage.details">
+      <br />
+      <br />
+    </template>
+    {{ errorMessage.details }}
   </notice-bar>
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">

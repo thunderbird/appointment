@@ -3,7 +3,7 @@ import { ref, onMounted, inject } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { PrimaryButton } from '@thunderbirdops/services-ui';
+import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
@@ -27,7 +27,7 @@ const externalConnectionStore = useExternalConnectionsStore();
 const { calendars } = storeToRefs(calendarStore);
 
 const isLoading = ref(false);
-const errorMessage = ref(null);
+const errorMessage = ref<{ title: string; details?: string } | null>(null);
 
 const onBackButtonClick = () => {
   ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
@@ -41,7 +41,11 @@ const onContinueButtonClick = async () => {
     localStorage?.setItem(initFlowKey, 'true');
     await calendarStore.connectGoogleCalendar();
   } catch (error) {
-    errorMessage.value = error ? error.message : t('error.somethingWentWrong');
+    const message = error instanceof Error ? error.message : null;
+
+    errorMessage.value = {
+      title: message || t('error.somethingWentWrong'),
+    };
   } finally {
     isLoading.value = false;
   }
@@ -108,6 +112,15 @@ onMounted(async () => {
 <template>
   <step-title :title="t('ftue.connectGoogleCalendar')" />
 
+  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
+    {{ errorMessage.title }}
+    <template v-if="errorMessage.details">
+      <br />
+      <br />
+    </template>
+    {{ errorMessage.details }}
+  </notice-bar>
+
   <p class="info-text">{{ t('ftue.connectGoogleCalendarInfo') }}</p>
 
   <div class="permission-container">
@@ -151,6 +164,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.notice-bar {
+  margin-block-end: 1.5rem;
+}
+
 .info-text {
   margin-block-end: 1.5rem;
 }
