@@ -134,7 +134,7 @@ def update_or_create(
     """update or create a subscriber calendar"""
     subscriber_calendar = get_by_url(db, calendar_url)
 
-    if subscriber_calendar is None:
+    if subscriber_calendar is None or subscriber_calendar.owner_id != subscriber_id:
         return create(db, calendar, subscriber_id, external_connection_id)
 
     return update_by_calendar(db, calendar, subscriber_calendar)
