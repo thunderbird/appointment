@@ -54,6 +54,8 @@ connection-contains-default-calendar = Dieses Konto kann nicht getrennt werden, 
 remote-calendar-reason-doesnt-support-caldav = Der Kalender bietet keine CalDAV-Unterstützung.
 remote-calendar-reason-doesnt-support-auth = Der Kalender unterstützt keine der verfügbaren Authentifizierungsmethoden
 remote-calendar-reason-unauthorized = Bitte überprüfe Benutzername und Passwort und versuche es nochmal.
+remote-calendar-reason-not-found = Der Kalender konnte nicht gefunden werden. Bitte überprüfe die URL und versuche es erneut.
+remote-calendar-reason-invalid-response = Der Server hat eine ungültige Antwort zurückgegeben. Bitte überprüfe die URL und versuche es erneut.
 
 event-could-not-be-accepted = Es ist ein Fehler bei der Annahme der Buchungsdaten aufgetreten. Bitte später noch einmal versuchen.
 event-could-not-be-deleted = Es ist ein Fehler beim Entfernen des vorläufigen Termins aufgetreten. Bitte später noch einmal versuchen.
