@@ -54,7 +54,7 @@ connection-contains-default-calendar = Cannot disconnect this account because it
 remote-calendar-reason-doesnt-support-caldav = The remote calendar does not support CalDAV.
 remote-calendar-reason-doesnt-support-auth = The server does not support any of the available authentication methods.
 remote-calendar-reason-unauthorized = Please check your username and password, then try again.
-remote-calendar-reason-not-found = The calendar URL could not be found. Please check the URL and try again.
+remote-calendar-reason-not-found = The calendar could not be found. Please check the URL and try again.
 remote-calendar-reason-invalid-response = The server returned an invalid response. Please check the URL and try again.
 
 event-could-not-be-accepted = There was an error accepting the booking details. Please try again later.
