@@ -5,11 +5,14 @@ import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup, darkenColor, hexToRgba } from '@/utils';
+import { initialEventPopupData, showEventPopup } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+
+// Constants for grid calculations
+const ROW_HEIGHT_PX = 60; // Matches minmax(60px, min-content) in grid-template-rows
 
 enum Weekday {
   DayOfTheWeek = 0,
@@ -111,13 +114,10 @@ function onRemoteEventMouseLeave() {
 
 /**
  * Calculates grid positioning for calendar events
+ * Returns position info including calculated height based on duration
  */
 function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
   if (!slots.length) return null;
-
-  // Create a quick lookup map for slot start times to grid rows
-  const timeToRowMap = new Map(slots.map(s => [s.startTime, s.gridRowStart]));
-  const lastRow = slots[slots.length - 1].gridRowEnd;
 
   // 1. Calculate grid column based on the event's position within the week
   // Get the weekdays array to determine the correct column position
@@ -134,25 +134,33 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   const gridColumn = eventDayOfWeek + 2; // +2 to account for the time column (column 1)
 
-  // 2. Calculate the Start Row
-  const startHourMinute = eventStart.format('HH:mm');
-  const gridRowStart = timeToRowMap.get(startHourMinute);
+  // 2. Calculate the Start Row based on the hour
+  const startHour = eventStart.hour();
+  const gridRowStart = startHour + 1; // Row 1 is 00:00, Row 2 is 01:00, etc.
 
-  // 3. Calculate the End Row
-  // Find the first slot that starts AT or AFTER the event ends
-  // Attention: the end time could be lower than the start time on events going to or over midnight! So we must always
-  // normalize the end of an event to 24 if it is 0.
-  const endTime = eventEnd.format('HH:mm') === '00:00' ? '24:00' : eventEnd.format('HH:mm');
-  const endSlot = slots.find(slot => slot.startTime >= endTime);
+  // 3. Calculate vertical offset within the starting row (for events not starting on the hour)
+  const startMinutes = eventStart.minute();
+  const topOffset = (startMinutes / 60) * ROW_HEIGHT_PX;
 
-  const gridRowEnd = endSlot ? endSlot.gridRowStart : lastRow;
+  // 4. Calculate event duration and height
+  // Handle events that cross midnight
+  let durationMinutes = eventEnd.diff(eventStart, 'minute');
+  if (durationMinutes <= 0) {
+    // Event crosses midnight, calculate duration to end of day
+    durationMinutes = (24 * 60) - (startHour * 60 + startMinutes);
+  }
 
-  // Return the positioning data, only if it's within calendar hours
-  if (gridRowStart && gridRowEnd) {
+  // Height based on duration with minimum of 1.25rem (approximately 20px, 1rem for text and 0.25rem for padding)
+  const calculatedHeight = (durationMinutes / 60) * ROW_HEIGHT_PX;
+  const height = `max(1.25rem, ${calculatedHeight}px)`;
+
+  // Return the positioning data if the event falls within calendar hours
+  if (gridRowStart >= 1 && gridRowStart <= 24) {
     return {
       gridColumn,
       gridRowStart,
-      gridRowEnd,
+      topOffset: `${topOffset}px`,
+      height,
     };
   }
 
@@ -196,10 +204,10 @@ const weekdays = computed(() => {
 const timeSlotsForGrid = computed(() => {
   const slots = [];
 
-  // Always show full 24-hour day with 15-minute intervals
+  // Always show full 24-hour day with 60-minute intervals
   const startTime = dj('00:00', 'HH:mm');
   const endTime = dj('00:00', 'HH:mm').add(1, 'day');
-  const slotDuration = 15;
+  const slotDuration = 60;
 
   let currentTime = startTime;
 
@@ -322,7 +330,6 @@ const filteredSelectableSlotsForGrid = computed(() => {
         start: slot.start,
         end: slotEnd.format(),
         calendar_title: '',
-        calendar_color: '58C9FF', // TODO: Use design colors
       };
     }
   }).filter(Boolean)
@@ -336,11 +343,9 @@ function scrollToCurrentTime() {
 
   const now = dj();
   const currentHour = now.hour();
-  const currentMinute = now.minute();
 
-  // Find the slot that corresponds to the current time (round down to nearest 15 minutes)
-  const roundedMinute = currentMinute >= 15 ? 15 : 0;
-  const targetTime = `${String(currentHour).padStart(2, '0')}:${String(roundedMinute).padStart(2, '0')}`;
+  // Find the slot that corresponds to the current hour
+  const targetTime = `${String(currentHour).padStart(2, '0')}:00`;
 
   // Find the time slot element using its data-testid
   const targetElement = calendarContainerRef.value.querySelector(`[data-testid="time-${targetTime}"]`);
@@ -385,7 +390,7 @@ onMounted(() => {
     <div
       ref="calendarContainerRef"
       class="calendar-body"
-      :style="{ 'grid-template-rows': `repeat(${timeSlotsForGrid.length}, minmax(50px, min-content))` }"
+      :style="{ 'grid-template-rows': `repeat(${timeSlotsForGrid.length}, minmax(60px, min-content))` }"
       @scroll="syncScroll('body')"
     >
       <!-- Left-side hourly blocks -->
@@ -396,7 +401,10 @@ onMounted(() => {
         :style="{ gridRow: `${timeSlot.gridRowStart} / ${timeSlot.gridRowEnd}`, gridColumn: 1 }"
         :data-testid="`time-${timeSlot.startTime}`"
       >
-        {{ timeSlot.text }}
+        <!-- Omit 12 AM (00:00) label, show other hours at the top of the row -->
+        <span v-if="timeSlot.text && timeSlot.startTime !== '00:00'" class="time-label">
+          {{ timeSlot.text }}
+        </span>
       </div>
 
       <!-- Remote events -->
@@ -404,11 +412,12 @@ onMounted(() => {
         v-for="remoteEvent in filteredRemoteEventsForGrid"
         :key="remoteEvent?.start"
         class="event-item"
+        :class="{ 'dark': isDarkMode }"
         :style="{
           gridColumn: remoteEvent?.gridColumn,
-          gridRow: `${remoteEvent?.gridRowStart} / ${remoteEvent?.gridRowEnd}`,
-          backgroundColor: remoteEvent?.calendar_color,
-          borderLeftColor: darkenColor(remoteEvent?.calendar_color, 30)
+          gridRowStart: remoteEvent?.gridRowStart,
+          marginTop: remoteEvent?.topOffset,
+          height: remoteEvent?.height,
         }"
         @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
         @mouseleave="onRemoteEventMouseLeave"
@@ -425,9 +434,9 @@ onMounted(() => {
         :class="{ 'dark': isDarkMode }"
         :style="{
           gridColumn: pendingAppointment?.gridColumn,
-          gridRow: `${pendingAppointment?.gridRowStart} / ${pendingAppointment?.gridRowEnd}`,
-          backgroundColor: hexToRgba(pendingAppointment?.calendar_color, 0.4),
-          borderColor: darkenColor(pendingAppointment?.calendar_color, 30),
+          gridRowStart: pendingAppointment?.gridRowStart,
+          marginTop: pendingAppointment?.topOffset,
+          height: pendingAppointment?.height,
         }"
         @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
         @mouseleave="onRemoteEventMouseLeave"
@@ -444,8 +453,9 @@ onMounted(() => {
         :class="{ 'dark': isDarkMode, 'selected': (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
         :style="{
           gridColumn: slot?.gridColumn,
-          gridRow: `${slot?.gridRowStart} / ${slot?.gridRowEnd}`,
-          backgroundColor: hexToRgba(slot?.calendar_color, 0.4),
+          gridRowStart: slot?.gridRowStart,
+          marginTop: slot?.topOffset,
+          height: slot?.height,
         }"
         @click="emit('event-selected', slot.start)"
         :data-testid="`event-${dj(slot.start).format(DateFormatStrings.Qalendar)}`"
@@ -591,7 +601,7 @@ onMounted(() => {
 .time-slot-cell {
   padding-inline: 1rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
   height: 100%;
@@ -601,6 +611,10 @@ onMounted(() => {
   color: var(--colour-ti-secondary);
   font-size: 0.68rem;
   z-index: 9;
+
+  .time-label {
+    transform: translateY(-50%);
+  }
 }
 
 .event-item {
@@ -608,33 +622,38 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 0.5rem;
-  color: var(--colour-ti-secondary-light);
+  padding-block-start: 0.125rem;
+  padding-inline-start: 0.25rem;
+  color: var(--colour-ti-secondary);
   font-size: 0.68rem;
-  border-left: solid 3px;
+  border-left: solid 3px var(--colour-primary-default);
   border-top: 1px solid var(--colour-neutral-border);
   border-radius: 3px;
+  background-color: #d4ebfa; /* One-off colour not in design system */
   cursor: pointer;
   z-index: 1;
   min-width: 200px;
+  align-self: start;
+  box-sizing: border-box;
+
+  &.dark {
+    background-color: #d4ebfa19; /* One-off colour not in design system */
+  }
 }
 
 .pending-appointment {
-  border: 2px dashed;
+  border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
+  background-color: color-mix(in srgb, var(--colour-primary-default) 19%, transparent);
 
   &.dark {
-    color: var(--colour-ti-black);
+    border-color: var(--colour-primary-default);
   }
 }
 
 .selectable-slot {
-  border: none;
+  border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
   margin: .125rem;
   width: 90%;
-
-  &.dark {
-    color: var(--colour-ti-black);
-  }
 
   &.selected {
     background-color: var(--colour-accent-blue) !important; /* TODO: Update this once design is ready */
@@ -687,6 +706,10 @@ onMounted(() => {
     left: auto;
     background-color: transparent;
     z-index: auto;
+
+    .time-label {
+      transform: translateY(-50%);
+    }
   }
 
   .event-item {
