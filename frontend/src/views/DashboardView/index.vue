@@ -133,6 +133,8 @@ export default {
     flex-direction: row;
     gap: 2rem;
     overflow-y: auto;
+    margin: 0 auto;
+    max-width: 1440px;    
   }
 
   .calendar-header-container {
