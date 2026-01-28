@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import {
-  onMounted, inject, toRefs, onUnmounted,
+  onMounted, toRefs, onUnmounted,
 } from 'vue';
-import { refreshKey } from '@/keys';
 import { useI18n } from 'vue-i18n';
 import { Alert } from '@/models';
 import { AlertSchemes } from '@/definitions';
@@ -28,12 +27,9 @@ const emits = defineEmits(['close']);
 
 const { infoMessage, warningMessage, errorMessage } = toRefs(props);
 
-const refresh = inject(refreshKey);
-
 onMounted(async () => {
   // Activate page scroll-lock
   window.document.body.classList.add('modal-active');
-  await refresh();
 });
 onUnmounted(() => {
   // Release page scroll-lock

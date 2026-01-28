@@ -185,11 +185,15 @@ export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, posit
   const popupHeight = 120; // Estimated height based on content
   const offset = 4; // Gap between trigger and popup
 
-  // Calculate trigger element position relative to viewport
+  // Calculate trigger element position relative to viewport using getBoundingClientRect
+  // This works correctly with position: fixed on the popup
   const triggerRect = el.target.getBoundingClientRect();
   const triggerLeft = triggerRect.left;
   const triggerRight = triggerRect.right;
   const triggerTop = triggerRect.top;
+
+  const triggerCenterY = triggerTop + triggerRect.height / 2;
+  const triggerCenterX = triggerLeft + triggerRect.width / 2;
 
   // Determine optimal position based on available space
   let optimalPosition = position;
@@ -238,18 +242,17 @@ export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, posit
     }
   }
 
-  // Set position based on optimal position
-  obj.top = `${el.target.offsetTop + el.target.clientHeight / 2 - el.target.parentElement.scrollTop}px`;
-
+  // Set position based on optimal position using viewport-relative coordinates
+  // These work correctly with position: fixed on the popup
   if (optimalPosition === 'right') {
-    obj.left = `${el.target.offsetLeft + el.target.clientWidth + offset}px`;
+    obj.top = `${triggerCenterY}px`;
+    obj.left = `${triggerRight + offset}px`;
   } else if (optimalPosition === 'left') {
-    // For left position, position at trigger's left edge (CSS transform will move it left by full width)
-    obj.left = `${el.target.offsetLeft}px`;
+    obj.top = `${triggerCenterY}px`;
+    obj.left = `${triggerLeft - offset}px`;
   } else if (optimalPosition === 'top') {
-    // For top position, center horizontally (CSS transform will center it)
-    obj.left = `${el.target.offsetLeft + el.target.clientWidth / 2}px`;
-    obj.top = `${el.target.offsetTop - popupHeight - offset}px`;
+    obj.top = `${triggerTop - offset}px`;
+    obj.left = `${triggerCenterX}px`;
   }
 
   // Store the optimal position for the component to use

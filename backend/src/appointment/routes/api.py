@@ -403,6 +403,7 @@ def read_remote_events(
     id: int,
     start: str,
     end: str,
+    force_refresh: bool = False,
     db: Session = Depends(get_db),
     google_client: GoogleClient = Depends(get_google_client),
     subscriber: Subscriber = Depends(get_subscriber),
@@ -439,6 +440,10 @@ def read_remote_events(
             subscriber_id=subscriber.id,
             calendar_id=db_calendar.id,
         )
+
+    # Bust the cache if refresh is requested
+    if force_refresh:
+        con.bust_cached_events()
 
     try:
         events = con.list_events(start, end)

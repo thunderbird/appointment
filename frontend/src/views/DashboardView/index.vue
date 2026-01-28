@@ -27,6 +27,8 @@ const userStore = useUserStore();
 const { remoteEvents } = storeToRefs(calendarStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
 
+const isLoading = ref(false);
+
 // current selected date, defaults to now
 const activeDate = ref(dj());
 const activeDateRange = computed(() => {
@@ -38,15 +40,21 @@ const activeDateRange = computed(() => {
 });
 
 async function onDateChange(dateObj: TimeFormatted) {
+  isLoading.value = true;
+
   const start = dj(dateObj.start);
   const end = dj(dateObj.end);
 
   activeDate.value = start.add(end.diff(start, 'minutes') / 2, 'minutes');
 
   await calendarStore.getRemoteEvents(activeDate.value);
+
+  isLoading.value = false;
 };
 
 onMounted(async () => {
+  isLoading.value = true;
+
   // Don't actually load anything during the FTUE
   if (route.name === 'setup') {
     return;
@@ -54,6 +62,8 @@ onMounted(async () => {
 
   await refresh();
   await calendarStore.getRemoteEvents(activeDate.value, true);
+
+  isLoading.value = false;
 });
 </script>
 
@@ -74,7 +84,7 @@ export default {
           :onDateChange="onDateChange"
         />
 
-        <user-calendar-sync />
+        <user-calendar-sync v-model:loading="isLoading" :active-date="activeDate" />
       </div>
 
       <div class="calendar-container">
@@ -82,6 +92,7 @@ export default {
           :active-date-range="activeDateRange"
           :events="remoteEvents"
           :pending-appointments="pendingAppointments"
+          :is-loading="isLoading"
         />
       </div>
     </div>

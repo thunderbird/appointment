@@ -88,7 +88,10 @@ export const useCalendarStore = defineStore('calendars', () => {
 
     // Only retrieve remote events if we don't have this month already cached
     await Promise.all(connectedCalendars.value.map(async (calendar) => {
-      const { data }: RemoteEventListResponse = await call.value(`rmt/cal/${calendar.id}/${from}/${to}`).get().json();
+      const url = force
+        ? `rmt/cal/${calendar.id}/${from}/${to}?force_refresh=true`
+        : `rmt/cal/${calendar.id}/${from}/${to}`;
+      const { data }: RemoteEventListResponse = await call.value(url).get().json();
       if (Array.isArray(data.value)) {
         calendarEvents.push(
           ...data.value.map((event) => ({
