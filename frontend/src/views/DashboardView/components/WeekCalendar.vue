@@ -656,7 +656,8 @@ onMounted(() => {
   width: 90%;
 
   &.selected {
-    background-color: var(--colour-accent-blue) !important; /* TODO: Update this once design is ready */
+    background-color: var(--colour-accent-blue);
+    color: var(--colour-neutral-base);
   }
 }
 
