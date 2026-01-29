@@ -41,9 +41,12 @@
     "weCouldntConnect": "Es konnte keine Verbindung hergestellt werden."
   },
   "fields": {
-    "details": "Seitenbeschreibung",
-    "slot_duration": "Dauer",
-    "unknown": "Unbekannt"
+    "schedule": {
+      "details": "Seitenbeschreibung",
+      "name": "Buchungsseite Titel",
+      "slot_duration": "Dauer",
+      "unknown": "Unbekannt"
+    }
   },
   "ftue": {
     "createYourProfile": "Dein Profil erstellen",
