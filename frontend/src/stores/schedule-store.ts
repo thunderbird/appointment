@@ -118,7 +118,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       // We do a look-up on field, and the field's unit (if any) along with the error type.
       const errorDetails = value.detail.map((err) => {
         const field = err.loc[1] ?? 'unknown';
-        const fieldLocalized = i18n.t(`fields.${field}`);
+        const fieldLocalized = i18n.t(`fields.schedule.${field}`);
         let message = i18n.t('error.unknownScheduleError');
 
         if (err.type === 'greater_than_equal') {
