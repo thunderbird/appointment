@@ -42,9 +42,12 @@
     "weCouldntConnect": "We couldn't connect to your calendar."
   },
   "fields": {
-    "details": "Page Description",
-    "slot_duration": "Slot Duration",
-    "unknown": "Unknown"
+    "schedule": {
+      "details": "Page Description",
+      "name": "Booking Page Title",
+      "slot_duration": "Slot Duration",
+      "unknown": "Unknown"
+    }
   },
   "ftue": {
     "createYourProfile": "Create your profile",
