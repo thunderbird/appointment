@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import { PhCalendarBlank } from '@phosphor-icons/vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import { SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
+import { isUnconfirmed } from '@/utils';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
 import DateRequestedAppointments from './components/DateRequestedAppointments.vue';
 import MeetingDateAppointments from './components/MeetingDateAppointments.vue';
@@ -67,6 +69,16 @@ const sortOptions = [{
 
 const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
+const showNoUnconfirmedBookings = computed(() => {
+  return selectedFilter.value === BookingsFilterOptions.Unconfirmed
+    && appointments.value.filter((a) => isUnconfirmed(a)).length === 0;
+});
+
+const showNoBookings = computed(() => {
+  return selectedFilter.value !== BookingsFilterOptions.Unconfirmed
+    && appointments.value.length === 0;
+});
+
 onMounted(async () => {
   if (!appointmentStore.isLoaded) {
     await appointmentStore.fetch();
@@ -110,21 +122,41 @@ export default {
   
     <!-- page content -->
     <div class="page-content">
-      <template v-if="isLoading">
-        <loading-spinner />
-      </template>
+      <div class="appointments-container">
+        <template v-if="isLoading">
+          <div class="loading-container">
+            <loading-spinner />
+          </div>
+        </template>
 
-      <div v-else class="appointments-container">
-        <date-requested-appointments
-          v-if="selectedSort === BookingsSortOptions.DateRequested"
-          :filter="selectedFilter"
-          @select-appointment="showAppointmentSlidingPanel"
-        />
-        <meeting-date-appointments
-          v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
-          :filter="selectedFilter"
-          @select-appointment="showAppointmentSlidingPanel"
-        />
+        <template v-else-if="showNoUnconfirmedBookings">
+          <div class="no-bookings-container">
+            <ph-calendar-blank size="24" weight="duotone" />
+            <h2>{{ t('label.noUnconfirmedBookings') }}</h2>
+            <p>{{ t('label.noUnconfirmedBookingsMessage') }}</p>
+          </div>
+        </template>
+
+        <template v-else-if="showNoBookings">
+          <div class="no-bookings-container">
+            <ph-calendar-blank size="24" weight="duotone" />
+            <h2>{{ t('label.noBookings') }}</h2>
+            <p>{{ t('label.noBookingsMessage') }}</p>
+          </div>
+        </template>
+
+        <template v-else-if="appointments.length > 0">
+          <date-requested-appointments
+            v-if="selectedSort === BookingsSortOptions.DateRequested"
+            :filter="selectedFilter"
+            @select-appointment="showAppointmentSlidingPanel"
+          />
+          <meeting-date-appointments
+            v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
+            :filter="selectedFilter"
+            @select-appointment="showAppointmentSlidingPanel"
+          />
+        </template>
       </div>
     </div>
   </div>
@@ -178,6 +210,30 @@ h1 {
   padding: 1rem 0.75rem;
   border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.no-bookings-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  color: var(--colour-ti-muted);
+
+  h2 {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.875rem;
+  }
 }
 
 @media (--md) {
