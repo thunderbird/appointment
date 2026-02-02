@@ -8,6 +8,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import { SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
+import { isUnconfirmed } from '@/utils';
 import AppointmentSlidingPanel from './components/AppointmentSlidingPanel.vue';
 import DateRequestedAppointments from './components/DateRequestedAppointments.vue';
 import MeetingDateAppointments from './components/MeetingDateAppointments.vue';
@@ -68,14 +69,14 @@ const sortOptions = [{
 
 const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
-const noBookingsText = computed(() => {
-  return selectedFilter.value === BookingsFilterOptions.Unconfirmed ? {
-    title: t('label.noUnconfirmedBookings'),
-    message: t('label.noUnconfirmedBookingsMessage'),
-  } : {
-    title: t('label.noBookings'),
-    message: t('label.noBookingsMessage'),
-  };
+const showNoUnconfirmedBookings = computed(() => {
+  return selectedFilter.value === BookingsFilterOptions.Unconfirmed
+    && appointments.value.filter((a) => isUnconfirmed(a)).length === 0;
+});
+
+const showNoBookings = computed(() => {
+  return selectedFilter.value !== BookingsFilterOptions.Unconfirmed
+    && appointments.value.length === 0;
 });
 
 onMounted(async () => {
@@ -128,6 +129,22 @@ export default {
           </div>
         </template>
 
+        <template v-else-if="showNoUnconfirmedBookings">
+          <div class="no-bookings-container">
+            <ph-calendar-blank size="24" weight="duotone" />
+            <h2>{{ t('label.noUnconfirmedBookings') }}</h2>
+            <p>{{ t('label.noUnconfirmedBookingsMessage') }}</p>
+          </div>
+        </template>
+
+        <template v-else-if="showNoBookings">
+          <div class="no-bookings-container">
+            <ph-calendar-blank size="24" weight="duotone" />
+            <h2>{{ t('label.noBookings') }}</h2>
+            <p>{{ t('label.noBookingsMessage') }}</p>
+          </div>
+        </template>
+
         <template v-else-if="appointments.length > 0">
           <date-requested-appointments
             v-if="selectedSort === BookingsSortOptions.DateRequested"
@@ -139,14 +156,6 @@ export default {
             :filter="selectedFilter"
             @select-appointment="showAppointmentSlidingPanel"
           />
-        </template>
-
-        <template v-else>
-          <div class="no-bookings-container">
-            <ph-calendar-blank size="24" weight="duotone" />
-            <h2>{{ noBookingsText.title }}</h2>
-            <p>{{ noBookingsText.message }}</p>
-          </div>
         </template>
       </div>
     </div>
