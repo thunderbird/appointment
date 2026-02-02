@@ -2,6 +2,7 @@
 import { BookingCalendarView } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { dayjsKey, callKey } from '@/keys';
 import {
@@ -16,6 +17,7 @@ import BookingViewError from './components/BookingViewError.vue';
 const dj = inject(dayjsKey);
 const call = inject(callKey);
 const bookingViewStore = useBookingViewStore();
+const { t } = useI18n();
 
 const errorHeading = ref<string>(null);
 const errorBody = ref<string>(null);
@@ -74,9 +76,12 @@ const handleError = (data: Exception) => {
   if (errorDetail?.id === 'SCHEDULE_NOT_ACTIVE') {
     errorHeading.value = '';
     errorBody.value = errorDetail.message;
-  } else if (errorDetail.id === 'RATE_LIMIT_EXCEEDED') {
+  } else if (errorDetail?.id === 'RATE_LIMIT_EXCEEDED') {
     errorHeading.value = '';
     errorBody.value = errorDetail.message;
+  } else if (errorDetail?.id === 'REMOTE_CALENDAR_CONNECTION_ERROR') {
+    errorHeading.value = t('error.scheduleRemoteCalendarConnectionError');
+    errorBody.value = t('error.scheduleRemoteCalendarConnectionDetails');
   }
 };
 
