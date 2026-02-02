@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import { PhCalendarBlank } from '@phosphor-icons/vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import { SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
@@ -67,6 +68,16 @@ const sortOptions = [{
 
 const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
+const noBookingsText = computed(() => {
+  return selectedFilter.value === BookingsFilterOptions.Unconfirmed ? {
+    title: t('label.noUnconfirmedBookings'),
+    message: t('label.noUnconfirmedBookingsMessage'),
+  } : {
+    title: t('label.noBookings'),
+    message: t('label.noBookingsMessage'),
+  };
+});
+
 onMounted(async () => {
   if (!appointmentStore.isLoaded) {
     await appointmentStore.fetch();
@@ -114,7 +125,7 @@ export default {
         <loading-spinner />
       </template>
 
-      <div v-else class="appointments-container">
+      <template v-else-if="appointments.length > 0">
         <date-requested-appointments
           v-if="selectedSort === BookingsSortOptions.DateRequested"
           :filter="selectedFilter"
@@ -125,7 +136,15 @@ export default {
           :filter="selectedFilter"
           @select-appointment="showAppointmentSlidingPanel"
         />
-      </div>
+      </template>
+
+      <template v-else>
+        <div class="no-bookings-container">
+          <ph-calendar-blank size="24" weight="duotone" />
+          <h2>{{ noBookingsText.title }}</h2>
+          <p>{{ noBookingsText.message }}</p>
+        </div>
+      </template>
     </div>
   </div>
 
@@ -170,14 +189,29 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.appointments-container {
   width: 100%;
   box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
   padding: 1rem 0.75rem;
   border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
+}
+
+.no-bookings-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  color: var(--colour-ti-muted);
+
+  h2 {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.875rem;
+  }
 }
 
 @media (--md) {
