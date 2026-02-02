@@ -121,30 +121,34 @@ export default {
   
     <!-- page content -->
     <div class="page-content">
-      <template v-if="isLoading">
-        <loading-spinner />
-      </template>
+      <div class="appointments-container">
+        <template v-if="isLoading">
+          <div class="loading-container">
+            <loading-spinner />
+          </div>
+        </template>
 
-      <template v-else-if="appointments.length > 0">
-        <date-requested-appointments
-          v-if="selectedSort === BookingsSortOptions.DateRequested"
-          :filter="selectedFilter"
-          @select-appointment="showAppointmentSlidingPanel"
-        />
-        <meeting-date-appointments
-          v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
-          :filter="selectedFilter"
-          @select-appointment="showAppointmentSlidingPanel"
-        />
-      </template>
+        <template v-else-if="appointments.length > 0">
+          <date-requested-appointments
+            v-if="selectedSort === BookingsSortOptions.DateRequested"
+            :filter="selectedFilter"
+            @select-appointment="showAppointmentSlidingPanel"
+          />
+          <meeting-date-appointments
+            v-else-if="selectedSort === BookingsSortOptions.MeetingDate"
+            :filter="selectedFilter"
+            @select-appointment="showAppointmentSlidingPanel"
+          />
+        </template>
 
-      <template v-else>
-        <div class="no-bookings-container">
-          <ph-calendar-blank size="24" weight="duotone" />
-          <h2>{{ noBookingsText.title }}</h2>
-          <p>{{ noBookingsText.message }}</p>
-        </div>
-      </template>
+        <template v-else>
+          <div class="no-bookings-container">
+            <ph-calendar-blank size="24" weight="duotone" />
+            <h2>{{ noBookingsText.title }}</h2>
+            <p>{{ noBookingsText.message }}</p>
+          </div>
+        </template>
+      </div>
     </div>
   </div>
 
@@ -189,11 +193,20 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.appointments-container {
   width: 100%;
   box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
   padding: 1rem 0.75rem;
   border-radius: 1.5rem;
   background-color: var(--colour-neutral-base);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .no-bookings-container {
