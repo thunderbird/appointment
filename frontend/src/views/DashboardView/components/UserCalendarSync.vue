@@ -1,50 +1,53 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue';
-import { callKey, refreshKey } from '@/keys';
+import { computed, inject, ref } from 'vue';
+import { refreshKey } from '@/keys';
 import { PhArrowClockwise } from '@phosphor-icons/vue';
 import { storeToRefs } from 'pinia';
-import { useTimeAgoIntl } from '@vueuse/core';
+import { formatTimeAgoIntl, useNow } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import { Dayjs } from 'dayjs';
 import { useCalendarStore } from '@/stores/calendar-store';
-import { createScheduleStore } from '@/stores/schedule-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 import { useUserStore } from '@/stores/user-store';
 
-const refresh = inject(refreshKey);
-const call = inject(callKey);
-const { t } = useI18n();
+const loading = defineModel<boolean>('loading', { required: true });
 
-const loading = ref(false);
-const lastRefreshedTime = ref(Date.now());
+const props = defineProps<{
+  activeDate: Dayjs,
+}>();
+
+const refresh = inject(refreshKey);
+const { t } = useI18n();
 
 const calendarStore = useCalendarStore();
 const userStore = useUserStore();
-const scheduleStore = createScheduleStore(call);
+const scheduleStore = useScheduleStore();
+
 const { firstSchedule } = storeToRefs(scheduleStore);
+
+const lastRefreshedTime = ref(new Date());
+
+const { now } = useNow({ interval: 30000, controls: true });
+const timeAgo = computed(() =>
+  formatTimeAgoIntl(lastRefreshedTime.value, { locale: userStore?.data?.settings?.language }, now.value)
+);
 
 const scheduleCalendar = computed(() => {
   return calendarStore.calendarById(firstSchedule.value?.calendar_id)
 })
 
-const timeAgo = userStore?.data?.settings?.language && useTimeAgoIntl(lastRefreshedTime, { locale: userStore.data.settings.language });
-
 async function onSyncCalendarButtonClicked() {
   loading.value = true;
 
-  await calendarStore.syncCalendars();
-  await refreshData();
-  lastRefreshedTime.value = Date.now();
+  await refresh();
+  await calendarStore.getRemoteEvents(props.activeDate, true);
+
+  const currentTime = new Date();
+  lastRefreshedTime.value = currentTime;
+  now.value = currentTime;
 
   loading.value = false;
 }
-
-async function refreshData() {
-  calendarStore.$reset();
-  await refresh();
-};
-
-onMounted(async () => {
-  await scheduleStore.fetch();
-})
 </script>
 
 <template>
@@ -73,6 +76,7 @@ onMounted(async () => {
   text-align: right;
   gap: 0.5rem;
   width: 100%;
+  padding-inline-end: 0.3rem;
 
   button {
     color: var(--colour-ti-secondary);

@@ -819,7 +819,7 @@ class Tools:
                         schemas.SlotBase(
                             start=current_datetime + timedelta(seconds=time), duration=schedule.slot_duration
                         )
-                        for time in range(time_start, total_time, slot_duration_seconds)
+                        for time in range(time_start, total_time - slot_duration_seconds + 1, slot_duration_seconds)
                     ]
 
             return day_slots
