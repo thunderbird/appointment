@@ -213,7 +213,13 @@ def read_schedule_availabilities(
     available_slots = Tools.available_slots_from_schedule(schedule)
 
     # get all events from all connected calendars in scheduled date range
-    existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
+    existing_slots = []
+
+    try:
+        existing_slots = Tools.existing_events_for_schedule(schedule, calendars, subscriber, google_client, db, redis)
+    except Exception:
+        raise RemoteCalendarConnectionError()
+
     actual_slots = Tools.events_roll_up_difference(available_slots, existing_slots)
 
     if not actual_slots or len(actual_slots) == 0:

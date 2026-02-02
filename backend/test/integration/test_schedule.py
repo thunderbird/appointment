@@ -710,6 +710,48 @@ class TestSchedule:
         data = response.json()
         assert data['detail']['id'] == 'SCHEDULE_NOT_ACTIVE'
 
+    def test_public_availability_remote_calendar_connection_error(
+        self, monkeypatch, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
+        """Test that a RemoteCalendarConnectionError is raised when fetching existing events fails."""
+        from appointment.controller.calendar import Tools
+
+        start_date = date(2024, 3, 1)
+        start_time = time(17, tzinfo=UTC)
+        end_time = time(1, tzinfo=UTC)
+
+        subscriber = make_pro_subscriber()
+        generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        with freeze_time(start_date):
+            make_schedule(
+                calendar_id=generated_calendar.id,
+                active=True,
+                start_date=start_date,
+                start_time=start_time,
+                end_time=end_time,
+                end_date=None,
+                earliest_booking=1440,
+                farthest_booking=20160,
+                slot_duration=30,
+            )
+
+            # Mock existing_events_for_schedule to raise an exception
+            def mock_existing_events_raises(*args, **kwargs):
+                raise Exception('Remote calendar connection failed')
+
+            monkeypatch.setattr(Tools, 'existing_events_for_schedule', mock_existing_events_raises)
+
+            response = with_client.post(
+                '/schedule/public/availability',
+                json={'url': signed_url},
+                headers=auth_headers,
+            )
+            assert response.status_code == 400, response.text
+            data = response.json()
+            assert data['detail']['id'] == 'REMOTE_CALENDAR_CONNECTION_ERROR'
+
     def test_meeting_link_provider_is_in_sync(
         self,
         monkeypatch,
