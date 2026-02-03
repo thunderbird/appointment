@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -13,11 +12,20 @@ defineProps<Props>();
 </script>
 
 <template>
-  <art-invalid-link class="my-6 h-auto max-w-sm"/>
-  <div class="text-xl font-semibold text-sky-600">
-    {{ heading ?? t('error.somethingWentWrong') }}
-  </div>
-  <div class="text-gray-800 dark:text-gray-300">
-    {{ body ?? t('error.generalBookingError') }}
-  </div>
+  <h1>{{ heading ?? t('error.somethingWentWrong') }}</h1>
+  <p>{{ body ?? t('error.generalBookingError') }}</p>
 </template>
+
+<style scoped>
+h1 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  font-family: metropolis, sans-serif;
+  color: var(--colour-primary-default);
+}
+
+p {
+  color: var(--colour-ti-secondary);
+}
+</style>
