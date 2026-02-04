@@ -17,6 +17,8 @@ jobs:
   build-and-deploy-stage-frontend:
     environment: staging
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     steps:
       - uses: actions/checkout@v4
 
@@ -26,11 +28,6 @@ jobs:
           aws-region: eu-central-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
-      
-      - name: Setup NPM
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
 
       - name: Install dependencies
         run: cd frontend && npm install
@@ -49,6 +46,8 @@ jobs:
   build-backend-image:
     environment: staging
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     steps:
       - uses: actions/checkout@v4
 
@@ -91,6 +90,8 @@ jobs:
     if: needs.build-backend-image.result == 'success'
     environment: staging
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     steps:
       - uses: actions/checkout@v4
 
@@ -112,11 +113,6 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: "true"
-
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
 
       - name: Unpack ECR tag
         id: get_ecr_tag
@@ -170,14 +166,10 @@ jobs:
       ! contains(join(needs.*.result, ','), 'failure')
     environment: production
     runs-on: ubuntu-latest
-
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup NPM
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
 
       - name: Install dependencies
         run: cd frontend && npm install
@@ -233,6 +225,8 @@ jobs:
     if: false
     # if: ${{ !failure() || !cancelled() }}
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     environment: staging
     env:
       TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_STAGE_TB_ACCTS_EMAIL }}
@@ -242,12 +236,6 @@ jobs:
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_STAGE_BOOKEE_EMAIL }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'test/e2e/package-lock.json'
 
       - name: Install dependencies
         run: |
