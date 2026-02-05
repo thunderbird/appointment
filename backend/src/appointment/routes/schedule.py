@@ -72,7 +72,40 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
 
     # Is the time requested within our booking times?
     today = booking_slot.start.date()
+    booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
+    if schedule.use_custom_availabilities:
+        custom_availabilities = [
+            a for a in schedule.availabilities
+            if a.day_of_week.value == iso_weekday
+        ]
+
+        if not custom_availabilities:
+            return False
+
+        # Check if booking slot falls within any of the custom availability time ranges
+        for availability in custom_availabilities:
+            # If our end time is below start time, then it's the next day.
+            add_day = 1 if availability.end_time <= availability.start_time else 0
+
+            start_datetime = (
+                datetime.combine(today, availability.start_time, tzinfo=schedule_tzinfo)
+                + schedule.timezone_offset
+            )
+            end_datetime = (
+                datetime.combine(today, availability.end_time, tzinfo=schedule_tzinfo)
+                + timedelta(days=add_day)
+                + schedule.timezone_offset
+            )
+
+            # Check if the booking slot fits within this availability window
+            if booking_slot_start >= start_datetime and booking_slot_end <= end_datetime:
+                return True
+
+        # Booking slot didn't fit within any custom availability
+        return False
+
+    # Default behavior (no custom availability): check against schedule's general start/end time
     # If our end time is below start time, then it's the next day.
     add_day = 1 if schedule.end_time <= schedule.start_time else 0
 
@@ -83,7 +116,6 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
         + timedelta(days=add_day)
         + schedule.timezone_offset
     )
-    booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
     too_early = booking_slot_start < start_datetime
     too_late = booking_slot_end > end_datetime
