@@ -65,6 +65,7 @@
     "connectCalendarTBPro": "Mit Thunderbird Pro verbinden",
     "connectCalendarTBProInfo": "Synchronisiere Thunderbird Appointment mit deinem Thunderbird Pro Kalender. Du kannst auswählen, welche Kalender eingeschlossen werden sollen.",
     "connectWithCalDav": "Mit CalDAV verbinden",
+    "calDavAppPasswordInfo": "Für CalDAV Verbindungen benötigen wir die Verwendung eines App Passworts. Dies ist normalerweise anders als das Passwort, das du für die Anmeldung bei deinem E-Mail-Konto verwendest.",
     "calendarUrl": "Kalender URL",
     "calendarUrlPlaceholder": "Vollständige URL eingeben",
     "calendarIcon": "Kalender Icon",
