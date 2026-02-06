@@ -95,7 +95,6 @@ test.describe('set availability on desktop browser', {
       await availabilityPage.turnOffCustomizePerDayAndVerify();
     } else {
       // is on already, turn it off, verify daily time slot options aren't visible
-      const custom1vis = await availabilityPage.customStartTime1Input.isVisible();
       await availabilityPage.turnOffCustomizePerDayAndVerify();
       await availabilityPage.turnOnCustomizePerDayAndVerify();
     }
