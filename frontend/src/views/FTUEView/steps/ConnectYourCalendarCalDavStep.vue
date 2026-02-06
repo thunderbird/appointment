@@ -82,19 +82,6 @@ const onContinueButtonClick = async () => {
   </notice-bar>
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">
-    <div class="calendar-url-container">
-      <img src="@/assets/svg/icons/calendar.svg" :alt="t('ftue.calendarIcon')" :title="t('ftue.calendarIcon')"/>
-      <text-input
-        name="calendarUrl"
-        :placeholder="t('ftue.calendarUrlPlaceholder')"
-        required
-        class="calendar-url-input"
-        v-model="calendarUrl"
-      >
-        {{ t('ftue.calendarUrl') }}
-      </text-input>
-    </div>
-
     <!-- TODO: Implement this checkbox when we support anonymous CalDAV servers -->
     <!-- https://github.com/thunderbird/appointment/issues/1363 -->
     <!-- <div class="no-sign-in-credentials-checkbox">
@@ -107,11 +94,33 @@ const onContinueButtonClick = async () => {
     </div> -->
 
     <div class="credentials-container">
-      <text-input name="login" required v-model="login" :disabled="noSignInCredentialsRequired">
+      <text-input
+        name="calendarUrl"
+        :placeholder="t('ftue.calendarUrlPlaceholder')"
+        required
+        class="calendar-url-input"
+        v-model="calendarUrl"
+      >
+        {{ t('ftue.calendarUrl') }}
+      </text-input>
+
+      <text-input
+        name="login"
+        required
+        v-model="login"
+        :disabled="noSignInCredentialsRequired"
+      >
         {{ t('label.logIn') }}
       </text-input>
 
-      <text-input name="password" type="password" required v-model="password" :disabled="noSignInCredentialsRequired">
+      <text-input
+        name="password"
+        type="password"
+        required
+        v-model="password"
+        :disabled="noSignInCredentialsRequired"
+        :help="t('ftue.calDavAppPasswordInfo')"
+      >
         {{ t('label.password') }}
       </text-input>
     </div>
@@ -128,19 +137,12 @@ const onContinueButtonClick = async () => {
 </template>
 
 <style scoped>
-.notice-bar {
-  margin-block-end: 1.5rem;
+form {
+  margin-block-start: 2rem;
 }
 
-.calendar-url-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-block-end: 1rem;
-
-  .calendar-url-input {
-    width: 100%;
-  }
+.notice-bar {
+  margin-block-end: 1.5rem;
 }
 
 .no-sign-in-credentials-checkbox {
@@ -149,6 +151,7 @@ const onContinueButtonClick = async () => {
 
 .credentials-container {
   display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 
   .text-input {
