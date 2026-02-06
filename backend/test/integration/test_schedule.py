@@ -1225,9 +1225,9 @@ class TestRequestScheduleAvailability:
     ):
         """Test that a user can request a booking from a schedule with custom availability slots"""
         start_date = date(2024, 4, 1)
-        start_time = time(9, tzinfo=UTC)
+        start_time = time(9)
         start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
-        end_time = time(10, tzinfo=UTC)
+        end_time = time(10)
 
         class MockCaldavConnector:
             @staticmethod
