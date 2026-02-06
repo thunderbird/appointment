@@ -112,14 +112,15 @@ export class AvailabilityPage {
       await this.customizePerDayCheckBoxContainer.click();
       await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
       await expect(this.customStartTime1Input).toBeVisible();
+      expect(await this.customStartTime1Input.isVisible()).toBeTruthy();
       await expect(this.customStartTime1Input).toBeEnabled();
-      await expect(this.customStartTime2Input).toBeVisible();
+      expect(await this.customStartTime2Input.isVisible()).toBeTruthy();
       await expect(this.customStartTime2Input).toBeEnabled();
-      await expect(this.customStartTime3Input).toBeVisible();
+      expect(await this.customStartTime3Input.isVisible()).toBeTruthy();
       await expect(this.customStartTime3Input).toBeEnabled();
-      await expect(this.customStartTime4Input).toBeVisible();
+      expect(await this.customStartTime4Input.isVisible()).toBeTruthy();
       await expect(this.customStartTime4Input).toBeEnabled();
-      await expect(this.customStartTime5Input).toBeVisible();
+      expect(await this.customStartTime5Input.isVisible()).toBeTruthy();
       await this.customStartTime5Input.scrollIntoViewIfNeeded();
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);
       await expect(this.customStartTime5Input).toBeEnabled();
@@ -136,11 +137,11 @@ export class AvailabilityPage {
       // container blocks cbox itself so click container to change
       await this.customizePerDayCheckBoxContainer.click();
       await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-      await expect(this.customStartTime1Input).toBeHidden();
-      await expect(this.customStartTime2Input).toBeHidden();
-      await expect(this.customStartTime3Input).toBeHidden();
-      await expect(this.customStartTime4Input).toBeHidden();
-      await expect(this.customStartTime5Input).toBeHidden();
+      expect(await this.customStartTime1Input.isVisible()).toBeFalsy();
+      expect(await this.customStartTime2Input.isVisible()).toBeFalsy();
+      expect(await this.customStartTime3Input.isVisible()).toBeFalsy();
+      expect(await this.customStartTime4Input.isVisible()).toBeFalsy();
+      expect(await this.customStartTime5Input.isVisible()).toBeFalsy();
     }
   }
 }
