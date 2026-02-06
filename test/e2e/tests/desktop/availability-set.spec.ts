@@ -46,7 +46,7 @@ test.describe('set availability on desktop browser', {
 
     // automatically confirm bookings checkbox is on
     await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
-    await expect(availabilityPage.autoConfirmBookingsCheckBox).toBeChecked();
+    expect(await availabilityPage.autoConfirmBookingsCheckBox.isChecked()).toBeTruthy();
 
     // customize per day checkbox
     await availabilityPage.customizePerDayCheckBox.scrollIntoViewIfNeeded();
@@ -95,6 +95,7 @@ test.describe('set availability on desktop browser', {
       await availabilityPage.turnOffCustomizePerDayAndVerify();
     } else {
       // is on already, turn it off, verify daily time slot options aren't visible
+      const custom1vis = await availabilityPage.customStartTime1Input.isVisible();
       await availabilityPage.turnOffCustomizePerDayAndVerify();
       await availabilityPage.turnOnCustomizePerDayAndVerify();
     }
@@ -107,7 +108,7 @@ test.describe('set availability on desktop browser', {
     // in the ui you can see you can click on the text beside the toggle (ie. "You're bookable") and
     // that changes the setting
     await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
-    await expect(availabilityPage.bookableToggle).toBeChecked();
+    expect.soft(await availabilityPage.bookableToggle.isChecked()).toBeTruthy();
     await availabilityPage.bookableToggleContainer.click();
     await availabilityPage.saveChangesBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
@@ -115,7 +116,7 @@ test.describe('set availability on desktop browser', {
     // now that we've turned off availability we use expect.soft, that ensures the rest of the test will
     // run even if the assert fails, so that we ensure we turn availability back on again after; note that
     // the test will still be marked as a failure if an expect.soft assert fails, just it will finish first
-    await expect.soft(availabilityPage.bookableToggle).toBeChecked({ checked: false });
+    expect.soft(await availabilityPage.bookableToggle.isChecked()).toBeFalsy();
 
     // go to share link/book appointment page and verify not available
     await page.goto(APPT_MY_SHARE_LINK);
