@@ -34,7 +34,7 @@ const description = props.requested
   : t('text.timeHasBeenConfirmed', {'email': props.attendee.email});
 
 const date = dj(props.selectedEvent.start).format('ddd') + ', '
-  + dj(props.selectedEvent.start).format('MMM DD') + ' from '
+  + dj(props.selectedEvent.start).format('MMM D') + ' from '
   + dj(props.selectedEvent.start).format(timeFormat()) + ' – '
   + dj(props.selectedEvent.start).add(props.selectedEvent.duration, 'minutes').format(timeFormat())
   + ' (' + dj.tz.guess() + ')';
