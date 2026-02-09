@@ -94,6 +94,7 @@ export default {
     name="bookingPageLinkInput"
     class="share-link-input"
     :model-value="userStore.myLink"
+    readonly
   >
     {{ t('label.shareYourLink') }}:
     <link-button @click="copyLink">
