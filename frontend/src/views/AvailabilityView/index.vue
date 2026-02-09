@@ -137,7 +137,25 @@ export default {
     </h1>
   
     <notice-bar
-      v-if="isDirty"
+      v-if="validationError"
+      :type="NoticeBarTypes.Critical"
+      class="notice-bar"
+    >
+      {{ validationError.title }}
+
+      <template #cta>
+        <icon-button
+          @click="clearNotices"
+          :title="t('label.close')"
+          class="btn-close"
+        >
+          <ph-x />
+        </icon-button>
+      </template>
+    </notice-bar>
+
+    <notice-bar
+      v-else-if="isDirty"
       :type="NoticeBarTypes.Warning"
       class="notice-bar"
     >
@@ -157,24 +175,6 @@ export default {
         >
           {{ t('label.saveChanges') }}
         </primary-button>
-      </template>
-    </notice-bar>
-
-    <notice-bar
-      v-else-if="validationError"
-      :type="NoticeBarTypes.Critical"
-      class="notice-bar"
-    >
-      {{ validationError.title }}
-
-      <template #cta>
-        <icon-button
-          @click="clearNotices"
-          :title="t('label.close')"
-          class="btn-close"
-        >
-          <ph-x />
-        </icon-button>
       </template>
     </notice-bar>
   
