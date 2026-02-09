@@ -46,7 +46,7 @@ onBeforeUnmount(() => {
       <a :href="supportUrl">
         {{ t('label.support') }}
       </a>
-      <router-link to="logout">
+      <router-link :to="{ name: 'logout' }">
         {{ t('label.logOut') }}
       </router-link>
     </div>
