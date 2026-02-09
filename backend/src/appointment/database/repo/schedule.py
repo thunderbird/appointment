@@ -4,7 +4,9 @@ Repository providing CRUD functions for schedule database models.
 """
 
 import uuid
+import zoneinfo
 
+from datetime import datetime, time, timezone
 from sqlalchemy.orm import Session
 from .. import models, schemas, repo
 from ... import utils
@@ -96,25 +98,40 @@ def all_availability_is_valid(schedule: schemas.ScheduleValidationIn):
     if size <= 0:
         return True
 
+    # The frontend converts local times to UTC before sending. We need to convert
+    # back to the schedule's local timezone for validation, because UTC times may
+    # cross midnight boundaries (e.g. 5pm-7pm CST-6 becomes 23:00-01:00 UTC).
+    tz = schedule.timezone or 'UTC'
+    tz_info = zoneinfo.ZoneInfo(tz)
+
+    def to_local_time(utc_time: time) -> time:
+        """Convert a UTC time to the schedule's local timezone."""
+        utc_dt = datetime.combine(schedule.start_date, utc_time, tzinfo=timezone.utc)
+        local_dt = utc_dt.astimezone(tz_info)
+        return local_dt.time()
+
     # Make sure, that the availabilities are sorted by weekday AND by start time. This is important for checking
     # validity of times of adjacent availabilities at the same day
-    availabilities = sorted(schedule.availabilities, key=lambda x: (x.day_of_week.value, x.start_time))
+    availabilities = sorted(schedule.availabilities, key=lambda x: (x.day_of_week.value, to_local_time(x.start_time)))
     for i, a in enumerate(availabilities):
+        local_start = to_local_time(a.start_time)
+        local_end = to_local_time(a.end_time)
+
         # Check valid times (start time before end time) and duration (end time at least x minutes after start)
-        if not utils.is_valid_time_range(a.start_time, a.end_time, schedule.slot_duration):
+        if not utils.is_valid_time_range(local_start, local_end, schedule.slot_duration):
             return False
         # If a previous slot exists on that day, fail if the times overlap
         if (
             i > 0
             and (a.day_of_week.value == availabilities[i - 1].day_of_week.value)
-            and not utils.is_valid_time_range(availabilities[i - 1].end_time, a.start_time)
+            and not utils.is_valid_time_range(to_local_time(availabilities[i - 1].end_time), local_start)
         ):
             return False
         # If a next slot exists on that day, fail if the times overlap
         if (
             i < size - 1
             and (a.day_of_week.value == availabilities[i + 1].day_of_week.value)
-            and not utils.is_valid_time_range(a.end_time, availabilities[i + 1].start_time)
+            and not utils.is_valid_time_range(local_end, to_local_time(availabilities[i + 1].start_time))
         ):
             return False
 
