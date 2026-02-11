@@ -29,7 +29,7 @@ The E2E tests require an existing TB Pro account and other settings that are rea
 The tests expect the following Appointment application settings:
 - The user scheduling availability hasn't been changed from the default settings;
 - In the dashboard the default calendar view is the current month view; this is important so that the tests can find an available booking slot, etc.
-- In `Booking Settings`, the `Automatically confirm bookings if time is available` option is checked / turned on
+- In `Booking Settings`, the `Automatically confirm bookings if time is available` option is UNchecked / turned off (which is default)
 
 ## Running the E2E tests against your local dev environment
 

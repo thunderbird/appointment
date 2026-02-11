@@ -47,7 +47,7 @@ export class BookingPage {
     this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy'});
     this.bookSelectionNameInput = this.page.getByPlaceholder('First and last name');
     this.bookSelectionEmailInput = this.page.getByPlaceholder('john.doe@example.com');
-    this.bookingConfirmedTitleText = this.page.getByText('Booking confirmed');
+    this.bookingConfirmedTitleText = this.page.getByText('Booking Request Sent');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.eventBookedTitleText = this.page.getByText('Event booked!');

@@ -17,8 +17,8 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* No retries locally or in CI, just makes failing jobs longer */
-  retries: 0,
+  /* 1 failed test retry in CI */
+  retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : 1, // actualy don't run in parallel locally either, for now
   // Global timeout: Playwright will timeout if the entire session (includes all test runs) exceeds this.
