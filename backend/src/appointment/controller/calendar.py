@@ -18,6 +18,7 @@ import sentry_sdk
 from dns.exception import DNSException
 from redis import Redis, RedisCluster
 from caldav import DAVClient
+from caldav.requests import HTTPBearerAuth
 from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
@@ -322,7 +323,15 @@ class GoogleConnector(BaseConnector):
 
 class CalDavConnector(BaseConnector):
     def __init__(
-        self, db: Session, subscriber_id: int, calendar_id: int, redis_instance, url: str, user: str, password: str
+        self,
+        db: Session,
+        subscriber_id: int,
+        calendar_id: int,
+        redis_instance,
+        url: str,
+        user: str | None = None,
+        password: str | None = None,
+        token: str | None = None,
     ):
         super().__init__(subscriber_id, calendar_id, redis_instance)
 
@@ -338,7 +347,10 @@ class CalDavConnector(BaseConnector):
             sentry_sdk.set_tag('caldav_host', parsed_url.hostname)
 
         # connect to the CalDAV server
-        self.client = DAVClient(url=self.url, username=self.user, password=self.password)
+        if token:
+            self.client = DAVClient(url=self.url, auth=HTTPBearerAuth(token))
+        else:
+            self.client = DAVClient(url=self.url, username=self.user, password=self.password)
 
     def get_busy_time(self, calendar_ids: list, start: str, end: str):
         """Retrieve a list of { start, end } dicts that will indicate busy time for a user

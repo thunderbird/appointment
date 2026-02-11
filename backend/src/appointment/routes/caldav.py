@@ -1,3 +1,4 @@
+import os
 import json
 import urllib
 from typing import Optional
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Session
 from appointment import utils
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
-from appointment.dependencies.auth import get_subscriber
+from appointment.dependencies.auth import get_subscriber, oauth2_scheme
 from appointment.dependencies.database import get_db, get_redis
 from appointment.exceptions.calendar import TestConnectionFailed
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
@@ -126,6 +127,96 @@ def caldav_autodiscover_auth(
     else:
         external_connection = repo.external_connection.update_token(
             db, connection.password, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
+        )
+
+    con.sync_calendars(external_connection_id=external_connection.id)
+    return True
+
+
+@router.post('/oidc/auth')
+def oidc_autodiscover_auth(
+    db: Session = Depends(get_db),
+    subscriber: models.Subscriber = Depends(get_subscriber),
+    redis_client: Redis = Depends(get_redis),
+    token: str = Depends(oauth2_scheme),
+):
+    """Connects a principal caldav server through oidc token auth"""
+
+    connection_url = os.getenv('TB_ACCOUNTS_CALDAV_URL')
+    dns_lookup_cache_key = f'dns:{utils.encrypt(connection_url)}'
+    lookup_url = None
+
+    if redis_client:
+        lookup_url = redis_client.get(dns_lookup_cache_key)
+
+    if lookup_url and 'http' not in lookup_url:
+        debug_obj = {'url': lookup_url, 'branch': 'CACHE'}
+        # Raise and catch the unexpected behaviour warning so we can get proper stacktrace in sentry...
+        try:
+            sentry_sdk.set_extra('debug_object', debug_obj)
+            raise UnexpectedBehaviourWarning(message='Cache incorrect', info=debug_obj)
+        except UnexpectedBehaviourWarning as ex:
+            sentry_sdk.capture_exception(ex)
+
+        # Clear cache for that key
+        redis_client.delete(dns_lookup_cache_key)
+
+        # Ignore cached result and look it up again
+        lookup_url = None
+
+    # Do a dns lookup first
+    if lookup_url is None:
+        parsed_url = urlparse(connection_url)
+        lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname, secure=True)
+        # set the cached lookup for the remainder of the dns ttl
+        if redis_client and lookup_url:
+            redis_client.set(dns_lookup_cache_key, utils.encrypt(lookup_url), ex=ttl)
+    else:
+        # Extract the cached value
+        lookup_url = utils.decrypt(lookup_url)
+
+    # If we have a lookup_url then apply it
+    if lookup_url and 'http' not in lookup_url:
+        connection_url = urllib.parse.urljoin(connection_url, lookup_url)
+    elif lookup_url:
+        connection_url = lookup_url
+
+    con = CalDavConnector(
+        db=db,
+        redis_instance=None,
+        url=connection_url,
+        subscriber_id=subscriber.id,
+        calendar_id=None,
+        token=token,
+    )
+
+    try:
+        if not con.test_connection():
+            raise RemoteCalendarConnectionError()
+    except TestConnectionFailed as ex:
+        raise RemoteCalendarConnectionError(reason=ex.reason)
+
+    caldav_name = subscriber.email
+    caldav_id = json.dumps([connection_url, caldav_name])
+
+    external_connection = repo.external_connection.get_by_type(
+        db, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
+    )
+
+    # Create or update the external connection
+    if not external_connection:
+        external_connection_schema = schemas.ExternalConnection(
+            name=caldav_name,
+            type=models.ExternalConnectionType.caldav,
+            type_id=caldav_id,
+            owner_id=subscriber.id,
+            token=token,
+        )
+
+        external_connection = repo.external_connection.create(db, external_connection_schema)
+    else:
+        external_connection = repo.external_connection.update_token(
+            db, token, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
         )
 
     con.sync_calendars(external_connection_id=external_connection.id)

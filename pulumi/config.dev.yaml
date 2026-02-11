@@ -226,6 +226,8 @@ resources:
                 value: "60"
               - name: OIDC_FALLBACK_MATCH_BY_EMAIL
                 value: "True"
+              - name: TB_ACCOUNTS_CALDAV_URL
+                value: https://stage-thundermail.com
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
