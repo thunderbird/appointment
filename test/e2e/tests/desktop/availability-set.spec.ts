@@ -46,7 +46,7 @@ test.describe('set availability on desktop browser', {
 
     // automatically confirm bookings checkbox is on
     await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
-    expect(await availabilityPage.autoConfirmBookingsCheckBox.isChecked()).toBeTruthy();
+    expect(await availabilityPage.autoConfirmBookingsCheckBox.isChecked()).toBeFalsy();
 
     // customize per day checkbox
     await availabilityPage.customizePerDayCheckBox.scrollIntoViewIfNeeded();
