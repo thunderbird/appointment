@@ -29,7 +29,7 @@ const onContinueButtonClick = async () => {
 
   switch (calendarProvider.value) {
     case 'oidc':
-      // TODO: Implement OIDC flow (get the token and try to authenticate)
+      await ftueStore.moveToStep(FtueStep.ConnectCalendarsThundermail);
       break;
     case 'caldav':
       await ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
