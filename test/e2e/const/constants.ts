@@ -29,9 +29,9 @@ export const APPT_BOOKEE_EMAIL = String(process.env.APPT_BOOKEE_EMAIL);
 
 // playwright test tags
 export const PLAYWRIGHT_TAG_PROD_SANITY = '@prod-sanity';
-export const PLAYWRIGHT_TAG_E2E_SUITE = '@e2e-suite';
+export const PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE = '@e2e-desktop-suite';
 export const PLAYWRIGHT_TAG_PROD_NIGHTLY = '@prod-nightly';
-export const PLAYWRIGHT_TAG_E2E_SUITE_MOBILE = '@e2e-mobile-suite';
+export const PLAYWRIGHT_TAG_E2E_MOBILE_SUITE = '@e2e-mobile-suite';
 export const PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY = '@prod-mobile-nightly';
 
 // general settings options
@@ -40,9 +40,8 @@ export const APPT_LANGUAGE_SETTING_DE = 'DE — German';
 export const APPT_THEME_SETTING_LIGHT = 'Light';
 export const APPT_THEME_SETTING_DARK = 'Dark';
 // set the Appointment time zone setting to the local timezone is where the test is running
-export const APPT_TIMEZONE_SETTING_PRIMARY = Intl.DateTimeFormat().resolvedOptions().timeZone;
-console.log(`using local timezone: ${APPT_TIMEZONE_SETTING_PRIMARY}`)
-export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax'; // settings test changes to this tz temporarily
+export const APPT_TIMEZONE_SETTING_PRIMARY = 'America/Toronto';
+console.log(`appt app is using timezone: ${APPT_TIMEZONE_SETTING_PRIMARY}`)
 export const APPT_START_OF_WEEK_SUN = 'SUN';
 export const APPT_START_OF_WEEK_MON = 'MON';
 export const APPT_START_OF_WEEK_DASHBOARD_SUN = 'Sun';

@@ -66,13 +66,13 @@ npm run e2e-test-headed
 To run the E2E tests against google chromium with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npx playwright test --grep e2e-suite --project=chromium --headed
+npx playwright test --grep e2e-desktop-suite --project=chromium --headed
 ```
 
 To run the E2E tests against safari with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npx playwright test --grep e2e-suite --project=safari --headed
+npx playwright test --grep e2e-desktop-suite --project=safari --headed
 ```
 
 Note that for project you can use any of the project/browser names as listed in the [playwright.config.ts](./playwright.config.ts) file (but the browser must be installed on your local machine).

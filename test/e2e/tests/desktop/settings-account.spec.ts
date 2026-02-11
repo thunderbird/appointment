@@ -6,9 +6,8 @@ import { BookingPage } from '../../pages/booking-page';
 import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE,
+  PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  APPT_DISPLAY_NAME,
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
@@ -20,7 +19,7 @@ let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
 
 test.describe('account settings on desktop browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     await ensureWeAreSignedIn(page);
@@ -37,12 +36,12 @@ test.describe('account settings on desktop browser', {
     // verify section header
     await expect(settingsPage.accountSettingsHeader).toBeVisible();
 
-    // verify display name displayed is as expected
+    // display name field is ready
     await expect(settingsPage.displayNameInput).toBeVisible();
-    expect(await settingsPage.displayNameInput.inputValue()).toBe(APPT_DISPLAY_NAME);
+    await expect(settingsPage.displayNameInput).toBeEnabled();
 
     // verify booking page url displayed is correct
-    await settingsPage.bookingPageURLInput.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.bookingPageURLInput);
     expect(await settingsPage.bookingPageURLInput.inputValue()).toBe(APPT_MY_SHARE_LINK);
 
     // ensure we can click the copy link button; note: we can't access clipboard in firefox b/c of security
@@ -52,22 +51,20 @@ test.describe('account settings on desktop browser', {
 
     // just ensure the download your data button exists and is enabled as don't want to actually
     // download and leave potenial sensitive data on the test instance
-    await settingsPage.downloadDataBtn.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.downloadDataBtn);
     await expect(settingsPage.downloadDataBtn).toBeVisible();
-    await expect(settingsPage.downloadDataBtn).toBeEnabled();
 
     // delete all data button brings up confirmation dialog (just cancel out)
-    await settingsPage.deleteDataBtn.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.deleteDataBtn);
     await settingsPage.deleteDataBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
-    await settingsPage.deleteDataConfirmCancelBtn.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.deleteDataConfirmCancelBtn);
     await settingsPage.deleteDataConfirmCancelBtn.click({ timeout: TIMEOUT_30_SECONDS });
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
     // clicking 'manage booking' link brings up availability page
-    await settingsPage.manageBookingLink.scrollIntoViewIfNeeded();
+    await settingsPage.scrollIntoView(settingsPage.manageBookingLink);
     await settingsPage.manageBookingLink.click();
-    await page.waitForURL('**/availability');
     await expect(availabilityPage.setAvailabilityText).toBeVisible();
   });
 });

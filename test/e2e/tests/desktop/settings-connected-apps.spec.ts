@@ -4,7 +4,7 @@ import { DashboardPage } from '../../pages/dashboard-page';
 import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE,
+  PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   TIMEOUT_1_SECOND,
   TIMEOUT_30_SECONDS,
@@ -14,7 +14,7 @@ let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
 
 test.describe('connected applications settings on desktop browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     await ensureWeAreSignedIn(page);

@@ -5,6 +5,7 @@ import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_
 export class BookingPage {
   readonly page: Page;
   readonly titleText: Locator;
+  readonly bookingPageTimeZoneFooter: Locator;
   readonly bookATimeToMeetText: Locator;
   readonly selectTimeSlotText: Locator;
   readonly bookApptBtn: Locator;
@@ -32,6 +33,7 @@ export class BookingPage {
   constructor(page: Page) {
     this.page = page;
     this.titleText = this.page.getByTestId('booking-view-title-text');
+    this.bookingPageTimeZoneFooter = this.page.locator('div').filter({ hasText: /^Timezone:/ });
     this.bookATimeToMeetText = this.page.getByTestId('booking-view-book-a-time-to-meet-with-text');
     this.selectTimeSlotText = this.page.getByText('Select an open time slot from the calendar');
     this.bookingCalendarHdrSun = this.page.getByText('SUN', { exact: true });
@@ -42,19 +44,19 @@ export class BookingPage {
     this.bookingCalendarHdrFri = this.page.getByText('FRI', { exact: true });
     this.bookingCalendarHdrSat = this.page.getByText('SAT', { exact: true });
     this.bookingWeekPickerBtn = this.page.locator('.week-picker-button');
-    this.bookApptBtn = this.page.getByTestId('booking-view-confirm-selection-button');
     this.nextWeekArrow = this.page.getByRole('button', { name: 'Next week' });
-    this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy'});
-    this.bookSelectionNameInput = this.page.getByPlaceholder('First and last name');
-    this.bookSelectionEmailInput = this.page.getByPlaceholder('john.doe@example.com');
+    this.availableBookingSlot = this.page.locator('.selectable-slot', { hasNotText: 'Busy' });
+    this.bookSelectionNameInput = this.page.locator('[name="booker-view-user-name"]');
+    this.bookSelectionEmailInput = this.page.locator('[name="booker-view-user-email"]');
+    this.bookApptBtn = this.page.getByTestId('booking-view-confirm-selection-button');
     this.bookingConfirmedTitleText = this.page.getByText('Booking Request Sent');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.eventBookedTitleText = this.page.getByText('Event booked!');
     this.scheduleTurnedOffText = this.page.getByText('The schedule has been turned off.');
     this.bookApptPage7AMSlot = this.page.getByText('7:00 AM', { exact: true }).first();
-    this.bookApptPage630PMSlot = this.page.getByText('6:30 PM', { exact: true }).first();
-    this.bookApptPage15MinSlot = this.page.getByText('9:15 AM', { exact: true }).first();
+    this.bookApptPage630PMSlot = this.page.getByText(':30 PM').first();
+    this.bookApptPage15MinSlot = this.page.getByText(':15 AM').first();
   }
 
   /**

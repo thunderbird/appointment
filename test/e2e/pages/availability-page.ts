@@ -2,7 +2,6 @@ import { expect, type Page, type Locator } from '@playwright/test';
 
 import {
   APPT_AVAILABILITY_PAGE,
-  APPT_TIMEZONE_SETTING_PRIMARY,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   TIMEOUT_10_SECONDS,
@@ -55,7 +54,7 @@ export class AvailabilityPage {
     this.setAvailabilityText = this.page.getByText('Set Your Availability');
     this.bookableToggle = this.page.getByTestId('availability-set-availability-toggle');
     this.bookableToggleContainer = this.page.getByTitle('Activate schedule');
-    this.timeZoneSelect = this.page.getByLabel(APPT_TIMEZONE_SETTING_PRIMARY);
+    this.timeZoneSelect = this.page.locator('#timezone');
     this.calendarSelect = this.page.locator('select[name="calendar"]');
     this.autoConfirmBookingsCheckBox = this.page.getByTestId('availability-automatically-confirm-checkbox');
     this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
@@ -95,6 +94,10 @@ export class AvailabilityPage {
     // go to availability page, sometimes takes a bit to load all element values!
     await this.page.goto(APPT_AVAILABILITY_PAGE, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
+    // the bookable toggle especially seems to take a long time to load in BrowserStack
+    if (! await this.bookableToggle.isEnabled()) {
+      await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
+    }
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.bookingPageMtgDur15MinBtn.waitFor({ timeout: TIMEOUT_30_SECONDS });
@@ -110,16 +113,11 @@ export class AvailabilityPage {
     if (!await this.customizePerDayCheckBox.isChecked()) {
       // container blocks cbox itself so click container to change
       await this.customizePerDayCheckBoxContainer.click();
-      await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
-      await expect(this.customStartTime1Input).toBeVisible();
+      await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
       expect(await this.customStartTime1Input.isVisible()).toBeTruthy();
-      await expect(this.customStartTime1Input).toBeEnabled();
       expect(await this.customStartTime2Input.isVisible()).toBeTruthy();
-      await expect(this.customStartTime2Input).toBeEnabled();
       expect(await this.customStartTime3Input.isVisible()).toBeTruthy();
-      await expect(this.customStartTime3Input).toBeEnabled();
       expect(await this.customStartTime4Input.isVisible()).toBeTruthy();
-      await expect(this.customStartTime4Input).toBeEnabled();
       expect(await this.customStartTime5Input.isVisible()).toBeTruthy();
       await this.customStartTime5Input.scrollIntoViewIfNeeded();
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);

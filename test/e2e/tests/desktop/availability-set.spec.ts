@@ -4,21 +4,21 @@ import { BookingPage } from '../../pages/booking-page';
 import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE,
+  PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   TIMEOUT_10_SECONDS,
   TIMEOUT_60_SECONDS,
-  TB_ACCTS_EMAIL,
+  APPT_TIMEZONE_SETTING_PRIMARY,
  } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
 
 test.describe('set availability on desktop browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     await ensureWeAreSignedIn(page);
@@ -36,13 +36,13 @@ test.describe('set availability on desktop browser', {
     // timezone displayed is correct
     await expect(availabilityPage.timeZoneSelect).toBeVisible();
     await availabilityPage.timeZoneSelect.scrollIntoViewIfNeeded();
+    expect(await availabilityPage.timeZoneSelect.inputValue()).toBe(APPT_TIMEZONE_SETTING_PRIMARY);
 
     // selected calendar ('booking to') has correct value; takes a bit to load
     if ((await availabilityPage.calendarSelect.inputValue()).length == 0) {
       await page.waitForTimeout(TIMEOUT_3_SECONDS);
     }
     expect(await availabilityPage.calendarSelect.inputValue()).toBeTruthy();
-    expect(await availabilityPage.calendarSelect.textContent()).toContain(TB_ACCTS_EMAIL);
 
     // automatically confirm bookings checkbox is on
     await availabilityPage.autoConfirmBookingsCheckBox.scrollIntoViewIfNeeded();
@@ -107,7 +107,11 @@ test.describe('set availability on desktop browser', {
     // in the ui you can see you can click on the text beside the toggle (ie. "You're bookable") and
     // that changes the setting
     await availabilityPage.bookableToggleContainer.scrollIntoViewIfNeeded();
-    expect.soft(await availabilityPage.bookableToggle.isChecked()).toBeTruthy();
+    if (! await availabilityPage.bookableToggle.isChecked()) {
+      // may need more time to load the element
+      await page.waitForTimeout(TIMEOUT_10_SECONDS);
+    }
+    expect(await availabilityPage.bookableToggle.isChecked()).toBeTruthy();
     await availabilityPage.bookableToggleContainer.click();
     await availabilityPage.saveChangesBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);

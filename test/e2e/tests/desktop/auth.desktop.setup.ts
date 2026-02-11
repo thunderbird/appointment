@@ -7,7 +7,7 @@ import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from
 import {
     APPT_DASHBOARD_HOME_PAGE,
     APPT_SETTINGS_PAGE,
-    APPT_DISPLAY_NAME,
+    APPT_TIMEZONE_SETTING_PRIMARY,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
     TIMEOUT_5_SECONDS,
@@ -49,6 +49,7 @@ setup('desktop browser authenticate', async ({ page }) => {
   // previous test run failed and left the settings in an incorrect state)
   await page.goto(APPT_SETTINGS_PAGE);
   await page.waitForTimeout(TIMEOUT_5_SECONDS);
+  
   await setDefaultUserSettingsLocalStore(page);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
 
@@ -63,6 +64,12 @@ setup('desktop browser authenticate', async ({ page }) => {
     await availabilityPage.bookableToggleContainer.click();
     await page.waitForTimeout(TIMEOUT_5_SECONDS)
     console.log('turned booking availibility on');
+  }
+
+  // ensure availability timezone is set to APPT_TIMEZONE_SETTING_PRIMARY
+  if (await availabilityPage.timeZoneSelect.inputValue() != APPT_TIMEZONE_SETTING_PRIMARY) {
+    await availabilityPage.timeZoneSelect.selectOption(APPT_TIMEZONE_SETTING_PRIMARY);
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
   }
 
   // And ensure availability start time is 9am, end time 5pm
@@ -82,18 +89,12 @@ setup('desktop browser authenticate', async ({ page }) => {
     console.log('set availability end time to 17:00');
   }
 
-  // set booking meeting duration and page name
+  // set booking meeting duration
   await availabilityPage.bookingPageMtgDur30MinBtn.scrollIntoViewIfNeeded();
   await availabilityPage.bookingPageMtgDur30MinBtn.click();
   await page.waitForTimeout(TIMEOUT_1_SECOND);
   console.log('set meeting duration to 30 min');
-  await availabilityPage.bookingPageNameInput.scrollIntoViewIfNeeded();
-  await availabilityPage.bookingPageNameInput.fill(APPT_DISPLAY_NAME);
-  await page.waitForTimeout(TIMEOUT_1_SECOND);
-  await availabilityPage.bookingPageDescInput.clear();
-  await page.waitForTimeout(TIMEOUT_1_SECOND);
-  console.log('set booking page name and description');
-
+  
   // if availability changes were made, save them
   const saveBtnVisible = await availabilityPage.saveChangesBtn.isVisible({ timeout: TIMEOUT_5_SECONDS });
   if (saveBtnVisible) {

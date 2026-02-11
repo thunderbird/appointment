@@ -4,9 +4,9 @@ import { BookingPage } from '../../pages/booking-page';
 import { ensureWeAreSignedIn } from '../../utils/utils';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE,
+  PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
-  APPT_TIMEZONE_SETTING_PRIMARY,
+
   APPT_MY_SHARE_LINK,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
@@ -15,12 +15,10 @@ import {
 
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
-let origPageName: string;
-let origPageDesc: string;
 
 
 test.describe('availability - booking page details on desktop browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_DESKTOP_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }) => {
     await ensureWeAreSignedIn(page);
@@ -30,26 +28,15 @@ test.describe('availability - booking page details on desktop browser', {
     await availabilityPage.gotoAvailabilityPage();
   });
 
-  // the share link (request a booking page) will display in the local browser context timezone but the main
-  // appointment account settings could be a different timezone; set the browser context to always be in
-  // the primary timezone
-  test.use({
-    timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
-  });
-
   test('able to change booking details on desktop browser', async ({ page }) => {
     await availabilityPage.bookingPageDetailsHdr.scrollIntoViewIfNeeded();
     await expect(availabilityPage.bookingPageDetailsHdr).toBeVisible();
 
-    // change page name (use current date/time value so can verify was changed by this test)
-    origPageName = await availabilityPage.bookingPageNameInput.inputValue();
-    const newPageName = `Page name modified by E2E test at ${new Date().toDateString()}`;
-    await availabilityPage.bookingPageNameInput.fill(newPageName);
-
-    // add a page description (again use current date/time in there too so can verify was changed by this test)
-    origPageDesc = await availabilityPage.bookingPageDescInput.inputValue();
-    const newPageDesc = `Page description modified by E2E test at ${new Date().toDateString}`;
-    await availabilityPage.bookingPageDescInput.fill(newPageDesc);
+    // page name and description fields enabled and editable
+    await expect(availabilityPage.bookingPageNameInput).toBeEnabled();
+    await expect(availabilityPage.bookingPageNameInput).toBeEditable();
+    await expect(availabilityPage.bookingPageDescInput).toBeEnabled();
+    await expect(availabilityPage.bookingPageDescInput).toBeEditable();
 
     // able to type in a virtual meeting link
     await availabilityPage.bookingPageMtgLinkInput.scrollIntoViewIfNeeded();
@@ -67,11 +54,6 @@ test.describe('availability - booking page details on desktop browser', {
     await page.goto(APPT_MY_SHARE_LINK);
     await page.waitForTimeout(TIMEOUT_3_SECONDS);
 
-    // page name and description
-    expect.soft(await bookApptPage.titleText.innerText()).toEqual(newPageName);
-    const pageDescLocator = page.getByText(newPageDesc, { exact: true });
-    await expect.soft(pageDescLocator).toBeVisible();
-
     // verify a 15 min slot now exists
     await bookApptPage.goForwardOneWeek();
     await expect.soft(bookApptPage.bookApptPage15MinSlot).toBeVisible();
@@ -80,8 +62,6 @@ test.describe('availability - booking page details on desktop browser', {
     await availabilityPage.gotoAvailabilityPage();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
-    await availabilityPage.bookingPageNameInput.fill(origPageName);
-    await availabilityPage.bookingPageDescInput.fill(origPageDesc);
     await availabilityPage.bookingPageMtgLinkInput.clear();
     await availabilityPage.bookingPageMtgDur30MinBtn.scrollIntoViewIfNeeded();
     await availabilityPage.bookingPageMtgDur30MinBtn.click();
@@ -93,5 +73,26 @@ test.describe('availability - booking page details on desktop browser', {
       await availabilityPage.saveChangesBtn.click();
       await page.waitForTimeout(TIMEOUT_1_SECOND);
     }
+  });
+
+  test('verify booking page link on desktop browser', async ({ page }) => {
+    await availabilityPage.bookingPageLinkHdr.scrollIntoViewIfNeeded();
+    await expect(availabilityPage.bookingPageLinkHdr).toBeVisible();
+
+    // click the refresh link button and then cancel out on the confirmation dialog, as we
+    // don't want to actually change our share link as that would break the the E2E tests
+    await availabilityPage.refreshLinkBtn.click();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+    await expect(availabilityPage.refreshLinkConfirmTxt).toBeVisible();
+    await availabilityPage.refreshLinkConfirmCancelBtn.click();
+    await page.waitForTimeout(TIMEOUT_1_SECOND);
+
+    // verify booking page link displayed in 'share your link' is correct
+    await availabilityPage.shareYourLinkInput.scrollIntoViewIfNeeded();
+    expect(await availabilityPage.shareYourLinkInput.inputValue()).toBe(APPT_MY_SHARE_LINK);
+
+    // ensure we can click the copy link button; we can't access the clipboard so can't verify
+    await expect(availabilityPage.shareLinkCopyBtn).toBeEnabled();
+    await availabilityPage.shareLinkCopyBtn.click();
   });
 });

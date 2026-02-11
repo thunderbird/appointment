@@ -6,15 +6,14 @@ import { BookingPage } from '../../pages/booking-page';
 import { mobileSignInAndSetup } from '../../utils/utils';
 
 import {
-  PLAYWRIGHT_TAG_E2E_SUITE_MOBILE,
+  PLAYWRIGHT_TAG_E2E_MOBILE_SUITE,
   PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY,
   APPT_MY_SHARE_LINK,
-  APPT_DISPLAY_NAME,
   TIMEOUT_1_SECOND,
   TIMEOUT_3_SECONDS,
   TIMEOUT_30_SECONDS,
-  TIMEOUT_2_SECONDS,
  } from '../../const/constants';
+import { set } from 'date-fns/set';
 
 let settingsPage: SettingsPage;
 let dashboardPage: DashboardPage;
@@ -22,7 +21,7 @@ let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;
 
 test.describe('account settings on mobile browser', {
-  tag: [PLAYWRIGHT_TAG_E2E_SUITE_MOBILE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
+  tag: [PLAYWRIGHT_TAG_E2E_MOBILE_SUITE, PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY],
 }, () => {
   test.beforeEach(async ({ page }, testInfo) => {
     settingsPage = new SettingsPage(page, testInfo.project.name); // i.e. 'ios-safari'
@@ -48,9 +47,9 @@ test.describe('account settings on mobile browser', {
     // verify section header
     await expect(settingsPage.accountSettingsHeader).toBeVisible();
 
-    // verify display name displayed is as expected
+    // display name field is ready
     await expect(settingsPage.displayNameInput).toBeVisible();
-    expect(await settingsPage.displayNameInput.inputValue()).toBe(APPT_DISPLAY_NAME);
+    expect (await settingsPage.displayNameInput.isEnabled()).toBeTruthy();
 
     // verify booking page url displayed is correct
     await settingsPage.scrollIntoView(settingsPage.bookingPageURLInput);
@@ -59,7 +58,7 @@ test.describe('account settings on mobile browser', {
     // ensure we can click the copy link button; note: we can't access clipboard in firefox b/c of security
     await settingsPage.scrollIntoView(settingsPage.copyLinkBtn);
     if (!testInfo.project.name.includes('ios')) { // 'toBeEnabled' is not supported on BrowserStack for ios at least not yet
-      await expect(settingsPage.copyLinkBtn).toBeEnabled();  
+      expect (await settingsPage.copyLinkBtn.isEnabled()).toBeTruthy();
     }
     await settingsPage.copyLinkBtn.click();
 

@@ -7,7 +7,6 @@ import {
   PLAYWRIGHT_TAG_PROD_SANITY,
   TIMEOUT_60_SECONDS,
   APPT_TARGET_ENV,
-  APPT_TIMEZONE_SETTING_PRIMARY,
   TIMEOUT_1_SECOND,
 } from '../../const/constants';
 
@@ -47,13 +46,6 @@ const verifyBookingPageLoaded = async (page: Page) => {
 test.beforeEach(async ({ page }) => {
   bookingPage = new BookingPage(page);
   dashboardPage = new DashboardPage(page);
-});
-
-// the share link (request a booking page) will display in the local browser context timezone but the main
-// appointment account settings could be a different timezone; set the browser context to always be in
-// the primary timezone
-test.use({
-  timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
 });
 
 test.describe('access booking page on desktop browser', () => {
