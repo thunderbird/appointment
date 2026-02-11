@@ -6,6 +6,7 @@ import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/servic
 import { useFTUEStore } from '@/stores/ftue-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
+import mailIcon from '@/assets/svg/icons/mail.svg';
 import { FtueStep } from '@/definitions';
 
 import StepTitle from '../components/StepTitle.vue';
@@ -17,7 +18,7 @@ const ftueStore = useFTUEStore();
 const { errorMessage } = storeToRefs(ftueStore);
 
 type CalendarProvider = 'caldav' | 'google' | 'oidc';
-const calendarProvider = ref<CalendarProvider | null>(null);
+const calendarProvider = ref<CalendarProvider | null>('oidc');
 
 const onBackButtonClick = () => {
   ftueStore.moveToStep(FtueStep.SetupProfile, true);
@@ -51,16 +52,15 @@ const onContinueButtonClick = async () => {
   </notice-bar>
 
   <div class="radio-group" role="radiogroup" :aria-label="t('ftue.connectYourCalendar')">
-    <!-- TODO: Implement OIDC / TB Pro Calendar auto-connect through token -->
-    <!-- <radio-provider-card-button
+    <radio-provider-card-button
       :title="t('ftue.connectCalendarTBPro')"
       :description="t('ftue.connectCalendarTBProInfo')"
-      :iconSrc="calendarIcon"
+      :iconSrc="mailIcon"
       :iconAlt="t('ftue.appointmentLogo')"
       value="oidc"
       name="calendar-provider"
       v-model="calendarProvider"
-    /> -->
+    />
 
     <radio-provider-card-button
       :title="t('ftue.connectCalendarCalDav')"
