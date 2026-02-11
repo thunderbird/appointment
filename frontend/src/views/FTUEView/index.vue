@@ -186,10 +186,10 @@ section {
         min-height: auto;
 
         .panel {
-          padding: 6rem 10rem 5.625rem 6rem;
+          padding: 6rem 9rem 5.625rem 6rem;
 
           &:has(.notice-bar) {
-            padding: 6rem 10rem 5.625rem 6rem;
+            padding: 6rem 9rem 5.625rem 6rem;
           }
         }
       }

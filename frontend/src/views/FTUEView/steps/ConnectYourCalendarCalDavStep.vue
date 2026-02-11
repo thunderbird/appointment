@@ -17,7 +17,7 @@ const { t } = useI18n();
 
 const calendarUrl = ref(null);
 const noSignInCredentialsRequired = ref(false);
-const login = ref(null);
+const username = ref(null);
 const password = ref(null);
 const errorMessage = ref<{ title: string; details?: string } | null>(null);
 const isLoading = ref(false);
@@ -38,7 +38,7 @@ const onContinueButtonClick = async () => {
   try {
     const payload =  noSignInCredentialsRequired.value
       ? { url: calendarUrl.value }
-      : { url: calendarUrl.value, user: login.value, password: password.value };
+      : { url: calendarUrl.value, user: username.value, password: password.value };
 
     const { error, data }: CalendarListResponse = await call('caldav/auth').post(payload).json();
 
@@ -72,6 +72,8 @@ const onContinueButtonClick = async () => {
 <template>
   <step-title :title="t('ftue.connectWithCalDav')" />
 
+  <p class="info-text">{{ t('ftue.connectWithCalDavInfo') }} <a href="https://caldav.org/" target="_blank">{{ t('label.learnMore') }}</a></p>
+
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage.title }}
     <template v-if="errorMessage.details">
@@ -95,22 +97,13 @@ const onContinueButtonClick = async () => {
 
     <div class="credentials-container">
       <text-input
-        name="calendarUrl"
-        :placeholder="t('ftue.calendarUrlPlaceholder')"
+        name="username"
         required
-        class="calendar-url-input"
-        v-model="calendarUrl"
-      >
-        {{ t('ftue.calendarUrl') }}
-      </text-input>
-
-      <text-input
-        name="login"
-        required
-        v-model="login"
+        v-model="username"
         :disabled="noSignInCredentialsRequired"
+        class="username-input"
       >
-        {{ t('label.logIn') }}
+        {{ t('label.username') }}
       </text-input>
 
       <text-input
@@ -119,9 +112,21 @@ const onContinueButtonClick = async () => {
         required
         v-model="password"
         :disabled="noSignInCredentialsRequired"
-        :help="t('ftue.calDavAppPasswordInfo')"
+        class="app-password-input"
       >
-        {{ t('label.password') }}
+        {{ t('label.appPassword') }}
+      </text-input>
+
+      <p class="app-password-info-text">{{ t('ftue.calDavAppPasswordInfo') }} <a href="https://caldav.org/app-passwords/" target="_blank">{{ t('ftue.calDavLearnMoreAppPassword') }}</a></p>
+
+      <text-input
+        name="calendarUrl"
+        placeholder="https://calendar.example.com/caldav/"
+        required
+        class="calendar-url-input"
+        v-model="calendarUrl"
+      >
+        {{ t('ftue.calendarUrl') }}
       </text-input>
     </div>
 
@@ -141,6 +146,18 @@ form {
   margin-block-start: 2rem;
 }
 
+.info-text {
+  margin-block-end: 2.25rem;
+  color: var(--colour-ti-secondary);
+  font-size: 0.875rem;
+  line-height: 1.23;
+
+  a {
+    text-decoration: underline;
+    font-size: 0.75rem;
+  }
+}
+
 .notice-bar {
   margin-block-end: 1.5rem;
 }
@@ -150,12 +167,28 @@ form {
 }
 
 .credentials-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  margin-block-end: 2.25rem;
 
   .text-input {
     width: 100%;
+  }
+
+  .username-input, .app-password-info-text {
+    margin-block-end: 1rem;
+  }
+
+  .app-password-input {
+    margin-block-end: 0.5rem;
+  }
+
+  .app-password-info-text {
+    color: var(--colour-ti-muted);
+    font-size: 0.6875rem;
+
+    a {
+      color: var(--colour-ti-secondary);
+      border-block-end: 1px solid var(--colour-ti-secondary);
+    }
   }
 }
 
@@ -163,7 +196,6 @@ form {
   display: flex;
   justify-content: end;
   gap: 1.5rem;
-  margin-block-start: 10.45rem;
 
   button {
     min-width: 123px;
