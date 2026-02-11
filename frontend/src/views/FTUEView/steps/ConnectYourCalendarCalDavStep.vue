@@ -3,7 +3,7 @@ import { ref, inject, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { callKey } from '@/keys';
 import { TextInput, PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
-import { CalendarListResponse, PydanticException } from '@/models';
+import { CalendarListResponse, FormExceptionDetail, PydanticException } from '@/models';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { FtueStep } from '@/definitions';
 import { handleFormError } from '@/utils';
@@ -20,6 +20,7 @@ const noSignInCredentialsRequired = ref(false);
 const username = ref(null);
 const password = ref(null);
 const errorMessage = ref<{ title: string; details?: string } | null>(null);
+const calendarUrlErrorMessage = ref<string | null>(null);
 const isLoading = ref(false);
 const formRef = useTemplateRef('formRef');
 
@@ -34,6 +35,7 @@ const onContinueButtonClick = async () => {
 
   isLoading.value = true;
   errorMessage.value = null;
+  calendarUrlErrorMessage.value = null;
 
   try {
     const payload =  noSignInCredentialsRequired.value
@@ -44,6 +46,18 @@ const onContinueButtonClick = async () => {
 
     if (error.value) {
       const err = data?.value as PydanticException;
+      const formExceptionDetail = err?.detail as FormExceptionDetail;
+
+      // This is related to the calendar url input so the error message should be there
+      if (formExceptionDetail?.id === 'REMOTE_CALENDAR_CONNECTION_ERROR') {
+        calendarUrlErrorMessage.value = t('ftue.calendarUrlErrorMessage');
+        return;
+      } else if (formExceptionDetail?.id === 'REMOTE_CALENDAR_AUTHENTICATION_ERROR') {
+        errorMessage.value = { title: formExceptionDetail.reason };
+        return;
+      }
+
+      // If it's a network or another type of backend error, show the notice bar
       const formError = handleFormError(t, formRef, err);
 
       if (formError) {
@@ -125,6 +139,7 @@ const onContinueButtonClick = async () => {
         required
         class="calendar-url-input"
         v-model="calendarUrl"
+        :error="calendarUrlErrorMessage"
       >
         {{ t('ftue.calendarUrl') }}
       </text-input>

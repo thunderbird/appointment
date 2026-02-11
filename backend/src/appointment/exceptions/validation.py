@@ -374,3 +374,7 @@ class ConnectionContainsDefaultCalendarException(APIException):
 
     def get_msg(self):
         return l10n('connection-contains-default-calendar')
+
+class RemoteCalendarAuthenticationException(APIException):
+    id_code = 'REMOTE_CALENDAR_AUTHENTICATION_ERROR'
+    status_code = 400

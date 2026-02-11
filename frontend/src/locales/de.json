@@ -70,6 +70,7 @@
     "calDavLearnMoreAppPassword": "Mehr über App Passwörter erfahren",
     "calendarUrl": "Kalender URL",
     "calendarUrlPlaceholder": "Vollständige URL eingeben",
+    "calendarUrlErrorMessage": "Die Kalender URL ist nicht gültig. Bitte überprüfe die URL und versuche es erneut.",
     "calendarIcon": "Kalender Icon",
     "noSignInCredentialsRequired": "Dieser Kalender benötigt keine Anmeldeinformationen",
     "connectGoogleCalendar": "Mit Google Kalender verbinden",

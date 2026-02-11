@@ -33,7 +33,7 @@ from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
-from ..exceptions.calendar import TestConnectionFailed
+from ..exceptions.calendar import TestConnectionFailed, RemoteCalendarAuthenticationError
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email, send_cancel_email
@@ -424,7 +424,7 @@ class CalDavConnector(BaseConnector):
             if reason == 'Unauthorized':
                 # ex.reason seems to be pulling from status codes for some errors?
                 # Let's replace this with our own.
-                reason = l10n('remote-calendar-reason-unauthorized')
+                raise RemoteCalendarAuthenticationError(reason=l10n('remote-calendar-reason-unauthorized'))
 
             raise TestConnectionFailed(reason=reason)
 

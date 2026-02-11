@@ -71,6 +71,7 @@
     "calDavLearnMoreAppPassword": "Learn more about app passwords",
     "calendarUrl": "Calendar URL",
     "calendarUrlPlaceholder": "Enter full URL",
+    "calendarUrlErrorMessage": "Unable to access calendar at this URL.",
     "calendarIcon": "Calendar icon",
     "noSignInCredentialsRequired": "This calendar doesn't require sign-in credentials",
     "connectGoogleCalendar": "Connect Google Calendar",
