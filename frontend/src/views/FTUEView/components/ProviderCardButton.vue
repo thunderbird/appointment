@@ -13,7 +13,7 @@ defineProps<{
     <img :src="iconSrc" :alt="iconAlt" :title="iconAlt"/>
 
     <div>
-      <h3>{{ title }}</h3>
+      <h3 :class="{ 'withDescription' : showDescription }">{{ title }}</h3>
       <p v-if="showDescription">{{ description }}</p>
     </div>
   </button>
@@ -39,7 +39,10 @@ button {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--colour-ti-base);
-    margin-block-end: 0.5rem;
+
+    &.withDescription {
+      margin-block-end: 0.5rem;
+    }
   }
 
   p {

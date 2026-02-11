@@ -52,6 +52,7 @@
     }
   },
   "ftue": {
+    "appointmentLogo": "Thunderbird Appointment Logo",
     "createYourProfile": "Create your profile",
     "fullName": "Full Name",
     "urlUsername": "URL Username",
@@ -67,6 +68,8 @@
     "connectCalendarTBProInfo": "Sync your Appointment calendar with your Thundermail calendar (CalDAV).",
     "connectWithCalDav": "Connect with CalDav",
     "connectWithCalDavInfo": "CalDAV is a calendar connection that keeps events in sync everywhere you use them.",
+    "connectWithThundermail": "Connect with Thundermail",
+    "connectWithThundermailAppPasswordInfo": "Use the app password you set in the Thundermail Dashboard (not your account password).",
     "calDavAppPasswordInfo": "App Password required (not your account password). Appointment stores encrypted app passwords to keep your calendar connected.",
     "calDavLearnMoreAppPassword": "Learn more about app passwords",
     "calendarUrl": "Calendar URL",
