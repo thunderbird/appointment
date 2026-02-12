@@ -90,9 +90,7 @@ def _check_caldav(ec: ExternalConnections, db: Session) -> ExternalConnectionSta
             subscriber_id=ec.owner_id,
             calendar_id=None,
         )
-        result = con.test_connection()
-
-        print('result ------>', result)
+        con.test_connection()
 
         return ExternalConnectionStatus.ok
     except (TestConnectionFailed, Exception) as e:
