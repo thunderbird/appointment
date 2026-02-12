@@ -69,6 +69,7 @@ html {
   --colour-danger-default: #991B1B;
   --colour-danger-hover: #7F1D1D;
   --colour-danger-pressed: #7F1D1D;
+  --colour-danger-pressed-dark: #FCA5A5;
 
   /*
    * Text+Icon
