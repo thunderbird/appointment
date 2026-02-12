@@ -14,7 +14,8 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { PhX } from '@phosphor-icons/vue';
+import { PhX, PhWarningCircle } from '@phosphor-icons/vue';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 
 // Page sections
 import AccountSettings from './components/AccountSettings.vue';
@@ -40,6 +41,7 @@ const userStore = useUserStore();
 const calendarStore = useCalendarStore();
 const scheduleStore = useScheduleStore();
 const settingsStore = createSettingsStore(call);
+const externalConnectionsStore = useExternalConnectionsStore();
 const { currentState, isDirty } = storeToRefs(settingsStore)
 
 const scrollToSection = (key: string) => {
@@ -306,6 +308,11 @@ export default {
           @click="scrollToSection(key)"
           :data-testid="'settings-' + key + '-settings-btn'"
         >
+          <ph-warning-circle
+            v-if="key === 'connectedApplications' && externalConnectionsStore.hasUnhealthyConnections"
+            class="warning-icon"
+            weight="fill"
+          />
           <span>{{ t('heading.' + key) }}</span>
         </button>
       </aside>
@@ -396,7 +403,6 @@ section {
 
     button {
       display: flex;
-      justify-content: space-between;
       padding: 1rem;
       border-radius: 8px;
       background-color: var(--colour-neutral-base);
@@ -410,10 +416,21 @@ section {
       &.active {
         color: var(--colour-neutral-lower);
         background-color: var(--colour-primary-default);
+
+        .warning-icon {
+          color: var(--colour-neutral-lower);
+        }
       }
 
       &:hover {
         border-color: var(--colour-primary-hover);
+      }
+
+      .warning-icon {
+        color: var(--colour-danger-default);
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-inline-end: 0.5rem;
       }
     }
   }
