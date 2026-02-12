@@ -68,6 +68,11 @@ class ExternalConnectionType(enum.Enum):
     oidc = 6
 
 
+class ExternalConnectionStatus(enum.Enum):
+    ok = 'ok'
+    error = 'error'
+
+
 class MeetingLinkProviderType(enum.StrEnum):
     none = 'none'
     zoom = 'zoom'
@@ -455,6 +460,8 @@ class ExternalConnections(Base):
     type = Column(Enum(ExternalConnectionType), index=True)
     type_id = Column(encrypted_type(String), index=True)
     token = Column(encrypted_type(String, length=2048), index=False)
+    status = Column(Enum(ExternalConnectionStatus), default=ExternalConnectionStatus.ok, nullable=False)
+    status_checked_at = Column(DateTime, nullable=True)
     owner: Mapped[Subscriber] = relationship('Subscriber', back_populates='external_connections')
     calendars: Mapped[list[Calendar]] = relationship('Calendar', back_populates='external_connection')
 
