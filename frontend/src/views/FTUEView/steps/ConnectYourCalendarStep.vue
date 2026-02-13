@@ -44,12 +44,12 @@ const onContinueButtonClick = async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.connectYourCalendar')" />
-  <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
-
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage.title }}
   </notice-bar>
+
+  <step-title :title="t('ftue.connectYourCalendar')" />
+  <p>{{ t('ftue.connectYourCalendarInfo') }}</p>
 
   <div class="radio-group" role="radiogroup" :aria-label="t('ftue.connectYourCalendar')">
     <radio-provider-card-button

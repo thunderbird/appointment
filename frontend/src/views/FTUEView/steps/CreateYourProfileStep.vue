@@ -85,11 +85,11 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.createYourProfile')" />
-
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage }}
   </notice-bar>
+
+  <step-title :title="t('ftue.createYourProfile')" />
 
   <form ref="formRef" @submit.prevent @keyup.enter="onSubmit">
     <text-input

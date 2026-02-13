@@ -19,7 +19,7 @@ const calendarUrl = ref(null);
 const noSignInCredentialsRequired = ref(false);
 const username = ref(null);
 const password = ref(null);
-const errorMessage = ref<{ title: string; details?: string } | null>(null);
+const errorMessage = ref<{ boldSegment?: string; title: string; details?: string } | null>(null);
 const calendarUrlErrorMessage = ref<string | null>(null);
 const isLoading = ref(false);
 const formRef = useTemplateRef('formRef');
@@ -53,7 +53,7 @@ const onContinueButtonClick = async () => {
         calendarUrlErrorMessage.value = t('ftue.calendarUrlErrorMessage');
         return;
       } else if (formExceptionDetail?.id === 'REMOTE_CALENDAR_AUTHENTICATION_ERROR') {
-        errorMessage.value = { title: formExceptionDetail.reason };
+        errorMessage.value = { boldSegment: t('ftue.calendarUrlCantSignIn'), title: t('ftue.calendarCheckCredentials') };
         return;
       }
 
@@ -84,6 +84,20 @@ const onContinueButtonClick = async () => {
 </script>
 
 <template>
+  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
+    <template v-if="errorMessage.boldSegment">
+      <strong>{{ errorMessage.boldSegment }}</strong>
+    </template>
+
+    {{ errorMessage.title }}
+
+    <template v-if="errorMessage.details">
+      <br />
+      <br />
+    </template>
+    {{ errorMessage.details }}
+  </notice-bar>
+
   <step-title :title="t('ftue.connectWithCalDav')" />
 
   <p class="info-text">{{ t('ftue.connectWithCalDavInfo') }} 
@@ -91,15 +105,6 @@ const onContinueButtonClick = async () => {
       {{ t('label.learnMore') }}
     </a>
   </p>
-
-  <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
-    {{ errorMessage.title }}
-    <template v-if="errorMessage.details">
-      <br />
-      <br />
-    </template>
-    {{ errorMessage.details }}
-  </notice-bar>
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">
     <!-- TODO: Implement this checkbox when we support anonymous CalDAV servers -->
@@ -143,7 +148,7 @@ const onContinueButtonClick = async () => {
 
       <text-input
         name="calendarUrl"
-        placeholder="https://calendar.example.com/caldav/"
+        placeholder="https://www.domain.com/dav/username/calendar"
         required
         class="calendar-url-input"
         v-model="calendarUrl"
