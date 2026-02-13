@@ -5,6 +5,7 @@ import { callKey } from '@/keys';
 import { TextInput, PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { CalendarListResponse, FormExceptionDetail, PydanticException } from '@/models';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { useUserStore } from '@/stores/user-store';
 import { FtueStep } from '@/definitions';
 import { handleFormError } from '@/utils';
 
@@ -13,11 +14,12 @@ import StepTitle from '../components/StepTitle.vue';
 const call = inject(callKey);
 
 const ftueStore = useFTUEStore();
+const userStore = useUserStore();
 const { t } = useI18n();
 
-const calendarUrl = ref(null);
+const calendarUrl = ref(import.meta.env.VITE_THUNDERMAIL_CALDAV_URL || null);
 const noSignInCredentialsRequired = ref(false);
-const username = ref(null);
+const username = ref(userStore?.data?.email || null);
 const password = ref(null);
 const errorMessage = ref<{ title: string; details?: string } | null>(null);
 const calendarUrlErrorMessage = ref<string | null>(null);
@@ -84,13 +86,7 @@ const onContinueButtonClick = async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.connectWithCalDav')" />
-
-  <p class="info-text">{{ t('ftue.connectWithCalDavInfo') }} 
-    <a href="https://support.tb.pro/hc/articles/43161616587027" target="_blank">
-      {{ t('label.learnMore') }}
-    </a>
-  </p>
+  <step-title :title="t('ftue.connectWithThundermail')" />
 
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage.title }}
@@ -102,17 +98,6 @@ const onContinueButtonClick = async () => {
   </notice-bar>
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">
-    <!-- TODO: Implement this checkbox when we support anonymous CalDAV servers -->
-    <!-- https://github.com/thunderbird/appointment/issues/1363 -->
-    <!-- <div class="no-sign-in-credentials-checkbox">
-      <checkbox-input
-        name="noSignInCredentialsRequired"
-        :label="t('ftue.noSignInCredentialsRequired')"
-        class="no-sign-in-credentials-checkbox"
-        v-model="noSignInCredentialsRequired"
-      />
-    </div> -->
-
     <div class="credentials-container">
       <text-input
         name="username"
@@ -135,7 +120,7 @@ const onContinueButtonClick = async () => {
         {{ t('label.appPassword') }}
       </text-input>
 
-      <p class="app-password-info-text">{{ t('ftue.calDavAppPasswordInfo') }} 
+      <p class="app-password-info-text">{{ t('ftue.connectWithThundermailAppPasswordInfo') }} 
         <a href="https://support.tb.pro/hc/articles/46805020320275" target="_blank">
           {{ t('ftue.calDavLearnMoreAppPassword') }}
         </a>
@@ -148,6 +133,7 @@ const onContinueButtonClick = async () => {
         class="calendar-url-input"
         v-model="calendarUrl"
         :error="calendarUrlErrorMessage"
+        readonly
       >
         {{ t('ftue.calendarUrl') }}
       </text-input>

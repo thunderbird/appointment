@@ -55,6 +55,7 @@ const handleKeydown = (event: KeyboardEvent) => {
       :iconSrc="iconSrc"
       :iconAlt="iconAlt"
       tabindex="-1"
+      :showDescription="isSelected"
     />
   </label>
 </template>
@@ -63,7 +64,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 label {
   display: block;
   cursor: pointer;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-radius: 0.5rem;
   outline: none;
 
@@ -73,7 +74,8 @@ label {
   }
 
   &.selected {
-    border-color: color-mix(in srgb, var(--colour-ti-highlight) 30%, transparent);
+    border-color: var(--colour-primary-default);
+    background-color: var(--colour-primary-soft);
   }
 }
 

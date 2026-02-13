@@ -13,12 +13,13 @@ from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber
 from appointment.dependencies.database import get_db, get_redis
-from appointment.exceptions.calendar import TestConnectionFailed
+from appointment.exceptions.calendar import TestConnectionFailed, RemoteCalendarAuthenticationError
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 from appointment.exceptions.validation import (
     RemoteCalendarConnectionError,
     GoogleCaldavNotSupported,
     ConnectionContainsDefaultCalendarException,
+    RemoteCalendarAuthenticationException,
 )
 from appointment.l10n import l10n
 from appointment.defines import GOOGLE_CALDAV_DOMAINS
@@ -104,6 +105,8 @@ def caldav_autodiscover_auth(
     try:
         if not con.test_connection():
             raise RemoteCalendarConnectionError(reason=l10n('remote-calendar-reason-doesnt-support-caldav'))
+    except RemoteCalendarAuthenticationError as ex:
+        raise RemoteCalendarAuthenticationException(reason=ex.reason)
     except TestConnectionFailed as ex:
         raise RemoteCalendarConnectionError(reason=ex.reason)
 

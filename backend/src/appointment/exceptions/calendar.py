@@ -21,3 +21,9 @@ class TestConnectionFailed(Exception):
 
     def __init__(self, reason: str | None = None):
         self.reason = reason
+
+class RemoteCalendarAuthenticationError(Exception):
+    """Raise if the calendar authentication fails"""
+
+    def __init__(self, reason: str | None = None):
+        self.reason = reason

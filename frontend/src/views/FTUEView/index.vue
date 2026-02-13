@@ -12,6 +12,7 @@ import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
 import ConnectYourCalendarStep from './steps/ConnectYourCalendarStep.vue';
 import ConnectYourCalendarCalDavStep from './steps/ConnectYourCalendarCalDavStep.vue';
 import ConnectYourCalendarGoogleStep from './steps/ConnectYourCalendarGoogleStep.vue';
+import ConnectYourCalendarThundermailStep from './steps/ConnectYourCalendarThundermailStep.vue';
 import CreateBookingPageStep from './steps/CreateBookingPageStep.vue';
 import SetYourAvailabilityStep from './steps/SetYourAvailabilityStep.vue';
 import VideoMeetingLinkStep from './steps/VideoMeetingLinkStep.vue';
@@ -22,6 +23,7 @@ const STEPS = {
   [FtueStep.ConnectCalendars]: ConnectYourCalendarStep,
   [FtueStep.ConnectCalendarsCalDav]: ConnectYourCalendarCalDavStep,
   [FtueStep.ConnectCalendarsGoogle]: ConnectYourCalendarGoogleStep,
+  [FtueStep.ConnectCalendarsThundermail]: ConnectYourCalendarThundermailStep,
   [FtueStep.CreateBookingPage]: CreateBookingPageStep,
   [FtueStep.SetAvailability]: SetYourAvailabilityStep,
   [FtueStep.VideoMeetingLink]: VideoMeetingLinkStep,
@@ -186,10 +188,10 @@ section {
         min-height: auto;
 
         .panel {
-          padding: 6rem 10rem 5.625rem 6rem;
+          padding: 6rem 9rem 5.625rem 6rem;
 
           &:has(.notice-bar) {
-            padding: 6rem 10rem 5.625rem 6rem;
+            padding: 6rem 9rem 5.625rem 6rem;
           }
         }
       }
