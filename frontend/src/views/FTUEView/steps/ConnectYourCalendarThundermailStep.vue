@@ -120,7 +120,11 @@ const onContinueButtonClick = async () => {
         {{ t('label.appPassword') }}
       </text-input>
 
-      <p class="app-password-info-text">{{ t('ftue.connectWithThundermailAppPasswordInfo') }} <a href="https://caldav.org/app-passwords/" target="_blank">{{ t('ftue.calDavLearnMoreAppPassword') }}</a></p>
+      <p class="app-password-info-text">{{ t('ftue.connectWithThundermailAppPasswordInfo') }} 
+        <a href="https://support.tb.pro/hc/articles/46805020320275" target="_blank">
+          {{ t('ftue.calDavLearnMoreAppPassword') }}
+        </a>
+      </p>
 
       <text-input
         name="calendarUrl"

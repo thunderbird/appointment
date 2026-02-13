@@ -86,7 +86,11 @@ const onContinueButtonClick = async () => {
 <template>
   <step-title :title="t('ftue.connectWithCalDav')" />
 
-  <p class="info-text">{{ t('ftue.connectWithCalDavInfo') }} <a href="https://caldav.org/" target="_blank">{{ t('label.learnMore') }}</a></p>
+  <p class="info-text">{{ t('ftue.connectWithCalDavInfo') }} 
+    <a href="https://support.tb.pro/hc/articles/43161616587027" target="_blank">
+      {{ t('label.learnMore') }}
+    </a>
+  </p>
 
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage.title }}
@@ -131,7 +135,11 @@ const onContinueButtonClick = async () => {
         {{ t('label.appPassword') }}
       </text-input>
 
-      <p class="app-password-info-text">{{ t('ftue.calDavAppPasswordInfo') }} <a href="https://caldav.org/app-passwords/" target="_blank">{{ t('ftue.calDavLearnMoreAppPassword') }}</a></p>
+      <p class="app-password-info-text">{{ t('ftue.calDavAppPasswordInfo') }} 
+        <a href="https://support.tb.pro/hc/articles/46805020320275" target="_blank">
+          {{ t('ftue.calDavLearnMoreAppPassword') }}
+        </a>
+      </p>
 
       <text-input
         name="calendarUrl"
