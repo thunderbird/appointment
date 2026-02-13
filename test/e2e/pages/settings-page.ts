@@ -152,22 +152,6 @@ export class SettingsPage {
   }
 
   /**
-   * Change the default time zone setting
-   */
-  async changeDefaultTimezoneSetting(timezone: string) {
-    await this.defaultTimeZoneSelect.waitFor( { timeout: TIMEOUT_30_SECONDS });
-    await this.scrollIntoView(this.defaultTimeZoneSelect);
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.defaultTimeZoneSelect.selectOption(timezone, { timeout: TIMEOUT_30_SECONDS });
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await this.scrollIntoView(this.saveBtnEN);
-    await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(this.savedSuccessfullyTextEN).toBeVisible();
-    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
-  }
-
-  /**
    * Change the language setting
    */
   async changeLanguageSetting(currentLanguage: string, newLanguage: string) {

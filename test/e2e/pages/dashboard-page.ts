@@ -37,11 +37,9 @@ export class DashboardPage {
  
   /**
    * Given a requested booking's time slot reference, verify that a corresponding event exists
-   * in the host account's list of bookings. The bookings screen shows all bookings by default
-   * (confirmed and unconfirmed) which is great because it is possible the test account could
-   * have 'auto confirm' turned on.
+   * in the host account's list of bookings.
    * @param selectedSlot String containing date time of the requested slot (format 'event-2026-01-23 17:00')
-   * as provided from the booking page (dom element of the requested time slot)
+   * as provided from the bookee page (dom element of the requested time slot)
    */
   async verifyEventCreated(selectedSlot: string) {
     // now wait a max of 2 minutes for the newly request appt to appear in the dashboard pending appts list
@@ -55,7 +53,7 @@ export class DashboardPage {
       const selectedSlotDateObj = new Date(selectedSlotStr);
       const selectedSlotFormattedDate = format(selectedSlotDateObj, 'MM/dd/yyyy, h:mm a'); // '01/23/2026, 5:00 PM'
 
-      // now we can search for it on the bookings list
+      // now our selected slot is in the same format we can seach for it on the pending bookings list
       console.log(`searching bookings list for event: ${selectedSlotFormattedDate}`);
       const apptLocator = this.page.getByRole('button', { name: selectedSlotFormattedDate });
       await apptLocator.scrollIntoViewIfNeeded();
