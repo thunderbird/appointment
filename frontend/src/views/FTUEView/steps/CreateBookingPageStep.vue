@@ -103,11 +103,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.createBookingPage')" />
-
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage }}
   </notice-bar>
+
+  <step-title :title="t('ftue.createBookingPage')" />
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick">
     <text-input
